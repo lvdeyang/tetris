@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: tetris-test-flow
+  cloud:    
+    client:
+      ipAddress: 192.165.56.71
+  profiles:
+    active: pro
+  datasource:
+    url: jdbc:mysql://localhost:3306/tetris-test-flow?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+    username: root
+    password: sumavisionrd
+    driver-class-name: com.mysql.jdbc.Driver
+    #base:
+    #  url: jdbc:mysql://localhost:3306/tetris-test-flow?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+    #  username: root
+    #  password: sumavisionrd
+    #  driver-class-name: com.mysql.jdbc.Driver
+    #resource:
+    #  url: jdbc:mysql://192.165.56.64:3306/venus_resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+    #  username: root
+    #  password: sumavisionrd
+    #  driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database: MYSQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  thymeleaf:
+    cache: false
+    
+  #spring mvc视图
+  mvc:
+    view:
+      prefix: /WEB-INF/jsp/
+      suffix: .jsp
+server:
+  port: 8086
+  #context-path: /tetris
+  
+ribbon:
+  ReadTimeout: 120000
+  ConnectTimeout: 30000
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://192.165.56.64:8761/eureka/
+  instance:
+    instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
+    prefer-ip-address: true  
