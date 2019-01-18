@@ -1,5 +1,6 @@
 package com.sumavision.tetris.user;
 
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 /**
@@ -9,16 +10,22 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2018年11月19日 下午4:51:51
  */
-public class UserVO extends AbstractBaseVO<UserVO, Object>{
+public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 
 	/** 用户名 */
-	private String name;
+	private String username;
+	
+	/** 用户昵称 */
+	private String nickname;
 	
 	/** 头像 */
 	private String icon;
 	
 	/** 用户状态 */
 	private String status;
+	
+	/** 是否是自动生成的 */
+	private boolean autoGeneration;
 	
 	/** 用户分类 */
 	private String classify;
@@ -38,12 +45,21 @@ public class UserVO extends AbstractBaseVO<UserVO, Object>{
 	/** 素材库文件夹名称 */
 	private String rootFolderName;
 
-	public String getName() {
-		return name;
+	public String getUsername() {
+		return username;
 	}
 
-	public UserVO setName(String name) {
-		this.name = name;
+	public UserVO setUsername(String username) {
+		this.username = username;
+		return this;
+	}
+
+	public String getNickname() {
+		return nickname;
+	}
+
+	public UserVO setNickname(String nickname) {
+		this.nickname = nickname;
 		return this;
 	}
 
@@ -65,6 +81,15 @@ public class UserVO extends AbstractBaseVO<UserVO, Object>{
 		return this;
 	}
 	
+	public boolean isAutoGeneration() {
+		return autoGeneration;
+	}
+
+	public UserVO setAutoGeneration(boolean autoGeneration) {
+		this.autoGeneration = autoGeneration;
+		return this;
+	}
+
 	public String getClassify() {
 		return classify;
 	}
@@ -120,7 +145,15 @@ public class UserVO extends AbstractBaseVO<UserVO, Object>{
 	}
 
 	@Override
-	public UserVO set(Object entity) throws Exception {
+	public UserVO set(UserPO entity) throws Exception {
+		this.setId(entity.getId())
+			.setUuid(entity.getUuid())
+			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
+			.setUsername(entity.getUsername())
+			.setNickname(entity.getNickname())
+			.setIcon(entity.getIcon())
+			.setStatus(entity.getStatus().getName())
+			.setAutoGeneration(entity.isAutoGeneration());
 		return null;
 	}
 	

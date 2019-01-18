@@ -3,12 +3,54 @@ package com.sumavision.tetris.user;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 
 @Component
 public class UserQuery {
-
+	
+	@Autowired
+	private UserDAO userDao;
+	
+	/**
+	 * 分页查询用户（前端接口）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月18日 下午5:32:06
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> list(int currentPage, int pageSize) throws Exception{
+		List<UserPO> users = findAllOrderByUpdateTimeDesc(currentPage, pageSize);
+		if(users == null) return null;
+		return UserVO.getConverter(UserVO.class).convert(users, UserVO.class);
+	}
+	
+	/**
+	 * 分页查询用户（后台接口）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月18日 下午5:32:46
+	  * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findAllOrderByUpdateTimeDesc(int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> users = userDao.findAllOrderByUpdateTimeDesc(page);
+		return users.getContent();
+	}
+	
+	
+	/**************************************************************************
+	 **************************************************************************
+	 **************************************************************************/
+	
 	/**
 	 * 获取当前登录用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -16,9 +58,10 @@ public class UserQuery {
 	 * <b>日期：</b>2018年11月22日 上午10:14:26
 	 * @return UserVO 当前用户
 	 */
+	@Deprecated
 	public UserVO current(){
 		return new UserVO().setUuid("1")
-						   .setName("用户1")
+						   .setNickname("用户1")
 						   .setClassify(UserClassify.MAINTENANCE.toString())
 						   .setIcon("")
 						   .setGroupId(null)
@@ -35,6 +78,7 @@ public class UserQuery {
 	 * @param String groupId 用户组id
 	 * @return List<UserVO> 用户列表
 	 */
+	@Deprecated
 	public List<UserVO> list(String groupId){
 		return this.users;
 	}
@@ -50,6 +94,7 @@ public class UserQuery {
 	 * @oaran Collection<String> except 例外用户
 	 * @return List<UserVO> 用户列表
 	 */
+	@Deprecated
 	public List<UserVO> list(String groupId, Integer pageSize, Integer currentPage, Collection<String> except){
 		if(except==null || except.size()<=0) return this.users;
 		List<UserVO> users = this.users;
@@ -71,6 +116,7 @@ public class UserQuery {
 	 * @param Collection<String> except 例外用户id列表
 	 * @return Integer 总数
 	 */
+	@Deprecated
 	public Integer count(String groupId, Collection<String> except){
 		if(except==null || except.size()<=0) return count(groupId);
 		List<UserVO> users = this.users;
@@ -91,6 +137,7 @@ public class UserQuery {
 	 * @param String groupId 用户组id
 	 * @return Integer 用户数量
 	 */
+	@Deprecated
 	public Integer count(String groupId){
 		return this.users.size();
 	}
@@ -103,6 +150,7 @@ public class UserQuery {
 	 * @param Collection<String> userIds 用户id列表
 	 * @return List<UserVO> 用户列表
 	 */
+	@Deprecated
 	public List<UserVO> find(Collection<String> userIds){
 		List<UserVO> users = this.users;
 		List<UserVO> findUsers = new ArrayList<UserVO>();
@@ -127,33 +175,34 @@ public class UserQuery {
 	 * @param Integer currentPage 当前页码
 	 * @return List<UserVO> 用户列表
 	 */
+	@Deprecated
 	public List<UserVO> find(Collection<String> userIds, Integer pageSize, Integer currentPage){
 		return find(userIds);
 	}
 	
 	/** 测试数据 */
 	private List<UserVO> users = new ArrayListWrapper<UserVO>().add(new UserVO().setUuid("1")
-																        .setName("用户1")
+																        .setNickname("用户1")
 																        .setStatus(UserStatus.ONLINE.getName())
 																        .setNumbersOfMessage(0))
 														.add(new UserVO().setUuid("2")
-															            .setName("用户2")
+															            .setNickname("用户2")
 															            .setStatus(UserStatus.OFFLINE.getName())
 															            .setNumbersOfMessage(0))
 														.add(new UserVO().setUuid("3")
-															            .setName("用户3")
+															            .setNickname("用户3")
 															            .setStatus(UserStatus.OFFLINE.getName())
 															            .setNumbersOfMessage(0))
 														.add(new UserVO().setUuid("4")
-														                .setName("用户4")
+														                .setNickname("用户4")
 															            .setStatus(UserStatus.ONLINE.getName())
 															            .setNumbersOfMessage(13))
 														.add(new UserVO().setUuid("5")
-															            .setName("用户5")
+															            .setNickname("用户5")
 															            .setStatus(UserStatus.OFFLINE.getName())
 															            .setNumbersOfMessage(0))
 														.add(new UserVO().setUuid("6")
-														                .setName("用户6")
+														                .setNickname("用户6")
 															            .setStatus(UserStatus.OFFLINE.getName())
 															            .setNumbersOfMessage(2))
 														.getList();

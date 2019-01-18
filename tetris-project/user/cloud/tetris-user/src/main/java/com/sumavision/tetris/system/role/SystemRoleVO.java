@@ -9,13 +9,16 @@ package com.sumavision.tetris.system.role;
 public class SystemRoleVO {
 
 	/** 角色id */
-	private String roleId;
+	private String id;
 	
 	/** 角色名称 */
-	private String roleName;
+	private String name;
 	
 	/** 是否是自动生成 */
 	private boolean autoGeneration;
+	
+	/** ui树形结构数据 */
+	private boolean isGroup = false;
 	
 	/** 系统角色一级分类 */
 	private SystemRoleLevel level_1;
@@ -23,21 +26,21 @@ public class SystemRoleVO {
 	/** 系统角色二级分类 */
 	private SystemRoleLevel level_2;
 
-	public String getRoleId() {
-		return roleId;
+	public String getId() {
+		return id;
 	}
 
-	public SystemRoleVO setRoleId(String roleId) {
-		this.roleId = roleId;
+	public SystemRoleVO setId(String id) {
+		this.id = id;
 		return this;
 	}
 
-	public String getRoleName() {
-		return roleName;
+	public String getName() {
+		return name;
 	}
 
-	public SystemRoleVO setRoleName(String roleName) {
-		this.roleName = roleName;
+	public SystemRoleVO setName(String name) {
+		this.name = name;
 		return this;
 	}
 
@@ -48,6 +51,10 @@ public class SystemRoleVO {
 	public SystemRoleVO setAutoGeneration(boolean autoGeneration) {
 		this.autoGeneration = autoGeneration;
 		return this;
+	}
+
+	public boolean getIsGroup() {
+		return isGroup;
 	}
 
 	public SystemRoleLevel getLevel_1() {
@@ -69,8 +76,8 @@ public class SystemRoleVO {
 	}
 	
 	public SystemRoleVO set(SystemRolePO entity){
-		this.setRoleId(entity.getId().toString())
-			.setRoleName(entity.getName())
+		this.setId(entity.getId().toString())
+			.setName(entity.getName())
 			.setAutoGeneration(entity.isAutoGeneration());
 		return this;
 	}

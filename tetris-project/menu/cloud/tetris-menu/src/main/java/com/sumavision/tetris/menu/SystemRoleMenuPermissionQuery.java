@@ -29,7 +29,7 @@ public class SystemRoleMenuPermissionQuery {
 	 * @param int pageSize 每页数据量
 	 * @return List<SystemRoleMenuPermissionPO> 授权列表
 	 */
-	public List<SystemRoleMenuPermissionPO> findByMenuId(Long menuId, int currentPage, int pageSize){
+	public List<SystemRoleMenuPermissionPO> findByMenuIdOrderByUpdateTimeDesc(Long menuId, int currentPage, int pageSize){
 		Pageable page = new PageRequest(currentPage - 1, pageSize);
 		Page<SystemRoleMenuPermissionPO> permissions = systemRoleMenuPermissionDao.findByMenuId(menuId, page);
 		return permissions.getContent();

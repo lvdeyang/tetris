@@ -35,11 +35,11 @@ public class SystemRoleQuery {
 	 * @return List<SystemRoleVO> 角色列表
 	 */
 	public List<SystemRoleVO> queryUserRoles(String userId) throws Exception{
-		return new ArrayListWrapper<SystemRoleVO>().add(new SystemRoleVO().setRoleId("1").setRoleName("菜单运维").setLevel_1(SystemRoleLevel.SYSTEM_ADMIN).setLevel_2(SystemRoleLevel.MENU))
-												   .add(new SystemRoleVO().setRoleId("2").setRoleName("流程运维").setLevel_1(SystemRoleLevel.SYSTEM_ADMIN).setLevel_2(SystemRoleLevel.MENU))
-												   .add(new SystemRoleVO().setRoleId("3").setRoleName("个人用户").setLevel_1(SystemRoleLevel.BUSINESS).setLevel_2(SystemRoleLevel.NORMAL))
-												   .add(new SystemRoleVO().setRoleId("4").setRoleName("企业用户").setLevel_1(SystemRoleLevel.BUSINESS).setLevel_2(SystemRoleLevel.COMPANY_USER))
-												   .add(new SystemRoleVO().setRoleId("5").setRoleName("企业管理员").setLevel_1(SystemRoleLevel.BUSINESS).setLevel_2(SystemRoleLevel.COMPANY_ADMIN))
+		return new ArrayListWrapper<SystemRoleVO>().add(new SystemRoleVO().setId("1").setName("菜单运维").setLevel_1(SystemRoleLevel.SYSTEM_ADMIN).setLevel_2(SystemRoleLevel.MENU))
+												   .add(new SystemRoleVO().setId("2").setName("流程运维").setLevel_1(SystemRoleLevel.SYSTEM_ADMIN).setLevel_2(SystemRoleLevel.MENU))
+												   .add(new SystemRoleVO().setId("3").setName("个人用户").setLevel_1(SystemRoleLevel.BUSINESS).setLevel_2(SystemRoleLevel.NORMAL))
+												   .add(new SystemRoleVO().setId("4").setName("企业用户").setLevel_1(SystemRoleLevel.BUSINESS).setLevel_2(SystemRoleLevel.COMPANY_USER))
+												   .add(new SystemRoleVO().setId("5").setName("企业管理员").setLevel_1(SystemRoleLevel.BUSINESS).setLevel_2(SystemRoleLevel.COMPANY_ADMIN))
 												   .getList();
 	}
 	

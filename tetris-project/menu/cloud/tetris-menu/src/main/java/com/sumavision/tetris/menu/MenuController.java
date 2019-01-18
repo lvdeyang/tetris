@@ -1,10 +1,7 @@
 package com.sumavision.tetris.menu;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -14,12 +11,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.menu.MenuPO.MenuComparator;
-import com.sumavision.tetris.menu.exception.MenuNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.system.role.SystemRoleQuery;
-import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -40,9 +33,6 @@ public class MenuController {
 	private UserQuery userQuery;
 	
 	@Autowired
-	private SystemRoleQuery systemRoleQuery;
-	
-	@Autowired
 	private MenuDAO menuDao;
 	
 	@Autowired
@@ -50,12 +40,6 @@ public class MenuController {
 	
 	@Autowired
 	private MenuService menuService;
-	
-	@Autowired
-	private SystemRoleMenuPermissionDAO systemRoleMenuPermissionDao;
-	
-	@Autowired
-	private SystemRoleMenuPermissionQuery systemRoleMenuPermissionQuery;
 	
 	/**
 	 * 查询菜单树<br/>
@@ -185,65 +169,6 @@ public class MenuController {
 		MenuVO menu = menuService.save(id, title, link, icon, style, serial);
 		
 		return menu;
-	}
-	
-	/**
-	 * 分页查询菜单授权情况<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年1月17日 下午1:43:35
-	 * @param Long menuId 菜单id
-	 * @return List<SystemRoleMenuPermissionPO> 权限列表
-	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/query/permission/roles")
-	public Object queryPermissionRoles(
-			Long menuId,
-			int pageSize,
-			int currentPage,
-			HttpServletRequest request) throws Exception{
-		
-		UserVO user = userQuery.current();
-		
-		//TODO 权限校验
-		
-		MenuPO menu = menuDao.findOne(menuId);
-		if(menu == null){
-			throw new MenuNotExistException(menuId);
-		}
-		
-		int total = systemRoleMenuPermissionDao.countByMenuId(menuId);
-		
-		List<SystemRoleMenuPermissionPO> permissions = systemRoleMenuPermissionQuery.findByMenuId(menuId, currentPage, pageSize);
-		
-		List<SystemRoleVO> roles = null;
-		
-		List<SystemRoleMenuPermissionVO> view_permissions = new ArrayList<SystemRoleMenuPermissionVO>();
-		
-		if(permissions!=null && permissions.size()>0){
-			
-			Set<String> roleIds = new HashSet<String>();
-			for(SystemRoleMenuPermissionPO permission:permissions){
-				roleIds.add(permission.getRoleId());
-			}
-			
-			roles = systemRoleQuery.listByIds(roleIds);
-			
-			for(SystemRoleMenuPermissionPO permission:permissions){
-				for(SystemRoleVO role:roles){
-					if(role.getRoleId().equals(permission.getRoleId())){
-						view_permissions.add(new SystemRoleMenuPermissionVO().set(permission, role));
-						break;
-					}
-				}
-			}
-			
-		}
-		
-		return new HashMapWrapper<String, Object>().put("total", total)
-											       .put("rows", roles)
-											       .getMap();
 	}
 	
 }

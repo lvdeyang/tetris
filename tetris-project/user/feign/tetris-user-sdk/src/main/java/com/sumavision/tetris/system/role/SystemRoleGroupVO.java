@@ -20,6 +20,8 @@ public class SystemRoleGroupVO {
 	
 	private boolean autoGeneration;
 	
+	private boolean isGroup = true;
+	
 	private List<SystemRoleVO> roles;
 
 	public Long getId() {
@@ -67,6 +69,10 @@ public class SystemRoleGroupVO {
 		return this;
 	}
 	
+	public boolean getIsGroup() {
+		return isGroup;
+	}
+
 	public List<SystemRoleVO> getRoles() {
 		return roles;
 	}

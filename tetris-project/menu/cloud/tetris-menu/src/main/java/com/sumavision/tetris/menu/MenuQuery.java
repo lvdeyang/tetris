@@ -46,7 +46,7 @@ public class MenuQuery {
 		if(roles!=null && roles.size()>0){
 			Set<String> roleIds = new HashSet<String>();
 			for(SystemRoleVO role:roles){
-				roleIds.add(role.getRoleId());
+				roleIds.add(role.getId());
 			}
 			
 			//根据权限获取菜单

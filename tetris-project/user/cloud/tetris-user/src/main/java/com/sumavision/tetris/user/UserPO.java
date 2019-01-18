@@ -2,6 +2,8 @@ package com.sumavision.tetris.user;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -25,6 +27,12 @@ public class UserPO extends AbstractBasePO{
 	
 	/** 用户昵称 */
 	private String nickname;
+	
+	/** 用户头像 */
+	private String icon;
+	
+	/** 用户状态 */
+	private UserStatus status;
 	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
@@ -54,6 +62,25 @@ public class UserPO extends AbstractBasePO{
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	@Column(name = "ICON")
+	public String getIcon() {
+		return icon;
+	}
+
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "STATUS")
+	public UserStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(UserStatus status) {
+		this.status = status;
 	}
 
 	@Column(name = "AUTO_GENERATION")
