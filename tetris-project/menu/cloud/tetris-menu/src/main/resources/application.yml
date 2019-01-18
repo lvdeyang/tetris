@@ -72,6 +72,9 @@ logging:
     level: INFO 
   path: /var/log/tomcat  
 ribbon:
+  eager-load:
+      enabled: true
+      clients: tetris-user
   ReadTimeout: 120000
   ConnectTimeout: 30000
 eureka:
