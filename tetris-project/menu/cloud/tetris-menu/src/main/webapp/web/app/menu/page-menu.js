@@ -11,6 +11,7 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
+    'mi-system-role-dialog',
     'css!' + window.APPPATH + 'menu/page-menu.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
 
@@ -30,14 +31,6 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
-                processTypes:[],
-                table:{
-                    rows:[],
-                    pageSize:50,
-                    pageSizes:[50, 100, 200, 400],
-                    currentPage:0,
-                    total:0
-                },
                 tree:{
                     props:{
                         label: 'title',
@@ -200,7 +193,7 @@ define([
                     if(self.tree.current.isGroup) return;
                     self.table.data.splice(0, self.table.data.length);
                     self.loading.table = true;
-                    ajax.post('/menu/query/permission/roles', {
+                    ajax.post('/system/role/menu/permission/list', {
                         menuId:menuId,
                         pageSize:self.table.pageSize,
                         currentPage:currentPage
@@ -220,8 +213,49 @@ define([
                         self.table.currentPage = currentPage;
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
+                removePermission:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.loading.table = true;
+                    ajax.post('/system/role/menu/permission/unbind/' + row.id, null, function(data, status){
+                        self.loading.table = false;
+                        if(status !== 200) return;
+                        for(var i=0; i<self.table.data.length; i++){
+                            if(self.table.data[i].id === row.id){
+                                self.table.data.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
                 bindingSystemRole:function(){
-
+                    var self = this;
+                    var existRoles = self.table.data;
+                    if(existRoles && existRoles.length>0){
+                        var existRoleIds = [];
+                        for(var i=0; i<existRoles.length; i++){
+                            existRoleIds.push(existRoles[i].id);
+                        }
+                        self.$refs.systemRoleDialog.open(existRoleIds);
+                    }else{
+                        self.$refs.systemRoleDialog.open();
+                    }
+                },
+                selectedRoles:function(roles, buffer, startLoading, endLoading, done){
+                    var self = this;
+                    startLoading();
+                    ajax.post('/system/role/menu/permission/bind/roles/' + self.tree.current.id, {
+                        roles: $.toJSON(roles)
+                    }, function(data, status){
+                        endLoading();
+                        if(status !== 200) return;
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.table.data.splice(0, 0, data[i]);
+                            }
+                        }
+                        done();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
                 }
             },
             created:function(){
