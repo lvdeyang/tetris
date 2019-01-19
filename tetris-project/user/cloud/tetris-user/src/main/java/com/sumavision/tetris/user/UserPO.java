@@ -34,6 +34,12 @@ public class UserPO extends AbstractBasePO{
 	/** 用户状态 */
 	private UserStatus status;
 	
+	/** 电话号 */
+	private String mobile;
+	
+	/** 邮箱 */
+	private String mail;
+	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
 
@@ -81,6 +87,24 @@ public class UserPO extends AbstractBasePO{
 
 	public void setStatus(UserStatus status) {
 		this.status = status;
+	}
+	
+	@Column(name = "MOBILE")
+	public String getMobile() {
+		return mobile;
+	}
+
+	public void setMobile(String mobile) {
+		this.mobile = mobile;
+	}
+
+	@Column(name = "MAIL")
+	public String getMail() {
+		return mail;
+	}
+
+	public void setMail(String mail) {
+		this.mail = mail;
 	}
 
 	@Column(name = "AUTO_GENERATION")

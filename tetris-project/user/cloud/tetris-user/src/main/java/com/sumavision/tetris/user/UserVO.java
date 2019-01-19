@@ -24,6 +24,12 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/** 用户状态 */
 	private String status;
 	
+	/** 手机号 */
+	private String mobile;
+	
+	/** 邮箱 */
+	private String mail;
+	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
 	
@@ -81,6 +87,24 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		return this;
 	}
 	
+	public String getMobile() {
+		return mobile;
+	}
+
+	public UserVO setMobile(String mobile) {
+		this.mobile = mobile;
+		return this;
+	}
+
+	public String getMail() {
+		return mail;
+	}
+
+	public UserVO setMail(String mail) {
+		this.mail = mail;
+		return this;
+	}
+
 	public boolean isAutoGeneration() {
 		return autoGeneration;
 	}
@@ -151,10 +175,12 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setUsername(entity.getUsername())
 			.setNickname(entity.getNickname())
+			.setMobile(entity.getMobile())
+			.setMail(entity.getMail())
 			.setIcon(entity.getIcon())
-			.setStatus(entity.getStatus().getName())
+			.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
 			.setAutoGeneration(entity.isAutoGeneration());
-		return null;
+		return this;
 	}
 	
 }

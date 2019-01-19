@@ -2,6 +2,7 @@ package com.sumavision.tetris.user;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
@@ -22,6 +23,7 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * <b>日期：</b>2018年11月22日 上午10:14:26
 	 * @return Page<UserPO> 用户列表
 	 */
+	@Query(value = "from com.sumavision.tetris.user.UserPO user ORDER BY user.updateTime DESC")
 	public Page<UserPO> findAllOrderByUpdateTimeDesc(Pageable page);
 	
 }

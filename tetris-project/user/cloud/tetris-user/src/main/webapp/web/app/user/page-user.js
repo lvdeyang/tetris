@@ -29,7 +29,6 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
-                processTypes:[],
                 table:{
                     rows:[],
                     pageSize:50,
@@ -38,21 +37,26 @@ define([
                     total:0
                 },
                 dialog:{
-                    createProcess:{
+                    createUser:{
                         visible:false,
-                        type:'',
-                        processId:'',
-                        name:'',
-                        remarks:'',
+                        nickname:'',
+                        username:'',
+                        password:'',
+                        repeat:'',
+                        mobile:'',
+                        mail:'',
                         loading:false
                     },
-                    editProcess:{
+                    editUser:{
                         visible:false,
+                        editPassword:false,
                         id:'',
-                        type:'',
-                        processId:'',
-                        name:'',
-                        remarks:'',
+                        nickname:'',
+                        mobile:'',
+                        mail:'',
+                        oldPassword:'',
+                        newPassword:'',
+                        repeat:'',
                         loading:false
                     }
                 }
@@ -65,51 +69,41 @@ define([
             },
             methods:{
                 rowKey:function(row){
-                    return 'process-' + row.uuid;
+                    return 'user-' + row.uuid;
                 },
-                gotoProcessDesign:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-process-design/' + row.id + '/' + row.name;
-                },
-                gotoProcessVariable:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-process-variable/' + row.id + '/' + row.name;
-                },
-                publishProcess:function(scope){
-                    var self = this;
-                    var row = scope.row;
-                    ajax.post('/api/process/publish/' + row.id, null, function(){
-                        self.$message({
-                            type:'success',
-                            message:'发布成功！'
-                        });
-                    });
+                gotoBindSystemRole:function(scope){
+                    var slef = this;
+                    var row = scope.role;
                 },
                 handleCreate:function(){
                     var self = this;
-                    self.dialog.createProcess.visible = true;
+                    self.dialog.createUser.visible = true;
                 },
-                handleCreateProcessClose:function(){
+                handleCreateUserClose:function(){
                     var self = this;
-                    self.dialog.createProcess.type = '';
-                    self.dialog.createProcess.processId = '';
-                    self.dialog.createProcess.name = '';
-                    self.dialog.createProcess.remarks = '';
-                    self.dialog.createProcess.visible = false;
+                    self.dialog.createUser.nickname = '';
+                    self.dialog.createUser.username = '';
+                    self.dialog.createUser.password = '';
+                    self.dialog.createUser.repeat = '';
+                    self.dialog.createUser.mobile = '';
+                    self.dialog.createUser.mail = '';
+                    self.dialog.createUser.visible = false;
                 },
-                handleCreateProcessSubmit:function(){
+                handleCreateUserSubmit:function(){
                     var self = this;
-                    self.dialog.createProcess.loading = true;
-                    ajax.post('/process/add', {
-                        type:self.dialog.createProcess.type,
-                        processId:self.dialog.createProcess.processId,
-                        name:self.dialog.createProcess.name,
-                        remarks:self.dialog.createProcess.remarks
+                    self.dialog.createUser.loading = true;
+                    ajax.post('/user/add', {
+                        nickname:self.dialog.createUser.nickname,
+                        username:self.dialog.createUser.username,
+                        password:self.dialog.createUser.password,
+                        repeat:self.dialog.createUser.repeat,
+                        mobile:self.dialog.createUser.mobile,
+                        mail:self.dialog.createUser.mail
                     }, function(data, status){
-                        self.dialog.createProcess.loading = false;
+                        self.dialog.createUser.loading = false;
                         if(status !== 200) return;
                         self.table.rows.push(data);
-                        self.handleCreateProcessClose();
+                        self.handleCreateUserClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 handleDelete:function(){
@@ -118,38 +112,45 @@ define([
                 handleRowEdit:function(scope){
                     var self = this;
                     var row = scope.row;
-                    self.dialog.editProcess.id = row.id;
-                    self.dialog.editProcess.type = row.type;
-                    self.dialog.editProcess.processId = row.processId;
-                    self.dialog.editProcess.name = row.name;
-                    self.dialog.editProcess.remarks = row.remarks;
-                    self.dialog.editProcess.visible = true;
+                    self.dialog.editUser.id = row.id;
+                    self.dialog.editUser.nickname = row.nickname;
+                    self.dialog.editUser.mobile = row.mobile;
+                    self.dialog.editUser.mail = row.mail;
+                    self.dialog.editUser.visible = true;
                 },
-                handleEditProcessClose:function(){
+                handleEditUserClose:function(){
                     var self = this;
-                    self.dialog.editProcess.id = '';
-                    self.dialog.editProcess.type = '';
-                    self.dialog.editProcess.processId = '';
-                    self.dialog.editProcess.name = '';
-                    self.dialog.editProcess.remarks = '';
-                    self.dialog.editProcess.visible = false;
+                    self.dialog.editUser.id = '';
+                    self.dialog.editUser.nickname = '';
+                    self.dialog.editUser.mobile = '';
+                    self.dialog.editUser.mail = '';
+                    self.dialog.editUser.editPassword = '';
+                    self.dialog.editUser.oldPassword = '';
+                    self.dialog.editUser.newPassword = '';
+                    self.dialog.editUser.repeat = '';
+                    self.dialog.editUser.visible = false;
                 },
-                handleEditProcessSubmit:function(){
+                handleEditUserSubmit:function(){
                     var self = this;
-                    self.dialog.editProcess.loading = true;
-                    ajax.post('/process/edit/' + self.dialog.editProcess.id, {
-                        name:self.dialog.editProcess.name,
-                        remarks:self.dialog.editProcess.remarks
+                    self.dialog.editUser.loading = true;
+                    ajax.post('/user/edit/' + self.dialog.editUser.id, {
+                        nickname:self.dialog.editUser.nickname,
+                        mobile:self.dialog.editUser.mobile,
+                        mail:self.dialog.editUser.mail,
+                        editPassword:self.dialog.editUser.editPassword,
+                        oldPassword:self.dialog.editUser.oldPassword,
+                        newPassword:self.dialog.editUser.newPassword,
+                        repeat:self.dialog.editUser.repeat
                     }, function(data, status){
-                        self.dialog.editProcess.loading = false;
+                        self.dialog.editUser.loading = false;
                         if(status !== 200) return;
                         for(var i=0; i<self.table.rows.length; i++){
-                            if(self.table.rows[i].id === self.dialog.editProcess.id){
+                            if(self.table.rows[i].id === self.dialog.editUser.id){
                                 self.table.rows.splice(i, 1, data);
                                 break;
                             }
                         }
-                        self.handleEditProcessClose();
+                        self.handleEditUserClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 handleRowDelete:function(scope){
@@ -161,7 +162,7 @@ define([
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
-                                h('p', null, ['此操作将永久删除该流程，且不可恢复，是否继续?'])
+                                h('p', null, ['此操作将永久删除该用户，且不可恢复，是否继续?'])
                             ])
                         ]),
                         type:'wraning',
@@ -171,7 +172,7 @@ define([
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
-                                ajax.post('/process/delete/' + row.id, null, function(data, status){
+                                ajax.post('/user/delete/' + row.id, null, function(data, status){
                                     instance.confirmButtonLoading = false;
                                     if(status !== 200) return;
                                     for(var i=0; i<self.table.rows.length; i++){
@@ -201,7 +202,7 @@ define([
                 load:function(currentPage){
                     var self = this;
                     self.table.rows.splice(0, self.table.rows.length);
-                    ajax.post('/process/list', {
+                    ajax.post('/user/list', {
                         currentPage:currentPage,
                         pageSize:self.table.pageSize
                     }, function(data){
@@ -219,14 +220,7 @@ define([
             },
             created:function(){
                 var self = this;
-                /*ajax.post('/process/query/types', null, function(data){
-                    if(data && data.length>0){
-                        for(var i=0; i<data.length; i++){
-                            self.processTypes.push(data[i]);
-                        }
-                    }
-                });*/
-                //self.load(1);
+                self.load(1);
             }
         });
 

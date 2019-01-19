@@ -3,12 +3,15 @@ package com.sumavision.tetris.user;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
 @Component
 public class UserQuery {
@@ -25,10 +28,13 @@ public class UserQuery {
 	 * @param int pageSize 每页数据量
 	 * @return List<UserVO> 用户列表
 	 */
-	public List<UserVO> list(int currentPage, int pageSize) throws Exception{
+	public Map<String, Object> list(int currentPage, int pageSize) throws Exception{
 		List<UserPO> users = findAllOrderByUpdateTimeDesc(currentPage, pageSize);
-		if(users == null) return null;
-		return UserVO.getConverter(UserVO.class).convert(users, UserVO.class);
+		List<UserVO> view_users = UserVO.getConverter(UserVO.class).convert(users, UserVO.class);
+		long total = userDao.count();
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", view_users)
+												   .getMap();
 	}
 	
 	/**
