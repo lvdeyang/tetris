@@ -18,6 +18,8 @@
   	<version>0.0.1-SNAPSHOT</version>
   	<name>tetris-common</name>
   	<description>tetris-common</description>
+  	
+  	<packaging>jar</packaging>
   		
  	<dependencies>
  		
@@ -124,5 +126,19 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
+	
+	<distributionManagement>
+	  	<repository>
+		    <id>releases</id>
+		    <name>User Project Release</name>
+		    <url>http://10.10.40.123:8081/nexus/content/repositories/releases/</url>
+	  	</repository>
+	
+	  	<snapshotRepository>
+		    <id>snapshots</id>
+		    <name>User Project SNAPSHOTS</name>
+		    <url>http://10.10.40.123:8081/nexus/content/repositories/snapshots/</url>
+	  	</snapshotRepository>
+	</distributionManagement>
 	
 </project>

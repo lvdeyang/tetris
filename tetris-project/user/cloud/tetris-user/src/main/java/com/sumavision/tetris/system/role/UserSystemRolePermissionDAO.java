@@ -1,6 +1,10 @@
 package com.sumavision.tetris.system.role;
 
+import java.util.Collection;
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
@@ -16,5 +20,37 @@ public interface UserSystemRolePermissionDAO extends BaseDAO<UserSystemRolePermi
 	 * @return List<UserSystemRolePermissionPO> 权限列表
 	 */
 	public List<UserSystemRolePermissionPO> findByUserId(Long userId);
+	
+	/**
+	 * 根据用户id和系统角色列表获取权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月21日 下午2:14:21
+	 * @param Long userId 用户id
+	 * @param Collection<Long> roleIds 系统角色id列表
+	 * @return List<UserSystemRolePermissionPO> 权限列表
+	 */
+	public List<UserSystemRolePermissionPO> findByUserIdAndRoleIdIn(Long userId, Collection<Long> roleIds);
+	
+	/**
+	 * 分页获取用户的系统角色权限绑定<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月19日 下午4:34:45
+	 * @param Long userId 用户id
+	 * @param Pageable page 分页信息
+	 * @return Page<UserSystemRolePermissionPO> 权限列表
+	 */
+	public Page<UserSystemRolePermissionPO> findByUserId(Long userId, Pageable page);
+	
+	/**
+	 * 统计用户绑定的系统角色数量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月21日 下午12:30:40
+	 * @param Long userId 用户id
+	 * @return int 系统角色数量
+	 */
+	public int countByUserId(Long userId);
 	
 }

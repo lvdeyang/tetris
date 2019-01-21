@@ -3,6 +3,7 @@ package com.sumavision.tetris.system.role;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -22,6 +23,9 @@ public class UserSystemRolePermissionPO extends AbstractBasePO{
 	
 	/** 角色id */
 	private Long roleId;
+	
+	/** 是否是自动生成的 */
+	private boolean autoGeneration;
 
 	@Column(name = "USER_ID")
 	public Long getUserId() {
@@ -39,6 +43,15 @@ public class UserSystemRolePermissionPO extends AbstractBasePO{
 
 	public void setRoleId(Long roleId) {
 		this.roleId = roleId;
+	}
+
+	@Column(name = "AUTO_GENERATION")
+	public boolean isAutoGeneration() {
+		return autoGeneration;
+	}
+
+	public void setAutoGeneration(boolean autoGeneration) {
+		this.autoGeneration = autoGeneration;
 	} 
 	
 }

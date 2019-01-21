@@ -40,10 +40,11 @@ require.config({
         'mi-upload-dialog':window.APPPATH + 'component/dialog/upload/upload-dialog',
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
+        'mi-system-role-dialog':window.APPPATH + 'component/dialog/system-role/system-role-dialog',
 
         /* pages */
         'page-user':window.APPPATH + 'user/page-user',
-        'page-system-role':window.APPPATH + 'system-role/page-system-role'
+        'page-bind-system-role':window.APPPATH + 'bind-system-role/page-bind-system-role'
     },
     shim:{
         'vue':{

@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
 /**
  * 用户系统角色查询<br/>
@@ -24,7 +27,55 @@ public class SystemRoleQuery {
 	private SystemRoleDAO systemRoleDao;
 	
 	@Autowired
+	private UserSystemRolePermissionDAO userSystemRolePermissionDao;
+	
+	@Autowired
 	private SystemRoleGroupDAO systemRoleGroupDao;
+	
+	/**
+	 * 分页查询用户下绑定的系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月21日 下午12:27:08
+	 * @param Long userId 用户id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户绑定的角色数量
+	 * @return List<SystemRoleVO> rows 系统角色列表
+	 */
+	public Map<String, Object> listByUserId(Long userId, int currentPage, int pageSize) throws Exception{
+		int total = userSystemRolePermissionDao.countByUserId(userId);
+		List<SystemRolePO> systemRoles = findByUserId(userId, currentPage, pageSize);
+		List<SystemRoleVO> view_systemRoles = new ArrayList<SystemRoleVO>();
+		if(systemRoles!=null && systemRoles.size()>0){
+			for(SystemRolePO systemRole:systemRoles){
+				view_systemRoles.add(new SystemRoleVO().set(systemRole));
+			}
+		}
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", view_systemRoles)
+												   .getMap();
+	}
+	
+	/**
+	 * 分页查询用户绑定的系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月21日 下午12:19:26
+	 * @param Long userId 用户id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<SystemRolePO> 系统角色列表
+	 */
+	public List<SystemRolePO> findByUserId(Long userId, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<SystemRolePO> systemRoles = systemRoleDao.findByUserId(userId, page);
+		return systemRoles.getContent();
+	}
+	
+	/******************************************************
+	 ******************************************************
+	 ******************************************************/
 	
 	/**
 	 * 查询用户的所有系统角色，包含组织机构关联角色，取并集<br/>
@@ -34,6 +85,7 @@ public class SystemRoleQuery {
 	 * @param String userId 用户id
 	 * @return List<SystemRoleVO> 角色列表
 	 */
+	@Deprecated
 	public List<SystemRoleVO> queryUserRoles(String userId) throws Exception{
 		return new ArrayListWrapper<SystemRoleVO>().add(new SystemRoleVO().setId("1").setName("菜单运维").setLevel_1(SystemRoleLevel.SYSTEM_ADMIN).setLevel_2(SystemRoleLevel.MENU))
 												   .add(new SystemRoleVO().setId("2").setName("流程运维").setLevel_1(SystemRoleLevel.SYSTEM_ADMIN).setLevel_2(SystemRoleLevel.MENU))
@@ -51,6 +103,7 @@ public class SystemRoleQuery {
 	 * @param Collection<String> roleIds 例外角色id列表
 	 * @return List<SystemRoleGroupVO> 分组后的角色列表
 	 */
+	@Deprecated
 	public List<SystemRoleGroupVO> listWithGroupByExceptIds(Collection<String> roleIds) throws Exception{
 		List<SystemRolePO> roles = null;
 		if(roleIds==null || roleIds.size()<=0){
@@ -73,6 +126,7 @@ public class SystemRoleQuery {
 	 * @param Collection<String> roleIds 系统角色id列表
 	 * @return List<SystemRoleGroupVO> 分组后的系统角色列表
 	 */
+	@Deprecated
 	public List<SystemRoleGroupVO> listWithGroupByIds(Collection<String> roleIds) throws Exception{
 		List<SystemRolePO> roles = null;
 		if(roleIds==null || roleIds.size()<=0){
@@ -95,6 +149,7 @@ public class SystemRoleQuery {
 	 * @param List<SystemRolePO> roles 系统角色列表
 	 * @return List<SystemRoleGroupVO 分组后的角色列表
 	 */
+	@Deprecated
 	private List<SystemRoleGroupVO> packageSystemRolesWithGroup(List<SystemRolePO> roles) throws Exception{
 		if(roles!=null && roles.size()>0){
 			Set<Long> groupIds = new HashSet<Long>();
@@ -125,6 +180,7 @@ public class SystemRoleQuery {
 	 * @param Collection<String> roleIds 系统角色id列表
 	 * @return List<SystemRoleVO> 系统角色列表
 	 */
+	@Deprecated
 	public List<SystemRoleVO> listByIds(Collection<String> roleIds) throws Exception{
 		List<SystemRolePO> roles = null;
 		if(roleIds==null || roleIds.size()<=0){

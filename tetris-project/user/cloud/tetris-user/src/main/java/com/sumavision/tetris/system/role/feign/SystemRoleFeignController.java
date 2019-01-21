@@ -52,7 +52,7 @@ public class SystemRoleFeignController {
 		
 		List<SystemRoleGroupVO> groups = null;
 		
-		if(roleIds == null){
+		if(roleIds==null || "".equals(roleIds)){
 			groups = systemRoleQuery.listWithGroupByExceptIds(null);
 		}else{
 			List<String> parsedRoleIds = JSON.parseArray(roleIds, String.class);

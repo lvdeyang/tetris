@@ -19,6 +19,8 @@
     <name>tetris-orm</name>
     <description>tetris-orm</description>
   
+  	<packaging>jar</packaging>
+  
   	<dependencies>
   		
   		<dependency>

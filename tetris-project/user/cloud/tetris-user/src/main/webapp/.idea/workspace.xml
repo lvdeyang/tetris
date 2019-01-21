@@ -21,41 +21,31 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="page-user.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/app/user/page-user.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="9.322034">
-              <caret line="31" column="23" selection-start-line="31" selection-start-column="23" selection-end-line="31" selection-end-column="23" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="page-bind-system-role.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="page-bind-system-role.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+            <state vertical-scroll-proportion="-0.28944504">
+              <caret line="91" column="31" selection-start-line="91" selection-start-column="16" selection-end-line="91" selection-end-column="31" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="page-bind-system-role.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="system-role-dialog.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/dialog/system-role/system-role-dialog.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="-1.6271186">
+              <caret line="79" column="19" selection-start-line="79" selection-start-column="19" selection-end-line="79" selection-end-column="19" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="page-bind-system-role.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="35" selection-start-line="0" selection-start-column="35" selection-end-line="0" selection-end-column="35" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="page-user.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/app/user/page-user.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-14.178572">
-              <caret line="50" column="199" selection-start-line="50" selection-start-column="181" selection-end-line="50" selection-end-column="199" />
+            <state vertical-scroll-proportion="-7.37931">
+              <caret line="61" column="84" selection-start-line="61" selection-start-column="71" selection-end-line="61" selection-end-column="84" />
               <folding>
                 <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#span#0;n#el-button#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
@@ -63,34 +53,10 @@
                 <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#el-scrollbar#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#el-table#0;n#el-scrollbar#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#template#0;n#el-table-column#5;n#el-table#0;n#el-scrollbar#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#el-tooltip#1;n#template#0;n#el-table-column#5;n#el-table#0;n#el-scrollbar#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#el-tooltip#2;n#template#0;n#el-table-column#5;n#el-table#0;n#el-scrollbar#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#el-pagination#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#0;n#el-form#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#div#0;n#el-form#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
               </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="page-bind-system-role.css" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.css">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="main.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/app/main.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="36" column="64" selection-start-line="36" selection-start-column="64" selection-end-line="36" selection-end-column="64" />
-              <folding />
             </state>
           </provider>
         </entry>
@@ -100,12 +66,13 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/web/app/main.js" />
         <option value="$PROJECT_DIR$/web/app/system-role/page-system-role.html" />
         <option value="$PROJECT_DIR$/web/app/system-role/page-system-role.js" />
         <option value="$PROJECT_DIR$/web/app/user/page-user.html" />
         <option value="$PROJECT_DIR$/web/app/user/page-user.js" />
+        <option value="$PROJECT_DIR$/web/app/main.js" />
         <option value="$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.html" />
+        <option value="$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.js" />
       </list>
     </option>
   </component>
@@ -215,7 +182,93 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="user" />
+              <option name="myItemId" value="component" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="component" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dialog" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="component" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dialog" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="system-role" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="component" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dialog" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="folder" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -252,6 +305,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\user\cloud\tetris-user\src\main\webapp\web\app\component\dialog" />
       <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\user\cloud\tetris-user\src\main\webapp\web\app\bind-role" />
       <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\user\cloud\tetris-user\src\main\webapp\web\app\system-role" />
     </key>
@@ -329,10 +383,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.17291667" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.21875" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
@@ -433,6 +487,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -481,25 +536,9 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/main.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="36" column="64" selection-start-line="36" selection-start-column="64" selection-end-line="36" selection-end-column="64" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/web/app/user/page-user.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-14.178572">
+        <state vertical-scroll-proportion="0.44556677">
           <caret line="50" column="199" selection-start-line="50" selection-start-column="181" selection-end-line="50" selection-end-column="199" />
           <folding>
             <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
@@ -527,7 +566,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.js">
+    <entry file="file://$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.css">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
@@ -535,10 +574,52 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.51686615">
+          <caret line="42" column="30" selection-start-line="42" selection-start-column="9" selection-end-line="42" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/dialog/folder/folder-dialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.020674646">
+          <caret line="17" column="30" selection-start-line="17" selection-start-column="30" selection-end-line="17" selection-end-column="30" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/dialog/system-role/system-role-dialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-1.6271186">
+          <caret line="79" column="19" selection-start-line="79" selection-start-column="19" selection-end-line="79" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="35" selection-start-line="0" selection-start-column="35" selection-end-line="0" selection-end-column="35" />
+        <state vertical-scroll-proportion="-7.37931">
+          <caret line="61" column="84" selection-start-line="61" selection-start-column="71" selection-end-line="61" selection-end-column="84" />
+          <folding>
+            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-scrollbar#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-table#0;n#el-scrollbar#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-pagination#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/bind-system-role/page-bind-system-role.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-0.28944504">
+          <caret line="91" column="31" selection-start-line="91" selection-start-column="16" selection-end-line="91" selection-end-column="31" />
           <folding />
         </state>
       </provider>

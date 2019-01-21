@@ -19,6 +19,8 @@
     <name>tetris-mvc</name>
     <description>tetris-mvc</description>
   	
+  	<packaging>jar</packaging>
+  	
   	<dependencies>
   		
   		<dependency>
