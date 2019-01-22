@@ -165,7 +165,7 @@ define([
                         menu.active = false;
                     }
                 }else if(menu.link){
-                    if(menu.link === window.location.href){
+                    if(menu.link === (activeId || window.location.href)){
                         menu.active = true;
                     }else{
                         menu.active = false;

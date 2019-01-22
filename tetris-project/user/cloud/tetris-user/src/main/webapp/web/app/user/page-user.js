@@ -73,7 +73,8 @@ define([
                 },
                 gotoBindSystemRole:function(scope){
                     var slef = this;
-                    var row = scope.role;
+                    var row = scope.row;
+                    window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname;
                 },
                 handleCreate:function(){
                     var self = this;

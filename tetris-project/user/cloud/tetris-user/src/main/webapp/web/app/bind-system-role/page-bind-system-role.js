@@ -35,6 +35,7 @@ define([
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 username:username,
+                activeId:window.BASEPATH + 'index#/page-user',
                 table:{
                     rows:[],
                     pageSize:50,
@@ -108,7 +109,7 @@ define([
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
-                                ajax.post('/user/delete/' + row.id, null, function(data, status){
+                                ajax.post('/user/system/role/permission/unbind/' + row.id, null, function(data, status){
                                     instance.confirmButtonLoading = false;
                                     if(status !== 200) return;
                                     for(var i=0; i<self.table.rows.length; i++){
