@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.sumavision.tetris.system.role.exception.SystemRoleNotExistException;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.exception.UserNotExistException;
@@ -83,6 +86,62 @@ public class UserSystemRolePermissionService {
 		}
 		
 		return view_permissions;
+	}
+	
+	/**
+	 * 系统角色授权用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午8:06:45
+	 * @param Long roleId 系统角色id
+	 * @param Collectin<Long> userIds 用户id列表
+	 * @return List<UserSystemRolePermissionVO> 添加的权限列表
+	 */
+	public List<UserSystemRolePermissionVO> bindUser(Long roleId, Collection<Long> userIds) throws Exception{
+		
+		SystemRolePO role = systemRoleDao.findOne(roleId);
+		if(role == null){
+			throw new SystemRoleNotExistException(roleId);
+		}
+		
+		List<UserPO> users = userDao.findAll(userIds);
+		if(users==null || users.size()<=0) return null;
+		
+		List<UserSystemRolePermissionPO> existPermissions = userSystemRolePermissionDao.findByRoleIdAndUserIdIn(roleId, userIds);
+		
+		List<UserSystemRolePermissionPO> permissions = new ArrayList<UserSystemRolePermissionPO>();
+		for(UserPO user:users){
+			boolean finded = false;
+			for(UserSystemRolePermissionPO existPermission:existPermissions){
+				if(user.getId().equals(existPermission.getUserId())){
+					finded = true;
+					break;
+				}
+			}
+			if(!finded){
+				UserSystemRolePermissionPO permission = new UserSystemRolePermissionPO();
+				permission.setRoleId(role.getId());
+				permission.setUserId(user.getId());
+				permission.setAutoGeneration(false);
+				permission.setUpdateTime(new Date());
+				permissions.add(permission);
+			}
+		}
+		
+		userSystemRolePermissionDao.save(permissions);
+		
+		List<UserSystemRolePermissionVO> view_permissions = new ArrayList<UserSystemRolePermissionVO>();
+		for(UserSystemRolePermissionPO permission:permissions){
+			for(UserPO user:users){
+				if(permission.getUserId().equals(user.getId())){
+					view_permissions.add(new UserSystemRolePermissionVO().set(permission, user));
+					break;
+				}
+			}
+		}
+		
+		return view_permissions;
+		
 	}
 	
 	/**

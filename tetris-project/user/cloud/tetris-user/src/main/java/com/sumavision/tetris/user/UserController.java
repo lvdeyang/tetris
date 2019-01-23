@@ -1,17 +1,20 @@
 package com.sumavision.tetris.user;
 
+import java.util.List;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping(value = "/user")
 public class UserController {
-
+	
 	@Autowired
 	private UserQuery userQuery;
 	
@@ -33,13 +36,47 @@ public class UserController {
 	public Object list(
 			int currentPage,
 			int pageSize,
-			HttpServletRequest request) throws Exception{
+			HttpServletRequest request,
+			HttpServletResponse response) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		
 		return userQuery.list(currentPage, pageSize);
+	}
+	
+	/**
+	 * 分页查询用户（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午5:33:31
+	 * @param JSONString except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 总数据量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/with/except")
+	public Object listWithExceptIds(
+			String except,
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		if(except == null){
+			return userQuery.list(currentPage, pageSize);
+		}else{
+			List<Long> exceptIds = JSON.parseArray(except, Long.class);
+			return userQuery.listWithExcept(exceptIds, currentPage, pageSize);
+		}
+		
 	}
 	
 	/**

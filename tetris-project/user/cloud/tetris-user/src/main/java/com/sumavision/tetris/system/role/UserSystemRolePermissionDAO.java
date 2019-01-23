@@ -53,4 +53,46 @@ public interface UserSystemRolePermissionDAO extends BaseDAO<UserSystemRolePermi
 	 */
 	public int countByUserId(Long userId);
 	
+	/**
+	 * 根据角色（批量）获取角色权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午2:13:45
+	 * @param Collection<Long> roleIds 角色id列表
+	 * @return List<UserSystemRolePermissionPO> 权限列表
+	 */
+	public List<UserSystemRolePermissionPO> findByRoleIdIn(Collection<Long> roleIds);
+	
+	/**
+	 * 分页查询系统角色绑定的用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午4:59:50
+	 * @param Long roleId 角色id
+	 * @param Pageable page 分页信息
+	 * @return Page<UserSystemRolePermissionPO> 权限列表
+	 */
+	public Page<UserSystemRolePermissionPO> findByRoleId(Long roleId, Pageable page);
+	
+	/**
+	 * 统计系统角色绑定的用户数量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午4:56:13
+	 * @param Long roleId 系统角色id
+	 * @return int 用户数量
+	 */
+	public int countByRoleId(Long roleId);
+	
+	/**
+	 * 根据系统角色id和用户列表获取权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午8:03:12
+	 * @param Long roleId 系统角色id
+	 * @param Collection<Long> userIds 用户id列表 
+	 * @return List<UserSystemRolePermissionPO> 权限列表
+	 */
+	public List<UserSystemRolePermissionPO> findByRoleIdAndUserIdIn(Long roleId, Collection<Long> userIds);
+	
 }

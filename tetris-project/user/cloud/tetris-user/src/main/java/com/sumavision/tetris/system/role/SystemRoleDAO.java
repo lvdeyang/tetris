@@ -34,4 +34,26 @@ public interface SystemRoleDAO extends BaseDAO<SystemRolePO>{
 	@Query(value = "SELECT role.* FROM tetris_user_system_role role LEFT JOIN tetris_user_system_role_permission permission ON role.id=permission.role_id WHERE permission.user_id=?1 \n#pageable\n", nativeQuery = true)
 	public Page<SystemRolePO> findByUserId(Long userId, Pageable page);
 	
+	/**
+	 * 分页查询系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 上午10:17:36
+	 * @param Pageable page 分页信息
+	 * @return Page<SystemRolePO> 系统角色列表
+	 */
+	@Query(value = "from com.sumavision.tetris.system.role.SystemRolePO role where role.systemRoleGroupId=?1 order by role.updateTime desc")
+	public Page<SystemRolePO> findAllOrderByUpdateTimeDesc(Long systemRoleGroupId, Pageable page);
+	
+	/**
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午1:50:21
+	 * @param systemRoleGroupId
+	 * @return
+	 */
+	public List<SystemRolePO> findBySystemRoleGroupId(Long systemRoleGroupId);
+	
 }

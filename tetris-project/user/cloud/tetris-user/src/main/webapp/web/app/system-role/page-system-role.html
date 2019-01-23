@@ -8,147 +8,157 @@
     </template>
 
     <template>
+        <div style="width:100%; height:100%; position:relative;">
+            <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+                <div style="box-sizing:border-box; width:420px; position:absolute; left:0; top:0; bottom:0; padding:10px; border-right:1px solid #ebeef5;">
+                    <div style="width:100%; height:100%; position:relative">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                    v-loading="loading.roleGroup"
+                                    ref="roleGroupTree"
+                                    :props = "tree.props"
+                                    :data = "tree.data"
+                                    node-key="uuid"
+                                    :current-node-key="tree.current"
+                                    check-strictly
+                                    :expand-on-click-node="false"
+                                    default-expand-all
+                                    highlight-current
+                                    @current-change="currentTreeNodeChange">
 
-        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+                                <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px; position:relative; bottom:1px; padding-right:8px;" slot-scope="{node, data}">
+                                    <span style="font-size:14px;">
+                                         <span class="feather-icon-folder"></span>
+                                         <span>{{data.name}}</span>
+                                    </span>
+                                    <span>
+                                        <el-button v-if="!data.autoGeneration" type="text" size="mini" style="padding:0;" @click.stop="handleEditSystemRoleGroup(node, data)">
+                                            <span style="font-size:16px;" class="el-icon-edit"></span>
+                                        </el-button>
+                                        <el-button v-if="!data.autoGeneration" type="text" size="mini" style="padding:0; margin-left:5px;" @click.stop="handleDeleteSystemRoleGroup(node, data)">
+                                            <span style="font-size:16px;" class="el-icon-delete"></span>
+                                        </el-button>
+                                    </span>
+                                </span>
 
-            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加流程</el-button>
-            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除流程</el-button>
-
-            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
-                <el-scrollbar style="height:100%;">
-                    <el-table
-                            :data="table.rows"
-                            :row-key="rowKey"
-                            style="width:100%">
-                        <el-table-column
-                                type="selection"
-                                width="55">
-                        </el-table-column>
-                        <el-table-column
-                                label="流程id"
-                                prop="processId">
-                        </el-table-column>
-                        <el-table-column
-                                label="名称"
-                                prop="name">
-                        </el-table-column>
-                        <el-table-column
-                                label="类型"
-                                prop="type">
-                        </el-table-column>
-                        <el-table-column
-                                label="说明"
-                                prop="remarks">
-                        </el-table-column>
-                        <el-table-column
-                                label="操作"
-                                width="250">
-                            <template slot-scope="scope">
-                                <el-tooltip class="item" effect="dark" content="编辑流程" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
-                                </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="设计流程" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-news" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoProcessDesign(scope)"></el-button>
-                                </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="流程变量" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-tickets" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoProcessVariable(scope)"></el-button>
-                                </el-tooltip>
-                                <el-tooltip v-if="scope.row.type !== '流程模板'" class="item" effect="dark" content="发布流程" placement="bottom-end">
-                                    <el-button type="text" icon="feather-icon-send" style="font-size:20px; padding:0; position:relative; top:2px; left:1px; margin-left:20px;" @click="publishProcess(scope)"></el-button>
-                                </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="删除流程" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
-                                </el-tooltip>
-                            </template>
-                        </el-table-column>
-                    </el-table>
-                </el-scrollbar>
-            </div>
-
-            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
-                <el-pagination
-                        style="float:right;"
-                        background
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="table.currentPage"
-                        :page-sizes="table.pageSizes"
-                        :page-size="table.pageSize"
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total="table.total">
-                </el-pagination>
-            </div>
-
-        </el-card>
-
-        <!-- 新建流程对话框 -->
-        <el-dialog
-                title="新建流程"
-                :visible.sync="dialog.createProcess.visible"
-                width="500px"
-                :before-close="handleCreateProcessClose">
-
-            <div>
-                <el-form label-width="100px">
-                    <el-form-item label="流程类型:">
-                        <el-select v-model="dialog.createProcess.type" style="width:100%;">
-                            <el-option
-                                    v-for="processType in processTypes"
-                                    :key="processType"
-                                    :label="processType"
-                                    :value="processType">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <div style="margin-bottom:5px; color:#F56C6C; text-align:right;">
-                        流程id定义后，不可修改
+                            </el-tree>
+                        </el-scrollbar>
+                        <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="handleCreateSystemRoleGroup" icon="el-icon-plus"></el-button>
                     </div>
-                    <el-form-item label="自定义流程id:">
-                        <el-input v-model="dialog.createProcess.processId"></el-input>
-                    </el-form-item>
-                    <el-form-item label="流程名称:">
-                        <el-input v-model="dialog.createProcess.name"></el-input>
-                    </el-form-item>
-                    <el-form-item label="备注说明">
-                        <el-input type="textarea" v-model="dialog.createProcess.remarks"></el-input>
-                    </el-form-item>
-                </el-form>
-            </div>
+                </div>
+                <div v-if="tree.current" style="box-sizing:border-box; position:absolute; left:420px; top:0; bottom:0; right:0; padding:10px;">
+                    <div style="width:100%; height:100%; position:relative;">
+
+                        <el-button type="primary" size="small" @click="handleCreateSystemRole"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加角色</el-button>
+                        <el-button type="warning" size="small" @click="handleDeleteSystemRole"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除角色</el-button>
+
+                        <div style="position:absolute; top:86px; left:0; bottom:0; right:0;">
+                            <el-scrollbar style="height:100%;">
+                                <el-table
+                                        :data="table.rows"
+                                        :row-key="rowKey"
+                                        style="width:100%">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55">
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="角色"
+                                            prop="name">
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="操作"
+                                            width="250">
+                                        <template slot-scope="scope">
+                                            <el-tooltip class="item" effect="dark" content="修改角色" placement="bottom-end">
+                                                <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip class="item" effect="dark" content="授权用户" placement="bottom-end">
+                                                <el-button type="text" icon="el-icon-tickets" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoBindUser(scope)"></el-button>
+                                            </el-tooltip>
+                                            <el-tooltip class="item" effect="dark" content="删除角色" placement="bottom-end">
+                                                <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                                <div style="height:48px; width:100%;">
+                                    <el-pagination
+                                            style="float:right; margin-top:10px;"
+                                            @current-change="handleCurrentChange"
+                                            background
+                                            layout="total, prev, pager, next, jumper"
+                                            :total="table.total">
+                                    </el-pagination>
+                                </div>
+                            </el-scrollbar>
+                        </div>
+                    </div>
+
+                </div>
+            </el-card>
+        </div>
+
+        <!-- 添加系统角色组对话框 -->
+        <el-dialog
+                title="新建系统角色组"
+                :visible.sync="dialog.createSystemRoleGroup.visible"
+                width="500px"
+                :before-close="handleCreateSystemRoleGroupClose">
+
+            <el-input v-model="dialog.createSystemRoleGroup.name" placeholder="起个名吧！"></el-input>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.createProcess.visible = false">取消</el-button>
-                <el-button size="medium" type="primary" @click="handleCreateProcessSubmit" :loading="dialog.createProcess.loading">确定</el-button>
+                <el-button size="medium" @click="dialog.createSystemRoleGroup.visible = false">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateSystemRoleGroupSubmit" :loading="dialog.createSystemRoleGroup.loading">确定</el-button>
             </span>
 
         </el-dialog>
 
-        <!-- 修改流程对话框 -->
+        <!-- 修改系统角色组对话框 -->
         <el-dialog
-                title="修改流程"
-                :visible.sync="dialog.editProcess.visible"
+                title="编辑系统角色组"
+                :visible.sync="dialog.editSystemRoleGroup.visible"
                 width="500px"
-                :before-close="handleEditProcessClose">
+                :before-close="handleEditSystemRoleGroupClose">
 
-            <div>
-                <el-form label-width="100px">
-                    <el-form-item label="流程类型:">
-                        <el-input v-model="dialog.editProcess.type" :disabled="true"></el-input>
-                    </el-form-item>
-                    <el-form-item label="自定义流程id:">
-                        <el-input v-model="dialog.editProcess.processId" :disabled="true"></el-input>
-                    </el-form-item>
-                    <el-form-item label="流程名称:">
-                        <el-input v-model="dialog.editProcess.name"></el-input>
-                    </el-form-item>
-                    <el-form-item label="备注说明">
-                        <el-input type="textarea" v-model="dialog.editProcess.remarks"></el-input>
-                    </el-form-item>
-                </el-form>
-            </div>
+            <el-input v-model="dialog.editSystemRoleGroup.name" placeholder="改个名吧！"></el-input>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.editProcess.visible = false">取消</el-button>
-                <el-button size="medium" type="primary" @click="handleEditProcessSubmit" :loading="dialog.editProcess.loading">确定</el-button>
+                <el-button size="medium" @click="dialog.editSystemRoleGroup.visible = false">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditSystemRoleGroupSubmit" :loading="dialog.editSystemRoleGroup.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <!-- 添加系统角色 -->
+        <el-dialog
+                title="新建系统角色"
+                :visible.sync="dialog.createSystemRole.visible"
+                width="500px"
+                :before-close="handleCreateSystemRoleClose">
+
+            <el-input v-model="dialog.createSystemRole.name" placeholder="起个名吧！"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.createSystemRole.visible = false">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateSystemRoleSubmit" :loading="dialog.createSystemRole.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <!-- 修改系统角色 -->
+        <el-dialog
+                title="编辑系统角色"
+                :visible.sync="dialog.editSystemRole.visible"
+                width="500px"
+                :before-close="handleEditSystemRoleClose">
+
+            <el-input v-model="dialog.editSystemRole.name" placeholder="改个名吧！"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.editSystemRole.visible = false">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditSystemRoleSubmit" :loading="dialog.editSystemRole.loading">确定</el-button>
             </span>
 
         </el-dialog>

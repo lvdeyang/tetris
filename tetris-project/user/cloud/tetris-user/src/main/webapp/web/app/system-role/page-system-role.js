@@ -29,7 +29,20 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
-                processTypes:[],
+                tree:{
+                    props:{
+                        label: 'name',
+                        children: 'sub',
+                        isLeaf: 'isLeaf'
+                    },
+                    expandOnClickNode:false,
+                    data:[],
+                    current:''
+                },
+                loading:{
+                    roleGroup:false,
+                    addRoot:false
+                },
                 table:{
                     rows:[],
                     pageSize:50,
@@ -38,21 +51,26 @@ define([
                     total:0
                 },
                 dialog:{
-                    createProcess:{
+                    createSystemRoleGroup:{
                         visible:false,
-                        type:'',
-                        processId:'',
                         name:'',
-                        remarks:'',
                         loading:false
                     },
-                    editProcess:{
+                    editSystemRoleGroup:{
                         visible:false,
                         id:'',
-                        type:'',
-                        processId:'',
                         name:'',
-                        remarks:'',
+                        loading:false
+                    },
+                    createSystemRole:{
+                        visible:false,
+                        name:'',
+                        loading:false
+                    },
+                    editSystemRole:{
+                        visible:false,
+                        id:'',
+                        name:'',
                         loading:false
                     }
                 }
@@ -64,93 +82,211 @@ define([
 
             },
             methods:{
-                rowKey:function(row){
-                    return 'process-' + row.uuid;
-                },
-                gotoProcessDesign:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-process-design/' + row.id + '/' + row.name;
-                },
-                gotoProcessVariable:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-process-variable/' + row.id + '/' + row.name;
-                },
-                publishProcess:function(scope){
+                loadGroups:function(){
                     var self = this;
-                    var row = scope.row;
-                    ajax.post('/api/process/publish/' + row.id, null, function(){
-                        self.$message({
-                            type:'success',
-                            message:'发布成功！'
-                        });
-                    });
-                },
-                handleCreate:function(){
-                    var self = this;
-                    self.dialog.createProcess.visible = true;
-                },
-                handleCreateProcessClose:function(){
-                    var self = this;
-                    self.dialog.createProcess.type = '';
-                    self.dialog.createProcess.processId = '';
-                    self.dialog.createProcess.name = '';
-                    self.dialog.createProcess.remarks = '';
-                    self.dialog.createProcess.visible = false;
-                },
-                handleCreateProcessSubmit:function(){
-                    var self = this;
-                    self.dialog.createProcess.loading = true;
-                    ajax.post('/process/add', {
-                        type:self.dialog.createProcess.type,
-                        processId:self.dialog.createProcess.processId,
-                        name:self.dialog.createProcess.name,
-                        remarks:self.dialog.createProcess.remarks
-                    }, function(data, status){
-                        self.dialog.createProcess.loading = false;
+                    self.loading.roleGroup = true;
+                    ajax.post('/system/role/group/list', null, function(data, status){
+                        self.loading.roleGroup = false;
                         if(status !== 200) return;
-                        self.table.rows.push(data);
-                        self.handleCreateProcessClose();
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                data[i].isLeaf = true;
+                                self.tree.data.push(data[i]);
+                            }
+                            self.currentNode(data[0]);
+                        }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                handleDelete:function(){
+                currentTreeNodeChange:function(data){
+                    var self = this;
+                    self.tree.current = data;
+                    self.loadRoles(data.id, 1);
+                },
+                handleCreateSystemRoleGroup:function(){
+                    var self = this;
+                    self.dialog.createSystemRoleGroup.visible = true;
+                },
+                handleCreateSystemRoleGroupClose:function(){
+                    var self = this;
+                    self.dialog.createSystemRoleGroup.visible = false;
+                    self.dialog.createSystemRoleGroup.name = '';
+                    self.dialog.createSystemRoleGroup.loading = false;
+                },
+                handleCreateSystemRoleGroupSubmit:function(){
+                    var self = this;
+                    self.dialog.createSystemRoleGroup.loading = true;
+                    ajax.post('/system/role/group/add', {
+                        name:self.dialog.createSystemRoleGroup.name
+                    }, function(data, status){
+                        self.dialog.createSystemRoleGroup.loading = false;
+                        if(status !== 200) return;
+                        self.tree.data.splice(0, 0, data);
+                        self.handleCreateSystemRoleGroupClose();
+                        self.currentNode(data);
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                handleEditSystemRoleGroup:function(node, data){
+                    var self = this;
+                    self.dialog.editSystemRoleGroup.id = data.id;
+                    self.dialog.editSystemRoleGroup.name = data.name;
+                    self.dialog.editSystemRoleGroup.visible = true;
+                },
+                handleEditSystemRoleGroupClose:function(){
+                    var self = this;
+                    self.dialog.editSystemRoleGroup.id = '';
+                    self.dialog.editSystemRoleGroup.name = '';
+                    self.dialog.editSystemRoleGroup.visible = false;
+                    self.dialog.editSystemRoleGroup.loading = false;
+                },
+                handleEditSystemRoleGroupSubmit:function(){
+                    var self = this;
+                    self.dialog.editSystemRoleGroup.loading = true;
+                    ajax.post('/system/role/group/edit/' + self.dialog.editSystemRoleGroup.id, {
+                        name:self.dialog.editSystemRoleGroup.name
+                    }, function(data, status){
+                        self.dialog.editSystemRoleGroup.loading = false;
+                        if(status !== 200) return;
+                        for(var i=0; i<self.tree.data.length; i++){
+                            if(self.tree.data[i].id === data.id){
+                                self.tree.data[i].name = data.name;
+                                break;
+                            }
+                        }
+                        self.handleEditSystemRoleGroupClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                handleDeleteSystemRoleGroup:function(node, data){
+                    var self = this;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'危险操作',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['此操作将永久删除角色组以及组内所有角色，且不可恢复，是否继续?'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose:function(action, instance, done){
+                            instance.confirmButtonLoading = true;
+                            if(action === 'confirm'){
+                                ajax.post('/system/role/group/delete/' + data.id, null, function(response, status){
+                                    instance.confirmButtonLoading = false;
+                                    if(status !== 200) return;
+                                    for(var i=0; i<self.tree.data.length; i++){
+                                        if(self.tree.data[i].id === data.id){
+                                            self.tree.data.splice(i, 1);
+                                            break;
+                                        }
+                                    }
+                                    done();
+                                    self.currentNode(self.tree.data[0]);
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            }else{
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
+                },
+                currentNode:function(data){
+                    if(!data) return;
+                    var self = this;
+                    self.$nextTick(function(){
+                        self.$refs.roleGroupTree.setCurrentKey(data.uuid);
+                    });
+                    self.tree.current = data;
+                    self.loadRoles(data.id, 1);
+                },
+                rowKey:function(row){
+                    return 'system-role-' + row.id;
+                },
+                loadRoles:function(groupId, currentPage){
+                    var self = this;
+                    self.table.rows.splice(0, self.table.rows.length);
+                    ajax.post('/system/role/list', {
+                        groupId:groupId,
+                        currentPage:currentPage,
+                        pageSize:self.table.pageSize
+                    }, function(data){
+                        var total = data.total;
+                        var rows = data.rows;
+                        self.table.total = total;
+                        if(rows && rows.length>0){
+                            for(var i=0; i<rows.length; i++){
+                                self.table.rows.push(rows[i]);
+                            }
+                        }
+                    });
+                },
+                handleCurrentChange:function(currentPage){
+                    var self = this;
+                    self.loadRoles(self.tree.current.id, currentPage)
+                },
+                handleCreateSystemRole:function(){
+                    var self = this;
+                    self.dialog.createSystemRole.visible = true;
+                },
+                handleDeleteSystemRole:function(){
 
+                },
+                handleCreateSystemRoleClose:function(){
+                    var self = this;
+                    self.dialog.createSystemRole.visible = false;
+                    self.dialog.createSystemRole.name = '';
+                    self.dialog.createSystemRole.loading = false;
+                },
+                handleCreateSystemRoleSubmit:function(){
+                    var self = this;
+                    self.dialog.createSystemRole.loading = true;
+                    ajax.post('/system/role/add', {
+                        groupId:self.tree.current.id,
+                        name:self.dialog.createSystemRole.name
+                    }, function(data, status){
+                        self.dialog.createSystemRole.loading = false;
+                        if(status !== 200) return;
+                        self.table.rows.push(data);
+                        self.handleCreateSystemRoleClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
                 handleRowEdit:function(scope){
                     var self = this;
                     var row = scope.row;
-                    self.dialog.editProcess.id = row.id;
-                    self.dialog.editProcess.type = row.type;
-                    self.dialog.editProcess.processId = row.processId;
-                    self.dialog.editProcess.name = row.name;
-                    self.dialog.editProcess.remarks = row.remarks;
-                    self.dialog.editProcess.visible = true;
+                    self.dialog.editSystemRole.visible = true;
+                    self.dialog.editSystemRole.id = row.id;
+                    self.dialog.editSystemRole.name = row.name;
                 },
-                handleEditProcessClose:function(){
+                handleEditSystemRoleSubmit:function(){
                     var self = this;
-                    self.dialog.editProcess.id = '';
-                    self.dialog.editProcess.type = '';
-                    self.dialog.editProcess.processId = '';
-                    self.dialog.editProcess.name = '';
-                    self.dialog.editProcess.remarks = '';
-                    self.dialog.editProcess.visible = false;
-                },
-                handleEditProcessSubmit:function(){
-                    var self = this;
-                    self.dialog.editProcess.loading = true;
-                    ajax.post('/process/edit/' + self.dialog.editProcess.id, {
-                        name:self.dialog.editProcess.name,
-                        remarks:self.dialog.editProcess.remarks
+                    self.dialog.editSystemRole.loading = true;
+                    ajax.post('/system/role/edit/' + self.dialog.editSystemRole.id, {
+                        name:self.dialog.editSystemRole.name
                     }, function(data, status){
-                        self.dialog.editProcess.loading = false;
+                        self.dialog.editSystemRole.loading = false;
                         if(status !== 200) return;
                         for(var i=0; i<self.table.rows.length; i++){
-                            if(self.table.rows[i].id === self.dialog.editProcess.id){
-                                self.table.rows.splice(i, 1, data);
+                            if(self.table.rows[i].id === data.id){
+                                self.table.rows[i].name = data.name;
                                 break;
                             }
                         }
-                        self.handleEditProcessClose();
+                        self.handleEditSystemRoleClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                handleEditSystemRoleClose:function(){
+                    var self = this;
+                    self.dialog.editSystemRole.visible = false;
+                    self.dialog.editSystemRole.id = '';
+                    self.dialog.editSystemRole.name = '';
+                    self.dialog.editSystemRole.loading = false;
+                },
+                gotoBindUser:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    window.location.hash = '#/page-bind-user/' + row.id + '/' + row.name;
                 },
                 handleRowDelete:function(scope){
                     var self = this;
@@ -161,7 +297,7 @@ define([
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
-                                h('p', null, ['此操作将永久删除该流程，且不可恢复，是否继续?'])
+                                h('p', null, ['此操作将永久删除角色以及角色授权，且不可恢复，是否继续?'])
                             ])
                         ]),
                         type:'wraning',
@@ -171,7 +307,7 @@ define([
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
-                                ajax.post('/process/delete/' + row.id, null, function(data, status){
+                                ajax.post('/system/role/delete/' + row.id, null, function(response, status){
                                     instance.confirmButtonLoading = false;
                                     if(status !== 200) return;
                                     for(var i=0; i<self.table.rows.length; i++){
@@ -188,45 +324,11 @@ define([
                             }
                         }
                     }).catch(function(){});
-                },
-                handleSizeChange:function(size){
-                    var self = this;
-                    self.table.pageSize = size;
-                    self.load(self.table.currentPage);
-                },
-                handleCurrentChange:function(currentPage){
-                    var self = this;
-                    self.load(currentPage);
-                },
-                load:function(currentPage){
-                    var self = this;
-                    self.table.rows.splice(0, self.table.rows.length);
-                    ajax.post('/process/list', {
-                        currentPage:currentPage,
-                        pageSize:self.table.pageSize
-                    }, function(data){
-                        var total = data.total;
-                        var rows = data.rows;
-                        if(rows && rows.length>0){
-                            for(var i=0; i<rows.length; i++){
-                                self.table.rows.push(rows[i]);
-                            }
-                            self.table.total = total;
-                        }
-                        self.table.currentPage = currentPage;
-                    });
                 }
             },
             created:function(){
                 var self = this;
-                /*ajax.post('/process/query/types', null, function(data){
-                    if(data && data.length>0){
-                        for(var i=0; i<data.length; i++){
-                            self.processTypes.push(data[i]);
-                        }
-                    }
-                });*/
-                //self.load(1);
+                self.loadGroups();
             }
         });
 

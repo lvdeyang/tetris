@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
@@ -52,6 +53,41 @@ public class UserQuery {
 		return users.getContent();
 	}
 	
+	/**
+	 * 分页查询用户（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午6:37:06
+	 * @param Collection<Long> except 例外用户id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 数据总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	public Map<String, Object> listWithExcept(Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		int total = userDao.countWithExcept(except);
+		List<UserPO> users = findWithExceptOrderByUpdateTimeDesc(except, currentPage, pageSize);
+		List<UserVO> view_users = UserVO.getConverter(UserVO.class).convert(users, UserVO.class);
+		return new HashMapWrapper<String, Object>().put("total", total)
+											       .put("rows", view_users)
+											       .getMap();
+	}
+	
+	/**
+	 * 分页查询用户（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午6:31:48
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findWithExceptOrderByUpdateTimeDesc(Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> users = userDao.findWithExceptOrderByUpdateTimeDesc(except, page);
+		return users.getContent();
+	}
 	
 	/**************************************************************************
 	 **************************************************************************

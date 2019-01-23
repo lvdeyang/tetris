@@ -45,7 +45,8 @@ public class UserSystemRolePermissionController {
 	public Object listByUserId(
 			Long userId,
 			int currentPage,
-			int pageSize) throws Exception{
+			int pageSize,
+			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
@@ -103,6 +104,61 @@ public class UserSystemRolePermissionController {
 		userSystemRolePermissionService.unbind(id);
 		
 		return null;
+	}
+	
+	/**
+	 * 分页查询系统角色的权限绑定信息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午5:10:27
+	 * @param Long roleId 系统角色id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 总数据量
+	 * @return rows List<UserSystemRolePermissionVO> 权限列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/by/roleId")
+	public Object listByRoleId(
+			Long roleId,
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//权限校验	
+		
+		return userSystemRolePermissionQuery.listByRoleId(roleId, currentPage, pageSize);
+	}
+	
+	/**
+	 * 系统角色授权用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午8:09:36
+	 * @param Long roleId 系统角色id
+	 * @param JSONString userIds 用户id列表
+	 * @return List<UserSystemRolePermissionVO> 权限列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/bind/user")
+	public Object bindUser(
+			Long roleId,
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//权限校验
+		
+		if(userIds == null) return null;
+		
+		List<UserSystemRolePermissionVO> permissions = userSystemRolePermissionService.bindUser(roleId, JSON.parseArray(userIds, Long.class));
+		
+		return permissions;
 	}
 	
 }

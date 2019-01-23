@@ -1,9 +1,12 @@
 package com.sumavision.tetris.user;
 
+import java.util.Collection;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
+
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 /**
@@ -23,7 +26,30 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * <b>日期：</b>2018年11月22日 上午10:14:26
 	 * @return Page<UserPO> 用户列表
 	 */
-	@Query(value = "from com.sumavision.tetris.user.UserPO user ORDER BY user.updateTime DESC")
+	@Query(value = "from com.sumavision.tetris.user.UserPO user order by user.updateTime desc")
 	public Page<UserPO> findAllOrderByUpdateTimeDesc(Pageable page);
+	
+	/**
+	 * 分页查询用户列表（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午6:29:45
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param Pageable page 分页信息
+	 * @return Page<UserPO> 用户列表
+	 */
+	@Query(value = "from com.sumavision.tetris.user.UserPO user where id not in ?1 order by user.updateTime desc")
+	public Page<UserPO> findWithExceptOrderByUpdateTimeDesc(Collection<Long> except, Pageable page);
+	
+	/**
+	 * 统计用户数量（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月23日 下午6:34:17
+	 * @param Collection<Long> except 例外用户id列表
+	 * @return int 用户数量
+	 */
+	@Query(value = "select count(user.id) from com.sumavision.tetris.user.UserPO user where id not in ?1")
+	public int countWithExcept(Collection<Long> except);
 	
 }
