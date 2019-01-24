@@ -82,27 +82,88 @@
                 width="500px"
                 :before-close="handleCreateUserClose">
 
-            <div>
-                <el-form label-width="60px">
-                    <el-form-item label="昵称:">
-                        <el-input v-model="dialog.createUser.nickname"></el-input>
-                    </el-form-item>
-                    <el-form-item label="账号:">
-                        <el-input v-model="dialog.createUser.username"></el-input>
-                    </el-form-item>
-                    <el-form-item label="密码:">
-                        <el-input type="password" v-model="dialog.createUser.password"></el-input>
-                    </el-form-item>
-                    <el-form-item label="确认:">
-                        <el-input type="password" v-model="dialog.createUser.repeat" placeholder="请再次输入密码！"></el-input>
-                    </el-form-item>
-                    <el-form-item label="手机:">
-                        <el-input v-model="dialog.createUser.mobile"></el-input>
-                    </el-form-item>
-                    <el-form-item label="邮箱:">
-                        <el-input v-model="dialog.createUser.mail"></el-input>
-                    </el-form-item>
-                </el-form>
+            <el-dialog
+                    title="选择公司"
+                    :visible.sync="dialog.company.visible"
+                    width="600px"
+                    append-to-body
+                    :before-close="handleCompanyClose">
+
+                <el-table
+                        ref="companyTable"
+                        :data="dialog.company.rows"
+                        :row-key="companyKey"
+                        highlight-current-row
+                        @current-change="companyChange"
+                        style="width:100%">
+                    </el-table-column>
+                    <el-table-column
+                            label="公司"
+                            prop="name">
+                    </el-table-column>
+                </el-table>
+
+                <div style="height:50px; width:100%; box-sizing:border-box;">
+                    <el-pagination
+                            style="position:relative; top:9px;"
+                            background
+                            @current-change="handleCurrentChange"
+                            :current-page="dialog.company.currentPage"
+                            :page-size="dialog.company.pageSize"
+                            layout="total, prev, pager, next, jumper"
+                            :total="dialog.company.total">
+                    </el-pagination>
+                </div>
+
+                <div slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="dialog.company.visible = false">取 消</el-button>
+                    <el-button size="medium" type="primary" @click="companySelected">确 定</el-button>
+                </div>
+            </el-dialog>
+
+            <div style="height:412px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form label-width="80px">
+                        <el-form-item label="昵称:">
+                            <el-input v-model="dialog.createUser.nickname"></el-input>
+                        </el-form-item>
+                        <el-form-item label="账号:">
+                            <el-input v-model="dialog.createUser.username"></el-input>
+                        </el-form-item>
+                        <el-form-item label="密码:">
+                            <el-input type="password" v-model="dialog.createUser.password"></el-input>
+                        </el-form-item>
+                        <el-form-item label="确认:">
+                            <el-input type="password" v-model="dialog.createUser.repeat" placeholder="请再次输入密码！"></el-input>
+                        </el-form-item>
+                        <el-form-item label="手机:">
+                            <el-input v-model="dialog.createUser.mobile"></el-input>
+                        </el-form-item>
+                        <el-form-item label="邮箱:">
+                            <el-input v-model="dialog.createUser.mail"></el-input>
+                        </el-form-item>
+                        <el-form-item label="类型:">
+                            <el-select v-model="dialog.createUser.classify" placeholder="请选择" style="width:100%;">
+                                <el-option
+                                        v-for="classify in classifies"
+                                        :key="classify"
+                                        :label="classify"
+                                        :value="classify">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <div style="margin-bottom:22px; text-align:center;" v-if="dialog.createUser.classify==='企业用户'">
+                            <el-radio-group v-model="dialog.createUser.company.create" @change="companyActionChange" size="mini">
+                                <el-radio-button label="1">新建</el-radio-button>
+                                <el-radio-button label="0">选择</el-radio-button>
+                            </el-radio-group>
+                        </div>
+                        <el-form-item v-if="dialog.createUser.classify==='企业用户'" label="公司名称:">
+                            <el-input v-if="dialog.createUser.company.create==1" v-model="dialog.createUser.company.name"></el-input>
+                            <el-input v-else v-model="dialog.createUser.company.name" readonly placeholder="点击选择企业" @focus="selectCompany"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
             </div>
 
             <span slot="footer" class="dialog-footer">

@@ -29,6 +29,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                classifies:[],
                 table:{
                     rows:[],
                     pageSize:50,
@@ -37,6 +38,14 @@ define([
                     total:0
                 },
                 dialog:{
+                    company:{
+                        visible:false,
+                        pageSize:10,
+                        total:0,
+                        currentPage:0,
+                        rows:[],
+                        current:''
+                    },
                     createUser:{
                         visible:false,
                         nickname:'',
@@ -45,6 +54,12 @@ define([
                         repeat:'',
                         mobile:'',
                         mail:'',
+                        classify:'普通用户',
+                        company:{
+                            create:1,
+                            id:'',
+                            name:''
+                        },
                         loading:false
                     },
                     editUser:{
@@ -80,6 +95,68 @@ define([
                     var self = this;
                     self.dialog.createUser.visible = true;
                 },
+                handleCompanyClose:function(){
+                    var self = this;
+                    self.dialog.company.visible = false;
+                    self.dialog.company.total = 0;
+                    self.dialog.company.currentPage = 0;
+                    self.dialog.company.rows.splice(0, self.dialog.company.rows.length);
+                    self.dialog.company.current = '';
+                },
+                selectCompany:function(){
+                    var self = this;
+                    self.dialog.company.visible = true;
+                    self.loadCompany(1);
+                },
+                companyKey:function(row){
+                    return 'company-' + row.uuid;
+                },
+                handleCompanyCurrentChange:function(currentPage){
+                    var self = this;
+                    self.loadCompany(currentPage);
+                },
+                loadCompany:function(currentPage){
+                    var self = this;
+                    self.dialog.company.rows.splice(0, self.dialog.company.rows.length);
+                    ajax.post('/company/list', {
+                        currentPage:currentPage,
+                        pageSize:self.dialog.company.pageSize
+                    }, function(data){
+                        var total = data.total;
+                        var rows = data.rows;
+                        if(rows && rows.length>0){
+                            for(var i=0; i<rows.length; i++){
+                                self.dialog.company.rows.push(rows[i]);
+                            }
+                        }
+                        self.dialog.company.currentPage = currentPage;
+                        self.dialog.company.total = total;
+                    });
+                },
+                companyChange:function(row){
+                    var self = this;
+                    self.dialog.company.current = row;
+                },
+                companySelected:function(){
+                    var self = this;
+                    if(!self.dialog.company.current){
+                        self.$message({
+                            type:'warning',
+                            message:'您还没有选择一个公司！'
+                        });
+                    }else{
+                        self.dialog.createUser.company.id = self.dialog.company.current.id;
+                        self.dialog.createUser.company.name = self.dialog.company.current.name;
+                        self.handleCompanyClose();
+                    }
+                },
+                companyActionChange:function(label){
+                    var self = this;
+                    if(label == 1){
+                        self.dialog.createUser.company.id = '';
+                        self.dialog.createUser.company.name = '';
+                    }
+                },
                 handleCreateUserClose:function(){
                     var self = this;
                     self.dialog.createUser.nickname = '';
@@ -88,19 +165,30 @@ define([
                     self.dialog.createUser.repeat = '';
                     self.dialog.createUser.mobile = '';
                     self.dialog.createUser.mail = '';
+                    self.dialog.createUser.classify = '普通用户';
+                    self.dialog.createUser.company.create = 1;
+                    self.dialog.createUser.company.id = '';
+                    self.dialog.createUser.company.name = '';
                     self.dialog.createUser.visible = false;
                 },
                 handleCreateUserSubmit:function(){
                     var self = this;
                     self.dialog.createUser.loading = true;
-                    ajax.post('/user/add', {
+                    var params = {
                         nickname:self.dialog.createUser.nickname,
                         username:self.dialog.createUser.username,
                         password:self.dialog.createUser.password,
                         repeat:self.dialog.createUser.repeat,
                         mobile:self.dialog.createUser.mobile,
-                        mail:self.dialog.createUser.mail
-                    }, function(data, status){
+                        mail:self.dialog.createUser.mail,
+                        classify:self.dialog.createUser.classify
+                    };
+                    if(self.dialog.createUser.company.create == 1){
+                        params['companyName'] = self.dialog.createUser.company.name;
+                    }else if(self.dialog.createUser.company.create == 0){
+                        params['companyId'] = self.dialog.createUser.company.id;
+                    }
+                    ajax.post('/user/add', params, function(data, status){
                         self.dialog.createUser.loading = false;
                         if(status !== 200) return;
                         self.table.rows.push(data);
@@ -221,6 +309,11 @@ define([
             },
             created:function(){
                 var self = this;
+                ajax.post('/user/query/types', null, function(data){
+                    for(var i=0; i<data.length; i++){
+                        self.classifies.push(data[i]);
+                    }
+                });
                 self.load(1);
             }
         });

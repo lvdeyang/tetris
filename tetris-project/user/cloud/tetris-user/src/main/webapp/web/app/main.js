@@ -46,7 +46,9 @@ require.config({
         'page-user':window.APPPATH + 'user/page-user',
         'page-bind-system-role':window.APPPATH + 'bind-system-role/page-bind-system-role',
         'page-system-role':window.APPPATH + 'system-role/page-system-role',
-        'page-bind-user':window.APPPATH + 'bind-user/page-bind-user'
+        'page-bind-user':window.APPPATH + 'bind-user/page-bind-user',
+        'page-company':window.APPPATH + 'company/page-company',
+        'page-organization':window.APPPATH + 'organization/page-organization'
     },
     shim:{
         'vue':{

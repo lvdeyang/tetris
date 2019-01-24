@@ -57,10 +57,12 @@ public class UserSystemRolePermissionService {
 		List<UserSystemRolePermissionPO> permissions = new ArrayList<UserSystemRolePermissionPO>();
 		for(SystemRolePO role:roles){
 			boolean finded = false;
-			for(UserSystemRolePermissionPO existPermission:existPermissions){
-				if(role.getId().equals(existPermission.getRoleId())){
-					finded = true;
-					break;
+			if(existPermissions!=null && existPermissions.size()>0){
+				for(UserSystemRolePermissionPO existPermission:existPermissions){
+					if(role.getId().equals(existPermission.getRoleId())){
+						finded = true;
+						break;
+					}
 				}
 			}
 			if(!finded){
@@ -112,10 +114,12 @@ public class UserSystemRolePermissionService {
 		List<UserSystemRolePermissionPO> permissions = new ArrayList<UserSystemRolePermissionPO>();
 		for(UserPO user:users){
 			boolean finded = false;
-			for(UserSystemRolePermissionPO existPermission:existPermissions){
-				if(user.getId().equals(existPermission.getUserId())){
-					finded = true;
-					break;
+			if(existPermissions!=null && existPermissions.size()>0){
+				for(UserSystemRolePermissionPO existPermission:existPermissions){
+					if(user.getId().equals(existPermission.getUserId())){
+						finded = true;
+						break;
+					}
 				}
 			}
 			if(!finded){

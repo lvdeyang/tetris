@@ -99,7 +99,14 @@ define([
                 var self = this;
                 if(node.isGroup) return;
                 if(checked){
-                    self.tree.checked.push(node);
+                    var finded = false;
+                    for(var i=0; i<self.tree.checked.length; i++){
+                        if(self.tree.checked[i].id === node.id){
+                            finded = true;
+                            break;
+                        }
+                    }
+                    if(!finded) self.tree.checked.push(node);
                 }else{
                     for(var i=0; i<self.tree.checked.length; i++){
                         if(self.tree.checked[i].id === node.id){

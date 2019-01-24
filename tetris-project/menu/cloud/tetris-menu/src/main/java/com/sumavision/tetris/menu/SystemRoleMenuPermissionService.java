@@ -52,18 +52,20 @@ public class SystemRoleMenuPermissionService {
 		
 		List<SystemRoleVO> complementRoles = new ArrayList<SystemRoleVO>();
 		
-		if(existPermissions!=null && existPermissions.size()>0){
-			for(SystemRoleVO role:roles){
-				boolean exist = false;
+		for(SystemRoleVO role:roles){
+			boolean exist = false;
+			if(existPermissions!=null && existPermissions.size()>0){
 				for(SystemRoleMenuPermissionPO existPermission:existPermissions){
 					if(existPermission.getRoleId().equals(role.getId())){
 						exist = true;
 						break;
 					}
 				}
-				if(!exist) complementRoles.add(role);
 			}
+			if(!exist) complementRoles.add(role);
 		}
+		
+		
 		
 		List<SystemRoleMenuPermissionPO> permissions = new ArrayList<SystemRoleMenuPermissionPO>();
 		for(SystemRoleVO complementRole:complementRoles){

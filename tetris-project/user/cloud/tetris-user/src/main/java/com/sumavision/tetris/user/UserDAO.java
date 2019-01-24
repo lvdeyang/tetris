@@ -1,6 +1,7 @@
 package com.sumavision.tetris.user;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,5 +52,28 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 */
 	@Query(value = "select count(user.id) from com.sumavision.tetris.user.UserPO user where id not in ?1")
 	public int countWithExcept(Collection<Long> except);
+	
+	/**
+	 * 获取公司内的用户（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月24日 下午3:05:24
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @return 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.id NOT IN ?2", nativeQuery = true)
+	public List<UserPO> findByCompanyIdAndExcept(Long companyId, Collection<Long> except);
+	
+	/**
+	 * 获取公司内用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月24日 下午3:06:50
+	 * @param Long companyId 公司id
+	 * @return List<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1", nativeQuery = true)
+	public List<UserPO> findByCompanyId(Long companyId);
 	
 }

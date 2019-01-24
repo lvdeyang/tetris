@@ -1,6 +1,9 @@
 package com.sumavision.tetris.user;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +23,36 @@ public class UserController {
 	
 	@Autowired
 	private UserService userService;
+	
+	/**
+	 * 查询枚举类型<br/>
+	 * <p>
+	 *   查询用户分类<br/>
+	 * </p>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月24日 上午9:26:40
+	 * @return Set<String> classifies 用户分类
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/types")
+	public Object queryTypes(HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		Set<String> values = new HashSet<String>();
+		UserClassify[] classifies = UserClassify.values();
+		for(UserClassify classify:classifies){
+			if(classify.isShow()){
+				values.add(classify.getName());
+			}
+		}
+		
+		return values;
+	}
 	
 	/**
 	 * 分页查询用户<br/>
@@ -90,6 +123,8 @@ public class UserController {
 	 * @param String repeat 密码确认
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Long companyId 公司id
+	 * @param String companyName 公司名称
 	 * @return UserVO 用户数据
 	 */
 	@JsonBody
@@ -101,13 +136,25 @@ public class UserController {
             String password,
             String repeat,
             String mobile,
-            String mail) throws Exception{
+            String mail,
+            String classify,
+            Long companyId,
+            String companyName) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		
-		return userService.add(nickname, username, password, repeat, mobile, mail);
+		if(classify.equals(UserClassify.NORMAL.getName())){
+			return userService.add(nickname, username, password, repeat, mobile, mail, classify);
+		}else if(classify.equals(UserClassify.COMPANY.getName())){
+			if(companyId!=null && companyName==null){
+				return userService.add(nickname, username, password, repeat, mobile, mail, classify, companyId);
+			}else if(companyName!=null && companyId==null){
+				return userService.add(nickname, username, password, repeat, mobile, mail, classify, companyName);
+			}
+		}
+		return null;
 	}
 	
 	/**

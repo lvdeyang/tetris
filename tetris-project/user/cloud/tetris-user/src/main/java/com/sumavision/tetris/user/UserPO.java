@@ -42,7 +42,10 @@ public class UserPO extends AbstractBasePO{
 	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
-
+	
+	/** 用户分类 */
+	private UserClassify classify;
+	
 	@Column(name = "USERNAME")
 	public String getUsername() {
 		return username;
@@ -114,6 +117,16 @@ public class UserPO extends AbstractBasePO{
 
 	public void setAutoGeneration(boolean autoGeneration) {
 		this.autoGeneration = autoGeneration;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "CLASSIFY")
+	public UserClassify getClassify() {
+		return classify;
+	}
+
+	public void setClassify(UserClassify classify) {
+		this.classify = classify;
 	}
 	
 }
