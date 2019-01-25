@@ -19,8 +19,8 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
-import com.sumavision.tetris.mims.app.user.UserVO;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 素材文件相关操作，主增删改<br/>
@@ -118,7 +118,7 @@ public class MaterialFileService {
 												   .append("upload")
 												   .append(separator)
 												   .append("tmp")
-												   .append(separator).append(user.getName())
+												   .append(separator).append(user.getNickname())
 												   .append(separator).append(folder.getUuid())
 												   .toString();
 		List<MaterialFilePO> entities = new ArrayList<MaterialFilePO>();
@@ -142,7 +142,7 @@ public class MaterialFileService {
 													   .append(task.getName())
 													   .toString());
 			entity.setPreviewUrl(new StringBufferWrapper().append("/upload/tmp/")
-														  .append(user.getName())
+														  .append(user.getNickname())
 														  .append("/")
 														  .append(folder.getUuid())
 														  .append("/")

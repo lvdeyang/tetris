@@ -23,6 +23,17 @@ public interface SystemRoleDAO extends BaseDAO<SystemRolePO>{
 	public List<SystemRolePO> findByIdNotIn(Collection<Long> ids);
 	
 	/**
+	 * 查询用户的系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:46:52
+	 * @param Long userId 用户id
+	 * @return List<SystemRolePO> 系统角色列表
+	 */
+	@Query(value = "SELECT role.* FROM tetris_user_system_role role LEFT JOIN tetris_user_system_role_permission permission ON role.id=permission.role_id WHERE permission.user_id=?1", nativeQuery = true)
+	public List<SystemRolePO> findByUserId(Long userId);
+	
+	/**
 	 * 分页查询用户绑定的系统角色<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

@@ -122,4 +122,21 @@ public class SystemRoleFeignController {
 		return roles;
 	}
 	
+	/**
+	 * 获取用户的系统角色列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:55:39
+	 * @return List<SystemRoleVO> 系统角色列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/user/roles")
+	public Object queryUserRoles(HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		return systemRoleQuery.queryUserRoles(user.getUuid());
+	}
+	
 }

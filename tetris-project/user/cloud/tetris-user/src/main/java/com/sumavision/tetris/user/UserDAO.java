@@ -76,4 +76,52 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1", nativeQuery = true)
 	public List<UserPO> findByCompanyId(Long companyId);
 	
+	/**
+	 * 分页查询公司下的用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:10:01
+	 * @param Long companyId 公司id
+	 * @param Pageable page 分页信息
+	 * @return Page<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 \n#pageable\n", nativeQuery = true)
+	public Page<UserPO> findByCompanyId(Long companyId, Pageable page);
+	
+	/**
+	 * 查询公司下的用户数量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:14:16
+	 * @param Long companyId 公司id
+	 * @return int 用户数量
+	 */
+	@Query(value = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1", nativeQuery = true)
+	public int countByCompanyId(Long companyId);
+	
+	/**
+	 * 分页查询公司下的用户（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:10:01
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param Pageable page 分页信息
+	 * @return Page<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.id NOT IN ?2 \n#pageable\n", nativeQuery = true)
+	public Page<UserPO> findByCompanyIdWithExcept(Long companyId, Collection<Long> except, Pageable page);
+	
+	/**
+	 * 查询公司下的用户数量（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:14:16
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @return int 用户数量
+	 */
+	@Query(value = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.id NOT IN ?2", nativeQuery = true)
+	public int countByCompanyIdWithExcept(Long companyId, Collection<Long> except);
+	
 }

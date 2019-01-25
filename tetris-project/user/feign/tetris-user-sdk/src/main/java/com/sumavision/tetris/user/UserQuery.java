@@ -18,12 +18,12 @@ public class UserQuery {
 	 */
 	@Deprecated
 	public UserVO current(){
-		return new UserVO().setUuid("1")
-						   .setName("用户1")
+		return new UserVO().setUuid("24")
+						   .setNickname("新媒体应急广播媒资管理员")
 						   .setClassify(UserClassify.MAINTENANCE.toString())
 						   .setIcon("")
-						   .setGroupId(null)
-						   .setGroupName(null);
+						   .setGroupId("7")
+						   .setGroupName("数码视讯");
 	}
 	
 	
@@ -140,27 +140,27 @@ public class UserQuery {
 	
 	/** 测试数据 */
 	private List<UserVO> users = new ArrayListWrapper<UserVO>().add(new UserVO().setUuid("1")
-																        .setName("用户1")
+																        .setNickname("用户1")
 																        .setStatus(UserStatus.ONLINE.getName())
 																        .setNumbersOfMessage(0))
 														.add(new UserVO().setUuid("2")
-															            .setName("用户2")
+															            .setNickname("用户2")
 															            .setStatus(UserStatus.OFFLINE.getName())
 															            .setNumbersOfMessage(0))
 														.add(new UserVO().setUuid("3")
-															            .setName("用户3")
+															            .setNickname("用户3")
 															            .setStatus(UserStatus.OFFLINE.getName())
 															            .setNumbersOfMessage(0))
 														.add(new UserVO().setUuid("4")
-														                .setName("用户4")
+														                .setNickname("用户4")
 															            .setStatus(UserStatus.ONLINE.getName())
 															            .setNumbersOfMessage(13))
 														.add(new UserVO().setUuid("5")
-															            .setName("用户5")
+															            .setNickname("用户5")
 															            .setStatus(UserStatus.OFFLINE.getName())
 															            .setNumbersOfMessage(0))
 														.add(new UserVO().setUuid("6")
-														                .setName("用户6")
+														                .setNickname("用户6")
 															            .setStatus(UserStatus.OFFLINE.getName())
 															            .setNumbersOfMessage(2))
 														.getList();

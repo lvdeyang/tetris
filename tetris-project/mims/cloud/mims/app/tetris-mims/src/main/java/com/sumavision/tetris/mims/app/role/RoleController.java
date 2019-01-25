@@ -24,10 +24,10 @@ import com.sumavision.tetris.mims.app.folder.FolderRolePermissionPO;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.role.exception.RoleNotExistException;
 import com.sumavision.tetris.mims.app.role.exception.UserHasNoPermissionForRoleException;
-import com.sumavision.tetris.mims.app.user.UserClassify;
-import com.sumavision.tetris.mims.app.user.UserQuery;
-import com.sumavision.tetris.mims.app.user.UserVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserClassify;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/role")
@@ -163,7 +163,7 @@ public class RoleController {
 		RolePO role = new RolePO();
 		role.setName(name);
 		role.setRemoveable(true);
-		role.setClassify(UserClassify.COMPANY_USER);
+		//role.setClassify(UserClassify.COMPANY_USER);
 		role.setSerial(1);
 		role.setGroupId(user.getGroupId());
 		role.setUpdateTime(new Date());

@@ -19,9 +19,14 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.material.MaterialFileDAO;
 import com.sumavision.tetris.mims.app.material.MaterialFilePO;
-import com.sumavision.tetris.mims.app.material.MaterialFileService;
 import com.sumavision.tetris.mims.app.material.MaterialFileQuery;
-import com.sumavision.tetris.mims.app.user.UserVO;
+import com.sumavision.tetris.mims.app.material.MaterialFileService;
+import com.sumavision.tetris.mims.app.role.RoleClassify;
+import com.sumavision.tetris.mims.app.role.RoleDAO;
+import com.sumavision.tetris.mims.app.role.RolePO;
+import com.sumavision.tetris.mims.app.role.RoleUserPermissionDAO;
+import com.sumavision.tetris.mims.app.role.RoleUserPermissionPO;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 文件夹操作（主增删改）<br/>
@@ -44,6 +49,12 @@ public class FolderService {
 	private FolderUserPermissionDAO folderUserPermissionDao;
 	
 	@Autowired
+	private FolderGroupPermissionDAO folderGroupPermissionDao;
+	
+	@Autowired
+	private FolderRolePermissionDAO folderRolePermissionDao;
+	
+	@Autowired
 	private MaterialFileDAO materialFileDao;
 	
 	@Autowired
@@ -54,6 +65,12 @@ public class FolderService {
 	
 	@Autowired
 	private MaterialFileQuery materialTool;
+	
+	@Autowired
+	private RoleDAO roleDao;
+	
+	@Autowired
+	private RoleUserPermissionDAO roleUserPermissionDao;
 
 	/**
 	 * 新增文件夹<br/>
@@ -335,7 +352,121 @@ public class FolderService {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 创建个人网盘<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 下午3:27:20
+	 * @param String userId 用户id
+	 * @param String nickname 昵称 
+	 */
+	public FolderPO createPersonalDisk(String userId, String nickname) throws Exception{
+		FolderPO folder = new FolderPO();
+		folder.setName(new StringBufferWrapper().append(nickname).append("（").append(FolderType.PERSONAL.getName()).append("）").toString());
+		folder.setDepth();
+		folder.setType(FolderType.PERSONAL);
+		folder.setUpdateTime(new Date());
+		folderDao.save(folder);
+		FolderUserPermissionPO permission = new FolderUserPermissionPO();
+		permission.setFolderId(folder.getId());
+		permission.setUserId(userId);
+		permission.setUpdateTime(new Date());
+		folderUserPermissionDao.save(permission);
+		return folder;
+	}
+	
+	/**
+	 * 创建企业文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 下午3:30:15
+	 * @param String companyId 公司id
+	 * @param String companyName 公司名称
+	 * @param FolderType type 文件夹类型
+	 * @param Long parentId 父文件夹
+	 * @param String parentPath 上级文件夹路径
+	 * @param Long roleId 媒资内角色id
+	 * @return FolderPO 文件夹数据
+	 */
+	public FolderPO createCompanyFolder(
+			String companyId, 
+			String companyName, 
+			FolderType type, 
+			Long parentId, 
+			String parentPath,
+			Long roleId) throws Exception{
+		FolderPO folder = new FolderPO();
+		folder.setName(new StringBufferWrapper().append(companyName).append("（").append(type.getName()).append("）").toString());
+		folder.setDepth();
+		folder.setType(type);
+		folder.setUpdateTime(new Date());
+		folder.setParentId(parentId);
+		folder.setParentPath(parentPath);
+		folderDao.save(folder);
+		FolderGroupPermissionPO permission0 = new FolderGroupPermissionPO();
+		permission0.setFolderId(folder.getId());
+		permission0.setGroupId(companyId);
+		permission0.setUpdateTime(new Date());
+		folderGroupPermissionDao.save(permission0);
+		FolderRolePermissionPO permission1 = new FolderRolePermissionPO();
+		permission1.setFolderId(folder.getId());
+		permission1.setRoleId(roleId);
+		permission1.setUpdateTime(new Date());
+		folderRolePermissionDao.save(permission1);
+		return folder;
+	}
+	
+	/**
+	 * 创建企业网盘<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 下午3:35:36
+	 * @param String companyId 公司id
+	 * @param String companyName 公司名称
+	 * @param String userId 用户id
+	 */
+	public void createCompanyDisk(String companyId, String companyName, String userId) throws Exception{
+		//创建管理员
+		RolePO role = new RolePO();
+		role.setGroupId(companyId);
+		role.setName("管理员");
+		role.setRemoveable(false);
+		role.setSerial(0);
+		role.setUpdateTime(new Date());
+		role.setClassify(RoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
+		roleDao.save(role);
 		
+		//绑定用户
+		RoleUserPermissionPO permission1 = new RoleUserPermissionPO();
+		permission1.setRoleId(role.getId());
+		permission1.setUserId(userId);
+		permission1.setUpdateTime(new Date());
+		roleUserPermissionDao.save(permission1);
+		
+		//企业根目录
+		FolderPO root = createCompanyFolder(companyId, companyName, FolderType.COMPANY, null, null, role.getId());
+		
+		String parentPath = new StringBufferWrapper().append("/").append(root.getId()).toString();
+		
+		//图片
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_PICTURE, root.getId(), parentPath, role.getId());
+		
+		//视频
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO, root.getId(), parentPath, role.getId());
+		
+		//音频
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO, root.getId(), parentPath, role.getId());
+		
+		//视频流
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO_STREAM, root.getId(), parentPath, role.getId());
+		
+		//音频流
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO_STREAM, root.getId(), parentPath, role.getId());
+		
+		//文本
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_TXT, root.getId(), parentPath, role.getId());
 	}
 	
 }

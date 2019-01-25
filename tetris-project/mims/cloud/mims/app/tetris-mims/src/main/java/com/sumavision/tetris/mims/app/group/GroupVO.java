@@ -1,10 +1,10 @@
 package com.sumavision.tetris.mims.app.group;
 
 import java.util.List;
+
 import com.sumavision.tetris.commons.util.date.DateUtil;
-import com.sumavision.tetris.mims.app.organization.OrganizationPO;
-import com.sumavision.tetris.mims.app.user.UserVO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 用户组/角色<br/>

@@ -12,16 +12,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sumavision.tetris.menu.MenuQuery;
+import com.sumavision.tetris.menu.MenuVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.group.ChatQuery;
 import com.sumavision.tetris.mims.app.group.GroupVO;
-import com.sumavision.tetris.mims.app.menu.MenuQuery;
-import com.sumavision.tetris.mims.app.menu.MenuVO;
-import com.sumavision.tetris.mims.app.user.UserClassify;
-import com.sumavision.tetris.mims.app.user.UserQuery;
-import com.sumavision.tetris.mims.app.user.UserVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserClassify;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "")
@@ -30,7 +30,7 @@ public class WelcomeController {
 	@Autowired
 	private MenuQuery menuTool;
 	
-	@Autowired
+	//@Autowired
 	private ChatQuery chatTool;
 	
 	@Autowired
@@ -42,7 +42,7 @@ public class WelcomeController {
 	@RequestMapping(value = "/index")
 	public ModelAndView index() throws Exception{
 		ModelAndView mv = null;
-		mv = new ModelAndView("web/menu/index");
+		mv = new ModelAndView("web/mims/index");
 		return mv;
 	}
 	
@@ -56,6 +56,8 @@ public class WelcomeController {
 		//用户信息
 		UserVO user = userTool.current();
 		
+		//TODO 权限校验
+		
 		//根目录
 		FolderPO folder = folderDao.findMaterialRootByUserId(user.getUuid());
 		user.setRootFolderId(folder.getId());
@@ -63,23 +65,13 @@ public class WelcomeController {
 		
 		appInfo.put("user", user);
 		
-		UserClassify classify = UserClassify.valueOf(user.getClassify());
-		
 		//菜单信息
-		List<MenuVO> menus = menuTool.permissionMenus(classify);
-		
-		if(classify.equals(UserClassify.MAINTENANCE)){
-			menus.get(0).getSub().get(0).setActive(true);
-		}else if(classify.equals(UserClassify.COMPANY_ADMIN) || classify.equals(UserClassify.COMPANY_USER)){
-			menus.get(0).setActive(true);
-		}else if(classify.equals(UserClassify.NORMAL)){
-			menus.get(0).setActive(true);
-		}
+		List<MenuVO> menus = menuTool.permissionMenus(user);
 		
 		appInfo.put("menus", menus);
 		
-		List<GroupVO> groups = chatTool.generateOrganization(user.getGroupId(), user.getUuid());
-		appInfo.put("groups", groups);
+		/*List<GroupVO> groups = chatTool.generateOrganization(user.getGroupId(), user.getUuid());
+		appInfo.put("groups", groups);*/
 		
 		return appInfo;
 	}

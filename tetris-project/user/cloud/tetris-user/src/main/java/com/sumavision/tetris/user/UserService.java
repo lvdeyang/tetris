@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import com.sumavision.tetris.organization.CompanyService;
 import com.sumavision.tetris.organization.CompanyUserPermissionDAO;
 import com.sumavision.tetris.organization.CompanyUserPermissionPO;
 import com.sumavision.tetris.organization.CompanyUserPermissionService;
+import com.sumavision.tetris.organization.CompanyVO;
 import com.sumavision.tetris.organization.OrganizationDAO;
 import com.sumavision.tetris.organization.OrganizationPO;
 import com.sumavision.tetris.organization.OrganizationUserPermissionDAO;
@@ -23,6 +25,7 @@ import com.sumavision.tetris.organization.OrganizationUserPermissionPO;
 import com.sumavision.tetris.organization.exception.CompanyNotExistException;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
+import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
@@ -63,6 +66,9 @@ public class UserService {
 	@Autowired
 	private CompanyUserPermissionDAO companyUserPermissionDao;
 	
+	@Autowired
+	private ApplicationEventPublisher applicationEventPublisher;
+	
 	/**
 	 * 添加一个用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -87,6 +93,10 @@ public class UserService {
             String classify) throws Exception{
 		
 		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, classify);
+		
+		//发布用户注册事件
+		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
+		applicationEventPublisher.publishEvent(event);
 		
 		return new UserVO().set(user);
 	}
@@ -117,10 +127,20 @@ public class UserService {
 		
 		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, classify);
 		
+		CompanyVO company = null;
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//创建公司
-			companyService.add(companyName, user);
+			company = companyService.add(companyName, user);
 		}
+		
+		//发布用户注册事件
+		UserRegisteredEvent event = null;
+		if(company == null){
+			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
+		}else{
+			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName());
+		}
+		applicationEventPublisher.publishEvent(event);
 		
 		return new UserVO().set(user);
 	}
@@ -161,6 +181,10 @@ public class UserService {
 			//加入公司
 			companyUserPermissionService.add(company, user);
 		}
+		
+		//发布用户注册事件
+		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
+		applicationEventPublisher.publishEvent(event);
 		
 		return new UserVO().set(user);
 	}

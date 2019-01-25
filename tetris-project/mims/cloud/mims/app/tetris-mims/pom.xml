@@ -23,34 +23,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
 	</properties>
 	
 	<dependencies>
 	
-		<dependency>
-		    <groupId>org.activiti</groupId>
-		    <artifactId>activiti-spring-boot-starter-integration</artifactId>
-		    <version>6.0.0</version>
-		</dependency>
-		
-		<dependency>
-		    <groupId>org.activiti</groupId>
-		    <artifactId>activiti-spring-boot-starter-jpa</artifactId>
-		    <version>6.0.0</version>
-		</dependency>
-		
-		<!-- <dependency>
-		    <groupId>org.activiti</groupId>
-		    <artifactId>activiti-spring-boot-starter-security</artifactId>
-		    <version>6.0.0</version>
-		</dependency> -->
-		
-		<!-- <dependency>
-		    <groupId>org.activiti</groupId>
-		    <artifactId>activiti-spring-boot-starter-rest-api</artifactId>
-		    <version>6.0.0</version>
-		</dependency> -->
-		
 		<!-- mysql驱动 -->
 		<dependency>
             <groupId>mysql</groupId>
@@ -114,7 +91,44 @@
 		  	<groupId>org.apache.httpcomponents</groupId>
 		  	<artifactId>httpasyncclient</artifactId>
 		</dependency>
+		
+		<!-- user-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-user-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- menu-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-menu-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- eureka依赖 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-feign</artifactId>
+		</dependency>
+		
 	</dependencies>
+	
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     
     <build>
     	<finalName>springboot</finalName>

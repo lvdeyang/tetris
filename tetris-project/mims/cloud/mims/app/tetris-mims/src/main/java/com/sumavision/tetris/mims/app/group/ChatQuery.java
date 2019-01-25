@@ -10,12 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
-import com.sumavision.tetris.mims.app.organization.OrganizationDAO;
-import com.sumavision.tetris.mims.app.organization.OrganizationPO;
-import com.sumavision.tetris.mims.app.organization.OrganizationUserPermissionDAO;
-import com.sumavision.tetris.mims.app.organization.OrganizationUserPermissionPO;
-import com.sumavision.tetris.mims.app.user.UserQuery;
-import com.sumavision.tetris.mims.app.user.UserVO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 聊天窗口工具<br/>
@@ -23,16 +19,16 @@ import com.sumavision.tetris.mims.app.user.UserVO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2018年11月21日 下午2:38:45
  */
-@Component
+//@Component
 public class ChatQuery {
 	
-	@Autowired
+	//@Autowired
 	private UserQuery userTool;
 	
-	@Autowired
+	//@Autowired
 	private OrganizationDAO organizationDao;
 	
-	@Autowired
+	//@Autowired
 	private OrganizationUserPermissionDAO organizationUserPermissionDao;
 	
 	/**

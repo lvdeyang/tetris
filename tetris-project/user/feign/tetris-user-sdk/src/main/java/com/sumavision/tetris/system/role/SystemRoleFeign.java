@@ -47,4 +47,14 @@ public interface SystemRoleFeign {
 	 */
 	@RequestMapping(value = "/system/role/feign/list/by/ids")
 	public JSONObject listByIds(@RequestParam("roleIds") String roleIds) throws Exception;
+	
+	/**
+	 * 查询用户绑定的系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:58:53
+	 * @return JSONObject 系统角色列表
+	 */
+	@RequestMapping(value = "/system/role/feign/query/user/roles")
+	public JSONObject queryUserRoles() throws Exception;
 }

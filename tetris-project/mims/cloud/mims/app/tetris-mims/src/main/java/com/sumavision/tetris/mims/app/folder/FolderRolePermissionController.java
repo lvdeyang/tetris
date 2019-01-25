@@ -3,7 +3,9 @@ package com.sumavision.tetris.mims.app.folder;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +19,10 @@ import com.sumavision.tetris.mims.app.role.RolePO;
 import com.sumavision.tetris.mims.app.role.RoleVO;
 import com.sumavision.tetris.mims.app.role.exception.RoleNotExistException;
 import com.sumavision.tetris.mims.app.role.exception.UserHasNoPermissionForRoleException;
-import com.sumavision.tetris.mims.app.user.UserClassify;
-import com.sumavision.tetris.mims.app.user.UserQuery;
-import com.sumavision.tetris.mims.app.user.UserVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserClassify;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/folder/role/permission")

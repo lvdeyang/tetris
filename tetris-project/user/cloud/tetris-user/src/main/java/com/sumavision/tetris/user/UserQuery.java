@@ -89,6 +89,90 @@ public class UserQuery {
 		return users.getContent();
 	}
 	
+	/**
+	 * 分页查询公司下的用户列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:17:57
+	 * @param Long companyId 公司id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	public Map<String, Object> listByCompanyId(Long companyId, int currentPage, int pageSize) throws Exception{
+		int total = userDao.countByCompanyId(companyId);
+		List<UserPO> users = findByCompanyId(companyId, currentPage, pageSize);
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			for(UserPO user:users){
+				view_users.add(new UserVO().set(user));
+			}
+		}
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", view_users)
+												   .getMap();
+	}
+	
+	/**
+	 * 分页查询公司下的用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:12:38
+	 * @param Long companyId 公司id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByCompanyId(Long companyId, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> users = userDao.findByCompanyId(companyId, page);
+		return users.getContent();
+	}
+	
+	/**
+	 * 分页查询公司下的用户列表（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:17:57
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	public Map<String, Object> listByCompanyIdWithExcept(Long companyId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		int total = userDao.countByCompanyIdWithExcept(companyId, except);
+		List<UserPO> users = findByCompanyIdWithExcept(companyId, except, currentPage, pageSize);
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			for(UserPO user:users){
+				view_users.add(new UserVO().set(user));
+			}
+		}
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", view_users)
+												   .getMap();
+	}
+	
+	/**
+	 * 分页查询公司下的用户（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:12:38
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByCompanyIdWithExcept(Long companyId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> users = userDao.findByCompanyIdWithExcept(companyId, except, page);
+		return users.getContent();
+	}
+	
 	/**************************************************************************
 	 **************************************************************************
 	 **************************************************************************/
@@ -102,12 +186,12 @@ public class UserQuery {
 	 */
 	@Deprecated
 	public UserVO current(){
-		return new UserVO().setUuid("1")
-						   .setNickname("用户1")
+		return new UserVO().setUuid("24")
+						   .setNickname("新媒体应急广播媒资管理员")
 						   .setClassify(UserClassify.MAINTENANCE.toString())
 						   .setIcon("")
-						   .setGroupId(null)
-						   .setGroupName(null);
+						   .setGroupId("7")
+						   .setGroupName("数码视讯");
 	}
 	
 	

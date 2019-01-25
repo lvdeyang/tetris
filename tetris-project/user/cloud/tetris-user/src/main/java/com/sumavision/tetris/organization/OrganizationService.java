@@ -1,7 +1,5 @@
 package com.sumavision.tetris.organization;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,28 +40,6 @@ public class OrganizationService {
 		organizationDao.delete(organization);
 		
 		return organization;
-	}
-	
-	/**
-	 * 绑定用户<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2018年12月7日 下午6:01:44
-	 * @param OrganizationPO organization 部门
-	 * @param List<String> userIds 用户id列表
-	 */
-	public void binding(OrganizationPO organization, List<String> userIds) throws Exception{
-		if(userIds!=null && userIds.size()>0){
-			List<OrganizationUserPermissionPO> permissions = new ArrayList<OrganizationUserPermissionPO>();
-			for(String userId:userIds){
-				OrganizationUserPermissionPO permission = new OrganizationUserPermissionPO();
-				permission.setOrganizationId(organization.getId());
-				permission.setUserId(userId);
-				permission.setUpdateTime(new Date());
-				permissions.add(permission);
-			}
-			organizationUserPermissionDao.save(permissions);
-		}
 	}
 	
 }

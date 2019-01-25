@@ -1,7 +1,5 @@
 package com.sumavision.tetris.user;
 
-import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
-
 /**
  * 登录用户信息<br/>
  * <p>特殊注明：用uuid字段存储userId</p>
@@ -18,13 +16,22 @@ public class UserVO{
 	private String updateTime;
 	
 	/** 用户名 */
-	private String name;
+	private String nickname;
 	
 	/** 头像 */
 	private String icon;
 	
 	/** 用户状态 */
 	private String status;
+	
+	/** 手机号 */
+	private String mobile;
+	
+	/** 邮箱 */
+	private String mail;
+	
+	/** 是否是自动生成的 */
+	private boolean autoGeneration;
 	
 	/** 用户分类 */
 	private String classify;
@@ -43,7 +50,7 @@ public class UserVO{
 	
 	/** 素材库文件夹名称 */
 	private String rootFolderName;
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -71,12 +78,12 @@ public class UserVO{
 		return this;
 	}
 
-	public String getName() {
-		return name;
+	public String getNickname() {
+		return nickname;
 	}
 
-	public UserVO setName(String name) {
-		this.name = name;
+	public UserVO setNickname(String nickname) {
+		this.nickname = nickname;
 		return this;
 	}
 
@@ -97,7 +104,34 @@ public class UserVO{
 		this.status = status;
 		return this;
 	}
-	
+
+	public String getMobile() {
+		return mobile;
+	}
+
+	public UserVO setMobile(String mobile) {
+		this.mobile = mobile;
+		return this;
+	}
+
+	public String getMail() {
+		return mail;
+	}
+
+	public UserVO setMail(String mail) {
+		this.mail = mail;
+		return this;
+	}
+
+	public boolean isAutoGeneration() {
+		return autoGeneration;
+	}
+
+	public UserVO setAutoGeneration(boolean autoGeneration) {
+		this.autoGeneration = autoGeneration;
+		return this;
+	}
+
 	public String getClassify() {
 		return classify;
 	}
@@ -133,7 +167,7 @@ public class UserVO{
 		this.groupName = groupName;
 		return this;
 	}
-	
+
 	public Long getRootFolderId() {
 		return rootFolderId;
 	}

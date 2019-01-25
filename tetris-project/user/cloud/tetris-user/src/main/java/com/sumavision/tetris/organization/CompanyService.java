@@ -30,7 +30,7 @@ public class CompanyService {
 	 * @param String companyName 公司名
 	 * @param UserPO user 创建用户
 	 */
-	public void add(String companyName, UserPO user) throws Exception{
+	public CompanyVO add(String companyName, UserPO user) throws Exception{
 		CompanyPO company = new CompanyPO();
 		company.setName(companyName);
 		company.setUserId(user.getId().toString());
@@ -38,6 +38,7 @@ public class CompanyService {
 		companyDao.save(company);
 		//加关联
 		companyUserPermissionService.add(company, user);
+		return new CompanyVO().set(company);
 	}
 	
 }

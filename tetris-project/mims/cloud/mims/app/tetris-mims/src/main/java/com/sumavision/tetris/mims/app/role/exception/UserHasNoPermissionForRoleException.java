@@ -2,15 +2,15 @@ package com.sumavision.tetris.mims.app.role.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.mims.app.organization.exception.UserHasNoPermissionForOrganizationException;
 
 public class UserHasNoPermissionForRoleException extends BaseException{
 
-	private static final Logger LOG = LoggerFactory.getLogger(UserHasNoPermissionForOrganizationException.class);
+	private static final Logger LOG = LoggerFactory.getLogger(UserHasNoPermissionForRoleException.class);
 	
 	private static final long serialVersionUID = 1L;
 

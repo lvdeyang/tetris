@@ -50,7 +50,7 @@ public interface OrganizationUserPermissionDAO extends BaseDAO<OrganizationUserP
 	 * @param Long organizationId 部门id
 	 * @return int 用户数量
 	 */
-	public int countByOrganization(Long organizationId);
+	public int countByOrganizationId(Long organizationId);
 	
 	/**
 	 * 根据部门id（批量）查询权限<br/>

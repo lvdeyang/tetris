@@ -42,10 +42,10 @@ import com.sumavision.tetris.mims.app.material.exception.StatusErrorWhenUploadCa
 import com.sumavision.tetris.mims.app.material.exception.StatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.material.exception.StatusErrorWhenUploadingException;
 import com.sumavision.tetris.mims.app.material.exception.UserHasNoPermissionForMaterialException;
-import com.sumavision.tetris.mims.app.user.UserQuery;
-import com.sumavision.tetris.mims.app.user.UserVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 素材库相关接口<br/>

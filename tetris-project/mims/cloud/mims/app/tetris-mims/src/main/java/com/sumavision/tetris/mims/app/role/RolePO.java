@@ -6,7 +6,6 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
-import com.sumavision.tetris.mims.app.user.UserClassify;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -31,7 +30,7 @@ public class RolePO extends AbstractBasePO{
 	private Boolean removeable;
 	
 	/** 用户类型 */
-	private UserClassify classify;
+	private RoleClassify classify;
 	
 	/** 显示排序 */
 	private int serial;
@@ -65,11 +64,11 @@ public class RolePO extends AbstractBasePO{
 	
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "CLASSIFY")
-	public UserClassify getClassify() {
+	public RoleClassify getClassify() {
 		return classify;
 	}
 
-	public void setClassify(UserClassify classify) {
+	public void setClassify(RoleClassify classify) {
 		this.classify = classify;
 	}
 
