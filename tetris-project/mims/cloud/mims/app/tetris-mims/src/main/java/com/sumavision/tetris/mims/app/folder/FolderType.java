@@ -12,22 +12,40 @@ public enum FolderType {
 	
 	PERSONAL("私人文件夹"),
 	COMPANY("企业文件夹"),
-	COMPANY_PICTURE("图片库"),
-	COMPANY_VIDEO("视频库"),
-	COMPANY_AUDIO("音频库"),
-	COMPANY_VIDEO_STREAM("视频流库"),
-	COMPANY_AUDIO_STREAM("音频流库"),
-	COMPANY_TXT("文本库"),
+	COMPANY_PICTURE("图片库", "picture", "picture"),
+	COMPANY_VIDEO("视频库", "video", "video"),
+	COMPANY_AUDIO("音频库", "audio", "audio"),
+	COMPANY_VIDEO_STREAM("视频流库", "videoStream", "video-stream"),
+	COMPANY_AUDIO_STREAM("音频流库", "audioStream", "audio-stream"),
+	COMPANY_TXT("文本库", "txt", "txt"),
 	SHARE("共享文件夹");
 	
 	private String name;
+	
+	private String primaryKey;
+	
+	private String webSuffix;
 	
 	private FolderType(String name){
 		this.name = name;
 	}
 	
+	private FolderType(String name, String primaryKey, String webSuffix){
+		this.name = name;
+		this.primaryKey = primaryKey;
+		this.webSuffix = webSuffix;
+	}
+	
 	public String getName(){
 		return this.name;
+	}
+	
+	public String getPrimaryKey(){
+		return this.primaryKey;
+	}
+	
+	public String getWebSuffix(){
+		return this.webSuffix;
 	}
 	
 	public static FolderType fromName(String name) throws Exception{
@@ -39,4 +57,15 @@ public enum FolderType {
 		}
 		throw new ErrorTypeException("name", name);
 	}
+	
+	public static FolderType fromPrimaryKey(String primaryKey) throws Exception{
+		FolderType[] values = FolderType.values();
+		for(FolderType value:values){
+			if(value.getPrimaryKey()!=null && value.getPrimaryKey().equals(primaryKey)){
+				return value;
+			}
+		}
+		throw new ErrorTypeException("primaryKey", primaryKey);
+	}
+	
 }

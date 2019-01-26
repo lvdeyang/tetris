@@ -2,64 +2,64 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" readonly="true" id="ac9e0e39-46c9-4579-9d7a-2cca2b44f524" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point-param" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/joint-constraint-expression" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/service/rest" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/service" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point-param/page-backstage-access-point-param.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point-param/page-backstage-access-point-param.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point-param/page-backstage-access-point-param.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point/page-backstage-access-point.css" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point/page-backstage-access-point.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point/page-backstage-access-point.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/joint-constraint-expression" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point-param/page-backstage-access-point-param.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/service/rest/page-backstage-service-rest.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point-param/page-backstage-access-point-param.css" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point/page-backstage-access-point.css" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/service/rest/page-backstage-service-rest.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point-param/page-backstage-access-point-param.html" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.js" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process/page-backstage-process.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process/page-backstage-process.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point/page-backstage-access-point.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/service" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/service/rest" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process/page-backstage-process.js" />
       <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/service/rest/page-backstage-service-rest.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/service/rest/page-backstage-service-rest.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/service/rest/page-backstage-service-rest.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.classpath" afterPath="$PROJECT_DIR$/.classpath" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.factorypath" afterPath="$PROJECT_DIR$/.factorypath" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.project" afterPath="$PROJECT_DIR$/.project" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/easy/process/access/point/AccessPointPO.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/easy/process/access/point/AccessPointPO.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/easy/process/access/point/AccessPointParamPO.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/easy/process/access/point/AccessPointParamPO.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/demo/activiti/controller/ApprovalService.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/demo/activiti/controller/ApprovalService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/config/datasource/BaseDatasource.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/config/datasource/BaseDatasource.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/Constraint.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/Constraint.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/ConstraintBO.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/ConstraintBO.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/impl/DemoConstraint.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/impl/DemoConstraint.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/folder/FolderTypeCannotMatchException.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/folder/FolderTypeCannotMatchException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/demo/activiti/controller/IndexController.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/demo/activiti/controller/IndexController.java" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process/page-backstage-process.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/access-point-param" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.html" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.js" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\user\UserTool.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\user\UserTool.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/material/MaterialFileService.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/material/MaterialFileService.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/Param.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/Param.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/ParamBO.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/constraint/ParamBO.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/easy/process/access/service/rest/RestServicePO.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/easy/process/access/service/rest/RestServicePO.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/easy/process/access/service/ServiceType.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/easy/process/access/service/ServiceType.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/TetrisMimsApplication.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/TetrisMimsApplication.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/folder/UserHasNoPermissionForFolderException.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/folder/UserHasNoPermissionForFolderException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/material/UserHasNoPermissionForMaterialException.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/material/UserHasNoPermissionForMaterialException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/organization/UserHasNoPermissionForOrganizationException.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/organization/UserHasNoPermissionForOrganizationException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/role/UserHasNoPermissionForRoleException.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/role/UserHasNoPermissionForRoleException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/media/picture/UserHashNoPermissionForMediaPictureException.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/media/picture/UserHashNoPermissionForMediaPictureException.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/user/UserTool.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/user/UserTool.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/application.yml" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/processes/demo01.bpmn" afterPath="$PROJECT_DIR$/src/main/resources/processes/demo01.bpmn" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/demo/demo01.html" afterPath="$PROJECT_DIR$/src/main/webapp/web/demo/demo01.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/demo/demo05.html" afterPath="$PROJECT_DIR$/src/main/webapp/web/demo/demo05.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/app/component/frame/frame.css" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/component/frame/frame.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/app/component/frame/frame.js" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/component/frame/frame.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/app/main.js" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/main.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.settings/org.eclipse.wst.common.project.facet.core.prefs.xml" afterPath="$PROJECT_DIR$/.settings/org.eclipse.wst.common.project.facet.core.prefs.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.settings/org.eclipse.wst.common.project.facet.core.xml" afterPath="$PROJECT_DIR$/.settings/org.eclipse.wst.common.project.facet.core.xml" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\ConstraintBO.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\ConstraintBO.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/app/front/organization/page-front-organization.js" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/front/organization/page-front-organization.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/app/component/frame/frame.js" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/component/frame/frame.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.settings/org.eclipse.wst.common.project.facet.core.prefs.xml" afterPath="$PROJECT_DIR$/.settings/org.eclipse.wst.common.project.facet.core.prefs.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/app/main.js" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/main.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.project" afterPath="$PROJECT_DIR$/.project" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\easy\process\access\point\AccessPointParamPO.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\easy\process\access\point\AccessPointParamPO.java" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\Constraint.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\Constraint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/media/picture/UserHashNoPermissionForMediaPictureException.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/app/media/picture/UserHashNoPermissionForMediaPictureException.java" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\organization\UserHasNoPermissionForOrganizationException.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\organization\UserHasNoPermissionForOrganizationException.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/app/front/material/page-material.js" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/front/material/page-material.js" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\folder\UserHasNoPermissionForFolderException.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\folder\UserHasNoPermissionForFolderException.java" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\Param.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\Param.java" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\impl\DemoConstraint.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\impl\DemoConstraint.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/app/component/frame/frame.css" afterPath="$PROJECT_DIR$/src/main/webapp/web/app/component/frame/frame.css" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\ParamBO.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\constraint\ParamBO.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/demo/demo05.html" afterPath="$PROJECT_DIR$/src/main/webapp/web/demo/demo05.html" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\material\UserHasNoPermissionForMaterialException.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\material\UserHasNoPermissionForMaterialException.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/webapp/web/demo/demo01.html" afterPath="$PROJECT_DIR$/src/main/webapp/web/demo/demo01.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.classpath" afterPath="$PROJECT_DIR$/.classpath" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/TetrisMimsApplication.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/TetrisMimsApplication.java" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\resources\processes\demo01.bpmn" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\resources\processes\demo01.bpmn" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\demo\activiti\controller\IndexController.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\demo\activiti\controller\IndexController.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.factorypath" afterPath="$PROJECT_DIR$/.factorypath" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\demo\activiti\controller\ApprovalService.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\demo\activiti\controller\ApprovalService.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/resources/application.yml" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\role\UserHasNoPermissionForRoleException.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\role\UserHasNoPermissionForRoleException.java" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\easy\process\access\service\rest\RestServicePO.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\easy\process\access\service\rest\RestServicePO.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/config/datasource/BaseDatasource.java" afterPath="$PROJECT_DIR$/src/main/java/com/sumavision/tetris/mims/config/datasource/BaseDatasource.java" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\easy\process\access\service\ServiceType.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\easy\process\access\service\ServiceType.java" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\easy\process\access\point\AccessPointPO.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\easy\process\access\point\AccessPointPO.java" />
+      <change type="MODIFICATION" beforePath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\folder\FolderTypeCannotMatchException.java" afterPath="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\java\com\sumavision\tetris\mims\app\folder\FolderTypeCannotMatchException.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.settings/org.eclipse.wst.common.project.facet.core.xml" afterPath="$PROJECT_DIR$/.settings/org.eclipse.wst.common.project.facet.core.xml" />
     </list>
     <ignored path="tetris-mims.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -115,28 +115,8 @@
       <file leaf-file-name="page-backstage-process-design.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.24809575">
-              <caret line="36" column="14" selection-start-line="36" selection-start-column="14" selection-end-line="36" selection-end-column="14" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="main.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/webapp/web/test/demo/main.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="46" column="46" selection-start-line="46" selection-start-column="46" selection-end-line="46" selection-end-column="46" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TetrisBpmnExtention.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/webapp/web/lib/tetris-bpmn/ext/TetrisBpmnExtention.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="637" column="17" selection-start-line="637" selection-start-column="17" selection-end-line="637" selection-end-column="17" />
+            <state vertical-scroll-proportion="0.08269858">
+              <caret line="40" column="18" selection-start-line="40" selection-start-column="18" selection-end-line="40" selection-end-column="18" />
               <folding />
             </state>
           </provider>
@@ -146,7 +126,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/main.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="88" column="26" selection-start-line="88" selection-start-column="26" selection-end-line="88" selection-end-column="26" />
+              <caret line="88" column="10" selection-start-line="88" selection-start-column="10" selection-end-line="88" selection-end-column="10" />
               <folding />
             </state>
           </provider>
@@ -254,8 +234,8 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -431,34 +411,49 @@
     <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/test/demo/bpmn-demo01.js.html">
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/main.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="21" column="7" selection-start-line="21" selection-start-column="7" selection-end-line="21" selection-end-column="7" />
+          <caret line="88" column="10" selection-start-line="88" selection-start-column="10" selection-end-line="88" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/backstage/process/page-backstage-process.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="59" column="19" selection-start-line="59" selection-start-column="19" selection-end-line="59" selection-end-column="19" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="6" column="31" selection-start-line="6" selection-start-column="31" selection-end-line="6" selection-end-column="31" />
           <folding>
-            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#button#0;n#body#0;n#html#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/test/demo/main.js">
+    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="46" column="46" selection-start-line="46" selection-start-column="46" selection-end-line="46" selection-end-column="46" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/lib/tetris-bpmn/ext/TetrisBpmnExtention.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <caret line="24" column="0" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -580,7 +575,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.22836539">
           <caret line="10" column="31" selection-start-line="10" selection-start-column="30" selection-end-line="10" selection-end-column="31" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -714,7 +708,7 @@
     <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/main.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="88" column="26" selection-start-line="88" selection-start-column="26" selection-end-line="88" selection-end-column="26" />
+          <caret line="88" column="10" selection-start-line="88" selection-start-column="10" selection-end-line="88" selection-end-column="10" />
           <folding />
         </state>
       </provider>
@@ -737,13 +731,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/test/demo/demo01.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="20" selection-start-line="0" selection-start-column="20" selection-end-line="0" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/webapp/web/test/index.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.36026937">
@@ -751,37 +738,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/test/demo/main.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="46" column="46" selection-start-line="46" selection-start-column="46" selection-end-line="46" selection-end-column="46" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/lib/tetris-bpmn/ext/TetrisBpmnExtention.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="637" column="17" selection-start-line="637" selection-start-column="17" selection-end-line="637" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/webapp/web/test/demo/bpmn-demo01.js.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.4264871">
-          <caret line="20" column="59" selection-start-line="20" selection-start-column="59" selection-end-line="20" selection-end-column="59" />
-          <folding>
-            <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#button#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/webapp/web/app/backstage/process-design/page-backstage-process-design.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.24809575">
-          <caret line="36" column="14" selection-start-line="36" selection-start-column="14" selection-end-line="36" selection-end-column="14" />
+        <state vertical-scroll-proportion="0.08269858">
+          <caret line="40" column="18" selection-start-line="40" selection-start-column="18" selection-end-line="40" selection-end-column="18" />
           <folding />
         </state>
       </provider>

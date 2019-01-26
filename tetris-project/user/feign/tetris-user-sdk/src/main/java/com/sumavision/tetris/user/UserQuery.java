@@ -16,7 +16,6 @@ public class UserQuery {
 	 * <b>日期：</b>2018年11月22日 上午10:14:26
 	 * @return UserVO 当前用户
 	 */
-	@Deprecated
 	public UserVO current(){
 		return new UserVO().setUuid("24")
 						   .setNickname("新媒体应急广播媒资管理员")

@@ -46,6 +46,7 @@ define([
                     menus:context.getProp('menus'),
                     user:context.getProp('user'),
                     groups:context.getProp('groups'),
+                    activeId:window.BASEPATH + 'index/material',
                     breadCrumb:items,
                     table:{
                         tooltip:false,

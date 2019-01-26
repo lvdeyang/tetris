@@ -363,6 +363,9 @@ public class FolderService {
 	 * @param String nickname 昵称 
 	 */
 	public FolderPO createPersonalDisk(String userId, String nickname) throws Exception{
+		//判重
+		FolderPO existFolder = folderDao.findMaterialRootByUserId(userId);
+		if(existFolder != null) return existFolder;
 		FolderPO folder = new FolderPO();
 		folder.setName(new StringBufferWrapper().append(nickname).append("（").append(FolderType.PERSONAL.getName()).append("）").toString());
 		folder.setDepth();
@@ -428,6 +431,10 @@ public class FolderService {
 	 * @param String userId 用户id
 	 */
 	public void createCompanyDisk(String companyId, String companyName, String userId) throws Exception{
+		//判重
+		FolderPO existFolder = folderDao.findCompanyRootFolderByType(companyId, FolderType.COMPANY_PICTURE);
+		if(existFolder != null) return;
+		
 		//创建管理员
 		RolePO role = new RolePO();
 		role.setGroupId(companyId);

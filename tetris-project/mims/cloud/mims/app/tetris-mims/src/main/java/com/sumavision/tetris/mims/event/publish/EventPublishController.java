@@ -46,7 +46,7 @@ public class EventPublishController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
-		
+		System.out.println(nickname);
 		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, userId, nickname, companyId, companyName);
 		applicationEventPublisher.publishEvent(event);
 		

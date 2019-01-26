@@ -27,7 +27,7 @@ public interface UserRegisteredFeign {
 	@RequestMapping(value = "/event/publish/user/registered")
 	public JSONObject userRegistered(
 			@RequestParam("userId") String userId,
-			@RequestParam("userName") String userName,
+			@RequestParam("nickname") String nickname,
 			@RequestParam("companyId") String companyId,
 			@RequestParam("companyName") String companyName) throws Exception;
 	

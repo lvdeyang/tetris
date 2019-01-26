@@ -139,7 +139,7 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 					   "WHERE permission1.user_id=?1 "+
 					   "AND folder.type=?2 "+ 
 				   ")", nativeQuery = true)
-	public List<FolderPO> findPermissionCompanyRootFolder(String userId, FolderType type);
+	public List<FolderPO> findPermissionCompanyRootFolder(String userId, String type);
 	
 	/**
 	 * 获取企业文件夹下的有权限的子文件夹<br/>
@@ -158,17 +158,15 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 				   "WHERE permission1.user_id=?1 "+
 				   "AND folder.parent_id=?2 "+
 				   "AND folder.type=?3", nativeQuery = true)
-	public List<FolderPO> findPermissionCompanyFoldersByParentId(String userId, Long parentId, FolderType type);
+	public List<FolderPO> findPermissionCompanyFoldersByParentId(String userId, Long parentId, String type);
 	
 	/**
-	 * 方法概述<br/>
-	 * <p>详细描述</p>
-	 * <b>作者:</b>Administrator<br/>
+	 * 查询企业分类根文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月12日 下午4:01:05
-	 * @param groupId
-	 * @param type
-	 * @return
+	 * @param String groupId 公司id
+	 * @param FolderType type 文件夹类型
 	 */
 	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+
 				   "FROM mims_folder folder "+
@@ -180,5 +178,5 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 					   "LEFT JOIN mims_folder_group_permission permission0 ON folder.id=permission0.folder_id "+ 
 					   "WHERE permission0.group_id=?1 AND folder.type='COMPANY' "+
 				   ")", nativeQuery = true)
-	public FolderPO findCompanyRootFolderByType(String groupId, FolderType type);
+	public FolderPO findCompanyRootFolderByType(String groupId, String type);
 }
