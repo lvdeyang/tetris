@@ -64,7 +64,7 @@ public class MaterialFileService {
 	public void remove(Collection<MaterialFilePO> materials) throws Exception{
 		
 		//生成待删除存储文件数据
-		List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemove(materials);
+		List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMaterials(materials);
 		
 		//删除素材文件元数据
 		materialFileDao.deleteInBatch(materials);

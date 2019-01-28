@@ -1,4 +1,4 @@
-package com.sumavision.tetris.mims.app.media.picture;
+package com.sumavision.tetris.mims.app.media.picture.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

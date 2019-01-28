@@ -3,10 +3,13 @@ package com.sumavision.tetris.mims.app.media.picture;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import com.sumavision.tetris.mims.app.media.StoreType;
+import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.history.picture.HistoryMediaPicturePO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -78,6 +81,9 @@ public class MediaPicturePO extends AbstractBasePO{
 	
 	/** 关键字， 格式：,分割*/
 	private String keyWords;
+	
+	/** 文件上传状态 */
+	private UploadStatus uploadStatus;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -233,6 +239,16 @@ public class MediaPicturePO extends AbstractBasePO{
 		this.keyWords = keyWords;
 	}
 	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "UPLOAD_STATUS")
+	public UploadStatus getUploadStatus() {
+		return uploadStatus;
+	}
+
+	public void setUploadStatus(UploadStatus uploadStatus) {
+		this.uploadStatus = uploadStatus;
+	}
+
 	/**
 	 * 转换为历史数据<br/>
 	 * <b>作者:</b>lvdeyang<br/>

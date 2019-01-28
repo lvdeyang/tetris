@@ -22,6 +22,16 @@ public interface FolderRolePermissionDAO extends BaseDAO<FolderRolePermissionPO>
 	public List<FolderRolePermissionPO> findByFolderId(Long folderId);
 	
 	/**
+	 * 根据文件夹查询授权（批量）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月28日 下午3:09:26
+	 * @param Collection<Long> folderIds 文件夹id列表
+	 * @return List<FolderRolePermissionPO> 权限列表
+	 */
+	public List<FolderRolePermissionPO> findByFolderIdIn(Collection<Long> folderIds);
+	
+	/**
 	 * 查询具体授权<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

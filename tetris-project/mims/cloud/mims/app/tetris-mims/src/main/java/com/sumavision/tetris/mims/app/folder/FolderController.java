@@ -16,6 +16,7 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.FolderTypeCannotMatchException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.MaterialVO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
@@ -26,10 +27,10 @@ import com.sumavision.tetris.user.UserVO;
 public class FolderController {
 
 	@Autowired
-	private UserQuery userTool;
+	private UserQuery userQuery;
 	
 	@Autowired
-	private FolderQuery folderTool;
+	private FolderQuery folderQuery;
 	
 	@Autowired
 	private FolderService folderService;
@@ -54,13 +55,13 @@ public class FolderController {
 			String folderName,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
-		if(!folderTool.hasPermission(user.getUuid(), parentFolderId)){
+		if(!folderQuery.hasPermission(user.getUuid(), parentFolderId)){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.PARENT_CREATE);
 		}
 		
-		FolderPO folder = folderService.add(user.getUuid(), parentFolderId, folderName, FolderType.PERSONAL);
+		FolderPO folder = folderService.addPersionalFolder(user.getUuid(), parentFolderId, folderName, FolderType.PERSONAL);
 		
 		MaterialVO material = new MaterialVO().set(folder);
 		
@@ -81,9 +82,9 @@ public class FolderController {
 			@PathVariable Long folderId, 
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
-		if(!folderTool.hasPermission(user.getUuid(), folderId)){
+		if(!folderQuery.hasPermission(user.getUuid(), folderId)){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
@@ -117,9 +118,9 @@ public class FolderController {
 			String folderName,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
-		if(!folderTool.hasPermission(user.getUuid(), folderId)){
+		if(!folderQuery.hasPermission(user.getUuid(), folderId)){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
@@ -154,9 +155,9 @@ public class FolderController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
-		if(!folderTool.hasPermission(user.getUuid(), folderId)){
+		if(!folderQuery.hasPermission(user.getUuid(), folderId)){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
@@ -203,9 +204,9 @@ public class FolderController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
-		if(!folderTool.hasPermission(user.getUuid(), folderId)){
+		if(!folderQuery.hasPermission(user.getUuid(), folderId)){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
@@ -257,7 +258,7 @@ public class FolderController {
 			Integer depth, 
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
 		List<FolderPO> folderTree = null;
 		if(except==null && depth==null){
@@ -265,12 +266,12 @@ public class FolderController {
 		}else if(except==null && depth!=null){
 			folderTree = folderDao.findMaterialTreeByUserIdWithDepth(user.getUuid(), depth);
 		}else if(except!=null && depth==null){
-			folderTree = folderTool.findMaterialTreeByUserIdWithExcept(user.getUuid(), except);
+			folderTree = folderQuery.findMaterialTreeByUserIdWithExcept(user.getUuid(), except);
 		}else{
-			folderTree = folderTool.findMaterialTreeByUserIdWithExceptAndDepth(user.getUuid(), except, depth);
+			folderTree = folderQuery.findMaterialTreeByUserIdWithExceptAndDepth(user.getUuid(), except, depth);
 		}
 		
-		List<FolderTreeVO> roots = folderTool.generateFolderTree(folderTree);
+		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
 		
 		return roots;
 	}
@@ -287,7 +288,7 @@ public class FolderController {
 	@RequestMapping(value = "/organization/tree")
 	public Object organizationTree(HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
 		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
@@ -299,9 +300,112 @@ public class FolderController {
 		
 		List<FolderPO> folderTree = folderDao.findCompanyTreeByGroupId(user.getGroupId());
 		
-		List<FolderTreeVO> roots = folderTool.generateFolderTree(folderTree);
+		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
 		
 		return roots;
 	}
+	
+	/**
+	 * 添加媒资图片文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月28日 下午1:43:00
+	 * @param @PathVariable String folderType FolderType.primaryKey 文件夹类型
+	 * @param Long parentFolderId 父文件夹id
+	 * @param String folderName 文件夹名称
+	 * @return MediaPictureVO 新增的文件夹
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/media/add/{folderType}")
+	public Object mediaAdd(
+			@PathVariable String folderType,
+			Long parentFolderId,
+			String folderName,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		FolderPO parent = folderDao.findOne(parentFolderId);
+		
+		if(parent == null){
+			throw new FolderNotExistException(parentFolderId);
+		}
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), parent.getId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		FolderType type = FolderType.fromPrimaryKey(folderType);
+		
+		FolderPO folder = folderService.addMediaFolder(user.getGroupId(), parent.getId(), folderName, type);
+		
+		return new MediaPictureVO().set(folder);
+	}
+	
+	/**
+	 * 删除媒资库文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月23日 下午1:50:15
+	 * @param PathVariable Long folderId 待删除的文件夹id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/media/remove/{folderId}")
+	public Object mediaRemove(
+			@PathVariable Long folderId, 
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		FolderPO folder = folderDao.findOne(folderId);
+		if(folder == null){
+			throw new FolderNotExistException(folderId);
+		}
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), folder.getId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		folderService.removeMediaFolder(folder, user);
+				
+		return null;
+	}
+	
+	/**
+	 * 重命名媒资库文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月23日 下午1:55:53
+	 * @param PathVariable Long folderId 待处理文件夹id
+	 * @param String folderName 新文件夹名称
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/media/rename/{folderId}")
+	public Object mediaRename(
+			@PathVariable Long folderId,
+			String folderName,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		FolderPO folder = folderDao.findOne(folderId);
+		if(folder == null){
+			throw new FolderNotExistException(folderId);
+		}
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), folder.getId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		folderService.rename(folder, folderName);
+		
+		return null;
+	}
+	
 	
 }

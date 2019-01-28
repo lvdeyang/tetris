@@ -20,6 +20,14 @@ public class RoleNotExistException extends BaseException{
 										   .append(roleId)
 										   .toString());
 	}
+	
+	public RoleNotExistException(String companyId){
+		super(StatusCode.FORBIDDEN, "数据不存在！");
+		LOG.error(DateUtil.now());
+		LOG.error(new StringBufferWrapper().append("公司内置管理员角色不存在，公司id：")
+										   .append(companyId)
+										   .toString());
+	}
 
 	
 }

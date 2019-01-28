@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.folder;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.repository.RepositoryDefinition;
@@ -29,4 +30,14 @@ public interface FolderGroupPermissionDAO extends BaseDAO<FolderGroupPermissionP
 	 * @return List<FolderGroupPermissionPO> 权限
 	 */
 	public FolderGroupPermissionPO findByGroupIdAndFolderId(String groupId, Long folderId);
+	
+	/**
+	 * 获取文件夹的组权限（批量）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月28日 下午3:04:50
+	 * @param Collection<Long> folderIds 文件夹id列表
+	 * @return List<FolderGroupPermissionPO> 权限列表
+	 */
+	public List<FolderGroupPermissionPO> findByFolderIdIn(Collection<Long> folderIds);
 }

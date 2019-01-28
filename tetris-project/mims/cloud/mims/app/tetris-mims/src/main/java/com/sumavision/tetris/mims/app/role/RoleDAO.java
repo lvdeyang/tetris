@@ -2,12 +2,25 @@ package com.sumavision.tetris.mims.app.role;
 
 import java.util.Collection;
 import java.util.List;
+
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = RolePO.class, idClass = Long.class)
 public interface RoleDAO extends BaseDAO<RolePO>{
 
+	/**
+	 * 获取内置公司管理员角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月28日 下午1:15:31
+	 * @param String companyId 公司id
+	 * @return RolePO 角色
+	 */
+	@Query(value = "SELECT role.* FROM mims_role role WHERE role.group_id=?1 AND role.classify='INTERNAL_COMPANY_ADMIN_ROLE'", nativeQuery = true)
+	public RolePO findInternalCompanyAdminRole(String companyId);
+	
 	/**
 	 * 查询组下的角色列表<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -39,5 +52,7 @@ public interface RoleDAO extends BaseDAO<RolePO>{
 	 * @return List<RolePO> 权限数据
 	 */
 	public List<RolePO> findByGroupIdAndIdIn(String groupId, Collection<Long> ids);
+	
+	
 	
 }

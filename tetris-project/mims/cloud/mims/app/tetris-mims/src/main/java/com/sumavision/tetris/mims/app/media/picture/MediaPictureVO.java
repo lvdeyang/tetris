@@ -12,7 +12,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	
 	private String authorName;
 	
-	private Long size;
+	private String size;
 	
 	private String createTime;
 	
@@ -48,11 +48,11 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return this;
 	}
 
-	public Long getSize() {
+	public String getSize() {
 		return size;
 	}
 
-	public MediaPictureVO setSize(Long size) {
+	public MediaPictureVO setSize(String size) {
 		this.size = size;
 		return this;
 	}
@@ -136,7 +136,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setAuthorName(entity.getAuthorName())
-			.setSize(entity.getSize())
+			.setSize(entity.getSize().toString())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
@@ -154,7 +154,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setAuthorName(entity.getAuthorName())
-			.setSize(0l)
+			.setSize("-")
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setVersion("-")
 			.setRemarks("-")

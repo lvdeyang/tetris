@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
@@ -21,11 +22,15 @@ import com.sumavision.tetris.mims.app.material.MaterialFileDAO;
 import com.sumavision.tetris.mims.app.material.MaterialFilePO;
 import com.sumavision.tetris.mims.app.material.MaterialFileQuery;
 import com.sumavision.tetris.mims.app.material.MaterialFileService;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
 import com.sumavision.tetris.mims.app.role.RoleClassify;
 import com.sumavision.tetris.mims.app.role.RoleDAO;
 import com.sumavision.tetris.mims.app.role.RolePO;
 import com.sumavision.tetris.mims.app.role.RoleUserPermissionDAO;
 import com.sumavision.tetris.mims.app.role.RoleUserPermissionPO;
+import com.sumavision.tetris.mims.app.role.exception.RoleNotExistException;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -58,22 +63,25 @@ public class FolderService {
 	private MaterialFileDAO materialFileDao;
 	
 	@Autowired
-	private MaterialFileQuery materialFileTool;
+	private MaterialFileQuery materialFileQuery;
 	
 	@Autowired
 	private MaterialFileService materialFileService;
-	
-	@Autowired
-	private MaterialFileQuery materialTool;
 	
 	@Autowired
 	private RoleDAO roleDao;
 	
 	@Autowired
 	private RoleUserPermissionDAO roleUserPermissionDao;
+	
+	@Autowired
+	private MediaPictureDAO mediaPictureDao;
 
+	@Autowired
+	private MediaPictureService mediaPictureService;
+	
 	/**
-	 * 新增文件夹<br/>
+	 * 新增私人文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月22日 下午3:42:28
@@ -83,7 +91,7 @@ public class FolderService {
 	 * @return FolderPO 新建的文件夹
 	 * @exception FolderNotExistException 未查询到父文件夹
 	 */
-	public FolderPO add(String userId, Long parentFolderId, String folderName, FolderType type) throws FolderNotExistException{
+	public FolderPO addPersionalFolder(String userId, Long parentFolderId, String folderName, FolderType type) throws Exception{
 		
 		FolderPO parentFolder = folderDao.findOne(parentFolderId);
 		if(parentFolder == null) throw new FolderNotExistException(parentFolderId);
@@ -108,13 +116,57 @@ public class FolderService {
 	}
 	
 	/**
+	 * 新增媒资文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月28日 下午1:32:48
+	 * @param String companyId 公司id
+	 * @param Long parentFolderId 父文件夹id
+	 * @param String folderName 文件夹名称
+	 * @param FolderType type 媒资文件夹类型
+	 * @return FolderPO 新建的文件夹
+	 */
+	public FolderPO addMediaFolder(String companyId, Long parentFolderId, String folderName, FolderType type) throws Exception{
+		FolderPO parentFolder = folderDao.findOne(parentFolderId);
+		if(parentFolder == null) throw new FolderNotExistException(parentFolderId);
+		String basePath = parentFolder.getParentPath()==null?"":parentFolder.getParentPath();
+		
+		FolderPO folder = new FolderPO();
+		folder.setName(folderName);
+		folder.setParentId(parentFolderId);
+		folder.setParentPath(new StringBufferWrapper().append(basePath).append("/").append(parentFolderId).toString());
+		folder.setDepth();
+		folder.setType(type);
+		folder.setUpdateTime(new Date());
+		folderDao.save(folder);
+		
+		FolderGroupPermissionPO permission0 = new FolderGroupPermissionPO();
+		permission0.setFolderId(folder.getId());
+		permission0.setGroupId(companyId);
+		permission0.setUpdateTime(new Date());
+		folderGroupPermissionDao.save(permission0);
+		
+		RolePO role = roleDao.findInternalCompanyAdminRole(companyId);
+		if(role == null){
+			throw new RoleNotExistException(companyId);
+		}
+		
+		FolderRolePermissionPO permission1 = new FolderRolePermissionPO();
+		permission1.setFolderId(folder.getId());
+		permission1.setRoleId(role.getId());
+		permission1.setUpdateTime(new Date());
+		folderRolePermissionDao.save(permission1);
+		
+		return folder;
+	}
+	
+	/**
 	 * 删除素材库文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月23日 上午10:32:06
 	 * @param FolderPO folder 待删除文件夹
 	 * @param UserVO user 操作用户
-	 * @throws Exception
 	 */
 	public void removeMaterialFolder(FolderPO folder, UserVO user) throws Exception{
 		
@@ -144,6 +196,69 @@ public class FolderService {
 		//删除所有素材
 		materialFileService.remove(materials);
 		
+	}
+	
+	/**
+	 * 删除媒资库文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月23日 上午10:32:06
+	 * @param FolderPO folder 待删除文件夹
+	 * @param UserVO user 操作用户
+	 */
+	public void removeMediaFolder(FolderPO folder, UserVO user) throws Exception{
+		
+		//获取所有的子文件夹
+		List<FolderPO> subFolders = folderTool.findSubFolders(folder.getId());
+		List<FolderPO> totalFolders = new ArrayListWrapper<FolderPO>().add(folder).getList();
+		if(subFolders!=null && subFolders.size()>0) totalFolders.addAll(subFolders);
+		
+		//获取所有的文件夹id
+		Set<Long> folderIds = new HashSet<Long>();
+		for(FolderPO scope:totalFolders){
+			folderIds.add(scope.getId());
+		}
+		
+		//获取所有的组权限数据
+		List<FolderGroupPermissionPO> permissions0 = folderGroupPermissionDao.findByFolderIdIn(folderIds);
+		
+		//获取所有的角色权限数据
+		List<FolderRolePermissionPO> permissions1 = folderRolePermissionDao.findByFolderIdIn(folderIds);
+		
+		//获取图片媒资
+		List<MediaPicturePO> pictures = mediaPictureDao.findByFolderIdIn(folderIds);
+		
+		//获取视频媒资
+		
+		//获取音频媒资
+		
+		//获取视频流媒资
+		
+		//获取音频流媒资
+		
+		//获取文本媒资
+		
+		//删除所有文件夹
+		folderDao.deleteInBatch(totalFolders);
+		
+		//删除所有组权限
+		folderGroupPermissionDao.deleteInBatch(permissions0);
+		
+		//删除所有角色权限
+		folderRolePermissionDao.deleteInBatch(permissions1);
+		
+		//删除所有图片媒资
+		if(pictures!=null && pictures.size()>0) mediaPictureService.remove(pictures);
+		
+		//删除所有视频媒资
+		
+		//删除所有音频媒资
+		
+		//删除所有视频流媒资
+		
+		//删除所有音频流媒资
+		
+		//删除所有文本媒资
 	}
 	
 	/**
@@ -258,7 +373,7 @@ public class FolderService {
 		folderUserPermissionDao.save(permissions);
 		
 		//复制素材
-		List<MaterialFilePO> materials = materialFileTool.findMaterialsByFolderIds(totalFolderIds);
+		List<MaterialFilePO> materials = materialFileQuery.findMaterialsByFolderIds(totalFolderIds);
 		List<MaterialFilePO> totalCopyMaterials = new ArrayList<MaterialFilePO>();
 		if(materials!=null && materials.size()>0){
 			for(MaterialFilePO material:materials){
@@ -346,7 +461,7 @@ public class FolderService {
 			if(materials!=null && materials.size()>0){
 				for(MaterialFilePO material:materials){
 					if(material.getFolderId().equals(root.getId())){
-						MaterialFilePO copiedMaterial = materialTool.loopForUuid(material.getUuid(), copiedMaterials);
+						MaterialFilePO copiedMaterial = materialFileQuery.loopForUuid(material.getUuid(), copiedMaterials);
 						copiedMaterial.setFolderId(copiedRoot.getId());
 					}
 				}
@@ -432,7 +547,7 @@ public class FolderService {
 	 */
 	public void createCompanyDisk(String companyId, String companyName, String userId) throws Exception{
 		//判重
-		FolderPO existFolder = folderDao.findCompanyRootFolderByType(companyId, FolderType.COMPANY_PICTURE);
+		FolderPO existFolder = folderDao.findCompanyRootFolderByType(companyId, FolderType.COMPANY_PICTURE.toString());
 		if(existFolder != null) return;
 		
 		//创建管理员
