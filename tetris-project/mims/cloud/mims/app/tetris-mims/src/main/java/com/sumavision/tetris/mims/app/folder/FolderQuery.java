@@ -27,6 +27,9 @@ public class FolderQuery {
 	@Autowired
 	private FolderGroupPermissionDAO folderGroupPermissionDao;
 	
+	@Autowired
+	private FolderRolePermissionDAO folderRolePermissionDao;
+	
 	/**
 	 * 根据uuid查找文件夹（内存循环）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -117,6 +120,20 @@ public class FolderQuery {
 	}
 	
 	/**
+	 * 获取有权限的企业文件夹（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月29日 下午2:15:52
+	 * @param String userId 用户id
+	 * @param String type 文件夹类型
+	 * @param Long except 例外文件夹id
+	 * @return List<FolderPO> 文件夹列表
+	 */
+	public List<FolderPO> findPermissionCompanyTreeWithExcept(String userId, String type, Long except){
+		return folderDao.findPermissionCompanyTreeWithExcept(userId, type, except, splicePathReg(except));
+	}
+	
+	/**
 	 * 生成文件夹面包屑<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -200,6 +217,21 @@ public class FolderQuery {
 	public boolean hasGroupPermission(String groupId, Long folderId){
 		FolderGroupPermissionPO permission = folderGroupPermissionDao.findByGroupIdAndFolderId(groupId, folderId);
 		if(permission == null) return false;
+		return true;
+	}
+	
+	/**
+	 * 判断用户对媒资文件夹是否有权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月29日 下午2:43:03
+	 * @param String userId 用户id
+	 * @param Long folderId 媒资文件夹id
+	 * @return boolean 判断结果
+	 */
+	public boolean hasMediaPermission(String userId, Long folderId){
+		List<FolderRolePermissionPO> permissions = folderRolePermissionDao.findByFolderIdAndUserId(userId, folderId);
+		if(permissions==null || permissions.size()<=0) return false;
 		return true;
 	}
 	

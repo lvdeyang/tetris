@@ -272,19 +272,19 @@ define([
                     }else if(command === '1'){
                         //移动
                         if(row.type === 'FOLDER'){
-                            self.$refs.moveMediaPictureFolderDialog.open(row.id);
-                            self.$refs.movePersonalFolderDialog.setBuffer(row);
+                            self.$refs.moveMediaPictureFolderDialog.open('/folder/permission/media/tree/with/except/picture', row.id);
+                            self.$refs.moveMediaPictureFolderDialog.setBuffer(row);
                         }else{
-                            self.$refs.moveMaterialFileDialog.open();
+                            self.$refs.moveMaterialFileDialog.open('/folder/permission/media/tree/picture');
                             self.$refs.moveMaterialFileDialog.setBuffer(row);
                         }
                     }else if(command === '2'){
                         //复制
                         if(row.type === 'FOLDER'){
-                            self.$refs.copyPersonalFolderDialog.open();
+                            self.$refs.copyPersonalFolderDialog.open('/folder/permission/media/tree/picture');
                             self.$refs.copyPersonalFolderDialog.setBuffer(row);
                         }else{
-                            self.$refs.copyMaterialFileDialog.open();
+                            self.$refs.copyMaterialFileDialog.open('/folder/permission/media/tree/picture');
                             self.$refs.copyMaterialFileDialog.setBuffer(row);
                         }
                     }
@@ -323,7 +323,7 @@ define([
                 moveMediaPictureFolder:function(folder, buffer, startLoading, endLoading, close){
                     var self = this;
                     startLoading();
-                    ajax.post('/folder/personal/move', {
+                    ajax.post('/folder/media/move', {
                         folderId:buffer.id,
                         targetId:folder.id
                     }, function(data, status){

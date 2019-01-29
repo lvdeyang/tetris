@@ -280,4 +280,35 @@ public class MediaPicturePO extends AbstractBasePO{
 		return history;
 	}
 	
+	/**
+	 * 复制图片媒资<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月29日 下午3:45:49
+	 * @return MediaPicturePO 复制的图片媒资
+	 */
+	public MediaPicturePO copy(){
+		MediaPicturePO copy_picture = new MediaPicturePO();
+		copy_picture.setUuid(this.getUuid());
+		copy_picture.setUpdateTime(new Date());
+		copy_picture.setName(this.getName());
+		copy_picture.setFileName(this.getFileName());
+		copy_picture.setStoreType(this.getStoreType());
+		copy_picture.setStoreUrl(this.getStoreUrl());
+		copy_picture.setPreviewUrl(this.getPreviewUrl());
+		copy_picture.setUploadTmpPath(this.getUploadTmpPath());
+		copy_picture.setAuthorId(this.getAuthorId());
+		copy_picture.setAuthorName(this.getAuthorName());
+		copy_picture.setSuffix(this.getSuffix());
+		copy_picture.setMimeType(this.getMimeType());
+		copy_picture.setSize(this.getSize());
+		copy_picture.setCreateTime(this.getCreateTime());
+		copy_picture.setVersion(this.getVersion());
+		copy_picture.setRemarks(this.getRemarks());
+		copy_picture.setTags(this.getTags());
+		copy_picture.setKeyWords(this.getKeyWords());
+		copy_picture.setUploadStatus(this.getUploadStatus());
+		return copy_picture;
+	}
+	
 }

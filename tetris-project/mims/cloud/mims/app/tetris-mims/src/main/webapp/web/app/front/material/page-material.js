@@ -279,19 +279,19 @@ define([
                         }else if(command === '1'){
                             //移动
                             if(row.type === 'FOLDER'){
-                                self.$refs.movePersonalFolderDialog.open(row.id);
+                                self.$refs.movePersonalFolderDialog.open('/folder/personal/tree', row.id);
                                 self.$refs.movePersonalFolderDialog.setBuffer(row);
                             }else{
-                                self.$refs.moveMaterialFileDialog.open();
+                                self.$refs.moveMaterialFileDialog.open('/folder/personal/tree');
                                 self.$refs.moveMaterialFileDialog.setBuffer(row);
                             }
                         }else if(command === '2'){
                             //复制
                             if(row.type === 'FOLDER'){
-                                self.$refs.copyPersonalFolderDialog.open();
+                                self.$refs.copyPersonalFolderDialog.open('/folder/personal/tree');
                                 self.$refs.copyPersonalFolderDialog.setBuffer(row);
                             }else{
-                                self.$refs.copyMaterialFileDialog.open();
+                                self.$refs.copyMaterialFileDialog.open('/folder/personal/tree');
                                 self.$refs.copyMaterialFileDialog.setBuffer(row);
                             }
                         }

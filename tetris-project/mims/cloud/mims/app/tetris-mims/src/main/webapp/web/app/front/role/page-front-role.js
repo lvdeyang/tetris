@@ -416,7 +416,7 @@ define([
             },
             created:function(){
                 var self = this;
-                ajax.post('/folder/organization/tree', null, function(data){
+                ajax.post('/folder/media/tree', null, function(data){
                     for(var i=0; i<data.length; i++){
                         self.tree.data.push(data[i]);
                     }

@@ -21,6 +21,17 @@ public interface MediaPictureDAO extends BaseDAO<MediaPicturePO>{
 	public List<MediaPicturePO> findByFolderIdAndUploadStatusOrderByName(Long folderId, UploadStatus uploadStatus);
 	
 	/**
+	 * 获取文件夹下特定上传状态的图片媒资（批量）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月29日 下午3:33:50
+	 * @param Collection<Long> folderIds 文件夹id列表
+	 * @param UploadStatus status 上传状态
+	 * @return List<MediaPicturePO> 媒资图片列表
+	 */
+	public List<MediaPicturePO> findByFolderIdInAndUploadStatus(Collection<Long> folderIds, UploadStatus status);
+	
+	/**
 	 * 获取文件夹下的图片媒资（批量）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

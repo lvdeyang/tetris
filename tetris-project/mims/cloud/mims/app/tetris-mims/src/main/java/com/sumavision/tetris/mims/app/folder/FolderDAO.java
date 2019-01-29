@@ -1,7 +1,6 @@
 package com.sumavision.tetris.mims.app.folder;
 
 import java.util.List;
-
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.orm.dao.BaseDAO;
@@ -116,30 +115,41 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	public List<FolderPO> findCompanyTreeByGroupId(String groupId);
 	
 	/**
-	 * 获取用户有权限的企业根文件夹（区分文件夹类型）<br/>
+	 * 获取有权限的企业文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2018年12月12日 下午1:20:22
-	 * @param String userId 用户id
-	 * @param FolderType type 文件夹类型
-	 * @return List<FolderPO> 根文件夹列表
+	 * <b>日期：</b>2019年1月29日 下午12:00:25
+	 * @param String companyId 公司id
+	 * @return List<FolderPO> 文件夹树
 	 */
-	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+
-			       "FROM mims_folder folder "+
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+ 
+				   "FROM mims_folder folder "+
+				   "LEFT JOIN mims_folder_role_permission permission0 ON folder.id=permission0.folder_id "+
+				   "LEFT JOIN mims_role role ON permission0.role_id=role.id "+
+				   "LEFT JOIN mims_role_user_permission permission1 ON role.id=permission1.role_id "+
+				   "WHERE permission1.user_id=?1 "+
+				   "AND folder.type=?2", nativeQuery = true)
+	public List<FolderPO> findPermissionCompanyTree(String userId, String type);
+	
+	/**
+	 * 获取有权限的企业文件夹（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月29日 下午12:04:29
+	 * @param String companyId 公司id
+	 * @param Collection<Long> except 例外文件夹id列表
+	 * @return List<FolderPO> 文件夹树
+	 */
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+ 
+				   "FROM mims_folder folder "+
 				   "LEFT JOIN mims_folder_role_permission permission0 ON folder.id=permission0.folder_id "+
 				   "LEFT JOIN mims_role role ON permission0.role_id=role.id "+
 				   "LEFT JOIN mims_role_user_permission permission1 ON role.id=permission1.role_id "+
 				   "WHERE permission1.user_id=?1 "+
 				   "AND folder.type=?2 "+
-				   "AND folder.parent_id NOT IN( "+
-					   "SELECT folder.id FROM mims_folder folder "+
-					   "LEFT JOIN mims_folder_role_permission permission0 ON folder.id=permission0.folder_id "+
-					   "LEFT JOIN mims_role role ON permission0.role_id=role.id "+
-					   "LEFT JOIN mims_role_user_permission permission1 ON role.id=permission1.role_id "+
-					   "WHERE permission1.user_id=?1 "+
-					   "AND folder.type=?2 "+ 
-				   ")", nativeQuery = true)
-	public List<FolderPO> findPermissionCompanyRootFolder(String userId, String type);
+				   "AND folder.id<>?3 "+
+				   "AND (folder.parent_path IS NULL OR folder.parent_path NOT LIKE ?4)", nativeQuery = true)
+	public List<FolderPO> findPermissionCompanyTreeWithExcept(String userId, String type, Long except, String exceptReg);
 	
 	/**
 	 * 获取企业文件夹下的有权限的子文件夹<br/>

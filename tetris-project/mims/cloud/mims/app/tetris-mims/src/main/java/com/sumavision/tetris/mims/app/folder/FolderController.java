@@ -18,7 +18,6 @@ import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFol
 import com.sumavision.tetris.mims.app.material.MaterialVO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -233,7 +232,7 @@ public class FolderController {
 		//判断当前文件夹的父文件夹是否是目标文件夹
 		if(folder.getParentId()!=null && folder.getParentId().equals(target.getId())) moved = false;
 		
-		FolderPO copiedFolder = folderService.copy(user.getUuid(), folder, target);
+		FolderPO copiedFolder = folderService.copyMaterialFolder(user.getUuid(), folder, target);
 		
 		Map<String, Object> result = new HashMapWrapper<String, Object>().put("moved", moved)
 																		 .put("copied", new MaterialVO().set(copiedFolder))
@@ -277,7 +276,7 @@ public class FolderController {
 	}
 	
 	/**
-	 * 获取企业硬盘文件夹树（完整树）<br/>
+	 * 获取媒资文件夹树（完整树）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月8日 下午2:34:47
@@ -285,20 +284,78 @@ public class FolderController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/organization/tree")
-	public Object organizationTree(HttpServletRequest request) throws Exception{
+	@RequestMapping(value = "/media/tree")
+	public Object mediaTree(HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
-		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-		}
-		
-		if(user.getGroupId() == null){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-		}
+		//TODO 权限校验
 		
 		List<FolderPO> folderTree = folderDao.findCompanyTreeByGroupId(user.getGroupId());
+		
+		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
+		
+		return roots;
+	}
+	
+	/**
+	 * 查询有权限的媒资库树（特定类型，全量）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月29日 下午1:43:58
+	 * @param @PathVariable String folderType 媒资文件夹类型
+	 * @return List<FolderTreeVO> 根节点
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/permission/media/tree/{folderType}")
+	public Object permissionMediaTree(
+			@PathVariable String folderType,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		FolderType type = FolderType.fromPrimaryKey(folderType);
+		
+		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), type.toString());
+		
+		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
+		
+		return roots;
+	}
+	
+	/**
+	 * 查询有权限的媒资库树（特定类型，全量，带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月29日 下午1:43:58
+	 * @param @PathVariable String folderType 媒资文件夹类型
+	 * @param JSONString except 例外文件夹id列表
+	 * @return List<FolderTreeVO> 根节点
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/permission/media/tree/with/except/{folderType}")
+	public Object permissionMediaTreeWithExcept(
+			@PathVariable String folderType,
+			Long except,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		FolderType type = FolderType.fromPrimaryKey(folderType);
+		
+		List<FolderPO> folderTree = null;
+		
+		if(except == null){
+			folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), type.toString());
+		}else{
+			folderTree = folderQuery.findPermissionCompanyTreeWithExcept(user.getUuid(), type.toString(), except);
+		}
 		
 		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
 		
@@ -407,5 +464,99 @@ public class FolderController {
 		return null;
 	}
 	
+	/**
+	 * 移动媒资库文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月25日 下午5:20:58
+	 * @param Long folderId 被移动文件夹
+	 * @param Long targetId 目标文件夹
+	 * @return boolean 文件夹移动是否有效
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/media/move")
+	public Object mediaMove(
+			Long folderId,
+			Long targetId,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		if(!folderQuery.hasMediaPermission(user.getUuid(), folderId)){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		FolderPO folder = folderDao.findOne(folderId);
+		if(folder == null){
+			throw new FolderNotExistException(folderId);
+		}
+		
+		FolderPO target = folderDao.findOne(targetId);
+		if(target == null){
+			throw new FolderNotExistException(targetId);
+		}
+		
+		if(!folder.getType().equals(target.getType())){
+			throw new FolderTypeCannotMatchException(FolderTypeCannotMatchException.GROUP);
+		}
+		
+		if(folder.getParentId()!=null && folder.getParentId().equals(target.getId())) return false;
+		
+		folderService.move(folder, target);
+		
+		return true;
+	}
+	
+	/**
+	 * 复制媒资库文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月26日 下午1:59:56
+	 * @param Long folderId 待复制文件夹id
+	 * @param Long targetId 目的文件夹id
+	 * @return boolean moved 记录是否复制到其他文件夹中
+	 * @return MaterialVO copied 复制后的文件夹信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/media/copy")
+	public Object mediaCopy(
+			Long folderId,
+			Long targetId,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		if(!folderQuery.hasMediaPermission(user.getUuid(), folderId)){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		FolderPO folder = folderDao.findOne(folderId);
+		if(folder == null){
+			throw new FolderNotExistException(folderId);
+		}
+		
+		FolderPO target = folderDao.findOne(targetId);
+		if(target == null){
+			throw new FolderNotExistException(targetId);
+		}
+		
+		if(!folder.getType().equals(target.getType())){
+			throw new FolderTypeCannotMatchException(FolderTypeCannotMatchException.GROUP);
+		}
+		
+		boolean moved = true;
+		
+		//判断当前文件夹的父文件夹是否是目标文件夹
+		if(folder.getParentId()!=null && folder.getParentId().equals(target.getId())) moved = false;
+		
+		FolderPO copiedFolder = folderService.copy(user.getUuid(), folder, target);
+		
+		Map<String, Object> result = new HashMapWrapper<String, Object>().put("moved", moved)
+																		 .put("copied", new MaterialVO().set(copiedFolder))
+																		 .getMap();
+		return result;
+	}
 	
 }

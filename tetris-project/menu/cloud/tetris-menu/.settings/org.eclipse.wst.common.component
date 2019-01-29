@@ -16,6 +16,9 @@
         <dependent-module archiveName="tetris-user-feign-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/tetris-user-feign/tetris-user-feign">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="tetris-ui-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/tetris-ui/tetris-ui">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="springboot"/>
         <property name="java-output-path" value="/tetris-menu/target/classes"/>
     </wb-module>

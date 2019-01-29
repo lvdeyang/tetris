@@ -75,7 +75,7 @@ public class MediaPictureService {
 		
 		//删除临时文件
 		for(MediaPicturePO picture:pictures){
-			List<MediaPicturePO> results = mediaPictureDao.findByTmpPathAndIdNotIn(picture.getUploadTmpPath(), pictureIds);
+			List<MediaPicturePO> results = mediaPictureDao.findByUploadTmpPathAndIdNotIn(picture.getUploadTmpPath(), pictureIds);
 			if(results==null || results.size()<=0){
 				File file = new File(new File(picture.getUploadTmpPath()).getParent());
 				File[] children = file.listFiles();

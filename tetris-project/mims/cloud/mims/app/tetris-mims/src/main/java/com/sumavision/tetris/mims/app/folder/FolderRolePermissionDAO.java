@@ -64,4 +64,16 @@ public interface FolderRolePermissionDAO extends BaseDAO<FolderRolePermissionPO>
 	 * @return List<FolderRolePermissionPO> 授权列表
 	 */
 	public List<FolderRolePermissionPO> findByFolderIdInAndRoleId(Collection<Long> folderIds, Long roleId);
+	
+	/**
+	 * 判断用户对媒资文件夹是否有权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月29日 下午2:34:08
+	 * @param Long folderId 媒资文件夹id
+	 * @param String userId 用户id
+	 * @return List<FolderRolePermissionPO> 权限列表
+	 */
+	@Query(value = "SELECT permission0.* FROM mims_folder_role_permission permission0 LEFT JOIN mims_role_user_permission permission1 ON permission0.role_id=permission1.role_id WHERE permission1.user_id=?1 AND permission0.folder_id=?2", nativeQuery = true)
+	public List<FolderRolePermissionPO> findByFolderIdAndUserId(String userId, Long folderId);
 }

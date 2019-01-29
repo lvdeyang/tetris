@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
@@ -24,6 +23,7 @@ import com.sumavision.tetris.mims.app.material.MaterialFileQuery;
 import com.sumavision.tetris.mims.app.material.MaterialFileService;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
 import com.sumavision.tetris.mims.app.role.RoleClassify;
 import com.sumavision.tetris.mims.app.role.RoleDAO;
@@ -79,6 +79,9 @@ public class FolderService {
 
 	@Autowired
 	private MediaPictureService mediaPictureService;
+	
+	@Autowired
+	private MediaPictureQuery mediaPictureQuery;
 	
 	/**
 	 * 新增私人文件夹<br/>
@@ -323,7 +326,7 @@ public class FolderService {
 	}
 	
 	/**
-	 * 复制文件夹<br/>
+	 * 复制素材文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月26日 上午9:35:20
@@ -331,7 +334,7 @@ public class FolderService {
 	 * @param FolderPO target 目标文件夹
 	 * @return boolean 是否复制到其他文件夹中
 	 */
-	public FolderPO copy(String userId, FolderPO folder, FolderPO target) throws Exception{
+	public FolderPO copyMaterialFolder(String userId, FolderPO folder, FolderPO target) throws Exception{
 		
 		boolean moved = true;
 		
@@ -404,6 +407,109 @@ public class FolderService {
 	}
 	
 	/**
+	 * 复制媒资文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月26日 上午9:35:20
+	 * @param FolderPO folder 待复制文件夹
+	 * @param FolderPO target 目标文件夹
+	 * @return boolean 是否复制到其他文件夹中
+	 */
+	public FolderPO copyMediaFolder(String userId, String companyId, FolderPO folder, FolderPO target) throws Exception{
+		
+		boolean moved = true;
+		
+		//判断当前文件夹的父文件夹是否是目标文件夹
+		if(folder.getParentId()!=null && folder.getParentId().equals(target.getId())) moved = false;
+		
+		//所有文件夹id
+		Set<Long> totalFolderIds = new HashSetWrapper<Long>().add(folder.getId()).getSet();
+		
+		//复制文件夹
+		FolderPO copiedFolder = folder.copy(moved?null:new StringBufferWrapper().append(folder.getName())
+																		        .append("（副本：")
+																		        .append(DateUtil.format(new Date(), DateUtil.dateTimePattern))
+																		        .append("）")
+																		        .toString());
+		List<FolderPO> totalCopyFolders = new ArrayListWrapper<FolderPO>().add(copiedFolder).getList();
+		
+		//获取子文件夹
+		List<FolderPO> subFolders = folderTool.findSubFolders(folder.getId());
+		if(subFolders!=null && subFolders.size()>0){
+			for(FolderPO subFolder:subFolders){
+				totalCopyFolders.add(subFolder.copy(null));
+				totalFolderIds.add(subFolder.getId());
+			}
+		}
+		
+		//保存一下
+		folderDao.save(totalCopyFolders);
+		
+		//生成公司权限
+		List<FolderGroupPermissionPO> permissions0 = new ArrayList<FolderGroupPermissionPO>();
+		for(FolderPO copyFolder:totalCopyFolders){
+			FolderGroupPermissionPO permission0 = new FolderGroupPermissionPO();
+			permission0.setFolderId(copyFolder.getId());
+			permission0.setGroupId(companyId);
+			permission0.setUpdateTime(new Date());
+			permissions0.add(permission0);
+		}
+		folderGroupPermissionDao.save(permissions0);
+		
+		//生成管理员权限
+		RolePO admin = roleDao.findInternalCompanyAdminRole(companyId);
+		List<FolderRolePermissionPO> permissions1 = new ArrayList<FolderRolePermissionPO>();
+		for(FolderPO copyFolder:totalCopyFolders){
+			FolderRolePermissionPO permission1 = new FolderRolePermissionPO();
+			permission1.setRoleId(admin.getId());
+			permission1.setFolderId(copyFolder.getId());
+			permission1.setUpdateTime(new Date());
+			permissions1.add(permission1);
+		}
+		folderRolePermissionDao.save(permissions1);
+		
+		List<FolderPO> rootFolders = new ArrayListWrapper<FolderPO>().add(folder).getList();
+		List<FolderPO> rootCopyFolders = new ArrayListWrapper<FolderPO>().add(folderTool.loopByUuid(folder.getUuid(), totalCopyFolders)).getList();
+		
+		//复制图片媒资
+		List<MediaPicturePO> pictures = mediaPictureQuery.findCompleteByFolderIds(totalFolderIds);
+		if(pictures!=null && pictures.size()>0){
+			List<MediaPicturePO> totalCopyPictures = new ArrayList<MediaPicturePO>();
+			for(MediaPicturePO picture:pictures){
+				totalCopyPictures.add(picture.copy());
+			}
+			mediaPictureDao.save(totalCopyPictures);
+			//重组文件夹链
+			setMediaPictureFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, pictures, totalCopyPictures);
+			//生成新的uuid
+			for(MediaPicturePO picture:totalCopyPictures){
+				picture.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+			}
+			mediaPictureDao.save(totalCopyPictures);
+		}
+		
+		//复制视频媒资
+		
+		//复制音频媒资
+		
+		//复制视频流媒资
+		
+		//复制音频流媒资
+		
+		//复制文本媒资
+		
+		//生成新的uuid
+		for(FolderPO copyFolder:totalCopyFolders){
+			copyFolder.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+		}
+		
+		//保存数据
+		folderDao.save(totalCopyFolders);
+		
+		return copiedFolder;
+	}
+	
+	/**
 	 * 重组文件夹链<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -463,6 +569,72 @@ public class FolderService {
 					if(material.getFolderId().equals(root.getId())){
 						MaterialFilePO copiedMaterial = materialFileQuery.loopForUuid(material.getUuid(), copiedMaterials);
 						copiedMaterial.setFolderId(copiedRoot.getId());
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 重组图片媒资文件夹链<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月26日 下午1:14:48
+	 * @param Collection<FolderPO> roots 待重组的文件夹（复制前）
+	 * @param Collection<FolderPO> copiedRoots 待重组的文件夹（复制后的）
+	 * @param FolderPO parent 待重组文件夹的父文件夹
+	 * @param Collection<FolderPO> copiedSubFolders 复制之后的子文件夹
+	 * @param Collection<FolderPO> subFolders 原子文件夹
+	 * @param Collection<MaterialFilePO> copiedMaterials 复制之后的素材
+	 * @param Collection<MaterialFilePO> materials 原素材
+	 */
+	private void setMediaPictureFolderChain(
+			Collection<FolderPO> roots,
+			Collection<FolderPO> copiedRoots, 
+			FolderPO parent,
+			Collection<FolderPO> subFolders,
+			Collection<FolderPO> copiedSubFolders,
+			Collection<MediaPicturePO> picutres,
+			Collection<MediaPicturePO> copiedPictures){
+		
+		if(roots==null || roots.size()<=0 || copiedRoots==null || copiedRoots.size()<=0) return;
+		
+		for(FolderPO copiedRoot:copiedRoots){
+			copiedRoot.setParentId(parent==null?null:parent.getId());
+			copiedRoot.setParentPath(parent==null?
+										null
+										:(parent.getParentPath()==null?
+												new StringBufferWrapper().append("/")
+																	     .append(parent.getId())
+																	     .toString()
+										       :new StringBufferWrapper().append(parent.getParentPath())
+										       							 .append("/")
+										       							 .append(parent.getId())
+										       							 .toString()));
+			copiedRoot.setDepth();
+			
+			FolderPO root = folderTool.loopByUuid(copiedRoot.getUuid(), roots);
+			
+			//重组子文件夹
+			if(subFolders!=null && subFolders.size()>0){
+				List<FolderPO> filteredSubFolders = new ArrayList<FolderPO>();
+				List<FolderPO> filteredCopiedSubFolders = new ArrayList<FolderPO>();
+				for(FolderPO subFolder:subFolders){
+					if(root.getId().equals(subFolder.getParentId())){
+						FolderPO copiedSubFolder = folderTool.loopByUuid(subFolder.getUuid(), copiedSubFolders);
+						filteredSubFolders.add(subFolder);
+						filteredCopiedSubFolders.add(copiedSubFolder);
+					}
+				}
+				setMediaPictureFolderChain(filteredSubFolders, filteredCopiedSubFolders, copiedRoot, subFolders, copiedSubFolders, picutres, copiedPictures);
+			}
+			
+			//重组素材文件
+			if(picutres!=null && picutres.size()>0){
+				for(MediaPicturePO picture:picutres){
+					if(picture.getFolderId().equals(root.getId())){
+						MediaPicturePO copiedPicture = mediaPictureQuery.loopForUuid(picture.getUuid(), copiedPictures);
+						copiedPicture.setFolderId(copiedRoot.getId());
 					}
 				}
 			}

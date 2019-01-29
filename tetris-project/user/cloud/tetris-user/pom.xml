@@ -74,6 +74,13 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- tetris-ui -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-ui</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- eureka依赖 -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -88,6 +95,7 @@
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
 		</dependency>
+		
 	</dependencies>
 	
 	<dependencyManagement>
