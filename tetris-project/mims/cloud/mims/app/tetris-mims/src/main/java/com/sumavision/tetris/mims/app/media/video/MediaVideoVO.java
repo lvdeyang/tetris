@@ -1,4 +1,4 @@
-package com.sumavision.tetris.mims.app.media.picture;
+package com.sumavision.tetris.mims.app.media.video;
 
 import java.util.Arrays;
 import java.util.List;
@@ -6,7 +6,7 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
-public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPicturePO>{
+public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 
 	private String name;
 	
@@ -38,7 +38,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return name;
 	}
 
-	public MediaPictureVO setName(String name) {
+	public MediaVideoVO setName(String name) {
 		this.name = name;
 		return this;
 	}
@@ -47,7 +47,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return authorName;
 	}
 
-	public MediaPictureVO setAuthorName(String authorName) {
+	public MediaVideoVO setAuthorName(String authorName) {
 		this.authorName = authorName;
 		return this;
 	}
@@ -56,7 +56,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return size;
 	}
 
-	public MediaPictureVO setSize(String size) {
+	public MediaVideoVO setSize(String size) {
 		this.size = size;
 		return this;
 	}
@@ -65,7 +65,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return createTime;
 	}
 
-	public MediaPictureVO setCreateTime(String createTime) {
+	public MediaVideoVO setCreateTime(String createTime) {
 		this.createTime = createTime;
 		return this;
 	}
@@ -74,7 +74,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return version;
 	}
 
-	public MediaPictureVO setVersion(String version) {
+	public MediaVideoVO setVersion(String version) {
 		this.version = version;
 		return this;
 	}
@@ -83,7 +83,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return remarks;
 	}
 
-	public MediaPictureVO setRemarks(String remarks) {
+	public MediaVideoVO setRemarks(String remarks) {
 		this.remarks = remarks;
 		return this;
 	}
@@ -92,7 +92,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return tags;
 	}
 
-	public MediaPictureVO setTags(List<String> tags) {
+	public MediaVideoVO setTags(List<String> tags) {
 		this.tags = tags;
 		return this;
 	}
@@ -101,7 +101,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return keyWords;
 	}
 
-	public MediaPictureVO setKeyWords(List<String> keyWords) {
+	public MediaVideoVO setKeyWords(List<String> keyWords) {
 		this.keyWords = keyWords;
 		return this;
 	}
@@ -110,7 +110,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return type;
 	}
 
-	public MediaPictureVO setType(String type) {
+	public MediaVideoVO setType(String type) {
 		this.type = type;
 		return this;
 	}
@@ -119,7 +119,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return icon;
 	}
 
-	public MediaPictureVO setIcon(String icon) {
+	public MediaVideoVO setIcon(String icon) {
 		this.icon = icon;
 		return this;
 	}
@@ -128,7 +128,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return style;
 	}
 
-	public MediaPictureVO setStyle(String style) {
+	public MediaVideoVO setStyle(String style) {
 		this.style = style;
 		return this;
 	}
@@ -137,7 +137,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return mimetype;
 	}
 
-	public MediaPictureVO setMimetype(String mimetype) {
+	public MediaVideoVO setMimetype(String mimetype) {
 		this.mimetype = mimetype;
 		return this;
 	}
@@ -146,13 +146,13 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return progress;
 	}
 
-	public MediaPictureVO setProgress(Integer progress) {
+	public MediaVideoVO setProgress(Integer progress) {
 		this.progress = progress;
 		return this;
 	}
 
 	@Override
-	public MediaPictureVO set(MediaPicturePO entity) throws Exception {
+	public MediaVideoVO set(MediaVideoPO entity) throws Exception {
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
@@ -162,17 +162,17 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
-			.setType(MediaPictureItemType.PICTURE.toString())
-			.setIcon(MediaPictureItemType.PICTURE.getIcon())
-			.setStyle(MediaPictureItemType.PICTURE.getStyle()[0])
+			.setType(MediaVideoItemType.VIDEO.toString())
+			.setIcon(MediaVideoItemType.VIDEO.getIcon())
+			.setStyle(MediaVideoItemType.VIDEO.getStyle()[0])
 			.setMimetype(entity.getMimetype())
 			.setProgress(0);
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaPicturePO.SEPARATOR_TAG)));
-		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaPicturePO.SEPARATOR_KEYWORDS)));	 
+		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG)));
+		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoPO.SEPARATOR_KEYWORDS)));	 
 		return this;
 	}
 	
-	public MediaPictureVO set(FolderPO entity) throws Exception {
+	public MediaVideoVO set(FolderPO entity) throws Exception {
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
@@ -182,9 +182,9 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setVersion("-")
 			.setRemarks("-")
-			.setType(MediaPictureItemType.FOLDER.toString())
-			.setIcon(MediaPictureItemType.FOLDER.getIcon())
-			.setStyle(MediaPictureItemType.FOLDER.getStyle()[0]);
+			.setType(MediaVideoItemType.FOLDER.toString())
+			.setIcon(MediaVideoItemType.FOLDER.getIcon())
+			.setStyle(MediaVideoItemType.FOLDER.getStyle()[0]);
 		return this;
 	}
 	

@@ -63,7 +63,7 @@ public class MaterialFileQuery {
 	 * @return List<MaterialFilePO> 上传任务列表
 	 */
 	public List<MaterialFilePO> findTasksByFolderIds(Collection<Long> folderIds){
-		return materialFileDao.findByFolderIdInAndUploadStatusNotOrderByIdAsc(folderIds, MaterialFileUploadStatus.COMPLETE);
+		return materialFileDao.findByFolderIdInAndUploadStatusNotOrderByIdAsc(folderIds, MaterialFileUploadStatus.UPLOADING);
 	}
 	
 }

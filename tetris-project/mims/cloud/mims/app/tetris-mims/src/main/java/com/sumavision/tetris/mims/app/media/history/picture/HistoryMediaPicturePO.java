@@ -49,7 +49,7 @@ public class HistoryMediaPicturePO extends AbstractBasePO{
 	private String suffix;
 	
 	/** http mimetype类型 */
-	private String mimeType;
+	private String mimetype;
 	
 	/** 文件大小 */
 	private Long size;
@@ -156,13 +156,13 @@ public class HistoryMediaPicturePO extends AbstractBasePO{
 		this.suffix = suffix;
 	}
 
-	@Column(name = "MIME_TYPE")
-	public String getMimeType() {
-		return mimeType;
+	@Column(name = "MIMETYPE")
+	public String getMimetype() {
+		return mimetype;
 	}
 
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
+	public void setMimetype(String mimetype) {
+		this.mimetype = mimetype;
 	}
 
 	@Column(name = "SIZE")

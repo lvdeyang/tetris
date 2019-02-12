@@ -1,16 +1,16 @@
 <mi-frame ref="frame" id="page-media-picture-wrapper" :menus="menus" :user="user" :groups="groups" @task-show="exitTaskViewMinimizeState" :active-id="activeId">
 
-    <template slot="title">个人硬盘</template>
+    <template slot="title">{{user.groupName}}（图片库）</template>
 
     <template slot="links">
         <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item>个人硬盘</el-breadcrumb-item>
+        <el-breadcrumb-item>图片仓库</el-breadcrumb-item>
     </template>
 
     <template>
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
             <div style="margin-bottom:10px;">
-                <el-button type="primary" size="small" @click="handleUpload"><span class="el-icon-upload" style="position:relative; right:1px;"></span>&nbsp;上传</el-button>
+                <el-button type="primary" size="small" @click="dialog.addPicture.visible = true"><span class="el-icon-upload" style="position:relative; right:1px;"></span>&nbsp;上传</el-button>
                 <el-button type="warning" size="small" @click="dialog.createFolder.visible = true"><span class="icon-folder-open" style="position:relative; right:1px;"></span>&nbsp;新建文件夹</el-button>
                 <!--<el-button-group style="margin-left:10px;">
                     <el-button size="small">下载</el-button>
@@ -146,7 +146,7 @@
         <mi-folder-dialog ref="moveMediaPictureFolderDialog" @selected-folder="moveMediaPictureFolder"></mi-folder-dialog>
 
         <!-- 复制文件夹 -->
-        <mi-folder-dialog ref="copyPersonalFolderDialog" @selected-folder="copyPersonalFolder"></mi-folder-dialog>
+        <mi-folder-dialog ref="copyMediaPictureFolderDialog" @selected-folder="copyMediaPictureFolder"></mi-folder-dialog>
 
         <!-- 任务列表 -->
         <mi-task-view
@@ -158,13 +158,48 @@
                 @task-restart="taskRestart"></mi-task-view>
 
         <!-- 文件上传 -->
-        <mi-upload-dialog ref="uploadDialog" @file-selected="fileSelected"></mi-upload-dialog>
+        <mi-upload-dialog ref="uploadDialog" @file-selected="fileSelected" :require-type="dialog.upload.fileType" :multiple="dialog.upload.multiple"></mi-upload-dialog>
+
+        <!-- 添加图片媒资对话框 -->
+        <el-dialog
+                title="添加图片"
+                :visible.sync="dialog.addPicture.visible"
+                width="500px"
+                :before-close="handleAddPictureClose">
+
+            <div>
+                <el-form ref="form" label-width="80px">
+                    <el-form-item label="媒资名称">
+                        <el-input v-model="dialog.addPicture.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="贴标签">
+                        <el-input v-model="dialog.addPicture.tags"></el-input>
+                    </el-form-item>
+                    <el-form-item label="关键字">
+                        <el-input v-model="dialog.addPicture.keyWords"></el-input>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button size="small" type="primary" @click="handleUpload"><span class="icon-picture" style="margin-right:5px;"></span>选择文件</el-button>
+                        <div v-if="dialog.addPicture.task">{{dialog.addPicture.task.name}}</div>
+                    </el-form-item>
+                    <el-form-item label="备注">
+                        <el-input type="textarea" v-model="dialog.addPicture.remark"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.addPicture.visible = false">取 消</el-button>
+                <el-button size="medium" type="primary" :loading="dialog.addPicture.loading" @click="addMediaPictureTask">确 定</el-button>
+            </span>
+
+        </el-dialog>
 
         <!-- 移动文件 -->
-        <mi-folder-dialog ref="moveMaterialFileDialog" @selected-folder="moveMaterialFile"></mi-folder-dialog>
+        <mi-folder-dialog ref="moveMediaPictureDialog" @selected-folder="moveMediaPicture"></mi-folder-dialog>
 
         <!-- 复制文件 -->
-        <mi-folder-dialog ref="copyMaterialFileDialog" @selected-folder="copyMaterialFile"></mi-folder-dialog>
+        <mi-folder-dialog ref="copyMediaPictureDialog" @selected-folder="copyMediaPicture"></mi-folder-dialog>
 
         <!-- 预览灯箱 -->
         <mi-lightbox ref="Lightbox" @on-txt-save="handleTxtSave"></mi-lightbox>

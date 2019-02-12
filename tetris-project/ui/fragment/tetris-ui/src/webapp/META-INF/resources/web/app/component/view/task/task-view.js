@@ -149,6 +149,7 @@ define([
             },
             //四舍五入进度
             fixedProgress:function(progress){
+                if(!progress) progress = 0;
                 return parseInt(progress.toFixed(0));
             },
             //上传任务删除

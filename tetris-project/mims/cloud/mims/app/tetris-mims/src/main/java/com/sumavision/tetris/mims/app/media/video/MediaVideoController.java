@@ -1,4 +1,4 @@
-package com.sumavision.tetris.mims.app.media.picture;
+package com.sumavision.tetris.mims.app.media.video;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -30,20 +29,20 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureCannotMatchException;
-import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureErrorBeginOffsetException;
-import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureNotExistException;
 import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatusErrorWhenUploadCancelException;
 import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatusErrorWhenUploadErrorException;
-import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatusErrorWhenUploadingException;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoCannotMatchException;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoErrorBeginOffsetException;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 @Controller
-@RequestMapping(value = "/media/picture")
-public class MediaPictureController {
+@RequestMapping(value = "/media/video")
+public class MediaVideoController {
 
 	@Autowired
 	private FolderQuery folderQuery;
@@ -55,21 +54,21 @@ public class MediaPictureController {
 	private UserQuery userQuery;
 	
 	@Autowired
-	private MediaPictureQuery mediaPictureQuery;
+	private MediaVideoQuery mediaVideoQuery;
 	
 	@Autowired
-	private MediaPictureService mediaPictureService;
+	private MediaVideoService mediaVideoService;
 	
 	@Autowired
-	private MediaPictureDAO mediaPictureDao;
+	private MediaVideoDAO mediaVideoDao;
 	
 	/**
-	 * 加载文件夹下的图片媒资<br/>
+	 * 加载文件夹下的视频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
 	 * @param folderId 文件夹id
-	 * @return rows List<MediaPictureVO> 图片媒资列表
+	 * @return rows List<MediaVideoVO> 视频媒资列表
 	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
 	 */
 	@JsonBody
@@ -108,19 +107,19 @@ public class MediaPictureController {
 		//生成面包屑数据
 		FolderBreadCrumbVO folderBreadCrumb = folderQuery.generateFolderBreadCrumb(filteredParentFolders);
 		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_PICTURE.toString());
+		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_VIDEO.toString());
 		
-		List<MediaPicturePO> pictures = mediaPictureQuery.findCompleteByFolderId(current.getId());
+		List<MediaVideoPO> videos = mediaVideoQuery.findCompleteByFolderId(current.getId());
 		
-		List<MediaPictureVO> medias = new ArrayList<MediaPictureVO>();
+		List<MediaVideoVO> medias = new ArrayList<MediaVideoVO>();
 		if(folders!=null && folders.size()>0){
 			for(FolderPO folder:folders){
-				medias.add(new MediaPictureVO().set(folder));
+				medias.add(new MediaVideoVO().set(folder));
 			}
 		}
-		if(pictures!=null && pictures.size()>0){
-			for(MediaPicturePO picture:pictures){
-				medias.add(new MediaPictureVO().set(picture));
+		if(videos!=null && videos.size()>0){
+			for(MediaVideoPO video:videos){
+				medias.add(new MediaVideoVO().set(video));
 			}
 		}
 		
@@ -156,7 +155,7 @@ public class MediaPictureController {
 			Long folderId, 
 			HttpServletRequest request) throws Exception{
 		
-		MediaPictureTaskVO taskParam = JSON.parseObject(task, MediaPictureTaskVO.class);
+		MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class);
 		
 		UserVO user = userQuery.current();
 		
@@ -169,9 +168,9 @@ public class MediaPictureController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaPicturePO entity = mediaPictureService.addTask(user, name, null, null, remark, taskParam, folder);
+		MediaVideoPO entity = mediaVideoService.addTask(user, name, null, null, remark, taskParam, folder);
 		
-		return new MediaPictureVO().set(entity);
+		return new MediaVideoVO().set(entity);
 		
 	}
 	
@@ -180,7 +179,7 @@ public class MediaPictureController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月30日 上午10:10:56
-	 * @return List<MediaPictureVO> 任务列表 
+	 * @return List<MediaVideoVO> 任务列表 
 	 */
 	@JsonBody
 	@ResponseBody
@@ -192,7 +191,7 @@ public class MediaPictureController {
 		Set<Long> folderIds = new HashSet<Long>();
 		
 		//获取图片媒资库根目录
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_PICTURE.toString());
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO.toString());
 		folderIds.add(folder.getId());
 		List<FolderPO> subFolders = folderQuery.findSubFolders(folder.getId());
 		if(subFolders!=null && subFolders.size()>0){
@@ -201,13 +200,13 @@ public class MediaPictureController {
 			}
 		}
 		
-		List<MediaPicturePO> tasks = mediaPictureQuery.findTasksByFolderIds(folderIds);
+		List<MediaVideoPO> tasks = mediaVideoQuery.findTasksByFolderIds(folderIds);
 		
-		List<MediaPictureVO> view_tasks = new ArrayList<MediaPictureVO>();
+		List<MediaVideoVO> view_tasks = new ArrayList<MediaVideoVO>();
 		
 		if(tasks!=null && tasks.size()>0){
-			for(MediaPicturePO task:tasks){
-				MediaPictureVO view_task = new MediaPictureVO().set(task);
+			for(MediaVideoPO task:tasks){
+				MediaVideoVO view_task = new MediaVideoVO().set(task);
 				File file = new File(task.getUploadTmpPath());
 				Long currentSize = file==null?0l:file.length();
 				Long totalSize = task.getSize();
@@ -220,7 +219,7 @@ public class MediaPictureController {
 	}
 	
 	/**
-	 * 素材分片上传<br/>
+	 * 视频媒资上传<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月2日 下午3:32:40
@@ -233,7 +232,7 @@ public class MediaPictureController {
 	 * @param long size 文件大小
 	 * @param String type 文件的mimetype
 	 * @param blob block 文件分片数据
-	 * @return MediaPictureVO 图片媒资
+	 * @return MediaVideoVO 视频媒资
 	 */
 	@JsonBody
 	@ResponseBody
@@ -256,10 +255,10 @@ public class MediaPictureController {
 			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
-		MediaPicturePO task = mediaPictureDao.findByUuid(uuid);
+		MediaVideoPO task = mediaVideoDao.findByUuid(uuid);
 		
 		if(task == null){
-			throw new MediaPictureNotExistException(uuid);
+			throw new MediaVideoNotExistException(uuid);
 		}
 		
 		UserVO user = userQuery.current();
@@ -270,7 +269,7 @@ public class MediaPictureController {
 		
 		//状态错误
 		if(!UploadStatus.UPLOADING.equals(task.getUploadStatus())){
-			throw new MediaPictureStatusErrorWhenUploadingException(uuid, task.getUploadStatus());
+			throw new MediaVideoStatusErrorWhenUploadingException(uuid, task.getUploadStatus());
 		}
 		
 		//文件不是一个
@@ -278,7 +277,7 @@ public class MediaPictureController {
 				|| lastModified!=task.getLastModified() 
 				|| size!=task.getSize() 
 				|| !type.equals(task.getMimetype())){
-			throw new MediaPictureCannotMatchException(uuid, name, lastModified, size, type, task.getFileName(), 
+			throw new MediaVideoCannotMatchException(uuid, name, lastModified, size, type, task.getFileName(), 
 											   task.getLastModified(), task.getSize(), task.getMimetype());
 		}
 		
@@ -286,7 +285,7 @@ public class MediaPictureController {
 		File file = new File(task.getUploadTmpPath());
 		if((!file.exists() && beginOffset!=0l) 
 				|| (file.length() != beginOffset)){
-			throw new MediaPictureErrorBeginOffsetException(uuid, beginOffset, file.length());
+			throw new MediaVideoErrorBeginOffsetException(uuid, beginOffset, file.length());
 		}
 		
 		//分块
@@ -306,10 +305,10 @@ public class MediaPictureController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
-			mediaPictureDao.save(task);
+			mediaVideoDao.save(task);
 		}
 		
-        return new MediaPictureVO().set(task);
+        return new MediaVideoVO().set(task);
 	}
 	
 	/**
@@ -326,10 +325,10 @@ public class MediaPictureController {
 			@PathVariable String uuid, 
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO task = mediaPictureDao.findByUuid(uuid);
+		MediaVideoPO task = mediaVideoDao.findByUuid(uuid);
 		
 		if(task == null){
-			throw new MediaPictureNotExistException(uuid);
+			throw new MediaVideoNotExistException(uuid);
 		}
 		
 		UserVO user = userQuery.current();
@@ -345,7 +344,7 @@ public class MediaPictureController {
 		
 		task.setUploadStatus(UploadStatus.ERROR);
 		
-		mediaPictureDao.save(task);
+		mediaVideoDao.save(task);
 		
 		return null;
 	}
@@ -364,10 +363,10 @@ public class MediaPictureController {
 			@PathVariable String uuid,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO task = mediaPictureDao.findByUuid(uuid);
+		MediaVideoPO task = mediaVideoDao.findByUuid(uuid);
 		
 		if(task == null){
-			throw new MediaPictureNotExistException(uuid);
+			throw new MediaVideoNotExistException(uuid);
 		}
 		
 		if(UploadStatus.COMPLETE.equals(task.getUploadStatus())){
@@ -380,7 +379,7 @@ public class MediaPictureController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaPictureService.uploadCancel(task);
+		mediaVideoService.uploadCancel(task);
 		
 		return null;
 	}
@@ -400,10 +399,10 @@ public class MediaPictureController {
 			@PathVariable String uuid,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO task = mediaPictureDao.findByUuid(uuid);
+		MediaVideoPO task = mediaVideoDao.findByUuid(uuid);
 		
 		if(task == null){
-			throw new MediaPictureNotExistException(uuid);
+			throw new MediaVideoNotExistException(uuid);
 		}
 		
 		UserVO user = userQuery.current();
@@ -412,11 +411,11 @@ public class MediaPictureController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		return new MediaPictureUploadInfoVO().set(task);
+		return new MediaVideoUploadInfoVO().set(task);
 	}
 	
 	/**
-	 * 删除图片媒资<br/>
+	 * 删除视频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 上午9:07:53
@@ -429,10 +428,10 @@ public class MediaPictureController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findOne(id);
 		
 		if(media == null){
-			throw new MediaPictureNotExistException(id);
+			throw new MediaVideoNotExistException(id);
 		}
 		
 		UserVO user = userQuery.current();
@@ -441,7 +440,7 @@ public class MediaPictureController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaPictureService.remove(new ArrayListWrapper<MediaPicturePO>().add(media).getList());
+		mediaVideoService.remove(new ArrayListWrapper<MediaVideoPO>().add(media).getList());
 		
 		return null;
 	}
@@ -463,10 +462,10 @@ public class MediaPictureController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 	
-		MediaPicturePO media = mediaPictureDao.findOne(mediaId);
+		MediaVideoPO media = mediaVideoDao.findOne(mediaId);
 		
 		if(media == null){
-			throw new MediaPictureNotExistException(mediaId);
+			throw new MediaVideoNotExistException(mediaId);
 		}
 		
 		UserVO user = userQuery.current();
@@ -487,20 +486,20 @@ public class MediaPictureController {
 		if(target.getId().equals(media.getFolderId())) return false;
 		
 		media.setFolderId(target.getId());
-		mediaPictureDao.save(media);
+		mediaVideoDao.save(media);
 		
 		return true;
 	}
 	
 	/**
-	 * 复制图片媒资<br/>
+	 * 复制视频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 下午2:36:40
-	 * @param Long mediaId 待复制图片媒资id
+	 * @param Long mediaId 待复制视频媒资id
 	 * @param Long targetId 目标文件夹id
 	 * @return boolean moved 标识文件是否复制到其他文件夹中
-	 * @return MeidaPictureVO copied 复制后的图片媒资
+	 * @return MeidaVideoVO copied 复制后的视频媒资
 	 */
 	@JsonBody
 	@ResponseBody
@@ -510,10 +509,10 @@ public class MediaPictureController {
 			Long targetId,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO media = mediaPictureDao.findOne(mediaId);
+		MediaVideoPO media = mediaVideoDao.findOne(mediaId);
 		
 		if(media == null){
-			throw new MediaPictureNotExistException(mediaId);
+			throw new MediaVideoNotExistException(mediaId);
 		}
 		
 		UserVO user = userQuery.current();
@@ -536,16 +535,16 @@ public class MediaPictureController {
 		//判断是否被复制到其他文件夹中
 		if(target.getId().equals(media.getFolderId())) moved = false;
 		
-		MediaPicturePO copiedMedia  = mediaPictureService.copy(media, target);
+		MediaVideoPO copiedMedia  = mediaVideoService.copy(media, target);
 		
 		Map<String, Object> result = new HashMapWrapper<String, Object>().put("moved", moved)
-																		 .put("copied", new MediaPictureVO().set(copiedMedia))
+																		 .put("copied", new MediaVideoVO().set(copiedMedia))
 																		 .getMap();
 		return result;
 	}
 	
 	/**
-	 * 获取素材文件预览地址<br/>
+	 * 获取视频媒资预览地址<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 下午2:44:22
@@ -560,10 +559,10 @@ public class MediaPictureController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaPicturePO media = mediaPictureDao.findOne(id);
+		MediaVideoPO media = mediaVideoDao.findOne(id);
 		
 		if(media == null){
-			throw new MediaPictureNotExistException(id);
+			throw new MediaVideoNotExistException(id);
 		}
 		
 		UserVO user = userQuery.current();

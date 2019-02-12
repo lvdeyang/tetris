@@ -43,6 +43,18 @@ public class MediaPictureQuery {
 	}
 	
 	/**
+	 * 获取文件夹（多个）下的图片媒资上传任务（上传未完成的）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午1:25:31
+	 * @param Collection<Long> folderIds 文件夹id列表
+	 * @return List<MediaPicturePO> 上传任务列表
+	 */
+	public List<MediaPicturePO> findTasksByFolderIds(Collection<Long> folderIds){
+		return mediaPictureDao.findByFolderIdInAndUploadStatus(folderIds, UploadStatus.UPLOADING);
+	}
+	
+	/**
 	 * 根据uuid查找媒资图片（内存循环）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

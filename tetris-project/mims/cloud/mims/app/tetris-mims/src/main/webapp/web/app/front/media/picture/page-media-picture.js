@@ -59,6 +59,19 @@ define([
                         row:null,
                         folderName:'',
                         loading:false
+                    },
+                    addPicture:{
+                        visible:false,
+                        name:'',
+                        remark:'',
+                        tags:'',
+                        keyWords:'',
+                        task:'',
+                        loading:false
+                    },
+                    upload:{
+                        fileType:['image'],
+                        multiple:false
                     }
                 },
                 prepareUploadFileInfo:null
@@ -97,7 +110,7 @@ define([
                 formatSize:function(size){
                     return File.prototype.formatSize(size);
                 },
-                //添加素材库文件夹
+                //添加图片媒资库文件夹
                 addMediaPictureFolder:function(){
                     var self = this;
                     var folderName = self.dialog.createFolder.folderName;
@@ -128,7 +141,7 @@ define([
                 //下载文件
                 handleDownload:function(scope){
                     var row = scope.row;
-                    ajax.post('/material/preview/uri/' + row.id, null, function(data){
+                    ajax.post('/media/picture/preview/uri/' + row.id, null, function(data){
                         var name = data.name;
                         var uri = data.uri;
                         var a = document.createElement('a');
@@ -147,7 +160,7 @@ define([
                             self.$refs.Lightbox.preview(data, 'txt', row);
                         });
                     }else{
-                        ajax.post('/material/preview/uri/' + row.id, null, function(data){
+                        ajax.post('/media/picture/preview/uri/' + row.id, null, function(data){
                             var name = data.name;
                             var uri = data.uri;
                             if(self.$refs.uploadDialog.isImage(row.mimetype)){
@@ -213,7 +226,7 @@ define([
                             cancelButtonText: '取消',
                             beforeClose:function(action, instance, done){
                                 if(action === 'confirm'){
-                                    self.removeMaterialFile(scope, instance, done);
+                                    self.removeMediaPicture(scope, instance, done);
                                 }else{
                                     done();
                                 }
@@ -240,12 +253,12 @@ define([
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                //删除素材库文件
-                removeMaterialFile:function(scope, $confirm, done){
+                //删除图片媒资
+                removeMediaPicture:function(scope, $confirm, done){
                     var self = this;
                     var row = scope.row;
                     if($confirm) $confirm.confirmButtonLoading = true;
-                    ajax.post('/material/remove/' + row.id, null, function(data, status, message){
+                    ajax.post('/media/picture/remove/' + row.id, null, function(data, status, message){
                         if($confirm) $confirm.confirmButtonLoading = false;
                         if(typeof done === 'function') done();
                         if(status === 200){
@@ -275,17 +288,17 @@ define([
                             self.$refs.moveMediaPictureFolderDialog.open('/folder/permission/media/tree/with/except/picture', row.id);
                             self.$refs.moveMediaPictureFolderDialog.setBuffer(row);
                         }else{
-                            self.$refs.moveMaterialFileDialog.open('/folder/permission/media/tree/picture');
-                            self.$refs.moveMaterialFileDialog.setBuffer(row);
+                            self.$refs.moveMediaPictureDialog.open('/folder/permission/media/tree/with/except/picture', row.id);
+                            self.$refs.moveMediaPictureDialog.setBuffer(row);
                         }
                     }else if(command === '2'){
                         //复制
                         if(row.type === 'FOLDER'){
-                            self.$refs.copyPersonalFolderDialog.open('/folder/permission/media/tree/picture');
-                            self.$refs.copyPersonalFolderDialog.setBuffer(row);
+                            self.$refs.copyMediaPictureFolderDialog.open('/folder/permission/media/tree/picture');
+                            self.$refs.copyMediaPictureFolderDialog.setBuffer(row);
                         }else{
-                            self.$refs.copyMaterialFileDialog.open('/folder/permission/media/tree/picture');
-                            self.$refs.copyMaterialFileDialog.setBuffer(row);
+                            self.$refs.copyMediaPictureDialog.open('/folder/permission/media/tree/picture');
+                            self.$refs.copyMediaPictureDialog.setBuffer(row);
                         }
                     }
                 },
@@ -344,12 +357,12 @@ define([
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                //素材文件移动
-                moveMaterialFile:function(folder, buffer, startLoading, endLoading, close){
+                //图片媒资移动
+                moveMediaPicture:function(folder, buffer, startLoading, endLoading, close){
                     var self = this;
                     startLoading();
-                    ajax.post('/material/move', {
-                        materialId:buffer.id,
+                    ajax.post('/media/picture/move', {
+                        mediaId:buffer.id,
                         targetId:folder.id
                     }, function(data, status){
                         endLoading();
@@ -370,10 +383,10 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 //文件夹复制
-                copyPersonalFolder:function(folder, buffer, startLoading, endLoading, close){
+                copyMediaPictureFolder:function(folder, buffer, startLoading, endLoading, close){
                     var self = this;
                     startLoading();
-                    ajax.post('/folder/personal/copy', {
+                    ajax.post('/folder/media/copy', {
                         folderId:buffer.id,
                         targetId:folder.id
                     }, function(data, status){
@@ -392,11 +405,11 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 //素材文件复制
-                copyMaterialFile:function(folder, buffer, startLoading, endLoading, close){
+                copyMediaPicture:function(folder, buffer, startLoading, endLoading, close){
                     var self = this;
                     startLoading();
-                    ajax.post('/material/copy', {
-                        materialId:buffer.id,
+                    ajax.post('/media/picture/copy', {
+                        mediaId:buffer.id,
                         targetId:folder.id
                     }, function(data, status){
                         endLoading();
@@ -416,7 +429,7 @@ define([
                 //展示任务列表
                 taskViewShow:function(){
                     var self = this;
-                    self.$refs.taskView.open('/material/query/tasks');
+                    self.$refs.taskView.open('/media/picture/query/tasks');
                 },
                 //任务列表关闭
                 afterTaskViewClose:function(metadata){
@@ -433,6 +446,54 @@ define([
                     var self = this;
                     self.$refs.taskView.exitMinimizeState();
                 },
+                //添加媒资对话框关闭
+                handleAddPictureClose:function(){
+                    var self = this;
+                    self.dialog.addPicture.name = '';
+                    self.dialog.addPicture.remark = '';
+                    self.dialog.addPicture.tags = '';
+                    self.dialog.addPicture.keyWords = '';
+                    self.dialog.addPicture.task = '';
+                    self.dialog.addPicture.visible = false;
+                    self.dialog.addPicture.loading = false;
+                },
+                //添加图片媒资任务
+                addMediaPictureTask:function(){
+                    var self = this;
+                    var task = {
+                        name:self.dialog.addPicture.task.name,
+                        size:self.dialog.addPicture.task.size,
+                        mimetype:self.dialog.addPicture.task.mimetype,
+                        lastModified:self.dialog.addPicture.task.lastModified,
+                    };
+                    self.dialog.addPicture.loading = true;
+                    ajax.post('/media/picture/task/add', {
+                        task: $.toJSON(task),
+                        name:self.dialog.addPicture.name,
+                        tags:self.dialog.addPicture.tags,
+                        keyWords:self.dialog.addPicture.keyWords,
+                        remark:self.dialog.addPicture.remark,
+                        folderId:self.current.id
+                    }, function(data, status){
+                        self.dialog.addPicture.loading = false;
+                        if(status !== 200) return;
+                        if(self.$refs.taskView.isVisible()){
+                            self.$refs.taskView.open([data]);
+                        }else{
+                            self.$refs.taskView.open('/media/picture/query/tasks');
+                        }
+                        var uploadfiles = [];
+                        uploadfiles.push(new File(data.uuid, 0, self.dialog.addPicture.task.file));
+                        var mediaPictureUploader = context.getProp('mediaPictureUploader');
+                        if(mediaPictureUploader){
+                            mediaPictureUploader.setContext(self);
+                            mediaPictureUploader.push(uploadfiles);
+                        }else{
+                            createUploader(self, uploadfiles);
+                        }
+                        self.handleAddPictureClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
                 //上传按钮点击
                 handleUpload:function(){
                     var self = this;
@@ -440,69 +501,36 @@ define([
                 },
                 fileSelected:function(files, done){
                     var self = this;
-                    var tasks = [];
-                    for(var i=0; i<files.length; i++){
-                        var file = files[i];
-                        tasks.push({
-                            name:file.name,
-                            size:file.size,
-                            mimetype:file.type,
-                            lastModified:file.lastModified
-                        });
-                    }
-                    ajax.post('/material/tasks/add', {
-                        tasks: $.toJSON(tasks),
-                        folderId:current.id
-                    }, function(data, status){
-                        if(status !== 200) return;
-                        if(self.$refs.taskView.isVisible()){
-                            self.$refs.taskView.open(data);
-                        }else{
-                            self.$refs.taskView.open('/material/query/tasks');
-                        }
-                        var uploadfiles = [];
-                        for(var i=0; i<data.length; i++){
-                            var task = data[i];
-                            for(var j=0; j<files.length; j++){
-                                var file = files[j];
-                                if(task.lastModified===file.lastModified &&
-                                    task.name===file.name &&
-                                    task.size===file.size &&
-                                    task.mimetype===file.type){
-                                    uploadfiles.push(new File(task.uuid, 0, file));
-                                    break;
-                                }
-                            }
-                        }
-                        var materialUploader = context.getProp('materialUploader');
-                        if(materialUploader){
-                            materialUploader.setContext(self);
-                            materialUploader.push(uploadfiles);
-                        }else{
-                            createUploader(self, uploadfiles);
-                        }
-                        done();
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                    var file = files[0];
+                    var task = {
+                        name:file.name,
+                        size:file.size,
+                        mimetype:file.type,
+                        lastModified:file.lastModified,
+                        file:file
+                    };
+                    self.dialog.addPicture.task = task;
+                    done();
                 },
                 taskCancel:function(row, done){
-                    var materialUploader = context.getProp('materialUploader');
-                    if(materialUploader && materialUploader.contains('uuid', row.uuid)){
-                        materialUploader.cancel([row.uuid]);
+                    var mediaPictureUploader = context.getProp('mediaPictureUploader');
+                    if(mediaPictureUploader && mediaPictureUploader.contains('uuid', row.uuid)){
+                        mediaPictureUploader.cancel([row.uuid]);
                     }else{
-                        ajax.post('/material/upload/cancel/' + row.uuid, null, function(data){
+                        ajax.post('/media/picture/upload/cancel/' + row.uuid, null, function(data){
                             done();
                         });
                     }
                 },
                 taskPause:function(row){
-                    var materialUploader = context.getProp('materialUploader');
-                    materialUploader.pause('uuid', row.uuid);
+                    var mediaPictureUploader = context.getProp('mediaPictureUploader');
+                    mediaPictureUploader.pause('uuid', row.uuid);
                 },
                 taskRestart:function(row){
                     var self = this;
-                    var materialUploader = context.getProp('materialUploader');
-                    if(materialUploader && materialUploader.contains('uuid', row.uuid)){
-                        materialUploader.restart('uuid', row.uuid);
+                    var mediaPictureUploader = context.getProp('mediaPictureUploader');
+                    if(mediaPictureUploader && mediaPictureUploader.contains('uuid', row.uuid)){
+                        mediaPictureUploader.restart('uuid', row.uuid);
                         self.$refs.taskView.restart(row.uuid);
                     }else{
                         var $file = $('#tmp-file');
@@ -515,7 +543,7 @@ define([
                             if(!file){
                                 self.$message.error('您没有选择任何文件!');
                             }else{
-                                ajax.post('/material/query/upload/info/' + row.uuid, null, function(data, status){
+                                ajax.post('/media/picture/query/upload/info/' + row.uuid, null, function(data, status){
                                     if(status !== 200){
                                         return;
                                     }
@@ -526,10 +554,10 @@ define([
                                         self.$message.error('您选择的文件与当前任务的文件不同！');
                                     }else{
                                         var uploadFile = new File(data.uuid, data.offset, file);
-                                        if(!materialUploader){
+                                        if(!mediaPictureUploader){
                                             createUploader(self, [uploadFile]);
                                         }else{
-                                            materialUploader.push([uploadFile]);
+                                            mediaPictureUploader.push([uploadFile]);
                                         }
                                         self.$refs.taskView.restart(row.uuid);
                                     }
@@ -581,40 +609,40 @@ define([
 
     //创建文件上传工具
     var createUploader = function(instance, uploadfiles){
-        var materialUploader = new Uploader('/material/upload', uploadfiles, 1024*1024*49);
-        materialUploader.setContext(instance);
-        materialUploader.onUploadProgress = function(file, progress){
+        var mediaPictureUploader = new Uploader('/media/picture/upload', uploadfiles, 1024*1024*49);
+        mediaPictureUploader.setContext(instance);
+        mediaPictureUploader.onUploadProgress = function(file, progress){
             var instance = this;
             instance.$refs.taskView.progress('uuid', file.uuid, progress);
         };
 
-        materialUploader.onUpLoadCanceled = function(file){
+        mediaPictureUploader.onUpLoadCanceled = function(file){
             var instance = this;
-            ajax.post('/material/upload/cancel/' + file.uuid, null, function(data){
+            ajax.post('/media/picture/upload/cancel/' + file.uuid, null, function(data){
                 instance.$refs.taskView.cancel(file.uuid);
             });
         };
 
-        materialUploader.onUploadPaused = function(file){
+        mediaPictureUploader.onUploadPaused = function(file){
             var instance = this;
             instance.$refs.taskView.pause(file.uuid);
         };
 
-        materialUploader.onUploadSuccess = function(file, data){
+        mediaPictureUploader.onUploadSuccess = function(file, data){
             var instance = this;
             instance.$refs.taskView.success('uuid', file.uuid);
             prependExceptFolderRow(instance.table.rows, data);
         };
 
-        materialUploader.onUploadError = function(file){
+        mediaPictureUploader.onUploadError = function(file){
             var instance = this;
-            ajax.post('/material/upload/error/' + file.uuid, null, function(data){
+            ajax.post('/media/picture/upload/error/' + file.uuid, null, function(data){
                 instance.$refs.taskView.error('uuid', file.uuid);
             });
         };
 
-        context.setProp('materialUploader', materialUploader);
-        materialUploader.run();
+        context.setProp('mediaPictureUploader', mediaPictureUploader);
+        mediaPictureUploader.run();
 
         return;
     };

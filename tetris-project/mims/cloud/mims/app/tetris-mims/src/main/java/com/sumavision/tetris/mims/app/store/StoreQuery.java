@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.mims.app.material.MaterialFilePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 
 /**
  * 存储相关工具（主查询以及数据转换）<br/>
@@ -66,6 +67,23 @@ public class StoreQuery {
 	}
 	
 	/**
+	 * 根据视频媒资（批量）生成预删除存储文件<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月23日 下午3:56:32
+	 * @param Collection<MediaVideoPO> videos 视频媒资列表
+	 * @return List<PreRemoveStoreFilePO> 预删除存储文件列表
+	 */
+	public List<PreRemoveFilePO> preRemoveMediaVideos(Collection<MediaVideoPO> videos) throws Exception{
+		if(videos==null || videos.size()<=0) return null;
+		List<PreRemoveFilePO> preRemoveFiles = new ArrayList<PreRemoveFilePO>();
+		for(MediaVideoPO video:videos){
+			preRemoveFiles.add(preRemoveMediaVideo(video));
+		}
+		return preRemoveFiles;
+	}
+	
+	/**
 	 * 根据图片媒资生成预删除存储文件<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -74,6 +92,19 @@ public class StoreQuery {
 	 * @return PreRemoveStoreFilePO 预删除存储文件
 	 */
 	public PreRemoveFilePO preRemoveMediaPicture(MediaPicturePO picture) throws Exception{
+		PreRemoveFilePO preRemoveFile = new PreRemoveFilePO();
+		return preRemoveFile;
+	}
+	
+	/**
+	 * 根据视频媒资生成预删除存储文件<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月23日 下午3:53:08
+	 * @param MediaVideoPO video 视频媒资
+	 * @return PreRemoveStoreFilePO 预删除存储文件
+	 */
+	public PreRemoveFilePO preRemoveMediaVideo(MediaVideoPO video) throws Exception{
 		PreRemoveFilePO preRemoveFile = new PreRemoveFilePO();
 		return preRemoveFile;
 	}

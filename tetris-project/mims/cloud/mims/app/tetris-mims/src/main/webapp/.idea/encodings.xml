@@ -13,20 +13,6 @@
     <file url="file://$PROJECT_DIR$/web/app/backstage/production/video-stream/page-backstage-production-video-stream.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/backstage/production/video/page-backstage-production-video.css" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/backstage/production/video/page-backstage-production-video.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/dialog/folder/folder-dialog.css" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/dialog/folder/folder-dialog.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.css" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/dialog/user/user-dialog.css" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/dialog/user/user-dialog.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/frame/frame.css" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/frame/frame.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/lightbox/lightbox.css" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/lightbox/lightbox.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/sub-title/sub-title.css" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/sub-title/sub-title.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/view/task/task-view.css" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/app/component/view/task/task-view.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/check/article/page-check-article.css" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/check/article/page-check-article.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/check/audio-stream/page-check-audio-stream.css" charset="UTF-8" />
@@ -65,8 +51,5 @@
     <file url="file://$PROJECT_DIR$/web/app/front/production/video-stream/page-front-production-video-stream.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/production/video/page-front-production-video.css" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/production/video/page-front-production-video.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/commons/uploader/Uploader.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/lib/TweenMax/cmd/TweenLite.js" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/web/lib/animate/animate.css" charset="UTF-8" />
   </component>
 </project>

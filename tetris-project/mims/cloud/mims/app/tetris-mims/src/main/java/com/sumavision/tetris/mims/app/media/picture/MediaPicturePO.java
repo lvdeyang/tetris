@@ -25,12 +25,21 @@ public class MediaPicturePO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 	
+	/** 原始媒资 */
+	public static final String VERSION_OF_ORIGIN = "0.0";
+	
+	/** 二次生产媒资 */
+	public static final String VERSION_OF_SECONDARY = "0.1";
+	
 	/** 标签分隔符 */
 	public static final String SEPARATOR_TAG = ",";
 	
 	/** 关键字分隔符 */
 	public static final String SEPARATOR_KEYWORDS = ",";
 
+	/** 最后更新时间 */
+	private Long lastModified;
+	
 	/** 媒资别名 */
 	private String name;
 	
@@ -59,7 +68,7 @@ public class MediaPicturePO extends AbstractBasePO{
 	private String suffix;
 	
 	/** http mimetype类型 */
-	private String mimeType;
+	private String mimetype;
 	
 	/** 文件大小 */
 	private Long size;
@@ -67,7 +76,7 @@ public class MediaPicturePO extends AbstractBasePO{
 	/** 媒资创建时间 */
 	private Date createTime;
 	
-	/** 版本号，格式：类型.timestamp, 0.0（素材） 0.1（媒资）*/
+	/** 版本号，格式：类型.timestamp, 0.0（原始媒资） 0.1（二次生产媒资）*/
 	private String version;
 	
 	/** 备注 */
@@ -84,6 +93,15 @@ public class MediaPicturePO extends AbstractBasePO{
 	
 	/** 文件上传状态 */
 	private UploadStatus uploadStatus;
+
+	@Column(name = "LAST_MODIFIED")
+	public Long getLastModified() {
+		return lastModified;
+	}
+
+	public void setLastModified(Long lastModified) {
+		this.lastModified = lastModified;
+	}
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -166,13 +184,13 @@ public class MediaPicturePO extends AbstractBasePO{
 		this.suffix = suffix;
 	}
 
-	@Column(name = "MIME_TYPE")
-	public String getMimeType() {
-		return mimeType;
+	@Column(name = "MIMETYPE")
+	public String getMimetype() {
+		return mimetype;
 	}
 
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
+	public void setMimetype(String mimetype) {
+		this.mimetype = mimetype;
 	}
 
 	@Column(name = "SIZE")
@@ -268,7 +286,7 @@ public class MediaPicturePO extends AbstractBasePO{
 		history.setAuthorId(this.getAuthorId());
 		history.setAuthorName(this.getAuthorName());
 		history.setSuffix(this.getSuffix());
-		history.setMimeType(this.getMimeType());
+		history.setMimetype(this.getMimetype());
 		history.setSize(this.getSize());
 		history.setCreateTime(this.getCreateTime());
 		history.setVersion(this.getVersion());
@@ -291,6 +309,7 @@ public class MediaPicturePO extends AbstractBasePO{
 		MediaPicturePO copy_picture = new MediaPicturePO();
 		copy_picture.setUuid(this.getUuid());
 		copy_picture.setUpdateTime(new Date());
+		copy_picture.setLastModified(this.getLastModified());
 		copy_picture.setName(this.getName());
 		copy_picture.setFileName(this.getFileName());
 		copy_picture.setStoreType(this.getStoreType());
@@ -300,7 +319,7 @@ public class MediaPicturePO extends AbstractBasePO{
 		copy_picture.setAuthorId(this.getAuthorId());
 		copy_picture.setAuthorName(this.getAuthorName());
 		copy_picture.setSuffix(this.getSuffix());
-		copy_picture.setMimeType(this.getMimeType());
+		copy_picture.setMimetype(this.getMimetype());
 		copy_picture.setSize(this.getSize());
 		copy_picture.setCreateTime(this.getCreateTime());
 		copy_picture.setVersion(this.getVersion());

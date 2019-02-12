@@ -9,7 +9,8 @@
             <el-button type="primary" size="small" style="position:relative;" @click="selectFile">
                 <span class="feather-icon-file" style="position:absolute; font-size:14px; top:7px;"></span>
                 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;选择文件
-                <input type="file" multiple @change="fileSelected" style="display:none;" :accept="accept()"/>
+                <input v-if="multiple" type="file" multiple @change="fileSelected" style="display:none;" :accept="accept()"/>
+                <input v-else type="file" @change="fileSelected" style="display:none;" :accept="accept()"/>
             </el-button>
             <div class="mimetype-summary">{{requireTypes()}}</div>
         </div>

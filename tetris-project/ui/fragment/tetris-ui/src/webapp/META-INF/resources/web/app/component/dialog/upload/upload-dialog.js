@@ -35,13 +35,6 @@ define([
         return this.mimetype === mimetype;
     };
 
-    requires.push(new Type('image/jpeg', 'jpg', MATERIAL_TYPE_IMAGE));
-    requires.push(new Type('image/png', 'png', MATERIAL_TYPE_IMAGE));
-    requires.push(new Type('image/gif', 'gif', MATERIAL_TYPE_IMAGE));
-    requires.push(new Type('audio/mpeg', 'mp3', MATERIAL_TYPE_AUDIO));
-    requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
-    requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
-
     var isRequiresType = function(mimetype){
         for(var i=0; i<requires.length; i++){
             if(requires[i].equals(mimetype)){
@@ -61,6 +54,7 @@ define([
     };
 
     Vue.component(pluginName, {
+        props:['require-type', 'multiple'],
         template: tpl,
         data:function(){
             return {
@@ -196,6 +190,34 @@ define([
                     }
                 }
                 return false;
+            }
+        },
+        created:function(){
+            var self = this;
+            if(self.multiple !== false){
+                self.multiple = true;
+            }
+            if(self.requireType && self.requireType.length>0){
+                for(var i=0; i<self.requireType.length; i++){
+                    if(self.requireType[i] === MATERIAL_TYPE_IMAGE){
+                        requires.push(new Type('image/jpeg', 'jpg', MATERIAL_TYPE_IMAGE));
+                        requires.push(new Type('image/png', 'png', MATERIAL_TYPE_IMAGE));
+                        requires.push(new Type('image/gif', 'gif', MATERIAL_TYPE_IMAGE));
+                    }else if(self.requireType[i] === MATERIAL_TYPE_AUDIO){
+                        requires.push(new Type('audio/mpeg', 'mp3', MATERIAL_TYPE_AUDIO));
+                    }else if(self.requireType[i] === MATERIAL_TYPE_VIDEO){
+                        requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
+                    }else if(self.requireType[i] === MATERIAL_TYPE_TXT){
+                        requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
+                    }
+                }
+            }else{
+                requires.push(new Type('image/jpeg', 'jpg', MATERIAL_TYPE_IMAGE));
+                requires.push(new Type('image/png', 'png', MATERIAL_TYPE_IMAGE));
+                requires.push(new Type('image/gif', 'gif', MATERIAL_TYPE_IMAGE));
+                requires.push(new Type('audio/mpeg', 'mp3', MATERIAL_TYPE_AUDIO));
+                requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
+                requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
             }
         }
     });

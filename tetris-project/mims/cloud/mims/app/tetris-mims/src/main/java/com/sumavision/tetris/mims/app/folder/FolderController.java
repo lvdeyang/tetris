@@ -551,7 +551,7 @@ public class FolderController {
 		//判断当前文件夹的父文件夹是否是目标文件夹
 		if(folder.getParentId()!=null && folder.getParentId().equals(target.getId())) moved = false;
 		
-		FolderPO copiedFolder = folderService.copy(user.getUuid(), folder, target);
+		FolderPO copiedFolder = folderService.copyMediaFolder(user.getUuid(), user.getGroupId(), folder, target);
 		
 		Map<String, Object> result = new HashMapWrapper<String, Object>().put("moved", moved)
 																		 .put("copied", new MaterialVO().set(copiedFolder))
