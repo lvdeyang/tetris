@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -29,11 +30,11 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatusErrorWhenUploadCancelException;
-import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoCannotMatchException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoErrorBeginOffsetException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadCancelException;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
@@ -339,7 +340,7 @@ public class MediaVideoController {
 		
 		//状态错误
 		if(!UploadStatus.UPLOADING.equals(task.getUploadStatus())){
-			throw new MediaPictureStatusErrorWhenUploadErrorException(uuid, task.getUploadStatus());
+			throw new MediaVideoStatusErrorWhenUploadErrorException(uuid, task.getUploadStatus());
 		}
 		
 		task.setUploadStatus(UploadStatus.ERROR);
@@ -370,7 +371,7 @@ public class MediaVideoController {
 		}
 		
 		if(UploadStatus.COMPLETE.equals(task.getUploadStatus())){
-			throw new MediaPictureStatusErrorWhenUploadCancelException(uuid, task.getUploadStatus());
+			throw new MediaVideoStatusErrorWhenUploadCancelException(uuid, task.getUploadStatus());
 		}
 		
 		UserVO user = userQuery.current();

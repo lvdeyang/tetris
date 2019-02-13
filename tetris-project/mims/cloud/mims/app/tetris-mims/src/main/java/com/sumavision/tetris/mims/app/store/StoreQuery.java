@@ -7,6 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.mims.app.material.MaterialFilePO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 
@@ -84,6 +85,23 @@ public class StoreQuery {
 	}
 	
 	/**
+	 * 根据音频媒资（批量）生成预删除存储文件<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月23日 下午3:56:32
+	 * @param Collection<MediaAudioPO> videos 音频媒资列表
+	 * @return List<PreRemoveStoreFilePO> 预删除存储文件列表
+	 */
+	public List<PreRemoveFilePO> preRemoveMediaAudios(Collection<MediaAudioPO> audios) throws Exception{
+		if(audios==null || audios.size()<=0) return null;
+		List<PreRemoveFilePO> preRemoveFiles = new ArrayList<PreRemoveFilePO>();
+		for(MediaAudioPO audio:audios){
+			preRemoveFiles.add(preRemoveMediaAudio(audio));
+		}
+		return preRemoveFiles;
+	}
+	
+	/**
 	 * 根据图片媒资生成预删除存储文件<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -101,10 +119,23 @@ public class StoreQuery {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月23日 下午3:53:08
-	 * @param MediaVideoPO video 视频媒资
+	 * @param MediaAudioPO video 视频媒资
 	 * @return PreRemoveStoreFilePO 预删除存储文件
 	 */
 	public PreRemoveFilePO preRemoveMediaVideo(MediaVideoPO video) throws Exception{
+		PreRemoveFilePO preRemoveFile = new PreRemoveFilePO();
+		return preRemoveFile;
+	}
+	
+	/**
+	 * 根据音频媒资生成预删除存储文件<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月23日 下午3:53:08
+	 * @param MediaAudioPO audio 音频媒资
+	 * @return PreRemoveStoreFilePO 预删除存储文件
+	 */
+	public PreRemoveFilePO preRemoveMediaAudio(MediaAudioPO audio) throws Exception{
 		PreRemoveFilePO preRemoveFile = new PreRemoveFilePO();
 		return preRemoveFile;
 	}

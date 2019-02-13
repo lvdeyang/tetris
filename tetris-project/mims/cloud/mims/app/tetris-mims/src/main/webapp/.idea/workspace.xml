@@ -59,48 +59,37 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="page-media-picture.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/web/app/front/media/picture/page-media-picture.js">
+      <file leaf-file-name="page-media-video-stream.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.51468986">
-              <caret line="469" column="50" selection-start-line="469" selection-start-column="46" selection-end-line="469" selection-end-column="50" />
+            <state vertical-scroll-proportion="-7.4915257">
+              <caret line="456" column="11" selection-start-line="34" selection-start-column="8" selection-end-line="456" selection-end-column="11" />
               <folding>
-                <element signature="e#2326#2887#0" expanded="false" />
-                <element signature="e#2973#3134#0" expanded="false" />
-                <element signature="e#3202#3422#0" expanded="false" />
-                <element signature="e#3491#3570#0" expanded="false" />
-                <element signature="e#3649#4635#0" expanded="false" />
-                <element signature="e#4734#4852#0" expanded="false" />
-                <element signature="e#4923#5457#0" expanded="false" />
-                <element signature="e#5527#6708#0" expanded="false" />
-                <element signature="e#6764#7163#0" expanded="false" />
-                <element signature="e#7240#9582#0" expanded="false" />
-                <element signature="e#9683#10562#0" expanded="false" />
-                <element signature="e#10655#11535#0" expanded="false" />
-                <element signature="e#13285#14269#0" expanded="false" />
-                <element signature="e#14372#14547#0" expanded="false" />
-                <element signature="e#14669#15664#0" expanded="false" />
-                <element signature="e#15781#16756#0" expanded="false" />
-                <element signature="e#16878#17723#0" expanded="false" />
-                <element signature="e#18757#18889#0" expanded="false" />
-                <element signature="e#18969#19088#0" expanded="false" />
-                <element signature="e#19172#19288#0" expanded="false" />
-                <element signature="e#19370#19487#0" expanded="false" />
+                <element signature="e#2230#2791#0" expanded="false" />
+                <element signature="e#2877#3038#0" expanded="false" />
+                <element signature="e#3121#4111#0" expanded="false" />
+                <element signature="e#5637#6036#0" expanded="false" />
+                <element signature="e#6113#8463#0" expanded="false" />
+                <element signature="e#8570#9449#0" expanded="false" />
+                <element signature="e#9546#10431#0" expanded="false" />
+                <element signature="e#10520#12140#0" expanded="false" />
+                <element signature="e#12225#13209#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="page-media-picture.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/app/front/media/picture/page-media-picture.html">
+      <file leaf-file-name="page-media-video-stream.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-6.551724">
-              <caret line="192" column="83" selection-start-line="192" selection-start-column="83" selection-end-line="192" selection-end-column="83" />
+            <state vertical-scroll-proportion="-1.091954">
+              <caret line="5" column="48" selection-start-line="0" selection-start-column="0" selection-end-line="185" selection-end-column="11" />
               <folding>
                 <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-input#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
@@ -108,82 +97,49 @@
                 <element signature="n#style#0;n#el-button#0;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#el-tooltip#2;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#2;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#1;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#el-button#0;n#el-form-item#3;n#el-form#0;n#div#0;n#el-dialog#2;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="page-media-video.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/app/front/media/video/page-media-video.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="480" column="59" selection-start-line="480" selection-start-column="59" selection-end-line="480" selection-end-column="59" />
-              <folding>
-                <element signature="e#2312#2873#0" expanded="false" />
-                <element signature="e#2959#3120#0" expanded="false" />
-                <element signature="e#3188#3408#0" expanded="false" />
-                <element signature="e#3477#3556#0" expanded="false" />
-                <element signature="e#3635#4619#0" expanded="false" />
-                <element signature="e#4718#4836#0" expanded="false" />
-                <element signature="e#4907#5439#0" expanded="false" />
-                <element signature="e#5509#6688#0" expanded="false" />
-                <element signature="e#6744#7143#0" expanded="false" />
-                <element signature="e#7220#9558#0" expanded="false" />
-                <element signature="e#9659#10538#0" expanded="false" />
-                <element signature="e#10629#11507#0" expanded="false" />
-                <element signature="e#11596#13156#0" expanded="false" />
-                <element signature="e#13237#14221#0" expanded="false" />
-                <element signature="e#14324#14499#0" expanded="false" />
-                <element signature="e#14619#15614#0" expanded="false" />
-                <element signature="e#15729#16702#0" expanded="false" />
-                <element signature="e#16822#17667#0" expanded="false" />
-                <element signature="e#17784#18633#0" expanded="false" />
-                <element signature="e#18699#18829#0" expanded="false" />
-                <element signature="e#18909#19028#0" expanded="false" />
-                <element signature="e#19112#19228#0" expanded="false" />
-                <element signature="e#19310#19427#0" expanded="false" />
-                <element signature="e#19503#19941#0" expanded="false" />
-                <element signature="e#21966#22074#0" expanded="false" />
-                <element signature="e#22126#22575#0" expanded="false" />
-                <element signature="e#22623#23093#0" expanded="false" />
-                <element signature="e#23134#23301#0" expanded="false" />
-                <element signature="e#23344#25885#0" expanded="false" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="page-media-video.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/web/app/front/media/video/page-media-video.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-20.964285">
-              <caret line="198" column="85" selection-start-line="198" selection-start-column="85" selection-end-line="198" selection-end-column="85" />
-              <folding>
-                <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#el-tooltip#1;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#1;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#el-button#0;n#el-tooltip#2;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#2;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#span#1;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#span#0;n#el-button#0;n#el-form-item#3;n#el-form#0;n#div#0;n#el-dialog#2;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="page-media-txt.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="29" column="33" selection-start-line="29" selection-start-column="33" selection-end-line="29" selection-end-column="33" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="page-media-txt.html" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.38341346">
+              <caret line="115" column="59" selection-start-line="115" selection-start-column="59" selection-end-line="115" selection-end-column="59" />
+              <folding>
+                <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-input#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-button#0;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+                <element signature="n#style#0;n#span#1;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -203,18 +159,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/web/app/component/lightbox/lightbox.html" />
-        <option value="$PROJECT_DIR$/web/app/component/lightbox/lightbox.css" />
-        <option value="$PROJECT_DIR$/web/commons/router/router.js" />
-        <option value="$PROJECT_DIR$/web/commons/menu/menu.js" />
-        <option value="$PROJECT_DIR$/web/app/component/frame/frame.html" />
-        <option value="$PROJECT_DIR$/web/app/component/dialog/folder/folder-dialog.js" />
-        <option value="$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.js" />
-        <option value="$PROJECT_DIR$/web/app/front/organization/page-front-organization.html" />
-        <option value="$PROJECT_DIR$/web/app/component/dialog/user/user-dialog.js" />
-        <option value="$PROJECT_DIR$/web/app/front/role/page-front-role.css" />
-        <option value="$PROJECT_DIR$/web/app/front/role/page-front-role.html" />
-        <option value="$PROJECT_DIR$/web/app/component/dialog/user/user-dialog.css" />
         <option value="$PROJECT_DIR$/web/app/component/dialog/user/user-dialog.html" />
         <option value="$PROJECT_DIR$/web/lib/tetris-bpmn/lib/bpmn-modeler.development.js" />
         <option value="$PROJECT_DIR$/web/test/demo/main.js" />
@@ -233,7 +177,6 @@
         <option value="$PROJECT_DIR$/web/app/front/organization/page-front-organization.js" />
         <option value="$PROJECT_DIR$/web/commons/bpmn/ext/empty.bpmn" />
         <option value="$PROJECT_DIR$/web/app/component/frame/frame.js" />
-        <option value="$PROJECT_DIR$/web/app/main.js" />
         <option value="$PROJECT_DIR$/web/app/backstage/process-variable/page-backstage-process-variable.html" />
         <option value="$PROJECT_DIR$/web/commons/bpmn/demo/main.js" />
         <option value="$PROJECT_DIR$/web/commons/bpmn/bpmn-modeler.development.js" />
@@ -251,9 +194,22 @@
         <option value="$PROJECT_DIR$/web/app/front/material/page-material.js" />
         <option value="$PROJECT_DIR$/web/app/front/media/video/page-media-video.css" />
         <option value="$PROJECT_DIR$/web/app/front/media/picture/page-media-picture.html" />
+        <option value="$PROJECT_DIR$/web/app/front/media/picture/page-media-picture.js" />
+        <option value="$PROJECT_DIR$/web/app/front/media/audio/page-media-audio.css" />
+        <option value="$PROJECT_DIR$/web/app/front/media/audio/page-media-audio.html" />
         <option value="$PROJECT_DIR$/web/app/front/media/video/page-media-video.html" />
         <option value="$PROJECT_DIR$/web/app/front/media/video/page-media-video.js" />
-        <option value="$PROJECT_DIR$/web/app/front/media/picture/page-media-picture.js" />
+        <option value="$PROJECT_DIR$/web/app/front/media/audio/page-media-audio.js" />
+        <option value="$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.css" />
+        <option value="$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.js" />
+        <option value="$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.html" />
+        <option value="$PROJECT_DIR$/web/app/front/media/audio-stream/page-media-audio-stream.css" />
+        <option value="$PROJECT_DIR$/web/app/front/media/audio-stream/page-media-audio-stream.html" />
+        <option value="$PROJECT_DIR$/web/app/front/media/audio-stream/page-media-audio-stream.js" />
+        <option value="$PROJECT_DIR$/web/app/main.js" />
+        <option value="$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.css" />
+        <option value="$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.js" />
+        <option value="$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.html" />
       </list>
     </option>
   </component>
@@ -392,34 +348,8 @@
               <option name="myItemId" value="media" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-          </PATH>
-          <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="webapp" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="webapp" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="web" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="app" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="front" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="media" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="video" />
+              <option name="myItemId" value="video-stream" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -448,8 +378,34 @@
               <option name="myItemId" value="media" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
+          </PATH>
+          <PATH>
             <PATH_ELEMENT>
-              <option name="myItemId" value="picture" />
+              <option name="myItemId" value="webapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="app" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="front" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="media" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="txt" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -467,11 +423,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\tetris\tetris-project\mims\cloud\mims\app\tetris-mims\src\main\webapp\web\app\front\media\txt" />
       <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\mims\app\tetris-mims\src\main\webapp\web\commons\bpmn\demo" />
       <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\mims\app\tetris-mims\src\main\webapp\web\app\backstage\process-variable" />
       <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\mims\app\tetris-mims\src\main\webapp\web\lib\tetris-bpmn\ext" />
       <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\mims\app\tetris-mims\src\main\webapp\web\app\front\role" />
-      <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\mims\app\tetris-mims\src\main\webapp\web\lib\TweenMax" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="G:\java\myEclipse\workspaces\BVC2.0\venus-java\mims\app\tetris-mims\src\main\webapp\web\demo" />
@@ -538,7 +494,7 @@
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.15416667" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.19791667" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -636,13 +592,13 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="145" column="93" selection-start-line="145" selection-start-column="75" selection-end-line="145" selection-end-column="93" />
           <folding>
-            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -789,14 +745,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/front/media/article/page-media-article.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.51686615">
-          <caret line="28" column="48" selection-start-line="28" selection-start-column="48" selection-end-line="28" selection-end-column="48" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/web/app/backstage/process-design/page-backstage-process-design.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.13166486">
@@ -805,33 +753,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/front/media/article/page-media-article.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/front/media/article/page-media-article.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/web/app/front/material/page-material.css">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="3" selection-end-column="78" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/main.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.5511627">
-          <caret line="4" column="51" selection-start-line="4" selection-start-column="51" selection-end-line="4" selection-end-column="51" />
           <folding />
         </state>
       </provider>
@@ -857,22 +782,14 @@
         <state vertical-scroll-proportion="0.27497193">
           <caret line="145" column="93" selection-start-line="145" selection-start-column="75" selection-end-line="145" selection-end-column="93" />
           <folding>
-            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/front/media/video/page-media-video.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.062023938">
-          <caret line="3" column="78" selection-start-line="3" selection-start-column="78" selection-end-line="3" selection-end-column="78" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -909,10 +826,121 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/picture/page-media-picture.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.55603915">
+          <caret line="471" column="48" selection-start-line="471" selection-start-column="48" selection-end-line="471" selection-end-column="48" />
+          <folding>
+            <element signature="e#2326#2887#0" expanded="false" />
+            <element signature="e#2973#3134#0" expanded="false" />
+            <element signature="e#3202#3422#0" expanded="false" />
+            <element signature="e#3491#3570#0" expanded="false" />
+            <element signature="e#3649#4635#0" expanded="false" />
+            <element signature="e#4734#4852#0" expanded="false" />
+            <element signature="e#4923#5457#0" expanded="false" />
+            <element signature="e#5527#6708#0" expanded="false" />
+            <element signature="e#6764#7163#0" expanded="false" />
+            <element signature="e#7240#9582#0" expanded="false" />
+            <element signature="e#9683#10562#0" expanded="false" />
+            <element signature="e#10655#11535#0" expanded="false" />
+            <element signature="e#13285#14269#0" expanded="false" />
+            <element signature="e#14372#14547#0" expanded="false" />
+            <element signature="e#14669#15664#0" expanded="false" />
+            <element signature="e#15781#16756#0" expanded="false" />
+            <element signature="e#16878#17723#0" expanded="false" />
+            <element signature="e#18757#18889#0" expanded="false" />
+            <element signature="e#18969#19088#0" expanded="false" />
+            <element signature="e#19172#19288#0" expanded="false" />
+            <element signature="e#19370#19487#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/audio/page-media-audio.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.062023938">
+          <caret line="3" column="78" selection-start-line="3" selection-start-column="78" selection-end-line="3" selection-end-column="78" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/audio/page-media-audio.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.724138">
+          <caret line="201" column="87" selection-start-line="201" selection-start-column="87" selection-end-line="201" selection-end-column="87" />
+          <folding>
+            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#1;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#1;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#2;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#2;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#1;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-form-item#3;n#el-form#0;n#div#0;n#el-dialog#2;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/audio/page-media-audio.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.33255813">
+          <caret line="241" column="42" selection-start-line="241" selection-start-column="42" selection-end-line="241" selection-end-column="42" />
+          <folding>
+            <element signature="e#2312#2873#0" expanded="false" />
+            <element signature="e#2959#3120#0" expanded="false" />
+            <element signature="e#3188#3408#0" expanded="false" />
+            <element signature="e#3477#3556#0" expanded="false" />
+            <element signature="e#3633#4617#0" expanded="false" />
+            <element signature="e#4714#4832#0" expanded="false" />
+            <element signature="e#4903#5435#0" expanded="false" />
+            <element signature="e#5505#6684#0" expanded="false" />
+            <element signature="e#6740#7139#0" expanded="false" />
+            <element signature="e#7216#9554#0" expanded="false" />
+            <element signature="e#10625#11503#0" expanded="false" />
+            <element signature="e#13219#14203#0" expanded="false" />
+            <element signature="e#14304#14479#0" expanded="false" />
+            <element signature="e#14599#15594#0" expanded="false" />
+            <element signature="e#15709#16682#0" expanded="false" />
+            <element signature="e#16802#17647#0" expanded="false" />
+            <element signature="e#17762#18611#0" expanded="false" />
+            <element signature="e#18677#18807#0" expanded="false" />
+            <element signature="e#18887#19006#0" expanded="false" />
+            <element signature="e#19090#19206#0" expanded="false" />
+            <element signature="e#19288#19405#0" expanded="false" />
+            <element signature="e#21944#22052#0" expanded="false" />
+            <element signature="e#22104#22553#0" expanded="false" />
+            <element signature="e#22601#23071#0" expanded="false" />
+            <element signature="e#23112#23279#0" expanded="false" />
+            <element signature="e#23322#25863#0" expanded="false" />
+            <element signature="e#25909#26846#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/video/page-media-video.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="3" selection-end-column="78" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/web/app/front/media/video/page-media-video.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-20.964285">
-          <caret line="198" column="85" selection-start-line="198" selection-start-column="85" selection-end-line="198" selection-end-column="85" />
+        <state vertical-scroll-proportion="-4.071429">
+          <caret line="6" column="53" selection-start-line="0" selection-start-column="0" selection-end-line="208" selection-end-column="11" />
           <folding>
             <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
@@ -940,68 +968,196 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/web/app/front/media/video/page-media-video.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="480" column="59" selection-start-line="480" selection-start-column="59" selection-end-line="480" selection-end-column="59" />
+        <state vertical-scroll-proportion="-9.745763">
+          <caret line="677" column="40" selection-start-line="677" selection-start-column="25" selection-end-line="677" selection-end-column="40" />
           <folding>
             <element signature="e#2312#2873#0" expanded="false" />
             <element signature="e#2959#3120#0" expanded="false" />
             <element signature="e#3188#3408#0" expanded="false" />
             <element signature="e#3477#3556#0" expanded="false" />
-            <element signature="e#3635#4619#0" expanded="false" />
-            <element signature="e#4718#4836#0" expanded="false" />
-            <element signature="e#4907#5439#0" expanded="false" />
-            <element signature="e#5509#6688#0" expanded="false" />
-            <element signature="e#6744#7143#0" expanded="false" />
-            <element signature="e#7220#9558#0" expanded="false" />
-            <element signature="e#9659#10538#0" expanded="false" />
-            <element signature="e#10629#11507#0" expanded="false" />
-            <element signature="e#11596#13156#0" expanded="false" />
-            <element signature="e#13237#14221#0" expanded="false" />
-            <element signature="e#14324#14499#0" expanded="false" />
-            <element signature="e#14619#15614#0" expanded="false" />
-            <element signature="e#15729#16702#0" expanded="false" />
-            <element signature="e#16822#17667#0" expanded="false" />
-            <element signature="e#17784#18633#0" expanded="false" />
-            <element signature="e#18699#18829#0" expanded="false" />
-            <element signature="e#18909#19028#0" expanded="false" />
-            <element signature="e#19112#19228#0" expanded="false" />
-            <element signature="e#19310#19427#0" expanded="false" />
-            <element signature="e#19503#19941#0" expanded="false" />
-            <element signature="e#21966#22074#0" expanded="false" />
-            <element signature="e#22126#22575#0" expanded="false" />
-            <element signature="e#22623#23093#0" expanded="false" />
-            <element signature="e#23134#23301#0" expanded="false" />
-            <element signature="e#23344#25885#0" expanded="false" />
+            <element signature="e#3633#4617#0" expanded="false" />
+            <element signature="e#4714#4832#0" expanded="false" />
+            <element signature="e#4903#5435#0" expanded="false" />
+            <element signature="e#5505#6684#0" expanded="false" />
+            <element signature="e#6740#7139#0" expanded="false" />
+            <element signature="e#7216#9554#0" expanded="false" />
+            <element signature="e#10625#11503#0" expanded="false" />
+            <element signature="e#14304#14479#0" expanded="false" />
+            <element signature="e#14599#15594#0" expanded="false" />
+            <element signature="e#16802#17647#0" expanded="false" />
+            <element signature="e#17762#18611#0" expanded="false" />
+            <element signature="e#18677#18807#0" expanded="false" />
+            <element signature="e#18887#19006#0" expanded="false" />
+            <element signature="e#19090#19206#0" expanded="false" />
+            <element signature="e#19288#19405#0" expanded="false" />
+            <element signature="e#19481#19919#0" expanded="false" />
+            <element signature="e#21944#22052#0" expanded="false" />
+            <element signature="e#22104#22553#0" expanded="false" />
+            <element signature="e#22601#23071#0" expanded="false" />
+            <element signature="e#23112#23279#0" expanded="false" />
+            <element signature="e#23322#25863#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/front/media/picture/page-media-picture.js">
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/audio-stream/page-media-audio-stream.css">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.51468986">
-          <caret line="469" column="50" selection-start-line="469" selection-start-column="46" selection-end-line="469" selection-end-column="50" />
+        <state vertical-scroll-proportion="0.062023938">
+          <caret line="3" column="78" selection-start-line="3" selection-start-column="78" selection-end-line="3" selection-end-column="78" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/audio-stream/page-media-audio-stream.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-38.87356">
+          <caret line="178" column="97" selection-start-line="178" selection-start-column="97" selection-end-line="178" selection-end-column="97" />
           <folding>
-            <element signature="e#2326#2887#0" expanded="false" />
-            <element signature="e#2973#3134#0" expanded="false" />
-            <element signature="e#3202#3422#0" expanded="false" />
-            <element signature="e#3491#3570#0" expanded="false" />
-            <element signature="e#3649#4635#0" expanded="false" />
-            <element signature="e#4734#4852#0" expanded="false" />
-            <element signature="e#4923#5457#0" expanded="false" />
-            <element signature="e#5527#6708#0" expanded="false" />
-            <element signature="e#6764#7163#0" expanded="false" />
-            <element signature="e#7240#9582#0" expanded="false" />
-            <element signature="e#9683#10562#0" expanded="false" />
-            <element signature="e#10655#11535#0" expanded="false" />
-            <element signature="e#13285#14269#0" expanded="false" />
-            <element signature="e#14372#14547#0" expanded="false" />
-            <element signature="e#14669#15664#0" expanded="false" />
-            <element signature="e#15781#16756#0" expanded="false" />
-            <element signature="e#16878#17723#0" expanded="false" />
-            <element signature="e#18757#18889#0" expanded="false" />
-            <element signature="e#18969#19088#0" expanded="false" />
-            <element signature="e#19172#19288#0" expanded="false" />
-            <element signature="e#19370#19487#0" expanded="false" />
+            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-input#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#1;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/audio-stream/page-media-audio-stream.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.648531">
+          <caret line="265" column="28" selection-start-line="265" selection-start-column="28" selection-end-line="265" selection-end-column="28" />
+          <folding>
+            <element signature="e#2230#2791#0" expanded="false" />
+            <element signature="e#2877#3038#0" expanded="false" />
+            <element signature="e#3121#4111#0" expanded="false" />
+            <element signature="e#4214#4332#0" expanded="false" />
+            <element signature="e#4402#5581#0" expanded="false" />
+            <element signature="e#5637#6036#0" expanded="false" />
+            <element signature="e#6113#8463#0" expanded="false" />
+            <element signature="e#8570#9449#0" expanded="false" />
+            <element signature="e#9546#10431#0" expanded="false" />
+            <element signature="e#12225#13209#0" expanded="false" />
+            <element signature="e#13316#13491#0" expanded="false" />
+            <element signature="e#13617#14612#0" expanded="false" />
+            <element signature="e#14733#15713#0" expanded="false" />
+            <element signature="e#15839#16684#0" expanded="false" />
+            <element signature="e#16805#17661#0" expanded="false" />
+            <element signature="e#17743#18229#0" expanded="false" />
+            <element signature="e#18308#19225#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.28944504">
+          <caret line="62" column="102" selection-start-line="62" selection-start-column="102" selection-end-line="62" selection-end-column="102" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.062023938">
+          <caret line="3" column="78" selection-start-line="3" selection-start-column="78" selection-end-line="3" selection-end-column="78" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="3" selection-end-column="78" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-1.091954">
+          <caret line="5" column="48" selection-start-line="0" selection-start-column="0" selection-end-line="185" selection-end-column="11" />
+          <folding>
+            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-input#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#1;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-7.4915257">
+          <caret line="456" column="11" selection-start-line="34" selection-start-column="8" selection-end-line="456" selection-end-column="11" />
+          <folding>
+            <element signature="e#2230#2791#0" expanded="false" />
+            <element signature="e#2877#3038#0" expanded="false" />
+            <element signature="e#3121#4111#0" expanded="false" />
+            <element signature="e#5637#6036#0" expanded="false" />
+            <element signature="e#6113#8463#0" expanded="false" />
+            <element signature="e#8570#9449#0" expanded="false" />
+            <element signature="e#9546#10431#0" expanded="false" />
+            <element signature="e#10520#12140#0" expanded="false" />
+            <element signature="e#12225#13209#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="29" column="33" selection-start-line="29" selection-start-column="33" selection-end-line="29" selection-end-column="33" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.38341346">
+          <caret line="115" column="59" selection-start-line="115" selection-start-column="59" selection-end-line="115" selection-end-column="59" />
+          <folding>
+            <element signature="n#style#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#1;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-input#0;n#div#0;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#1;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#el-button#0;n#el-tooltip#0;n#el-dropdown#0;n#span#1;n#template#0;n#el-table-column#2;n#el-table#0;n#el-scrollbar#0;n#div#2;n#el-card#0;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#1;n#div#0;n#div#0;n#el-dialog#1;n#template#2;n#mi-frame#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>

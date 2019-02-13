@@ -111,7 +111,7 @@ define([
                     return File.prototype.formatSize(size);
                 },
                 //添加图片媒资库文件夹
-                addMediaPictureFolder:function(){
+                addMediaVideoFolder:function(){
                     var self = this;
                     var folderName = self.dialog.createFolder.folderName;
                     if(!folderName){
@@ -134,7 +134,7 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 //添加素材库文件夹对话框关闭初始化数据
-                addMediaPictureFolderDialogClosed:function(){
+                addMediaVideoFolderDialogClosed:function(){
                     var self = this;
                     self.dialog.createFolder.folderName = '';
                 },
@@ -288,7 +288,7 @@ define([
                             self.$refs.moveMediaVideoFolderDialog.open('/folder/permission/media/tree/with/except/video', row.id);
                             self.$refs.moveMediaVideoFolderDialog.setBuffer(row);
                         }else{
-                            self.$refs.moveMediaVideoDialog.open('/folder/permission/media/tree/with/except/video', row.id);
+                            self.$refs.moveMediaVideoDialog.open('/folder/permission/media/tree/with/except/video');
                             self.$refs.moveMediaVideoDialog.setBuffer(row);
                         }
                     }else if(command === '2'){
@@ -297,13 +297,13 @@ define([
                             self.$refs.copyMediaVideoFolderDialog.open('/folder/permission/media/tree/video');
                             self.$refs.copyMediaVideoFolderDialog.setBuffer(row);
                         }else{
-                            self.$refs.copyMediaPictureDialog.open('/folder/permission/media/tree/video');
-                            self.$refs.copyMediaPictureDialog.setBuffer(row);
+                            self.$refs.copyMediaVideoDialog.open('/folder/permission/media/tree/video');
+                            self.$refs.copyMediaVideoDialog.setBuffer(row);
                         }
                     }
                 },
                 //重命名素材库文件夹
-                renameMediaPictureFolder:function(){
+                renameMediaVideoFolder:function(){
                     var self = this;
                     var folderName = self.dialog.renameFolder.folderName;
                     if(!folderName){
@@ -327,7 +327,7 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
                 //重命名素材库文件夹对话框关闭初始化数据
-                renameMediaPictureFolderDialogClosed:function(){
+                renameMediaVideoFolderDialogClosed:function(){
                     var self = this;
                     self.dialog.renameFolder.row = null;
                     self.dialog.renameFolder.folderName = '';
@@ -405,7 +405,7 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 //素材文件复制
-                copyMediaPicture:function(folder, buffer, startLoading, endLoading, close){
+                copyMediaVideo:function(folder, buffer, startLoading, endLoading, close){
                     var self = this;
                     startLoading();
                     ajax.post('/media/video/copy', {

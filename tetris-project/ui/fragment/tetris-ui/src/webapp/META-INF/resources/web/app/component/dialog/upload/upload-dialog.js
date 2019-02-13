@@ -23,8 +23,6 @@ define([
 
     var MATERIAL_TYPE_TXT = 'txt';
 
-    var requires = [];
-
     function Type(mimetype, suffix, type){
         this.mimetype = mimetype;
         this.suffix = suffix;
@@ -35,7 +33,7 @@ define([
         return this.mimetype === mimetype;
     };
 
-    var isRequiresType = function(mimetype){
+    var isRequiresType = function(mimetype, requires){
         for(var i=0; i<requires.length; i++){
             if(requires[i].equals(mimetype)){
                 return true;
@@ -44,7 +42,7 @@ define([
         return false;
     };
 
-    var translateSuffix = function(mimetype){
+    var translateSuffix = function(mimetype, requires){
         for(var i=0; i<requires.length; i++){
             if(requires[i].equals(mimetype)){
                 return requires[i].suffix;
@@ -59,7 +57,8 @@ define([
         data:function(){
             return {
                 visible:false,
-                files:[]
+                files:[],
+                requires:[]
             }
         },
         methods:{
@@ -82,7 +81,7 @@ define([
                 var files = $input.files;
                 for(var i=0; i<files.length; i++){
                     var file = files[i];
-                    if(isRequiresType(files[i].type)){
+                    if(isRequiresType(files[i].type, self.requires)){
                         var finded = false;
                         for(var j=0; j<self.files.length; j++){
                             var exist = self.files[j];
@@ -131,14 +130,16 @@ define([
             },
             //获取文件类型
             type:function(type){
-                return translateSuffix(type);
+                var self = this;
+                return translateSuffix(type, self.requires);
             },
             //获取文件类型描述
             requireTypes:function(){
+                var self = this;
                 var summary = '支持格式：';
-                for(var i=0; i<requires.length; i++){
-                    summary += requires[i].suffix;
-                    if(i !== requires.length-1){
+                for(var i=0; i<self.requires.length; i++){
+                    summary += self.requires[i].suffix;
+                    if(i !== self.requires.length-1){
                         summary += ', ';
                     }
                 }
@@ -146,10 +147,11 @@ define([
             },
             //input类型过滤
             accept:function(){
+                var self = this;
                 var accept = '';
-                for(var i=0; i<requires.length; i++){
-                    accept += requires[i].mimetype;
-                    if(i !== requires.length-1){
+                for(var i=0; i<self.requires.length; i++){
+                    accept += self.requires[i].mimetype;
+                    if(i !== self.requires.length-1){
                         accept += ',';
                     }
                 }
@@ -157,8 +159,9 @@ define([
             },
             //判断是否是图片类型
             isImage:function(mimetype){
-                for(var i=0; i<requires.length; i++){
-                    if(requires[i].mimetype===mimetype && requires[i].type===MATERIAL_TYPE_IMAGE){
+                var self = this;
+                for(var i=0; i<self.requires.length; i++){
+                    if(self.requires[i].mimetype===mimetype && self.requires[i].type===MATERIAL_TYPE_IMAGE){
                         return true;
                     }
                 }
@@ -166,8 +169,9 @@ define([
             },
             //判断是否是音频类型
             isAudio:function(mimetype){
-                for(var i=0; i<requires.length; i++){
-                    if(requires[i].mimetype===mimetype && requires[i].type===MATERIAL_TYPE_AUDIO){
+                var self = this;
+                for(var i=0; i<self.requires.length; i++){
+                    if(self.requires[i].mimetype===mimetype && self.requires[i].type===MATERIAL_TYPE_AUDIO){
                         return true;
                     }
                 }
@@ -175,8 +179,9 @@ define([
             },
             //判断是否是视频类型
             isVideo:function(mimetype){
-                for(var i=0; i<requires.length; i++){
-                    if(requires[i].mimetype===mimetype && requires[i].type===MATERIAL_TYPE_VIDEO){
+                var self = this;
+                for(var i=0; i<self.requires.length; i++){
+                    if(self.requires[i].mimetype===mimetype && self.requires[i].type===MATERIAL_TYPE_VIDEO){
                         return true;
                     }
                 }
@@ -184,8 +189,9 @@ define([
             },
             //判断是否是文本类型
             isTxt:function(mimetype){
-                for(var i=0; i<requires.length; i++){
-                    if(requires[i].mimetype===mimetype && requires[i].type===MATERIAL_TYPE_TXT){
+                var self = this;
+                for(var i=0; i<self.requires.length; i++){
+                    if(self.requires[i].mimetype===mimetype && self.requires[i].type===MATERIAL_TYPE_TXT){
                         return true;
                     }
                 }
@@ -200,24 +206,24 @@ define([
             if(self.requireType && self.requireType.length>0){
                 for(var i=0; i<self.requireType.length; i++){
                     if(self.requireType[i] === MATERIAL_TYPE_IMAGE){
-                        requires.push(new Type('image/jpeg', 'jpg', MATERIAL_TYPE_IMAGE));
-                        requires.push(new Type('image/png', 'png', MATERIAL_TYPE_IMAGE));
-                        requires.push(new Type('image/gif', 'gif', MATERIAL_TYPE_IMAGE));
+                        self.requires.push(new Type('image/jpeg', 'jpg', MATERIAL_TYPE_IMAGE));
+                        self.requires.push(new Type('image/png', 'png', MATERIAL_TYPE_IMAGE));
+                        self.requires.push(new Type('image/gif', 'gif', MATERIAL_TYPE_IMAGE));
                     }else if(self.requireType[i] === MATERIAL_TYPE_AUDIO){
-                        requires.push(new Type('audio/mpeg', 'mp3', MATERIAL_TYPE_AUDIO));
+                        self.requires.push(new Type('audio/mp3', 'mp3', MATERIAL_TYPE_AUDIO));
                     }else if(self.requireType[i] === MATERIAL_TYPE_VIDEO){
-                        requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
+                        self.requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
                     }else if(self.requireType[i] === MATERIAL_TYPE_TXT){
-                        requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
+                        self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
                     }
                 }
             }else{
-                requires.push(new Type('image/jpeg', 'jpg', MATERIAL_TYPE_IMAGE));
-                requires.push(new Type('image/png', 'png', MATERIAL_TYPE_IMAGE));
-                requires.push(new Type('image/gif', 'gif', MATERIAL_TYPE_IMAGE));
-                requires.push(new Type('audio/mpeg', 'mp3', MATERIAL_TYPE_AUDIO));
-                requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
-                requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
+                self.requires.push(new Type('image/jpeg', 'jpg', MATERIAL_TYPE_IMAGE));
+                self.requires.push(new Type('image/png', 'png', MATERIAL_TYPE_IMAGE));
+                self.requires.push(new Type('image/gif', 'gif', MATERIAL_TYPE_IMAGE));
+                self.requires.push(new Type('audio/mp3', 'mp3', MATERIAL_TYPE_AUDIO));
+                self.requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
+                self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
             }
         }
     });

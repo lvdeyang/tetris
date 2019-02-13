@@ -109,7 +109,7 @@ public class MediaVideoService {
 	 * @param List<String> tags 标签列表
 	 * @param List<String> keyWords 关键字列表
 	 * @param String remark 备注
-	 * @param MediaVideoTaskVO task 上传任务
+	 * @param MediaAudioTaskVO task 上传任务
 	 * @param FolderPO folder 文件夹
 	 * @return MediaVideoPO 视频媒资
 	 */
@@ -181,7 +181,7 @@ public class MediaVideoService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月3日 上午11:29:23
-	 * @param MediaVideoPO task 素材上传任务
+	 * @param MediaAudioPO task 素材上传任务
 	 */
 	public void uploadCancel(MediaVideoPO task) throws Exception{
 		File file = new File(new File(task.getUploadTmpPath()).getParent());
@@ -200,7 +200,7 @@ public class MediaVideoService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 下午1:21:15
-	 * @param MediaVideoPO media 待复制的图片媒资
+	 * @param MediaAudioPO media 待复制的图片媒资
 	 * @param FolderPO target 目标文件夹
 	 * @return MediaVideoPO 复制后的图片媒资
 	 */

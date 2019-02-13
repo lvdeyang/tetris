@@ -109,13 +109,13 @@
                 title="新建文件夹"
                 width="500px"
                 :visible.sync="dialog.createFolder.visible"
-                @closed="addMediaPictureFolderDialogClosed">
+                @closed="addMediaVideoFolderDialogClosed">
 
             <el-input v-model="dialog.createFolder.folderName" placeholder="请输入文件夹名称"></el-input>
 
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="dialog.createFolder.visible = false">取 消</el-button>
-                <el-button size="medium" type="primary" :loading="dialog.createFolder.loading" @click="addMediaPictureFolder">确 定</el-button>
+                <el-button size="medium" type="primary" :loading="dialog.createFolder.loading" @click="addMediaVideoFolder">确 定</el-button>
             </span>
 
         </el-dialog>
@@ -125,7 +125,7 @@
                 title="重命名"
                 width="500px"
                 :visible.sync="dialog.renameFolder.visible"
-                @closed="renameMediaPictureFolderDialogClosed">
+                @closed="renameMediaVideoFolderDialogClosed">
 
             <div v-if="dialog.renameFolder.row">
                 <div style="margin-bottom:20px;">
@@ -137,7 +137,7 @@
 
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="dialog.renameFolder.visible = false">取 消</el-button>
-                <el-button size="medium" type="primary" :loading="dialog.renameFolder.loading" @click="renameMediaPictureFolder">确 定</el-button>
+                <el-button size="medium" type="primary" :loading="dialog.renameFolder.loading" @click="renameMediaVideoFolder">确 定</el-button>
             </span>
 
         </el-dialog>
@@ -199,7 +199,7 @@
         <mi-folder-dialog ref="moveMediaVideoDialog" @selected-folder="moveMediaVideo"></mi-folder-dialog>
 
         <!-- 复制文件 -->
-        <mi-folder-dialog ref="copyMediaPictureDialog" @selected-folder="copyMediaPicture"></mi-folder-dialog>
+        <mi-folder-dialog ref="copyMediaVideoDialog" @selected-folder="copyMediaVideo"></mi-folder-dialog>
 
         <!-- 预览灯箱 -->
         <mi-lightbox ref="Lightbox" @on-txt-save="handleTxtSave"></mi-lightbox>

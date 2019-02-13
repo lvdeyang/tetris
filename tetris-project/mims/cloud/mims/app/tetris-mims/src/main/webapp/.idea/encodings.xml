@@ -35,6 +35,8 @@
     <file url="file://$PROJECT_DIR$/web/app/front/media/audio/page-media-audio.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/media/picture/page-media-picture.css" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/media/picture/page-media-picture.js" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.css" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/web/app/front/media/txt/page-media-txt.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.css" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/media/video-stream/page-media-video-stream.js" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/web/app/front/media/video/page-media-video.css" charset="UTF-8" />

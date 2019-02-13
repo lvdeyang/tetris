@@ -21,11 +21,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="upload-dialog.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="upload-dialog.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-3.3050847">
-              <caret line="181" column="17" selection-start-line="181" selection-start-column="17" selection-end-line="181" selection-end-column="17" />
+            <state vertical-scroll-proportion="1.066279">
+              <caret line="210" column="73" selection-start-line="210" selection-start-column="73" selection-end-line="210" selection-end-column="73" />
               <folding />
             </state>
           </provider>
@@ -48,11 +48,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="task-view.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="task-view.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/web/app/component/view/task/task-view.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5093023">
-              <caret line="152" column="48" selection-start-line="152" selection-start-column="41" selection-end-line="152" selection-end-column="48" />
+            <state vertical-scroll-proportion="-1.3050847">
+              <caret line="133" column="43" selection-start-line="133" selection-start-column="43" selection-end-line="133" selection-end-column="43" />
               <folding />
             </state>
           </provider>
@@ -65,8 +65,8 @@
       <list>
         <option value="$PROJECT_DIR$/web/app/component/dialog/folder/folder-dialog.js" />
         <option value="$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.html" />
-        <option value="$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.js" />
         <option value="$PROJECT_DIR$/web/app/component/view/task/task-view.js" />
+        <option value="$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.js" />
       </list>
     </option>
   </component>
@@ -360,6 +360,14 @@
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
   </component>
@@ -392,14 +400,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.3050847">
-          <caret line="181" column="17" selection-start-line="181" selection-start-column="17" selection-end-line="181" selection-end-column="17" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.html">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-14.928572">
@@ -417,8 +417,16 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/web/app/component/view/task/task-view.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5093023">
-          <caret line="152" column="48" selection-start-line="152" selection-start-column="41" selection-end-line="152" selection-end-column="48" />
+        <state vertical-scroll-proportion="-1.3050847">
+          <caret line="133" column="43" selection-start-line="133" selection-start-column="43" selection-end-line="133" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/dialog/upload/upload-dialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="1.066279">
+          <caret line="210" column="73" selection-start-line="210" selection-start-column="73" selection-end-line="210" selection-end-column="73" />
           <folding />
         </state>
       </provider>

@@ -21,10 +21,26 @@ import com.sumavision.tetris.mims.app.material.MaterialFileDAO;
 import com.sumavision.tetris.mims.app.material.MaterialFilePO;
 import com.sumavision.tetris.mims.app.material.MaterialFileQuery;
 import com.sumavision.tetris.mims.app.material.MaterialFileService;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamDAO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamService;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamDAO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtQuery;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
@@ -95,6 +111,42 @@ public class FolderService {
 	
 	@Autowired
 	private MediaVideoQuery mediaVideoQuery;
+	
+	@Autowired
+	private MediaAudioQuery mediaAudioQuery;
+	
+	@Autowired
+	private MediaAudioService mediaAudioService;
+	
+	@Autowired
+	private MediaAudioDAO mediaAudioDao;
+	
+	@Autowired
+	private MediaVideoStreamQuery mediaVideoStreamQuery;
+	
+	@Autowired
+	private MediaVideoStreamService mediaVideoStreamService;
+	
+	@Autowired
+	private MediaVideoStreamDAO mediaVideoStreamDao;
+	
+	@Autowired
+	private MediaAudioStreamQuery mediaAudioStreamQuery;
+	
+	@Autowired
+	private MediaAudioStreamService mediaAudioStreamService;
+	
+	@Autowired
+	private MediaAudioStreamDAO mediaAudioStreamDao;
+	
+	@Autowired
+	private MediaTxtQuery mediaTxtQuery;
+	
+	@Autowired
+	private MediaTxtService mediaTxtService;
+	
+	@Autowired
+	private MediaTxtDAO mediaTxtDao;
 	
 	/**
 	 * 新增私人文件夹<br/>
@@ -248,12 +300,16 @@ public class FolderService {
 		List<MediaVideoPO> videos = mediaVideoDao.findByFolderIdIn(folderIds);
 		
 		//获取音频媒资
+		List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdIn(folderIds);
 		
 		//获取视频流媒资
+		List<MediaVideoStreamPO> videoStreams = mediaVideoStreamDao.findByFolderIdIn(folderIds);
 		
 		//获取音频流媒资
+		List<MediaAudioStreamPO> audioStreams = mediaAudioStreamDao.findByFolderIdIn(folderIds);
 		
 		//获取文本媒资
+		List<MediaTxtPO> txts = mediaTxtDao.findByFolderIdIn(folderIds);
 		
 		//删除所有文件夹
 		folderDao.deleteInBatch(totalFolders);
@@ -271,12 +327,16 @@ public class FolderService {
 		if(videos!=null && videos.size()>0) mediaVideoService.remove(videos);
 		
 		//删除所有音频媒资
+		if(audios!=null && audios.size()>0) mediaAudioService.remove(audios);
 		
 		//删除所有视频流媒资
+		if(videoStreams!=null && videoStreams.size()>0) mediaVideoStreamService.remove(videoStreams);
 		
 		//删除所有音频流媒资
+		if(audioStreams!=null && audioStreams.size()>0) mediaAudioStreamService.remove(audioStreams);
 		
 		//删除所有文本媒资
+		if(txts!=null && txts.size()>0) mediaTxtService.remove(txts);
 	}
 	
 	/**
@@ -525,12 +585,76 @@ public class FolderService {
 		}
 		
 		//复制音频媒资
+		List<MediaAudioPO> audios = mediaAudioQuery.findCompleteByFolderIds(totalFolderIds);
+		if(audios!=null && audios.size()>0){
+			List<MediaAudioPO> totalCopyAudios = new ArrayList<MediaAudioPO>();
+			for(MediaAudioPO audio:audios){
+				totalCopyAudios.add(audio.copy());
+			}
+			mediaAudioDao.save(totalCopyAudios);
+			//重组文件夹链
+			setMediaAudioFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, audios, totalCopyAudios);
+			//生成新的uuid
+			for(MediaAudioPO audio:totalCopyAudios){
+				audio.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+			}
+			mediaAudioDao.save(totalCopyAudios);
+			resetFolderChain = true;
+		}
 		
 		//复制视频流媒资
+		List<MediaVideoStreamPO> videoStreams = mediaVideoStreamQuery.findCompleteByFolderIds(totalFolderIds);
+		if(videoStreams!=null && videoStreams.size()>0){
+			List<MediaVideoStreamPO> totalCopyVideoStreams = new ArrayList<MediaVideoStreamPO>();
+			for(MediaVideoStreamPO videoStream:videoStreams){
+				totalCopyVideoStreams.add(videoStream.copy());
+			}
+			mediaVideoStreamDao.save(totalCopyVideoStreams);
+			//重组文件夹链
+			setMediaVideoStreamFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, videoStreams, totalCopyVideoStreams);
+			//生成新的uuid
+			for(MediaVideoStreamPO videoStream:totalCopyVideoStreams){
+				videoStream.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+			}
+			mediaVideoStreamDao.save(totalCopyVideoStreams);
+			resetFolderChain = true;
+		}
 		
 		//复制音频流媒资
+		List<MediaAudioStreamPO> audioStreams = mediaAudioStreamQuery.findCompleteByFolderIds(totalFolderIds);
+		if(audioStreams!=null && audioStreams.size()>0){
+			List<MediaAudioStreamPO> totalCopyAudioStreams = new ArrayList<MediaAudioStreamPO>();
+			for(MediaAudioStreamPO audioStream:audioStreams){
+				totalCopyAudioStreams.add(audioStream.copy());
+			}
+			mediaAudioStreamDao.save(totalCopyAudioStreams);
+			//重组文件夹链
+			setMediaAudioStreamFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, audioStreams, totalCopyAudioStreams);
+			//生成新的uuid
+			for(MediaAudioStreamPO audioStream:totalCopyAudioStreams){
+				audioStream.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+			}
+			mediaAudioStreamDao.save(totalCopyAudioStreams);
+			resetFolderChain = true;
+		}
 		
 		//复制文本媒资
+		List<MediaTxtPO> txts = mediaTxtQuery.findCompleteByFolderIds(totalFolderIds);
+		if(txts!=null && txts.size()>0){
+			List<MediaTxtPO> totalCopyTxts = new ArrayList<MediaTxtPO>();
+			for(MediaTxtPO txt:txts){
+				totalCopyTxts.add(txt.copy());
+			}
+			mediaTxtDao.save(totalCopyTxts);
+			//重组文件夹链
+			setMediaTxtFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders, txts, totalCopyTxts);
+			//生成新的uuid
+			for(MediaTxtPO txt:totalCopyTxts){
+				txt.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+			}
+			mediaTxtDao.save(totalCopyTxts);
+			resetFolderChain = true;
+		}
 		
 		if(!resetFolderChain){
 			setFolderChain(rootFolders, rootCopyFolders, target, subFolders, totalCopyFolders);
@@ -791,6 +915,270 @@ public class FolderService {
 					if(video.getFolderId().equals(root.getId())){
 						MediaVideoPO copiedVideo = mediaVideoQuery.loopForUuid(video.getUuid(), copiedVideos);
 						copiedVideo.setFolderId(copiedRoot.getId());
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 重组音频媒资文件夹链<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月26日 下午1:14:48
+	 * @param Collection<FolderPO> roots 待重组的文件夹（复制前）
+	 * @param Collection<FolderPO> copiedRoots 待重组的文件夹（复制后的）
+	 * @param FolderPO parent 待重组文件夹的父文件夹
+	 * @param Collection<FolderPO> copiedSubFolders 复制之后的子文件夹
+	 * @param Collection<FolderPO> subFolders 原子文件夹
+	 * @param Collection<MediaAudioPO> copiedAudios 复制之后的音频媒资
+	 * @param Collection<MediaAudioPO> videos 原音频媒资
+	 */
+	private void setMediaAudioFolderChain(
+			Collection<FolderPO> roots,
+			Collection<FolderPO> copiedRoots, 
+			FolderPO parent,
+			Collection<FolderPO> subFolders,
+			Collection<FolderPO> copiedSubFolders,
+			Collection<MediaAudioPO> audios,
+			Collection<MediaAudioPO> copiedAudios){
+		
+		if(roots==null || roots.size()<=0 || copiedRoots==null || copiedRoots.size()<=0) return;
+		
+		for(FolderPO copiedRoot:copiedRoots){
+			copiedRoot.setParentId(parent==null?null:parent.getId());
+			copiedRoot.setParentPath(parent==null?
+										null
+										:(parent.getParentPath()==null?
+												new StringBufferWrapper().append("/")
+																	     .append(parent.getId())
+																	     .toString()
+										       :new StringBufferWrapper().append(parent.getParentPath())
+										       							 .append("/")
+										       							 .append(parent.getId())
+										       							 .toString()));
+			copiedRoot.setDepth();
+			
+			FolderPO root = folderTool.loopByUuid(copiedRoot.getUuid(), roots);
+			
+			//重组子文件夹
+			if(subFolders!=null && subFolders.size()>0){
+				List<FolderPO> filteredSubFolders = new ArrayList<FolderPO>();
+				List<FolderPO> filteredCopiedSubFolders = new ArrayList<FolderPO>();
+				for(FolderPO subFolder:subFolders){
+					if(root.getId().equals(subFolder.getParentId())){
+						FolderPO copiedSubFolder = folderTool.loopByUuid(subFolder.getUuid(), copiedSubFolders);
+						filteredSubFolders.add(subFolder);
+						filteredCopiedSubFolders.add(copiedSubFolder);
+					}
+				}
+				setMediaAudioFolderChain(filteredSubFolders, filteredCopiedSubFolders, copiedRoot, subFolders, copiedSubFolders, audios, copiedAudios);
+			}
+			
+			//重组音频媒资
+			if(audios!=null && audios.size()>0){
+				for(MediaAudioPO audio:audios){
+					if(audio.getFolderId().equals(root.getId())){
+						MediaAudioPO copiedAudio = mediaAudioQuery.loopForUuid(audio.getUuid(), copiedAudios);
+						copiedAudio.setFolderId(copiedRoot.getId());
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 重组视频流媒资文件夹链<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月26日 下午1:14:48
+	 * @param Collection<FolderPO> roots 待重组的文件夹（复制前）
+	 * @param Collection<FolderPO> copiedRoots 待重组的文件夹（复制后的）
+	 * @param FolderPO parent 待重组文件夹的父文件夹
+	 * @param Collection<FolderPO> copiedSubFolders 复制之后的子文件夹
+	 * @param Collection<FolderPO> subFolders 原子文件夹
+	 * @param Collection<MediaVideoStreamPO> copiedVideoStreams 复制之后的视频流媒资
+	 * @param Collection<MediaVideoStreamPO> videoStreams 原视频流媒资
+	 */
+	private void setMediaVideoStreamFolderChain(
+			Collection<FolderPO> roots,
+			Collection<FolderPO> copiedRoots, 
+			FolderPO parent,
+			Collection<FolderPO> subFolders,
+			Collection<FolderPO> copiedSubFolders,
+			Collection<MediaVideoStreamPO> videoStreams,
+			Collection<MediaVideoStreamPO> copiedVideoStreams){
+		
+		if(roots==null || roots.size()<=0 || copiedRoots==null || copiedRoots.size()<=0) return;
+		
+		for(FolderPO copiedRoot:copiedRoots){
+			copiedRoot.setParentId(parent==null?null:parent.getId());
+			copiedRoot.setParentPath(parent==null?
+										null
+										:(parent.getParentPath()==null?
+												new StringBufferWrapper().append("/")
+																	     .append(parent.getId())
+																	     .toString()
+										       :new StringBufferWrapper().append(parent.getParentPath())
+										       							 .append("/")
+										       							 .append(parent.getId())
+										       							 .toString()));
+			copiedRoot.setDepth();
+			
+			FolderPO root = folderTool.loopByUuid(copiedRoot.getUuid(), roots);
+			
+			//重组子文件夹
+			if(subFolders!=null && subFolders.size()>0){
+				List<FolderPO> filteredSubFolders = new ArrayList<FolderPO>();
+				List<FolderPO> filteredCopiedSubFolders = new ArrayList<FolderPO>();
+				for(FolderPO subFolder:subFolders){
+					if(root.getId().equals(subFolder.getParentId())){
+						FolderPO copiedSubFolder = folderTool.loopByUuid(subFolder.getUuid(), copiedSubFolders);
+						filteredSubFolders.add(subFolder);
+						filteredCopiedSubFolders.add(copiedSubFolder);
+					}
+				}
+				setMediaVideoStreamFolderChain(filteredSubFolders, filteredCopiedSubFolders, copiedRoot, subFolders, copiedSubFolders, videoStreams, copiedVideoStreams);
+			}
+			
+			//重组视频流媒资
+			if(videoStreams!=null && videoStreams.size()>0){
+				for(MediaVideoStreamPO videoStream:videoStreams){
+					if(videoStream.getFolderId().equals(root.getId())){
+						MediaVideoStreamPO copiedVideoStream = mediaVideoStreamQuery.loopForUuid(videoStream.getUuid(), copiedVideoStreams);
+						copiedVideoStream.setFolderId(copiedRoot.getId());
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 重组音频流媒资文件夹链<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月26日 下午1:14:48
+	 * @param Collection<FolderPO> roots 待重组的文件夹（复制前）
+	 * @param Collection<FolderPO> copiedRoots 待重组的文件夹（复制后的）
+	 * @param FolderPO parent 待重组文件夹的父文件夹
+	 * @param Collection<FolderPO> copiedSubFolders 复制之后的子文件夹
+	 * @param Collection<FolderPO> subFolders 原子文件夹
+	 * @param Collection<MediaAudioStreamPO> copiedAudioStreams 复制之后的音频流媒资
+	 * @param Collection<MediaAudioStreamPO> audioStreams 原音频流媒资
+	 */
+	private void setMediaAudioStreamFolderChain(
+			Collection<FolderPO> roots,
+			Collection<FolderPO> copiedRoots, 
+			FolderPO parent,
+			Collection<FolderPO> subFolders,
+			Collection<FolderPO> copiedSubFolders,
+			Collection<MediaAudioStreamPO> audioStreams,
+			Collection<MediaAudioStreamPO> copiedAudioStreams){
+		
+		if(roots==null || roots.size()<=0 || copiedRoots==null || copiedRoots.size()<=0) return;
+		
+		for(FolderPO copiedRoot:copiedRoots){
+			copiedRoot.setParentId(parent==null?null:parent.getId());
+			copiedRoot.setParentPath(parent==null?
+										null
+										:(parent.getParentPath()==null?
+												new StringBufferWrapper().append("/")
+																	     .append(parent.getId())
+																	     .toString()
+										       :new StringBufferWrapper().append(parent.getParentPath())
+										       							 .append("/")
+										       							 .append(parent.getId())
+										       							 .toString()));
+			copiedRoot.setDepth();
+			
+			FolderPO root = folderTool.loopByUuid(copiedRoot.getUuid(), roots);
+			
+			//重组子文件夹
+			if(subFolders!=null && subFolders.size()>0){
+				List<FolderPO> filteredSubFolders = new ArrayList<FolderPO>();
+				List<FolderPO> filteredCopiedSubFolders = new ArrayList<FolderPO>();
+				for(FolderPO subFolder:subFolders){
+					if(root.getId().equals(subFolder.getParentId())){
+						FolderPO copiedSubFolder = folderTool.loopByUuid(subFolder.getUuid(), copiedSubFolders);
+						filteredSubFolders.add(subFolder);
+						filteredCopiedSubFolders.add(copiedSubFolder);
+					}
+				}
+				setMediaAudioStreamFolderChain(filteredSubFolders, filteredCopiedSubFolders, copiedRoot, subFolders, copiedSubFolders, audioStreams, copiedAudioStreams);
+			}
+			
+			//重组视频流媒资
+			if(audioStreams!=null && audioStreams.size()>0){
+				for(MediaAudioStreamPO audioStream:audioStreams){
+					if(audioStream.getFolderId().equals(root.getId())){
+						MediaAudioStreamPO copiedAudioStream = mediaAudioStreamQuery.loopForUuid(audioStream.getUuid(), copiedAudioStreams);
+						copiedAudioStream.setFolderId(copiedRoot.getId());
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 重组文本媒资文件夹链<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月26日 下午1:14:48
+	 * @param Collection<FolderPO> roots 待重组的文件夹（复制前）
+	 * @param Collection<FolderPO> copiedRoots 待重组的文件夹（复制后的）
+	 * @param FolderPO parent 待重组文件夹的父文件夹
+	 * @param Collection<FolderPO> copiedSubFolders 复制之后的子文件夹
+	 * @param Collection<FolderPO> subFolders 原子文件夹
+	 * @param Collection<MediaTxtPO> copiedTxts 复制之后的文本媒资
+	 * @param Collection<MediaTxtPO> txts 原文本媒资
+	 */
+	private void setMediaTxtFolderChain(
+			Collection<FolderPO> roots,
+			Collection<FolderPO> copiedRoots, 
+			FolderPO parent,
+			Collection<FolderPO> subFolders,
+			Collection<FolderPO> copiedSubFolders,
+			Collection<MediaTxtPO> txts,
+			Collection<MediaTxtPO> copiedTxts){
+		
+		if(roots==null || roots.size()<=0 || copiedRoots==null || copiedRoots.size()<=0) return;
+		
+		for(FolderPO copiedRoot:copiedRoots){
+			copiedRoot.setParentId(parent==null?null:parent.getId());
+			copiedRoot.setParentPath(parent==null?
+										null
+										:(parent.getParentPath()==null?
+												new StringBufferWrapper().append("/")
+																	     .append(parent.getId())
+																	     .toString()
+										       :new StringBufferWrapper().append(parent.getParentPath())
+										       							 .append("/")
+										       							 .append(parent.getId())
+										       							 .toString()));
+			copiedRoot.setDepth();
+			
+			FolderPO root = folderTool.loopByUuid(copiedRoot.getUuid(), roots);
+			
+			//重组子文件夹
+			if(subFolders!=null && subFolders.size()>0){
+				List<FolderPO> filteredSubFolders = new ArrayList<FolderPO>();
+				List<FolderPO> filteredCopiedSubFolders = new ArrayList<FolderPO>();
+				for(FolderPO subFolder:subFolders){
+					if(root.getId().equals(subFolder.getParentId())){
+						FolderPO copiedSubFolder = folderTool.loopByUuid(subFolder.getUuid(), copiedSubFolders);
+						filteredSubFolders.add(subFolder);
+						filteredCopiedSubFolders.add(copiedSubFolder);
+					}
+				}
+				setMediaTxtFolderChain(filteredSubFolders, filteredCopiedSubFolders, copiedRoot, subFolders, copiedSubFolders, txts, copiedTxts);
+			}
+			
+			//重组视频流媒资
+			if(txts!=null && txts.size()>0){
+				for(MediaTxtPO txt:txts){
+					if(txt.getFolderId().equals(root.getId())){
+						MediaTxtPO copiedTxt = mediaTxtQuery.loopForUuid(txt.getUuid(), copiedTxts);
+						copiedTxt.setFolderId(copiedRoot.getId());
 					}
 				}
 			}
