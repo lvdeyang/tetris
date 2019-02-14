@@ -1,14 +1,15 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" 
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>com.sumavision.tetris</groupId>
-    <artifactId>tetris-mims</artifactId>
+    <artifactId>tetris-cms</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     
-    <name>tetris-mims</name>
-    <description>媒体融合平台</description>
+    <name>tetris-cms</name>
+    <description>融媒体发布平台</description>
     
     <packaging>war</packaging>
     
@@ -106,6 +107,13 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- mims-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-mims-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- tetris-ui -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
@@ -125,7 +133,7 @@
 
 	</dependencies>
 	
-    <dependencyManagement>
+	<dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -156,5 +164,5 @@
 	        </plugin>
 		</plugins>
     </build>
-
+  
 </project>

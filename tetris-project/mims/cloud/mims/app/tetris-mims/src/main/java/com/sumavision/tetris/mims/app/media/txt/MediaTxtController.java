@@ -91,7 +91,7 @@ public class MediaTxtController {
 		//生成面包屑数据
 		FolderBreadCrumbVO folderBreadCrumb = folderQuery.generateFolderBreadCrumb(filteredParentFolders);
 		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_VIDEO_STREAM.toString());
+		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_TXT.toString());
 		
 		List<MediaTxtPO> txts = mediaTxtQuery.findCompleteByFolderId(current.getId());
 		
@@ -131,7 +131,7 @@ public class MediaTxtController {
 	@ResponseBody
 	@RequestMapping(value = "/task/add")
 	public Object addTask(
-			String previewUrl, 
+			String content, 
 			String name,
             String tags,
             String keyWords,
@@ -150,7 +150,7 @@ public class MediaTxtController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaTxtPO entity = mediaTxtService.addTask(user, name, null, null, remark, previewUrl, folder);
+		MediaTxtPO entity = mediaTxtService.addTask(user, name, null, null, remark, content, folder);
 		
 		return new MediaTxtVO().set(entity);
 		
@@ -283,6 +283,66 @@ public class MediaTxtController {
 																		 .put("copied", new MediaTxtVO().set(copiedMedia))
 																		 .getMap();
 		return result;
+	}
+	
+	/**
+	 * 查询文本内容<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月14日 上午9:25:28
+	 * @param @PathVariable Long id 媒资id
+	 * @return String 文本内容
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/content/{id}")
+	public Object queryContent(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		MediaTxtPO txt = mediaTxtDao.findOne(id);
+		
+		if(txt == null){
+			throw new MediaTxtNotExistException(id);
+		}
+		
+		return txt.getContent();
+	}
+	
+	/**
+	 * 保存文本内容<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月14日 上午9:33:03
+	 * @param @PathVariable Long id 媒资id
+	 * @param String content 文本内容
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/save/content/{id}")
+	public Object saveContent(
+			@PathVariable Long id,
+			String content,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		MediaTxtPO txt = mediaTxtDao.findOne(id);
+		
+		if(txt == null){
+			throw new MediaTxtNotExistException(id);
+		}
+		
+		txt.setContent(content);
+		mediaTxtDao.save(txt);
+		
+		return null;
 	}
 	
 }

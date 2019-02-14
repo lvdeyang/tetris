@@ -5,7 +5,7 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum MediaTxtItemType {
 
 	FOLDER("文件夹", "icon-folder-close", new String[]{"font-size:20px; position:relative; top:2px; color:#FFD659;"}),
-	TXT("文本", "feather-icon-file-text", new String[]{"font-size:16px; position:relative; top:1px;"});
+	TXT("文本", "el-icon-document", new String[]{"font-size:16px;"});
 	
 	/** 名称 */
 	private String name;
