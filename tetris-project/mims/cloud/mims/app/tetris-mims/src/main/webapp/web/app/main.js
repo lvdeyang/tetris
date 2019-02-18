@@ -46,7 +46,7 @@ require.config({
         /* user-pages */
         'page-home':window.APPPATH + 'front/home/page-home',
         'page-material':window.APPPATH + 'front/material/page-material',
-        'page-media-article':window.APPPATH + 'front/media/article/page-media-article',
+        'page-media-txt':window.APPPATH + 'front/media/txt/page-media-txt',
         'page-media-audio':window.APPPATH + 'front/media/audio/page-media-audio',
         'page-media-audio-stream':window.APPPATH + 'front/media/audio-stream/page-media-audio-stream',
         'page-media-picture':window.APPPATH + 'front/media/picture/page-media-picture',
@@ -60,7 +60,7 @@ require.config({
         'page-check-video':window.APPPATH + 'front/check/video/page-check-video',
         'page-check-video-stream':window.APPPATH + 'front/check/video-stream/page-check-video-stream',
 
-        'page-front-production-txt':window.APPPATH + 'front/production/txt/page-front-production-txt',
+        'page-front-production-article':window.APPPATH + 'front/production/article/page-front-production-article',
         'page-front-production-audio':window.APPPATH + 'front/production/audio/page-front-production-audio',
         'page-front-production-audio-stream':window.APPPATH + 'front/production/audio-stream/page-front-production-audio-stream',
         'page-front-production-picture':window.APPPATH + 'front/production/picture/page-front-production-picture',

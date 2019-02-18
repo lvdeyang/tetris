@@ -77,17 +77,13 @@ public class TemplateTagController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年2月14日 下午3:01:16
-	 * @param String name 标签名称
-	 * @param Long parentId 父标签
 	 * @param String remark 备注
 	 * @return TemplateTagVO 标签
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/add")
-	public Object add(
-			String name,
-			String remark,
+	@RequestMapping(value = "/append")
+	public Object append(
 			Long parentId,
 			HttpServletRequest request) throws Exception{
 		
@@ -100,7 +96,7 @@ public class TemplateTagController {
 			throw new TemplateTagNotExistException(parentId);
 		}
 		
-		TemplateTagPO tag = templateTagService.add(name, remark, parent);
+		TemplateTagPO tag = templateTagService.append(parent);
 		
 		return new TemplateTagVO().set(tag);
 	}	
@@ -195,7 +191,7 @@ public class TemplateTagController {
 			throw new TemplateTagNotExistException(targetId);
 		}
 		
-		if(sourceTag.getParentId().equals(targetTag.getId())){
+		if(targetTag.getId().equals(sourceTag.getParentId())){
 			return false;
 		}
 		
@@ -204,6 +200,37 @@ public class TemplateTagController {
 		}
 		
 		templateTagService.move(sourceTag, targetTag);
+		
+		return true;
+	}
+	
+	/**
+	 * 标签置顶<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月18日 上午10:00:23
+	 * @param @PathVariable id 标签id
+	 * @param boolean 节点是否移动
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/top/{id}")
+	public Object top(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		TemplateTagPO tag = templateTagDao.findOne(id);	
+		if(tag == null){
+			throw new TemplateTagNotExistException(id);
+		}
+		
+		if(tag.getParentId() == null) return false;
+		
+		templateTagService.top(tag);
 		
 		return true;
 	}

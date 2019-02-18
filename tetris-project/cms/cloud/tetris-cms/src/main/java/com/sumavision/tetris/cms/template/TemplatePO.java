@@ -3,6 +3,9 @@ package com.sumavision.tetris.cms.template;
 import javax.persistence.Column;
 import javax.persistence.Table;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -32,6 +35,9 @@ public class TemplatePO extends AbstractBasePO{
 	
 	/** 模板分类标签 */
 	private Long templateTagId;
+	
+	/** 模板用途 */
+	private TemplateType type;
 	
 	/** 模板html内容 */
 	private String html;
@@ -85,6 +91,16 @@ public class TemplatePO extends AbstractBasePO{
 
 	public void setTemplateTagId(Long templateTagId) {
 		this.templateTagId = templateTagId;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "TYPE")
+	public TemplateType getType() {
+		return type;
+	}
+
+	public void setType(TemplateType type) {
+		this.type = type;
 	}
 
 	@Column(name = "HTML")

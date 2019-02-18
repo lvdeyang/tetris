@@ -7,6 +7,8 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.netflix.ribbon.proxy.annotation.Var;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
@@ -52,12 +54,10 @@ public class TemplateTagService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年2月14日 下午3:07:03
-	 * @param String name 标签名称
-	 * @param String remark 标签备注
 	 * @param TemplateTagPO parent 父标签
 	 * @return TemplateTagPO 新建的标签
 	 */
-	public TemplateTagPO add(String name, String remark, TemplateTagPO parent) throws Exception{
+	public TemplateTagPO append(TemplateTagPO parent) throws Exception{
 		
 		StringBufferWrapper parentPath = new StringBufferWrapper();
 		if(parent.getParentId() == null){
@@ -67,8 +67,7 @@ public class TemplateTagService {
 		}
 		
 		TemplateTagPO tag = new TemplateTagPO();
-		tag.setName(name);
-		tag.setRemark(remark);
+		tag.setName("新建的标签");
 		tag.setParentId(parent.getId());
 		tag.setParentPath(parentPath.toString());
 		tag.setUpdateTime(new Date());
@@ -175,6 +174,38 @@ public class TemplateTagService {
 		subTags.add(sourceTag);
 		
 		templateTagDao.save(subTags);
+	}
+	
+	/**
+	 * 置顶一个标签<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月18日 上午10:05:39
+	 * @param TemplateTagPO tag 待置顶的标签
+	 */
+	public void top(TemplateTagPO tag) throws Exception{
+		
+		if(tag.getParentId() == null) return;
+		
+		List<TemplateTagPO> subTags = templateTagQuery.findAllSubTags(tag.getId());
+		
+		tag.setParentId(null);
+		tag.setParentPath(null);
+		
+		if(subTags!=null && subTags.size()>0){
+			
+			String reg = new StringBufferWrapper().append("/").append(tag.getParentId()).toString();
+			
+			for(TemplateTagPO subTag:subTags){
+				subTag.setParentPath(subTag.getParentPath().split(reg)[1]);
+			}
+			
+		}
+		
+		if(subTags == null) subTags = new ArrayList<TemplateTagPO>();
+		subTags.add(tag);
+		templateTagDao.save(subTags);
+		
 	}
 	
 }
