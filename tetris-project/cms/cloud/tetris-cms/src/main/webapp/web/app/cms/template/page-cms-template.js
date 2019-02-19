@@ -477,6 +477,31 @@ define([
                 jsEditor.setTheme("ace/theme/idle_fingers");
                 jsEditor.getSession().setMode("ace/mode/javascript");
                 jsEditor.setFontSize(16);
+
+                //编辑器事件
+                self.editor.el.on('click.toolbar.show', '.editor-toolbar', function(e){
+                    e.stopPropagation();
+                    var $this = $(this);
+                    $this.removeClass('mini').addClass('max');
+                });
+                self.editor.el.on('click.toolbar.exit', '.toolbar-exit', function(e){
+                    e.stopPropagation();
+                    var $this = $(this);
+                    var $toolbar = $this.closest('.editor-toolbar');
+                    $toolbar.removeClass('max').addClass('mini');
+                });
+                self.editor.el.on('click.toolbar.max', '.change-max', function(e){
+                    e.stopPropagation();
+                    var $this = $(this);
+                    var $toolbar = $this.closest('.editor-toolbar');
+                    $toolbar.siblings('.editor-container').parent().parent().addClass('max');
+                });
+                self.editor.el.on('click.toolbar.mini', '.change-mini', function(e){
+                    e.stopPropagation();
+                    var $this = $(this);
+                    var $toolbar = $this.closest('.editor-toolbar');
+                    $toolbar.siblings('.editor-container').parent().parent().removeClass('max');
+                });
             }
         });
 
