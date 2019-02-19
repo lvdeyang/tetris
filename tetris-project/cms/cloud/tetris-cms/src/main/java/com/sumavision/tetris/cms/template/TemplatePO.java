@@ -1,10 +1,13 @@
 package com.sumavision.tetris.cms.template;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Table;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.Lob;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -103,7 +106,9 @@ public class TemplatePO extends AbstractBasePO{
 		this.type = type;
 	}
 
-	@Column(name = "HTML")
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "HTML", columnDefinition = "text")
 	public String getHtml() {
 		return html;
 	}
@@ -112,7 +117,9 @@ public class TemplatePO extends AbstractBasePO{
 		this.html = html;
 	}
 
-	@Column(name = "CSS")
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "CSS", columnDefinition = "text")
 	public String getCss() {
 		return css;
 	}
@@ -121,7 +128,9 @@ public class TemplatePO extends AbstractBasePO{
 		this.css = css;
 	}
 
-	@Column(name = "JS")
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "JS", columnDefinition = "text")
 	public String getJs() {
 		return js;
 	}

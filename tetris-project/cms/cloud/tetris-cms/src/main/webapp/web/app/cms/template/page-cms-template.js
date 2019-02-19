@@ -3,27 +3,23 @@
  */
 define([
     'text!' + window.APPPATH + 'cms/template/page-cms-template.html',
-    'text!' + window.APPPATH + 'cms/template/html-editor.html',
+    'text!' + window.APPPATH + 'cms/template/editor.html',
     'config',
     'jquery',
     'restfull',
     'context',
     'commons',
-    'ace',
+    'editor',
     'vue',
     'element-ui',
     'mi-frame',
-    'ace-theme-monokai',
-    'ace-theme-chrome',
-    'ace-language-tools',
-    'ace-mode-html',
-    'ace-mode-css',
-    'css!' + window.APPPATH + 'cms/template/page-cms-template.css'
-], function(tpl, tpl_html_editor, config, $, ajax, context, commons, ace, Vue){
-
-    ace.require('ace/ext/language_tools');
+    'css!' + window.APPPATH + 'cms/template/page-cms-template.css',
+    'css!' + window.APPPATH + 'cms/template/editor.css'
+], function(tpl, tpl_editors, config, $, ajax, context, commons, editor, Vue){
 
     var pageId = 'page-cms-template';
+
+    var instance = null;
 
     var init = function(){
 
@@ -33,7 +29,7 @@ define([
         var $page = document.getElementById(pageId);
         $page.innerHTML = tpl;
 
-        new Vue({
+        instance = new Vue({
             el: '#' + pageId + '-wrapper',
             data: {
                 menus:context.getProp('menus'),
@@ -92,6 +88,14 @@ define([
                 loading:{
                     tree:false,
                     addRoot:false
+                },
+                editor:{
+                    el:'',
+                    html:'',
+                    css:'',
+                    js:'',
+                    show:editorShow,
+                    hide:editorHide
                 }
             },
             computed:{
@@ -296,27 +300,7 @@ define([
                 templateEdit:function(scope){
                     var self = this;
                     var row = scope.row;
-                    var $htmlEditor = $(tpl_html_editor);
-                    $('body').append($htmlEditor);
-                    var htmlEditor = ace.edit($('#html-editor')[0]);
-                    htmlEditor.setOptions({
-                        enableBasicAutocompletion:true,
-                        enableSnippets:true,
-                        enableLiveAutocompletion:true//只能补全
-                    });
-                    htmlEditor.setTheme("ace/theme/monokai");
-                    htmlEditor.getSession().setMode("ace/mode/css");
-                    htmlEditor.setFontSize(16);
-
-                    var cssEditor = ace.edit($('#css-editor')[0]);
-                    cssEditor.setOptions({
-                        enableBasicAutocompletion:true,
-                        enableSnippets:true,
-                        enableLiveAutocompletion:true
-                    });
-                    cssEditor.setTheme("ace/theme/chrome");
-                    cssEditor.getSession().setMode("ace/mode/html");
-                    cssEditor.setFontSize(16);
+                    self.editor.show({});
                 },
                 rowEdit:function(scope){
                     var self = this;
@@ -458,13 +442,85 @@ define([
                 var self = this;
                 self.loadTagTree();
                 self.loadTemplateTypes();
+            },
+            mounted:function(){
+                var self = this;
+                self.editor.el = $(tpl_editors);
+                $('body').append(self.editor.el);
+
+                var htmlEditor = self.editor.html = editor.edit($('#html-editor')[0]);
+                htmlEditor.setOptions({
+                    enableBasicAutocompletion:true,
+                    enableSnippets:true,
+                    enableLiveAutocompletion:true
+                });
+                htmlEditor.setTheme("ace/theme/idle_fingers");
+                htmlEditor.getSession().setMode("ace/mode/html");
+                htmlEditor.setFontSize(16);
+
+                var cssEditor = self.editor.css = editor.edit($('#css-editor')[0]);
+                cssEditor.setOptions({
+                    enableBasicAutocompletion:true,
+                    enableSnippets:true,
+                    enableLiveAutocompletion:true
+                });
+                cssEditor.setTheme("ace/theme/xcode");
+                cssEditor.getSession().setMode("ace/mode/css");
+                cssEditor.setFontSize(16);
+
+                var jsEditor = self.editor.js = editor.edit($('#js-editor')[0]);
+                jsEditor.setOptions({
+                    enableBasicAutocompletion:true,
+                    enableSnippets:true,
+                    enableLiveAutocompletion:true
+                });
+                jsEditor.setTheme("ace/theme/idle_fingers");
+                jsEditor.getSession().setMode("ace/mode/javascript");
+                jsEditor.setFontSize(16);
             }
         });
 
     };
 
     var destroy = function(){
+        //销毁组件
+        instance.editor.html.destroy();
+        instance.editor.css.destroy();
+        instance.editor.js.destroy();
+        instance.editor.el.remove();
+    };
 
+    /**
+     * @param code:{
+     *     html:'',
+     *     css:'',
+     *     js:''
+     * }
+     */
+    var editorShow = function(code){
+        var html = code.html || '<!-- html编辑器 -->\n<!-- 使用class和id时要注意命名空间避免冲突 -->\n<div>\n    \n</div>';
+        var css = code.css || '/* css编辑器 */\n/* 使用class和id时要注意命名空间避免冲突 */\n';
+        var js = code.js || '//测试json数据\n{\n    \n}';
+        this.html.setValue(html);
+        this.html.selection.clearSelection();
+        this.css.setValue(css);
+        this.css.selection.clearSelection();
+        this.js.setValue(js);
+        this.js.selection.clearSelection();
+        this.el.show();
+    };
+
+    /**
+     * @returns code:{
+     *     html:'',
+     *     css:'',
+     *     js:''
+     * }
+     */
+    var editorHide = function(){
+        var code = {};
+        this.el.hide();
+        return code;
     };
 
     var groupList = {

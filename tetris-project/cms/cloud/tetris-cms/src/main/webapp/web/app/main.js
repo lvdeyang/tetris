@@ -12,14 +12,6 @@ require.config({
 
         'TweenLite':window.LIBPATH + 'TweenMax/cmd/TweenLite',
 
-        'ace':window.LIBPATH + 'ace/src/ace',
-        'ace-language-tools':window.LIBPATH + 'ace/src/ext-language_tools',
-        'ace-theme-monokai':window.LIBPATH + 'ace/src/theme-monokai',
-        'ace-theme-chrome':window.LIBPATH + 'ace/src/theme-chrome',
-        'ace-mode-html':window.LIBPATH + 'ace/src/mode-html',
-        'ace-mode-css':window.LIBPATH + 'ace/src/mode-css',
-        'ace-mode-javascript':window.LIBPATH + 'ace/src/mode-javascript',
-
         /* commons */
         'context':window.COMMONSPATH + 'context/context',
         'page-wrapper':window.COMMONSPATH + 'page/page-wrapper',
@@ -32,6 +24,7 @@ require.config({
         'uploader':window.COMMONSPATH + 'uploader/Uploader',
         'menu':window.COMMONSPATH + 'menu/menu',
         'bpmn-ext':window.COMMONSPATH + 'bpmn/ext/BpmnExtension',
+        'editor':window.COMMONSPATH + 'editor/definitions/editor-for-website',
 
         /* app */
         'config':window.APPPATH + 'config',
@@ -72,27 +65,6 @@ require.config({
         'json':{
         	deps:['jquery'],
         	exports:'jQuery'
-        },
-        'ace':{
-            exports:'ace'
-        },
-        'ace-language-tools':{
-            deps:['ace']
-        },
-        'ace-theme-monokai':{
-            deps:['ace']
-        },
-        'ace-theme-chrome':{
-        	deps:['ace']
-        },
-        'ace-mode-html':{
-            deps:['ace']
-        },
-        'ace-mode-css':{
-        	deps:['ace']
-        },
-        'ace-mode-javascript':{
-        	deps:['ace']
         }
     }
 });
