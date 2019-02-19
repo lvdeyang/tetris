@@ -1,0 +1,23 @@
+/* ace-reset */
+.ace-monokai .ace_print-margin{background:transparent!important;}
+.ace-github .ace_print-margin{background:transparent!important;}
+.ace-idle-fingers .ace_print-margin{background:transparent!important;}
+.ace-xcode .ace_print-margin{background:transparent!important;}
+
+/* editor */
+.editor{position:fixed; left:0; top:0; z-index:1000; width:100%; height:100%; background-color:#F2F3F7; display:none;}
+.editor,
+.editor>div,
+.editor>span{box-sizing:border-box;}
+.editor-wrapper{height:100%; width:100%; position:relative;}
+
+.editor .top{width:50%; height:100%;}
+.editor .bottom{width:50%; height:100%; position:absolute; top:0; right:0;}
+.editor .top-left{width:100%; height:50%; position:relative;}
+.editor .bottom-left{width:100%; height:50%; position:relative;}
+.editor .top-right{width:100%; height:50%; position:relative;}
+.editor .bottom-right{width:100%; height:50%; position:relative;}
+
+.editor .editor-container{width:100%; height:100%;}
+.editor .editor-toolbar{position:absolute; right:5px; top:5px; z-index:20;}
+.editor .editor-toolbar:hover{cursor:pointer;}
