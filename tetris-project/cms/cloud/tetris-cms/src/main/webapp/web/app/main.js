@@ -9,6 +9,7 @@ require.config({
         'jquery':window.LIBPATH + 'frame/jQuery/jquery-2.2.3.min',
         'json':window.LIBPATH + 'frame/jQuery/jquery.json',
         'element-ui':window.LIBPATH + 'ui/element-ui/element-ui-2.4.3.min',
+        'juicer':window.LIBPATH + 'frame/juicer-0.6.5/juicer-v0.6.5-min',
 
         'TweenLite':window.LIBPATH + 'TweenMax/cmd/TweenLite',
 
@@ -65,12 +66,16 @@ require.config({
         'json':{
         	deps:['jquery'],
         	exports:'jQuery'
+        },
+        'juicer':{
+            exports:'juicer'
         }
     }
 });
 
 require([
     'storage',
+    'juicer',
     'vue',
     'router',
     'context',
@@ -79,7 +84,22 @@ require([
     'restfull',
     'element-ui',
     'css!' + window.APPPATH + 'reset.css'
-], function(storage, Vue, router, context, menuUtil, config, ajax){
+], function(storage, juicer, Vue, router, context, menuUtil, config, ajax){
+
+    juicer.set({
+        'tag::operationOpen': '{@',    //操作标记（循环，判断）
+        'tag::operationClose': '}',
+        'tag::interpolateOpen': '${',  //插值转义标记
+        'tag::interpolateClose': '}',
+        'tag::noneencodeOpen': '$${',  //不转义标记
+        'tag::noneencodeClose': '}',
+        'tag::commentOpen': '{#',       //注释标记
+        'tag::commentClose': '}',
+        'cache':false,
+        'strip':true,
+        'errorhandling':true,
+        'detection':true
+    });
 
     var app = null;
 
