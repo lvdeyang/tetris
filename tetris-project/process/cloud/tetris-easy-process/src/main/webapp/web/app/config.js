@@ -11,7 +11,7 @@ define(function(){
 
         //配置默认页面跳转
         redirect:{
-            home:'page-home',
+            home:'page-process',
             error:'page-error'
         },
 

@@ -7,14 +7,14 @@ spring:
     database-schema-update: true
     #这里保存全部历史记录
     history-level: full
-#  application:
-#    name: suma-bvc-business
-#  cloud:
+  application:
+    name: tetris-easy-process
+  cloud:
 #    config:
 #      uri: http://localhost:8769
 #      fail-fast: true
-#    client:
-#      ipAddress: 192.165.56.71
+    client:
+      ipAddress: localhost
 #  profiles:
 #    active: pro
   datasource:
@@ -64,23 +64,26 @@ spring:
       enabled: true    
 server:
 #  context-path: /mims 
-  address: 192.165.56.71
-  port: 8084
+#  address: 192.165.56.71
+  port: 8087
 logging:
   pattern:
     console: "%d - %msg%n" 
     level: INFO 
   path: /var/log/tomcat  
-#ribbon:
-#  ReadTimeout: 120000
-#  ConnectTimeout: 30000
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://192.165.56.64:8761/eureka/
-#  instance:
-#    instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
-#    prefer-ip-address: true
+ribbon:
+  eager-load:
+      enabled: true
+      clients: tetris-menu, tetris-user
+  ReadTimeout: 120000
+  ConnectTimeout: 30000
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8081/eureka/
+  instance:
+    instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
+    prefer-ip-address: true
 #security:
 #  oauth2:
 #    resource:
@@ -90,4 +93,6 @@ logging:
 #      prefer-token-info: false
       #指定user info的URI
 #      user-info-uri: http://192.165.56.64:5000/uaa/users/current
-    
+feign: 
+  hystrix: 
+   enabled: true     

@@ -8,7 +8,7 @@
     <version>0.0.1-SNAPSHOT</version>
     
     <name>tetris-easy-process</name>
-    <description>tetris-easy-process</description>
+    <description>流程管理</description>
   
     <packaging>war</packaging>
     
@@ -23,6 +23,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
 	</properties>
 	
 	<dependencies>
@@ -113,16 +114,25 @@
 		  	<groupId>org.apache.httpcomponents</groupId>
 		  	<artifactId>httpasyncclient</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.hadoop</groupId>
-			<artifactId>hadoop-core</artifactId>
-			<version>1.0.0</version>
-		</dependency>
 		
-		<!-- user-sdk -->
+		<!-- user-feign -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-user-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- menu-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-menu-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- tetris-ui -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-ui</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
@@ -133,7 +143,29 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- eureka依赖 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-feign</artifactId>
+		</dependency>
+		
 	</dependencies>
+	
+	<dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 	
 	<build>
     	<finalName>springboot</finalName>
