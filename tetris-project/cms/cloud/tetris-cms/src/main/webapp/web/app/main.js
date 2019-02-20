@@ -25,7 +25,7 @@ require.config({
         'menu':window.COMMONSPATH + 'menu/menu',
         'bpmn-ext':window.COMMONSPATH + 'bpmn/ext/BpmnExtension',
         'editor':window.COMMONSPATH + 'editor/definitions/editor-for-website',
-
+        
         /* app */
         'config':window.APPPATH + 'config',
         'commons':window.APPPATH + 'commons',
@@ -45,7 +45,8 @@ require.config({
 
         /* pages */
         'page-cms-template':window.APPPATH + 'cms/template/page-cms-template',
-        'page-cms-article':window.APPPATH + 'cms/article/page-cms-article'
+        'page-cms-article':window.APPPATH + 'cms/article/page-cms-article',
+        'page-cms-column':window.APPPATH + 'cms/column/page-cms-column'
 
     },
     shim:{

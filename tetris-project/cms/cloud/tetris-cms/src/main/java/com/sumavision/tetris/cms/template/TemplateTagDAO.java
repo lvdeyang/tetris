@@ -17,7 +17,7 @@ public interface TemplateTagDAO extends BaseDAO<TemplateTagPO>{
 	 * @param String reg2 '%/id/%'
 	 * @return List<TemplateTagPO> 标签列表
 	 */
-	@Query(value = "SELECT * FROM TETRIS_CMS_TEMPLATE_TAG WHERE PARENT_PATH LIKE ?1 OR PARENT_PATH LIKE ?2", nativeQuery = true)
+	@Query(value = "SELECT * FROM TETRIS_CMS_TEMPLATE_TAG WHERE parentPath LIKE ?1 OR PARENT_PATH LIKE ?2", nativeQuery = true)
 	public List<TemplateTagPO> findAllSubTags(String reg1, String reg2);
 	
 }
