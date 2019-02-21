@@ -3,7 +3,6 @@
  */
 define([
     'text!' + window.APPPATH + 'cms/template/page-cms-template.html',
-    'text!' + window.APPPATH + 'cms/template/editor.html',
     'config',
     'jquery',
     'restfull',
@@ -13,9 +12,8 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
-    'css!' + window.APPPATH + 'cms/template/page-cms-template.css',
-    'css!' + window.APPPATH + 'cms/template/editor.css'
-], function(tpl, tpl_editors, config, $, ajax, context, commons, editor, Vue){
+    'css!' + window.APPPATH + 'cms/template/page-cms-template.css'
+], function(tpl, config, $, ajax, context, commons, editor, Vue){
 
     var pageId = 'page-cms-template';
 
@@ -83,34 +81,11 @@ define([
                             current:''
                         },
                         loading:false
-                    },
-                    selectText:{
-                        visible:false,
-                        data:[],
-                        current:''
-                    },
-                    selectImage:{
-                        visible:false,
-                        data:[],
-                        current:''
-                    },
-                    viewportSize:{
-                        visible:false,
-                        width:'',
-                        height:''
                     }
                 },
                 loading:{
                     tree:false,
                     addRoot:false
-                },
-                editor:{
-                    el:'',
-                    html:'',
-                    css:'',
-                    js:'',
-                    show:editorShow,
-                    hide:editorHide
                 }
             },
             computed:{
@@ -315,7 +290,7 @@ define([
                 templateEdit:function(scope){
                     var self = this;
                     var row = scope.row;
-                    self.editor.show({});
+                    self.$refs.templateEditor.show(row);
                 },
                 rowEdit:function(scope){
                     var self = this;
@@ -451,75 +426,6 @@ define([
                 currentSelectedTagChange:function(data){
                     var self = this;
                     self.dialog.selectTag.tree.current = data;
-                },
-                handleSelectTextClose:function(){
-                    var self = this;
-                    self.dialog.selectText.data.splice(0, self.dialog.selectText.data.length);
-                    self.dialog.selectText.current = '';
-                    self.dialog.selectText.visible = false;
-                },
-                currentSelectTextChange:function(row){
-                    var self = this;
-                    self.dialog.selectText.current = row;
-                },
-                handleSelectTextCommit:function(){
-                    var self = this;
-                    var row = self.dialog.selectText.current;
-                    self.editor.js.insert('"'+row.content+'"');
-                    self.editor.js.resize();
-                    self.handleSelectTextClose();
-                },
-                handleSelectImageClose:function(){
-                    var self = this;
-                    self.dialog.selectImage.data.splice(0, self.dialog.selectImage.data.length);
-                    self.dialog.selectImage.current = '';
-                    self.dialog.selectImage.visible = false;
-                },
-                currentSelectImageChange:function(row){
-                    var self = this;
-                    self.dialog.selectImage.current = row;
-                },
-                handleSelectImageCommit:function(){
-                    var self = this;
-                    var row = self.dialog.selectImage.current;
-                    self.editor.js.insert('"'+window.BASEPATH + row.previewUrl+'"');
-                    self.editor.js.resize();
-                    self.handleSelectImageClose();
-                },
-                handleViewportSizeClose:function(){
-                    var self = this;
-                    self.dialog.viewportSize.width = '';
-                    self.dialog.viewportSize.height = '';
-                    self.dialog.viewportSize.visible = false;
-                },
-                handleViewportSizeCommit:function(){
-                    var self = this;
-                    var $viewport = self.editor.el.find('.preview-viewport');
-                    $viewport.css({
-                        width:self.dialog.viewportSize.width.indexOf('%')>=0?self.dialog.viewportSize.width:(self.dialog.viewportSize.width + 'px'),
-                        height:self.dialog.viewportSize.height.indexOf('%')>=0?self.dialog.viewportSize.height:(self.dialog.viewportSize.height + 'px')
-                    });
-                    self.handleViewportSizeClose();
-                },
-                handleViewportMaximize:function(){
-                    var self = this;
-                    self.dialog.viewportSize.width = '100%';
-                    self.dialog.viewportSize.height = '100%';
-                },
-                handleViewportSD:function(){
-                    var self = this;
-                    self.dialog.viewportSize.width = '1280';
-                    self.dialog.viewportSize.height = '720';
-                },
-                handleViewportHD:function(){
-                    var self = this;
-                    self.dialog.viewportSize.width = '1920';
-                    self.dialog.viewportSize.height = '1080';
-                },
-                handleViewportPhone:function(){
-                    var self = this;
-                    self.dialog.viewportSize.width = '1080';
-                    self.dialog.viewportSize.height = '1920';
                 }
             },
             created:function(){
@@ -529,119 +435,7 @@ define([
             },
             mounted:function(){
                 var self = this;
-                self.editor.el = $(tpl_editors);
-                $('body').append(self.editor.el);
 
-                var htmlEditor = self.editor.html = editor.edit(self.editor.el.find('.html-editor')[0]);
-                htmlEditor.setOptions({
-                    enableBasicAutocompletion:true,
-                    enableSnippets:true,
-                    enableLiveAutocompletion:true
-                });
-                htmlEditor.setTheme("ace/theme/idle_fingers");
-                htmlEditor.getSession().setMode("ace/mode/html");
-                htmlEditor.setFontSize(16);
-
-                var cssEditor = self.editor.css = editor.edit(self.editor.el.find('.css-editor')[0]);
-                cssEditor.setOptions({
-                    enableBasicAutocompletion:true,
-                    enableSnippets:true,
-                    enableLiveAutocompletion:true
-                });
-                cssEditor.setTheme("ace/theme/xcode");
-                cssEditor.getSession().setMode("ace/mode/css");
-                cssEditor.setFontSize(16);
-
-                var jsEditor = self.editor.js = editor.edit(self.editor.el.find('.js-editor')[0]);
-                jsEditor.setOptions({
-                    enableBasicAutocompletion:true,
-                    enableSnippets:true,
-                    enableLiveAutocompletion:true
-                });
-                jsEditor.setTheme("ace/theme/idle_fingers");
-                jsEditor.getSession().setMode("ace/mode/javascript");
-                jsEditor.setFontSize(16);
-
-                //格式化
-                var fmt = editor.require('ace/ext/beautify');
-
-                //编辑器事件
-                self.editor.el.on('click.toolbar.show', '.editor-toolbar', function(e){
-                    e.stopPropagation();
-                    var $this = $(this);
-                    $this.removeClass('mini').addClass('max');
-                });
-                self.editor.el.on('click.toolbar.exit', '.toolbar-exit', function(e){
-                    e.stopPropagation();
-                    var $this = $(this);
-                    var $toolbar = $this.closest('.editor-toolbar');
-                    $toolbar.removeClass('max').addClass('mini');
-                });
-                self.editor.el.on('click.toolbar.max', '.change-max', function(e){
-                    e.stopPropagation();
-                    var $this = $(this);
-                    var $toolbar = $this.closest('.editor-toolbar');
-                    $toolbar.siblings('.editor-container').closest('.split').addClass('max');
-                });
-                self.editor.el.on('click.toolbar.mini', '.change-mini', function(e){
-                    e.stopPropagation();
-                    var $this = $(this);
-                    var $toolbar = $this.closest('.editor-toolbar');
-                    $toolbar.siblings('.editor-container').closest('.split').removeClass('max');
-                });
-                self.editor.el.on('click.insert.variable', '.insert-variable', function(e){
-                    e.stopPropagation();
-                    self.editor.html.insert('${_'+new Date().getTime()+'}');
-                    fmt.beautify(self.editor.html.session);
-                });
-                self.editor.el.on('click.insert.if', '.insert-if', function(e){
-                    e.stopPropagation();
-                    self.editor.html.insert('\n{@if _'+new Date().getTime()+' == 0}\n{@else}\n{@/if}\n');
-                    fmt.beautify(self.editor.html.session);
-                });
-                self.editor.el.on('click.insert.for', '.insert-for', function(e){
-                    e.stopPropagation();
-                    self.editor.html.insert('\n{@each _'+new Date().getTime()+' as scope, index}\n${scope}\n{@/each}\n');
-                    fmt.beautify(self.editor.html.session);
-                });
-                self.editor.el.on('click.insert.image', '.insert-image', function(e){
-                    e.stopPropagation();
-                    self.dialog.selectImage.visible = true;
-                    ajax.post('/cms/resource/list/image', null, function(data){
-                        if(data && data.length>0){
-                            for(var i=0; i<data.length; i++){
-                                self.dialog.selectImage.data.push(data[i]);
-                            }
-                        }
-                    });
-                });
-                self.editor.el.on('click.insert.text', '.insert-text', function(e){
-                    e.stopPropagation();
-                    self.dialog.selectText.visible = true;
-                    ajax.post('/cms/resource/list/text', null, function(data){
-                        if(data && data.length>0){
-                            for(var i=0; i<data.length; i++){
-                                self.dialog.selectText.data.push(data[i]);
-                            }
-                        }
-                    });
-                });
-                self.editor.html.getSession().on('change', function(e) {
-                    doPreview();
-                });
-                self.editor.css.getSession().on('change', function(e) {
-                    doPreview();
-                });
-                self.editor.js.getSession().on('change', function(e) {
-                    doPreview();
-                });
-                self.editor.el.on('click.preview.viewport.size', '.change-size', function(e){
-                    e.stopPropagation();
-                    var $viewport = self.editor.el.find('.preview-viewport');
-                    self.dialog.viewportSize.width = $viewport[0].clientWidth;
-                    self.dialog.viewportSize.height = $viewport[0].clientHeight;
-                    self.dialog.viewportSize.visible = true;
-                });
             }
         });
 
@@ -649,64 +443,7 @@ define([
 
     var destroy = function(){
         //销毁组件
-        instance.editor.html.destroy();
-        instance.editor.css.destroy();
-        instance.editor.js.destroy();
-        instance.editor.el.remove();
-    };
-
-    /**
-     * @param code:{
-     *     html:'',
-     *     css:'',
-     *     js:''
-     * }
-     */
-    var editorShow = function(code){
-        var html = code.html || '<!-- html编辑器 -->\n<!-- 使用class和id时要注意命名空间避免冲突 -->\n<div>\n    \n</div>';
-        var css = code.css || '/* css编辑器 */\n/* 使用class和id时要注意命名空间避免冲突 */\n';
-        var js = code.js || '//测试json数据\n//key与value必须使用双引号\n{\n    \n}';
-        this.html.setValue(html);
-        this.html.selection.clearSelection();
-        this.css.setValue(css);
-        this.css.selection.clearSelection();
-        this.js.setValue(js);
-        this.js.selection.clearSelection();
-        this.el.show();
-    };
-
-    /**
-     * @returns code:{
-     *     html:'',
-     *     css:'',
-     *     js:''
-     * }
-     */
-    var editorHide = function(){
-        var code = {};
-        this.el.hide();
-        return code;
-    };
-
-    var doPreview = function(){
-        var $editor = instance.editor.el;
-        var $viewport = $editor.find('.preview-viewport');
-        var html = instance.editor.html.getValue();
-        var css = instance.editor.css.getValue();
-        var reg = /("([^\\\"]*(\\.)?)*")|('([^\\\']*(\\.)?)*')|(\/{2,}.*?(\r|\n|$))|(\/\*(\n|.)*?\*\/)/g;
-        var js = instance.editor.js.getValue().replace(reg, function(word) {
-            // 去除注释后的文本
-            return /^\/{2,}/.test(word) || /^\/\*/.test(word) ? "" : word;
-        });
-
-        var json = null;
-        try{
-            json = $.parseJSON(js);
-            html = juicer(html).render(json);
-        }catch(e){
-            console.log(e);
-        }
-        $viewport.empty().append('<style type="text/css">'+css+'</style>').append(html);
+        instance.$refs.templateEditor.destroy();
     };
 
     var groupList = {

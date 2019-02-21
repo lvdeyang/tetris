@@ -25,7 +25,7 @@ require.config({
         'uploader':window.COMMONSPATH + 'uploader/Uploader',
         'menu':window.COMMONSPATH + 'menu/menu',
         'bpmn-ext':window.COMMONSPATH + 'bpmn/ext/BpmnExtension',
-        'editor':window.COMMONSPATH + 'editor/definitions/editor-for-website',
+        'ace-for-website':window.COMMONSPATH + 'ace/quick-build/ace-for-website',
         
         /* app */
         'config':window.APPPATH + 'config',
@@ -46,6 +46,7 @@ require.config({
 
         /* pages */
         'page-cms-template':window.APPPATH + 'cms/template/page-cms-template',
+        'editor':window.APPPATH + 'cms/template/editor',
         'page-cms-article':window.APPPATH + 'cms/article/page-cms-article',
         'page-cms-column':window.APPPATH + 'cms/column/page-cms-column'
 

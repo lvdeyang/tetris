@@ -30,4 +30,10 @@ public class TextVO {
 		return this;
 	}
 	
+	public TextVO set(Text entity){
+		this.setName(entity.getName())
+			.setContent(entity.getContent());
+		return this;
+	}
+	
 }

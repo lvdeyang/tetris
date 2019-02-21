@@ -4,40 +4,48 @@
 .ace-idle-fingers .ace_print-margin{background:transparent!important;}
 .ace-xcode .ace_print-margin{background:transparent!important;}
 
+/* element-ui 样式 */
+.el-tag + .el-tag {margin-left:10px;  }
+.button-new-tag {width:78px; margin-left:10px; height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;}
+.input-new-tag {width:78px; margin-left:10px; vertical-align:bottom; position:relative; bottom:1px;}
+
 /* editor */
-.editor{position:fixed; left:0; top:0; z-index:1000; width:100%; height:100%; background-color:#fff; display:none;}
-.editor,
-.editor>div,
-.editor>span{box-sizing:border-box;}
+.template-editor{position:fixed; left:0; top:0; z-index:1000; width:100%; height:100%; background-color:#fff; display:none;}
+.template-editor,
+.template-editor>div,
+.template-editor>span{box-sizing:border-box;}
 .editor-wrapper{height:100%; width:100%; position:relative;}
 
 .core{position:absolute; top:0; left:0; right:50px; bottom:0;}
 .toolbar{width:50px; height:100%; position:absolute; top:0; right:0; background-color:#f2f3f7;}
+.toolbar>.button-scope{width:50px; height:50px; padding:5px; box-sizing:border-box;}
+.toolbar>.button-scope:not(:first-child){padding-top:0; height:45px;}
 
-.editor .top{width:50%; height:100%;}
-.editor .bottom{width:50%; height:100%; position:absolute; top:0; right:0;}
-.editor .top-left{width:100%; height:50%;}
-.editor .bottom-left{width:100%; height:50%;}
-.editor .top-right{width:100%; height:50%;}
-.editor .bottom-right{width:100%; height:50%;}
+.template-editor .left{width:50%; height:100%;}
+.template-editor .right{width:50%; height:100%; position:absolute; top:0; right:0;}
+.template-editor .top-left{width:100%; height:100%;}
+.template-editor .bottom-left{width:100%; height:50%;}
+.template-editor .top-right{width:100%; height:50%; background-color:#fff;}
+.template-editor .bottom-right{width:100%; height:50%;}
 
-.editor .top-left.max,
-.editor .bottom-left.max,
-.editor .top-right.max,
-.editor .bottom-right.max{position:fixed; left:0; top:0; z-index:500; width:100%; height:100%;}
+.template-editor .top-left.max,
+.template-editor .bottom-left.max,
+.template-editor .top-right.max,
+.template-editor .bottom-right.max{position:fixed; left:0; top:0; z-index:500; width:100%; height:100%;}
 
-.editor .editor-container{width:100%; height:100%;}
-.editor .background-dark{background:#000; width:100%; height:100%;}
-.editor .preview{display:table;}
-.editor .preview>div{width:100%; height:100%; display:table-cell; vertical-align:middle;}
-.editor .preview-viewport{display:block; margin:auto; width:935px; height:486.5px; background-color:#fff; text-align:left;}
-.editor .editor-toolbar{position:absolute; right:0; bottom:0; z-index:20; overflow:hidden; border-style:solid; border-color:lightblue gray gray rgb(206, 173, 230);}
-.editor .editor-toolbar.mini{width:0; height:0; border-width:10px;}
-.editor .editor-toolbar.max{border-width:0; width:30px; height:auto; overflow:visible;}
-.editor .editor-toolbar.max .button-scope button{display:inline-block;}
-.editor .editor-toolbar:hover{cursor:pointer;}
+.template-editor .editor-container{width:100%; height:100%;}
+.template-editor .preview-container{width:100%; height:100%; overflow:auto; background-color:gray;}
+.template-editor .preview-layer0{width:100%; height:100%; display:table;}
+.template-editor .preview-layer1{width:100%; height:100%; display:table-cell; vertical-align:middle;}
+.template-editor .preview-layer2{display:block; margin:auto; width:100%; height:100%; background-color:#fff; text-align:left;}
+.template-editor .preview-viewport{width:100%; height:100%; float:left; overflow:auto;}
+.template-editor .editor-toolbar{position:absolute; right:0; bottom:0; z-index:20; overflow:hidden; border-style:solid; border-color:lightblue gray gray rgb(206, 173, 230);}
+.template-editor .editor-toolbar.mini{width:0; height:0; border-width:10px;}
+.template-editor .editor-toolbar.max{border-width:0; width:30px; height:auto; overflow:visible;}
+.template-editor .editor-toolbar.max .button-scope button{display:inline-block;}
+.template-editor .editor-toolbar:hover{cursor:pointer;}
 
-.editor .editor-toolbar .button-scope{width:30px; height:30px; line-height:30px; text-align:center;}
-.editor .editor-toolbar .button-scope button{width:100%; height:100%; text-align:center; padding:0; font-size:16px; border-radius:0; display:none;}
-.editor .editor-toolbar .button-scope button:focus,
-.editor .editor-toolbar .button-scope button:active{outline:none;}
+.template-editor .editor-toolbar .button-scope{width:30px; height:30px; line-height:30px; text-align:center;}
+.template-editor .editor-toolbar .button-scope button{width:100%; height:100%; text-align:center; padding:0; font-size:16px; border-radius:0; display:none;}
+.template-editor .editor-toolbar .button-scope button:focus,
+.template-editor .editor-toolbar .button-scope button:active{outline:none;}

@@ -189,7 +189,7 @@
 
         <!-- 选择标签对话框 -->
         <el-dialog
-                title="修改模板"
+                title="修改标签"
                 :visible.sync="dialog.selectTag.visible"
                 width="550px"
                 :before-close="handleSelectTagClose">
@@ -230,126 +230,7 @@
 
         </el-dialog>
 
-        <!-- 选择文本对话框 -->
-        <el-dialog
-                title="选择测试文本"
-                :visible.sync="dialog.selectText.visible"
-                width="550px"
-                :before-close="handleSelectTextClose">
-
-            <el-table
-                    :data="dialog.selectText.data"
-                    style="width:100%"
-                    highlight-current-row
-                    @current-change="currentSelectTextChange"
-                    height="300px">
-                <el-table-column
-                        prop="name"
-                        label="名称">
-                </el-table-column>
-                <el-table-column
-                        prop="content"
-                        label="内容">
-                </el-table-column>
-            </el-table>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.selectText.visible = false">取 消</el-button>
-                <el-button size="medium" type="primary" @click="handleSelectTextCommit">确 定</el-button>
-            </span>
-
-        </el-dialog>
-
-        <!-- 选择图片对话框 -->
-        <el-dialog
-                title="选择测试图片"
-                :visible.sync="dialog.selectImage.visible"
-                width="550px"
-                :before-close="handleSelectImageClose">
-
-            <el-table
-                    :data="dialog.selectImage.data"
-                    style="width:100%"
-                    highlight-current-row
-                    @current-change="currentSelectImageChange"
-                    height="300px">
-                <el-table-column
-                        prop="name"
-                        label="名称">
-                </el-table-column>
-                <el-table-column
-                        prop="previewUrl"
-                        label="预览地址">
-                </el-table-column>
-            </el-table>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.selectImage.visible = false">取 消</el-button>
-                <el-button size="medium" type="primary" @click="handleSelectImageCommit">确 定</el-button>
-            </span>
-
-        </el-dialog>
-
-        <!-- 选择图片对话框 -->
-        <el-dialog
-                title="选择测试图片"
-                :visible.sync="dialog.selectImage.visible"
-                width="550px"
-                :before-close="handleSelectImageClose">
-
-            <el-table
-                    :data="dialog.selectImage.data"
-                    style="width:100%"
-                    highlight-current-row
-                    @current-change="currentSelectImageChange"
-                    height="300px">
-                <el-table-column
-                        prop="name"
-                        label="名称">
-                </el-table-column>
-                <el-table-column
-                        prop="previewUrl"
-                        label="预览地址">
-                </el-table-column>
-            </el-table>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.selectImage.visible = false">取 消</el-button>
-                <el-button size="medium" type="primary" @click="handleSelectImageCommit">确 定</el-button>
-            </span>
-
-        </el-dialog>
-
-        <!-- 预览窗口尺寸调整 -->
-        <el-dialog
-                title="预览窗口尺寸"
-                :visible.sync="dialog.viewportSize.visible"
-                width="550px"
-                :before-close="handleViewportSizeClose">
-
-            <el-button-group style="margin-bottom:22px;">
-                <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportMaximize"><span style="font-size:14px; position:relative; top:2px;" class="feather-icon-maximize"></span></el-button>
-                <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportSD">SD</el-button>
-                <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportHD">HD</el-button>
-                <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportPhone"><span style="font-size:20px; position:relative; top:3px;" class="icon-mobile-phone"></span></el-button>
-            </el-button-group>
-
-            <el-form ref="form" label-width="20px">
-                <el-form-item label="宽">
-                    <el-input v-model="dialog.viewportSize.width"></el-input>
-                </el-form-item>
-                <el-form-item label="高">
-                    <el-input v-model="dialog.viewportSize.height"></el-input>
-                </el-form-item>
-            </el-form>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.viewportSize.visible = false">取 消</el-button>
-                <el-button size="medium" type="primary" @click="handleViewportSizeCommit">确 定</el-button>
-            </span>
-
-        </el-dialog>
-
+        <template-editor ref="templateEditor" id="template-editor"></template-editor>
 
     </template>
 

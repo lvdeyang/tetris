@@ -1,68 +1,314 @@
-<!-- 代码编辑 -->
-<div class="editor">
-    <div class="editor-wrapper">
-        <div class="core">
-            <div class="top">
-                <div class="split top-left">
-                    <div class="editor-wrapper">
-                        <div class="editor-container html-editor"></div>
-                        <div class="editor-toolbar mini">
-                            <div class="button-scope"><button class="el-button el-button--default insert-variable" title="插入变量"><span class="feather-icon-activity"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default insert-if" title="分支结构"><span class="feather-icon-git-branch"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default insert-for" title="循环结构"><span class="feather-icon-repeat"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default change-max" title="全屏"><span class="feather-icon-maximize"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default change-mini" title="退出全屏"><span class="feather-icon-minimize"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default toolbar-exit" title="最小化菜单"><span class="feather-icon-log-out"></span></button></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="split bottom-left">
-                    <div class="editor-wrapper">
-                        <div class="editor-container css-editor"></div>
-                        <div class="editor-toolbar mini">
-                            <div class="button-scope"><button class="el-button el-button--default change-max" title="全屏"><span class="feather-icon-maximize"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default change-mini" title="退出全屏"><span class="feather-icon-minimize"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default toolbar-exit" title="最小化菜单"><span class="feather-icon-log-out"></span></button></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="bottom">
-                <div class="split top-right">
-                    <div class="editor-wrapper">
-                        <div class="background-dark">
-                            <div class="editor-container preview">
-                                <div>
-                                    <div class="editor-wrapper" style="overflow:auto;">
-                                        <div class="preview-viewport"></div>
-                                    </div>
-                                </div>
-                            </div>
+<div>
+
+    <!-- 编辑器 -->
+    <div class="template-editor" :id="id">
+        <div class="editor-wrapper">
+            <div class="core">
+                <div class="left">
+                    <div class="split top-left">
+                        <div class="editor-wrapper">
+                            <div class="editor-container html-editor"></div>
                             <div class="editor-toolbar mini">
-                                <div class="button-scope"><button class="el-button el-button--default change-size" title="调节视图尺寸"><span class="feather-icon-airplay"></span></button></div>
+                                <div class="button-scope"><button class="el-button el-button--default insert-variable" title="插入变量"><span class="feather-icon-activity"></span></button></div>
+                                <div class="button-scope"><button class="el-button el-button--default insert-if" title="分支结构"><span class="feather-icon-git-branch"></span></button></div>
+                                <div class="button-scope"><button class="el-button el-button--default insert-for" title="循环结构"><span class="feather-icon-repeat"></span></button></div>
                                 <div class="button-scope"><button class="el-button el-button--default change-max" title="全屏"><span class="feather-icon-maximize"></span></button></div>
                                 <div class="button-scope"><button class="el-button el-button--default change-mini" title="退出全屏"><span class="feather-icon-minimize"></span></button></div>
                                 <div class="button-scope"><button class="el-button el-button--default toolbar-exit" title="最小化菜单"><span class="feather-icon-log-out"></span></button></div>
                             </div>
                         </div>
                     </div>
+                    <!--<div class="split bottom-left">
+
+                    </div>-->
                 </div>
-                <div class="split bottom-right">
-                    <div class="editor-wrapper">
-                        <div class="editor-container js-editor"></div>
-                        <div class="editor-toolbar mini">
-                            <div class="button-scope"><button class="el-button el-button--default insert-image" title="插入图片"><span class="feather-icon-image"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default insert-text" title="插入文本"><span class="feather-icon-type"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default change-max" title="全屏"><span class="feather-icon-maximize"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default change-mini" title="退出全屏"><span class="feather-icon-minimize"></span></button></div>
-                            <div class="button-scope"><button class="el-button el-button--default toolbar-exit" title="最小化菜单"><span class="feather-icon-log-out"></span></button></div>
+                <div class="right">
+                    <div class="split top-right" style="border-bottom:1px solid gray;">
+                        <div class="editor-wrapper">
+                            <div class="editor-container">
+                                <el-scrollbar style="height:100%;">
+                                    <el-tree
+                                            ref="variableTree"
+                                            :props = "tree.props"
+                                            :data = "tree.data"
+                                            :expand-on-click-node="false"
+                                            default-expand-all>
+
+                                        <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
+                                            <span style="font-size:14px;">
+                                                 <span :class="data.icon" :style="data.style"></span>
+                                                 <span>{{data.key}}</span>
+                                            </span>
+                                            <span>
+                                                <el-button v-if="data.editor==='ARRAY_OBJECT'" type="text" size="mini" style="padding:0;" @click.stop="treeNodeAppend(node, data)">
+                                                    <span style="font-size:17px;" class="icon-plus"></span>
+                                                </el-button>
+                                                <el-button type="text" size="mini" style="padding:0; margin-left:5px;" @click.stop="treeNodeEdit(node, data)">
+                                                    <span style="font-size:16px; position:relative; bottom:1px; left:2px;" class="icon-pencil"></span>
+                                                </el-button>
+                                                <el-button type="text" size="mini" style="padding:0; margin-left:10px;" @click.stop="treeNodeDelete(node, data)">
+                                                    <span style="font-size:17px;" class="icon-trash"></span>
+                                                </el-button>
+                                            </span>
+                                          </span>
+
+                                    </el-tree>
+                                </el-scrollbar>
+                                <el-button type="primary" size="medium" circle style="position:absolute; left:-5px; bottom:-5px; z-index:1; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="addRootTreeNode" icon="el-icon-plus"></el-button>
+                            </div>
+                            <!--<div class="editor-toolbar mini">
+                                <div class="button-scope"><button class="el-button el-button&#45;&#45;default change-max" title="全屏"><span class="feather-icon-maximize"></span></button></div>
+                                <div class="button-scope"><button class="el-button el-button&#45;&#45;default change-mini" title="退出全屏"><span class="feather-icon-minimize"></span></button></div>
+                                <div class="button-scope"><button class="el-button el-button&#45;&#45;default toolbar-exit" title="最小化菜单"><span class="feather-icon-log-out"></span></button></div>
+                            </div>-->
+                        </div>
+                    </div>
+                    <div class="split bottom-right">
+                        <div class="editor-wrapper">
+                            <div class="preview-container">
+                                <div class="preview-layer0">
+                                    <div class="preview-layer1">
+                                        <div class="preview-layer2">
+                                            <div class="preview-viewport"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="editor-toolbar mini">
+                                <el-tooltip class="item" effect="dark" content="调节视图尺寸" placement="bottom-end">
+                                    <div class="button-scope"><button class="el-button el-button--default change-size"><span class="feather-icon-airplay"></span></button></div>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="全屏" placement="bottom-end">
+                                    <div class="button-scope"><button class="el-button el-button--default change-max"><span class="feather-icon-maximize"></span></button></div>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="退出全屏" placement="bottom-end">
+                                    <div class="button-scope"><button class="el-button el-button--default change-mini"><span class="feather-icon-minimize"></span></button></div>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="最小化菜单" placement="bottom-end">
+                                    <div class="button-scope"><button class="el-button el-button--default toolbar-exit"><span class="feather-icon-log-out"></span></button></div>
+                                </el-tooltip>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="toolbar">
-
+            <div class="toolbar">
+                <div class="button-scope">
+                    <el-tooltip class="item" effect="dark" content="退出" placement="bottom-end">
+                        <el-button size="medium" style="width:40px; height:40px; padding:0;"><span class="feather-icon-log-out" style="font-size:22px; position:relative; left:2px; bottom:1px;"></span></el-button>
+                    </el-tooltip>
+                </div>
+                <div class="button-scope">
+                    <el-tooltip class="item" effect="dark" content="保存" placement="bottom-end">
+                        <el-button size="medium" style="width:40px; height:40px; padding:0;"><span class="feather-icon-save" style="font-size:22px; position:relative; left:1px; bottom:1px;"></span></el-button>
+                    </el-tooltip>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- 选择文本对话框 -->
+    <el-dialog
+            title="选择测试文本"
+            :visible.sync="dialog.selectText.visible"
+            width="550px"
+            :before-close="handleSelectTextClose">
+
+        <el-table
+                :data="dialog.selectText.data"
+                style="width:100%"
+                highlight-current-row
+                @current-change="currentSelectTextChange"
+                height="300px">
+            <el-table-column
+                    prop="name"
+                    label="名称">
+            </el-table-column>
+            <el-table-column
+                    prop="content"
+                    label="内容">
+            </el-table-column>
+        </el-table>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="dialog.selectText.visible = false">取 消</el-button>
+            <el-button size="medium" type="primary" @click="handleSelectTextCommit">确 定</el-button>
+        </span>
+
+    </el-dialog>
+
+    <!-- 选择图片对话框（单选） -->
+    <el-dialog
+            title="选择测试图片"
+            :visible.sync="dialog.selectImage.visible"
+            width="650px"
+            :before-close="handleSelectImageClose">
+
+        <el-table
+                :data="dialog.selectImage.data"
+                style="width:100%"
+                highlight-current-row
+                @current-change="currentSelectImageChange"
+                height="300px">
+            <el-table-column
+                    prop="name"
+                    label="名称">
+            </el-table-column>
+            <el-table-column
+                    prop="previewUrl"
+                    label="预览地址">
+            </el-table-column>
+        </el-table>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="dialog.selectImage.visible = false">取 消</el-button>
+            <el-button size="medium" type="primary" @click="handleSelectImageCommit">确 定</el-button>
+        </span>
+
+    </el-dialog>
+
+    <!-- 选择图片对话框（批量） -->
+    <el-dialog
+            title="选择测试图片"
+            :visible.sync="dialog.selectMultipleImage.visible"
+            width="650px"
+            row-key="previewUrl"
+            :before-close="handleSelectMultipleImageClose">
+
+        <el-table
+                :data="dialog.selectMultipleImage.data"
+                style="width:100%"
+                height="300px"
+                @selection-change="handleSelectMultipleImageChange">
+            <el-table-column
+                    type="selection"
+                    width="55">
+            </el-table-column>
+            <el-table-column
+                    prop="name"
+                    label="名称">
+            </el-table-column>
+            <el-table-column
+                    prop="previewUrl"
+                    label="预览地址">
+            </el-table-column>
+        </el-table>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="dialog.selectMultipleImage.visible = false">取 消</el-button>
+            <el-button size="medium" type="primary" @click="handleSelectMultipleImageCommit">确 定</el-button>
+        </span>
+
+    </el-dialog>
+
+    <!-- 预览窗口尺寸调整 -->
+    <el-dialog
+            title="预览窗口尺寸"
+            :visible.sync="dialog.viewportSize.visible"
+            width="550px"
+            :before-close="handleViewportSizeClose">
+
+        <el-button-group style="margin-bottom:22px;">
+            <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportMaximize"><span style="font-size:14px; position:relative; top:2px;" class="feather-icon-maximize"></span></el-button>
+            <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportSD">SD</el-button>
+            <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportHD">HD</el-button>
+            <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportPhone"><span style="font-size:20px; position:relative; top:3px;" class="icon-mobile-phone"></span></el-button>
+        </el-button-group>
+
+        <el-form ref="form" label-width="20px">
+            <el-form-item label="宽">
+                <el-input v-model="dialog.viewportSize.width"></el-input>
+            </el-form-item>
+            <el-form-item label="高">
+                <el-input v-model="dialog.viewportSize.height"></el-input>
+            </el-form-item>
+        </el-form>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="dialog.viewportSize.visible = false">取 消</el-button>
+            <el-button size="medium" type="primary" @click="handleViewportSizeCommit">确 定</el-button>
+        </span>
+
+    </el-dialog>
+
+    <!-- 修改变量对话框 -->
+    <el-dialog
+            title="修改变量"
+            :visible.sync="dialog.editVariable.visible"
+            width="550px"
+            :before-close="handleEditVariableClose">
+
+        <el-form ref="form" label-width="70px">
+            <el-form-item label="变量id">
+                <el-input v-model="dialog.editVariable.key"></el-input>
+            </el-form-item>
+            <el-form-item label="编辑器">
+                <el-select v-model="dialog.editVariable.editor" @change="handleEditorChange" placeholder="请选择" style="width:100%;">
+                    <el-option
+                            v-for="editor in editors"
+                            :key="editor.key"
+                            :label="editor.name"
+                            :value="editor.key">
+                    </el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="注释">
+                <el-input type="textarea" v-model="dialog.editVariable.comment"></el-input>
+            </el-form-item>
+            <div v-if="(!dialog.editVariable || dialog.editVariable.editor.indexOf('ARRAY')<0)">
+                <el-form-item>
+                    <el-tooltip v-if="dialog.editVariable.editor==='IMAGE'" class="item" effect="dark" content="插入图片" placement="bottom">
+                        <el-button size="small" style="width:30px; height:30px; line-height:30px; text-align:center; padding:0;" @click="handleInsertImage"><span class="feather-icon-image"></span></el-button>
+                    </el-tooltip>
+                    <el-tooltip v-if="dialog.editVariable.editor!=='IMAGE'" class="item" effect="dark" content="插入文本" placement="bottom">
+                        <el-button size="small" style="width:30px; height:30px; line-height:30px; text-align:center; padding:0;" @click="handleInsertText"><span class="feather-icon-type"></span></el-button>
+                    </el-tooltip>
+                </el-form-item>
+                <el-form-item label="测试值">
+                    <el-input type="textarea" v-model="dialog.editVariable.value"></el-input>
+                </el-form-item>
+            </div>
+            <el-form-item v-if="dialog.editVariable.editor === 'ARRAY_SIMPLE'" label="测试值">
+                <el-tag
+                        :key="tag"
+                        v-for="tag in dialog.editVariable.value"
+                        closable
+                        :disable-transitions="false"
+                        @close="handleArraySimpleRemove(tag)">
+                    {{tag}}
+                </el-tag>
+                <el-input
+                        class="input-new-tag"
+                        v-if="arraySimple.visible"
+                        v-model="arraySimple.value"
+                        ref="arraySimpleAddInput"
+                        size="small"
+                        @keyup.enter.native="handleArraySimpleAdd"
+                        @blur="handleArraySimpleAdd">
+                </el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="handleArraySimpleEdit">+ 添加值</el-button>
+            </el-form-item>
+            <div v-if="dialog.editVariable.editor === 'ARRAY_IMAGE'">
+                <el-form-item>
+                    <el-tooltip class="item" effect="dark" content="插入图片" placement="bottom">
+                        <el-button size="small" style="width:30px; height:30px; line-height:30px; text-align:center; padding:0;" @click="handleInsertMultipleImage"><span class="feather-icon-image"></span></el-button>
+                    </el-tooltip>
+                </el-form-item>
+                <el-form-item label="测试值">
+                    <div v-for="image in dialog.editVariable.value">{{image}}</div>
+                </el-form-item>
+            </div>
+
+            <!--<el-form-item v-if="dialog.editVariable.editor === 'ARRAY_OBJECT'" label="测试值">
+
+            </el-form-item>-->
+        </el-form>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="dialog.dialog.visible = false">取 消</el-button>
+            <el-button size="medium" type="primary" @click="handleEditVariableCommit">确 定</el-button>
+        </span>
+
+    </el-dialog>
+
 </div>

@@ -30,4 +30,10 @@ public class ImageVO {
 		return this;
 	}
 	
+	public ImageVO set(Image entity){
+		this.setName(entity.getName())
+			.setPreviewUrl(entity.getPreviewUrl());
+		return this;
+	}
+	
 }
