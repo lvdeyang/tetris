@@ -147,13 +147,12 @@ public class MenuQuery {
 	 * @return List<MenuPO> 所有的子菜单
 	 */
 	public List<MenuPO> findAllSubMenus(Long id){
-		return menuDao.findAllSubMenus(new StringBufferWrapper().append("'%/")
+		return menuDao.findAllSubMenus(new StringBufferWrapper().append("%/")
 														        .append(id)
-														        .append("'")
 														        .toString(), 
-									   new StringBufferWrapper().append("'%/")
+									   new StringBufferWrapper().append("%/")
 															    .append(id)
-															    .append("/%'")
+															    .append("/%")
 															    .toString());
 	}
 	

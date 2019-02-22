@@ -9,12 +9,24 @@
                         <div class="editor-wrapper">
                             <div class="editor-container html-editor"></div>
                             <div class="editor-toolbar mini">
-                                <div class="button-scope"><button class="el-button el-button--default insert-variable" title="插入变量"><span class="feather-icon-activity"></span></button></div>
-                                <div class="button-scope"><button class="el-button el-button--default insert-if" title="分支结构"><span class="feather-icon-git-branch"></span></button></div>
-                                <div class="button-scope"><button class="el-button el-button--default insert-for" title="循环结构"><span class="feather-icon-repeat"></span></button></div>
-                                <div class="button-scope"><button class="el-button el-button--default change-max" title="全屏"><span class="feather-icon-maximize"></span></button></div>
-                                <div class="button-scope"><button class="el-button el-button--default change-mini" title="退出全屏"><span class="feather-icon-minimize"></span></button></div>
-                                <div class="button-scope"><button class="el-button el-button--default toolbar-exit" title="最小化菜单"><span class="feather-icon-log-out"></span></button></div>
+                                <el-tooltip class="item" effect="dark" content="插入变量" placement="right">
+                                    <div class="button-scope"><button class="el-button el-button--default insert-variable" title="插入变量"><span class="feather-icon-activity"></span></button></div>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="分支结构" placement="right">
+                                    <div class="button-scope"><button class="el-button el-button--default insert-if" title="分支结构"><span class="feather-icon-git-branch"></span></button></div>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="循环结构" placement="right">
+                                    <div class="button-scope"><button class="el-button el-button--default insert-for" title="循环结构"><span class="feather-icon-repeat"></span></button></div>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="全屏" placement="right">
+                                    <div class="button-scope"><button class="el-button el-button--default change-max" title="全屏"><span class="feather-icon-maximize"></span></button></div>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="退出全屏" placement="right">
+                                    <div class="button-scope"><button class="el-button el-button--default change-mini" title="退出全屏"><span class="feather-icon-minimize"></span></button></div>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="最小化菜单" placement="right">
+                                    <div class="button-scope"><button class="el-button el-button--default toolbar-exit" title="最小化菜单"><span class="feather-icon-log-out"></span></button></div>
+                                </el-tooltip>
                             </div>
                         </div>
                     </div>
@@ -75,16 +87,16 @@
                                 </div>
                             </div>
                             <div class="editor-toolbar mini">
-                                <el-tooltip class="item" effect="dark" content="调节视图尺寸" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="调节视图尺寸" placement="left">
                                     <div class="button-scope"><button class="el-button el-button--default change-size"><span class="feather-icon-airplay"></span></button></div>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="全屏" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="全屏" placement="left">
                                     <div class="button-scope"><button class="el-button el-button--default change-max"><span class="feather-icon-maximize"></span></button></div>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="退出全屏" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="退出全屏" placement="left">
                                     <div class="button-scope"><button class="el-button el-button--default change-mini"><span class="feather-icon-minimize"></span></button></div>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="最小化菜单" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="最小化菜单" placement="left">
                                     <div class="button-scope"><button class="el-button el-button--default toolbar-exit"><span class="feather-icon-log-out"></span></button></div>
                                 </el-tooltip>
                             </div>
@@ -94,13 +106,13 @@
             </div>
             <div class="toolbar">
                 <div class="button-scope">
-                    <el-tooltip class="item" effect="dark" content="退出" placement="bottom-end">
-                        <el-button size="medium" style="width:40px; height:40px; padding:0;"><span class="feather-icon-log-out" style="font-size:22px; position:relative; left:2px; bottom:1px;"></span></el-button>
+                    <el-tooltip class="item" effect="dark" content="退出" placement="left">
+                        <el-button size="medium" style="width:40px; height:40px; padding:0;" @click="hide"><span class="feather-icon-log-out" style="font-size:22px; position:relative; left:2px; bottom:1px;"></span></el-button>
                     </el-tooltip>
                 </div>
                 <div class="button-scope">
-                    <el-tooltip class="item" effect="dark" content="保存" placement="bottom-end">
-                        <el-button size="medium" style="width:40px; height:40px; padding:0;"><span class="feather-icon-save" style="font-size:22px; position:relative; left:1px; bottom:1px;"></span></el-button>
+                    <el-tooltip class="item" effect="dark" content="保存" placement="left">
+                        <el-button size="medium" style="font-size:22px; width:40px; height:40px; padding:0;" @click="save" :loading="loading.saveTemplate"><span v-if="!loading.saveTemplate" class="feather-icon-save" style="font-size:22px; position:relative; left:1px; bottom:1px;"></span></el-button>
                     </el-tooltip>
                 </div>
             </div>
@@ -305,7 +317,7 @@
         </el-form>
 
         <span slot="footer" class="dialog-footer">
-            <el-button size="medium" @click="dialog.dialog.visible = false">取 消</el-button>
+            <el-button size="medium" @click="dialog.editVariable.visible = false">取 消</el-button>
             <el-button size="medium" type="primary" @click="handleEditVariableCommit">确 定</el-button>
         </span>
 

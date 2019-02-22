@@ -24,9 +24,7 @@ define([
                 template:'',
                 editor:{
                     el:'',
-                    html:'',
-                    css:'',
-                    js:''
+                    html:''
                 },
                 editors:[],
                 dialog:{
@@ -82,8 +80,10 @@ define([
                          comment:'变量注释',
                          value:'变量测试值'}*/
                     ]
+                },
+                loading:{
+                    saveTemplate:false
                 }
-
             }
         },
         methods:{
@@ -97,7 +97,42 @@ define([
             },
             hide:function(){
                 var self = this;
-                self.editor.el.hide();
+                var h = self.$createElement;
+                self.$msgbox({
+                    title:'危险操作',
+                    message:h('div', null, [
+                        h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                        h('div', {class:'el-message-box__message'}, [
+                            h('p', null, ['推出前请先保存，否则会丢失内容，是否继续?'])
+                        ])
+                    ]),
+                    type:'wraning',
+                    showCancelButton: true,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    beforeClose:function(action, instance, done){
+                        if(action === 'confirm'){
+                            done();
+                            self.$nextTick(function(){
+                                self.editor.el.hide();
+                            });
+                        }else{
+                            done();
+                        }
+                    }
+                }).catch(function(){});
+
+            },
+            save:function(){
+                var self = this;
+                var html = self.editor.html.getValue();
+                var js = self.tree.data;
+                var template = self.template;
+                var endLoading = function(){
+                    self.loading.saveTemplate = false;
+                };
+                self.loading.saveTemplate = true;
+                self.$emit('save-template', template, html, js, endLoading);
             },
             doPreview:function(){
                 var self = this;

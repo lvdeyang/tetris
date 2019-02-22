@@ -426,6 +426,27 @@ define([
                 currentSelectedTagChange:function(data){
                     var self = this;
                     self.dialog.selectTag.tree.current = data;
+                },
+                saveTemplate:function(template, html, js, endLoading){
+                    var self = this;
+                    ajax.post('/cms/template/save/' + template.id, {
+                        html:html,
+                        js: $.toJSON(js)
+                    }, function(data, status){
+                        endLoading();
+                        if(status !== 200) return;
+                        for(var i=0; i<self.table.data.legnth; i++){
+                            if(self.table.data[i].id === data.id){
+                                self.table.data.splice(i, 1);
+                                self.table.data.push(data);
+                                break;
+                            }
+                        }
+                        self.$message({
+                            type:'success',
+                            message:'保存成功！'
+                        });
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
                 }
             },
             created:function(){

@@ -91,13 +91,12 @@ public class TemplateTagQuery {
 	 * @return List<TemplateTagPO> 字标签
 	 */
 	public List<TemplateTagPO> findAllSubTags(Long id) throws Exception{
-		return templateTagDao.findAllSubTags(new StringBufferWrapper().append("'%/")
+		return templateTagDao.findAllSubTags(new StringBufferWrapper().append("%/")
 															          .append(id)
-															          .append("'")
 															          .toString(), 
-											 new StringBufferWrapper().append("'%/")
+											 new StringBufferWrapper().append("%/")
 																      .append(id)
-																      .append("/%'")
+																      .append("/%")
 																      .toString());
 	}
 	

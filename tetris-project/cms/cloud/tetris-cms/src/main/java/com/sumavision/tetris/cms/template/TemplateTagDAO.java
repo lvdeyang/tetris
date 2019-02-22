@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
-@RepositoryDefinition(domainClass = TemplateTagPO.class, idClass = Long.class)
+@RepositoryDefinition(domainClass = TemplateTagPO.class, idClass = long.class)
 public interface TemplateTagDAO extends BaseDAO<TemplateTagPO>{
 
 	/**
@@ -17,7 +17,7 @@ public interface TemplateTagDAO extends BaseDAO<TemplateTagPO>{
 	 * @param String reg2 '%/id/%'
 	 * @return List<TemplateTagPO> 标签列表
 	 */
-	@Query(value = "SELECT * FROM TETRIS_CMS_TEMPLATE_TAG WHERE parentPath LIKE ?1 OR PARENT_PATH LIKE ?2", nativeQuery = true)
+	@Query(value = "SELECT id, uuid, update_time, name, parent_id, parent_path, remark FROM TETRIS_CMS_TEMPLATE_TAG WHERE parent_path LIKE ?1 OR parent_path LIKE ?2", nativeQuery = true)
 	public List<TemplateTagPO> findAllSubTags(String reg1, String reg2);
 	
 }

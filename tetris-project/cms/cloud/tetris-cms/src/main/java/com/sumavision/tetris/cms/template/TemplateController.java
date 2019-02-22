@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cms.template;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +18,8 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+
+import javassist.expr.NewArray;
 
 
 @Controller
@@ -233,6 +236,42 @@ public class TemplateController {
 		}
 		
 		return true;
+	}
+	
+	/**
+	 * 保存模板<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月22日 下午4:41:56
+	 * @param @PathVariable Long id 模板id
+	 * @param String html 模板内容
+	 * @param JSONString js 变量描述
+	 * @return TemplateVO 模板数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/save/{id}")
+	public Object save(
+			@PathVariable Long id,
+			String html,
+			String js,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		TemplatePO template = templateDao.findOne(id);
+		if(template == null){
+			throw new TemplateNotExistException(id);
+		}
+		
+		template.setHtml(html);
+		template.setJs(js);
+		template.setUpdateTime(new Date());
+		templateDao.save(template);
+		
+		return new TemplateVO().set(template);
 	}
 	
 }
