@@ -108,7 +108,7 @@ public class TemplatePO extends AbstractBasePO{
 
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(name = "HTML", columnDefinition = "text")
+	@Column(name = "HTML", columnDefinition = "MEDIUMTEXT", nullable = true)
 	public String getHtml() {
 		return html;
 	}
@@ -119,7 +119,7 @@ public class TemplatePO extends AbstractBasePO{
 
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(name = "CSS", columnDefinition = "text")
+	@Column(name = "CSS", columnDefinition = "MEDIUMTEXT", nullable = true)
 	public String getCss() {
 		return css;
 	}
@@ -130,7 +130,7 @@ public class TemplatePO extends AbstractBasePO{
 
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(name = "JS", columnDefinition = "text")
+	@Column(name = "JS", columnDefinition = "MEDIUMTEXT", nullable = true)
 	public String getJs() {
 		return js;
 	}

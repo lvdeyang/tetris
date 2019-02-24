@@ -63,9 +63,6 @@ define([
                    visible:false,
                    value:''
                 },
-                arrayImage:{
-
-                },
                 tree:{
                     props:{
                         label: 'key',
@@ -94,6 +91,17 @@ define([
                 self.editor.html.setValue(html);
                 self.editor.html.selection.clearSelection();
                 self.editor.el.show();
+                try{
+                    var json = $.parseJSON(template.js);
+                    if(json && json.length>0){
+                        for(var i=0; i<json.length; i++){
+                            self.tree.data.push(json[i]);
+                        }
+                    }
+                }catch(e){
+                    console.log(e);
+                }
+                self.doPreview();
             },
             hide:function(){
                 var self = this;
@@ -115,6 +123,7 @@ define([
                             done();
                             self.$nextTick(function(){
                                 self.editor.el.hide();
+                                self.tree.data.splice(0, self.tree.data.length);
                             });
                         }else{
                             done();

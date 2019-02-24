@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.cms.template.exception.TemplateNotExistException;
 import com.sumavision.tetris.cms.template.exception.TemplateTagNotExistException;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -272,6 +273,42 @@ public class TemplateController {
 		templateDao.save(template);
 		
 		return new TemplateVO().set(template);
+	}
+	
+	/**
+	 * 查询模板内容<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月24日 上午11:49:56
+	 * @param @PathVariable Long id 模板id
+	 * @return String html
+	 * @return String js 
+	 * @return String css
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/content/{id}")
+	public Object content(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		TemplatePO template = templateDao.findOne(id);
+		if(template == null){
+			throw new TemplateNotExistException(id);
+		}
+		
+		String html = template.getHtml();
+		String js = template.getJs();
+		String css = template.getCss();
+		
+		return new HashMapWrapper<String, String>().put("html", html)
+												   .put("css", css)
+												   .put("js", js)
+												   .getMap();
 	}
 	
 }

@@ -290,7 +290,12 @@ define([
                 templateEdit:function(scope){
                     var self = this;
                     var row = scope.row;
-                    self.$refs.templateEditor.show(row);
+                    ajax.post('/cms/template/content/' + row.id, null, function(data){
+                        row.html = data.html;
+                        row.js = data.js;
+                        row.css = data.css;
+                        self.$refs.templateEditor.show(row);
+                    });
                 },
                 rowEdit:function(scope){
                     var self = this;
