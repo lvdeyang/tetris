@@ -1,0 +1,27 @@
+.article-layout-editor{width:100%; height:100%; position:fixed; left:0; top:0; z-index:500; background-color:#fff;}
+.article-layout-editor div,
+.article-layout-editor span{box-sizing:border-box;}
+.article-layout-editor .position-wrapper{width:100%; height:100%; position:relative;}
+
+.article-layout-editor .left{width:241px; height:100%; background-color:#fbfbfb;  border-right:1px solid #eaeaea;}
+.article-layout-editor .template{cursor:move; width:80px; height:80px; display:flex; justify-content:center; align-items:center; float:left; border-right:1px dashed #eaeaea; box-sizing:border-box; border-bottom:1px solid #eaeaea;}
+.article-layout-editor .template:hover{border:1px dashed #6680e1;}
+.article-layout-editor .template>span{text-align:center; color:#333;}
+.article-layout-editor .template>span .text{font-size:12px;}
+.article-layout-editor .template.last{border-right-color:transparent;}
+.article-layout-editor .template.last:hover{border-right-color:#6680e1;}
+.article-layout-editor .templates hr{border:0;}
+
+.article-layout-editor .middle{width:550px; height:100%; position:absolute; left:241px; top:0; border-right:1px solid #eaeaea;}
+.article-layout-editor .article-modules{padding:10px;}
+.article-layout-editor .article-module,
+.article-layout-editor .drop-area{margin-bottom:5px;}
+.article-layout-editor .article-module{border:1px dashed transparent; position:relative; min-height:40px;}
+.article-layout-editor .article-module:hover{border:1px dashed #6680e1;}
+.article-layout-editor .drop-area{border:1px dashed #eaeaea; height:40px; line-height:38px; text-align:center; background-color:#fbfbfb; color:#eaeaea; font-weight:700;}
+
+.article-layout-editor .right{position:absolute; top:0; left:790px; right:50px; bottom:0;}
+
+.article-layout-editor .toolbar{width:50px; height:100%; position:absolute; top:0; right:0; background-color:#f2f3f7; border-left:1px solid #eaeaea;}
+.article-layout-editor .toolbar>.button-scope{width:50px; height:50px; padding:5px; box-sizing:border-box;}
+.article-layout-editor .toolbar>.button-scope:not(:first-child){padding-top:0; height:45px;}

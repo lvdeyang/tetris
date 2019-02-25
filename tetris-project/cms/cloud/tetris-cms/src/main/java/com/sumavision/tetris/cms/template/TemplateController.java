@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,8 +20,6 @@ import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
-
-import javassist.expr.NewArray;
 
 
 @Controller
@@ -38,6 +37,9 @@ public class TemplateController {
 	
 	@Autowired
 	private TemplateTagDAO templateTagDao;
+	
+	@Autowired
+	private TemplateQuery templateQuery;
 	
 	/**
 	 * 查询类型<br/>
@@ -112,6 +114,9 @@ public class TemplateController {
 	public Object add(
 			String name,
 			String type,
+			String icon,
+			String style,
+			Integer serial,
 			String remark,
 			Long tagId,
 			HttpServletRequest request) throws Exception{
@@ -122,7 +127,7 @@ public class TemplateController {
 		
 		TemplateTagPO tag = templateTagDao.findOne(tagId);
 		
-		TemplatePO template = templateService.add(name, type, remark, tag);
+		TemplatePO template = templateService.add(user, name, type, icon, style, serial, remark, tag);
 		
 		return new TemplateVO().set(template);
 	}
@@ -171,6 +176,9 @@ public class TemplateController {
 			@PathVariable Long id,
 			String name,
 			String type,
+			String icon,
+			String style,
+			Integer serial,
 			String remark,
 			HttpServletRequest request) throws Exception{
 		
@@ -186,6 +194,9 @@ public class TemplateController {
 		
 		template.setName(name);
 		template.setType(TemplateType.fromName(type));
+		template.setIcon(icon);
+		template.setStyle(style);
+		template.setSerial(serial);
 		template.setRemark(remark);
 		templateDao.save(template);
 		
@@ -309,6 +320,29 @@ public class TemplateController {
 												   .put("css", css)
 												   .put("js", js)
 												   .getMap();
+	}
+	
+	/**
+	 * 查询文章模板<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月25日 下午4:49:41
+	 * @return List<TemplateVO> 文章模板列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/article/templates")
+	public Object queryArticleTemplates(HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		List<TemplatePO> templates = templateQuery.queryArticleTemplates();
+		
+		List<TemplateVO> view_templates = TemplateVO.getConverter(TemplateVO.class).convert(templates, TemplateVO.class);
+		
+		return view_templates;
 	}
 	
 }

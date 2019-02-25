@@ -29,4 +29,15 @@ public interface TemplateDAO extends BaseDAO<TemplatePO>{
 	 */
 	@Query(value = "SELECT * FROM TETRIS_CMS_TEMPLATE WHERE TEMPLATE_TAG_ID IS NULL", nativeQuery = true)
 	public List<TemplatePO> findByTemplateTagIdIsNull();
+	
+	/**
+	 * 根据类型查询模板<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月25日 下午4:43:13
+	 * @param String type 模板类型
+	 * @return List<TemplatePO> 模板列表
+	 */
+	@Query(value = "SELECT * FROM TETRIS_CMS_TEMPLATE WHERE TYPE=?1 ORDER BY SERIAL ASC", nativeQuery = true)
+	public List<TemplatePO> findByTypeOrderBySerialAsc(String type);
 }

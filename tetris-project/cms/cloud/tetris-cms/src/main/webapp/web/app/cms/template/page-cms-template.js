@@ -57,6 +57,8 @@ define([
                         visible:false,
                         name:'',
                         type:'',
+                        icon:'',
+                        style:'',
                         remark:'',
                         loading:false
                     },
@@ -65,6 +67,8 @@ define([
                         id:'',
                         name:'',
                         type:'',
+                        icon:'',
+                        style:'',
                         remark:'',
                         loading:false
                     },
@@ -304,6 +308,8 @@ define([
                     self.dialog.editTemplate.id = row.id;
                     self.dialog.editTemplate.name = row.name;
                     self.dialog.editTemplate.type = row.type;
+                    self.dialog.editTemplate.icon = row.icon;
+                    self.dialog.editTemplate.style = row.style;
                     self.dialog.editTemplate.remark = row.remark;
                     self.dialog.editTemplate.loading = false;
                 },
@@ -350,6 +356,8 @@ define([
                     self.dialog.addTemplate.name = '';
                     self.dialog.addTemplate.remark = '';
                     self.dialog.addTemplate.type = '';
+                    self.dialog.addTemplate.icon = '';
+                    self.dialog.addTemplate.style = '';
                     self.dialog.addTemplate.visible = false;
                 },
                 handleAddTemplateCommit:function(){
@@ -358,6 +366,8 @@ define([
                     ajax.post('/cms/template/add', {
                         name:self.dialog.addTemplate.name,
                         type:self.dialog.addTemplate.type,
+                        icon:self.dialog.addTemplate.icon,
+                        style:self.dialog.addTemplate.style,
                         remark:self.dialog.addTemplate.remark,
                         tagId:self.tree.current.id
                     }, function(data, status){
@@ -373,6 +383,8 @@ define([
                     self.dialog.editTemplate.id = '';
                     self.dialog.editTemplate.name = '';
                     self.dialog.editTemplate.type = '';
+                    self.dialog.editTemplate.icon = '';
+                    self.dialog.editTemplate.style = '';
                     self.dialog.editTemplate.remark = '';
                     self.dialog.editTemplate.loading = false;
                 },
@@ -382,6 +394,8 @@ define([
                     ajax.post('/cms/template/update/' + self.dialog.editTemplate.id, {
                         name:self.dialog.editTemplate.name,
                         type:self.dialog.editTemplate.type,
+                        icon:self.dialog.editTemplate.icon,
+                        style:self.dialog.editTemplate.style,
                         remark:self.dialog.editTemplate.remark,
                     }, function(data, status){
                         self.dialog.editTemplate.loading = false;
@@ -390,6 +404,8 @@ define([
                             if(self.table.data[i].id === self.dialog.editTemplate.id){
                                 self.table.data[i].name = self.dialog.editTemplate.name;
                                 self.table.data[i].type = self.dialog.editTemplate.type;
+                                self.table.data[i].icon = self.dialog.editTemplate.icon;
+                                self.table.data[i].style = self.dialog.editTemplate.style;
                                 self.table.data[i].remark = self.dialog.editTemplate.remark;
                                 break;
                             }

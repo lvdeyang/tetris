@@ -27,6 +27,15 @@ public class TemplatePO extends AbstractBasePO{
 	/** 内容模板名称 */
 	private String name;
 	
+	/** 图标 */
+	private String icon;
+	
+	/** 图标样式 */
+	private String style;
+	
+	/** 排序 */
+	private Integer serial;
+	
 	/** 作者id */
 	private String authorId;
 	
@@ -58,6 +67,33 @@ public class TemplatePO extends AbstractBasePO{
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Column(name = "ICON")
+	public String getIcon() {
+		return icon;
+	}
+
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+	@Column(name = "STYLE")
+	public String getStyle() {
+		return style;
+	}
+
+	public void setStyle(String style) {
+		this.style = style;
+	}
+	
+	@Column(name = "SERIAL")
+	public Integer getSerial() {
+		return serial;
+	}
+
+	public void setSerial(Integer serial) {
+		this.serial = serial;
 	}
 
 	@Column(name = "AUTHOR_ID")

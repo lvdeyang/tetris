@@ -11,7 +11,7 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
-    'mi-system-role-dialog',
+    'layout-editor',
     'css!' + window.APPPATH + 'cms/article/page-cms-article.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
 
@@ -69,10 +69,48 @@ define([
                 rowEdit:function(scope){
                     var self = this;
                     var row = scope.row;
+                    self.dialog.editArticle.id = row.id;
+                    self.dialog.editArticle.name = row.name;
+                    self.dialog.editArticle.remark = row.remark;
+                    self.dialog.editArticle.visible = true;
                 },
                 rowDelete:function(scope){
                     var self = this;
                     var row = scope.row;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title:'危险操作',
+                        message:h('div', null, [
+                            h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class:'el-message-box__message'}, [
+                                h('p', null, ['此操作将永久删除文章，且不可恢复，是否继续?'])
+                            ])
+                        ]),
+                        type:'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose:function(action, instance, done){
+                            instance.confirmButtonLoading = true;
+                            if(action === 'confirm'){
+                                ajax.post('/cms/article/remove/' + row.id, null, function(data, status){
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                    if(status !== 200) return;
+                                    for(var i=0; i<self.table.data.length; i++){
+                                        if(self.table.data[i].id === row.id){
+                                            self.table.data.splice(i ,1);
+                                            break;
+                                        }
+                                    }
+                                    self.table.page.total -= 1;
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            }else{
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function(){});
                 },
                 handleSizeChange:function(){
                     var self = this;
@@ -106,6 +144,17 @@ define([
                 },
                 handleAddArticleCommit:function(){
                     var self = this;
+                    self.dialog.addArticle.loading = true;
+                    ajax.post('/cms/article/add', {
+                        name:self.dialog.addArticle.name,
+                        remark:self.dialog.addArticle.remark
+                    }, function(data, status){
+                        self.dialog.addArticle.loading = false;
+                        if(status !== 200) return;
+                        self.table.data.push(data);
+                        self.table.page.total += 1;
+                        self.handleAddArticleClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 handleEditArticleClose:function(){
                     var self = this;
@@ -116,6 +165,25 @@ define([
                 },
                 handleEditArticleCommit:function(){
                     var self = this;
+                    self.dialog.editArticle.loading = true;
+                    ajax.post('/cms/article/edit/' + self.dialog.editArticle.id, {
+                        name:self.dialog.editArticle.name,
+                        remark:self.dialog.editArticle.remark
+                    }, function(data, status){
+                        self.dialog.editArticle.loading = false;
+                        if(status !== 200) return;
+                        for(var i=0; i<self.table.data.length; i++){
+                            if(self.table.data[i].id === data.id){
+                                self.table.data.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleEditArticleClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                editLayout:function(scope){
+                    var self = this;
+                    self.$refs.articleLayoutEditor.show();
                 }
             },
             created:function(){

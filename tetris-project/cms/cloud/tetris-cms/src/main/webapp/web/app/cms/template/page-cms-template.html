@@ -74,12 +74,22 @@
                                 <el-table-column
                                         prop="name"
                                         label="模板名称"
-                                        width="250">
+                                        width="150">
                                 </el-table-column>
                                 <el-table-column
                                         prop="type"
                                         label="模板类型"
-                                        width="180">
+                                        width="110">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="icon"
+                                        label="图标"
+                                        width="200">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="style"
+                                        label="图标样式"
+                                        width="200">
                                 </el-table-column>
                                 <el-table-column
                                         prop="remark"
@@ -149,6 +159,12 @@
                         <el-option v-for="type in types" :label="type" :value="type" :key="type"></el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="图标">
+                    <el-input v-model="dialog.addTemplate.icon"></el-input>
+                </el-form-item>
+                <el-form-item label="样式">
+                    <el-input v-model="dialog.addTemplate.style"></el-input>
+                </el-form-item>
                 <el-form-item label="备注">
                     <el-input type="textarea" v-model="dialog.addTemplate.remark"></el-input>
                 </el-form-item>
@@ -175,6 +191,12 @@
                     <el-select v-model="dialog.editTemplate.type" placeholder="模板类型" style="width:100%;">
                         <el-option v-for="type in types" :label="type" :value="type" :key="type"></el-option>
                     </el-select>
+                </el-form-item>
+                <el-form-item label="图标">
+                    <el-input v-model="dialog.editTemplate.icon"></el-input>
+                </el-form-item>
+                <el-form-item label="样式">
+                    <el-input v-model="dialog.editTemplate.style"></el-input>
                 </el-form-item>
                 <el-form-item label="备注">
                     <el-input type="textarea" v-model="dialog.editTemplate.remark"></el-input>

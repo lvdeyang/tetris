@@ -48,6 +48,7 @@ require.config({
         'page-cms-template':window.APPPATH + 'cms/template/page-cms-template',
         'editor':window.APPPATH + 'cms/template/editor',
         'page-cms-article':window.APPPATH + 'cms/article/page-cms-article',
+        'layout-editor':window.APPPATH + 'cms/article/layout-editor',
         'page-cms-column':window.APPPATH + 'cms/column/page-cms-column'
 
     },

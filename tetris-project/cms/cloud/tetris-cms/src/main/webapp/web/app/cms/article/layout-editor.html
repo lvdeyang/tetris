@@ -1,0 +1,50 @@
+<div v-if="visible" class="article-layout-editor" @drop="dragEnd($event)" @dragover="allowDrop($event)">
+    <div class="position-wrapper">
+        <div class="left">
+            <div class="templates">
+                <el-scrollbar style="height:100%;">
+                    <template v-for="template, index in templates">
+                        <div v-if="(index+1)%3===0" class="template last" draggable="true" @dragstart="templateDragstart(template, $event)">
+                            <span>
+                                <span :class="template.icon" :style="template.style"></span>
+                                <br/>
+                                <span class="text">{{template.name}}</span>
+                            </span>
+                        </div>
+                        <div v-else class="template" draggable="true" @dragstart="templateDragstart(template, $event)">
+                            <span>
+                                <span :class="template.icon" :style="template.style"></span>
+                                <br/>
+                                <span class="text">{{template.name}}</span>
+                            </span>
+                        </div>
+                    </template>
+                    <hr style="clear:both; margin-bottom:30px;"/>
+                </el-scrollbar>
+            </div>
+        </div>
+        <div class="middle" @drop="templateDrop($event)" @dragover="allowDrop($event)">
+            <div class="position-wrapper article-modules">
+                <el-scrollbar style="height:100%;">
+                    <template v-for="module, index in modules">
+                        <div class="article-module" @dragover="moduleDragOver($event)">{{module.render}}</div>
+                    </template>
+                    <div v-if="drag.ongoing" class="drop-area" @dragover="allowDrop($event)">拖放此处</div>
+                </el-scrollbar>
+            </div>
+        </div>
+        <div class="right"></div>
+        <div class="toolbar">
+            <div class="button-scope">
+                <el-tooltip class="item" effect="dark" content="退出" placement="left">
+                    <el-button size="medium" style="width:40px; height:40px; padding:0;" @click="hide"><span class="feather-icon-log-out" style="font-size:22px; position:relative; left:2px; bottom:1px;"></span></el-button>
+                </el-tooltip>
+            </div>
+            <div class="button-scope">
+                <el-tooltip class="item" effect="dark" content="保存" placement="left">
+                    <el-button size="medium" style="font-size:22px; width:40px; height:40px; padding:0;" @click="save" :loading="loading.save"><span v-if="!loading.save" class="feather-icon-save" style="font-size:22px; position:relative; left:1px; bottom:1px;"></span></el-button>
+                </el-tooltip>
+            </div>
+        </div>
+    </div>
+</div>

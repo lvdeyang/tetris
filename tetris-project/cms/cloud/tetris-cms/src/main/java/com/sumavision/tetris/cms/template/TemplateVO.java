@@ -11,6 +11,10 @@ public class TemplateVO extends AbstractBaseVO<TemplateVO, TemplatePO>{
 	
 	private String type;
 	
+	private String icon;
+	
+	private String style;
+	
 	public String getName() {
 		return name;
 	}
@@ -37,6 +41,24 @@ public class TemplateVO extends AbstractBaseVO<TemplateVO, TemplatePO>{
 		this.type = type;
 		return this;
 	}
+	
+	public String getIcon() {
+		return icon;
+	}
+
+	public TemplateVO setIcon(String icon) {
+		this.icon = icon;
+		return this;
+	}
+
+	public String getStyle() {
+		return style;
+	}
+
+	public TemplateVO setStyle(String style) {
+		this.style = style;
+		return this;
+	}
 
 	@Override
 	public TemplateVO set(TemplatePO entity) throws Exception {
@@ -45,7 +67,9 @@ public class TemplateVO extends AbstractBaseVO<TemplateVO, TemplatePO>{
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setRemark(entity.getRemark())
-			.setType(entity.getType().getName());
+			.setType(entity.getType().getName())
+			.setIcon(entity.getIcon())
+			.setStyle(entity.getStyle());
 		return this;
 	}
 

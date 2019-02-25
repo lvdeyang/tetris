@@ -1,15 +1,13 @@
 package com.sumavision.tetris.cms.article;
 
-import java.util.Date;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import com.sumavision.tetris.cms.article.exception.ArticleNotExistException;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -62,6 +60,15 @@ public class ArticleController {
 												   .getMap();
 	}
 	
+	/**
+	 * 添加文章<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月25日 上午8:57:18
+	 * @param String name 文章名称
+	 * @param String remark 备注
+	 * @return ArticleVO 文章数据
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
@@ -74,15 +81,66 @@ public class ArticleController {
 		
 		//TODO 权限校验
 		
-		String baseFolder = "";
-		
-		ArticlePO article = new ArticlePO();
-		article.setName(name);
-		article.setRemark(remark);
-		article.setUpdateTime(new Date());
-		articleDao.save(article);
+		ArticlePO article = articleService.add(user, name, remark);
 		
 		return new ArticleVO().set(article);
+	}
+	
+	/**
+	 * 修改文章元数据<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月25日 上午8:59:48
+	 * @param @PathVariable Long id 文章id
+	 * @param String name 文章名称
+	 * @param String remark 备注
+	 * @return ArticleVO 文章数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/edit/{id}")
+	public Object edit(
+			@PathVariable Long id,
+			String name,
+			String remark,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		ArticlePO article = articleDao.findOne(id);
+		if(article == null){
+			throw new ArticleNotExistException(id);
+		}
+		
+		article = articleService.edit(article, name, remark);
+		
+		return new ArticleVO().set(article);
+	}
+	
+	/**
+	 * 删除文章<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月25日 上午9:49:01
+	 * @param @PathVariable Long id 文章id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove/{id}")
+	public Object remove(
+			@PathVariable Long id) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		ArticlePO article = articleDao.findOne(id);
+		
+		articleService.remove(article);
+		
+		return null;
 	}
 	
 }
