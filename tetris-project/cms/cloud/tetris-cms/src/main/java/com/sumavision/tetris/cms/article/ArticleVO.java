@@ -48,5 +48,5 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 			.setPreviewUrl(entity.getPreviewUrl());
 		return this;
 	}
-
+	
 }

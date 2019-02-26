@@ -183,7 +183,22 @@ define([
                 },
                 editLayout:function(scope){
                     var self = this;
-                    self.$refs.articleLayoutEditor.show();
+                    var row = scope.row;
+                    self.$refs.articleLayoutEditor.show(row);
+                },
+                saveArticle:function(article, html, modules, endLoading){
+                    var self = this;
+                    ajax.post('/cms/article/save/' + article.id, {
+                        html:html,
+                        modules:modules
+                    }, function(data, status){
+                        endLoading();
+                        if(status !== 200) return;
+                        self.$message({
+                            type:'success',
+                            message:'保存成功'
+                        })
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
                 }
             },
             created:function(){

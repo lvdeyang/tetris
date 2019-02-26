@@ -27,9 +27,9 @@
             <div class="position-wrapper article-modules">
                 <el-scrollbar style="height:100%;">
                     <template v-for="module, index in modules">
-                        <div class="article-module" @dragover="moduleDragOver($event)">{{module.render}}</div>
+                        <div class="article-module" @dragover="moduleDragOver($event)" v-html="module.render">{{module.render}}</div>
                     </template>
-                    <div v-if="drag.ongoing" class="drop-area" @dragover="allowDrop($event)">拖放此处</div>
+                    <div v-if="drag.ongoing" class="drop-area">拖放此处</div>
                 </el-scrollbar>
             </div>
         </div>

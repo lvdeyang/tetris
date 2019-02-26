@@ -2,6 +2,8 @@ package com.sumavision.tetris.cms.article;
 
 import java.io.File;
 import java.util.Date;
+
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,9 @@ public class ArticleService {
 
 	@Autowired
 	private ArticleDAO articleDao;
+	
+	@Autowired
+	private ArticleQuery articleQuery;
 	
 	@Autowired
 	private Path path;
@@ -112,6 +117,27 @@ public class ArticleService {
 			}
 			articleDao.delete(article);
 		}
+	}
+	
+	/**
+	 * 保存文章内容<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月26日 上午10:57:29
+	 * @param ArticlePO article 文章
+	 * @param String html html内容
+	 * @param JSONString modules 文章排版内容json
+	 * @return ArticlePO 文章
+	 */
+	public ArticlePO save(ArticlePO article, String html, String modules) throws Exception{
+		
+		File file = new File(article.getStorePath());
+		FileUtils.writeStringToFile(file, articleQuery.generateHtml(html, "", ""));
+		article.setModules(modules);
+		article.setUpdateTime(new Date());
+		articleDao.save(article);
+		
+		return article;
 	}
 	
 }

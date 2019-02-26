@@ -1,6 +1,10 @@
 package com.sumavision.tetris.cms.article;
 
+import javax.persistence.Basic;
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -25,9 +29,13 @@ public class ArticlePO extends AbstractBasePO{
 	/** 文本存储路径 */
 	private String storePath;
 	
+	/** 文章排版的模块json */
+	private String modules;
+	
 	/** 文章备注 */
 	private String remark;
 	
+	@Column(name = "NAME")
 	public String getName() {
 		return name;
 	}
@@ -36,6 +44,7 @@ public class ArticlePO extends AbstractBasePO{
 		this.name = name;
 	}
 
+	@Column(name = "PREVIEW_URL")
 	public String getPreviewUrl() {
 		return previewUrl;
 	}
@@ -44,6 +53,7 @@ public class ArticlePO extends AbstractBasePO{
 		this.previewUrl = previewUrl;
 	}
 
+	@Column(name = "STORE_PATH")
 	public String getStorePath() {
 		return storePath;
 	}
@@ -52,6 +62,18 @@ public class ArticlePO extends AbstractBasePO{
 		this.storePath = storePath;
 	}
 
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "MODULES", columnDefinition = "MEDIUMTEXT", nullable = true)
+	public String getModules() {
+		return modules;
+	}
+
+	public void setModules(String modules) {
+		this.modules = modules;
+	}
+
+	@Column(name = "REMARK")
 	public String getRemark() {
 		return remark;
 	}
