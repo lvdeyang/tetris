@@ -8,6 +8,7 @@ define([
     'juicer',
     'vue',
     'element-ui',
+    'mi-image-dialog',
     'css!' + window.APPPATH + 'cms/article/layout-editor.css'
 ], function(tpl, ajax, $, juicer, Vue){
 
@@ -31,6 +32,22 @@ define([
                     precise:5,
                     y:0,
                     template:''
+                },
+                dialog:{
+                    editContent:{
+                        visible:false,
+                        module:'',
+                        variables:[]
+                    },
+                    selectImage:{
+                        variable:''
+                    }
+                },
+                editors:{
+                    arraySimple:{
+                        visible:false,
+                        value:''
+                    }
                 }
             }
         },
@@ -44,6 +61,7 @@ define([
                         for(var i=0; i<data.length; i++){
                             var json = self.translateJSON(data[i].template.js);
                             data[i].render = juicer(data[i].template.html).render(json);
+                            data[i].mousein = false;
                             self.modules.push(data[i]);
                         }
                     }
@@ -63,6 +81,7 @@ define([
                     html += self.modules[i].render;
                     var c_module = $.extend(true, {}, self.modules[i]);
                     c_module.render = null;
+                    c_module.mousein = null;
                     c_modules.push(c_module);
                 }
                 var modules = $.toJSON(c_modules);
@@ -170,6 +189,97 @@ define([
                 var self = this;
                 self.drag.ongoing = false;
                 self.drag.template = '';
+            },
+            moduleMousemove:function(module, e){
+                Vue.set(module, 'mousein', true);
+            },
+            moduleMouseout:function(module, e){
+                Vue.set(module, 'mousein', false);
+            },
+            moduleEdit:function(module){
+                var self = this;
+                self.dialog.editContent.visible = true;
+                self.dialog.editContent.module = module;
+                self.dialog.editContent.variables.splice(0, self.dialog.editContent.variables.length);
+                if(module.template.js){
+                    var variables = $.parseJSON(module.template.js);
+                    if(variables.length > 0){
+                        for(var i=0; i<variables.length; i++){
+                            self.dialog.editContent.variables.push(variables[i]);
+                        }
+                    }
+                }
+                console.log(module);
+            },
+            moduleRemove:function(module){
+                var self = this;
+                var h = self.$createElement;
+                self.$msgbox({
+                    title:'危险操作',
+                    message:h('div', null, [
+                        h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                        h('div', {class:'el-message-box__message'}, [
+                            h('p', null, ['是否要删除此模板?'])
+                        ])
+                    ]),
+                    type:'wraning',
+                    showCancelButton: true,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    beforeClose:function(action, instance, done){
+                        if(action === 'confirm'){
+                            for(var i=0; i<self.modules.length; i++){
+                                if(self.modules[i].id === module.id){
+                                    self.modules.splice(i, 1);
+                                    break;
+                                }
+                            }
+                        }
+                        done();
+                    }
+                }).catch(function(){});
+            },
+            handleEditContentClose:function(){
+                var self = this;
+                self.dialog.editContent.visible = false;
+                self.dialog.editContent.module = '';
+            },
+            handleEditContentCommit:function(){
+                var self = this;
+            },
+            editContentTitle:function(){
+                var self = this;
+                return self.dialog.editContent.module?'编辑'+self.dialog.editContent.module.template.name:'';
+            },
+            handleArraySimpleRemove:function(values, simple){
+                var self = this;
+                for(var i=0; i<values.length; i++){
+                    if(values[i] === simple){
+                        values.splice(i, 1);
+                        break;
+                    }
+                }
+            },
+            handleArraySimpleAdd:function(values){
+                var self = this;
+                if(values.indexOf(self.editors.arraySimple.value) < 0) values.push(self.editors.arraySimple.value);
+                self.editors.arraySimple.visible = false;
+                self.editors.arraySimple.value = '';
+            },
+            handleArraySimpleEdit:function(){
+                var self = this;
+                self.editors.arraySimple.visible = true;
+                self.$nextTick(function(){
+                    self.$refs.arraySimpleAddInput[0].$refs.input.focus();
+                });
+            },
+            selectImage:function(variable){
+                var self = this;
+                self.dialog.selectImage.variable = variable;
+                self.$refs.selectImage.open();
+            },
+            selectedImage:function(){
+
             }
         },
         created:function(){

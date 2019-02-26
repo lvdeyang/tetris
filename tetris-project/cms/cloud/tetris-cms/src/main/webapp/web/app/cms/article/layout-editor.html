@@ -1,50 +1,124 @@
-<div v-if="visible" class="article-layout-editor" @drop="dragEnd($event)" @dragover="allowDrop($event)">
-    <div class="position-wrapper">
-        <div class="left">
-            <div class="templates">
-                <el-scrollbar style="height:100%;">
-                    <template v-for="template, index in templates">
-                        <div v-if="(index+1)%3===0" class="template last" draggable="true" @dragstart="templateDragstart(template, $event)">
-                            <span>
-                                <span :class="template.icon" :style="template.style"></span>
-                                <br/>
-                                <span class="text">{{template.name}}</span>
-                            </span>
-                        </div>
-                        <div v-else class="template" draggable="true" @dragstart="templateDragstart(template, $event)">
-                            <span>
-                                <span :class="template.icon" :style="template.style"></span>
-                                <br/>
-                                <span class="text">{{template.name}}</span>
-                            </span>
-                        </div>
-                    </template>
-                    <hr style="clear:both; margin-bottom:30px;"/>
-                </el-scrollbar>
+<div>
+    <div v-if="visible" class="article-layout-editor" @drop="dragEnd($event)" @dragover="allowDrop($event)">
+        <div class="position-wrapper">
+            <div class="left">
+                <div class="templates">
+                    <el-scrollbar style="height:100%;">
+                        <template v-for="template, index in templates">
+                            <div v-if="(index+1)%3===0" class="template last" draggable="true" @dragstart="templateDragstart(template, $event)">
+                                <span>
+                                    <span :class="template.icon" :style="template.style"></span>
+                                    <br/>
+                                    <span class="text">{{template.name}}</span>
+                                </span>
+                            </div>
+                            <div v-else class="template" draggable="true" @dragstart="templateDragstart(template, $event)">
+                                <span>
+                                    <span :class="template.icon" :style="template.style"></span>
+                                    <br/>
+                                    <span class="text">{{template.name}}</span>
+                                </span>
+                            </div>
+                        </template>
+                        <hr style="clear:both; margin-bottom:30px;"/>
+                    </el-scrollbar>
+                </div>
             </div>
-        </div>
-        <div class="middle" @drop="templateDrop($event)" @dragover="allowDrop($event)">
-            <div class="position-wrapper article-modules">
-                <el-scrollbar style="height:100%;">
-                    <template v-for="module, index in modules">
-                        <div class="article-module" @dragover="moduleDragOver($event)" v-html="module.render">{{module.render}}</div>
-                    </template>
-                    <div v-if="drag.ongoing" class="drop-area">拖放此处</div>
-                </el-scrollbar>
+            <div class="middle" @drop="templateDrop($event)" @dragover="allowDrop($event)">
+                <div class="position-wrapper article-modules">
+                    <el-scrollbar style="height:100%;">
+                        <template v-for="module, index in modules">
+                            <div class="article-module" @dragover="moduleDragOver($event)" @mousemove="moduleMousemove(module, $event)" @mouseout="moduleMouseout(module, $event)">
+                                <div class="article-module-render" v-html="module.render">{{module.render}}</div>
+                                <div class="article-module-options" v-if="module.mousein">
+                                    <el-button class="article-module-options-button" type="primary" size="mini" icon="el-icon-edit" @click="moduleEdit(module)"></el-button>
+                                    <el-button class="article-module-options-button" type="danger" size="mini" icon="el-icon-delete" @click="moduleRemove(module)"></el-button>
+                                </div>
+                            </div>
+                        </template>
+                        <div v-if="drag.ongoing" class="drop-area">拖放此处</div>
+                    </el-scrollbar>
+                </div>
             </div>
-        </div>
-        <div class="right"></div>
-        <div class="toolbar">
-            <div class="button-scope">
-                <el-tooltip class="item" effect="dark" content="退出" placement="left">
-                    <el-button size="medium" style="width:40px; height:40px; padding:0;" @click="hide"><span class="feather-icon-log-out" style="font-size:22px; position:relative; left:2px; bottom:1px;"></span></el-button>
-                </el-tooltip>
-            </div>
-            <div class="button-scope">
-                <el-tooltip class="item" effect="dark" content="保存" placement="left">
-                    <el-button size="medium" style="font-size:22px; width:40px; height:40px; padding:0;" @click="save" :loading="loading.save"><span v-if="!loading.save" class="feather-icon-save" style="font-size:22px; position:relative; left:1px; bottom:1px;"></span></el-button>
-                </el-tooltip>
+            <div class="right"></div>
+            <div class="toolbar">
+                <div class="button-scope">
+                    <el-tooltip class="item" effect="dark" content="退出" placement="left">
+                        <el-button size="medium" style="width:40px; height:40px; padding:0;" @click="hide"><span class="feather-icon-log-out" style="font-size:22px; position:relative; left:2px; bottom:1px;"></span></el-button>
+                    </el-tooltip>
+                </div>
+                <div class="button-scope">
+                    <el-tooltip class="item" effect="dark" content="保存" placement="left">
+                        <el-button size="medium" style="font-size:22px; width:40px; height:40px; padding:0;" @click="save" :loading="loading.save"><span v-if="!loading.save" class="feather-icon-save" style="font-size:22px; position:relative; left:1px; bottom:1px;"></span></el-button>
+                    </el-tooltip>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- 编辑内容对话框 -->
+    <el-dialog
+            :title="editContentTitle()"
+            :visible.sync="dialog.editContent.visible"
+            width="500px"
+            :before-close="handleEditContentClose">
+
+        <div style="max-height:300px; overflow-y:auto;">
+            <el-form label-width="80px">
+                <el-form-item v-for="variable in dialog.editContent.variables" :key="variable.key" :label="variable.comment">
+                    <template v-if="variable.editor === 'INPUT'">
+                        <el-input v-model="variable.value"></el-input>
+                    </template>
+                    <template v-if="variable.editor === 'PARAGRAPH'">
+                        <el-input type="textarea" v-model="variable.value" rows="8"></el-input>
+                    </template>
+                    <template v-if="variable.editor === 'IMAGE'">
+                        <table>
+                            <tr>
+                                <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                    <img style="width:100px; height:100px; float:left;" :src="variable.value" />
+                                </td>
+                                <td style="width:100px; vertical-align:middle;">
+                                    <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="selectImage(variable)">
+                                        <span class="el-icon-plus" style="font-size:40px; position:relative; top:7px;"></span>
+                                    </el-button>
+                                </td>
+                            </tr>
+                        </table>
+                    </template>
+                    <template v-if="variable.editor === 'ARRAY_SIMPLE'">
+                        <el-tag
+                                :key="simple"
+                                v-for="simple in variable.value"
+                                closable
+                                :disable-transitions="false"
+                                @close="handleArraySimpleRemove(variable.value, simple)">
+                            {{simple}}
+                        </el-tag>
+                        <el-input
+                                class="input-new-tag"
+                                v-if="editors.arraySimple.visible"
+                                v-model="editors.arraySimple.value"
+                                ref="arraySimpleAddInput"
+                                size="small"
+                                @keyup.enter.native="handleArraySimpleAdd(variable.value)"
+                                @blur="handleArraySimpleAdd(variable.value)">
+                        </el-input>
+                        <el-button v-else class="button-new-tag" size="small" @click="handleArraySimpleEdit">+ 添加值</el-button>
+                    </template>
+
+                </el-form-item>
+            </el-form>
+        </div>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="dialog.editContent.visible = false">取 消</el-button>
+            <el-button size="medium" type="primary" @click="handleEditContentCommit">确 定</el-button>
+        </span>
+
+    </el-dialog>
+
+    <!-- 选择图片对话框 -->
+    <mi-image-dialog ref="selectImage" @selected-image="selectedImage"></mi-image-dialog>
+
 </div>

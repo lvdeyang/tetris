@@ -1,3 +1,8 @@
+/* element-ui 样式 */
+.el-tag {margin-right:10px;}
+.button-new-tag {width:78px; height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;}
+.input-new-tag {width:78px; vertical-align:bottom; position:relative; bottom:1px;}
+
 .article-layout-editor{width:100%; height:100%; position:fixed; left:0; top:0; z-index:500; background-color:#fff;}
 .article-layout-editor div,
 .article-layout-editor span{box-sizing:border-box;}
@@ -18,6 +23,9 @@
 .article-layout-editor .drop-area{margin-bottom:5px;}
 .article-layout-editor .article-module{border:1px dashed transparent; position:relative; min-height:40px;}
 .article-layout-editor .article-module:hover{border:1px dashed #6680e1;}
+.article-layout-editor .article-module-render{width:100%; height:100%;}
+.article-layout-editor .article-module-options{height:28px; position:absolute; right:0; top:0;}
+.article-layout-editor .article-module-options-button{margin:0; padding:7px; border-radius:0;}
 .article-layout-editor .drop-area{border:1px dashed #eaeaea; height:40px; line-height:38px; text-align:center; background-color:#fbfbfb; color:#eaeaea; font-weight:700;}
 
 .article-layout-editor .right{position:absolute; top:0; left:790px; right:50px; bottom:0;}
