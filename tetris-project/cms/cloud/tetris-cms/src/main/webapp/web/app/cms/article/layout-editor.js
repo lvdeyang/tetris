@@ -39,8 +39,10 @@ define([
                         module:'',
                         variables:[]
                     },
-                    selectImage:{
-                        variable:''
+                    viewportSize:{
+                        visible:false,
+                        width:'100%',
+                        height:'100%'
                     }
                 },
                 editors:{
@@ -48,10 +50,26 @@ define([
                         visible:false,
                         value:''
                     }
+                },
+                toolbar:{
+                    status:'mini'
+                },
+                previewViewPort:{
+                    status:'',
+                    width:'414px',
+                    height:'738px'
                 }
             }
         },
         methods:{
+            doPreview:function(){
+                var self = this;
+                var html = '';
+                for(var i=0; i<self.modules.length; i++){
+                    html += self.modules[i].render;
+                }
+                return html;
+            },
             show:function(article){
                 var self = this;
                 self.visible = true;
@@ -209,7 +227,6 @@ define([
                         }
                     }
                 }
-                console.log(module);
             },
             moduleRemove:function(module){
                 var self = this;
@@ -246,6 +263,12 @@ define([
             },
             handleEditContentCommit:function(){
                 var self = this;
+                var module = self.dialog.editContent.module;
+                var variables = self.dialog.editContent.variables;
+                module.template.js = $.toJSON(variables);
+                var json = self.translateJSON(module.template.js);
+                module.render =juicer(module.template.html).render(json);
+                self.handleEditContentClose();
             },
             editContentTitle:function(){
                 var self = this;
@@ -275,11 +298,74 @@ define([
             },
             selectImage:function(variable){
                 var self = this;
-                self.dialog.selectImage.variable = variable;
+                self.$refs.selectImage.setBuffer(variable);
                 self.$refs.selectImage.open();
             },
-            selectedImage:function(){
-
+            selectedImage:function(url, buff, startLoading, endLoading, done){
+                Vue.set(buff, 'value', url);
+                done();
+            },
+            editorToolbarShow:function(){
+                var self = this;
+                self.toolbar.status = 'max';
+            },
+            editorToolbarHide:function(){
+                var self = this;
+                self.toolbar.status = 'mini';
+            },
+            previewViewportMax:function(){
+                var self = this;
+                self.previewViewPort.status = 'max';
+            },
+            previewViewportMini:function(){
+                var self  = this;
+                self.previewViewPort.status = '';
+            },
+            editViewportSize:function(){
+                var self = this;
+                self.dialog.viewportSize.visible = true;
+                self.dialog.viewportSize.width = self.previewViewPort.width;
+                self.dialog.viewportSize.height = self.previewViewPort.height;
+            },
+            handleViewportSizeClose:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '';
+                self.dialog.viewportSize.height = '';
+                self.dialog.viewportSize.visible = false;
+            },
+            handleViewportSizeCommit:function(){
+                var self = this;
+                if(typeof self.dialog.viewportSize.width==='string' && self.dialog.viewportSize.width.indexOf('%')>=0){
+                    self.previewViewPort.width = self.dialog.viewportSize.width;
+                }else{
+                    self.previewViewPort.width = self.dialog.viewportSize.width + 'px';
+                }
+                if(typeof self.dialog.viewportSize.height==='string' && self.dialog.viewportSize.height.indexOf('%')>=0){
+                    self.previewViewPort.height = self.dialog.viewportSize.height;
+                }else{
+                    self.previewViewPort.height = self.dialog.viewportSize.height + 'px';
+                }
+                self.handleViewportSizeClose();
+            },
+            handleViewportMaximize:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '100%';
+                self.dialog.viewportSize.height = '100%';
+            },
+            handleViewportSD:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '1280';
+                self.dialog.viewportSize.height = '720';
+            },
+            handleViewportHD:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '1920';
+                self.dialog.viewportSize.height = '1080';
+            },
+            handleViewportPhone:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '414';
+                self.dialog.viewportSize.height = '738';
             }
         },
         created:function(){

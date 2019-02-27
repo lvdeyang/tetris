@@ -40,7 +40,33 @@
                     </el-scrollbar>
                 </div>
             </div>
-            <div class="right"></div>
+            <div :class="'right ' + previewViewPort.status">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div class="preview-container">
+                        <div class="preview-layer0">
+                            <div class="preview-layer1">
+                                <div class="preview-layer2" :style="{width:previewViewPort.width, height:previewViewPort.height}">
+                                    <div class="preview-viewport" v-html="doPreview()">{{doPreview()}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div :class="'editor-toolbar '+toolbar.status" @click.stop="editorToolbarShow">
+                        <el-tooltip class="item" effect="dark" content="调节视图尺寸" placement="left">
+                            <div class="button-scope"><button class="el-button el-button--default change-size" @click.stop="editViewportSize"><span class="feather-icon-airplay"></span></button></div>
+                        </el-tooltip>
+                        <el-tooltip class="item" effect="dark" content="全屏" placement="left">
+                            <div class="button-scope"><button class="el-button el-button--default change-max" @click.stop="previewViewportMax"><span class="feather-icon-maximize"></span></button></div>
+                        </el-tooltip>
+                        <el-tooltip class="item" effect="dark" content="退出全屏" placement="left">
+                            <div class="button-scope"><button class="el-button el-button--default change-mini" @click.stop="previewViewportMini"><span class="feather-icon-minimize"></span></button></div>
+                        </el-tooltip>
+                        <el-tooltip class="item" effect="dark" content="最小化菜单" placement="left">
+                            <div class="button-scope"><button class="el-button el-button--default toolbar-exit" @click.stop="editorToolbarHide"><span class="feather-icon-log-out"></span></button></div>
+                        </el-tooltip>
+                    </div>
+                </div>
+            </div>
             <div class="toolbar">
                 <div class="button-scope">
                     <el-tooltip class="item" effect="dark" content="退出" placement="left">
@@ -80,7 +106,7 @@
                                 </td>
                                 <td style="width:100px; vertical-align:middle;">
                                     <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="selectImage(variable)">
-                                        <span class="el-icon-plus" style="font-size:40px; position:relative; top:7px;"></span>
+                                        <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
                                     </el-button>
                                 </td>
                             </tr>
@@ -120,5 +146,35 @@
 
     <!-- 选择图片对话框 -->
     <mi-image-dialog ref="selectImage" @selected-image="selectedImage"></mi-image-dialog>
+
+    <!-- 预览窗口尺寸调整 -->
+    <el-dialog
+            title="预览窗口尺寸"
+            :visible.sync="dialog.viewportSize.visible"
+            width="550px"
+            :before-close="handleViewportSizeClose">
+
+        <el-button-group style="margin-bottom:22px;">
+            <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportMaximize"><span style="font-size:14px; position:relative; top:2px;" class="feather-icon-maximize"></span></el-button>
+            <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportSD">SD</el-button>
+            <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportHD">HD</el-button>
+            <el-button style="line-height:35px; height:35px; width:35px; text-align:center; padding:0;" size="small" @click="handleViewportPhone"><span style="font-size:20px; position:relative; top:3px;" class="icon-mobile-phone"></span></el-button>
+        </el-button-group>
+
+        <el-form ref="form" label-width="20px">
+            <el-form-item label="宽">
+                <el-input v-model="dialog.viewportSize.width"></el-input>
+            </el-form-item>
+            <el-form-item label="高">
+                <el-input v-model="dialog.viewportSize.height"></el-input>
+            </el-form-item>
+        </el-form>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="dialog.viewportSize.visible = false">取 消</el-button>
+            <el-button size="medium" type="primary" @click="handleViewportSizeCommit">确 定</el-button>
+        </span>
+
+    </el-dialog>
 
 </div>

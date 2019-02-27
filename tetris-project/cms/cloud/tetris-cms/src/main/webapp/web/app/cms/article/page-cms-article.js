@@ -66,6 +66,11 @@ define([
                 handleSelectionChange:function(){
                     var self = this;
                 },
+                doPreview:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    window.open(window.BASEPATH + row.previewUrl, row.name, "status=no,menubar=yes,toolbar=no,width=414,height=738,left:100,top:100");
+                },
                 rowEdit:function(scope){
                     var self = this;
                     var row = scope.row;

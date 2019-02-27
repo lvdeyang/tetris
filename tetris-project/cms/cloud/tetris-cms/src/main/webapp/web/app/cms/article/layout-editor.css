@@ -28,8 +28,26 @@
 .article-layout-editor .article-module-options-button{margin:0; padding:7px; border-radius:0;}
 .article-layout-editor .drop-area{border:1px dashed #eaeaea; height:40px; line-height:38px; text-align:center; background-color:#fbfbfb; color:#eaeaea; font-weight:700;}
 
-.article-layout-editor .right{position:absolute; top:0; left:790px; right:50px; bottom:0;}
+.article-layout-editor .right{position:absolute; top:0; left:791px; right:50px; bottom:0;}
+.article-layout-editor .right.max{position:fixed; left:0; top:0; width:100%; height:100%; z-index:1;}
 
 .article-layout-editor .toolbar{width:50px; height:100%; position:absolute; top:0; right:0; background-color:#f2f3f7; border-left:1px solid #eaeaea;}
 .article-layout-editor .toolbar>.button-scope{width:50px; height:50px; padding:5px; box-sizing:border-box;}
 .article-layout-editor .toolbar>.button-scope:not(:first-child){padding-top:0; height:45px;}
+
+.article-layout-editor .preview-container{width:100%; height:100%; overflow:auto; background-color:gray;}
+.article-layout-editor .preview-layer0{width:100%; height:100%; display:table;}
+.article-layout-editor .preview-layer1{width:100%; height:100%; display:table-cell; vertical-align:middle;}
+.article-layout-editor .preview-layer2{display:block; margin:auto; width:100%; height:100%; background-color:#fff; text-align:left;}
+.article-layout-editor .preview-viewport{width:100%; height:100%; float:left; overflow:auto; padding:10px;}
+
+.article-layout-editor .editor-toolbar{position:absolute; right:0; bottom:0; z-index:20; overflow:hidden; border-style:solid; border-color:lightblue gray gray rgb(206, 173, 230);}
+.article-layout-editor .editor-toolbar.mini{width:0; height:0; border-width:10px;}
+.article-layout-editor .editor-toolbar.max{border-width:0; width:30px; height:auto; overflow:visible;}
+.article-layout-editor .editor-toolbar.max .button-scope button{display:inline-block;}
+.article-layout-editor .editor-toolbar:hover{cursor:pointer;}
+
+.article-layout-editor .editor-toolbar .button-scope{width:30px; height:30px; line-height:30px; text-align:center;}
+.article-layout-editor .editor-toolbar .button-scope button{width:100%; height:100%; text-align:center; padding:0; font-size:16px; border-radius:0; display:none;}
+.article-layout-editor .editor-toolbar .button-scope button:focus,
+.article-layout-editor .editor-toolbar .button-scope button:active{outline:none;}

@@ -20,50 +20,58 @@ define([
                     visible:false,
                     loading:false
                 },
-                tree:{
-                    props:{
-                        label: 'name',
-                        children: 'children',
-                        isLeaf: 'leaf'
-                    },
-                    expandOnClickNode:false,
-                    data:[]
-                }
+                breadCrumb:[],
+                data:[],
+                current:''
             }
         },
         methods:{
             //对话框关闭时初始化数据
             closed:function(){
                 var self = this;
-                self.tree.data.splice(0, self.tree.data.length);
-                self.cache = null;
-            },
-            loadNode:function(node, resolve){
-
-            },
-            //渲染函数
-            render:function(h, scope){
-                var data = scope.data;
-                return h('div', null, [
-                    h('span', {class:'icon-folder-close'}, []),
-                    h('span', null, data.name)
-                ]);
+                self.data.splice(0, self.data.length);
+                self.breadCrumb.splice(0, self.breadCrumb.length);
+                self.__buffer = null;
+                self.current = '';
+                self.dialog.visible = false;
             },
             //打开文件夹对话框
-            open:function(uri, except, depth){
+            open:function(){
                 var self = this;
-                /*ajax.post(uri, {
-                    except:except || null,
-                    depth:depth || null
-                }, function(data){
-                    if(data && data.length>0){
-                        for(var i=0; i<data.length; i++){
-                            self.tree.data.push(data[i]);
-                        }
-                    }
-                    self.dialog.visible = true;
-                });*/
+                self.load(null);
                 self.dialog.visible = true;
+            },
+            load:function(folderId){
+                var self = this;
+                self.dialog.loading = true;
+                ajax.post('/media/picture/feign/load', {
+                    folderId:folderId
+                }, function(data, status){
+                    setTimeout(function(){
+                        self.dialog.loading = false;
+                        self.data.splice(0, self.data.length);
+                        self.breadCrumb.splice(0, self.breadCrumb.length);
+                        self.current = '';
+                        if(status !== 200) return;
+                        var rows = data.rows;
+                        var breadCrumb = data.breadCrumb;
+                        if(rows && rows.length>0){
+                            for(var i=0; i<rows.length; i++){
+                                rows[i].__select = false;
+                                self.data.push(rows[i]);
+                            }
+                        }
+                        var items = [breadCrumb];
+                        var current = breadCrumb;
+                        while(current.next){
+                            current = current.next;
+                            items.push(current);
+                        }
+                        for(var i=0; i<items.length; i++){
+                            self.breadCrumb.push(items[i]);
+                        }
+                    }, 500);
+                }, null, ajax.NO_ERROR_CATCH_CODE);
             },
             //缓存数据
             setBuffer:function(data){
@@ -78,20 +86,34 @@ define([
             //文件夹选中
             handleOkButton:function(){
                 var self = this;
-                var currentNode = self.$refs.folderTree.getCurrentNode();
-                if(!currentNode){
-                    self.$message({
-                        message: '您还没有选择文件夹',
-                        type: 'warning'
-                    });
-                }
-                self.$emit('selected-image', currentNode, self.__buffer, function(){
+                self.$emit('selected-image', self.current.previewUrl, self.__buffer, function(){
                     self.dialog.loading = true;
                 }, function(){
                     self.dialog.loading = false;
                 }, function(){
                     self.dialog.visible = false;
                 });
+            },
+            pictureItemClass:function(item, index){
+                var c = 'picture-item';
+                if(item.__select){
+                    c += ' select'
+                }
+                if((index+1) % 9 === 0){
+                    c += ' last';
+                }
+                return c;
+            },
+            pictureSelect:function(picture){
+                var self = this;
+                for(var i=0; i<self.data.length; i++){
+                    if(self.data[i].id === picture.id){
+                        self.data[i].__select = true;
+                        self.current = self.data[i];
+                    }else{
+                        self.data[i].__select = false;
+                    }
+                }
             }
         }
     });
