@@ -22,7 +22,7 @@
 .article-layout-editor .article-module,
 .article-layout-editor .drop-area{margin-bottom:5px;}
 .article-layout-editor .article-module{border:1px dashed transparent; position:relative; min-height:40px;}
-.article-layout-editor .article-module:hover{border:1px dashed #6680e1;}
+.article-layout-editor .article-module:hover{border:1px dashed #409EFF;}
 .article-layout-editor .article-module-render{width:100%; height:100%;}
 .article-layout-editor .article-module-options{height:28px; position:absolute; right:0; top:0;}
 .article-layout-editor .article-module-options-button{margin:0; padding:7px; border-radius:0;}
@@ -51,3 +51,8 @@
 .article-layout-editor .editor-toolbar .button-scope button{width:100%; height:100%; text-align:center; padding:0; font-size:16px; border-radius:0; display:none;}
 .article-layout-editor .editor-toolbar .button-scope button:focus,
 .article-layout-editor .editor-toolbar .button-scope button:active{outline:none;}
+
+.variable-editor{position:relative; border:1px solid transparent;}
+.variable-editor.hover{border:1px dashed #409eff;}
+.variable-editor .variable-edit-button{padding:7px; position:absolute; right:0; top:0; border-radius:0; display:none;}
+.variable-editor.hover .variable-edit-button{display:inline-block;}

@@ -95,8 +95,14 @@
                     <template v-if="variable.editor === 'INPUT'">
                         <el-input v-model="variable.value"></el-input>
                     </template>
+                    <template v-if="variable.editor === 'TIME'">
+
+                    </template>
                     <template v-if="variable.editor === 'PARAGRAPH'">
-                        <el-input type="textarea" v-model="variable.value" rows="8"></el-input>
+                        <div :class="variable.__hover?'variable-editor hover':'variable-editor'" @mousemove="variableEditorMousemove(variable)" @mouseout="variableEditorMouseout(variable)">
+                            <el-input type="textarea" v-model="variable.value" rows="8"></el-input>
+                            <el-button class="variable-edit-button" type="primary" size="mini" icon="el-icon-edit"></el-button>
+                        </div>
                     </template>
                     <template v-if="variable.editor === 'IMAGE'">
                         <table>
@@ -111,6 +117,12 @@
                                 </td>
                             </tr>
                         </table>
+                    </template>
+                    <template v-if="variable.editor === 'VIDEO'">
+
+                    </template>
+                    <template v-if="variable.editor === 'AUDIO'">
+
                     </template>
                     <template v-if="variable.editor === 'ARRAY_SIMPLE'">
                         <el-tag

@@ -366,6 +366,14 @@ define([
                 var self = this;
                 self.dialog.viewportSize.width = '414';
                 self.dialog.viewportSize.height = '738';
+            },
+            variableEditorMousemove:function(variable){
+                var self = this;
+                Vue.set(variable, '__hover', true);
+            },
+            variableEditorMouseout:function(variable){
+                var self = this;
+                Vue.set(variable, '__hover', null);
             }
         },
         created:function(){

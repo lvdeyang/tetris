@@ -5,7 +5,7 @@
 .ace-xcode .ace_print-margin{background:transparent!important;}
 
 /* element-ui 样式 */
-.el-tag + .el-tag {margin-left:10px;  }
+.el-tag{margin-right:10px;}
 .button-new-tag {width:78px; margin-left:10px; height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;}
 .input-new-tag {width:78px; margin-left:10px; vertical-align:bottom; position:relative; bottom:1px;}
 
