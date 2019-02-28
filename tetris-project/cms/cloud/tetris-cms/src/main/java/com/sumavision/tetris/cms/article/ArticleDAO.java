@@ -1,13 +1,10 @@
 package com.sumavision.tetris.cms.article;
 
 import java.util.Collection;
-import java.util.List;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
-
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = ArticlePO.class, idClass = Long.class)
@@ -31,6 +28,6 @@ public interface ArticleDAO extends BaseDAO<ArticlePO>{
 	 * @param Pageable page 分页信息
 	 * @return Page<ArticlePO> 用户列表
 	 */
-	@Query(value = "SELECT article FROM TETRIS_CMS_ARTICLE article WHERE article.id NOT IN ?1")
+	@Query(value = "SELECT * FROM TETRIS_CMS_ARTICLE article WHERE article.id NOT IN ?1")
 	public Page<ArticlePO> findWithExcept(Collection<Long> except, Pageable page);
 }
