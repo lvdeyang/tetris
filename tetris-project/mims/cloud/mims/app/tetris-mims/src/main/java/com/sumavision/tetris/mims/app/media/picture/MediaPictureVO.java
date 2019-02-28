@@ -2,8 +2,12 @@ package com.sumavision.tetris.mims.app.media.picture;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPicturePO>{
@@ -33,6 +37,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	private String mimetype;
 	
 	private Integer progress;
+	
+	private String previewUrl;
 	
 	public String getName() {
 		return name;
@@ -150,9 +156,19 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		this.progress = progress;
 		return this;
 	}
+	
+	public String getPreviewUrl() {
+		return previewUrl;
+	}
+
+	public MediaPictureVO setPreviewUrl(String previewUrl) {
+		this.previewUrl = previewUrl;
+		return this;
+	}
 
 	@Override
 	public MediaPictureVO set(MediaPicturePO entity) throws Exception {
+		ServerProps props = SpringContext.getBean(ServerProps.class);
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
@@ -166,7 +182,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setIcon(MediaPictureItemType.PICTURE.getIcon())
 			.setStyle(MediaPictureItemType.PICTURE.getStyle()[0])
 			.setMimetype(entity.getMimetype())
-			.setProgress(0);
+			.setProgress(0)
+			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append(entity.getPreviewUrl()).toString());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaPicturePO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaPicturePO.SEPARATOR_KEYWORDS)));	 
 		return this;

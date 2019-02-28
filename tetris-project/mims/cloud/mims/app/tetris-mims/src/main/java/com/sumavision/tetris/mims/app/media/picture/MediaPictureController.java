@@ -21,7 +21,6 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -79,56 +78,7 @@ public class MediaPictureController {
 			@PathVariable Long folderId,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userQuery.current();
-		
-		//TODO 权限校验
-		
-		FolderPO current = folderDao.findOne(folderId);
-		
-		if(current == null) throw new FolderNotExistException(folderId);
-		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), current.getId())){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
-		
-		//获取当前文件夹的所有父目录
-		List<FolderPO> parentFolders = folderQuery.getParentFolders(current);
-		
-		List<FolderPO> filteredParentFolders = new ArrayList<FolderPO>();
-		if(parentFolders==null || parentFolders.size()<=0){
-			parentFolders = new ArrayList<FolderPO>();
-		}
-		for(FolderPO parentFolder:parentFolders){
-			if(!FolderType.COMPANY.equals(parentFolder.getType())){
-				filteredParentFolders.add(parentFolder);
-			}
-		}
-		filteredParentFolders.add(current);
-		
-		//生成面包屑数据
-		FolderBreadCrumbVO folderBreadCrumb = folderQuery.generateFolderBreadCrumb(filteredParentFolders);
-		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_PICTURE.toString());
-		
-		List<MediaPicturePO> pictures = mediaPictureQuery.findCompleteByFolderId(current.getId());
-		
-		List<MediaPictureVO> medias = new ArrayList<MediaPictureVO>();
-		if(folders!=null && folders.size()>0){
-			for(FolderPO folder:folders){
-				medias.add(new MediaPictureVO().set(folder));
-			}
-		}
-		if(pictures!=null && pictures.size()>0){
-			for(MediaPicturePO picture:pictures){
-				medias.add(new MediaPictureVO().set(picture));
-			}
-		}
-		
-		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
-																  		 .put("breadCrumb", folderBreadCrumb)
-																  		 .getMap();
-		
-		return result;
+		return mediaPictureQuery.load(folderId);
 	}
 	
 	/**

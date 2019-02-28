@@ -8,6 +8,7 @@ define([
     'juicer',
     'vue',
     'element-ui',
+    'mi-image-dialog',
     'css!' + window.APPPATH + 'cms/article/layout-editor.css'
 ], function(tpl, ajax, $, juicer, Vue){
 
@@ -31,10 +32,44 @@ define([
                     precise:5,
                     y:0,
                     template:''
+                },
+                dialog:{
+                    editContent:{
+                        visible:false,
+                        module:'',
+                        variables:[]
+                    },
+                    viewportSize:{
+                        visible:false,
+                        width:'100%',
+                        height:'100%'
+                    }
+                },
+                editors:{
+                    arraySimple:{
+                        visible:false,
+                        value:''
+                    }
+                },
+                toolbar:{
+                    status:'mini'
+                },
+                previewViewPort:{
+                    status:'',
+                    width:'414px',
+                    height:'738px'
                 }
             }
         },
         methods:{
+            doPreview:function(){
+                var self = this;
+                var html = '';
+                for(var i=0; i<self.modules.length; i++){
+                    html += self.modules[i].render;
+                }
+                return html;
+            },
             show:function(article){
                 var self = this;
                 self.visible = true;
@@ -44,6 +79,7 @@ define([
                         for(var i=0; i<data.length; i++){
                             var json = self.translateJSON(data[i].template.js);
                             data[i].render = juicer(data[i].template.html).render(json);
+                            data[i].mousein = false;
                             self.modules.push(data[i]);
                         }
                     }
@@ -63,6 +99,7 @@ define([
                     html += self.modules[i].render;
                     var c_module = $.extend(true, {}, self.modules[i]);
                     c_module.render = null;
+                    c_module.mousein = null;
                     c_modules.push(c_module);
                 }
                 var modules = $.toJSON(c_modules);
@@ -170,6 +207,173 @@ define([
                 var self = this;
                 self.drag.ongoing = false;
                 self.drag.template = '';
+            },
+            moduleMousemove:function(module, e){
+                Vue.set(module, 'mousein', true);
+            },
+            moduleMouseout:function(module, e){
+                Vue.set(module, 'mousein', false);
+            },
+            moduleEdit:function(module){
+                var self = this;
+                self.dialog.editContent.visible = true;
+                self.dialog.editContent.module = module;
+                self.dialog.editContent.variables.splice(0, self.dialog.editContent.variables.length);
+                if(module.template.js){
+                    var variables = $.parseJSON(module.template.js);
+                    if(variables.length > 0){
+                        for(var i=0; i<variables.length; i++){
+                            self.dialog.editContent.variables.push(variables[i]);
+                        }
+                    }
+                }
+            },
+            moduleRemove:function(module){
+                var self = this;
+                var h = self.$createElement;
+                self.$msgbox({
+                    title:'危险操作',
+                    message:h('div', null, [
+                        h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                        h('div', {class:'el-message-box__message'}, [
+                            h('p', null, ['是否要删除此模板?'])
+                        ])
+                    ]),
+                    type:'wraning',
+                    showCancelButton: true,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    beforeClose:function(action, instance, done){
+                        if(action === 'confirm'){
+                            for(var i=0; i<self.modules.length; i++){
+                                if(self.modules[i].id === module.id){
+                                    self.modules.splice(i, 1);
+                                    break;
+                                }
+                            }
+                        }
+                        done();
+                    }
+                }).catch(function(){});
+            },
+            handleEditContentClose:function(){
+                var self = this;
+                self.dialog.editContent.visible = false;
+                self.dialog.editContent.module = '';
+            },
+            handleEditContentCommit:function(){
+                var self = this;
+                var module = self.dialog.editContent.module;
+                var variables = self.dialog.editContent.variables;
+                module.template.js = $.toJSON(variables);
+                var json = self.translateJSON(module.template.js);
+                module.render =juicer(module.template.html).render(json);
+                self.handleEditContentClose();
+            },
+            editContentTitle:function(){
+                var self = this;
+                return self.dialog.editContent.module?'编辑'+self.dialog.editContent.module.template.name:'';
+            },
+            handleArraySimpleRemove:function(values, simple){
+                var self = this;
+                for(var i=0; i<values.length; i++){
+                    if(values[i] === simple){
+                        values.splice(i, 1);
+                        break;
+                    }
+                }
+            },
+            handleArraySimpleAdd:function(values){
+                var self = this;
+                if(values.indexOf(self.editors.arraySimple.value) < 0) values.push(self.editors.arraySimple.value);
+                self.editors.arraySimple.visible = false;
+                self.editors.arraySimple.value = '';
+            },
+            handleArraySimpleEdit:function(){
+                var self = this;
+                self.editors.arraySimple.visible = true;
+                self.$nextTick(function(){
+                    self.$refs.arraySimpleAddInput[0].$refs.input.focus();
+                });
+            },
+            selectImage:function(variable){
+                var self = this;
+                self.$refs.selectImage.setBuffer(variable);
+                self.$refs.selectImage.open();
+            },
+            selectedImage:function(url, buff, startLoading, endLoading, done){
+                Vue.set(buff, 'value', url);
+                done();
+            },
+            editorToolbarShow:function(){
+                var self = this;
+                self.toolbar.status = 'max';
+            },
+            editorToolbarHide:function(){
+                var self = this;
+                self.toolbar.status = 'mini';
+            },
+            previewViewportMax:function(){
+                var self = this;
+                self.previewViewPort.status = 'max';
+            },
+            previewViewportMini:function(){
+                var self  = this;
+                self.previewViewPort.status = '';
+            },
+            editViewportSize:function(){
+                var self = this;
+                self.dialog.viewportSize.visible = true;
+                self.dialog.viewportSize.width = self.previewViewPort.width;
+                self.dialog.viewportSize.height = self.previewViewPort.height;
+            },
+            handleViewportSizeClose:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '';
+                self.dialog.viewportSize.height = '';
+                self.dialog.viewportSize.visible = false;
+            },
+            handleViewportSizeCommit:function(){
+                var self = this;
+                if(typeof self.dialog.viewportSize.width==='string' && self.dialog.viewportSize.width.indexOf('%')>=0){
+                    self.previewViewPort.width = self.dialog.viewportSize.width;
+                }else{
+                    self.previewViewPort.width = self.dialog.viewportSize.width + 'px';
+                }
+                if(typeof self.dialog.viewportSize.height==='string' && self.dialog.viewportSize.height.indexOf('%')>=0){
+                    self.previewViewPort.height = self.dialog.viewportSize.height;
+                }else{
+                    self.previewViewPort.height = self.dialog.viewportSize.height + 'px';
+                }
+                self.handleViewportSizeClose();
+            },
+            handleViewportMaximize:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '100%';
+                self.dialog.viewportSize.height = '100%';
+            },
+            handleViewportSD:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '1280';
+                self.dialog.viewportSize.height = '720';
+            },
+            handleViewportHD:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '1920';
+                self.dialog.viewportSize.height = '1080';
+            },
+            handleViewportPhone:function(){
+                var self = this;
+                self.dialog.viewportSize.width = '414';
+                self.dialog.viewportSize.height = '738';
+            },
+            variableEditorMousemove:function(variable){
+                var self = this;
+                Vue.set(variable, '__hover', true);
+            },
+            variableEditorMouseout:function(variable){
+                var self = this;
+                Vue.set(variable, '__hover', null);
             }
         },
         created:function(){

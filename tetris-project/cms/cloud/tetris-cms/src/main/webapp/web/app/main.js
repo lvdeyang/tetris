@@ -43,6 +43,7 @@ require.config({
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
         'mi-system-role-dialog':window.APPPATH + 'component/dialog/system-role/system-role-dialog',
+        'mi-image-dialog':window.APPPATH + 'component/dialog/mims/image/mims-image',
 
         /* pages */
         'page-cms-template':window.APPPATH + 'cms/template/page-cms-template',
