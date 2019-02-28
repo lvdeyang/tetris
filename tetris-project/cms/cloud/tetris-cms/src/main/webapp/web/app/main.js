@@ -44,6 +44,9 @@ require.config({
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
         'mi-system-role-dialog':window.APPPATH + 'component/dialog/system-role/system-role-dialog',
         'mi-image-dialog':window.APPPATH + 'component/dialog/mims/image/mims-image',
+        'mi-txt-dialog':window.APPPATH + 'component/dialog/mims/txt/mims-txt',
+        'mi-video-dialog':window.APPPATH + 'component/dialog/mims/video/mims-video',
+        'mi-audio-dialog':window.APPPATH + 'component/dialog/mims/audio/mims-audio',
 
         /* pages */
         'page-cms-template':window.APPPATH + 'cms/template/page-cms-template',
