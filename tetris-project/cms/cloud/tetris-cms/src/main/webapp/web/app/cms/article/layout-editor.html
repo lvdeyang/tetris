@@ -96,12 +96,20 @@
                         <el-input v-model="variable.value"></el-input>
                     </template>
                     <template v-if="variable.editor === 'TIME'">
-
+                        <el-date-picker
+                                style="width:100%;"
+                                v-model="variable.value"
+                                type="datetime"
+                                placeholder="选择日期时间"
+                                align="right"
+                                :picker-options="editors.time"
+                                value-format="yyyy-MM-dd HH:mm:ss">
+                        </el-date-picker>
                     </template>
                     <template v-if="variable.editor === 'PARAGRAPH'">
                         <div :class="variable.__hover?'variable-editor hover':'variable-editor'" @mousemove="variableEditorMousemove(variable)" @mouseout="variableEditorMouseout(variable)">
                             <el-input type="textarea" v-model="variable.value" rows="8"></el-input>
-                            <el-button class="variable-edit-button" type="primary" size="mini" icon="el-icon-edit"></el-button>
+                            <el-button class="variable-edit-button" type="primary" size="mini" icon="el-icon-edit" @click="selectTxt(variable)"></el-button>
                         </div>
                     </template>
                     <template v-if="variable.editor === 'IMAGE'">
@@ -119,10 +127,16 @@
                         </table>
                     </template>
                     <template v-if="variable.editor === 'VIDEO'">
-
+                        <div :class="variable.__hover?'variable-editor hover':'variable-editor'" @mousemove="variableEditorMousemove(variable)" @mouseout="variableEditorMouseout(variable)" style="min-height:36px;">
+                            {{variable.value}}
+                            <el-button class="variable-edit-button" type="primary" size="mini" icon="el-icon-edit" @click="selectVideo(variable)"></el-button>
+                        </div>
                     </template>
                     <template v-if="variable.editor === 'AUDIO'">
-
+                        <div :class="variable.__hover?'variable-editor hover':'variable-editor'" @mousemove="variableEditorMousemove(variable)" @mouseout="variableEditorMouseout(variable)" style="min-height:36px;">
+                            {{variable.value}}
+                            <el-button class="variable-edit-button" type="primary" size="mini" icon="el-icon-edit" @click="selectAudio(variable)"></el-button>
+                        </div>
                     </template>
                     <template v-if="variable.editor === 'ARRAY_SIMPLE'">
                         <el-tag
@@ -158,6 +172,15 @@
 
     <!-- 选择图片对话框 -->
     <mi-image-dialog ref="selectImage" @selected-image="selectedImage"></mi-image-dialog>
+
+    <!-- 选择文本对话框 -->
+    <mi-txt-dialog ref="selectTxt" @selected-txt="selectedTxt"></mi-txt-dialog>
+
+    <!-- 选择视频对话框 -->
+    <mi-video-dialog ref="selectVideo" @selected-video="selectedVideo"></mi-video-dialog>
+
+    <!-- 选择音频对话框 -->
+    <mi-audio-dialog ref="selectAudio" @selected-audio="selectedAudio"></mi-audio-dialog>
 
     <!-- 预览窗口尺寸调整 -->
     <el-dialog

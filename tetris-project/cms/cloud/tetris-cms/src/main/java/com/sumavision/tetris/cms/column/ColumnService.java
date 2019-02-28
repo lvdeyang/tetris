@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sumavision.tetris.cms.template.TemplatePO;
-import com.sumavision.tetris.cms.template.TemplateTagPO;
+import com.sumavision.tetris.cms.article.ArticleDAO;
+import com.sumavision.tetris.cms.article.ArticlePO;
+import com.sumavision.tetris.cms.article.ArticleVO;
+import com.sumavision.tetris.cms.relation.ColumnRelationArticleDAO;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
@@ -25,7 +27,16 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 public class ColumnService {
 
 	@Autowired
-	private ColumnDAO columnDao;
+	private ColumnDAO columnDao;	
+
+	@Autowired
+	private ColumnQuery columnQuery;
+	
+	@Autowired
+	private ColumnRelationArticleDAO columnRelationArticleDao;
+	
+	@Autowired
+	private ArticleDAO articleDao;
 
 	public ColumnPO addRoot() throws Exception {
 
@@ -66,9 +77,6 @@ public class ColumnService {
 
 		return columnPO;
 	}
-
-	@Autowired
-	ColumnQuery columnQuery;
 
 	public void remove(ColumnPO columnPO) throws Exception {
 
@@ -155,6 +163,43 @@ public class ColumnService {
 		subColumns.add(columnPO);
 		columnDao.save(subColumns);
 
+	}
+	
+	/**
+	 * 查询一个栏目下的内容<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月27日 上午10:05:39
+	 * 
+	 * @param columnId 栏目id
+	 */
+	public ColumnVO query(Long columnId) throws Exception {
+		
+		ColumnPO column = columnDao.findOne(columnId);
+		
+		ColumnVO view_column = new ColumnVO().set(column);
+		
+		//栏目下子栏目
+		List<ColumnPO> subColumns = columnQuery.findAllSubTags(columnId);		
+		
+		if(subColumns != null && subColumns.size()>0){
+			List<ColumnVO> view_subColumns = ColumnVO.getConverter(ColumnVO.class).convert(subColumns, ColumnVO.class);			
+			if(view_column.getSubColumns() == null) view_column.setSubColumns(new ArrayList<ColumnVO>());
+			view_column.getSubColumns().addAll(view_subColumns);
+		}
+
+		//栏目下文章
+		List<Long> articleIds = columnRelationArticleDao.findArticleIdByColumnId(columnId);
+		if(articleIds != null && articleIds.size()>0){
+			List<ArticlePO> articles = articleDao.findAll(articleIds);
+			if(articles != null && articles.size()>0){
+				List<ArticleVO> view_articles = ArticleVO.getConverter(ArticleVO.class).convert(articles, ArticleVO.class);
+				if(view_column.getArticles() == null) view_column.setArticles(new ArrayList<ArticleVO>());
+				view_column.getArticles().addAll(view_articles);
+			}
+		}
+		
+		return view_column;
 	}
 
 }

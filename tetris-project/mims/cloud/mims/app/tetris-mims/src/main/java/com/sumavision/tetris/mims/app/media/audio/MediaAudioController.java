@@ -8,17 +8,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -76,56 +78,7 @@ public class MediaAudioController {
 			@PathVariable Long folderId,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userQuery.current();
-		
-		//TODO 权限校验
-		
-		FolderPO current = folderDao.findOne(folderId);
-		
-		if(current == null) throw new FolderNotExistException(folderId);
-		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), current.getId())){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
-		
-		//获取当前文件夹的所有父目录
-		List<FolderPO> parentFolders = folderQuery.getParentFolders(current);
-		
-		List<FolderPO> filteredParentFolders = new ArrayList<FolderPO>();
-		if(parentFolders==null || parentFolders.size()<=0){
-			parentFolders = new ArrayList<FolderPO>();
-		}
-		for(FolderPO parentFolder:parentFolders){
-			if(!FolderType.COMPANY.equals(parentFolder.getType())){
-				filteredParentFolders.add(parentFolder);
-			}
-		}
-		filteredParentFolders.add(current);
-		
-		//生成面包屑数据
-		FolderBreadCrumbVO folderBreadCrumb = folderQuery.generateFolderBreadCrumb(filteredParentFolders);
-		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_AUDIO.toString());
-		
-		List<MediaAudioPO> audios = mediaAudioQuery.findCompleteByFolderId(current.getId());
-		
-		List<MediaAudioVO> medias = new ArrayList<MediaAudioVO>();
-		if(folders!=null && folders.size()>0){
-			for(FolderPO folder:folders){
-				medias.add(new MediaAudioVO().set(folder));
-			}
-		}
-		if(audios!=null && audios.size()>0){
-			for(MediaAudioPO audio:audios){
-				medias.add(new MediaAudioVO().set(audio));
-			}
-		}
-		
-		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
-																  		 .put("breadCrumb", folderBreadCrumb)
-																  		 .getMap();
-		
-		return result;
+		return mediaAudioQuery.load(folderId);
 	}
 	
 	/**

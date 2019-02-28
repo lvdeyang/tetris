@@ -9,6 +9,9 @@ define([
     'vue',
     'element-ui',
     'mi-image-dialog',
+    'mi-txt-dialog',
+    'mi-video-dialog',
+    'mi-audio-dialog',
     'css!' + window.APPPATH + 'cms/article/layout-editor.css'
 ], function(tpl, ajax, $, juicer, Vue){
 
@@ -46,6 +49,28 @@ define([
                     }
                 },
                 editors:{
+                    time:{
+                        shortcuts: [{
+                            text: '今天',
+                            onClick:function(picker) {
+                                picker.$emit('pick', new Date());
+                            }
+                        }, {
+                            text: '昨天',
+                            onClick:function(picker) {
+                                var date = new Date();
+                                date.setTime(date.getTime() - 3600 * 1000 * 24);
+                                picker.$emit('pick', date);
+                            }
+                        }, {
+                            text: '一周前',
+                            onClick:function(picker) {
+                                const date = new Date();
+                                date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
+                                picker.$emit('pick', date);
+                            }
+                        }]
+                    },
                     arraySimple:{
                         visible:false,
                         value:''
@@ -302,6 +327,33 @@ define([
                 self.$refs.selectImage.open();
             },
             selectedImage:function(url, buff, startLoading, endLoading, done){
+                Vue.set(buff, 'value', url);
+                done();
+            },
+            selectTxt:function(variable){
+                var self = this;
+                self.$refs.selectTxt.setBuffer(variable);
+                self.$refs.selectTxt.open();
+            },
+            selectedTxt:function(txt, buff, startLoading, endLoading, done){
+                Vue.set(buff, 'value', txt);
+                done();
+            },
+            selectVideo:function(variable){
+                var self = this;
+                self.$refs.selectVideo.setBuffer(variable);
+                self.$refs.selectVideo.open();
+            },
+            selectedVideo:function(url, buff, startLoading, endLoading, done){
+                Vue.set(buff, 'value', url);
+                done();
+            },
+            selectAudio:function(variable){
+                var self = this;
+                self.$refs.selectAudio.setBuffer(variable);
+                self.$refs.selectAudio.open();
+            },
+            selectedAudio:function(url, buff, startLoading, endLoading, done){
                 Vue.set(buff, 'value', url);
                 done();
             },

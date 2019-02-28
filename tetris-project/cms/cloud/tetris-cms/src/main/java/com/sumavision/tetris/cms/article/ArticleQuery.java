@@ -1,12 +1,16 @@
 package com.sumavision.tetris.cms.article;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 /**
@@ -109,6 +113,46 @@ public class ArticleQuery {
 		"<body>";
 		String sufHtml = "</body></html>";
 		return new StringBufferWrapper().append(preHtml).append(articleHtml).append(sufHtml).toString();
+	}
+	
+	/**
+	 * 分页查询文章（前端接口）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月26日 下午5:32:06
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<ArticleVO> 用户列表
+	 */
+	public Map<String, Object> list(int currentPage, int pageSize) throws Exception{
+		List<ArticlePO> articles = findAll(currentPage, pageSize);
+		List<ArticleVO> view_articles = ArticleVO.getConverter(ArticleVO.class).convert(articles, ArticleVO.class);
+		long total = articleDao.count();
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", view_articles)
+												   .getMap();
+	}
+	
+	/**
+	 * 分页查询文章（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月26日 下午6:37:06
+	 * @param Collection<Long> except 例外文章id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 数据总量
+	 * @return List<ArticleVO> rows 用户列表
+	 */
+	public Map<String, Object> listWithExcept(Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<ArticlePO> pages = articleDao.findWithExcept(except, page);
+		List<ArticlePO> articles = pages.getContent();
+		long total = pages.getTotalElements();
+		List<ArticleVO> view_articles = ArticleVO.getConverter(ArticleVO.class).convert(articles, ArticleVO.class);
+		return new HashMapWrapper<String, Object>().put("total", total)
+											       .put("rows", view_articles)
+											       .getMap();
 	}
 	
 }

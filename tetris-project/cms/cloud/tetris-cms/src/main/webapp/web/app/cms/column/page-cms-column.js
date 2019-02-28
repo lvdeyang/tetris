@@ -1,5 +1,5 @@
 /**
- * Created by lvdeyang on 2018/12/24 0024.
+ * Created by lvdeyang on 2018/12/26 0026.
  */
 define([
     'text!' + window.APPPATH + 'cms/column/page-cms-column.html',
@@ -11,6 +11,7 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
+    'article-dialog',
     'css!' + window.APPPATH + 'cms/column/page-cms-column.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
 
@@ -52,21 +53,6 @@ define([
                         name:'',
                         remark:''
                     },
-                    addTemplate:{
-                        visible:false,
-                        name:'',
-                        type:'',
-                        remark:'',
-                        loading:false
-                    },
-                    editTemplate:{
-                        visible:false,
-                        id:'',
-                        name:'',
-                        type:'',
-                        remark:'',
-                        loading:false
-                    },
                     selectTag:{
                         visible:false,
                         template:'',
@@ -85,14 +71,6 @@ define([
                 loading:{
                     tree:false,
                     addRoot:false
-                },
-                editor:{
-                    el:'',
-                    html:'',
-                    css:'',
-                    js:'',
-                    show:editorShow,
-                    hide:editorHide
                 }
             },
             computed:{
@@ -263,28 +241,21 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 currentNode:function(data){
-                    if(!data) return;
                     var self = this;
+                    if(!data || data.id == -1){
+                        self.tree.current = '';
+                        return;
+                    }
                     self.tree.current = data;
                     self.$nextTick(function(){
                         self.$refs.tagTree.setCurrentKey(data.uuid);
                     });
-                    self.loadTemplates(data.id);
+                    self.loadArticles(data.id);
                 },
-                loadTemplateTypes:function(){
-                    var self = this;
-                    ajax.post('/cms/template/query/types', null, function(data){
-                        if(data && data.length>0){
-                            for(var i=0; i<data.length; i++){
-                                self.types.push(data[i]);
-                            }
-                        }
-                    });
-                },
-                loadTemplates:function(tagId){
+                loadArticles:function(tagId){
                     var self = this;
                     self.table.data.splice(0, self.table.data.length);
-                    ajax.post('/cms/template/load', {
+                    ajax.post('/cms/column/relation/article/load', {
                         tagId:tagId
                     }, function(data){
                         if(data && data.length>0){
@@ -293,21 +264,6 @@ define([
                             }
                         }
                     });
-                },
-                templateEdit:function(scope){
-                    var self = this;
-                    var row = scope.row;
-                    self.editor.show({});
-                },
-                rowEdit:function(scope){
-                    var self = this;
-                    var row = scope.row;
-                    self.dialog.editTemplate.visible = true;
-                    self.dialog.editTemplate.id = row.id;
-                    self.dialog.editTemplate.name = row.name;
-                    self.dialog.editTemplate.type = row.type;
-                    self.dialog.editTemplate.remark = row.remark;
-                    self.dialog.editTemplate.loading = false;
                 },
                 rowDelete:function(scope){
                     var self = this;
@@ -318,7 +274,7 @@ define([
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
-                                h('p', null, ['此操作将永久删除模板，且不可恢复，是否继续?'])
+                                h('p', null, ['此操作将下架该文章，是否继续?'])
                             ])
                         ]),
                         type:'wraning',
@@ -328,7 +284,7 @@ define([
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
-                                ajax.post('/cms/template/remove/' + row.id, null, function(data, status){
+                                ajax.post('/cms/column/relation/article/remove/' + row.id, null, function(data, status){
                                     instance.confirmButtonLoading = false;
                                     done();
                                     if(status !== 200) return;
@@ -347,177 +303,123 @@ define([
                     }).catch(function(){});
 
                 },
-                handleAddTemplateClose:function(){
-                    var self = this;
-                    self.dialog.addTemplate.name = '';
-                    self.dialog.addTemplate.remark = '';
-                    self.dialog.addTemplate.type = '';
-                    self.dialog.addTemplate.visible = false;
-                },
-                handleAddTemplateCommit:function(){
-                    var self = this;
-                    self.dialog.addTemplate.loading = true;
-                    ajax.post('/cms/template/add', {
-                        name:self.dialog.addTemplate.name,
-                        type:self.dialog.addTemplate.type,
-                        remark:self.dialog.addTemplate.remark,
-                        tagId:self.tree.current.id
-                    }, function(data, status){
-                        self.dialog.addTemplate.loading = false;
-                        if(status !== 200) return;
-                        self.table.data.push(data);
-                        self.handleAddTemplateClose();
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
-                },
-                handleEditTemplateClose:function(){
-                    var self = this;
-                    self.dialog.editTemplate.visible = false;
-                    self.dialog.editTemplate.id = '';
-                    self.dialog.editTemplate.name = '';
-                    self.dialog.editTemplate.type = '';
-                    self.dialog.editTemplate.remark = '';
-                    self.dialog.editTemplate.loading = false;
-                },
-                handleEditTemplateCommit:function(){
-                    var self = this;
-                    self.dialog.editTemplate.loading = true;
-                    ajax.post('/cms/template/update/' + self.dialog.editTemplate.id, {
-                        name:self.dialog.editTemplate.name,
-                        type:self.dialog.editTemplate.type,
-                        remark:self.dialog.editTemplate.remark,
-                    }, function(data, status){
-                        self.dialog.editTemplate.loading = false;
-                        if(status !== 200) return;
-                        for(var i=0; i<self.table.data.length; i++){
-                            if(self.table.data[i].id === self.dialog.editTemplate.id){
-                                self.table.data[i].name = self.dialog.editTemplate.name;
-                                self.table.data[i].type = self.dialog.editTemplate.type;
-                                self.table.data[i].remark = self.dialog.editTemplate.remark;
-                                break;
-                            }
-                        }
-                        self.handleEditTemplateClose();
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
-                },
-                changeTag:function(scope){
+                rowInform: function (scope) {
                     var self = this;
                     var row = scope.row;
-                    self.loadSelectTagTree();
-                    self.dialog.selectTag.visible = true;
-                    self.dialog.selectTag.template = row;
+                    ajax.post('/cms/column/relation/article/inform', {
+                        columnId: row.columnId,
+                        articleId: row.articleId
+                    }, function(data, status){
+                        
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                handleSelectTagClose:function(){
+                rowTop: function(scope){
                     var self = this;
-                    self.dialog.selectTag.visible = false;
-                    self.dialog.selectTag.template = '';
-                    self.dialog.selectTag.tree.data.splice(self.dialog.selectTag.tree.data.length);
-                    self.dialog.selectTag.tree.current = '';
-                    self.dialog.selectTag.loading = false;
-                },
-                handleSelectTagCommit:function(){
-                    var self = this;
-                    ajax.post('/cms/template/change/tag/' + self.dialog.selectTag.template.id, {
-                        tagId:self.dialog.selectTag.tree.current.id
-                    }, function(data){
-                        if(data){
-                            for(var i=0; i<self.table.data.length; i++){
-                                if(self.table.data[i].id === self.dialog.selectTag.template.id){
-                                    self.table.data.splice(i, 1);
-                                    break;
-                                }
+                    var row = scope.row;
+                    ajax.post('/cms/column/relation/article/top', {
+                        columnId: row.columnId,
+                        articleId: row.articleId
+                    }, function(data, status){
+                        if(status !== 200) return;
+                        if(data && data.length>0){
+                            self.table.data.splice(0, self.table.data.length);
+                            for(var i=0; i<data.length; i++){
+                                self.table.data.push(data[i]);
                             }
                         }
-                        self.handleSelectTagClose();
-                    });
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                currentSelectedTagChange:function(data){
+                rowBottom: function(scope){
                     var self = this;
-                    self.dialog.selectTag.tree.current = data;
-                }
+                    var row = scope.row;
+                    ajax.post('/cms/column/relation/article/bottom', {
+                        columnId: row.columnId,
+                        articleId: row.articleId
+                    }, function(data, status){
+                        if(status !== 200) return;
+                        if(data && data.length>0){
+                            self.table.data.splice(0, self.table.data.length);
+                            for(var i=0; i<data.length; i++){
+                                self.table.data.push(data[i]);
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                rowUp: function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/cms/column/relation/article/up', {
+                        columnId: row.columnId,
+                        articleId: row.articleId
+                    }, function(data, status){
+                        if(status !== 200) return;
+                        if(data && data.length>0){
+                            self.table.data.splice(0, self.table.data.length);
+                            for(var i=0; i<data.length; i++){
+                                self.table.data.push(data[i]);
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                rowDown: function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/cms/column/relation/article/down', {
+                        columnId: row.columnId,
+                        articleId: row.articleId
+                    }, function(data, status){
+                        if(status !== 200) return;
+                        if(data && data.length>0){
+                            self.table.data.splice(0, self.table.data.length);
+                            for(var i=0; i<data.length; i++){
+                                self.table.data.push(data[i]);
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                bindArticles:function(){
+                    var self = this;
+                    var rows = self.table.data;
+                    var exceptIds = [];
+                    for(var i=0; i<rows.length; i++){
+                        exceptIds.push(rows[i].articleId);
+                    }
+                    self.$refs.articleDialog.open('/cms/article/list/with/except', exceptIds);
+                },
+                selectedArticles:function(articles, buff, startLoading, endLoading){
+                    var self = this;
+                    var articleIds = [];
+                    for(var i=0; i<articles.length; i++){
+                        articleIds.push(articles[i].id);
+                    }
+                    startLoading();
+                    ajax.post('/cms/column/relation/article/bind', {
+                        columnId:self.tree.current.id,
+                        articleIds: $.toJSON(articleIds)
+                    }, function(data, status){
+                        endLoading();
+                        if(status !== 200) return;
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.table.data.push(data[i]);
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
             },
             created:function(){
                 var self = this;
                 self.loadTagTree();
-                self.loadTemplateTypes();
             },
             mounted:function(){
-                var self = this;
-                self.editor.el = $(tpl_editors);
-                $('body').append(self.editor.el);
 
-                var htmlEditor = self.editor.html = editor.edit($('#html-editor')[0]);
-                htmlEditor.setOptions({
-                    enableBasicAutocompletion:true,
-                    enableSnippets:true,
-                    enableLiveAutocompletion:true
-                });
-                htmlEditor.setTheme("ace/theme/idle_fingers");
-                htmlEditor.getSession().setMode("ace/mode/html");
-                htmlEditor.setFontSize(16);
-
-                var cssEditor = self.editor.css = editor.edit($('#css-editor')[0]);
-                cssEditor.setOptions({
-                    enableBasicAutocompletion:true,
-                    enableSnippets:true,
-                    enableLiveAutocompletion:true
-                });
-                cssEditor.setTheme("ace/theme/xcode");
-                cssEditor.getSession().setMode("ace/mode/css");
-                cssEditor.setFontSize(16);
-
-                var jsEditor = self.editor.js = editor.edit($('#js-editor')[0]);
-                jsEditor.setOptions({
-                    enableBasicAutocompletion:true,
-                    enableSnippets:true,
-                    enableLiveAutocompletion:true
-                });
-                jsEditor.setTheme("ace/theme/idle_fingers");
-                jsEditor.getSession().setMode("ace/mode/javascript");
-                jsEditor.setFontSize(16);
             }
         });
 
     };
 
     var destroy = function(){
-        //销毁组件
-        instance.editor.html.destroy();
-        instance.editor.css.destroy();
-        instance.editor.js.destroy();
-        instance.editor.el.remove();
-    };
 
-    /**
-     * @param code:{
-     *     html:'',
-     *     css:'',
-     *     js:''
-     * }
-     */
-    var editorShow = function(code){
-        var html = code.html || '<!-- html编辑器 -->\n<!-- 使用class和id时要注意命名空间避免冲突 -->\n<div>\n    \n</div>';
-        var css = code.css || '/* css编辑器 */\n/* 使用class和id时要注意命名空间避免冲突 */\n';
-        var js = code.js || '//测试json数据\n{\n    \n}';
-        this.html.setValue(html);
-        this.html.selection.clearSelection();
-        this.css.setValue(css);
-        this.css.selection.clearSelection();
-        this.js.setValue(js);
-        this.js.selection.clearSelection();
-        this.el.show();
-    };
-
-    /**
-     * @returns code:{
-     *     html:'',
-     *     css:'',
-     *     js:''
-     * }
-     */
-    var editorHide = function(){
-        var code = {};
-        this.el.hide();
-        return code;
     };
 
     var groupList = {

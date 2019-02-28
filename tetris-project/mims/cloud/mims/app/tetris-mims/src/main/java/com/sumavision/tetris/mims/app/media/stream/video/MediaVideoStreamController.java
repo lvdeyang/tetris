@@ -1,21 +1,20 @@
 package com.sumavision.tetris.mims.app.media.stream.video;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
-import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.stream.video.exception.MediaVideoStreamNotExistException;
@@ -62,56 +61,7 @@ public class MediaVideoStreamController {
 			@PathVariable Long folderId,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userQuery.current();
-		
-		//TODO 权限校验
-		
-		FolderPO current = folderDao.findOne(folderId);
-		
-		if(current == null) throw new FolderNotExistException(folderId);
-		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), current.getId())){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
-		
-		//获取当前文件夹的所有父目录
-		List<FolderPO> parentFolders = folderQuery.getParentFolders(current);
-		
-		List<FolderPO> filteredParentFolders = new ArrayList<FolderPO>();
-		if(parentFolders==null || parentFolders.size()<=0){
-			parentFolders = new ArrayList<FolderPO>();
-		}
-		for(FolderPO parentFolder:parentFolders){
-			if(!FolderType.COMPANY.equals(parentFolder.getType())){
-				filteredParentFolders.add(parentFolder);
-			}
-		}
-		filteredParentFolders.add(current);
-		
-		//生成面包屑数据
-		FolderBreadCrumbVO folderBreadCrumb = folderQuery.generateFolderBreadCrumb(filteredParentFolders);
-		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_VIDEO_STREAM.toString());
-		
-		List<MediaVideoStreamPO> videos = mediaVideoStreamQuery.findCompleteByFolderId(current.getId());
-		
-		List<MediaVideoStreamVO> medias = new ArrayList<MediaVideoStreamVO>();
-		if(folders!=null && folders.size()>0){
-			for(FolderPO folder:folders){
-				medias.add(new MediaVideoStreamVO().set(folder));
-			}
-		}
-		if(videos!=null && videos.size()>0){
-			for(MediaVideoStreamPO video:videos){
-				medias.add(new MediaVideoStreamVO().set(video));
-			}
-		}
-		
-		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
-																  		 .put("breadCrumb", folderBreadCrumb)
-																  		 .getMap();
-		
-		return result;
+		return mediaVideoStreamQuery.load(folderId);
 	}
 	
 	/**
