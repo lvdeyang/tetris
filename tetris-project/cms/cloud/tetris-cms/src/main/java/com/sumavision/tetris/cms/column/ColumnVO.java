@@ -2,7 +2,7 @@ package com.sumavision.tetris.cms.column;
 
 import java.util.List;
 
-import com.sumavision.tetris.cms.template.TemplateTagVO;
+import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -11,6 +11,7 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 	private String name;
 	private long parentId;
 	private List<ColumnVO> subColumns;
+	private List<ArticleVO> articles;
 	
 	public String getName() {
 		return name;
@@ -48,6 +49,14 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 
 	public void setSubColumns(List<ColumnVO> subColumns) {
 		this.subColumns = subColumns;
+	}
+
+	public List<ArticleVO> getArticles() {
+		return articles;
+	}
+
+	public void setArticles(List<ArticleVO> articles) {
+		this.articles = articles;
 	}
 
 }

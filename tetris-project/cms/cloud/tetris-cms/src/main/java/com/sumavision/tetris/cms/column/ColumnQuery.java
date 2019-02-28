@@ -13,6 +13,15 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 public class ColumnQuery {
 	@Autowired
 	private ColumnDAO columnDao;
+	
+	public List<ColumnVO> queryColumnRoot() throws Exception {
+
+		List<ColumnPO> columns = columnDao.findAll();
+
+		List<ColumnVO> rootColumns = generateRootcolumns(columns);
+
+		return rootColumns;
+	}
 
 	public List<ColumnVO> querycolumnTree() throws Exception {
 

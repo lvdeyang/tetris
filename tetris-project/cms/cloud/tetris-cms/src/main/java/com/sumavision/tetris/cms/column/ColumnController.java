@@ -52,6 +52,34 @@ public class ColumnController {
 
 		return rootColumns;
 	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/root")
+	public Object listRoot(HttpServletRequest request) throws Exception {
+
+		UserVO user = userQuery.current();
+
+		// TODO 权限校验
+
+		List<ColumnVO> rootColumns = columnQuery.querycolumnTree();
+
+		return rootColumns;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/{id}")
+	public Object query(@PathVariable Long id, HttpServletRequest request) throws Exception {
+
+		UserVO user = userQuery.current();
+
+		// TODO 权限校验
+
+		List<ColumnVO> columns = null;
+
+		return columns;
+	}
 
 	@JsonBody
 	@ResponseBody

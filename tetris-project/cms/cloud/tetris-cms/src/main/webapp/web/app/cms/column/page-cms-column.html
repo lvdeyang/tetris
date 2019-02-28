@@ -59,8 +59,8 @@
                 <div v-if="tree.current" style="box-sizing:border-box; position:absolute; left:420px; top:0; right:0; bottom:0; padding:10px;">
                     <div style="width:100%; height:100%; position:relative;">
                         <div style="height:54px;">
-                            <el-button size="small" type="primary" @click="dialog.addTemplate.visible = true"><span class="icon-plus" style="margin-right:5px;"></span>添加模板</el-button>
-                            <el-button size="small" type="warning"><span class="icon-trash" style="margin-right:5px;"></span>删除模板</el-button>
+                            <el-button size="small" type="primary" @click="bindArticles"><span class="icon-plus" style="margin-right:5px;"></span>文章上架</el-button>
+                            <el-button size="small" type="warning"><span class="icon-trash" style="margin-right:5px;"></span>文章下架</el-button>
                         </div>
                         <div style="position:absolute; top:54px; left:0; right:0; bottom:0;">
                             <el-table
@@ -71,35 +71,34 @@
                                         width="55">
                                 </el-table-column>
                                 <el-table-column
-                                        prop="name"
-                                        label="模板名称"
-                                        width="250">
+                                        prop="articleName"
+                                        label="文章名称">
                                 </el-table-column>
                                 <el-table-column
-                                        prop="type"
-                                        label="模板类型"
-                                        width="180">
-                                </el-table-column>
-                                <el-table-column
-                                        prop="remark"
+                                        prop="articleRemark"
                                         label="备注">
                                 </el-table-column>
                                 <el-table-column
-                                        prop="remark"
                                         label="操作"
-                                        width="200">
+                                        width="250">
                                     <template slot-scope="scope">
-                                        <el-tooltip class="item" effect="dark" content="编写模板代码" placement="bottom">
-                                            <el-button type="text" icon="icon-font" style="margin:0; font-size:18px; padding:0; margin-right:25px;" @click="templateEdit(scope)"></el-button>
+                                        <el-tooltip class="item" effect="dark" content="通知" placement="bottom">
+                                            <el-button type="text" icon="icon-bell-alt" style="margin:0; font-size:18px; padding:0; margin-right:15px;" @click="rowInform(scope)"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip class="item" effect="dark" content="修改模板数据" placement="bottom">
-                                            <el-button type="text" icon="el-icon-edit" style="margin:0; font-size:18px; padding:0; margin-right:20px;" @click="rowEdit(scope)"></el-button>
+                                        <el-tooltip class="item" effect="dark" content="置顶" placement="bottom">
+                                            <el-button type="text" icon="icon-circle-arrow-up" style="margin:0; font-size:18px; padding:0; margin-right:15px;" @click="rowTop(scope)"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip class="item" effect="dark" content="修改标签" placement="bottom">
-                                            <el-button type="text" icon="icon-tag" style="margin:0; font-size:18px; padding:0; margin-right:25px;" @click="changeTag(scope)"></el-button>
+                                        <el-tooltip class="item" effect="dark" content="上移" placement="bottom">
+                                            <el-button type="text" icon="icon-double-angle-up" style="margin:0; font-size:18px; padding:0; margin-right:15px;" @click="rowUp(scope)"></el-button>
                                         </el-tooltip>
-                                        <el-tooltip class="item" effect="dark" content="删除模板" placement="bottom">
-                                            <el-button type="text" icon="el-icon-delete" style="margin:0; font-size:18px; padding:0;" @click="rowDelete(scope)"></el-button>
+                                        <el-tooltip class="item" effect="dark" content="下移" placement="bottom">
+                                            <el-button type="text" icon="icon-double-angle-down" style="margin:0; font-size:18px; padding:0; margin-right:15px;" @click="rowDown(scope)"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="置底" placement="bottom">
+                                            <el-button type="text" icon="icon-circle-arrow-down" style="margin:0; font-size:18px; padding:0; margin-right:15px;" @click="rowBottom(scope)"></el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="下架" placement="bottom">
+                                            <el-button type="text" icon="icon-trash" style="margin:0; font-size:18px; padding:0; margin-right:15px;" @click="rowDelete(scope)"></el-button>
                                         </el-tooltip>
                                     </template>
                                 </el-table-column>
@@ -132,102 +131,8 @@
             </span>
         </el-dialog>
 
-        <!-- 添加内容模板 -->
-        <el-dialog
-                title="添加模板"
-                :visible.sync="dialog.addTemplate.visible"
-                width="500px"
-                :before-close="handleAddTemplateClose">
-
-            <el-form ref="form" label-width="70px">
-                <el-form-item label="模板名称">
-                    <el-input v-model="dialog.addTemplate.name"></el-input>
-                </el-form-item>
-                <el-form-item label="模板类型">
-                    <el-select v-model="dialog.addTemplate.type" placeholder="模板类型" style="width:100%;">
-                        <el-option v-for="type in types" :label="type" :value="type" :key="type"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="备注">
-                    <el-input type="textarea" v-model="dialog.addTemplate.remark"></el-input>
-                </el-form-item>
-            </el-form>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.addTemplate.visible = false">取 消</el-button>
-                <el-button size="medium" type="primary" @click="handleAddTemplateCommit" v-loading="dialog.addTemplate.loading">确 定</el-button>
-            </span>
-        </el-dialog>
-
-        <!-- 修改内容模板数据 -->
-        <el-dialog
-                title="修改模板"
-                :visible.sync="dialog.editTemplate.visible"
-                width="500px"
-                :before-close="handleEditTemplateClose">
-
-            <el-form ref="form" label-width="70px">
-                <el-form-item label="模板名称">
-                    <el-input v-model="dialog.editTemplate.name"></el-input>
-                </el-form-item>
-                <el-form-item label="模板类型">
-                    <el-select v-model="dialog.editTemplate.type" placeholder="模板类型" style="width:100%;">
-                        <el-option v-for="type in types" :label="type" :value="type" :key="type"></el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="备注">
-                    <el-input type="textarea" v-model="dialog.editTemplate.remark"></el-input>
-                </el-form-item>
-            </el-form>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.editTemplate.visible = false">取 消</el-button>
-                <el-button size="medium" type="primary" @click="handleEditTemplateCommit" v-loading="dialog.editTemplate.loading">确 定</el-button>
-            </span>
-        </el-dialog>
-
-        <!-- 选择标签对话框 -->
-        <el-dialog
-                title="修改模板"
-                :visible.sync="dialog.selectTag.visible"
-                width="550px"
-                :before-close="handleSelectTagClose">
-
-            <div style="height:240px; position:relative;">
-                <div style="position:absolute; top:-30px; left:-20px; bottom:-30px; right:-20px;">
-                    <div style="width:100%; height:100%;">
-                        <el-scrollbar style="height:100%;">
-                            <el-tree
-                                    ref="selectTagTree"
-                                    :props = "dialog.selectTag.tree.props"
-                                    :data = "dialog.selectTag.tree.data"
-                                    node-key="id"
-                                    :current-node-key="dialog.selectTag.tree.current"
-                                    check-strictly
-                                    :expand-on-click-node="false"
-                                    default-expand-all
-                                    highlight-current
-                                    @current-change="currentSelectedTagChange">
-
-                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
-                                <span style="font-size:14px;">
-                                     <span :class="data.icon" :style="data.style"></span>
-                                     <span>{{data.name}}</span>
-                                </span>
-                            </span>
-
-                            </el-tree>
-                        </el-scrollbar>
-                    </div>
-                </div>
-            </div>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.selectTag.visible = false">取 消</el-button>
-                <el-button size="medium" type="primary" @click="handleSelectTagCommit" v-loading="dialog.selectTag.loading">确 定</el-button>
-            </span>
-
-        </el-dialog>
+        <!-- 上架对话框 -->
+        <article-dialog ref="articleDialog" @on-article-dialog-close="selectedArticles"></article-dialog>
 
     </template>
 
