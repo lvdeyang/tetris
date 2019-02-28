@@ -1,13 +1,7 @@
 package com.sumavision.tetris.cms.column;
 
-import javax.persistence.Basic;
-import javax.persistence.Column;
-import javax.persistence.Table;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Lob;
+import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -25,6 +19,7 @@ public class ColumnPO extends AbstractBasePO{
 	private static final long serialVersionUID = 1L;
 	
 	private String name;
+	private String remark;
 	private long parentId;
 	private String parentPath;
 	public String getName() {
@@ -32,6 +27,12 @@ public class ColumnPO extends AbstractBasePO{
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public String getRemark() {
+		return remark;
+	}
+	public void setRemark(String remark) {
+		this.remark = remark;
 	}
 	public long getParentId() {
 		return parentId;
