@@ -48,6 +48,8 @@ require.config({
         'mi-video-dialog':window.APPPATH + 'component/dialog/mims/video/mims-video',
         'mi-audio-dialog':window.APPPATH + 'component/dialog/mims/audio/mims-audio',
 
+        'region-dialog':window.APPPATH + 'component/dialog/region/region-dialog',
+
         /* pages */
         'page-cms-template':window.APPPATH + 'cms/template/page-cms-template',
         'editor':window.APPPATH + 'cms/template/editor',

@@ -13,6 +13,7 @@ define([
     'mi-frame',
     'layout-editor',
     'date',
+    'region-dialog',
     'css!' + window.APPPATH + 'cms/article/page-cms-article.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
 
@@ -216,6 +217,8 @@ define([
                 },
                 handleClassifyEdit:function(){
                     var self = this;
+                    var checkedRegions = []
+                    self.$refs.regionDialog.open('/cms/region/list/tree', checkedRegions);
                 },
                 handleAddArticleClose:function(){
                     var self = this;
@@ -292,7 +295,17 @@ define([
                             message:'保存成功'
                         })
                     }, null, ajax.NO_ERROR_CATCH_CODE);
-                }
+                },
+                selectedRegions:function(regions, buff, startLoading, endLoading){
+                    var self = this;
+                    var regionIds = [];
+                    for(var i=0; i<regions.length; i++){
+                        regionIds.push(regions[i].id);
+                    }
+                    startLoading();
+
+                    endLoading();
+                },
             },
             created:function(){
                 var self = this;

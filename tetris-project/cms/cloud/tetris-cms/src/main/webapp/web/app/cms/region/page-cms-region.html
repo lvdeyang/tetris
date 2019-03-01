@@ -16,7 +16,7 @@
                         <el-scrollbar style="height:100%;">
                             <el-tree
                                     v-loading="loading.tree"
-                                    ref="regionTree"
+                                    ref="regionDialogTree"
                                     :props = "tree.props"
                                     :data = "tree.data"
                                     node-key="uuid"
@@ -77,6 +77,8 @@
                 <el-button size="medium" type="primary" @click="handleEditTagCommit">确 定</el-button>
             </span>
         </el-dialog>
+
+        <region-dialog ref="regionDialog" @on-region-dialog-close="bindArticles"></region-dialog>
 
     </template>
 

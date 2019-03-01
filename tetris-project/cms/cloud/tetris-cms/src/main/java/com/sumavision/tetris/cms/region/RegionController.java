@@ -10,14 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.tetris.cms.column.ColumnDAO;
-import com.sumavision.tetris.cms.column.ColumnPO;
-import com.sumavision.tetris.cms.column.ColumnQuery;
-import com.sumavision.tetris.cms.column.ColumnService;
-import com.sumavision.tetris.cms.column.ColumnVO;
+import com.sumavision.tetris.cms.region.exception.RegionMoveFailException;
 import com.sumavision.tetris.cms.region.exception.RegionNotExistException;
-import com.sumavision.tetris.cms.template.exception.TemplateTagMoveFailException;
-import com.sumavision.tetris.cms.template.exception.TemplateTagNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -193,7 +187,7 @@ public class RegionController {
 		}
 
 		if (targetRegion.getParentPath() != null && targetRegion.getParentPath().indexOf(sourceRegion.getId().toString()) >= 0) {
-			throw new TemplateTagMoveFailException(sourceId, targetId);
+			throw new RegionMoveFailException(sourceId, targetId);
 		}
 
 		regionService.move(sourceRegion, targetRegion);

@@ -11,6 +11,7 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
+    'region-dialog',
     'css!' + window.APPPATH + 'cms/region/page-cms-region.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
 
@@ -38,7 +39,6 @@ define([
                         label: 'name',
                         children: 'subRegions'
                     },
-                    expandOnClickNode:false,
                     data:[],
                     current:''
                 },
@@ -226,7 +226,7 @@ define([
                     self.$nextTick(function(){
                         self.$refs.regionTree.setCurrentKey(data.uuid);
                     });
-                }
+                },
             },
             created:function(){
                 var self = this;
