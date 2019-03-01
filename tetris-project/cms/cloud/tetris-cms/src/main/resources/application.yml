@@ -74,7 +74,7 @@ logging:
 ribbon:
   eager-load:
       enabled: true
-      clients: tetris-menu, tetris-user
+      clients: tetris-menu, tetris-user, tetris-mims
   ReadTimeout: 120000
   ConnectTimeout: 30000
 eureka:

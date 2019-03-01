@@ -12,9 +12,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.cms.article.exception.ArticleNotExistException;
-import com.sumavision.tetris.cms.template.TemplatePO;
-import com.sumavision.tetris.cms.template.TemplateVO;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -81,6 +78,9 @@ public class ArticleController {
 	@RequestMapping(value = "/add")
 	public Object add(
 			String name,
+			String author,
+			String publishTime,
+			String thumbnail,
 			String remark,
 			HttpServletRequest request) throws Exception{
 		
@@ -88,7 +88,7 @@ public class ArticleController {
 		
 		//TODO 权限校验
 		
-		ArticlePO article = articleService.add(user, name, remark);
+		ArticlePO article = articleService.add(user, name, author, publishTime, thumbnail, remark);
 		
 		return new ArticleVO().set(article);
 	}
@@ -109,6 +109,9 @@ public class ArticleController {
 	public Object edit(
 			@PathVariable Long id,
 			String name,
+			String author,
+			String publishTime,
+			String thumbnail,
 			String remark,
 			HttpServletRequest request) throws Exception{
 		
@@ -121,7 +124,7 @@ public class ArticleController {
 			throw new ArticleNotExistException(id);
 		}
 		
-		article = articleService.edit(article, name, remark);
+		article = articleService.edit(article, name, author, publishTime, thumbnail, remark);
 		
 		return new ArticleVO().set(article);
 	}

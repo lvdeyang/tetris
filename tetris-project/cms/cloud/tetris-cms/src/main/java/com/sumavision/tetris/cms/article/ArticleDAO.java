@@ -28,6 +28,6 @@ public interface ArticleDAO extends BaseDAO<ArticlePO>{
 	 * @param Pageable page 分页信息
 	 * @return Page<ArticlePO> 用户列表
 	 */
-	@Query(value = "SELECT * FROM TETRIS_CMS_ARTICLE article WHERE article.id NOT IN ?1")
+	@Query(value = "SELECT article FROM com.sumavision.tetris.cms.article.ArticlePO article WHERE article.id NOT IN ?1")
 	public Page<ArticlePO> findWithExcept(Collection<Long> except, Pageable page);
 }

@@ -40,10 +40,19 @@ public class ArticleService {
 	 * @param String remark 备注
 	 * @return ArticlePO 文章数据
 	 */
-	public ArticlePO add(UserVO user, String name, String remark) throws Exception{
+	public ArticlePO add(
+			UserVO user, 
+			String name, 
+			String author,
+			String publishTime,
+			String thumbnail,
+			String remark) throws Exception{
 		
 		ArticlePO article = new ArticlePO();
 		article.setName(name);
+		article.setAuthor(author);
+		article.setPublishTime(publishTime);
+		article.setThumbnail(thumbnail);
 		article.setRemark(remark);
 		article.setUpdateTime(new Date());
 		
@@ -91,9 +100,18 @@ public class ArticleService {
 	 * @param String remark 备注
 	 * @return ArticlePO 文章
 	 */
-	public ArticlePO edit(ArticlePO article, String name, String remark) throws Exception{
+	public ArticlePO edit(
+			ArticlePO article, 
+			String name, 
+			String author,
+			String publishTime,
+			String thumbnail,
+			String remark) throws Exception{
 		
 		article.setName(name);
+		article.setAuthor(author);
+		article.setPublishTime(publishTime);
+		article.setThumbnail(thumbnail);
 		article.setRemark(remark);
 		article.setUpdateTime(new Date());
 		articleDao.save(article);
