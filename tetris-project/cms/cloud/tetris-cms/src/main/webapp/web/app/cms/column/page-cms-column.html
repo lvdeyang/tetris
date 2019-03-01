@@ -111,13 +111,13 @@
 
         <!-- 编辑标签对话框 -->
         <el-dialog
-                title="编辑标签"
+                title="编辑栏目"
                 :visible.sync="dialog.editTag.visible"
                 width="500px"
                 :before-close="handleEditTagClose">
 
             <el-form ref="form" label-width="70px">
-                <el-form-item label="标签名称">
+                <el-form-item label="栏目名称">
                     <el-input v-model="dialog.editTag.name"></el-input>
                 </el-form-item>
                 <el-form-item label="备注">

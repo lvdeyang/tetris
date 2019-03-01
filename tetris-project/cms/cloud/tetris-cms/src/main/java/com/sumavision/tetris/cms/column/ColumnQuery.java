@@ -39,7 +39,7 @@ public class ColumnQuery {
 			return null;
 		List<ColumnVO> rootcolumns = new ArrayList<ColumnVO>();
 		for (ColumnPO column : columns) {
-			if (column.getParentId() == 0) {
+			if (column.getParentId() == null) {
 				rootcolumns.add(new ColumnVO().set(column));
 			}
 		}
@@ -53,7 +53,7 @@ public class ColumnQuery {
 			ColumnVO rootcolumn = rootcolumns.get(i);
 			for (int j = 0; j < totalcolumns.size(); j++) {
 				ColumnPO column = totalcolumns.get(j);
-				if (column.getParentId() != 0 && column.getParentId() == rootcolumn.getId()) {
+				if (column.getParentId() != null && column.getParentId() == rootcolumn.getId()) {
 					if (rootcolumn.getSubColumns() == null)
 						rootcolumn.setSubColumns(new ArrayList<ColumnVO>());
 					rootcolumn.getSubColumns().add(new ColumnVO().set(column));
@@ -67,13 +67,12 @@ public class ColumnQuery {
 	
 	
 	public List<ColumnPO> findAllSubTags(Long id) throws Exception{
-		return columnDao.findAllSubColumns(new StringBufferWrapper().append("'%/")
+		return columnDao.findAllSubColumns(new StringBufferWrapper().append("%/")
 															          .append(id)
-															          .append("'")
 															          .toString(), 
-											 new StringBufferWrapper().append("'%/")
+											 new StringBufferWrapper().append("%/")
 																      .append(id)
-																      .append("/%'")
+																      .append("/%")
 																      .toString());
 	}
 	

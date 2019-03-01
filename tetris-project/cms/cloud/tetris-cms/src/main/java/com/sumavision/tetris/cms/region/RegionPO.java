@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cms.column;
+package com.sumavision.tetris.cms.region;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,62 +7,50 @@ import javax.persistence.Table;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
- * 栏目<br/>
- * <b>作者:</b>lvdeyang<br/>
- * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2019年2月14日 下午2:18:25
+ * 地区数据<br/>
+ * <b>作者: </b>ldy<br/>
+ * <b>版本: </b>1.0<br/> 
+ * <b>日期: </b>2019年2月28日 下午1:27:28
  */
 @Entity
-@Table(name = "TETRIS_CMS_COLUMN")
-public class ColumnPO extends AbstractBasePO{
+@Table(name = "TETRIS_CMS_REGION")
+public class RegionPO extends AbstractBasePO{
 
 	/** 这是一个常量的说明 */
 	private static final long serialVersionUID = 1L;
 	
-	/** 栏目名称 */
+	/** 地区名 */
 	private String name;
 	
-	/** 栏目备注 */
-	private String remark;
-	
-	/** 父栏目id */
+	/** 父地区id */
 	private Long parentId;
 	
-	/** 上级栏目id路径：/id/id/id */
+	/** 上级地区id路径：/id/id/id */
 	private String parentPath;
-	
+
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	@Column(name = "REMARK")
-	public String getRemark() {
-		return remark;
-	}
-	
-	public void setRemark(String remark) {
-		this.remark = remark;
-	}
-	
+
 	@Column(name = "PARENT_ID")
 	public Long getParentId() {
 		return parentId;
 	}
-	
+
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
 	}
-	
+
 	@Column(name = "PARENT_PATH")
 	public String getParentPath() {
 		return parentPath;
 	}
-	
+
 	public void setParentPath(String parentPath) {
 		this.parentPath = parentPath;
 	}

@@ -54,7 +54,8 @@ require.config({
         'page-cms-article':window.APPPATH + 'cms/article/page-cms-article',
         'layout-editor':window.APPPATH + 'cms/article/layout-editor',
         'page-cms-column':window.APPPATH + 'cms/column/page-cms-column',
-        'article-dialog':window.APPPATH + 'cms/column/article-dialog'
+        'article-dialog':window.APPPATH + 'cms/column/article-dialog',
+        'page-cms-region':window.APPPATH + 'cms/region/page-cms-region'
 
     },
     shim:{

@@ -9,7 +9,7 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 
 	private String name;
-	private long parentId;
+	private Long parentId;
 	private List<ColumnVO> subColumns;
 	private List<ArticleVO> articles;
 	
@@ -34,11 +34,11 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 		return this;
 	}
 
-	public long getParentId() {
+	public Long getParentId() {
 		return parentId;
 	}
 
-	public ColumnVO setParentId(long parentId) {
+	public ColumnVO setParentId(Long parentId) {
 		this.parentId = parentId;
 		return this;
 	}
