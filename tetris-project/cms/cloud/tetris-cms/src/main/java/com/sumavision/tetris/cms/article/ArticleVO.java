@@ -7,6 +7,12 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 
 	private String name;
 	
+	private String thumbnail;
+	
+	private String author;
+	
+	private String publishTime;
+	
 	private String remark;
 	
 	private String previewUrl;
@@ -17,6 +23,33 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 
 	public ArticleVO setName(String name) {
 		this.name = name;
+		return this;
+	}
+	
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public ArticleVO setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+		return this;
+	}
+
+	public String getAuthor() {
+		return author;
+	}
+
+	public ArticleVO setAuthor(String author) {
+		this.author = author;
+		return this;
+	}
+
+	public String getPublishTime() {
+		return publishTime;
+	}
+
+	public ArticleVO setPublishTime(String publishTime) {
+		this.publishTime = publishTime;
 		return this;
 	}
 
@@ -44,6 +77,9 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
+			.setThumbnail(entity.getThumbnail())
+			.setAuthor(entity.getAuthor())
+			.setPublishTime(entity.getPublishTime())
 			.setRemark(entity.getRemark())
 			.setPreviewUrl(entity.getPreviewUrl());
 		return this;

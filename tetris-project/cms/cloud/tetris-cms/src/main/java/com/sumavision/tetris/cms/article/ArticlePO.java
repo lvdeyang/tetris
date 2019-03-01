@@ -24,6 +24,15 @@ public class ArticlePO extends AbstractBasePO{
 	/** 文章名称 */
 	private String name;
 	
+	/** 缩略图 */
+	private String thumbnail;
+	
+	/** 作者 */
+	private String author;
+	
+	/** 发表时间 */
+	private String publishTime;
+	
 	/** 预览地址 */
 	private String previewUrl;
 
@@ -43,6 +52,33 @@ public class ArticlePO extends AbstractBasePO{
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	@Column(name = "THUMBNAIL")
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
+	@Column(name = "AUTHOR")
+	public String getAuthor() {
+		return author;
+	}
+
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	@Column(name = "PUBLISH_TIME")
+	public String getPublishTime() {
+		return publishTime;
+	}
+
+	public void setPublishTime(String publishTime) {
+		this.publishTime = publishTime;
 	}
 
 	@Column(name = "PREVIEW_URL")
