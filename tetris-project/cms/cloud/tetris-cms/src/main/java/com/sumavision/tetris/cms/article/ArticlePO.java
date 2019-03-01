@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
