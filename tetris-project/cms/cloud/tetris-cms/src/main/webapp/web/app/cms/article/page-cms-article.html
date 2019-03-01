@@ -29,7 +29,15 @@
                                 </el-table-column>
                                 <el-table-column
                                         prop="name"
-                                        label="姓名">
+                                        label="文章名称">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="author"
+                                        label="作者">
+                                </el-table-column>
+                                <el-table-column
+                                        prop="publishTime"
+                                        label="发布时间">
                                 </el-table-column>
                                 <el-table-column
                                         prop="remark"
@@ -78,15 +86,70 @@
                 :visible.sync="dialog.addArticle.visible"
                 width="500px"
                 :before-close="handleAddArticleClose">
-
-            <el-form ref="form" label-width="70px">
-                <el-form-item label="文章名称">
-                    <el-input v-model="dialog.addArticle.name"></el-input>
-                </el-form-item>
-                <el-form-item label="备注">
-                    <el-input type="textarea" v-model="dialog.addArticle.remark"></el-input>
-                </el-form-item>
-            </el-form>
+            <div style="height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="70px">
+                        <el-form-item label="文章名称">
+                            <el-input v-model="dialog.addArticle.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="作者">
+                            <el-input v-model="dialog.addArticle.author"></el-input>
+                        </el-form-item>
+                        <el-form-item label="发表时间">
+                            <el-date-picker
+                                    style="width:100%;"
+                                    v-model="dialog.addArticle.publishTime"
+                                    type="datetime"
+                                    placeholder="选择日期时间"
+                                    align="right"
+                                    :picker-options="dialog.addArticle.timeOption"
+                                    value-format="yyyy-MM-dd HH:mm:ss">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="发表时间">
+                            <table>
+                                <tr>
+                                    <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                        <img v-if="dialog.addArticle.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.addArticle.thumbnail" />
+                                    </td>
+                                    <td style="width:100px; vertical-align:middle;">
+                                        <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.addArticle)">
+                                            <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                        </el-button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </el-form-item>
+                        <el-form-item label="文章分类">
+                            <el-tag
+                                    :key="simple"
+                                    v-for="simple in dialog.addArticle.classify"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleClassifyRemove(dialog.addArticle.classify, simple)">
+                                {{simple}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleClassifyEdit" icon="el-icon-edit"> 编辑值</el-button>
+                        </el-form-item>
+                        <el-form-item label="地区">
+                            <el-tag
+                                    :key="simple"
+                                    v-for="simple in dialog.addArticle.classify"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleClassifyRemove(dialog.addArticle.classify, simple)">
+                                {{simple}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleClassifyEdit" icon="el-icon-edit"> 编辑值</el-button>
+                        </el-form-item>
+                        <el-form-item label="备注">
+                            <el-input type="textarea" v-model="dialog.addArticle.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
 
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="dialog.addArticle.visible = false">取 消</el-button>
@@ -105,6 +168,34 @@
                 <el-form-item label="文章名称">
                     <el-input v-model="dialog.editArticle.name"></el-input>
                 </el-form-item>
+                <el-form-item label="作者">
+                    <el-input v-model="dialog.editArticle.author"></el-input>
+                </el-form-item>
+                <el-form-item label="发表时间">
+                    <el-date-picker
+                            style="width:100%;"
+                            v-model="dialog.editArticle.publishTime"
+                            type="datetime"
+                            placeholder="选择日期时间"
+                            align="right"
+                            :picker-options="dialog.editArticle.timeOption"
+                            value-format="yyyy-MM-dd HH:mm:ss">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="发表时间">
+                    <table>
+                        <tr>
+                            <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                <img v-if="dialog.editArticle.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.editArticle.thumbnail" />
+                            </td>
+                            <td style="width:100px; vertical-align:middle;">
+                                <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.editArticle)">
+                                    <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                </el-button>
+                            </td>
+                        </tr>
+                    </table>
+                </el-form-item>
                 <el-form-item label="备注">
                     <el-input type="textarea" v-model="dialog.editArticle.remark"></el-input>
                 </el-form-item>
@@ -115,6 +206,9 @@
                 <el-button size="medium" type="primary" @click="handleEditArticleCommit">确 定</el-button>
             </span>
         </el-dialog>
+
+        <!-- 选择图片对话框 -->
+        <mi-image-dialog ref="selectThumbnail" @selected-image="selectedThumbnail"></mi-image-dialog>
 
         <!-- 文章排版编辑器 -->
         <article-layout-editor ref="articleLayoutEditor" @save-article="saveArticle"></article-layout-editor>

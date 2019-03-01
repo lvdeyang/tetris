@@ -12,6 +12,7 @@ define([
     'element-ui',
     'mi-frame',
     'layout-editor',
+    'date',
     'css!' + window.APPPATH + 'cms/article/page-cms-article.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
 
@@ -44,15 +45,67 @@ define([
                     addArticle:{
                         visible:false,
                         name:'',
+                        author:'',
+                        publishTime:new Date().format('yyyy-MM-DD HH:mm:ss'),
+                        thumbnail:'',
+                        classify:[],
                         remark:'',
-                        loading:false
+                        loading:false,
+                        timeOption:{
+                            shortcuts: [{
+                                text: '今天',
+                                onClick:function(picker) {
+                                    picker.$emit('pick', new Date());
+                                }
+                            }, {
+                                text: '昨天',
+                                onClick:function(picker) {
+                                    var date = new Date();
+                                    date.setTime(date.getTime() - 3600 * 1000 * 24);
+                                    picker.$emit('pick', date);
+                                }
+                            }, {
+                                text: '一周前',
+                                onClick:function(picker) {
+                                    const date = new Date();
+                                    date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
+                                    picker.$emit('pick', date);
+                                }
+                            }]
+                        }
                     },
                     editArticle:{
                         visible:false,
                         id:'',
                         name:'',
+                        author:'',
+                        publishTime:'',
+                        thumbnail:'',
+                        classify:[],
                         remark:'',
-                        loading:false
+                        loading:false,
+                        timeOption:{
+                            shortcuts: [{
+                                text: '今天',
+                                onClick:function(picker) {
+                                    picker.$emit('pick', new Date());
+                                }
+                            }, {
+                                text: '昨天',
+                                onClick:function(picker) {
+                                    var date = new Date();
+                                    date.setTime(date.getTime() - 3600 * 1000 * 24);
+                                    picker.$emit('pick', date);
+                                }
+                            }, {
+                                text: '一周前',
+                                onClick:function(picker) {
+                                    const date = new Date();
+                                    date.setTime(date.getTime() - 3600 * 1000 * 24 * 7);
+                                    picker.$emit('pick', date);
+                                }
+                            }]
+                        }
                     }
                 }
             },
@@ -76,6 +129,9 @@ define([
                     var row = scope.row;
                     self.dialog.editArticle.id = row.id;
                     self.dialog.editArticle.name = row.name;
+                    self.dialog.editArticle.author = row.author;
+                    self.dialog.editArticle.publishTime = row.publishTime;
+                    self.dialog.editArticle.thumbnail = row.thumbnail;
                     self.dialog.editArticle.remark = row.remark;
                     self.dialog.editArticle.visible = true;
                 },
@@ -141,9 +197,32 @@ define([
                         self.table.page.currentPage = currentPage;
                     });
                 },
+                handleSelectThumbnail:function(buff){
+                    var self = this;
+                    self.$refs.selectThumbnail.setBuffer(buff);
+                    self.$refs.selectThumbnail.open();
+                },
+                selectedThumbnail:function(url, buff, startLoading, endLoading, done){
+                    buff.thumbnail = url;
+                    done();
+                },
+                handleClassifyRemove:function(classify, value){
+                    for(var i=0; i<classify.length; i++){
+                        if(classify[i] === value){
+                            classify.splice(i, 1);
+                            break;
+                        }
+                    }
+                },
+                handleClassifyEdit:function(){
+                    var self = this;
+                },
                 handleAddArticleClose:function(){
                     var self = this;
                     self.dialog.addArticle.name = '';
+                    self.dialog.addArticle.author = '';
+                    self.dialog.addArticle.publishTime = new Date().format('yyyy-MM-DD HH:mm:ss');
+                    self.dialog.addArticle.thumbnail = '';
                     self.dialog.addArticle.remark = '';
                     self.dialog.addArticle.visible = false;
                 },
@@ -152,6 +231,9 @@ define([
                     self.dialog.addArticle.loading = true;
                     ajax.post('/cms/article/add', {
                         name:self.dialog.addArticle.name,
+                        author:self.dialog.addArticle.author,
+                        publishTime:self.dialog.addArticle.publishTime,
+                        thumbnail:self.dialog.addArticle.thumbnail,
                         remark:self.dialog.addArticle.remark
                     }, function(data, status){
                         self.dialog.addArticle.loading = false;
@@ -165,6 +247,9 @@ define([
                     var self = this;
                     self.dialog.editArticle.id = '';
                     self.dialog.editArticle.name = '';
+                    self.dialog.editArticle.author = '';
+                    self.dialog.editArticle.publishTime = '';
+                    self.dialog.editArticle.thumbnail = '';
                     self.dialog.editArticle.remark = '';
                     self.dialog.editArticle.visible = false;
                 },
@@ -173,6 +258,9 @@ define([
                     self.dialog.editArticle.loading = true;
                     ajax.post('/cms/article/edit/' + self.dialog.editArticle.id, {
                         name:self.dialog.editArticle.name,
+                        author:self.dialog.addArticle.author,
+                        publishTime:self.dialog.addArticle.publishTime,
+                        thumbnail:self.dialog.addArticle.thumbnail,
                         remark:self.dialog.editArticle.remark
                     }, function(data, status){
                         self.dialog.editArticle.loading = false;

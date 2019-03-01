@@ -78,6 +78,9 @@ public class ArticleController {
 	@RequestMapping(value = "/add")
 	public Object add(
 			String name,
+			String author,
+			String publishTime,
+			String thumbnail,
 			String remark,
 			HttpServletRequest request) throws Exception{
 		
@@ -85,7 +88,7 @@ public class ArticleController {
 		
 		//TODO 权限校验
 		
-		ArticlePO article = articleService.add(user, name, remark);
+		ArticlePO article = articleService.add(user, name, author, publishTime, thumbnail, remark);
 		
 		return new ArticleVO().set(article);
 	}
@@ -106,6 +109,9 @@ public class ArticleController {
 	public Object edit(
 			@PathVariable Long id,
 			String name,
+			String author,
+			String publishTime,
+			String thumbnail,
 			String remark,
 			HttpServletRequest request) throws Exception{
 		
@@ -118,7 +124,7 @@ public class ArticleController {
 			throw new ArticleNotExistException(id);
 		}
 		
-		article = articleService.edit(article, name, remark);
+		article = articleService.edit(article, name, author, publishTime, thumbnail, remark);
 		
 		return new ArticleVO().set(article);
 	}
