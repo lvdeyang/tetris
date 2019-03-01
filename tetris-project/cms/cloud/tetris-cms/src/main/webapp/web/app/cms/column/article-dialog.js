@@ -64,7 +64,7 @@ define([
                     self.total = total;
                 });
             },
-            handleUserClose:function(){
+            handleArticleClose:function(){
                 var self = this;
                 self.visible = false;
                 self.rows.splice(0, self.rows.length);

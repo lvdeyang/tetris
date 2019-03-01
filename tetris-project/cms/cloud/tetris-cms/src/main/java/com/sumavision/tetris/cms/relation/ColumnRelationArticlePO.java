@@ -2,13 +2,14 @@ package com.sumavision.tetris.cms.relation;
 
 import java.util.Comparator;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
- * 文章元数据<br/>
+ * 栏目关联文章元数据<br/>
  * <b>作者:</b>lvdeyang<br/>
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年2月26日 下午3:45:09
@@ -19,21 +20,28 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 	
+	/** 文章id */
 	private Long articleId;
 	
+	/** 文章名称 */
 	private String articleName;
 	
+	/** 文章备注 */
 	private String articleRemark;
 	
 	/** 文章顺序--由小到大排序  */
 	private Long articleOrder;
 	
+	/** 栏目id */
 	private Long columnId;
 	
+	/** 栏目名称 */
 	private String columnName;
 	
+	/** 栏目备注 */
 	private String columnRemark;
 
+	@Column(name = "ARTICLE_ID")
 	public Long getArticleId() {
 		return articleId;
 	}
@@ -42,6 +50,7 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 		this.articleId = articleId;
 	}
 
+	@Column(name = "COLUMN_ID")
 	public Long getColumnId() {
 		return columnId;
 	}
@@ -50,6 +59,7 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 		this.columnId = columnId;
 	}
 
+	@Column(name = "ARTICLE_NAME")
 	public String getArticleName() {
 		return articleName;
 	}
@@ -58,6 +68,7 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 		this.articleName = articleName;
 	}
 
+	@Column(name = "ARTICLE_REMARK")
 	public String getArticleRemark() {
 		return articleRemark;
 	}
@@ -66,6 +77,7 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 		this.articleRemark = articleRemark;
 	}
 
+	@Column(name = "COLUMN_NAME")
 	public String getColumnName() {
 		return columnName;
 	}
@@ -74,6 +86,7 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 		this.columnName = columnName;
 	}
 
+	@Column(name = "COLUMN_REMARK")
 	public String getColumnRemark() {
 		return columnRemark;
 	}
@@ -82,6 +95,7 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 		this.columnRemark = columnRemark;
 	}
 
+	@Column(name = "ARTICLE_ORDER")
 	public Long getArticleOrder() {
 		return articleOrder;
 	}

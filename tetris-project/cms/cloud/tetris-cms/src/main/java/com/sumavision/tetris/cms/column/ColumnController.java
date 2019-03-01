@@ -1,24 +1,17 @@
 package com.sumavision.tetris.cms.column;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.tetris.cms.template.TemplateTagPO;
-import com.sumavision.tetris.cms.template.TemplateTagVO;
-import com.sumavision.tetris.cms.template.exception.TemplateNotExistException;
 import com.sumavision.tetris.cms.template.exception.TemplateTagMoveFailException;
 import com.sumavision.tetris.cms.template.exception.TemplateTagNotExistException;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -76,9 +69,9 @@ public class ColumnController {
 
 		// TODO 权限校验
 
-		List<ColumnVO> columns = null;
+		ColumnVO column = columnService.query(id);
 
-		return columns;
+		return column;
 	}
 
 	@JsonBody
@@ -198,7 +191,7 @@ public class ColumnController {
 			throw new TemplateTagNotExistException(id);
 		}
 
-		if (col.getParentId() == 0)
+		if (col.getParentId() == null)
 			return false;
 
 		columnService.top(col);

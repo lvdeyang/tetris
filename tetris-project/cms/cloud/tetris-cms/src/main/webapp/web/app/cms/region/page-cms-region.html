@@ -1,0 +1,85 @@
+<mi-frame id="page-cms-region-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">栏目管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>地区管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <div style="width:100%; height:100%; position:relative;">
+            <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+                <div style="box-sizing:border-box; width:420px; position:absolute; left:0; top:0; bottom:0; padding:10px; border-right:1px solid #ebeef5;">
+                    <div style="width:100%; height:100%; position:relative">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                    v-loading="loading.tree"
+                                    ref="regionDialogTree"
+                                    :props = "tree.props"
+                                    :data = "tree.data"
+                                    node-key="uuid"
+                                    :current-node-key="tree.current"
+                                    check-strictly
+                                    :expand-on-click-node="false"
+                                    default-expand-all
+                                    highlight-current
+                                    @current-change="currentTreeNodeChange"
+                                    draggable
+                                    :allow-drag="treeNodeAllowDrag"
+                                    :allow-drop="treeNodeAllowDrop"
+                                    @node-drop="treeNodeDrop">
+
+                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
+                                <span style="font-size:14px;">
+                                     <span>{{data.name}}</span>
+                                </span>
+                                <span v-if="data.id !== -1">
+                                    <el-button v-if="!node.parent.data.length" type="text" size="mini" style="padding:0;" @click.stop="treeNodeTop(node, data)">
+                                        <span style="font-size:15px; position:relative; bottom:1px; left:2px;" class="icon-arrow-up"></span>
+                                    </el-button>
+                                    <el-button type="text" size="mini" style="padding:0;" @click.stop="treeNodeEdit(node, data)">
+                                        <span style="font-size:15px; position:relative; bottom:1px; left:2px;" class="icon-pencil"></span>
+                                    </el-button>
+                                    <el-button type="text" size="mini" style="padding:0;" @click.stop="treeNodeAppend(node, data)">
+                                        <span style="font-size:16px;" class="icon-plus"></span>
+                                    </el-button>
+                                    <el-button v-if="!data.autoGeneration" type="text" size="mini" style="padding:0; margin-left:5px;" @click.stop="treeNodeDelete(node, data)">
+                                        <span style="font-size:16px;" class="icon-trash"></span>
+                                    </el-button>
+                                </span>
+                              </span>
+
+                            </el-tree>
+                        </el-scrollbar>
+                        <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="addRootTreeNode" :loading="loading.addRoot" icon="el-icon-plus"></el-button>
+                    </div>
+                </div>
+            </el-card>
+        </div>
+
+        <!-- 编辑标签对话框 -->
+        <el-dialog
+                title="编辑地区"
+                :visible.sync="dialog.editTag.visible"
+                width="500px"
+                :before-close="handleEditTagClose">
+
+            <el-form ref="form" label-width="70px">
+                <el-form-item label="地区名称">
+                    <el-input v-model="dialog.editTag.name"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.editTag.visible = false">取 消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditTagCommit">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <region-dialog ref="regionDialog" @on-region-dialog-close="bindArticles"></region-dialog>
+
+    </template>
+
+</mi-frame>

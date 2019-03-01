@@ -52,10 +52,10 @@ public class ColumnService {
 	public ColumnPO append(ColumnPO parent) throws Exception {
 
 		StringBufferWrapper parentPath = new StringBufferWrapper();
-		if (parent.getParentId() == 0) {
-			parentPath.append("/").append(parent.getParentId());
+		if (parent.getParentId() == null) {
+			parentPath.append("/").append(parent.getId());
 		} else {
-			parentPath.append(parent.getParentPath()).append("/").append(parent.getParentId());
+			parentPath.append(parent.getParentPath()).append("/").append(parent.getId());
 		}
 
 		ColumnPO columnPO = new ColumnPO();
@@ -72,6 +72,7 @@ public class ColumnService {
 	public ColumnPO update(ColumnPO columnPO, String name, String remark) throws Exception {
 
 		columnPO.setName(name);
+		columnPO.setRemark(remark);
 		columnPO.setUpdateTime(new Date());
 		columnDao.save(columnPO);
 
@@ -99,7 +100,7 @@ public class ColumnService {
 	public void move(ColumnPO sourceCol, ColumnPO targetCol) throws Exception {
 
 		StringBufferWrapper parentPath = new StringBufferWrapper();
-		if (targetCol.getParentId() == 0) {
+		if (targetCol.getParentId() == null) {
 			parentPath.append("/").append(targetCol.getId());
 		} else {
 			parentPath.append(targetCol.getParentPath()).append("/").append(targetCol.getId());
@@ -140,13 +141,10 @@ public class ColumnService {
 	 */
 	public void top(ColumnPO columnPO) throws Exception {
 
-		if (columnPO.getParentId() == 0)
+		if (columnPO.getParentId() == null)
 			return;
 
 		List<ColumnPO> subColumns = columnQuery.findAllSubTags(columnPO.getId());
-
-		columnPO.setParentId(0);
-		columnPO.setParentPath(null);
 
 		if (subColumns != null && subColumns.size() > 0) {
 
@@ -157,6 +155,9 @@ public class ColumnService {
 			}
 
 		}
+		
+		columnPO.setParentId(null);
+		columnPO.setParentPath(null);
 
 		if (subColumns == null)
 			subColumns = new ArrayList<ColumnPO>();

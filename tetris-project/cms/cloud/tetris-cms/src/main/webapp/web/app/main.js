@@ -48,13 +48,16 @@ require.config({
         'mi-video-dialog':window.APPPATH + 'component/dialog/mims/video/mims-video',
         'mi-audio-dialog':window.APPPATH + 'component/dialog/mims/audio/mims-audio',
 
+        'region-dialog':window.APPPATH + 'component/dialog/region/region-dialog',
+
         /* pages */
         'page-cms-template':window.APPPATH + 'cms/template/page-cms-template',
         'editor':window.APPPATH + 'cms/template/editor',
         'page-cms-article':window.APPPATH + 'cms/article/page-cms-article',
         'layout-editor':window.APPPATH + 'cms/article/layout-editor',
         'page-cms-column':window.APPPATH + 'cms/column/page-cms-column',
-        'article-dialog':window.APPPATH + 'cms/column/article-dialog'
+        'article-dialog':window.APPPATH + 'cms/column/article-dialog',
+        'page-cms-region':window.APPPATH + 'cms/region/page-cms-region'
 
     },
     shim:{

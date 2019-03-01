@@ -61,9 +61,9 @@ public class TemplateTagService {
 		
 		StringBufferWrapper parentPath = new StringBufferWrapper();
 		if(parent.getParentId() == null){
-			parentPath.append("/").append(parent.getParentId());
+			parentPath.append("/").append(parent.getId());
 		}else{
-			parentPath.append(parent.getParentPath()).append("/").append(parent.getParentId());
+			parentPath.append(parent.getParentPath()).append("/").append(parent.getId());
 		}
 		
 		TemplateTagPO tag = new TemplateTagPO();
@@ -189,9 +189,6 @@ public class TemplateTagService {
 		
 		List<TemplateTagPO> subTags = templateTagQuery.findAllSubTags(tag.getId());
 		
-		tag.setParentId(null);
-		tag.setParentPath(null);
-		
 		if(subTags!=null && subTags.size()>0){
 			
 			String reg = new StringBufferWrapper().append("/").append(tag.getParentId()).toString();
@@ -201,6 +198,9 @@ public class TemplateTagService {
 			}
 			
 		}
+		
+		tag.setParentId(null);
+		tag.setParentPath(null);
 		
 		if(subTags == null) subTags = new ArrayList<TemplateTagPO>();
 		subTags.add(tag);

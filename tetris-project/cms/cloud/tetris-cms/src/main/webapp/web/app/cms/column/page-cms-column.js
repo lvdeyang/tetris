@@ -99,24 +99,6 @@ define([
                         self.currentNode(self.tree.data[0]);
                     });
                 },
-                loadSelectTagTree:function(){
-                    var self = this;
-                    self.dialog.selectTag.tree.data.splice(0, self.dialog.selectTag.tree.data.length);
-                    ajax.post('/cms/column/list/tree', null, function(data){
-                        self.dialog.selectTag.tree.data.push({
-                            id:-1,
-                            uuid:'-1',
-                            name:'无标签',
-                            icon:'icon-tag',
-                            style:'font-size:15px; position:relative; top:1px; margin-right:1px;'
-                        });
-                        if(data && data.length>0){
-                            for(var i=0; i<data.length; i++){
-                                self.dialog.selectTag.tree.data.push(data[i]);
-                            }
-                        };
-                    });
-                },
                 treeNodeAllowDrag:function(node){
                     return node.data.id !== -1;
                 },
@@ -310,7 +292,7 @@ define([
                         columnId: row.columnId,
                         articleId: row.articleId
                     }, function(data, status){
-                        
+
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 rowTop: function(scope){
