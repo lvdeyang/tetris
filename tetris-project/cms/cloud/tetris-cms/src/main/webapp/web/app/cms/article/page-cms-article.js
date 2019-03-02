@@ -14,6 +14,7 @@ define([
     'layout-editor',
     'date',
     'region-dialog',
+    'classify-dialog',
     'css!' + window.APPPATH + 'cms/article/page-cms-article.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
 
@@ -217,7 +218,12 @@ define([
                 },
                 handleClassifyEdit:function(){
                     var self = this;
-                    var checkedRegions = []
+                    var checkedClassifies = [];
+                    self.$refs.classifyDialog.open('/cms/classify/list/with/except', checkedClassifies);
+                },
+                handleRegionEdit:function(){
+                    var self = this;
+                    var checkedRegions = [];
                     self.$refs.regionDialog.open('/cms/region/list/tree', checkedRegions);
                 },
                 handleAddArticleClose:function(){
@@ -296,6 +302,16 @@ define([
                         })
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
+                selectedClassifies:function(classifies, buff, startLoading, endLoading){
+                    var self = this;
+                    var classifyIds = [];
+                    for(var i=0; i<classifies.length; i++){
+                        classifyIds.push(classifies[i].id);
+                    }
+                    startLoading();
+
+                    endLoading();
+                },
                 selectedRegions:function(regions, buff, startLoading, endLoading){
                     var self = this;
                     var regionIds = [];
@@ -305,7 +321,7 @@ define([
                     startLoading();
 
                     endLoading();
-                },
+                }
             },
             created:function(){
                 var self = this;

@@ -142,7 +142,7 @@
                                     @close="handleClassifyRemove(dialog.addArticle.classify, simple)">
                                 {{simple}}
                             </el-tag>
-                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleClassifyEdit" icon="el-icon-edit"> 改地区</el-button>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleRegionEdit" icon="el-icon-edit"> 改地区</el-button>
                         </el-form-item>
                         <el-form-item label="备注">
                             <el-input type="textarea" v-model="dialog.addArticle.remark"></el-input>
@@ -215,6 +215,9 @@
 
         <!-- 选择地区对话框 -->
         <region-dialog ref="regionDialog" @on-region-dialog-close="selectedRegions"></region-dialog>
+
+        <!-- 选择分类对话框 -->
+        <classify-dialog ref="classifyDialog" @on-classify-dialog-close="selectedClassifies"></classify-dialog>
 
     </template>
 
