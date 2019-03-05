@@ -26,14 +26,18 @@ define([
                 pageSize:50,
                 total:0,
                 loading:false,
-                selected:[]
+                selected:[],
+                buff:[]
             }
         },
         methods:{
-            open:function(uri, except){
+            open:function(uri, except, buff){
                 var self = this;
                 self.visible = true;
                 self.uri = uri;
+                self.currentPage = 0;
+                self.except = [];
+                self.buff = buff;
                 if(except && except.length>0){
                     for(var i=0; i<except.length; i++){
                         self.except.push(except[i]);
@@ -84,6 +88,7 @@ define([
             handleClassifyBindingOk:function(){
                 var self = this;
                 var selected = self.selected;
+                var buff = self.buff;
                 if(!selected || selected.length<=0){
                     self.$message({
                         message:'您没有选择任何数据！',
@@ -100,7 +105,7 @@ define([
                 var close = function(){
                     self.visible =false;
                 };
-                self.$emit(ON_CLASSIFY_DIALOG_CLOSE, selected, startLoading, endLoading, close);
+                self.$emit(ON_CLASSIFY_DIALOG_CLOSE, selected, buff, startLoading, endLoading, close);
             }
         }
     });

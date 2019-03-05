@@ -36,6 +36,10 @@
                                         label="作者">
                                 </el-table-column>
                                 <el-table-column
+                                        prop="articleType"
+                                        label="类型">
+                                </el-table-column>
+                                <el-table-column
                                         prop="publishTime"
                                         label="发布时间">
                                 </el-table-column>
@@ -106,7 +110,17 @@
                                     value-format="yyyy-MM-dd HH:mm:ss">
                             </el-date-picker>
                         </el-form-item>
-                        <el-form-item label="发表时间">
+                        <el-form-item label="文章类型">
+                            <el-select v-model="dialog.addArticle.value" placeholder="请选择">
+                                <el-option
+                                        v-for="item in dialog.type"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="文章海报">
                             <table>
                                 <tr>
                                     <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
@@ -122,27 +136,27 @@
                         </el-form-item>
                         <el-form-item label="文章分类">
                             <el-tag
-                                    :key="simple"
+                                    :key="simple.name"
                                     v-for="simple in dialog.addArticle.classify"
                                     style="margin-right:10px;"
                                     closable
                                     :disable-transitions="false"
                                     @close="handleClassifyRemove(dialog.addArticle.classify, simple)">
-                                {{simple}}
+                                {{simple.name}}
                             </el-tag>
-                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleClassifyEdit" icon="el-icon-edit"> 加分类</el-button>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleClassifyAdd" icon="el-icon-edit"> 加分类</el-button>
                         </el-form-item>
                         <el-form-item label="地区">
                             <el-tag
-                                    :key="simple"
-                                    v-for="simple in dialog.addArticle.classify"
+                                    :key="simple.name"
+                                    v-for="simple in dialog.addArticle.region"
                                     style="margin-right:10px;"
                                     closable
                                     :disable-transitions="false"
-                                    @close="handleClassifyRemove(dialog.addArticle.classify, simple)">
-                                {{simple}}
+                                    @close="handleClassifyRemove(dialog.addArticle.region, simple)">
+                                {{simple.name}}
                             </el-tag>
-                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleRegionEdit" icon="el-icon-edit"> 改地区</el-button>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleRegionAdd" icon="el-icon-edit"> 改地区</el-button>
                         </el-form-item>
                         <el-form-item label="备注">
                             <el-input type="textarea" v-model="dialog.addArticle.remark"></el-input>
@@ -164,42 +178,80 @@
                 width="500px"
                 :before-close="handleEditArticleClose">
 
-            <el-form ref="form" label-width="70px">
-                <el-form-item label="文章名称">
-                    <el-input v-model="dialog.editArticle.name"></el-input>
-                </el-form-item>
-                <el-form-item label="作者">
-                    <el-input v-model="dialog.editArticle.author"></el-input>
-                </el-form-item>
-                <el-form-item label="发表时间">
-                    <el-date-picker
-                            style="width:100%;"
-                            v-model="dialog.editArticle.publishTime"
-                            type="datetime"
-                            placeholder="选择日期时间"
-                            align="right"
-                            :picker-options="dialog.editArticle.timeOption"
-                            value-format="yyyy-MM-dd HH:mm:ss">
-                    </el-date-picker>
-                </el-form-item>
-                <el-form-item label="发表时间">
-                    <table>
-                        <tr>
-                            <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
-                                <img v-if="dialog.editArticle.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.editArticle.thumbnail" />
-                            </td>
-                            <td style="width:100px; vertical-align:middle;">
-                                <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.editArticle)">
-                                    <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
-                                </el-button>
-                            </td>
-                        </tr>
-                    </table>
-                </el-form-item>
-                <el-form-item label="备注">
-                    <el-input type="textarea" v-model="dialog.editArticle.remark"></el-input>
-                </el-form-item>
-            </el-form>
+            <div style="height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="70px">
+                        <el-form-item label="文章名称">
+                            <el-input v-model="dialog.editArticle.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="作者">
+                            <el-input v-model="dialog.editArticle.author"></el-input>
+                        </el-form-item>
+                        <el-form-item label="发表时间">
+                            <el-date-picker
+                                    style="width:100%;"
+                                    v-model="dialog.editArticle.publishTime"
+                                    type="datetime"
+                                    placeholder="选择日期时间"
+                                    align="right"
+                                    :picker-options="dialog.editArticle.timeOption"
+                                    value-format="yyyy-MM-dd HH:mm:ss">
+                            </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="文章类型">
+                            <el-select v-model="dialog.editArticle.value" placeholder="请选择">
+                                <el-option
+                                        v-for="item in dialog.type"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="文章海报">
+                            <table>
+                                <tr>
+                                    <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                        <img v-if="dialog.editArticle.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.editArticle.thumbnail" />
+                                    </td>
+                                    <td style="width:100px; vertical-align:middle;">
+                                        <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.editArticle)">
+                                            <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                        </el-button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </el-form-item>
+                        <el-form-item label="文章分类">
+                            <el-tag
+                                    :key="simple.name"
+                                    v-for="simple in dialog.editArticle.classify"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleClassifyRemove(dialog.editArticle.classify, simple)">
+                                {{simple.name}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleClassifyEdit" icon="el-icon-edit"> 加分类</el-button>
+                        </el-form-item>
+                        <el-form-item label="地区">
+                            <el-tag
+                                    :key="simple.name"
+                                    v-for="simple in dialog.editArticle.region"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleClassifyRemove(dialog.editArticle.region, simple)">
+                                {{simple.name}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleRegionEdit" icon="el-icon-edit"> 改地区</el-button>
+                        </el-form-item>
+                        <el-form-item label="备注">
+                            <el-input type="textarea" v-model="dialog.editArticle.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
 
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="dialog.editArticle.visible = false">取 消</el-button>

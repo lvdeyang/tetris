@@ -28,6 +28,21 @@ define([
         var $page = document.getElementById(pageId);
         $page.innerHTML = tpl;
 
+        //查询文章类型
+        var articleType = [];
+        ajax.post('/cms/article/query/type', null, function(data) {
+            var types = data.type;
+            if (types && types.length > 0) {
+                for (var j = 0; j < types.length; j++) {
+                    var type = {
+                        value: types[j],
+                        label: types[j]
+                    };
+                    articleType.push(type);
+                }
+            }
+        });
+
         new Vue({
             el: '#' + pageId + '-wrapper',
             data: {
@@ -44,6 +59,7 @@ define([
                     }
                 },
                 dialog:{
+                    type:articleType,
                     addArticle:{
                         visible:false,
                         name:'',
@@ -51,8 +67,10 @@ define([
                         publishTime:new Date().format('yyyy-MM-DD HH:mm:ss'),
                         thumbnail:'',
                         classify:[],
+                        region:[],
                         remark:'',
                         loading:false,
+                        value:'',
                         timeOption:{
                             shortcuts: [{
                                 text: '今天',
@@ -84,8 +102,10 @@ define([
                         publishTime:'',
                         thumbnail:'',
                         classify:[],
+                        region:[],
                         remark:'',
                         loading:false,
+                        value:'',
                         timeOption:{
                             shortcuts: [{
                                 text: '今天',
@@ -136,6 +156,18 @@ define([
                     self.dialog.editArticle.thumbnail = row.thumbnail;
                     self.dialog.editArticle.remark = row.remark;
                     self.dialog.editArticle.visible = true;
+
+                    self.dialog.editArticle.region.splice(0, self.dialog.editArticle.region.length);
+                    self.dialog.editArticle.classify.splice(0, self.dialog.editArticle.classify.length);
+
+                    for(var i=0;i<row.regions.length;i++){
+                        self.dialog.editArticle.region.push(row.regions[i]);
+                    }
+                    for(var j=0;j<row.classifies.length;j++){
+                        self.dialog.editArticle.classify.push(row.classifies[j]);
+                    }
+
+                    self.dialog.editArticle.value = row.articleType;
                 },
                 rowDelete:function(scope){
                     var self = this;
@@ -184,15 +216,26 @@ define([
                 loadArticle:function(currentPage){
                     var self = this;
                     self.table.data.splice(0, self.table.data.length);
+                    self.dialog.type.splice(0, self.dialog.type.length);
                     ajax.post('/cms/article/list', {
                         currentPage:currentPage,
                         pageSize:self.table.page.size
                     }, function(data){
                         var rows = data.rows;
                         var total = data.total;
+                        var types = data.type;
                         if(rows && rows.length>0){
                             for(var i=0; i<rows.length; i++){
                                 self.table.data.push(rows[i]);
+                            }
+                        }
+                        if(types && types.length>0){
+                            for(var j=0;j<types.length;j++){
+                                var type = {
+                                    value: types[j],
+                                    label: types[j]
+                                };
+                                self.dialog.type.push(type);
                             }
                         }
                         self.table.page.total = total;
@@ -216,15 +259,49 @@ define([
                         }
                     }
                 },
+                handleClassifyAdd:function(){
+                    var self = this;
+                    var checkedClassifies = [];
+                    var classify = self.dialog.addArticle.classify;
+                    if(classify.length > 0){
+                        for(var i=0;i<classify.length;i++){
+                            checkedClassifies.push(classify[i].id);
+                        }
+                    }
+                    self.$refs.classifyDialog.open('/cms/classify/list/with/except', checkedClassifies, classify);
+                },
+                handleRegionAdd:function(){
+                    var self = this;
+                    var checkedRegions = [];
+                    var region = self.dialog.addArticle.region;
+                    if(region.length > 0){
+                        for(var i=0;i<region.length;i++){
+                            checkedRegions.push(region[i].id);
+                        }
+                    }
+                    self.$refs.regionDialog.open('/cms/region/list/tree', checkedRegions, region);
+                },
                 handleClassifyEdit:function(){
                     var self = this;
                     var checkedClassifies = [];
-                    self.$refs.classifyDialog.open('/cms/classify/list/with/except', checkedClassifies);
+                    var classify = self.dialog.editArticle.classify;
+                    if(classify.length > 0){
+                        for(var i=0;i<classify.length;i++){
+                            checkedClassifies.push(classify[i].id);
+                        }
+                    }
+                    self.$refs.classifyDialog.open('/cms/classify/list/with/except', checkedClassifies, classify);
                 },
                 handleRegionEdit:function(){
                     var self = this;
                     var checkedRegions = [];
-                    self.$refs.regionDialog.open('/cms/region/list/tree', checkedRegions);
+                    var region = self.dialog.editArticle.region;
+                    if(region.length > 0){
+                        for(var i=0;i<region.length;i++){
+                            checkedRegions.push(region[i].id);
+                        }
+                    }
+                    self.$refs.regionDialog.open('/cms/region/list/tree', checkedRegions, region);
                 },
                 handleAddArticleClose:function(){
                     var self = this;
@@ -233,7 +310,10 @@ define([
                     self.dialog.addArticle.publishTime = new Date().format('yyyy-MM-DD HH:mm:ss');
                     self.dialog.addArticle.thumbnail = '';
                     self.dialog.addArticle.remark = '';
+                    self.dialog.addArticle.classify = [];
+                    self.dialog.addArticle.region = [];
                     self.dialog.addArticle.visible = false;
+                    self.dialog.addArticle.value = '';
                 },
                 handleAddArticleCommit:function(){
                     var self = this;
@@ -243,7 +323,10 @@ define([
                         author:self.dialog.addArticle.author,
                         publishTime:self.dialog.addArticle.publishTime,
                         thumbnail:self.dialog.addArticle.thumbnail,
-                        remark:self.dialog.addArticle.remark
+                        remark: self.dialog.addArticle.remark,
+                        classify: $.toJSON(self.dialog.addArticle.classify),
+                        region: $.toJSON(self.dialog.addArticle.region),
+                        type: self.dialog.addArticle.value
                     }, function(data, status){
                         self.dialog.addArticle.loading = false;
                         if(status !== 200) return;
@@ -260,17 +343,23 @@ define([
                     self.dialog.editArticle.publishTime = '';
                     self.dialog.editArticle.thumbnail = '';
                     self.dialog.editArticle.remark = '';
+                    self.dialog.editArticle.region = [];
+                    self.dialog.editArticle.classify = [];
                     self.dialog.editArticle.visible = false;
+                    self.dialog.editArticle.value = '';
                 },
                 handleEditArticleCommit:function(){
                     var self = this;
                     self.dialog.editArticle.loading = true;
                     ajax.post('/cms/article/edit/' + self.dialog.editArticle.id, {
                         name:self.dialog.editArticle.name,
-                        author:self.dialog.addArticle.author,
-                        publishTime:self.dialog.addArticle.publishTime,
-                        thumbnail:self.dialog.addArticle.thumbnail,
-                        remark:self.dialog.editArticle.remark
+                        author:self.dialog.editArticle.author,
+                        publishTime:self.dialog.editArticle.publishTime,
+                        thumbnail:self.dialog.editArticle.thumbnail,
+                        remark:self.dialog.editArticle.remark,
+                        classify: $.toJSON(self.dialog.editArticle.classify),
+                        region: $.toJSON(self.dialog.editArticle.region),
+                        type: self.dialog.editArticle.value
                     }, function(data, status){
                         self.dialog.editArticle.loading = false;
                         if(status !== 200) return;
@@ -302,25 +391,28 @@ define([
                         })
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                selectedClassifies:function(classifies, buff, startLoading, endLoading){
+                selectedClassifies:function(classifies, buff, startLoading, endLoading, close){
                     var self = this;
                     var classifyIds = [];
+                    startLoading();
                     for(var i=0; i<classifies.length; i++){
                         classifyIds.push(classifies[i].id);
+                        buff.push(classifies[i]);
                     }
-                    startLoading();
-
                     endLoading();
+                    close();
                 },
-                selectedRegions:function(regions, buff, startLoading, endLoading){
+                selectedRegions:function(regions, buff, startLoading, endLoading, close){
                     var self = this;
                     var regionIds = [];
+                    startLoading();
+                    buff.splice(0,buff.length);
                     for(var i=0; i<regions.length; i++){
                         regionIds.push(regions[i].id);
+                        buff.push(regions[i]);
                     }
-                    startLoading();
-
                     endLoading();
+                    close();
                 }
             },
             created:function(){
@@ -331,7 +423,6 @@ define([
                 self.loadArticle(1);
             }
         });
-
     };
 
     var destroy = function(){

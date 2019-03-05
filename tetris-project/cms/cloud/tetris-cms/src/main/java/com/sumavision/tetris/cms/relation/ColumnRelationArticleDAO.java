@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cms.relation;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -46,5 +47,14 @@ public interface ColumnRelationArticleDAO extends BaseDAO<ColumnRelationArticleP
 	 * @param Long columnId 栏目id
 	 */
 	public List<ColumnRelationArticlePO> findByColumnIdOrderByArticleOrder(Long columnId);
+	
+	/**
+	 * 根据文章id列表删除关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月5日 上午11:04:04
+	 * @param ids 文章id列表
+	 */
+	public void deleteByArticleIdIn(Collection<Long> ids);
 
 }

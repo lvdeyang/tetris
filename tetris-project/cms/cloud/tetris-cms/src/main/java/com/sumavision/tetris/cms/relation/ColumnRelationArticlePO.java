@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -117,6 +118,20 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 				return 1;
 			}
 			if(o1.getArticleOrder() == o2.getArticleOrder()){
+				return 0;
+			}
+			return -1;
+		}
+	}
+
+	public static final class ArticleVoOrderComparator implements Comparator<ArticleVO>{
+		@Override
+		public int compare(ArticleVO o1, ArticleVO o2) {
+			
+			if(o1.getOrder() > o2.getOrder()){
+				return 1;
+			}
+			if(o1.getOrder() == o2.getOrder()){
 				return 0;
 			}
 			return -1;

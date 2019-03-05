@@ -1,6 +1,7 @@
 package com.sumavision.tetris.cms.column;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -9,10 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.cms.article.ArticleClassifyPermissionDAO;
+import com.sumavision.tetris.cms.article.ArticleClassifyPermissionPO;
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticlePO;
+import com.sumavision.tetris.cms.article.ArticleRegionPermissionDAO;
+import com.sumavision.tetris.cms.article.ArticleRegionPermissionPO;
 import com.sumavision.tetris.cms.article.ArticleVO;
+import com.sumavision.tetris.cms.classify.ClassifyVO;
+import com.sumavision.tetris.cms.region.RegionVO;
 import com.sumavision.tetris.cms.relation.ColumnRelationArticleDAO;
+import com.sumavision.tetris.cms.relation.ColumnRelationArticlePO;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
@@ -37,6 +45,9 @@ public class ColumnService {
 	
 	@Autowired
 	private ArticleDAO articleDao;
+	
+	@Autowired
+	private ArticleClassifyPermissionDAO articleClassifyPermissionDao;
 
 	public ColumnPO addRoot() throws Exception {
 
@@ -82,7 +93,11 @@ public class ColumnService {
 	public void remove(ColumnPO columnPO) throws Exception {
 
 		List<ColumnPO> subColumnPOs = columnQuery.findAllSubTags(columnPO.getId());
-
+		
+		//删除关联
+		List<ColumnRelationArticlePO> relationArticles = columnRelationArticleDao.findByColumnId(columnPO.getId());
+		columnRelationArticleDao.deleteInBatch(relationArticles);
+		
 		Set<Long> colIds = new HashSetWrapper<Long>().add(columnPO.getId()).getSet();
 		if (subColumnPOs != null && subColumnPOs.size() > 0) {
 			for (ColumnPO column : subColumnPOs) {
@@ -191,10 +206,33 @@ public class ColumnService {
 
 		//栏目下文章
 		List<Long> articleIds = columnRelationArticleDao.findArticleIdByColumnId(columnId);
+		List<ColumnRelationArticlePO> columnRelationArticles = columnRelationArticleDao.findByColumnId(columnId);
 		if(articleIds != null && articleIds.size()>0){
 			List<ArticlePO> articles = articleDao.findAll(articleIds);
+			List<ArticleClassifyPermissionPO> classifies = articleClassifyPermissionDao.findByArticleIdIn(articleIds);
 			if(articles != null && articles.size()>0){
-				List<ArticleVO> view_articles = ArticleVO.getConverter(ArticleVO.class).convert(articles, ArticleVO.class);
+				List<ArticleVO> view_articles = new ArrayList<ArticleVO>();
+				for(ArticlePO article: articles){
+					ArticleVO view_article = new ArticleVO().set(article)
+															.setClassifies(new ArrayList<ClassifyVO>());
+					for(ArticleClassifyPermissionPO classify: classifies){
+						if(classify.getArticleId().equals(article.getId())){
+							ClassifyVO view_classify = new ClassifyVO();
+							view_classify.setId(classify.getClassifyId())
+										 .setName(classify.getClassifyName());
+							view_article.getClassifies().add(view_classify);
+						}
+					}
+					for(ColumnRelationArticlePO columnRelationArticle: columnRelationArticles){
+						if(columnRelationArticle.getArticleId().equals(article.getId())){
+							view_article.setOrder(columnRelationArticle.getArticleOrder());
+							break;
+						}
+					}
+					view_articles.add(view_article);
+				}
+				
+				Collections.sort(view_articles, new ColumnRelationArticlePO.ArticleVoOrderComparator());
 				if(view_column.getArticles() == null) view_column.setArticles(new ArrayList<ArticleVO>());
 				view_column.getArticles().addAll(view_articles);
 			}
