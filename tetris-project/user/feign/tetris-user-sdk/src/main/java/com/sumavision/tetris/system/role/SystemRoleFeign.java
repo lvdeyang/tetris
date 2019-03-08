@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.config.feign.FeignConfiguration;
 
 /**
  * 系统角色feign接口<br/>
@@ -12,7 +13,7 @@ import com.alibaba.fastjson.JSONObject;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年1月17日 下午1:05:08
  */
-@FeignClient(name = "tetris-user")
+@FeignClient(name = "tetris-user", configuration = FeignConfiguration.class)
 public interface SystemRoleFeign {
 
 	/**
@@ -57,4 +58,14 @@ public interface SystemRoleFeign {
 	 */
 	@RequestMapping(value = "/system/role/feign/query/user/roles")
 	public JSONObject queryUserRoles() throws Exception;
+	
+	/**
+	 * 查询系统内置角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午1:44:52
+	 * @return SystemRoleVO 系统内置角色
+	 */
+	@RequestMapping(value = "/system/role/feign/query/internal/role")
+	public JSONObject queryInternalRole() throws Exception;
 }

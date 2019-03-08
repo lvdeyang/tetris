@@ -38,7 +38,7 @@ define([
                 menus:context.getProp('menus'),
                 user:context.getProp('user'),
                 groups:context.getProp('groups'),
-                activeId:window.BASEPATH + 'index/media/txt',
+                activeId:window.BASEPATH + 'index/media/txt/' + window.TOKEN,
                 current:'',
                 breadCrumb:[],
                 table:{

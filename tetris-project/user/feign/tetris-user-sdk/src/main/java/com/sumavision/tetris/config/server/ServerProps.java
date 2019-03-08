@@ -1,20 +1,11 @@
-package com.sumavision.tetris.menu.config;
+package com.sumavision.tetris.config.server;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-@Component  
-@ConfigurationProperties
 public class ServerProps {
 
-	@Value("${spring.application.name}")
 	private String id;
 	
-	@Value("${spring.cloud.client.ipAddress}")
 	private String ip;
 	
-	@Value("${server.port}")
 	private String port;
 
 	public String getId() {

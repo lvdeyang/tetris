@@ -42,7 +42,7 @@ define([
 
         if(_status === ajax.TIMEOUT){
             //超时重定向到错误页面
-            window.location.href = window.BASEPATH + conf.timeouturi;
+            window.location.href = window.BASEPATH + 'web/app/error/timeout.html';
         }else if(_status === ajax.FORBIDDEN){
             //校验失败
             conf.messenger.error('服务器拒绝，拒绝原因：'+data.message, status);
@@ -126,6 +126,7 @@ define([
             jsonp:'jsonpQueue',
             login:null,
             authname:'BASENAME000001',
+            sessionIdName:'BASENAME000002',
             timeouturi:'error',
             messenger:messenger,
             loader:loader
@@ -136,6 +137,7 @@ define([
          * conf.jsonp jsonp请求的回调名称
          * conf.login:登录页面
          * conf.authname 登录标记名称
+         * conf.sessionIdName sessionId名称
          * conf.timeouturi  登录页面uri
          * conf.messanger.info 信息提示
          * conf.messanger.success 成功提示
@@ -227,8 +229,9 @@ define([
                                 _error.apply($this, [XMLHttpRequest]);
                             }else{
                                 //执行默认动作
-                                window.location.hash = baseError + '/' + XMLHttpRequest.status + '/' + encodeURI('服务器信息：'+textStatus);
+                                //window.location.hash = baseError + '/' + XMLHttpRequest.status + '/' + encodeURI('服务器信息：'+textStatus);
                                 //router.push({path:config.redirect.error, params:{code:XMLHttpRequest.status, message:encodeURI('服务器信息：'+textStatus)}});
+                                window.location.href = window.BASEPATH + 'web/app/error/request-fail.html';
                             }
                         }
                     }
@@ -236,7 +239,13 @@ define([
 
                 //加入oauth2令牌
                 var _token = storage.getItem(ajax._conf.authname) || '';
+                var _sessionId = storage.getItem(ajax._conf.sessionIdName) || '';
+
+                //bvc兼容
                 _opt.headers = {Authorization:_token};
+
+                _opt.headers['tetris-001'] = _token;
+                _opt.headers['tetris-002'] = _sessionId;
 
                 //成功请求处理
                 if(!conf.debug && opt.dataType!=='jsonp'){

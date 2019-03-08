@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
@@ -30,6 +31,7 @@ import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
 import com.sumavision.tetris.user.exception.UserNotExistException;
+import com.sumavision.tetris.user.exception.UsernameAlreadyExistException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 
 /**
@@ -40,7 +42,7 @@ import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
  */
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class UserService {
+public class UserService{
 
 	@Autowired
 	private UserDAO userDao;
@@ -68,6 +70,9 @@ public class UserService {
 	
 	@Autowired
 	private ApplicationEventPublisher applicationEventPublisher;
+	
+	@Autowired
+	private Sha256Encoder sha256Encoder;
 	
 	/**
 	 * 添加一个用户<br/>
@@ -220,10 +225,15 @@ public class UserService {
 		
 		if(!password.equals(repeat)) throw new RepeatNotMatchPasswordException();
 		
-		UserPO user = new UserPO();
+		UserPO user = userDao.findByUsername(username);
+		if(user != null){
+			throw new UsernameAlreadyExistException(username);
+		}
+		
+		user = new UserPO();
 		user.setNickname(nickname);
 		user.setUsername(username);
-		user.setPassword(password);
+		user.setPassword(sha256Encoder.encode(password));
 		user.setMobile(mobile);
 		user.setMail(mail);
 		user.setStatus(UserStatus.OFFLINE);
@@ -343,13 +353,14 @@ public class UserService {
 		if(user == null) throw new UserNotExistException(id);
 		
 		if(editPassword){
+			oldPassword = sha256Encoder.encode(oldPassword);
 			if(!user.getPassword().equals(oldPassword)) throw new PasswordErrorException();
 			
 			if(newPassword == null) throw new PasswordCannotBeNullException();
 			
 			if(!newPassword.equals(repeat)) throw new RepeatNotMatchPasswordException();
 			
-			user.setPassword(newPassword);
+			user.setPassword(sha256Encoder.encode(newPassword));
 		}
 		
 		user.setNickname(nickname);
@@ -360,5 +371,5 @@ public class UserService {
 		
 		return new UserVO().set(user);
 	}
-	
+
 }

@@ -8,24 +8,40 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2018年11月20日 上午11:38:11
  */
-@Deprecated
 public enum UserClassify {
 
-	MAINTENANCE("运维"),
-	COMPANY_ADMIN("企业管理员"),
-	COMPANY_USER("企业用户"),
-	NORMAL("普通用户");
+	@Deprecated
+	MAINTENANCE("运维", false),
+	@Deprecated
+	COMPANY_ADMIN("企业管理员", false),
+	@Deprecated
+	COMPANY_USER("企业用户----", false),
+	
+	INTERNAL("系统内置用户", false),
+	COMPANY("企业用户", true),
+	NORMAL("普通用户", true);
 	
 	private String name;
 	
-	private UserClassify(String name){
+	private boolean show;
+	
+	private UserClassify(String name, boolean show){
 		this.name = name;
+		this.show = show;
 	}
 	
 	public String getName(){
 		return this.name;
 	}
 	
+	public boolean isShow() {
+		return this.show;
+	}
+
+	public void setShow(boolean show) {
+		this.show = show;
+	}
+
 	public static UserClassify fromName(String name) throws Exception{
 		UserClassify[] values = UserClassify.values();
 		for(UserClassify value:values){

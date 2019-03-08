@@ -1,4 +1,4 @@
-package com.sumavision.tetris.config;
+package com.sumavision.tetris.config.server;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;

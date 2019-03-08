@@ -59,7 +59,8 @@
                          background-color="#37404f"
                          text-color="#fff"
                          active-text-color="#ffd04b"
-                         mode="horizontal">
+                         mode="horizontal"
+                         @select="menuSelect">
                     <el-menu-item v-if="user.classify==='COMPANY_ADMIN' || user.classify==='COMPANY_USER'" @click="userGroupToggle" class="no-border-bottom-style right item-message" index="1">
                         <span class="el-icon-message" style="position:relative; left:4px;"></span>
                         <span class="tag error" v-if="numberOfMessage>0">{{numberOfMessage}}</span>

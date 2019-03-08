@@ -38,7 +38,7 @@ define([
                 menus:context.getProp('menus'),
                 user:context.getProp('user'),
                 groups:context.getProp('groups'),
-                activeId:window.BASEPATH + 'index/media/audioStream',
+                activeId:window.BASEPATH + 'index/media/audioStream/' + window.TOKEN,
                 current:'',
                 breadCrumb:[],
                 table:{

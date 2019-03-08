@@ -1,4 +1,4 @@
-package com.sumavision.tetris.menu.config;
+package com.sumavision.tetris.menu.config.datasource;
 
 import java.util.Map;
 import javax.persistence.EntityManager;

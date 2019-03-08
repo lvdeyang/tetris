@@ -12,6 +12,8 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 
+import com.sumavision.tetris.commons.context.SpringContext;
+
 @ComponentScan(basePackages = {"com.sumavision.tetris"})
 @ServletComponentScan(basePackages = {"com.sumavision.tetris.mvc.listener"})
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
@@ -23,6 +25,7 @@ public class TetrisMenuApplication extends SpringBootServletInitializer{
 
 	public static void main(String[] args) {
 		SpringApplication.run(TetrisMenuApplication.class, args);
+		SpringContext.asynchronizedDone();
 	}
 	
 	@Override

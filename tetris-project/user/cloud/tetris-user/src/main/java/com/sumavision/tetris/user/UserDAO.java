@@ -124,4 +124,35 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	@Query(value = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.id NOT IN ?2", nativeQuery = true)
 	public int countByCompanyIdWithExcept(Long companyId, Collection<Long> except);
 	
+	/**
+	 * 根据用户名查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 上午10:52:46
+	 * @param String username 用户名
+	 * @return UserPO 用户
+	 */
+	public UserPO findByUsername(String username);
+	
+	/**
+	 * 根据用户名和自动生成类型查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午1:03:54
+	 * @param String username 用户名
+	 * @param boolean autoGeneration 是否自动生成
+	 * @return UserPO 用户
+	 */
+	public UserPO findByUsernameAndAutoGeneration(String username, boolean autoGeneration);
+	
+	/**
+	 * 根据token查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月6日 上午11:11:18
+	 * @param String token 用户登录的token
+	 * @return UserPO 用户
+	 */
+	public UserPO findByToken(String token);
+	
 }

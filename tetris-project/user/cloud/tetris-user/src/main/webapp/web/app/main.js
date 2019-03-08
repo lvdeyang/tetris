@@ -48,7 +48,9 @@ require.config({
         'page-system-role':window.APPPATH + 'system-role/page-system-role',
         'page-bind-user':window.APPPATH + 'bind-user/page-bind-user',
         'page-company':window.APPPATH + 'company/page-company',
-        'page-organization':window.APPPATH + 'organization/page-organization'
+        'page-organization':window.APPPATH + 'organization/page-organization',
+        'page-login':window.APPPATH + 'login/page-login',
+        'page-login1':window.APPPATH + 'login1/page-login'
     },
     shim:{
         'vue':{
@@ -86,12 +88,14 @@ require([
     var app = null;
 
     //缓存token
-    storage.setItem(config.ajax.authname, window.TOKEN);
+    storage.setItem(config.ajax.header_auth_token, window.TOKEN);
+    storage.setItem(config.ajax.header_session_id, window.SESSIONID);
 
     //初始化ajax
     ajax.init({
         login:config.ajax.login,
-        authname:config.ajax.authname,
+        authname:config.ajax.header_auth_token,
+        sessionIdName:config.ajax.header_session_id,
         debug:config.ajax.debug,
         messenger:{
             info:function(message, status){
@@ -147,7 +151,8 @@ require([
         context.setProp('app', app)
                .setProp('router', router)
                .setProp('user', appInfo.user)
-               .setProp('groups', appInfo.groups || []);
+               .setProp('groups', appInfo.groups || [])
+               .setProp('token', window.TOKEN);
 
         //解析模板
         menuUtil.parseUrlTemplate(appInfo.menus);

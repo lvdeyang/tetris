@@ -1,10 +1,15 @@
 package com.sumavision.tetris.user;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -33,6 +38,12 @@ public class UserPO extends AbstractBasePO{
 	
 	/** 用户状态 */
 	private UserStatus status;
+	
+	/** 用户登录的token */
+	private String token;
+	
+	/** 操作时间 */
+	private Date lastModifyTime;
 	
 	/** 电话号 */
 	private String mobile;
@@ -92,6 +103,25 @@ public class UserPO extends AbstractBasePO{
 		this.status = status;
 	}
 	
+	@Column(name = "TOKEN")
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "LAST_MODIFY_TIME")
+	public Date getLastModifyTime() {
+		return lastModifyTime;
+	}
+
+	public void setLastModifyTime(Date lastModifyTime) {
+		this.lastModifyTime = lastModifyTime;
+	}
+
 	@Column(name = "MOBILE")
 	public String getMobile() {
 		return mobile;

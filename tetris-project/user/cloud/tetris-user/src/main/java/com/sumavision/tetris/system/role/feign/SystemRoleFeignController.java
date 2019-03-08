@@ -139,4 +139,19 @@ public class SystemRoleFeignController {
 		return systemRoleQuery.queryUserRoles(user.getUuid());
 	}
 	
+	/**
+	 * 查询系统内置角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午1:47:47
+	 * @return SystemRoleVO 系统角色
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/internal/role")
+	public Object queryInternalRole() throws Exception{
+		
+		return systemRoleQuery.queryInternalRole();
+	}
+	
 }

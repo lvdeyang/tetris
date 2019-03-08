@@ -5,8 +5,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.config.feign.FeignConfiguration;
 
-@FeignClient(name = "tetris-mims")
+@FeignClient(name = "tetris-mims", configuration = FeignConfiguration.class)
 public interface MediaAudioStreamFeign {
 
 	/**

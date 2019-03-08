@@ -95,4 +95,16 @@ public interface UserSystemRolePermissionDAO extends BaseDAO<UserSystemRolePermi
 	 */
 	public List<UserSystemRolePermissionPO> findByRoleIdAndUserIdIn(Long roleId, Collection<Long> userIds);
 	
+	/**
+	 * 根据用户id,权限id以及生成类型查询权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午1:29:05
+	 * @param Long userId 用户id
+	 * @param Long roleId 权限id
+	 * @param boolean autoGeneration 是否自动生成
+	 * @return UserSystemRolePermissionPO 权限
+	 */
+	public UserSystemRolePermissionPO findByUserIdAndRoleIdAndAutoGeneration(Long userId, Long roleId, boolean autoGeneration);
+	
 }

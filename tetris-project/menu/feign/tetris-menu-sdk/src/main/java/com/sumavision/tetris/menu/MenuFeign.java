@@ -2,7 +2,9 @@ package com.sumavision.tetris.menu;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.config.feign.FeignConfiguration;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -11,7 +13,7 @@ import com.sumavision.tetris.user.UserVO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2018年11月20日 下午1:47:17
  */
-@FeignClient(name = "tetris-menu")
+@FeignClient(name = "tetris-menu", configuration = FeignConfiguration.class)
 public interface MenuFeign {
 
 	/**

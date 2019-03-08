@@ -4,7 +4,10 @@
 	String host = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
 	String scheme = request.getContextPath();
 	String basePath = host + scheme + "/";
-	String token = request.getParameter("token");
+	String token = (String)request.getAttribute("token");
+	token = token==null?"":token;
+	String sessionId = (String)request.getAttribute("sessionId");
+	sessionId = sessionId==null?"":sessionId;
 %>
 <!DOCTYPE HTML>
 <html lang="zh-cmn-Hans">
@@ -70,6 +73,7 @@
     <!-- icons -->
     <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/icon/Font-Awesome-3.2.1/css/font-awesome.css"/>
     <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/icon/feather/style.css"/>
+    <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/icon/brands/style.css"/>
 
     <script type="text/javascript">
         window.HOST = '<%=host%>';
@@ -79,6 +83,7 @@
         window.APPPATH = 'web/app/';
         window.COMMONSPATH = 'web/commons/';
         window.TOKEN = '<%=token%>';
+        window.SESSIONID = '<%=sessionId%>';
     </script>
 
     <title>媒体融合平台</title>
