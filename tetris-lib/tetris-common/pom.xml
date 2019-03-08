@@ -66,8 +66,7 @@
 		    <groupId>com.sun.mail</groupId>
 		    <artifactId>javax.mail</artifactId>
 		    <version>1.5.6</version>
-		</dependency>
-		
+		</dependency>	
  	</dependencies>
   
     <build>
