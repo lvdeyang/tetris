@@ -2,23 +2,116 @@ package com.sumavision.tetris.user;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
+import javax.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mvc.constant.HttpConstant;
+import com.sumavision.tetris.mvc.ext.context.HttpSessionThreadLocal;
+import com.sumavision.tetris.organization.CompanyDAO;
+import com.sumavision.tetris.organization.CompanyPO;
+import com.sumavision.tetris.user.exception.TokenTimeoutException;
 
 @Component
 public class UserQuery {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(UserQuery.class);
+	
 	@Autowired
 	private UserDAO userDao;
+	
+	@Autowired
+	private CompanyDAO companyDao;
+	
+	/**
+	 * 用户登录校验<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月7日 下午2:39:14
+	 * @param String token 登录token
+	 * @return boolean 判断结果
+	 */
+	public boolean checkToken(String token) throws Exception{
+		UserPO user = userDao.findByToken(token);
+		if(user == null){
+			LOG.error(new StringBufferWrapper().append("token 无效：").append(token).toString());
+			throw new TokenTimeoutException();
+		}
+		Date now = new Date();
+		Date timeScope = DateUtil.addMinute(user.getLastModifyTime(), 30);
+		if(!timeScope.after(now)){
+			LOG.error(new StringBufferWrapper().append("token 超时：").append(token).toString());
+			throw new TokenTimeoutException();
+		}
+		user.setLastModifyTime(now);
+		userDao.save(user);
+		return true;
+	}
+	
+	/**
+	 * 获取当前登录用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月22日 上午10:14:26
+	 * @return UserVO 当前用户
+	 */
+	public UserVO current() throws Exception{
+		Thread thread = Thread.currentThread();
+		HttpSession session = HttpSessionThreadLocal.get(thread);
+		
+		String token = (String)session.getAttribute(HttpConstant.ATTRIBUTE_AUTH_TOKEN);
+		UserVO user = (UserVO)session.getAttribute(HttpConstant.ATTRIBUTE_USER);
+		boolean needQuery = false;
+		if(user == null) needQuery = true;
+		else if(!user.getToken().equals(token)) needQuery = true;
+		if(!needQuery) return user;
+		
+		//查询用户
+		user = findByToken(token);
+		session.setAttribute(HttpConstant.ATTRIBUTE_USER, user);
+		
+		return user;
+	}
+	
+	/**
+	 * 根据token查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月6日 上午11:12:39
+	 * @param String token 用户登录令牌
+	 * @return UserPO 用户
+	 */
+	public UserVO findByToken(String token) throws Exception{
+		UserPO userEntity = userDao.findByToken(token);
+		if(userEntity == null) return null;
+		
+		UserVO user = new UserVO();
+		user.setUuid(userEntity.getId().toString())
+			.setNickname(userEntity.getNickname())
+			.setClassify(userEntity.getClassify()==null?"":userEntity.getClassify().toString())
+			.setIcon(userEntity.getIcon())
+			.setToken(userEntity.getToken());
+		
+		//加入组织机构信息
+		if(UserClassify.COMPANY.equals(userEntity.getClassify())){
+			CompanyPO company = companyDao.findByUserId(userEntity.getId());
+			user.setGroupId(company.getId().toString())
+				.setGroupName(company.getName());
+		}
+		
+		return user;
+	}
 	
 	/**
 	 * 分页查询用户（前端接口）<br/>
@@ -176,25 +269,6 @@ public class UserQuery {
 	/**************************************************************************
 	 **************************************************************************
 	 **************************************************************************/
-	
-	/**
-	 * 获取当前登录用户<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2018年11月22日 上午10:14:26
-	 * @return UserVO 当前用户
-	 */
-	@Deprecated
-	public UserVO current(){
-		return new UserVO().setUuid("24")
-						   .setNickname("新媒体应急广播媒资管理员")
-						   .setClassify(UserClassify.MAINTENANCE.toString())
-						   .setIcon("")
-						   .setGroupId("7")
-						   .setGroupName("数码视讯");
-	}
-	
-	
 	
 	/**
 	 * 获取用户组下所有的用户<br/>

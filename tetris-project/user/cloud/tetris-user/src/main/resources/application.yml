@@ -91,12 +91,20 @@ eureka:
 #security:
 #  oauth2:
 #    resource:
-      #指定resource的唯一标识
+#      #指定resource的唯一标识
 #      id: ${spring.application.name}
-      #是否使用token info
+#      #是否使用token info
 #      prefer-token-info: false
-      #指定user info的URI
-#      user-info-uri: http://192.165.56.64:5000/uaa/users/current
+#      #指定user info的URI
+#      user-info-uri: http://localhost:8084/user
 feign: 
   hystrix: 
    enabled: true    
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          strategy: SEMAPHORE   

@@ -22,7 +22,12 @@ define([
             var items = placeholder.replace('{context:', '')
                 .replace('}', '')
                 .split(';');
-            var value = context.formatValue(items[0], items[1]?items[1].replace('prop:', ''):'');
+            var value = null;
+            if(items.length === 1){
+                value = context.getProp(items[0]);
+            }else {
+                value = context.formatValue(items[0], items[1]?items[1].replace('prop:', ''):'');
+            }
             url = url.replace(new RegExp(placeholder,'g'), value);
         }
         return url;
@@ -82,9 +87,17 @@ define([
     };
 
     //¥”hash÷–Ω‚ŒˆpageId
-    var parsePageId = function(hash){
-        hash = hash.replace('#/', '');
-        return hash.split('/')[0];
+    var parsePageId = function(href){
+        if(isHash(href)){
+            href = href.replace('#/', '');
+            return href.split('/')[0];
+        }else{
+            if(href.indexOf('#/') < 0){
+                return href;
+            }else{
+                return href.split('#/')[1].split('/')[0];
+            }
+        }
     };
 
     return{

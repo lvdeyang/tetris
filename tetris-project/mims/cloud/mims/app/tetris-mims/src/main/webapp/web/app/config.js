@@ -6,7 +6,9 @@ define(function(){
         ajax:{
             debug:false,
             login:'http://192.165.56.64:18080/vue/#/',
-            authname:'business_cache_key_5002'
+            authname:'business_cache_key_5002',
+            header_auth_token:'tetris-001',
+            header_session_id:'tetris-002'
         },
 
         //配置默认页面跳转

@@ -64,4 +64,14 @@ public interface MenuDAO extends BaseDAO<MenuPO>{
 	@Query(value = "SELECT id, update_time, uuid, icon, is_group, link, menu_id_path, parent_id, serial, style, title, auto_generation FROM tetris_menu WHERE menu_id_path LIKE ?1 OR menu_id_path LIKE ?2", nativeQuery = true)
 	public List<MenuPO> findAllSubMenus(String reg0, String reg1);
 	
+	/**
+	 * 根据类型查询菜单<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午2:33:45
+	 * @param boolean autoGeneration 是否自动生成
+	 * @return List<MenuPO> 菜单列表
+	 */
+	public List<MenuPO> findByAutoGeneration(boolean autoGeneration);
+	
 }

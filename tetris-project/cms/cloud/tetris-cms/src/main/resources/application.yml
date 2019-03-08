@@ -99,4 +99,12 @@ eureka:
 #      user-info-uri: http://192.165.56.64:5000/uaa/users/current
 feign: 
   hystrix: 
-   enabled: true      
+   enabled: true 
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          strategy: SEMAPHORE           

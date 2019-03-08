@@ -33,7 +33,7 @@ define([
         data:function(){
             return {
                 logo:{
-                    img:'web/app/icons/logo/logo.png',
+                    img:window.BASEPATH + 'web/app/icons/logo/logo.png',
                     collapsed0:'suma',
                     title:'视频融合平台',
                     collapsed1:'mims'
@@ -133,6 +133,46 @@ define([
                 }else if(item.type === 'multiple'){
 
                 }
+            },
+            menuSelect:function(index, indexPath){
+                var self = this;
+                if(index === '2-1'){
+                    //个人中心
+                }else if(index === '2-2'){
+                    //注销登录
+                    self.logout();
+                }
+            },
+            logout:function(){
+                var self = this;
+                var h = self.$createElement;
+                self.$msgbox({
+                    title:'提示',
+                    message:h('div', null, [
+                        h('div', {class:'el-message-box__status el-icon-warning'}, null),
+                        h('div', {class:'el-message-box__message'}, [
+                            h('p', null, ['是否要退出登录?'])
+                        ])
+                    ]),
+                    type:'wraning',
+                    showCancelButton: true,
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    beforeClose:function(action, instance, done){
+                        instance.confirmButtonLoading = true;
+                        if(action === 'confirm'){
+                            ajax.post('/do/logout', null, function(data, status){
+                                instance.confirmButtonLoading = false;
+                                if(status !== 200) return;
+                                done();
+                                window.location.href = '/web/app/login/login.html';
+                            }, null, ajax.NO_ERROR_CATCH_CODE);
+                        }else{
+                            instance.confirmButtonLoading = false;
+                            done();
+                        }
+                    }
+                }).catch(function(){});
             }
         },
         created:function(){
@@ -165,10 +205,26 @@ define([
                         menu.active = false;
                     }
                 }else if(menu.link){
-                    if(menu.link === (activeId || window.location.href)){
-                        menu.active = true;
+                    if(menu.link.indexOf('#/') >= 0){
+                        if(activeId){
+                            if(menuUtil.parsePageId(activeId) === menuUtil.parsePageId(menu.link)){
+                                menu.active = true;
+                            }else{
+                                menu.active = false;
+                            }
+                        }else{
+                            if(menuUtil.parsePageId(window.location.href) === menuUtil.parsePageId(menu.link)){
+                                menu.active = true;
+                            }else{
+                                menu.active = false;
+                            }
+                        }
                     }else{
-                        menu.active = false;
+                        if(menu.link === (activeId || window.location.href)){
+                            menu.active = true;
+                        }else{
+                            menu.active = false;
+                        }
                     }
                 }
                 if(menu.sub && menu.sub.length>0){

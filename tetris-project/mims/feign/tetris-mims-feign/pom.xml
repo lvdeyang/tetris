@@ -31,25 +31,8 @@
     
     	<dependency>
 		   <groupId>com.sumavision.tetris</groupId>
-		   <artifactId>tetris-common</artifactId>
+		   <artifactId>tetris-spring-feign</artifactId>
 		   <version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		
-		<dependency>
-		   <groupId>com.sumavision.tetris</groupId>
-		   <artifactId>tetris-mvc</artifactId>
-		   <version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		
-		<dependency>
-		   <groupId>com.sumavision.tetris</groupId>
-		   <artifactId>tetris-orm</artifactId>
-		   <version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency>
 		
 		<!-- user-feign -->

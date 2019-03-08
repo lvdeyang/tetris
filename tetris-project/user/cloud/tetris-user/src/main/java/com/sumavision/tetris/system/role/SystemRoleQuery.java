@@ -6,15 +6,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
 /**
@@ -34,6 +30,18 @@ public class SystemRoleQuery {
 	
 	@Autowired
 	private SystemRoleGroupDAO systemRoleGroupDao;
+	
+	/**
+	 * 查询系统内置角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午1:44:52
+	 * @return SystemRoleVO 系统内置角色
+	 */
+	public SystemRoleVO queryInternalRole(){
+		SystemRolePO internalRole =  systemRoleDao.findByAutoGeneration(true);
+		return new SystemRoleVO().set(internalRole);
+	}
 	
 	/**
 	 * 分页查询系统角色<br/>

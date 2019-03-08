@@ -3,9 +3,11 @@ package com.sumavision.tetris.mims.app.media.picture;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.alibaba.fastjson.JSONObject;
 
-@FeignClient(name = "tetris-mims")
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.config.feign.FeignConfiguration;
+
+@FeignClient(name = "tetris-mims", configuration = FeignConfiguration.class)
 public interface MediaPictureFeign {
 
 	/**

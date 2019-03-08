@@ -29,7 +29,23 @@ public class SpringContext implements ApplicationContextAware {
 	
 	//语言环境
 	private static Locale locale = Locale.CHINA;
-
+	
+	//异步线程
+	private static Thread thread;
+	
+	/**
+	 * 方法概述<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午7:16:58
+	 */
+	public static void asynchronizedDone(){
+		synchronized(thread){
+			if(thread != null) thread.notify();
+		}
+	}
+	
 	/**
 	 * 实现ApplicationContextAware接口的回调方法，设置上下文环境
 	 * 
@@ -41,6 +57,7 @@ public class SpringContext implements ApplicationContextAware {
 			throws BeansException {
 		SpringContext.applicationContext = applicationContext;
 		try {
+			//同步接口
 			Map<String, SystemInitialization> handlerMaps = SpringContext.getBeanOfType(SystemInitialization.class);
 			if(handlerMaps!=null && handlerMaps.size()>0){
 				List<SystemInitialization> handlers = new ArrayListWrapper<SystemInitialization>().addAll(handlerMaps.values()).getList();
@@ -48,6 +65,29 @@ public class SpringContext implements ApplicationContextAware {
 				for(int i=0; i<handlers.size(); i++){
 					handlers.get(i).init();
 				}
+			}
+			//异步接口
+			Map<String, AsynchronizedSystemInitialization> asynchronizedHandlerMaps = SpringContext.getBeanOfType(AsynchronizedSystemInitialization.class);
+			if(asynchronizedHandlerMaps!=null && asynchronizedHandlerMaps.size()>0){
+				final List<AsynchronizedSystemInitialization> handlers = new ArrayListWrapper<AsynchronizedSystemInitialization>().addAll(asynchronizedHandlerMaps.values()).getList();
+				Collections.sort(handlers, new AsynchronizedSystemInitialization.HandlerComparator());
+				thread = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						synchronized (thread) {
+							try {
+								thread.wait(0);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+								System.exit(0);
+							}
+							for(int i=0; i<handlers.size(); i++){
+								handlers.get(i).init();
+							}
+						}
+					}
+				});
+				thread.start();
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -189,4 +229,5 @@ public class SpringContext implements ApplicationContextAware {
 		builderA.setScope("singleton");
 		ctx.registerBeanDefinition(beanName, builderA.getBeanDefinition());
 	}
+	
 }

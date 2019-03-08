@@ -88,4 +88,15 @@ public class SystemRoleQuery {
 		return JsonBodyResponseParser.parseArray(response, SystemRoleVO.class);
 	}
 	
+	/**
+	 * 查询系统内置角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午1:44:52
+	 * @return SystemRoleVO 系统内置角色
+	 */
+	public SystemRoleVO queryInternalRole() throws Exception{
+		return JsonBodyResponseParser.parseObject(systemRoleFeign.queryInternalRole(), SystemRoleVO.class);
+	}
+	
 }

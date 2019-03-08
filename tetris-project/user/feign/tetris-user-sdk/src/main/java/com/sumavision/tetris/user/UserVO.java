@@ -24,6 +24,9 @@ public class UserVO{
 	/** 用户状态 */
 	private String status;
 	
+	/** 用户登录token */
+	private String token;
+	
 	/** 手机号 */
 	private String mobile;
 	
@@ -102,6 +105,15 @@ public class UserVO{
 
 	public UserVO setStatus(String status) {
 		this.status = status;
+		return this;
+	}
+	
+	public String getToken() {
+		return token;
+	}
+
+	public UserVO setToken(String token) {
+		this.token = token;
 		return this;
 	}
 

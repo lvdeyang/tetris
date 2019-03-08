@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
+
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = SystemRolePO.class, idClass = Long.class)
@@ -57,14 +58,23 @@ public interface SystemRoleDAO extends BaseDAO<SystemRolePO>{
 	public Page<SystemRolePO> findAllOrderByUpdateTimeDesc(Long systemRoleGroupId, Pageable page);
 	
 	/**
-	 * 方法概述<br/>
-	 * <p>详细描述</p>
-	 * <b>作者:</b>Administrator<br/>
+	 * 根据系统角色组查询系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年1月23日 下午1:50:21
-	 * @param systemRoleGroupId
-	 * @return
+	 * @param Long systemRoleGroupId 系统角色组id
+	 * @return List<SystemRolePO> 系统角色列表
 	 */
 	public List<SystemRolePO> findBySystemRoleGroupId(Long systemRoleGroupId);
+	
+	/**
+	 * 根据类型查询系统角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午1:21:09
+	 * @param boolean autoGeneration 是否自动生成
+	 * @return SystemRolePO 系统角色
+	 */
+	public SystemRolePO findByAutoGeneration(boolean autoGeneration);
 	
 }

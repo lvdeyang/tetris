@@ -18,4 +18,14 @@ public interface SystemRoleGroupDAO extends BaseDAO<SystemRoleGroupPO>{
 	@Query(value = "from com.sumavision.tetris.system.role.SystemRoleGroupPO group order by group.updateTime desc")
 	public List<SystemRoleGroupPO> findAllOrderByUpdateTimeDesc();
 	
+	/**
+	 * 根据类型查询系统权限组<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午1:16:13
+	 * @param boolean autoGeneration 是否自动生成
+	 * @return SystemRoleGroupPO 系统角色组
+	 */
+	public SystemRoleGroupPO findByAutoGeneration(boolean autoGeneration);
+	
 }

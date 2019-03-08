@@ -1,0 +1,35 @@
+package com.sumavision.tetris.mvc.constant;
+
+/**
+ * http相关常量<br/>
+ * <b>作者:</b>lvdeyang<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2019年3月7日 上午9:19:26
+ */
+public interface HttpConstant {
+
+	/** header token */
+	public static final String HEADER_AUTH_TOKEN = "tetris-001";
+	
+	/** header session id */
+	public static final String HEADER_SESSION_ID = "tetris-002";
+	
+	/** session attribute token */
+	public static final String ATTRIBUTE_AUTH_TOKEN = "tetris-003";
+	
+	/** session attribute user */
+	public static final String ATTRIBUTE_USER = "tetris-004";
+	
+	/** model token */
+	public static final String MODEL_TOKEN = "token";
+	
+	/** model session id  */
+	public static final String MODEL_SESSION_ID = "sessionId";
+	
+	/** session超时时间：30分钟 */
+	public static final int SESSION_TIMEOUT = 30*60;
+	
+	/** 临时session超时时间：5秒 */
+	public static final int TEMPORARY_SESSION_TIMEOUT = 5;
+	
+}

@@ -24,6 +24,9 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/** 用户状态 */
 	private String status;
 	
+	/** 用户登录token */
+	private String token;
+	
 	/** 手机号 */
 	private String mobile;
 	
@@ -50,7 +53,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	
 	/** 素材库文件夹名称 */
 	private String rootFolderName;
-
+	
 	public String getUsername() {
 		return username;
 	}
@@ -87,6 +90,15 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		return this;
 	}
 	
+	public String getToken() {
+		return token;
+	}
+
+	public UserVO setToken(String token) {
+		this.token = token;
+		return this;
+	}
+
 	public String getMobile() {
 		return mobile;
 	}
@@ -169,7 +181,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	}
 
 	@Override
-	public UserVO set(UserPO entity) throws Exception {
+	public UserVO set(UserPO entity){
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
@@ -179,6 +191,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setMail(entity.getMail())
 			.setIcon(entity.getIcon())
 			.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
+			.setToken(entity.getToken())
 			.setAutoGeneration(entity.isAutoGeneration());
 		return this;
 	}

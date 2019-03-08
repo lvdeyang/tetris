@@ -1,11 +1,13 @@
 package com.sumavision.tetris.mims.app;
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,11 +23,12 @@ import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.group.ChatQuery;
-import com.sumavision.tetris.mims.app.group.GroupVO;
+import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+
+import javassist.expr.NewArray;
 
 @Controller
 @RequestMapping(value = "")
@@ -43,13 +46,36 @@ public class WelcomeController {
 	@Autowired
 	private FolderDAO folderDao;
 
-	@RequestMapping(value = "/index")
-	public ModelAndView index() throws Exception{
+	/**
+	 * 需要登录后访问<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月5日 下午4:51:11
+	 * @param String token 登录后的token
+	 */
+	@RequestMapping(value = "/index/{token}")
+	public ModelAndView index(
+			@PathVariable String token, 
+			HttpServletRequest request) throws Exception{
 		ModelAndView mv = null;
+		//初始化一个session
+		HttpSession session = request.getSession(false);
+		if(session == null){
+			session = request.getSession();
+			session.setMaxInactiveInterval(HttpConstant.SESSION_TIMEOUT);
+		}
 		mv = new ModelAndView("web/mims/index");
+		mv.addObject(HttpConstant.MODEL_TOKEN, token);
+		mv.addObject(HttpConstant.MODEL_SESSION_ID, session.getId());
 		return mv;
 	}
 	
+	/**
+	 * 页面框架初始化数据查询<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月5日 下午4:51:49
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/prepare/app")
@@ -89,10 +115,13 @@ public class WelcomeController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年1月26日 上午9:40:54
 	 */
-	@RequestMapping(value = "/index/material")
-	public void indexMaterial(HttpServletRequest request, HttpServletResponse response) throws Exception{
+	@RequestMapping(value = "/index/material/{token}")
+	public void indexMaterial(
+			@PathVariable String token,
+			HttpServletRequest request, 
+			HttpServletResponse response) throws Exception{
 		
-		UserVO user = userQuery.current();
+		UserVO user = userQuery.findByToken(token);
 		
 		//TODO 权限校验
 		
@@ -103,9 +132,10 @@ public class WelcomeController {
 																   .append(":")
 																   .append(request.getServerPort())
 																   .append("/")
-																   .append("index");
+																   .append("index/")
+																   .append(token);
 		if(folder == null){
-			redirectUrl.append("#/page-error/403/您没有权限！");
+			redirectUrl.append("#/page-error/403/").append(URLEncoder.encode("数据异常，网盘根目录丢失，请联系管理员！"));
 		}else{
 			redirectUrl.append("#/page-material/")
 					   .append(folder.getId());
@@ -126,13 +156,14 @@ public class WelcomeController {
 	 * @param response
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/index/media/{folderType}")
+	@RequestMapping(value = "/index/media/{folderType}/{token}")
 	public void indexMedia(
+			@PathVariable String token,
 			@PathVariable String folderType, 
 			HttpServletRequest request, 
 			HttpServletResponse response) throws Exception{
 		
-		UserVO user = userQuery.current();
+		UserVO user = userQuery.findByToken(token);
 		
 		//权限校验
 		
@@ -145,9 +176,10 @@ public class WelcomeController {
 																   .append(":")
 																   .append(request.getServerPort())
 																   .append("/")
-																   .append("index");
+																   .append("index/")
+																   .append(token);
 		if(folder == null){
-			redirectUrl.append("#/page-error/403/您没有权限！");
+			redirectUrl.append("#/page-error/403/").append(URLEncoder.encode(new StringBufferWrapper().append("数据异常，").append(type.getName()).append("根目录丢失，请联系管理员！").toString()));
 		}else{
 			redirectUrl.append("#/page-media-")
 					   .append(type.getWebSuffix())
