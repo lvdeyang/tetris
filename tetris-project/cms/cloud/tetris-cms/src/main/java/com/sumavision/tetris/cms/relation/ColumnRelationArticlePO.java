@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -31,6 +32,9 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 	
 	/** 文章顺序--由小到大排序  */
 	private Long articleOrder;
+	
+	/** 文章是否推荐 */
+	private Boolean command;
 	
 	/** 栏目id */
 	private Long columnId;
@@ -103,7 +107,16 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 	public void setArticleOrder(Long articleOrder) {
 		this.articleOrder = articleOrder;
 	}
-	
+
+	@Column(name = "COMMAND")
+	public Boolean getCommand() {
+		return command;
+	}
+
+	public void setCommand(Boolean command) {
+		this.command = command;
+	}
+
 	/**
 	 * @ClassName: 排序器，从小到大排列<br/> 
 	 * @author lvdeyang
@@ -117,6 +130,20 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 				return 1;
 			}
 			if(o1.getArticleOrder() == o2.getArticleOrder()){
+				return 0;
+			}
+			return -1;
+		}
+	}
+
+	public static final class ArticleVoOrderComparator implements Comparator<ArticleVO>{
+		@Override
+		public int compare(ArticleVO o1, ArticleVO o2) {
+			
+			if(o1.getOrder() > o2.getOrder()){
+				return 1;
+			}
+			if(o1.getOrder() == o2.getOrder()){
 				return 0;
 			}
 			return -1;

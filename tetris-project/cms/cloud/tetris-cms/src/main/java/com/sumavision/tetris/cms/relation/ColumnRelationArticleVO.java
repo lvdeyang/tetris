@@ -14,6 +14,7 @@ public class ColumnRelationArticleVO extends AbstractBaseVO<ColumnRelationArticl
 	private Long articleId;
 	private String articleName;
 	private String articleRemark;
+	private Boolean command;
 	
 	@Override
 	public ColumnRelationArticleVO set(ColumnRelationArticlePO entity) throws Exception {
@@ -23,7 +24,8 @@ public class ColumnRelationArticleVO extends AbstractBaseVO<ColumnRelationArticl
 			.setColumnRemark(entity.getColumnRemark())
 			.setArticleId(entity.getArticleId())
 			.setArticleName(entity.getArticleName())
-			.setArticleRemark(entity.getArticleRemark());
+			.setArticleRemark(entity.getArticleRemark())
+			.setCommand(entity.getCommand());
 		
 		return this;
 	}
@@ -79,6 +81,15 @@ public class ColumnRelationArticleVO extends AbstractBaseVO<ColumnRelationArticl
 
 	public ColumnRelationArticleVO setArticleRemark(String articleRemark) {
 		this.articleRemark = articleRemark;
+		return this;
+	}
+
+	public Boolean getCommand() {
+		return command;
+	}
+
+	public ColumnRelationArticleVO setCommand(Boolean command) {
+		this.command = command;
 		return this;
 	}
 	

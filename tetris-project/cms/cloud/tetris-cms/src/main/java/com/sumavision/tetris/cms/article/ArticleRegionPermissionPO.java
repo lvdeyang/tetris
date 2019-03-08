@@ -3,17 +3,18 @@ package com.sumavision.tetris.cms.article;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
- * 文章分类关联表<br/>
- * <b>作者:</b>lvdeyang<br/>
+ * 文章地区关联表<br/>
+ * <b>作者:</b>ldy<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2019年2月28日 下午5:04:19
+ * <b>日期：</b>2019年3月4日 下午2:19:47
  */
 @Entity
-@Table(name = "TETRIS_CMS_ARTICLE_CLASSIFY_PERMISSION")
-public class ArticleClassifyPermissionPO extends AbstractBasePO{
+@Table(name = "TETRIS_CMS_ARTICLE_REGION_PERMISSION")
+public class ArticleRegionPermissionPO extends AbstractBasePO {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -23,11 +24,11 @@ public class ArticleClassifyPermissionPO extends AbstractBasePO{
 	/** 文章名称 */
 	private String articleName;
 	
-	/** 分类id */
-	private Long classifyId;
+	/** 地区id */
+	private Long regionId;
 	
-	/** 分类名称 */
-	private String classifyName;
+	/** 地区名称 */
+	private String regionName;
 
 	@Column(name = "ARTICLE_ID")
 	public Long getArticleId() {
@@ -47,22 +48,22 @@ public class ArticleClassifyPermissionPO extends AbstractBasePO{
 		this.articleName = articleName;
 	}
 
-	@Column(name = "CLASSIFY_ID")
-	public Long getClassifyId() {
-		return classifyId;
+	@Column(name = "REGION_ID")
+	public Long getRegionId() {
+		return regionId;
 	}
 
-	public void setClassifyId(Long classifyId) {
-		this.classifyId = classifyId;
+	public void setRegionId(Long regionId) {
+		this.regionId = regionId;
 	}
 
-	@Column(name = "CLASSIFY_NAME")
-	public String getClassifyName() {
-		return classifyName;
+	@Column(name = "REGION_NAME")
+	public String getRegionName() {
+		return regionName;
 	}
 
-	public void setClassifyName(String classifyName) {
-		this.classifyName = classifyName;
+	public void setRegionName(String regionName) {
+		this.regionName = regionName;
 	}
-	
+
 }

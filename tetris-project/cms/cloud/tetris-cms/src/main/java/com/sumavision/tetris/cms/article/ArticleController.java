@@ -1,6 +1,9 @@
 package com.sumavision.tetris.cms.article;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,7 +14,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.cms.article.exception.ArticleNotExistException;
+import com.sumavision.tetris.cms.classify.ClassifyVO;
+import com.sumavision.tetris.cms.region.RegionVO;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -33,6 +40,12 @@ public class ArticleController {
 	@Autowired
 	private ArticleService articleService;
 	
+	@Autowired
+	private ArticleClassifyPermissionDAO articleClassifyPermissionDao;
+	
+	@Autowired
+	private ArticleRegionPermissionDAO articleRegionPermissionDao;
+	
 	/**
 	 * 查询所有的文章<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -53,15 +66,63 @@ public class ArticleController {
 		
 		//TODO 权限校验
 		
-		List<ArticlePO> entities = articleQuery.findAll(currentPage, pageSize);
+		List<ArticlePO> entities = articleQuery.findAll(currentPage, pageSize);	
+		List<Long> articleIds = new ArrayList<Long>();
+		for(ArticlePO entity: entities){
+			articleIds.add(entity.getId());
+		}
+		List<ArticleClassifyPermissionPO> classifies = articleClassifyPermissionDao.findByArticleIdIn(articleIds);
+		List<ArticleRegionPermissionPO> regions = articleRegionPermissionDao.findByArticleIdIn(articleIds);
 		
 		List<ArticleVO> articles = ArticleVO.getConverter(ArticleVO.class).convert(entities, ArticleVO.class);
+		for(ArticleVO article: articles){
+			article.setClassifies(new ArrayList<ClassifyVO>())
+				   .setRegions(new ArrayList<RegionVO>());
+			//分类
+			for(ArticleClassifyPermissionPO classify: classifies){
+				if(classify.getArticleId().equals(article.getId())){
+					ClassifyVO classifyVO = new ClassifyVO().setId(classify.getClassifyId())
+															.setName(classify.getClassifyName());
+					article.getClassifies().add(classifyVO);
+				}
+			}
+			//地区
+			for(ArticleRegionPermissionPO region: regions){
+				if(region.getArticleId().equals(article.getId())){
+					RegionVO regionVO = new RegionVO().setId(region.getRegionId())
+													  .setName(region.getRegionName());
+					article.getRegions().add(regionVO);
+				}
+			}
+		}
 		
 		Long total = articleDao.count();
 		
 		return new HashMapWrapper<String, Object>().put("rows", articles)
 												   .put("total", total)
 												   .getMap();
+	}
+	
+	/**
+	 * 查询文章类型<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月5日 上午10:11:08
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/type")
+	public Object queryType(HttpServletRequest request) throws Exception{
+		
+		//查询文章类型
+		Set<String> articleTypes = new HashSet<String>();
+		ArticleType[] types = ArticleType.values();
+		for(ArticleType type: types){
+			articleTypes.add(type.getName());
+		}
+		
+		return new HashMapWrapper<String, Object>().put("type", articleTypes)
+			   									   .getMap();
 	}
 	
 	/**
@@ -82,15 +143,46 @@ public class ArticleController {
 			String publishTime,
 			String thumbnail,
 			String remark,
+			String classify,
+			String region,
+			String type,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		List<JSONObject> classifies = JSONArray.parseArray(classify, JSONObject.class);
+		List<JSONObject> regions = JSONArray.parseArray(region, JSONObject.class);
 		
-		ArticlePO article = articleService.add(user, name, author, publishTime, thumbnail, remark);
+		ArticlePO article = articleService.add(user, name, author, publishTime, thumbnail, remark, classifies, regions, type);
 		
-		return new ArticleVO().set(article);
+		List<Long> articleIds = new ArrayList<Long>();
+		articleIds.add(article.getId());
+		
+		List<ArticleClassifyPermissionPO> classifyPermissions = articleClassifyPermissionDao.findByArticleIdIn(articleIds);
+		List<ArticleRegionPermissionPO> regionPermissions = articleRegionPermissionDao.findByArticleIdIn(articleIds);
+
+		ArticleVO articleVO = new ArticleVO().set(article)
+											 .setClassifies(new ArrayList<ClassifyVO>())
+										 	 .setRegions(new ArrayList<RegionVO>());
+		//分类
+		for(ArticleClassifyPermissionPO classifyPermission: classifyPermissions){
+			if(classifyPermission.getArticleId().equals(article.getId())){
+				ClassifyVO classifyVO = new ClassifyVO().setId(classifyPermission.getClassifyId())
+														.setName(classifyPermission.getClassifyName());
+				articleVO.getClassifies().add(classifyVO);
+			}
+		}
+		//地区
+		for(ArticleRegionPermissionPO regionPermission: regionPermissions){
+			if(regionPermission.getArticleId().equals(article.getId())){
+				RegionVO regionVO = new RegionVO().setId(regionPermission.getRegionId())
+												  .setName(regionPermission.getRegionName());
+				articleVO.getRegions().add(regionVO);
+			}
+		}
+		
+		return articleVO;
 	}
 	
 	/**
@@ -113,6 +205,9 @@ public class ArticleController {
 			String publishTime,
 			String thumbnail,
 			String remark,
+			String classify,
+			String region,
+			String type,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -124,9 +219,37 @@ public class ArticleController {
 			throw new ArticleNotExistException(id);
 		}
 		
-		article = articleService.edit(article, name, author, publishTime, thumbnail, remark);
+		List<JSONObject> classifies = JSONArray.parseArray(classify, JSONObject.class);
+		List<JSONObject> regions = JSONArray.parseArray(region, JSONObject.class);
 		
-		return new ArticleVO().set(article);
+		article = articleService.edit(article, name, author, publishTime, thumbnail, remark, classifies, regions, type);
+		List<Long> articleIds = new ArrayList<Long>();
+		articleIds.add(article.getId());
+		
+		List<ArticleClassifyPermissionPO> classifyPermissions = articleClassifyPermissionDao.findByArticleIdIn(articleIds);
+		List<ArticleRegionPermissionPO> regionPermissions = articleRegionPermissionDao.findByArticleIdIn(articleIds);
+
+		ArticleVO articleVO = new ArticleVO().set(article)
+											 .setClassifies(new ArrayList<ClassifyVO>())
+										 	 .setRegions(new ArrayList<RegionVO>());
+		//分类
+		for(ArticleClassifyPermissionPO classifyPermission: classifyPermissions){
+			if(classifyPermission.getArticleId().equals(article.getId())){
+				ClassifyVO classifyVO = new ClassifyVO().setId(classifyPermission.getClassifyId())
+														.setName(classifyPermission.getClassifyName());
+				articleVO.getClassifies().add(classifyVO);
+			}
+		}
+		//地区
+		for(ArticleRegionPermissionPO regionPermission: regionPermissions){
+			if(regionPermission.getArticleId().equals(article.getId())){
+				RegionVO regionVO = new RegionVO().setId(regionPermission.getRegionId())
+												  .setName(regionPermission.getRegionName());
+				articleVO.getRegions().add(regionVO);
+			}
+		}
+		
+		return articleVO;
 	}
 	
 	/**

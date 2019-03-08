@@ -28,14 +28,16 @@ define([
                 checked:[],
                 loading:false,
                 selected:[],
-                checkStrictly: true
+                checkStrictly: true,
+                buff:[]
             }
         },
         methods:{
-            open:function(uri, checked){
+            open:function(uri, checked, buff){
                 var self = this;
                 self.visible = true;
                 self.uri = uri;
+                self.buff = buff;
                 if(checked && checked.length>0){
                     for(var i=0; i<checked.length; i++){
                         self.checked.push(checked[i]);
@@ -55,7 +57,7 @@ define([
 
                     self.$nextTick(function(){
                         self.checkStrictly = false;
-                    })
+                    });
                 });
             },
             handleRegionClose:function(){
@@ -70,17 +72,18 @@ define([
             handleRegionBindingOk:function(){
                 var self = this;
                 var selected = [];
-                var checkedKeys = self.$refs.regionTree.getCheckedKeys();
-                var halfCheckedKeys = self.$refs.regionTree.getHalfCheckedKeys();
+                var buff = self.buff;
+                var checkedNodes = self.$refs.regionTree.getCheckedNodes();
+                var halfCheckedNodes = self.$refs.regionTree.getHalfCheckedNodes();
 
-                if(checkedKeys && checkedKeys.length > 0){
-                    for(var i=0; i<checkedKeys.length; i++){
-                        selected.push(checkedKeys[i]);
+                if(checkedNodes && checkedNodes.length > 0){
+                    for(var i=0; i<checkedNodes.length; i++){
+                        selected.push(checkedNodes[i]);
                     }
                 }
-                if(halfCheckedKeys && halfCheckedKeys.length > 0){
-                    for(var j=0; j<halfCheckedKeys.length; j++){
-                        selected.push(halfCheckedKeys[j]);
+                if(halfCheckedNodes && halfCheckedNodes.length > 0){
+                    for(var j=0; j<halfCheckedNodes.length; j++){
+                        selected.push(halfCheckedNodes[j]);
                     }
                 }
                 if(!selected || selected.length<=0){
@@ -97,10 +100,13 @@ define([
                     self.loading = false;
                 };
                 var close = function(){
+                    self.$nextTick(function(){
+                        self.checkStrictly = true;
+                    });
                     self.visible =false;
                 };
-                console.log(selected);
-                self.$emit(ON_REGION_DIALOG_CLOSE, selected, startLoading, endLoading, close);
+
+                self.$emit(ON_REGION_DIALOG_CLOSE, selected, buff, startLoading, endLoading, close);
             }
         },
         mounted: function(){

@@ -13,7 +13,7 @@ define(function(){
 
         //配置默认页面跳转
         redirect:{
-            home:'page-menu',
+            home:'page-cms-article',
             error:'page-error'
         },
 

@@ -45,6 +45,9 @@ public class ArticlePO extends AbstractBasePO{
 	/** 文章备注 */
 	private String remark;
 	
+	/** 文章类型 */
+	private ArticleType type;
+	
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -117,6 +120,15 @@ public class ArticlePO extends AbstractBasePO{
 
 	public void setRemark(String remark) {
 		this.remark = remark;
+	}
+
+	@Column(name = "TYPE")
+	public ArticleType getType() {
+		return type;
+	}
+
+	public void setType(ArticleType type) {
+		this.type = type;
 	}
 	
 }
