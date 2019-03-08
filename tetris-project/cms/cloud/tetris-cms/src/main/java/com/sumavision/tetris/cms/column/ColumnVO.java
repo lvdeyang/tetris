@@ -47,16 +47,18 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 		return subColumns;
 	}
 
-	public void setSubColumns(List<ColumnVO> subColumns) {
+	public ColumnVO setSubColumns(List<ColumnVO> subColumns) {
 		this.subColumns = subColumns;
+		return this;
 	}
 
 	public List<ArticleVO> getArticles() {
 		return articles;
 	}
 
-	public void setArticles(List<ArticleVO> articles) {
+	public ColumnVO setArticles(List<ArticleVO> articles) {
 		this.articles = articles;
+		return this;
 	}
 
 }

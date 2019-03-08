@@ -27,6 +27,9 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 	
 	private String articleType;
 	
+	/** 额外：栏目名称 */
+	private String columnName;
+	
 	private List<ClassifyVO> classifies;
 	
 	private List<RegionVO> regions;
@@ -127,6 +130,15 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 
 	public ArticleVO setArticleType(String articleType) {
 		this.articleType = articleType;
+		return this;
+	}
+
+	public String getColumnName() {
+		return columnName;
+	}
+
+	public ArticleVO setColumnName(String columnName) {
+		this.columnName = columnName;
 		return this;
 	}
 

@@ -10,13 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.cms.aliPush.AliPushService;
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.column.ColumnDAO;
 import com.sumavision.tetris.cms.column.ColumnPO;
 import com.sumavision.tetris.cms.column.exception.ColumnNotExistException;
-import com.sumavision.tetris.cms.webSocket.WebSocketServer;
 
 /**
  * 栏目关联文章增删改操作<br/>
@@ -36,6 +37,9 @@ public class ColumnRelationArticleService {
 	
 	@Autowired
 	private ColumnRelationArticleDAO columnRelationArticleDao;
+	
+	@Autowired
+	private AliPushService aliPushService;
 
 	/**
 	 * 添加文章到栏目<br/>
@@ -77,6 +81,7 @@ public class ColumnRelationArticleService {
 					relation.setColumnName(column.getName());
 					relation.setColumnRemark(column.getRemark());
 					relation.setArticleOrder(++tag);
+					relation.setCommand(false);
 					relations.add(relation);
 				}
 				columnRelationArticleDao.save(relations);
@@ -245,7 +250,11 @@ public class ColumnRelationArticleService {
 		
 		ArticlePO article = articleDao.findOne(articleId);		
 		ArticleVO view_article = new ArticleVO().set(article);
+		
+		JSONObject param = new JSONObject();
+		param.put("url", view_article.getPreviewUrl());
  		
-		WebSocketServer.sendInfo(view_article.toString());
+//		aliPushService.sendMessage(view_article.getName(), view_article.getRemark(), param.toJSONString());
+		aliPushService.sendSms();
 	}
 }

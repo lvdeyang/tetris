@@ -33,6 +33,9 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 	/** 文章顺序--由小到大排序  */
 	private Long articleOrder;
 	
+	/** 文章是否推荐 */
+	private Boolean command;
+	
 	/** 栏目id */
 	private Long columnId;
 	
@@ -104,7 +107,16 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 	public void setArticleOrder(Long articleOrder) {
 		this.articleOrder = articleOrder;
 	}
-	
+
+	@Column(name = "COMMAND")
+	public Boolean getCommand() {
+		return command;
+	}
+
+	public void setCommand(Boolean command) {
+		this.command = command;
+	}
+
 	/**
 	 * @ClassName: 排序器，从小到大排列<br/> 
 	 * @author lvdeyang

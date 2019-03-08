@@ -285,6 +285,32 @@ define([
                     }).catch(function(){});
 
                 },
+                rowCommand: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/cms/column/relation/article/command/' + row.id, null, function(data, status){
+                        if(status !== 200) return;
+                        for(var i=0; i<self.table.data.length; i++){
+                            if(self.table.data[i].id === data.id){
+                                self.table.data.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                rowNotCommand: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/cms/column/relation/article/not/command/' + row.id, null, function(data, status){
+                        if(status !== 200) return;
+                        for(var i=0; i<self.table.data.length; i++){
+                            if(self.table.data[i].id === data.id){
+                                self.table.data.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
                 rowInform: function (scope) {
                     var self = this;
                     var row = scope.row;
