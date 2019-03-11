@@ -19,6 +19,7 @@ public class FilterValidate {
 												   .add("/do/phone/login")
 												   .add("/do/wechat/login")
 												   .add("/after/login/success")
+												   .add("/system/role/feign/query/internal/role")
 												   .add("/index")
 												   .add("/index/*")
 												   .add("/user/feign/check/token")
@@ -29,6 +30,7 @@ public class FilterValidate {
 												   .add("/cms/server/props/feign/query/props")
 												   .add("/user/server/props/feign/query/props")
 												   .add("/menu/server/props/feign/query/props")
+												   .add("/api/*")
 												   .getList();
 		staticResource = new ArrayListWrapper<String>().add(".js")
 													   .add(".html")

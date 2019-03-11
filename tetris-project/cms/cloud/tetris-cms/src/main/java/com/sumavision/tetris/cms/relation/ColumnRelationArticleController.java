@@ -228,4 +228,64 @@ public class ColumnRelationArticleController {
 		
 		return null;
 	}
+	
+	/**
+	 * 推荐栏目文章<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月6日 下午3:31:43
+	 * @param id
+	 * @return ColumnRelationArticleVO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/command/{id}")
+	public Object command(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		ColumnRelationArticlePO relation = columnRelationArticleDao.findOne(id);
+		
+		if(relation != null){
+			relation.setCommand(true);
+		}
+		
+		columnRelationArticleDao.save(relation);
+		
+		return new ColumnRelationArticleVO().set(relation);
+	}
+	
+	/**
+	 * 取消推荐栏目文章<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月6日 下午3:31:43
+	 * @param id
+	 * @return ColumnRelationArticleVO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/not/command/{id}")
+	public Object notCommand(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		ColumnRelationArticlePO relation = columnRelationArticleDao.findOne(id);
+		
+		if(relation != null){
+			relation.setCommand(false);
+		}
+		
+		columnRelationArticleDao.save(relation);
+		
+		return new ColumnRelationArticleVO().set(relation);
+	}
 }

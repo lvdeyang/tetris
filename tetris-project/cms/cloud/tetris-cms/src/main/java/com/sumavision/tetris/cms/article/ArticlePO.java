@@ -3,6 +3,8 @@ package com.sumavision.tetris.cms.article;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Lob;
 import javax.persistence.Table;
@@ -122,6 +124,7 @@ public class ArticlePO extends AbstractBasePO{
 		this.remark = remark;
 	}
 
+	@Enumerated(EnumType.STRING)
 	@Column(name = "TYPE")
 	public ArticleType getType() {
 		return type;

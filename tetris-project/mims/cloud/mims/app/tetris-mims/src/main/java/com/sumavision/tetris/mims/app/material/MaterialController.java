@@ -258,7 +258,7 @@ public class MaterialController {
 		long endOffset = request.getLongValue("endOffset");
 		
 		//参数错误
-		if((beginOffset + endOffset) != blockSize){
+		if((endOffset - beginOffset) != blockSize){
 			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
