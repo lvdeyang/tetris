@@ -16,6 +16,12 @@ zuul:
     tetris-menu: 
       path: /tetris-menu/**
       serviceId: tetris-menu
+    tetris-mims:
+      path: /tetris-mims/**
+      serviceId: tetris-mims
+    tetris-cms:
+      path: /tetris-cms/**
+      serviceId: tetris-cms    
 
 eureka:
 #客户端
@@ -23,3 +29,15 @@ eureka:
 #注册中心地址
     service-url:
       defaultZone: http://localhost:8081/eureka/
+      
+#security:
+#  basic:
+#    enabled: false
+#  oauth2:
+#    client:
+#      access-token-uri: http://localhost:8084/oauth/token
+#      user-authorization-uri: http://localhost:8084/oauth/authorize
+#    resource:
+#      user-info-uri:  http://localhost:8084/user
+#      prefer-token-info: false
+      
