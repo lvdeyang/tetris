@@ -83,22 +83,28 @@ public class AliPushService extends BasePush{
                 pushResponse.getRequestId(), pushResponse.getMessageId());
 	}
 	
-	//发送短信--值周放到tetris-user里
-	public void sendSms() throws Exception{
+	/**
+	 * 发送短信<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月12日 下午2:23:04
+	 * @param telephone 电话号码
+	 * @param param 短信模板所需参数, JSONObject.toJSONString()
+	 * @throws Exception
+	 */
+	public void sendSms(String telephone, String param) throws Exception{
 		
 		CommonRequest request = new CommonRequest();
 //        request.setProtocol(ProtocolType.HTTPS);
         request.setMethod(MethodType.POST);
         request.setDomain("dysmsapi.aliyuncs.com");
         request.setVersion("2017-05-25");
-        request.setAction("SendSms"); //系统规定参数。取值：SendSms。
+        request.setAction("SendSms"); //系统规定参数。取值：sSendSms。
         request.putQueryParameter("RegionId", region);
-        request.putQueryParameter("PhoneNumbers", "13810728953"); //支持对多个手机号码发送短信，手机号码之间以英文逗号（,）分隔。上限为1000个手机号码
-        request.putQueryParameter("SignName", "过来玩"); //短信签名名称。请在控制台签名管理页面签名名称一列查看。
-        request.putQueryParameter("TemplateCode", "SMS_131795230"); //短信模板ID。请在控制台模板管理页面模板CODE一列查看。
-        JSONObject param = new JSONObject();
-        param.put("code", "500202");
-        request.putQueryParameter("TemplateParam", param.toJSONString()); //短信模板变量对应的实际值，JSON格式。
+        request.putQueryParameter("PhoneNumbers", telephone); //支持对多个手机号码发送短信，手机号码之间以英文逗号（,）分隔。上限为1000个手机号码
+        request.putQueryParameter("SignName", signName); //短信签名名称。请在控制台签名管理页面签名名称一列查看。
+        request.putQueryParameter("TemplateCode", templateCode); //短信模板ID。请在控制台模板管理页面模板CODE一列查看。
+        request.putQueryParameter("TemplateParam", param); //短信模板变量对应的实际值，JSON格式。
         
         try {
             CommonResponse response = client.getCommonResponse(request);

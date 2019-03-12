@@ -16,6 +16,8 @@ public class BasePush {
 	protected static String region;
     protected static long appKey;
     protected static String androidActivity;
+    protected static String signName;
+    protected static String templateCode;
 
     protected static DefaultAcsClient client;
 
@@ -40,6 +42,8 @@ public class BasePush {
         region = properties.getProperty("regionId");
         appKey = Long.valueOf(key);
         androidActivity = properties.getProperty("androidActivity");
+        signName = properties.getProperty("signName");
+        templateCode = properties.getProperty("templateCode");
 
         IClientProfile profile = DefaultProfile.getProfile(region, accessKeyId, accessKeySecret);
         client = new DefaultAcsClient(profile);
