@@ -3,6 +3,9 @@ server:
 spring:
   application:
     name: tetris-spring-zuul
+  cloud:
+    client:
+      ipAddress: 192.165.56.71
 zuul:
   routes:
 #标识你服务的名字，这里可以自己定义，一般方便和规范来讲还是跟自己服务的名字一样
@@ -28,7 +31,7 @@ eureka:
   client:
 #注册中心地址
     service-url:
-      defaultZone: http://localhost:8081/eureka/
+      defaultZone: http://192.165.56.71:8081/eureka/
       
 #security:
 #  basic:
