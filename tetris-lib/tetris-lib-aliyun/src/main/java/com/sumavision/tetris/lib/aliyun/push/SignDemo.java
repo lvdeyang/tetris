@@ -12,7 +12,7 @@ public class SignDemo {
         paras.put("AccessKeyId", accessKeyId);
         paras.put("SignatureVersion", "1.0");
         paras.put("Timestamp", df.format(new java.util.Date()));
-        paras.put("Format", "XML");
+        paras.put("Format", "JSON");
         // 2. 业务API参数
         paras.put("Action", "SendSms");
         paras.put("Version", "2017-05-25");
