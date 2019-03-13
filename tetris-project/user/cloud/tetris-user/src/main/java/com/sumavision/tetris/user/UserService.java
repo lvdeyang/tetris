@@ -27,6 +27,8 @@ import com.sumavision.tetris.organization.exception.CompanyNotExistException;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
+import com.sumavision.tetris.user.exception.MailAlreadyExistException;
+import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
 import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
@@ -86,6 +88,7 @@ public class UserService{
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
 	 * @param String classify 用户类型
+	 * @param boolean emit 是否要发射事件
 	 * @return UserVO 用户
 	 */
 	public UserVO add(
@@ -95,13 +98,16 @@ public class UserService{
             String repeat,
             String mobile,
             String mail,
-            String classify) throws Exception{
+            String classify,
+            boolean emit) throws Exception{
 		
 		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, classify);
 		
-		//发布用户注册事件
-		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
-		applicationEventPublisher.publishEvent(event);
+		if(emit){
+			//发布用户注册事件
+			UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
+			applicationEventPublisher.publishEvent(event);
+		}
 		
 		return new UserVO().set(user);
 	}
@@ -228,6 +234,20 @@ public class UserService{
 		UserPO user = userDao.findByUsername(username);
 		if(user != null){
 			throw new UsernameAlreadyExistException(username);
+		}
+		
+		if(mobile != null){
+			user = userDao.findByMobile(mobile);
+			if(user != null){
+				throw new MobileAlreadyExistException(mobile);
+			}
+		}
+		
+		if(mail != null){
+			user = userDao.findByMail(mail);
+			if(user != null){
+				throw new MailAlreadyExistException(mail);
+			}
 		}
 		
 		user = new UserPO();
@@ -361,6 +381,20 @@ public class UserService{
 			if(!newPassword.equals(repeat)) throw new RepeatNotMatchPasswordException();
 			
 			user.setPassword(sha256Encoder.encode(newPassword));
+		}
+		
+		if(mobile != null){
+			UserPO userExist = userDao.findByMobileWithExcept(mobile, user.getId());
+			if(userExist != null){
+				throw new MobileAlreadyExistException(mobile);
+			}
+		}
+		
+		if(mail != null){
+			UserPO userExist = userDao.findByMailWithExcept(mail, user.getId());
+			if(userExist != null){
+				throw new MailAlreadyExistException(mail);
+			}
 		}
 		
 		user.setNickname(nickname);

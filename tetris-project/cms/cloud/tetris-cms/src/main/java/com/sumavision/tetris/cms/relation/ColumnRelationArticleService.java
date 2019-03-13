@@ -11,13 +11,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.cms.aliPush.AliPushService;
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.column.ColumnDAO;
 import com.sumavision.tetris.cms.column.ColumnPO;
 import com.sumavision.tetris.cms.column.exception.ColumnNotExistException;
+import com.sumavision.tetris.lib.aliyun.push.AliPushService;
 
 /**
  * 栏目关联文章增删改操作<br/>
@@ -254,7 +254,6 @@ public class ColumnRelationArticleService {
 		JSONObject param = new JSONObject();
 		param.put("url", view_article.getPreviewUrl());
  		
-//		aliPushService.sendMessage(view_article.getName(), view_article.getRemark(), param.toJSONString());
-		aliPushService.sendSms();
+		aliPushService.sendMessage(view_article.getName(), view_article.getRemark(), param.toJSONString());
 	}
 }

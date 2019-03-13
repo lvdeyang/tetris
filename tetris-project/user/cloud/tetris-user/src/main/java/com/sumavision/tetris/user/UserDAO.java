@@ -155,4 +155,48 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 */
 	public UserPO findByToken(String token);
 	
+	/**
+	 * 根据手机号查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月12日 下午1:20:06
+	 * @param String mobile 手机号
+	 * @return UserPO 用户
+	 */
+	public UserPO findByMobile(String mobile);
+	
+	/**
+	 * 根据手机号查询用户（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月12日 下午1:20:06
+	 * @param String mobile 手机号
+	 * @param Long except 例外用户id
+	 * @return UserPO 用户
+	 */
+	@Query(value = "from com.sumavision.tetris.user UserPO user where user.mobile=?1 and user.id<>?2", nativeQuery = true)
+	public UserPO findByMobileWithExcept(String mobile, Long except);
+	
+	/**
+	 * 根据邮箱查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月12日 下午1:21:17
+	 * @param String mail 邮箱
+	 * @return UserPO 用户
+	 */
+	public UserPO findByMail(String mail);
+	
+	/**
+	 * 根据邮箱查询用户（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月12日 下午1:21:17
+	 * @param String mail 邮箱
+	 * @param Long except 例外用户id
+	 * @return UserPO 用户
+	 */
+	@Query(value = "from com.sumavision.tetris.user UserPO user where user.mail=?1 and user.id<>?2", nativeQuery = true)
+	public UserPO findByMailWithExcept(String mail, Long except);
+	
 }
