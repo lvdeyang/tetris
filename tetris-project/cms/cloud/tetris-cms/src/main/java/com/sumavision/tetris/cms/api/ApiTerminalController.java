@@ -3,6 +3,7 @@ package com.sumavision.tetris.cms.api;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,12 @@ import com.sumavision.tetris.cms.column.ColumnVO;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
+/**
+ * 外部app接口<br/>
+ * <b>作者:</b>ldy<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2019年3月11日 下午1:12:35
+ */
 @Controller
 @RequestMapping(value = "/api/terminal/cms/column")
 public class ApiTerminalController {
@@ -102,8 +109,7 @@ public class ApiTerminalController {
 		ColumnVO column = columnService.queryByRegion(id, province, city, district, page);
 
 		return column;
-	}
-	
+	}	
 	
 	/**
 	 * 文章搜索<br/>
@@ -127,4 +133,5 @@ public class ApiTerminalController {
 		return new HashMapWrapper<String, Object>().put("articles", list)
 												   .getMap();
 	}
+	
 }

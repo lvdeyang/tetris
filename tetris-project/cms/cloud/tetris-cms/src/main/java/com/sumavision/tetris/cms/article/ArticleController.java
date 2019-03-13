@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -322,8 +323,7 @@ public class ArticleController {
 			String modules,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userQuery.current();
-		
+		UserVO user = userQuery.current();	
 		//TODO 权限校验
 		
 		ArticlePO article = articleDao.findOne(id);

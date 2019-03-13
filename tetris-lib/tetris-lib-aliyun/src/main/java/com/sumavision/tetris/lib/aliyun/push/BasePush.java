@@ -20,6 +20,8 @@ public class BasePush {
     protected static String androidActivity;
     protected static String signName;
     protected static String templateCode;
+    protected static String accessKeyId;
+    protected static String accessKeySecret;
 
     protected static DefaultAcsClient client;
 
@@ -35,9 +37,9 @@ public class BasePush {
         Properties properties = new Properties();
         properties.load(inputStream);
 
-        String accessKeyId = properties.getProperty("accessKeyId");
+        accessKeyId = properties.getProperty("accessKeyId");
 
-        String accessKeySecret = properties.getProperty("accessKeySecret");
+        accessKeySecret = properties.getProperty("accessKeySecret");
 
         String key = properties.getProperty("appKey");
 
