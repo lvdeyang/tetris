@@ -4,13 +4,13 @@ import java.util.Date;
 
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSONObject;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.aliyuncs.exceptions.ServerException;
 import com.aliyuncs.http.MethodType;
 import com.aliyuncs.http.ProtocolType;
+import com.aliyuncs.profile.DefaultProfile;
 import com.aliyuncs.push.model.v20160801.PushRequest;
 import com.aliyuncs.push.model.v20160801.PushResponse;
 import com.aliyuncs.utils.ParameterHelper;
@@ -28,7 +28,7 @@ public class AliPushService extends BasePush{
 	 * @param param 附加参数
 	 */
 	public void sendMessage(String title, String body, String param) throws Exception{
-
+		
         PushRequest pushRequest = new PushRequest();
         //安全性比较高的内容建议使用HTTPS
         pushRequest.setProtocol(ProtocolType.HTTPS);
@@ -99,7 +99,7 @@ public class AliPushService extends BasePush{
         request.setMethod(MethodType.POST);
         request.setDomain("dysmsapi.aliyuncs.com");
         request.setVersion("2017-05-25");
-        request.setAction("SendSms"); //系统规定参数。取值：sSendSms。
+        request.setAction("SendSms"); //系统规定参数。取值：SendSms。
         request.putQueryParameter("RegionId", region);
         request.putQueryParameter("PhoneNumbers", telephone); //支持对多个手机号码发送短信，手机号码之间以英文逗号（,）分隔。上限为1000个手机号码
         request.putQueryParameter("SignName", signName); //短信签名名称。请在控制台签名管理页面签名名称一列查看。

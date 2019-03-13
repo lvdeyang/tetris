@@ -46,6 +46,7 @@ public class BasePush {
         templateCode = properties.getProperty("templateCode");
 
         IClientProfile profile = DefaultProfile.getProfile(region, accessKeyId, accessKeySecret);
+        DefaultProfile.addEndpoint(region, region, "Push", "cloudPush.aliyuncs.com");
         client = new DefaultAcsClient(profile);
         return client;
     }
