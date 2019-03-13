@@ -6,15 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.api.terminal.exception.ImageVerificationCodeErrorException;
 import com.sumavision.tetris.api.terminal.exception.ImageVerificationCodeTimeoutException;
 import com.sumavision.tetris.api.terminal.exception.MobileVerificationCodeErrorException;
 import com.sumavision.tetris.api.terminal.exception.MobileVerificationCodeTimeoutException;
 import com.sumavision.tetris.auth.login.LoginService;
 import com.sumavision.tetris.commons.util.random.RandomMessage;
-//import com.sumavision.tetris.lib.aliyun.push.AliPushService;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -34,11 +31,9 @@ public class ApiTerminalAuthController {
 	@Autowired
 	private LoginService loginService;
 	
-	//@Autowired
-	//private AliPushService aliPushService;
-	
 	/**
 	 * 移动终端请求手机验证码<br/>
+	 * <p>url:/api/terminal/auth/generate/phone/verification/code</p>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年3月12日 上午10:09:29
@@ -59,9 +54,7 @@ public class ApiTerminalAuthController {
 		String number = randomMessage.onlyNumber(6);
 		
 		//TODO 发短信
-		JSONObject param = new JSONObject();
-		param.put("code", number);
-		//aliPushService.sendSms(mobile, param.toJSONString());
+		System.out.println(number);
 		
 		session.setAttribute("verification-code-phone", number);
 		
@@ -70,6 +63,7 @@ public class ApiTerminalAuthController {
 	
 	/**
 	 * 引动终端用户注册<br/>
+	 * <p>url:/api/terminal/auth/do/register</p>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年3月12日 上午10:26:37
@@ -86,7 +80,7 @@ public class ApiTerminalAuthController {
 	public Object doRegister(
 			String username,
 			String password,
-			String repeat,
+			String passwordRepeat,
 			String mobile,
 			String verificationCode,
 			String sessionToken,
@@ -102,11 +96,25 @@ public class ApiTerminalAuthController {
 			throw new MobileVerificationCodeErrorException(username, mobile);
 		}
 		
-		userService.add(username, username, password, repeat, mobile, null, UserClassify.TERMINAL.toString(), false);
+		userService.add(username, username, password, passwordRepeat, mobile, null, UserClassify.TERMINAL.getName(), false);
 		
 		return null;
 	}
 	
+	/**
+	 * 用户名密码登录<br/>
+	 * <p>url:/api/terminal/auth/do/username/password/login</p>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月13日 上午9:43:12
+	 * @param String username 用户名
+	 * @param String password 密码
+	 * @param String verificationCode 验证码
+	 * @param String sessionToken session token
+	 * @return String token 用户登录token
+	 */
+	@JsonBody
+	@ResponseBody
 	@RequestMapping(value = "/do/username/password/login")
 	public Object doUsernamePasswordLogin(
 			String username,
@@ -115,7 +123,7 @@ public class ApiTerminalAuthController {
 			String sessionToken,
 			HttpServletRequest request) throws Exception{
 		
-		HttpSession session = HttpSessionContext.get(sessionToken);
+		/*HttpSession session = HttpSessionContext.get(sessionToken);
 		if(session == null){
 			throw new ImageVerificationCodeTimeoutException(username);
 		}
@@ -123,7 +131,7 @@ public class ApiTerminalAuthController {
 		String existCode = session.getAttribute("verification-code-image").toString();
 		if(!existCode.equals(verificationCode)){
 			throw new ImageVerificationCodeErrorException(username);
-		}
+		}*/
 		
 		String token = loginService.doPasswordLogin(username, password, null);
 		

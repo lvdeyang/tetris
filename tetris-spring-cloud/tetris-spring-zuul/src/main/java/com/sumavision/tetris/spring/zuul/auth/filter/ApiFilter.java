@@ -3,7 +3,9 @@ package com.sumavision.tetris.spring.zuul.auth.filter;
 import javax.servlet.http.HttpServletRequest;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mvc.ext.request.RequestResouceTypeAnalyzer;
 
 /**
  * 不是api开头的接口都不开放<br/>
@@ -15,8 +17,12 @@ public class ApiFilter extends ZuulFilter{
 
 	@Override
 	public Object run() {
+		RequestResouceTypeAnalyzer analyzer = SpringContext.getBean(RequestResouceTypeAnalyzer.class);
 		RequestContext ctx = RequestContext.getCurrentContext();
 		HttpServletRequest request = ctx.getRequest();
+		if(analyzer.isStaticResource(request)){
+			return null;
+		}
 		String requestUri = request.getRequestURI();
 		requestUri = requestUri.replace(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
 		if(!requestUri.startsWith("/api")){

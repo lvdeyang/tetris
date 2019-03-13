@@ -39,7 +39,7 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
  * lvdeyang 2017年6月12日
  */
 @Controller
-@RequestMapping("/verify/code")
+@RequestMapping("/api/verify/code")
 public class VerifyCodeController{
 	
 	@Autowired
