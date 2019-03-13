@@ -85,7 +85,7 @@ public class JsonBodyWrapper {
 			//返回成功状态
 			jsonResult.put("status", StatusCode.SUCCESS.getCode());
 			jsonResult.put("message", "操作成功");
-			if(data!=null) jsonResult.put("data", data);
+			jsonResult.put("data", data);
 			
 			//debug模式变成jsonp返回
 			if(DEBUG && request!=null){

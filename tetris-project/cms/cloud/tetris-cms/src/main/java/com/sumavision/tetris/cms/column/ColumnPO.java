@@ -22,6 +22,9 @@ public class ColumnPO extends AbstractBasePO{
 	/** 栏目名称 */
 	private String name;
 	
+	/** 栏目编号 */
+	private String code;
+	
 	/** 栏目备注 */
 	private String remark;
 	
@@ -40,6 +43,15 @@ public class ColumnPO extends AbstractBasePO{
 		this.name = name;
 	}
 	
+	@Column(name = "CODE")
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
 	@Column(name = "REMARK")
 	public String getRemark() {
 		return remark;

@@ -19,8 +19,6 @@ import com.sumavision.tetris.cms.column.ColumnService;
 import com.sumavision.tetris.cms.column.ColumnVO;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserQuery;
-import com.sumavision.tetris.user.UserVO;
 
 /**
  * 外部app接口<br/>
@@ -33,9 +31,6 @@ import com.sumavision.tetris.user.UserVO;
 public class ApiTerminalController {
 	
 	@Autowired
-	private UserQuery userQuery;
-	
-	@Autowired
 	private ColumnQuery columnQuery;
 	
 	@Autowired
@@ -45,10 +40,6 @@ public class ApiTerminalController {
 	@ResponseBody
 	@RequestMapping(value = "/list/root")
 	public Object listRoot(HttpServletRequest request) throws Exception {
-
-//		UserVO user = userQuery.current();
-
-		// TODO 权限校验
 
 		List<ColumnVO> rootColumns = columnQuery.querycolumnTree();
 
@@ -64,9 +55,6 @@ public class ApiTerminalController {
 			Integer pageSize,
 			HttpServletRequest request) throws Exception {
 
-//		UserVO user = userQuery.current();
-
-		// TODO 权限校验
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		ColumnVO column = columnService.query(id, page);
 
@@ -88,9 +76,6 @@ public class ApiTerminalController {
 			Integer pageSize,
 			HttpServletRequest request) throws Exception {
 
-//		UserVO user = userQuery.current();
-
-		// TODO 权限校验
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		ColumnVO column = columnService.queryCommand(page);
 
@@ -120,10 +105,6 @@ public class ApiTerminalController {
 			Integer pageSize,
 			HttpServletRequest request) throws Exception {
 
-//		UserVO user = userQuery.current();
-
-		// TODO 权限校验
-
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		ColumnVO column = columnService.queryByRegion(id, province, city, district, page);
 
@@ -146,9 +127,6 @@ public class ApiTerminalController {
 			Integer pageSize,
 			HttpServletRequest request) throws Exception{
 		
-//		UserVO user = userQuery.current();
-
-		// TODO 权限校验
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		List<ArticleVO> list = columnService.search(search, page);
 		

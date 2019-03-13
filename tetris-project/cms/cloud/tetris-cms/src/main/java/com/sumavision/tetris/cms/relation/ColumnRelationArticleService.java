@@ -11,14 +11,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.cms.aliPush.AliPushService;
-//import com.sumavision.tetris.cms.aliPush.AliPushService;
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.column.ColumnDAO;
 import com.sumavision.tetris.cms.column.ColumnPO;
 import com.sumavision.tetris.cms.column.exception.ColumnNotExistException;
+import com.sumavision.tetris.lib.aliyun.push.AliPushService;
+import com.sumavision.tetris.lib.aliyun.push.AliSendSmsService;
 
 /**
  * 栏目关联文章增删改操作<br/>
@@ -41,6 +41,9 @@ public class ColumnRelationArticleService {
 	
 	@Autowired
 	private AliPushService aliPushService;
+	
+	@Autowired
+	private AliSendSmsService aliSendSmsService;
 
 	/**
 	 * 添加文章到栏目<br/>
@@ -255,9 +258,6 @@ public class ColumnRelationArticleService {
 		JSONObject param = new JSONObject();
 		param.put("url", view_article.getPreviewUrl());
  		
-		aliPushService.sendMessage(view_article.getName(), view_article.getRemark(), param.toJSONString());
-//        JSONObject paramaa = new JSONObject();
-//        paramaa.put("code", "500202");
-//		aliPushService.sendSms("15101596648", paramaa.toJSONString());
+		aliPushService.sendMessage(view_article.getName(), view_article.getRemark(), param.toJSONString());		
 	}
 }

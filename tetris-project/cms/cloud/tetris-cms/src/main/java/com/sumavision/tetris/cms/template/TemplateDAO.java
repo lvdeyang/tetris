@@ -40,4 +40,5 @@ public interface TemplateDAO extends BaseDAO<TemplatePO>{
 	 */
 	@Query(value = "SELECT * FROM TETRIS_CMS_TEMPLATE WHERE TYPE=?1 ORDER BY SERIAL ASC", nativeQuery = true)
 	public List<TemplatePO> findByTypeOrderBySerialAsc(String type);
+
 }

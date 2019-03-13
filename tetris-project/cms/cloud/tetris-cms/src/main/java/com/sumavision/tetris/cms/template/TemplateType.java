@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cms.template;
 
+import org.omg.CORBA.INTERNAL;
+
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 /**
@@ -10,7 +12,8 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  */
 public enum TemplateType {
 
-	ARTICLE("文章排版");
+	ARTICLE("文章排版"),
+	INTERNAL("内置模板");
 	
 	private String name;
 	

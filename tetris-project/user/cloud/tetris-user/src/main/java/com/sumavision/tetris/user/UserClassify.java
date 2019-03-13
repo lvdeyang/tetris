@@ -17,6 +17,7 @@ public enum UserClassify {
 	@Deprecated
 	COMPANY_USER("企业用户----", false),
 	
+	TERMINAL("终端用户", false),
 	INTERNAL("系统内置用户", false),
 	COMPANY("企业用户", true),
 	NORMAL("普通用户", true);

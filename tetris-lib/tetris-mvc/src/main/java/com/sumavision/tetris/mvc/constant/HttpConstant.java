@@ -32,4 +32,7 @@ public interface HttpConstant {
 	/** 临时session超时时间：5秒 */
 	public static final int TEMPORARY_SESSION_TIMEOUT = 5;
 	
+	/** 验证码有效期：3分钟 */
+	public static final int VERIFICATION_CODE_TIMEOUT = 3*60;
+	
 }

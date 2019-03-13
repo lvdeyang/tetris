@@ -20,5 +20,13 @@ public class TemplateNotExistException extends BaseException{
 										   .append(id)
 										   .toString());
 	}
+	
+	public TemplateNotExistException(String templateId) {
+		super(StatusCode.FORBIDDEN, "模板不存在！");
+		LOG.error(DateUtil.now());
+		LOG.error(new StringBufferWrapper().append("模板不存在!模板templateId：")
+										   .append(templateId)
+										   .toString());
+	}
 
 }

@@ -51,6 +51,9 @@ public class TemplatePO extends AbstractBasePO{
 	/** 模板用途 */
 	private TemplateType type;
 	
+	/** 模板用途（额外） */
+	private TemplateId templateId; 
+	
 	/** 模板html内容 */
 	private String html;
 	
@@ -140,6 +143,16 @@ public class TemplatePO extends AbstractBasePO{
 
 	public void setType(TemplateType type) {
 		this.type = type;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "TEMPLATE_ID")
+	public TemplateId getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(TemplateId templateId) {
+		this.templateId = templateId;
 	}
 
 	@Lob

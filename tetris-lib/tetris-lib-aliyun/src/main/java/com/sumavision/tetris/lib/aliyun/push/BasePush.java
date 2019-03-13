@@ -1,8 +1,10 @@
-package com.sumavision.tetris.cms.aliPush;
+package com.sumavision.tetris.lib.aliyun.push;
 
 import java.io.InputStream;
-import java.util.Properties;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Properties;import org.aspectj.weaver.NewConstructorTypeMunger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +20,8 @@ public class BasePush {
     protected static String androidActivity;
     protected static String signName;
     protected static String templateCode;
+    protected static String accessKeyId;
+    protected static String accessKeySecret;
 
     protected static DefaultAcsClient client;
 
@@ -33,9 +37,9 @@ public class BasePush {
         Properties properties = new Properties();
         properties.load(inputStream);
 
-        String accessKeyId = properties.getProperty("accessKeyId");
+        accessKeyId = properties.getProperty("accessKeyId");
 
-        String accessKeySecret = properties.getProperty("accessKeySecret");
+        accessKeySecret = properties.getProperty("accessKeySecret");
 
         String key = properties.getProperty("appKey");
 
@@ -46,8 +50,12 @@ public class BasePush {
         templateCode = properties.getProperty("templateCode");
 
         IClientProfile profile = DefaultProfile.getProfile(region, accessKeyId, accessKeySecret);
-        DefaultProfile.addEndpoint(region, region, "Push", "cloudPush.aliyuncs.com");
         client = new DefaultAcsClient(profile);
         return client;
+    }
+    
+    public static void main(String[] args){
+    	SimpleDateFormat sf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+    	System.out.println(sf.format(new Date()));
     }
 }
