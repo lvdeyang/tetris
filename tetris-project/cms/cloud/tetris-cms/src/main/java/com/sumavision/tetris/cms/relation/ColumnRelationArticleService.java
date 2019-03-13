@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.cms.aliPush.AliPushService;
+//import com.sumavision.tetris.cms.aliPush.AliPushService;
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleVO;
@@ -254,7 +255,9 @@ public class ColumnRelationArticleService {
 		JSONObject param = new JSONObject();
 		param.put("url", view_article.getPreviewUrl());
  		
-//		aliPushService.sendMessage(view_article.getName(), view_article.getRemark(), param.toJSONString());
-		aliPushService.sendSms();
+		aliPushService.sendMessage(view_article.getName(), view_article.getRemark(), param.toJSONString());
+//        JSONObject paramaa = new JSONObject();
+//        paramaa.put("code", "500202");
+//		aliPushService.sendSms("15101596648", paramaa.toJSONString());
 	}
 }
