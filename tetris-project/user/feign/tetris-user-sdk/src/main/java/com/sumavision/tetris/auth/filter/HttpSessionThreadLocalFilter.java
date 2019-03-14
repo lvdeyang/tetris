@@ -1,6 +1,7 @@
 package com.sumavision.tetris.auth.filter;
 
 import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -11,9 +12,10 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
+
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionThreadLocal;
@@ -25,16 +27,14 @@ import com.sumavision.tetris.mvc.ext.context.HttpSessionThreadLocal;
  * <b>日期：</b>2019年3月6日 上午11:34:58
  */
 @Order(1)
-@Component
 @WebFilter(urlPatterns = "/*", filterName = "com.sumavision.tetris.auth.filter.HttpSessionThreadLocalFilter")
 public class HttpSessionThreadLocalFilter implements Filter{
 
-	@Autowired
-	private FilterValidate filterValidate;
-	
 	@Override
 	public void doFilter(ServletRequest nativeRequest, ServletResponse nativeResponse, FilterChain chain)
 			throws IOException, ServletException {
+		
+		FilterValidate filterValidate = SpringContext.getBean(FilterValidate.class);
 		
 		try{
 			HttpServletRequest request = (HttpServletRequest)nativeRequest;

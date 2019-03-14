@@ -56,7 +56,6 @@
     </dependencyManagement>
     
     <build>
-    	<finalName>tetris-menu-feign</finalName>
 	    <plugins>
 			<plugin>
 		       	<groupId>org.apache.maven.plugins</groupId>

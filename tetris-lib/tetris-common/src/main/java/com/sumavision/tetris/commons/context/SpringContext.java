@@ -41,9 +41,9 @@ public class SpringContext implements ApplicationContextAware {
 	 * <b>日期：</b>2019年3月4日 下午7:16:58
 	 */
 	public static void asynchronizedDone(){
-		synchronized(thread){
+		/*synchronized(thread){
 			if(thread != null) thread.notify();
-		}
+		}*/
 	}
 	
 	/**
@@ -56,6 +56,7 @@ public class SpringContext implements ApplicationContextAware {
 	public void setApplicationContext(ApplicationContext applicationContext)
 			throws BeansException {
 		SpringContext.applicationContext = applicationContext;
+		
 		try {
 			//同步接口
 			Map<String, SystemInitialization> handlerMaps = SpringContext.getBeanOfType(SystemInitialization.class);
@@ -76,7 +77,8 @@ public class SpringContext implements ApplicationContextAware {
 					public void run() {
 						synchronized (thread) {
 							try {
-								thread.wait(0);
+								//thread.wait(0);
+								thread.sleep(30*1000);
 							} catch (InterruptedException e) {
 								e.printStackTrace();
 								System.exit(0);

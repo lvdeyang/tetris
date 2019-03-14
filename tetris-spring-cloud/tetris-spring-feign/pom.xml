@@ -73,7 +73,6 @@
     </dependencyManagement>
   
   	<build>
-    	<finalName>tetris-spring-feign</finalName>
 	    <plugins>
 			<plugin>
 		       	<groupId>org.apache.maven.plugins</groupId>

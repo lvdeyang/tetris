@@ -13,11 +13,10 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
@@ -30,19 +29,15 @@ import com.sumavision.tetris.user.UserQuery;
  * <b>日期：</b>2019年3月6日 上午11:38:45
  */
 @Order(0)
-@Component
 @WebFilter(urlPatterns = "/*", filterName = "com.sumavision.tetris.auth.filter.LoginFilter")
 public class LoginFilter implements Filter{
 
-	@Autowired
-	private FilterValidate filterValidate;
-	
-	@Autowired
-	private UserQuery userQuery;
-	
 	@Override
 	public void doFilter(ServletRequest nativeRequest, ServletResponse nativeResponse, FilterChain chain)
 			throws IOException, ServletException {
+		
+		FilterValidate filterValidate = SpringContext.getBean(FilterValidate.class);
+		UserQuery userQuery = SpringContext.getBean(UserQuery.class);
 		
 		HttpServletRequest request = (HttpServletRequest)nativeRequest;
 		HttpServletResponse response = (HttpServletResponse)nativeResponse;

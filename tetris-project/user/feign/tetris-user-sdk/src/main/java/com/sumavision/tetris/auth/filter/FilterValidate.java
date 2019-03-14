@@ -1,17 +1,19 @@
 package com.sumavision.tetris.auth.filter;
 
 import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.mvc.ext.request.RequestResouceTypeAnalyzer;
 
 @Component
 public class FilterValidate {
+	
+	@Autowired
+	private RequestResouceTypeAnalyzer requestResouceTypeAnalyzer;
 
 	/** 不拦截路径 */
 	private List<String> ignorePath = null;
-	
-	/** 静态资源 */
-	private List<String> staticResource = null;
 	
 	public FilterValidate(){
 		ignorePath = new ArrayListWrapper<String>().add("/login")
@@ -32,35 +34,6 @@ public class FilterValidate {
 												   .add("/menu/server/props/feign/query/props")
 												   .add("/api/*")
 												   .getList();
-		staticResource = new ArrayListWrapper<String>().add(".js")
-													   .add(".html")
-													   .add(".css")
-													   .add(".png")
-													   .add(".jpg")
-													   .add(".jsp")
-													   .add(".ttf")
-													   .add(".eot")
-													   .add(".svg")
-													   .add(".woff")
-													   .add(".ico")
-											   		   .getList();
-	}
-	
-	/**
-	 * 判断请求资源是否是静态资源<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年3月6日 上午11:30:08
-	 * @param String uri 请求uri
-	 * @return boolean 判断结果
-	 */
-	public boolean isStaticResource(String uri){
-		for(String resource:staticResource){
-			if(uri.endsWith(resource)){
-				return true;
-			}
-		}
-		return false;
 	}
 	
 	/**
@@ -96,7 +69,7 @@ public class FilterValidate {
 	 * @return boolean 判断结果
 	 */
 	public boolean canDoFilter(String uri){
-		if(isStaticResource(uri)) return false;
+		if(requestResouceTypeAnalyzer.isStaticResource(uri)) return false;
 		if(isIgnorePath(uri)) return false;
 		return true;
 	}

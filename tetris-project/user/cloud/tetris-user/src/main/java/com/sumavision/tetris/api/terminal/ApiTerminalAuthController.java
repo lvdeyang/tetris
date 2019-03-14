@@ -2,25 +2,36 @@ package com.sumavision.tetris.api.terminal;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.api.terminal.exception.ImageVerificationCodeErrorException;
 import com.sumavision.tetris.api.terminal.exception.ImageVerificationCodeTimeoutException;
 import com.sumavision.tetris.api.terminal.exception.MobileVerificationCodeErrorException;
 import com.sumavision.tetris.api.terminal.exception.MobileVerificationCodeTimeoutException;
 import com.sumavision.tetris.auth.login.LoginService;
 import com.sumavision.tetris.commons.util.random.RandomMessage;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.lib.aliyun.push.AliSendSmsService;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserService;
 
+import scala.annotation.meta.param;
+
 @Controller
 @RequestMapping(value = "/api/terminal/auth")
 public class ApiTerminalAuthController {
+	
+	private static final Logger LOG = LoggerFactory.getLogger(ApiTerminalAuthController.class);
 	
 	@Autowired
 	private RandomMessage randomMessage;
@@ -30,6 +41,9 @@ public class ApiTerminalAuthController {
 	
 	@Autowired
 	private LoginService loginService;
+	
+	@Autowired
+	private AliSendSmsService aliSendSmsService;
 	
 	/**
 	 * 移动终端请求手机验证码<br/>
@@ -54,7 +68,10 @@ public class ApiTerminalAuthController {
 		String number = randomMessage.onlyNumber(6);
 		
 		//TODO 发短信
-		System.out.println(number);
+		LOG.info(new StringBufferWrapper().append("向手机：").append(mobile).append("发送验证码：").append(number).toString());
+		JSONObject param = new JSONObject();
+		param.put("code", number);
+		aliSendSmsService.sendSms(mobile, param.toJSONString());
 		
 		session.setAttribute("verification-code-phone", number);
 		
