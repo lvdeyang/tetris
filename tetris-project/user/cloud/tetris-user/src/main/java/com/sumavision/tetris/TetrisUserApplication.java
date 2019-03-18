@@ -13,7 +13,7 @@ import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 
 @ComponentScan(basePackages = {"com.sumavision.tetris"})
-@ServletComponentScan(basePackages = {"com.sumavision.tetris.mvc.listener"})
+@ServletComponentScan(basePackages = {"com.sumavision.tetris"})
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
 @EnableCaching
 @EnableFeignClients("com.sumavision.tetris")
