@@ -1,6 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" 
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
     <modelVersion>4.0.0</modelVersion>
   
     <groupId>com.sumavision.tetris</groupId>
@@ -11,6 +12,7 @@
     <description>流程管理</description>
   
     <packaging>war</packaging>
+    <!-- <packaging>jar</packaging> -->
     
     <parent>
 		<groupId>org.springframework.boot</groupId>
@@ -27,6 +29,8 @@
 	</properties>
 	
 	<dependencies>
+	
+		<!-- 流程引擎 -->
 		<dependency>
 		    <groupId>org.activiti</groupId>
 		    <artifactId>activiti-spring-boot-starter-integration</artifactId>
@@ -38,18 +42,6 @@
 		    <artifactId>activiti-spring-boot-starter-jpa</artifactId>
 		    <version>6.0.0</version>
 		</dependency>
-		
-		<!-- <dependency>
-		    <groupId>org.activiti</groupId>
-		    <artifactId>activiti-spring-boot-starter-security</artifactId>
-		    <version>6.0.0</version>
-		</dependency> -->
-		
-		<!-- <dependency>
-		    <groupId>org.activiti</groupId>
-		    <artifactId>activiti-spring-boot-starter-rest-api</artifactId>
-		    <version>6.0.0</version>
-		</dependency> -->
 		
 		<!-- mysql驱动 -->
 		<dependency>
@@ -168,7 +160,7 @@
     </dependencyManagement>
 	
 	<build>
-    	<finalName>springboot</finalName>
+    	<finalName>tetris-easy-process</finalName>
 	    <plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
@@ -185,6 +177,38 @@
 		        </configuration>
 	        </plugin>
 		</plugins>
+		<!-- <plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<fork>true</fork>
+					<mainClass>com.sumavision.tetris.spring.eureka.TetrisSpringEurekaApplication</mainClass>
+					<layout>ZIP</layout>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>repackage</goal>
+						</goals>
+						分离出代码包
+						<configuration>
+							<classifier>exec</classifier>
+						</configuration>
+						
+					</execution>
+				</executions>
+			</plugin>
+		</plugins> -->
     </build>
 
 </project>
