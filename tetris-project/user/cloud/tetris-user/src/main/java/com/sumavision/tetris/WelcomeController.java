@@ -29,19 +29,6 @@ public class WelcomeController {
 	private MenuQuery menuQuery;
 	
 	/**
-	 * 访问不需要登录<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年3月5日 下午4:50:31
-	 */
-	@RequestMapping(value = "/index")
-	public ModelAndView index() throws Exception{
-		ModelAndView mv = null;
-		mv = new ModelAndView("web/user/index");
-		return mv;
-	}
-	
-	/**
 	 * 需要登录后访问<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
