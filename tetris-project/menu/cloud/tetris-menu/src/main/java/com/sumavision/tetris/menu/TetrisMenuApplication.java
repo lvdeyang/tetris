@@ -15,7 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
 import com.sumavision.tetris.commons.context.SpringContext;
 
 @ComponentScan(basePackages = {"com.sumavision.tetris"})
-@ServletComponentScan(basePackages = {"com.sumavision.tetris.mvc.listener"})
+@ServletComponentScan(basePackages = {"com.sumavision.tetris"})
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
 @EnableCaching
 @EnableFeignClients("com.sumavision.tetris")

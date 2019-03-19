@@ -15,7 +15,7 @@ import com.sumavision.tetris.spring.zuul.auth.filter.ApiFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.MobileLoginFilter;
 
 @ComponentScan(basePackages = {"com.sumavision.tetris"})
-@ServletComponentScan(basePackages = {"com.sumavision.tetris.mvc.listener"})
+@ServletComponentScan(basePackages = {"com.sumavision.tetris"})
 @EnableZuulProxy
 @EnableEurekaClient
 @EnableDiscoveryClient
