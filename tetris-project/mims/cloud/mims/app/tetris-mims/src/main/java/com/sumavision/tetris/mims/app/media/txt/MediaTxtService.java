@@ -91,6 +91,37 @@ public class MediaTxtService {
 	}
 	
 	/**
+	 * 编辑文本媒资<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月25日 下午5:01:28
+	 * @param user 用户
+	 * @param txt 文本媒资
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键词列表
+	 * @param remark 备注
+	 * @param content 文本内容
+	 * @return MediaTxtPO 文本媒资
+	 */
+	public MediaTxtPO editTask(
+			UserVO user,
+			MediaTxtPO txt,
+			String name,
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark,
+			String content) throws Exception{
+
+		txt.setName(name);
+		txt.setRemarks(remark);
+		txt.setContent(content);
+		mediaTxtDao.save(txt);
+		
+		return txt;
+	}
+	
+	/**
 	 * 复制文本媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

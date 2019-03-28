@@ -9,6 +9,7 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 
 	private String name;
+	private String code;
 	private Long parentId;
 	private List<ColumnVO> subColumns;
 	private List<ArticleVO> articles;
@@ -22,15 +23,12 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 		return this;
 	}
 
+	public String getCode() {
+		return code;
+	}
 
-
-	@Override
-	public ColumnVO set(ColumnPO entity) throws Exception {
-		this.setId(entity.getId())
-			.setUuid(entity.getUuid())
-			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setName(entity.getName())
-			.setParentId(entity.getParentId());
+	public ColumnVO setCode(String code) {
+		this.code = code;
 		return this;
 	}
 
@@ -58,6 +56,17 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 
 	public ColumnVO setArticles(List<ArticleVO> articles) {
 		this.articles = articles;
+		return this;
+	}
+	
+	@Override
+	public ColumnVO set(ColumnPO entity) throws Exception {
+		this.setId(entity.getId())
+			.setUuid(entity.getUuid())
+			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
+			.setName(entity.getName())
+			.setCode(entity.getCode())
+			.setParentId(entity.getParentId());
 		return this;
 	}
 

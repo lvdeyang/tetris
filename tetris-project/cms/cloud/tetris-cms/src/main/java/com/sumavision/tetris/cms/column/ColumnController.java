@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.cms.article.ArticleVO;
+import com.sumavision.tetris.cms.column.exception.UserHasNotPermissionForColumnException;
 import com.sumavision.tetris.cms.template.exception.TemplateTagMoveFailException;
 import com.sumavision.tetris.cms.template.exception.TemplateTagNotExistException;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -45,7 +46,7 @@ public class ColumnController {
 
 		// TODO 权限校验
 
-		List<ColumnVO> rootColumns = columnQuery.querycolumnTree();
+		List<ColumnVO> rootColumns = columnQuery.querycolumnTree(user);
 
 		return rootColumns;
 	}
@@ -60,7 +61,7 @@ public class ColumnController {
 
 		// TODO 权限校验
 
-		ColumnPO column = columnService.addRoot();
+		ColumnPO column = columnService.addRoot(user);
 
 		return new ColumnVO().set(column);
 	}
@@ -73,33 +74,39 @@ public class ColumnController {
 		UserVO user = userQuery.current();
 
 		// TODO 权限校验
+		if(!columnQuery.hasPermission(parentId, user)){
+			throw new UserHasNotPermissionForColumnException(parentId, user);
+		}
 
 		ColumnPO parent = columnDao.findOne(parentId);
 		if (parent == null) {
 			throw new TemplateTagNotExistException(parentId);
 		}
 
-		ColumnPO columnPO = columnService.append(parent);
+		ColumnPO column = columnService.append(user, parent);
 
-		return new ColumnVO().set(columnPO);
+		return new ColumnVO().set(column);
 	}
 
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/update/{id}")
-	public Object update(@PathVariable Long id, String name, String remark, HttpServletRequest request)
+	public Object update(@PathVariable Long id, String name, String code, String remark, HttpServletRequest request)
 			throws Exception {
 
 		UserVO user = userQuery.current();
 
 		// TODO 权限校验
+		if(!columnQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForColumnException(id, user);
+		}
 
 		ColumnPO columnPO = columnDao.findOne(id);
 		if (columnPO == null) {
 			throw new TemplateTagNotExistException(id);
 		}
 
-		columnPO = columnService.update(columnPO, name, remark);
+		columnPO = columnService.update(columnPO, name, code, remark);
 
 		return new ColumnVO().set(columnPO);
 	}
@@ -112,6 +119,9 @@ public class ColumnController {
 		UserVO user = userQuery.current();
 
 		// TODO 权限校验
+		if(!columnQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForColumnException(id, user);
+		}
 
 		ColumnPO columnPO = columnDao.findOne(id);
 
@@ -130,6 +140,12 @@ public class ColumnController {
 		UserVO user = userQuery.current();
 
 		// TODO 权限校验
+		if(!columnQuery.hasPermission(sourceId, user)){
+			throw new UserHasNotPermissionForColumnException(sourceId, user);
+		}
+		if(!columnQuery.hasPermission(targetId, user)){
+			throw new UserHasNotPermissionForColumnException(targetId, user);
+		}
 
 		ColumnPO sourceCol = columnDao.findOne(sourceId);
 		if (sourceCol == null) {
@@ -162,6 +178,9 @@ public class ColumnController {
 		UserVO user = userQuery.current();
 
 		// TODO 权限校验
+		if(!columnQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForColumnException(id, user);
+		}
 
 		ColumnPO col = columnDao.findOne(id);
 		if (col == null) {

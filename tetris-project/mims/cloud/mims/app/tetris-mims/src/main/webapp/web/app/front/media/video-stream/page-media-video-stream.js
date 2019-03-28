@@ -68,6 +68,16 @@ define([
                         keyWords:'',
                         previewUrl:'',
                         loading:false
+                    },
+                    editVideoStream:{
+                        visible:false,
+                        id:'',
+                        name:'',
+                        remark:'',
+                        tags:'',
+                        keyWords:'',
+                        previewUrl:'',
+                        loading:false
                     }
                 },
                 prepareUploadFileInfo:null
@@ -254,6 +264,17 @@ define([
                             self.dialog.renameFolder.visible = true;
                         }
                     }else if(command === '1'){
+                        //编辑
+                        if(row.type === 'VIDEO_STREAM'){
+                            self.dialog.editVideoStream.id = row.id;
+                            self.dialog.editVideoStream.name = row.name;
+                            self.dialog.editVideoStream.remark = row.remarks;
+                            self.dialog.editVideoStream.tags = row.tags;
+                            self.dialog.editVideoStream.keyWords = row.keyWords;
+                            self.dialog.editVideoStream.previewUrl = row.previewUrl;
+                            self.dialog.editVideoStream.visible = true;
+                        }
+                    }else if(command === '2'){
                         //移动
                         if(row.type === 'FOLDER'){
                             self.$refs.moveMediaVideoStreamFolderDialog.open('/folder/permission/media/tree/with/except/videoStream', row.id);
@@ -262,7 +283,7 @@ define([
                             self.$refs.moveMediaVideoStreamDialog.open('/folder/permission/media/tree/with/except/videoStream');
                             self.$refs.moveMediaVideoStreamDialog.setBuffer(row);
                         }
-                    }else if(command === '2'){
+                    }else if(command === '3'){
                         //复制
                         if(row.type === 'FOLDER'){
                             self.$refs.copyMediaVideoStreamFolderDialog.open('/folder/permission/media/tree/videoStream');
@@ -408,7 +429,19 @@ define([
                     self.dialog.addVideoStream.visible = false;
                     self.dialog.addVideoStream.loading = false;
                 },
-                //添加视频媒资任务
+                //编辑媒资对话框关闭
+                handleEditVideoStreamClose:function(){
+                    var self = this;
+                    self.dialog.editVideoStream.id = '';
+                    self.dialog.editVideoStream.name = '';
+                    self.dialog.editVideoStream.remark = '';
+                    self.dialog.editVideoStream.tags = '';
+                    self.dialog.editVideoStream.keyWords = '';
+                    self.dialog.editVideoStream.previewUrl = '';
+                    self.dialog.editVideoStream.visible = false;
+                    self.dialog.editVideoStream.loading = false;
+                },
+                //添加视频流媒资任务
                 addMediaVideoStreamTask:function(){
                     var self = this;
                     self.dialog.addVideoStream.loading = true;
@@ -424,6 +457,29 @@ define([
                         if(status !== 200) return;
                         prependExceptFolderRow(self.table.rows, data);
                         self.handleAddVideoStreamClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                //编辑视频流媒资任务
+                editMediaVideoStreamTask:function(){
+                    var self = this;
+                    self.dialog.editVideoStream.loading = true;
+                    ajax.post('/media/video/stream/task/edit/' + self.dialog.editVideoStream.id, {
+                        previewUrl:self.dialog.editVideoStream.previewUrl,
+                        name:self.dialog.editVideoStream.name,
+                        tags:self.dialog.editVideoStream.tags,
+                        keyWords:self.dialog.editVideoStream.keyWords,
+                        remark:self.dialog.editVideoStream.remark
+                    }, function(data, status){
+                        self.dialog.editVideoStream.loading = false;
+                        if(status !== 200) return;
+                        var rows = self.table.rows;
+                        for(var i=0; i<rows.length; i++){
+                            if(rows[i].id === data.id){
+                                rows.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleEditVideoStreamClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 }
             },

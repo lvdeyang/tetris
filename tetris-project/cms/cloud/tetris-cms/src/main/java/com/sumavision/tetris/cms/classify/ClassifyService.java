@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.cms.article.ArticleClassifyPermissionDAO;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -20,6 +21,12 @@ public class ClassifyService {
 	
 	@Autowired
 	private ClassifyDAO classifyDao;
+	
+	@Autowired
+	private ClassifyUserPermissionDAO classifyUserPermissionDao;
+	
+	@Autowired
+	private ArticleClassifyPermissionDAO articleClassifyPermissionDao;
 
 	/**
 	 * 添加分类<br/>
@@ -42,6 +49,8 @@ public class ClassifyService {
 		classify.setUpdateTime(new Date());
 
 		classifyDao.save(classify);
+		
+		addPermission(classify, user);
 		
 		return classify;
 	}
@@ -67,5 +76,41 @@ public class ClassifyService {
 		classifyDao.save(classify);
 		
 		return classify;
+	}
+	
+	/**
+	 * 添加分类用户关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月27日 上午9:45:47
+	 * @param classify 分类信息
+	 * @param user 用户信息
+	 * @return ClassifyUserPermissionPO 分类用户关联
+	 */
+	public ClassifyUserPermissionPO addPermission(
+			ClassifyPO classify,
+			UserVO user) throws Exception{
+		
+		ClassifyUserPermissionPO permission = new ClassifyUserPermissionPO();
+		permission.setClassifyId(classify.getId());
+		permission.setUserId(user.getUuid());
+		permission.setGroupId(user.getGroupId());
+		
+		classifyUserPermissionDao.save(permission);
+		
+		return permission;
+	}
+	
+	/**
+	 * 删除分类及关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月27日 上午10:29:18
+	 * @param classify 分类
+	 */
+	public void remove(ClassifyPO classify) throws Exception{
+		classifyUserPermissionDao.deleteByClassifyId(classify.getId());
+		articleClassifyPermissionDao.deleteByClassifyId(classify.getId());
+		classifyDao.delete(classify);
 	}
 }

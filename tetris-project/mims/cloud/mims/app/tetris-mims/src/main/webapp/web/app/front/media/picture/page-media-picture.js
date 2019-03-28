@@ -66,7 +66,15 @@ define([
                         remark:'',
                         tags:'',
                         keyWords:'',
-                        task:'',
+                        loading:false
+                    },
+                    editPicture:{
+                        visible:false,
+                        id:'',
+                        name:'',
+                        remark:'',
+                        tags:'',
+                        keyWords:'',
                         loading:false
                     },
                     upload:{
@@ -282,7 +290,17 @@ define([
                             self.dialog.renameFolder.row = row;
                             self.dialog.renameFolder.visible = true;
                         }
-                    }else if(command === '1'){
+                    }else if(command === "1"){
+                        //编辑
+                        if(row.type === 'PICTURE'){
+                            self.dialog.editPicture.id = row.id;
+                            self.dialog.editPicture.name = row.name;
+                            self.dialog.editPicture.remark = row.remarks;
+                            self.dialog.editPicture.tags = row.tags;
+                            self.dialog.editPicture.keyWords = row.keyWords;
+                            self.dialog.editPicture.visible = true;
+                        }
+                    }else if(command === '2'){
                         //移动
                         if(row.type === 'FOLDER'){
                             self.$refs.moveMediaPictureFolderDialog.open('/folder/permission/media/tree/with/except/picture', row.id);
@@ -291,7 +309,7 @@ define([
                             self.$refs.moveMediaPictureDialog.open('/folder/permission/media/tree/with/except/picture', row.id);
                             self.$refs.moveMediaPictureDialog.setBuffer(row);
                         }
-                    }else if(command === '2'){
+                    }else if(command === '3'){
                         //复制
                         if(row.type === 'FOLDER'){
                             self.$refs.copyMediaPictureFolderDialog.open('/folder/permission/media/tree/picture');
@@ -457,6 +475,17 @@ define([
                     self.dialog.addPicture.visible = false;
                     self.dialog.addPicture.loading = false;
                 },
+                //编辑媒资对话框关闭
+                handleEditPictureClose:function(){
+                    var self = this;
+                    self.dialog.editPicture.id = '';
+                    self.dialog.editPicture.name = '';
+                    self.dialog.editPicture.remark = '';
+                    self.dialog.editPicture.tags = '';
+                    self.dialog.editPicture.keyWords = '';
+                    self.dialog.editPicture.visible = false;
+                    self.dialog.editPicture.loading = false;
+                },
                 //添加图片媒资任务
                 addMediaPictureTask:function(){
                     var self = this;
@@ -492,6 +521,28 @@ define([
                             createUploader(self, uploadfiles);
                         }
                         self.handleAddPictureClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                //编辑图片媒资任务
+                editMediaPictureTask:function(){
+                    var self = this;
+                    self.dialog.editPicture.loading = true;
+                    ajax.post('/media/picture/task/edit/' + self.dialog.editPicture.id, {
+                        name:self.dialog.editPicture.name,
+                        tags:self.dialog.editPicture.tags,
+                        keyWords:self.dialog.editPicture.keyWords,
+                        remark:self.dialog.editPicture.remark
+                    }, function(data, status){
+                        self.dialog.editPicture.loading = false;
+                        if(status !== 200) return;
+                        var rows = self.table.rows;
+                        for(var i=0; i<rows.length; i++){
+                            if(rows[i].id === data.id){
+                                rows.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleEditPictureClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 //上传按钮点击

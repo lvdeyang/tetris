@@ -2,6 +2,7 @@ package com.sumavision.tetris.cms.relation;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticlePO;
+import com.sumavision.tetris.cms.article.ArticleRegionPermissionPO;
 import com.sumavision.tetris.cms.article.ArticleVO;
+import com.sumavision.tetris.cms.article.exception.ArticleNotExistException;
 import com.sumavision.tetris.cms.column.ColumnDAO;
 import com.sumavision.tetris.cms.column.ColumnPO;
 import com.sumavision.tetris.cms.column.exception.ColumnNotExistException;
@@ -41,9 +44,6 @@ public class ColumnRelationArticleService {
 	
 	@Autowired
 	private AliPushService aliPushService;
-	
-	@Autowired
-	private AliSendSmsService aliSendSmsService;
 
 	/**
 	 * 添加文章到栏目<br/>
@@ -54,7 +54,7 @@ public class ColumnRelationArticleService {
 	 * @param List<String> articleIds 文章id列表
 	 * @return List<ColumnRelationArticleVO> 栏目文章
 	 */
-	public List<ColumnRelationArticleVO> bind(Long columnId, List<String> articleIds) throws Exception{
+	public List<ColumnRelationArticleVO> bindArticle(Long columnId, List<String> articleIds) throws Exception{
 		
 		ColumnPO column = columnDao.findOne(columnId);
 		if(column == null){
@@ -78,11 +78,96 @@ public class ColumnRelationArticleService {
 				List<ColumnRelationArticlePO> relations = new ArrayList<ColumnRelationArticlePO>();
 				for(ArticlePO article: articles){
 					ColumnRelationArticlePO relation = new ColumnRelationArticlePO();
+					relation.setUpdateTime(new Date());
 					relation.setArticleId(article.getId());
 					relation.setArticleName(article.getName());
 					relation.setArticleRemark(article.getRemark());
 					relation.setColumnId(column.getId());
 					relation.setColumnName(column.getName());
+					relation.setColumnCode(column.getCode());
+					relation.setColumnRemark(column.getRemark());
+					relation.setArticleOrder(++tag);
+					relation.setCommand(false);
+					relations.add(relation);
+				}
+				columnRelationArticleDao.save(relations);
+				
+				List<ColumnRelationArticleVO> view_relations = ColumnRelationArticleVO.getConverter(ColumnRelationArticleVO.class).convert(relations, ColumnRelationArticleVO.class);
+				
+				return view_relations;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 添加栏目到文章<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月19日 下午6:01:44
+	 * @param Long articleId 文章id
+	 * @param List<String> columnIds 栏目id列表
+	 * @return List<ColumnRelationArticleVO> 栏目文章
+	 */
+	public List<ColumnRelationArticleVO> bindColumn(Long articleId, List<String> columnIds) throws Exception{
+		
+		ArticlePO article = articleDao.findOne(articleId);
+		if(article == null){
+			throw new ArticleNotExistException(articleId);
+		}
+		
+		Long tag = 0l;
+		
+		List<ColumnRelationArticlePO> exsitRelations = columnRelationArticleDao.findByArticleIdOrderByArticleOrderDesc(articleId);		
+		if(exsitRelations != null && exsitRelations.size()>0){
+			tag = exsitRelations.get(0).getArticleOrder();
+		}
+		
+		//找需要添加的
+		List<Long> needAddColumns = new ArrayList<Long>();
+		for(String columnId: columnIds){
+			boolean needAdd = true;
+			for(ColumnRelationArticlePO exsitRelation: exsitRelations){
+				if(exsitRelation.getColumnId().equals(Long.valueOf(columnId))){
+					needAdd = false;
+					break;
+				}				
+			}	
+			if(needAdd){
+				needAddColumns.add(Long.valueOf(columnId));
+			}
+		}
+		
+		//找需要删除的
+		List<ColumnRelationArticlePO> needRemoveRelations = new ArrayList<ColumnRelationArticlePO>();
+		for(ColumnRelationArticlePO exsitRelation: exsitRelations){
+			boolean needRemove = true;
+			for(String columnId: columnIds){
+				if(Long.valueOf(columnId).equals(exsitRelation.getColumnId())){
+					needRemove = false;
+					break;
+				}
+			}
+			if(needRemove){
+				needRemoveRelations.add(exsitRelation);
+			}
+		}
+		
+		columnRelationArticleDao.deleteInBatch(needRemoveRelations);
+		
+		if(needAddColumns!=null && needAddColumns.size()>0){
+			List<ColumnPO> columns = columnDao.findAll(needAddColumns);
+			if(columns!=null && columns.size()>0){
+				List<ColumnRelationArticlePO> relations = new ArrayList<ColumnRelationArticlePO>();
+				for(ColumnPO column: columns){
+					ColumnRelationArticlePO relation = new ColumnRelationArticlePO();
+					relation.setUpdateTime(new Date());
+					relation.setArticleId(article.getId());
+					relation.setArticleName(article.getName());
+					relation.setArticleRemark(article.getRemark());
+					relation.setColumnId(column.getId());
+					relation.setColumnName(column.getName());
+					relation.setColumnCode(column.getCode());
 					relation.setColumnRemark(column.getRemark());
 					relation.setArticleOrder(++tag);
 					relation.setCommand(false);
@@ -253,11 +338,10 @@ public class ColumnRelationArticleService {
 	public void inform(Long columnId, Long articleId) throws Exception{
 		
 		ArticlePO article = articleDao.findOne(articleId);		
-		ArticleVO view_article = new ArticleVO().set(article);
 		
 		JSONObject param = new JSONObject();
-		param.put("url", view_article.getPreviewUrl());
+		param.put("url", article.getPreviewUrl());
  		
-		aliPushService.sendMessage(view_article.getName(), view_article.getRemark(), param.toJSONString());		
+		aliPushService.sendMessage(article.getName(), article.getRemark(), param.toJSONString());		
 	}
 }

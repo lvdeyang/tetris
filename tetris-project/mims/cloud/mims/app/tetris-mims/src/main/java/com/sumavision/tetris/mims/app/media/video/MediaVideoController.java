@@ -123,6 +123,39 @@ public class MediaVideoController {
 	}
 	
 	/**
+	 * 编辑视频媒资<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月25日 下午4:51:08
+	 * @param id 视频媒资id
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @return MediaVideoVO 视频媒资
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/edit/{id}")
+	public Object editTask(
+			@PathVariable Long id,
+			String name,
+            String tags,
+            String keyWords,
+            String remark,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+
+		MediaVideoPO video = mediaVideoDao.findOne(id);
+		
+		MediaVideoPO entity = mediaVideoService.editTask(user, video, name, null, null, remark);
+		
+		return new MediaVideoVO().set(entity);
+		
+	}
+	
+	/**
 	 * 查询图片媒资上传任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.api.terminal.exception.ImageVerificationCodeErrorException;
-import com.sumavision.tetris.api.terminal.exception.ImageVerificationCodeTimeoutException;
+import com.sumavision.tetris.api.terminal.exception.MobileNotMatchedException;
 import com.sumavision.tetris.api.terminal.exception.MobileVerificationCodeErrorException;
 import com.sumavision.tetris.api.terminal.exception.MobileVerificationCodeTimeoutException;
 import com.sumavision.tetris.auth.login.LoginService;
@@ -23,9 +22,10 @@ import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
+import com.sumavision.tetris.user.UserDAO;
+import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.UserService;
-
-import scala.annotation.meta.param;
+import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
 
 @Controller
 @RequestMapping(value = "/api/terminal/auth")
@@ -44,6 +44,9 @@ public class ApiTerminalAuthController {
 	
 	@Autowired
 	private AliSendSmsService aliSendSmsService;
+	
+	@Autowired
+	private UserDAO userDao;
 	
 	/**
 	 * 移动终端请求手机验证码<br/>
@@ -74,6 +77,7 @@ public class ApiTerminalAuthController {
 		aliSendSmsService.sendSms(mobile, param.toJSONString());
 		
 		session.setAttribute("verification-code-phone", number);
+		session.setAttribute("verification-phone", mobile);
 		
 		return session.getId();
 	}
@@ -113,7 +117,56 @@ public class ApiTerminalAuthController {
 			throw new MobileVerificationCodeErrorException(username, mobile);
 		}
 		
+		String phone = session.getAttribute("verification-phone").toString();
+		if(!phone.equals(mobile)){
+			throw new MobileNotMatchedException(mobile, phone);
+		}
+		
 		userService.add(username, username, password, passwordRepeat, mobile, null, UserClassify.TERMINAL.getName(), false);
+		
+		return null;
+	}
+	
+	/**
+	 * 修改密码<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月16日 上午11:37:15
+	 * @param username 用户民
+	 * @param mobile 手机号
+	 * @param password 密码
+	 * @param passwordRepeat 密码重复
+	 * @param verificationCode 验证码
+	 * @param sessionToken session标识
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/modify/passward")
+	public Object modifyPassward(
+			String username,
+			String mobile,
+			String password,
+			String passwordRepeat,
+			String verificationCode,
+			String sessionToken,
+			HttpServletRequest request) throws Exception{
+		
+		HttpSession session = HttpSessionContext.get(sessionToken);
+		if(session == null){
+			throw new MobileVerificationCodeTimeoutException(username, mobile);
+		}
+		
+		String number = session.getAttribute("verification-code-phone").toString();
+		if(!number.equals(verificationCode)){
+			throw new MobileVerificationCodeErrorException(username, mobile);
+		}
+		
+		String phone = session.getAttribute("verification-phone").toString();
+		if(!phone.equals(mobile)){
+			throw new MobileNotMatchedException(mobile, phone);
+		}
+		
+		userService.modifyPassword(username, mobile, password, passwordRepeat);
 		
 		return null;
 	}

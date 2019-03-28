@@ -29,4 +29,22 @@ public interface ArticleClassifyPermissionDAO extends BaseDAO<ArticleClassifyPer
 	 * @param ids 文章ids
 	 */
 	public void deleteByArticleIdIn(Collection<Long> ids);
+	
+	/**
+	 * 根据分类id删除关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月27日 上午10:41:09
+	 * @param classifyId 分类id
+	 */
+	public void deleteByClassifyId(Long classifyId);
+	
+	/**
+	 * 根据分类id列表删除关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月27日 上午10:41:47
+	 * @param classifyIds 分类id列表
+	 */
+	public void deleteByClassifyIdIn(Collection<Long> classifyIds);
 }

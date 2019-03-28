@@ -68,6 +68,16 @@ define([
                         keyWords:'',
                         previewUrl:'',
                         loading:false
+                    },
+                    editAudioStream:{
+                        visible:false,
+                        id:'',
+                        name:'',
+                        remark:'',
+                        tags:'',
+                        keyWords:'',
+                        previewUrl:'',
+                        loading:false
                     }
                 },
                 prepareUploadFileInfo:null
@@ -254,6 +264,17 @@ define([
                             self.dialog.renameFolder.visible = true;
                         }
                     }else if(command === '1'){
+                        //编辑
+                        if(row.type === 'AUDIO_STREAM'){
+                            self.dialog.editAudioStream.id = row.id;
+                            self.dialog.editAudioStream.name = row.name;
+                            self.dialog.editAudioStream.remark = row.remarks;
+                            self.dialog.editAudioStream.tags = row.tags;
+                            self.dialog.editAudioStream.keyWords = row.keyWords;
+                            self.dialog.editAudioStream.previewUrl = row.previewUrl;
+                            self.dialog.editAudioStream.visible = true;
+                        }
+                    }else if(command === '2'){
                         //移动
                         if(row.type === 'FOLDER'){
                             self.$refs.moveMediaAudioStreamFolderDialog.open('/folder/permission/media/tree/with/except/audioStream', row.id);
@@ -262,7 +283,7 @@ define([
                             self.$refs.moveMediaAudioStreamDialog.open('/folder/permission/media/tree/with/except/audioStream');
                             self.$refs.moveMediaAudioStreamDialog.setBuffer(row);
                         }
-                    }else if(command === '2'){
+                    }else if(command === '3'){
                         //复制
                         if(row.type === 'FOLDER'){
                             self.$refs.copyMediaAudioStreamFolderDialog.open('/folder/permission/media/tree/audioStream');
@@ -408,7 +429,19 @@ define([
                     self.dialog.addAudioStream.visible = false;
                     self.dialog.addAudioStream.loading = false;
                 },
-                //添加视频媒资任务
+                //添加媒资对话框关闭
+                handleEditAudioStreamClose:function(){
+                    var self = this;
+                    self.dialog.editAudioStream.id = '';
+                    self.dialog.editAudioStream.name = '';
+                    self.dialog.editAudioStream.remark = '';
+                    self.dialog.editAudioStream.tags = '';
+                    self.dialog.editAudioStream.keyWords = '';
+                    self.dialog.editAudioStream.previewUrl = '';
+                    self.dialog.editAudioStream.visible = false;
+                    self.dialog.editAudioStream.loading = false;
+                },
+                //添加音频流媒资任务
                 addMediaAudioStreamTask:function(){
                     var self = this;
                     self.dialog.addAudioStream.loading = true;
@@ -424,6 +457,29 @@ define([
                         if(status !== 200) return;
                         prependExceptFolderRow(self.table.rows, data);
                         self.handleAddAudioStreamClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                //编辑音频流媒资任务
+                editMediaAudioStreamTask:function(){
+                    var self = this;
+                    self.dialog.editAudioStream.loading = true;
+                    ajax.post('/media/audio/stream/task/edit/' + self.dialog.editAudioStream.id, {
+                        previewUrl:self.dialog.editAudioStream.previewUrl,
+                        name:self.dialog.editAudioStream.name,
+                        tags:self.dialog.editAudioStream.tags,
+                        keyWords:self.dialog.editAudioStream.keyWords,
+                        remark:self.dialog.editAudioStream.remark,
+                    }, function(data, status){
+                        self.dialog.addAudioStream.loading = false;
+                        if(status !== 200) return;
+                        var rows = self.table.rows;
+                        for(var i=0; i<rows.length; i++){
+                            if(rows[i].id === data.id){
+                                rows.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleEditAudioStreamClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 }
             },

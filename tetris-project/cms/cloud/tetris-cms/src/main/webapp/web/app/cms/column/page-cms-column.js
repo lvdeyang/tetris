@@ -51,6 +51,7 @@ define([
                         visible:false,
                         data:'',
                         name:'',
+                        code:'',
                         remark:''
                     },
                     selectTag:{
@@ -148,6 +149,7 @@ define([
                     var self = this;
                     self.dialog.editTag.data = data;
                     self.dialog.editTag.name = data.name;
+                    self.dialog.editTag.code = data.code;
                     self.dialog.editTag.remark = data.remark;
                     self.dialog.editTag.visible = true;
                 },
@@ -205,6 +207,7 @@ define([
                     var self = this;
                     self.dialog.editTag.data = '';
                     self.dialog.editTag.name = '';
+                    self.dialog.editTag.code = '';
                     self.dialog.editTag.remark = '';
                     self.dialog.editTag.visible = false;
                 },
@@ -213,11 +216,13 @@ define([
                     self.loading.tree = true;
                     ajax.post('/cms/column/update/' + self.dialog.editTag.data.id, {
                         name:self.dialog.editTag.name,
+                        code:self.dialog.editTag.code,
                         remark:self.dialog.editTag.remark
                     }, function(data, status){
                         self.loading.tree = false;
                         if(status !== 200) return;
                         self.dialog.editTag.data.name = data.name;
+                        self.dialog.editTag.data.code = data.code;
                         self.dialog.editTag.data.remark = data.remark;
                         self.handleEditTagClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
@@ -234,11 +239,11 @@ define([
                     });
                     self.loadArticles(data.id);
                 },
-                loadArticles:function(tagId){
+                loadArticles:function(columnId){
                     var self = this;
                     self.table.data.splice(0, self.table.data.length);
                     ajax.post('/cms/column/relation/article/load', {
-                        tagId:tagId
+                        columnId:columnId
                     }, function(data){
                         if(data && data.length>0){
                             for(var i=0; i<data.length; i++){

@@ -126,6 +126,42 @@ public class MediaPictureController {
 	}
 	
 	/**
+	 * 编辑图片媒资<br/>
+	 * <b>作者:</b>sm<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月25日 下午3:22:50
+	 * @param id 图片媒资id
+	 * @param name 图片媒资名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @return MediaPictureVO 图片媒资
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/edit/{id}")
+	public Object editTask(
+			@PathVariable Long id,
+			String name,
+            String tags,
+            String keyWords,
+            String remark,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		MediaPicturePO picture = mediaPictureDao.findOne(id);
+		if(picture == null){
+			throw new MediaPictureNotExistException(id);
+		}
+		
+		MediaPicturePO entity = mediaPictureService.editTask(user, picture, name, null, null, remark);
+		
+		return new MediaPictureVO().set(entity);
+		
+	}
+	
+	/**
 	 * 查询图片媒资上传任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

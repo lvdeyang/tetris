@@ -158,7 +158,7 @@
                 @task-restart="taskRestart"></mi-task-view>
 
         <!-- 文件上传 -->
-        <mi-upload-dialog ref="uploadDialog" @file-selected="fileSelected"></mi-upload-dialog>
+        <mi-upload-dialog ref="uploadDialog" :multiple="true" @file-selected="fileSelected"></mi-upload-dialog>
 
         <!-- 移动文件 -->
         <mi-folder-dialog ref="moveMaterialFileDialog" @selected-folder="moveMaterialFile"></mi-folder-dialog>

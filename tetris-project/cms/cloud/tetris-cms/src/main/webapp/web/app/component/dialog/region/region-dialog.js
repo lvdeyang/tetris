@@ -38,6 +38,7 @@ define([
                 self.visible = true;
                 self.uri = uri;
                 self.buff = buff;
+                self.checked = [];
                 if(checked && checked.length>0){
                     for(var i=0; i<checked.length; i++){
                         self.checked.push(checked[i]);

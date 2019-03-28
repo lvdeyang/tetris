@@ -126,6 +126,42 @@ public class MediaAudioController {
 	}
 	
 	/**
+	 * 编辑音频媒资<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月25日 下午4:42:43
+	 * @param id 音频媒资id
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @return MediaAudioVO 音频媒资
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/edit/{id}")
+	public Object editTask(
+			@PathVariable Long id,
+			String name,
+            String tags,
+            String keyWords,
+            String remark,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+
+		MediaAudioPO audio = mediaAudioDao.findOne(id);
+		if(audio == null){
+			throw new MediaAudioNotExistException(id);
+		}
+		
+		MediaAudioPO entity = mediaAudioService.editAudio(user, audio, name, null, null, remark);
+		
+		return new MediaAudioVO().set(entity);
+		
+	}
+	
+	/**
 	 * 查询图片媒资上传任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

@@ -17,8 +17,16 @@ public class RegionNotExistException extends BaseException{
 	public RegionNotExistException(Long id) {
 		super(StatusCode.FORBIDDEN, "地区不存在！");
 		LOG.error(DateUtil.now());
-		LOG.error(new StringBufferWrapper().append("地区不存在!模板id：")
+		LOG.error(new StringBufferWrapper().append("地区不存在!地区id：")
 										   .append(id)
+										   .toString());
+	}
+	
+	public RegionNotExistException(String code) {
+		super(StatusCode.FORBIDDEN, "地区不存在！");
+		LOG.error(DateUtil.now());
+		LOG.error(new StringBufferWrapper().append("地区不存在!地区code：")
+										   .append(code)
 										   .toString());
 	}
 }

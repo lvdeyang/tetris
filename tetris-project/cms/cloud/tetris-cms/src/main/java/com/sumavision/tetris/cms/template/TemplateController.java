@@ -68,6 +68,32 @@ public class TemplateController {
 	}
 	
 	/**
+	 * 查询templateId列表<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月19日 下午3:27:45
+	 * @return Set<String> templateId列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/ids")
+	public Object queryIds(HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		TemplateId[] values = TemplateId.values();
+		
+		Set<String> ids = new HashSet<String>();
+		for(TemplateId value:values){
+			ids.add(value.getName());
+		}
+		
+		return ids;
+	}
+	
+	/**
 	 * 根据标签查询模板<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -114,6 +140,7 @@ public class TemplateController {
 	public Object add(
 			String name,
 			String type,
+			String templateId,
 			String icon,
 			String style,
 			Integer serial,
@@ -127,7 +154,7 @@ public class TemplateController {
 		
 		TemplateTagPO tag = templateTagDao.findOne(tagId);
 		
-		TemplatePO template = templateService.add(user, name, type, icon, style, serial, remark, tag);
+		TemplatePO template = templateService.add(user, name, type, templateId, icon, style, serial, remark, tag);
 		
 		return new TemplateVO().set(template);
 	}

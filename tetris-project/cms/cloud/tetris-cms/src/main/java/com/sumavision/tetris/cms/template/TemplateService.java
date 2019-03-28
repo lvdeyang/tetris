@@ -36,6 +36,7 @@ public class TemplateService {
 			UserVO user,
 			String name,
 			String type,
+			String templateId,
 			String icon,
 			String style,
 			Integer serial,
@@ -47,6 +48,11 @@ public class TemplateService {
 		template.setAuthorName(user.getNickname());
 		template.setName(name);
 		template.setType(TemplateType.fromName(type));
+		
+		if(templateId != null && !templateId.equals("")){
+			template.setTemplateId(TemplateId.fromName(templateId));
+		}
+
 		template.setIcon(icon);
 		template.setStyle(style);
 		template.setSerial(serial);

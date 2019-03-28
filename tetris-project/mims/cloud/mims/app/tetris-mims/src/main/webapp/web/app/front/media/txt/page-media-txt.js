@@ -68,6 +68,16 @@ define([
                         keyWords:'',
                         content:'',
                         loading:false
+                    },
+                    editTxt:{
+                        visible:false,
+                        id:'',
+                        name:'',
+                        remark:'',
+                        tags:'',
+                        keyWords:'',
+                        content:'',
+                        loading:false
                     }
                 },
                 prepareUploadFileInfo:null
@@ -252,6 +262,17 @@ define([
                             self.dialog.renameFolder.visible = true;
                         }
                     }else if(command === '1'){
+                        //编辑
+                        if(row.type === 'TXT'){
+                            self.dialog.editTxt.id = row.id;
+                            self.dialog.editTxt.name = row.name;
+                            self.dialog.editTxt.remark = row.remarks;
+                            self.dialog.editTxt.tags = row.tags;
+                            self.dialog.editTxt.keyWords = row.keyWords;
+                            self.dialog.editTxt.content = row.content;
+                            self.dialog.editTxt.visible = true;
+                        }
+                    }else if(command === '2'){
                         //移动
                         if(row.type === 'FOLDER'){
                             self.$refs.moveMediaTxtFolderDialog.open('/folder/permission/media/tree/with/except/txt', row.id);
@@ -260,7 +281,7 @@ define([
                             self.$refs.moveMediaTxtDialog.open('/folder/permission/media/tree/with/except/txt');
                             self.$refs.moveMediaTxtDialog.setBuffer(row);
                         }
-                    }else if(command === '2'){
+                    }else if(command === '3'){
                         //复制
                         if(row.type === 'FOLDER'){
                             self.$refs.copyMediaTxtFolderDialog.open('/folder/permission/media/tree/txt');
@@ -406,7 +427,19 @@ define([
                     self.dialog.addTxt.visible = false;
                     self.dialog.addTxt.loading = false;
                 },
-                //添加视频媒资任务
+                //编辑媒资对话框关闭
+                handleEditTxtClose:function(){
+                    var self = this;
+                    self.dialog.editTxt.id = '';
+                    self.dialog.editTxt.name = '';
+                    self.dialog.editTxt.remark = '';
+                    self.dialog.editTxt.tags = '';
+                    self.dialog.editTxt.keyWords = '';
+                    self.dialog.editTxt.content = '';
+                    self.dialog.editTxt.visible = false;
+                    self.dialog.editTxt.loading = false;
+                },
+                //添加文本媒资任务
                 addMediaTxtTask:function(){
                     var self = this;
                     self.dialog.addTxt.loading = true;
@@ -422,6 +455,29 @@ define([
                         if(status !== 200) return;
                         prependExceptFolderRow(self.table.rows, data);
                         self.handleAddTxtClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                //编辑文本媒资任务
+                editMediaTxtTask:function(){
+                    var self = this;
+                    self.dialog.editTxt.loading = true;
+                    ajax.post('/media/txt/task/edit/' + self.dialog.editTxt.id, {
+                        content:self.dialog.editTxt.content,
+                        name:self.dialog.editTxt.name,
+                        tags:self.dialog.editTxt.tags,
+                        keyWords:self.dialog.editTxt.keyWords,
+                        remark:self.dialog.editTxt.remark
+                    }, function(data, status){
+                        self.dialog.editTxt.loading = false;
+                        if(status !== 200) return;
+                        var rows = self.table.rows;
+                        for(var i=0; i<rows.length; i++){
+                            if(rows[i].id === data.id){
+                                rows.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleEditTxtClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 }
             },

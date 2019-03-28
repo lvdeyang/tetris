@@ -46,6 +46,9 @@ public class ArticleService {
 	@Autowired
 	private ColumnRelationArticleDAO columnRelationArticleDao;
 	
+	@Autowired
+	private ArticleUserPermissionDAO articleUserPermissionDao;
+	
 	/**
 	 * 添加文章<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -134,6 +137,8 @@ public class ArticleService {
 			}
 			articleRegionPermissionDao.save(articleRegionPermissions);
 		}
+		
+		addPermission(user, article);
 		
 		return article;
 	}
@@ -298,6 +303,7 @@ public class ArticleService {
 			articleClassifyPermissionDao.deleteByArticleIdIn(ids);
 			articleRegionPermissionDao.deleteByArticleIdIn(ids);
 			columnRelationArticleDao.deleteByArticleIdIn(ids);
+			articleUserPermissionDao.deleteByArticleIdIn(ids);
 			
 			articleDao.delete(article);
 		}
@@ -322,6 +328,27 @@ public class ArticleService {
 		articleDao.save(article);
 		
 		return article;
+	}
+	
+	/**
+	 * 添加文章用户关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月27日 下午3:30:46
+	 * @param user 用户
+	 * @param article 文章
+	 * @return ArticleUserPermissionPO 文章用户关联
+	 */
+	public ArticleUserPermissionPO addPermission(UserVO user, ArticlePO article) throws Exception{
+		
+		ArticleUserPermissionPO permission = new ArticleUserPermissionPO();
+		permission.setArticleId(article.getId());
+		permission.setUserId(user.getUuid());
+		permission.setGroupId(user.getGroupId());
+		
+		articleUserPermissionDao.save(permission);
+		
+		return permission;
 	}
 	
 }

@@ -22,6 +22,9 @@ public class RegionPO extends AbstractBasePO{
 	/** 地区名 */
 	private String name;
 	
+	/** 地区编号 */
+	private String code;
+	
 	/** 父地区id */
 	private Long parentId;
 	
@@ -35,6 +38,15 @@ public class RegionPO extends AbstractBasePO{
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Column(name = "CODE")
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	@Column(name = "PARENT_ID")

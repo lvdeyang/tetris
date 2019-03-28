@@ -9,6 +9,8 @@ public class RegionVO extends AbstractBaseVO<RegionVO, RegionPO>{
 	
 	private String name;
 	
+	private String code;
+	
 	private Long parentId;
 	
 	private List<RegionVO> subRegions;
@@ -19,7 +21,8 @@ public class RegionVO extends AbstractBaseVO<RegionVO, RegionPO>{
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setParentId(entity.getParentId())
-			.setName(entity.getName());		
+			.setName(entity.getName())
+			.setCode(entity.getCode());		
 		return this;
 	}
 
@@ -38,6 +41,15 @@ public class RegionVO extends AbstractBaseVO<RegionVO, RegionPO>{
 
 	public RegionVO setParentId(Long parentId) {
 		this.parentId = parentId;
+		return this;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public RegionVO setCode(String code) {
+		this.code = code;
 		return this;
 	}
 

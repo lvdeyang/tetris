@@ -49,7 +49,8 @@ define([
                     editTag:{
                         visible:false,
                         data:'',
-                        name:''
+                        name:'',
+                        code:''
                     },
                     selectTag:{
                         visible:false,
@@ -146,6 +147,7 @@ define([
                     var self = this;
                     self.dialog.editTag.data = data;
                     self.dialog.editTag.name = data.name;
+                    self.dialog.editTag.code = data.code;
                     self.dialog.editTag.visible = true;
                 },
                 treeNodeAppend:function(parentNode, parent){
@@ -202,6 +204,7 @@ define([
                     var self = this;
                     self.dialog.editTag.data = '';
                     self.dialog.editTag.name = '';
+                    self.dialog.editTag.code = '';
                     self.dialog.editTag.visible = false;
                 },
                 handleEditTagCommit:function(){
@@ -209,10 +212,12 @@ define([
                     self.loading.tree = true;
                     ajax.post('/cms/region/update/' + self.dialog.editTag.data.id, {
                         name:self.dialog.editTag.name,
+                        code:self.dialog.editTag.code
                     }, function(data, status){
                         self.loading.tree = false;
                         if(status !== 200) return;
                         self.dialog.editTag.data.name = data.name;
+                        self.dialog.editTag.data.code = data.code;
                         self.handleEditTagClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },

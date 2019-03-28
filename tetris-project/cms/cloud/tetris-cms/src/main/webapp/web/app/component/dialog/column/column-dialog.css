@@ -1,0 +1,4 @@
+.column-dialog .content{height:340px; position:relative;}
+.column-dialog .content-wrapper{width:600px; height:400px; position:absolute; top:-30px; left:0;}
+.column-dialog .tree-wrapper{height:348px; margin-top: 20px; overflow: auto;}
+.column-dialog .footer{height:32px;}

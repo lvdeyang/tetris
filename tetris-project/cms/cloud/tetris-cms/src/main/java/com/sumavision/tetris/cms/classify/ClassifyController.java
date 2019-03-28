@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.cms.classify.exception.ClassifyNotExistException;
+import com.sumavision.tetris.cms.classify.exception.UserHasNotPermissionForClassifyException;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -51,17 +53,18 @@ public class ClassifyController {
 		
 		UserVO user = userQuery.current();
 		
-		//TODO 权限校验
+		//TODO 权限校验		
+		Page<ClassifyPO> page = classifyQuery.findAllByUser(user, currentPage, pageSize);
 		
-		List<ClassifyPO> entities = classifyQuery.findAll(currentPage, pageSize);
+		List<ClassifyPO> entities = page.getContent();
 		
 		List<ClassifyVO> classifies = ClassifyVO.getConverter(ClassifyVO.class).convert(entities, ClassifyVO.class);
 		
-		Long total = classifyDao.count();
-		
+		Long total = page.getTotalElements();
+			
 		return new HashMapWrapper<String, Object>().put("rows", classifies)
-												   .put("total", total)
-												   .getMap();
+													   .put("total", total)
+													   .getMap();
 	}
 	
 	/**
@@ -112,6 +115,9 @@ public class ClassifyController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!classifyQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForClassifyException(id, user);
+		}
 		
 		ClassifyPO classify = classifyDao.findOne(id);
 		if(classify == null){
@@ -139,11 +145,14 @@ public class ClassifyController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!classifyQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForClassifyException(id, user);
+		}
 		
 		ClassifyPO classify = classifyDao.findOne(id);
 		
 		if(classify != null){
-			classifyDao.delete(classify);
+			classifyService.remove(classify);
 		}
 		
 		return null;
@@ -174,10 +183,10 @@ public class ClassifyController {
 		//TODO 权限校验
 		
 		if(except == null){
-			return classifyQuery.list(currentPage, pageSize);
+			return classifyQuery.list(user, currentPage, pageSize);
 		}else{
 			List<Long> exceptIds = JSON.parseArray(except, Long.class);
-			return classifyQuery.listWithExcept(exceptIds, currentPage, pageSize);
+			return classifyQuery.listWithExcept(user, exceptIds, currentPage, pageSize);
 		}
 		
 	}

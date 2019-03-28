@@ -69,6 +69,15 @@ define([
                         task:'',
                         loading:false
                     },
+                    editVideo:{
+                        visible:false,
+                        id:'',
+                        name:'',
+                        remark:'',
+                        tags:'',
+                        keyWords:'',
+                        loading:false
+                    },
                     upload:{
                         fileType:['video'],
                         multiple:false
@@ -283,6 +292,16 @@ define([
                             self.dialog.renameFolder.visible = true;
                         }
                     }else if(command === '1'){
+                        //编辑
+                        if(row.type === 'VIDEO'){
+                            self.dialog.editVideo.id = row.id;
+                            self.dialog.editVideo.name = row.name;
+                            self.dialog.editVideo.remark = row.remarks;
+                            self.dialog.editVideo.tags = row.tags;
+                            self.dialog.editVideo.keyWords = row.keyWords;
+                            self.dialog.editVideo.visible = true;
+                        }
+                    }else if(command === '2'){
                         //移动
                         if(row.type === 'FOLDER'){
                             self.$refs.moveMediaVideoFolderDialog.open('/folder/permission/media/tree/with/except/video', row.id);
@@ -291,7 +310,7 @@ define([
                             self.$refs.moveMediaVideoDialog.open('/folder/permission/media/tree/with/except/video');
                             self.$refs.moveMediaVideoDialog.setBuffer(row);
                         }
-                    }else if(command === '2'){
+                    }else if(command === '3'){
                         //复制
                         if(row.type === 'FOLDER'){
                             self.$refs.copyMediaVideoFolderDialog.open('/folder/permission/media/tree/video');
@@ -457,6 +476,16 @@ define([
                     self.dialog.addVideo.visible = false;
                     self.dialog.addVideo.loading = false;
                 },
+                //编辑媒资对话框关闭
+                handleEditVideoClose:function(){
+                    var self = this;
+                    self.dialog.editVideo.name = '';
+                    self.dialog.editVideo.remark = '';
+                    self.dialog.editVideo.tags = '';
+                    self.dialog.editVideo.keyWords = '';
+                    self.dialog.editVideo.visible = false;
+                    self.dialog.editVideo.loading = false;
+                },
                 //添加视频媒资任务
                 addMediaVideoTask:function(){
                     var self = this;
@@ -464,7 +493,7 @@ define([
                         name:self.dialog.addVideo.task.name,
                         size:self.dialog.addVideo.task.size,
                         mimetype:self.dialog.addVideo.task.mimetype,
-                        lastModified:self.dialog.addVideo.task.lastModified,
+                        lastModified:self.dialog.addVideo.task.lastModified
                     };
                     self.dialog.addVideo.loading = true;
                     ajax.post('/media/video/task/add', {
@@ -492,6 +521,28 @@ define([
                             createUploader(self, uploadfiles);
                         }
                         self.handleAddVideoClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                //编辑视频媒资任务
+                editMediaVideoTask:function(){
+                    var self = this;
+                    self.dialog.editVideo.loading = true;
+                    ajax.post('/media/video/task/edit/' + self.dialog.editVideo.id, {
+                        name:self.dialog.editVideo.name,
+                        tags:self.dialog.editVideo.tags,
+                        keyWords:self.dialog.editVideo.keyWords,
+                        remark:self.dialog.editVideo.remark
+                    }, function(data, status){
+                        self.dialog.editVideo.loading = false;
+                        if(status !== 200) return;
+                        var rows = self.table.rows;
+                        for(var i=0; i<rows.length; i++){
+                            if(rows[i].id === data.id){
+                                rows.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleEditVideoClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 //上传按钮点击

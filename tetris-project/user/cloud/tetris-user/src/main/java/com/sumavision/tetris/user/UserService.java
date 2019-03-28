@@ -29,6 +29,7 @@ import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.user.exception.MailAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
+import com.sumavision.tetris.user.exception.MobileNotExistException;
 import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
@@ -405,5 +406,39 @@ public class UserService{
 		
 		return new UserVO().set(user);
 	}
-
+	
+	/**
+	 * 修改密码<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月16日 上午11:01:23
+	 * @param username 用户民
+	 * @param mobile 手机号
+	 * @param newPassword 新密码
+	 * @param repeat 重复新密码
+	 * @return UserVO 修改后的用户
+	 */
+	public UserVO modifyPassword(
+			String username,
+			String mobile,
+            String newPassword,
+            String repeat) throws Exception{
+		
+		UserPO user = null;
+		
+		if(mobile != null){
+			user = userDao.findByMobile(mobile);
+			if(user == null){
+				throw new MobileNotExistException(mobile);
+			}
+			
+			if(!newPassword.equals(repeat)) throw new RepeatNotMatchPasswordException();
+			
+			user.setPassword(sha256Encoder.encode(newPassword));
+		}
+		
+		userDao.save(user);
+		
+		return new UserVO().set(user);
+	}
 }

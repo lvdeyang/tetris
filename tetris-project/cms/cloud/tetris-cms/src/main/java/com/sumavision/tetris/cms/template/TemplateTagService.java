@@ -162,10 +162,10 @@ public class TemplateTagService {
 		if(subTags!=null && subTags.size()>0){
 			for(TemplateTagPO subTag:subTags){
 				String[] paths = subTag.getParentPath().split(new StringBufferWrapper().append("/").append(sourceTag.getId()).toString());
-				if(paths.length == 1){
-					subTag.setParentPath(parentPath.append("/").append(targetTag.getId()).toString());
+				if(paths.length == 1 || paths.length == 0){
+					subTag.setParentPath(parentPath.append("/").append(sourceTag.getId()).toString());
 				}else{
-					subTag.setParentPath(parentPath.append("/").append(targetTag.getId()).append(paths[1]).toString());
+					subTag.setParentPath(parentPath.append("/").append(sourceTag.getId()).append(paths[1]).toString());
 				}
 			}
 		}

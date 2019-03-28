@@ -53,23 +53,32 @@ public class AliPushService extends BasePush{
         pushRequest.setIOSApnsEnv("DEV");//iOS的通知是通过APNs中心来发送的，需要填写对应的环境信息。"DEV" : 表示开发环境 "PRODUCT" : 表示生产环境
         pushRequest.setIOSRemind(true); // 消息推送时设备不在线（既与移动推送的服务端的长连接通道不通），则这条推送会做为通知，通过苹果的APNs通道送达一次。注意：离线消息转通知仅适用于生产环境
         pushRequest.setIOSRemindBody("iOSRemindBody");//iOS消息转通知时使用的iOS通知内容，仅当iOSApnsEnv=PRODUCT && iOSRemind为true时有效
-        pushRequest.setIOSExtParameters("{\"_ENV_\":\"DEV\",\"k2\":\"v2\"}"); //通知的扩展属性(注意 : 该参数要以json map的格式传入,否则会解析出错)
+        pushRequest.setIOSExtParameters(param); //通知的扩展属性(注意 : 该参数要以json map的格式传入,否则会解析出错)
         
         // 推送配置: Android
-        pushRequest.setAndroidNotifyType("NONE");//通知的提醒方式 "VIBRATE" : 震动 "SOUND" : 声音 "BOTH" : 声音和震动 NONE : 静音
+        pushRequest.setAndroidNotifyType("BOTH");//通知的提醒方式 "VIBRATE" : 震动 "SOUND" : 声音 "BOTH" : 声音和震动 NONE : 静音
         pushRequest.setAndroidNotificationBarType(1);//通知栏自定义样式0-100
         pushRequest.setAndroidNotificationBarPriority(1);//通知栏自定义样式0-100
         pushRequest.setAndroidOpenType("ACTIVITY"); //点击通知后动作 "APPLICATION" : 打开应用 "ACTIVITY" : 打开AndroidActivity "URL" : 打开URL "NONE" : 无跳转
         //pushRequest.setAndroidOpenUrl("http://192.165.56.84:8086/cms/resource/article/24/70c5d5e653e84dd288df2189973024b5.html"); //Android收到推送后打开对应的url,仅当AndroidOpenType="URL"有效
         pushRequest.setAndroidActivity(androidActivity); // 设定通知打开的activity，仅当AndroidOpenType="Activity"有效
+      
+        // 指定notificaitonchannel id
+        pushRequest.setAndroidNotificationChannel(notificaitonchannel);
+        
+//        //设置辅助弹窗打开Activity
+//        pushRequest.setAndroidPopupActivity("com.suma.yingjigb.SendActivity");
+//        pushRequest.setAndroidPopupTitle(title);
+//        pushRequest.setAndroidPopupBody(body);
+        
         pushRequest.setAndroidMusic("default"); // Android通知音乐
         pushRequest.setAndroidExtParameters(param); //设定通知的扩展属性。(注意 : 该参数要以 json map 的格式传入,否则会解析出错)
-
+        
         // 推送控制
         Date pushDate = new Date(System.currentTimeMillis()); // 30秒之间的时间点, 也可以设置成你指定固定时间
         String pushTime = ParameterHelper.getISO8601Time(pushDate);
         pushRequest.setPushTime(pushTime); // 延后推送。可选，如果不设置表示立即推送
-        String expireTime = ParameterHelper.getISO8601Time(new Date(System.currentTimeMillis() + 12 * 3600 * 1000)); // 12小时后消息失效, 不会再发送
+        String expireTime = ParameterHelper.getISO8601Time(new Date(System.currentTimeMillis() + 600 * 1000)); // 十分钟后消息失效, 不会再发送
         pushRequest.setExpireTime(expireTime);
         pushRequest.setStoreOffline(true); // 离线消息是否保存,若保存, 在推送时候，用户即使不在线，下一次上线则会收到
 
