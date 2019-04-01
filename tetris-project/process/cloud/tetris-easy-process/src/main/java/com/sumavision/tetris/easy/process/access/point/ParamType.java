@@ -10,7 +10,9 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  */
 public enum ParamType {
 
+	OBJECT("复杂类型"),
 	ENUM("枚举"),
+	ARRAY("数组"),
 	BASIC("基本类型");
 	
 	private String name;

@@ -2,9 +2,10 @@ package com.sumavision.tetris.easy.process.core;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Set;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.apache.http.Header;
@@ -16,6 +17,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -25,11 +27,12 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
+import com.sumavision.tetris.commons.util.json.AliFastJsonObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.easy.process.access.point.AccessPointDAO;
@@ -39,13 +42,12 @@ import com.sumavision.tetris.easy.process.access.point.AccessPointParamDAO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointParamPO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointType;
 import com.sumavision.tetris.easy.process.access.point.ParamDirection;
+import com.sumavision.tetris.easy.process.access.point.ParamPackagingMethod;
 import com.sumavision.tetris.easy.process.access.service.ServiceType;
 import com.sumavision.tetris.easy.process.access.service.rest.RestServiceDAO;
 import com.sumavision.tetris.easy.process.access.service.rest.RestServicePO;
-import com.sumavision.tetris.easy.process.api.InternalVariableKey;
-import com.sumavision.tetris.easy.process.api.exception.RepeatedVariableValueCheckFailedException;
-import com.sumavision.tetris.easy.process.api.exception.VariableValueCheckFailedException;
 import com.sumavision.tetris.easy.process.core.exception.ErrorAccessPointResponseStatusCodeException;
+import com.sumavision.tetris.easy.process.core.exception.VariableValueCheckFailedException;
 import com.sumavision.tetris.sdk.constraint.api.ConstraintValidator;
 
 /**
@@ -54,7 +56,8 @@ import com.sumavision.tetris.sdk.constraint.api.ConstraintValidator;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年1月9日 上午8:57:33
  */
-@Component
+@Service
+@Transactional(rollbackFor = Exception.class)
 public class RemoteAccessPoint {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(RemoteAccessPoint.class);
@@ -73,6 +76,15 @@ public class RemoteAccessPoint {
 	
 	@Autowired
 	private ConstraintValidator constraintValidator;
+	
+	@Autowired
+	private AliFastJsonObject aliFastJsonObject;
+	
+	@Autowired
+	private ProcessDAO processDao;
+	
+	@Autowired
+	private ProcessParamReferenceDAO processParamReferenceDao;
 
 	/**
 	 * 远程接入点调用<br/>
@@ -84,8 +96,6 @@ public class RemoteAccessPoint {
 	 */
 	public void invoke(DelegateExecution execution, Long accessPointId) throws Exception{
 		
-		String processInstanceId = execution.getProcessInstanceId();
-		
 		AccessPointPO accessPoint = accessPointDao.findOne(accessPointId);
 		
 		List<AccessPointParamPO> paramDefinitions = accessPointParamDao.findByAccessPointIdInAndDirection(new ArrayListWrapper<Long>().add(accessPoint.getId()).getList(), ParamDirection.FORWARD);
@@ -93,7 +103,7 @@ public class RemoteAccessPoint {
 		if(ServiceType.REST.equals(accessPoint.getServiceType())){
 			RestServicePO restService = restServiceDao.findOne(accessPoint.getServiceId());
 			
-			invokeHttpAccessPoint(processInstanceId, restService, accessPoint, paramDefinitions);
+			invokeHttpAccessPoint(execution, restService, accessPoint, paramDefinitions);
 			
 		}
 		
@@ -110,25 +120,49 @@ public class RemoteAccessPoint {
 	 * @param AccessPointPO accessPoint 接入点
 	 * @param List<AccessPointParamPO> paramDefinitions 参数列表
 	 */
-	@SuppressWarnings("unchecked")
 	public void invokeHttpAccessPoint(
-			final String processInstanceId, 
+			DelegateExecution execution,
 			RestServicePO service, 
 			AccessPointPO accessPoint, 
 			List<AccessPointParamPO> paramDefinitions) throws Exception{
 		
+		final String processInstanceId = execution.getProcessInstanceId();
+		
+		ProcessPO process = processDao.findByUuid(execution.getProcessDefinitionId());
+		
 		Map<String, Object> processVariables = runtimeService.getVariables(processInstanceId);
 		
-		List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
-		for(AccessPointParamPO paramDefinition:paramDefinitions){
-			params.add(new BasicNameValuePair(paramDefinition.getPrimaryKey(), processVariables.get(paramDefinition.getPrimaryKey()).toString()));
+		JSONObject variableContext = (JSONObject)processVariables.get("variable-context");
+		
+		Map<String, Object> contextVariableMap = aliFastJsonObject.convertToHashMap(variableContext);
+		
+		Map<String, Object> paramVariableMap = new HashMap<String, Object>();
+		if(paramDefinitions!=null && paramDefinitions.size()>0){
+			for(AccessPointParamPO paramDefinition:paramDefinitions){
+				Object findedValue = contextVariableMap.get(paramDefinition.getPrimaryKeyPath());
+				if(findedValue == null){
+					LOG.error(new StringBufferWrapper().append("接入点调用时未获取到参数；")
+													   .append("流程：").append(process.getName())
+													   .append("，流程实例：").append(processInstanceId)
+													   .append("参数：").append(paramDefinition.getPrimaryKeyPath())
+													   .toString());
+				}else{
+					//key值转换
+					paramVariableMap.put(paramDefinition.getReferenceKeyPath(), findedValue);
+				}
+			}
 		}
-		params.add(new BasicNameValuePair(InternalVariableKey.PROCESSID.getVariableKey(), processVariables.get(InternalVariableKey.PROCESSID.getVariableKey()).toString()));
-		params.add(new BasicNameValuePair(InternalVariableKey.STARTUSERID.getVariableKey(), processVariables.get(InternalVariableKey.STARTUSERID.getVariableKey()).toString()));
+		
+		//加入内置参数
+		paramVariableMap.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), contextVariableMap.get(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey()));
+		paramVariableMap.put(InternalVariableKey.START_USER_ID.getVariableKey(), contextVariableMap.get(InternalVariableKey.START_USER_ID.getVariableKey()));
+		
 		if(AccessPointType.REMOTE_ASYNCHRONOUS.equals(accessPoint.getType())){
-			//异步接口回调的时候需要把接入点id回传到sdk中
-			params.add(new BasicNameValuePair(InternalVariableKey.ACCESSPOINTID.getVariableKey(), accessPoint.getId().toString()));
+			paramVariableMap.put(InternalVariableKey.ACCESS_POINT_ID.getVariableKey(), accessPoint.getId());
 		}
+		
+		JSONObject paramJson = aliFastJsonObject.convertFromHashMap(paramVariableMap);
+		
 		String url = new StringBufferWrapper().append("http://")
 											  .append(service.getHost())
 											  .append(":")
@@ -136,9 +170,17 @@ public class RemoteAccessPoint {
 											  .append(service.getContextPath())
 											  .append(accessPoint.getMethod())
 											  .toString();
+
+		RestAccessPointInvoker invoker = null;
+		if(AccessPointMethodType.HTTP_METHOD_POST.equals(accessPoint.getMethodType()) && 
+				ParamPackagingMethod.JSON.equals(accessPoint.getParamPackagingMethod())){
+			invoker = new RestAccessPointInvoker(url, paramJson, RestAccessPointInvoker.JSON);
+		}else{
+			invoker = new RestAccessPointInvoker(url, paramJson, RestAccessPointInvoker.FORMDATA);
+		}
 		
-		RestAccessPointInvoker invoker = new RestAccessPointInvoker(url, params);
 		try{
+			//返回值判断
 			String result = null;
 			JSONObject data = null;
 			if(accessPoint.getMethodType().equals(AccessPointMethodType.HTTP_METHOD_POST)){
@@ -154,67 +196,83 @@ public class RemoteAccessPoint {
 			}else{
 				data = resultJson.getJSONObject("data");
 			}
-			
 			if(data==null || !AccessPointType.REMOTE_SYNCHRONOUS.equals(accessPoint.getType())) return;
+			
+			//返回值定义
 			List<AccessPointParamPO> reverseParamDefinitions = accessPointParamDao.findByAccessPointIdInAndDirection(new ArrayListWrapper<Long>().add(accessPoint.getId()).getList(), ParamDirection.REVERSE);
 			if(reverseParamDefinitions==null || reverseParamDefinitions.size()<=0) return;
 			
-			List<ProcessVariableVO> variableDefinitions = (List<ProcessVariableVO>)processVariables.get("variableDefinitions");
-			
-			//回写流程变量
-			for(AccessPointParamPO reverseParamDefinition:reverseParamDefinitions){
-				if(!data.containsKey(reverseParamDefinition.getPrimaryKey())){
-					//没有返回值就不回写
-					LOG.warn(new StringBufferWrapper().append("接入点返回值缺失! 接入点：")
-													  .append(url)
-													  .append("参数主键：")
-													  .append(reverseParamDefinition.getPrimaryKey())
-													  .toString());
-				}else{
-					String value = data.getString(reverseParamDefinition.getPrimaryKey());
-					
-					//检查返回值与参数是否重复
-					ProcessVariableVO targetVariableDefinition = null;
-					for(ProcessVariableVO variableDefinition:variableDefinitions){
-						if(variableDefinition.getPrimaryKey().equals(reverseParamDefinition.getPrimaryKey())){
-							targetVariableDefinition = variableDefinition;
-							break;
-						}
-					}
-					if(targetVariableDefinition != null){
-						boolean checkResult = constraintValidator.validate(reverseParamDefinition.getPrimaryKey(), 
-																		   value, 
-																		   targetVariableDefinition.getConstraintExpression());
-						if(!checkResult){
-							throw new RepeatedVariableValueCheckFailedException(reverseParamDefinition.getPrimaryKey(),
-																				reverseParamDefinition.getName(),
-																				value,
-																				targetVariableDefinition.getConstraintExpression());
-						}
-					}
-					
-					if(reverseParamDefinition.getConstraintExpression() != null){
-						boolean checkResult = constraintValidator.validate(reverseParamDefinition.getPrimaryKey(), 
-																		   value, 
-																		   reverseParamDefinition.getConstraintExpression());
-						if(!checkResult){
-							throw new VariableValueCheckFailedException(reverseParamDefinition.getPrimaryKey(), 
-																		reverseParamDefinition.getName(), 
-																		value, 
-																		reverseParamDefinition.getConstraintExpression());
-						}else{
-							//回写变量
-							runtimeService.setVariable(processInstanceId, reverseParamDefinition.getPrimaryKey(), value);
-						}
-					}else{
-						//回写变量
-						runtimeService.setVariable(processInstanceId, reverseParamDefinition.getPrimaryKey(), value);
+			//key值转换
+			Map<String, Object> reverseReferenceParamMap = aliFastJsonObject.convertToHashMap(data);
+			Map<String, Object> reverseParamMap = new HashMap<String, Object>();
+			Set<String> reverseReferenceParamMapKeys = reverseReferenceParamMap.keySet();
+			for(String reverseReferenceParamMapKey:reverseReferenceParamMapKeys){
+				for(AccessPointParamPO reverseParamDefinition:reverseParamDefinitions){
+					if(reverseReferenceParamMapKey.equals(reverseParamDefinition.getReferenceKeyPath())){
+						reverseParamMap.put(reverseParamDefinition.getPrimaryKeyPath(), reverseReferenceParamMap.get(reverseReferenceParamMapKey));
+						break;
 					}
 				}
 			}
+			
+			//处理映射
+			Set<String> reverseParamMapKeys = reverseParamMap.keySet();
+			List<ProcessParamReferencePO> paramReferences = processParamReferenceDao.findByProcessId(process.getId());
+			if(paramReferences!=null && paramReferences.size()>0){
+				for(String reverseParamMapKey:reverseParamMapKeys){
+					for(ProcessParamReferencePO paramReference:paramReferences){
+						String scopeReference = paramReference.getReference();
+						if(scopeReference != null){
+							if(scopeReference==null || "".equals(scopeReference)) continue;
+							if(scopeReference.indexOf(reverseParamMapKey) < 0) continue;
+							String[] primaryKeyPaths = scopeReference.split(ProcessParamReferencePO.KEY_SEPARATOR);
+							Object effectValue = null;
+							//校验值的有效性
+							for(String keyPath:primaryKeyPaths){
+								Object setValue = reverseParamMap.get(keyPath);
+								if(setValue != null){
+									if(effectValue == null){
+										effectValue = setValue;
+									}else{
+										if(!effectValue.equals(setValue)){
+											throw new Exception("两个key存在映射但赋值不一样！");
+										}
+									}
+								}
+							}
+							//设置值
+							for(String keyPath:primaryKeyPaths){
+								reverseParamMap.put(keyPath, effectValue);
+							}
+						}
+					}
+				}
+			}
+			
+			//返回值有效性校验
+			JSONObject validataJsonContext = aliFastJsonObject.convertFromHashMap(reverseParamMap);
+			for(String reverseParamMapKey:reverseParamMapKeys){
+				for(AccessPointParamPO reverseParamDefinition:reverseParamDefinitions){
+					if(reverseParamMapKey.equals(reverseParamDefinition.getPrimaryKeyPath())){
+						boolean validateResult = constraintValidator.validate(validataJsonContext, reverseParamDefinition.getConstraintExpression());
+						if(!validateResult){
+							//校验未通过
+							throw new VariableValueCheckFailedException(reverseParamDefinition.getPrimaryKeyPath(), reverseParamDefinition.getName(), reverseParamMap.get(reverseParamMapKey).toString(), reverseParamDefinition.getConstraintExpression());
+						}
+						break;
+					}
+				}
+			}
+			
+			//回写参数
+			for(String reverseParamMapKey:reverseParamMapKeys){
+				contextVariableMap.put(reverseParamMapKey, reverseParamMap.get(reverseParamMapKey));
+			}
+			variableContext = aliFastJsonObject.convertFromHashMap(contextVariableMap);
+			runtimeService.setVariable(processInstanceId, "variable-context", variableContext);
+			
 		}catch(Exception e){
 			e.printStackTrace();
-			//TODO 发生异常
 			throw e;
 		}
 	}
@@ -227,14 +285,24 @@ public class RemoteAccessPoint {
 	 */
 	public static class RestAccessPointInvoker{
 		
+		public static final String FORMDATA = "application/x-www-form-urlencoded; charset=UTF-8";
+		
+		public static final String JSON = "application/json;charset=UTF-8";
+		
+		public static final String GET = "get";
+		
+		public static final String POST = "post";
+		
 		private static final Logger LOG = LoggerFactory.getLogger(RestAccessPointInvoker.class);
 		
 		private RequestConfig requestConfig;
 		
 		private CloseableHttpClient httpClient;
 		
-		private List<BasicNameValuePair> params;
-
+		private JSONObject params;
+		
+		private String dataType;
+		
 		private String url;
 		
 		private HttpClientContext context;
@@ -259,11 +327,13 @@ public class RemoteAccessPoint {
 		 */
 		public RestAccessPointInvoker(
 				String url, 
-				List<BasicNameValuePair> params, 
+				JSONObject params, 
+				String dataType,
 				BasicClientCookie cookie,
 				Header[] headers){
 			this.url = url;
 			this.params = params;
+			this.dataType = dataType;
 			this.requestConfig = RequestConfig.custom().setSocketTimeout(3000).setConnectTimeout(3000).build();
 			this.httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build();
 			this.context = HttpClientContext.create();
@@ -288,8 +358,9 @@ public class RemoteAccessPoint {
 		 */
 		public RestAccessPointInvoker(
 				String url, 
-				List<BasicNameValuePair> params){
-			this(url, params, null, null);
+				JSONObject params,
+				String dataType){
+			this(url, params, dataType, null, null);
 		}
 		
 		/**
@@ -300,9 +371,10 @@ public class RemoteAccessPoint {
 		 */
 		public RestAccessPointInvoker(
 				String url, 
-				List<BasicNameValuePair> params,
+				JSONObject params,
+				String dataType,
 				BasicClientCookie cookie){
-			this(url, params, cookie, null);
+			this(url, params, dataType, cookie, null);
 		}
 		
 		/**
@@ -313,9 +385,10 @@ public class RemoteAccessPoint {
 		 */
 		public RestAccessPointInvoker(
 				String url, 
-				List<BasicNameValuePair> params,
+				JSONObject params,
+				String dataType,
 				Header[] headers){
-			this(url, params, null, headers);
+			this(url, params, dataType, null, headers);
 		}
 		
 		/**
@@ -330,7 +403,14 @@ public class RemoteAccessPoint {
 			try{
 				HttpPost postMethod = new HttpPost(this.url);
 				if(this.headers!=null && this.headers.length>0) postMethod.setHeaders(this.headers);
-				UrlEncodedFormEntity entity = new UrlEncodedFormEntity(this.params, "utf-8");
+				HttpEntity entity = null;
+				if(this.dataType == FORMDATA){
+					entity = getEntity(POST);
+					postMethod.setHeader("Content-Type", FORMDATA);
+				}else if(this.dataType == JSON){
+					entity = getEntity(POST);
+					postMethod.setHeader("Content-Type", JSON);
+				}
 				postMethod.setEntity(entity);
 				CloseableHttpResponse response = null;
 				if(this.context != null){
@@ -367,7 +447,7 @@ public class RemoteAccessPoint {
 			try{
 				HttpGet getMethod = new HttpGet(this.url);
 				if(this.headers!=null && this.headers.length>0) getMethod.setHeaders(this.headers);
-				String urlParam = EntityUtils .toString(new UrlEncodedFormEntity(this.params));  
+				String urlParam = EntityUtils.toString(getEntity(GET));  
 				getMethod.setURI(new URI(new StringBufferWrapper().append(getMethod.getURI().toString())
 	            												  .append("?")
 	            												  .append(urlParam)
@@ -447,6 +527,31 @@ public class RemoteAccessPoint {
 			}
 		    return content;
 		}
+        
+        /**
+         * 生成http Entity<br/>
+         * <b>作者:</b>lvdeyang<br/>
+         * <b>版本：</b>1.0<br/>
+         * <b>日期：</b>2019年3月27日 下午4:17:16
+         * @return HttpEntity 
+         */
+        public HttpEntity getEntity(String httpMethod) throws Exception{
+        	if(httpMethod==GET || (httpMethod==POST && this.dataType==FORMDATA)){
+        		List<BasicNameValuePair> formatParams = new ArrayList<BasicNameValuePair>();
+        		if(this.params!=null && this.params.size()>0){
+        			Set<String> paramKeys = params.keySet();
+        			for(String paramKey:paramKeys){
+        				BasicNameValuePair formatParam = new BasicNameValuePair(paramKey, this.params.getString(paramKey));
+        				formatParams.add(formatParam);
+        			}
+        		}
+        		return new UrlEncodedFormEntity(formatParams, "utf-8");
+        	}else if(httpMethod==POST && this.dataType==JSON){
+        		String formatParams = this.params==null?new JSONObject().toJSONString():this.params.toJSONString();
+        		return new StringEntity(formatParams);
+        	}
+        	return null;
+        }
 		
 	}
 	

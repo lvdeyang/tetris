@@ -16,7 +16,7 @@
 .prop-process-id{margin-bottom:22px; font-size:14px; word-wrap:break-word;}
 .prop-panel-content-var-action,
 .prop-binding-action{line-height:40px;}
-.prop-panel-content-var{position:absolute; top:105px; left:0px; right:0; bottom:0; overflow-y:auto; padding:0 10px;}
+.prop-panel-content-var{position:absolute; top:105px; top:75px; left:0px; right:0; bottom:0; overflow-y:auto; padding:0 10px;}
 .prop-expression-variable-table,
 .prop-panel-content-var table,
 .prop-user-binding table,

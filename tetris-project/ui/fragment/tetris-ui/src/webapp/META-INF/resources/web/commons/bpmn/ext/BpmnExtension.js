@@ -1597,7 +1597,7 @@ define([
         var $contents = $tabs.siblings('.prop-panel-contents');
         if($tab.is('.is-active')) return;
         var $oldActive = $tabs.find('.is-active');
-        $contents.find('[data-id='+$oldActive.data('ref')+']').hide();
+        $contents.find('.prop-panel-content[data-id='+$oldActive.data('ref')+']').hide();
         $oldActive.removeClass('is-active');
         $tab.addClass('is-active');
         $contents.find('[data-id='+$tab.data('ref')+']').show();
@@ -1679,7 +1679,7 @@ define([
             var tr = '<tr>';
             var variable = variables[i];
             tr += '<td data-id="'+variable.id+'" title="'+variable.name+'">'+variable.primaryKey+'</td>';
-            tr += '<td><button class="el-button el-button--text prop-panel-variable-delete"><span class="el-icon-delete"></span></button></td>';
+            //tr += '<td><button class="el-button el-button--text prop-panel-variable-delete"><span class="el-icon-delete"></span></button></td>';
             tr += '</tr>';
             tpl += tr;
         }

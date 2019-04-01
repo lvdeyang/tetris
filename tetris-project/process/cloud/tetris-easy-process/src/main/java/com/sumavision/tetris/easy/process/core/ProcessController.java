@@ -28,9 +28,8 @@ import com.sumavision.tetris.easy.process.access.service.rest.RestServiceDAO;
 import com.sumavision.tetris.easy.process.access.service.rest.RestServicePO;
 import com.sumavision.tetris.easy.process.core.exception.ProcessIdAlreadyExistException;
 import com.sumavision.tetris.easy.process.core.exception.ProcessNotExistException;
-import com.sumavision.tetris.easy.process.core.exception.UserHasNoPermissionForProcessQueryException;
+import com.sumavision.tetris.easy.process.core.exception.UserHasNoPermissionForProcessActionException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -76,10 +75,6 @@ public class ProcessController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "基础流程分页查询");
-		}
-		
 		long total = processDao.count();
 		
 		List<ProcessPO> entities = processTool.findAll(currentPage, pageSize);
@@ -114,10 +109,6 @@ public class ProcessController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "添加基础流程");
-		}
 		
 		ProcessPO process = processDao.findByProcessId(processId);
 
@@ -171,10 +162,6 @@ public class ProcessController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "修改基础流程");
-		}
-		
 		ProcessPO process = processDao.findOne(id);
 		
 		if(process == null){
@@ -204,10 +191,6 @@ public class ProcessController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "删除基础流程");
-		}
-		
 		ProcessPO process = processDao.findOne(id);
 		
 		if(process != null){
@@ -230,10 +213,6 @@ public class ProcessController {
 	public Object queryTypes(HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "查询流程类型");
-		}
 		
 		Set<String> processTypes = new HashSet<String>();
 		ProcessType[] types = ProcessType.values();
@@ -263,10 +242,6 @@ public class ProcessController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "查询流程bpmn内容和可配置的接入点列表");
-		}
 		
 		ProcessPO process = processDao.findOne(id);
 		
@@ -326,10 +301,6 @@ public class ProcessController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "查询流程bpmn内容和可配置的接入点列表");
-		}
-		
 		ProcessPO process = processDao.findOne(id);
 		
 		if(process == null){
@@ -358,6 +329,39 @@ public class ProcessController {
 		}
 		
 		processService.saveBpmn(process, bpmn, accessPoints);
+		
+		return null;
+	}
+	
+	/**
+	 * 发布流程<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月7日 下午4:13:52
+	 * @param @PathVariable Long id 流程id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/publish/{id}")
+	public Object publish(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userTool.current();
+		
+		ProcessPO process = processDao.findOne(id);
+		
+		if(process == null){
+			throw new ProcessNotExistException(id);
+		}
+		
+		//判断权限
+		boolean flag = false;
+		if(flag){
+			throw new UserHasNoPermissionForProcessActionException(user.getUuid(), id, "发布流程。");
+		}
+		
+		processService.publish(process);
 		
 		return null;
 	}

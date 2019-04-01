@@ -75,10 +75,14 @@ define([
                     var row = scope.row;
                     window.location.hash = '#/page-process-variable/' + row.id + '/' + row.name;
                 },
+                gotoProcessParamReference:function(scope){
+                    var row = scope.row;
+                    window.location.hash = '#/page-process-param-reference/' + row.id + '/' + row.name;
+                },
                 publishProcess:function(scope){
                     var self = this;
                     var row = scope.row;
-                    ajax.post('/api/process/publish/' + row.id, null, function(){
+                    ajax.post('/process/publish/' + row.id, null, function(){
                         self.$message({
                             type:'success',
                             message:'发布成功！'

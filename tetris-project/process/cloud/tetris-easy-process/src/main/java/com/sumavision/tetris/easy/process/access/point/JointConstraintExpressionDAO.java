@@ -51,6 +51,6 @@ public interface JointConstraintExpressionDAO extends BaseDAO<JointConstraintExp
 	 * @param String primaryKeyReg 参数主键匹配字符串
 	 * @return List<JointConstraintExpressionPO> 约束列表
 	 */
-	@Query(value = "SELECT joint_constraint.id, joint_constraint.uuid, joint_constraint.update_time, joint_constraint.name, joint_constraint.expression, joint_constraint.access_point_id FROM mims_process_joint_constraint joint_constraint WHERE joint_constraint.expression LIKE ?1", nativeQuery = true)
+	@Query(value = "SELECT joint_constraint.id, joint_constraint.uuid, joint_constraint.update_time, joint_constraint.name, joint_constraint.expression, joint_constraint.access_point_id FROM tetris_process_joint_constraint joint_constraint WHERE joint_constraint.expression LIKE ?1", nativeQuery = true)
 	public List<JointConstraintExpressionPO> findByParamPrimaryKey(String primaryKeyReg);
 }

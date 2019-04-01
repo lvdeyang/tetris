@@ -1,7 +1,6 @@
 package com.sumavision.tetris.spring.zuul.auth.filter;
 
 import javax.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.sumavision.tetris.commons.context.SpringContext;
@@ -21,11 +20,11 @@ public class MobileLoginFilter extends ZuulFilter{
 		RequestUserAgentAnalyzer analyzer = SpringContext.getBean(RequestUserAgentAnalyzer.class);
 		RequestContext ctx = RequestContext.getCurrentContext();
 		HttpServletRequest request = ctx.getRequest();
-		/*if(!analyzer.isMobileDevie(request)){
+		if(!analyzer.isMobileDevie(request)){
 			//不是移动终端拒绝访问
 			ctx.setResponseStatusCode(403);
 			ctx.setSendZuulResponse(false);
-		}*/
+		}
 		
 		//不需要登录访问
 		String requestUri = request.getRequestURI();

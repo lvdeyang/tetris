@@ -34,6 +34,9 @@ public class AccessPointPO extends AbstractBasePO{
 	/** 接入点方法类型 */
 	private AccessPointMethodType methodType;
 	
+	/** 参数打包格式 */
+	private ParamPackagingMethod paramPackagingMethod;
+	
 	/** 隶属服务id */
 	private Long serviceId;
 	
@@ -82,6 +85,16 @@ public class AccessPointPO extends AbstractBasePO{
 
 	public void setMethodType(AccessPointMethodType methodType) {
 		this.methodType = methodType;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "PARAM_PACKAGING_METHOD")
+	public ParamPackagingMethod getParamPackagingMethod() {
+		return paramPackagingMethod;
+	}
+
+	public void setParamPackagingMethod(ParamPackagingMethod paramPackagingMethod) {
+		this.paramPackagingMethod = paramPackagingMethod;
 	}
 
 	@Column(name = "SERVICE_ID")

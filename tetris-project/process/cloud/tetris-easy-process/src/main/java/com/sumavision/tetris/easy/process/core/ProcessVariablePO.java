@@ -1,7 +1,12 @@
 package com.sumavision.tetris.easy.process.core;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
+
+import com.sumavision.tetris.commons.constant.DataType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -25,13 +30,20 @@ public class ProcessVariablePO extends AbstractBasePO{
 	
 	/** 变量名称 */
 	private String name;
+	
+	/** 数据类型 */
+	private DataType dataType;
 
 	/** 变量默认值 */
 	private String defaultValue;
 	
+	/** 值引用表达式 */
+	private String expressionValue;
+	
 	/** 流程id */
 	private Long processId;
 	
+	@Column(name = "PRIMARY_KEY")
 	public String getPrimaryKey() {
 		return primaryKey;
 	}
@@ -40,6 +52,7 @@ public class ProcessVariablePO extends AbstractBasePO{
 		this.primaryKey = primaryKey;
 	}
 
+	@Column(name = "NAME")
 	public String getName() {
 		return name;
 	}
@@ -47,7 +60,18 @@ public class ProcessVariablePO extends AbstractBasePO{
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "DATA_TYPE")
+	public DataType getDataType() {
+		return dataType;
+	}
 
+	public void setDataType(DataType dataType) {
+		this.dataType = dataType;
+	}
+
+	@Column(name = "DEFAULT_VALUE")
 	public String getDefaultValue() {
 		return defaultValue;
 	}
@@ -55,7 +79,17 @@ public class ProcessVariablePO extends AbstractBasePO{
 	public void setDefaultValue(String defaultValue) {
 		this.defaultValue = defaultValue;
 	}
+	
+	@Column(name = "EXPRESSION_VALUE")
+	public String getExpressionValue() {
+		return expressionValue;
+	}
 
+	public void setExpressionValue(String expressionValue) {
+		this.expressionValue = expressionValue;
+	}
+
+	@Column(name = "PROCESS_ID")
 	public Long getProcessId() {
 		return processId;
 	}

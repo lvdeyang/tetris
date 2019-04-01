@@ -22,8 +22,17 @@ public class AccessPointParamPO extends AbstractBasePO{
 	/** 参数名称 */
 	private String name;
 	
-	/** 参数key */
+	/** 流程内主键key */
 	private String primaryKey;
+	
+	/** 参数层级路径primaryKey.primaryKey.primaryKey */
+	private String primaryKeyPath;
+	
+	/** 子系统接入点参数主键 */
+	private String referenceKey;
+	
+	/** 参数层级路径referenceKey.referenceKey.referenceKey */
+	private String referenceKeyPath;
 	
 	/** 参数默认值 */
 	private String defaultValue;
@@ -48,6 +57,12 @@ public class AccessPointParamPO extends AbstractBasePO{
 	
 	/** 备注 */
 	private String remarks;
+	
+	/** 父级参数id */
+	private Long parentId;
+	
+	/** 父级参数id路径 /id/id/id */
+	private String parentPath;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -65,6 +80,33 @@ public class AccessPointParamPO extends AbstractBasePO{
 
 	public void setPrimaryKey(String primaryKey) {
 		this.primaryKey = primaryKey;
+	}
+	
+	@Column(name = "PRIMARY_KEY_PATH")
+	public String getPrimaryKeyPath() {
+		return primaryKeyPath;
+	}
+
+	public void setPrimaryKeyPath(String primaryKeyPath) {
+		this.primaryKeyPath = primaryKeyPath;
+	}
+	
+	@Column(name = "REFERENCE_KEY_PATH")
+	public String getReferenceKeyPath() {
+		return referenceKeyPath;
+	}
+
+	public void setReferenceKeyPath(String referenceKeyPath) {
+		this.referenceKeyPath = referenceKeyPath;
+	}
+
+	@Column(name = "REFERENCE_KEY")
+	public String getReferenceKey() {
+		return referenceKey;
+	}
+
+	public void setReferenceKey(String referenceKey) {
+		this.referenceKey = referenceKey;
 	}
 
 	@Column(name = "DEFAULT_VALUE")
@@ -139,6 +181,24 @@ public class AccessPointParamPO extends AbstractBasePO{
 
 	public void setRemarks(String remarks) {
 		this.remarks = remarks;
+	}
+
+	@Column(name = "PARENT_ID")
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	@Column(name = "PARENT_PATH")
+	public String getParentPath() {
+		return parentPath;
+	}
+
+	public void setParentPath(String parentPath) {
+		this.parentPath = parentPath;
 	}
 	
 }

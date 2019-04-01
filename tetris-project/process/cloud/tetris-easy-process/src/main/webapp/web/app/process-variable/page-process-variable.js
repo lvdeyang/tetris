@@ -10,6 +10,7 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
+    'process-variable-dialog',
     'css!' + window.APPPATH + 'process-variable/page-process-variable.css'
 ], function(tpl, config, ajax, context, commons, Vue){
 
@@ -34,6 +35,7 @@ define([
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 processName:processName,
+                dataType:[],
                 table:{
                     rows:[],
                     pageSize:50,
@@ -42,13 +44,6 @@ define([
                     total:0
                 },
                 dialog:{
-                    createProcessVariable:{
-                        visible:false,
-                        primaryKey:'',
-                        name:'',
-                        defaultValue:'',
-                        loading:false
-                    },
                     editProcessVariable:{
                         visible:false,
                         id:'',
@@ -71,29 +66,7 @@ define([
                 },
                 handleCreate:function(){
                     var self = this;
-                    self.dialog.createProcessVariable.visible = true;
-                },
-                handleCreateProcessVariableClose:function(){
-                    var self = this;
-                    self.dialog.createProcessVariable.primaryKey = '';
-                    self.dialog.createProcessVariable.name = '';
-                    self.dialog.createProcessVariable.defaultValue = '';
-                    self.dialog.createProcessVariable.visible = false;
-                },
-                handleCreateProcessVariableSubmit:function(){
-                    var self = this;
-                    self.dialog.createProcessVariable.loading = true;
-                    ajax.post('/process/variable/add', {
-                        processId:processId,
-                        primaryKey:self.dialog.createProcessVariable.primaryKey,
-                        name:self.dialog.createProcessVariable.name,
-                        defaultValue:self.dialog.createProcessVariable.defaultValue
-                    }, function(data, status){
-                        self.dialog.createProcessVariable.loading = false;
-                        if(status !== 200) return;
-                        self.table.rows.push(data);
-                        self.handleCreateProcessVariableClose();
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                    self.$refs.processVariable.open(processId);
                 },
                 handleDelete:function(){
 
@@ -198,6 +171,9 @@ define([
                         }
                         self.table.currentPage = currentPage;
                     });
+                },
+                onProcessVariableAdded:function(variable){
+                    var self = this;
                 }
             },
             created:function(){

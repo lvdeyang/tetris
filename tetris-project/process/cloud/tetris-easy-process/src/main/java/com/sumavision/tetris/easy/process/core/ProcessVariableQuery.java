@@ -2,6 +2,7 @@ package com.sumavision.tetris.easy.process.core;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,8 +14,6 @@ import com.sumavision.tetris.easy.process.access.point.AccessPointParamPO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionDAO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionPO;
 import com.sumavision.tetris.easy.process.access.point.ParamDirection;
-import com.sumavision.tetris.easy.process.api.InternalVariableKey;
-import com.sumavision.tetris.easy.process.api.ProcessVariableOrigin;
 
 @Component
 public class ProcessVariableQuery {
@@ -56,14 +55,14 @@ public class ProcessVariableQuery {
 		List<ProcessVariableVO> variables = new ArrayList<ProcessVariableVO>();
 		
 		//流程id
-		ProcessVariableVO processInstanceId = new ProcessVariableVO().setPrimaryKey(InternalVariableKey.PROCESSID.getVariableKey())
-															 		 .setName(InternalVariableKey.PROCESSID.getName())
+		ProcessVariableVO processInstanceId = new ProcessVariableVO().setPrimaryKey(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey())
+															 		 .setName(InternalVariableKey.PROCESS_INSTANCE_ID.getName())
 															 		 .setOrigin(ProcessVariableOrigin.INTERNAL.getName());
 		variables.add(processInstanceId);
 		
 		//启动用户id
-		ProcessVariableVO startUserId = new ProcessVariableVO().setPrimaryKey(InternalVariableKey.STARTUSERID.getVariableKey())
-														  .setName(InternalVariableKey.STARTUSERID.getName())
+		ProcessVariableVO startUserId = new ProcessVariableVO().setPrimaryKey(InternalVariableKey.START_USER_ID.getVariableKey())
+														  .setName(InternalVariableKey.START_USER_ID.getName())
 														  .setOrigin(ProcessVariableOrigin.INTERNAL.getName());
 		variables.add(startUserId);
 		

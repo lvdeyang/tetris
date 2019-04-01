@@ -20,11 +20,9 @@ import com.sumavision.tetris.easy.process.access.point.exception.AccessPointCann
 import com.sumavision.tetris.easy.process.access.point.exception.AccessPointNotExistException;
 import com.sumavision.tetris.easy.process.access.service.ServiceType;
 import com.sumavision.tetris.easy.process.access.service.exception.ServiceNotExistException;
-import com.sumavision.tetris.easy.process.access.service.exception.UserHasNoPermissionForServiceQueryException;
 import com.sumavision.tetris.easy.process.access.service.rest.RestServiceDAO;
 import com.sumavision.tetris.easy.process.access.service.rest.RestServicePO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -50,6 +48,34 @@ public class AccessPointController {
 	@Autowired
 	private AccessPointProcessPermissionDAO accessPointProcessPermissionDao;
 	
+	/**
+	 * 查询流程下的接入点<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月22日 上午10:44:07
+	 * @param @PathVariable Long processId 流程id
+	 * @return List<AccessPointVO> 接入点列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/by/process/{processId}")
+	public Object queryByProcess(
+			@PathVariable Long processId,
+			HttpServletRequest request) throws Exception{
+		
+		List<AccessPointProcessPermissionPO> permissions = accessPointProcessPermissionDao.findByProcessId(processId);
+		Set<Long> accessPointIds = new HashSet<Long>();
+		if(permissions!=null && permissions.size()>0){
+			for(AccessPointProcessPermissionPO permission:permissions){
+				accessPointIds.add(permission.getAccessPointId());
+			}
+		}
+		
+		List<AccessPointPO> entities = accessPointDao.findAll(accessPointIds);
+		List<AccessPointVO> accessPoints = AccessPointVO.getConverter(AccessPointVO.class).convert(entities, AccessPointVO.class);
+		
+		return accessPoints;
+	}
 	
 	/**
 	 * 分页查询接入点<br/>
@@ -72,10 +98,6 @@ public class AccessPointController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "服务接入点查询");
-		}
 		
 		RestServicePO service = null;
 		
@@ -118,10 +140,6 @@ public class AccessPointController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "服务接入点查询");
-		}
-		
 		AccessPointType[] values = AccessPointType.values();
 		
 		Set<String> types = new HashSet<String>();
@@ -159,10 +177,6 @@ public class AccessPointController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "新建服务接入点");
-		}
 		
 		RestServicePO service = null;
 		
@@ -213,10 +227,6 @@ public class AccessPointController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "新建服务接入点");
-		}
-		
 		AccessPointPO accessPoint = accessPointDao.findOne(id);
 		
 		if(accessPoint == null){
@@ -249,10 +259,6 @@ public class AccessPointController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "新建服务接入点");
-		}
 		
 		AccessPointPO accessPoint = accessPointDao.findOne(id);
 		
