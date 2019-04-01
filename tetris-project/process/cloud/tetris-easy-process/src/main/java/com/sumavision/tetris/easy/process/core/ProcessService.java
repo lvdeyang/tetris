@@ -33,9 +33,11 @@ import com.sumavision.tetris.easy.process.access.point.AccessPointParamPO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionDAO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionPO;
 import com.sumavision.tetris.easy.process.access.point.ParamDirection;
+import com.sumavision.tetris.easy.process.core.exception.ProcessNotExistException;
 import com.sumavision.tetris.easy.process.core.exception.VariableValueCheckFailedException;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.sdk.constraint.api.ConstraintValidator;
+import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 @Service
@@ -73,6 +75,9 @@ public class ProcessService {
 	
 	@Autowired
 	private RuntimeService runtimeService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 保存流程的bpmn配置<br/>
@@ -201,9 +206,15 @@ public class ProcessService {
 	 * @return String processInstanceId 流程实例id
 	 */
 	public String startByKey(
-			ProcessPO process,
-			String variables,
-			UserVO user) throws Exception{
+			String primaryKey,
+			String variables) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		ProcessPO process = processDao.findByProcessId(primaryKey);
+		if(process == null){
+			throw new ProcessNotExistException(primaryKey);
+		}
 		
 		//构建上下文流程变量
 		JSONObject contextVariables = variables!=null?JSON.parseObject(variables):new JSONObject();

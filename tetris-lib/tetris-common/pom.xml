@@ -44,10 +44,22 @@
 		  	<artifactId>spring-boot-starter-logging</artifactId>
 		</dependency>
 		
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.4</version>
+		</dependency>
+		
         <dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 			<version>3.1</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>dom4j</groupId>
+		    <artifactId>dom4j</artifactId>
+		    <version>1.6.1</version>
 		</dependency>
 		
         <dependency>
@@ -66,7 +78,7 @@
 		    <groupId>com.sun.mail</groupId>
 		    <artifactId>javax.mail</artifactId>
 		    <version>1.5.6</version>
-		</dependency>	
+		</dependency>
  	</dependencies>
   
     <build>

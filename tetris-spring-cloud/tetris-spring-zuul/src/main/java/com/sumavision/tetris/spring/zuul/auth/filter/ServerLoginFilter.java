@@ -12,7 +12,7 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年3月12日 下午1:34:26
  */
-public class ServiceLoginFilter extends ZuulFilter{
+public class ServerLoginFilter extends ZuulFilter{
 
 	@Override
 	public Object run() {
@@ -39,7 +39,7 @@ public class ServiceLoginFilter extends ZuulFilter{
 		HttpServletRequest request = ctx.getRequest();
 		String requestUri = request.getRequestURI();
 		requestUri = requestUri.replace(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
-		if(requestUri.startsWith("/api/service")){
+		if(requestUri.startsWith("/api/server")){
 			return true;
 		}else{
 			return false;

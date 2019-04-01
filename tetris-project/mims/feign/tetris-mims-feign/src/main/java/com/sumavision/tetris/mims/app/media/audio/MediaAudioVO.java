@@ -1,16 +1,8 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
-import java.util.Arrays;
 import java.util.List;
 
-import com.sumavision.tetris.commons.context.SpringContext;
-import com.sumavision.tetris.commons.util.date.DateUtil;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.mims.app.folder.FolderPO;
-import com.sumavision.tetris.mims.config.server.ServerProps;
-import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
-
-public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
+public class MediaAudioVO {
 
 	private String name;
 	
@@ -177,43 +169,4 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 
-	@Override
-	public MediaAudioVO set(MediaAudioPO entity) throws Exception {
-		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
-		this.setId(entity.getId())
-			.setUuid(entity.getUuid())
-			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setName(entity.getName())
-			.setAuthorName(entity.getAuthorName())
-			.setSize(entity.getSize().toString())
-			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
-			.setVersion(entity.getVersion())
-			.setRemarks(entity.getRemarks())
-			.setType(MediaAudioItemType.AUDIO.toString())
-			.setIcon(MediaAudioItemType.AUDIO.getIcon())
-			.setStyle(MediaAudioItemType.AUDIO.getStyle()[0])
-			.setMimetype(entity.getMimetype())
-			.setProgress(0)
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString());
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioPO.SEPARATOR_TAG)));
-		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaAudioPO.SEPARATOR_KEYWORDS)));	 
-		return this;
-	}
-	
-	public MediaAudioVO set(FolderPO entity) throws Exception {
-		this.setId(entity.getId())
-			.setUuid(entity.getUuid())
-			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setName(entity.getName())
-			.setAuthorName(entity.getAuthorName())
-			.setSize("-")
-			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setVersion("-")
-			.setRemarks("-")
-			.setType(MediaAudioItemType.FOLDER.toString())
-			.setIcon(MediaAudioItemType.FOLDER.getIcon())
-			.setStyle(MediaAudioItemType.FOLDER.getStyle()[0]);
-		return this;
-	}
-	
 }

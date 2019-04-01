@@ -1,17 +1,12 @@
-package com.sumavision.tetris.easy.process.api;
+package com.sumavision.tetris.easy.process.core.api.server;
 
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.sumavision.tetris.easy.process.core.ProcessDAO;
-import com.sumavision.tetris.easy.process.core.ProcessPO;
 import com.sumavision.tetris.easy.process.core.ProcessService;
-import com.sumavision.tetris.easy.process.core.exception.ProcessNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserQuery;
-import com.sumavision.tetris.user.UserVO;
 
 /**
  * 流程相关api<br/>
@@ -20,17 +15,11 @@ import com.sumavision.tetris.user.UserVO;
  * <b>日期：</b>2019年1月7日 下午4:14:32
  */
 @Controller
-@RequestMapping(value = "/api/service/process")
-public class ApiServiceProcessController {
+@RequestMapping(value = "/api/server/process")
+public class ApiServerProcessController {
 
 	@Autowired
-	private UserQuery userQuery;
-	
-	@Autowired
 	private ProcessService processService;
-	
-	@Autowired
-	private ProcessDAO processDao;
 	
 	/**
 	 * 根据流程的主键启动流程<br/>
@@ -49,14 +38,7 @@ public class ApiServiceProcessController {
 			String variables,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userQuery.current();
-		
-		ProcessPO process = processDao.findByProcessId(primaryKey);
-		if(process == null){
-			throw new ProcessNotExistException(primaryKey);
-		}
-		
-		String processInstanceId = processService.startByKey(process, variables, user);
+		String processInstanceId = processService.startByKey(primaryKey, variables);
 		
 		return processInstanceId;
 	}

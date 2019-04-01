@@ -259,7 +259,7 @@ public class FolderQuery {
 	 * @param Collection<FolderPO> folders 查找范围
 	 * @return List<FolderPO> 根节点
 	 */
-	private List<FolderPO> findRoots(Collection<FolderPO> folders) throws Exception{
+	public List<FolderPO> findRoots(Collection<FolderPO> folders) throws Exception{
 		List<FolderPO> roots = new ArrayList<FolderPO>();
 		if(folders==null || folders.size()<=0) return roots;
 		for(FolderPO folder:folders){
