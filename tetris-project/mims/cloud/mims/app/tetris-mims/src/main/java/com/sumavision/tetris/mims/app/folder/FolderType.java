@@ -18,6 +18,7 @@ public enum FolderType {
 	COMPANY_VIDEO_STREAM("视频流库", "videoStream", "video-stream"),
 	COMPANY_AUDIO_STREAM("音频流库", "audioStream", "audio-stream"),
 	COMPANY_TXT("文本库", "txt", "txt"),
+	COMPANY_COMPRESS("压缩包库", "compress", "compress"),
 	SHARE("共享文件夹");
 	
 	private String name;

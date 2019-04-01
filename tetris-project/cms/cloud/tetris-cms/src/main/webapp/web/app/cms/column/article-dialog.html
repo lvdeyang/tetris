@@ -7,10 +7,10 @@
 
     <div class="content">
         <div class="content-wrapper">
-            <el-input placeholder="搜索文章" size="small" suffix-icon="el-icon-search"></el-input>
+            <el-input  v-model="search" placeholder="搜索文章" size="small" suffix-icon="el-icon-search"></el-input>
             <div class="table-wrapper">
                 <el-table
-                        :data="rows"
+                        :data="rows.filter(data => !search || data.name.includes(search))"
                         style="width:100%"
                         height="100%"
                         @selection-change="handleArticleSelectionChange"

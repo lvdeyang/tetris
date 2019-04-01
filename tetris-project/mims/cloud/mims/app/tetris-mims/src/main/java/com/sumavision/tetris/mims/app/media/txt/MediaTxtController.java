@@ -104,6 +104,41 @@ public class MediaTxtController {
 	}
 	
 	/**
+	 * 编辑文本媒资<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月25日 下午5:04:34
+	 * @param id 文本媒资id
+	 * @param content 文本内容
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+ 	 * @return MediaTxtVO 文本媒资
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/edit/{id}")
+	public Object editTask(
+			@PathVariable Long id,
+			String content, 
+			String name,
+            String tags,
+            String keyWords,
+            String remark,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		MediaTxtPO txt = mediaTxtDao.findOne(id);
+		
+		MediaTxtPO entity = mediaTxtService.editTask(user, txt, name, null, null, remark, content);
+		
+		return new MediaTxtVO().set(entity);
+		
+	}
+	
+	/**
 	 * 删除文本媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

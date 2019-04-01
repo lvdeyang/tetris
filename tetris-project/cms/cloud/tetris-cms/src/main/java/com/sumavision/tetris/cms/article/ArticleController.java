@@ -6,9 +6,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,9 +20,16 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.cms.article.exception.ArticleNotExistException;
+import com.sumavision.tetris.cms.article.exception.UserHasNotPermissionForArticleException;
+import com.sumavision.tetris.cms.classify.ClassifyDAO;
+import com.sumavision.tetris.cms.classify.ClassifyPO;
 import com.sumavision.tetris.cms.classify.ClassifyVO;
+import com.sumavision.tetris.cms.region.RegionDAO;
+import com.sumavision.tetris.cms.region.RegionPO;
 import com.sumavision.tetris.cms.region.RegionVO;
+import com.sumavision.tetris.cms.relation.ColumnRelationArticleService;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -47,6 +56,15 @@ public class ArticleController {
 	@Autowired
 	private ArticleRegionPermissionDAO articleRegionPermissionDao;
 	
+	@Autowired
+	private ColumnRelationArticleService columnRelationArticleService;
+	
+	@Autowired
+	private RegionDAO regionDao;
+	
+	@Autowired
+	private ClassifyDAO classifyDao;
+	
 	/**
 	 * 查询所有的文章<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -67,7 +85,8 @@ public class ArticleController {
 		
 		//TODO 权限校验
 		
-		List<ArticlePO> entities = articleQuery.findAll(currentPage, pageSize);	
+		Page<ArticlePO> page = articleQuery.findAllByUser(user, currentPage, pageSize);
+		List<ArticlePO> entities = page.getContent();
 		List<Long> articleIds = new ArrayList<Long>();
 		for(ArticlePO entity: entities){
 			articleIds.add(entity.getId());
@@ -97,7 +116,7 @@ public class ArticleController {
 			}
 		}
 		
-		Long total = articleDao.count();
+		Long total = page.getTotalElements();
 		
 		return new HashMapWrapper<String, Object>().put("rows", articles)
 												   .put("total", total)
@@ -122,7 +141,24 @@ public class ArticleController {
 			articleTypes.add(type.getName());
 		}
 		
+		//TODO:绑定用户后需要修改
+		//查询地区
+		Set<String> regions = new HashSet<String>();
+		List<RegionPO> regionPOs = regionDao.findAll();
+		for(RegionPO region: regionPOs){
+			regions.add(region.getName());
+		}
+		
+		//查询分类
+		Set<String> classies = new HashSet<String>();
+		List<ClassifyPO> classifyPOs = classifyDao.findAll();
+		for(ClassifyPO classify: classifyPOs){
+			classies.add(classify.getName());
+		}
+		
 		return new HashMapWrapper<String, Object>().put("type", articleTypes)
+												   .put("region", regions)
+												   .put("classify", classies)
 			   									   .getMap();
 	}
 	
@@ -214,6 +250,9 @@ public class ArticleController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!articleQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForArticleException(id, user);
+		}
 		
 		ArticlePO article = articleDao.findOne(id);
 		if(article == null){
@@ -269,6 +308,9 @@ public class ArticleController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!articleQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForArticleException(id, user);
+		}
 		
 		ArticlePO article = articleDao.findOne(id);
 		
@@ -295,6 +337,9 @@ public class ArticleController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!articleQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForArticleException(id, user);
+		}
 		
 		ArticlePO article = articleDao.findOne(id);
 		if(article == null){
@@ -325,6 +370,9 @@ public class ArticleController {
 		
 		UserVO user = userQuery.current();	
 		//TODO 权限校验
+		if(!articleQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForArticleException(id, user);
+		}
 		
 		ArticlePO article = articleDao.findOne(id);
 		if(article == null){
@@ -345,7 +393,7 @@ public class ArticleController {
 	 * @param int currentPage 当前页码
 	 * @param int pageSize 每页数据量
 	 * @return int total 总数据量
-	 * @return List<ArticleVO> rows 用户列表
+	 * @return List<ArticleVO> rows 文章列表
 	 */
 	@JsonBody
 	@ResponseBody
@@ -361,12 +409,125 @@ public class ArticleController {
 		//TODO 权限校验
 		
 		if(except == null){
-			return articleQuery.list(currentPage, pageSize);
+			return articleQuery.list(user, currentPage, pageSize);
 		}else{
 			List<Long> exceptIds = JSON.parseArray(except, Long.class);
-			return articleQuery.listWithExcept(exceptIds, currentPage, pageSize);
-		}
-		
+			return articleQuery.listWithExcept(user, exceptIds, currentPage, pageSize);
+		}		
 	}
 	
+	/**
+	 * 文章绑定栏目<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月19日 下午2:19:28
+	 * @param articleId 文章id
+	 * @param columnIds 栏目id列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/bind/column")
+	public Object bindColumn(
+			Long articleId,
+			String columnIds,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		if(!articleQuery.hasPermission(articleId, user)){
+			throw new UserHasNotPermissionForArticleException(articleId, user);
+		}
+		
+		if(columnIds == null) return null;
+		
+		return columnRelationArticleService.bindColumn(articleId, JSON.parseArray(columnIds, String.class));
+	}
+	
+	/**
+	 * 文章检索<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月25日 上午8:45:06
+	 * @param name 文章名
+	 * @param author 作者
+	 * @param region 地区
+	 * @param classify 分类
+	 * @param beginTime 开始时间
+	 * @param endTime 结束时间
+	 * @param currentPage 当前页数
+	 * @param pageSize 每页数据量
+	 * @return int total 总数据量
+	 * @return List<ArticleVO> rows 文章列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/search")
+	public Object search(
+			String name,
+			String author,
+			String region,
+			String classify,
+			String beginTime,
+			String endTime,
+			Integer currentPage,
+			Integer pageSize,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<ArticlePO> articlePages = null;
+		if(user.getGroupId() != null){
+			articlePages = articleDao.findAllWithGroupIdBySearch(new StringBufferWrapper().append("%").append(name).append("%").toString(),
+													new StringBufferWrapper().append("%").append(author).append("%").toString(),
+													new StringBufferWrapper().append("%").append(region).append("%").toString(), 
+													new StringBufferWrapper().append("%").append(classify).append("%").toString(),
+													beginTime, endTime, user.getGroupId(), page);
+		}else if(user.getUuid() != null){
+			articlePages = articleDao.findAllWithUserIdBySearch(new StringBufferWrapper().append("%").append(name).append("%").toString(),
+													new StringBufferWrapper().append("%").append(author).append("%").toString(),
+													new StringBufferWrapper().append("%").append(region).append("%").toString(), 
+													new StringBufferWrapper().append("%").append(classify).append("%").toString(),
+													beginTime, endTime, user.getUuid(), page);
+		}		
+		
+		List<ArticlePO> entities = articlePages.getContent();;
+				
+		List<Long> articleIds = new ArrayList<Long>();
+		for(ArticlePO entity: entities){
+			articleIds.add(entity.getId());
+		}
+		List<ArticleClassifyPermissionPO> classifies = articleClassifyPermissionDao.findByArticleIdIn(articleIds);
+		List<ArticleRegionPermissionPO> regions = articleRegionPermissionDao.findByArticleIdIn(articleIds);
+		
+		List<ArticleVO> articles = ArticleVO.getConverter(ArticleVO.class).convert(entities, ArticleVO.class);
+		for(ArticleVO article: articles){
+			article.setClassifies(new ArrayList<ClassifyVO>())
+				   .setRegions(new ArrayList<RegionVO>());
+			//分类
+			for(ArticleClassifyPermissionPO classifyPo: classifies){
+				if(classifyPo.getArticleId().equals(article.getId())){
+					ClassifyVO classifyVO = new ClassifyVO().setId(classifyPo.getClassifyId())
+															.setName(classifyPo.getClassifyName());
+					article.getClassifies().add(classifyVO);
+				}
+			}
+			//地区
+			for(ArticleRegionPermissionPO regionPo: regions){
+				if(regionPo.getArticleId().equals(article.getId())){
+					RegionVO regionVO = new RegionVO().setId(regionPo.getRegionId())
+													  .setName(regionPo.getRegionName());
+					article.getRegions().add(regionVO);
+				}
+			}
+		}
+		
+		Long total = articlePages.getTotalElements();
+		
+		return new HashMapWrapper<String, Object>().put("rows", articles)
+												   .put("total", total)
+												   .getMap();
+	}
 }

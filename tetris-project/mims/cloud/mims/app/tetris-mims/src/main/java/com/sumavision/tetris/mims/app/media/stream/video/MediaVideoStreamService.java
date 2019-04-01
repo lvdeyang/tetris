@@ -11,6 +11,7 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -88,6 +89,37 @@ public class MediaVideoStreamService {
 		mediaVideoStreamDao.save(entity);
 		
 		return entity;
+	}
+	
+	/**
+	 * 编辑视频流媒资<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月26日 上午8:57:13
+	 * @param user 用户
+	 * @param videoStream 视频流媒资
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @param previewUrl 视频流地址
+	 * @return MediaVideoStreamPO 视频流媒资
+	 */
+	public MediaVideoStreamPO editTask(
+			UserVO user, 
+			MediaVideoStreamPO videoStream,
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			String previewUrl) throws Exception{
+		
+		videoStream.setName(name);
+		videoStream.setRemarks(remark);
+		videoStream.setPreviewUrl(previewUrl);
+		mediaVideoStreamDao.save(videoStream);
+		
+		return videoStream;
 	}
 	
 	/**

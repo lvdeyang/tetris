@@ -15,6 +15,7 @@ define([
     'date',
     'region-dialog',
     'classify-dialog',
+    'column-dialog',
     'css!' + window.APPPATH + 'cms/article/page-cms-article.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
 
@@ -28,10 +29,14 @@ define([
         var $page = document.getElementById(pageId);
         $page.innerHTML = tpl;
 
-        //查询文章类型
+        //查询文章类型、地区、分类
         var articleType = [];
+        var articleRegion = [];
+        var articleClassify = [];
         ajax.post('/cms/article/query/type', null, function(data) {
             var types = data.type;
+            var regions = data.region;
+            var classies = data.classify;
             if (types && types.length > 0) {
                 for (var j = 0; j < types.length; j++) {
                     var type = {
@@ -39,6 +44,20 @@ define([
                         label: types[j]
                     };
                     articleType.push(type);
+                }
+            }
+            if(regions && regions.length > 0){
+                for(var i = 0; i<regions.length; i++){
+                    articleRegion.push(regions[i]);
+                }
+            }
+            if(classies && classies.length > 0){
+                for(var k = 0; k<classies.length; k++){
+                    var classify = {
+                        value: classies[k],
+                        label: classies[k]
+                    };
+                    articleClassify.push(classify);
                 }
             }
         });
@@ -52,11 +71,26 @@ define([
                 table:{
                     data:[],
                     page:{
-                        currentPage:0,
-                        sizes:[20, 50, 100, 500, 1000],
+                        currentPage:1,
+                        sizes:[20, 50, 100, 200, 500],
                         size:20,
                         total:0
                     }
+                },
+                popover:{
+                    visible: false
+                },
+                param:{
+                    region:articleRegion,
+                    classify:articleClassify
+                },
+                search:{
+                    name:'',
+                    author:'',
+                    type:'',
+                    region:'',
+                    classify:'',
+                    time:''
                 },
                 dialog:{
                     type:articleType,
@@ -128,6 +162,13 @@ define([
                                 }
                             }]
                         }
+                    },
+                    bindColumn:{
+                        visible:false,
+                        id:'',
+                        name:'',
+                        loading:false,
+                        column:[]
                     }
                 }
             },
@@ -207,35 +248,28 @@ define([
                         }
                     }).catch(function(){});
                 },
-                handleSizeChange:function(){
+                handleSizeChange:function(val){
                     var self = this;
+                    self.table.page.size = parseInt(val);
+                    self.onSubmit(self.table.page.currentPage);
                 },
-                handleCurrentChange:function(){
+                handleCurrentChange:function(val){
                     var self = this;
+                    self.table.page.currentPage = parseInt(val);
+                    self.onSubmit(self.table.page.currentPage);
                 },
-                loadArticle:function(currentPage){
+                loadArticle :function(currentPage){
                     var self = this;
                     self.table.data.splice(0, self.table.data.length);
-                    self.dialog.type.splice(0, self.dialog.type.length);
                     ajax.post('/cms/article/list', {
                         currentPage:currentPage,
-                        pageSize:self.table.page.size
+                        pageSize:self.table.page.size,
                     }, function(data){
                         var rows = data.rows;
                         var total = data.total;
-                        var types = data.type;
                         if(rows && rows.length>0){
                             for(var i=0; i<rows.length; i++){
                                 self.table.data.push(rows[i]);
-                            }
-                        }
-                        if(types && types.length>0){
-                            for(var j=0;j<types.length;j++){
-                                var type = {
-                                    value: types[j],
-                                    label: types[j]
-                                };
-                                self.dialog.type.push(type);
                             }
                         }
                         self.table.page.total = total;
@@ -413,6 +447,115 @@ define([
                     }
                     endLoading();
                     close();
+                },
+                rowBindColumn:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.bindColumn.id = row.id;
+                    self.dialog.bindColumn.name = row.name;
+                    self.dialog.bindColumn.visible = true;
+
+                    self.dialog.bindColumn.column.splice(0, self.dialog.bindColumn.column.length);
+                    ajax.post('/cms/column/relation/article/load/column', {articleId: row.id}, function(data, status){
+                        if(status !== 200) return;
+                        for(var i=0; i<data.length; i++){
+                            self.dialog.bindColumn.column.push(data[i]);
+                        }
+                    });
+
+                },
+                handleBindColumnClose:function(){
+                    var self = this;
+                    self.dialog.bindColumn.id = '';
+                    self.dialog.bindColumn.name = '';
+                    self.dialog.bindColumn.column = [];
+                    self.dialog.bindColumn.visible = false;
+                },
+                handleColumnEdit: function(){
+                    var self = this;
+                    var checkedColumns = [];
+                    var column = self.dialog.bindColumn.column;
+                    if(column.length > 0){
+                        for(var i=0;i<column.length;i++){
+                            checkedColumns.push(column[i].id);
+                        }
+                    }
+                    self.$refs.columnDialog.open('/cms/column/list/tree', checkedColumns, column);
+                },
+                handleColumnRemove: function(column, value){
+                    for(var i=0; i<column.length; i++){
+                        if(column[i] === value){
+                            column.splice(i, 1);
+                            break;
+                        }
+                    }
+                },
+                handleBindColumnCommit: function(){
+                    var self = this;
+                    var columnIds = [];
+                    var columns = self.dialog.bindColumn.column;
+                    for(var i=0; i<columns.length; i++){
+                        columnIds.push(columns[i].id);
+                    }
+                    self.dialog.bindColumn.loading = true;
+                    ajax.post('/cms/article/bind/column' , {
+                        articleId: self.dialog.bindColumn.id,
+                        columnIds: $.toJSON(columnIds)
+                    }, function(data, status){
+                        self.dialog.bindColumn.loading = false;
+                        if(status !== 200) return;
+                        self.handleBindColumnClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                selectedColumns:function(columns, buff, startLoading, endLoading, close){
+                    var self = this;
+                    var columnIds = [];
+                    startLoading();
+                    buff.splice(0,buff.length);
+                    for(var i=0; i<columns.length; i++){
+                        columnIds.push(columns[i].id);
+                        buff.push(columns[i]);
+                    }
+                    endLoading();
+                    close();
+                },
+                onSubmit:function(currentPage){
+                    var self = this;
+                    self.table.page.currentPage = currentPage;
+                    self.table.data.splice(0, self.table.data.length);
+                    ajax.post('/cms/article/search', {
+                        name:self.search.name,
+                        author:self.search.author,
+                        region:self.search.region,
+                        classify:self.search.classify,
+                        beginTime:(self.search.time == null || self.search.time == "")?"":self.search.time[0],
+                        endTime:(self.search.time == null || self.search.time == "") ?"":self.search.time[1],
+                        currentPage:self.table.page.currentPage,
+                        pageSize:self.table.page.size
+                    }, function(data){
+                        var rows = data.rows;
+                        var total = data.total;
+                        if(rows && rows.length>0){
+                            for(var i=0; i<rows.length; i++){
+                                self.table.data.push(rows[i]);
+                            }
+                        }
+                        self.table.page.total = total;
+                    });
+                },
+                onClear:function(){
+                    var self = this;
+                    self.search.name = "";
+                    self.search.author = "";
+                    self.search.region = "";
+                    self.search.classify = "";
+                    self.search.time = null;
+                    self.onSubmit(1);
+                },
+                clickTag:function(value){
+                    var self = this;
+                    self.popover.visible = false;
+                    self.search.region = value;
                 }
             },
             created:function(){

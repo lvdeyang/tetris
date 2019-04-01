@@ -39,4 +39,22 @@ public interface ArticleRegionPermissionDAO extends BaseDAO<ArticleRegionPermiss
 	 * @param ids 文章id列表
 	 */
 	public void deleteByArticleIdIn(Collection<Long> ids);
+	
+	/**
+	 * 根据地区id删除关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月27日 上午10:38:43
+	 * @param regionId 地区id
+	 */
+	public void deleteByRegionId(Long regionId);
+	
+	/**
+	 * 根据地区id列表删除关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月27日 上午10:39:30
+	 * @param regionIds 地区id列表
+	 */
+	public void deleteByRegionIdIn(Collection<Long> regionIds);
 }

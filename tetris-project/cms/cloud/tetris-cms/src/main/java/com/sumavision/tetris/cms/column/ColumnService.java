@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,14 +18,13 @@ import com.sumavision.tetris.cms.article.ArticleClassifyPermissionPO;
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleRegionPermissionDAO;
-import com.sumavision.tetris.cms.article.ArticleRegionPermissionPO;
 import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.classify.ClassifyVO;
-import com.sumavision.tetris.cms.region.RegionVO;
 import com.sumavision.tetris.cms.relation.ColumnRelationArticleDAO;
 import com.sumavision.tetris.cms.relation.ColumnRelationArticlePO;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 内容模板增删改操作<br/>
@@ -53,19 +53,24 @@ public class ColumnService {
 	
 	@Autowired
 	private ArticleClassifyPermissionDAO articleClassifyPermissionDao;
+	
+	@Autowired
+	private ColumnUserPermissionDAO columnUserPermissionDao;
 
-	public ColumnPO addRoot() throws Exception {
+	public ColumnPO addRoot(UserVO user) throws Exception {
 
 		ColumnPO columnPO = new ColumnPO();
 		columnPO.setName("新建的标签");
 		columnPO.setUpdateTime(new Date());
 
 		columnDao.save(columnPO);
+		
+		addPermission(user, columnPO);
 
 		return columnPO;
 	}
 
-	public ColumnPO append(ColumnPO parent) throws Exception {
+	public ColumnPO append(UserVO user, ColumnPO parent) throws Exception {
 
 		StringBufferWrapper parentPath = new StringBufferWrapper();
 		if (parent.getParentId() == null) {
@@ -81,13 +86,16 @@ public class ColumnService {
 		columnPO.setUpdateTime(new Date());
 
 		columnDao.save(columnPO);
+		
+		addPermission(user, columnPO);
 
 		return columnPO;
 	}
 
-	public ColumnPO update(ColumnPO columnPO, String name, String remark) throws Exception {
+	public ColumnPO update(ColumnPO columnPO, String name, String code, String remark) throws Exception {
 
 		columnPO.setName(name);
+		columnPO.setCode(code);
 		columnPO.setRemark(remark);
 		columnPO.setUpdateTime(new Date());
 		columnDao.save(columnPO);
@@ -102,6 +110,7 @@ public class ColumnService {
 		//删除关联
 		List<ColumnRelationArticlePO> relationArticles = columnRelationArticleDao.findByColumnId(columnPO.getId());
 		columnRelationArticleDao.deleteInBatch(relationArticles);
+		columnUserPermissionDao.deleteByColumnId(columnPO.getId());
 		
 		Set<Long> colIds = new HashSetWrapper<Long>().add(columnPO.getId()).getSet();
 		if (subColumnPOs != null && subColumnPOs.size() > 0) {
@@ -135,10 +144,10 @@ public class ColumnService {
 			for (ColumnPO subCol : subCols) {
 				String[] paths = subCol.getParentPath()
 						.split(new StringBufferWrapper().append("/").append(sourceCol.getId()).toString());
-				if (paths.length == 1) {
-					subCol.setParentPath(parentPath.append("/").append(targetCol.getId()).toString());
+				if (paths.length == 1 || paths.length == 0) {
+					subCol.setParentPath(new StringBufferWrapper().append(parentPath).append("/").append(sourceCol.getId()).toString());
 				} else {
-					subCol.setParentPath(parentPath.append("/").append(targetCol.getId()).append(paths[1]).toString());
+					subCol.setParentPath(new StringBufferWrapper().append(parentPath).append("/").append(sourceCol.getId()).append(paths[1]).toString());
 				}
 			}
 		}
@@ -256,12 +265,17 @@ public class ColumnService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年3月6日 下午4:03:16
 	 */
-	public ColumnVO queryCommand(Pageable page) throws Exception {
+	public ColumnVO queryCommand(UserVO user, Pageable page) throws Exception {
 		
 		ColumnVO view_column = new ColumnVO().setName("推荐")
 											 .setArticles(new ArrayList<ArticleVO>());
 		
-		Page<ColumnRelationArticlePO> pages = columnRelationArticleDao.findByCommand(true, page);
+		Page<ColumnRelationArticlePO> pages = null;
+		if(user.getGroupId() != null){
+			pages = columnRelationArticleDao.findCommandByGroupId(true, user.getGroupId(), page);
+		}else if(user.getUuid() != null){
+			pages = columnRelationArticleDao.findCommandByUserId(true, user.getUuid(), page);
+		}
 		List<ColumnRelationArticlePO> columnRelationArticles = pages.getContent();
 		//推荐下文章
 		List<Long> articleIds = new ArrayList<Long>();
@@ -311,7 +325,6 @@ public class ColumnService {
 	 * <b>作者:</b>ldy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年2月27日 上午10:05:39
-	 * 
 	 * @param columnId 栏目id
 	 * @param province 省
 	 * @param city 市
@@ -392,21 +405,27 @@ public class ColumnService {
 	}
 	
 	/**
-	 * 搜索文章<br/>
+	 * 用户搜索文章<br/>
 	 * <b>作者:</b>ldy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年3月7日 下午3:38:20
+	 * @param user 用户
 	 * @param search 搜索关键字
 	 * @param page 分页
 	 * @return
 	 */
-	public List<ArticleVO> search(String search, Pageable page) throws Exception{
+	public List<ArticleVO> search(UserVO user, String search, Pageable page) throws Exception{
 		
 		String reg = new StringBufferWrapper().append("%")
 											  .append(search)
 											  .append("%")
 											  .toString();
-		Page<ColumnRelationArticlePO> pages = columnRelationArticleDao.findAllBySearch(reg, page);
+		Page<ColumnRelationArticlePO> pages = null;
+		if(user.getGroupId() != null){
+			pages = columnRelationArticleDao.findAllWithGroupIdBySearch(reg, user.getGroupId(), page);
+		}else if(user.getUuid() != null){
+			pages = columnRelationArticleDao.findAllWithUserIdBySearch(reg, user.getUuid(), page);
+		}
 		long total = pages.getTotalElements();
 		
 		List<ArticleVO> view_articles = new ArrayList<ArticleVO>();
@@ -433,5 +452,26 @@ public class ColumnService {
 		}
  		
  		return view_articles;
+	}
+	
+	/**
+	 * 添加栏目用户关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月27日 下午1:28:14
+	 * @param user 用户
+	 * @param column 栏目
+	 * @return ColumnUserPermissionPO 栏目用户关联
+	 */
+	public ColumnUserPermissionPO addPermission(UserVO user, ColumnPO column) throws Exception{
+		
+		ColumnUserPermissionPO permission = new ColumnUserPermissionPO();
+		permission.setColumnId(column.getId());
+		permission.setUserId(user.getUuid());
+		permission.setGroupId(user.getGroupId());
+		
+		columnUserPermissionDao.save(permission);
+		
+		return permission;
 	}
 }

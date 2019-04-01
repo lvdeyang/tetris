@@ -18,6 +18,7 @@ import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.stream.video.exception.MediaVideoStreamNotExistException;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -101,6 +102,44 @@ public class MediaVideoStreamController {
 		}
 		
 		MediaVideoStreamPO entity = mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrl, folder);
+		
+		return new MediaVideoStreamVO().set(entity);
+		
+	}
+	
+	/**
+	 * 编辑视频流媒资<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月26日 上午9:02:08
+	 * @param id 视频流媒资id
+	 * @param previewUrl 视频流地址
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @return MediaVideoStreamVO 视频流媒资
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/edit/{id}")
+	public Object editTask(
+			@PathVariable Long id,
+			String previewUrl, 
+			String name,
+            String tags,
+            String keyWords,
+            String remark,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		MediaVideoStreamPO videoStream = mediaVideoStreamDao.findOne(id);
+		if(videoStream == null){
+			throw new MediaVideoStreamNotExistException(id);
+		}
+		
+		MediaVideoStreamPO entity = mediaVideoStreamService.editTask(user, videoStream, name, null, null, remark, previewUrl);
 		
 		return new MediaVideoStreamVO().set(entity);
 		

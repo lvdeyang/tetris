@@ -1264,7 +1264,18 @@ public class FolderService {
 	public void createCompanyDisk(String companyId, String companyName, String userId) throws Exception{
 		//判重
 		FolderPO existFolder = folderDao.findCompanyRootFolderByType(companyId, FolderType.COMPANY_PICTURE.toString());
-		if(existFolder != null) return;
+		//TODO: role
+		if(existFolder != null){
+			RolePO rolePO = roleDao.findInternalCompanyAdminRole(companyId);
+			if(rolePO != null) {
+				RoleUserPermissionPO permission = new RoleUserPermissionPO();
+				permission.setRoleId(rolePO.getId());
+				permission.setUserId(userId);
+				permission.setUpdateTime(new Date());
+				roleUserPermissionDao.save(permission);
+			}
+			return;
+		}
 		
 		//创建管理员
 		RolePO role = new RolePO();
@@ -1305,6 +1316,9 @@ public class FolderService {
 		
 		//文本
 		createCompanyFolder(companyId, companyName, FolderType.COMPANY_TXT, root.getId(), parentPath, role.getId());
+	
+		//压缩文件
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_COMPRESS, root.getId(), parentPath, role.getId());
 	}
 	
 }

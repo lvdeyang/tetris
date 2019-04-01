@@ -27,7 +27,8 @@ define([
                 total:0,
                 loading:false,
                 __buffer:'',
-                selected:[]
+                selected:[],
+                search:''
             }
         },
         methods:{

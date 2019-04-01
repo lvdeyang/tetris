@@ -68,8 +68,9 @@
                                         </el-tooltip>
                                         <el-dropdown-menu slot="dropdown">
                                             <el-dropdown-item command="0" v-if="scope.row.type==='FOLDER'">重命名</el-dropdown-item>
-                                            <el-dropdown-item command="1">移动</el-dropdown-item>
-                                            <el-dropdown-item command="2">复制</el-dropdown-item>
+                                            <el-dropdown-item command="1" v-if="scope.row.type==='AUDIO_STREAM'">编辑</el-dropdown-item>
+                                            <el-dropdown-item command="2">移动</el-dropdown-item>
+                                            <el-dropdown-item command="3">复制</el-dropdown-item>
                                         </el-dropdown-menu>
                                     </el-dropdown>
                                 </span>
@@ -138,7 +139,7 @@
         <!-- 复制文件夹 -->
         <mi-folder-dialog ref="copyMediaAudioStreamFolderDialog" @selected-folder="copyMediaAudioStreamFolder"></mi-folder-dialog>
 
-        <!-- 添加视频媒资对话框 -->
+        <!-- 添加音频流媒资对话框 -->
         <el-dialog
                 title="添加视频"
                 :visible.sync="dialog.addAudioStream.visible"
@@ -168,6 +169,40 @@
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="dialog.addAudioStream.visible = false">取 消</el-button>
                 <el-button size="medium" type="primary" :loading="dialog.addAudioStream.loading" @click="addMediaAudioStreamTask">确 定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <!-- 编辑音频流媒资对话框 -->
+        <el-dialog
+                title="编辑音频流"
+                :visible.sync="dialog.editAudioStream.visible"
+                width="500px"
+                :before-close="handleEditAudioStreamClose">
+
+            <div>
+                <el-form ref="form" label-width="80px">
+                    <el-form-item label="媒资名称">
+                        <el-input v-model="dialog.editAudioStream.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="流地址">
+                        <el-input v-model="dialog.editAudioStream.previewUrl"></el-input>
+                    </el-form-item>
+                    <el-form-item label="贴标签">
+                        <el-input v-model="dialog.editAudioStream.tags"></el-input>
+                    </el-form-item>
+                    <el-form-item label="关键字">
+                        <el-input v-model="dialog.editAudioStream.keyWords"></el-input>
+                    </el-form-item>
+                    <el-form-item label="备注">
+                        <el-input type="textarea" v-model="dialog.editAudioStream.remark"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.editAudioStream.visible = false">取 消</el-button>
+                <el-button size="medium" type="primary" :loading="dialog.editAudioStream.loading" @click="editMediaAudioStreamTask">确 定</el-button>
             </span>
 
         </el-dialog>

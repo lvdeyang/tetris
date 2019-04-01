@@ -40,6 +40,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private String previewUrl;
 	
+	private List<MediaVideoVO> children;
+	
 	public String getName() {
 		return name;
 	}
@@ -163,6 +165,15 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 
 	public MediaVideoVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public List<MediaVideoVO> getChildren() {
+		return children;
+	}
+
+	public MediaVideoVO setChildren(List<MediaVideoVO> children) {
+		this.children = children;
 		return this;
 	}
 

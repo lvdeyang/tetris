@@ -82,6 +82,11 @@
                                         width="110">
                                 </el-table-column>
                                 <el-table-column
+                                        prop="templateId"
+                                        label="模板用途"
+                                        width="150">
+                                </el-table-column>
+                                <el-table-column
                                         prop="icon"
                                         label="图标"
                                         width="200">
@@ -114,7 +119,7 @@
                                         </el-tooltip>
                                     </template>
                                 </el-table-column>
-                            </el-table>
+                            </el-table-column>
                         </div>
                     </div>
                 </div>
@@ -159,6 +164,11 @@
                         <el-option v-for="type in types" :label="type" :value="type" :key="type"></el-option>
                     </el-select>
                 </el-form-item>
+                <el-form-item label="模板用途">
+                    <el-select v-model="dialog.addTemplate.templateId" placeholder="模板用途" style="width:100%;">
+                        <el-option v-for="templateId in templateIds" :label="templateId" :value="templateId" :key="templateId"></el-option>
+                    </el-select>
+                </el-form-item>
                 <el-form-item label="图标">
                     <el-input v-model="dialog.addTemplate.icon"></el-input>
                 </el-form-item>
@@ -190,6 +200,11 @@
                 <el-form-item label="模板类型">
                     <el-select v-model="dialog.editTemplate.type" placeholder="模板类型" style="width:100%;">
                         <el-option v-for="type in types" :label="type" :value="type" :key="type"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="模板用途">
+                    <el-select v-model="dialog.editTemplate.templateId" placeholder="模板用途" style="width:100%;">
+                        <el-option v-for="templateId in templateIds" :label="templateId" :value="templateId" :key="templateId"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="图标">

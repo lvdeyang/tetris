@@ -91,6 +91,37 @@ public class MediaAudioStreamService {
 	}
 	
 	/**
+	 * 编辑音频流媒资<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月26日 上午8:42:12
+	 * @param user 用户
+	 * @param audioStream 音频流媒资
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @param previewUrl 流地址
+	 * @return MediaAudioStreamPO 音频流媒资
+	 */
+	public MediaAudioStreamPO editTask(
+			UserVO user, 
+			MediaAudioStreamPO audioStream,
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			String previewUrl) throws Exception{
+		
+		audioStream.setName(name);
+		audioStream.setRemarks(remark);
+		audioStream.setPreviewUrl(previewUrl);
+		mediaAudioStreamDao.save(audioStream);
+		
+		return audioStream;
+	}
+	
+	/**
 	 * 复制音频流媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

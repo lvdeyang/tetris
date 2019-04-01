@@ -50,6 +50,7 @@ require.config({
 
         'region-dialog':window.APPPATH + 'component/dialog/region/region-dialog',
         'classify-dialog':window.APPPATH + 'component/dialog/classify/classify-dialog',
+        'column-dialog':window.APPPATH + 'component/dialog/column/column-dialog',
 
         /* pages */
         'page-cms-template':window.APPPATH + 'cms/template/page-cms-template',

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.mims.app.material.MaterialFilePO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressPO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 
@@ -68,6 +69,23 @@ public class StoreQuery {
 	}
 	
 	/**
+	 * 根据播发媒资（批量）生成预删除存储文件<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月31日 下午3:56:32
+	 * @param Collection<MediaCompressPO> compresses 播发媒资列表
+	 * @return List<PreRemoveStoreFilePO> 预删除存储文件列表
+	 */
+	public List<PreRemoveFilePO> preRemoveMediaCompresses(Collection<MediaCompressPO> compresses) throws Exception{
+		if(compresses==null || compresses.size()<=0) return null;
+		List<PreRemoveFilePO> preRemoveFiles = new ArrayList<PreRemoveFilePO>();
+		for(MediaCompressPO compress:compresses){
+			preRemoveFiles.add(preRemoveMediaPicture(compress));
+		}
+		return preRemoveFiles;
+	}
+	
+	/**
 	 * 根据视频媒资（批量）生成预删除存储文件<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -110,6 +128,19 @@ public class StoreQuery {
 	 * @return PreRemoveStoreFilePO 预删除存储文件
 	 */
 	public PreRemoveFilePO preRemoveMediaPicture(MediaPicturePO picture) throws Exception{
+		PreRemoveFilePO preRemoveFile = new PreRemoveFilePO();
+		return preRemoveFile;
+	}
+	
+	/**
+	 * 根据播发媒资生成预删除存储文件<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年3月31日 下午3:53:08
+	 * @param MediaCompressPO compress 播发媒资
+	 * @return PreRemoveStoreFilePO 预删除存储文件
+	 */
+	public PreRemoveFilePO preRemoveMediaPicture(MediaCompressPO compress) throws Exception{
 		PreRemoveFilePO preRemoveFile = new PreRemoveFilePO();
 		return preRemoveFile;
 	}

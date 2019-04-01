@@ -4,7 +4,6 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum TemplateId {
 
-	YJGB_COMMOM("应急广播通用", "yjgb_commom"),
 	YJGB_TITLE("应急广播标题", "yjgb_title"),
 	YJGB_TXT("应急广播文本", "yjgb_txt"),
 	YJGB_VIDEO("应急广播视频", "yjgb_video"),

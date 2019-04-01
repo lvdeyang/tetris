@@ -69,6 +69,15 @@ define([
                         task:'',
                         loading:false
                     },
+                    editAudio:{
+                        id:'',
+                        visible:false,
+                        name:'',
+                        remark:'',
+                        tags:'',
+                        keywords:'',
+                        loading:false
+                    },
                     upload:{
                         fileType:['audio'],
                         multiple:false
@@ -283,6 +292,16 @@ define([
                             self.dialog.renameFolder.visible = true;
                         }
                     }else if(command === '1'){
+                        //编辑
+                        if(row.type === 'AUDIO'){
+                            self.dialog.editAudio.id = row.id;
+                            self.dialog.editAudio.name = row.name;
+                            self.dialog.editAudio.remark = row.remarks;
+                            self.dialog.editAudio.tags = row.tags;
+                            self.dialog.editAudio.keyWords = row.keyWords;
+                            self.dialog.editAudio.visible = true;
+                        }
+                    }else if(command === '2'){
                         //移动
                         if(row.type === 'FOLDER'){
                             self.$refs.moveMediaAudioFolderDialog.open('/folder/permission/media/tree/with/except/audio', row.id);
@@ -291,7 +310,7 @@ define([
                             self.$refs.moveMediaAudioDialog.open('/folder/permission/media/tree/with/except/audio');
                             self.$refs.moveMediaAudioDialog.setBuffer(row);
                         }
-                    }else if(command === '2'){
+                    }else if(command === '3'){
                         //复制
                         if(row.type === 'FOLDER'){
                             self.$refs.copyMediaAudioFolderDialog.open('/folder/permission/media/tree/audio');
@@ -457,6 +476,17 @@ define([
                     self.dialog.addAudio.visible = false;
                     self.dialog.addAudio.loading = false;
                 },
+                //编辑媒资对话框关闭
+                handleEditAudioClose:function(){
+                    var self = this;
+                    self.dialog.editAudio.id = '';
+                    self.dialog.editAudio.name = '';
+                    self.dialog.editAudio.remark = '';
+                    self.dialog.editAudio.tags = '';
+                    self.dialog.editAudio.keyWords = '';
+                    self.dialog.editAudio.visible = false;
+                    self.dialog.editAudio.loading = false;
+                },
                 //添加视频媒资任务
                 addMediaAudioTask:function(){
                     var self = this;
@@ -492,6 +522,28 @@ define([
                             createUploader(self, uploadfiles);
                         }
                         self.handleAddAudioClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                //编辑音频媒资任务
+                editMediaAudioTask:function(){
+                    var self = this;
+                    self.dialog.editAudio.loading = true;
+                    ajax.post('/media/audio/task/edit/' + self.dialog.editAudio.id, {
+                        name:self.dialog.editAudio.name,
+                        tags:self.dialog.editAudio.tags,
+                        keyWords:self.dialog.editAudio.keyWords,
+                        remark:self.dialog.editAudio.remark
+                    }, function(data, status){
+                        self.dialog.editAudio.loading = false;
+                        if(status !== 200) return;
+                        var rows = self.table.rows;
+                        for(var i=0; i<rows.length; i++){
+                            if(rows[i].id === data.id){
+                                rows.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleEditAudioClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 //上传按钮点击

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.cms.region.exception.RegionMoveFailException;
 import com.sumavision.tetris.cms.region.exception.RegionNotExistException;
+import com.sumavision.tetris.cms.region.exception.UserHasNotPermissionForRegionException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -48,7 +49,7 @@ public class RegionController {
 
 		// TODO 权限校验
 
-		List<RegionVO> rootRegions = regionQuery.queryRegionTree();
+		List<RegionVO> rootRegions = regionQuery.queryRegionTree(user);
 
 		return rootRegions;
 	}
@@ -69,7 +70,7 @@ public class RegionController {
 
 		// TODO 权限校验
 
-		RegionPO region = regionService.addRoot();
+		RegionPO region = regionService.addRoot(user);
 
 		return new RegionVO().set(region);
 	}
@@ -89,15 +90,18 @@ public class RegionController {
 		UserVO user = userQuery.current();
 
 		// TODO 权限校验
+		if(!regionQuery.hasPermission(parentId, user)){
+			throw new UserHasNotPermissionForRegionException(parentId, user);
+		}
 
 		RegionPO parent = regionDao.findOne(parentId);
 		if (parent == null) {
 			throw new RegionNotExistException(parentId);
 		}
 
-		RegionPO regionPO = regionService.append(parent);
+		RegionPO region = regionService.append(user, parent);
 
-		return new RegionVO().set(regionPO);
+		return new RegionVO().set(region);
 	}
 
 	/**
@@ -112,19 +116,22 @@ public class RegionController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/update/{id}")
-	public Object update(@PathVariable Long id, String name, HttpServletRequest request)
+	public Object update(@PathVariable Long id, String name, String code, HttpServletRequest request)
 			throws Exception {
 
 		UserVO user = userQuery.current();
 
 		// TODO 权限校验
+		if(!regionQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForRegionException(id, user);
+		}
 
 		RegionPO regionPO = regionDao.findOne(id);
 		if (regionPO == null) {
 			throw new RegionNotExistException(id);
 		}
-
-		regionPO = regionService.update(regionPO, name);
+		
+		regionPO = regionService.update(regionPO, name, code);
 
 		return new RegionVO().set(regionPO);
 	}
@@ -143,8 +150,11 @@ public class RegionController {
 
 		UserVO user = userQuery.current();
 
-		// TODO 权限校验
-
+		// TODO 权限校验		
+		if(!regionQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForRegionException(id, user);
+		}
+		
 		RegionPO regionPO = regionDao.findOne(id);
 
 		if (regionPO != null) {
@@ -171,6 +181,12 @@ public class RegionController {
 		UserVO user = userQuery.current();
 
 		// TODO 权限校验
+		if(!regionQuery.hasPermission(sourceId, user)){
+			throw new UserHasNotPermissionForRegionException(sourceId, user);
+		}
+		if(!regionQuery.hasPermission(targetId, user)){
+			throw new UserHasNotPermissionForRegionException(targetId, user);
+		}
 
 		RegionPO sourceRegion = regionDao.findOne(sourceId);
 		if (sourceRegion == null) {
@@ -211,6 +227,9 @@ public class RegionController {
 		UserVO user = userQuery.current();
 
 		// TODO 权限校验
+		if(!regionQuery.hasPermission(id, user)){
+			throw new UserHasNotPermissionForRegionException(id, user);
+		}
 
 		RegionPO region = regionDao.findOne(id);
 		if (region == null) {

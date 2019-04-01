@@ -76,8 +76,9 @@
                                         </el-tooltip>
                                         <el-dropdown-menu slot="dropdown">
                                             <el-dropdown-item command="0" v-if="scope.row.type==='FOLDER'">重命名</el-dropdown-item>
-                                            <el-dropdown-item command="1">移动</el-dropdown-item>
-                                            <el-dropdown-item command="2">复制</el-dropdown-item>
+                                            <el-dropdown-item command="1" v-if="scope.row.type==='AUDIO'">编辑</el-dropdown-item>
+                                            <el-dropdown-item command="2">移动</el-dropdown-item>
+                                            <el-dropdown-item command="3">复制</el-dropdown-item>
                                         </el-dropdown-menu>
                                     </el-dropdown>
                                 </span>
@@ -160,9 +161,9 @@
         <!-- 文件上传 -->
         <mi-upload-dialog ref="uploadDialog" @file-selected="fileSelected" :require-type="dialog.upload.fileType" :multiple="dialog.upload.multiple"></mi-upload-dialog>
 
-        <!-- 添加视频媒资对话框 -->
+        <!-- 添加音频媒资对话框 -->
         <el-dialog
-                title="添加视频"
+                title="添加音频"
                 :visible.sync="dialog.addAudio.visible"
                 width="500px"
                 :before-close="handleAddAudioClose">
@@ -191,6 +192,37 @@
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="dialog.addAudio.visible = false">取 消</el-button>
                 <el-button size="medium" type="primary" :loading="dialog.addAudio.loading" @click="addMediaAudioTask">确 定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <!-- 编辑音频媒资对话框 -->
+        <el-dialog
+                title="编辑音频"
+                :visible.sync="dialog.editAudio.visible"
+                width="500px"
+                :before-close="handleEditAudioClose">
+
+            <div>
+                <el-form ref="form" label-width="80px">
+                    <el-form-item label="媒资名称">
+                        <el-input v-model="dialog.editAudio.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="贴标签">
+                        <el-input v-model="dialog.editAudio.tags"></el-input>
+                    </el-form-item>
+                    <el-form-item label="关键字">
+                        <el-input v-model="dialog.editAudio.keyWords"></el-input>
+                    </el-form-item>
+                    <el-form-item label="备注">
+                        <el-input type="textarea" v-model="dialog.editAudio.remark"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.editAudio.visible = false">取 消</el-button>
+                <el-button size="medium" type="primary" :loading="dialog.editAudio.loading" @click="editMediaAudioTask">确 定</el-button>
             </span>
 
         </el-dialog>

@@ -177,6 +177,34 @@ public class MediaVideoService {
 	}
 	
 	/**
+	 * 编辑视频媒资<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月25日 下午4:49:01
+	 * @param user 用户
+	 * @param video 视频媒资
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @return MediaVideoPO 视频媒资
+	 */
+	public MediaVideoPO editTask(
+			UserVO user, 
+			MediaVideoPO video,
+			String name,
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark) throws Exception{
+		
+		video.setName(name);
+		video.setRemarks(remark);
+		mediaVideoDao.save(video);
+		
+		return video;
+	}
+	
+	/**
 	 * 素材上传任务关闭<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

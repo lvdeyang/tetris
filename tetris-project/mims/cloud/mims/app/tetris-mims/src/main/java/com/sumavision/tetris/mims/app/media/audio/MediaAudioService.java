@@ -176,6 +176,34 @@ public class MediaAudioService {
 	}
 	
 	/**
+	 * 编辑音频媒资<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月25日 下午4:40:57
+	 * @param user 用户
+	 * @param audio 音频媒资
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @return MediaAudioPO 音频媒资
+	 */
+	public MediaAudioPO editAudio(
+			UserVO user, 
+			MediaAudioPO audio,
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark) throws Exception{
+		
+		audio.setName(name);
+		audio.setRemarks(remark);
+		mediaAudioDao.save(audio);
+		
+		return audio;
+	}
+	
+	/**
 	 * 音频媒资上传任务关闭<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

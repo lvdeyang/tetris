@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cms.relation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -11,6 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.cms.article.ArticleQuery;
+import com.sumavision.tetris.cms.article.exception.UserHasNotPermissionForArticleException;
+import com.sumavision.tetris.cms.column.ColumnDAO;
+import com.sumavision.tetris.cms.column.ColumnPO;
+import com.sumavision.tetris.cms.column.ColumnQuery;
+import com.sumavision.tetris.cms.column.ColumnVO;
+import com.sumavision.tetris.cms.column.exception.UserHasNotPermissionForColumnException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -23,10 +31,19 @@ public class ColumnRelationArticleController {
 	private UserQuery userQuery;
 	
 	@Autowired
+	private ColumnQuery columnQuery;
+	
+	@Autowired
+	private ArticleQuery articleQuery;
+	
+	@Autowired
 	private ColumnRelationArticleDAO columnRelationArticleDao;
 	
 	@Autowired
 	private ColumnRelationArticleService columnRelationArticleService;
+	
+	@Autowired
+	private ColumnDAO columnDao;
 
 	/**
 	 * 栏目绑定文章<br/>
@@ -46,12 +63,15 @@ public class ColumnRelationArticleController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
+		if(!columnQuery.hasPermission(columnId, user)){
+			throw new UserHasNotPermissionForColumnException(columnId, user);
+		}
 		
 		//TODO 权限校验
 		
 		if(articleIds == null) return null;
 		
-		return columnRelationArticleService.bind(columnId, JSON.parseArray(articleIds, String.class));
+		return columnRelationArticleService.bindArticle(columnId, JSON.parseArray(articleIds, String.class));
 	}
 	
 	/**
@@ -72,6 +92,12 @@ public class ColumnRelationArticleController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
+		if(!columnQuery.hasPermission(columnId, user)){
+			throw new UserHasNotPermissionForColumnException(columnId, user);
+		}
+		if(!articleQuery.hasPermission(articleId, user)){
+			throw new UserHasNotPermissionForArticleException(articleId, user);
+		}		
 		
 		//TODO 权限校验
 		
@@ -98,6 +124,12 @@ public class ColumnRelationArticleController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!columnQuery.hasPermission(columnId, user)){
+			throw new UserHasNotPermissionForColumnException(columnId, user);
+		}
+		if(!articleQuery.hasPermission(articleId, user)){
+			throw new UserHasNotPermissionForArticleException(articleId, user);
+		}
 		
 		return columnRelationArticleService.down(columnId, articleId);
 	}
@@ -122,6 +154,12 @@ public class ColumnRelationArticleController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!columnQuery.hasPermission(columnId, user)){
+			throw new UserHasNotPermissionForColumnException(columnId, user);
+		}
+		if(!articleQuery.hasPermission(articleId, user)){
+			throw new UserHasNotPermissionForArticleException(articleId, user);
+		}
 		
 		columnRelationArticleService.inform(columnId, articleId);
 		
@@ -148,6 +186,12 @@ public class ColumnRelationArticleController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!columnQuery.hasPermission(columnId, user)){
+			throw new UserHasNotPermissionForColumnException(columnId, user);
+		}
+		if(!articleQuery.hasPermission(articleId, user)){
+			throw new UserHasNotPermissionForArticleException(articleId, user);
+		}
 		
 		return columnRelationArticleService.top(columnId, articleId);
 	}
@@ -172,32 +216,41 @@ public class ColumnRelationArticleController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!columnQuery.hasPermission(columnId, user)){
+			throw new UserHasNotPermissionForColumnException(columnId, user);
+		}
+		if(!articleQuery.hasPermission(articleId, user)){
+			throw new UserHasNotPermissionForArticleException(articleId, user);
+		}	
 		
 		return columnRelationArticleService.bottom(columnId, articleId);
 	}
 	
 	/**
-	 * 根据标签查询文章<br/>
+	 * 根据栏目查询文章<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年2月26日 上午10:58:46
-	 * @param Long tagId 标签id
+	 * @param Long columnId 栏目id
 	 * @return
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/load")
 	public Object load(
-			Long tagId,
+			Long columnId,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		if(!columnQuery.hasPermission(columnId, user)){
+			throw new UserHasNotPermissionForColumnException(columnId, user);
+		}
 		
 		List<ColumnRelationArticlePO> articles = null;
 
-		articles = columnRelationArticleDao.findByColumnIdOrderByArticleOrder(tagId);
+		articles = columnRelationArticleDao.findByColumnIdOrderByArticleOrder(columnId);
 		
 		return ColumnRelationArticleVO.getConverter(ColumnRelationArticleVO.class).convert(articles, ColumnRelationArticleVO.class);
 	}
@@ -288,4 +341,39 @@ public class ColumnRelationArticleController {
 		
 		return new ColumnRelationArticleVO().set(relation);
 	}
+	
+	/**
+	 * 根据文章查询栏目<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年2月26日 上午10:58:46
+	 * @param Long articleId 文章id
+	 * @return List<ColumnVO> 栏目列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/column")
+	public Object loadColumn(
+			Long articleId,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		if(!articleQuery.hasPermission(articleId, user)){
+			throw new UserHasNotPermissionForArticleException(articleId, user);
+		}	
+		
+		List<ColumnPO> columns = null;
+		List<Long> columnIds = new ArrayList<Long>();
+
+		List<ColumnRelationArticlePO> relations = columnRelationArticleDao.findByArticleId(articleId);
+		for(ColumnRelationArticlePO relation: relations){
+			columnIds.add(relation.getColumnId());
+		}
+		
+		columns = columnDao.findAll(columnIds);
+		
+		return ColumnVO.getConverter(ColumnVO.class).convert(columns, ColumnVO.class);
+	}	
 }

@@ -9,8 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.cms.article.ArticleRegionPermissionDAO;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -21,6 +23,12 @@ public class RegionService {
 
 	@Autowired
 	private RegionQuery regionQuery;
+	
+	@Autowired
+	private RegionUserPermissionDAO regionUserPermissionDao;
+	
+	@Autowired
+	private ArticleRegionPermissionDAO articleRegionPermissionDao;
 
 	/**
 	 * 添加一个根地区<br/>
@@ -29,13 +37,15 @@ public class RegionService {
 	 * <b>日期：</b>2019年2月28日下午3:11:33
 	 * @return RegionPO 地区
 	 */
-	public RegionPO addRoot() throws Exception {
+	public RegionPO addRoot(UserVO user) throws Exception {
 
 		RegionPO regionPO = new RegionPO();
 		regionPO.setName("新建的标签");
 		regionPO.setUpdateTime(new Date());
 
 		regionDao.save(regionPO);
+		
+		addPermission(user, regionPO);
 
 		return regionPO;
 	}
@@ -47,7 +57,7 @@ public class RegionService {
 	 * <b>日期：</b>2019年2月28日下午3:13:25
 	 * @return RegionPO 地区
 	 */
-	public RegionPO append(RegionPO parent) throws Exception {
+	public RegionPO append(UserVO user, RegionPO parent) throws Exception {
 
 		StringBufferWrapper parentPath = new StringBufferWrapper();
 		if (parent.getParentId() == null) {
@@ -63,6 +73,8 @@ public class RegionService {
 		regionPO.setUpdateTime(new Date());
 
 		regionDao.save(regionPO);
+		
+		addPermission(user, regionPO);
 
 		return regionPO;
 	}
@@ -74,11 +86,13 @@ public class RegionService {
 	 * <b>日期：</b>2019年2月28日下午3:39:14
 	 * @param regionPO 地区
 	 * @param name 名称
+	 * @param code 编号
 	 * @return RegionPO 地区
 	 */
-	public RegionPO update(RegionPO regionPO, String name) throws Exception {
+	public RegionPO update(RegionPO regionPO, String name, String code) throws Exception {
 
 		regionPO.setName(name);
+		regionPO.setCode(code);
 		regionPO.setUpdateTime(new Date());
 		regionDao.save(regionPO);
 
@@ -107,7 +121,10 @@ public class RegionService {
 			subRegionPOs = new ArrayList<RegionPO>();
 		subRegionPOs.add(regionPO);
 		regionDao.deleteInBatch(subRegionPOs);
-
+		
+		List<RegionUserPermissionPO> permissions = regionUserPermissionDao.findByRegionIdIn(regionIds);
+		regionUserPermissionDao.deleteInBatch(permissions);
+		articleRegionPermissionDao.deleteByRegionIdIn(regionIds);
 	}
 
 	/**
@@ -137,10 +154,10 @@ public class RegionService {
 			for (RegionPO subRegion : subRegions) {
 				String[] paths = subRegion.getParentPath()
 						.split(new StringBufferWrapper().append("/").append(sourceRegion.getId()).toString());
-				if (paths.length == 1) {
-					subRegion.setParentPath(parentPath.append("/").append(targetRegion.getId()).toString());
+				if (paths.length == 1 || paths.length == 0) {
+					subRegion.setParentPath(parentPath.append("/").append(sourceRegion.getId()).toString());
 				} else {
-					subRegion.setParentPath(parentPath.append("/").append(targetRegion.getId()).append(paths[1]).toString());
+					subRegion.setParentPath(parentPath.append("/").append(sourceRegion.getId()).append(paths[1]).toString());
 				}
 			}
 		}
@@ -184,5 +201,26 @@ public class RegionService {
 		subRegions.add(regionPO);
 		regionDao.save(subRegions);
 
+	}
+	
+	/**
+	 * 添加地区用户关联<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月26日 下午2:24:03
+	 * @param user 用户信息
+	 * @param region 地区信息
+	 * @return RegionUserPermissionPO 地区用户关联
+	 */
+	public RegionUserPermissionPO addPermission(UserVO user, RegionPO region) throws Exception{
+		
+		RegionUserPermissionPO permission = new RegionUserPermissionPO();
+		permission.setRegionId(region.getId());
+		permission.setUserId(user.getUuid());
+		permission.setGroupId(user.getGroupId());
+		
+		regionUserPermissionDao.save(permission);
+		
+		return permission;
 	}
 }

@@ -42,6 +42,9 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 	/** 栏目名称 */
 	private String columnName;
 	
+	/** 栏目编号 */
+	private String columnCode;
+	
 	/** 栏目备注 */
 	private String columnRemark;
 
@@ -88,6 +91,15 @@ public class ColumnRelationArticlePO extends AbstractBasePO{
 
 	public void setColumnName(String columnName) {
 		this.columnName = columnName;
+	}	
+
+	@Column(name = "COLUMN_CODE")
+	public String getColumnCode() {
+		return columnCode;
+	}
+
+	public void setColumnCode(String columnCode) {
+		this.columnCode = columnCode;
 	}
 
 	@Column(name = "COLUMN_REMARK")

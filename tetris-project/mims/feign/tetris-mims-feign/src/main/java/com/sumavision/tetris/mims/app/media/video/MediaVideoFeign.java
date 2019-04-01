@@ -22,4 +22,16 @@ public interface MediaVideoFeign {
 	@RequestMapping(value = "/media/video/feign/load")
 	public JSONObject load(@RequestParam("folderId") Long folderId) throws Exception;
 	
+	/**
+	 * 加载所有视频媒资<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return rows List<MediaVideoVO> 视频媒资列表
+	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 */
+	@RequestMapping(value = "/media/video/feign/load/all")
+	public JSONObject loadAll() throws Exception;
+	
+	
 }

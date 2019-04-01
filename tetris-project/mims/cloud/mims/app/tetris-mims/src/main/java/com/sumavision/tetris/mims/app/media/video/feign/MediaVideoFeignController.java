@@ -34,4 +34,22 @@ public class MediaVideoFeignController {
 		return mediaVideoQuery.load(folderId);
 	}
 	
+	/**
+	 * 加载所有视频媒资<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @param folderId 文件夹id
+	 * @return rows List<MediaVideoVO> 视频媒资列表
+	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/all")
+	public Object loadAll(
+			HttpServletRequest request) throws Exception{
+		
+		return mediaVideoQuery.loadAll();
+	}
+	
 }

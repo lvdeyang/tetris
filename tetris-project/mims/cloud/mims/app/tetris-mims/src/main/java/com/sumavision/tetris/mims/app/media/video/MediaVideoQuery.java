@@ -110,6 +110,37 @@ public class MediaVideoQuery {
 	}
 	
 	/**
+	 * 加载所有的视频媒资<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return rows List<MediaVideoVO> 视频媒资列表
+	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 */
+	public Map<String, Object> loadAll() throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验		
+		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), FolderType.COMPANY_VIDEO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		List<MediaVideoPO> videos = mediaVideoDao.findByFolderIdIn(folderIds);
+		
+		List<MediaVideoVO> medias = findFolderTreeRoot(folderTree);
+		packMediaVideoTree(medias, folderTree, videos);
+		
+		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
+																  		 .getMap();
+		
+		return result;
+	}
+	
+	/**
 	 * 查询文件夹下上传完成的视频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -164,4 +195,59 @@ public class MediaVideoQuery {
 		return null;
 	}
 	
+	/**
+	 * 找出文件夹根列表<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月31日 上午11:06:48
+	 * @param folders 所有文件夹
+	 * @return List<FolderPO> 文件夹根列表
+	 */
+	public List<MediaVideoVO> findFolderTreeRoot(List<FolderPO> folders) throws Exception{
+
+		if(folders == null || folders.size() <= 0){
+			return null;
+		}
+		List<MediaVideoVO> roots = new ArrayList<MediaVideoVO>();
+		for(FolderPO folder: folders){
+			if(folder.getParentId() == null){
+				roots.add(new MediaVideoVO().set(folder));
+			}
+		}
+		return roots;
+	}
+	
+	/**
+	 * 生成媒资视频树<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月31日 上午11:29:34
+	 * @param roots 根
+	 * @param folders 所有文件夹
+	 * @param medias 所有视频媒资
+	 */
+	public void packMediaVideoTree(List<MediaVideoVO> roots, List<FolderPO> folders, List<MediaVideoPO> medias) throws Exception{
+		if(roots == null || roots.size() <= 0){
+			return;
+		}
+		
+		for(MediaVideoVO root: roots){
+			if(root.getType().equals(MediaVideoItemType.FOLDER.toString())){
+				if(root.getChildren() == null) root.setChildren(new ArrayList<MediaVideoVO>());
+				for(FolderPO folder: folders){
+					if(folder.getParentId() != null && folder.getParentId().equals(root.getId())){
+						root.getChildren().add(new MediaVideoVO().set(folder));
+					}
+				}
+				for(MediaVideoPO media: medias){
+					if(media.getFolderId() != null && media.getFolderId().equals(root.getId())){
+						root.getChildren().add(new MediaVideoVO().set(media));
+					}
+				}
+				if(root.getChildren().size() > 0){
+					packMediaVideoTree(root.getChildren(), folders, medias);
+				}
+			}
+		}
+	}
 }

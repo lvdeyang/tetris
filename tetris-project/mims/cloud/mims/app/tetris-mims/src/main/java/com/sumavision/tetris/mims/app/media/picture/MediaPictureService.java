@@ -181,6 +181,33 @@ public class MediaPictureService {
 	}
 	
 	/**
+	 * 编辑图片媒资信息<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月25日 下午3:19:38
+	 * @param picture 图片媒资
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @return MediaPicturePO 图片媒资
+	 */
+	public MediaPicturePO editTask(
+			UserVO user,
+			MediaPicturePO picture,
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark) throws Exception{
+		
+		picture.setName(name);
+		picture.setRemarks(remark);
+		
+		mediaPictureDao.save(picture);
+		return picture;
+	}
+	
+	/**
 	 * 素材上传任务关闭<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

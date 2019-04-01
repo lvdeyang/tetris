@@ -34,6 +34,7 @@ define([
                 user:context.getProp('user'),
                 groups:context.getProp('groups'),
                 types:[],
+                templateIds:[],
                 tree:{
                     props:{
                         label: 'name',
@@ -57,6 +58,7 @@ define([
                         visible:false,
                         name:'',
                         type:'',
+                        templateId:'',
                         icon:'',
                         style:'',
                         remark:'',
@@ -67,6 +69,7 @@ define([
                         id:'',
                         name:'',
                         type:'',
+                        templateId:'',
                         icon:'',
                         style:'',
                         remark:'',
@@ -308,6 +311,7 @@ define([
                     self.dialog.editTemplate.id = row.id;
                     self.dialog.editTemplate.name = row.name;
                     self.dialog.editTemplate.type = row.type;
+                    self.dialog.editTemplate.templateId = row.templateId;
                     self.dialog.editTemplate.icon = row.icon;
                     self.dialog.editTemplate.style = row.style;
                     self.dialog.editTemplate.remark = row.remark;
@@ -366,6 +370,7 @@ define([
                     ajax.post('/cms/template/add', {
                         name:self.dialog.addTemplate.name,
                         type:self.dialog.addTemplate.type,
+                        templateId:self.dialog.addTemplate.templateId,
                         icon:self.dialog.addTemplate.icon,
                         style:self.dialog.addTemplate.style,
                         remark:self.dialog.addTemplate.remark,
@@ -383,6 +388,7 @@ define([
                     self.dialog.editTemplate.id = '';
                     self.dialog.editTemplate.name = '';
                     self.dialog.editTemplate.type = '';
+                    self.dialog.addTemplate.templateId = '';
                     self.dialog.editTemplate.icon = '';
                     self.dialog.editTemplate.style = '';
                     self.dialog.editTemplate.remark = '';
@@ -394,9 +400,10 @@ define([
                     ajax.post('/cms/template/update/' + self.dialog.editTemplate.id, {
                         name:self.dialog.editTemplate.name,
                         type:self.dialog.editTemplate.type,
+                        templateId:self.dialog.addTemplate.templateId,
                         icon:self.dialog.editTemplate.icon,
                         style:self.dialog.editTemplate.style,
-                        remark:self.dialog.editTemplate.remark,
+                        remark:self.dialog.editTemplate.remark
                     }, function(data, status){
                         self.dialog.editTemplate.loading = false;
                         if(status !== 200) return;
@@ -468,12 +475,23 @@ define([
                             message:'保存成功！'
                         });
                     }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                loadTemplateIds: function(){
+                    var self = this;
+                    ajax.post('/cms/template/query/ids', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.templateIds.push(data[i]);
+                            }
+                        }
+                    });
                 }
             },
             created:function(){
                 var self = this;
                 self.loadTagTree();
                 self.loadTemplateTypes();
+                self.loadTemplateIds();
             },
             mounted:function(){
                 var self = this;
