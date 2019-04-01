@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
@@ -72,5 +73,28 @@ public interface AccessPointParamDAO extends BaseDAO<AccessPointParamPO>{
 	 * @return AccessPointParamPO 参数
 	 */
 	public AccessPointParamPO findByAccessPointIdAndSerial(Long accessPointId, Integer serial);
+	
+	/**
+	 * 查询一个参数下的所有子参数<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月17日 上午8:57:46
+	 * @param String reg0 '%/id'
+	 * @param String reg1 '%/id/%'
+	 * @return List<AccessPointParamPO> 所有的子参数
+	 */
+	@Query(value = "SELECT * FROM tetris_process_access_point_param WHERE parent_path LIKE ?1 OR parent_path LIKE ?2", nativeQuery = true)
+	public List<AccessPointParamPO> findAllSubParams(String reg0, String reg1);
+	
+	/**
+	 * 查询流程内配置的接入点内所有的参数（包括参数和返回值）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月21日 下午4:58:47
+	 * @param Long processId 流程id
+	 * @return List<AccessPointParamPO> 参数列表
+	 */
+	@Query(value = "SELECT param.* FROM TETRIS_PROCESS_ACCESS_POINT_PARAM param LEFT JOIN TETRIS_PROCESS_ACCESS_POINT ap ON param.access_point_id=ap.id LEFT JOIN TETRIS_ACCESS_POINT_PROCESS_PERMISSION permission ON ap.id=permission.access_point_id WHERE permission.process_id=?1", nativeQuery = true)
+	public List<AccessPointParamPO> findByProcessId(Long processId);
 	
 }

@@ -1,8 +1,11 @@
 package com.sumavision.tetris.mims.app.media.video;
 
+import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Component
@@ -29,12 +32,10 @@ public class MediaVideoQuery {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
-	 * @param folderId 文件夹id
-	 * @return rows List<MediaVideoVO> 视频媒资列表
-	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 * @return List<MediaVideoVO> 视频媒资列表
 	 */
-	public Map<String, Object> loadAll() throws Exception{
-		return JsonBodyResponseParser.parseObject(mediaVideoFeign.loadAll(), Map.class);
+	public List<MediaVideoVO> loadAll() throws Exception{
+		return JsonBodyResponseParser.parseArray(mediaVideoFeign.loadAll(), MediaVideoVO.class);
 	}
 	
 }

@@ -12,7 +12,11 @@ public class ProcessVariableVO extends AbstractBaseVO<ProcessVariableVO, Process
 	
 	private String name;
 	
+	private String dataType;
+	
 	private String defaultValue;
+	
+	private String expressionValue;
 	
 	private boolean removeable;
 	
@@ -47,12 +51,30 @@ public class ProcessVariableVO extends AbstractBaseVO<ProcessVariableVO, Process
 		return this;
 	}
 
+	public String getDataType() {
+		return dataType;
+	}
+
+	public ProcessVariableVO setDataType(String dataType) {
+		this.dataType = dataType;
+		return this;
+	}
+
 	public String getDefaultValue() {
 		return defaultValue;
 	}
 
 	public ProcessVariableVO setDefaultValue(String defaultValue) {
 		this.defaultValue = defaultValue;
+		return this;
+	}
+
+	public String getExpressionValue() {
+		return expressionValue;
+	}
+
+	public ProcessVariableVO setExpressionValue(String expressionValue) {
+		this.expressionValue = expressionValue;
 		return this;
 	}
 
@@ -90,7 +112,9 @@ public class ProcessVariableVO extends AbstractBaseVO<ProcessVariableVO, Process
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setPrimaryKey(entity.getPrimaryKey())
 			.setName(entity.getName())
+			.setDataType(entity.getDataType().getName())
 			.setDefaultValue(entity.getDefaultValue())
+			.setExpressionValue(entity.getExpressionValue())
 			.setRemoveable(true);
 		return this;
 	}

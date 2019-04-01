@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.easy.process.access.service.exception.ServiceNotExistException;
-import com.sumavision.tetris.easy.process.access.service.exception.UserHasNoPermissionForServiceQueryException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -56,10 +54,6 @@ public class RestServiceController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "rest服务查询");
-		}
-		
 		List<RestServicePO> entities = restServiceTool.findAll(currentPage, pageSize);
 		
 		List<RestServiceVO> rows = RestServiceVO.getConverter(RestServiceVO.class).convert(entities, RestServiceVO.class);
@@ -97,10 +91,6 @@ public class RestServiceController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "rest服务查询");
-		}
 		
 		RestServicePO service = new RestServicePO();
 		service.setName(name);
@@ -141,10 +131,6 @@ public class RestServiceController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "rest服务查询");
-		}
-		
 		RestServicePO service = restServiceDao.findOne(id);
 		
 		if(service == null){
@@ -177,10 +163,6 @@ public class RestServiceController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "rest服务查询");
-		}
 		
 		RestServicePO service = restServiceDao.findOne(id);
 		

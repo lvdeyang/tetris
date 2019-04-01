@@ -1,5 +1,6 @@
 package com.sumavision.tetris.easy.process.access.point;
 
+import java.util.List;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -8,6 +9,8 @@ public class AccessPointParamVO extends AbstractBaseVO<AccessPointParamVO, Acces
 	private String name;
 	
 	private String primaryKey;
+	
+	private String referenceKey;
 	
 	private String defaultValue;
 	
@@ -25,6 +28,8 @@ public class AccessPointParamVO extends AbstractBaseVO<AccessPointParamVO, Acces
 	
 	private String remarks;
 	
+	private List<AccessPointParamVO> sub;
+	
 	public String getName() {
 		return name;
 	}
@@ -40,6 +45,15 @@ public class AccessPointParamVO extends AbstractBaseVO<AccessPointParamVO, Acces
 
 	public AccessPointParamVO setPrimaryKey(String primaryKey) {
 		this.primaryKey = primaryKey;
+		return this;
+	}
+
+	public String getReferenceKey() {
+		return referenceKey;
+	}
+
+	public AccessPointParamVO setReferenceKey(String referenceKey) {
+		this.referenceKey = referenceKey;
 		return this;
 	}
 
@@ -115,6 +129,15 @@ public class AccessPointParamVO extends AbstractBaseVO<AccessPointParamVO, Acces
 		return this;
 	}
 
+	public List<AccessPointParamVO> getSub() {
+		return sub;
+	}
+
+	public AccessPointParamVO setSub(List<AccessPointParamVO> sub) {
+		this.sub = sub;
+		return this;
+	}
+
 	@Override
 	public AccessPointParamVO set(AccessPointParamPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -122,6 +145,7 @@ public class AccessPointParamVO extends AbstractBaseVO<AccessPointParamVO, Acces
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setPrimaryKey(entity.getPrimaryKey())
+			.setReferenceKey(entity.getReferenceKey())
 			.setDefaultValue(entity.getDefaultValue())
 			.setType(entity.getType().getName())
 			.setDirection(entity.getDirection().getName())
@@ -138,6 +162,7 @@ public class AccessPointParamVO extends AbstractBaseVO<AccessPointParamVO, Acces
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setPrimaryKey(entity.getPrimaryKey())
+			.setReferenceKey(entity.getReferenceKey())
 			.setDefaultValue(entity.getDefaultValue())
 			.setType(entity.getType().getName())
 			.setDirection(entity.getDirection().getName())

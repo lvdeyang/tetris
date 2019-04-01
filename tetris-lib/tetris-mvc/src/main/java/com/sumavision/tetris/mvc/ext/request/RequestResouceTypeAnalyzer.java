@@ -10,7 +10,7 @@ public class RequestResouceTypeAnalyzer {
 	private String[] staticResourceSuffix = new String[]{
 		".html", ".js", ".css", ".jpg", ".png", ".ico",
 		".eot", ".svg", ".ttf", ".woff", ".jsp", ".gif",
-		".mp4", ".mp3", ".m3u8", ".ts"
+		".mp4", ".mp3", ".m3u8", ".ts", ".bpmn", ".xml"
 	};
 	
 	/**

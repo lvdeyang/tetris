@@ -40,14 +40,16 @@ require.config({
         'mi-upload-dialog':window.APPPATH + 'component/dialog/upload/upload-dialog',
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
+        'process-variable-dialog':window.APPPATH + 'component/dialog/process-variable/process-variable-dialog',
+        'process-param-dialog':window.APPPATH + 'component/dialog/process-param/process-param-dialog',
 
         /* pages */
         'page-service-rest':window.APPPATH + 'service/rest/page-service-rest',
         'page-access-point':window.APPPATH + 'access-point/page-access-point',
-        'page-access-point-param':window.APPPATH + 'access-point-param/page-access-point-param',
         'page-joint-constraint-expression':window.APPPATH + 'joint-constraint-expression/page-joint-constraint-expression',
         'page-process':window.APPPATH + 'process/page-process',
         'page-process-variable':window.APPPATH + 'process-variable/page-process-variable',
+        'page-process-param-reference':window.APPPATH + 'process-param-reference/process-param-reference',
         'page-process-design':window.APPPATH + 'process-design/page-process-design'
 
     },

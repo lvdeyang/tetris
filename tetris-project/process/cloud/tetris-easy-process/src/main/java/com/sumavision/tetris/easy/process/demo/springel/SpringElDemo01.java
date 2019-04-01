@@ -142,6 +142,16 @@ public class SpringElDemo01 {
 		System.out.println(result);
 	}
 	
+	@Test
+	public void test09(){
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("test1", 5);
+		SpelExpressionParser parser = new SpelExpressionParser();
+		Expression expression = parser.parseExpression("#test1+3");
+		String result = expression.getValue(context, String.class);
+		System.out.println(result);
+	}
+	
 }
 
 class Constraints{

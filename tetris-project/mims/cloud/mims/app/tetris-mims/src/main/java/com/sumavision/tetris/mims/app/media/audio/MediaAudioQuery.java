@@ -17,6 +17,9 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -111,6 +114,40 @@ public class MediaAudioQuery {
 	}
 	
 	/**
+	 * 加载所有的音频媒资<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return List<MediaAudioVO> 视频媒资列表
+	 */
+	public List<MediaAudioVO> loadAll() throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验		
+		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), FolderType.COMPANY_AUDIO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdIn(folderIds);
+		
+		List<FolderPO> roots = folderQuery.findRoots(folderTree);
+		
+		List<MediaAudioVO> medias = new ArrayList<MediaAudioVO>();
+		
+		for(FolderPO root:roots){
+			medias.add(new MediaAudioVO().set(root));
+		}
+		
+		packMediaVideoTree(medias, folderTree, audios);
+		
+		return medias;
+	}
+	
+	/**
 	 * 查询文件夹下上传完成的音频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -163,6 +200,39 @@ public class MediaAudioQuery {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * 生成媒资音频树<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月31日 上午11:29:34
+	 * @param List<MediaAudioVO> roots 根
+	 * @param List<FolderPO> folders 所有文件夹
+	 * @param List<MediaAudioPO> medias 所有视频媒资
+	 */
+	public void packMediaVideoTree(List<MediaAudioVO> roots, List<FolderPO> folders, List<MediaAudioPO> medias) throws Exception{
+		if(roots == null || roots.size() <= 0){
+			return;
+		}
+		for(MediaAudioVO root: roots){
+			if(root.getType().equals(MediaVideoItemType.FOLDER.toString())){
+				if(root.getChildren() == null) root.setChildren(new ArrayList<MediaAudioVO>());
+				for(FolderPO folder: folders){
+					if(folder.getParentId() != null && folder.getParentId().equals(root.getId())){
+						root.getChildren().add(new MediaAudioVO().set(folder));
+					}
+				}
+				for(MediaAudioPO media: medias){
+					if(media.getFolderId() != null && media.getFolderId().equals(root.getId())){
+						root.getChildren().add(new MediaAudioVO().set(media));
+					}
+				}
+				if(root.getChildren().size() > 0){
+					packMediaVideoTree(root.getChildren(), folders, medias);
+				}
+			}
+		}
 	}
 	
 }

@@ -114,10 +114,9 @@ public class MediaVideoQuery {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
-	 * @return rows List<MediaVideoVO> 视频媒资列表
-	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 * @return List<MediaVideoVO> 视频媒资列表
 	 */
-	public Map<String, Object> loadAll() throws Exception{
+	public List<MediaVideoVO> loadAll() throws Exception{
 		
 		UserVO user = userQuery.current();
 		
@@ -131,13 +130,15 @@ public class MediaVideoQuery {
 		
 		List<MediaVideoPO> videos = mediaVideoDao.findByFolderIdIn(folderIds);
 		
-		List<MediaVideoVO> medias = findFolderTreeRoot(folderTree);
+		List<FolderPO> roots = folderQuery.findRoots(folderTree);
+		List<MediaVideoVO> medias = new ArrayList<MediaVideoVO>();
+		for(FolderPO root:roots){
+			medias.add(new MediaVideoVO().set(root));
+		}
+		
 		packMediaVideoTree(medias, folderTree, videos);
 		
-		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
-																  		 .getMap();
-		
-		return result;
+		return medias;
 	}
 	
 	/**
@@ -193,28 +194,6 @@ public class MediaVideoQuery {
 			}
 		}
 		return null;
-	}
-	
-	/**
-	 * 找出文件夹根列表<br/>
-	 * <b>作者:</b>ldy<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年3月31日 上午11:06:48
-	 * @param folders 所有文件夹
-	 * @return List<FolderPO> 文件夹根列表
-	 */
-	public List<MediaVideoVO> findFolderTreeRoot(List<FolderPO> folders) throws Exception{
-
-		if(folders == null || folders.size() <= 0){
-			return null;
-		}
-		List<MediaVideoVO> roots = new ArrayList<MediaVideoVO>();
-		for(FolderPO folder: folders){
-			if(folder.getParentId() == null){
-				roots.add(new MediaVideoVO().set(folder));
-			}
-		}
-		return roots;
 	}
 	
 	/**

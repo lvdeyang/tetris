@@ -42,7 +42,7 @@
                         </el-table-column>
                         <el-table-column
                                 label="操作"
-                                width="250">
+                                width="300">
                             <template slot-scope="scope">
                                 <el-tooltip class="item" effect="dark" content="编辑流程" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
@@ -52,6 +52,9 @@
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="流程变量" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-tickets" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoProcessVariable(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="变量映射" placement="bottom-end">
+                                    <el-button type="text" icon="feather-icon-link" style="font-size:18px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoProcessParamReference(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip v-if="scope.row.type !== '流程模板'" class="item" effect="dark" content="发布流程" placement="bottom-end">
                                     <el-button type="text" icon="feather-icon-send" style="font-size:20px; padding:0; position:relative; top:2px; left:1px; margin-left:20px;" @click="publishProcess(scope)"></el-button>

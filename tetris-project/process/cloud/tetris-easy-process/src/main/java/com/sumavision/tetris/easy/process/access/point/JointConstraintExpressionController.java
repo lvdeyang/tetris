@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.easy.process.access.point.exception.AccessPointNotExistException;
-import com.sumavision.tetris.easy.process.access.service.exception.UserHasNoPermissionForServiceQueryException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -58,10 +56,6 @@ public class JointConstraintExpressionController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "服务接入点查询");
-		}
-		
 		AccessPointPO accessPoint =  accessPointDao.findOne(accessPointId);
 		
 		if(accessPoint == null){
@@ -97,10 +91,6 @@ public class JointConstraintExpressionController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "服务接入点查询");
-		}
-		
 		JointConstraintExpressionPO constraint =  jointConstraintExpressionDao.findOne(id);
 		
 		if(constraint != null){
@@ -130,10 +120,6 @@ public class JointConstraintExpressionController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForServiceQueryException(user.getUuid(), "服务接入点查询");
-		}
 		
 		AccessPointPO accessPoint =  accessPointDao.findOne(accessPointId);
 		

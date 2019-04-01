@@ -27,8 +27,7 @@ public interface MediaVideoFeign {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
-	 * @return rows List<MediaVideoVO> 视频媒资列表
-	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 * @return List<MediaVideoVO> 视频媒资列表
 	 */
 	@RequestMapping(value = "/media/video/feign/load/all")
 	public JSONObject loadAll() throws Exception;

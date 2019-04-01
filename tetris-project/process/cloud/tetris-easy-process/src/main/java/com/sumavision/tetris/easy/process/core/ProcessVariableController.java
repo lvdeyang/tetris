@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sumavision.tetris.commons.constant.DataType;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.easy.process.core.exception.ProcessNotExistException;
 import com.sumavision.tetris.easy.process.core.exception.ProcessVariableNotExistException;
-import com.sumavision.tetris.easy.process.core.exception.UserHasNoPermissionForProcessQueryException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -58,10 +57,6 @@ public class ProcessVariableController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "基础流程分页查询");
-		}
-		
 		ProcessPO process = processDao.findOne(processId);
 		
 		if(process == null){
@@ -98,10 +93,6 @@ public class ProcessVariableController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "基础流程分页查询");
-		}
-		
 		ProcessPO process = processDao.findOne(processId);
 		
 		if(process == null){
@@ -133,14 +124,12 @@ public class ProcessVariableController {
 			Long processId,
 			String primaryKey,
 			String name,
+			String dataType,
 			String defaultValue,
+			String expressionValue,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "添加流程变量");
-		}
 		
 		ProcessPO process = processDao.findOne(processId);
 		
@@ -151,7 +140,9 @@ public class ProcessVariableController {
 		ProcessVariablePO variable = new ProcessVariablePO();
 		variable.setPrimaryKey(primaryKey);
 		variable.setName(name);
+		variable.setDataType(DataType.fromName(dataType));
 		variable.setDefaultValue(defaultValue);
+		variable.setExpressionValue(expressionValue);
 		variable.setProcessId(processId);
 		processVariableDao.save(variable);
 		
@@ -180,10 +171,6 @@ public class ProcessVariableController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "修改流程变量");
-		}
 		
 		ProcessVariablePO variable = processVariableDao.findOne(id);
 		
@@ -215,10 +202,6 @@ public class ProcessVariableController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.MAINTENANCE.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForProcessQueryException(user.getUuid(), "删除流程变量");
-		}
 		
 		ProcessVariablePO variable = processVariableDao.findOne(id);
 		
