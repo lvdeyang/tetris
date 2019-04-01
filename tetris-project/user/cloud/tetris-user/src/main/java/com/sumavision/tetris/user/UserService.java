@@ -194,8 +194,9 @@ public class UserService{
 			companyUserPermissionService.add(company, user);
 		}
 		
+		//TODO：加company
 		//发布用户注册事件
-		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
+		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName());
 		applicationEventPublisher.publishEvent(event);
 		
 		return new UserVO().set(user);

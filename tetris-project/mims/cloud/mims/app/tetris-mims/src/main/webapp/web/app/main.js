@@ -52,6 +52,7 @@ require.config({
         'page-media-picture':window.APPPATH + 'front/media/picture/page-media-picture',
         'page-media-video':window.APPPATH + 'front/media/video/page-media-video',
         'page-media-video-stream':window.APPPATH + 'front/media/video-stream/page-media-video-stream',
+        'page-media-compress':window.APPPATH + 'front/media/compress/page-media-compress',
 
         'page-check-article':window.APPPATH + 'front/check/article/page-check-article',
         'page-check-audio':window.APPPATH + 'front/check/audio/page-check-audio',

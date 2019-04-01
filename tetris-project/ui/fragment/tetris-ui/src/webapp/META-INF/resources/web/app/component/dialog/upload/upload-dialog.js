@@ -23,6 +23,8 @@ define([
 
     var MATERIAL_TYPE_TXT = 'txt';
 
+    var MATERIAL_TYPE_COMPRESS = 'compress';
+
     function Type(mimetype, suffix, type){
         this.mimetype = mimetype;
         this.suffix = suffix;
@@ -196,6 +198,16 @@ define([
                     }
                 }
                 return false;
+            },
+            //判断是否是压缩包类型
+            isCompress:function(mimetype){
+                var self = this;
+                for(var i=0; i<self.requires.length; i++){
+                    if(self.requires[i].mimetype===mimetype && self.requires[i].type===MATERIAL_TYPE_COMPRESS){
+                        return true;
+                    }
+                }
+                return false;
             }
         },
         created:function(){
@@ -215,6 +227,9 @@ define([
                         self.requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
                     }else if(self.requireType[i] === MATERIAL_TYPE_TXT){
                         self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
+                    }else if(self.requireType[i] === MATERIAL_TYPE_COMPRESS){
+                        self.requires.push(new Type('application/x-zip-compressed', 'zip', MATERIAL_TYPE_COMPRESS));
+                        self.requires.push(new Type('application/x-tar', 'tar', MATERIAL_TYPE_COMPRESS));
                     }
                 }
             }else{
@@ -224,6 +239,8 @@ define([
                 self.requires.push(new Type('audio/mp3', 'mp3', MATERIAL_TYPE_AUDIO));
                 self.requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
                 self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
+                self.requires.push(new Type('application/x-zip-compressed', 'zip', MATERIAL_TYPE_COMPRESS));
+                self.requires.push(new Type('application/x-tar', 'tar', MATERIAL_TYPE_COMPRESS));
             }
         }
     });
