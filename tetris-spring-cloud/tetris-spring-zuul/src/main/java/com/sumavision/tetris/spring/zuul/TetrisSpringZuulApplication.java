@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 import com.sumavision.tetris.spring.zuul.auth.filter.ApiFilter;
-import com.sumavision.tetris.spring.zuul.auth.filter.MobileLoginFilter;
+import com.sumavision.tetris.spring.zuul.auth.filter.terminal.ApiTerminalLoginFilter;
 
 @ComponentScan(basePackages = {"com.sumavision.tetris"})
 @ServletComponentScan(basePackages = {"com.sumavision.tetris"})
@@ -32,8 +32,8 @@ public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
     }
 	
 	@Bean
-	public MobileLoginFilter mobileLoginFilter() {
-		return new MobileLoginFilter();
+	public ApiTerminalLoginFilter mobileLoginFilter() {
+		return new ApiTerminalLoginFilter();
 	}
 	
 	@Bean

@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +16,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
-import com.sumavision.tetris.mvc.ext.context.HttpSessionThreadLocal;
+import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
@@ -67,10 +73,23 @@ public class UserQuery {
 	 * @return UserVO 当前用户
 	 */
 	public UserVO current() throws Exception{
-		Thread thread = Thread.currentThread();
-		HttpSession session = HttpSessionThreadLocal.get(thread);
+
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
 		
-		String token = (String)session.getAttribute(HttpConstant.ATTRIBUTE_AUTH_TOKEN);
+		HttpSession session = null;
+		String sessionId = request.getHeader(HttpConstant.HEADER_SESSION_ID);
+		if(sessionId == null){
+			//临时session 5秒超时
+			session = HttpSessionContext.build(null, HttpConstant.TEMPORARY_SESSION_TIMEOUT);
+		}else{
+			session = HttpSessionContext.get(sessionId);
+			if(session == null){
+				//feign调用统一sessionid 超时时间
+				session = HttpSessionContext.build(sessionId, HttpConstant.SESSION_TIMEOUT);
+			}
+		}
+		
+		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);
 		UserVO user = (UserVO)session.getAttribute(HttpConstant.ATTRIBUTE_USER);
 		boolean needQuery = false;
 		if(user == null) needQuery = true;

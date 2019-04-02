@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
-import com.sumavision.tetris.mvc.ext.context.HttpSessionThreadLocal;
+import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
 
@@ -48,10 +51,23 @@ public class UserQuery {
 	 * @return UserVO 当前用户
 	 */
 	public UserVO current()throws Exception{
-		Thread thread = Thread.currentThread();
-		HttpSession session = HttpSessionThreadLocal.get(thread);
 		
-		String token = (String)session.getAttribute(HttpConstant.ATTRIBUTE_AUTH_TOKEN);
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+		
+		HttpSession session = null;
+		String sessionId = request.getHeader(HttpConstant.HEADER_SESSION_ID);
+		if(sessionId == null){
+			//临时session 5秒超时
+			session = HttpSessionContext.build(null, HttpConstant.TEMPORARY_SESSION_TIMEOUT);
+		}else{
+			session = HttpSessionContext.get(sessionId);
+			if(session == null){
+				//feign调用统一sessionid 超时时间
+				session = HttpSessionContext.build(sessionId, HttpConstant.SESSION_TIMEOUT);
+			}
+		}
+		
+		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);
 		UserVO user = (UserVO)session.getAttribute(HttpConstant.ATTRIBUTE_USER);
 		boolean needQuery = false;
 		if(user == null) needQuery = true;

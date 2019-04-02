@@ -2,6 +2,7 @@ package com.sumavision.tetris.auth.filter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -19,7 +20,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
+import com.sumavision.tetris.mvc.ext.request.RequestResouceTypeAnalyzer;
 import com.sumavision.tetris.user.UserQuery;
 
 /**
@@ -29,22 +32,32 @@ import com.sumavision.tetris.user.UserQuery;
  * <b>日期：</b>2019年3月6日 上午11:38:45
  */
 @Order(0)
-@WebFilter(urlPatterns = "/*", filterName = "com.sumavision.tetris.auth.filter.LoginFilter")
-public class LoginFilter implements Filter{
+@WebFilter(urlPatterns = "/*", filterName = "com.sumavision.tetris.auth.filter.PcWebLoginFilter")
+public class PcWebLoginFilter implements Filter{
 
+	/** 不拦截路径 */
+	private List<String> ignorePath = null;
+	
+	private RequestResouceTypeAnalyzer requestResouceTypeAnalyzer = null;
+	
+	private UserQuery userQuery = null;
+	
+	private void initBean(){
+		if(requestResouceTypeAnalyzer == null) requestResouceTypeAnalyzer = SpringContext.getBean(RequestResouceTypeAnalyzer.class);
+		if(userQuery == null) userQuery = SpringContext.getBean(UserQuery.class);
+	}
+	
 	@Override
 	public void doFilter(ServletRequest nativeRequest, ServletResponse nativeResponse, FilterChain chain)
 			throws IOException, ServletException {
 		
-		FilterValidate filterValidate = SpringContext.getBean(FilterValidate.class);
-		UserQuery userQuery = SpringContext.getBean(UserQuery.class);
+		initBean();
 		
 		HttpServletRequest request = (HttpServletRequest)nativeRequest;
 		HttpServletResponse response = (HttpServletResponse)nativeResponse;
 		
 		String requestUri = request.getRequestURI();
-		
-		if(!filterValidate.canDoFilter(requestUri)){
+		if(!shouldFilter(requestUri)){
 			chain.doFilter(request, response);
 			return;
 		}
@@ -73,10 +86,52 @@ public class LoginFilter implements Filter{
 			writer.write(jsonResult.toJSONString());
 			writer.close();
 		}
+		
 	}
 
+	private boolean shouldFilter(String uri) {
+		
+		//静态资源
+		if(requestResouceTypeAnalyzer.isStaticResource(uri)) return false;
+		
+		//不拦截uri配置
+		for(String patten:ignorePath){
+			if(patten.equals(uri)){
+				return false;
+			}else{
+				if(patten.endsWith("/*")){
+					patten = patten.replace("/*", "");
+					if(uri.startsWith(patten)){
+						return false;
+					}
+				}
+			}
+		}
+		
+		return true;
+	}
+	
 	@Override
-	public void init(FilterConfig filterConfig) throws ServletException {}
+	public void init(FilterConfig filterConfig) throws ServletException{
+		ignorePath = new ArrayListWrapper<String>().add("/login")
+												   .add("/do/password/login")
+												   .add("/do/phone/login")
+												   .add("/do/wechat/login")
+												   .add("/after/login/success")
+												   .add("/system/role/feign/query/internal/role")
+												   .add("/index")
+												   .add("/index/*")
+												   .add("/user/feign/check/token")
+												   .add("/user/feign/find/by/token")
+												   .add("/login/feign/do/password/login")
+												   .add("/login/feign/query/redirect/url")
+												   .add("/mims/server/props/feign/query/props")
+												   .add("/cms/server/props/feign/query/props")
+												   .add("/user/server/props/feign/query/props")
+												   .add("/menu/server/props/feign/query/props")
+												   .add("/api/*")
+												   .getList();
+	}
 	
 	@Override
 	public void destroy() {}

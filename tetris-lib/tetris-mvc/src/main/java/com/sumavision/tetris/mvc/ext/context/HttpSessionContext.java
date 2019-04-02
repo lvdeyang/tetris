@@ -4,7 +4,12 @@ import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * http session上下文缓存<br/>
@@ -63,6 +68,25 @@ public class HttpSessionContext {
 				context.remove(key);
 			}
 		}
+	}
+	
+	/**
+	 * 创建session<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月1日 下午4:53:24
+	 * @param String customSessionId 用户自定义sessionId
+	 * @param int timeout session超时时间
+	 * @return HttpSession session
+	 */
+	public static HttpSession build(String customSessionId, int timeout){
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+		HttpSession session = request.getSession();
+		session.setMaxInactiveInterval(timeout);
+		if(customSessionId != null){
+			context.put(customSessionId, session);
+		}
+		return session;
 	}
 	
 }
