@@ -34,7 +34,7 @@ public interface MediaAudioFeign {
 	@RequestMapping(value = "/media/audio/feign/load/all")
 	public JSONObject loadAll() throws Exception;
 	
-	@RequestMapping(value = "/api/server/media/feign/audio/add")
+	@RequestMapping(value = "/media/audio/feign/add")
 	public JSONObject add(
 				@RequestParam("userId") String userId,
 				@RequestParam("userName") String userName,

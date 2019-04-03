@@ -1,22 +1,36 @@
 package com.sumavision.tetris.mims.app.media.compress;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.tar.TarUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.commons.util.xml.XmlReader;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
@@ -41,6 +55,9 @@ public class MediaCompressService {
 	
 	@Autowired
 	private MediaCompressDAO mediaCompressDao;
+	
+	@Autowired
+	private MediaAudioService mediaAudioService;
 	
 	@Autowired
 	private Path path;
@@ -248,6 +265,216 @@ public class MediaCompressService {
 		mediaCompressDao.save(copiedMedia);
 		
 		return copiedMedia;
+	}
+	
+	/**
+	 * 解压tar包<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月3日 下午4:19:44
+	 * @param String path tar包路径
+	 * @return String type 文章类型
+	 * @return String name 文章名称
+	 * @return String publishTime 文章发布时间
+	 * @return String remark 备注
+	 * @return String author 作者
+	 * @return String keywords 关键字
+	 * @return String column 栏目
+	 * @return String region 地区
+	 * @return String content 媒体内容
+	 */
+	public Map<String, String> parse(String path) throws Exception{
+		
+		UserVO user = new UserVO().setGroupId("4")
+				  .setGroupName("数码视讯")
+				  .setUuid("5")
+				  .setNickname("lvdeyang");
+		
+		File file = new File(path);
+		String parentFilePath = new File(file.getParent()).getParent();
+		String separator = File.separator;
+		
+		//文章的渲染类型
+		String type = "";
+		//作者
+		String author = "";
+		//文章名称
+		String articleName = "";
+		//发布时间
+		String publishTime = "";
+		//备注
+		String remark = "";
+		//关键字
+		String keywords = "";
+		//栏目
+		String column = "";
+		//地区
+		String region = "";
+		//tar包内容
+		String content = "";
+		String templateId = "";
+		
+		File parseFile = new File(new StringBufferWrapper().append(parentFilePath).append(separator).append("compress").toString());
+		
+		if(!parseFile.exists()){
+			parseFile.mkdir();
+		}
+		
+		//解压到指定文件夹
+		TarUtil.dearchive(file, parseFile);
+		
+		File[] fileList = parseFile.listFiles();
+		for(File f: fileList){
+			String fileName = f.getName();
+			String name = fileName.split("\\.")[0];
+			Long size = f.length();
+			String uploadTempPath = f.getPath();
+			
+			String fileNameSuffix = f.getName().split("\\.")[1];
+			if(fileNameSuffix.equals("mp3")){
+				
+				String folderType = "audio";
+				String mimeType = "audio/mp3";
+				
+				MediaAudioPO audio = mediaAudioService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
+				
+				content = audio.getPreviewUrl();
+				templateId = "yjgb_audio";
+				type = "AVIDEO";
+
+			}else if(fileNameSuffix.equals("mp4")){
+				templateId = "yjgb_video";
+				type = "AVIDEO";
+			}else if(fileNameSuffix.equals("txt")){
+				templateId = "yjgb_txt";
+				type = "TXT";
+			}else if(fileNameSuffix.equals("jpg")){
+				templateId = "yjgb_picture";
+				type = "TXT";
+			}else if(fileNameSuffix.equals("png")){
+				templateId = "yjgb_picture";
+				type = "TXT";
+			}else if(fileNameSuffix.equals("gif")){
+				templateId = "yjgb_picture";
+				type = "TXT";
+			}else if(fileNameSuffix.equals("xml")){
+				InputStream xmlStream = new FileInputStream(f);
+				XmlReader reader = new XmlReader(xmlStream);
+				author = reader.readString("EBD.EBM.MsgBasicInfo.SenderName");
+				publishTime = reader.readString("EBD.EBM.MsgBasicInfo.SendTime");
+				articleName = reader.readString("EBD.EBM.MsgContent.MsgTitle");
+				remark = reader.readString("EBD.EBM.MsgContent.MsgDesc");
+				
+				//转换栏目
+				String eventType = reader.readString("EBD.EBM.MsgBasicInfo.EventType");
+				Map<String, String> parseResult = parseEventType(eventType);
+				keywords = parseResult.get("keyWords");
+				column = JSON.toJSONString(new ArrayListWrapper<String>().add(parseResult.get("code")).getList());
+				
+				//转换地区
+				String areaCode = reader.readString("EBD.EBM.MsgContent.AreaCode");
+				region = JSON.toJSONString(new ArrayListWrapper<String>().add(areaCode).getList());
+			}
+			
+		}
+		
+		JSONArray contents = new JSONArray();
+		JSONObject titleTemplate = new JSONObject();
+		titleTemplate.put("type", "yjgb_title");
+		titleTemplate.put("value", articleName);
+		contents.add(titleTemplate);
+		
+		JSONObject authorTemplate = new JSONObject();
+		authorTemplate.put("type", "yjgb_txt");
+		authorTemplate.put("value", author);
+		contents.add(authorTemplate);
+		
+		JSONObject mediaTemplate = new JSONObject();
+		mediaTemplate.put("type", templateId);
+		mediaTemplate.put("value", content);
+		contents.add(mediaTemplate);
+		
+		return new HashMapWrapper<String, String>().put("type", type)
+												   .put("name", articleName)
+												   .put("publishTime", publishTime)
+												   .put("remark", remark)
+												   .put("author", author)
+												   .put("keywords", keywords)
+												   .put("column", column)
+												   .put("region", region)
+												   .put("content", contents.toJSONString())
+												   .getMap();
+	}
+	
+	/**
+	 * 解析eventType.json<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>sm<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月3日 上午9:49:53
+	 * @param String code 分类（栏目）编码
+	 * @return String code 所在栏目编码
+	 * @return String keyWords 关键字 keyword,keyword,keyword
+	 */
+	private Map<String, String> parseEventType(String code) throws Exception{
+		
+		String separator = ",";
+
+		String needCode = "";
+		StringBufferWrapper keyWordsBuffer = new StringBufferWrapper();
+		
+		File jsonFile = ResourceUtils.getFile("classpath:eventType.json");
+		String json = FileUtils.readFileToString(jsonFile);
+        List<JSONObject> firstArray = JSONArray.parseArray(json, JSONObject.class);
+		if(firstArray != null && firstArray.size() > 0){
+			for(JSONObject first: firstArray){
+				if(first.getString("code").equals(code)){
+					needCode = first.getString("code");
+					keyWordsBuffer.append(first.getString("text"));
+					break;
+				}
+				if(first.getString("children") != null){
+					List<JSONObject> secondArray = JSONArray.parseArray(first.getString("children"), JSONObject.class);
+					if(secondArray.size() > 0){
+						for(JSONObject second: secondArray){
+							if(second.getString("code").equals(code)){
+								needCode = second.getString("code");
+								keyWordsBuffer.append(first.getString("text")).append(separator).append(second.getString("text"));
+								break;
+							}
+							if(second.getString("children") != null){
+								List<JSONObject> thirdArray = JSONArray.parseArray(second.getString("children"), JSONObject.class);
+								if(thirdArray.size() > 0){
+									for(JSONObject third: thirdArray){
+										if(third.getString("code").equals(code)){
+											needCode = third.getString("code");
+											keyWordsBuffer.append(first.getString("text")).append(separator).append(second.getString("text")).append(separator).append(third.getString("text"));
+											break;
+										}
+										if(third.getString("children") != null){
+											List<JSONObject> forthArray = JSONArray.parseArray(third.getString("children"), JSONObject.class);
+											if(forthArray.size() > 0){
+												for(JSONObject forth: forthArray){
+													if(forth.getString("code").equals(code)){
+														needCode = third.getString("code");
+														keyWordsBuffer.append(first.getString("text")).append(separator).append(second.getString("text")).append(separator).append(third.getString("text")).append(separator).append(forth.getString("text"));
+														break;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		
+		return new HashMapWrapper<String, String>().put("code", needCode)
+								   				   .put("keyWords", keyWordsBuffer.toString())
+						   						   .getMap();
 	}
 	
 }

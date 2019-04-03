@@ -258,10 +258,23 @@ public class MediaAudioService {
 		return copiedMedia;
 	}
 	
-	public MediaAudioPO feignAdd(
-			String userId,
-			String userName,
-			String groupId,
+	/**
+	 * 添加已上传好的媒资任务<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月3日 下午1:34:18
+	 * @param user
+	 * @param name
+	 * @param fileName
+	 * @param size
+	 * @param folderType
+	 * @param mimeType
+	 * @param uploadTempPath
+	 * @return
+	 * @throws Exception
+	 */
+	public MediaAudioPO add(
+			UserVO user,
 			String name,
 			String fileName,
 			Long size,
@@ -271,15 +284,15 @@ public class MediaAudioService {
 			) throws Exception{
 		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
-		FolderPO folder = folderDao.findCompanyRootFolderByType(groupId, type.toString());
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
 		
 		Date date = new Date();
 		String version = new StringBufferWrapper().append(MediaAudioPO.VERSION_OF_ORIGIN).append(".").append(date.getTime()).toString();
 		
 		MediaAudioPO entity = new MediaAudioPO();
 		entity.setName(name);
-		entity.setAuthorId(userId);
-		entity.setAuthorName(userName);
+		entity.setAuthorId(user.getUuid());
+		entity.setAuthorName(user.getNickname());
 		entity.setVersion(version);
 		entity.setFileName(fileName);
 		entity.setSize(size);

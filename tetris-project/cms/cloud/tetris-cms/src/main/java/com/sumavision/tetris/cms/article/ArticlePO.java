@@ -50,6 +50,9 @@ public class ArticlePO extends AbstractBasePO{
 	/** 文章类型 */
 	private ArticleType type;
 	
+	/** 关键字 */
+	private String keywords;
+	
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -132,6 +135,15 @@ public class ArticlePO extends AbstractBasePO{
 
 	public void setType(ArticleType type) {
 		this.type = type;
+	}
+
+	@Column(name = "KEY_WORDS")
+	public String getKeywords() {
+		return keywords;
+	}
+
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
 	}
 	
 }

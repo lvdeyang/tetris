@@ -1,0 +1,2319 @@
+[{
+    "id": 6000,
+    "text": "测试专用",
+    "code": "00000",
+    "state": "closed"
+ },
+ {
+    "id": 6100,
+    "text": "突发事件",
+    "code": "10000",
+    "children":[
+  {
+    "id": 10000,
+    "text": "自然灾害",
+    "code": "11000",
+    "children": [
+      {
+        "id": 10100,
+        "text": "水旱灾害",
+        "code": "11A00",
+        "children": [
+          {
+            "id": 10101,
+            "text": "洪水",
+            "code": "11A01",
+            "state": "closed"
+          },
+          {
+            "id": 10102,
+            "text": "内涝",
+            "code": "11A02",
+            "state": "closed"
+          },
+          {
+            "id": 10103,
+            "text": "水库重大险情",
+            "code": "11A03",
+            "state": "closed"
+          },
+          {
+            "id": 10104,
+            "text": "堤防重大险情",
+            "code": "11A04",
+            "state": "closed"
+          },
+          {
+            "id": 10105,
+            "text": "凌汛灾害",
+            "code": "11A05",
+            "state": "closed"
+          },
+          {
+            "id": 10106,
+            "text": "山洪灾害事件",
+            "code": "11A51",
+            "state": "closed"
+          },
+          {
+            "id": 10107,
+            "text": "农业干旱",
+            "code": "11A52",
+            "state": "closed"
+          },
+          {
+            "id": 10108,
+            "text": "城镇缺水",
+            "code": "11A53",
+            "state": "closed"
+          },
+          {
+            "id": 10109,
+            "text": "生态干旱",
+            "code": "11A54",
+            "state": "closed"
+          },
+          {
+            "id": 10110,
+            "text": "农村人畜饮水困难",
+            "code": "11A10",
+            "state": "closed"
+          },
+          {
+            "id": 10111,
+            "text": "其它水旱灾害",
+            "code": "11A99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 10200,
+        "text": "气象灾害",
+        "code": "11B00",
+        "children": [
+          {
+            "id": 10201,
+            "text": "台风事件",
+            "code": "11B01",
+            "state": "closed"
+          },
+          {
+            "id": 10202,
+            "text": "龙卷风事件",
+            "code": "11B02",
+            "state": "closed"
+          },
+          {
+            "id": 10203,
+            "text": "暴雨事件",
+            "code": "11B03",
+            "state": "closed"
+          },
+          {
+            "id": 10204,
+            "text": "暴雪事件",
+            "code": "11B04",
+            "state": "closed"
+          },
+          {
+            "id": 10205,
+            "text": "寒潮事件",
+            "code": "11B05",
+            "state": "closed"
+          },
+          {
+            "id": 10206,
+            "text": "大风事件",
+            "code": "11B06",
+            "state": "closed"
+          },
+          {
+            "id": 10207,
+            "text": "沙尘暴事件",
+            "code": "11B07",
+            "state": "closed"
+          },
+          {
+            "id": 10208,
+            "text": "低温冻害事件",
+            "code": "11B08",
+            "state": "closed"
+          },
+          {
+            "id": 10209,
+            "text": "高温事件",
+            "code": "11B09",
+            "state": "closed"
+          },
+          {
+            "id": 10210,
+            "text": "热浪事件",
+            "code": "11B10",
+            "state": "closed"
+          },
+          {
+            "id": 10211,
+            "text": "干热风",
+            "code": "11B11",
+            "state": "closed"
+          },
+          {
+            "id": 10212,
+            "text": "下击暴流事件",
+            "code": "11B12",
+            "state": "closed"
+          },
+          {
+            "id": 10213,
+            "text": "雪崩事件",
+            "code": "11B13",
+            "state": "closed"
+          },
+          {
+            "id": 10214,
+            "text": "雷电事件",
+            "code": "11B14",
+            "state": "closed"
+          },
+          {
+            "id": 10215,
+            "text": "冰雹事件",
+            "code": "11B15",
+            "state": "closed"
+          },
+          {
+            "id": 10216,
+            "text": "霜冻事件",
+            "code": "11B16",
+            "state": "closed"
+          },
+          {
+            "id": 10217,
+            "text": "大雾事件",
+            "code": "11B17",
+            "state": "closed"
+          },
+          {
+            "id": 10218,
+            "text": "低空风切变事件",
+            "code": "11B18",
+            "state": "closed"
+          },
+          {
+            "id": 10219,
+            "text": "其它气象灾害事件",
+            "code": "11B99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 10300,
+        "text": "地震灾害",
+        "code": "11C00",
+        "children": [
+          {
+            "id": 10301,
+            "text": "人工地震事件",
+            "code": "11C01",
+            "state": "closed"
+          },
+          {
+            "id": 10302,
+            "text": "天然地震事件",
+            "code": "11C02",
+            "state": "closed"
+          },
+          {
+            "id": 10303,
+            "text": "其它地震灾害",
+            "code": "11C99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 10400,
+        "text": "地质灾害",
+        "code": "11D00",
+        "children": [
+          {
+            "id": 10401,
+            "text": "滑坡事件",
+            "code": "11D01",
+            "state": "closed"
+          },
+          {
+            "id": 10402,
+            "text": "泥石流事件",
+            "code": "11D02",
+            "state": "closed"
+          },
+          {
+            "id": 10403,
+            "text": "山体崩塌事件",
+            "code": "11D03",
+            "state": "closed"
+          },
+          {
+            "id": 10404,
+            "text": "地面塌陷事件",
+            "code": "11D04",
+            "state": "closed"
+          },
+          {
+            "id": 10405,
+            "text": "地裂缝事件",
+            "code": "11D05",
+            "state": "closed"
+          },
+          {
+            "id": 10406,
+            "text": "地面沉降事件",
+            "code": "11D06",
+            "state": "closed"
+          },
+          {
+            "id": 10407,
+            "text": "火山喷发事件",
+            "code": "11D07",
+            "state": "closed"
+          },
+          {
+            "id": 10408,
+            "text": "其它地质灾害事件",
+            "code": "11D99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 10500,
+        "text": "海洋灾害事件",
+        "code": "11E00",
+        "children": [
+          {
+            "id": 10501,
+            "text": "海啸事件",
+            "code": "11E01",
+            "state": "closed"
+          },
+          {
+            "id": 10502,
+            "text": "风暴潮事件",
+            "code": "11E02",
+            "state": "closed"
+          },
+          {
+            "id": 10503,
+            "text": "海冰事件",
+            "code": "11E03",
+            "state": "closed"
+          },
+          {
+            "id": 10504,
+            "text": "巨浪事件",
+            "code": "11E04",
+            "state": "closed"
+          },
+          {
+            "id": 10505,
+            "text": "赤潮事件",
+            "code": "11E05",
+            "state": "closed"
+          },
+          {
+            "id": 10506,
+            "text": "其它海洋灾害事件",
+            "code": "11E99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 10600,
+        "text": "生物灾害事件",
+        "code": "11F00",
+        "children": [
+          {
+            "id": 10601,
+            "text": "农业病害事件",
+            "code": "11F01",
+            "state": "closed"
+          },
+          {
+            "id": 10602,
+            "text": "农业虫害事件",
+            "code": "11F02",
+            "state": "closed"
+          },
+          {
+            "id": 10603,
+            "text": "农业草害事件",
+            "code": "11F03",
+            "state": "closed"
+          },
+          {
+            "id": 10604,
+            "text": "农业鼠害事件",
+            "code": "11F04",
+            "state": "closed"
+          },
+          {
+            "id": 10605,
+            "text": "森林病害事件",
+            "code": "11F05",
+            "state": "closed"
+          },
+          {
+            "id": 10606,
+            "text": "森林虫害事件",
+            "code": "11F06",
+            "state": "closed"
+          },
+          {
+            "id": 10607,
+            "text": "森林鼠害事件",
+            "code": "11F07",
+            "state": "closed"
+          },
+          {
+            "id": 10608,
+            "text": "农业转基因生物安全突发事件",
+            "code": "11F08",
+            "state": "closed"
+          },
+          {
+            "id": 10609,
+            "text": "林业转基因生物安全突发事件",
+            "code": "11F09",
+            "state": "closed"
+          },
+          {
+            "id": 10610,
+            "text": "林业有害植物事件",
+            "code": "11F10",
+            "state": "closed"
+          },
+          {
+            "id": 10611,
+            "text": "外来有害动植物威胁农业生产事件",
+            "code": "11F11",
+            "state": "closed"
+          },
+          {
+            "id": 10612,
+            "text": "外来有害动植物威胁林业生产事件",
+            "code": "11F12",
+            "state": "closed"
+          },
+          {
+            "id": 10613,
+            "text": "其它生物灾害",
+            "code": "11F99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 10700,
+        "text": "森林草原火灾",
+        "code": "11G00",
+        "children": [
+          {
+            "id": 10701,
+            "text": "境内森林火灾事件",
+            "code": "11G01",
+            "state": "closed"
+          },
+          {
+            "id": 10702,
+            "text": "跨境森林火灾事件",
+            "code": "11G02",
+            "state": "closed"
+          },
+          {
+            "id": 10703,
+            "text": "境外威胁我国境内的森林火灾",
+            "code": "11G03",
+            "state": "closed"
+          },
+          {
+            "id": 10704,
+            "text": "其他森林火灾事件",
+            "code": "11G04",
+            "state": "closed"
+          },
+          {
+            "id": 10705,
+            "text": "境内草原火灾事件",
+            "code": "11G05",
+            "state": "closed"
+          },
+          {
+            "id": 10706,
+            "text": "跨境草原火灾事件",
+            "code": "11G06",
+            "state": "closed"
+          },
+          {
+            "id": 10707,
+            "text": "境外威胁我国境内的草原火灾",
+            "code": "11G07",
+            "state": "closed"
+          },
+          {
+            "id": 10708,
+            "text": "其他草原火灾事件",
+            "code": "11G08",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 10800,
+        "text": "其他自然灾害事件",
+        "code": "11Y00",
+        "state": "closed"
+      }
+    ],
+    "state": "closed"
+  },
+  {
+    "id": 20000,
+    "text": "事故灾难",
+    "code": "12000",
+    "children": [
+      {
+        "id": 20100,
+        "text": "煤矿事故",
+        "code": "12A00",
+        "children": [
+          {
+            "id": 20101,
+            "text": "煤矿瓦斯事故",
+            "code": "12A01",
+            "state": "closed"
+          },
+          {
+            "id": 20102,
+            "text": "煤矿顶板事故",
+            "code": "12A02",
+            "state": "closed"
+          },
+          {
+            "id": 20103,
+            "text": "煤矿运输事故",
+            "code": "12A03",
+            "state": "closed"
+          },
+          {
+            "id": 20104,
+            "text": "煤矿水害事故",
+            "code": "12A04",
+            "state": "closed"
+          },
+          {
+            "id": 20105,
+            "text": "煤矿机电事故",
+            "code": "12A05",
+            "state": "closed"
+          },
+          {
+            "id": 20106,
+            "text": "煤矿放炮事故",
+            "code": "12A06",
+            "state": "closed"
+          },
+          {
+            "id": 20107,
+            "text": "煤矿火灾事故",
+            "code": "12A07",
+            "state": "closed"
+          },
+          {
+            "id": 20108,
+            "text": "煤矿其他事故",
+            "code": "12A99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 20200,
+        "text": "金属与非金属矿山事故",
+        "code": "12B00",
+        "children": [
+          {
+            "id": 20201,
+            "text": "金属与非金属矿顶板事故",
+            "code": "12B01",
+            "state": "closed"
+          },
+          {
+            "id": 20202,
+            "text": "金属与非金属矿水害事故",
+            "code": "12B02",
+            "state": "closed"
+          },
+          {
+            "id": 20203,
+            "text": "金属与非金属矿中毒和窒息事故",
+            "code": "12B03",
+            "state": "closed"
+          },
+          {
+            "id": 20204,
+            "text": "金属与非金属矿尾矿库垮坝事故",
+            "code": "12B04",
+            "state": "closed"
+          },
+          {
+            "id": 20205,
+            "text": "金属与非金属矿火灾事故",
+            "code": "12B05",
+            "state": "closed"
+          },
+          {
+            "id": 20206,
+            "text": "金属与非金属矿机电事故",
+            "code": "12B06",
+            "state": "closed"
+          },
+          {
+            "id": 20207,
+            "text": "金属与非金属矿运输事故",
+            "code": "12B07",
+            "state": "closed"
+          },
+          {
+            "id": 20208,
+            "text": "金属与非金属矿放炮事故",
+            "code": "12B08",
+            "state": "closed"
+          },
+          {
+            "id": 20209,
+            "text": "金属与非金属矿火药爆炸事故",
+            "code": "12B09",
+            "state": "closed"
+          },
+          {
+            "id": 20210,
+            "text": "金属与非金属矿山其他事故",
+            "code": "12B99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 20300,
+        "text": "建筑业事故",
+        "code": "12C00",
+        "children": [
+          {
+            "id": 20301,
+            "text": "房屋建筑与市政工程施工安全事故",
+            "code": "12C01",
+            "state": "closed"
+          },
+          {
+            "id": 20302,
+            "text": "其他建筑施工安全事故",
+            "code": "12C02",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 20400,
+        "text": "危险化学品事故",
+        "code": "12D00",
+        "children": [
+          {
+            "id": 20401,
+            "text": "危险化学品爆炸事故",
+            "code": "12D01",
+            "state": "closed"
+          },
+          {
+            "id": 20402,
+            "text": "危险化学品泄漏事故",
+            "code": "12D02",
+            "state": "closed"
+          },
+          {
+            "id": 20403,
+            "text": "危险化学品火灾事故",
+            "code": "12D03",
+            "state": "closed"
+          },
+          {
+            "id": 20404,
+            "text": "危险化学品中毒和窒息事故",
+            "code": "12D04",
+            "state": "closed"
+          },
+          {
+            "id": 20405,
+            "text": "危险化学品灼烫事故",
+            "code": "12D05",
+            "state": "closed"
+          },
+          {
+            "id": 20406,
+            "text": "危险化学品其他事故",
+            "code": "12D99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 20500,
+        "text": "烟花爆竹和民用爆炸物事故",
+        "code": "12E00",
+        "children": [
+          {
+            "id": 20501,
+            "text": "烟花爆竹生产企业爆炸事故",
+            "code": "12E01",
+            "state": "closed"
+          },
+          {
+            "id": 20502,
+            "text": "烟花爆竹运输爆炸事故",
+            "code": "12E02",
+            "state": "closed"
+          },
+          {
+            "id": 20503,
+            "text": "民用爆炸物爆炸事故",
+            "code": "12E03",
+            "state": "closed"
+          },
+          {
+            "id": 20504,
+            "text": "其他烟花爆竹事故",
+            "code": "12E99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 20600,
+        "text": "其他工矿商贸事故",
+        "code": "12F00",
+        "state": "closed"
+      },
+      {
+        "id": 20700,
+        "text": "火灾事故",
+        "code": "12G00",
+        "children": [
+          {
+            "id": 20701,
+            "text": "一般工业建筑火灾",
+            "code": "12G01",
+            "state": "closed"
+          },
+          {
+            "id": 20702,
+            "text": "特种工业建筑火灾",
+            "code": "12G02",
+            "state": "closed"
+          },
+          {
+            "id": 20703,
+            "text": "一般民用建筑火灾",
+            "code": "12G03",
+            "state": "closed"
+          },
+          {
+            "id": 20704,
+            "text": "高层民用建筑火灾",
+            "code": "12G04",
+            "state": "closed"
+          },
+          {
+            "id": 20705,
+            "text": "地下建筑火灾",
+            "code": "12G05",
+            "state": "closed"
+          },
+          {
+            "id": 20706,
+            "text": "公用建筑火灾",
+            "code": "12G06",
+            "state": "closed"
+          },
+          {
+            "id": 20707,
+            "text": "隧道火灾",
+            "code": "12G07",
+            "state": "closed"
+          },
+          {
+            "id": 20708,
+            "text": "其它火灾事故",
+            "code": "12099",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 20800,
+        "text": "道路交通事故",
+        "code": "12H00",
+        "children": [
+          {
+            "id": 20801,
+            "text": "翻车事件",
+            "code": "12H01",
+            "state": "closed"
+          },
+          {
+            "id": 20802,
+            "text": "撞车事件",
+            "code": "12H02",
+            "state": "closed"
+          },
+          {
+            "id": 20803,
+            "text": "车辆坠水、坠沟事件",
+            "code": "12H03",
+            "state": "closed"
+          },
+          {
+            "id": 20804,
+            "text": "车辆起火事件",
+            "code": "12H04",
+            "state": "closed"
+          },
+          {
+            "id": 20805,
+            "text": "校车交通事故",
+            "code": "12H05",
+            "state": "closed"
+          },
+          {
+            "id": 20806,
+            "text": "其他道路交通事故",
+            "code": "12H99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 20900,
+        "text": "水上交通事故",
+        "code": "12J00",
+        "children": [
+          {
+            "id": 20901,
+            "text": "船舶碰撞事故",
+            "code": "12J01",
+            "state": "closed"
+          },
+          {
+            "id": 20902,
+            "text": "船舶触礁事故",
+            "code": "12J02",
+            "state": "closed"
+          },
+          {
+            "id": 20903,
+            "text": "船舶触损事故",
+            "code": "12J03",
+            "state": "closed"
+          },
+          {
+            "id": 20904,
+            "text": "船舶搁浅事故",
+            "code": "12J04",
+            "state": "closed"
+          },
+          {
+            "id": 20905,
+            "text": "船舶遭受风灾事故",
+            "code": "12J05",
+            "state": "closed"
+          },
+          {
+            "id": 20906,
+            "text": "船舶火灾事故",
+            "code": "12J06",
+            "state": "closed"
+          },
+          {
+            "id": 20907,
+            "text": "船舶失踪事故",
+            "code": "12J07",
+            "state": "closed"
+          },
+          {
+            "id": 20908,
+            "text": "船舶海上遇险事故",
+            "code": "12J08",
+            "state": "closed"
+          },
+          {
+            "id": 20909,
+            "text": "水上保安事件",
+            "code": "12J09",
+            "state": "closed"
+          },
+          {
+            "id": 20910,
+            "text": "沿海渔业设施事故",
+            "code": "12J10",
+            "state": "closed"
+          },
+          {
+            "id": 20911,
+            "text": "其他水上交通事故",
+            "code": "12J99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21000,
+        "text": "铁路交通事故",
+        "code": "12K00",
+        "children": [
+          {
+            "id": 21001,
+            "text": "列车脱轨事故",
+            "code": "12K01",
+            "state": "closed"
+          },
+          {
+            "id": 21002,
+            "text": "列车追尾事故",
+            "code": "12K02",
+            "state": "closed"
+          },
+          {
+            "id": 21003,
+            "text": "列车撞车事故",
+            "code": "12K03",
+            "state": "closed"
+          },
+          {
+            "id": 21004,
+            "text": "列车撞人事故",
+            "code": "12K04",
+            "state": "closed"
+          },
+          {
+            "id": 21005,
+            "text": "列车火灾、爆炸事故",
+            "code": "12K05",
+            "state": "closed"
+          },
+          {
+            "id": 21006,
+            "text": "其他铁路交通事故",
+            "code": "12K99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21100,
+        "text": "城市轨道交通事故",
+        "code": "12L00",
+        "children": [
+          {
+            "id": 21101,
+            "text": "地铁、轻轨、单轨列车脱轨事故",
+            "code": "12L01",
+            "state": "closed"
+          },
+          {
+            "id": 21102,
+            "text": "地铁、轻轨、单轨列车追尾事故",
+            "code": "12L02",
+            "state": "closed"
+          },
+          {
+            "id": 21103,
+            "text": "地铁、轻轨、单轨列车撞车事故",
+            "code": "12L03",
+            "state": "closed"
+          },
+          {
+            "id": 21104,
+            "text": "地铁、轻轨、单轨列车撞人事故",
+            "code": "12L04",
+            "state": "closed"
+          },
+          {
+            "id": 21105,
+            "text": "地铁、轻轨、单轨列车火灾、爆炸事故",
+            "code": "12L05",
+            "state": "closed"
+          },
+          {
+            "id": 21106,
+            "text": "其他城市轨道交通事故",
+            "code": "12L99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21200,
+        "text": "民用航空器事故",
+        "code": "12M00",
+        "children": [
+          {
+            "id": 21201,
+            "text": "坠机事件",
+            "code": "12M01",
+            "state": "closed"
+          },
+          {
+            "id": 21202,
+            "text": "撞机事件",
+            "code": "12M02",
+            "state": "closed"
+          },
+          {
+            "id": 21203,
+            "text": "其他民用航空器飞行事故",
+            "code": "12M99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21300,
+        "text": "特种设备事故",
+        "code": "12N00",
+        "children": [
+          {
+            "id": 21301,
+            "text": "锅炉事故",
+            "code": "12N01",
+            "state": "closed"
+          },
+          {
+            "id": 21302,
+            "text": "压力容器事故",
+            "code": "12N02",
+            "state": "closed"
+          },
+          {
+            "id": 21303,
+            "text": "压力管道事故",
+            "code": "12N03",
+            "state": "closed"
+          },
+          {
+            "id": 21304,
+            "text": "电梯事故",
+            "code": "12N04",
+            "state": "closed"
+          },
+          {
+            "id": 21305,
+            "text": "起重机械事故",
+            "code": "12N05",
+            "state": "closed"
+          },
+          {
+            "id": 21306,
+            "text": "客运索道事故",
+            "code": "12N06",
+            "state": "closed"
+          },
+          {
+            "id": 21307,
+            "text": "大型游乐设施事故",
+            "code": "12N07",
+            "state": "closed"
+          },
+          {
+            "id": 21308,
+            "text": "其他特种设备事故",
+            "code": "12N99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21400,
+        "text": "基础设施和公用设施事故",
+        "code": "12P00",
+        "children": [
+          {
+            "id": 21401,
+            "text": "公路交通设施事故",
+            "code": "12P01",
+            "state": "closed"
+          },
+          {
+            "id": 21402,
+            "text": "铁路交通设施事故",
+            "code": "12P02",
+            "state": "closed"
+          },
+          {
+            "id": 21403,
+            "text": "城市轨道交通设施事故",
+            "code": "12P03",
+            "state": "closed"
+          },
+          {
+            "id": 21404,
+            "text": "城市桥梁隧道设施事故",
+            "code": "12P04",
+            "state": "closed"
+          },
+          {
+            "id": 21405,
+            "text": "水运交通设施事故",
+            "code": "12P05",
+            "state": "closed"
+          },
+          {
+            "id": 21406,
+            "text": "民航交通设施事故",
+            "code": "12P06",
+            "state": "closed"
+          },
+          {
+            "id": 21407,
+            "text": "水利设施事故",
+            "code": "12P07",
+            "state": "closed"
+          },
+          {
+            "id": 21408,
+            "text": "电力基础设施事故",
+            "code": "12P08",
+            "state": "closed"
+          },
+          {
+            "id": 21409,
+            "text": "石油天然气基础设施事故",
+            "code": "12P09",
+            "state": "closed"
+          },
+          {
+            "id": 21410,
+            "text": "通讯基础设施事故",
+            "code": "12P10",
+            "state": "closed"
+          },
+          {
+            "id": 21411,
+            "text": "金融基础设施事故",
+            "code": "12P11",
+            "state": "closed"
+          },
+          {
+            "id": 21412,
+            "text": "城市生命线基础设施事故",
+            "code": "12P12",
+            "state": "closed"
+          },
+          {
+            "id": 21413,
+            "text": "建筑垮塌事故",
+            "code": "12P13",
+            "state": "closed"
+          },
+          {
+            "id": 21414,
+            "text": "其他公用设施和设备事故",
+            "code": "12P99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21500,
+        "text": "环境污染和生态破坏事件",
+        "code": "12Q00",
+        "children": [
+          {
+            "id": 21501,
+            "text": "水域污染事件",
+            "code": "12Q01",
+            "state": "closed"
+          },
+          {
+            "id": 21502,
+            "text": "空气污染事件",
+            "code": "12Q02",
+            "state": "closed"
+          },
+          {
+            "id": 21503,
+            "text": "土壤污染事件",
+            "code": "12Q03",
+            "state": "closed"
+          },
+          {
+            "id": 21504,
+            "text": "海上溢油事件",
+            "code": "12Q04",
+            "state": "closed"
+          },
+          {
+            "id": 21505,
+            "text": "污染导致城市水源供水中断事故",
+            "code": "12Q05",
+            "state": "closed"
+          },
+          {
+            "id": 21506,
+            "text": "转基因生物生态破坏事件",
+            "code": "12Q06",
+            "state": "closed"
+          },
+          {
+            "id": 21507,
+            "text": "盗伐、滥伐、哄抢森林事件",
+            "code": "12Q07",
+            "state": "closed"
+          },
+          {
+            "id": 21508,
+            "text": "毁林、乱占林地、非法改变林地用途事件",
+            "code": "12Q10",
+            "state": "closed"
+          },
+          {
+            "id": 21509,
+            "text": "濒危物种生存环境遭受环境污染事件",
+            "code": "12Q11",
+            "state": "closed"
+          },
+          {
+            "id": 21510,
+            "text": "野生动（植）物种群大批死亡事件",
+            "code": "12Q12",
+            "state": "closed"
+          },
+          {
+            "id": 21511,
+            "text": "自然保护区、风景名胜区生态破坏",
+            "code": "12Q13",
+            "state": "closed"
+          },
+          {
+            "id": 21512,
+            "text": "进口再生原料污染事件",
+            "code": "12Q14",
+            "state": "closed"
+          },
+          {
+            "id": 21513,
+            "text": "非法倾倒、埋藏剧毒危险废物事件",
+            "code": "12Q15",
+            "state": "closed"
+          },
+          {
+            "id": 21514,
+            "text": "其它环境污染和生态破坏事件",
+            "code": "12Q99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21600,
+        "text": "农业机械事故",
+        "code": "12R00",
+        "children": [
+          {
+            "id": 21601,
+            "text": "农业机械行驶事故",
+            "code": "12R01",
+            "state": "closed"
+          },
+          {
+            "id": 21602,
+            "text": "农业机械作业事故",
+            "code": "12R02",
+            "state": "closed"
+          },
+          {
+            "id": 21603,
+            "text": "农业机械碾压事件",
+            "code": "12R03",
+            "state": "closed"
+          },
+          {
+            "id": 21604,
+            "text": "农业机械碰撞事件",
+            "code": "12R04",
+            "state": "closed"
+          },
+          {
+            "id": 21605,
+            "text": "农业机械翻车事件",
+            "code": "12R05",
+            "state": "closed"
+          },
+          {
+            "id": 21606,
+            "text": "农业机械落车事件",
+            "code": "12R06",
+            "state": "closed"
+          },
+          {
+            "id": 21607,
+            "text": "农业机械火灾事件",
+            "code": "12R07",
+            "state": "closed"
+          },
+          {
+            "id": 21608,
+            "text": "其他农业机械事故",
+            "code": "12R99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21700,
+        "text": "踩踏事件",
+        "code": "12800",
+        "children": [
+          {
+            "id": 21701,
+            "text": "公园组织大型群众性活动或聚会踩踏事件",
+            "code": "12801",
+            "state": "closed"
+          },
+          {
+            "id": 21702,
+            "text": "校园踩踏事件",
+            "code": "12802",
+            "state": "closed"
+          },
+          {
+            "id": 21703,
+            "text": "其他踩踏事件",
+            "code": "12899",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21800,
+        "text": "核与辐射事故",
+        "code": "12T00",
+        "children": [
+          {
+            "id": 21801,
+            "text": "核设施事故",
+            "code": "12T01",
+            "state": "closed"
+          },
+          {
+            "id": 21802,
+            "text": "放射性物质运输事故",
+            "code": "12T02",
+            "state": "closed"
+          },
+          {
+            "id": 21803,
+            "text": "放射源事故",
+            "code": "12T03",
+            "state": "closed"
+          },
+          {
+            "id": 21804,
+            "text": "射线装置事故",
+            "code": "12T99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 21900,
+        "text": "能源供应中断事故",
+        "code": "12U00",
+        "state": "closed"
+      },
+      {
+        "id": 22000,
+        "text": "其他事故灾难",
+        "code": "12Y00",
+        "state": "closed"
+      }
+    ],
+    "state": "closed"
+  },
+  {
+    "id": 30000,
+    "text": "公共卫生事件",
+    "code": "13000",
+    "children": [
+      {
+        "id": 30100,
+        "text": "传染病事件",
+        "code": "13A00",
+        "children": [
+          {
+            "id": 30101,
+            "text": "鼠疫流行事件",
+            "code": "13A01",
+            "state": "closed"
+          },
+          {
+            "id": 30102,
+            "text": "霍乱流行事件",
+            "code": "13A02",
+            "state": "closed"
+          },
+          {
+            "id": 30103,
+            "text": "肺炭疽流行事件",
+            "code": "13A03",
+            "state": "closed"
+          },
+          {
+            "id": 30104,
+            "text": "传染性非典型肺炎流行事件",
+            "code": "13A04",
+            "state": "closed"
+          },
+          {
+            "id": 30105,
+            "text": "大感染高致病性禽流感流行事件",
+            "code": "13A05",
+            "state": "closed"
+          },
+          {
+            "id": 30106,
+            "text": "其他甲类或甲类管理传染病流行事件",
+            "code": "13A06",
+            "state": "closed"
+          },
+          {
+            "id": 30107,
+            "text": "其他乙类传染病流行事件",
+            "code": "13A07",
+            "state": "closed"
+          },
+          {
+            "id": 30108,
+            "text": "新传染病或我国尚未发现的传染病传入事件",
+            "code": "13A08",
+            "state": "closed"
+          },
+          {
+            "id": 30109,
+            "text": "我国己消灭传染病重新流行事件",
+            "code": "13A09",
+            "state": "closed"
+          },
+          {
+            "id": 30110,
+            "text": "其它传染病事件流行事件",
+            "code": "13A99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 30200,
+        "text": "食品药品安全事件",
+        "code": "13B00",
+        "children": [
+          {
+            "id": 30201,
+            "text": "药品安全事件",
+            "code": "13B01",
+            "state": "closed"
+          },
+          {
+            "id": 30202,
+            "text": "群体性预防接种反应",
+            "code": "13B02",
+            "state": "closed"
+          },
+          {
+            "id": 30203,
+            "text": "食品安全事件",
+            "code": "13B03",
+            "state": "closed"
+          },
+          {
+            "id": 30204,
+            "text": "农产品质量安全事件",
+            "code": "13B04",
+            "state": "closed"
+          },
+          {
+            "id": 30205,
+            "text": "其它食品药品安全事件",
+            "code": "13B99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 30300,
+        "text": "群体性中毒、感染事件",
+        "code": "13C00",
+        "children": [
+          {
+            "id": 30301,
+            "text": "急性职业中毒事件",
+            "code": "13C01",
+            "state": "closed"
+          },
+          {
+            "id": 30302,
+            "text": "重金属中毒事件",
+            "code": "13C02",
+            "state": "closed"
+          },
+          {
+            "id": 30303,
+            "text": "非职业性一氧化碳中毒事件",
+            "code": "13C03",
+            "state": "closed"
+          },
+          {
+            "id": 30304,
+            "text": "其他群体性中毒感染事件",
+            "code": "13C99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 30400,
+        "text": "病原微生物、菌毒株事件",
+        "code": "13D00",
+        "children": [
+          {
+            "id": 30401,
+            "text": "菌株、毒株、致病因子丢失事件",
+            "code": "13D01",
+            "state": "closed"
+          },
+          {
+            "id": 30402,
+            "text": "隐匿运输、邮寄病原体、生物毒素",
+            "code": "13D02",
+            "state": "closed"
+          },
+          {
+            "id": 30403,
+            "text": "医源性感染事件",
+            "code": "13D03",
+            "state": "closed"
+          },
+          {
+            "id": 30404,
+            "text": "其他病原微生物、菌毒株事件",
+            "code": "13D99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 30500,
+        "text": "动物疫情事件",
+        "code": "13E00",
+        "children": [
+          {
+            "id": 30501,
+            "text": "高致病性禽流感",
+            "code": "13E01",
+            "state": "closed"
+          },
+          {
+            "id": 30502,
+            "text": "口蹄疫",
+            "code": "13E02",
+            "state": "closed"
+          },
+          {
+            "id": 30503,
+            "text": "疯牛病",
+            "code": "13E03",
+            "state": "closed"
+          },
+          {
+            "id": 30504,
+            "text": "猪瘟",
+            "code": "13E04",
+            "state": "closed"
+          },
+          {
+            "id": 30505,
+            "text": "新城疫",
+            "code": "13E05",
+            "state": "closed"
+          },
+          {
+            "id": 30506,
+            "text": "蓝舌病",
+            "code": "13E06",
+            "state": "closed"
+          },
+          {
+            "id": 30507,
+            "text": "动物布鲁氏菌病",
+            "code": "13E07",
+            "state": "closed"
+          },
+          {
+            "id": 30508,
+            "text": "动物结核病",
+            "code": "13E08",
+            "state": "closed"
+          },
+          {
+            "id": 30509,
+            "text": "狂犬病",
+            "code": "13E09",
+            "state": "closed"
+          },
+          {
+            "id": 30510,
+            "text": "动物炭瘟病",
+            "code": "13E10",
+            "state": "closed"
+          },
+          {
+            "id": 30511,
+            "text": "反鱼兽疫",
+            "code": "13E11",
+            "state": "closed"
+          },
+          {
+            "id": 30512,
+            "text": "我国未发的动物疫病传入事件",
+            "code": "13E12",
+            "state": "closed"
+          },
+          {
+            "id": 30513,
+            "text": "我国己消灭动物疫病重新流行事件",
+            "code": "13E13",
+            "state": "closed"
+          },
+          {
+            "id": 30514,
+            "text": "其他动物疫情事件",
+            "code": "13E99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 30600,
+        "text": "群体性不明原因疾病",
+        "code": "13F00",
+        "state": "closed"
+      },
+      {
+        "id": 30700,
+        "text": "其它严重影响公共健康和卫生安全事件",
+        "code": "13600",
+        "state": "closed"
+      },
+      {
+        "id": 30800,
+        "text": "其它社会公共卫生事件",
+        "code": "13Y00",
+        "state": "closed"
+      }
+    ],
+    "state": "closed"
+  },
+  {
+    "id": 40000,
+    "text": "安全事件",
+    "code": "14000",
+    "children": [
+      {
+        "id": 40100,
+        "text": "群体性事件",
+        "code": "14A00",
+        "children": [
+          {
+            "id": 40101,
+            "text": "非法集会游行示威",
+            "code": "14A01",
+            "state": "closed"
+          },
+          {
+            "id": 40102,
+            "text": "集体上访请愿",
+            "code": "14A02",
+            "state": "closed"
+          },
+          {
+            "id": 40103,
+            "text": "冲击、围攻党政军机关和要害部门事件",
+            "code": "14A03",
+            "state": "closed"
+          },
+          {
+            "id": 40104,
+            "text": "大规模打、砸、抢、烧犯罪事件",
+            "code": "14A04",
+            "state": "closed"
+          },
+          {
+            "id": 40105,
+            "text": "群体性械斗、冲突事件",
+            "code": "14A05",
+            "state": "closed"
+          },
+          {
+            "id": 40106,
+            "text": "静坐事件",
+            "code": "14A06",
+            "state": "closed"
+          },
+          {
+            "id": 40107,
+            "text": "罢市、罢工",
+            "code": "14A07",
+            "state": "closed"
+          },
+          {
+            "id": 40108,
+            "text": "罢课",
+            "code": "14A10",
+            "state": "closed"
+          },
+          {
+            "id": 40109,
+            "text": "高校内聚集事件失控",
+            "code": "14A11",
+            "state": "closed"
+          },
+          {
+            "id": 40110,
+            "text": "高校校园网大范围串联、煽动和蛊惑信息事件",
+            "code": "14A12",
+            "state": "closed"
+          },
+          {
+            "id": 40111,
+            "text": "阻断交通事件",
+            "code": "14A13",
+            "state": "closed"
+          },
+          {
+            "id": 40112,
+            "text": "阻挠、妨碍国家重点建设工程施工事件",
+            "code": "14A14",
+            "state": "closed"
+          },
+          {
+            "id": 40113,
+            "text": "暴狱事件",
+            "code": "14A15",
+            "state": "closed"
+          },
+          {
+            "id": 40114,
+            "text": "聚众闹事",
+            "code": "14A16",
+            "state": "closed"
+          },
+          {
+            "id": 40115,
+            "text": "其它群体事件",
+            "code": "14A99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 40200,
+        "text": "刑事案件",
+        "code": "14B00",
+        "children": [
+          {
+            "id": 40201,
+            "text": "杀人案件",
+            "code": "14B01",
+            "state": "closed"
+          },
+          {
+            "id": 40202,
+            "text": "爆炸案件",
+            "code": "14B02",
+            "state": "closed"
+          },
+          {
+            "id": 40203,
+            "text": "放火案件",
+            "code": "14B03",
+            "state": "closed"
+          },
+          {
+            "id": 40204,
+            "text": "投放危险物质案件",
+            "code": "14B04",
+            "state": "closed"
+          },
+          {
+            "id": 40205,
+            "text": "以危害方法危害公共安全案件",
+            "code": "14B05",
+            "state": "closed"
+          },
+          {
+            "id": 40206,
+            "text": "绑架案件",
+            "code": "14B06",
+            "state": "closed"
+          },
+          {
+            "id": 40207,
+            "text": "抢劫、盗窃金融机构或运钞车案件",
+            "code": "14B07",
+            "state": "closed"
+          },
+          {
+            "id": 40208,
+            "text": "抢劫、走私、盗窃军(警)用枪械案件",
+            "code": "14B08",
+            "state": "closed"
+          },
+          {
+            "id": 40209,
+            "text": "放射性材料被盗、丢失案件",
+            "code": "14B09",
+            "state": "closed"
+          },
+          {
+            "id": 40210,
+            "text": "炸药、雷管被盗、丢失案件",
+            "code": "14B10",
+            "state": "closed"
+          },
+          {
+            "id": 40211,
+            "text": "走私放射性材料案件",
+            "code": "14B11",
+            "state": "closed"
+          },
+          {
+            "id": 40212,
+            "text": "走私固体废物案件",
+            "code": "14B12",
+            "state": "closed"
+          },
+          {
+            "id": 40213,
+            "text": "制贩毒品案件",
+            "code": "14B13",
+            "state": "closed"
+          },
+          {
+            "id": 40214,
+            "text": "盗窃、出卖、泄露及丢失国家秘密案件",
+            "code": "14B14",
+            "state": "closed"
+          },
+          {
+            "id": 40215,
+            "text": "攻击破坏计算机网络案件",
+            "code": "14B15",
+            "state": "closed"
+          },
+          {
+            "id": 40216,
+            "text": "攻击破坏卫星通信、广播电视传输系统案件",
+            "code": "14B16",
+            "state": "closed"
+          },
+          {
+            "id": 40217,
+            "text": "制售假劣药品、医疗器械案件",
+            "code": "14B17",
+            "state": "closed"
+          },
+          {
+            "id": 40218,
+            "text": "制售不符合卫生标准、有毒有害食品",
+            "code": "14B18",
+            "state": "closed"
+          },
+          {
+            "id": 40219,
+            "text": "走私、骗汇、逃汇、洗钱案件",
+            "code": "14B19",
+            "state": "closed"
+          },
+          {
+            "id": 40220,
+            "text": "金融诈骗案",
+            "code": "14B20",
+            "state": "closed"
+          },
+          {
+            "id": 40221,
+            "text": "增值税发票及其他票证案",
+            "code": "14B21",
+            "state": "closed"
+          },
+          {
+            "id": 40222,
+            "text": "假劣种子、化肥、农药坑农案件",
+            "code": "14B22",
+            "state": "closed"
+          },
+          {
+            "id": 40223,
+            "text": "非法狗猎、采集保护野生动植物案件",
+            "code": "14B23",
+            "state": "closed"
+          },
+          {
+            "id": 40224,
+            "text": "破坏物种资源案件",
+            "code": "14B24",
+            "state": "closed"
+          },
+          {
+            "id": 40225,
+            "text": "偷渡案件",
+            "code": "14B25",
+            "state": "closed"
+          },
+          {
+            "id": 40226,
+            "text": "其它刑事案件",
+            "code": "14B99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 40300,
+        "text": "金融突发事件",
+        "code": "14C00",
+        "children": [
+          {
+            "id": 40301,
+            "text": "银行业金融突发事件",
+            "code": "14C01",
+            "state": "closed"
+          },
+          {
+            "id": 40302,
+            "text": "证券业金融突发事件",
+            "code": "14C02",
+            "state": "closed"
+          },
+          {
+            "id": 40303,
+            "text": "保险业金融突发事件",
+            "code": "14C03",
+            "state": "closed"
+          },
+          {
+            "id": 40304,
+            "text": "外汇类突发事件",
+            "code": "14C04",
+            "state": "closed"
+          },
+          {
+            "id": 40305,
+            "text": "货币发行类突发事件",
+            "code": "14C05",
+            "state": "closed"
+          },
+          {
+            "id": 40306,
+            "text": "支付结算类突发事件",
+            "code": "14C06",
+            "state": "closed"
+          },
+          {
+            "id": 40307,
+            "text": "其它金融突发事件",
+            "code": "14C99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 40400,
+        "text": "影响市场稳定的突发事件",
+        "code": "14D00",
+        "children": [
+          {
+            "id": 40401,
+            "text": "粮食市场异常波动",
+            "code": "14D01",
+            "state": "closed"
+          },
+          {
+            "id": 40402,
+            "text": "生活必需品市场异常波动",
+            "code": "14D02",
+            "state": "closed"
+          },
+          {
+            "id": 40403,
+            "text": "其他影响市场稳定的突发事件",
+            "code": "14D99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 40500,
+        "text": "民族和宗教事件",
+        "code": "14E00",
+        "children": [
+          {
+            "id": 40501,
+            "text": "民族分裂活动",
+            "code": "14E01",
+            "state": "closed"
+          },
+          {
+            "id": 40502,
+            "text": "宗教大规模非法聚会",
+            "code": "14E02",
+            "state": "closed"
+          },
+          {
+            "id": 40503,
+            "text": "民族冲突事件",
+            "code": "14E03",
+            "state": "closed"
+          },
+          {
+            "id": 40504,
+            "text": "宗教冲突事件",
+            "code": "14E04",
+            "state": "closed"
+          },
+          {
+            "id": 40505,
+            "text": "其它民族宗教事件",
+            "code": "14E99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 40600,
+        "text": "恐怖袭击事件",
+        "code": "14F00",
+        "children": [
+          {
+            "id": 40601,
+            "text": "袭击公共聚集场所事件",
+            "code": "14F01",
+            "state": "closed"
+          },
+          {
+            "id": 40602,
+            "text": "袭击党政军首脑机关事件",
+            "code": "14F02",
+            "state": "closed"
+          },
+          {
+            "id": 40603,
+            "text": "袭击城市标志性建筑物事件",
+            "code": "14F03",
+            "state": "closed"
+          },
+          {
+            "id": 40604,
+            "text": "袭击国防设施事件",
+            "code": "14F04",
+            "state": "closed"
+          },
+          {
+            "id": 40605,
+            "text": "袭击宗教场所事件",
+            "code": "14F05",
+            "state": "closed"
+          },
+          {
+            "id": 40606,
+            "text": "袭击外交机构或国际组织事件",
+            "code": "14F06",
+            "state": "closed"
+          },
+          {
+            "id": 40607,
+            "text": "袭击重要经济目标事件",
+            "code": "14F07",
+            "state": "closed"
+          },
+          {
+            "id": 40608,
+            "text": "袭击重要基础设施事件",
+            "code": "14F08",
+            "state": "closed"
+          },
+          {
+            "id": 40609,
+            "text": "袭击城市基础设施事件",
+            "code": "14F09",
+            "state": "closed"
+          },
+          {
+            "id": 40610,
+            "text": "袭击交通工具事件",
+            "code": "14F10",
+            "state": "closed"
+          },
+          {
+            "id": 40611,
+            "text": "袭击重要计算机信息网络系统事件",
+            "code": "14F11",
+            "state": "closed"
+          },
+          {
+            "id": 40612,
+            "text": "袭击通信或新闻中枢事件",
+            "code": "14F12",
+            "state": "closed"
+          },
+          {
+            "id": 40613,
+            "text": "袭击重要核生化设施事件",
+            "code": "14F13",
+            "state": "closed"
+          },
+          {
+            "id": 40614,
+            "text": "袭击党政军要员事件",
+            "code": "14F14",
+            "state": "closed"
+          },
+          {
+            "id": 40615,
+            "text": "袭击外交人员事件",
+            "code": "14F15",
+            "state": "closed"
+          },
+          {
+            "id": 40616,
+            "text": "袭击平民事件",
+            "code": "14F16",
+            "state": "closed"
+          },
+          {
+            "id": 40617,
+            "text": "袭击宗教人士事件",
+            "code": "14F17",
+            "state": "closed"
+          },
+          {
+            "id": 40618,
+            "text": "袭击知名人士事件",
+            "code": "14F18",
+            "state": "closed"
+          },
+          {
+            "id": 40619,
+            "text": "袭击外国公民事件",
+            "code": "14F19",
+            "state": "closed"
+          },
+          {
+            "id": 40620,
+            "text": "核生化战剂袭击事件",
+            "code": "14F20",
+            "state": "closed"
+          },
+          {
+            "id": 40621,
+            "text": "劫持航空器事件",
+            "code": "14F21",
+            "state": "closed"
+          },
+          {
+            "id": 40622,
+            "text": "劫持船舶事件",
+            "code": "14F22",
+            "state": "closed"
+          },
+          {
+            "id": 40623,
+            "text": "劫持火车事件",
+            "code": "14F23",
+            "state": "closed"
+          },
+          {
+            "id": 40624,
+            "text": "袭击警卫对象、警卫现场事件",
+            "code": "14F24",
+            "state": "closed"
+          },
+          {
+            "id": 40625,
+            "text": "其它恐怖袭击事件",
+            "code": "14F99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 40700,
+        "text": "涉外事件",
+        "code": "14G00",
+        "children": [
+          {
+            "id": 40701,
+            "text": "政治类涉外事件",
+            "code": "14G01",
+            "state": "closed"
+          },
+          {
+            "id": 40702,
+            "text": "经济类涉外事件",
+            "code": "14G02",
+            "state": "closed"
+          },
+          {
+            "id": 40703,
+            "text": "灾害事故卫生类涉外事件",
+            "code": "14G03",
+            "state": "closed"
+          },
+          {
+            "id": 40704,
+            "text": "恐怖暴力类涉外事件",
+            "code": "14G04",
+            "state": "closed"
+          },
+          {
+            "id": 40705,
+            "text": "境外敌对势力类涉外事件",
+            "code": "14G05",
+            "state": "closed"
+          },
+          {
+            "id": 40706,
+            "text": "社会安全类涉外事件",
+            "code": "14G06",
+            "state": "closed"
+          },
+          {
+            "id": 40707,
+            "text": "其它涉外事件",
+            "code": "14G99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 40800,
+        "text": "信息安全事件",
+        "code": "14H00",
+        "children": [
+          {
+            "id": 40801,
+            "text": "影响公共互联网骨干网的大规模网络病毒传播事件",
+            "code": "14H01",
+            "state": "closed"
+          },
+          {
+            "id": 40802,
+            "text": "针对公共互联网核心设备的网络攻击事件",
+            "code": "14H02",
+            "state": "closed"
+          },
+          {
+            "id": 40803,
+            "text": "针对国家重要信息系统的网络攻击入侵事件",
+            "code": "14H03",
+            "state": "closed"
+          },
+          {
+            "id": 40804,
+            "text": "其他信息安全事件",
+            "code": "14H99",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      },
+      {
+        "id": 40900,
+        "text": "其他社会安全事件",
+        "code": "14Y00",
+        "children": [
+          {
+            "id": 40901,
+            "text": "行政区划界限纠纷事件",
+            "code": "14Y01",
+            "state": "closed"
+          },
+          {
+            "id": 40902,
+            "text": "行政区划调整和地名变更引发事件",
+            "code": "14Y02",
+            "state": "closed"
+          }
+        ],
+        "state": "closed"
+      }
+    ],
+    "state": "closed"
+  },
+  {
+    "id": 50000,
+    "text": "其它突发事件",
+    "code": "19000",
+    "state": "closed"
+  }
+ ],
+ "state": "closed"
+ }
+]
