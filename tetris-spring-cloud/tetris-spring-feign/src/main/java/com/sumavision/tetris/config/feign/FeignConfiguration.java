@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import com.sumavision.tetris.mvc.constant.HttpConstant;
+
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
@@ -32,6 +35,9 @@ public class FeignConfiguration implements RequestInterceptor{
             }
             //LOG.info("feign interceptor header:{}",template);
         }
+        
+        //内部feign调用id识别
+    	template.header(HttpConstant.HEADER_FEIGN_CLIENT, HttpConstant.HEADER_FEIGN_CLIENT_KEY);
 	}
 
 }

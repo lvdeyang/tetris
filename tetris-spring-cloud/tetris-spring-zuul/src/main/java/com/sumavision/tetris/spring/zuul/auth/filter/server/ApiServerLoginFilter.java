@@ -1,52 +1,56 @@
-package com.sumavision.tetris.spring.zuul.auth.filter;
+package com.sumavision.tetris.spring.zuul.auth.filter.server;
 
 import javax.servlet.http.HttpServletRequest;
+
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
-import com.sumavision.tetris.commons.context.SpringContext;
+import com.sumavision.tetris.commons.util.uri.UriUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.mvc.constant.HttpConstant;
-import com.sumavision.tetris.mvc.ext.request.RequestResouceTypeAnalyzer;
 
 /**
- * 不是api开头的接口都不开放<br/>
+ * 服务端端拦截器<br/>
  * <b>作者:</b>lvdeyang<br/>
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年3月12日 下午1:34:26
  */
-public class ApiFilter extends ZuulFilter{
+public class ApiServerLoginFilter extends ZuulFilter{
 
+	private String[] ignores = new String[]{
+		"/api/server/cms/*", 
+		""
+	};
+	
 	@Override
 	public Object run() {
-		RequestResouceTypeAnalyzer analyzer = SpringContext.getBean(RequestResouceTypeAnalyzer.class);
 		RequestContext ctx = RequestContext.getCurrentContext();
 		HttpServletRequest request = ctx.getRequest();
-		if(analyzer.isStaticResource(request)){
-			return null;
-		}
+		
+		//不需要登录访问
 		String requestUri = request.getRequestURI();
 		requestUri = requestUri.replace(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
-		if(!requestUri.startsWith("/api")){
-			ctx.setResponseStatusCode(403);
-			ctx.setSendZuulResponse(false);
-			return null;
-		}
+		if(UriUtil.match(requestUri, ignores)) return null;
 		
-		//zuul调用client 密钥
-		ctx.addZuulRequestHeader(HttpConstant.HEADER_FEIGN_CLIENT, HttpConstant.HEADER_FEIGN_CLIENT_KEY);
+		//登录校验
 		
 		return null;
-
 	}
 
 	@Override
 	public boolean shouldFilter() {
-		return true;
+		RequestContext ctx = RequestContext.getCurrentContext();
+		HttpServletRequest request = ctx.getRequest();
+		String requestUri = request.getRequestURI();
+		requestUri = requestUri.replace(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
+		if(requestUri.startsWith("/api/server")){
+			return true;
+		}else{
+			return false;
+		}
 	}
 
 	@Override
 	public int filterOrder() {
-		return 0;
+		return 1;
 	}
 
 	@Override
