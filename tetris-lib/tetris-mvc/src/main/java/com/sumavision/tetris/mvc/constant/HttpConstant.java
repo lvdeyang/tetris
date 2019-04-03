@@ -14,6 +14,12 @@ public interface HttpConstant {
 	/** header session id */
 	public static final String HEADER_SESSION_ID = "tetris-002";
 	
+	/** header feign client id */
+	public static final String HEADER_FEIGN_CLIENT = "tetris-005";
+	
+	/** feign 调用密钥 */
+	public static final String HEADER_FEIGN_CLIENT_KEY = "4b159799e7ce411386e4cdfc3c8f2c39";
+	
 	/** session attribute token */
 	public static final String ATTRIBUTE_AUTH_TOKEN = "tetris-003";
 	

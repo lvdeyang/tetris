@@ -14,12 +14,15 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.uri.UriUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.request.RequestResouceTypeAnalyzer;
@@ -35,6 +38,8 @@ import com.sumavision.tetris.user.UserQuery;
 @WebFilter(urlPatterns = "/*", filterName = "com.sumavision.tetris.auth.filter.PcWebLoginFilter")
 public class PcWebLoginFilter implements Filter{
 
+	private static final Logger LOG = LoggerFactory.getLogger(PcWebLoginFilter.class);
+	
 	/** 不拦截路径 */
 	private List<String> ignorePath = null;
 	
@@ -56,6 +61,8 @@ public class PcWebLoginFilter implements Filter{
 		HttpServletRequest request = (HttpServletRequest)nativeRequest;
 		HttpServletResponse response = (HttpServletResponse)nativeResponse;
 		
+		JSONObject jsonResult = new JSONObject();
+		
 		String requestUri = request.getRequestURI();
 		if(!shouldFilter(requestUri)){
 			chain.doFilter(request, response);
@@ -64,27 +71,43 @@ public class PcWebLoginFilter implements Filter{
 		
 		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);
 		
-		try {
-			userQuery.checkToken(token);
-			chain.doFilter(request, response);
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("----------------------------");
-			System.out.println(requestUri);
-			JSONObject jsonResult = new JSONObject();
-			//返回错误信息
-			if(e instanceof BaseException){
-				BaseException bex = (BaseException)e;
-				jsonResult.put("status", bex.getCode().getCode());
-				jsonResult.put("message", bex.getMessage());
+		if(token == null){
+			String clientKey = request.getHeader(HttpConstant.HEADER_FEIGN_CLIENT);
+			if(HttpConstant.HEADER_FEIGN_CLIENT_KEY.equals(clientKey)){
+				chain.doFilter(request, response);
+				return;
 			}else{
-				jsonResult.put("status", StatusCode.ERROR.getCode());
-				jsonResult.put("message", "服务器端异常");
+				LOG.error("----------------------------");
+				LOG.error(requestUri);
+				jsonResult.put("status", StatusCode.FORBIDDEN.getCode());
+				jsonResult.put("message", "非法访问！");
+				response.setContentType("application/json; charset=UTF-8");
+				PrintWriter writer = response.getWriter();
+				writer.write(jsonResult.toJSONString());
+				writer.close();
 			}
-			response.setContentType("application/json; charset=UTF-8");
-			PrintWriter writer = response.getWriter();
-			writer.write(jsonResult.toJSONString());
-			writer.close();
+		}else{
+			try {
+				userQuery.checkToken(token);
+				chain.doFilter(request, response);
+				return;
+			} catch (Exception e) {
+				LOG.error("----------------------------");
+				LOG.error(requestUri);
+				e.printStackTrace();
+				if(e instanceof BaseException){
+					BaseException bex = (BaseException)e;
+					jsonResult.put("status", bex.getCode().getCode());
+					jsonResult.put("message", bex.getMessage());
+				}else{
+					jsonResult.put("status", StatusCode.ERROR.getCode());
+					jsonResult.put("message", "服务器端异常");
+				}
+				response.setContentType("application/json; charset=UTF-8");
+				PrintWriter writer = response.getWriter();
+				writer.write(jsonResult.toJSONString());
+				writer.close();
+			}
 		}
 		
 	}
@@ -95,18 +118,7 @@ public class PcWebLoginFilter implements Filter{
 		if(requestResouceTypeAnalyzer.isStaticResource(uri)) return false;
 		
 		//不拦截uri配置
-		for(String patten:ignorePath){
-			if(patten.equals(uri)){
-				return false;
-			}else{
-				if(patten.endsWith("/*")){
-					patten = patten.replace("/*", "");
-					if(uri.startsWith(patten)){
-						return false;
-					}
-				}
-			}
-		}
+		if(UriUtil.match(uri, ignorePath)) return false;
 		
 		return true;
 	}
@@ -118,18 +130,18 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/do/phone/login")
 												   .add("/do/wechat/login")
 												   .add("/after/login/success")
-												   .add("/system/role/feign/query/internal/role")
+												   //.add("/system/role/feign/query/internal/role")
 												   .add("/index")
 												   .add("/index/*")
 												   .add("/user/feign/check/token")
-												   .add("/user/feign/find/by/token")
+												   /*.add("/user/feign/find/by/token")
 												   .add("/login/feign/do/password/login")
 												   .add("/login/feign/query/redirect/url")
 												   .add("/mims/server/props/feign/query/props")
 												   .add("/cms/server/props/feign/query/props")
 												   .add("/user/server/props/feign/query/props")
 												   .add("/menu/server/props/feign/query/props")
-												   .add("/api/*")
+												   .add("/api/*")*/
 												   .getList();
 	}
 	
