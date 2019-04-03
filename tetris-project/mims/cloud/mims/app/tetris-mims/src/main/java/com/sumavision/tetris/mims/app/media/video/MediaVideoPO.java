@@ -133,7 +133,7 @@ public class MediaVideoPO extends AbstractBasePO{
 		this.storeUrl = storeUrl;
 	}
 
-	@Column(name = "PREVIEW_URL")
+	@Column(name = "PREVIEW_URL", length = 1024)
 	public String getPreviewUrl() {
 		return previewUrl;
 	}
@@ -142,7 +142,7 @@ public class MediaVideoPO extends AbstractBasePO{
 		this.previewUrl = previewUrl;
 	}
 
-	@Column(name = "UPLOAD_TMP_PATH")
+	@Column(name = "UPLOAD_TMP_PATH", length = 1024)
 	public String getUploadTmpPath() {
 		return uploadTmpPath;
 	}

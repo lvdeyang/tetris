@@ -53,6 +53,9 @@ public class MediaCompressPO extends AbstractBasePO{
 	/** 存储路径（storeType为REMOTE时记录远程路径） */
 	private String storeUrl;
 	
+	/** 预览地址 */
+	private String previewUrl;
+	
 	/** 上传时临时存储位置（storeType.LOCAL时有效） */
 	private String uploadTmpPath;
 	
@@ -137,7 +140,16 @@ public class MediaCompressPO extends AbstractBasePO{
 		this.storeUrl = storeUrl;
 	}
 
-	@Column(name = "UPLOAD_TMP_PATH")
+	@Column(name = "PREVIEW_URL", length = 1024)
+	public String getPreviewUrl() {
+		return previewUrl;
+	}
+
+	public void setPreviewUrl(String previewUrl) {
+		this.previewUrl = previewUrl;
+	}
+
+	@Column(name = "UPLOAD_TMP_PATH", length = 1024)
 	public String getUploadTmpPath() {
 		return uploadTmpPath;
 	}

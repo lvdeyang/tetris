@@ -27,6 +27,8 @@ public class MediaCompressTaskVO  extends AbstractBaseVO<MediaCompressTaskVO, Me
 	
 	private String uploadStatus;
 	
+	private String previewUrl;
+	
 	private Integer progress;
 	
 	public Long getLastModified() {
@@ -128,6 +130,15 @@ public class MediaCompressTaskVO  extends AbstractBaseVO<MediaCompressTaskVO, Me
 		return this;
 	}
 	
+	public String getPreviewUrl() {
+		return previewUrl;
+	}
+
+	public MediaCompressTaskVO setPreviewUrl(String previewUrl) {
+		this.previewUrl = previewUrl;
+		return this;
+	}
+
 	public Integer getProgress() {
 		return progress;
 	}

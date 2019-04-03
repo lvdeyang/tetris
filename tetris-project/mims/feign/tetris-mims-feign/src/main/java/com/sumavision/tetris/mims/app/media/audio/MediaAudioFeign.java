@@ -1,11 +1,13 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
+import com.sumavision.tetris.user.UserVO;
 
 @FeignClient(name = "tetris-mims", configuration = FeignConfiguration.class)
 public interface MediaAudioFeign {
@@ -31,4 +33,16 @@ public interface MediaAudioFeign {
 	 */
 	@RequestMapping(value = "/media/audio/feign/load/all")
 	public JSONObject loadAll() throws Exception;
+	
+	@RequestMapping(value = "/api/server/media/feign/audio/add")
+	public JSONObject add(
+				@RequestParam("userId") String userId,
+				@RequestParam("userName") String userName,
+				@RequestParam("groupId") String groupId,
+				@RequestParam("name") String name,
+				@RequestParam("fileName") String fileName,
+				@RequestParam("size") Long size,
+				@RequestParam("folderType") String folderType,
+				@RequestParam("mimeType") String mimeType,
+				@RequestParam("uploadTempPath") String uploadTempPath) throws Exception;
 }

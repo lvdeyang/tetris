@@ -7,6 +7,9 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/test/resources"/>
+        <dependent-module archiveName="tetris-lib-aliyun-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/tetris-lib-aliyun/tetris-lib-aliyun">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <dependent-module archiveName="tetris-common-0.0.1-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/tetris-common/tetris-common">
             <dependency-type>uses</dependency-type>
         </dependent-module>

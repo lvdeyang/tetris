@@ -17,6 +17,8 @@ import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleService;
 import com.sumavision.tetris.cms.column.ColumnDAO;
 import com.sumavision.tetris.cms.column.ColumnPO;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressQuery;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserVO;
 
@@ -32,6 +34,9 @@ public class ApiServerController {
 	
 	@Autowired
 	private ArticleService articleService;
+	
+	@Autowired
+	private MediaCompressQuery mediaCompressQuery;
 
 	/**
 	 * 批量添加栏目<br/>
@@ -113,5 +118,19 @@ public class ApiServerController {
 		articleService.addPermission(user, article);
 		
 		return null;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/mims/compress/add")
+	public Object addMims(
+					Long id,
+					HttpServletRequest request) throws Exception{
+		
+		MediaCompressVO media = mediaCompressQuery.query(id);
+		
+		//return apiServerService.parseCompress(media.getUploadTmpPath());
+		return null;
+		
 	}
 }

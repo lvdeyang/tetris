@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 
@@ -168,6 +171,5 @@ public class FileUtil {
         }
         return code;  
     }
-
 	 
 }

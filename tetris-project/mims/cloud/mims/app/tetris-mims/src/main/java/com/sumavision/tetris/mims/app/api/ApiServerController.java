@@ -28,6 +28,15 @@ import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioCannotMatc
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioErrorBeginOffsetException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadingException;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressDAO;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressPO;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressTaskVO;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
+import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressCannotMatchException;
+import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressErrorBeginOffsetException;
+import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressNotExistException;
+import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
@@ -91,6 +100,9 @@ public class ApiServerController {
 	private MediaVideoStreamService mediaVideoStreamService;
 	
 	@Autowired
+	private MediaCompressService mediaCompressService;
+	
+	@Autowired
 	private MediaPictureDAO mediaPictureDao;
 	
 	@Autowired
@@ -98,6 +110,9 @@ public class ApiServerController {
 	
 	@Autowired
 	private MediaAudioDAO mediaAudioDao;
+	
+	@Autowired
+	private MediaCompressDAO mediaCompressDao;
 	
 	/**
 	 * 添加上传任务<br/>
@@ -155,6 +170,10 @@ public class ApiServerController {
 		}else if(type.equals(FolderType.COMPANY_VIDEO_STREAM)){
 			MediaVideoStreamPO entity = mediaVideoStreamService.addTask(user, name, null, null, remark, task, folder);			
 			return new MediaVideoStreamVO().set(entity);
+		}else if(type.equals(FolderType.COMPANY_COMPRESS)){
+			MediaCompressTaskVO taskParam = JSON.parseObject(task, MediaCompressTaskVO.class);
+			MediaCompressPO entity = mediaCompressService.addTask(user, name, null, null, remark, taskParam, folder);
+			return new MediaCompressVO().set(entity);
 		}
 		
 		return null;
@@ -166,7 +185,7 @@ public class ApiServerController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月2日 下午3:32:40
 	 * @param String uuid 任务uuid
-	 * @param String folderType 文件类型--picture/video/audio 
+	 * @param String folderType 文件类型--picture/video/audio/compress 
 	 * @param String name 文件名称
 	 * @param long lastModified 最后修改日期
 	 * @param long beginOffset 文件分片的起始位置
@@ -348,6 +367,56 @@ public class ApiServerController {
 			}
 			
 	        return new MediaVideoVO().set(task);
+	        
+		}else if(folderType.equals(FolderType.COMPANY_COMPRESS)){
+			MediaCompressPO task = mediaCompressDao.findByUuid(uuid);
+			
+			if(task == null){
+				throw new MediaCompressNotExistException(uuid);
+			}
+			
+			//状态错误
+			if(!UploadStatus.UPLOADING.equals(task.getUploadStatus())){
+				throw new MediaCompressStatusErrorWhenUploadingException(uuid, task.getUploadStatus());
+			}
+			
+			//文件不是一个
+			if(!name.equals(task.getFileName()) 
+					|| lastModified!=task.getLastModified() 
+					|| size!=task.getSize() 
+					|| !type.equals(task.getMimetype())){
+				throw new MediaCompressCannotMatchException(uuid, name, lastModified, size, type, task.getFileName(), 
+												   task.getLastModified(), task.getSize(), task.getMimetype());
+			}
+			
+			//文件起始位置错误
+			File file = new File(task.getUploadTmpPath());
+			if((!file.exists() && beginOffset!=0l) 
+					|| (file.length() != beginOffset)){
+				throw new MediaCompressErrorBeginOffsetException(uuid, beginOffset, file.length());
+			}
+			
+			//分块
+			InputStream block = null;
+			FileOutputStream out = null;
+			try{
+				if(!file.exists()) file.createNewFile();
+				block = request.getInputStream("block");
+				byte[] blockBytes = ByteUtil.inputStreamToBytes(block);
+				out = new FileOutputStream(file, true);
+				out.write(blockBytes);
+			}finally{
+				if(block != null) block.close();
+				if(out != null) out.close();
+			}
+			
+			if(endOffset == size){
+				//上传完成
+				task.setUploadStatus(UploadStatus.COMPLETE);
+				mediaCompressDao.save(task);
+			}
+			
+			return new MediaCompressVO().set(task);
 		}
 		
 		return null;		

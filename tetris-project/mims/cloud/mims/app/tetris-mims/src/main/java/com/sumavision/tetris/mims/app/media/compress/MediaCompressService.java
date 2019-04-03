@@ -159,17 +159,17 @@ public class MediaCompressService {
 												   .append(separator)
 												   .append(task.getName())
 												   .toString());
-		entity.setStoreUrl(new StringBufferWrapper().append("/upload/tmp/")
-											   	.append(user.getGroupName())
-											   	.append("/")
-											   	.append(folder.getUuid())
-											   	.append("/")
-											   	.append(fileNamePrefix)
-											   	.append("/")
-											   	.append(version)
-											   	.append("/")
-											   	.append(task.getName())
-											   	.toString());
+		entity.setPreviewUrl(new StringBufferWrapper().append("/upload/tmp/")
+											   		.append(user.getGroupName())
+											   		.append("/")
+											   		.append(folder.getUuid())
+											   		.append("/")
+											   		.append(fileNamePrefix)
+											   		.append("/")
+											   		.append(version)
+											   		.append("/")
+											   		.append(task.getName())
+											   		.toString());
 		entity.setUpdateTime(date);
 		
 		mediaCompressDao.save(entity);

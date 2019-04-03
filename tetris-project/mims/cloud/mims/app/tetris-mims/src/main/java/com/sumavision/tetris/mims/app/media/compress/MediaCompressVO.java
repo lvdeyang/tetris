@@ -38,6 +38,10 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 	
 	private Integer progress;
 	
+	private String previewUrl;
+	
+	private String uploadTmpPath;
+	
 	public String getName() {
 		return name;
 	}
@@ -155,6 +159,24 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 		return this;
 	}
 
+	public String getPreviewUrl() {
+		return previewUrl;
+	}
+
+	public MediaCompressVO setPreviewUrl(String previewUrl) {
+		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaCompressVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
+		return this;
+	}
+
 	@Override
 	public MediaCompressVO set(MediaCompressPO entity) throws Exception {
 		ServerProps props = SpringContext.getBean(ServerProps.class);
@@ -171,7 +193,9 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 			.setIcon(MediaCompressItemType.COMPRESS.getIcon())
 			.setStyle(MediaCompressItemType.COMPRESS.getStyle()[0])
 			.setMimetype(entity.getMimetype())
-			.setProgress(0);
+			.setProgress(0)
+			.setUploadTmpPath(entity.getUploadTmpPath())
+			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append(entity.getPreviewUrl()).toString());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaCompressPO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaCompressPO.SEPARATOR_KEYWORDS)));	 
 		return this;
