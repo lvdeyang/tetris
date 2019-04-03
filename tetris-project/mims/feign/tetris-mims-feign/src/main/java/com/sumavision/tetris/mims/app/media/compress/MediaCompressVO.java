@@ -1,16 +1,8 @@
 package com.sumavision.tetris.mims.app.media.compress;
 
-import java.util.Arrays;
 import java.util.List;
 
-import com.sumavision.tetris.commons.context.SpringContext;
-import com.sumavision.tetris.commons.util.date.DateUtil;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.mims.app.folder.FolderPO;
-import com.sumavision.tetris.mims.config.server.ServerProps;
-import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
-
-public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompressPO>{
+public class MediaCompressVO {
 
 	private String name;
 	
@@ -177,44 +169,4 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 		return this;
 	}
 
-	@Override
-	public MediaCompressVO set(MediaCompressPO entity) throws Exception {
-		ServerProps props = SpringContext.getBean(ServerProps.class);
-		this.setId(entity.getId())
-			.setUuid(entity.getUuid())
-			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setName(entity.getName())
-			.setAuthorName(entity.getAuthorName())
-			.setSize(entity.getSize().toString())
-			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
-			.setVersion(entity.getVersion())
-			.setRemarks(entity.getRemarks())
-			.setType(MediaCompressItemType.COMPRESS.toString())
-			.setIcon(MediaCompressItemType.COMPRESS.getIcon())
-			.setStyle(MediaCompressItemType.COMPRESS.getStyle()[0])
-			.setMimetype(entity.getMimetype())
-			.setProgress(0)
-			.setUploadTmpPath(entity.getUploadTmpPath())
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append(entity.getPreviewUrl()).toString());
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaCompressPO.SEPARATOR_TAG)));
-		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaCompressPO.SEPARATOR_KEYWORDS)));	 
-		return this;
-	}
-	
-	public MediaCompressVO set(FolderPO entity) throws Exception {
-		this.setId(entity.getId())
-			.setUuid(entity.getUuid())
-			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setName(entity.getName())
-			.setAuthorName(entity.getAuthorName())
-			.setSize("-")
-			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setVersion("-")
-			.setRemarks("-")
-			.setType(MediaCompressItemType.FOLDER.toString())
-			.setIcon(MediaCompressItemType.FOLDER.getIcon())
-			.setStyle(MediaCompressItemType.FOLDER.getStyle()[0]);
-		return this;
-	}
-	
 }

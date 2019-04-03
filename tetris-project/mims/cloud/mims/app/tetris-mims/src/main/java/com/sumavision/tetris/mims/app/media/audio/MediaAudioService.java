@@ -8,13 +8,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
@@ -44,6 +48,9 @@ public class MediaAudioService {
 	
 	@Autowired
 	private Path path;
+	
+	@Autowired
+	private FolderDAO folderDao;
 	
 	/**
 	 * 音频媒资删除<br/>
@@ -249,6 +256,57 @@ public class MediaAudioService {
 		mediaAudioDao.save(copiedMedia);
 		
 		return copiedMedia;
+	}
+	
+	/**
+	 * 添加已上传好的媒资任务<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月3日 下午1:34:18
+	 * @param user
+	 * @param name
+	 * @param fileName
+	 * @param size
+	 * @param folderType
+	 * @param mimeType
+	 * @param uploadTempPath
+	 * @return
+	 * @throws Exception
+	 */
+	public MediaAudioPO add(
+			UserVO user,
+			String name,
+			String fileName,
+			Long size,
+			String folderType,
+			String mimeType,
+			String uploadTempPath
+			) throws Exception{
+		
+		FolderType type = FolderType.fromPrimaryKey(folderType);
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
+		
+		Date date = new Date();
+		String version = new StringBufferWrapper().append(MediaAudioPO.VERSION_OF_ORIGIN).append(".").append(date.getTime()).toString();
+		
+		MediaAudioPO entity = new MediaAudioPO();
+		entity.setName(name);
+		entity.setAuthorId(user.getUuid());
+		entity.setAuthorName(user.getNickname());
+		entity.setVersion(version);
+		entity.setFileName(fileName);
+		entity.setSize(size);
+		entity.setMimetype(mimeType);
+		entity.setFolderId(folder.getId());
+		entity.setUploadStatus(UploadStatus.COMPLETE);
+		entity.setStoreType(StoreType.LOCAL);
+		entity.setUploadTmpPath(uploadTempPath);
+		entity.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString());
+		entity.setUpdateTime(date);
+		
+		mediaAudioDao.save(entity);
+		
+		return entity;
 	}
 	
 }

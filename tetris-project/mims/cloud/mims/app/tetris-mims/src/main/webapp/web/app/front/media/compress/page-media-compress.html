@@ -52,13 +52,8 @@
                                 <span v-else>{{scope.row.name}}</span>
                                 <span :style="'float:right; position:relative;' + (scope.row.__hover__?'display:inline-block;':'display:none;')">
                                     <el-tooltip  v-if="scope.row.type!=='FOLDER'" class="item" effect="dark" content="下载" placement="bottom">
-                                        <el-button size="small" type="text" style="padding:0; position:absolute; top:1px; right:87px;" @click="handleDownload(scope)">
+                                        <el-button size="small" type="text" style="padding:0; position:absolute; top:1px; right:57px;" @click="handleDownload(scope)">
                                             <span class="el-icon-download" style="font-size:20px; position:relative; top:1px;"></span>
-                                        </el-button>
-                                    </el-tooltip>
-                                    <el-tooltip v-if="scope.row.type!=='FOLDER'" class="item" effect="dark" content="预览" placement="bottom">
-                                        <el-button size="small" type="text" style="padding:0; position:absolute; top:2px; right:57px;" @click="handlePreview(scope)">
-                                            <span class="icon-eye-open" style="font-size:18px; position:relative; top:1px;"></span>
                                         </el-button>
                                     </el-tooltip>
                                     <el-tooltip class="item" effect="dark" content="删除" placement="bottom">

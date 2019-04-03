@@ -35,6 +35,8 @@ import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressNotE
 import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressStatusErrorWhenUploadCancelException;
 import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressStatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressStatusErrorWhenUploadingException;
+import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
+import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
@@ -402,10 +404,10 @@ public class MediaCompressController {
 	}
 	
 	/**
-	 * 删除图片媒资<br/>
+	 * 删除播发媒资<br/>
 	 * <b>作者:</b>ldy<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年3月431日 上午9:07:53
+	 * <b>日期：</b>2019年3月31日 上午9:07:53
 	 * @param @PathVariable Long id 媒资id
 	 */
 	@JsonBody
@@ -527,6 +529,41 @@ public class MediaCompressController {
 		Map<String, Object> result = new HashMapWrapper<String, Object>().put("moved", moved)
 																		 .put("copied", new MediaCompressVO().set(copiedMedia))
 																		 .getMap();
+		return result;
+	}
+	
+	/**
+	 * 获取素材文件存储地址<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月1日 下午2:44:22
+	 * @param @PathVariable Long id 素材文件id
+	 * @return String name 文件名称
+	 * @return String uri 存储uri
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/store/uri/{id}")
+	public Object previewUri(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		MediaCompressPO media = mediaCompressDao.findOne(id);
+		
+		if(media == null){
+			throw new MediaPictureNotExistException(id);
+		}
+		
+		UserVO user = userQuery.current();
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), media.getFolderId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		Map<String, String> result = new HashMapWrapper<String, String>().put("name", media.getFileName())
+																		 .put("uri", media.getPreviewUrl())
+																		 .getMap();
+		
 		return result;
 	}
 	

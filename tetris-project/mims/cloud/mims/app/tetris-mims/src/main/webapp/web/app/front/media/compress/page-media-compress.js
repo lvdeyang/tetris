@@ -160,28 +160,6 @@ define([
                         a.dispatchEvent(event)
                     });
                 },
-                //预览文件
-                handlePreview:function(scope){
-                    var self = this;
-                    var row = scope.row;
-                    if(self.$refs.uploadDialog.isTxt(row.mimetype)){
-                        ajax.post('/material/txt/' + row.id, null, function(data){
-                            self.$refs.Lightbox.preview(data, 'txt', row);
-                        });
-                    }else{
-                        ajax.post('/media/compress/preview/uri/' + row.id, null, function(data){
-                            var name = data.name;
-                            var uri = data.uri;
-                            if(self.$refs.uploadDialog.isImage(row.mimetype)){
-                                self.$refs.Lightbox.preview(window.BASEPATH + uri, 'image');
-                            }else if(self.$refs.uploadDialog.isAudio(row.mimetype)){
-                                self.$refs.Lightbox.preview(window.BASEPATH + uri, 'audio');
-                            }else if(self.$refs.uploadDialog.isVideo(row.mimetype)){
-                                self.$refs.Lightbox.preview(window.BASEPATH + uri, 'video');
-                            }
-                        });
-                    }
-                },
                 handleTxtSave:function(txt, row, done){
                     var self = this;
                     ajax.post('/material/save/txt/' + row.id, {

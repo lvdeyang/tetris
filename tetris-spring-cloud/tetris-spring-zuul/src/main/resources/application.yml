@@ -63,8 +63,8 @@ eureka:
 #    enabled: false
 #  oauth2:
 #    client:
-#      access-token-uri: http://localhost:8084/oauth/token
-#      user-authorization-uri: http://localhost:8084/oauth/authorize
+#      access-token-uri: http://localhost:8071/oauth/token
+#      user-authorization-uri: http://localhost:8071/oauth/authorize
 #    resource:
-#      user-info-uri:  http://localhost:8084/user
+#      user-info-uri:  http://localhost:8071/user
 #      prefer-token-info: false

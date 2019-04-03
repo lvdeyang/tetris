@@ -84,17 +84,21 @@ define([
             },
             goto:function(menu){
                 var self = this;
-                var menus = self.menus;
-                if(menu.link){
-                    if(menuUtil.isHash(menu.link)){
-                        window.location.hash = menu.link;
+                var app = context.getProp('app');
+                app.loading = true;
+                app.$nextTick(function(){
+                    var menus = self.menus;
+                    if(menu.link){
+                        if(menuUtil.isHash(menu.link)){
+                            window.location.hash = menu.link;
+                        }else{
+                            window.location.href = menu.link;
+                        }
                     }else{
-                        window.location.href = menu.link;
+                        //不跳转只做样式变换
+                        self.active = menu.uuid;
                     }
-                }else{
-                    //不跳转只做样式变换
-                    self.active = menu.uuid;
-                }
+                });
             },
             addMinimize:function(metadata){
                 var self = this;
