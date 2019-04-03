@@ -5,6 +5,7 @@ import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.request.RequestResouceTypeAnalyzer;
 
 /**
@@ -30,6 +31,10 @@ public class ApiFilter extends ZuulFilter{
 			ctx.setSendZuulResponse(false);
 			return null;
 		}
+		
+		//zuul调用client 密钥
+		ctx.addZuulRequestHeader(HttpConstant.HEADER_FEIGN_CLIENT, HttpConstant.HEADER_FEIGN_CLIENT_KEY);
+		
 		return null;
 
 	}

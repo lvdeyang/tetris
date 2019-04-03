@@ -21,7 +21,8 @@ import com.sumavision.tetris.spring.zuul.auth.filter.server.ApiServerLoginFilter
 import com.sumavision.tetris.spring.zuul.auth.filter.terminal.ApiTerminalLoginFilter;
 
 @ComponentScan(basePackages = {"com.sumavision.tetris"})
-@ServletComponentScan(basePackages = {"com.sumavision.tetris"})
+//这个地方不能扫描user-feign中的filter
+@ServletComponentScan(basePackages = {"com.sumavision.tetris.mvc.listener", "com.sumavision.tetris.spring.zuul"})
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
 @EnableZuulProxy
 @EnableEurekaClient

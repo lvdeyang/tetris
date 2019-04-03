@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.sumavision.tetris.commons.context.SpringContext;
+import com.sumavision.tetris.commons.util.uri.UriUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.request.RequestUserAgentAnalyzer;
@@ -35,12 +36,8 @@ public class ApiCaptureLoginFilter extends ZuulFilter{
 		
 		//不需要登录访问
 		String requestUri = request.getRequestURI();
-		String[] ignores = new String[]{"", ""};
-		for(String ignore:ignores){
-			if(requestUri.equals(ignore)){
-				return null;
-			}
-		}
+		requestUri = requestUri.replace(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
+		if(UriUtil.match(requestUri, ignores)) return null;
 		
 		//登录校验
 		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);

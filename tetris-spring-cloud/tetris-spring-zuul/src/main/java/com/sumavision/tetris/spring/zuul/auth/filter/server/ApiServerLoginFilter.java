@@ -4,6 +4,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
+import com.sumavision.tetris.commons.util.uri.UriUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 /**
@@ -15,7 +16,7 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 public class ApiServerLoginFilter extends ZuulFilter{
 
 	private String[] ignores = new String[]{
-		"", 
+		"/api/server/cms/*", 
 		""
 	};
 	
@@ -26,11 +27,8 @@ public class ApiServerLoginFilter extends ZuulFilter{
 		
 		//不需要登录访问
 		String requestUri = request.getRequestURI();
-		for(String ignore:ignores){
-			if(requestUri.equals(ignore)){
-				return null;
-			}
-		}
+		requestUri = requestUri.replace(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
+		if(UriUtil.match(requestUri, ignores)) return null;
 		
 		//登录校验
 		
