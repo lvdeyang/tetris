@@ -68,7 +68,7 @@ define([
             var toPage = getPage(toId);
             if(fromPage || toPage){
                 var app = context.getProp('app');
-                app.loading = true;
+                if(!app.loading) app.loading = true;
                 //销毁前一个页面
                 if(fromPage && fromPage.isActive){
                     fromPage.destroy.apply(fromPage.$page);
