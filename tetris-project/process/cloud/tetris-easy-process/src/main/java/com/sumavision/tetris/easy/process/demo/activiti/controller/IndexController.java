@@ -33,7 +33,7 @@ import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
  * <b>日期：</b>2018年10月30日 下午5:15:19
  */
 @Controller
-@RequestMapping(value = "")
+@RequestMapping(value = "/demo")
 public class IndexController {
 
 	@Autowired

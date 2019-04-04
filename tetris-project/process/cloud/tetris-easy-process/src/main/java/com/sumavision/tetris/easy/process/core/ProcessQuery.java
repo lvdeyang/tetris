@@ -1,6 +1,8 @@
 package com.sumavision.tetris.easy.process.core;
 
 import java.util.List;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.runtime.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,9 @@ public class ProcessQuery {
 	@Autowired
 	private ProcessDAO processDao;
 	
+	@Autowired
+	private RuntimeService runtimeService;
+	
 	/**
 	 * 分页查询流程<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -32,6 +37,21 @@ public class ProcessQuery {
 		Pageable page = new PageRequest(currentPage - 1, pageSize);
 		Page<ProcessPO> pagedProcesses = processDao.findAll(page);
 		return pagedProcesses.getContent();
+	}
+	
+	/**
+	 * 查询流程实例进度<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月2日 下午1:32:05
+	 * @throws Exception
+	 */
+	public void queryProgressByProcessInstanceId(String processInstanceId) throws Exception{
+		
+		Execution execution = runtimeService.createExecutionQuery().processInstanceId(processInstanceId).onlyChildExecutions().singleResult();
+		
+		//execution.getActivityId()
+		
 	}
 	
 }
