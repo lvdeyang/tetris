@@ -28,16 +28,21 @@ public class ApiServerCompressController {
 	 * <b>作者:</b>sm<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月3日 下午2:11:43
-	 * @param task
-	 * @param id
-	 * @param request
-	 * @return
-	 * @throws Exception
+	 * @param Long id 播发媒资id
+	 * @return String type 文章类型
+	 * @return String name 文章名称
+	 * @return String publishTime 文章发布时间
+	 * @return String remark 备注
+	 * @return String author 作者
+	 * @return String keywords 关键字
+	 * @return String column 栏目
+	 * @return String region 地区
+	 * @return String content 媒体内容
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/parse")
-	public Object parse(String task, 
+	public Object parse(
 			Long id,
 			HttpServletRequest request) throws Exception{
 		

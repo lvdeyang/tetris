@@ -3,7 +3,6 @@ package com.sumavision.tetris.cms.article;
 import java.util.List;
 
 import com.sumavision.tetris.cms.classify.ClassifyVO;
-import com.sumavision.tetris.cms.column.ColumnVO;
 import com.sumavision.tetris.cms.region.RegionVO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;

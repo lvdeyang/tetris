@@ -36,12 +36,12 @@ public class ApiServerArticleController {
 	 * @param content 内容--json字符串，结构:[{"type":"内容类型",--yjgb_title(标题)/yjgb_txt(文本)/yjgb_picture(图片)/yjgb_video(视频)/yjgb_audio(音频)
 	 * 										"value":"内容值",--标题和文本传对应的String,图片、视频和音频传对应的url}]
 	 * @param region 地区 -- "[code1,code2]"
-	 * @return
+	 * @return ArticleVO 新建的文章数据
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/article/add")
-	public Object addArticle(
+	@RequestMapping(value = "/generate/with/internal/template")
+	public Object generateWithInternalTemplate(
 			String column,
 			String name, 
 			String type,
