@@ -135,6 +135,20 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- 媒体编辑模块（qt端、移动端等） -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+		    <artifactId>tetris-easy-process-media-editor</artifactId>
+		    <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- 应急广播播发模块 -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+		    <artifactId>tetris-easy-process-yjgb-broadcast</artifactId>
+		    <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- eureka依赖 -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

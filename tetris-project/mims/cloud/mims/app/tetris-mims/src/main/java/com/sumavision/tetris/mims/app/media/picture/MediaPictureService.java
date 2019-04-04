@@ -168,7 +168,7 @@ public class MediaPictureService {
 												   .append(separator)
 												   .append(task.getName())
 												   .toString());
-		entity.setPreviewUrl(new StringBufferWrapper().append("/upload/tmp/")
+		entity.setPreviewUrl(new StringBufferWrapper().append("upload/tmp/")
 													  .append(user.getGroupName())
 													  .append("/")
 													  .append(folder.getUuid())
@@ -301,7 +301,7 @@ public class MediaPictureService {
 		entity.setUploadStatus(UploadStatus.COMPLETE);
 		entity.setStoreType(StoreType.LOCAL);
 		entity.setUploadTmpPath(uploadTempPath);
-		entity.setPreviewUrl(new StringBufferWrapper().append("/upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
+		entity.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
 		entity.setUpdateTime(date);
 		
 		mediaPictureDao.save(entity);

@@ -300,7 +300,7 @@ public class MediaAudioService {
 		entity.setUploadStatus(UploadStatus.COMPLETE);
 		entity.setStoreType(StoreType.LOCAL);
 		entity.setUploadTmpPath(uploadTempPath);
-		entity.setPreviewUrl(new StringBufferWrapper().append("/upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
+		entity.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
 		entity.setUpdateTime(date);
 		
 		mediaAudioDao.save(entity);

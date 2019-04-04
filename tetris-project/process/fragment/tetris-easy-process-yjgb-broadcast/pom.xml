@@ -1,18 +1,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" 
 		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-		 
     <modelVersion>4.0.0</modelVersion>
-    
+  
     <groupId>com.sumavision.tetris</groupId>
-    <artifactId>tetris-cms</artifactId>
+    <artifactId>tetris-easy-process-yjgb-broadcast</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    
-    <name>tetris-cms</name>
-    <description>融媒体发布平台</description>
-    
-    <packaging>war</packaging>
-    <!-- <packaging>jar</packaging> -->
+  
+    <name>tetris-easy-process-yjgb-broadcast</name>
+    <description>应急广播播发模块</description>
+  	
+  	<packaging>jar</packaging>
     
     <parent>
 		<groupId>org.springframework.boot</groupId>
@@ -27,29 +25,10 @@
 		<java.version>1.8</java.version>
 		<spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
 	</properties>
-	
-	<dependencies>
-	
-		<!-- mysql驱动 -->
-		<dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-		
-		<!-- druid连接池 -->
-		<dependency>
-		   <groupId>com.alibaba</groupId>
-		   <artifactId>druid-spring-boot-starter</artifactId>
-		   <version>1.1.10</version>
-		</dependency>
-		
-		<dependency>
-		   <groupId>com.sumavision.tetris</groupId>
-		   <artifactId>tetris-lib-aliyun</artifactId>
-		   <version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		
-		<dependency>
+    
+    <dependencies>
+    
+    	<dependency>
 		   <groupId>com.sumavision.tetris</groupId>
 		   <artifactId>tetris-common</artifactId>
 		   <version>0.0.1-SNAPSHOT</version>
@@ -65,28 +44,6 @@
 		   <groupId>com.sumavision.tetris</groupId>
 		   <artifactId>tetris-orm</artifactId>
 		   <version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-configuration-processor</artifactId>
-			<optional>true</optional>
-		</dependency>
-		
-		<!-- caching -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-        </dependency>
-
-		<!-- apache httpasyncclient -->
-		<dependency>
-		  	<groupId>org.apache.httpcomponents</groupId>
-		  	<artifactId>httpasyncclient</artifactId>
 		</dependency>
 		
 		<!-- user-feign -->
@@ -109,21 +66,25 @@
 			<artifactId>tetris-mims-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-		<!-- process-feign -->
-		<!-- <dependency>
+		
+		<!--  
+			process-feign 
+			这个依赖只是为了开发阶段不报错，实际运行时自动依赖主工程
+		-->
+		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
-   	 		<artifactId>tetris-easy-process-feign</artifactId>
-    		<version>0.0.1-SNAPSHOT</version>
-		</dependency> -->
-
+			<artifactId>tetris-easy-process-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		
 		<!-- tetris-ui -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-ui</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
+		
 		<!-- eureka依赖 -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -133,10 +94,10 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency>
-
-	</dependencies>
-	
-	<dependencyManagement>
+		
+    </dependencies>
+    
+    <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -149,13 +110,7 @@
     </dependencyManagement>
     
     <build>
-    	<finalName>tetris-cms</finalName>
 	    <plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-			
 			<plugin>
 		       	<groupId>org.apache.maven.plugins</groupId>
 		        <artifactId>maven-compiler-plugin</artifactId>
@@ -166,38 +121,6 @@
 		        </configuration>
 	        </plugin>
 		</plugins>
-		<!-- <plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-					<encoding>UTF-8</encoding>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<fork>true</fork>
-					<mainClass>com.sumavision.tetris.spring.eureka.TetrisSpringEurekaApplication</mainClass>
-					<layout>ZIP</layout>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>repackage</goal>
-						</goals>
-						分离出代码包
-						<configuration>
-							<classifier>exec</classifier>
-						</configuration>
-						
-					</execution>
-				</executions>
-			</plugin>
-		</plugins> -->
     </build>
-  
+  	
 </project>

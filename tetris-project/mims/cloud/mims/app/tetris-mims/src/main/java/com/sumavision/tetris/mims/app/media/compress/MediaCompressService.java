@@ -31,11 +31,14 @@ import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
@@ -309,7 +312,7 @@ public class MediaCompressService {
 		String separator = File.separator;
 		
 		//文章的渲染类型
-		String type = "";
+		String type = "TEXT";
 		//作者
 		String author = "";
 		//文章名称
@@ -352,7 +355,7 @@ public class MediaCompressService {
 				
 				MediaAudioPO audio = mediaAudioService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
 				
-				content = audio.getPreviewUrl();
+				content = new MediaAudioVO().set(audio).getPreviewUrl();
 				templateId = "yjgb_audio";
 				type = "AVIDEO";
 
@@ -363,7 +366,7 @@ public class MediaCompressService {
 				
 				MediaVideoPO video = mediaVideoService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
 				
-				content = video.getPreviewUrl();
+				content = new MediaVideoVO().set(video).getPreviewUrl();
 				templateId = "yjgb_video";
 				type = "AVIDEO";
 				
@@ -374,9 +377,9 @@ public class MediaCompressService {
 				
 				MediaPicturePO picture = mediaPictureService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
 				
-				content = picture.getPreviewUrl();
+				content = new MediaPictureVO().set(picture).getPreviewUrl();
 				templateId = "yjgb_picture";
-				type = "TXT";
+				type = "TEXT";
 				
 			}else if(fileNameSuffix.equals("png")){
 				
@@ -385,9 +388,9 @@ public class MediaCompressService {
 				
 				MediaPicturePO picture = mediaPictureService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
 				
-				content = picture.getPreviewUrl();
+				content = new MediaPictureVO().set(picture).getPreviewUrl();
 				templateId = "yjgb_picture";
-				type = "TXT";
+				type = "TEXT";
 				
 			}else if(fileNameSuffix.equals("gif")){
 
@@ -396,9 +399,9 @@ public class MediaCompressService {
 				
 				MediaPicturePO picture = mediaPictureService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
 				
-				content = picture.getPreviewUrl();
+				content = new MediaPictureVO().set(picture).getPreviewUrl();
 				templateId = "yjgb_picture";
-				type = "TXT";
+				type = "TEXT";
 				
 			}else if(fileNameSuffix.equals("xml")){
 				
@@ -412,7 +415,7 @@ public class MediaCompressService {
 				
 				//文本媒资
 				if(remark != null){
-					
+					mediaTxtService.add(user, name, "txt", remark);
 				}
 				
 				//转换栏目
@@ -444,15 +447,17 @@ public class MediaCompressService {
 		contentTemplate.put("value", remark);
 		contents.add(contentTemplate);
 		
-		JSONObject mediaTemplate = new JSONObject();
-		mediaTemplate.put("type", templateId);
-		mediaTemplate.put("value", content);
-		contents.add(mediaTemplate);
+		if(!templateId.equals("")){
+			JSONObject mediaTemplate = new JSONObject();
+			mediaTemplate.put("type", templateId);
+			mediaTemplate.put("value", content);
+			contents.add(mediaTemplate);
+		}
 		
 		return new HashMapWrapper<String, String>().put("type", type)
 												   .put("name", articleName)
 												   .put("publishTime", publishTime)
-												   .put("remark", remark)
+												   .put("remark", articleName)
 												   .put("author", author)
 												   .put("keywords", keywords)
 												   .put("column", column)

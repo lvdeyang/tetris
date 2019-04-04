@@ -24,7 +24,7 @@ public class ApiServerArticleController {
 	
 	@Autowired
 	private ArticleService articleService;
-	
+
 //	@Autowired
 //	private ProcessService processService;
 	
@@ -91,7 +91,7 @@ public class ApiServerArticleController {
 				user);
 		return new ArticleVO().set(article);
 	}
-	
+
 	/**
 	 * 启动应急广播根据播发媒资生成广播流程<br/>
 	 * <b>作者:</b>ldy<br/>
