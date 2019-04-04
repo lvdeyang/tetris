@@ -37,7 +37,7 @@ public class ApiServerCompressController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/parse")
-	public Object parse(String task, 
+	public Object parse(
 			Long id,
 			HttpServletRequest request) throws Exception{
 		
