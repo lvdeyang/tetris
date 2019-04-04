@@ -263,15 +263,14 @@ public class MediaAudioService {
 	 * <b>作者:</b>ldy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月3日 下午1:34:18
-	 * @param user
-	 * @param name
-	 * @param fileName
-	 * @param size
-	 * @param folderType
-	 * @param mimeType
-	 * @param uploadTempPath
-	 * @return
-	 * @throws Exception
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param String fileName 文件名
+ 	 * @param Long size 文件大小
+	 * @param String folderType 文件夹类型 
+	 * @param String mimeType 文件类型
+	 * @param String uploadTempPath 存储位置
+	 * @return MediaAudioPO 音频媒资
 	 */
 	public MediaAudioPO add(
 			UserVO user,
@@ -301,7 +300,7 @@ public class MediaAudioService {
 		entity.setUploadStatus(UploadStatus.COMPLETE);
 		entity.setStoreType(StoreType.LOCAL);
 		entity.setUploadTmpPath(uploadTempPath);
-		entity.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString());
+		entity.setPreviewUrl(new StringBufferWrapper().append("/upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
 		entity.setUpdateTime(date);
 		
 		mediaAudioDao.save(entity);

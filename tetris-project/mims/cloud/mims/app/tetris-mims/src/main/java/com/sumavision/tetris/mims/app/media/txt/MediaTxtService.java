@@ -4,13 +4,19 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderType;
+import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -25,6 +31,9 @@ public class MediaTxtService {
 
 	@Autowired
 	private MediaTxtDAO mediaTxtDao;
+	
+	@Autowired
+	private FolderDAO folderDao;
 	
 	/**
 	 * 文本媒资删除<br/>
@@ -148,6 +157,41 @@ public class MediaTxtService {
 		mediaTxtDao.save(copiedMedia);
 		
 		return copiedMedia;
+	}
+	
+	/**
+	 * 添加已上传好的媒资任务<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月3日 下午1:34:18
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param String fileName 文件名
+	 * @param String folderType 文件夹类型 
+	 * @param String content 内容
+	 * @return MediaPicturePO 图片媒资
+	 */
+	public MediaTxtPO add(
+			UserVO user,
+			String name,
+			String folderType,
+			String content
+			) throws Exception{
+		
+		FolderType type = FolderType.fromPrimaryKey(folderType);
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
+		
+		Date date = new Date();
+		
+		MediaTxtPO entity = new MediaTxtPO();
+		entity.setName(name);
+		entity.setAuthorId(user.getUuid());
+		entity.setAuthorName(user.getNickname());
+		entity.setContent(content);
+		entity.setFolderId(folder.getId());
+		entity.setUpdateTime(date);
+		
+		return entity;
 	}
 	
 }

@@ -31,6 +31,11 @@ import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
+import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtService;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
@@ -58,6 +63,15 @@ public class MediaCompressService {
 	
 	@Autowired
 	private MediaAudioService mediaAudioService;
+	
+	@Autowired
+	private MediaVideoService mediaVideoService;
+	
+	@Autowired
+	private MediaPictureService mediaPictureService;
+	
+	@Autowired
+	private MediaTxtService mediaTxtService;
 	
 	@Autowired
 	private Path path;
@@ -343,27 +357,63 @@ public class MediaCompressService {
 				type = "AVIDEO";
 
 			}else if(fileNameSuffix.equals("mp4")){
+				
+				String folderType = "video";
+				String mimeType = "video/mp4";
+				
+				MediaVideoPO video = mediaVideoService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
+				
+				content = video.getPreviewUrl();
 				templateId = "yjgb_video";
 				type = "AVIDEO";
-			}else if(fileNameSuffix.equals("txt")){
-				templateId = "yjgb_txt";
-				type = "TXT";
+				
 			}else if(fileNameSuffix.equals("jpg")){
+				
+				String folderType = "picture";
+				String mimeType = "image/jpeg";
+				
+				MediaPicturePO picture = mediaPictureService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
+				
+				content = picture.getPreviewUrl();
 				templateId = "yjgb_picture";
 				type = "TXT";
+				
 			}else if(fileNameSuffix.equals("png")){
+				
+				String folderType = "picture";
+				String mimeType = "image/png";
+				
+				MediaPicturePO picture = mediaPictureService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
+				
+				content = picture.getPreviewUrl();
 				templateId = "yjgb_picture";
 				type = "TXT";
+				
 			}else if(fileNameSuffix.equals("gif")){
+
+				String folderType = "picture";
+				String mimeType = "image/gif";
+				
+				MediaPicturePO picture = mediaPictureService.add(user, name, fileName, size, folderType, mimeType, uploadTempPath);
+				
+				content = picture.getPreviewUrl();
 				templateId = "yjgb_picture";
 				type = "TXT";
+				
 			}else if(fileNameSuffix.equals("xml")){
+				
+				//解析xml
 				InputStream xmlStream = new FileInputStream(f);
 				XmlReader reader = new XmlReader(xmlStream);
 				author = reader.readString("EBD.EBM.MsgBasicInfo.SenderName");
 				publishTime = reader.readString("EBD.EBM.MsgBasicInfo.SendTime");
 				articleName = reader.readString("EBD.EBM.MsgContent.MsgTitle");
 				remark = reader.readString("EBD.EBM.MsgContent.MsgDesc");
+				
+				//文本媒资
+				if(remark != null){
+					
+				}
 				
 				//转换栏目
 				String eventType = reader.readString("EBD.EBM.MsgBasicInfo.EventType");
@@ -388,6 +438,11 @@ public class MediaCompressService {
 		authorTemplate.put("type", "yjgb_txt");
 		authorTemplate.put("value", author);
 		contents.add(authorTemplate);
+		
+		JSONObject contentTemplate = new JSONObject();
+		contentTemplate.put("type", "yjgb_txt");
+		contentTemplate.put("value", remark);
+		contents.add(contentTemplate);
 		
 		JSONObject mediaTemplate = new JSONObject();
 		mediaTemplate.put("type", templateId);

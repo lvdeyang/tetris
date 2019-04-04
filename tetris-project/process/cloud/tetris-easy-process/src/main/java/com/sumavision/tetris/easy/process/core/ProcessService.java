@@ -6,13 +6,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.util.ReflectUtil;
+import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.apache.commons.io.FileUtils;
@@ -21,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.json.AliFastJsonObject;
@@ -33,6 +33,7 @@ import com.sumavision.tetris.easy.process.access.point.AccessPointParamPO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionDAO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionPO;
 import com.sumavision.tetris.easy.process.access.point.ParamDirection;
+import com.sumavision.tetris.easy.process.core.exception.ProcessInUseException;
 import com.sumavision.tetris.easy.process.core.exception.ProcessNotExistException;
 import com.sumavision.tetris.easy.process.core.exception.VariableValueCheckFailedException;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
@@ -78,6 +79,12 @@ public class ProcessService {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private ProcessDeploymentPermissionDAO processDeploymentPermissionDao;
+	
+	@Autowired
+	private ProcessInstanceDeploymentPermissionDAO processInstanceDeploymentPermissionDao;
 	
 	/**
 	 * 保存流程的bpmn配置<br/>
@@ -132,17 +139,45 @@ public class ProcessService {
 	 */
 	public void delete(ProcessPO process) throws Exception{
 		
+		//删除发布信息
+		List<ProcessDeploymentPermissionPO> deployments = processDeploymentPermissionDao.findByProcessId(process.getId());
+		if(deployments!=null && deployments.size()>0){
+			Set<String> deploymentIds = new HashSet<String>();
+			for(ProcessDeploymentPermissionPO deployment:deployments){
+				deploymentIds.add(deployment.getDeploymentId());
+			}
+			List<ProcessInstanceDeploymentPermissionPO> permissions = processInstanceDeploymentPermissionDao.findByDeploymentIdIn(deploymentIds);
+			if(permissions!=null && permissions.size()>0){
+				throw new ProcessInUseException(process.getId(), "流程不能删除！");
+			}
+		}
+		
 		List<AccessPointProcessPermissionPO> permissions = accessPointProcessPermissionDao.findByProcessId(process.getId());
 		if(permissions!=null && permissions.size()>0){
 			accessPointProcessPermissionDao.deleteInBatch(permissions);
 		}
 		
+		//删除流程变量
 		List<ProcessVariablePO> variables = processVariableDao.findByProcessId(process.getId());
 		if(variables!=null && variables.size()>0){
 			processVariableDao.deleteInBatch(variables);
 		}
 		
+		//删除流程变量映射
+		List<ProcessParamReferencePO> processParamReferences = processParamReferenceDao.findByProcessId(process.getId());
+		if(processParamReferences!=null && processParamReferences.size()>0){
+			processParamReferenceDao.deleteInBatch(processParamReferences);
+		}
+		
 		processDao.delete(process);
+		
+		//删除流程发布信息
+		if(deployments!=null && deployments.size()>0){
+			for(ProcessDeploymentPermissionPO deployment:deployments){
+				repositoryService.deleteDeployment(deployment.getDeploymentId());
+			}
+			processDeploymentPermissionDao.deleteInBatch(deployments);
+		}
 	}
 	
 	/**
@@ -178,8 +213,16 @@ public class ProcessService {
 			inputStream = ReflectUtil.getResourceAsStream(process.getPath());
 			
 			//发布流程
-			repositoryService.createDeployment().addInputStream(process.getPath(), inputStream).deploy();
+			Deployment deployment = repositoryService.createDeployment().addInputStream(process.getPath(), inputStream).deploy();
 			
+			ProcessDeploymentPermissionPO permission = new ProcessDeploymentPermissionPO();
+			permission.setUpdateTime(new Date());
+			permission.setProcessId(process.getId());
+			permission.setName(process.getName());
+			permission.setRemarks(process.getRemarks());
+			permission.setBpmn(process.getBpmn());
+			permission.setDeploymentId(deployment.getId());
+			processDeploymentPermissionDao.save(permission);
 		}finally{
 			if(inputStream != null) inputStream.close();
 			
@@ -303,6 +346,12 @@ public class ProcessService {
 		}
 		
 		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid());
+		
+		ProcessInstanceDeploymentPermissionPO permission = new ProcessInstanceDeploymentPermissionPO();
+		permission.setProcessInstanceId(processInstance.getId());
+		permission.setDeploymentId(processInstance.getDeploymentId());
+		permission.setUpdateTime(new Date());
+		processInstanceDeploymentPermissionDao.save(permission);
 		
 		//内置变量
 		contextVariableMap.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstance.getId());

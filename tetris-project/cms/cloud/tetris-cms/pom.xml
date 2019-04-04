@@ -110,6 +110,13 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- process-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+   	 		<artifactId>tetris-easy-process-feign</artifactId>
+    		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- tetris-ui -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>

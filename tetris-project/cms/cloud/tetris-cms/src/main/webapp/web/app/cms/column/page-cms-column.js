@@ -191,7 +191,7 @@ define([
                                     instance.confirmButtonLoading = false;
                                     done();
                                     if(status !== 200) return;
-                                    self.$refs.tagTree.remove(nodeData);
+                                    self.$refs.columnTree.remove(nodeData);
                                     if(nodeData.id === self.tree.current.id){
                                         self.currentNode(self.tree.data[0]);
                                     }
@@ -235,7 +235,7 @@ define([
                     }
                     self.tree.current = data;
                     self.$nextTick(function(){
-                        self.$refs.tagTree.setCurrentKey(data.uuid);
+                        self.$refs.columnTree.setCurrentKey(data.uuid);
                     });
                     self.loadArticles(data.id);
                 },

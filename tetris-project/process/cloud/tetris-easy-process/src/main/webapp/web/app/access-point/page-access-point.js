@@ -92,6 +92,7 @@ define([
                         parentReferenceKeyPath:'',
                         accessPointId:'',
                         name:'',
+                        //保证id的为一性，以“_pa + 接入点id + _”开头
                         keyPrefix:'',
                         keySuffix:'',
                         primaryKey:'',
@@ -211,7 +212,7 @@ define([
                         accessPointId:currentRow.id
                     }, function(data){
                         self.table.current = currentRow;
-                        self.dialog.createAccessPointParam.keyPrefix = '_' + currentRow.id + '_';
+                        self.dialog.createAccessPointParam.keyPrefix = '_pa' + currentRow.id + '_';
                         self.dialog.createAccessPointParam.accessPointId = currentRow.id;
                         var paramValues = data.paramValues;
                         var returnValues = data.returnValues;

@@ -14,9 +14,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
@@ -41,6 +44,9 @@ public class MediaVideoService {
 	
 	@Autowired
 	private MediaVideoDAO mediaVideoDao;
+	
+	@Autowired
+	private FolderDAO folderDao;
 	
 	@Autowired
 	private Path path;
@@ -250,6 +256,56 @@ public class MediaVideoService {
 		mediaVideoDao.save(copiedMedia);
 		
 		return copiedMedia;
+	}
+	
+	/**
+	 * 添加已上传好的媒资任务<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月3日 下午1:34:18
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param String fileName 文件名
+ 	 * @param Long size 文件大小
+	 * @param String folderType 文件夹类型 
+	 * @param String mimeType 文件类型
+	 * @param String uploadTempPath 存储位置
+	 * @return MediaVideoPO 视频媒资
+	 */
+	public MediaVideoPO add(
+			UserVO user,
+			String name,
+			String fileName,
+			Long size,
+			String folderType,
+			String mimeType,
+			String uploadTempPath
+			) throws Exception{
+		
+		FolderType type = FolderType.fromPrimaryKey(folderType);
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
+		
+		Date date = new Date();
+		String version = new StringBufferWrapper().append(MediaVideoPO.VERSION_OF_ORIGIN).append(".").append(date.getTime()).toString();
+		
+		MediaVideoPO entity = new MediaVideoPO();
+		entity.setName(name);
+		entity.setAuthorId(user.getUuid());
+		entity.setAuthorName(user.getNickname());
+		entity.setVersion(version);
+		entity.setFileName(fileName);
+		entity.setSize(size);
+		entity.setMimetype(mimeType);
+		entity.setFolderId(folder.getId());
+		entity.setUploadStatus(UploadStatus.COMPLETE);
+		entity.setStoreType(StoreType.LOCAL);
+		entity.setUploadTmpPath(uploadTempPath);
+		entity.setPreviewUrl(new StringBufferWrapper().append("/upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
+		entity.setUpdateTime(date);
+		
+		mediaVideoDao.save(entity);
+		
+		return entity;
 	}
 	
 }

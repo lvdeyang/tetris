@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.cms.column.ColumnDAO;
 import com.sumavision.tetris.cms.column.ColumnPO;
@@ -140,7 +141,7 @@ public class ArticleService {
 		
 		//查询所有内置模板
 		StringBufferWrapper allHtml = new StringBufferWrapper();
-		List<JSONObject> moduleJsons = new ArrayList<JSONObject>();
+		JSONArray moduleJsons = new JSONArray();
 		List<TemplatePO> templates = templateDao.findByTypeOrderBySerialAsc(TemplateType.INTERNAL.toString());
 		for(JSONObject content: contents){
 			String contentType = content.getString("type");
@@ -153,13 +154,16 @@ public class ArticleService {
 			JSONObject jsJson = JSONObject.parseArray(contentJs, JSONObject.class).get(0);
 			jsJson.put("value", contentValue);
 			String jsKey = jsJson.getString("key");
-			view_template.setJs(jsJson.toString());
+			
+			JSONArray jsArray = new JSONArray();
+			jsArray.add(jsJson);
+			view_template.setJs(jsArray.toJSONString());
 			
 			String newHtml = contentHtml.replace("${"+jsKey+"}", contentValue);
 			allHtml.append(newHtml);
 			
 			JSONObject module = new JSONObject();
-			module.put("id", "module_" + new Date().getTime());
+			module.put("id", "module" + jsKey);
 			module.put("template", view_template);
 			module.put("render", null);
 			module.put("mousein", null);
@@ -169,7 +173,7 @@ public class ArticleService {
 		
 		File file = new File(article.getStorePath());
 		FileUtils.writeStringToFile(file, articleQuery.generateHtml(allHtml.toString(), "", ""));
-		article.setModules(moduleJsons.toString());
+		article.setModules(moduleJsons.toJSONString());
 		article.setUpdateTime(new Date());
 		articleDao.save(article);		
 		
