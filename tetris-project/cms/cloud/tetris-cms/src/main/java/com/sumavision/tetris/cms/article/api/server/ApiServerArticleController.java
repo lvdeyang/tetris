@@ -11,7 +11,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleService;
 import com.sumavision.tetris.cms.article.ArticleVO;
-import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserVO;
 
@@ -21,9 +20,6 @@ public class ApiServerArticleController {
 	
 	@Autowired
 	private ArticleService articleService;
-	
-	@Autowired
-	private ProcessService processService;
 	
 	/**
 	 * 添加文章<br/>
@@ -87,27 +83,6 @@ public class ApiServerArticleController {
 				regions,
 				user);
 		return new ArticleVO().set(article);
-	}
-	
-	/**
-	 * 启动应急广播根据播发媒资生成广播流程<br/>
-	 * <b>作者:</b>ldy<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年4月4日 下午2:43:55
-	 * @param Long id 播发媒资id
-	 * @return String 流程实例id
-	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/generate/with/compress")
-	public Object generateWithCompress(
-			Long id, 
-			HttpServletRequest request) throws Exception{
-		
-		JSONObject jsonObject = new JSONObject();
-		jsonObject.put("_pa1_id", id);
-		
-		return processService.startByKey("_yjgb_generate_article_by_compress_", jsonObject.toJSONString());
 	}
 	
 }
