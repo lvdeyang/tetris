@@ -15,8 +15,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
+import com.sumavision.tetris.mvc.ext.request.RequestResouceTypeAnalyzer;
 
 /**
  * 网关安全访问<br/>
@@ -30,9 +32,17 @@ public class AccessSecurityFilter implements Filter{
 
 	private static final Logger LOG = LoggerFactory.getLogger(AccessSecurityFilter.class);
 	
+	private RequestResouceTypeAnalyzer resouceTypeAnalyzer;
+	
+	public void initBean(){
+		if(resouceTypeAnalyzer==null) resouceTypeAnalyzer = SpringContext.getBean(RequestResouceTypeAnalyzer.class);
+	}
+	
 	@Override
 	public void doFilter(ServletRequest nativeRequest, ServletResponse nativeResponse, FilterChain chain)
 			throws IOException, ServletException {
+		
+		initBean();
 		
 		HttpServletRequest request = (HttpServletRequest)nativeRequest;
 		HttpServletResponse response = (HttpServletResponse)nativeResponse;
@@ -44,9 +54,16 @@ public class AccessSecurityFilter implements Filter{
 			return;
 		}
 		
+		String requestUri = request.getRequestURI();
+		
+		//允许静态资源访问
+		if(resouceTypeAnalyzer.isStaticResource(requestUri)){
+			chain.doFilter(request, response);
+			return;
+		}
+		
 		JSONObject jsonResult = new JSONObject();
 		
-		String requestUri = request.getRequestURI();
 		if(!requestUri.startsWith("/tetris-spring-eureka") &&
 				!requestUri.startsWith("/tetris-spring-zull") && 
 				!requestUri.startsWith("/tetris-menu") && 

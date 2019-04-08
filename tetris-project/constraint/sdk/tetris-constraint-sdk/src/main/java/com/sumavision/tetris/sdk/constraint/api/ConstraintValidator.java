@@ -40,6 +40,8 @@ public class ConstraintValidator {
 	 */
 	public boolean validate(JSONObject params, String constraintExpression) throws Exception{
 		
+		if(constraintExpression==null || "".equals(constraintExpression)) return true;
+		
 		//加入内置约束校验
 		Map<String, InternalConstraintBean> internalConstraints = constraintQuery.formatList();
 		
@@ -47,7 +49,7 @@ public class ConstraintValidator {
 		if(params!=null && params.size()>0){
 			Set<String> keys = params.keySet();
 			for(String key:keys){
-				context.setVariable(key, params.getJSONObject(key));
+				context.setVariable(key, params.get(key));
 			}
 		}
 		context.setVariable("internalConstraints", internalConstraints);

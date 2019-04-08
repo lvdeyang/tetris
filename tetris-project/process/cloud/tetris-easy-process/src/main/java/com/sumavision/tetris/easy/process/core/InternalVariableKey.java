@@ -19,6 +19,7 @@ public enum InternalVariableKey {
 	private String name;
 	
 	private InternalVariableKey(String variableKey, String name){
+		this.variableKey = variableKey;
 		this.name = name;
 	}
 	

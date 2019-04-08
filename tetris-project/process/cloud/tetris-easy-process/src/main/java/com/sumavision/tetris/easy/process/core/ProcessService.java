@@ -26,6 +26,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.json.AliFastJsonObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.easy.process.access.point.AccessPointPO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointParamDAO;
@@ -345,21 +346,19 @@ public class ProcessService {
 			}
 		}
 		
-		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid());
+		//内置变量
+		//这个接口里内置变量没办法加入流程实例id
+		//contextVariableMap.put(InternalVariableKey.START_USER_ID.getVariableKey(), user.getUuid());
+		
+		JSONObject finalVariableContext = aliFastJsonObject.convertFromHashMap(contextVariableMap);
+		
+		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid(), new HashMapWrapper<String, Object>().put("variable-context", finalVariableContext).getMap());
 		
 		ProcessInstanceDeploymentPermissionPO permission = new ProcessInstanceDeploymentPermissionPO();
 		permission.setProcessInstanceId(processInstance.getId());
 		permission.setDeploymentId(processInstance.getDeploymentId());
 		permission.setUpdateTime(new Date());
 		processInstanceDeploymentPermissionDao.save(permission);
-		
-		//内置变量
-		contextVariableMap.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstance.getId());
-		contextVariableMap.put(InternalVariableKey.START_USER_ID.getVariableKey(), user.getUuid());
-		
-		JSONObject finalVariableContext = aliFastJsonObject.convertFromHashMap(contextVariableMap);
-		
-		runtimeService.setVariable(processInstance.getId(), "variable-context", finalVariableContext);
 		
 		return processInstance.getId();
 	}

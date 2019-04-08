@@ -134,6 +134,11 @@ public class RemoteAccessPoint {
 		
 		JSONObject variableContext = (JSONObject)processVariables.get("variable-context");
 		
+		//加入内置变量：流程实例id
+		if(variableContext.getString(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey()) == null){
+			variableContext.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstanceId);
+		}
+		
 		Map<String, Object> contextVariableMap = aliFastJsonObject.convertToHashMap(variableContext);
 		
 		Map<String, Object> paramVariableMap = new HashMap<String, Object>();

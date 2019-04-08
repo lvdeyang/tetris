@@ -21,23 +21,26 @@ public class FeignConfiguration implements RequestInterceptor{
 	@Override
 	public void apply(RequestTemplate template) {
 		ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
-		if(attributes == null){
+		
+		//内部feign调用id识别
+    	template.header(HttpConstant.HEADER_FEIGN_CLIENT, HttpConstant.HEADER_FEIGN_CLIENT_KEY);
+		
+		if(attributes != null){
+			HttpServletRequest request = attributes.getRequest();
+	    	Enumeration<String> headerNames = request.getHeaderNames();
+	        if (headerNames != null) {
+	            while (headerNames.hasMoreElements()) {
+	                String name = headerNames.nextElement();
+	                String values = request.getHeader(name);
+	                template.header(name, values);
+	            }
+	            //LOG.info("feign interceptor header:{}",template);
+	        }
+		}else{
 			LOG.info("当前线程没有绑定请求（系统初始化）：", template);
 			return;
 		}
-        HttpServletRequest request = attributes.getRequest();
-        Enumeration<String> headerNames = request.getHeaderNames();
-        if (headerNames != null) {
-            while (headerNames.hasMoreElements()) {
-                String name = headerNames.nextElement();
-                String values = request.getHeader(name);
-                template.header(name, values);
-            }
-            //LOG.info("feign interceptor header:{}",template);
-        }
-        
-        //内部feign调用id识别
-    	template.header(HttpConstant.HEADER_FEIGN_CLIENT, HttpConstant.HEADER_FEIGN_CLIENT_KEY);
+       
 	}
 
 }
