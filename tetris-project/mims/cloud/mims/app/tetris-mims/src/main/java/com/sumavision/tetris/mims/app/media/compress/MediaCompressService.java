@@ -302,10 +302,10 @@ public class MediaCompressService {
 	 */
 	public Map<String, String> parse(String path) throws Exception{
 		
-		UserVO user = new UserVO().setGroupId("4")
+		UserVO user = new UserVO().setGroupId("2")
 				  .setGroupName("数码视讯")
-				  .setUuid("5")
-				  .setNickname("lvdeyang");
+				  .setUuid("3")
+				  .setNickname("应急广播播发媒资用户");
 		
 		File file = new File(path);
 		String parentFilePath = new File(file.getParent()).getParent();

@@ -83,9 +83,9 @@ public class EntryVO {
 			this.setExpression(entity.getMethod());
 		}else if(entity.getType().equals(AccessPointType.REMOTE_ASYNCHRONOUS) ||
 				entity.getType().equals(AccessPointType.REMOTE_SYNCHRONOUS)){
-			this.setExpression(new StringBufferWrapper().append("remoteAccessPoint.invoke(execution, ")
+			this.setExpression(new StringBufferWrapper().append("#{remoteAccessPoint.invoke(execution, ")
 													    .append(entity.getId())
-													    .append(")").toString());
+													    .append(")}").toString());
 		}
 		
 		return this;

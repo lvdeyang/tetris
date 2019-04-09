@@ -65,10 +65,10 @@ public class ApiServerArticleController {
 			HttpServletRequest request) throws Exception{
 		
 		//TODO:暂时自己创建一个UserVO
-		UserVO user = new UserVO().setGroupId("4")
+		UserVO user = new UserVO().setGroupId("2")
 								  .setGroupName("数码视讯")
-								  .setUuid("5")
-								  .setNickname("lvdeyang");
+								  .setUuid("3")
+								  .setNickname("yjgb");
 		
 		List<String> columns = JSONArray.parseArray(column, String.class);
 		List<JSONObject> contents = JSONArray.parseArray(content, JSONObject.class);

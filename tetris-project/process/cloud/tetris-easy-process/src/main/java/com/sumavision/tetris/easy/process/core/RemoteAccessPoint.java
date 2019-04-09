@@ -128,7 +128,7 @@ public class RemoteAccessPoint {
 		
 		final String processInstanceId = execution.getProcessInstanceId();
 		
-		ProcessPO process = processDao.findByUuid(execution.getProcessDefinitionId());
+		ProcessPO process = processDao.findByUuid(execution.getProcessDefinitionId().split(":")[0]);
 		
 		Map<String, Object> processVariables = runtimeService.getVariables(processInstanceId);
 		
@@ -188,10 +188,10 @@ public class RemoteAccessPoint {
 			//返回值判断
 			String result = null;
 			JSONObject data = null;
-			if(accessPoint.getMethodType().equals(AccessPointMethodType.HTTP_METHOD_POST)){
-				result = invoker.doPost();
-			}else if(accessPoint.getMethodType().equals(AccessPointMethodType.HTTP_METHOD_GET)){
+			if(AccessPointMethodType.HTTP_METHOD_GET.equals(accessPoint.getMethodType())){
 				result = invoker.doGet();
+			}else{
+				result = invoker.doPost();
 			}
 			JSONObject resultJson = JSON.parseObject(result);
 			int status = resultJson.getIntValue("status");
@@ -210,18 +210,20 @@ public class RemoteAccessPoint {
 			//key值转换
 			Map<String, Object> reverseReferenceParamMap = aliFastJsonObject.convertToHashMap(data);
 			Map<String, Object> reverseParamMap = new HashMap<String, Object>();
+			Map<String, Object> loopedReverseParamMap = new HashMap<String, Object>();
 			Set<String> reverseReferenceParamMapKeys = reverseReferenceParamMap.keySet();
 			for(String reverseReferenceParamMapKey:reverseReferenceParamMapKeys){
 				for(AccessPointParamPO reverseParamDefinition:reverseParamDefinitions){
 					if(reverseReferenceParamMapKey.equals(reverseParamDefinition.getReferenceKeyPath())){
 						reverseParamMap.put(reverseParamDefinition.getPrimaryKeyPath(), reverseReferenceParamMap.get(reverseReferenceParamMapKey));
+						loopedReverseParamMap.put(reverseParamDefinition.getPrimaryKeyPath(), reverseReferenceParamMap.get(reverseReferenceParamMapKey));
 						break;
 					}
 				}
 			}
 			
 			//处理映射
-			Set<String> reverseParamMapKeys = reverseParamMap.keySet();
+			Set<String> reverseParamMapKeys = loopedReverseParamMap.keySet();
 			List<ProcessParamReferencePO> paramReferences = processParamReferenceDao.findByProcessId(process.getId());
 			if(paramReferences!=null && paramReferences.size()>0){
 				for(String reverseParamMapKey:reverseParamMapKeys){
@@ -234,7 +236,7 @@ public class RemoteAccessPoint {
 							Object effectValue = null;
 							//校验值的有效性
 							for(String keyPath:primaryKeyPaths){
-								Object setValue = reverseParamMap.get(keyPath);
+								Object setValue = loopedReverseParamMap.get(keyPath);
 								if(setValue != null){
 									if(effectValue == null){
 										effectValue = setValue;
@@ -270,6 +272,7 @@ public class RemoteAccessPoint {
 			}
 			
 			//回写参数
+			reverseParamMapKeys = reverseParamMap.keySet();
 			for(String reverseParamMapKey:reverseParamMapKeys){
 				contextVariableMap.put(reverseParamMapKey, reverseParamMap.get(reverseParamMapKey));
 			}
