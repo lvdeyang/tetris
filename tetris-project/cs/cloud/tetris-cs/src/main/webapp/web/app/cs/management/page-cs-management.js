@@ -1,5 +1,5 @@
 /**
- * Created by lvy on 2019/3/16.
+ * Created by lzp on 2019/3/16.
  */
 define([
     'text!' + window.APPPATH + 'cs/management/page-cs-management.html',
@@ -12,11 +12,11 @@ define([
     'element-ui',
     'mi-frame',
     'css!' + window.APPPATH + 'cs/management/page-cs-management.css'
-], function(tpl, config, $, ajax, context, commons, Vue){
+], function (tpl, config, $, ajax, context, commons, Vue) {
 
     var pageId = 'page-cs-management';
 
-    var init = function(){
+    var init = function () {
 
         //设置标题
         commons.setTitle(pageId);
@@ -29,37 +29,1094 @@ define([
             data: {
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
-                groups: context.getProp('groups')
+                groups: context.getProp('groups'),
+                loading: false,
+                loadingText: "",
+                screen: {
+                    one: "一分屏",
+                    four: "四分屏",
+                    six: "六分屏",
+                    nine: "九分屏"
+                },
+                channel: {
+                    page: {
+                        currentPage: 1,
+                        sizes: [10, 15, 20, 50],
+                        size: 10,
+                        total: 0
+                    },
+                    data: [],
+                    multipleSelection: []
+                },
+                dialog: {
+                    addProgram: {
+                        visible: false,
+                        loading: false,
+                        name: "",
+                        remark: "",
+                        date: ""
+                    },
+                    editName: {
+                        visible: false,
+                        loading: false,
+                        data: "",
+                        name: ""
+                    },
+                    editMenu: {
+                        visible: false,
+                        loading: false,
+                        data: "",
+                        tree: {
+                            props: {
+                                label: 'name',
+                                children: 'subColumns'
+                            },
+                            expandOnClickNode: false,
+                            data: [],
+                            current: '',
+                            loading: false
+                        },
+                        resource: {
+                            data: []
+                        },
+                        dialog: {
+                            editNode: {
+                                visible: false,
+                                loading: false,
+                                data: "",
+                                name: "",
+                                remark: ""
+                            },
+                            chooseResource: {
+                                visible: false,
+                                loading: false,
+                                tree: {
+                                    props: {
+                                        label: "name",
+                                        children: "children"
+                                    },
+                                    expandOnClickNode: false,
+                                    data: [],
+                                    current: '',
+                                    loading: false
+                                },
+                                chooseNode: []
+                            }
+                        }
+                    },
+                    editProgram: {
+                        visible: false,
+                        loading: false,
+                        data: "",
+                        previewData: {},
+                        commitData: {
+                            screenNum: "",
+                            screenInfo: [],
+                            currentSerialNum: "",
+                            currentSerialInfo: []
+                        },
+                        options: {
+                            list: [{
+                                id: 1,
+                                name: "一分屏"
+                            }, {
+                                id: 4,
+                                name: "四分屏"
+                            }, {
+                                id: 6,
+                                name: "六分屏"
+                            }, {
+                                id: 9,
+                                name: "九分屏"
+                            }],
+                            current: "一分屏"
+                        },
+                        screen: {
+                            one: {
+                                resources: {}
+                            },
+                            four: {
+                                resources: []
+                            },
+                            six: {
+                                resources: []
+                            },
+                            nine: {
+                                resources: []
+                            }
+                        },
+                        dialog: {
+                            chooseResource: {
+                                visible: false,
+                                loading: false,
+                                tree: {
+                                    loading: false,
+                                    props: {
+                                        label: "name",
+                                        children: "subColumns"
+                                    },
+                                    expandOnClickNode: false,
+                                    data: [],
+                                    current: {}
+                                },
+                                resources: {
+                                    data: [],
+                                    chooses: []
+                                }
+                            }
+                        }
+                    },
+                    manageBroadcastArea: {
+                        visible: false,
+                        data: "",
+                        tree: {
+                            loading: false,
+                            props: {
+                                lable: "name",
+                                children: "subColumns"
+                            },
+                            expandOnclickNode: false,
+                            data: [],
+                            current: []
+                        }
+                    },
+                    manageBroad: {
+                        visible: false,
+                        loading: false,
+                        data: [
+                            {
+                                name: "20190313发布",
+                                size: "256MB",
+                                status: "播发完成"
+                            }, {
+                                name: "海淀区20190313发布",
+                                size: "312MB",
+                                status: "正在发送"
+                            }
+                        ],
+                        dialog: {
+                            addBroad: {
+                                visible: false,
+                                loading: false,
+                                tree: {
+                                    props: {
+                                        label: "name",
+                                        children: "subColumns"
+                                    },
+                                    expandOnClickNode: false,
+                                    data: "",
+                                    current: '',
+                                    loading: false
+                                },
+                                chooseNode: []
+                            }
+                        }
+                    },
+                    deleteProgram: {
+                        visible: false,
+                        loading: false,
+                        name: "",
+                        remark: "",
+                        date: ""
+                    }
+                }
             },
-            computed:{
+            computed: {},
+            watch: {},
+            methods: {
+                getChannelList: function () {
+                    var self = this;
+                    var requestData = {
+                        currentPage: self.channel.page.currentPage,
+                        pageSize: self.channel.page.size
+                    };
+                    ajax.post('/cs/channel/list', requestData, function (data, status) {
+                        if (status != 200) return;
+                        self.channel.data = data.rows;
+                        self.channel.page.total = data.total;
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                multiDelete: function () {
+                    var self = this;
+                    //if (self.channel.multipleSelection.length > 0) {
+                    //    var h = self.$createElement;
+                    //    self.$msgbox({
+                    //        title: '危险操作',
+                    //        message: h('div', null, [
+                    //            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
+                    //            h('div', {class: 'el-message-box__message'}, [
+                    //                h('p', null, ['此操作将永久删除频道，且不可恢复，是否继续?'])
+                    //            ])
+                    //        ]),
+                    //        type: 'wraning',
+                    //        showCancelButton: true,
+                    //        confirmButtonText: '确定',
+                    //        cancelButtonText: '取消',
+                    //        beforeClose: function (action, instance, done) {
+                    //            instance.confirmButtonLoading = true;
+                    //            if (action === 'confirm' && self.channel.multipleSelection) {
+                    //                var idList = [];
+                    //                for (var i = 0; i < self.channel.multipleSelection; i++) {
+                    //                    idList.push(self.channel.multipleSelection[i]);
+                    //                }
+                    //                var questData = {id: idList};
+                    //                ajax.post('/cs/channel/remove', questData, function (data, status) {
+                    //                    instance.confirmButtonLoading = false;
+                    //                    done();
+                    //                    self.channel.multipleSelection = [];
+                    //                    slef.getChannelList();
+                    //                }, null, ajax.NO_ERROR_CATCH_CODE);
+                    //            } else {
+                    //                instance.confirmButtonLoading = false;
+                    //                done();
+                    //            }
+                    //        }
+                    //    }).catch(function () {
+                    //    });
+                    //}
+                },
+                handleAddProgramClose: function () {
+                    var self = this;
+                    self.dialog.addProgram.name = "";
+                    self.dialog.addProgram.date = "";
+                    self.dialog.addProgram.visible = false;
+                    self.dialog.addProgram.value = "";
+                },
+                handleAddProgramCommit: function () {
+                    var self = this;
+                    self.dialog.addProgram.loading = true;
+                    var newData = {
+                        name: self.dialog.addProgram.name,
+                        date: self.dialog.addProgram.date,
+                        remark: self.dialog.addProgram.remark
+                    };
+                    ajax.post('/cs/channel/add', newData, function (data, status) {
+                        self.dialog.addProgram.loading = false;
+                        if (status != 200) return;
+                        if (self.channel.data.length < self.channel.page.size) {
+                            self.channel.data.push(data);
+                        }
+                        self.channel.page.total += 1;
+                        self.handleAddProgramClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                editName: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.editName.data = row;
+                    self.dialog.editName.name = row.name;
+                    self.dialog.editName.visible = true;
+                },
+                handleEditNameClose: function () {
+                    var self = this;
+                    self.dialog.editName.visible = false;
+                    self.dialog.editName.data = "";
+                    self.dialog.editName.name = "";
+                },
+                handleEditNameCommit: function () {
+                    var self = this;
+                    self.dialog.editName.loading = true;
+                    var newName = self.dialog.editName.name;
+                    if (newName == self.dialog.editName.data.name) {
+                        self.dialog.editName.loading = false;
+                        self.handleEditNameClose();
+                        return;
+                    }
+                    var questData = {
+                        id: self.dialog.editName.data.id,
+                        name: newName
+                    };
+                    ajax.post('/cs/channel/rename', questData, function (data, status) {
+                        self.dialog.editName.loading = false;
+                        if (status != 200) return;
+                        self.$message({
+                            message: '保存成功',
+                            type: 'success'
+                        });
+                        self.dialog.editName.data.name = newName;
+                        self.handleEditNameClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                rowDelete: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title: '危险操作',
+                        message: h('div', null, [
+                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class: 'el-message-box__message'}, [
+                                h('p', null, ['此操作将永久删除频道，且不可恢复，是否继续?'])
+                            ])
+                        ]),
+                        type: 'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose: function (action, instance, done) {
+                            instance.confirmButtonLoading = true;
+                            if (action === 'confirm') {
+                                var questData = {
+                                    id: row.id
+                                };
+                                ajax.post('/cs/channel/remove', questData, function (data, status) {
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                    if (status != 200) return;
+                                    self.getChannelList();
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            } else {
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function () {
+                    });
+                },
+                toggleSelection: function (rows) {
+                    if (rows) {
+                        for (var i = 0; i < rows.length; i++) {
+                            this.$refs.multipleChannelTable.toggleRowSelection(row);
+                        }
+                        //rows.forEach(row => {
+                        //  this.$refs.multipleChannelTable.toggleRowSelection(row);
+                        //});
+                    } else {
+                        this.$refs.multipleChannelTable.clearSelection();
+                    }
+                },
+                handleSelectionChange: function (val) {
+                    this.channel.multipleSelection = val;
+                },
+                handlePageCurrentChange: function (val) {
+                    var self = this;
+                    self.channel.page.currentPage = val;
+                    self.getChannelList();
+                },
+                handleSizeChange: function (val) {
+                    var self = this;
+                    self.channel.page.size = val;
+                    self.getChannelList();
+                },
 
-            },
-            watch:{
 
-            },
-            methods:{
+                editMenu: function (scope) {
+                    var self = this;
+                    self.dialog.editMenu.data = scope.row;
+                    self.dialog.editMenu.visible = true;
+                    self.loadMenuTree();
+                },
+                handleEditMenuClose: function () {
+                    var self = this;
+                    self.dialog.editMenu.data = "";
+                    self.dialog.editMenu.visible = false;
+                },
+                loadMenuTree: function () {
+                    var self = this;
+                    self.dialog.editMenu.tree.loading = true;
+                    self.dialog.editMenu.tree.data.splice(0, self.dialog.editMenu.tree.data.length);
+                    self.dialog.editMenu.tree.data.push({
+                        id: -1,
+                        uuid: '-1',
+                        name: '资源目录',
+                        icon: 'icon-tag',
+                        style: 'font-size:15px; position:relative; top:1px; margin-right:1px;'
+                    });
+                    var questData = {channelId: self.dialog.editMenu.data.id};
+                    ajax.post('/cs/menu/list/tree', questData, function (data, status) {
+                        self.dialog.editMenu.tree.loading = false;
+                        if (data && data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                self.dialog.editMenu.tree.data.push(data[i]);
+                            }
+                        }
+                        self.currentNode(self.dialog.editMenu.tree.data[0]);
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                treeNodeAllowDrag: function (node) {
+                    return node.data.id !== -1;
+                },
+                treeNodeAllowDrop: function (dragNode, dropNode, type) {
+                    return type === 'inner' && dropNode.data.id !== -1;
+                },
+                treeNodeDrop: function (dragNode, dropNode, type) {
+                    var self = this;
+                    self.dialog.editMenu.tree.loading = true;
+                    var nodeData = dragNode.data;
+                    var parentData = dropNode.data;
+                    var questData = {
+                        id: nodeData.id,
+                        newParentId: parentData.id
+                    };
+                    ajax.post('/cs/menu/move', questData, function (data, status) {
+                        self.dialog.editMenu.tree.loading = false;
+                        if (status != 200) return;
+                        self.loadMenuTree();
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                addRootTreeNode: function () {
+                    var self = this;
+                    var questData = {
+                        channelId: self.dialog.editMenu.data.id,
+                        name: "新建的节点"
+                    };
+                    self.dialog.editMenu.tree.loading = true;
+                    ajax.post('/cs/menu/add/root', questData, function (data, status) {
+                        self.dialog.editMenu.tree.loading = false;
+                        if (status != 200) return;
+                        self.dialog.editMenu.tree.data.push(data);
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                currentTreeNodeChange: function (data) {
+                    var self = this;
+                    self.currentNode(data);
+                },
+                treeNodeTop: function (node, parentData) {
+                    var self = this;
+                    self.dialog.editMenu.tree.loading = true;
+                    var questData = {
+                        id: node.data.id,
+                        newParentId: parentData.parentId
+                    };
+                    ajax.post('/cs/menu/move', questData, function (data, status) {
+                        self.dialog.editMenu.tree.loading = false;
+                        if (status != 200) return;
+                        self.loadMenuTree();
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                treeNodeEdit: function (node, data) {
+                    var self = this;
+                    self.dialog.editMenu.dialog.editNode.data = data;
+                    self.dialog.editMenu.dialog.editNode.name = data.name;
+                    self.dialog.editMenu.dialog.editNode.remark = data.remark;
+                    self.dialog.editMenu.dialog.editNode.visible = true;
+                },
+                treeNodeAppend: function (parentNode, parent) {
+                    var self = this;
+                    self.dialog.editMenu.tree.loading = true;
+                    var questData = {
+                        id: parent.id,
+                        channelId: parent.channelId,
+                        name: "新建的节点"
+                    };
+                    ajax.post('/cs/menu/append', questData, function (data, status) {
+                        self.dialog.editMenu.tree.loading = false;
+                        if (status != 200) return;
+                        if (!parent.subColumns) {
+                            Vue.set(parent, 'subColumns', []);
+                        }
+                        parent.subColumns.push(data);
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                treeNodeDelete: function (node, data) {
+                    var self = this;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title: '危险操作',
+                        message: h('div', null, [
+                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class: 'el-message-box__message'}, [
+                                h('p', null, ['此操作将永久删除标签以及子标签，且不可恢复，是否继续?'])
+                            ])
+                        ]),
+                        type: 'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose: function (action, instance, done) {
+                            instance.confirmButtonLoading = true;
+                            if (action === 'confirm') {
+                                var questData = {id: data.id};
+                                ajax.post('/cs/menu/remove', questData, function (data, status) {
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                    if (status != 200) return;
+                                    self.loadMenuTree();
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            } else {
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function () {
+                    });
+                },
+                handleEditNodeClose: function () {
+                    var self = this;
+                    self.dialog.editMenu.dialog.editNode.data = '';
+                    self.dialog.editMenu.dialog.editNode.name = '';
+                    self.dialog.editMenu.dialog.editNode.remark = '';
+                    self.dialog.editMenu.dialog.editNode.visible = false;
+                },
+                handleEditNodeCommit: function () {
+                    var self = this;
+                    var nodeData = self.dialog.editMenu.dialog.editNode;
+                    nodeData.loading = true;
+                    if (nodeData.name == nodeData.data.name && nodeData.remark == nodeData.data.remark) {
+                        nodeData.loading = false;
+                        self.handleEditNodeClose();
+                    } else {
+                        var questData = {
+                            id: nodeData.data.id,
+                            name: nodeData.name,
+                            remark: nodeData.remark
+                        };
+                        ajax.post('/cs/menu/edit', questData, function (data, status) {
+                            nodeData.loading = false;
+                            if (status != 200) return;
+                            self.handleEditNodeClose();
+                            self.loadMenuTree();
+                        }, null, ajax.NO_ERROR_CATCH_CODE)
+                    }
+                },
+                currentNode: function (data) {
+                    var self = this;
+                    if (!data || data.id == -1) {
+                        self.dialog.editMenu.tree.current = '';
+                        return;
+                    }
+                    self.dialog.editMenu.tree.current = data;
+                    self.$nextTick(function () {
+                        self.$refs.tagTree.setCurrentKey(data.uuid);
+                    });
+                    self.loadingMenuResource();
+                },
+                loadingMenuResource: function () {
+                    var self = this;
+                    if (self.dialog.editMenu.resource.data)
+                        self.dialog.editMenu.resource.data.splice(0, self.dialog.editMenu.resource.data.length);
+                    var questData = {
+                        id: self.dialog.editMenu.tree.current.id
+                    };
+                    ajax.post('/cs/menu/resource/get', questData, function (data, status) {
+                        if (status != 200) return;
+                        if (data && data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                self.dialog.editMenu.resource.data.push(data[i])
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                loadingMenuResourceTree: function () {
+                    var self = this;
+                    self.dialog.editMenu.dialog.chooseResource.visible = true;
+                    self.dialog.editMenu.dialog.chooseResource.tree.data.splice(0, self.dialog.editMenu.dialog.chooseResource.tree.data.length);
+                    var questData = {id: self.dialog.editMenu.tree.current.id};
+                    ajax.post('/cs/menu/resource/get/mims', questData, function (data, status) {
+                        if (status != 200) return;
+                        if (data && data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                self.dialog.editMenu.dialog.chooseResource.tree.data.push(data[i]);
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                handleMenuResourceCheckChange: function (data, checked, indeterminate) {
+                    var self = this;
+                    self.dialog.editMenu.dialog.chooseResource.chooseNode = this.$refs.menuResourceTree.getCheckedNodes(true, false);
+                },
+                handleChooseResourceClose: function () {
+                    var self = this;
+                    self.dialog.editMenu.dialog.chooseResource.chooseNode = [];
+                    self.dialog.editMenu.dialog.chooseResource.visible = false;
+                },
+                handleChooseResourceCommit: function () {
+                    var self = this;
+                    self.dialog.editMenu.dialog.chooseResource.loading = true;
+                    var questData = {
+                        resourcesListStr: JSON.stringify(self.dialog.editMenu.dialog.chooseResource.chooseNode),
+                        parentId: self.dialog.editMenu.tree.current.id,
+                        channelId: self.dialog.editMenu.tree.current.channelId
+                    };
+                    ajax.post('/cs/menu/resource/add', questData, function (data, status) {
+                        self.dialog.editMenu.dialog.chooseResource.loading = false;
+                        self.handleChooseResourceClose();
+                        if (status != 200) return;
+                        self.dialog.editMenu.resource.data.splice(0, self.dialog.editMenu.resource.data.length);
+                        if (data && data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                self.dialog.editMenu.resource.data.push(data[i]);
+                            }
+                        }
+                        self.$message({
+                            message: '添加成功',
+                            type: 'success'
+                        });
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                menuResourceDelete: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title: '危险操作',
+                        message: h('div', null, [
+                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class: 'el-message-box__message'}, [
+                                h('p', null, ['删除资源操作，是否继续?'])
+                            ])
+                        ]),
+                        type: 'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose: function (action, instance, done) {
+                            instance.confirmButtonLoading = true;
+                            if (action === 'confirm') {
+                                var questData = {id: row.id};
+                                ajax.post('/cs/menu/resource/remove', questData, function (data, status) {
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                    if (status != 200) return;
+                                    self.$message({
+                                        message: '删除成功',
+                                        type: 'success'
+                                    });
+                                    for (var i = 0; i < self.dialog.editMenu.resource.data.length; i++) {
+                                        if (self.dialog.editMenu.resource.data[i].id == data.id) {
+                                            self.dialog.editMenu.resource.data.splice(i, 1);
+                                            break;
+                                        }
+                                    }
+                                    //self.loadingMenuResource();
+                                }, null, ajax.NO_ERROR_CATCH_CODE)
+                            } else {
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function () {
+                    });
+                },
 
-            },
-            created:function(){
 
+                editProgram: function (scope) {
+                    var self = this;
+                    self.dialog.editProgram.data = scope.row;
+                    self.getPreviewScreenData();
+                    self.dialog.editProgram.visible = true;
+                },
+                getPreviewScreenData: function () {
+                    //获取之前的屏幕配置信息,设置初始显示分屏信息;
+                    var self = this;
+
+                    var questData = {id: self.dialog.editProgram.data.id};
+                    ajax.post('/cs/program/get', questData, function (data, status) {
+                        if (status != 200 || !data) {
+                            self.dialog.editProgram.options.current = self.screen.one;
+                            self.releaseScreenCommitInfo(1);
+                        } else {
+                            self.dialog.editProgram.previewData = data;
+                            switch (data.screenNum) {
+                                case 1:
+                                    self.dialog.editProgram.options.current = self.screen.one;
+                                    self.handleScreenOptionsChange(self.screen.one);
+                                    break;
+                                case 4:
+                                    self.dialog.editProgram.options.current = self.screen.four;
+                                    self.handleScreenOptionsChange(self.screen.four);
+                                    break;
+                                case 6:
+                                    self.dialog.editProgram.options.current = self.screen.six;
+                                    self.handleScreenOptionsChange(self.screen.six);
+                                    break;
+                                case 9:
+                                    self.dialog.editProgram.options.current = self.screen.nine;
+                                    self.handleScreenOptionsChange(self.screen.nine);
+                                    break;
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                handleEditProgramClose: function () {
+                    var self = this;
+                    self.dialog.editProgram.visible = false;
+                    self.dialog.editProgram.commitData.screenNum = 1;
+                    self.dialog.editProgram.data = "";
+                    self.dialog.editProgram.previewData = {};
+                    self.dialog.editProgram.commitData.screenNum = "";
+                    self.dialog.editProgram.commitData.currentSerialNum = "";
+                    self.dialog.editProgram.commitData.screenInfo = [];
+                    self.dialog.editProgram.commitData.currentSerialInfo = [];
+                    self.dialog.editProgram.options.current = self.screen.one;
+                },
+                handleEditProgramCommit: function () {
+                    var self = this;
+                    self.dialog.editProgram.loading = true;
+                    var screenInfo = [];
+                    for (var i = 0; i < self.dialog.editProgram.commitData.screenInfo.length; i++) {
+                        var item = self.dialog.editProgram.commitData.screenInfo[i];
+                        if (item.subColumns && item.subColumns.length > 0) {
+                            for (var j = 0; j < item.subColumns.length; j++) {
+                                item.subColumns[j].serialNum = item.serialNum;
+                                screenInfo.push(item.subColumns[j])
+                            }
+                        }
+                    }
+                    var programInfo = {
+                        channelId: self.dialog.editProgram.data.id,
+                        screenNum: self.dialog.editProgram.commitData.screenNum,
+                        screenInfo: screenInfo
+                    };
+                    var questData = {
+                        programInfo: JSON.stringify(programInfo)
+                    };
+                    ajax.post('/cs/program/set', questData, function (data, status) {
+                        self.dialog.editProgram.loading = false;
+                        if (status != 200) return;
+                        self.$message({
+                            message: '保存成功',
+                            type: 'success'
+                        });
+                        self.dialog.editProgram.previewData = data;
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                handleScreenOptionsChange: function (data) {
+                    var self = this;
+                    switch (data) {
+                        case self.screen.one:
+                            self.releaseScreenCommitInfo(1);
+                            break;
+                        case self.screen.four:
+                            self.releaseScreenCommitInfo(4);
+                            break;
+                        case self.screen.six:
+                            self.releaseScreenCommitInfo(6);
+                            break;
+                        case self.screen.nine:
+                            self.releaseScreenCommitInfo(9);
+                            break;
+                    }
+                    self.clickScreen(1);
+                },
+                releaseScreenCommitInfo: function (num) {
+                    var self = this;
+                    self.dialog.editProgram.commitData.screenNum = num;
+                    self.dialog.editProgram.commitData.screenInfo.splice(0, self.dialog.editProgram.commitData.screenInfo.length);
+                    self.dialog.editProgram.commitData.currentSerialInfo.splice(0, self.dialog.editProgram.commitData.currentSerialInfo.length);
+                    var i = 0;
+                    var data = {};
+                    if (self.dialog.editProgram.previewData.screenNum != num) {
+                        for (i = 0; i < num; i++) {
+                            data = {
+                                serialNum: i + 1,
+                                subColumns: []
+                            };
+                            self.dialog.editProgram.commitData.screenInfo.push(data);
+                        }
+                    } else {
+                        for (i = 0; i < num; i++) {
+                            data = {
+                                serialNum: i + 1,
+                                subColumns: []
+                            };
+                            for (var j = 0; j < self.dialog.editProgram.previewData.screenInfo.length; j++) {
+                                if (self.dialog.editProgram.previewData.screenInfo[j].serialNum == data.serialNum) {
+                                    data.subColumns.push(self.dialog.editProgram.previewData.screenInfo[j]);
+                                }
+                            }
+                            self.dialog.editProgram.commitData.screenInfo.push(data);
+                        }
+                    }
+                },
+                clickScreen: function (serialNum) {
+                    var self = this;
+                    self.dialog.editProgram.commitData.currentSerialNum = serialNum;
+                    for (var i = 0; i < self.dialog.editProgram.commitData.screenInfo.length; i++) {
+                        var item = self.dialog.editProgram.commitData.screenInfo[i];
+                        if (item.serialNum == serialNum) {
+                            self.dialog.editProgram.commitData.currentSerialInfo = item.subColumns;
+                            break;
+                        }
+                    }
+                },
+                chooseResources: function (serialNum) {
+                    var self = this;
+                    self.dialog.editProgram.dialog.chooseResource.visible = true;
+                    self.loadProgramMenuTree();
+                },
+                loadProgramMenuTree: function () {
+                    var self = this;
+                    self.dialog.editProgram.dialog.chooseResource.tree.loading = true;
+                    self.dialog.editProgram.dialog.chooseResource.tree.data.splice(0, self.dialog.editProgram.dialog.chooseResource.tree.data.length);
+                    self.dialog.editProgram.dialog.chooseResource.tree.data.push({
+                        id: -1,
+                        uuid: '-1',
+                        name: '资源目录',
+                        icon: 'icon-tag',
+                        style: 'font-size:15px; position:relative; top:1px; margin-right:1px;'
+                    });
+                    var questData = {channelId: self.dialog.editProgram.data.id};
+                    ajax.post('/cs/menu/list/tree', questData, function (data, status) {
+                        self.dialog.editProgram.dialog.chooseResource.tree.loading = false;
+                        if (data && data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                self.dialog.editProgram.dialog.chooseResource.tree.data.push(data[i]);
+                            }
+                        }
+                        self.currentProgramMenuNode(self.dialog.editProgram.dialog.chooseResource.tree.data[0]);
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                currentProgramResourceTreeNodeChange: function (data) {
+                    var self = this;
+                    self.currentProgramMenuNode(data);
+                },
+                currentProgramMenuNode: function (data) {
+                    var self = this;
+                    if (!data || data.id == -1) {
+                        self.dialog.editProgram.dialog.chooseResource.tree.current = '';
+                        if (self.dialog.editProgram.dialog.chooseResource.resources.data)
+                            self.dialog.editProgram.dialog.chooseResource.resources.data.splice(0, self.dialog.editProgram.dialog.chooseResource.resources.data.length);
+                        return;
+                    }
+                    self.dialog.editProgram.dialog.chooseResource.tree.current = data;
+                    self.$nextTick(function () {
+                        self.$refs.programResourceTree.setCurrentKey(data.uuid);
+                    });
+                    self.loadingProgramMenuResource();
+                },
+                loadingProgramMenuResource: function () {
+                    var self = this;
+                    if (self.dialog.editProgram.dialog.chooseResource.resources.data)
+                        self.dialog.editProgram.dialog.chooseResource.resources.data.splice(0, self.dialog.editProgram.dialog.chooseResource.resources.data.length);
+                    var questData = {
+                        id: self.dialog.editProgram.dialog.chooseResource.tree.current.id
+                    };
+                    ajax.post('/cs/menu/resource/get', questData, function (data, status) {
+                        if (status != 200) return;
+                        if (data && data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                self.dialog.editProgram.dialog.chooseResource.resources.data.push(data[i])
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                handleProgramMenuResourceCheckChange: function (val) {
+                    var self = this;
+                    self.dialog.editProgram.dialog.chooseResource.resources.chooses = val;
+                },
+                getRowKeys: function (row) {
+                    return row.id;
+                },
+                handleChooseResourcesClose: function () {
+                    var self = this;
+                    self.dialog.editProgram.dialog.chooseResource.visible = false;
+                    self.dialog.editProgram.dialog.chooseResource.resources.chooses = [];
+                    this.$refs.programResourceTable.clearSelection();
+                },
+                handleChooseResourcesCommit: function () {
+                    var self = this;
+                    self.dialog.editProgram.dialog.chooseResource.loading = true;
+
+                    var chooseResources = self.dialog.editProgram.dialog.chooseResource.resources.chooses;
+                    if (chooseResources && chooseResources.length > 0) {
+                        for (var i = 0; i < chooseResources.length; i++) {
+                            chooseResources[i].index = self.dialog.editProgram.commitData.currentSerialInfo.length + 1;
+                            chooseResources[i].resourceId = chooseResources[i].id;
+                            self.dialog.editProgram.commitData.currentSerialInfo.push(chooseResources[i])
+                        }
+                        for (var j = 0; j < self.dialog.editProgram.commitData.screenInfo.length; j++) {
+                            if (self.dialog.editProgram.commitData.screenInfo[j].serialNum == self.dialog.editProgram.commitData.currentSerialNum) {
+                                self.dialog.editProgram.commitData.screenInfo[j].subColumns = self.dialog.editProgram.commitData.currentSerialInfo;
+                                break;
+                            }
+                        }
+                    }
+                    self.dialog.editProgram.dialog.chooseResource.loading = false;
+                    self.handleChooseResourcesClose();
+                },
+                programResourceUp: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    var index = row.index;
+                    if (index == 1 || !self.dialog.editProgram.commitData.currentSerialInfo || self.dialog.editProgram.commitData.currentSerialInfo.length <= 1) return;
+                    for (var i = 0; i < self.dialog.editProgram.commitData.currentSerialInfo.length; i++) {
+                        var item = self.dialog.editProgram.commitData.currentSerialInfo[i];
+                        if (item.index == index - 1) {
+                            item.index += 1;
+                            break;
+                        }
+                    }
+                    row.index -= 1;
+                    this.$refs.programTable.sort('index', 'ascending');
+                },
+                programResourceDown: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    var index = row.index;
+                    if (!self.dialog.editProgram.commitData.currentSerialInfo) return;
+                    var length = self.dialog.editProgram.commitData.currentSerialInfo.length;
+                    if (index == length || length <= 1) return;
+                    for (var i = 0; i < length; i++) {
+                        var item = self.dialog.editProgram.commitData.currentSerialInfo[i];
+                        if (item.index == index + 1) {
+                            item.index -= 1;
+                            break;
+                        }
+                    }
+                    row.index += 1;
+                    this.$refs.programTable.sort('index', 'ascending');
+                },
+                programResourceDelete: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    for (var i = 0; i < self.dialog.editProgram.commitData.screenInfo.length; i++) {
+                        if (self.dialog.editProgram.commitData.currentSerialNum == self.dialog.editProgram.commitData.screenInfo[i].serialNum) {
+                            var index = 0;
+                            for (var j = 0; j < self.dialog.editProgram.commitData.screenInfo[i].subColumns.length; j++) {
+                                if (row.id == self.dialog.editProgram.commitData.screenInfo[i].subColumns[j].id) {
+                                    index = j;
+                                    break;
+                                }
+                            }
+                            self.dialog.editProgram.commitData.screenInfo[i].subColumns.splice(index, 1);
+                            for (var m = 0; m < self.dialog.editProgram.commitData.screenInfo[i].subColumns.length; m++) {
+                                self.dialog.editProgram.commitData.screenInfo[i].subColumns[m].index = m + 1;
+                            }
+                            break;
+                        }
+                    }
+                },
+
+
+                manageBroadcastArea: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.manageBroadcastArea.visible = true;
+                    self.dialog.manageBroadcastArea.data = row;
+                    self.loadingArea();
+                },
+                loadingArea: function () {
+                    var self = this;
+                    var questData = {
+                        channelId: self.dialog.manageBroadcastArea.data.id
+                    };
+                    self.dialog.manageBroadcastArea.tree.data = [];
+                    ajax.post('/cs/area/list', questData, function (data, status) {
+                        if (status != 200) return;
+                        self.dialog.manageBroadcastArea.tree.data = data.treeData;
+                        self.$refs.broadcastAreaTree.setCheckedKeys(data.checkList);
+                        setTimeout(function () {
+                            self.dialog.manageBroadcastArea.tree.current = self.$refs.broadcastAreaTree.getCheckedNodes(true, false);
+                        }, 100);
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                handleManageBroadcastAreaClose: function () {
+                    var self = this;
+                    self.dialog.manageBroadcastArea.visible = false;
+                    self.dialog.manageBroadcastArea.data = "";
+                    self.dialog.manageBroadcastArea.tree.data = [];
+                    self.dialog.manageBroadcastArea.tree.current.splice(0, self.dialog.manageBroadcastArea.tree.current.length);
+                },
+                handleManageBroadcastAreaCommit: function () {
+                    var self = this;
+                    self.dialog.manageBroadcastArea.loading = true;
+                    var questData = {
+                        channelId: self.dialog.manageBroadcastArea.data.id,
+                        areaListStr: JSON.stringify(self.dialog.manageBroadcastArea.tree.current)
+                    };
+                    ajax.post('/cs/area/set', questData, function (data, status) {
+                        self.dialog.manageBroadcastArea.loading = false;
+                        self.handleManageBroadcastAreaClose();
+                        if (status == 200) {
+                            self.$message({
+                                message: '保存成功',
+                                type: 'success'
+                            });
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                handleManageBroadcastAreaCheckChange: function (data, checked, indeterminate) {
+                    var self = this;
+                    self.dialog.manageBroadcastArea.tree.current = self.$refs.broadcastAreaTree.getCheckedNodes(true, false);
+                },
+
+
+                startBroadcast: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    var questData = {
+                        channelId: row.id
+                    };
+                    self.loadingText = "正在请求播发";
+                    self.loading = true;
+                    ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
+                        setTimeout(function(){
+                            self.loading = false;
+                            self.loadingText = "";
+                            if(status == 200){
+                                self.$message({
+                                    message: '请求播发成功',
+                                    type: 'success'
+                                });
+                            }
+                            self.getChannelList();
+                        },1000);
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+
+
+                manageBroad: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.manageBroad.visible = true;
+                },
+                handleManageBroadClose: function () {
+                    var self = this;
+                    self.dialog.manageBroad.visible = false;
+                },
+                handleManageBroadCommit: function () {
+
+                },
+                addBroad: function () {
+                    var self = this;
+                    self.dialog.manageBroad.dialog.addBroad.visible = true;
+                },
+                startBroad: function (scope) {
+
+                },
+                stopBroad: function (scope) {
+
+                },
+                handleBroadCheckChange: function (data, checked, indeterminate) {
+                    var self = this;
+                    self.dialog.manageBroad.dialog.addBroad.chooseNode = this.$refs.broadTree.getCheckedNodes(true, false);
+                },
+                handleAddBroadClose: function () {
+                    var self = this;
+                    self.dialog.manageBroad.dialog.addBroad.chooseNode = [];
+                    self.dialog.manageBroad.dialog.addBroad.visible = false;
+                },
+                handleAddBroadCommit: function () {
+                    var self = this;
+                    self.dialog.manageBroad.dialog.addBroad.loading = true;
+                    setTimeout(function () {
+                        self.dialog.manageBroad.dialog.addBroad.loading = false;
+                        self.handleAddBroadClose()
+                    }, 1000)
+                }
             },
-            mounted:function(){
+            created: function () {
+                var self = this;
+                self.getChannelList();
+            },
+            mounted: function () {
 
             }
         });
     };
 
-    var destroy = function(){
+    var destroy = function () {
 
     };
 
     var groupList = {
-        path:'/' + pageId,
-        component:{
-            template:'<div id="' + pageId + '" class="page-wrapper"></div>'
+        path: '/' + pageId,
+        component: {
+            template: '<div id="' + pageId + '" class="page-wrapper"></div>'
         },
-        init:init,
-        destroy:destroy
+        init: init,
+        destroy: destroy
     };
 
     return groupList;
