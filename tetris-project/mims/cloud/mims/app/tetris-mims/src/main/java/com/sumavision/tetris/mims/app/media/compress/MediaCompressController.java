@@ -543,7 +543,7 @@ public class MediaCompressController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/store/uri/{id}")
+	@RequestMapping(value = "/preview/uri/{id}")
 	public Object previewUri(
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{

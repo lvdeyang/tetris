@@ -60,7 +60,7 @@ public class MediaCompressQuery {
 		
 		//TODO 权限校验		
 		if(folderId == null){
-			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_PICTURE.toString());
+			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_COMPRESS.toString());
 			folderId = folder.getId();
 		}
 		
@@ -89,7 +89,7 @@ public class MediaCompressQuery {
 		//生成面包屑数据
 		FolderBreadCrumbVO folderBreadCrumb = folderQuery.generateFolderBreadCrumb(filteredParentFolders);
 		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_PICTURE.toString());
+		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_COMPRESS.toString());
 		
 		List<MediaCompressPO> pictures = mediaPictureQuery.findCompleteByFolderId(current.getId());
 		
