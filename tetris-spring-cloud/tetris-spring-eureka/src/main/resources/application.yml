@@ -3,7 +3,7 @@ server:
 
 eureka:
   instance:
-    hostname: 192.165.56.84
+    hostname: 192.165.56.85
   # 关闭自我保护机制，保证不可用服务及时踢出
   server:
     enableSelfPreservation: false
