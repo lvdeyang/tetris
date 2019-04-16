@@ -3,12 +3,14 @@ package com.sumavision.tetris.cs.program;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
+import kafka.utils.immutable;
+
 public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 
 	private Long programId;
 	private Long serialNum;
 	private Long index;
-	private Long mimsId;
+	private String mimsUuid;
 	private Long resourceId;
 
 	private String name;
@@ -25,7 +27,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setIndex(entity.getScreenIndex())
 		.setName(entity.getName())
 		.setPreviewUrl(entity.getPreviewUrl())
-		.setMimsId(entity.getMimsId())
+		.setMimsUuid(entity.getMimsUuid())
 		.setResourceId(entity.getResourceId());
 		return this;
 	}
@@ -60,12 +62,12 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		return this;
 	}
 
-	public Long getMimsId() {
-		return mimsId;
+	public String getMimsUuid() {
+		return mimsUuid;
 	}
 
-	public ScreenVO setMimsId(Long mimsId) {
-		this.mimsId = mimsId;
+	public ScreenVO setMimsUuid(String mimsUuid) {
+		this.mimsUuid = mimsUuid;
 		return this;
 	}
 	

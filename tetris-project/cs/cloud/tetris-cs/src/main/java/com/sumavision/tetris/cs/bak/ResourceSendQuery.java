@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import com.sumavision.tetris.cs.menu.CsResourceQuery;
 import com.sumavision.tetris.cs.menu.CsResourceVO;
 
+import scala.annotation.elidable;
+
 @Component
 public class ResourceSendQuery {
 	@Autowired
@@ -27,21 +29,21 @@ public class ResourceSendQuery {
 
 		resourceSendDao.deleteInBatch(previewResource);
 		if (resources != null && resources.size() > 0) {
-			List<Long> mimsIdList = new ArrayList<Long>();
+			List<String> mimsUuidList = new ArrayList<String>();
 			Iterator<CsResourceVO> it = resources.iterator();
 			while (it.hasNext()) {
 				CsResourceVO item = it.next();
-				if (mimsIdList.contains(item.getMimsId())) {
+				if (mimsUuidList.contains(item.getMimsUuid())) {
 					it.remove();
 				} else {
-					mimsIdList.add(item.getMimsId());
+					mimsUuidList.add(item.getMimsUuid());
 				}
 			}
 
 			for (CsResourceVO item : resources) {
 				ResourceSendPO sourceSend = new ResourceSendPO();
 				sourceSend.setChannelId(channelId);
-				sourceSend.setMimsId(item.getMimsId());
+				sourceSend.setMimsUuid(item.getMimsUuid());
 				sourceSend.setName(item.getName());
 				sourceSend.setParentId(item.getParentId());
 				sourceSend.setPreviewUrl(item.getPreviewUrl());
@@ -50,13 +52,15 @@ public class ResourceSendQuery {
 
 				if (previewResource != null && previewResource.size() > 0) {
 					for (int i = 0; i < previewResource.size(); i++) {
-						if (previewResource.get(i).getMimsId() == item.getMimsId()) {
+						if (previewResource.get(i).getMimsUuid() == item.getMimsUuid()) {
 							break;
 						}
 						if (i == previewResource.size() - 1) {
 							returnList.add(item);
 						}
 					}
+				}else{
+					returnList.add(item);
 				}
 			}
 			resourceSendDao.save(saveResource);

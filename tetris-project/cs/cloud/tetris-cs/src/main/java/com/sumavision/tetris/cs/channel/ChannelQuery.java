@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
 public class ChannelQuery {
 	@Autowired
 	private ChannelDAO channelDao;
-	
-	public List<ChannelPO> findAll(int currentPage, int pageSize){
-		Pageable page = new PageRequest(currentPage-1, pageSize);
+
+	public List<ChannelPO> findAll(int currentPage, int pageSize) {
+		Pageable page = new PageRequest(currentPage - 1, pageSize);
 		Page<ChannelPO> channels = channelDao.findAll(page);
 		return channels.getContent();
 	}
-	
-	public ChannelPO findByChannelId(Long channelId){
+
+	public ChannelPO findByChannelId(Long channelId) {
 		return channelDao.findOne(channelId);
 	}
 }

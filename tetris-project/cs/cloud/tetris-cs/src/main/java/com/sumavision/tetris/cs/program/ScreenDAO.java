@@ -13,8 +13,8 @@ public interface ScreenDAO extends BaseDAO<ScreenPO>{
 	@Query(value = "SELECT * FROM TETRIS_CS_SCREEN WHERE PROGRAM_ID LIKE ?1", nativeQuery = true)
 	public List<ScreenPO> findByProgramId(Long reg1);
 	
-	@Query(value = "SELECT * FROM TETRIS_CS_SCREEN WHERE PROGRAM_ID LIKE ?1 AND MIMS_ID LIKE ?2", nativeQuery = true)
-	public List<ScreenPO> findByProgramIdAndMimsId(Long programId,Long mimsId);
+	@Query(value = "SELECT * FROM TETRIS_CS_SCREEN WHERE PROGRAM_ID LIKE ?1 AND MIMS_UUID LIKE ?2", nativeQuery = true)
+	public List<ScreenPO> findByProgramIdAndMimsUuid(Long programId,String mimsUuid);
 	
 	@Query(value = "SELECT * FROM TETRIS_CS_SCREEN WHERE PROGRAM_ID LIKE ?1 AND SERIAL_NUM LIKE ?2", nativeQuery = true)
 	public List<ScreenPO> findByProgramIdAndSerialNum(Long programId,Long serialNum);

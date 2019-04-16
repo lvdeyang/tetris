@@ -1,8 +1,14 @@
 package com.sumavision.tetris.cs.channel;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.mail.Folder;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.file.CopyFileUtil;
+import com.sumavision.tetris.commons.util.file.GetFileSizeUtil;
+import com.sumavision.tetris.commons.util.json.CreateFileUtil;
+import com.sumavision.tetris.commons.util.tar.TarUtil;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
 import com.sumavision.tetris.cs.bak.ResourceSendQuery;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
@@ -23,6 +33,10 @@ import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenQuery;
 import com.sumavision.tetris.cs.program.ScreenVO;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -56,6 +70,12 @@ public class ChannelService {
 
 	@Autowired
 	private ScreenQuery screenQuery;
+
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private MediaCompressService mediaCompressService;
 
 	public ChannelPO add(String name, String date, String remark) throws Exception {
 
@@ -106,12 +126,15 @@ public class ChannelService {
 		}
 		// 获取媒资全量并保存/获取媒资增量
 		List<CsResourceVO> addResourceList = resourceSendQuery.saveResource(channelId);
-		// 获取相关媒资
-
+		Map<String, CsResourceVO> resourceMap = new HashMap<String, CsResourceVO>();
+		for (CsResourceVO item : addResourceList) {
+			String[] previewUrl = item.getPreviewUrl().split("/");
+			resourceMap.put(previewUrl[previewUrl.length - 1], item);
+		}
 		// 生成Json字符串
 		JSONObject textJson = new JSONObject();
 		String newVersion = versionSendQuery.getNewVersion(versionSendQuery.getLastVersion(channelId));
-		String effectTime = null;
+		String effectTime = "null";
 
 		textJson.put("fileSize", "");
 		textJson.put("version", newVersion);
@@ -120,9 +143,17 @@ public class ChannelService {
 		textJson.put("files", this.getFilesPath(addResourceList));
 		textJson.put("screens", this.programText(programQuery.getProgram(channelId)));
 
-		String text = JSON.toJSONString(textJson);
 		// 打包
-
+		Date currentTime = new Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		String dateString = formatter.format(currentTime);
+		textJson.put("file", dateString + ".tar");
+		
+		List<String> mimsUuidList = new ArrayList<String>();
+		for(CsResourceVO item : addResourceList){
+			mimsUuidList.add(item.getMimsUuid());
+		}
+		MediaCompressVO mediaCompressVO = mediaCompressService.packageTar(textJson.toString(), mimsUuidList);
 		// 请求播发
 
 		// 播发成功处理

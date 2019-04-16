@@ -1041,17 +1041,15 @@ define([
                     self.loadingText = "正在请求播发";
                     self.loading = true;
                     ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
-                        setTimeout(function(){
-                            self.loading = false;
-                            self.loadingText = "";
-                            if(status == 200){
-                                self.$message({
-                                    message: '请求播发成功',
-                                    type: 'success'
-                                });
-                            }
-                            self.getChannelList();
-                        },1000);
+                        self.loading = false;
+                        self.loadingText = "";
+                        if (status == 200) {
+                            self.$message({
+                                message: '请求播发成功',
+                                type: 'success'
+                            });
+                        }
+                        self.getChannelList();
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
 
@@ -1094,6 +1092,11 @@ define([
                         self.dialog.manageBroad.dialog.addBroad.loading = false;
                         self.handleAddBroadClose()
                     }, 1000)
+                },
+                tarTest: function () {
+                    ajax.post('/cs/channel/tarTest', null, function (data, status) {
+
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
                 }
             },
             created: function () {

@@ -36,7 +36,7 @@ public class ScreenService {
 
 				ScreenPO screenPO = new ScreenPO();
 				screenPO.setProgramId(programId);
-				screenPO.setMimsId(screenVO.getMimsId());
+				screenPO.setMimsUuid(screenVO.getMimsUuid());
 				screenPO.setResourceId(screenVO.getResourceId());
 				screenPO.setScreenIndex(screenVO.getIndex());
 				screenPO.setSerialNum(screenVO.getSerialNum());
@@ -58,10 +58,10 @@ public class ScreenService {
 		screenDao.deleteInBatch(screenList);
 	}
 
-	public void dealWithResourceRemove(Long channelId, Long mimsId) throws Exception {
+	public void dealWithResourceRemove(Long channelId, String mimsUuid) throws Exception {
 		ProgramVO program = programQuery.getProgram(channelId);
 		Long programId = program.getId();
-		List<ScreenPO> removeScreenList = screenDao.findByProgramIdAndMimsId(programId, mimsId);
+		List<ScreenPO> removeScreenList = screenDao.findByProgramIdAndMimsUuid(programId, mimsUuid);
 		screenDao.deleteInBatch(removeScreenList);
 		if (removeScreenList != null && removeScreenList.size() > 0) {
 			List<ScreenPO> needSaveList = new ArrayList<ScreenPO>();

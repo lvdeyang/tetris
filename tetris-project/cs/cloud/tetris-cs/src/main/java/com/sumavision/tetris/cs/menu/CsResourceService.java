@@ -48,7 +48,7 @@ public class CsResourceService {
 				if (aliveResource != null && aliveResource.size() > 0) {
 					Boolean alive = false;
 					for (int j = 0; j < aliveResource.size(); j++) {
-						if (aliveResource.get(j).getMimsId() == resourceList.get(i).getId()) {
+						if (aliveResource.get(j).getMimsUuid() == resourceList.get(i).getUuid()) {
 							alive = true;
 							break;
 						}
@@ -61,7 +61,7 @@ public class CsResourceService {
 				resource.setName(resourceList.get(i).getName());
 				resource.setTime("");
 				resource.setPreviewUrl(resourceList.get(i).getPreviewUrl());
-				resource.setMimsId(resourceList.get(i).getId());
+				resource.setMimsUuid(resourceList.get(i).getUuid());
 				resource.setChannelId(channelId);
 				resource.setParentId(parentId);
 				resource.setParentPath(parentMenu.getParentPath() + "/" + parentMenu.getName());
@@ -88,11 +88,11 @@ public class CsResourceService {
 
 		resourceDao.delete(id);
 		
-		Long mimsId = resource.getMimsId();
+		String mimsUuid = resource.getMimsUuid();
 		Long channelId = resource.getChannelId();
-		List<CsResourcePO> mimsList = resourceDao.findResourceByChannelAndMims(channelId, mimsId);
+		List<CsResourcePO> mimsList = resourceDao.findResourceByChannelAndMims(channelId, mimsUuid);
 		if(mimsList == null || mimsList.size() <= 0){
-			screenService.dealWithResourceRemove(channelId,mimsId);
+			screenService.dealWithResourceRemove(channelId,mimsUuid);
 		}
 
 		return new CsResourceVO().set(resource);

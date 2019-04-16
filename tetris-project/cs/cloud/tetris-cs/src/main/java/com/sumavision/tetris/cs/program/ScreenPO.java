@@ -19,7 +19,7 @@ public class ScreenPO extends AbstractBasePO {
 	private Long serialNum;
 	private Long screenIndex;
 	private Long resourceId;
-	private Long mimsId;
+	private String mimsUuid;
 	private String name;
 	private String previewUrl;
 
@@ -59,13 +59,13 @@ public class ScreenPO extends AbstractBasePO {
 		this.resourceId = resourceId;
 	}
 
-	@Column(name="MIMS_ID")
-	public Long getMimsId() {
-		return mimsId;
+	@Column(name="MIMS_UUID")
+	public String getMimsUuid() {
+		return mimsUuid;
 	}
 
-	public void setMimsId(Long mimsId) {
-		this.mimsId = mimsId;
+	public void setMimsUuid(String mimsUuid) {
+		this.mimsUuid = mimsUuid;
 	}
 
 	@Column(name="NAME")

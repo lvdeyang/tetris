@@ -17,7 +17,7 @@ public class ResourceSendPO extends AbstractBasePO{
 	
 	private String name;
 	private String time;
-	private Long mimsId;
+	private String mimsUuid;
 	private Long parentId;
 	private Long channelId;
 	private String previewUrl;
@@ -58,13 +58,13 @@ public class ResourceSendPO extends AbstractBasePO{
 		this.channelId = channelId;
 	}
 
-	@Column(name = "MIMS_ID")
-	public Long getMimsId() {
-		return mimsId;
+	@Column(name = "MIMS_UUID")
+	public String getMimsUuid() {
+		return mimsUuid;
 	}
 
-	public void setMimsId(Long mimsId) {
-		this.mimsId = mimsId;
+	public void setMimsUuid(String mimsUuid) {
+		this.mimsUuid = mimsUuid;
 	}
 
 	@Column(name = "PREVIEW_URL")

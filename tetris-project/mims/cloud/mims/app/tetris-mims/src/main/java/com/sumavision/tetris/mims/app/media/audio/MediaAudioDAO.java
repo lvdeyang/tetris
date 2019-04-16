@@ -10,6 +10,16 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 
 	/**
+	 * uuid批量查询<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月28日 上午10:33:08
+	 * @param Collection<String> uuids uuid列表
+	 * @return List<MediaAudioPO> 音频媒资列表
+	 */
+	public List<MediaAudioPO> findByUuidIn(Collection<String> uuids);
+	
+	/**
 	 * 获取文件夹下特定上传状态的音频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
