@@ -20,7 +20,7 @@ public class ApiTerminalLoginFilter extends ZuulFilter{
 
 	private String[] ignores = new String[]{
 		"/api/terminal/cms/column/*", 
-		""
+		"/api/terminal/auth/*"
 	};
 	
 	@Override

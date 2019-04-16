@@ -17,15 +17,15 @@
                             <el-button size="small" type="primary" @click="dialog.addArticle.visible = true"><span class="icon-plus" style="margin-right:5px;"></span>添加文章</el-button>
                             <el-button size="small" type="warning"><span class="icon-trash" style="margin-right:5px;"></span>删除文章</el-button>
                         </div>
-                        <div style="height: 48px; position: absolute; top: 0; right: 0;">
-                            <el-form ref="searchForm" :inline="true" size="small">
-                                <el-form-item label="文章名称">
-                                    <el-input v-model="search.name" style="width: 120px;"></el-input>
-                                </el-form-item>
-                                <el-form-item label="作者">
-                                    <el-input v-model="search.author" style="width: 120px;"></el-input>
-                                </el-form-item>
-                                <el-form-item label="地区">
+                        <div style="height: 48px; position: absolute; left: 30%;top: 0; right: 0;">
+                            <el-row :gutter="8">
+                                <el-col :span="3">
+                                    <el-input v-model="search.name" placeholder="文章名称"></el-input>
+                                </el-col>
+                                <el-col :span="3">
+                                    <el-input v-model="search.author" placeholder="作者"></el-input>
+                                </el-col>
+                                <el-col :span="3">
                                     <el-popover
                                             placement="bottom-start"
                                             trigger="click"
@@ -40,11 +40,11 @@
                                                 @click="clickTag(tag)">
                                             {{tag}}
                                         </el-button>
-                                        <el-input slot="reference" v-model="search.region" style="width: 120px;"></el-input>
+                                        <el-input slot="reference" v-model="search.region" placeholder="地区"></el-input>
                                     </el-popover>
-                                </el-form-item>
-                                <el-form-item label="分类">
-                                    <el-select v-model="search.classify" style="width: 120px;">
+                                </el-col>
+                                <el-col :span="3">
+                                    <el-select v-model="search.classify" placeholder="分类">
                                         <el-option
                                                 v-for="item in param.classify"
                                                 :key="item.value"
@@ -52,8 +52,8 @@
                                                 :value="item.value">
                                         </el-option>
                                     </el-select>
-                                </el-form-item>
-                                <el-form-item label="时间">
+                                </el-col>
+                                <el-col :span="8">
                                     <el-date-picker
                                             v-model="search.time"
                                             type="datetimerange"
@@ -61,16 +61,70 @@
                                             start-placeholder="开始日期"
                                             end-placeholder="结束日期"
                                             value-format="yyyy-MM-dd HH:mm:ss"
-                                            style="width: 336px;">
+                                            style="width: 100%;">
                                     </el-date-picker>
-                                </el-form-item>
-                                <el-form-item>
-                                    <el-button type="primary" @click="onSubmit(1)">查询</el-button>
-                                </el-form-item>
-                                <el-form-item>
-                                    <el-button type="danger" @click="onClear()">清空</el-button>
-                                </el-form-item>
-                            </el-form>
+                                </el-col>
+                                <el-col :span="2">
+                                    <el-button type="primary" icon="el-icon-search" @click="onSubmit(1)" style="width: 100%;"></el-button>
+                                </el-col>
+                                <el-col :span="2">
+                                    <el-button type="danger" icon="el-icon-delete" @click="onClear()" style="width: 100%;"></el-button>
+                                </el-col>
+                            </el-row>
+
+                            <!--<el-form ref="searchForm" :inline="true" size="small">-->
+                                <!--<el-form-item label="文章名称">-->
+                                    <!--<el-input v-model="search.name" style="width: 120px;"></el-input>-->
+                                <!--</el-form-item>-->
+                                <!--<el-form-item label="作者">-->
+                                    <!--<el-input v-model="search.author" style="width: 120px;"></el-input>-->
+                                <!--</el-form-item>-->
+                                <!--<el-form-item label="地区">-->
+                                    <!--<el-popover-->
+                                            <!--placement="bottom-start"-->
+                                            <!--trigger="click"-->
+                                            <!--v-model="popover.visible"-->
+                                            <!--width="200">-->
+                                        <!--<el-button-->
+                                                <!--v-for="tag in param.region"-->
+                                                <!--:key="tag"-->
+                                                <!--size="medium"-->
+                                                <!--type="text"-->
+                                                <!--style="color:#606266;margin-left: 10px"-->
+                                                <!--@click="clickTag(tag)">-->
+                                            <!--{{tag}}-->
+                                        <!--</el-button>-->
+                                        <!--<el-input slot="reference" v-model="search.region" style="width: 120px;"></el-input>-->
+                                    <!--</el-popover>-->
+                                <!--</el-form-item>-->
+                                <!--<el-form-item label="分类">-->
+                                    <!--<el-select v-model="search.classify" style="width: 120px;">-->
+                                        <!--<el-option-->
+                                                <!--v-for="item in param.classify"-->
+                                                <!--:key="item.value"-->
+                                                <!--:label="item.label"-->
+                                                <!--:value="item.value">-->
+                                        <!--</el-option>-->
+                                    <!--</el-select>-->
+                                <!--</el-form-item>-->
+                                <!--<el-form-item label="时间">-->
+                                    <!--<el-date-picker-->
+                                            <!--v-model="search.time"-->
+                                            <!--type="datetimerange"-->
+                                            <!--range-separator="至"-->
+                                            <!--start-placeholder="开始日期"-->
+                                            <!--end-placeholder="结束日期"-->
+                                            <!--value-format="yyyy-MM-dd HH:mm:ss"-->
+                                            <!--style="width: 336px;">-->
+                                    <!--</el-date-picker>-->
+                                <!--</el-form-item>-->
+                                <!--<el-form-item>-->
+                                    <!--<el-button type="primary" @click="onSubmit(1)">查询</el-button>-->
+                                <!--</el-form-item>-->
+                                <!--<el-form-item>-->
+                                    <!--<el-button type="danger" @click="onClear()">清空</el-button>-->
+                                <!--</el-form-item>-->
+                            <!--</el-form>-->
                         </div>
                         <div style="position:absolute; left:0; right:0; top:48px; bottom:48px; overflow: auto">
                             <el-table
