@@ -1,0 +1,13 @@
+.programScreen{
+    border: 1px solid #ebeef5;
+    transition: .3s;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color:#777;
+    padding-top: 20px;
+    padding-left: 20px;
+}
+
+.programScreen:hover{
+    box-shadow: 0 2px 12px 0 rgba(1, 1, 1, 1);
+}

@@ -3,7 +3,11 @@ spring:
     name: tetris-spring-zuul
   cloud:
     client:
+<<<<<<< HEAD
       ipAddress: 192.165.56.71
+=======
+      ipAddress: 192.165.56.85
+>>>>>>> refs/remotes/choose_remote_name/master
   datasource:
     base:
       url: jdbc:mysql://localhost:3306/zuul?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
@@ -34,6 +38,9 @@ spring:
 server:
   port: 8082      
 zuul:
+#需要忽略的头部信息，不在传播到其他服务
+  sensitive-headers: Access-Control-Allow-Origin
+  ignored-headers: Access-Control-Allow-Origin,H-APP-Id,Token,APPToken
   routes:
 #标识你服务的名字，这里可以自己定义，一般方便和规范来讲还是跟自己服务的名字一样
     tetris-user:
@@ -57,7 +64,11 @@ eureka:
   client:
 #注册中心地址
     service-url:
+<<<<<<< HEAD
       defaultZone: http://192.165.56.60:8081/eureka/
+=======
+      defaultZone: http://192.165.56.85:8081/eureka/
+>>>>>>> refs/remotes/choose_remote_name/master
 #security:
 #  basic:
 #    enabled: false

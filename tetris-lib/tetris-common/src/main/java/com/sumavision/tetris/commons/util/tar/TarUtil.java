@@ -14,6 +14,8 @@ import java.io.LineNumberReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -70,7 +72,29 @@ public abstract class TarUtil {
   
         taos.flush();  
         taos.close();  
-    }  
+    }
+    
+    public static void archive(List<File> srcPaths, String dstPath) throws Exception{
+    	
+    	TarArchiveOutputStream taos = new TarArchiveOutputStream(  
+                new FileOutputStream(new File(dstPath)));
+    	
+        if (srcPaths.size() < 1) {  
+            TarArchiveEntry entry = new TarArchiveEntry(dstPath);  
+  
+            taos.putArchiveEntry(entry);  
+            taos.closeArchiveEntry();  
+        }  
+  
+        for (File file : srcPaths) {   
+            archive(file, taos, ""); 
+  
+        }
+        
+        taos.flush();  
+        taos.close();  
+    	
+    }
   
     /** 
      * 归档 

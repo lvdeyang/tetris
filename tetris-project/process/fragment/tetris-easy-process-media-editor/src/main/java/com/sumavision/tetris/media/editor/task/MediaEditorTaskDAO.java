@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
-@RepositoryDefinition(domainClass = MediaEditorTaskPO.class, idClass = Long.class)
+//@RepositoryDefinition(domainClass = MediaEditorTaskPO.class, idClass = Long.class)
 public interface MediaEditorTaskDAO extends BaseDAO<MediaEditorTaskPO>{
 
 	/**

@@ -3,6 +3,9 @@ package com.sumavision.tetris.mims.app.media.video;
 import java.util.List;
 
 public class MediaVideoVO{
+	private Long id;
+	
+	private String uuid;
 
 	private String name;
 	
@@ -34,6 +37,24 @@ public class MediaVideoVO{
 	
 	private List<MediaVideoVO> children;
 	
+	public Long getId() {
+		return id;
+	}
+
+	public MediaVideoVO setId(Long id) {
+		this.id = id;
+		return this;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public MediaVideoVO setUuid(String uuid) {
+		this.uuid = uuid;
+		return this;
+	}
+
 	public String getName() {
 		return name;
 	}

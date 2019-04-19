@@ -3,7 +3,11 @@ server:
 
 eureka:
   instance:
+<<<<<<< HEAD
     hostname: 192.165.56.71
+=======
+    hostname: 192.165.56.85
+>>>>>>> refs/remotes/choose_remote_name/master
   # 关闭自我保护机制，保证不可用服务及时踢出
   server:
     enableSelfPreservation: false

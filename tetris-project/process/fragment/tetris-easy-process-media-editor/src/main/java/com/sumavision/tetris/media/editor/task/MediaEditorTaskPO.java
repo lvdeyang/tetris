@@ -1,6 +1,6 @@
 package com.sumavision.tetris.media.editor.task;
 
-import java.sql.Date;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,8 +10,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
-@Entity
-@Table(name = "TETRIS_MEDIA_EDITOR_TASK")
+/*@Entity
+@Table(name = "TETRIS_MEDIA_EDITOR_TASK")*/
 public class MediaEditorTaskPO extends AbstractBasePO{
 
 	/** 这是一个常量的说明 */

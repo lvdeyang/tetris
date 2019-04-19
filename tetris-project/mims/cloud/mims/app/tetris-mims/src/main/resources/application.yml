@@ -14,7 +14,11 @@ spring:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
+<<<<<<< HEAD
       ipAddress: 192.165.56.71
+=======
+      ipAddress: 192.165.56.85
+>>>>>>> refs/remotes/choose_remote_name/master
 #  profiles:
 #    active: pro
   datasource:
@@ -80,7 +84,11 @@ ribbon:
 eureka:
   client:
     serviceUrl:
+<<<<<<< HEAD
       defaultZone: http://192.165.56.60:8081/eureka/
+=======
+      defaultZone: http://192.165.56.85:8081/eureka/
+>>>>>>> refs/remotes/choose_remote_name/master
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true

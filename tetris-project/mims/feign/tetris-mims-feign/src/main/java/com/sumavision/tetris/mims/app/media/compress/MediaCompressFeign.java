@@ -18,6 +18,18 @@ public interface MediaCompressFeign {
 	 * @param Long id 媒资id
 	 * @return MediaCompressVO 播发媒资
 	 */
-	@RequestMapping(value = "/media/feign/compress/query")
+	@RequestMapping(value = "/media/compress/feign/query")
 	public JSONObject query(@RequestParam("id") Long id) throws Exception;
+	
+	/**
+	 * 压缩播发媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月3日 上午9:49:53
+	 * @param String jsonString 播发媒资json描述
+	 * @param JSONArray mimsUuidList 打包媒资Uuid列表
+	 * @return MediaCompressVO 生成的播发媒资
+	 */
+	@RequestMapping(value = "/media/compress/feign/package/tar")
+	public JSONObject packageTar(@RequestParam("jsonString") String jsonString, @RequestParam("mimsUuidList") String mimsUuidList);
 }
