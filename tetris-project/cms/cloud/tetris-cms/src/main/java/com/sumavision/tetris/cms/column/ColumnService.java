@@ -3,19 +3,26 @@ package com.sumavision.tetris.cms.column;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.catalina.User;
+import org.neo4j.cypher.internal.compiler.v2_1.docbuilders.internalDocBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.boolean_expr_return;
 import com.sumavision.tetris.cms.article.ArticleClassifyPermissionDAO;
 import com.sumavision.tetris.cms.article.ArticleClassifyPermissionPO;
 import com.sumavision.tetris.cms.article.ArticleDAO;
+import com.sumavision.tetris.cms.article.ArticleHistoryDAO;
+import com.sumavision.tetris.cms.article.ArticleHistoryPO;
+import com.sumavision.tetris.cms.article.ArticleKeepDAO;
+import com.sumavision.tetris.cms.article.ArticleKeepPO;
 import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleRegionPermissionDAO;
 import com.sumavision.tetris.cms.article.ArticleVO;
@@ -56,6 +63,15 @@ public class ColumnService {
 	
 	@Autowired
 	private ColumnUserPermissionDAO columnUserPermissionDao;
+	
+	@Autowired
+	private ArticleHistoryDAO articleHistoryDAO;
+	
+	@Autowired
+	private ArticleKeepDAO articleKeepDAO;
+	
+	@Autowired
+	private ColumnSubscriptionDAO columnSubscriptionDAO;
 
 	public ColumnPO addRoot(UserVO user) throws Exception {
 
@@ -202,7 +218,7 @@ public class ColumnService {
 	 * <b>日期：</b>2019年2月27日 上午10:05:39
 	 * @param columnId 栏目id
 	 */
-	public ColumnVO query(Long columnId, Pageable page) throws Exception {
+	public ColumnVO query(UserVO user, Long columnId, Pageable page) throws Exception {
 		
 		ColumnPO column = columnDao.findOne(columnId);
 		
@@ -244,8 +260,12 @@ public class ColumnService {
 						if(columnRelationArticle.getArticleId().equals(article.getId())){
 							view_article.setOrder(columnRelationArticle.getArticleOrder());
 							view_article.setColumnName(columnRelationArticle.getColumnName());
+							view_article.setColumnId(columnRelationArticle.getColumnId());
 							break;
 						}
+					}
+					if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(), article.getId()) != null){
+						view_article.setKeep(true);
 					}
 					view_articles.add(view_article);
 				}
@@ -304,8 +324,12 @@ public class ColumnService {
 							if(columnRelationArticle.getArticleId().equals(article.getId())){
 								view_article.setOrder(columnRelationArticle.getArticleOrder());
 								view_article.setColumnName(columnRelationArticle.getColumnName());
+								view_article.setColumnId(columnRelationArticle.getColumnId());
 								break;
 							}
+						}
+						if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(),article.getId()) != null){
+							view_article.setKeep(true);
 						}
 						view_articles.add(view_article);
 					}
@@ -330,7 +354,7 @@ public class ColumnService {
 	 * @param city 市
 	 * @param district 区
 	 */
-	public ColumnVO queryByRegion(Long columnId, String province, String city, String district, Pageable page) throws Exception {
+	public ColumnVO queryByRegion(UserVO user, Long columnId, String province, String city, String district, Pageable page) throws Exception {
 		
 		ColumnPO column = columnDao.findOne(columnId);
 		
@@ -360,7 +384,7 @@ public class ColumnService {
 												  .toString();
 			regionArticleIds = articleRegionPermissionDao.findArticleIdByRegion(reg);			
 		}else if(city == "" && district == ""){
-			view_column = query(columnId, page);
+			view_column = query(user, columnId, page);
 		}
 		
 		if(regionArticleIds.size()>0){
@@ -388,8 +412,12 @@ public class ColumnService {
 							if(columnRelationArticle.getArticleId().equals(article.getId())){
 								view_article.setOrder(columnRelationArticle.getArticleOrder());
 								view_article.setColumnName(columnRelationArticle.getColumnName());
+								view_article.setColumnId(columnRelationArticle.getColumnId());
 								break;
 							}
+						}
+						if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(), article.getId()) != null){
+							view_article.setKeep(true);
 						}
 						view_articles.add(view_article);
 					}
@@ -443,6 +471,10 @@ public class ColumnService {
 					if(relation.getArticleId().equals(article.getId())){
 						ArticleVO articleVO = new ArticleVO().set(article);	
 						articleVO.setColumnName(relation.getColumnName());
+						articleVO.setColumnId(relation.getColumnId());
+						if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(), article.getId()) != null){
+							articleVO.setKeep(true);
+						}
 						view_articles.add(articleVO);
 						break;
 					}
@@ -452,6 +484,306 @@ public class ColumnService {
 		}
  		
  		return view_articles;
+	}
+	
+	/**
+	 * 添加浏览历史<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午11:18:58
+	 * @param user 用户
+	 * @param articleId 文章id
+	 * @param columnId 栏目id
+	 * @return
+	 */
+	public ArticleVO saveHistory(UserVO user, Long articleId,Long columnId) throws Exception{
+		Boolean addBoolean = false;
+		Boolean dealBoolean = false;
+		
+		List<ArticleHistoryPO> articleHistoryPOs = new ArrayList<ArticleHistoryPO>();
+		if(user.getId() != null){
+			articleHistoryPOs = articleHistoryDAO.findByUserId(user.getId());
+		}
+		
+		if(articleHistoryPOs.size() > 0){
+			Collections.sort(articleHistoryPOs, new ArticleHistoryPO.ArticleTimeComparator());
+			for(ArticleHistoryPO item : articleHistoryPOs){
+				if (item.getArticleId() == articleId) {
+					item.setUpdateTime(new Date());
+					item.setColumnId(columnId);
+					articleHistoryDAO.save(item);
+					dealBoolean = true;
+					break;
+				}
+			}
+		}
+		
+		if(!dealBoolean){
+			ArticleHistoryPO article = new ArticleHistoryPO();
+			article.setArticleId(articleId);
+			article.setUserId(user.getId());
+			article.setColumnId(columnId);
+			article.setUpdateTime(new Date());
+			articleHistoryDAO.save(article);
+			addBoolean = true;
+		}
+		
+		if(addBoolean && articleHistoryPOs.size() >= 20){
+			articleHistoryDAO.delete(articleHistoryPOs.get(articleHistoryPOs.size() - 1).getId());
+		}
+		
+		ArticleVO articleVO = new ArticleVO().set(articleDao.findOne(articleId));
+		if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(), articleId) != null){
+			articleVO.setKeep(true);
+		}
+ 		
+ 		return articleVO;
+	}
+	
+	/**
+	 * 获取浏览历史<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午11:18:58
+	 * @param user 用户
+	 * @return articleList 浏览历史文章列表
+	 */
+	public List<ArticleVO> getHistory(UserVO user) throws Exception{
+		List<ArticleVO> articleList = new ArrayList<ArticleVO>();
+		List<ArticleHistoryPO> articleHistoryPOs = new ArrayList<ArticleHistoryPO>();
+		
+		if(user.getId() != null){
+			articleHistoryPOs = articleHistoryDAO.findByUserId(user.getId());
+		}
+		
+		if(articleHistoryPOs.size() > 0){
+			Collections.sort(articleHistoryPOs, new ArticleHistoryPO.ArticleTimeComparator());
+			for(ArticleHistoryPO item:articleHistoryPOs){
+				ArticlePO articlePO = articleDao.findOne(item.getArticleId());
+				if (articlePO != null) {
+					ArticleVO articleVO = new ArticleVO().set(articlePO);
+					articleVO.setColumnId(item.getColumnId());
+					articleVO.setColumnName(columnDao.findOne(item.getColumnId()).getName());
+					articleVO.setWatchTime(item.getUpdateTime());
+					if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(),item.getArticleId()) != null){
+						articleVO.setKeep(true);
+					}
+					articleList.add(articleVO);
+				}
+			}
+		}
+ 		
+ 		return articleList;
+	}
+	
+	/**
+	 * 删除指定浏览历史文章<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午11:18:58
+	 * @param user 用户
+	 * @param articleId 文章id
+	 * @param columnId 栏目id
+	 * @return
+	 */
+	public List<ArticleVO> removeHistory(UserVO user,Long articleId) throws Exception{
+		if(user.getId() != null){
+			ArticleHistoryPO articleHistoryPO = articleHistoryDAO.findByUserIdAndArticleId(user.getId(), articleId);
+			if (articleHistoryPO != null) {
+				articleHistoryDAO.delete(articleHistoryPO);
+			}
+		}
+		
+		List<ArticleHistoryPO> articleHistoryPOs = articleHistoryDAO.findByUserId(user.getId());
+		List<ArticleVO> articleVOs = new ArrayList<ArticleVO>();
+		for (ArticleHistoryPO articleHistoryPO : articleHistoryPOs) {
+			ArticlePO articlePO = articleDao.findOne(articleHistoryPO.getArticleId());
+			if (articlePO != null) {
+				ArticleVO articleVO = new ArticleVO().set(articlePO);
+				if(user.getId() != null && articleKeepDAO.findByUserIdAndArticleId(user.getId(),articleHistoryPO.getArticleId()) != null){
+					articleVO.setKeep(true);
+				}
+				articleVOs.add(articleVO);
+			}
+		}
+		
+		return articleVOs;
+	}
+	
+	/**
+	 * 清空浏览历史<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午11:18:58
+	 * @param user 用户
+	 * @return
+	 */
+	public void clearHistory(UserVO user) throws Exception{
+		if(user.getId() != null){
+			List<ArticleHistoryPO> articleHistoryPOs = new ArrayList<ArticleHistoryPO>();
+			articleHistoryPOs = articleHistoryDAO.findByUserId(user.getId());
+			if(articleHistoryPOs.size() > 0){
+				articleHistoryDAO.deleteInBatch(articleHistoryPOs);
+			}
+		}
+	}
+	
+	/**
+	 * 添加收藏文章<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午11:18:58
+	 * @param user 用户
+	 * @param articleId 文章id
+	 * @param columnId 栏目id
+	 * @return
+	 */
+	public ArticleVO keep(UserVO user, Long articleId,Long columnId) throws Exception{
+		Boolean addBoolean = false;
+		Boolean dealBoolean = false;
+		
+		List<ArticleKeepPO> articleKeepPOs = new ArrayList<ArticleKeepPO>();
+		if(user.getId() != null){
+			articleKeepPOs = articleKeepDAO.findByUserId(user.getId());
+		}
+		
+		if(articleKeepPOs.size() > 0){
+			Collections.sort(articleKeepPOs, new ArticleKeepPO.ArticleTimeComparator());
+			for(ArticleKeepPO item : articleKeepPOs){
+				if (item.getArticleId() == articleId) {
+					item.setUpdateTime(new Date());
+					item.setColumnId(columnId);
+					articleKeepDAO.save(item);
+					dealBoolean = true;
+					break;
+				}
+			}
+		}
+		
+		if(!dealBoolean){
+			ArticleKeepPO article = new ArticleKeepPO();
+			article.setArticleId(articleId);
+			article.setUserId(user.getId());
+			article.setColumnId(columnId);
+			article.setUpdateTime(new Date());
+			articleKeepDAO.save(article);
+			addBoolean = true;
+		}
+		
+		if(addBoolean && articleKeepPOs.size() >= 20){
+			articleKeepDAO.delete(articleKeepPOs.get(articleKeepPOs.size() - 1).getId());
+		}
+ 		
+ 		return new ArticleVO().set(articleDao.findOne(articleId)).setKeep(true);
+	}
+	
+	/**
+	 * 获取收藏列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午11:18:58
+	 * @param user 用户
+	 * @return articleList 收藏文章列表
+	 */
+	public List<ArticleVO> getKeep(UserVO user) throws Exception{
+		List<ArticleVO> articleList = new ArrayList<ArticleVO>();
+		List<ArticleKeepPO> articleKeepPOs = new ArrayList<ArticleKeepPO>();
+		
+		if(user.getId() != null){
+			articleKeepPOs = articleKeepDAO.findByUserId(user.getId());
+		}
+		
+		if(articleKeepPOs.size() > 0){
+			Collections.sort(articleKeepPOs, new ArticleKeepPO.ArticleTimeComparator());
+			for(ArticleKeepPO item:articleKeepPOs){
+				ArticlePO articlePO = articleDao.findOne(item.getArticleId());
+				if (articlePO != null) {
+					ArticleVO articleVO = new ArticleVO().set(articlePO);
+					articleVO.setColumnId(item.getColumnId());
+					articleVO.setColumnName(columnDao.findOne(item.getColumnId()).getName());
+					articleVO.setWatchTime(item.getUpdateTime());
+					articleVO.setKeep(true);
+					articleList.add(articleVO);
+				}
+			}
+		}
+ 		
+ 		return articleList;
+	}
+	
+	/**
+	 * 删除指定收藏文章<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午11:18:58
+	 * @param user 用户
+	 * @param articleId 文章id
+	 * @param columnId 栏目id
+	 * @return
+	 */
+	public List<ArticleVO> removeKeep(UserVO user,Long articleId) throws Exception{
+		
+		if(user.getId() != null){
+			ArticleKeepPO articleKeepPO = articleKeepDAO.findByUserIdAndArticleId(user.getId(), articleId);
+			if (articleKeepPO != null) {
+				articleKeepDAO.delete(articleKeepPO);
+			}
+		}
+		
+		List<ArticleKeepPO> articleKeepPOs = articleKeepDAO.findByUserId(user.getId());
+		List<ArticleVO> articleVOs = new ArrayList<ArticleVO>();
+		for (ArticleKeepPO articleKeepPO : articleKeepPOs) {
+			ArticlePO articlePO = articleDao.findOne(articleKeepPO.getArticleId());
+			if (articlePO != null) {
+				articleVOs.add(new ArticleVO().set(articlePO).setKeep(true));
+			}
+		}
+		
+		return articleVOs;
+	}
+	
+	/**
+	 * 清空收藏列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午11:18:58
+	 * @param user 用户
+	 * @return
+	 */
+	public void clearKeep(UserVO user) throws Exception{
+		if(user.getId() != null){
+			List<ArticleKeepPO> articleKeepPOs = new ArrayList<ArticleKeepPO>();
+			articleKeepPOs = articleKeepDAO.findByUserId(user.getId());
+			if(articleKeepPOs.size() > 0){
+				articleKeepDAO.deleteInBatch(articleKeepPOs);
+			}
+		}
+	}
+	
+	/**
+	 * 设置订阅栏目<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月17日 下午11:18:58
+	 * @param user 用户
+	 * @param columnList 栏目id
+	 * @return
+	 */
+	public void setSubscriptionColumnTree(UserVO userVO,List<Long> columnList){
+		if (userVO.getId() != null) {
+			List<ColumnSubscriptionPO> columnSubscriptionPOs = columnSubscriptionDAO.findByUserId(userVO.getId());
+			if (columnSubscriptionPOs != null && columnSubscriptionPOs.size() > 0) {
+				columnSubscriptionDAO.deleteInBatch(columnSubscriptionPOs);
+			}
+			if(columnList != null && columnList.size() > 0){
+				for(Long column:columnList){
+					ColumnSubscriptionPO columnSubscriptionPO = new ColumnSubscriptionPO();
+					columnSubscriptionPO.setColumnId(column);
+					columnSubscriptionPO.setUserId(userVO.getId());
+					columnSubscriptionDAO.save(columnSubscriptionPO);
+				}
+			}
+		}
 	}
 	
 	/**

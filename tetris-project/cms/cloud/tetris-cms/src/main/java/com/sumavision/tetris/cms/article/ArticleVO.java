@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cms.article;
 
+import java.util.Date;
 import java.util.List;
 
 import com.sumavision.tetris.cms.classify.ClassifyVO;
@@ -29,6 +30,15 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 	
 	/** 额外：栏目名称 */
 	private String columnName;
+	
+	/** 额外：栏目id */
+	private Long columnId;
+	
+	/** 额外：历史浏览时间 */
+	private Date watchTime;
+	
+	/** 额外：收藏标识 */
+	private Boolean keep;
 	
 	private List<ClassifyVO> classifies;
 	
@@ -139,6 +149,33 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 
 	public ArticleVO setColumnName(String columnName) {
 		this.columnName = columnName;
+		return this;
+	}
+
+	public Long getColumnId() {
+		return columnId;
+	}
+
+	public ArticleVO setColumnId(Long columnId) {
+		this.columnId = columnId;
+		return this;
+	}
+
+	public Date getWatchTime() {
+		return watchTime;
+	}
+
+	public ArticleVO setWatchTime(Date watchTime) {
+		this.watchTime = watchTime;
+		return this;
+	}
+
+	public Boolean getKeep() {
+		return keep;
+	}
+
+	public ArticleVO setKeep(Boolean keep) {
+		this.keep = keep;
 		return this;
 	}
 

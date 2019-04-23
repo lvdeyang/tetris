@@ -11,6 +11,10 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 	private String name;
 	private String code;
 	private Long parentId;
+	/** 额外：标记订阅  */
+	private Boolean subscribed;
+	/** 额外：标记子栏目订阅 */
+	private Boolean subColumnSubscribed;
 	private List<ColumnVO> subColumns;
 	private List<ArticleVO> articles;
 	
@@ -59,6 +63,24 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 		return this;
 	}
 	
+	public Boolean getSubscribed() {
+		return subscribed;
+	}
+
+	public ColumnVO setSubscribed(Boolean subscribed) {
+		this.subscribed = subscribed;
+		return this;
+	}
+
+	public Boolean getSubColumnSubscribed() {
+		return subColumnSubscribed;
+	}
+
+	public ColumnVO setSubColumnSubscribed(Boolean subColumnSubscribed) {
+		this.subColumnSubscribed = subColumnSubscribed;
+		return this;
+	}
+
 	@Override
 	public ColumnVO set(ColumnPO entity) throws Exception {
 		this.setId(entity.getId())
