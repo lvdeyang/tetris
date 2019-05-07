@@ -183,17 +183,7 @@ define([
                     manageBroad: {
                         visible: false,
                         loading: false,
-                        data: [
-                            {
-                                name: "20190313发布",
-                                size: "256MB",
-                                status: "播发完成"
-                            }, {
-                                name: "海淀区20190313发布",
-                                size: "312MB",
-                                status: "正在发送"
-                            }
-                        ],
+                        data: [],
                         dialog: {
                             addBroad: {
                                 visible: false,
@@ -226,11 +216,13 @@ define([
             methods: {
                 getChannelList: function () {
                     var self = this;
+                    self.loading = true;
                     var requestData = {
                         currentPage: self.channel.page.currentPage,
                         pageSize: self.channel.page.size
                     };
                     ajax.post('/cs/channel/list', requestData, function (data, status) {
+                        self.loading = false;
                         if (status != 200) return;
                         self.channel.data = data.rows;
                         self.channel.page.total = data.total;
@@ -992,14 +984,45 @@ define([
                         channelId: self.dialog.manageBroadcastArea.data.id
                     };
                     self.dialog.manageBroadcastArea.tree.data = [];
+                    self.dialog.manageBroadcastArea.tree.loading = true;
                     ajax.post('/cs/area/list', questData, function (data, status) {
+                        self.dialog.manageBroadcastArea.tree.loading = false;
                         if (status != 200) return;
                         self.dialog.manageBroadcastArea.tree.data = data.treeData;
                         self.$refs.broadcastAreaTree.setCheckedKeys(data.checkList);
                         setTimeout(function () {
-                            self.dialog.manageBroadcastArea.tree.current = self.$refs.broadcastAreaTree.getCheckedNodes(true, false);
+                            self.dialog.manageBroadcastArea.tree.current = self.$refs.broadcastAreaTree.getCheckedNodes(false, false);
                         }, 100);
                     }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                manageBroadcastDivision: function (node, resolve) {
+                    var self = this;
+                    self.dialog.manageBroadcastArea.tree.loading = true;
+                    if (node.level != 0) {
+                        var questData = {
+                            channelId: self.dialog.manageBroadcastArea.data.id,
+                            divisionId: node.data.areaId,
+                            disabled: node.data.disabled
+                        };
+                        ajax.post('/cs/area/children', questData, function (data, status) {
+                            self.dialog.manageBroadcastArea.tree.loading = false;
+                            if (status != 200) return;
+                            resolve(data.treeData);
+                            var checkList = self.$refs.broadcastAreaTree.getCheckedKeys(false, false);
+                            if (!checkList) {
+                                checkList = []
+                            }
+                            if (data.checkList) {
+                                for (var i = 0; i < data.checkList.length; i++) {
+                                    checkList.push(data.checkList[i])
+                                }
+                            }
+                            self.$refs.broadcastAreaTree.setCheckedKeys(checkList);
+                            setTimeout(function () {
+                                self.dialog.manageBroadcastArea.tree.current = self.$refs.broadcastAreaTree.getCheckedNodes(false, false);
+                            }, 100);
+                        }, null, ajax.NO_ERROR_CATCH_CODE)
+                    }
                 },
                 handleManageBroadcastAreaClose: function () {
                     var self = this;
@@ -1028,7 +1051,7 @@ define([
                 },
                 handleManageBroadcastAreaCheckChange: function (data, checked, indeterminate) {
                     var self = this;
-                    self.dialog.manageBroadcastArea.tree.current = self.$refs.broadcastAreaTree.getCheckedNodes(true, false);
+                    self.dialog.manageBroadcastArea.tree.current = self.$refs.broadcastAreaTree.getCheckedNodes(false, false);
                 },
 
 
@@ -1038,16 +1061,103 @@ define([
                     var questData = {
                         channelId: row.id
                     };
-                    self.loadingText = "正在请求播发";
+                    self.loadingText = "正在更新播发状态";
                     self.loading = true;
-                    ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
+                    ajax.post('/cs/channel/broadcast/status', questData, function (data, status) {
                         self.loading = false;
                         self.loadingText = "";
                         if (status == 200) {
+                            switch (data) {
+                                case "发送中":
+                                {
+                                    self.$message.error("当前频道正在播发，已为您更新播发状态");
+                                    self.getChannelList();
+                                    break;
+                                }
+                                case "":
+                                case "发送完成":
+                                {
+                                    self.$confirm("当前状态正常，是否执行播发任务?", "提示", {
+                                        type: 'wraning',
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消'
+                                    }).then(
+                                        function () {
+                                            self.loading = true;
+                                            self.loadingText = "正在请求播发";
+                                            ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
+                                                self.loading = false;
+                                                if (data.success && status == 200) {
+                                                    self.$message({
+                                                        message: '请求播发成功',
+                                                        type: 'success'
+                                                    });
+                                                } else {
+                                                    self.$message.error(data.message);
+                                                }
+                                                self.getChannelList();
+                                            }, null, ajax.NO_ERROR_CATCH_CODE)
+                                        }
+                                    ).catch(function () {
+                                            self.getChannelList();
+                                        });
+                                    break;
+                                }
+                                case "发送停止":
+                                {
+                                    self.$confirm("当前频道播发状态已被停止，是否继续播发任务?", "提示", {
+                                        type: 'wraning',
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消'
+                                    }).then(
+                                        function () {
+                                            self.loading = true;
+                                            self.loadingText = "正在请求播发";
+                                            ajax.post('/cs/channel/broadcast/restart', questData, function (data, status) {
+                                                self.loading = false;
+                                                if (data.success && status == 200) {
+                                                    self.$message({
+                                                        message: '请求播发成功',
+                                                        type: 'success'
+                                                    });
+                                                } else {
+                                                    self.$message.error(data.message);
+                                                }
+                                                self.getChannelList();
+                                            }, null, ajax.NO_ERROR_CATCH_CODE)
+                                        }
+                                    ).catch(function () {
+                                            self.getChannelList();
+                                        });
+                                    break;
+                                }
+                                default :
+                                {
+                                    self.getChannelList();
+                                    break;
+                                }
+                            }
+                        }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                stopBroadcast: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    var questData = {
+                        channelId: row.id
+                    };
+                    self.loadingText = "正在请求停止播发";
+                    self.loading = true;
+                    ajax.post('/cs/channel/broadcast/stop', questData, function (data, status) {
+                        self.loading = false;
+                        self.loadingText = "";
+                        if (data.success == true && status == 200) {
                             self.$message({
-                                message: '请求播发成功',
+                                message: '请求停止播发成功',
                                 type: 'success'
                             });
+                        } else {
+                            self.$message.error(data.message);
                         }
                         self.getChannelList();
                     }, null, ajax.NO_ERROR_CATCH_CODE)

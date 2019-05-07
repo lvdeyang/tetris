@@ -70,7 +70,7 @@ public class ApiTerminalAuthController {
 		LOG.info(new StringBufferWrapper().append("向手机：").append(mobile).append("发送验证码：").append(number).toString());
 		JSONObject param = new JSONObject();
 		param.put("code", number);
-//		aliSendSmsService.sendSms(mobile, param.toJSONString());
+		aliSendSmsService.sendSms(mobile, param.toJSONString());
 		
 		session.setAttribute("verification-code-phone", number);
 		session.setAttribute("verification-phone", mobile);

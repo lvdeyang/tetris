@@ -10,7 +10,7 @@
     <template>
 
         <div style="width:100%; height:100%; position:relative;">
-            <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <el-card class="box-card" shadow="hover" style="width:100%; height:100%;" v-loading="loading" :element-loading-text=loadingText>
                 <div style="position:absolute; left:0; top:0; right:0; bottom:0; padding:20px;">
                     <div style="width:100%; height:100%; position:relative;">
                         <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
@@ -25,8 +25,6 @@
                         </div>
                         <div style="position:absolute; left:0; right:0; top:48px; bottom:48px;overflow-y: auto">
                             <el-table
-                                    v-loading="loading"
-                                    :element-loading-text=loadingText
                                     ref="multipleChannelTable"
                                     :data="channel.data"
                                     tooltip-effect="dark"
@@ -68,10 +66,16 @@
                                                        @click="manageBroadcastArea(scope)">
                                             </el-button>
                                         </el-tooltip>
-                                        <el-tooltip class="item" effect="dark" content="开始播发" placement="bottom">
-                                            <el-button type="text" icon="feather-icon-upload-cloud"
+                                        <el-tooltip class="item" effect="dark" content="开始播发" placement="bottom" v-if="scope.row.broadcastStatus=='未播发'||scope.row.broadcastStatus=='发送完成' || scope.row.broadcastStatus=='发送停止'">
+                                            <el-button type="text" icon="feather-icon-play-circle"
                                                        style="margin:0; font-size:18px; padding:0; margin-right:20px;"
                                                        @click="startBroadcast(scope)">
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="停止播发" placement="bottom" v-if="scope.row.broadcastStatus=='发送中'">
+                                            <el-button type="text" icon="feather-icon-stop-circle"
+                                                       style="margin:0; font-size:18px; padding:0; margin-right:20px;"
+                                                       @click="stopBroadcast(scope)">
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="删除频道" placement="bottom">
@@ -442,7 +446,7 @@
                         </el-col>
                         <el-col :span="8">
                             <el-row :gutter="1">
-                                <el-col v-for="i in 1" :key="i">
+                                <el-col v-for="i in 2" :key="i">
                                     <div class="programScreen" style="height: 118px;" @click="clickScreen(i+1)">
                                         <el-button size="small" type="primary" @click="chooseResources(i+1)"
                                                    style="margin-left: 10px">
@@ -606,13 +610,14 @@
                     ref="broadcastAreaTree"
                     :props="dialog.manageBroadcastArea.tree.props"
                     :data="dialog.manageBroadcastArea.tree.data"
+                    :expand-on-click-node="true"
                     node-key="areaId"
                     :check-strictly=false
                     show-checkbox
                     @check="handleManageBroadcastAreaCheckChange"
-                    :expand-on-click-node="false"
-                    default-expand-all
                     highlight-current
+                    lazy
+                    :load="manageBroadcastDivision"
                     style="padding: 20px;max-height: 400px;overflow-y:auto">
                         <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
                               slot-scope="{node, data}">

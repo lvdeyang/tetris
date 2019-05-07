@@ -14,7 +14,7 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.71
+      ipAddress: 192.165.56.85
 #  profiles:
 #    active: pro
   datasource:
@@ -80,7 +80,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.60:8081/eureka/
+      defaultZone: http://192.165.56.85:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
@@ -99,7 +99,7 @@ eureka:
 #      user-info-uri: http://192.165.56.64:5000/uaa/users/current
 feign: 
   hystrix: 
-   enabled: true 
+   enabled: true    
 hystrix:
   command:
     default:
@@ -107,4 +107,6 @@ hystrix:
         timeout:
           enabled: false
         isolation:
-          strategy: SEMAPHORE           
+          thread: 
+            timeoutInMilliseconds: 5000
+          strategy: SEMAPHORE          

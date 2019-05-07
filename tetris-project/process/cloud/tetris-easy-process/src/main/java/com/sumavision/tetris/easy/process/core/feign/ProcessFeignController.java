@@ -52,6 +52,7 @@ public class ProcessFeignController {
 	 * @param String __accessPointId__ 回调接入点id
 	 * @param JSONString variables 回传流程变量
 	 */
+	@RequestMapping(value = "/receive/task/trigger")
 	public Object receiveTaskTrigger(
 			String __processId__,
 			Long __accessPointId__,

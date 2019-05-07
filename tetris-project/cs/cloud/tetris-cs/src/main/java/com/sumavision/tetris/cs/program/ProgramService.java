@@ -34,27 +34,18 @@ public class ProgramService {
 	}
 
 	private ProgramPO setProgramScreenNum(Long channelId, Long screenNum) {
-		List<ProgramPO> programList = programDao.findAll();
-		ProgramPO programPO = new ProgramPO();
-		Boolean set = false;
-		if (programList != null && programList.size() > 0) {
-			for (int i = 0; i < programList.size(); i++) {
-				if (programList.get(i).getChannelId() == channelId) {
-					programPO = programList.get(i);
-					programPO.setScreenNum(screenNum);
-					set = true;
-					break;
-				}
-			}
+		ProgramPO program = programDao.findByChannelId(channelId);
+		if (program != null) {
+			program.setScreenNum(screenNum);
+		}else {
+			program = new ProgramPO();
+			program.setChannelId(channelId);
+			program.setScreenNum(screenNum);
+			program.setUpdateTime(new Date());
 		}
-		if (!set) {
-			programPO = new ProgramPO();
-			programPO.setChannelId(channelId);
-			programPO.setScreenNum(screenNum);
-			programPO.setUpdateTime(new Date());
-		}
-		programDao.save(programPO);
-		return programPO;
+		programDao.save(program);
+		
+		return program;
 	}
 
 	private List<ScreenVO> setScreenInfo(Long programId, List<ScreenVO> screenList) throws Exception {

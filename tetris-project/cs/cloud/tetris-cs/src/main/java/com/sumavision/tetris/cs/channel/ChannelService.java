@@ -1,6 +1,5 @@
 package com.sumavision.tetris.cs.channel;
 
-import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,20 +7,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.mail.Folder;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.commons.util.file.CopyFileUtil;
-import com.sumavision.tetris.commons.util.file.GetFileSizeUtil;
-import com.sumavision.tetris.commons.util.json.CreateFileUtil;
-import com.sumavision.tetris.commons.util.tar.TarUtil;
+import com.sumavision.tetris.cs.HttpRequestUtil;
+import com.sumavision.tetris.cs.area.AreaQuery;
+import com.sumavision.tetris.cs.area.AreaVO;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
 import com.sumavision.tetris.cs.bak.ResourceSendQuery;
+import com.sumavision.tetris.cs.bak.VersionSendPO;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
 import com.sumavision.tetris.cs.menu.CsMenuQuery;
 import com.sumavision.tetris.cs.menu.CsMenuService;
@@ -31,18 +28,18 @@ import com.sumavision.tetris.cs.menu.CsResourceVO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
-import com.sumavision.tetris.cs.program.ScreenQuery;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
-import com.sumavision.tetris.user.UserQuery;
-import com.sumavision.tetris.user.UserVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ChannelService {
 	@Autowired
 	private ChannelDAO channelDao;
+
+	@Autowired
+	private ChannelQuery channelQuery;
 
 	@Autowired
 	private CsMenuService csMenuService;
@@ -69,11 +66,8 @@ public class ChannelService {
 	private ProgramQuery programQuery;
 
 	@Autowired
-	private ScreenQuery screenQuery;
+	private AreaQuery areaQuery;
 
-	@Autowired
-	private UserQuery userQuery;
-	
 	@Autowired
 	private MediaCompressService mediaCompressService;
 
@@ -115,23 +109,45 @@ public class ChannelService {
 		return channel;
 	}
 
-	public JSONObject startBroadcast(Long channelId) throws Exception {
-		ChannelPO channel = channelDao.findOne(channelId);
-		// 校验播发状态
-		if (channel.getBroadcastStatus().equals("正在播发")) {
-			JSONObject json = new JSONObject();
-			json.put("success", "false");
-			json.put("message", "当前频道正在播发状态");
-			return json;
+	public JSONObject stopBroadcast(Long channelId) {
+		String versionSendNum = versionSendQuery.getBroadId(channelId);
+		if (!versionSendNum.isEmpty()
+				&& getChannelBroadstatus(channelId).equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+			JSONObject jsonParam = new JSONObject();
+			List<String> ids = new ArrayList<String>();
+			ids.add(versionSendNum);
+			jsonParam.put("ids", ids);
+			JSONObject response = HttpRequestUtil
+					.httpPost("http://" + ChannelBroadStatus.BROADCAST_IP + "/ed/speaker/stopSendFile", jsonParam);
+			if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+				return getReturnJSON(true, "");
+			} else {
+				return getReturnJSON(false, "未知错误，播发失败");
+			}
+		} else {
+			return getReturnJSON(false, "当前频道未处于可播发状态");
 		}
-		// 获取媒资全量并保存/获取媒资增量
-		List<CsResourceVO> addResourceList = resourceSendQuery.saveResource(channelId);
+	}
+
+	public JSONObject startBroadcast(Long channelId) throws Exception {
+		// 校验播发状态
+		String broadStatus = getChannelBroadstatus(channelId);
+		if (!broadStatus.isEmpty() && !broadStatus.equals("发送完成")) {
+			return getReturnJSON(false, "当前频道未处于可播发状态");
+		}
+		// 校验播发条件
+		List<String> areaVOs = areaQuery.getCheckAreaIdList(channelId);
+		if (areaVOs == null || areaVOs.size() <= 0) {
+			return getReturnJSON(false, "播发地区为空，播发任务自动取消");
+		}
+		// 获取媒资增量
+		List<CsResourceVO> addResourceList = resourceSendQuery.getAddResource(channelId, false);
 		Map<String, CsResourceVO> resourceMap = new HashMap<String, CsResourceVO>();
 		for (CsResourceVO item : addResourceList) {
 			String[] previewUrl = item.getPreviewUrl().split("/");
 			resourceMap.put(previewUrl[previewUrl.length - 1], item);
 		}
-		// 生成Json字符串
+		// 生成json字符串
 		JSONObject textJson = new JSONObject();
 		String newVersion = versionSendQuery.getNewVersion(versionSendQuery.getLastVersion(channelId));
 		String effectTime = "null";
@@ -148,25 +164,90 @@ public class ChannelService {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 		String dateString = formatter.format(currentTime);
 		textJson.put("file", dateString + ".tar");
-		
+
 		List<String> mimsUuidList = new ArrayList<String>();
-		for(CsResourceVO item : addResourceList){
+		for (CsResourceVO item : addResourceList) {
 			mimsUuidList.add(item.getMimsUuid());
 		}
 		MediaCompressVO mediaCompressVO = mediaCompressService.packageTar(textJson.toString(), mimsUuidList);
+
 		// 请求播发
+		String broadIdString = channelId.toString() + newVersion.split("v")[1];
+		JSONObject broadJsonObject = new JSONObject();
 
-		// 播发成功处理
-		channel.setBroadcastStatus("正在播发");
-		// 备份播发地区
-		areaSendQuery.saveArea(channelId);
-		// 保存播发版本
-		versionSendQuery.addVersion(channelId, newVersion);
+		broadJsonObject.put("id", broadIdString);
+		broadJsonObject.put("filePath", mediaCompressVO.getPreviewUrl());
+		broadJsonObject.put("fileSize", mediaCompressVO.getSize());
+		broadJsonObject.put("regionList", areaVOs);
 
-		ThreadBroadcast thread = new ThreadBroadcast(channelId, channelDao);
-		thread.run();
+//		JSONObject response = HttpRequestUtil
+//				.httpPost("http://" + ChannelBroadStatus.BROADCAST_IP + "/ed/speaker/startSendFile", broadJsonObject);
 
-		return null;
+//		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+			// 播发成功处理
+
+			// 备份播发媒资全量
+			resourceSendQuery.getAddResource(channelId, true);
+
+			// 备份播发地区
+			areaSendQuery.saveArea(channelId);
+
+			// 保存播发版本
+			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO);
+
+			return getReturnJSON(true, "");
+//		} else {
+//			return getReturnJSON(false, "播发未知错误");
+//		}
+	}
+
+	public JSONObject restartBroadcast(Long channelId) {
+		JSONObject broadJsonObject = new JSONObject();
+		VersionSendPO versionSendPO = versionSendQuery.getLastVersionSendPO(channelId);
+		if (versionSendPO == null) {
+			return getReturnJSON(false, "当前频道没有被储存的版本信息");
+		}
+		broadJsonObject.put("id", versionSendQuery.getBroadId(channelId));
+		broadJsonObject.put("filePath", versionSendPO.getFilePath());
+		broadJsonObject.put("fileSize", versionSendPO.getFileSize());
+		broadJsonObject.put("regionList", areaSendQuery.getAreaIdList(channelId));
+
+		JSONObject response = HttpRequestUtil
+				.httpPost("http://" + ChannelBroadStatus.BROADCAST_IP + "/ed/speaker/startSendFile", broadJsonObject);
+
+		return (response != null && response.containsKey("result") && response.getString("result").equals("1"))
+				? getReturnJSON(true, "") : getReturnJSON(false, "播发未知错误");
+	}
+
+	private JSONObject getReturnJSON(Boolean ifSuccess, String message) {
+		JSONObject returnJsonObject = new JSONObject();
+		returnJsonObject.put("success", ifSuccess);
+		returnJsonObject.put("message", message);
+		return returnJsonObject;
+	}
+
+	public String getChannelBroadstatus(Long channelId) {
+		String status = "";
+
+		String versionSendNum = versionSendQuery.getBroadId(channelId);
+		if (!versionSendNum.isEmpty()) {
+			List<String> ids = new ArrayList<String>();
+			ids.add(versionSendNum);
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("ids", ids);
+			JSONObject response = HttpRequestUtil
+					.httpPost("http://" + ChannelBroadStatus.BROADCAST_IP + "/ed/speaker/querySendFile", jsonObject);
+			if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
+				JSONArray statusArray = (JSONArray) response.get("data");
+				if (statusArray != null && statusArray.size() > 0) {
+					JSONObject item = (JSONObject) statusArray.get(0);
+					status = (item.containsKey("status") && item.get("status") != null)
+							? channelQuery.getStatusFromNum(item.getString("status")) : "";
+				}
+			}
+		}
+
+		return status;
 	}
 
 	private List<JSONObject> programText(ProgramVO program) throws Exception {
@@ -381,30 +462,5 @@ public class ChannelService {
 			break;
 		}
 		return returnItem;
-	}
-
-	public class ThreadBroadcast implements Runnable {
-		private ChannelDAO channelDao;
-
-		private Long channelId;
-
-		public ThreadBroadcast(Long channelId, ChannelDAO channelDao) {
-			this.channelId = channelId;
-			this.channelDao = channelDao;
-		}
-
-		@Override
-		public synchronized void run() {
-			ChannelPO channel = channelDao.findOne(channelId);
-			if (channel.getBroadcastStatus().equals("正在播发"))
-				;
-			try {
-				Thread.sleep(1000);
-				channel.setBroadcastStatus("已播发");
-				channelDao.save(channel);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 }

@@ -3,8 +3,6 @@ package com.sumavision.tetris.cs.program;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
-import kafka.utils.immutable;
-
 public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 
 	private Long programId;

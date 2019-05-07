@@ -57,17 +57,20 @@ public class ScreenService {
 		List<ScreenPO> screenList = screenDao.findByProgramId(programId);
 		screenDao.deleteInBatch(screenList);
 	}
-
-	public void dealWithResourceRemove(Long channelId, String mimsUuid) throws Exception {
+	
+	public void dealWithResourceRemove(Long channelId,Long resourceId) throws Exception{
 		ProgramVO program = programQuery.getProgram(channelId);
+		if (program == null) {
+			return;
+		}
 		Long programId = program.getId();
-		List<ScreenPO> removeScreenList = screenDao.findByProgramIdAndMimsUuid(programId, mimsUuid);
-		screenDao.deleteInBatch(removeScreenList);
-		if (removeScreenList != null && removeScreenList.size() > 0) {
+		List<ScreenPO> screenPOs = screenDao.findByProgramIdAndResourceId(programId, resourceId);
+		screenDao.deleteInBatch(screenPOs);
+		if (screenPOs != null && screenPOs.size() > 0) {
 			List<ScreenPO> needSaveList = new ArrayList<ScreenPO>();
-			for (int i = removeScreenList.size() - 1; i >= 0; i--) {
-				Long serialNum = removeScreenList.get(i).getSerialNum();
-				Long screenIndex = removeScreenList.get(i).getScreenIndex();
+			for (int i = screenPOs.size() - 1; i >= 0; i--) {
+				Long serialNum = screenPOs.get(i).getSerialNum();
+				Long screenIndex = screenPOs.get(i).getScreenIndex();
 				List<ScreenPO> allScreenList = screenDao.findByProgramIdAndSerialNum(programId, serialNum);
 				if (allScreenList != null && allScreenList.size() > 0) {
 					for (ScreenPO item : allScreenList) {
@@ -83,4 +86,30 @@ public class ScreenService {
 			}
 		}
 	}
+
+//	public void dealWithResourceRemove(Long channelId, String mimsUuid) throws Exception {
+//		ProgramVO program = programQuery.getProgram(channelId);
+//		Long programId = program.getId();
+//		List<ScreenPO> removeScreenList = screenDao.findByProgramIdAndMimsUuid(programId, mimsUuid);
+//		screenDao.deleteInBatch(removeScreenList);
+//		if (removeScreenList != null && removeScreenList.size() > 0) {
+//			List<ScreenPO> needSaveList = new ArrayList<ScreenPO>();
+//			for (int i = removeScreenList.size() - 1; i >= 0; i--) {
+//				Long serialNum = removeScreenList.get(i).getSerialNum();
+//				Long screenIndex = removeScreenList.get(i).getScreenIndex();
+//				List<ScreenPO> allScreenList = screenDao.findByProgramIdAndSerialNum(programId, serialNum);
+//				if (allScreenList != null && allScreenList.size() > 0) {
+//					for (ScreenPO item : allScreenList) {
+//						if (item.getScreenIndex() > screenIndex) {
+//							item.setScreenIndex(item.getScreenIndex() - 1);
+//							needSaveList.add(item);
+//						}
+//					}
+//				}
+//			}
+//			if (needSaveList.size() > 0) {
+//				screenDao.save(needSaveList);
+//			}
+//		}
+//	}
 }

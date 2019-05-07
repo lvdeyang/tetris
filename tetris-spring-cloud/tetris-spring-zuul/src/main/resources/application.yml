@@ -3,7 +3,7 @@ spring:
     name: tetris-spring-zuul
   cloud:
     client:
-      ipAddress: 192.165.56.71
+      ipAddress: 192.165.56.85
   datasource:
     base:
       url: jdbc:mysql://localhost:3306/zuul?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
@@ -60,7 +60,7 @@ eureka:
   client:
 #注册中心地址
     service-url:
-      defaultZone: http://192.165.56.60:8081/eureka/
+      defaultZone: http://192.165.56.85:8081/eureka/
 #security:
 #  basic:
 #    enabled: false
@@ -71,3 +71,16 @@ eureka:
 #    resource:
 #      user-info-uri:  http://localhost:8071/user
 #      prefer-token-info: false
+feign: 
+  hystrix: 
+   enabled: true    
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          thread: 
+            timeoutInMilliseconds: 5000
+          strategy: SEMAPHORE

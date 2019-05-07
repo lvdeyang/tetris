@@ -14,7 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleService;
 import com.sumavision.tetris.cms.article.ArticleVO;
-//import com.sumavision.tetris.easy.process.core.ProcessService;
+import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserVO;
 
@@ -25,8 +25,8 @@ public class ApiServerArticleController {
 	@Autowired
 	private ArticleService articleService;
 
-//	@Autowired
-//	private ProcessService processService;
+	@Autowired
+	private ProcessService processService;
 	
 	/**
 	 * 添加文章<br/>
@@ -100,7 +100,7 @@ public class ApiServerArticleController {
 	 * @param Long id 播发媒资id
 	 * @return String 流程实例id
 	 */
-	/*@JsonBody
+	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/generate/with/compress")
 	public Object generateWithCompress(
@@ -111,6 +111,6 @@ public class ApiServerArticleController {
 		jsonObject.put("_pa1_id", id);
 		
 		return processService.startByKey("_yjgb_generate_article_by_compress_", jsonObject.toJSONString());
-	}*/
+	}
 	
 }

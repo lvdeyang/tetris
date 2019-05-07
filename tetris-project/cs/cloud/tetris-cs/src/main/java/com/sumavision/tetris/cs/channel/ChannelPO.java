@@ -16,7 +16,7 @@ public class ChannelPO extends AbstractBasePO {
 	private String date;
 	/** 频道备注 */
 	private String remark;
-	
+	/** 播发状态 */
 	private String broadcastStatus;
 
 	@Column(name = "NAME")

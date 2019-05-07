@@ -41,7 +41,11 @@ public class AliPushService extends BasePush{
 
         // 推送配置
         pushRequest.setTitle(title); // 消息的标题
-        pushRequest.setBody(body); // 消息的内容
+        if (body == null || body.isEmpty()) {
+			pushRequest.setBody(title);
+		}else {
+			pushRequest.setBody(body); // 消息的内容
+		}
 
         // 推送配置: iOS
         pushRequest.setIOSBadge(5); // iOS应用图标右上角角标
