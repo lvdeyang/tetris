@@ -15,6 +15,8 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 	private Boolean subscribed;
 	/** 额外：标记子栏目订阅 */
 	private Boolean subColumnSubscribed;
+	/** 新增：栏目顺序 */
+	private Long columnOrder;
 	private List<ColumnVO> subColumns;
 	private List<ArticleVO> articles;
 	
@@ -42,6 +44,15 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 
 	public ColumnVO setParentId(Long parentId) {
 		this.parentId = parentId;
+		return this;
+	}
+
+	public Long getColumnOrder() {
+		return columnOrder;
+	}
+
+	public ColumnVO setColumnOrder(Long columnOrder) {
+		this.columnOrder = columnOrder;
 		return this;
 	}
 
@@ -88,6 +99,7 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setCode(entity.getCode())
+			.setColumnOrder(entity.getColumnOrder())
 			.setParentId(entity.getParentId());
 		return this;
 	}

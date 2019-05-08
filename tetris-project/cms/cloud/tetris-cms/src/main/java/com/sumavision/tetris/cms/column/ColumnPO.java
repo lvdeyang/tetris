@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cms.column;
 
+import java.util.Comparator;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
@@ -34,6 +36,9 @@ public class ColumnPO extends AbstractBasePO{
 	/** 上级栏目id路径：/id/id/id */
 	private String parentPath;
 	
+	/** 栏目顺序--由小到大排序  */
+	private Long columnOrder;
+	
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -61,6 +66,15 @@ public class ColumnPO extends AbstractBasePO{
 		this.remark = remark;
 	}
 	
+	@Column(name = "COLUMN_ORDER")
+	public Long getColumnOrder() {
+		return columnOrder;
+	}
+
+	public void setColumnOrder(Long columnOrder) {
+		this.columnOrder = columnOrder;
+	}
+
 	@Column(name = "PARENT_ID")
 	public Long getParentId() {
 		return parentId;
@@ -79,4 +93,36 @@ public class ColumnPO extends AbstractBasePO{
 		this.parentPath = parentPath;
 	}
 	
+	/**
+	 * @ClassName: 排序器，从小到大排列<br/> 
+	 * @author lzp
+	 * @date 2019年2月27日 上午8:36:10 
+	 */
+	public static final class ColumnOrderComparator implements Comparator<ColumnPO>{
+		@Override
+		public int compare(ColumnPO o1, ColumnPO o2) {
+			
+			if(o1.getColumnOrder() > o2.getColumnOrder()){
+				return 1;
+			}
+			if(o1.getColumnOrder() == o2.getColumnOrder()){
+				return 0;
+			}
+			return -1;
+		}
+	}
+	
+	public static final class ColumnVOOrderComparator implements Comparator<ColumnVO>{
+		@Override
+		public int compare(ColumnVO o1, ColumnVO o2) {
+			
+			if(o1.getColumnOrder() > o2.getColumnOrder()){
+				return 1;
+			}
+			if(o1.getColumnOrder() == o2.getColumnOrder()){
+				return 0;
+			}
+			return -1;
+		}
+	}
 }

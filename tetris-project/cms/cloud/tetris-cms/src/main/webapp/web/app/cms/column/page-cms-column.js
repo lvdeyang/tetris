@@ -81,6 +81,14 @@ define([
 
             },
             methods:{
+                mouseEnter:function(){
+                    var self = this;
+                    self.showButton30=false;
+                },
+                mouseLeave: function(){
+                    var self = this;
+                    self.showButton30=true;
+                },
                 loadTagTree:function(){
                     var self = this;
                     self.tree.data.splice(0, self.tree.data.length);
@@ -143,6 +151,29 @@ define([
                         if(data){
                             self.loadTagTree();
                         }
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                treeNodeUp: function(node, nodeData){
+                    var self = this;
+                    var parentData = node.data;
+                    ajax.post('/cms/column/up', {
+                        columnId: parentData.id
+                    }, function(data, status){
+                        if(status !== 200) return;
+                        self.tree.data.splice(0, self.tree.data.length);
+                        self.tree.data.push({
+                            id:-1,
+                            uuid:'-1',
+                            name:'栏目列表',
+                            icon:'icon-tag',
+                            style:'font-size:15px; position:relative; top:1px; margin-right:1px;'
+                        });
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.tree.data.push(data[i]);
+                            }
+                        }
+                        //self.currentNode(self.tree.data[0]);
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 treeNodeEdit:function(node, data){

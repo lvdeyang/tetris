@@ -63,7 +63,7 @@
                             <el-button size="small" type="primary" @click="dialog.addTemplate.visible = true"><span class="icon-plus" style="margin-right:5px;"></span>添加模板</el-button>
                             <el-button size="small" type="warning"><span class="icon-trash" style="margin-right:5px;"></span>删除模板</el-button>
                         </div>
-                        <div style="position:absolute; top:54px; left:0; right:0; bottom:0;">
+                        <div style="position:absolute; top:54px; left:0; right:0; bottom:0;overflow-y:auto">
                             <el-table
                                     :data="table.data"
                                     style="width:100%">

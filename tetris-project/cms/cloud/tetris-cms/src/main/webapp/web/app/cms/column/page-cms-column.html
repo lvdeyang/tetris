@@ -32,12 +32,15 @@
                                     @node-drop="treeNodeDrop">
 
                             <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
-                                <span style="font-size:14px;">
+                                <span style="font-size:14px;max-width: 200px">
                                      <span>{{data.name}}</span>
                                 </span>
-                                <span v-if="data.id !== -1">
+                                <span v-if="data.id !== -1" style="background-color: #fff">
                                     <el-button v-if="!node.parent.data.length" type="text" size="mini" style="padding:0;" @click.stop="treeNodeTop(node, data)">
                                         <span style="font-size:15px; position:relative; bottom:1px; left:2px;" class="icon-arrow-up"></span>
+                                    </el-button>
+                                    <el-button v-if="data.columnOrder != 1" type="text" size="mini" style="padding:0;" @click.stop="treeNodeUp(node, data)">
+                                        <span style="font-size:15px; position:relative; bottom:1px; left:2px;" class="icon-chevron-up"></span>
                                     </el-button>
                                     <el-button type="text" size="mini" style="padding:0;" @click.stop="treeNodeEdit(node, data)">
                                         <span style="font-size:15px; position:relative; bottom:1px; left:2px;" class="icon-pencil"></span>
@@ -50,7 +53,6 @@
                                     </el-button>
                                 </span>
                               </span>
-
                             </el-tree>
                         </el-scrollbar>
                         <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="addRootTreeNode" :loading="loading.addRoot" icon="el-icon-plus"></el-button>

@@ -29,6 +29,7 @@ import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.classify.ClassifyVO;
 import com.sumavision.tetris.cms.relation.ColumnRelationArticleDAO;
 import com.sumavision.tetris.cms.relation.ColumnRelationArticlePO;
+import com.sumavision.tetris.cms.relation.ColumnRelationArticleVO;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserVO;
@@ -78,6 +79,14 @@ public class ColumnService {
 		ColumnPO columnPO = new ColumnPO();
 		columnPO.setName("新建的标签");
 		columnPO.setUpdateTime(new Date());
+		
+		List<ColumnVO> columnVOs = columnQuery.queryColumnRoot(user);
+		Collections.sort(columnVOs,new ColumnPO.ColumnVOOrderComparator());
+		if (columnVOs != null && columnVOs.size() > 0) {
+			columnPO.setColumnOrder(columnVOs.get(columnVOs.size()-1).getColumnOrder() + 1);
+		}else{
+			columnPO.setColumnOrder(1l);
+		}
 
 		columnDao.save(columnPO);
 		
@@ -100,6 +109,13 @@ public class ColumnService {
 		columnPO.setParentId(parent.getId());
 		columnPO.setParentPath(parentPath.toString());
 		columnPO.setUpdateTime(new Date());
+		
+		Long setOrder = 1l;
+		List<ColumnPO> columnVOs = columnDao.findByParentIdOrderByColumnOrder(parent.getId());
+		if (columnVOs != null && columnVOs.size() > 0) {
+			setOrder = columnVOs.get(columnVOs.size() - 1).getColumnOrder() + 1;
+		}
+		columnPO.setColumnOrder(setOrder);
 
 		columnDao.save(columnPO);
 		
@@ -153,6 +169,13 @@ public class ColumnService {
 
 		sourceCol.setParentId(targetCol.getId());
 		sourceCol.setParentPath(parentPath.toString());
+		
+		Long orderLong = 1l;
+		List<ColumnPO> columnPOs = columnDao.findByParentIdOrderByColumnOrder(targetCol.getId());
+		if (columnPOs != null && columnPOs.size() > 0) {
+			orderLong = columnPOs.get(columnPOs.size() - 1).getColumnOrder() + 1;
+		}
+		sourceCol.setColumnOrder(orderLong);
 
 		List<ColumnPO> subCols = columnQuery.findAllSubTags(sourceCol.getId());
 
@@ -174,6 +197,42 @@ public class ColumnService {
 
 		columnDao.save(subCols);
 	}
+	
+	/**
+	 * 栏目排序上移<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月8日 上午10:05:39
+	 * @param columnPO 要上移的标签
+	 */
+	public List<ColumnVO> up(ColumnPO columnPO,UserVO user) throws Exception{
+		List<ColumnPO> relations = columnDao.findByParentIdOrderByColumnOrder(columnPO.getParentId());
+		
+		if (columnPO.getParentId() != null && columnPO.getColumnOrder() != 1) {
+			Long newOrder = null;
+			Long oldOrder = null;
+			
+			if(relations != null && relations.size()>0){
+				for(int i=0; i<relations.size(); i++){
+					if(i != 0){
+						ColumnPO relation = relations.get(i);
+						ColumnPO upRelation = relations.get(i-1);
+						if(relation.getUuid().equals(columnPO.getUuid())){
+							newOrder = upRelation.getColumnOrder();
+							oldOrder = relation.getColumnOrder();
+							relation.setColumnOrder(newOrder);
+							upRelation.setColumnOrder(oldOrder);
+							columnDao.save(relations);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		Collections.sort(relations, new ColumnPO.ColumnOrderComparator());
+		return columnQuery.querycolumnTree(user);
+	}
 
 	/**
 	 * 置顶一个标签<br/>
@@ -184,7 +243,7 @@ public class ColumnService {
 	 * @param TemplateTagPO
 	 *            tag 待置顶的标签
 	 */
-	public void top(ColumnPO columnPO) throws Exception {
+	public void top(ColumnPO columnPO,UserVO user) throws Exception {
 
 		if (columnPO.getParentId() == null)
 			return;
@@ -199,6 +258,14 @@ public class ColumnService {
 				subCol.setParentPath(subCol.getParentPath().split(reg)[1]);
 			}
 
+		}
+		
+		List<ColumnVO> columnVOs = columnQuery.queryColumnRoot(user);
+		Collections.sort(columnVOs,new ColumnPO.ColumnVOOrderComparator());
+		if (columnVOs != null && columnVOs.size() > 0) {
+			columnPO.setColumnOrder(columnVOs.get(columnVOs.size()-1).getColumnOrder() + 1);
+		}else{
+			columnPO.setColumnOrder(1l);
 		}
 		
 		columnPO.setParentId(null);

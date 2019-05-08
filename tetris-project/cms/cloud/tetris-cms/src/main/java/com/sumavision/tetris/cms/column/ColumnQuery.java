@@ -2,11 +2,13 @@ package com.sumavision.tetris.cms.column;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.cms.relation.ColumnRelationArticlePO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserVO;
 @Component
@@ -21,9 +23,14 @@ public class ColumnQuery {
 	@Autowired
 	private ColumnUserPermissionDAO columnUserPermissionDao;
 	
-	public List<ColumnVO> queryColumnRoot() throws Exception {
+	public List<ColumnVO> queryColumnRoot(UserVO user) throws Exception {
 
-		List<ColumnPO> columns = columnDao.findAll();
+		List<ColumnPO> columns = null;
+		if(user.getGroupId() != null){
+			columns = columnDao.findByGroupId(user.getGroupId());
+		}else if(user.getUuid() != null){
+			columns = columnDao.findByUserId(user.getUuid());
+		}
 
 		List<ColumnVO> rootColumns = generateRootcolumns(columns);
 
@@ -83,6 +90,7 @@ public class ColumnQuery {
 			return;
 		for (int i = 0; i < rootcolumns.size(); i++) {
 			ColumnVO rootcolumn = rootcolumns.get(i);
+			List<ColumnVO> columnVOs = new ArrayList<ColumnVO>();
 			for (int j = 0; j < totalcolumns.size(); j++) {
 				ColumnPO column = totalcolumns.get(j);
 				if (column.getParentId() != null && column.getParentId() == rootcolumn.getId()) {
@@ -92,10 +100,13 @@ public class ColumnQuery {
 					if(columnSubscriptionDao.findByUserIdAndColumnId(userId, column.getId()) != null){
 						columnVO.setSubscribed(true);
 						rootcolumn.setSubColumnSubscribed(true);
-						
 					}
-					rootcolumn.getSubColumns().add(columnVO);
+					columnVOs.add(new ColumnVO().set(column));
 				}
+			}
+			if (columnVOs.size() > 0) {
+				Collections.sort(columnVOs,new ColumnPO.ColumnVOOrderComparator());
+				rootcolumn.getSubColumns().addAll(columnVOs);
 			}
 			if (rootcolumn.getSubColumns() != null && rootcolumn.getSubColumns().size() > 0) {
 				packColumnSubscriptionTree(userId,rootcolumn.getSubColumns(), totalcolumns);
@@ -112,6 +123,7 @@ public class ColumnQuery {
 				rootcolumns.add(new ColumnVO().set(column));
 			}
 		}
+		Collections.sort(rootcolumns, new ColumnPO.ColumnVOOrderComparator());
 		return rootcolumns;
 	}
 
@@ -120,13 +132,18 @@ public class ColumnQuery {
 			return;
 		for (int i = 0; i < rootcolumns.size(); i++) {
 			ColumnVO rootcolumn = rootcolumns.get(i);
+			List<ColumnVO> columnVOs = new ArrayList<ColumnVO>();
 			for (int j = 0; j < totalcolumns.size(); j++) {
 				ColumnPO column = totalcolumns.get(j);
 				if (column.getParentId() != null && column.getParentId() == rootcolumn.getId()) {
 					if (rootcolumn.getSubColumns() == null)
 						rootcolumn.setSubColumns(new ArrayList<ColumnVO>());
-					rootcolumn.getSubColumns().add(new ColumnVO().set(column));
+					columnVOs.add(new ColumnVO().set(column));
 				}
+			}
+			if (columnVOs.size() > 0) {
+				Collections.sort(columnVOs,new ColumnPO.ColumnVOOrderComparator());
+				rootcolumn.getSubColumns().addAll(columnVOs);
 			}
 			if (rootcolumn.getSubColumns() != null && rootcolumn.getSubColumns().size() > 0) {
 				packcolumnTree(rootcolumn.getSubColumns(), totalcolumns);
