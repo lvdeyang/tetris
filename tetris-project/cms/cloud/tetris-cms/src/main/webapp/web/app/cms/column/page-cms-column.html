@@ -36,9 +36,9 @@
                                      <span>{{data.name}}</span>
                                 </span>
                                 <span v-if="data.id !== -1" style="background-color: #fff">
-                                    <el-button v-if="!node.parent.data.length" type="text" size="mini" style="padding:0;" @click.stop="treeNodeTop(node, data)">
-                                        <span style="font-size:15px; position:relative; bottom:1px; left:2px;" class="icon-arrow-up"></span>
-                                    </el-button>
+                                    <!--<el-button v-if="!node.parent.data.length" type="text" size="mini" style="padding:0;" @click.stop="treeNodeTop(node, data)">-->
+                                        <!--<span style="font-size:15px; position:relative; bottom:1px; left:2px;" class="icon-arrow-up"></span>-->
+                                    <!--</el-button>-->
                                     <el-button v-if="data.columnOrder != 1" type="text" size="mini" style="padding:0;" @click.stop="treeNodeUp(node, data)">
                                         <span style="font-size:15px; position:relative; bottom:1px; left:2px;" class="icon-chevron-up"></span>
                                     </el-button>
