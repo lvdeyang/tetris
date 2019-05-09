@@ -206,9 +206,15 @@ public class ColumnService {
 	 * @param columnPO 要上移的标签
 	 */
 	public List<ColumnVO> up(ColumnPO columnPO,UserVO user) throws Exception{
-		List<ColumnPO> relations = columnDao.findByParentIdOrderByColumnOrder(columnPO.getParentId());
+		List<ColumnPO> relations;
 		
-		if (columnPO.getParentId() != null && columnPO.getColumnOrder() != 1) {
+		if (columnPO.getParentId() == null) {
+			relations = columnQuery.queryColumnRootPO(user);
+		}else {
+			relations = columnDao.findByParentIdOrderByColumnOrder(columnPO.getParentId());
+		}
+		
+		if (relations != null && relations.size() > 0 && columnPO.getColumnOrder() != 1) {
 			Long newOrder = null;
 			Long oldOrder = null;
 			
@@ -228,9 +234,10 @@ public class ColumnService {
 					}
 				}
 			}
+			
+			Collections.sort(relations, new ColumnPO.ColumnOrderComparator());
 		}
 		
-		Collections.sort(relations, new ColumnPO.ColumnOrderComparator());
 		return columnQuery.querycolumnTree(user);
 	}
 

@@ -36,6 +36,20 @@ public class ColumnQuery {
 
 		return rootColumns;
 	}
+	
+	public List<ColumnPO> queryColumnRootPO(UserVO user) throws Exception {
+
+		List<ColumnPO> columns = null;
+		if(user.getGroupId() != null){
+			columns = columnDao.findByGroupId(user.getGroupId());
+		}else if(user.getUuid() != null){
+			columns = columnDao.findByUserId(user.getUuid());
+		}
+
+		List<ColumnPO> rootColumns = generateRootcolumnsPO(columns);
+
+		return rootColumns;
+	}
 
 	/**
 	 * 根据用户查询栏目树<br/>
@@ -124,6 +138,19 @@ public class ColumnQuery {
 			}
 		}
 		Collections.sort(rootcolumns, new ColumnPO.ColumnVOOrderComparator());
+		return rootcolumns;
+	}
+	
+	private List<ColumnPO> generateRootcolumnsPO(Collection<ColumnPO> columns) throws Exception {
+		if (columns == null || columns.size() <= 0)
+			return null;
+		List<ColumnPO> rootcolumns = new ArrayList<ColumnPO>();
+		for (ColumnPO column : columns) {
+			if (column.getParentId() == null) {
+				rootcolumns.add(column);
+			}
+		}
+		Collections.sort(rootcolumns, new ColumnPO.ColumnOrderComparator());
 		return rootcolumns;
 	}
 
