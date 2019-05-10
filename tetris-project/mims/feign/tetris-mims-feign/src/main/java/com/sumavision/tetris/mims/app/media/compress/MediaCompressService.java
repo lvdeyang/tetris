@@ -26,10 +26,10 @@ public class MediaCompressService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月3日 上午9:49:53
 	 * @param String jsonString 播发媒资json描述
-	 * @param JSONArray mimsUuidList 打包媒资Uuid列表
+	 * @param JSONArray mimsUuidList 打包媒资列表
 	 * @return MediaCompressVO 生成的播发媒资
 	 */
-	public MediaCompressVO packageTar(String jsonString, List<String> mimsUuidList) throws Exception {
-		return JsonBodyResponseParser.parseObject(mediaCompressFeign.packageTar(jsonString, JSON.toJSONString(mimsUuidList)), MediaCompressVO.class);
+	public MediaCompressVO packageTar(String jsonString, List<FileCompressVO> mimsList) throws Exception {
+		return JsonBodyResponseParser.parseObject(mediaCompressFeign.packageTar(jsonString, JSON.toJSONString(mimsList)), MediaCompressVO.class);
 	}
 }

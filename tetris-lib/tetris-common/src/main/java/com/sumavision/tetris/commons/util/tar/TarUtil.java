@@ -71,7 +71,8 @@ public abstract class TarUtil {
         archive(srcFile, taos, BASE_DIR);  
   
         taos.flush();  
-        taos.close();  
+        taos.close();
+        
     }
     
     public static void archive(List<File> srcPaths, String dstPath) throws Exception{
@@ -93,7 +94,6 @@ public abstract class TarUtil {
         
         taos.flush();  
         taos.close();  
-    	
     }
   
     /** 
@@ -160,7 +160,7 @@ public abstract class TarUtil {
      *            TarArchiveOutputStream 
      * @param basePath 
      * @throws Exception 
-     */  
+     */ 
     private static void archiveDir(File dir, TarArchiveOutputStream taos,  
             String basePath) throws Exception {  
   
@@ -174,13 +174,19 @@ public abstract class TarUtil {
             taos.closeArchiveEntry();  
         }  
   
-        for (File file : files) {  
-  
-            // 递归归档  
-//            archive(file, taos, basePath + dir.getName() + PATH);  
-            archive(file, taos, basePath + PATH); 
-  
-        }  
+        // 递归归档  
+//        if (first) {
+//        	for (File file : files) { 
+//        		//不带文件目录
+//        		archive(file, taos, basePath + PATH); 
+//        		first = false;
+//            } 
+//		}else {
+			for (File file : files) {  
+    			//带文件目录
+    			archive(file, taos, basePath + dir.getName() + PATH);
+            }
+//		}
     }  
   
     /** 
@@ -207,7 +213,7 @@ public abstract class TarUtil {
          * 如果用WinRAR打开归档包，中文名将显示为乱码 
          * </pre> 
          */  
-        TarArchiveEntry entry = new TarArchiveEntry(dir + file.getName());  
+        TarArchiveEntry entry = new TarArchiveEntry(dir + file.getName());
   
         entry.setSize(file.length());  
   

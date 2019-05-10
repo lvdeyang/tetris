@@ -139,10 +139,10 @@ public class ApiServerMediaController {
 			HttpServletRequest request) throws Exception{
 		
 		//TODO:暂时自己创建一个UserVO
-		UserVO user = new UserVO().setGroupId("4")
+		UserVO user = new UserVO().setGroupId("2")
 								  .setGroupName("数码视讯")
-								  .setUuid("5")
-								  .setNickname("lvdeyang");
+								  .setUuid("578e7123f1354af798e78992cb56b340")
+								  .setNickname("lzp");
 		
 	    FolderType type = FolderType.fromPrimaryKey(folderType);
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());

@@ -79,14 +79,14 @@ public class AreaQuery {
 		return returnObject;
 	}
 
-	public List<AreaData> getRootDivision() {
+	public List<AreaData> getRootDivision() throws Exception {
 		return getChildDivision("3204000000");
 	}
 
-	public List<AreaData> getChildDivision(String areaId) {
+	public List<AreaData> getChildDivision(String areaId) throws Exception {
 		List<AreaData> returnList = new ArrayList<AreaData>();
 
-		JSONObject jsonObject = HttpRequestUtil.httpGet("http://" + ChannelBroadStatus.BROADCAST_IP
+		JSONObject jsonObject = HttpRequestUtil.httpGet("http://" + ChannelBroadStatus.getBroadcastIPAndPort()
 				+ "/ed/ed/regiondivision/queryDivisionTree?division=" + areaId);
 
 		if (jsonObject != null && jsonObject.containsKey("divisionTrees") && jsonObject.get("divisionTrees") != null) {

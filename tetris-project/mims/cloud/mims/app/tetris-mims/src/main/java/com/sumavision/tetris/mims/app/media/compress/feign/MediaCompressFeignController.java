@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.mims.app.media.compress.FileCompressVO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressDAO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
@@ -45,7 +46,7 @@ public class MediaCompressFeignController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月3日 上午9:49:53
 	 * @param String jsonString 播发媒资json描述
-	 * @param JSONArray mimsUuidList 打包媒资Uuid列表
+	 * @param JSONArray mimsUuidList 打包媒资列表
 	 * @return MediaCompressVO 生成的播发媒资
 	 */
 	@JsonBody
@@ -53,7 +54,7 @@ public class MediaCompressFeignController {
 	@RequestMapping(value = "/package/tar")
 	public Object packageTar(String jsonString, String mimsUuidList, HttpServletRequest httpServletRequest) throws Exception{
 		
-		return mediaCompressService.packageTar(jsonString, JSON.parseArray(mimsUuidList, String.class));
+		return mediaCompressService.packageTar(jsonString, JSON.parseArray(mimsUuidList, FileCompressVO.class));
 	}
 	
 }

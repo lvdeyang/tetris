@@ -22,7 +22,7 @@ public class ChannelQuery {
 	@Autowired
 	private VersionSendQuery versionSendQuery;
 
-	public List<ChannelPO> findAll(int currentPage, int pageSize) {
+	public List<ChannelPO> findAll(int currentPage, int pageSize) throws Exception {
 		Pageable page = new PageRequest(currentPage - 1, pageSize);
 		Page<ChannelPO> channels = channelDao.findAll(page);
 		freshBroadStatus(channels.getContent());
@@ -35,7 +35,7 @@ public class ChannelQuery {
 		return channelDao.findOne(channelId);
 	}
 
-	private void freshBroadStatus(List<ChannelPO> channelVOs) {
+	private void freshBroadStatus(List<ChannelPO> channelVOs) throws Exception {
 		if (channelVOs != null && channelVOs.size() > 0) {
 			List<String> broadId = new ArrayList<String>();
 
@@ -50,7 +50,7 @@ public class ChannelQuery {
 				JSONObject statusRequestJsonObject = new JSONObject();
 				statusRequestJsonObject.put("ids", broadId);
 				JSONObject response = HttpRequestUtil.httpPost(
-						"http://" + ChannelBroadStatus.BROADCAST_IP + "/ed/speaker/querySendFile",
+						"http://" + ChannelBroadStatus.getBroadcastIPAndPort() + "/ed/speaker/querySendFile",
 						statusRequestJsonObject);
 				if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
 					JSONArray statusArray = (JSONArray) response.get("data");

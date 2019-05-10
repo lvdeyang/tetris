@@ -13,14 +13,14 @@ public class VersionSendQuery {
 	@Autowired
 	VersionSendDAO versionSendDao;
 
-	public void addVersion(Long channelId, String version, String broadId, MediaCompressVO mediaCompress) {
+	public void addVersion(Long channelId, String version, String broadId, MediaCompressVO mediaCompress, String filePath) {
 		VersionSendPO versionPO = new VersionSendPO();
 		versionPO.setChannelId(channelId);
 		versionPO.setVersion(version);
 		versionPO.setBroadId(broadId);
 		versionPO.setFileName(mediaCompress.getName());
 		versionPO.setFileSize(mediaCompress.getSize());
-		versionPO.setFilePath(mediaCompress.getPreviewUrl());
+		versionPO.setFilePath(filePath);
 
 		versionSendDao.save(versionPO);
 	}
