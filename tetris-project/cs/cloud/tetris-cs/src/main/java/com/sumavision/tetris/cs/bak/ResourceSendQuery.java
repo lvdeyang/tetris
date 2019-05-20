@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 import com.sumavision.tetris.cs.menu.CsResourceQuery;
 import com.sumavision.tetris.cs.menu.CsResourceVO;
 
-import scala.annotation.elidable;
-
 @Component
 public class ResourceSendQuery {
 	@Autowired
@@ -20,25 +18,28 @@ public class ResourceSendQuery {
 	@Autowired
 	CsResourceQuery csResourceQuery;
 
-	public List<CsResourceVO> saveResource(Long channelId) throws Exception {
+	public List<CsResourceVO> getAddResource(Long channelId, Boolean save) throws Exception {
 		List<CsResourceVO> resources = csResourceQuery.getResourcesFromChannelId(channelId);
 		List<ResourceSendPO> previewResource = resourceSendDao.findByChannelId(channelId);
 		List<ResourceSendPO> saveResource = new ArrayList<ResourceSendPO>();
 
 		List<CsResourceVO> returnList = new ArrayList<CsResourceVO>();
 
-		resourceSendDao.deleteInBatch(previewResource);
+		if (save) {
+			resourceSendDao.deleteInBatch(previewResource);
+		}
+
 		if (resources != null && resources.size() > 0) {
-			List<String> mimsUuidList = new ArrayList<String>();
-			Iterator<CsResourceVO> it = resources.iterator();
-			while (it.hasNext()) {
-				CsResourceVO item = it.next();
-				if (mimsUuidList.contains(item.getMimsUuid())) {
-					it.remove();
-				} else {
-					mimsUuidList.add(item.getMimsUuid());
-				}
-			}
+			// List<String> mimsUuidList = new ArrayList<String>();
+			// Iterator<CsResourceVO> it = resources.iterator();
+			// while (it.hasNext()) {
+			// CsResourceVO item = it.next();
+			// if (mimsUuidList.contains(item.getMimsUuid())) {
+			// it.remove();
+			// } else {
+			// mimsUuidList.add(item.getMimsUuid());
+			// }
+			// }
 
 			for (CsResourceVO item : resources) {
 				ResourceSendPO sourceSend = new ResourceSendPO();
@@ -52,18 +53,21 @@ public class ResourceSendQuery {
 
 				if (previewResource != null && previewResource.size() > 0) {
 					for (int i = 0; i < previewResource.size(); i++) {
-						if (previewResource.get(i).getMimsUuid() == item.getMimsUuid()) {
+						if (previewResource.get(i).getMimsUuid().equals(item.getMimsUuid())
+								&& previewResource.get(i).getParentId() == item.getParentId()) {
 							break;
 						}
 						if (i == previewResource.size() - 1) {
 							returnList.add(item);
 						}
 					}
-				}else{
+				} else {
 					returnList.add(item);
 				}
 			}
-			resourceSendDao.save(saveResource);
+			if (save) {
+				resourceSendDao.save(saveResource);
+			}
 		}
 
 		return returnList;

@@ -8,7 +8,7 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class AreaVO extends AbstractBaseVO<AreaVO, AreaPO> {
 
 	private String name;
-	private Long areaId;
+	private String areaId;
 	private Long channelId;
 	private Long parentId;
 	private Boolean disabled = true;
@@ -36,11 +36,11 @@ public class AreaVO extends AbstractBaseVO<AreaVO, AreaPO> {
 		return this;
 	}
 	
-	public Long getAreaId() {
+	public String getAreaId() {
 		return areaId;
 	}
 
-	public AreaVO setAreaId(Long areaId) {
+	public AreaVO setAreaId(String areaId) {
 		this.areaId = areaId;
 		return this;
 	}
@@ -76,7 +76,8 @@ public class AreaVO extends AbstractBaseVO<AreaVO, AreaPO> {
 		return disabled;
 	}
 
-	public void setDisabled(Boolean disabled) {
+	public AreaVO setDisabled(Boolean disabled) {
 		this.disabled = disabled;
+		return this;
 	}
 }

@@ -11,6 +11,12 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 	private String name;
 	private String code;
 	private Long parentId;
+	/** 额外：标记订阅  */
+	private Boolean subscribed;
+	/** 额外：标记子栏目订阅 */
+	private Boolean subColumnSubscribed;
+	/** 新增：栏目顺序 */
+	private Long columnOrder;
 	private List<ColumnVO> subColumns;
 	private List<ArticleVO> articles;
 	
@@ -41,6 +47,15 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 		return this;
 	}
 
+	public Long getColumnOrder() {
+		return columnOrder;
+	}
+
+	public ColumnVO setColumnOrder(Long columnOrder) {
+		this.columnOrder = columnOrder;
+		return this;
+	}
+
 	public List<ColumnVO> getSubColumns() {
 		return subColumns;
 	}
@@ -59,6 +74,24 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 		return this;
 	}
 	
+	public Boolean getSubscribed() {
+		return subscribed;
+	}
+
+	public ColumnVO setSubscribed(Boolean subscribed) {
+		this.subscribed = subscribed;
+		return this;
+	}
+
+	public Boolean getSubColumnSubscribed() {
+		return subColumnSubscribed;
+	}
+
+	public ColumnVO setSubColumnSubscribed(Boolean subColumnSubscribed) {
+		this.subColumnSubscribed = subColumnSubscribed;
+		return this;
+	}
+
 	@Override
 	public ColumnVO set(ColumnPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -66,6 +99,7 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setCode(entity.getCode())
+			.setColumnOrder(entity.getColumnOrder())
 			.setParentId(entity.getParentId());
 		return this;
 	}

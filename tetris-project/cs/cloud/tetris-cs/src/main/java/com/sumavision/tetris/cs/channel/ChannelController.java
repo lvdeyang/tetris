@@ -1,6 +1,5 @@
 package com.sumavision.tetris.cs.channel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -74,8 +73,30 @@ public class ChannelController {
 	@RequestMapping(value = "/broadcast/start")
 	public Object broadcastStart(Long channelId, HttpServletRequest request) throws Exception {
 
-		channelService.startBroadcast(channelId);
+		return channelService.startBroadcast(channelId);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/stop")
+	public Object broadcastStop(Long channelId, HttpServletRequest request) throws Exception {
 
-		return null;
+		return channelService.stopBroadcast(channelId);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/status")
+	public Object broadcastStatus(Long channelId, HttpServletRequest request) throws Exception {
+
+		return channelService.getChannelBroadstatus(channelId);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/restart")
+	public Object broadcastRestart(Long channelId, HttpServletRequest request) throws Exception {
+
+		return channelService.restartBroadcast(channelId);
 	}
 }

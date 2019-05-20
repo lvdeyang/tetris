@@ -10,21 +10,21 @@ import com.sumavision.tetris.config.feign.FeignConfiguration;
 public interface ProcessFeign {
 
 	/**
-	 * 根据流程的主键启动流程<br/>
+	 * 锟斤拷锟斤拷锟斤拷锟教碉拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷<br/>
 	 * <p>
-	 * 	传来的变量分类：流程变量+接入点参数<br/>
-	 * 	接口中对变量的处理：<br/>
-	 * 		1.接入点参数关联关系处理<br/>
-	 * 		2.接入点参数赋值约束校验<br/>
-	 * 		3.处理流程变量中的引用值<br/>
-	 * 		4.加入内置变量<br/>
+	 * 	锟斤拷锟斤拷锟侥憋拷锟斤拷锟斤拷锟洁：锟斤拷锟教憋拷锟斤拷+锟斤拷锟斤拷锟斤拷锟斤拷<br/>
+	 * 	锟接匡拷锟叫对憋拷锟斤拷锟侥达拷锟斤拷<br/>
+	 * 		1.锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷系锟斤拷锟斤拷<br/>
+	 * 		2.锟斤拷锟斤拷锟斤拷锟斤拷锟斤拷值约锟斤拷校锟斤拷<br/>
+	 * 		3.锟斤拷锟斤拷锟斤拷锟教憋拷锟斤拷锟叫碉拷锟斤拷锟斤拷值<br/>
+	 * 		4.锟斤拷锟斤拷锟斤拷锟矫憋拷锟斤拷<br/>
 	 * </p>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年1月9日 下午2:41:31
-	 * @param String primaryKey 流程主键
-	 * @param JSONString variables 流程必要变量初始值
-	 * @return String processInstanceId 流程实例id
+	 * <b>锟斤拷锟斤拷:</b>lvdeyang<br/>
+	 * <b>锟芥本锟斤拷</b>1.0<br/>
+	 * <b>锟斤拷锟节ｏ拷</b>2019锟斤拷1锟斤拷9锟斤拷 锟斤拷锟斤拷2:41:31
+	 * @param String primaryKey 锟斤拷锟斤拷锟斤拷锟斤拷
+	 * @param JSONString variables 锟斤拷锟教憋拷要锟斤拷锟斤拷锟斤拷始值
+	 * @return String processInstanceId 锟斤拷锟斤拷实锟斤拷id
 	 */
 	@RequestMapping(value = "/process/feign/start/by/key")
 	public JSONObject startByKey(
@@ -32,14 +32,15 @@ public interface ProcessFeign {
 			@RequestParam("variables") String variables);
 	
 	/**
-	 * 异步服务节点回调<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年3月28日 上午10:58:46
-	 * @param String __processId__ 流程实例id
-	 * @param String __accessPointId__ 回调接入点id
-	 * @param JSONString variables 回传流程变量
+	 * 锟届步锟斤拷锟斤拷诘锟截碉拷<br/>
+	 * <b>锟斤拷锟斤拷:</b>lvdeyang<br/>
+	 * <b>锟芥本锟斤拷</b>1.0<br/>
+	 * <b>锟斤拷锟节ｏ拷</b>2019锟斤拷3锟斤拷28锟斤拷 锟斤拷锟斤拷10:58:46
+	 * @param String __processId__ 锟斤拷锟斤拷实锟斤拷id
+	 * @param String __accessPointId__ 锟截碉拷锟斤拷锟斤拷锟絠d
+	 * @param JSONString variables 锟截达拷锟斤拷锟教憋拷锟斤拷
 	 */
+	@RequestMapping(value = "/process/feign/receive/task/trigger")
 	public JSONObject receiveTaskTrigger(
 			@RequestParam("__processId__") String __processId__,
 			@RequestParam("__accessPointId__") Long __accessPointId__,

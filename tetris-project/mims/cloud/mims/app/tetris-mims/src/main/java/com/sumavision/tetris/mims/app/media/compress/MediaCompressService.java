@@ -23,6 +23,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.file.CopyFileUtil;
+import com.sumavision.tetris.commons.util.file.DeleteFileAndDir;
 import com.sumavision.tetris.commons.util.file.GetFileSizeUtil;
 import com.sumavision.tetris.commons.util.json.CreateFileUtil;
 import com.sumavision.tetris.commons.util.tar.TarUtil;
@@ -580,7 +582,7 @@ public class MediaCompressService {
 	 *            mimsIdList 打包媒资Id列表
 	 * @return MediaCompressVO 生成的播发媒资
 	 */
-	public MediaCompressVO packageTar(String jsonString, List<String> mimsUuidList) throws Exception {
+	public MediaCompressVO packageTar(String jsonString, List<FileCompressVO> mimsUuidList) throws Exception {
 		UserVO userVO = userQuery.current();
 		FolderPO folderPO = folderDao.findCompanyRootFolderByType(userVO.getGroupId(),
 				FolderType.COMPANY_COMPRESS.toString());
@@ -592,32 +594,76 @@ public class MediaCompressService {
 		MediaCompressPO mediaCompressPO = addTask(userVO, fileNameString, null, null, fileVersion,
 				new MediaCompressTaskVO().setName(fileNameString), folderPO);
 		String jsonPathString = mediaCompressPO.getUploadTmpPath().replace(fileNameString, "");
+		
+		StringBufferWrapper tarDirPath = new StringBufferWrapper().append(jsonPathString).append(fileNameString.replace(".tar", ""));
+		File tarDir = new File(tarDirPath.toString());
+		if (!tarDir.exists()) {
+			tarDir.mkdirs();
+		}
+		for(FileCompressVO item:mimsUuidList){
+			String[] filePaths = item.getPath().split("/");
+			StringBufferWrapper filePathBuffer = new StringBufferWrapper().append(tarDirPath.toString());
+			for (int i = 1; i < filePaths.length; i++) {
+				filePathBuffer.append("/").append(filePaths[i]);
+			}
+			File fileDir = new File(filePathBuffer.toString());
+			if (!fileDir.exists()) {
+				fileDir.mkdirs();
+			}
+			
+			String uploadPath = ""; 
+			MediaVideoPO mediaVideoPO = mediaVideoDAO.findByUuid(item.getUuid());
+			if (mediaVideoPO != null) {
+				uploadPath = mediaVideoPO.getUploadTmpPath();
+			}else {
+				MediaAudioPO mediaAudioPO = mediaAudioDAO.findByUuid(item.getUuid());
+				if (mediaAudioPO != null) {
+					uploadPath = mediaAudioPO.getUploadTmpPath();
+				}
+			}
+			
+			if (!uploadPath.isEmpty()) {
+				String[] pathLists = uploadPath.split("/");
+				String mediaName = pathLists[pathLists.length-1];
+				
+				String copyDest = new StringBufferWrapper().append(filePathBuffer.toString()).append("/").append(mediaName).toString();
+				
+				CopyFileUtil.copyFileUsingFileChannels(new File(uploadPath), new File(copyDest));
+			}
+		}
+		
 		// 根据json字符串生成json文件
-		CreateFileUtil.createJsonFile(jsonString, jsonPathString, "metadata");
+		String jsonPath = tarDirPath.toString();
+		CreateFileUtil.createJsonFile(jsonString, jsonPath, "metadata");
 
-		List<MediaVideoPO> mediaVideoPOs = new ArrayList<MediaVideoPO>();
-		List<MediaAudioPO> mediaAudioPOs = new ArrayList<MediaAudioPO>();
-		if (mimsUuidList != null && mimsUuidList.size() > 0) {
-			mediaVideoPOs = mediaVideoDAO.findByUuidIn(mimsUuidList);
-			mediaAudioPOs = mediaAudioDAO.findByUuidIn(mimsUuidList);
-		}
-
-		List<File> fileList = new ArrayList<File>();
-		for (MediaVideoPO item : mediaVideoPOs) {
-			fileList.add(new File(item.getUploadTmpPath()));
-		}
-		for (MediaAudioPO item : mediaAudioPOs) {
-			fileList.add(new File(item.getUploadTmpPath()));
-		}
-		File jsonFile = new File(new StringBufferWrapper().append(jsonPathString).append("metadata.json").toString());
-		fileList.add(jsonFile);
-		TarUtil.archive(fileList, mediaCompressPO.getUploadTmpPath());
+//		List<MediaVideoPO> mediaVideoPOs = new ArrayList<MediaVideoPO>();
+//		List<MediaAudioPO> mediaAudioPOs = new ArrayList<MediaAudioPO>();
+//		if (mimsUuidList != null && mimsUuidList.size() > 0) {
+//			mediaVideoPOs = mediaVideoDAO.findByUuidIn(mimsUuidList);
+//			mediaAudioPOs = mediaAudioDAO.findByUuidIn(mimsUuidList);
+//		}
+//
+//		List<File> fileList = new ArrayList<File>();
+//		for (MediaVideoPO item : mediaVideoPOs) {
+//			fileList.add(new File(item.getUploadTmpPath()));
+//		}
+//		for (MediaAudioPO item : mediaAudioPOs) {
+//			fileList.add(new File(item.getUploadTmpPath()));
+//		}
+//		File jsonFile = new File(tarDirPath.append("\\").append("metadata.json").toString());
+//		fileList.add(jsonFile);
+//		TarUtil.archive(fileList, mediaCompressPO.getUploadTmpPath());
+		TarUtil.archive(tarDir);
 		// 获取当前压缩包大小
 		mediaCompressPO.setSize(GetFileSizeUtil.getFileSize(new File(mediaCompressPO.getUploadTmpPath())));
 		mediaCompressPO.setUploadStatus(UploadStatus.COMPLETE);
 		mediaCompressDao.save(mediaCompressPO);
 		
-        jsonFile.delete();
+		if (tarDir.exists()) {
+			DeleteFileAndDir.deleteDirectory(tarDirPath.toString());
+		}
+		
+//        jsonFile.delete();
 
 		return new MediaCompressVO().set(mediaCompressPO);
 	}

@@ -12,4 +12,6 @@ public interface CsMenuDAO extends BaseDAO<CsMenuPO>{
 
 	@Query(value = "SELECT * FROM TETRIS_CS_CHANNEL_MENU WHERE CHANNEL_ID LIKE ?1", nativeQuery = true)
 	public List<CsMenuPO> findByChannelId(Long reg1);
+	
+	public List<CsMenuPO> findByParentId(Long parentId);
 }

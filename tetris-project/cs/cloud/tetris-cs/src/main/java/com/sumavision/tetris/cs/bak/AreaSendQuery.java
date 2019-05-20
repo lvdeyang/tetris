@@ -23,7 +23,6 @@ public class AreaSendQuery {
 			for(AreaSendPO item:previewList){
 				areaSendDao.delete(item);
 			}
-//			areaSendDao.deleteInBatch(previewList);
 		}
 		List<AreaVO> list = areaQuery.getCheckArea(channelId);
 		if (list != null && list.size() > 0) {
@@ -44,6 +43,19 @@ public class AreaSendQuery {
 	
 	public List<AreaSendPO> getArea(Long channelId){
 		List<AreaSendPO> returnList = areaSendDao.findByChannelId(channelId);
+		return returnList;
+	}
+	
+	public List<String> getAreaIdList(Long channelId){
+		List<String> returnList = new ArrayList<String>();
+		
+		List<AreaSendPO> areaSendPOs = getArea(channelId);
+		if (areaSendPOs != null && areaSendPOs.size() > 0) {
+			for(AreaSendPO item:areaSendPOs){
+				returnList.add(item.getAreaId());
+			}
+		}
+		
 		return returnList;
 	}
 }

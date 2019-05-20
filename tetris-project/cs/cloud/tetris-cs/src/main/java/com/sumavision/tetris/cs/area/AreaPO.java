@@ -16,7 +16,7 @@ public class AreaPO extends AbstractBasePO {
 	private static final long serialVersionUID = 1L;
 
 	private String name;
-	private Long AreaId;
+	private String AreaId;
 	private Long channelId;
 	private Long parentId;
 
@@ -30,11 +30,11 @@ public class AreaPO extends AbstractBasePO {
 	}
 
 	@Column(name = "AREA_ID")
-	public Long getAreaId() {
+	public String getAreaId() {
 		return AreaId;
 	}
 
-	public void setAreaId(Long areaId) {
+	public void setAreaId(String areaId) {
 		AreaId = areaId;
 	}
 

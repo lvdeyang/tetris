@@ -10,7 +10,6 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = ProgramPO.class, idClass = Long.class)
 public interface ProgramDAO extends BaseDAO<ProgramPO>{
 	
-	@Query(value = "SELECT * FROM TETRIS_CS_PROGRAM WHERE CHANNEL_ID LIKE ?1", nativeQuery = true)
-	public ProgramPO findByChannelId(Long reg1);
+	public ProgramPO findByChannelId(Long channelId);
 	
 }

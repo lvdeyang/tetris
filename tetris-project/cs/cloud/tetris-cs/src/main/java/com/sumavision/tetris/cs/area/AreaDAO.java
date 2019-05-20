@@ -11,4 +11,6 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface AreaDAO extends BaseDAO<AreaPO>{
 	@Query(value = "SELECT * FROM TETRIS_CS_AREA WHERE CHANNEL_ID LIKE ?1", nativeQuery = true)
 	public List<AreaPO> findByChannelId(Long reg1);
+	
+	public AreaPO findByChannelIdAndAreaId(Long channelId,String areaId);
 }
