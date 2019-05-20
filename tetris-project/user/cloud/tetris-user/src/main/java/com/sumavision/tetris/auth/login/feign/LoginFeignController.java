@@ -1,13 +1,10 @@
 package com.sumavision.tetris.auth.login.feign;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
 import com.sumavision.tetris.auth.login.LoginQuery;
 import com.sumavision.tetris.auth.login.LoginService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -39,10 +36,31 @@ public class LoginFeignController {
 			String username,
 			String password,
 			String verifyCode,
-			HttpServletRequest request, 
-			HttpServletResponse response) throws Exception{
+			HttpServletRequest request) throws Exception{
 		
 		return loginService.doPasswordLogin(username, password, verifyCode);
+	}
+	
+	/**
+	 * 开发者登录<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月22日 下午4:30:59
+	 * @param String appId 开发者id
+	 * @param String timestamp 时间戳
+	 * @param String sign 签名
+	 * @return String token
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/do/app/secret/login")
+	public Object doAppSecretLogin(
+			String appId, 
+			String timestamp, 
+			String sign,
+			HttpServletRequest request) throws Exception{
+		
+		return loginService.doAppSecretLogin(appId, timestamp, sign);
 	}
 	
 	/**
