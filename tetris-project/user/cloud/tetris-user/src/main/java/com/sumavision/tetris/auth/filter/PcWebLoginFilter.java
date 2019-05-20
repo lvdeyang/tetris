@@ -134,6 +134,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/index")
 												   .add("/index/*")
 												   .add("/user/feign/check/token")
+												   .add("/api/server/media/upload")
 												   /*.add("/user/feign/find/by/token")
 												   .add("/login/feign/do/password/login")
 												   .add("/login/feign/query/redirect/url")

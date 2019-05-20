@@ -1,9 +1,11 @@
 package com.sumavision.tetris.cs.channel;
 
-import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.commons.util.file.CopyFileUtil;
-import com.sumavision.tetris.commons.util.tar.TarUtil;
 import com.sumavision.tetris.cs.HttpRequestUtil;
 import com.sumavision.tetris.cs.area.AreaQuery;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
@@ -28,7 +28,9 @@ import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
+import com.sumavision.tetris.mims.app.media.compress.FileCompressVO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -127,107 +129,128 @@ public class ChannelService {
 		}
 	}
 	
-	public JSONObject startBroadcast(Long channelId) throws Exception {
-		String path = "C:\\Users\\sms\\Desktop\\20190510112944";
-		
-//		String path1 = path + "\\newSubFile";
-//		File file1= new File(path1);
-//		Boolean check;
-//		if (!file1.exists()) {
-//			check = file1.mkdirs();
-//		}
-//		
-//		CopyFileUtil.copyFileUsingFileChannels("C:\\Users\\sms\\Desktop\\newFileTest\\duofen.mp4", path1 + "\\duofen.mp4");
-		TarUtil.archive(new File(path));
-		
-		return getReturnJSON(true, "");
-	}
-
 //	public JSONObject startBroadcast(Long channelId) throws Exception {
-//		// 校验播发状态
-//		String broadStatus = getChannelBroadstatus(channelId);
-//		if (!broadStatus.isEmpty() && !broadStatus.equals("发送完成")) {
-//			return getReturnJSON(false, "当前频道未处于可播发状态");
-//		}
-//		// 校验播发条件
-//		List<String> areaVOs = areaQuery.getCheckAreaIdList(channelId);
-//		if (areaVOs == null || areaVOs.size() <= 0) {
-//			return getReturnJSON(false, "播发地区为空，播发任务自动取消");
-//		}
-//		// 获取媒资增量
-//		List<CsResourceVO> addResourceList = resourceSendQuery.getAddResource(channelId, false);
-//		Map<String, CsResourceVO> resourceMap = new HashMap<String, CsResourceVO>();
-//		for (CsResourceVO item : addResourceList) {
-//			String[] previewUrl = item.getPreviewUrl().split("/");
-//			resourceMap.put(previewUrl[previewUrl.length - 1], item);
-//		}
-//		// 生成json字符串
-//		JSONObject textJson = new JSONObject();
-//		String newVersion = versionSendQuery.getNewVersion(versionSendQuery.getLastVersion(channelId));
-//		String effectTime = "null";
-//
-//		textJson.put("fileSize", "");
-//		textJson.put("version", newVersion);
-//		textJson.put("effectTime", effectTime);
-//		textJson.put("dir", this.getMenuAndResourcePath(channelId));
-////		textJson.put("files", this.getFilesPath(addResourceList));
-//		textJson.put("screens", this.programText(programQuery.getProgram(channelId)));
-//
-//		// 打包
-//		Date currentTime = new Date();
-//		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-//		String dateString = formatter.format(currentTime);
-//		textJson.put("file", dateString + ".tar");
-//
-////		List<String> mimsUuidList = new ArrayList<String>();
-////		for (CsResourceVO item : addResourceList) {
-////			mimsUuidList.add(item.getMimsUuid());
+//		CloseableHttpClient httpclient = HttpClients.createDefault();
+//		HttpPost httppost =new HttpPost("http://192.165.56.85:8085/api/server/media/upload");
+//		//httppost.setHeader("Content-Type", "multipart/form-data");
+//		//httppost.setHeader("tetris-001", "54118583a03b45799a58c7de27771652");
+//		MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+//		ContentType contentType = ContentType.create("text/plain",Charset.forName("UTF-8"));
+//		
+//		entityBuilder.addPart("uuid",new StringBody("aaa",contentType));
+//		entityBuilder.addPart("folderType",new StringBody("compress",contentType));
+//		entityBuilder.addPart("type",new StringBody("application/x-tar",contentType));
+//		
+//		String filePath = "C:\\Users\\sms\\Desktop\\duofen.mp4";
+//		InputStream fis = new FileInputStream(new File(filePath));
+//		byte[] bytes = FileCopyUtils.copyToByteArray(fis);
+////		entityBuilder.addBinaryBody("block", bytes);
+//		entityBuilder.addPart("block", new ByteArrayBody(bytes, "duofen.mp4"));
+//		
+//		httppost.setEntity(entityBuilder.build());
+//		httpclient.execute(httppost);
+//		
+//		
+////		String path = "C:\\Users\\sms\\Desktop\\20190510112944";
+//		
+////		String path1 = path + "\\newSubFile";
+////		File file1= new File(path1);
+////		Boolean check;
+////		if (!file1.exists()) {
+////			check = file1.mkdirs();
 ////		}
+////		
+////		CopyFileUtil.copyFileUsingFileChannels("C:\\Users\\sms\\Desktop\\newFileTest\\duofen.mp4", path1 + "\\duofen.mp4");
+////		TarUtil.archive(new File(path));
 //		
-//		List<FileCompressVO> fileCompressVOs = new ArrayList<FileCompressVO>();
-//		if (addResourceList!= null && addResourceList.size() > 0) {
-//			for(CsResourceVO item : addResourceList){
-//				fileCompressVOs.add(new FileCompressVO().setPath(item.getParentPath()).setUuid(item.getMimsUuid()));
-//			}
-//		}
-//		
-//		MediaCompressVO mediaCompressVO = mediaCompressService.packageTar(textJson.toString(), fileCompressVOs);
-//
-//		// 请求播发
-//		String broadIdString = channelId.toString() + newVersion.split("v")[1];
-//		JSONObject broadJsonObject = new JSONObject();
-//
-//		broadJsonObject.put("id", broadIdString);
-//		String filePath = "";
-//		if (ChannelBroadStatus.getBroadcastIfLocal()) {
-//			filePath = mediaCompressVO.getUploadTmpPath();
-//		}else {
-//			filePath = mediaCompressVO.getPreviewUrl();
-//		}
-//		broadJsonObject.put("filePath", filePath);
-//		broadJsonObject.put("fileSize", mediaCompressVO.getSize());
-//		broadJsonObject.put("regionList", areaVOs);
-//
-//		JSONObject response = HttpRequestUtil
-//				.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort() + "/ed/speaker/startSendFile", broadJsonObject);
-//
-//		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
-//			// 播发成功处理
-//
-//			// 备份播发媒资全量
-//			resourceSendQuery.getAddResource(channelId, true);
-//
-//			// 备份播发地区
-//			areaSendQuery.saveArea(channelId);
-//
-//			// 保存播发版本
-//			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath);
-//
-//			return getReturnJSON(true, "");
-//		} else {
-//			return getReturnJSON(false, "播发未知错误");
-//		}
+//		return getReturnJSON(true, "");
 //	}
+
+	public JSONObject startBroadcast(Long channelId) throws Exception {
+		// 校验播发状态
+		String broadStatus = getChannelBroadstatus(channelId);
+		if (!broadStatus.isEmpty() && !broadStatus.equals("发送完成")) {
+			return getReturnJSON(false, "当前频道未处于可播发状态");
+		}
+		// 校验播发条件
+		List<String> areaVOs = areaQuery.getCheckAreaIdList(channelId);
+		if (areaVOs == null || areaVOs.size() <= 0) {
+			return getReturnJSON(false, "播发地区为空，播发任务自动取消");
+		}
+		// 获取媒资增量
+		List<CsResourceVO> addResourceList = resourceSendQuery.getAddResource(channelId, false);
+		Map<String, CsResourceVO> resourceMap = new HashMap<String, CsResourceVO>();
+		for (CsResourceVO item : addResourceList) {
+			String[] previewUrl = item.getPreviewUrl().split("/");
+			resourceMap.put(previewUrl[previewUrl.length - 1], item);
+		}
+		// 生成json字符串
+		JSONObject textJson = new JSONObject();
+		String newVersion = versionSendQuery.getNewVersion(versionSendQuery.getLastVersion(channelId));
+		String effectTime = "null";
+
+		textJson.put("fileSize", "");
+		textJson.put("version", newVersion);
+		textJson.put("effectTime", effectTime);
+		textJson.put("dir", this.getMenuAndResourcePath(channelId));
+//		textJson.put("files", this.getFilesPath(addResourceList));
+		textJson.put("screens", this.programText(programQuery.getProgram(channelId)));
+
+		// 打包
+		Date currentTime = new Date();
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
+		String dateString = formatter.format(currentTime);
+		textJson.put("file", dateString + ".tar");
+
+		List<String> mimsUuidList = new ArrayList<String>();
+		for (CsResourceVO item : addResourceList) {
+			mimsUuidList.add(item.getMimsUuid());
+		}
+		
+		List<FileCompressVO> fileCompressVOs = new ArrayList<FileCompressVO>();
+		if (addResourceList!= null && addResourceList.size() > 0) {
+			for(CsResourceVO item : addResourceList){
+				fileCompressVOs.add(new FileCompressVO().setPath(item.getParentPath()).setUuid(item.getMimsUuid()));
+			}
+		}
+		
+		MediaCompressVO mediaCompressVO = mediaCompressService.packageTar(textJson.toString(), fileCompressVOs);
+
+		// 请求播发
+		String broadIdString = channelId.toString() + newVersion.split("v")[1];
+		JSONObject broadJsonObject = new JSONObject();
+
+		broadJsonObject.put("id", broadIdString);
+		String filePath = "";
+		if (ChannelBroadStatus.getBroadcastIfLocal()) {
+			filePath = mediaCompressVO.getUploadTmpPath();
+		}else {
+			filePath = mediaCompressVO.getPreviewUrl();
+		}
+		broadJsonObject.put("filePath", filePath);
+		broadJsonObject.put("fileSize", mediaCompressVO.getSize());
+		broadJsonObject.put("regionList", areaVOs);
+
+		JSONObject response = HttpRequestUtil
+				.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort() + "/ed/speaker/startSendFile", broadJsonObject);
+
+		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+			// 播发成功处理
+
+			// 备份播发媒资全量
+			resourceSendQuery.getAddResource(channelId, true);
+
+			// 备份播发地区
+			areaSendQuery.saveArea(channelId);
+
+			// 保存播发版本
+			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath);
+
+			return getReturnJSON(true, "");
+		} else {
+			return getReturnJSON(false, "播发未知错误");
+		}
+	}
 
 	public JSONObject restartBroadcast(Long channelId) throws Exception {
 		JSONObject broadJsonObject = new JSONObject();

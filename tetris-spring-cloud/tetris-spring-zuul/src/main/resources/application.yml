@@ -30,7 +30,11 @@ spring:
 #      test-while-idle : true
 #      test-on-borrow : true
 #      time-between-eviction-runs-millis : 600000
-#      min-evictable-idle-time-millis : 3600000         
+#      min-evictable-idle-time-millis : 3600000     
+  #http文件上传    
+  #http: 
+  #  multipart:
+  #    enabled: true    
 server:
   port: 8082      
 zuul:
