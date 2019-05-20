@@ -19,7 +19,6 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
@@ -145,11 +144,81 @@ public class MediaVideoService {
 		if(!file.exists()) file.mkdirs();
 		//这个地方保证每个任务的路径都不一样
 		Thread.sleep(1);
+		
+		String storePath = new StringBufferWrapper().append(folderPath)
+												    .append(separator)
+												    .append(task.getName())
+												    .toString();
+		
+		String previewUrl = new StringBufferWrapper().append("upload/tmp/")
+												     .append(user.getGroupName())
+												     .append("/")
+												     .append(folder.getUuid())
+												     .append("/")
+												     .append(fileNamePrefix)
+												     .append("/")
+												     .append(version)
+												     .append("/")
+												     .append(task.getName())
+												     .toString();
+		
+		return addTask(user, fileNamePrefix, tags, keyWords, remark, task, folder, version, storePath, previewUrl, date);
+	}
+	
+	/**
+	 * 添加视频媒资上传任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月23日 下午1:33:53
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param MediaAudioTaskVO task 上传任务
+	 * @param FolderPO folder 文件夹
+	 * @param String version 版本
+	 * @param String storePath 存储路径
+	 * @param String previewUrl 预览地址
+	 * @param Date date 当前时间
+	 * @return MediaVideoPO 视频媒资
+	 */
+	public MediaVideoPO addTask(
+			UserVO user, 
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			MediaVideoTaskVO task, 
+			FolderPO folder,
+			String version,
+			String storePath,
+			String previewUrl,
+			Date date) throws Exception{
+		
 		MediaVideoPO entity = new MediaVideoPO();
 		entity.setLastModified(task.getLastModified());
 		entity.setName(name);
-		entity.setTags("");
-		entity.setKeyWords("");
+		StringBufferWrapper transTag = new StringBufferWrapper();
+		if(tags!=null && tags.size()>0){
+			for(int i=0; i<tags.size(); i++){
+				transTag.append(tags.get(i));
+				if(i != tags.size()-1){
+					transTag.append(MediaVideoPO.SEPARATOR_TAG);
+				}
+			}
+		}
+		entity.setTags(transTag.toString());
+		StringBufferWrapper transKeyWords = new StringBufferWrapper();
+		if(keyWords!=null && keyWords.size()>0){
+			for(int i=0; i<keyWords.size(); i++){
+				transKeyWords.append(keyWords.get(i));
+				if(i != keyWords.size()-1){
+					transKeyWords.append(MediaVideoPO.SEPARATOR_KEYWORDS);
+				}
+			}
+		}
+		entity.setKeyWords(transKeyWords.toString());
 		entity.setRemarks(remark);
 		entity.setAuthorId(user.getUuid());
 		entity.setAuthorName(user.getNickname());
@@ -160,23 +229,9 @@ public class MediaVideoService {
 		entity.setFolderId(folder.getId());
 		entity.setUploadStatus(UploadStatus.UPLOADING);
 		entity.setStoreType(StoreType.LOCAL);
-		entity.setUploadTmpPath(new StringBufferWrapper().append(folderPath)
-												   .append(separator)
-												   .append(task.getName())
-												   .toString());
-		entity.setPreviewUrl(new StringBufferWrapper().append("upload/tmp/")
-													  .append(user.getGroupName())
-													  .append("/")
-													  .append(folder.getUuid())
-													  .append("/")
-													  .append(fileNamePrefix)
-													  .append("/")
-													  .append(version)
-													  .append("/")
-													  .append(task.getName())
-													  .toString());
+		entity.setUploadTmpPath(storePath);
+		entity.setPreviewUrl(previewUrl);
 		entity.setUpdateTime(date);
-		
 		mediaVideoDao.save(entity);
 		
 		return entity;

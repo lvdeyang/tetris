@@ -112,6 +112,7 @@ public class UserQuery {
 	 * @return UserPO 用户
 	 */
 	public UserVO findByToken(String token) throws Exception{
+		if(token == null) return null;
 		UserPO userEntity = userDao.findByToken(token);
 		if(userEntity == null) return null;
 		

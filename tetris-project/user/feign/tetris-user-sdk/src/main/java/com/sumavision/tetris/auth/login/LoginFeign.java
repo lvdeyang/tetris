@@ -26,6 +26,21 @@ public interface LoginFeign {
 			@RequestParam("password") String password, 
 			@RequestParam("verifyCode") String verifyCode) throws Exception;
 	
+	/**
+	 * 开发者登录<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月22日 下午4:30:59
+	 * @param String appId 开发者id
+	 * @param String timestamp 时间戳
+	 * @param String sign 签名
+	 * @return String token
+	 */
+	@RequestMapping(value = "/login/feign/do/app/secret/login")
+	public JSONObject doAppSecretLogin(
+			@RequestParam("appId") String appId, 
+			@RequestParam("timestamp") String timestamp, 
+			@RequestParam("sign") String sign) throws Exception;
 	
 	/**
 	 * 登录成功后重定向的页面<br/>

@@ -14,7 +14,7 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.60
+      ipAddress: 192.165.56.71
 #  profiles:
 #    active: pro
   datasource:

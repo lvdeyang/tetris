@@ -38,6 +38,24 @@ public class LoginService {
 	}
 	
 	/**
+	 * 开发者登录<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月22日 下午4:30:59
+	 * @param String appId 开发者id
+	 * @param String timestamp 时间戳
+	 * @param String sign 签名
+	 * @return String token
+	 */
+	public String doAppSecretLogin(
+			String appId,
+			String timestamp,
+			String sign) throws Exception{
+		JSONObject response = loginFeign.doAppSecretLogin(appId, timestamp, sign);
+		return JsonBodyResponseParser.parseObject(response, String.class);
+	}
+	
+	/**
 	 * 用户注销登录<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
