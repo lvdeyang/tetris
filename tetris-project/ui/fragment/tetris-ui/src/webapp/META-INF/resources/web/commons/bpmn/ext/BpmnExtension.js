@@ -410,7 +410,7 @@ define([
                 var shape = elementFactory.createShape(assign({ type: type }, options));
 
                 if(service){
-                    shape.businessObject.$attrs['activiti:expression'] = service.expression;
+                    shape.businessObject.$attrs['activiti:expression'] = '#{' + service.expression + '}';
                     shape.businessObject.name = service.name;
                     shape.businessObject.$attrs['extension:removeable'] = service.removeable;
                     shape.businessObject.$attrs['extension:type'] = service.type;
@@ -427,7 +427,7 @@ define([
 
                 var shape = elementFactory.createShape(assign({ type: type }, options));
                 if(service){
-                    shape.businessObject.$attrs['activiti:expression'] = service.expression;
+                    shape.businessObject.$attrs['activiti:expression'] = '#{' + service.expression + '}';
                     shape.businessObject.name = service.name;
                     shape.businessObject.$attrs['extension:removeable'] = service.removeable;
                     shape.businessObject.$attrs['extension:type'] = service.type;
@@ -676,7 +676,7 @@ define([
                                 return function(){
                                     var oldType = businessObject.$attrs['extension:type'];
                                     var oldId = businessObject.$attrs['extension:reference'];
-                                    businessObject.$attrs['activiti:expression'] = scope.expression;
+                                    businessObject.$attrs['activiti:expression'] = '#{' + scope.expression + '}';
                                     businessObject.name = scope.name;
                                     businessObject.$attrs['extension:removeable'] = scope.removeable;
                                     businessObject.$attrs['extension:type'] = scope.type;
@@ -771,7 +771,7 @@ define([
 
                 if(service){
                     if(!shape.businessObject.$attrs) shape.businessObject.$attrs = {};
-                    shape.businessObject.$attrs['activiti:expression'] = service.expression;
+                    shape.businessObject.$attrs['activiti:expression'] = '#{' + service.expression + '}';
                     shape.businessObject.name = service.name;
                     shape.businessObject.$attrs['extension:removeable'] = service.removeable;
                     shape.businessObject.$attrs['extension:type'] = service.type;

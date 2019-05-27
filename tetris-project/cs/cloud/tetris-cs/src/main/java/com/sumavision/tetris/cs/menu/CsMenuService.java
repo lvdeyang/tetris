@@ -77,9 +77,13 @@ public class CsMenuService {
 	public CsMenuPO removePO(Long menuId) throws Exception {
 		CsMenuPO menuPO = menuDao.findOne(menuId);
 
-		menuDao.delete(menuPO);
-		this.deleteMenuTree(menuId);
-		csResourceService.removeResourcesByMenuId(menuId, menuPO.getChannelId());
+		if(menuPO != null){
+			menuDao.delete(menuPO);
+			this.deleteMenuTree(menuId);
+			csResourceService.removeResourcesByMenuId(menuId, menuPO.getChannelId());
+		}else {
+			this.deleteMenuTree(menuId);
+		}
 
 		return menuPO;
 	}
@@ -100,7 +104,7 @@ public class CsMenuService {
 	}
 
 	public void removeMenuByChannelId(Long channelId) throws Exception {
-		List<CsMenuPO> menuList = menuDao.findByChannelId(channelId);
+		List<CsMenuPO> menuList = menuDao.findByChannelIdAndParentId(channelId, -1l);
 		if (menuList != null && menuList.size() > 0) {
 			for (int i = 0; i < menuList.size(); i++) {
 				removePO(menuList.get(i).getId());

@@ -67,6 +67,7 @@ import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistEx
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
+import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -115,6 +116,8 @@ public class ApiServerMediaController {
 	@Autowired
 	private MediaCompressDAO mediaCompressDao;
 	
+	@Autowired
+	private UserQuery userQuery;
 	/**
 	 * 添加上传任务<br/>
 	 * <b>作者:</b>ldy<br/>
@@ -139,10 +142,11 @@ public class ApiServerMediaController {
 			HttpServletRequest request) throws Exception{
 		
 		//TODO:暂时自己创建一个UserVO
-		UserVO user = new UserVO().setGroupId("2")
-								  .setGroupName("数码视讯")
-								  .setUuid("578e7123f1354af798e78992cb56b340")
-								  .setNickname("lzp");
+//		UserVO user = new UserVO().setGroupId("2")
+//								  .setGroupName("数码视讯")
+//								  .setUuid("119582623823434592de244140fb64cd")
+//								  .setNickname("yjgb");
+		UserVO user = userQuery.current();
 		
 	    FolderType type = FolderType.fromPrimaryKey(folderType);
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());

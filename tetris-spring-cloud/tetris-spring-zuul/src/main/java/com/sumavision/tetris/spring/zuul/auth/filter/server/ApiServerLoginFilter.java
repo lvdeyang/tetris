@@ -19,7 +19,8 @@ public class ApiServerLoginFilter extends ZuulFilter{
 
 	private String[] ignores = new String[]{
 		"/api/server/cms/*", 
-		""
+		"/api/server/compress/*",
+		"/api/server/article/generate/with/internal/template"
 	};
 	
 	@Override

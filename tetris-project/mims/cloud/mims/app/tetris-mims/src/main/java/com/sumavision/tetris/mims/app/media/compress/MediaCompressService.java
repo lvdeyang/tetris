@@ -327,7 +327,7 @@ public class MediaCompressService {
 	 */
 	public Map<String, String> parse(String path) throws Exception {
 
-		UserVO user = new UserVO().setGroupId("2").setGroupName("数码视讯").setUuid("3").setNickname("应急广播播发媒资用户");
+		UserVO user = new UserVO().setGroupId("2").setGroupName("数码视讯").setUuid("119582623823434592de244140fb64cd").setNickname("yjgb");
 
 		File file = new File(path);
 		String parentFilePath = new File(file.getParent()).getParent();
