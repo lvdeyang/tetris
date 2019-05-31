@@ -3,7 +3,7 @@ spring:
     name: tetris-spring-zuul
   cloud:
     client:
-      ipAddress: 192.165.56.85
+      ipAddress: 192.165.56.71
   datasource:
     base:
       url: jdbc:mysql://localhost:3306/zuul?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
@@ -32,12 +32,15 @@ spring:
 #      time-between-eviction-runs-millis : 600000
 #      min-evictable-idle-time-millis : 3600000     
   #http文件上传    
-  #http: 
-  #  multipart:
-  #    enabled: true    
+  http:
+    multipart:
+      file-size-threshold: 1Mb
+      max-file-size: 1000Mb
+      max-request-size: 1000Mb
 server:
   port: 8082      
 zuul:
+  servlet-path: /
 #需要忽略的头部信息，不在传播到其他服务
   sensitive-headers: Access-Control-Allow-Origin
   ignored-headers: Access-Control-Allow-Origin,H-APP-Id,Token,APPToken
@@ -64,7 +67,7 @@ eureka:
   client:
 #注册中心地址
     service-url:
-      defaultZone: http://192.165.56.85:8081/eureka/
+      defaultZone: http://192.165.56.60:8081/eureka/
 #security:
 #  basic:
 #    enabled: false
@@ -86,5 +89,8 @@ hystrix:
           enabled: false
         isolation:
           thread: 
-            timeoutInMilliseconds: 5000
+            timeoutInMilliseconds: 60000
           strategy: SEMAPHORE
+ribbon:
+  ConnectTimeout: 3000
+  ReadTimeout: 60000          
