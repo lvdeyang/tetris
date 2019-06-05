@@ -27,6 +27,8 @@ import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
+import com.sumavision.tetris.organization.CompanyUserPermissionDAO;
+import com.sumavision.tetris.organization.CompanyUserPermissionPO;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
 
 @Component
@@ -39,6 +41,9 @@ public class UserQuery {
 	
 	@Autowired
 	private CompanyDAO companyDao;
+	
+	@Autowired
+	private CompanyUserPermissionDAO companyUserPermissionDAO;
 	
 	/**
 	 * 用户登录校验<br/>
@@ -283,6 +288,68 @@ public class UserQuery {
 	public List<UserPO> findByCompanyIdWithExcept(Long companyId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		Page<UserPO> users = userDao.findByCompanyIdWithExcept(companyId, except, page);
+		return users.getContent();
+	}
+	
+	/**
+	 * 分页查询用户（前端接口，增加管理员过滤，跟隶属角色无关）<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月28日 下午5:32:06
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @param long userId 用户id
+	 * @return List<UserVO> 用户列表
+	 */
+	public Map<String, Object> list(int currentPage, int pageSize,Long userId) throws Exception{
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		List<Long> userList = new ArrayList<Long>();
+		userList.add(userId);
+		if (companyPO != null) {
+			return listByCompanyIdWithExcept(companyPO.getId(), userList, currentPage, pageSize);
+		}else {
+			return null;
+		}
+	}
+	
+	/**
+	 * 分页查询公司下的用户列表（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:17:57
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	public Map<String, Object> listByRoleIdWithExcept(Long roleId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		int total = userDao.countByRoleIdWithExcept(roleId, except);
+		List<UserPO> users = findByRoleIdWithExcept(roleId, except, currentPage, pageSize);
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			view_users = UserVO.getConverter(UserVO.class).convert(users, UserVO.class);
+		}
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", view_users)
+												   .getMap();
+	}
+	
+	/**
+	 * 分页查询公司下的用户（带例外）<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月30日 上午11:12:38
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByRoleIdWithExcept(Long roleId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> users = userDao.findByRoleIdWithExcept(roleId, except, page);
 		return users.getContent();
 	}
 	

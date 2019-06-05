@@ -249,4 +249,33 @@ public class UserController {
 		return userService.edit(id, nickname, mobile, mail, editPassword, oldPassword, newPassword, repeat);
 	}
 	
+	/**
+	 * 分页查询用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月19日 上午8:29:31
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<UserVO> 用户列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/subordinate/list")
+	public Object listBySubordinate(
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request,
+			HttpServletResponse response) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		if(user.getId() != null){
+			return userQuery.list(currentPage, pageSize,user.getId());
+		}else if(user.getUuid() != null){
+			return userQuery.list(currentPage, pageSize,Long.parseLong(user.getUuid()));
+		}else {
+			return null;
+		}
+	}
 }

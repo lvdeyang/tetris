@@ -49,7 +49,9 @@ require.config({
         'page-bind-user':window.APPPATH + 'bind-user/page-bind-user',
         'page-company':window.APPPATH + 'company/page-company',
         'page-organization':window.APPPATH + 'organization/page-organization',
-        'page-development-basic':window.APPPATH + 'development/basic/page-development-basic'
+        'page-development-basic':window.APPPATH + 'development/basic/page-development-basic',
+        'page-subordinate-user':window.APPPATH + 'subordinate/user/page-subordinate-user',
+        'page-subordinate-role':window.APPPATH + 'subordinate/role/page-subordinate-role'
     },
     shim:{
         'vue':{

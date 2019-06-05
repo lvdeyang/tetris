@@ -3,8 +3,9 @@ package com.sumavision.tetris.mims.app.media.compress;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +22,6 @@ import org.springframework.util.ResourceUtils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.file.CopyFileUtil;
 import com.sumavision.tetris.commons.util.file.DeleteFileAndDir;
@@ -364,6 +364,24 @@ public class MediaCompressService {
 		TarUtil.dearchive(file, parseFile);
 
 		File[] fileList = parseFile.listFiles();
+		
+		Arrays.sort(fileList, new Comparator<File>() {
+            public int compare(File f1, File f2) {
+                long diff = f1.lastModified() - f2.lastModified();
+                if (diff > 0)
+                    return 1;
+                else if (diff == 0)
+                    return 0;
+                else
+                    return -1;
+            }
+
+            public boolean equals(Object obj) {
+                return true;
+            }
+
+        });
+		
 		for (File f : fileList) {
 			String fileName = f.getName();
 			String name = fileName.split("\\.")[0];

@@ -1,13 +1,13 @@
-package com.sumavision.tetris.api.qt;
+package com.sumavision.tetris.api.android;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.sumavision.tetris.api.exception.ImageVerificationCodeErrorException;
-import com.sumavision.tetris.api.exception.ImageVerificationCodeTimeoutException;
+
 import com.sumavision.tetris.api.exception.MobileNotMatchedException;
 import com.sumavision.tetris.api.exception.MobileVerificationCodeErrorException;
 import com.sumavision.tetris.api.exception.MobileVerificationCodeTimeoutException;
@@ -18,8 +18,8 @@ import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserService;
 
 @Controller
-@RequestMapping(value = "/api/qt/auth")
-public class ApiQtAuthController {
+@RequestMapping(value = "/api/android/auth")
+public class ApiAndroidAuthController {
 
 	@Autowired
 	private LoginService loginService;
@@ -170,5 +170,4 @@ public class ApiQtAuthController {
 		loginService.doLogout();
 		return null;
 	}
-	
 }

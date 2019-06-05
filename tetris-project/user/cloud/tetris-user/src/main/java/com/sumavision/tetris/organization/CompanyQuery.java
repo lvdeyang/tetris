@@ -57,4 +57,14 @@ public class CompanyQuery {
 		return companies.getContent();
 	}
 	
+	public CompanyVO findByUserId(Long userId) throws Exception{
+		CompanyVO companyVO = null;
+		
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		if (companyPO != null) {
+			companyVO = new CompanyVO().set(companyPO);
+		}
+		
+		return companyVO;
+	}
 }

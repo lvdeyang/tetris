@@ -46,4 +46,27 @@ public class CompanyController {
 		return companyQuery.list(currentPage, pageSize);
 	}
 	
+	/**
+	 * 获取用户公司信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月24日 下午4:54:11
+	 * @return CompanyVO 修改后的数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/subordinate")
+	public Object company(HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		if(user.getId() != null){
+			return companyQuery.findByUserId(user.getId());
+		}else if(user.getUuid() != null){
+			return companyQuery.findByUserId(Long.parseLong(user.getUuid()));
+		}else {
+			return null;
+		}
+	}
 }
