@@ -8,7 +8,7 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, MediaVideoStreamPO>{
 
-	private String previewUrl;
+	private List<String> previewUrl;
 	
 	private String name;
 	
@@ -28,11 +28,11 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 	
 	private String style;
 	
-	public String getPreviewUrl() {
+	public List<String> getPreviewUrl() {
 		return previewUrl;
 	}
 
-	public MediaVideoStreamVO setPreviewUrl(String previewUrl) {
+	public MediaVideoStreamVO setPreviewUrl(List<String> previewUrl) {
 		this.previewUrl = previewUrl;
 		return this;
 	}
@@ -123,7 +123,6 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setPreviewUrl(entity.getPreviewUrl())
 			.setName(entity.getName())
 			.setAuthorName(entity.getAuthorName())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
@@ -140,7 +139,6 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setPreviewUrl("-")
 			.setName(entity.getName())
 			.setAuthorName(entity.getAuthorName())
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))

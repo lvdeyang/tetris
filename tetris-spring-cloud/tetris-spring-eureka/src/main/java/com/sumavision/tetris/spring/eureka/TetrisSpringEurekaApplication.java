@@ -6,12 +6,15 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 
+import com.sumavision.tetris.spring.eureka.heartbeat.HeartbeatThread;
+
 @SpringBootApplication
 @EnableEurekaServer
 public class TetrisSpringEurekaApplication extends SpringBootServletInitializer{
 
 	public static void main(String[] args) {
 		SpringApplication.run(TetrisSpringEurekaApplication.class, args);
+		new HeartbeatThread().start();
 	}
 	
 	@Override

@@ -95,7 +95,8 @@ public class ArticleService {
 			Boolean command,
 			List<JSONObject> contents,
 			List<String> regions,
-			UserVO user) throws Exception{
+			UserVO user,
+			Boolean... ifLive) throws Exception{
 		
 		ArticlePO article = new ArticlePO();
 		article.setName(name);
@@ -106,6 +107,9 @@ public class ArticleService {
 		article.setKeywords(keywords);
 		article.setUpdateTime(new Date());
 		article.setType(ArticleType.valueOf(type));
+		if (ifLive != null && ifLive.length > 0) {
+			article.setIfLive(ifLive[0]);
+		}
 		
 		String webappPath = path.webappPath();
 		String separator = File.separator;

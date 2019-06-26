@@ -34,6 +34,7 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 	/** 媒资别名 */
 	private String name;
 	
+//	使用多url的表关联，取消该表的url字段
 	/** 预览地址 */
 	private String previewUrl;
 	

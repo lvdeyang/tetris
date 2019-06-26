@@ -1,6 +1,8 @@
 package com.sumavision.tetris.cms.article;
 
 import java.util.Collection;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -186,4 +188,8 @@ public interface ArticleDAO extends BaseDAO<ArticlePO>{
 			countQuery = "SELECT count(article.id) FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE permission.group_id = ?1",
 			nativeQuery = true)
 	public Page<ArticlePO> findAllByGroupId(String groupId, Pageable pageable);
+	
+	@Query(value = "SELECT article.* FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE article.if_live = True AND permission.group_id = ?1 \n#pageable\n",
+			nativeQuery = true)
+	public List<ArticlePO> findAllByGroupId(String groupId);
 }

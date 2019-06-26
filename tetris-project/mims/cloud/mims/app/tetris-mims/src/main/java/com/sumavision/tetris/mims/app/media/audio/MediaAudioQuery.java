@@ -235,4 +235,72 @@ public class MediaAudioQuery {
 		}
 	}
 	
+	/**
+	 * 加载文件夹下的音频媒资(供采集app使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月6日 下午4:03:27
+	 * @param folderId 文件夹id
+	 * @return rows List<MediaAudioVO> 音频媒资列表
+	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 */
+	public Map<String, Object> loadForAndroid(Long folderId) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		if(folderId == null){
+			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_AUDIO.toString());
+			folderId = folder.getId();
+		}
+		
+		FolderPO current = folderDao.findOne(folderId);
+		
+		if(current == null) throw new FolderNotExistException(folderId);
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), current.getId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		//获取当前文件夹的所有父目录
+		List<FolderPO> parentFolders = folderQuery.getParentFolders(current);
+		
+		List<FolderPO> filteredParentFolders = new ArrayList<FolderPO>();
+		if(parentFolders==null || parentFolders.size()<=0){
+			parentFolders = new ArrayList<FolderPO>();
+		}
+		for(FolderPO parentFolder:parentFolders){
+			if(!FolderType.COMPANY.equals(parentFolder.getType())){
+				filteredParentFolders.add(parentFolder);
+			}
+		}
+		filteredParentFolders.add(current);
+		
+		//生成面包屑数据
+		List<FolderBreadCrumbVO> folderBreadCrumb = folderQuery.generateFolderBreadCrumbForAndroid(filteredParentFolders);
+		
+		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_AUDIO.toString());
+		
+		List<MediaAudioPO> audios = findCompleteByFolderId(current.getId());
+		
+		List<MediaAudioVO> medias = new ArrayList<MediaAudioVO>();
+		if(folders!=null && folders.size()>0){
+			for(FolderPO folder:folders){
+				medias.add(new MediaAudioVO().set(folder));
+			}
+		}
+		if(audios!=null && audios.size()>0){
+			for(MediaAudioPO audio:audios){
+				medias.add(new MediaAudioVO().set(audio));
+			}
+		}
+		
+		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
+																  		 .put("breadCrumb", folderBreadCrumb)
+																  		 .getMap();
+		
+		return result;
+		
+	}
 }

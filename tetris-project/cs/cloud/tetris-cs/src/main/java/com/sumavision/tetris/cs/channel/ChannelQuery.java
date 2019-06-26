@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.cs.HttpRequestUtil;
+import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
 
 @Component

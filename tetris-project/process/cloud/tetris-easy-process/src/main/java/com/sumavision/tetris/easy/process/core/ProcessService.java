@@ -5,11 +5,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.impl.util.ReflectUtil;
@@ -22,6 +26,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.servlet.support.RequestContext;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.json.AliFastJsonObject;
@@ -253,6 +261,15 @@ public class ProcessService {
 			String primaryKey,
 			String variables) throws Exception{
 		
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while(headerNames.hasMoreElements()){
+			String headerName = headerNames.nextElement();
+			headers.put(headerName, request.getHeader(headerName));
+		}
+		
 		UserVO user = userQuery.current();
 		
 		ProcessPO process = processDao.findByProcessId(primaryKey);
@@ -352,7 +369,7 @@ public class ProcessService {
 		
 		JSONObject finalVariableContext = aliFastJsonObject.convertFromHashMap(contextVariableMap);
 		
-		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid(), new HashMapWrapper<String, Object>().put("variable-context", finalVariableContext).getMap());
+		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid(), new HashMapWrapper<String, Object>().put("variable-context", finalVariableContext).put("request-headers", headers).getMap());
 		
 		ProcessInstanceDeploymentPermissionPO permission = new ProcessInstanceDeploymentPermissionPO();
 		permission.setProcessInstanceId(processInstance.getId());

@@ -276,4 +276,35 @@ public class FolderQuery {
 		return roots;
 	}
 	
+	/**
+	 * 生成文件夹面包屑<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月6日 下午1:24:00
+	 * @param List<FolderPO> folders 散排的文件夹
+	 * @return List<FolderBreadCrumbVO> 文件夹面包屑
+	 */
+	public List<FolderBreadCrumbVO> generateFolderBreadCrumbForAndroid(List<FolderPO> folders) throws Exception{
+		FolderBreadCrumbVO root = new FolderBreadCrumbVO().set(findRoots(folders).get(0));
+		FolderBreadCrumbVO current = root;
+		
+		List<FolderBreadCrumbVO> breadCrumbs = new ArrayList<FolderBreadCrumbVO>();
+		breadCrumbs.add(current);
+		
+		while(true){
+			boolean hasNext = false;
+			for(FolderPO folder:folders){
+				if(current.getId().equals(folder.getParentId())){
+					current.setChildId(folder.getId());
+					current = new FolderBreadCrumbVO().set(folder).setParentId(folder.getParentId());;
+					breadCrumbs.add(current);
+					hasNext = true;
+					break;
+				}
+			}
+			if(!hasNext) break;
+		}
+		return breadCrumbs;
+	}
+	
 }

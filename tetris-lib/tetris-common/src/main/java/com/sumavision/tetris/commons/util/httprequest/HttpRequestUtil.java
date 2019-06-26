@@ -1,6 +1,11 @@
-package com.sumavision.tetris.cs;
+package com.sumavision.tetris.commons.util.httprequest;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLDecoder;
 
 import org.apache.http.HttpResponse;
@@ -11,6 +16,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
+import org.aspectj.weaver.ast.Var;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,6 +77,41 @@ public class HttpRequestUtil {
             logger.error("post请求提交失败:" + url, e);
         }
         return jsonResult;
+    }
+    
+    /**
+     * post请求
+     * @param String url 请求url地址
+     * @param String xmlParam 参数
+     * @return String 返回的xml内容
+     */
+    public static String httpXmlPost(String url,String xmlParam){
+    	//post请求返回结果
+//		DefaultHttpClient httpClient = new DefaultHttpClient();
+        HttpClient httpClient = HttpClientBuilder.create().build();
+        String xmlResult = null;
+        HttpPost method = new HttpPost(url);
+        try {
+            if (null != xmlParam) {
+                //解决中文乱码问题
+                StringEntity entity = new StringEntity(xmlParam, "utf-8");
+                entity.setContentEncoding("UTF-8");
+                entity.setContentType("application/json");
+                method.setEntity(entity);
+            }
+            HttpResponse result = httpClient.execute(method);
+            url = URLDecoder.decode(url, "UTF-8");
+            /**请求发送成功，并得到响应**/
+            try {
+            	/**读取服务器返回过来的xml字符串数据**/
+            	xmlResult = EntityUtils.toString(result.getEntity());
+            } catch (Exception e) {
+            	logger.error("post请求提交失败:" + url, e);
+            }
+        } catch (IOException e) {
+            logger.error("post请求提交失败:" + url, e);
+        }
+        return xmlResult;
     }
  
     /**

@@ -15,6 +15,12 @@ public class FolderBreadCrumbVO extends AbstractBaseVO<FolderBreadCrumbVO, Folde
 	
 	private String type;
 	
+	/* android另加，返回list，添加子节点id做标识 */
+	private Long childId;
+	
+	/* android另加，返回list，添加父节点id做标识 */
+	private Long parentId;
+
 	private FolderBreadCrumbVO next;
 	
 	public String getName() {
@@ -32,6 +38,24 @@ public class FolderBreadCrumbVO extends AbstractBaseVO<FolderBreadCrumbVO, Folde
 
 	public FolderBreadCrumbVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+	
+	public Long getChildId() {
+		return childId;
+	}
+	
+	public FolderBreadCrumbVO setChildId(Long childId) {
+		this.childId = childId;
+		return this;
+	}
+	
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public FolderBreadCrumbVO setParentId(Long parentId) {
+		this.parentId = parentId;
 		return this;
 	}
 	

@@ -41,6 +41,9 @@ public class MediaVideoStreamQuery {
 	@Autowired
 	private FolderQuery folderQuery;
 	
+	@Autowired
+	private MediaVideoStreamUrlRelationQuery mediaVideoStreamUrlRelationQuery;
+	
 	/**
 	 * 加载文件夹下的视频流媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -98,7 +101,7 @@ public class MediaVideoStreamQuery {
 		}
 		if(videos!=null && videos.size()>0){
 			for(MediaVideoStreamPO video:videos){
-				medias.add(new MediaVideoStreamVO().set(video));
+				medias.add(new MediaVideoStreamVO().set(video).setPreviewUrl(mediaVideoStreamUrlRelationQuery.getAllUrlFromStreamId(video.getId())));
 			}
 		}
 		
@@ -164,4 +167,39 @@ public class MediaVideoStreamQuery {
 		return null;
 	}
 	
+	public List<MediaVideoStreamVO> loadAllByList() throws Exception{
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO_STREAM.toString());
+		Long folderId = folder.getId();
+		
+		return MediaVideoStreamVO.getConverter(MediaVideoStreamVO.class).convert(findChildVideosFromRoot(user, folderId), MediaVideoStreamVO.class);
+	}
+	
+	private List<MediaVideoStreamPO> findChildVideosFromRoot(UserVO user, Long rootFolderId) throws Exception{
+		List<MediaVideoStreamPO> allStream = new ArrayList<MediaVideoStreamPO>();
+		
+		FolderPO current = folderDao.findOne(rootFolderId);
+		
+		if(current == null) throw new FolderNotExistException(rootFolderId);
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), current.getId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), rootFolderId, FolderType.COMPANY_VIDEO_STREAM.toString());
+		
+		List<MediaVideoStreamPO> videos = findCompleteByFolderId(current.getId());
+		
+		allStream.addAll(videos);
+		
+		if(folders!=null && folders.size()>0){
+			for(FolderPO folder:folders){
+				allStream.addAll(this.findChildVideosFromRoot(user, folder.getId()));
+			}
+		}
+		
+		return allStream;
+	}
 }

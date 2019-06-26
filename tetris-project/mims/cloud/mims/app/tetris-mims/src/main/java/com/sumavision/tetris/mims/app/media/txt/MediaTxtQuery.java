@@ -188,4 +188,72 @@ public class MediaTxtQuery {
 		return null;
 	}
 	
+	/**
+	 * 加载文件夹下的文本媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月6日 下午4:03:27
+	 * @param folderId 文件夹id
+	 * @return rows List<MediaTxtVO> 文本媒资列表
+	 * @return breadCrumb List<FolderBreadCrumbVO> 面包屑数据
+	 */
+	public Map<String, Object> loadForAndroid(Long folderId) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		if(folderId == null){
+			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_TXT.toString());
+			folderId = folder.getId();
+		}
+		
+		FolderPO current = folderDao.findOne(folderId);
+		
+		if(current == null) throw new FolderNotExistException(folderId);
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), current.getId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		//获取当前文件夹的所有父目录
+		List<FolderPO> parentFolders = folderQuery.getParentFolders(current);
+		
+		List<FolderPO> filteredParentFolders = new ArrayList<FolderPO>();
+		if(parentFolders==null || parentFolders.size()<=0){
+			parentFolders = new ArrayList<FolderPO>();
+		}
+		for(FolderPO parentFolder:parentFolders){
+			if(!FolderType.COMPANY.equals(parentFolder.getType())){
+				filteredParentFolders.add(parentFolder);
+			}
+		}
+		filteredParentFolders.add(current);
+		
+		//生成面包屑数据
+		List<FolderBreadCrumbVO> folderBreadCrumb = folderQuery.generateFolderBreadCrumbForAndroid(filteredParentFolders);
+		
+		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_TXT.toString());
+		
+		List<MediaTxtPO> txts = findCompleteByFolderId(current.getId());
+		
+		List<MediaTxtVO> medias = new ArrayList<MediaTxtVO>();
+		if(folders!=null && folders.size()>0){
+			for(FolderPO folder:folders){
+				medias.add(new MediaTxtVO().set(folder));
+			}
+		}
+		if(txts!=null && txts.size()>0){
+			for(MediaTxtPO txt:txts){
+				medias.add(new MediaTxtVO().set(txt));
+			}
+		}
+		
+		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
+																  		 .put("breadCrumb", folderBreadCrumb)
+																  		 .getMap();
+		
+		return result;
+	}
+	
 }

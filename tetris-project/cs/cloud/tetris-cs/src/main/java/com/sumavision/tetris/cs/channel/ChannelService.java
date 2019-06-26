@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.cs.HttpRequestUtil;
+import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.cs.area.AreaQuery;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
 import com.sumavision.tetris.cs.bak.ResourceSendQuery;
