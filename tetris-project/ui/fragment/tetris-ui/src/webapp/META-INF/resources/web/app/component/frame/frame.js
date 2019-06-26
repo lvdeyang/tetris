@@ -35,7 +35,7 @@ define([
                 logo:{
                     img:window.BASEPATH + 'web/app/icons/logo/logo.png',
                     collapsed0:'suma',
-                    title:'视频融合平台',
+                    title:'应急广播新媒体CMS系统',
                     collapsed1:'mims'
                 },
                 isCollapsed:false,
@@ -98,6 +98,7 @@ define([
                         //不跳转只做样式变换
                         self.active = menu.uuid;
                     }
+                    app.loading = false;
                 });
             },
             addMinimize:function(metadata){
