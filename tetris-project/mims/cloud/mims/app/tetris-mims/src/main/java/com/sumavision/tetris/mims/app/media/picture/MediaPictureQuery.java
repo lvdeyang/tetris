@@ -169,4 +169,72 @@ public class MediaPictureQuery {
 		return null;
 	}
 	
+	/**
+	 * 根据文件夹id查询文件夹以及图片媒资（供android使用）<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月6日 下午5:14:37
+	 * @param UserVO user 用户
+	 * @param Long folderId 当前文件夹id
+	 * @return rows List<MediaPictureVO> 媒资项目列表
+	 * @return breadCrumb List<FolderBreadCrumbVO> 面包屑数据
+	 */
+	public Map<String, Object> loadForAndroid(Long folderId) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		
+		if(folderId == null){
+			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_PICTURE.toString());
+			folderId = folder.getId();
+		}
+		
+		FolderPO current = folderDao.findOne(folderId);
+		
+		if(current == null) throw new FolderNotExistException(folderId);
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), current.getId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		//获取当前文件夹的所有父目录
+		List<FolderPO> parentFolders = folderQuery.getParentFolders(current);
+		
+		List<FolderPO> filteredParentFolders = new ArrayList<FolderPO>();
+		if(parentFolders==null || parentFolders.size()<=0){
+			parentFolders = new ArrayList<FolderPO>();
+		}
+		for(FolderPO parentFolder:parentFolders){
+			if(!FolderType.COMPANY.equals(parentFolder.getType())){
+				filteredParentFolders.add(parentFolder);
+			}
+		}
+		filteredParentFolders.add(current);
+		
+		//生成面包屑数据
+		List<FolderBreadCrumbVO> folderBreadCrumb = folderQuery.generateFolderBreadCrumbForAndroid(filteredParentFolders);
+		
+		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_PICTURE.toString());
+		
+		List<MediaPicturePO> pictures = mediaPictureQuery.findCompleteByFolderId(current.getId());
+		
+		List<MediaPictureVO> medias = new ArrayList<MediaPictureVO>();
+		if(folders!=null && folders.size()>0){
+			for(FolderPO folder:folders){
+				medias.add(new MediaPictureVO().set(folder));
+			}
+		}
+		if(pictures!=null && pictures.size()>0){
+			for(MediaPicturePO picture:pictures){
+				medias.add(new MediaPictureVO().set(picture));
+			}
+		}
+		
+		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
+																  		 .put("breadCrumb", folderBreadCrumb)
+																  		 .getMap();
+		
+		return result;
+	}
 }

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
@@ -101,10 +102,7 @@ public class MediaVideoStreamController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaVideoStreamPO entity = mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrl, folder);
-		
-		return new MediaVideoStreamVO().set(entity);
-		
+		return  mediaVideoStreamService.addTask(user, name, null, null, remark, JSON.parseArray(previewUrl, String.class), folder);
 	}
 	
 	/**
@@ -139,9 +137,7 @@ public class MediaVideoStreamController {
 			throw new MediaVideoStreamNotExistException(id);
 		}
 		
-		MediaVideoStreamPO entity = mediaVideoStreamService.editTask(user, videoStream, name, null, null, remark, previewUrl);
-		
-		return new MediaVideoStreamVO().set(entity);
+		return mediaVideoStreamService.editTask(user, videoStream, name, null, null, remark, JSON.parseArray(previewUrl, String.class));
 		
 	}
 	
@@ -266,10 +262,10 @@ public class MediaVideoStreamController {
 		//判断是否被复制到其他文件夹中
 		if(target.getId().equals(media.getFolderId())) moved = false;
 		
-		MediaVideoStreamPO copiedMedia  = mediaVideoStreamService.copy(media, target);
+		MediaVideoStreamVO copiedMedia  = mediaVideoStreamService.copyByCountlessUrl(media, target);
 		
 		Map<String, Object> result = new HashMapWrapper<String, Object>().put("moved", moved)
-																		 .put("copied", new MediaVideoStreamVO().set(copiedMedia))
+																		 .put("copied", copiedMedia)
 																		 .getMap();
 		return result;
 	}

@@ -22,6 +22,7 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ import com.sumavision.tetris.easy.process.access.service.rest.RestServiceDAO;
 import com.sumavision.tetris.easy.process.access.service.rest.RestServicePO;
 import com.sumavision.tetris.easy.process.core.exception.ErrorAccessPointResponseStatusCodeException;
 import com.sumavision.tetris.easy.process.core.exception.VariableValueCheckFailedException;
+import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.sdk.constraint.api.ConstraintValidator;
 
 /**
@@ -133,6 +135,7 @@ public class RemoteAccessPoint {
 		Map<String, Object> processVariables = runtimeService.getVariables(processInstanceId);
 		
 		JSONObject variableContext = (JSONObject)processVariables.get("variable-context");
+		Map<String, String> requestHeaders = (Map<String, String>)processVariables.get("request-headers");
 		
 		//加入内置变量：流程实例id
 		if(variableContext.getString(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey()) == null){
@@ -177,11 +180,13 @@ public class RemoteAccessPoint {
 											  .toString();
 
 		RestAccessPointInvoker invoker = null;
+		Header tokenHeader = new BasicHeader(HttpConstant.HEADER_AUTH_TOKEN, requestHeaders.get(HttpConstant.HEADER_AUTH_TOKEN));
+		Header[] headers = new Header[]{tokenHeader};
 		if(AccessPointMethodType.HTTP_METHOD_POST.equals(accessPoint.getMethodType()) && 
 				ParamPackagingMethod.JSON.equals(accessPoint.getParamPackagingMethod())){
-			invoker = new RestAccessPointInvoker(url, paramJson, RestAccessPointInvoker.JSON);
+			invoker = new RestAccessPointInvoker(url, paramJson, RestAccessPointInvoker.JSON, headers);
 		}else{
-			invoker = new RestAccessPointInvoker(url, paramJson, RestAccessPointInvoker.FORMDATA);
+			invoker = new RestAccessPointInvoker(url, paramJson, RestAccessPointInvoker.FORMDATA, headers);
 		}
 		
 		try{

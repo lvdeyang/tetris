@@ -98,6 +98,7 @@ define([
                         //不跳转只做样式变换
                         self.active = menu.uuid;
                     }
+                    app.loading = false;
                 });
             },
             addMinimize:function(metadata){

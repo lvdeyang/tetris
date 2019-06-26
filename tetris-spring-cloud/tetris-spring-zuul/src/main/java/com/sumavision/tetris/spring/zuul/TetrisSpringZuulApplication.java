@@ -21,6 +21,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 import com.sumavision.tetris.spring.zuul.auth.filter.ApiFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.MultipartFilter;
+import com.sumavision.tetris.spring.zuul.auth.filter.android.ApiAndroidLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.capture.ApiCaptureLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.server.ApiServerLoginFilter;
@@ -65,6 +66,11 @@ public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
         return application.sources(TetrisSpringZuulApplication.class);
     }
+	
+	@Bean
+	public ApiAndroidLoginFilter apiAndroidLoginFilter(){
+		return new ApiAndroidLoginFilter();
+	}
 	
 	@Bean
 	public ApiCaptureLoginFilter apiCaptureLoginFilter(){

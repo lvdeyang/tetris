@@ -19,7 +19,7 @@ import com.sumavision.tetris.user.UserQuery;
 public class ApiQtLoginFilter extends ZuulFilter{
 
 	private String[] ignores = new String[]{
-		"", 
+		"/api/qt/transcoding/complete/notify", 
 		"/api/qt/auth/*"
 	};
 	

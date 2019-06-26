@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cms.article;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +238,23 @@ public class ArticleQuery {
 		
 		if(permission == null) return false;
 		return true;
+	}
+	
+	/**
+	 * 获取所有直播文章<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月10日 下午3:05:12
+	 * @param user 用户
+	 * @throws Exception 
+	 */
+	public List<ArticleVO> findAllLive(UserVO user) throws Exception{
+		
+		List<ArticlePO> articles = articleDao.findAllByGroupId(user.getGroupId());
+		
+		if (articles == null || articles.size() <= 0) return new ArrayList<ArticleVO>();
+				
+		return ArticleVO.getConverter(ArticleVO.class).convert(articles, ArticleVO.class);
 	}
 	
 }

@@ -17,12 +17,11 @@ public interface UserSubordinateRolePermissionDAO extends BaseDAO<UserSubordinat
 	public List<Long> getUserIdsFromRoleId(Long roleId);
 	
 	/**
-	 * 查询角色下的用户数量<br/>
+	 * 根据用户id移除用户角色关系<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年5月30日 上午11:14:16
 	 * @param Long roleId 角色id
-	 * @return int 用户数量
 	 */
 	@Query(value = "delete from tetris_subordinate_role_permission where user_id=?1 ", nativeQuery = true)
 	@Modifying

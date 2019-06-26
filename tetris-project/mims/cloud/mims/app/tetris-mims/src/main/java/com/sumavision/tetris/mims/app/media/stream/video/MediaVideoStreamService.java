@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.stream.video;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -11,7 +12,6 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -26,6 +26,9 @@ public class MediaVideoStreamService {
 
 	@Autowired
 	private MediaVideoStreamDAO mediaVideoStreamDao;
+	
+	@Autowired
+	private MediaVideoStreamUrlRelationService mediaVideoStreamUrlRelationService;
 	
 	/**
 	 * 视频流媒资删除<br/>
@@ -48,6 +51,11 @@ public class MediaVideoStreamService {
 		//删除视频流元数据
 		mediaVideoStreamDao.deleteInBatch(videoStreams);
 		
+		List<Long> ids = new ArrayList<Long>();
+		for(MediaVideoStreamPO mediaStream:videoStreams){
+			ids.add(mediaStream.getId());
+		}
+		mediaVideoStreamUrlRelationService.remove(ids);
 	}
 	
 	/**
@@ -92,6 +100,48 @@ public class MediaVideoStreamService {
 	}
 	
 	/**
+	 * 添加视频流媒资上传任务(多url)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月17日 下午3:21:49
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param List<String> previewUrl 视频流地址
+	 * @param FolderPO folder 文件夹
+	 * @return MediaVideoStreamPO 视频流媒资
+	 */
+	public MediaVideoStreamVO addTask(
+			UserVO user, 
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			List<String> previewUrl,
+			FolderPO folder) throws Exception{
+		
+		Date date = new Date();
+		
+		MediaVideoStreamPO entity = new MediaVideoStreamPO();
+		entity.setName(name);
+		entity.setTags("");
+		entity.setKeyWords("");
+		entity.setRemarks(remark);
+		entity.setAuthorId(user.getUuid());
+		entity.setAuthorName(user.getNickname());
+		entity.setFolderId(folder.getId());
+		entity.setUploadStatus(UploadStatus.COMPLETE);
+		entity.setUpdateTime(date);
+		mediaVideoStreamDao.save(entity);
+		
+		mediaVideoStreamUrlRelationService.add(previewUrl, entity.getId());
+		
+		return new MediaVideoStreamVO().set(entity).setPreviewUrl(previewUrl);
+	}
+	
+	/**
 	 * 编辑视频流媒资<br/>
 	 * <b>作者:</b>ldy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -123,6 +173,38 @@ public class MediaVideoStreamService {
 	}
 	
 	/**
+	 * 编辑视频流媒资(多url)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月17日 上午8:57:13
+	 * @param user 用户
+	 * @param videoStream 视频流媒资
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
+	 * @param previewUrl 视频流地址
+	 * @return MediaVideoStreamPO 视频流媒资
+	 */
+	public MediaVideoStreamVO editTask(
+			UserVO user, 
+			MediaVideoStreamPO videoStream,
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			List<String> previewUrl) throws Exception{
+		
+		videoStream.setName(name);
+		videoStream.setRemarks(remark);
+		mediaVideoStreamDao.save(videoStream);
+		
+		mediaVideoStreamUrlRelationService.update(previewUrl, videoStream.getId());
+		
+		return new MediaVideoStreamVO().set(videoStream).setPreviewUrl(previewUrl);
+	}
+	
+	/**
 	 * 复制视频流媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -149,6 +231,37 @@ public class MediaVideoStreamService {
 		mediaVideoStreamDao.save(copiedMedia);
 		
 		return copiedMedia;
+	}
+	
+	/**
+	 * 复制视频流媒资(多url)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月17日 下午1:21:15
+	 * @param MediaAudioStreamPO media 待复制的视频流媒资
+	 * @param FolderPO target 目标文件夹
+	 * @return MediaVideoStreamPO 复制后的视频流媒资
+	 */
+	public MediaVideoStreamVO copyByCountlessUrl(MediaVideoStreamPO media, FolderPO target) throws Exception{
+		
+		boolean moved = true;
+		
+		if(target.getId().equals(media.getFolderId())) moved = false;
+		
+		MediaVideoStreamPO copiedMedia = media.copy();
+		copiedMedia.setUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+		copiedMedia.setName(moved?media.getName():new StringBufferWrapper().append(media.getName())
+																           .append("（副本：")
+																           .append(DateUtil.format(new Date(), DateUtil.dateTimePattern))
+																           .append("）")
+																           .toString());
+		copiedMedia.setFolderId(target.getId());
+		
+		mediaVideoStreamDao.save(copiedMedia);
+		
+		List<String> mediaUrls = mediaVideoStreamUrlRelationService.copy(media.getId(), copiedMedia.getId());
+		
+		return new MediaVideoStreamVO().set(copiedMedia).setPreviewUrl(mediaUrls);
 	}
 	
 }

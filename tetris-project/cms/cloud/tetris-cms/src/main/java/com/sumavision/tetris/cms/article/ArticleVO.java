@@ -28,6 +28,8 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 	
 	private String articleType;
 	
+	private Boolean ifLive;
+	
 	/** 额外：栏目名称 */
 	private String columnName;
 	
@@ -152,6 +154,14 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 		return this;
 	}
 
+	public Boolean getIfLive() {
+		return ifLive;
+	}
+
+	public void setIfLive(Boolean ifLive) {
+		this.ifLive = ifLive;
+	}
+
 	public Long getColumnId() {
 		return columnId;
 	}
@@ -191,7 +201,8 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 			.setRemark(entity.getRemark())
 			.setPreviewUrl(entity.getPreviewUrl())
 			.setType(entity.getType().toString())
-			.setArticleType(entity.getType().getName());
+			.setArticleType(entity.getType().getName())
+			.setIfLive(entity.getIfLive());
 		return this;
 	}
 	

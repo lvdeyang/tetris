@@ -124,6 +124,16 @@
 			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.scala-lang</groupId>
+			<artifactId>scala-library</artifactId>
+			<version>2.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.rometools</groupId>
+			<artifactId>rome</artifactId>
+			<version>1.6.0</version>
+		</dependency>
 	</dependencies>
 	
     <dependencyManagement>
