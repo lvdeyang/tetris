@@ -20,7 +20,7 @@
 .platform-logo-wrapper{box-sizing:border-box;}
 .platform-logo{text-align:center;}
 .platform-logo>img{width:48%; position:relative; top:4px;}
-.platform-title{text-align:center; font-size:16px; font-weight:700; color:#fff; line-height:60px;}
+.platform-title{text-align:center; font-size:18px; font-weight:700; color:#fff; line-height:60px;}
 
 .aside-menu:not(.el-menu--collapse) .platform-logo.collapse{display:none;}
 .aside-menu:not(.el-menu--collapse) .platform-title.collapse{display:none;}

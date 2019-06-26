@@ -35,7 +35,7 @@ define([
                 logo:{
                     img:window.BASEPATH + 'web/app/icons/logo/logo.png',
                     collapsed0:'suma',
-                    title:'应急广播新媒体CMS系统',
+                    title:'视频融合平台',
                     collapsed1:'mims'
                 },
                 isCollapsed:false,
