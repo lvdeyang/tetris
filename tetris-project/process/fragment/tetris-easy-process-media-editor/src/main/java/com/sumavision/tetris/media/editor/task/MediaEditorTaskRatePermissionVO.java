@@ -14,6 +14,9 @@ public class MediaEditorTaskRatePermissionVO extends AbstractBaseVO<MediaEditorT
 	/** 进度 */
 	private int rate;
 	
+	/** 存储地址 */
+	private String saveUrl;
+	
 	@Override
 	public MediaEditorTaskRatePermissionVO set(MediaEditorTaskRatePermissionPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -21,6 +24,7 @@ public class MediaEditorTaskRatePermissionVO extends AbstractBaseVO<MediaEditorT
 		.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 		.setTaskId(entity.getTaskId())
 		.setTranscodeId(entity.getTranscodeId())
+		.setSaveUrl(entity.getSaveUrl())
 		.setRate(entity.getRate());
 		return this;
 	}
@@ -49,6 +53,15 @@ public class MediaEditorTaskRatePermissionVO extends AbstractBaseVO<MediaEditorT
 
 	public MediaEditorTaskRatePermissionVO setRate(int rate) {
 		this.rate = rate;
+		return this;
+	}
+
+	public String getSaveUrl() {
+		return saveUrl;
+	}
+
+	public MediaEditorTaskRatePermissionVO setSaveUrl(String saveUrl) {
+		this.saveUrl = saveUrl;
 		return this;
 	}
 }

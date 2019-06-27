@@ -142,6 +142,36 @@ public class MediaVideoQuery {
 	}
 	
 	/**
+	 * 加载所有的视频媒资目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午4:03:27
+	 * @return List<MediaVideoVO> 视频媒资列表
+	 */
+	public List<MediaVideoVO> loadAllFolder() throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验		
+		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), FolderType.COMPANY_VIDEO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		List<FolderPO> roots = folderQuery.findRoots(folderTree);
+		List<MediaVideoVO> medias = new ArrayList<MediaVideoVO>();
+		for(FolderPO root:roots){
+			medias.add(new MediaVideoVO().set(root));
+		}
+		
+		packMediaVideoTree(medias, folderTree, new ArrayList<MediaVideoPO>());
+		
+		return medias;
+	}
+	
+	/**
 	 * 查询文件夹下上传完成的视频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

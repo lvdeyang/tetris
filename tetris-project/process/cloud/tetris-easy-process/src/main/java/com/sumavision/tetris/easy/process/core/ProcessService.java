@@ -396,6 +396,8 @@ public class ProcessService {
 		
 		Map<String, Object> processVariables = runtimeService.getVariables(__processId__);
 		
+		String processUuid = runtimeService.createProcessInstanceQuery().processInstanceId(__processId__).singleResult().getProcessDefinitionKey();
+		
 		JSONObject variableContext = (JSONObject)processVariables.get("variable-context");
 		
 		Map<String, Object> variableMapContext = aliFastJsonObject.convertToHashMap(variableContext);
@@ -419,7 +421,7 @@ public class ProcessService {
 					}
 					//处理映射
 					Set<String> reverceVariableMapKeys = reverceVariableMap.keySet();
-					ProcessPO process = processDao.findByUuid(__processId__);
+					ProcessPO process = processDao.findByUuid(processUuid);
 					List<ProcessParamReferencePO> paramReferences = processParamReferenceDao.findByProcessId(process.getId());
 					if(paramReferences!=null && paramReferences.size()>0){
 						for(String reverceVariableMapKey:reverceVariableMapKeys){

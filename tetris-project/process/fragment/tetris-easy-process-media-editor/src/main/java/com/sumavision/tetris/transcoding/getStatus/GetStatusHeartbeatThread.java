@@ -24,6 +24,7 @@ public class GetStatusHeartbeatThread extends Thread{
 				}
 			}catch(Exception e){
 				e.printStackTrace();
+				Thread.interrupted();
 			}
 		}
 	}
