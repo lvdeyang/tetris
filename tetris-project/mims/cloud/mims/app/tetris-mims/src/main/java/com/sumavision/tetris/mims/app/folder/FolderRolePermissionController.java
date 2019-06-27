@@ -14,12 +14,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
-import com.sumavision.tetris.mims.app.role.RoleDAO;
-import com.sumavision.tetris.mims.app.role.RolePO;
-import com.sumavision.tetris.mims.app.role.RoleVO;
-import com.sumavision.tetris.mims.app.role.exception.RoleNotExistException;
-import com.sumavision.tetris.mims.app.role.exception.UserHasNoPermissionForRoleException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -37,8 +34,6 @@ public class FolderRolePermissionController {
 	@Autowired
 	private FolderRolePermissionDAO folderRolePermissionDao;
 	
-	@Autowired
-	private RoleDAO roleDao;
 	
 	@Autowired
 	private FolderQuery folderTool;
@@ -46,6 +41,8 @@ public class FolderRolePermissionController {
 	@Autowired
 	private FolderRolePermissionService folderRolePermissionService;
 	
+	@Autowired
+	SubordinateRoleQuery subordinateRoleQuery;
 	/**
 	 * 获取文件夹授权情况<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -63,9 +60,9 @@ public class FolderRolePermissionController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-		}
+//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
+//			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
+//		}
 		
 		if(user.getGroupId() == null){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
@@ -84,10 +81,11 @@ public class FolderRolePermissionController {
 			for(FolderRolePermissionPO permission:permissions){
 				roleIds.add(permission.getRoleId());
 			}
-			List<RolePO> roles = roleDao.findAll(roleIds);
-			List<RoleVO> view_roles = RoleVO.getConverter(RoleVO.class).convert(roles, RoleVO.class);
+
+			List<SubordinateRoleVO> roleVOS = subordinateRoleQuery.queryRolesByIds(roleIds);
 			
-			return view_roles;
+			
+			return roleVOS;
 		}
 		
 		return null;
@@ -111,9 +109,9 @@ public class FolderRolePermissionController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-		}
+//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
+//			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
+//		}
 		
 		if(user.getGroupId() == null){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
@@ -129,16 +127,17 @@ public class FolderRolePermissionController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		RolePO role = roleDao.findOne(roleId);
-		if(role == null){
-			throw new RoleNotExistException(roleId);
+		SubordinateRoleVO vo = subordinateRoleQuery.queryRoleById(roleId);
+		
+		if(vo == null){
+			//throw new RoleNotExistException(roleId);
 		}
 		
-		if(!user.getGroupId().equals(role.getGroupId())){
-			throw new UserHasNoPermissionForRoleException(user.getUuid(), roleId);
+		if(!user.getGroupId().equals(vo.getCompanyId())){
+			//throw new UserHasNoPermissionForRoleException(user.getUuid(), roleId);
 		}
 		
-		folderRolePermissionService.deletePermission(folder, role);
+		folderRolePermissionService.deletePermission(folder, vo);
 		
 		return null;
 	}
@@ -163,9 +162,9 @@ public class FolderRolePermissionController {
 		
 		UserVO user = userTool.current();
 		
-		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-		}
+//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
+//			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
+//		}
 		
 		if(user.getGroupId() == null){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
@@ -183,11 +182,9 @@ public class FolderRolePermissionController {
 		
 		List<Long> parsedRoleIds = JSON.parseArray(roleIds, Long.class);
 		
-		List<RolePO> roles = folderRolePermissionService.addPermission(user.getGroupId(), folder, parsedRoleIds);
+		List<SubordinateRoleVO> roles = folderRolePermissionService.addPermission(user.getGroupId(), folder, parsedRoleIds);
 		
-		List<RoleVO> view_roles = RoleVO.getConverter(RoleVO.class).convert(roles, RoleVO.class);
-		
-		return view_roles;
+		return roles;
 	}
 	
 }

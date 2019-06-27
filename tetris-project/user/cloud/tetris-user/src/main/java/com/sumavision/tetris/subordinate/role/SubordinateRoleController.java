@@ -16,6 +16,10 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+/**
+ * @author Administrator
+ *
+ */
 @Controller
 @RequestMapping(value = "/subordinate/role")
 public class SubordinateRoleController {
@@ -36,6 +40,11 @@ public class SubordinateRoleController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年5月29日 上午11:44:44
 	 * 
+	 * 获取隶属普通角色<br/>
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>2.0<br/>
+	 * <b>日期：</b>2019年6月17日 上午11:44:44
+	 * 
 	 * @return List<SubordinateRoleVO> 角色列表
 	 */
 	@JsonBody
@@ -47,11 +56,11 @@ public class SubordinateRoleController {
 
 		// TODO 权限校验
 
-		return subordinateRoleQuery.getListFromCompany(companyId);
+		return subordinateRoleQuery.getOrdinaryListFromCompany(companyId);
 	}
 
 	/**
-	 * 添加隶属角色<br/>
+	 * 添加隶属普通角色<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年5月29日 上午11:44:44
@@ -67,7 +76,27 @@ public class SubordinateRoleController {
 
 		// TODO 权限校验
 
-		return subordinateRoleService.addRole(companyId, roleName);
+		return subordinateRoleService.addRole(companyId, roleName,SubordinateRoleClassify.INTERNAL_COMPANY_ORDINARY_ROLE);
+	}
+	
+	/**
+	 * 添加隶属管理员角色<br/>
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月17日 上午11:44:44
+	 * 
+	 * @return SubordinateRoleVO 新建角色信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/addAdminRole")
+	public Object addAdminRole(Long companyId,String roleName,HttpServletRequest request)throws Exception {
+
+		UserVO user = userQuery.current();
+
+		// TODO 权限校验
+
+		return subordinateRoleService.addRole(companyId, roleName,SubordinateRoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
 	}
 
 	/**

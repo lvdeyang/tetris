@@ -126,7 +126,8 @@ public class UserQuery {
 			.setNickname(userEntity.getNickname())
 			.setClassify(userEntity.getClassify()==null?"":userEntity.getClassify().toString())
 			.setIcon(userEntity.getIcon())
-			.setToken(userEntity.getToken());
+			.setToken(userEntity.getToken())
+			.setId(userEntity.getId());
 		
 		//加入组织机构信息
 		if(UserClassify.COMPANY.equals(userEntity.getClassify())){

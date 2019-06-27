@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.arjuna.ats.internal.arjuna.objectstore.jdbc.drivers.ibm_driver;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
@@ -45,6 +46,12 @@ public class UserSubordinateRolePermissionQuery {
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", view_users)
 												   .getMap();
+	}
+	
+	public Long findRoleIdsByUserId(Long userId)throws Exception {
+		UserSubordinateRolePermissionPO PO = userSubordinateRolePermissionDAO.findByUserId(userId);
+		
+		return PO.getRoleId();
 	}
 	
 	public List<UserPO> findByRoleId(Long roleId, int currentPage, int pageSize) throws Exception{

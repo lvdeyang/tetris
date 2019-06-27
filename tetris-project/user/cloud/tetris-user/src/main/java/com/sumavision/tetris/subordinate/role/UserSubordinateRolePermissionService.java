@@ -103,9 +103,23 @@ public class UserSubordinateRolePermissionService {
 	 */
 	public UserVO removeUserFromRole(Long userId){
 		UserPO userPO = userDAO.findOne(userId);
-
+		
 		userSubordinateRolePermissionDAO.removeByUserId(userId);
 
 		return userPO != null ? new UserVO().set(userPO) : null;
+	}
+	
+	/**
+	 * 绑定一个角色和用户<br/>
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月17日 上午11:44:44
+	 */
+	public void addUserRolePermission(Long roleId,Long userId){
+		UserSubordinateRolePermissionPO po = new UserSubordinateRolePermissionPO();
+		po.setUserId(userId);
+		po.setRoleId(roleId);
+		po.setUpdateTime(new Date());
+		userSubordinateRolePermissionDAO.save(po);
 	}
 }

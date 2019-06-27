@@ -24,6 +24,10 @@ import com.sumavision.tetris.organization.OrganizationPO;
 import com.sumavision.tetris.organization.OrganizationUserPermissionDAO;
 import com.sumavision.tetris.organization.OrganizationUserPermissionPO;
 import com.sumavision.tetris.organization.exception.CompanyNotExistException;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleClassify;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleService;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
+import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionService;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
@@ -76,6 +80,12 @@ public class UserService{
 	
 	@Autowired
 	private Sha256Encoder sha256Encoder;
+	
+	@Autowired
+	private SubordinateRoleService subordinateRoleService;
+	
+	@Autowired
+	private UserSubordinateRolePermissionService userSubordinateRolePermissionService;
 	
 	/**
 	 * 添加一个用户<br/>
@@ -137,12 +147,17 @@ public class UserService{
             String classify,
             String companyName) throws Exception{
 		
-		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, classify);
+		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, UserClassify.COMPANY.toString());
 		
 		CompanyVO company = null;
+		SubordinateRoleVO roleVO = null;
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//创建公司
 			company = companyService.add(companyName, user);
+			//创建角色
+			roleVO = subordinateRoleService.addRoleWithUserId(user,company.getId(), "管理员",SubordinateRoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
+			//绑定用户和角色
+			userSubordinateRolePermissionService.addUserRolePermission(roleVO.getId(), user.getId());
 		}
 		
 		//发布用户注册事件
@@ -150,7 +165,7 @@ public class UserService{
 		if(company == null){
 			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
 		}else{
-			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName());
+			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(),roleVO.getId().toString());
 		}
 		applicationEventPublisher.publishEvent(event);
 		

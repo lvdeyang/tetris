@@ -13,6 +13,8 @@ import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
+import com.sumavision.tetris.mims.app.folder.FolderRolePermissionDAO;
+import com.sumavision.tetris.mims.app.folder.FolderRolePermissionPO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
@@ -20,6 +22,7 @@ import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -43,7 +46,11 @@ public class MediaAudioQuery {
 	
 	@Autowired
 	private FolderQuery folderQuery;
+	@Autowired 
+	private SubordinateRoleQuery subordinateRoleQuery;
 	
+	@Autowired
+	private FolderRolePermissionDAO folderRolePermissionDAO;	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -58,7 +65,22 @@ public class MediaAudioQuery {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
-		
+		Long role = subordinateRoleQuery.queryRolesByUserId(user.getId());
+		List<Long> folderIdsList = new ArrayList<Long>();
+		List<FolderRolePermissionPO> list = folderRolePermissionDAO.findByRoleId(role);
+		for (int j = 0; j < list.size(); j++) {
+			folderIdsList.add(list.get(j).getFolderId());
+		}
+		//具有权限的文件夹
+		List<FolderPO> permissFolders = folderDao.findByIdIn(folderIdsList);
+		//按照文件夹类型过滤
+		List<FolderPO> permissFolders1 = new ArrayList<FolderPO>();
+		for (int i = 0; i < permissFolders.size(); i++) {
+			FolderPO po = permissFolders.get(i);
+			if (po.getType() == FolderType.COMPANY_AUDIO) {
+				permissFolders1.add(po);
+			}
+		}		
 		if(folderId == null){
 			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_AUDIO.toString());
 			folderId = folder.getId();
@@ -74,22 +96,28 @@ public class MediaAudioQuery {
 		
 		//获取当前文件夹的所有父目录
 		List<FolderPO> parentFolders = folderQuery.getParentFolders(current);
+		List<FolderPO> parentFolders1 = new ArrayList<FolderPO>();
+		for (int i = 0; i < parentFolders.size(); i++) {
+			FolderPO po = parentFolders.get(i);
+			if (permissFolders1.contains(po)) {
+				parentFolders1.add(po);
+			}
+		}
 		
 		List<FolderPO> filteredParentFolders = new ArrayList<FolderPO>();
-		if(parentFolders==null || parentFolders.size()<=0){
+		if(parentFolders1==null || parentFolders1.size()<=0){
 			parentFolders = new ArrayList<FolderPO>();
 		}
-		for(FolderPO parentFolder:parentFolders){
+		for(FolderPO parentFolder:parentFolders1){
 			if(!FolderType.COMPANY.equals(parentFolder.getType())){
 				filteredParentFolders.add(parentFolder);
 			}
 		}
 		filteredParentFolders.add(current);
-		
 		//生成面包屑数据
 		FolderBreadCrumbVO folderBreadCrumb = folderQuery.generateFolderBreadCrumb(filteredParentFolders);
 		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_AUDIO.toString());
+		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByRoleId(role.toString(), folderId, FolderType.COMPANY_AUDIO.toString());
 		
 		List<MediaAudioPO> audios = findCompleteByFolderId(current.getId());
 		

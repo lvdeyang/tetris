@@ -171,6 +171,23 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	public List<FolderPO> findPermissionCompanyFoldersByParentId(String userId, Long parentId, String type);
 	
 	/**
+	 * 获取企业文件夹下的有权限的子文件夹<br/>
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午2:05:59
+	 * @param String roleId 角色id
+	 * @param Long parentId 父文件夹
+	 * @return List<FolderPO> 文件夹列表
+	 */
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+ 
+				   "FROM mims_folder folder "+
+				   "LEFT JOIN mims_folder_role_permission permission0 ON folder.id=permission0.folder_id "+
+				   "WHERE permission0.role_id=?1 "+
+				   "AND folder.parent_id=?2 "+
+				   "AND folder.type=?3", nativeQuery = true)
+	public List<FolderPO> findPermissionCompanyFoldersByRoleId(String roleId, Long parentId, String type);
+	
+	/**
 	 * 查询企业分类根文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -189,4 +206,34 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 					   "WHERE permission0.group_id=?1 AND folder.type='COMPANY' "+
 				   ")", nativeQuery = true)
 	public FolderPO findCompanyRootFolderByType(String groupId, String type);
+	
+	/**
+	 * 查询具有权限的企业分类根文件夹<br/>
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月26日 下午4:01:05
+	 * @param String groupId 公司id
+	 * @param FolderType type 文件夹类型
+	 */
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+
+				   "FROM mims_folder folder "+
+				   "LEFT JOIN mims_folder_group_permission permission0 ON folder.id=permission0.folder_id "+ 
+				   "WHERE permission0.group_id=?1 "+
+				   "AND folder.type=?2 "+
+				   "AND folder.parent_id=( "+
+					   "SELECT folder.id FROM mims_folder folder "+
+					   "LEFT JOIN mims_folder_group_permission permission0 ON folder.id=permission0.folder_id "+ 
+					   "WHERE permission0.group_id=?1 AND folder.type='COMPANY' "+
+				   ")", nativeQuery = true)
+	public FolderPO findHasPermissionCompanyRootFolderByType(String groupId, String type);
+
+	/**
+	 * 通过folderId查询<br/>
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月25日 上午11:34:51
+	 * @param Long userId 用户id
+	 * @return List<FolderPO> 文件夹列表
+	 */
+	public List<FolderPO> findByIdIn(List<Long> ids) ;
 }

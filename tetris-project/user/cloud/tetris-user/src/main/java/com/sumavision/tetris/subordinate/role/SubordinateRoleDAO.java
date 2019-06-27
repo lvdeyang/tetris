@@ -9,4 +9,6 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = SubordinateRolePO.class, idClass = Long.class)
 public interface SubordinateRoleDAO extends BaseDAO<SubordinateRolePO>{
 	public List<SubordinateRolePO> findByCompanyId(Long companyId);
+	public List<SubordinateRolePO> findByCompanyIdAndClassify(Long companyId, SubordinateRoleClassify classify);
+	public SubordinateRolePO findById(Long id);
 }

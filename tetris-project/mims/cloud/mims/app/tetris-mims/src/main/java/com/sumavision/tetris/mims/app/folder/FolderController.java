@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.folder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFol
 import com.sumavision.tetris.mims.app.material.MaterialVO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -37,6 +39,11 @@ public class FolderController {
 	@Autowired
 	private FolderDAO folderDao;
 	
+	@Autowired
+	private SubordinateRoleQuery subordinateRoleQuery;
+	
+	@Autowired
+	private FolderRolePermissionDAO folderRolePermissionDAO;
 	/**
 	 * 创建素材库文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -290,8 +297,16 @@ public class FolderController {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
+		//根据user->role->folder;
+		Long role = subordinateRoleQuery.queryRolesByUserId(user.getId());
+		List<Long> folderIdsList = new ArrayList<Long>();
+		List<FolderRolePermissionPO> list = folderRolePermissionDAO.findByRoleId(role);
+		for (int j = 0; j < list.size(); j++) {
+			folderIdsList.add(list.get(j).getFolderId());
+		}
 		
-		List<FolderPO> folderTree = folderDao.findCompanyTreeByGroupId(user.getGroupId());
+		List<FolderPO> folderTree = folderDao.findByIdIn(folderIdsList);
+		//List<FolderPO> folderTree = folderDao.findCompanyTreeByGroupId(user.getGroupId());
 		
 		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
 		

@@ -12,7 +12,7 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface UserSubordinateRolePermissionDAO extends BaseDAO<UserSubordinateRolePermissionPO>{
 	
 	public List<UserSubordinateRolePermissionPO> findByRoleId(Long roleId);
-	
+
 	@Query(value = "SELECT user_id from tetris_subordinate_role_permission where role_id=?1", nativeQuery = true)
 	public List<Long> getUserIdsFromRoleId(Long roleId);
 	
@@ -31,6 +31,7 @@ public interface UserSubordinateRolePermissionDAO extends BaseDAO<UserSubordinat
 	public int countByRoleId(Long companyId);
 
 	public List<UserSubordinateRolePermissionPO> findByRoleIdAndUserIdIn(Long roleId, List<Long> userId);
-
+	@Query(value = "SELECT role_id from tetris_subordinate_role_permission where user_id=?1", nativeQuery = true)
+	public Long getRoleIdFromUserId(Long userId);
 	public UserSubordinateRolePermissionPO findByUserId(Long userId);
 }

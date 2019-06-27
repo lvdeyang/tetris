@@ -45,12 +45,13 @@ import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
-import com.sumavision.tetris.mims.app.role.RoleClassify;
-import com.sumavision.tetris.mims.app.role.RoleDAO;
-import com.sumavision.tetris.mims.app.role.RolePO;
-import com.sumavision.tetris.mims.app.role.RoleUserPermissionDAO;
-import com.sumavision.tetris.mims.app.role.RoleUserPermissionPO;
-import com.sumavision.tetris.mims.app.role.exception.RoleNotExistException;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
+//import com.sumavision.tetris.mims.app.role.RoleDAO;
+//import com.sumavision.tetris.mims.app.role.RolePO;
+//import com.sumavision.tetris.mims.app.role.RoleUserPermissionDAO;
+//import com.sumavision.tetris.mims.app.role.RoleUserPermissionPO;
+//import com.sumavision.tetris.mims.app.role.exception.RoleNotExistException;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -89,10 +90,12 @@ public class FolderService {
 	private MaterialFileService materialFileService;
 	
 	@Autowired
-	private RoleDAO roleDao;
-	
-	@Autowired
-	private RoleUserPermissionDAO roleUserPermissionDao;
+	SubordinateRoleQuery subordinateRoleQuery;
+//	@Autowired
+//	private RoleDAO roleDao;
+//	
+//	@Autowired
+//	private RoleUserPermissionDAO roleUserPermissionDao;
 	
 	@Autowired
 	private MediaPictureDAO mediaPictureDao;
@@ -213,15 +216,16 @@ public class FolderService {
 		permission0.setGroupId(companyId);
 		permission0.setUpdateTime(new Date());
 		folderGroupPermissionDao.save(permission0);
+		//绑定公司管理员角色
+		SubordinateRoleVO roleVO = subordinateRoleQuery.queryRoleByCompany(companyId);
 		
-		RolePO role = roleDao.findInternalCompanyAdminRole(companyId);
-		if(role == null){
-			throw new RoleNotExistException(companyId);
+		if(roleVO == null){
+			return folder;
 		}
 		
 		FolderRolePermissionPO permission1 = new FolderRolePermissionPO();
 		permission1.setFolderId(folder.getId());
-		permission1.setRoleId(role.getId());
+		permission1.setRoleId(roleVO.getId());
 		permission1.setUpdateTime(new Date());
 		folderRolePermissionDao.save(permission1);
 		
@@ -532,11 +536,11 @@ public class FolderService {
 		folderGroupPermissionDao.save(permissions0);
 		
 		//生成管理员权限
-		RolePO admin = roleDao.findInternalCompanyAdminRole(companyId);
+		SubordinateRoleVO roleVO = subordinateRoleQuery.queryRoleByCompany(companyId);
 		List<FolderRolePermissionPO> permissions1 = new ArrayList<FolderRolePermissionPO>();
 		for(FolderPO copyFolder:totalCopyFolders){
 			FolderRolePermissionPO permission1 = new FolderRolePermissionPO();
-			permission1.setRoleId(admin.getId());
+			permission1.setRoleId(roleVO.getId());
 			permission1.setFolderId(copyFolder.getId());
 			permission1.setUpdateTime(new Date());
 			permissions1.add(permission1);
@@ -1260,65 +1264,73 @@ public class FolderService {
 	 * @param String companyId 公司id
 	 * @param String companyName 公司名称
 	 * @param String userId 用户id
+	 * 
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>2.0<br/>
+	 * <b>日期：</b>2019年6月17日 下午1:48:36
+	 * @param String companyId 公司id
+	 * @param String companyName 公司名称
+	 * @param String userId 用户id
+	 * @param String roleId 角色id 
 	 */
-	public void createCompanyDisk(String companyId, String companyName, String userId) throws Exception{
+	public void createCompanyDisk(String companyId, String companyName, String userId, String roleId) throws Exception{
 		//判重
 		FolderPO existFolder = folderDao.findCompanyRootFolderByType(companyId, FolderType.COMPANY_PICTURE.toString());
 		//TODO: role
 		if(existFolder != null){
-			RolePO rolePO = roleDao.findInternalCompanyAdminRole(companyId);
-			if(rolePO != null) {
-				RoleUserPermissionPO permission = new RoleUserPermissionPO();
-				permission.setRoleId(rolePO.getId());
-				permission.setUserId(userId);
-				permission.setUpdateTime(new Date());
-				roleUserPermissionDao.save(permission);
-			}
+//			RolePO rolePO = roleDao.findInternalCompanyAdminRole(companyId);
+//			if(rolePO != null) {
+//				RoleUserPermissionPO permission = new RoleUserPermissionPO();
+//				permission.setRoleId(rolePO.getId());
+//				permission.setUserId(userId);
+//				permission.setUpdateTime(new Date());
+//				roleUserPermissionDao.save(permission);
+//			}
 			return;
 		}
 		
 		//创建管理员
-		RolePO role = new RolePO();
-		role.setGroupId(companyId);
-		role.setName("管理员");
-		role.setRemoveable(false);
-		role.setSerial(0);
-		role.setUpdateTime(new Date());
-		role.setClassify(RoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
-		roleDao.save(role);
+//		RolePO role = new RolePO();
+//		role.setGroupId(companyId);
+//		role.setName("管理员");
+//		role.setRemoveable(false);
+//		role.setSerial(0);
+//		role.setUpdateTime(new Date());
+//		role.setClassify(RoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
+//		roleDao.save(role);
 		
 		//绑定用户
-		RoleUserPermissionPO permission1 = new RoleUserPermissionPO();
-		permission1.setRoleId(role.getId());
-		permission1.setUserId(userId);
-		permission1.setUpdateTime(new Date());
-		roleUserPermissionDao.save(permission1);
-		
+//		RoleUserPermissionPO permission1 = new RoleUserPermissionPO();
+//		permission1.setRoleId(Long.parseLong(roleId));
+//		permission1.setUserId(userId);
+//		permission1.setUpdateTime(new Date());
+//		roleUserPermissionDao.save(permission1);
+//		
 		//企业根目录
-		FolderPO root = createCompanyFolder(companyId, companyName, FolderType.COMPANY, null, null, role.getId());
+		FolderPO root = createCompanyFolder(companyId, companyName, FolderType.COMPANY, null, null, Long.parseLong(roleId));
 		
 		String parentPath = new StringBufferWrapper().append("/").append(root.getId()).toString();
 		
 		//图片
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_PICTURE, root.getId(), parentPath, role.getId());
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_PICTURE, root.getId(), parentPath, Long.parseLong(roleId));
 		
 		//视频
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO, root.getId(), parentPath, role.getId());
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO, root.getId(), parentPath, Long.parseLong(roleId));
 		
 		//音频
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO, root.getId(), parentPath, role.getId());
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO, root.getId(), parentPath, Long.parseLong(roleId));
 		
 		//视频流
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO_STREAM, root.getId(), parentPath, role.getId());
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO_STREAM, root.getId(), parentPath,Long.parseLong(roleId));
 		
 		//音频流
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO_STREAM, root.getId(), parentPath, role.getId());
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO_STREAM, root.getId(), parentPath, Long.parseLong(roleId));
 		
 		//文本
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_TXT, root.getId(), parentPath, role.getId());
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_TXT, root.getId(), parentPath, Long.parseLong(roleId));
 	
 		//压缩文件
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_COMPRESS, root.getId(), parentPath, role.getId());
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_COMPRESS, root.getId(), parentPath, Long.parseLong(roleId));
 	}
 	
 }

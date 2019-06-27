@@ -2,6 +2,8 @@ package com.sumavision.tetris.subordinate.role;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -29,6 +31,17 @@ public class SubordinateRolePO extends AbstractBasePO{
 	
 	/* 角色所属公司管理员id */
 	private String userId;
+	
+	
+	/** 是否能删除 */
+	private Boolean removeable;
+	
+	/** 用户类型 */
+	private SubordinateRoleClassify classify;
+	
+	/** 显示排序 */
+	private int serial;
+
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -55,5 +68,33 @@ public class SubordinateRolePO extends AbstractBasePO{
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+
+	@Column(name = "REMOVEABLE")
+	public Boolean getRemoveable() {
+		return removeable;
+	}
+
+	public void setRemoveable(Boolean removeable) {
+		this.removeable = removeable;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "CLASSIFY")
+	public SubordinateRoleClassify getClassify() {
+		return classify;
+	}
+
+	public void setClassify(SubordinateRoleClassify classify) {
+		this.classify = classify;
+	}
+
+	@Column(name = "SERIAL")
+	public int getSerial() {
+		return serial;
+	}
+
+	public void setSerial(int serial) {
+		this.serial = serial;
 	}
 }
