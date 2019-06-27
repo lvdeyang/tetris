@@ -1,6 +1,7 @@
 package com.sumavision.tetris.mims.app.media.video;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -363,4 +364,26 @@ public class MediaVideoService {
 		return entity;
 	}
 	
+	public List<MediaVideoPO> addList(UserVO user, List<String> urlList) throws Exception{
+		
+		if (urlList == null || urlList.size() <= 0) return null;
+		
+		String folderType = "video";
+		String mimeType = "video/mp4";
+		
+		List<MediaVideoPO> videos = new ArrayList<MediaVideoPO>();
+		for (String url : urlList) {
+			File file = new File(url);
+			
+			String fileName = file.getName();
+			String name = fileName.split("\\.")[0];
+			String uploadTempPath = new StringBufferWrapper().append(path.webappPath()).append("upload").append(file.getPath().split("upload")[1]).toString();
+			Long size = new File(new StringBufferWrapper().append(uploadTempPath).append(File.separator).append(fileName).toString()).length();
+			
+			MediaVideoPO video = this.add(user, name, fileName, size, folderType, mimeType,uploadTempPath);
+			videos.add(video);
+		}
+		
+		return videos;
+	}
 }

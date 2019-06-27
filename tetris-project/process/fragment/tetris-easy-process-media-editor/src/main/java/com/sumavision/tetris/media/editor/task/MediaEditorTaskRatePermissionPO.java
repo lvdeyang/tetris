@@ -23,6 +23,9 @@ public class MediaEditorTaskRatePermissionPO extends AbstractBasePO {
 	
 	/** 进度 */
 	private int rate;
+	
+	/** 存储地址 */
+	private String saveUrl;
 
 	@Column(name = "TASK_ID")
 	public Long getTaskId() {
@@ -49,5 +52,14 @@ public class MediaEditorTaskRatePermissionPO extends AbstractBasePO {
 
 	public void setRate(int rate) {
 		this.rate = rate;
+	}
+
+	@Column(name = "SAVE_URL")
+	public String getSaveUrl() {
+		return saveUrl;
+	}
+
+	public void setSaveUrl(String saveUrl) {
+		this.saveUrl = saveUrl;
 	}
 }

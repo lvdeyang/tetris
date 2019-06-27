@@ -1,7 +1,5 @@
 package com.sumavision.tetris.transcoding;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,9 +84,9 @@ public class TranscodingController {
 	public Object addTask(String transcodeJobs,String __processInstanceId__,
 			Long __accessPointId__, HttpServletRequest request) throws Exception {
 
-		List<String> ids = addTaskService.add(__processInstanceId__, __accessPointId__, transcodeJobs);
+		HashMapWrapper<String, String> ids = addTaskService.add(__processInstanceId__, __accessPointId__, transcodeJobs);
 		
-		return ids != null && ids.size() > 0 ? new HashMapWrapper<String, List<String>>().put("transcodeIds", ids)
+		return ids != null && ids.size() > 0 ? new HashMapWrapper<String, HashMapWrapper<String, String>>().put("transcodeIds", ids)
 				   .getMap() : null;
 	}
 	

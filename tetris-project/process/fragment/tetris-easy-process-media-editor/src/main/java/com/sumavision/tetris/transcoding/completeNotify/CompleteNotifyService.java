@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.easy.process.core.ProcessService;
+import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionVO;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskService;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskVO;
 import com.sumavision.tetris.transcoding.addTask.AddTaskService;
@@ -50,6 +51,13 @@ public class CompleteNotifyService {
 		if (mediaEditorTask == null) return;
 		
 		//回调流程
-		processService.receiveTaskTrigger(mediaEditorTask.getProcessInstanceId(), mediaEditorTask.getAccessPointId(), new JSONObject().toJSONString());
+		List<String> urlList = new ArrayList<String>();
+		for (MediaEditorTaskRatePermissionVO permission : mediaEditorTask.getTranscodes()) {
+			urlList.add(permission.getSaveUrl());
+		}
+		JSONObject listObject = new JSONObject();
+		listObject.put("urlList", String.join(",", urlList));
+		
+		processService.receiveTaskTrigger(mediaEditorTask.getProcessInstanceId(), mediaEditorTask.getAccessPointId(), listObject.toJSONString());
 	}
 }

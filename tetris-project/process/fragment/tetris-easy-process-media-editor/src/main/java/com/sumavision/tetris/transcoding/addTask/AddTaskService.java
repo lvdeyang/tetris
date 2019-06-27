@@ -1,6 +1,5 @@
 package com.sumavision.tetris.transcoding.addTask;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskService;
 import com.sumavision.tetris.transcoding.Adapter;
 import com.sumavision.tetris.transcoding.RequestCmdType;
@@ -38,8 +38,11 @@ public class AddTaskService {
 	 * 
 	 * @return List<String> 下成功的转码任务id
 	 */
-	public List<String> add(String __processInstanceId__, Long __accessPointId__,String transcodes) throws Exception{
+	public HashMapWrapper<String, String> add(String __processInstanceId__, Long __accessPointId__,String transcodes) throws Exception{
 		List<TranscodeVO> transcodeVOs = JSONObject.parseArray(transcodes, TranscodeVO.class);
+//		List<TranscodeVO> saveTranscodes = new ArrayList<TranscodeVO>();
+//		saveTranscodes.addAll(transcodeVOs);
+		
 		TranscodeJobsVO transcodeJobs = new TranscodeJobsVO();
 		transcodeJobs.setTranscode(transcodeVOs);
 		
@@ -52,7 +55,7 @@ public class AddTaskService {
 		addTask.setTranscodeJobs(transcodeJobs);
 		
 		AddTaskResponseVO response = adapter.addTask(addTask);
-		return dealAddResponse(response.getTranscodeJobs().getTranscodes(), __processInstanceId__, __accessPointId__);
+		return dealAddResponse(transcodeVOs, response.getTranscodeJobs().getTranscodes(), __processInstanceId__, __accessPointId__);
 	}
 	
 	/**
@@ -63,19 +66,19 @@ public class AddTaskService {
 	 * 
 	 * @return HashMapWrapper<String, Integer> 转码任务id，转码任务进度
 	 */
-	public List<String> dealAddResponse(List<com.sumavision.tetris.transcoding.addTask.rsponseVO.TranscodeVO> transcodes, String __processInstanceId__, Long __accessPointId__) throws Exception{
-		if (transcodes == null || transcodes.size() < 0) {
+	public HashMapWrapper<String, String> dealAddResponse(List<TranscodeVO> requesTranscodes, List<com.sumavision.tetris.transcoding.addTask.rsponseVO.TranscodeVO> responseTranscodes, String __processInstanceId__, Long __accessPointId__) throws Exception{
+		if (responseTranscodes == null || responseTranscodes.size() < 0) {
 			return null;
 		}else {
-			List<String> ids = new ArrayList<String>();
-			for(com.sumavision.tetris.transcoding.addTask.rsponseVO.TranscodeVO transcode:transcodes){
+			HashMapWrapper<String, String> idToUrl = new HashMapWrapper<String, String>();
+			for(com.sumavision.tetris.transcoding.addTask.rsponseVO.TranscodeVO transcode:responseTranscodes){
 				if(transcode.getResultCode() == 0 && transcode.getResultString().equals("OK")){
-					ids.add(transcode.getId());
+					idToUrl.put(transcode.getId(), adapter.changeFtpToHttp(requesTranscodes.get(responseTranscodes.indexOf(transcode)).getTarget().getTargetURI()));
 				}
 			}
 			
 			//存数据库
-			mediaEditorTaskService.addMediaEditorTask(__processInstanceId__, __accessPointId__, ids);
+			mediaEditorTaskService.addMediaEditorTask(__processInstanceId__, __accessPointId__, idToUrl);
 			
 			//开启获取任务进度线程
 			if (getStatusHeartbeatThread == null) {
@@ -85,7 +88,7 @@ public class AddTaskService {
 				getStatusHeartbeatThread.setSleep(5000);
 			}
 			
-			return ids;
+			return idToUrl;
 		}
 	}
 }
