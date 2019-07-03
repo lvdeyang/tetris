@@ -1,5 +1,6 @@
 .frame-wrapper{width:100%; height:100%; padding:0; margin:0; position:relative;}
-.el-aside{background-color:#37404f!important;}
+/* .el-aside{background-color:#37404f!important;} */
+.el-aside{background-color:#fff!important;}
 .el-main{overflow:hidden;}
 .frame-body{position:absolute; top:60px; bottom:50px; width:100%; padding:10px; box-sizing:border-box;}
 .frame-body-wrapper{width:100%; height:100%; position:relative;}
@@ -19,8 +20,10 @@
 
 .platform-logo-wrapper{box-sizing:border-box;}
 .platform-logo{text-align:center;}
-.platform-logo>img{width:48%; position:relative; top:4px;}
-.platform-title{text-align:center; font-size:18px; font-weight:700; color:#fff; line-height:60px;}
+/* .platform-logo>img{width:48%; position:relative; top:4px;} */
+.platform-logo>img{width:80%; position:relative; top:10px;} 
+/* .platform-title{text-align:center; font-size:16px; font-weight:700; color:#fff; line-height:60px;} */
+.platform-title{text-align:center; font-size:16px; font-weight:700; line-height:60px;}
 
 .aside-menu:not(.el-menu--collapse) .platform-logo.collapse{display:none;}
 .aside-menu:not(.el-menu--collapse) .platform-title.collapse{display:none;}
@@ -28,7 +31,8 @@
 .el-menu--collapse .platform-logo:not(.collapse){display:none;}
 .el-menu--collapse .platform-title:not(.collapse){display:none;}
 
-.platform-logo.collapse{text-align:center; line-height:30px; color:#fff; font-size:18px; font-weight:700; position:relative; top:5px;}
+/* .platform-logo.collapse{text-align:center; line-height:30px; color:#fff; font-size:18px; font-weight:700; position:relative; top:5px;} */
+.platform-logo.collapse{text-align:center; line-height:30px; font-size:18px; font-weight:700; position:relative; top:5px;}
 .platform-title.collapse{line-height:30px; position:relative; bottom:5px;}
 
 .el-scrollbar__wrap:not(.el-select-dropdown__wrap){overflow-x:hidden!important;}
