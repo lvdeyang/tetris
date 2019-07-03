@@ -15,7 +15,6 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderRolePermissionDAO;
 import com.sumavision.tetris.mims.app.folder.FolderRolePermissionPO;
-import com.sumavision.tetris.mims.app.folder.FolderTreeVO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
@@ -66,6 +65,11 @@ public class MediaVideoQuery {
 		
 		//TODO 权限校验
 		Long role = subordinateRoleQuery.queryRolesByUserId(user.getId());
+		if (role == null) {
+			return new HashMapWrapper<String, Object>().put("rows", new ArrayList<MediaVideoVO>())
+			  		 .put("breadCrumb", new FolderBreadCrumbVO())
+			  		 .getMap();
+		}
 		List<Long> folderIdsList = new ArrayList<Long>();
 		List<FolderRolePermissionPO> list = folderRolePermissionDAO.findByRoleId(role);
 		for (int j = 0; j < list.size(); j++) {
@@ -174,7 +178,8 @@ public class MediaVideoQuery {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验		
-		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), FolderType.COMPANY_VIDEO.toString());
+		Long roleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(user.getUuid()));
+		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(roleId, FolderType.COMPANY_VIDEO.toString());
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){
@@ -206,7 +211,8 @@ public class MediaVideoQuery {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验		
-		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), FolderType.COMPANY_VIDEO.toString());
+		Long roleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(user.getUuid()));
+		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(roleId, FolderType.COMPANY_VIDEO.toString());
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){

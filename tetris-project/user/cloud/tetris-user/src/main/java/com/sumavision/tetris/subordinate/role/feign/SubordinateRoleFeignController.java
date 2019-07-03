@@ -193,6 +193,6 @@ public class SubordinateRoleFeignController {
 	@RequestMapping(value = "/query/by/user")
 	public Object queryByUser(String userId,HttpServletRequest request)throws Exception{
 		Long result = userSubordinateRolePermissionDAO.getRoleIdFromUserId(Long.parseLong(userId));
-		return result.toString();
+		return result != null ? result.toString() : null;
 	}
 }

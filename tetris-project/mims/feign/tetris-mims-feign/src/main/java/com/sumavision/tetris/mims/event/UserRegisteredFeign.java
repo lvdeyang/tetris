@@ -31,6 +31,7 @@ public interface UserRegisteredFeign {
 			@RequestParam("userId") String userId,
 			@RequestParam("nickname") String nickname,
 			@RequestParam("companyId") String companyId,
-			@RequestParam("companyName") String companyName) throws Exception;
+			@RequestParam("companyName") String companyName,
+			@RequestParam("roleId") String roleId) throws Exception;
 	
 }

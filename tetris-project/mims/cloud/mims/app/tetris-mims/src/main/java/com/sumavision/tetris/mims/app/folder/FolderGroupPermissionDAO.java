@@ -40,4 +40,14 @@ public interface FolderGroupPermissionDAO extends BaseDAO<FolderGroupPermissionP
 	 * @return List<FolderGroupPermissionPO> 权限列表
 	 */
 	public List<FolderGroupPermissionPO> findByFolderIdIn(Collection<Long> folderIds);
+	
+	/**
+	 * 根据文件夹获取企业id<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月28日 下午3:04:50
+	 * @param Collection<Long> folderIds 文件夹id列表
+	 * @return List<FolderGroupPermissionPO> 权限列表
+	 */
+	public FolderGroupPermissionPO findByFolderId(Long folderId);
 }

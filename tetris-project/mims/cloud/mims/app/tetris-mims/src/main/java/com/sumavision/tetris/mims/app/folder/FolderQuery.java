@@ -129,8 +129,8 @@ public class FolderQuery {
 	 * @param Long except 例外文件夹id
 	 * @return List<FolderPO> 文件夹列表
 	 */
-	public List<FolderPO> findPermissionCompanyTreeWithExcept(String userId, String type, Long except){
-		return folderDao.findPermissionCompanyTreeWithExcept(userId, type, except, splicePathReg(except));
+	public List<FolderPO> findPermissionCompanyTreeWithExcept(Long roleId, String type, Long except){
+		return folderDao.findPermissionCompanyTreeWithExcept(roleId, type, except, splicePathReg(except));
 	}
 	
 	/**

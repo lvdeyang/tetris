@@ -41,13 +41,14 @@ public class EventPublishController {
 			String nickname,
 			String companyId,
 			String companyName,
+			String roleId,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		System.out.println(nickname);
-		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, userId, nickname, companyId, companyName);
+		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, userId, nickname, companyId, companyName, roleId);
 		applicationEventPublisher.publishEvent(event);
 		
 		return null;

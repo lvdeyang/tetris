@@ -125,11 +125,9 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+ 
 				   "FROM mims_folder folder "+
 				   "LEFT JOIN mims_folder_role_permission permission0 ON folder.id=permission0.folder_id "+
-				   "LEFT JOIN mims_role role ON permission0.role_id=role.id "+
-				   "LEFT JOIN mims_role_user_permission permission1 ON role.id=permission1.role_id "+
-				   "WHERE permission1.user_id=?1 "+
+				   "WHERE permission0.role_id=?1 "+
 				   "AND folder.type=?2", nativeQuery = true)
-	public List<FolderPO> findPermissionCompanyTree(String userId, String type);
+	public List<FolderPO> findPermissionCompanyTree(Long roleId, String type);
 	
 	/**
 	 * 获取有权限的企业文件夹（带例外）<br/>
@@ -143,13 +141,11 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+ 
 				   "FROM mims_folder folder "+
 				   "LEFT JOIN mims_folder_role_permission permission0 ON folder.id=permission0.folder_id "+
-				   "LEFT JOIN mims_role role ON permission0.role_id=role.id "+
-				   "LEFT JOIN mims_role_user_permission permission1 ON role.id=permission1.role_id "+
-				   "WHERE permission1.user_id=?1 "+
+				   "WHERE permission0.role_id=?1 "+
 				   "AND folder.type=?2 "+
 				   "AND folder.id<>?3 "+
 				   "AND (folder.parent_path IS NULL OR folder.parent_path NOT LIKE ?4)", nativeQuery = true)
-	public List<FolderPO> findPermissionCompanyTreeWithExcept(String userId, String type, Long except, String exceptReg);
+	public List<FolderPO> findPermissionCompanyTreeWithExcept(Long roleId, String type, Long except, String exceptReg);
 	
 	/**
 	 * 获取企业文件夹下的有权限的子文件夹<br/>

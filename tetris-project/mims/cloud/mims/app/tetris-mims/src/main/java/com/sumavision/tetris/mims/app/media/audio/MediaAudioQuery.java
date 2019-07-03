@@ -20,8 +20,6 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -66,6 +64,11 @@ public class MediaAudioQuery {
 		
 		//TODO 权限校验
 		Long role = subordinateRoleQuery.queryRolesByUserId(user.getId());
+		if (role == null) {
+			return new HashMapWrapper<String, Object>().put("rows", new ArrayList<MediaAudioVO>())
+			  		 .put("breadCrumb", new FolderBreadCrumbVO())
+			  		 .getMap();
+		}
 		List<Long> folderIdsList = new ArrayList<Long>();
 		List<FolderRolePermissionPO> list = folderRolePermissionDAO.findByRoleId(role);
 		for (int j = 0; j < list.size(); j++) {
@@ -152,8 +155,9 @@ public class MediaAudioQuery {
 		
 		UserVO user = userQuery.current();
 		
-		//TODO 权限校验		
-		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), FolderType.COMPANY_AUDIO.toString());
+		//TODO 权限校验
+		Long roleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(user.getUuid()));
+		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(roleId, FolderType.COMPANY_AUDIO.toString());
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){

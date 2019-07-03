@@ -30,6 +30,7 @@ import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
 import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionService;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
+import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.user.exception.MailAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
@@ -56,6 +57,9 @@ public class UserService{
 	
 	@Autowired
 	private UserSystemRolePermissionDAO userSystemRolePermissionDao;
+	
+	@Autowired
+	private UserSystemRolePermissionService userSystemRolePermissionService;
 	
 	@Autowired
 	private CompanyService companyService;
@@ -147,7 +151,7 @@ public class UserService{
             String classify,
             String companyName) throws Exception{
 		
-		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, UserClassify.COMPANY.toString());
+		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, UserClassify.COMPANY.getName());
 		
 		CompanyVO company = null;
 		SubordinateRoleVO roleVO = null;
@@ -156,7 +160,9 @@ public class UserService{
 			company = companyService.add(companyName, user);
 			//创建角色
 			roleVO = subordinateRoleService.addRoleWithUserId(user,company.getId(), "管理员",SubordinateRoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
-			//绑定用户和角色
+			//绑定用户和系统角色
+			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(3l).getList());
+			//绑定用户和业务角色
 			userSubordinateRolePermissionService.addUserRolePermission(roleVO.getId(), user.getId());
 		}
 		
@@ -207,6 +213,8 @@ public class UserService{
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//加入公司
 			companyUserPermissionService.add(company, user);
+			//绑定用户和系统角色
+			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(2l).getList());
 		}
 		
 		//TODO：加company

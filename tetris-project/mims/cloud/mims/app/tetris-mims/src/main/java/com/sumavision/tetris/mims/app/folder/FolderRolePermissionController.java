@@ -17,7 +17,6 @@ import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFol
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -42,7 +41,10 @@ public class FolderRolePermissionController {
 	private FolderRolePermissionService folderRolePermissionService;
 	
 	@Autowired
-	SubordinateRoleQuery subordinateRoleQuery;
+	private SubordinateRoleQuery subordinateRoleQuery;
+	
+	@Autowired
+	private FolderGroupPermissionDAO folderGroupPermissionDAO;
 	/**
 	 * 获取文件夹授权情况<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -74,7 +76,16 @@ public class FolderRolePermissionController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		List<FolderRolePermissionPO> permissions = folderRolePermissionDao.findByFolderId(folderId);
+		List<FolderRolePermissionPO> permissions;
+		
+		FolderGroupPermissionPO folderGroupPermission = folderGroupPermissionDAO.findByFolderId(folderId);
+		if (folderGroupPermission != null) {
+			String companyId = folderGroupPermission.getGroupId();
+			Long roleId = subordinateRoleQuery.queryRoleByCompany(companyId).getId();
+			permissions = folderRolePermissionDao.findByFolderIdExceptRoleId(folderId, roleId);
+		}else {
+			permissions = folderRolePermissionDao.findByFolderId(folderId);
+		}
 		
 		if(permissions!=null && permissions.size()>0){
 			Set<Long> roleIds = new HashSet<Long>();

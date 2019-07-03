@@ -67,6 +67,11 @@ public class MediaVideoStreamQuery {
 		
 		//TODO 权限校验
 		Long role = subordinateRoleQuery.queryRolesByUserId(user.getId());
+		if (role == null) {
+			return new HashMapWrapper<String, Object>().put("rows", new ArrayList<MediaVideoStreamVO>())
+			  		 .put("breadCrumb", new FolderBreadCrumbVO())
+			  		 .getMap();
+		}
 		List<Long> folderIdsList = new ArrayList<Long>();
 		List<FolderRolePermissionPO> list = folderRolePermissionDAO.findByRoleId(role);
 		for (int j = 0; j < list.size(); j++) {

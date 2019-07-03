@@ -95,7 +95,7 @@ public class SubordinateRoleQuery {
 	public Long queryRolesByUserId(Long userId)throws Exception{
 		JSONObject response = null;
 		response = subordinateRoleFeign.queryByUser(userId.toString());
-		return JsonBodyResponseParser.parseObject(response, Long.class);
+		return response != null ? JsonBodyResponseParser.parseObject(response, Long.class) : null;
 	}
 	
 	
