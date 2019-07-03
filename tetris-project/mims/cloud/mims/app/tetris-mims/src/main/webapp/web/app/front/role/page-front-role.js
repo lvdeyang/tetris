@@ -140,10 +140,10 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 handleRoleEdit:function(scope){
-                    var self = this;
-                    self.dialog.role.edit.visible = true;
+                    var self = this;        
                     self.dialog.role.edit.row = scope.row;
                     self.dialog.role.edit.name = scope.row.name;
+                    self.dialog.role.edit.visible = true;
                 },
                 handleRoleEditClose:function(){
                     var self = this;
@@ -193,7 +193,7 @@ define([
                         beforeClose:function(action, instance, done){
                             if(action === 'confirm'){
                                 var row = scope.row;
-                                ajax.post('/role/delete/' + row.id, null, function(data){
+                                ajax.post('/role/delet/' + row.id,null, function(data){
                                     for(var i=0; i<self.table.role.rows.length; i++){
                                         if(self.table.role.rows[i].id === row.id){
                                             self.table.role.rows.splice(i, 1);
@@ -213,10 +213,10 @@ define([
                     });
                 },
                 roleCurrentChange:function(currentRow, oldRow){
-                    var self = this;
-                    self.table.user.visible = true;
-                    self.table.user.row = currentRow;
-                    self.loadBindingUser(self.table.user.currentPage + 1);
+//                    var self = this;
+//                    self.table.user.visible = true;
+//                    self.table.user.row = currentRow;
+//                    self.loadBindingUser(self.table.user.currentPage + 1);
                 },
                 loadBindingUser:function(currentPage){
                     var self = this;
