@@ -5,10 +5,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -27,8 +24,8 @@ import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
-import com.sumavision.tetris.organization.CompanyUserPermissionDAO;
-import com.sumavision.tetris.organization.CompanyUserPermissionPO;
+import com.sumavision.tetris.system.theme.SystemThemeDAO;
+import com.sumavision.tetris.system.theme.SystemThemePO;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
 
 @Component
@@ -43,7 +40,7 @@ public class UserQuery {
 	private CompanyDAO companyDao;
 	
 	@Autowired
-	private CompanyUserPermissionDAO companyUserPermissionDAO;
+	private SystemThemeDAO systemThemeDao;
 	
 	/**
 	 * 用户登录校验<br/>
@@ -109,6 +106,23 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 清除当前登录用户缓存<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月22日 上午10:14:26
+	 */
+	public void clearCurrentUser() throws Exception{
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+		String sessionId = request.getHeader(HttpConstant.HEADER_SESSION_ID);
+		if(sessionId != null){
+			HttpSession session = HttpSessionContext.get(sessionId);
+			if(session != null){
+				session.removeAttribute(HttpConstant.ATTRIBUTE_USER);
+			}
+		}
+	}
+	
+	/**
 	 * 根据token查询用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -132,8 +146,20 @@ public class UserQuery {
 		//加入组织机构信息
 		if(UserClassify.COMPANY.equals(userEntity.getClassify())){
 			CompanyPO company = companyDao.findByUserId(userEntity.getId());
-			user.setGroupId(company.getId().toString())
-				.setGroupName(company.getName());
+			user.setCompanyInfo(company);
+			if(company.getThemeId() != null){
+				SystemThemePO theme = systemThemeDao.findOne(company.getThemeId());
+				if(theme == null){
+					user.setThemeUrl(SystemThemePO.DEFAULT_URL);
+				}else{
+					user.setThemeUrl(theme.getUrl());
+				}
+			}else{
+				user.setThemeUrl(SystemThemePO.DEFAULT_URL);
+			}
+		}else{
+			user.setCompanyInfo(null);
+			user.setThemeUrl(SystemThemePO.DEFAULT_URL);
 		}
 		
 		return user;

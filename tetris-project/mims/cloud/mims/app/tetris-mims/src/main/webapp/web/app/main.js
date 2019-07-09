@@ -187,6 +187,9 @@ require([
                .setProp('groups', appInfo.groups || [])
                .setProp('token', window.TOKEN);
 
+        //处理皮肤
+        if(appInfo.user.themeUrl) $('head').prepend('<link rel="stylesheet" type="text/css" href="'+window.BASEPATH + appInfo.user.themeUrl+'"/>');
+
         //解析模板
         menuUtil.parseUrlTemplate(appInfo.menus);
 

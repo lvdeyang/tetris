@@ -74,8 +74,6 @@
     <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/icon/Font-Awesome-3.2.1/css/font-awesome.css"/>
     <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/icon/feather/style.css"/>
 
-    <link rel="stylesheet" type="text/css" href="<%=basePath %>web/theme/monitor-92-theme.css"/>
-
     <script type="text/javascript">
         window.HOST = '<%=host%>';
         window.SCHEMA = '<%=scheme%>';

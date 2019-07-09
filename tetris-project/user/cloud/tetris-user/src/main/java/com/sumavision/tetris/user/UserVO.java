@@ -1,7 +1,12 @@
 package com.sumavision.tetris.user;
 
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.config.server.ServerProps;
+import com.sumavision.tetris.config.server.UserServerPropsQuery;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
+import com.sumavision.tetris.organization.CompanyPO;
 
 /**
  * 登录用户信息<br/>
@@ -47,6 +52,27 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	
 	/** 用户隶属组织名称 */
 	private String groupName;
+	
+	/** 用户隶属组织首页链接 */
+	private String groupHomeLink;
+	
+	/** 皮肤链接 */
+	private String themeUrl;
+	
+	/** logo */
+	private String logo;
+	
+	/** logo样式 */
+	private String logoStyle;
+	
+	/** logo缩写 */
+	private String logoShortName;
+	
+	/** 平台全名 */
+	private String platformFullName;
+	
+	/** 平台名称缩写 */
+	private String platformShortName;
 	
 	/** 素材库文件夹id */
 	private Long rootFolderId;
@@ -162,6 +188,69 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		return this;
 	}
 	
+	public String getGroupHomeLink() {
+		return groupHomeLink;
+	}
+
+	public UserVO setGroupHomeLink(String groupHomeLink) {
+		this.groupHomeLink = groupHomeLink;
+		return this;
+	}
+
+	public String getThemeUrl() {
+		return themeUrl;
+	}
+
+	public UserVO setThemeUrl(String themeUrl) {
+		this.themeUrl = themeUrl;
+		return this;
+	}
+
+	public String getLogo() {
+		return logo;
+	}
+
+	public UserVO setLogo(String logo) {
+		this.logo = logo;
+		return this;
+	}
+
+	public String getLogoStyle() {
+		return logoStyle;
+	}
+
+	public UserVO setLogoStyle(String logoStyle) {
+		this.logoStyle = logoStyle;
+		return this;
+	}
+
+	public String getLogoShortName() {
+		return logoShortName;
+	}
+
+	public UserVO setLogoShortName(String logoShortName) {
+		this.logoShortName = logoShortName;
+		return this;
+	}
+
+	public String getPlatformFullName() {
+		return platformFullName;
+	}
+
+	public UserVO setPlatformFullName(String platformFullName) {
+		this.platformFullName = platformFullName;
+		return this;
+	}
+
+	public String getPlatformShortName() {
+		return platformShortName;
+	}
+
+	public UserVO setPlatformShortName(String platformShortName) {
+		this.platformShortName = platformShortName;
+		return this;
+	}
+
 	public Long getRootFolderId() {
 		return rootFolderId;
 	}
@@ -193,6 +282,30 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
 			.setToken(entity.getToken())
 			.setAutoGeneration(entity.isAutoGeneration());
+		return this;
+	}
+	
+	public UserVO setCompanyInfo(CompanyPO entity){
+		if(entity != null){
+			this.setGroupId(entity.getId().toString())
+				.setGroupName(entity.getName())
+				.setGroupHomeLink(entity.getHomeLink()==null?"":entity.getHomeLink())
+				.setLogo(entity.getLogo())
+				.setLogoStyle(entity.getLogoStyle())
+				.setLogoShortName(entity.getLogoShortName())
+				.setPlatformFullName(entity.getPlatformFullName())
+				.setPlatformShortName(entity.getPlatformShortName());
+		}
+		
+		if(this.getLogo() == null) this.setLogo(CompanyPO.DEFAULT_LOGO);
+		UserServerPropsQuery userServerPropsQuery = SpringContext.getBean(UserServerPropsQuery.class);
+		ServerProps props = userServerPropsQuery.queryProps();
+		this.setLogo(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append(this.getLogo()).toString());
+		if(this.getLogoStyle() == null) this.setLogoStyle(CompanyPO.DEFAULT_LOGOSTYLE);
+		if(this.getLogoShortName() == null) this.setLogoShortName(CompanyPO.DEFAULT_LOGOSHORTNAME);
+		if(this.getPlatformFullName() == null) this.setPlatformFullName(CompanyPO.DEFAULT_PLATFORMFULLNAME);
+		if(this.getPlatformShortName() == null) this.setPlatformShortName(CompanyPO.DEFAULT_PLATFORMSHORTNAME);
+		
 		return this;
 	}
 	

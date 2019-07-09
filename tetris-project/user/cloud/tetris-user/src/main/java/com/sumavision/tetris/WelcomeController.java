@@ -46,6 +46,7 @@ public class WelcomeController {
 			session = request.getSession();
 			session.setMaxInactiveInterval(HttpConstant.SESSION_TIMEOUT);
 		}
+		
 		mv = new ModelAndView("web/user/index");
 		mv.addObject(HttpConstant.MODEL_TOKEN, token);
 		mv.addObject(HttpConstant.MODEL_SESSION_ID, session.getId());

@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.system.theme.SystemThemeDAO;
+import com.sumavision.tetris.system.theme.SystemThemePO;
 
 /**
  * 公司查询操作<br/>
@@ -22,6 +24,9 @@ public class CompanyQuery {
 
 	@Autowired
 	private CompanyDAO companyDao;
+	
+	@Autowired
+	private SystemThemeDAO systemThemeDao;
 	
 	/**
 	 * 分页查询公司<br/>
@@ -57,14 +62,33 @@ public class CompanyQuery {
 		return companies.getContent();
 	}
 	
+	/**
+	 * 查询用户的公司<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月8日 下午1:24:36
+	 * @param Long userId 用户id
+	 * @return CompanyVO 公司
+	 */
 	public CompanyVO findByUserId(Long userId) throws Exception{
-		CompanyVO companyVO = null;
+		CompanyVO company = null;
 		
-		CompanyPO companyPO = companyDao.findByUserId(userId);
-		if (companyPO != null) {
-			companyVO = new CompanyVO().set(companyPO);
+		CompanyPO entity = companyDao.findByUserId(userId);
+		if (entity != null) {
+			company = new CompanyVO().set(entity);
 		}
 		
-		return companyVO;
+		SystemThemePO theme = null;
+		if(company.getThemeId() == null){
+			theme = systemThemeDao.findByUrl("");
+		}else{
+			theme = systemThemeDao.findOne(company.getThemeId());
+		}
+		
+		company.setThemeId(theme.getId())
+			   .setThemeName(theme.getName())
+			   .setThemeUrl(theme.getUrl());
+		
+		return company;
 	}
 }

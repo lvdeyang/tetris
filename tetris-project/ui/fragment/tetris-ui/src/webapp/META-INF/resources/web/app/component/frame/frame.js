@@ -33,13 +33,20 @@ define([
         data:function(){
             return {
                 logo:{
-                    img:window.BASEPATH + 'web/app/icons/logo/bhlogo.jpg',
-                    /*collapsed0:'suma',
+
+                    logoUrl:'',
+                    logoStyle:'',
+                    logoShortName:'',
+                    platformFullName:'',
+                    platformShortName:''
+
+                    /*img:window.BASEPATH + 'web/app/icons/logo/bhlogo.jpg',
+                    /!*collapsed0:'suma',
                     title:'新媒体应急广播CMS系统',
-                    collapsed1:'mims'*/
+                    collapsed1:'mims'*!/
                     collapsed0:'BH',
                     title:'新媒体应急广播CMS系统',
-                    collapsed1:'CMS'
+                    collapsed1:'CMS'*/
                 },
                 isCollapsed:false,
                 numberOfMessage:0,
@@ -200,6 +207,13 @@ define([
             var groups = self.groups;
             var numbersOfTotalMessage = setGroupInfo(groups);
             if(numbersOfTotalMessage > 0) self.numberOfMessage = numbersOfTotalMessage;
+
+            var user = self.user;
+            self.logo.logoUrl = user.logo;
+            self.logo.logoStyle = user.logoStyle;
+            self.logo.logoShortName = user.logoShortName;
+            self.logo.platformFullName = user.platformFullName;
+            self.logo.platformShortName = user.platformShortName;
         }
     });
 

@@ -29,6 +29,24 @@ body{background-color:#e0e0e0!important;}
 .monitor92-top10{top:10px!important;}
 .monitor92-padding-top10{padding-top:10px!important;}
 
+/* frame */
+.el-aside,
+.el-menu{background-color:#fff!important;}
+.el-submenu__title,
+.el-submenu__title i,
+.el-menu-item,
+.el-menu-item i{color:#303133!important;}
+.el-menu-item.is-active{color:#009999!important;}
+.platform-title,
+.platform-logo.collapse{color:#303133!important;}
+.userGroup{box-shadow:none!important;}
+.el-menu-item{background-color:#fff!important;}
+.el-submenu>.el-submenu__title{background-color:#fff!important;}
+.el-submenu__title:hover,
+.el-menu-item:focus,
+.el-menu-item:hover{background-color:#f2f3f7!important;}
+
+
 /*  tooltip  */
 .el-tooltip__popper{padding:7px!important; background:rgba(0, 0, 0, 0.8)!important;}
 

@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -129,6 +131,10 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 	    }
 	}
 	
+	public boolean contains(String name){
+		return this.params.containsKey(name);
+	}
+	
 	@Override
 	public String getParameter(String name){
 		Object param = this.params.get(name);
@@ -151,6 +157,12 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 		Object param = this.params.get(name);
 		if(param == null) throw new Exception("参数不存在："+name);
 		return Boolean.parseBoolean(param.toString());
+	}
+	
+	public String getUnDecodeString(String name) throws Exception{
+		Object param = this.params.get(name);
+		if(param == null) throw new Exception("参数不存在："+name);
+		return param.toString();
 	}
 	
 	public String getString(String name) throws Exception{

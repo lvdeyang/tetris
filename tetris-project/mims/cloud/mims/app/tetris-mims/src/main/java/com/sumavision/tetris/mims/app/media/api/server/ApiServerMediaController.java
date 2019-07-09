@@ -30,7 +30,6 @@ import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistEx
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressDAO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressPO;
-import com.sumavision.tetris.mims.app.media.compress.MediaCompressQuery;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressTaskVO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
