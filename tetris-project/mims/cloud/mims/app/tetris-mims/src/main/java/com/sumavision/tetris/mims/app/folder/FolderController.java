@@ -414,7 +414,7 @@ public class FolderController {
 		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
 		
-		FolderPO folder = folderService.addMediaFolder(user.getGroupId(), parent.getId(), folderName, type);
+		FolderPO folder = folderService.addMediaFolder(user.getUuid(), user.getGroupId(), parent.getId(), folderName, type);
 		
 		return new MediaPictureVO().set(folder);
 	}

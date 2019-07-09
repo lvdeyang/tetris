@@ -32,6 +32,7 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.commons.util.xml.XmlReader;
+import com.sumavision.tetris.commons.util.xml.XmlUtil;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
@@ -41,6 +42,8 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
+import com.sumavision.tetris.mims.app.media.compress.api.server.SecureServiceXmlUtils;
+import com.sumavision.tetris.mims.app.media.compress.api.server.XmlVO.SignatureVO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
@@ -382,6 +385,8 @@ public class MediaCompressService {
 
         });
 		
+		File profile = null;
+		File signatureFile = null;
 		for (File f : fileList) {
 			String fileName = f.getName();
 			String name = fileName.split("\\.")[0];
@@ -450,9 +455,33 @@ public class MediaCompressService {
 				type = "TEXT";
 
 			} else if (fileNameSuffix.equals("xml")) {
-
+				String[] fileNameSplit = fileName.split("_");
+				if (fileNameSplit.length == 2) {
+					profile = f;
+				}else if (fileNameSplit.length == 3) {
+					signatureFile = f;
+				}
+			}
+		}
+		
+		if (profile != null) {
+			String check = "OK";
+			String profileName = profile.getName();
+			
+			if (signatureFile != null) {
+				String signatureFileName = signatureFile.getName();
+				if (profileName.split("_")[1].equals(signatureFileName.split("_")[2])) {
+					String xmlString = FileUtils.readFileToString(signatureFile);
+					SignatureVO signature = XmlUtil.XML2Obj(xmlString, SignatureVO.class);
+					String signatureValue = signature.getSignatureValue().trim();
+					check = SecureServiceXmlUtils.checkSignatureValueJnta(profile, signatureValue, 1);
+				}
+			}
+			
+			if (check.equals("OK")) {
+				String name = profileName.split("\\.")[0];
 				// 解析xml
-				InputStream xmlStream = new FileInputStream(f);
+				InputStream xmlStream = new FileInputStream(profile);
 				XmlReader reader = new XmlReader(xmlStream);
 				author = reader.readString("EBD.EBM.MsgBasicInfo.SenderName");
 				publishTime = reader.readString("EBD.EBM.MsgBasicInfo.SendTime");
@@ -474,7 +503,6 @@ public class MediaCompressService {
 				String areaCode = reader.readString("EBD.EBM.MsgContent.AreaCode");
 				region = JSON.toJSONString(new ArrayListWrapper<String>().add(areaCode).getList());
 			}
-
 		}
 
 		JSONArray contents = new JSONArray();

@@ -250,10 +250,50 @@ public class MediaTxtQuery {
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
-		
+		Long role = subordinateRoleQuery.queryRolesByUserId(user.getId());
+		if (role == null) {
+			return new HashMapWrapper<String, Object>().put("rows", new ArrayList<MediaTxtVO>())
+			  		 .put("breadCrumb", new FolderBreadCrumbVO())
+			  		 .getMap();
+		}
+		List<Long> folderIdsList = new ArrayList<Long>();
+		List<FolderRolePermissionPO> list = folderRolePermissionDAO.findByRoleId(role);
+		for (int j = 0; j < list.size(); j++) {
+			folderIdsList.add(list.get(j).getFolderId());
+		}
+		//具有权限的文件夹
+		List<FolderPO> permissFolders = folderDao.findByIdIn(folderIdsList);
+		//按照文件夹类型过滤
+		List<FolderPO> permissFolders1 = new ArrayList<FolderPO>();
+		for (int i = 0; i < permissFolders.size(); i++) {
+			FolderPO po = permissFolders.get(i);
+			if (po.getType() == FolderType.COMPANY_TXT) {
+				permissFolders1.add(po);
+			}
+		}
 		if(folderId == null){
-			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_TXT.toString());
-			folderId = folder.getId();
+//			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_TXT.toString());
+//			folderId = folder.getId();
+			
+			if (permissFolders1.size()>1) {
+				for (int i = 0; i < permissFolders1.size(); i++) {
+					for (int j = 0; j < permissFolders1.size()-i-1; j++) {
+						FolderPO po = permissFolders1.get(j);
+						Integer depth = po.getDepth();
+						FolderPO po1 = permissFolders1.get(j+1);
+						Integer depth1 = po1.getDepth();
+						if (depth>depth1) {
+							permissFolders1.set(j, po1);
+							permissFolders1.set(j+1, po);
+						}
+					}
+				}
+				folderId = permissFolders1.get(0).getId();
+			}else if (permissFolders1.size()==1) {
+				folderId = permissFolders1.get(0).getId();
+			} else {
+				
+			}
 		}
 		
 		FolderPO current = folderDao.findOne(folderId);
@@ -281,7 +321,7 @@ public class MediaTxtQuery {
 		//生成面包屑数据
 		List<FolderBreadCrumbVO> folderBreadCrumb = folderQuery.generateFolderBreadCrumbForAndroid(filteredParentFolders);
 		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_TXT.toString());
+		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByRoleId(role.toString(), folderId, FolderType.COMPANY_TXT.toString());
 		
 		List<MediaTxtPO> txts = findCompleteByFolderId(current.getId());
 		

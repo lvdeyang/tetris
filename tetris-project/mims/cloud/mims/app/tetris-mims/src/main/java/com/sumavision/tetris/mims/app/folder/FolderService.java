@@ -197,7 +197,7 @@ public class FolderService {
 	 * @param FolderType type 媒资文件夹类型
 	 * @return FolderPO 新建的文件夹
 	 */
-	public FolderPO addMediaFolder(String companyId, Long parentFolderId, String folderName, FolderType type) throws Exception{
+	public FolderPO addMediaFolder(String userId, String companyId, Long parentFolderId, String folderName, FolderType type) throws Exception{
 		FolderPO parentFolder = folderDao.findOne(parentFolderId);
 		if(parentFolder == null) throw new FolderNotExistException(parentFolderId);
 		String basePath = parentFolder.getParentPath()==null?"":parentFolder.getParentPath();
@@ -211,23 +211,31 @@ public class FolderService {
 		folder.setUpdateTime(new Date());
 		folderDao.save(folder);
 		
-		FolderGroupPermissionPO permission0 = new FolderGroupPermissionPO();
-		permission0.setFolderId(folder.getId());
-		permission0.setGroupId(companyId);
-		permission0.setUpdateTime(new Date());
-		folderGroupPermissionDao.save(permission0);
+		FolderGroupPermissionPO groupPermission = new FolderGroupPermissionPO();
+		groupPermission.setFolderId(folder.getId());
+		groupPermission.setGroupId(companyId);
+		groupPermission.setUpdateTime(new Date());
+		folderGroupPermissionDao.save(groupPermission);
 		//绑定公司管理员角色
 		SubordinateRoleVO roleVO = subordinateRoleQuery.queryRoleByCompany(companyId);
+		//绑定改用户角色
+		Long userRoleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(userId));
 		
 		if(roleVO == null){
 			return folder;
 		}
 		
-		FolderRolePermissionPO permission1 = new FolderRolePermissionPO();
-		permission1.setFolderId(folder.getId());
-		permission1.setRoleId(roleVO.getId());
-		permission1.setUpdateTime(new Date());
-		folderRolePermissionDao.save(permission1);
+		FolderRolePermissionPO adminPermission = new FolderRolePermissionPO();
+		adminPermission.setFolderId(folder.getId());
+		adminPermission.setRoleId(roleVO.getId());
+		adminPermission.setUpdateTime(new Date());
+		folderRolePermissionDao.save(adminPermission);
+		
+		FolderRolePermissionPO userPermission = new FolderRolePermissionPO();
+		userPermission.setFolderId(folder.getId());
+		userPermission.setRoleId(userRoleId);
+		userPermission.setUpdateTime(new Date());
+		folderRolePermissionDao.save(userPermission);
 		
 		return folder;
 	}

@@ -451,6 +451,13 @@ public class ColumnService {
 												  .append("%")
 												  .toString();
 			regionArticleIds = articleRegionPermissionDao.findArticleIdByRegion(reg);
+			if (city != null && city != "") {
+				String newReg = new StringBufferWrapper().append("%")
+						  .append(city)
+						  .append("%")
+						  .toString();
+				regionArticleIds.addAll(articleRegionPermissionDao.findArticleIdByRegion(newReg));
+			}
 		}else if(city != null && city != ""){
 			String reg = new StringBufferWrapper().append("%")
 												  .append(city)
