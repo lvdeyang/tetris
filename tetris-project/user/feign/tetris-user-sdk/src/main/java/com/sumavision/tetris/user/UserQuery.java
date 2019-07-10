@@ -17,7 +17,6 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
-import com.sumavision.tetris.user.exception.TokenTimeoutException;
 
 @Component
 public class UserQuery {
@@ -34,13 +33,8 @@ public class UserQuery {
 	 * @return boolean 判断结果
 	 */
 	public boolean checkToken(String token) throws Exception{
-		try {
-			JSONObject response = userFeign.checkToken(token);
-			return JsonBodyResponseParser.parseObject(response, Boolean.class);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new TokenTimeoutException();
-		}
+		JSONObject response = userFeign.checkToken(token);
+		return JsonBodyResponseParser.parseObject(response, Boolean.class);
 	}
 	
 	/**
