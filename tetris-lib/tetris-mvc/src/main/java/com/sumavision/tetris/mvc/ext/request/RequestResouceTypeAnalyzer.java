@@ -11,7 +11,7 @@ public class RequestResouceTypeAnalyzer {
 		".html", ".js", ".css", ".jpg", ".png", ".ico",
 		".eot", ".svg", ".ttf", ".woff", ".jsp", ".gif",
 		".mp4", ".mp3", ".m3u8", ".ts", ".bpmn", ".xml",
-		".tar", ".rar"
+		".tar", ".rar", ".txt"
 	};
 	
 	/**
