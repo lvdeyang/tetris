@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import org.springframework.data.repository.RepositoryDefinition;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = MediaVideoPO.class, idClass = Long.class)

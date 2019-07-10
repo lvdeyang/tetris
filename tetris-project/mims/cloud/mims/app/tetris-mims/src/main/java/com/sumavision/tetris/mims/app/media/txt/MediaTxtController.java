@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.txt;
 
+import java.io.File;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -312,6 +313,11 @@ public class MediaTxtController {
 		}
 		
 		txt.setContent(content);
+		if (txt.getUploadTmpPath() != null && !txt.getUploadTmpPath().isEmpty()) {
+			File file = new File(txt.getUploadTmpPath());
+			mediaTxtService.writeTxt(file, content);
+			txt.setSize(file.length());
+		}
 		mediaTxtDao.save(txt);
 		
 		return null;

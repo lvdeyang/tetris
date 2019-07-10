@@ -231,11 +231,13 @@ public class FolderService {
 		adminPermission.setUpdateTime(new Date());
 		folderRolePermissionDao.save(adminPermission);
 		
-		FolderRolePermissionPO userPermission = new FolderRolePermissionPO();
-		userPermission.setFolderId(folder.getId());
-		userPermission.setRoleId(userRoleId);
-		userPermission.setUpdateTime(new Date());
-		folderRolePermissionDao.save(userPermission);
+		if (roleVO.getId() != userRoleId) {
+			FolderRolePermissionPO userPermission = new FolderRolePermissionPO();
+			userPermission.setFolderId(folder.getId());
+			userPermission.setRoleId(userRoleId);
+			userPermission.setUpdateTime(new Date());
+			folderRolePermissionDao.save(userPermission);
+		}
 		
 		return folder;
 	}

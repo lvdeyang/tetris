@@ -41,4 +41,15 @@ public interface MediaTxtDAO extends BaseDAO<MediaTxtPO>{
 	 */
 	public List<MediaTxtPO> findByFolderIdIn(Collection<Long> folderId);
 	
+	/**
+	 * 判断临时文件是否可以删除<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月4日 上午10:03:21
+	 * @param String tmpPath 临时文件路径
+	 * @param Collection<Long> ids 例外素材id
+	 * @return List<MaterialFilePO> 查询结果
+	 */
+	public List<MediaTxtPO> findByUploadTmpPathAndIdNotIn(String tmpPath, Collection<Long> ids);
+	
 }

@@ -2,8 +2,12 @@ package com.sumavision.tetris.mims.app.media.txt;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
@@ -27,6 +31,12 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 	private String icon;
 	
 	private String style;
+	
+	private String previewUrl;
+	
+	private Long size;
+	
+	private Integer progress;
 	
 	public String getContent() {
 		return content;
@@ -118,8 +128,36 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 		return this;
 	}
 	
+	public String getPreviewUrl() {
+		return previewUrl;
+	}
+
+	public MediaTxtVO setPreviewUrl(String previewUrl) {
+		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public Long getSize() {
+		return size;
+	}
+
+	public MediaTxtVO setSize(Long size) {
+		this.size = size;
+		return this;
+	}
+
+	public Integer getProgress() {
+		return progress;
+	}
+
+	public MediaTxtVO setProgress(Integer progress) {
+		this.progress = progress;
+		return this;
+	}
+
 	@Override
 	public MediaTxtVO set(MediaTxtPO entity) throws Exception {
+		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
@@ -128,6 +166,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setAuthorName(entity.getAuthorName())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setRemarks(entity.getRemarks())
+			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setSize(entity.getSize())
 			.setType(MediaTxtItemType.TXT.toString())
 			.setIcon(MediaTxtItemType.TXT.getIcon())
 			.setStyle(MediaTxtItemType.TXT.getStyle()[0]);

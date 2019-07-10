@@ -161,6 +161,7 @@ define([
                             type:'success',
                             message:'保存成功!'
                         });
+                        row.content = txt;
                         done();
                     });
                 },
