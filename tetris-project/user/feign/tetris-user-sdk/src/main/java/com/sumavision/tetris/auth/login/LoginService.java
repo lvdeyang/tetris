@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
-import com.sumavision.tetris.user.exception.PasswordErrorException;
 
 @Component
 public class LoginService {
@@ -27,14 +26,8 @@ public class LoginService {
 			String username,
 			String password,
 			String verifyCode) throws Exception{
-		try{
-			JSONObject response = loginFeign.doPasswordLogin(username, password, verifyCode);
-			return JsonBodyResponseParser.parseObject(response, String.class);
-		}catch(Exception e){
-			e.printStackTrace();
-			throw new PasswordErrorException();
-		}
-		
+		JSONObject response = loginFeign.doPasswordLogin(username, password, verifyCode);
+		return JsonBodyResponseParser.parseObject(response, String.class);
 	}
 	
 	/**

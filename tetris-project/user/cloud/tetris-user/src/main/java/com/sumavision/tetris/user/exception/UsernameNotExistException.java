@@ -14,7 +14,7 @@ public class UsernameNotExistException extends BaseException{
 	private static final long serialVersionUID = 1L;
 
 	public UsernameNotExistException(String username) {
-		super(StatusCode.FORBIDDEN, "用户不存在！");
+		super(StatusCode.FORBIDDEN, "用户不存在！", "/web/app/login/login.html");
 		LOG.error(DateUtil.now());
 		LOG.error(new StringBufferWrapper().append("用户不存在！用户名：")
 										   .append(username)

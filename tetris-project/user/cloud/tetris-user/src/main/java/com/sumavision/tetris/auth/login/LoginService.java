@@ -2,11 +2,9 @@ package com.sumavision.tetris.auth.login;
 
 import java.util.Date;
 import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.sumavision.tetris.auth.login.exception.AppIdCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.SignCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.SignVerifyFailException;
@@ -21,9 +19,7 @@ import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserStatus;
 import com.sumavision.tetris.user.UserVO;
-import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
-import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 import com.sumavision.tetris.user.exception.UsernameNotExistException;
 
 @Service
@@ -59,10 +55,6 @@ public class LoginService {
 			String username,
 			String password,
 			String verifyCode) throws Exception{
-		
-		if(username == null) throw new UsernameCannotBeNullException();
-		
-		if(password == null) throw new PasswordCannotBeNullException();
 		
 		UserPO user = userDao.findByUsername(username);
 		

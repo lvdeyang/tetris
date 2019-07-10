@@ -73,6 +73,7 @@
         .border-radius-2px input,
         .border-radius-2px button{border-radius:2px!important;}
     </style>
+    
 </head>
 <body>
 <div id="page-login-wrapper" style="width:100%; height:100%; position:relative; background-color:#f0f6fe;">
@@ -196,7 +197,17 @@
             },
             created:function(){
                 var self = this;
-
+                var hash = window.location.hash;
+                if(hash){
+                    hash = hash.replace('#', '');
+                    hash = decodeURIComponent(decodeURIComponent(hash));
+                    hash = hash.split('&&');
+                    var message = hash[1];
+                    self.$message({
+                        type:'error',
+                        message:message
+                    });
+                }
             }
         });
     });
