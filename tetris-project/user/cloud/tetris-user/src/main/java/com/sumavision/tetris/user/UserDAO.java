@@ -21,6 +21,16 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface UserDAO extends BaseDAO<UserPO>{
 	
 	/**
+	 * 根据id查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 下午3:18:07
+	 * @param Collection<Long> ids 用户id列表
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByIdIn(Collection<Long> ids);
+	
+	/**
 	 * 分页查询用户列表<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

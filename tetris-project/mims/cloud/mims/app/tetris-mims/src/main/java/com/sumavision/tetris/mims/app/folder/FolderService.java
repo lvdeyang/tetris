@@ -1244,7 +1244,8 @@ public class FolderService {
 			FolderType type, 
 			Long parentId, 
 			String parentPath,
-			Long roleId) throws Exception{
+			Long roleId,
+			String roleName) throws Exception{
 		FolderPO folder = new FolderPO();
 		folder.setName(new StringBufferWrapper().append(companyName).append("（").append(type.getName()).append("）").toString());
 		folder.setDepth();
@@ -1261,6 +1262,8 @@ public class FolderService {
 		FolderRolePermissionPO permission1 = new FolderRolePermissionPO();
 		permission1.setFolderId(folder.getId());
 		permission1.setRoleId(roleId);
+		permission1.setRoleName(roleName);
+		permission1.setAutoGeneration(true);
 		permission1.setUpdateTime(new Date());
 		folderRolePermissionDao.save(permission1);
 		return folder;
@@ -1281,66 +1284,41 @@ public class FolderService {
 	 * @param String companyId 公司id
 	 * @param String companyName 公司名称
 	 * @param String userId 用户id
-	 * @param String roleId 角色id 
+	 * @param String roleId 管理员角色id 
+	 * @param String roleName 管理员角色名称
 	 */
-	public void createCompanyDisk(String companyId, String companyName, String userId, String roleId) throws Exception{
+	public void createCompanyDisk(String companyId, String companyName, String userId, String roleId, String roleName) throws Exception{
 		//判重
 		FolderPO existFolder = folderDao.findCompanyRootFolderByType(companyId, FolderType.COMPANY_PICTURE.toString());
-		//TODO: role
 		if(existFolder != null){
-//			RolePO rolePO = roleDao.findInternalCompanyAdminRole(companyId);
-//			if(rolePO != null) {
-//				RoleUserPermissionPO permission = new RoleUserPermissionPO();
-//				permission.setRoleId(rolePO.getId());
-//				permission.setUserId(userId);
-//				permission.setUpdateTime(new Date());
-//				roleUserPermissionDao.save(permission);
-//			}
 			return;
 		}
 		
-		//创建管理员
-//		RolePO role = new RolePO();
-//		role.setGroupId(companyId);
-//		role.setName("管理员");
-//		role.setRemoveable(false);
-//		role.setSerial(0);
-//		role.setUpdateTime(new Date());
-//		role.setClassify(RoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
-//		roleDao.save(role);
-		
-		//绑定用户
-//		RoleUserPermissionPO permission1 = new RoleUserPermissionPO();
-//		permission1.setRoleId(Long.parseLong(roleId));
-//		permission1.setUserId(userId);
-//		permission1.setUpdateTime(new Date());
-//		roleUserPermissionDao.save(permission1);
-//		
 		//企业根目录
-		FolderPO root = createCompanyFolder(companyId, companyName, FolderType.COMPANY, null, null, Long.parseLong(roleId));
+		FolderPO root = createCompanyFolder(companyId, companyName, FolderType.COMPANY, null, null, Long.parseLong(roleId), roleName);
 		
 		String parentPath = new StringBufferWrapper().append("/").append(root.getId()).toString();
 		
 		//图片
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_PICTURE, root.getId(), parentPath, Long.parseLong(roleId));
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_PICTURE, root.getId(), parentPath, Long.parseLong(roleId), roleName);
 		
 		//视频
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO, root.getId(), parentPath, Long.parseLong(roleId));
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO, root.getId(), parentPath, Long.parseLong(roleId), roleName);
 		
 		//音频
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO, root.getId(), parentPath, Long.parseLong(roleId));
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO, root.getId(), parentPath, Long.parseLong(roleId), roleName);
 		
 		//视频流
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO_STREAM, root.getId(), parentPath,Long.parseLong(roleId));
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_VIDEO_STREAM, root.getId(), parentPath,Long.parseLong(roleId), roleName);
 		
 		//音频流
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO_STREAM, root.getId(), parentPath, Long.parseLong(roleId));
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO_STREAM, root.getId(), parentPath, Long.parseLong(roleId), roleName);
 		
 		//文本
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_TXT, root.getId(), parentPath, Long.parseLong(roleId));
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_TXT, root.getId(), parentPath, Long.parseLong(roleId), roleName);
 	
 		//压缩文件
-		createCompanyFolder(companyId, companyName, FolderType.COMPANY_COMPRESS, root.getId(), parentPath, Long.parseLong(roleId));
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_COMPRESS, root.getId(), parentPath, Long.parseLong(roleId), roleName);
 	}
 	
 }

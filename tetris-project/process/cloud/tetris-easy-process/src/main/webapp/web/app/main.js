@@ -40,6 +40,7 @@ require.config({
         'mi-upload-dialog':window.APPPATH + 'component/dialog/upload/upload-dialog',
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
+        'mi-subordinate-role-dialog':window.APPPATH + 'component/dialog/subordinate-role/subordinate-role-dialog',
         'process-variable-dialog':window.APPPATH + 'component/dialog/process-variable/process-variable-dialog',
         'process-param-dialog':window.APPPATH + 'component/dialog/process-param/process-param-dialog',
 

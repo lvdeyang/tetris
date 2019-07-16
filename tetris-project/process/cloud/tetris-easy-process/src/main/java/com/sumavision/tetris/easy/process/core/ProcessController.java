@@ -1,8 +1,6 @@
 package com.sumavision.tetris.easy.process.core;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.easy.process.access.point.AccessPointDAO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointPO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointScope;
@@ -26,7 +23,6 @@ import com.sumavision.tetris.easy.process.access.point.exception.AccessPointNotE
 import com.sumavision.tetris.easy.process.access.service.ServiceType;
 import com.sumavision.tetris.easy.process.access.service.rest.RestServiceDAO;
 import com.sumavision.tetris.easy.process.access.service.rest.RestServicePO;
-import com.sumavision.tetris.easy.process.core.exception.ProcessIdAlreadyExistException;
 import com.sumavision.tetris.easy.process.core.exception.ProcessNotExistException;
 import com.sumavision.tetris.easy.process.core.exception.UserHasNoPermissionForProcessActionException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -44,7 +40,7 @@ public class ProcessController {
 	private ProcessDAO processDao;
 	
 	@Autowired
-	private ProcessQuery processTool;
+	private ProcessQuery processQuery;
 	
 	@Autowired
 	private ProcessService processService;
@@ -62,7 +58,7 @@ public class ProcessController {
 	 * <b>日期：</b>2018年12月24日 下午5:31:49
 	 * @param int currentPage 当前页码
 	 * @param int pageSize 每页数据量
-	 * @return long total 总数据量
+	 * @return int total 总数据量
 	 * @return List<ProcessVO> 流程列表
 	 */
 	@JsonBody
@@ -75,9 +71,9 @@ public class ProcessController {
 		
 		UserVO user = userTool.current();
 		
-		long total = processDao.count();
+		int total = processDao.countByCompanyId(user.getGroupId());
 		
-		List<ProcessPO> entities = processTool.findAll(currentPage, pageSize);
+		List<ProcessPO> entities = processQuery.findByCompanyId(user.getGroupId(), currentPage, pageSize);
 		
 		List<ProcessVO> rows = ProcessVO.getConverter(ProcessVO.class).convert(entities, ProcessVO.class);
 		
@@ -108,34 +104,7 @@ public class ProcessController {
 			String remarks,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
-		
-		ProcessPO process = processDao.findByProcessId(processId);
-
-		if(process != null){
-			throw new ProcessIdAlreadyExistException(processId);
-		}
-		
-		Date updateTime = new Date();
-		
-		process = new ProcessPO();
-		process.setType(ProcessType.fromName(type));
-		process.setProcessId(processId);
-		process.setName(name);
-		process.setRemarks(remarks);
-		process.setPath(new StringBufferWrapper().append("tmp")
-												 .append(File.separator)
-												 .append("processes")
-												 .append(File.separator)
-												 .append(user.getUuid())
-												 .append("-")
-												 .append(processId)
-												 .append("-")
-												 .append(updateTime.getTime())
-												 .append(".bpmn")
-												 .toString());
-		process.setUpdateTime(updateTime);
-		processDao.save(process);
+		ProcessPO process = processService.saveProcess(type, processId, name, remarks);
 		
 		return new ProcessVO().set(process);
 	}

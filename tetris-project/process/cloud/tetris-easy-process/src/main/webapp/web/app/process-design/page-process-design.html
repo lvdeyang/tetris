@@ -18,6 +18,10 @@
 
         </el-card>
 
+        <mi-user-dialog ref="miUserDialog" @on-dialog-close="onUserSelected"></mi-user-dialog>
+
+        <mi-subordinate-role-dialog ref="miSubordinateRoleDialog" @on-dialog-close="onSubordinateRoleSelected"></mi-subordinate-role-dialog>
+
     </template>
 
 </mi-frame>

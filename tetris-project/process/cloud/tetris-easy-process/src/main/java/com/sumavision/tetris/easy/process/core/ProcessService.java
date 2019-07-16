@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.support.RequestContext;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -42,6 +41,7 @@ import com.sumavision.tetris.easy.process.access.point.AccessPointParamPO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionDAO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionPO;
 import com.sumavision.tetris.easy.process.access.point.ParamDirection;
+import com.sumavision.tetris.easy.process.core.exception.ProcessIdAlreadyExistException;
 import com.sumavision.tetris.easy.process.core.exception.ProcessInUseException;
 import com.sumavision.tetris.easy.process.core.exception.ProcessNotExistException;
 import com.sumavision.tetris.easy.process.core.exception.VariableValueCheckFailedException;
@@ -61,6 +61,9 @@ public class ProcessService {
 	
 	@Autowired
 	private ProcessDAO processDao;
+	
+	@Autowired
+	private ProcessCompanyPermissionDAO processCompanyPermissionDao;
 	
 	@Autowired
 	private ProcessVariableDAO processVariableDao;
@@ -94,6 +97,61 @@ public class ProcessService {
 	
 	@Autowired
 	private ProcessInstanceDeploymentPermissionDAO processInstanceDeploymentPermissionDao;
+	
+	/**
+	 * 添加流程<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 上午10:29:42
+	 * @param String type 流程类型
+	 * @param String processId 流程id
+	 * @param String name 流程名称
+	 * @param String remarks 备注
+	 * @return ProcessPO 流程定义
+	 */
+	public ProcessPO saveProcess(
+			String type,
+			String processId,
+			String name,
+			String remarks) throws Exception{
+		
+		ProcessPO process = processDao.findByProcessId(processId);
+
+		if(process != null){
+			throw new ProcessIdAlreadyExistException(processId);
+		}
+		
+		UserVO user = userQuery.current();
+		
+		Date updateTime = new Date();
+		
+		process = new ProcessPO();
+		process.setType(ProcessType.fromName(type));
+		process.setProcessId(processId);
+		process.setName(name);
+		process.setRemarks(remarks);
+		process.setPath(new StringBufferWrapper().append("tmp")
+												 .append(File.separator)
+												 .append("processes")
+												 .append(File.separator)
+												 .append(user.getUuid())
+												 .append("-")
+												 .append(processId)
+												 .append("-")
+												 .append(updateTime.getTime())
+												 .append(".bpmn")
+												 .toString());
+		process.setUpdateTime(updateTime);
+		processDao.save(process);
+		
+		ProcessCompanyPermissionPO permission = new ProcessCompanyPermissionPO();
+		permission.setProcessId(process.getId());
+		permission.setCompanyId(user.getGroupId());
+		permission.setUpdateTime(updateTime);
+		processCompanyPermissionDao.save(permission);
+		
+		return process;
+	}
 	
 	/**
 	 * 保存流程的bpmn配置<br/>

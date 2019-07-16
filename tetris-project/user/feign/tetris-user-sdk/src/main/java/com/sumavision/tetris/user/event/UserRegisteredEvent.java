@@ -16,6 +16,8 @@ public class UserRegisteredEvent extends ApplicationEvent{
 	
 	private String roleId;
 	
+	private String roleName;
+	
 	public String getUserId() {
 		return userId;
 	}
@@ -34,6 +36,10 @@ public class UserRegisteredEvent extends ApplicationEvent{
 	
 	public String getRoleId() {
 		return roleId;
+	}
+	
+	public String getRoleName() {
+		return roleName;
 	}
 
 	public UserRegisteredEvent(
@@ -57,7 +63,8 @@ public class UserRegisteredEvent extends ApplicationEvent{
 			String nickname, 
 			String companyId, 
 			String companyName,
-			String roleId) {
+			String roleId,
+			String roleName) {
 		
 		super(source);
 		

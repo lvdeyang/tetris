@@ -1072,9 +1072,9 @@ define([
         var onDeleteVariable = this._onDeleteVariable = options.onDeleteVariable;
         var queryVariables = this._queryVariables = options.queryVariables;
         var queryUsers = this._queryUsers = options.queryUsers;
-        var totalUsers = this._totalUsers = options.totalUsers;
+        var onBindUserClick = this._onBindUserClick = options.onBindUserClick;
         var queryRoles = this._queryRoles = options.queryRoles;
-        var totalRoles = this._totalRoles = options.totalRoles;
+        var onBindRoleClick = this._onBindRoleClick = options.onBindRoleClick;
 
         var $container = $(container);
         var id = container + '-' + new Date().getTime();
@@ -1142,6 +1142,14 @@ define([
             elementRegistry.forEach(function(element){
                 if(!element.businessObject) return;
                 if(!element.businessObject.$attrs) element.businessObject.$attrs = {};
+                if(element.businessObject.candidateUsers){
+                    element.businessObject.$attrs['activiti:candidateUsers'] = element.businessObject.candidateUsers;
+                    delete element.businessObject.candidateUsers;
+                }
+                if(element.businessObject.candidateGroups){
+                    element.businessObject.$attrs['activiti:candidateGroups'] = element.businessObject.candidateGroups;
+                    delete element.businessObject.candidateGroups;
+                }
                 if(element.businessObject.removeable){
                     element.businessObject.$attrs['extension:removeable'] = element.businessObject.removeable;
                     delete element.businessObject.removeable;
@@ -1224,7 +1232,7 @@ define([
             var element = e.element;
             var businessObject = element.businessObject;
             if(is(businessObject, 'bpmn:UserTask')){
-                showUserTaskProps.apply($container[0], [element]);
+                showUserTaskProps.apply($container[0], [element, queryUsers, queryRoles]);
             }else if(is(businessObject, 'bpmn:ServiceTask')){
                 var serviceType = businessObject.$attrs['extension:type'];
                 if(serviceType === 'REMOTE_SYNCHRONOUS'){
@@ -1479,6 +1487,103 @@ define([
             if(typeof onDeleteVariable === 'function') onDeleteVariable(rowId, done);
         });
 
+        //当前选中用户节点
+        var getCurrentUserTaskElement = function(){
+            var nodeId = $container.find('.prop-scope-user-task .node-id').val();
+            var elementRegistry = self.get('elementRegistry');
+            var currentElement = null;
+            elementRegistry.forEach(function(element){
+                if(element.id === nodeId){
+                    currentElement = element;
+                    return false;
+                }
+            });
+            return currentElement;
+        };
+
+        $container.on('click.bpmnJS.ext.prop.panel.user.add', '.prop-user-binding-add', function(){
+            var element = getCurrentUserTaskElement();
+            var bindUsers = element.businessObject.$attrs['activiti:candidateUsers'];
+            onBindUserClick(function(users){
+                var $userContainer = $container.find('.prop-user-binding tbody');
+                if(users && users.length>0){
+                    var userIds = [];
+                    if(element.businessObject.$attrs['activiti:candidateUsers']){
+                        userIds = element.businessObject.$attrs['activiti:candidateUsers'].split(',');
+                    }
+                    for(var i=0; i<users.length; i++){
+                        var $user = $('<tr><td>'+users[i].nickname+'</td><td><button class="el-button el-button--text prop-user-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                        $user.data('bind', users[i]);
+                        $userContainer.append($user);
+                        userIds.push(users[i].id);
+                    }
+                    element.businessObject.$attrs['activiti:candidateUsers'] = userIds.join(',');
+                }
+            }, bindUsers?bindUsers.split(','):null);
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.user.delete', '.prop-user-binding-delete', function(){
+            var $button = $(this);
+            var $user = $button.closest('tr');
+            var user = $user.data('bind');
+            var element = getCurrentUserTaskElement();
+            var bindUsers = element.businessObject.$attrs['activiti:candidateUsers'].split(',');
+            for(var i=0; i<bindUsers.length; i++){
+                if(bindUsers[i] == user.id){
+                    bindUsers.splice(i, 1);
+                    break;
+                }
+            }
+            if(bindUsers.length > 0){
+                element.businessObject.$attrs['activiti:candidateUsers'] = bindUsers.join(',');
+            }else{
+                delete element.businessObject.$attrs['activiti:candidateUsers'];
+            }
+            $user.remove();
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.role.add', '.prop-role-binding-add', function(){
+            var element = getCurrentUserTaskElement();
+            var bindRoles = element.businessObject.$attrs['activiti:candidateGroups'];
+            onBindRoleClick(function(roles){
+                var $roleContainer = $container.find('.prop-role-binding tbody');
+                if(roles && roles.length){
+                    var roleIds = [];
+                    if(element.businessObject.$attrs['activiti:candidateGroups']){
+                        roleIds = element.businessObject.$attrs['activiti:candidateGroups'].split(',');
+                    }
+                    for(var i=0; i<roles.length; i++){
+                        var $role = $('<tr><td>'+roles[i].name+'</td><td><button class="el-button el-button--text prop-role-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                        $role.data('bind', roles[i]);
+                        $roleContainer.append($role);
+                        roleIds.push(roles[i].id);
+                    }
+                    element.businessObject.$attrs['activiti:candidateGroups'] = roleIds.join(',');
+                }
+
+            }, bindRoles?bindRoles.split(','):null);
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.role.delete', '.prop-role-binding-delete', function(){
+            var $button = $(this);
+            var $role = $button.closest('tr');
+            var role = $role.data('bind');
+            var element = getCurrentUserTaskElement();
+            var bindRoles = element.businessObject.$attrs['activiti:candidateGroups'].split(',');
+            for(var i=0; i<bindRoles.length; i++){
+                if(bindRoles[i] == role.id){
+                    bindRoles.splice(i, 1);
+                    break;
+                }
+            }
+            if(bindRoles.length > 0){
+                element.businessObject.$attrs['activiti:candidateGroups'] = bindRoles.join(',');
+            }else{
+                delete element.businessObject.$attrs['activiti:candidateGroups'];
+            }
+            $role.remove();
+        });
+
     }
 
     /**
@@ -1619,9 +1724,39 @@ define([
         $sequenceFlow.show();
     };
 
-    var showUserTaskProps = function(element){
+    var showUserTaskProps = function(element, queryUsers, queryRoles){
         var $container = $(this);
         var businessObject = element.businessObject;
+        var candidateUsers = businessObject.$attrs['activiti:candidateUsers'];
+        if(candidateUsers){
+            candidateUsers = candidateUsers.split(',');
+            queryUsers(candidateUsers, function(users){
+                var $userContainer = $container.find('.prop-user-binding tbody');
+                $userContainer.empty();
+                if(users && users.length>0){
+                    for(var i=0; i<users.length; i++){
+                        var $user = $('<tr><td>'+users[i].nickname+'</td><td><button class="el-button el-button--text prop-user-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                        $user.data('bind', users[i]);
+                        $userContainer.append($user);
+                    }
+                }
+            });
+        }
+        var candidateGroups = businessObject.$attrs['activiti:candidateGroups'];
+        if(candidateGroups){
+            candidateGroups = candidateGroups.split(',');
+            queryRoles(candidateGroups, function(roles){
+                var $roleContainer = $container.find('.prop-role-binding tbody');
+                $roleContainer.empty();
+                if(roles && roles.length){
+                    for(var i=0; i<roles.length; i++){
+                        var $role = $('<tr><td>'+roles[i].name+'</td><td><button class="el-button el-button--text prop-role-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                        $role.data('bind', roles[i]);
+                        $roleContainer.append($role);
+                    }
+                }
+            });
+        }
         var $userTask = $container.find('.prop-scope-user-task');
         var $nodeId = $userTask.find('.node-id');
         var $nodeLabel = $userTask.find('.node-label');

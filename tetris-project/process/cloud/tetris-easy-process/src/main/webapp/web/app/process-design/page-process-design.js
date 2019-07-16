@@ -12,6 +12,8 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
+    'mi-user-dialog',
+    'mi-subordinate-role-dialog',
     'css!' + window.APPPATH + 'process-design/page-process-design.css'
 ], function(tpl, config, ajax, $, context, commons, BpmnExtJS, Vue){
 
@@ -45,7 +47,18 @@ define([
 
             },
             methods:{
-
+                onUserSelected:function(users, startLoading, endLoading, close){
+                    var self = this;
+                    var buff = self.$refs.miUserDialog.getBuffer();
+                    buff(users);
+                    close();
+                },
+                onSubordinateRoleSelected:function(roles, startLoading, endLoading, close){
+                    var self = this;
+                    var buff = self.$refs.miSubordinateRoleDialog.getBuffer();
+                    buff(roles);
+                    close();
+                }
             },
             mounted:function(){
                 var self = this;
@@ -109,17 +122,20 @@ define([
                                 if(typeof fn === 'function') fn(data);
                             });
                         },
-                        queryUsers:function(){
-
+                        queryUsers:function(userIds, fn){
+                            ajax.post('/user/find/by/id/in', {ids:$.toJSON(userIds)}, fn);
                         },
-                        totalUsers:function(){
-
+                        onBindUserClick:function(fn, userIds){
+                            var companyId = self.user.groupId;
+                            self.$refs.miUserDialog.open('/user/list/by/'+companyId+'/with/except', (userIds&&userIds.length>0)?userIds:null);
+                            self.$refs.miUserDialog.setBuffer(fn);
                         },
-                        queryRoles:function(){
-
+                        queryRoles:function(roleIds, fn){
+                            ajax.post('/subordinate/role/find/by/id/in', {ids:$.toJSON(roleIds)}, fn);
                         },
-                        totalRoles:function(){
-
+                        onBindRoleClick:function(fn, roleIds){
+                            self.$refs.miSubordinateRoleDialog.open('/subordinate/role/find/by/company/id/with/except', (roleIds&&roleIds.length>0)?roleIds:null);
+                            self.$refs.miSubordinateRoleDialog.setBuffer(fn);
                         }
                     });
                 });

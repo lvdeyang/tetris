@@ -25,13 +25,13 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleService;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/role")
 public class RoleController {
+	
 	@Autowired
 	private UserQuery userTool;
 	
@@ -42,10 +42,10 @@ public class RoleController {
 	private FolderRolePermissionDAO folderRolePermissionDao;
 	
 	@Autowired
-	SubordinateRoleQuery subordinateRoleQuery;
+	private SubordinateRoleQuery subordinateRoleQuery;
 	
 	@Autowired
-	SubordinateRoleService subordinateRoleService;
+	private SubordinateRoleService subordinateRoleService;
 	/**
 	 * 查询所有的角色<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -59,14 +59,6 @@ public class RoleController {
 	public Object list(HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-		}
-		
-		if(user.getGroupId() == null){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-		}
 		
 		List<SubordinateRoleVO> roles = subordinateRoleQuery.queryRolesByCompany(user.getGroupId());
 		
@@ -90,14 +82,6 @@ public class RoleController {
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userTool.current();
-		
-//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-//			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-		
-		if(user.getGroupId() == null){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-		}
 		
 		FolderPO folder = folderDao.findOne(folderId);
 		
@@ -147,13 +131,6 @@ public class RoleController {
 		
 		UserVO user = userTool.current();
 		
-//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-//			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-		
-		if(user.getGroupId() == null){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-		}
 		Date date = new Date();
 		
 		SubordinateRoleVO vo = subordinateRoleService.addRole(user.getId(), Long.parseLong(user.getGroupId()), name, date.toString(), "true", "0");
@@ -178,30 +155,6 @@ public class RoleController {
 			String name,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
-		
-		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-		}
-		
-		if(user.getGroupId() == null){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-		}
-		
-		SubordinateRoleVO role = subordinateRoleQuery.queryRoleById(id);
-		
-		if(role == null){
-			//throw new RoleNotExistException(id);
-		}
-		
-//		if(UserClassify.COMPANY_ADMIN.equals(role.getClassify())){
-//			throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-		
-		if(!role.getCompanyId().toString().equals(user.getGroupId())){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-		}
-		
 		SubordinateRoleVO vo = subordinateRoleService.editRole(id, name);
 	
 		return vo;
@@ -222,170 +175,11 @@ public class RoleController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
-		
-//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-//			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-		
-		if(user.getGroupId() == null){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-		}
-		
-		SubordinateRoleVO role = subordinateRoleQuery.queryRoleById(id);
-		
-		if(role == null){
-			//throw new RoleNotExistException(id);
-		}
-		
-//		if(UserClassify.COMPANY_ADMIN.equals(role.getClassify())){
-//			throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-		
-		if(!role.getCompanyId().toString().equals(user.getGroupId())){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid());
-		}
-		
 		SubordinateRoleVO vo = subordinateRoleService.removeRole(id);
+		
 		folderRolePermissionDao.deleteInBatch(folderRolePermissionDao.findByRoleId(id)); 
+		
 		return vo;
 	}
-	
-//	/**
-//	 * 获取角色绑定用户<br/>
-//	 * <b>作者:</b>lvdeyang<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2018年12月10日 上午9:40:25
-//	 * @param @PathVariable Long id 角色id
-//	 * @return Integer total 总数据量
-//	 * @return List<UserVO> users 绑定用户
-//	 */
-//	@JsonBody
-//	@ResponseBody
-//	@RequestMapping(value = "/get/binding/users/{id}")
-//	public Object getBindingUsers(
-//			@PathVariable Long id,
-//			Integer pageSize,
-//			Integer currentPage,
-//			HttpServletRequest request) throws Exception{
-//		
-//		UserVO user = userTool.current();
-//		
-//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-//			throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-//		
-//		if(user.getGroupId() == null){
-//			throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-//		
-//		RolePO role = roleDao.findOne(id);
-//		
-//		if(role == null){
-//			throw new RoleNotExistException(id);
-//		}	
-//		
-//		List<RoleUserPermissionPO> permissions =  roleUserPermissionDao.findByRoleId(role.getId());
-//		
-//		List<UserVO> users = null;
-//		int total = 0;
-//		
-//		if(permissions!=null && permissions.size()>0){
-//			Set<String> userIds = new HashSet<String>();
-//			for(RoleUserPermissionPO permission:permissions){
-//				userIds.add(permission.getUserId());
-//			}
-//			users = userTool.find(userIds, pageSize, currentPage);
-//			total = userIds.size();
-//		}
-//		
-//		Map<String, Object> result = new HashMapWrapper<String, Object>().put("total", total)
-//																		 .put("users", users)
-//																		 .getMap();
-//		
-//		return result;
-//	}
-//	
-//	/**
-//	 * 用户角色解绑<br/>
-//	 * <b>作者:</b>lvdeyang<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2018年12月10日 上午10:52:05
-//	 * @param Long roleId 角色id
-//	 * @param String userId 用户id
-//	 */
-//	@JsonBody
-//	@ResponseBody
-//	@RequestMapping(value = "/user/unbinding")
-//	public Object userUnbinding(
-//			Long roleId,
-//			String userId,
-//			HttpServletRequest request) throws Exception{
-//		
-//		UserVO user = userTool.current();
-//		
-//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-//			throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-//		
-//		if(user.getGroupId() == null){
-//			throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-//		
-//		RolePO role = roleDao.findOne(roleId);
-//		
-//		if(role == null){
-//			throw new RoleNotExistException(roleId);
-//		}	
-//		
-//		List<RoleUserPermissionPO> permissions = roleUserPermissionDao.findByRoleIdAndUserId(roleId, userId);
-//		if(permissions!=null && permissions.size()>0){
-//			roleUserPermissionDao.deleteInBatch(permissions);
-//		}
-//		
-//		return null;
-//	}
-//	
-//	/**
-//	 * 用户绑定角色<br/>
-//	 * <b>作者:</b>lvdeyang<br/>
-//	 * <b>版本：</b>1.0<br/>
-//	 * <b>日期：</b>2018年12月10日 下午3:06:12
-//	 * @param Long roleId 角色id
-//	 * @param String userIds json数据：用户id列表
-//	 * @return List<UserVO> 绑定的用户
-//	 */
-//	@JsonBody
-//	@ResponseBody
-//	@RequestMapping(value = "/user/binding")
-//	public Object userBinding(
-//			Long roleId,
-//			String userIds,
-//			HttpServletRequest request) throws Exception{
-//		
-//		UserVO user = userTool.current();
-//		
-//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-//			throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-//		
-//		if(user.getGroupId() == null){
-//			throw new UserHasNoPermissionForRoleException(user.getUuid());
-//		}
-//		
-//		RolePO role = roleDao.findOne(roleId);
-//		
-//		if(role == null){
-//			throw new RoleNotExistException(roleId);
-//		}	
-//		
-//		List<String> parsedUserIds = JSON.parseArray(userIds, String.class);
-//		
-//		roleService.userBinding(role, parsedUserIds);
-//		
-//		List<UserVO> users = userTool.find(parsedUserIds);
-//		
-//		return users;
-//	}
 	
 }

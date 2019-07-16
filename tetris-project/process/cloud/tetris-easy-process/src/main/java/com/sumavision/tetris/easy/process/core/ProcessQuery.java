@@ -40,6 +40,23 @@ public class ProcessQuery {
 	}
 	
 	/**
+	 * 分页查询公司下的流程<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 下午1:16:58
+	 * @param String companyId 公司id
+	 * @param int currentPage 当前页
+	 * @param int pageSize 每页数据量
+	 * @return List<ProcessPO> 流程列表
+	 */
+	public List<ProcessPO> findByCompanyId(String companyId, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<ProcessPO> pagedEntities = processDao.findByCompanyId(companyId, page);
+		if(pagedEntities != null) return pagedEntities.getContent();
+		return null;
+	}
+	
+	/**
 	 * 查询流程实例进度<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

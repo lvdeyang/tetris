@@ -11,15 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.predicate_return;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleClassify;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleService;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
 import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionDAO;
-import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionPO;
-import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionQuery;
 
 /**
  * 公司角色rest接口<br/>
@@ -70,40 +67,6 @@ public class SubordinateRoleFeignController {
 			HttpServletRequest request) throws Exception{
 		List<SubordinateRoleVO> roleVOs = subordinateRoleQuery.getListFromCompany(Long.parseLong(companyId));
 		return roleVOs;
-	}
-	
-	/**
-	 * 通过角色id查询角色组<br/>
-	 * <b>作者:</b>ql<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月18日 上午12:54:29
-	 * @param JSONString ids 角色ids
-	 * @return List<SubordinateRoleVO> 角色
-	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/roles/by/ids")
-	public Object rolesByIds(String ids,HttpServletRequest request)throws Exception{
-		List<Long> roleIds = JSON.parseArray(ids, Long.class);
-		List<SubordinateRoleVO>	list = subordinateRoleQuery.getRolesByIds(roleIds);
-		return list;
-	}
-	
-	/**
-	 * 通过角色id列表查找角色<br/>
-	 * <b>作者:</b>ql<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月19日 上午10:21:59
-	 * @param  Long 用户id
-	 * @return SubordinaryRoleVO 角色
-	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/role/by/id")
-	public Object roleById(String id,HttpServletRequest request)throws Exception{
-		Long roleId = JSON.parseObject(id, Long.class);
-		SubordinateRoleVO Vo = subordinateRoleQuery.getRoleById(roleId);
-		return Vo;
 	}
 	
 	/**
@@ -194,5 +157,80 @@ public class SubordinateRoleFeignController {
 	public Object queryByUser(String userId,HttpServletRequest request)throws Exception{
 		Long result = userSubordinateRolePermissionDAO.getRoleIdFromUserId(Long.parseLong(userId));
 		return result != null ? result.toString() : null;
+	}
+	
+	/**
+	 * 通过角色id查询角色组<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月18日 上午12:54:29
+	 * @param JSONString ids 角色ids
+	 * @return List<SubordinateRoleVO> 角色
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/id/in")
+	public Object findByIdIn(String ids,HttpServletRequest request)throws Exception{
+		List<Long> roleIds = JSON.parseArray(ids, Long.class);
+		List<SubordinateRoleVO>	list = subordinateRoleQuery.findByIdIn(roleIds);
+		return list;
+	}
+	
+	/**
+	 * 通过角色id列表查找角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月19日 上午10:21:59
+	 * @param  Long 用户id
+	 * @return SubordinaryRoleVO 角色
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/id")
+	public Object findById(String id,HttpServletRequest request)throws Exception{
+		Long roleId = JSON.parseObject(id, Long.class);
+		SubordinateRoleVO Vo = subordinateRoleQuery.findById(roleId);
+		return Vo;
+	}
+	
+	/**
+	 * 查询公司下的业务角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月16日 上午8:53:15
+	 * @param Long companyId 公司id
+	 * @return List<SubordinateRoleVO> 业务角色列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/company/id")
+	public Object findByCompanyId(
+			Long companyId, 
+			HttpServletRequest request) throws Exception{
+		return subordinateRoleQuery.findByCompanyId(companyId);
+	}
+	
+	/**
+	 * 查询公司下的业务角色（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月16日 上午9:01:32
+	 * @param Long companyId 公司id
+	 * @param JSONArray except 例外角色id列表
+	 * @return List<SubordinateRoleVO> 业务角色列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/company/id/with/except")
+	public Object findByCompanyIdWithExcept(
+			Long companyId,
+			String except,
+			HttpServletRequest request) throws Exception{
+		
+		List<Long> ids = null;
+		if(except != null){
+			ids = JSON.parseArray(except, Long.class);
+		}
+		return subordinateRoleQuery.findByCompanyIdWithExcept(companyId, ids);
 	}
 }

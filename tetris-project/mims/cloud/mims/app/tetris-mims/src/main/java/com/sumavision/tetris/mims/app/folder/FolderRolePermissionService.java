@@ -60,6 +60,20 @@ public class FolderRolePermissionService {
 	}
 	
 	/**
+	 * 删除文件夹授权<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月16日 上午10:25:04
+	 * @param Long permissionId 授权id
+	 */
+	public void deletePermission(Long permissionId) throws Exception{
+		FolderRolePermissionPO permission = folderRolePermissionDao.findOne(permissionId);
+		if(permission != null){
+			folderRolePermissionDao.delete(permission);
+		}
+	}
+	
+	/**
 	 * 企业文件夹角色授权<br/>
 	 * <p>包括文件夹的子文件夹一并授权</p>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -101,6 +115,30 @@ public class FolderRolePermissionService {
 		}
 		
 		return roles;
+	}
+	
+	/**
+	 * 企业文件夹角色授权<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月16日 上午11:16:06
+	 * @param FolderPO folder 文件夹
+	 * @param Collection<SubordinateRoleVO> roles 角色列表
+	 * @return List<FolderRolePermissionPO> 授权列表
+	 */
+	public List<FolderRolePermissionPO> addPermission(FolderPO folder, Collection<SubordinateRoleVO> roles) throws Exception{
+		if(roles==null || roles.size()<=0) return null;
+		List<FolderRolePermissionPO> permissions = new ArrayList<FolderRolePermissionPO>();
+		for(SubordinateRoleVO role:roles){
+			FolderRolePermissionPO permission = new FolderRolePermissionPO();
+			permission.setRoleId(role.getId());
+			permission.setRoleName(role.getName());
+			permission.setFolderId(folder.getId());
+			permission.setAutoGeneration(false);
+			permissions.add(permission);
+		}
+		folderRolePermissionDao.save(permissions);
+		return permissions;
 	}
 	
 }

@@ -36,27 +36,6 @@ public interface SubordinateRoleFeign {
 	 */
 	@RequestMapping(value = "/subordinate/role/feign/roles/by/company")
 	public JSONObject rolesByCompany(@RequestParam("companyId") String company)throws Exception;
-	/**
-	 * 通过角色id列表查找角色列表<br/>
-	 * <b>作者:</b>ql<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月18日 上午10:21:59
-	 * @param  JSONString 用户ids
-	 * @return JSONObject 角色列表
-	 */
-	@RequestMapping(value = "/subordinate/role/feign/roles/by/ids")
-	public JSONObject rolesByIds(@RequestParam("ids")String ids)throws Exception;
-	
-	/**
-	 * 通过角色id列表查找角色<br/>
-	 * <b>作者:</b>ql<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月19日 上午10:21:59
-	 * @param  Long 用户id
-	 * @return SubordinaryRoleVO 角色
-	 */
-	@RequestMapping(value = "/subordinate/role/feign/role/by/id")
-	public JSONObject roleById(@RequestParam("id")String id)throws Exception;
 	
 	/**
 	 * 通过角色id列表和公司id查找角色组<br/>
@@ -107,4 +86,50 @@ public interface SubordinateRoleFeign {
 	 */
 	@RequestMapping(value = "/subordinate/role/feign/query/by/user")
 	public JSONObject queryByUser(@RequestParam("userId")String userId)throws Exception;
+	
+	/**
+	 * 通过角色id列表查找角色列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月18日 上午10:21:59
+	 * @param  JSONString 用户ids
+	 * @return JSONObject 角色列表
+	 */
+	@RequestMapping(value = "/subordinate/role/feign/find/by/id/in")
+	public JSONObject findByIdIn(@RequestParam("ids")String ids)throws Exception;
+	
+	/**
+	 * 通过角色id列表查找角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月19日 上午10:21:59
+	 * @param  Long 用户id
+	 * @return SubordinaryRoleVO 角色
+	 */
+	@RequestMapping(value = "/subordinate/role/feign/find/by/id")
+	public JSONObject findById(@RequestParam("id")Long id)throws Exception;
+	
+	/**
+	 * 查询公司下的业务角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月16日 上午9:09:00
+	 * @param Long companyId 公司id
+	 * @return JSONObject 角色列表
+	 */
+	@RequestMapping(value = "/subordinate/role/feign/find/by/company/id")
+	public JSONObject findByCompanyId(@RequestParam("companyId") Long companyId) throws Exception;
+	
+	/**
+	 * 查询公司下的业务角色（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月16日 上午9:13:29
+	 * @param Long companyId 公司id
+	 * @param JSONArray except 例外角色id列表
+	 * @return JSONObject 角色列表
+	 */
+	@RequestMapping(value = "/subordinate/role/feign/find/by/company/id/with/except")
+	public JSONObject findByCompanyIdWithExcept(@RequestParam("companyId") Long companyId, @RequestParam("except") String except) throws Exception;
+	
 }

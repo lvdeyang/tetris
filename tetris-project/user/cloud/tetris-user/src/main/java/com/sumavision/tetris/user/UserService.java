@@ -154,16 +154,16 @@ public class UserService{
 		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, UserClassify.COMPANY.getName());
 		
 		CompanyVO company = null;
-		SubordinateRoleVO roleVO = null;
+		SubordinateRoleVO roleAdmin = null;
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//创建公司
 			company = companyService.add(companyName, user);
-			//创建角色
-			roleVO = subordinateRoleService.addRoleWithUserId(user,company.getId(), "管理员",SubordinateRoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
+			//创建管理员角色
+			roleAdmin = subordinateRoleService.addRoleWithUserId(user, company.getId(), "管理员", SubordinateRoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
 			//绑定用户和系统角色
 			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(3l).getList());
 			//绑定用户和业务角色
-			userSubordinateRolePermissionService.addUserRolePermission(roleVO.getId(), user.getId());
+			userSubordinateRolePermissionService.addUserRolePermission(roleAdmin.getId(), user.getId());
 		}
 		
 		//发布用户注册事件
@@ -171,7 +171,7 @@ public class UserService{
 		if(company == null){
 			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
 		}else{
-			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(),roleVO.getId().toString());
+			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), roleAdmin.getId().toString(), roleAdmin.getName());
 		}
 		applicationEventPublisher.publishEvent(event);
 		
@@ -217,7 +217,6 @@ public class UserService{
 			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(2l).getList());
 		}
 		
-		//TODO：加company
 		//发布用户注册事件
 		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName());
 		applicationEventPublisher.publishEvent(event);

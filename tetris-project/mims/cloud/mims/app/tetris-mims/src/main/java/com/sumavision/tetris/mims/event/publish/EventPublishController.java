@@ -32,6 +32,8 @@ public class EventPublishController {
 	 * @param String nickname 昵称
 	 * @param String companyId 公司id
 	 * @param String companyName 公司名称
+	 * @param String roleId 管理员角色id
+	 * @param String roleName 管理员角色名称
 	 */
 	@JsonBody
 	@ResponseBody
@@ -42,13 +44,14 @@ public class EventPublishController {
 			String companyId,
 			String companyName,
 			String roleId,
+			String roleName,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		//TODO 权限校验
 		System.out.println(nickname);
-		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, userId, nickname, companyId, companyName, roleId);
+		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, userId, nickname, companyId, companyName, roleId, roleName);
 		applicationEventPublisher.publishEvent(event);
 		
 		return null;

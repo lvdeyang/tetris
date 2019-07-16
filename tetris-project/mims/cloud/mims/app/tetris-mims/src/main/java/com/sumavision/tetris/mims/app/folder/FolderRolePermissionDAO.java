@@ -12,6 +12,17 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface FolderRolePermissionDAO extends BaseDAO<FolderRolePermissionPO>{
 
 	/**
+	 * 查询文件夹可编辑授权情况<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月12日 下午3:49:29
+	 * @param Long folderId 文件夹id
+	 * @param Boolean autoGeneration 是否可编辑
+	 * @return List<FolderRolePermissionPO> 文件夹授权信息
+	 */
+	public List<FolderRolePermissionPO> findByFolderIdAndAutoGeneration(Long folderId, Boolean autoGeneration);
+	
+	/**
 	 * 根据文件夹查询授权<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

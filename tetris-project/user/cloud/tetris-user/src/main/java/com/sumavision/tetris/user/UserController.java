@@ -137,13 +137,11 @@ public class UserController {
 		
 		//TODO 权限校验
 		
-		if(except == null){
-			return userQuery.listByCompanyId(companyId, currentPage, pageSize);
-		}else{
-			List<Long> exceptIds = JSON.parseArray(except, Long.class);
-			return userQuery.listByCompanyIdWithExcept(companyId, exceptIds, currentPage, pageSize);
+		List<Long> exceptIds = null;
+		if(except != null){
+			exceptIds = JSON.parseArray(except, Long.class);
 		}
-		
+		return userQuery.listByCompanyIdWithExcept(companyId, exceptIds, currentPage, pageSize);
 	}
 	
 	/**

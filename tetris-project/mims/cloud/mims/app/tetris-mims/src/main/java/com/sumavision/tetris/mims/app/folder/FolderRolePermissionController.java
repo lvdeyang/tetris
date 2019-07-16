@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -15,8 +16,8 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
+import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -25,7 +26,7 @@ import com.sumavision.tetris.user.UserVO;
 public class FolderRolePermissionController {
 
 	@Autowired
-	private UserQuery userTool;
+	private UserQuery userQuery;
 	
 	@Autowired
 	private FolderDAO folderDao;
@@ -33,9 +34,8 @@ public class FolderRolePermissionController {
 	@Autowired
 	private FolderRolePermissionDAO folderRolePermissionDao;
 	
-	
 	@Autowired
-	private FolderQuery folderTool;
+	private FolderQuery folderQuery;
 	
 	@Autowired
 	private FolderRolePermissionService folderRolePermissionService;
@@ -43,15 +43,41 @@ public class FolderRolePermissionController {
 	@Autowired
 	private SubordinateRoleQuery subordinateRoleQuery;
 	
-	@Autowired
-	private FolderGroupPermissionDAO folderGroupPermissionDAO;
+	/**
+	 * 查询没有授权当前文件夹的角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月12日 下午5:21:21
+	 * @param @PathVariable Long folderId 文件夹id
+	 * @return List<SubordinateRoleVO> 业务角色列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/role/with/folder/permission/except/{folderId}")
+	public Object queryRoleWithFolderPermissionExcept(
+			@PathVariable Long folderId,
+			HttpServletRequest request) throws Exception{
+		
+		List<FolderRolePermissionPO> permissions = folderRolePermissionDao.findByFolderId(folderId);
+		Set<Long> exceptRoleIds = new HashSet<Long>();
+		if(permissions!=null && permissions.size()>0){
+			for(FolderRolePermissionPO permission:permissions){
+				exceptRoleIds.add(permission.getRoleId());
+			}
+		}
+		
+		UserVO user = userQuery.current();
+		
+		return subordinateRoleQuery.findByCompanyIdWithExcept(Long.valueOf(user.getGroupId()), exceptRoleIds);
+	}
+	
 	/**
 	 * 获取文件夹授权情况<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月11日 下午1:40:17
 	 * @param Long folderId 文件夹id
-	 * @return List<RoleVO> 授权情况
+	 * @return List<FolderRolePermissionVO> 授权情况
 	 */
 	@JsonBody
 	@ResponseBody
@@ -59,47 +85,9 @@ public class FolderRolePermissionController {
 	public Object list(
 			Long folderId,
 			HttpServletRequest request) throws Exception{
-		
-		UserVO user = userTool.current();
-		
-//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-//			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-//		}
-		
-		if(user.getGroupId() == null){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-		}
-		
-		FolderPO folder = folderDao.findOne(folderId);
-		
-		if(folder == null){
-			throw new FolderNotExistException(folderId);
-		}
-		
-		List<FolderRolePermissionPO> permissions;
-		
-		FolderGroupPermissionPO folderGroupPermission = folderGroupPermissionDAO.findByFolderId(folderId);
-		if (folderGroupPermission != null) {
-			String companyId = folderGroupPermission.getGroupId();
-			Long roleId = subordinateRoleQuery.queryRoleByCompany(companyId).getId();
-			permissions = folderRolePermissionDao.findByFolderIdExceptRoleId(folderId, roleId);
-		}else {
-			permissions = folderRolePermissionDao.findByFolderId(folderId);
-		}
-		
-		if(permissions!=null && permissions.size()>0){
-			Set<Long> roleIds = new HashSet<Long>();
-			for(FolderRolePermissionPO permission:permissions){
-				roleIds.add(permission.getRoleId());
-			}
-
-			List<SubordinateRoleVO> roleVOS = subordinateRoleQuery.queryRolesByIds(roleIds);
-			
-			
-			return roleVOS;
-		}
-		
-		return null;
+		List<FolderRolePermissionPO> entities = folderRolePermissionDao.findByFolderIdAndAutoGeneration(folderId, false);
+		List<FolderRolePermissionVO> permissions = FolderRolePermissionVO.getConverter(FolderRolePermissionVO.class).convert(entities, FolderRolePermissionVO.class);
+		return permissions;
 	}
 	
 	/**
@@ -112,44 +100,11 @@ public class FolderRolePermissionController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/delete")
+	@RequestMapping(value = "/delete/{id}")
 	public Object delete(
-			Long folderId,
-			Long roleId,
+			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
-		
-		UserVO user = userTool.current();
-		
-//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-//			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-//		}
-		
-		if(user.getGroupId() == null){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-		}
-		
-		FolderPO folder = folderDao.findOne(folderId);
-		
-		if(folder == null){
-			throw new FolderNotExistException(folderId);
-		}
-		
-		if(!folderTool.hasGroupPermission(user.getGroupId(), folderId)){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
-		
-		SubordinateRoleVO vo = subordinateRoleQuery.queryRoleById(roleId);
-		
-		if(vo == null){
-			//throw new RoleNotExistException(roleId);
-		}
-		
-		if(!user.getGroupId().equals(vo.getCompanyId())){
-			//throw new UserHasNoPermissionForRoleException(user.getUuid(), roleId);
-		}
-		
-		folderRolePermissionService.deletePermission(folder, vo);
-		
+		folderRolePermissionService.deletePermission(id);
 		return null;
 	}
 	
@@ -160,26 +115,16 @@ public class FolderRolePermissionController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月11日 下午4:09:35
 	 * @param Long folderId 文件夹id
-	 * @param String roleIds JSON数据，角色id列表
-	 * @return List<RoleVO> 授权的角色列表
+	 * @param String roles JSON数据，角色列表
+	 * @return List<FolderRolePermissionVO> 授权情况
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
 	public Object add(
 			Long folderId,
-			String roleIds,
+			String roles,
 			HttpServletRequest request) throws Exception{
-		
-		UserVO user = userTool.current();
-		
-//		if(!UserClassify.COMPANY_ADMIN.equals(UserClassify.valueOf(user.getClassify()))){
-//			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-//		}
-		
-		if(user.getGroupId() == null){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.NOPERMISSION);
-		}
 		
 		FolderPO folder = folderDao.findOne(folderId);
 		
@@ -187,15 +132,13 @@ public class FolderRolePermissionController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		if(!folderTool.hasGroupPermission(user.getGroupId(), folderId)){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
+		List<SubordinateRoleVO> _roles = JSON.parseArray(roles, SubordinateRoleVO.class);
 		
-		List<Long> parsedRoleIds = JSON.parseArray(roleIds, Long.class);
+		List<FolderRolePermissionPO> entities = folderRolePermissionService.addPermission(folder, _roles);
 		
-		List<SubordinateRoleVO> roles = folderRolePermissionService.addPermission(user.getGroupId(), folder, parsedRoleIds);
+		List<FolderRolePermissionVO> permissions = FolderRolePermissionVO.getConverter(FolderRolePermissionVO.class).convert(entities, FolderRolePermissionVO.class);
 		
-		return roles;
+		return permissions;
 	}
 	
 }

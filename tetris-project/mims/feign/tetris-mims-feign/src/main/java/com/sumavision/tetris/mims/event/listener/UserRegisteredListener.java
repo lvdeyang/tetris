@@ -30,7 +30,7 @@ public class UserRegisteredListener implements ApplicationListener<UserRegistere
 	@Override
 	public void onApplicationEvent(UserRegisteredEvent event){
 		try {
-			userRegisteredFeign.userRegistered(event.getUserId(), event.getNickname(), event.getCompanyId(), event.getCompanyName(), event.getRoleId());
+			userRegisteredFeign.userRegistered(event.getUserId(), event.getNickname(), event.getCompanyId(), event.getCompanyName(), event.getRoleId(), event.getRoleName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -16,35 +16,30 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
-/**
- * @author Administrator
- *
- */
 @Controller
 @RequestMapping(value = "/subordinate/role")
 public class SubordinateRoleController {
+	
 	@Autowired
 	private UserQuery userQuery;
+	
 	@Autowired
 	private SubordinateRoleQuery subordinateRoleQuery;
+	
 	@Autowired
 	private SubordinateRoleService subordinateRoleService;
+	
 	@Autowired
 	private UserSubordinateRolePermissionQuery userSubordinateRolePermissionQuery;
+	
 	@Autowired
 	private UserSubordinateRolePermissionService userSubordinateRolePermissionService;
 
 	/**
-	 * 获取隶属角色<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年5月29日 上午11:44:44
-	 * 
 	 * 获取隶属普通角色<br/>
 	 * <b>作者:</b>ql<br/>
 	 * <b>版本：</b>2.0<br/>
 	 * <b>日期：</b>2019年6月17日 上午11:44:44
-	 * 
 	 * @return List<SubordinateRoleVO> 角色列表
 	 */
 	@JsonBody

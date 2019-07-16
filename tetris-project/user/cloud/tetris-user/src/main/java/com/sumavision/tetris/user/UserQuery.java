@@ -288,6 +288,7 @@ public class UserQuery {
 	 * @return List<UserVO> rows 用户列表
 	 */
 	public Map<String, Object> listByCompanyIdWithExcept(Long companyId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		if(except == null) return listByCompanyId(companyId, currentPage, pageSize);
 		int total = userDao.countByCompanyIdWithExcept(companyId, except);
 		List<UserPO> users = findByCompanyIdWithExcept(companyId, except, currentPage, pageSize);
 		List<UserVO> view_users = new ArrayList<UserVO>();
@@ -378,6 +379,19 @@ public class UserQuery {
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		Page<UserPO> users = userDao.findByRoleIdWithExcept(roleId, except, page);
 		return users.getContent();
+	}
+	
+	/**
+	 * 根据id查询用户列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 下午3:20:13
+	 * @param Collection<Long> ids 用户id列表
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserVO> findByIdIn(Collection<Long> ids) throws Exception{
+		List<UserPO> entities = userDao.findByIdIn(ids);
+		return UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
 	}
 	
 	/**************************************************************************
