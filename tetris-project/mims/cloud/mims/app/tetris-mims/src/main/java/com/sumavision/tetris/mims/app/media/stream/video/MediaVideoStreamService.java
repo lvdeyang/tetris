@@ -8,10 +8,16 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -29,6 +35,12 @@ public class MediaVideoStreamService {
 	
 	@Autowired
 	private MediaVideoStreamUrlRelationService mediaVideoStreamUrlRelationService;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private FolderDAO folderDao;
 	
 	/**
 	 * 视频流媒资删除<br/>
@@ -264,4 +276,64 @@ public class MediaVideoStreamService {
 		return new MediaVideoStreamVO().set(copiedMedia).setPreviewUrl(mediaUrls);
 	}
 	
+	/**
+	 * 添加视频流媒资上传任务(为feign提供)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午3:21:49
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param String previewUrl 视频流地址
+	 * @param FolderPO folder 文件夹
+	 * @return MediaVideoStreamPO 视频流媒资
+	 */
+	public MediaVideoStreamVO addVideoStreamTask(
+			String previewUrl, 
+			String name) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO_STREAM.toString());
+		
+		return  addTask(user, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folder);
+	}
+	
+	/**
+	 * 视频流媒资删除(为feign提供)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月17日 下午3:43:03
+	 * @param MediaVideoStreamPO videos 视频流媒资列表
+	 */
+	public void remove(String mediaIds) throws Exception{
+		
+		List<Long> mediaIdList = JSON.parseArray(mediaIds, Long.class);
+		
+		List<MediaVideoStreamPO> medias = mediaVideoStreamDao.findAll(mediaIdList);
+		
+		if (medias == null) return; 
+		
+		remove(medias);
+	}
+	
+	/** 
+	 * 修改媒资
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午3:21:49
+	 * @param Long mediaId 媒资名称
+	 * @param String previewUrl 媒资地址
+	 * @param String name 媒资名称
+	 * @return MediaVideoStreamVO
+	 */
+	public MediaVideoStreamVO edit(Long mediaId, String previewUrl, String name) throws Exception{
+		UserVO user = userQuery.current();
+		
+		MediaVideoStreamPO videoStream = mediaVideoStreamDao.findOne(mediaId);
+		
+		return editTask(user, videoStream, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList());
+	}
 }

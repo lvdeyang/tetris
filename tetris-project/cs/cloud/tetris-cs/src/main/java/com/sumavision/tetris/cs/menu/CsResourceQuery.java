@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 
 @Component
 public class CsResourceQuery {
@@ -15,7 +15,7 @@ public class CsResourceQuery {
 	CsResourceDAO csSourceDao;
 
 	@Autowired
-	MediaVideoQuery mediaVideoQuery;
+	MediaAVideoQuery mediaAVideoQuery;
 
 	public List<CsResourceVO> queryMenuResources(Long menuId) throws Exception {
 		List<CsResourcePO> resources = csSourceDao.findByParentId(menuId);
@@ -46,10 +46,10 @@ public class CsResourceQuery {
 		return returnList;
 	}
 
-	public List<MediaVideoVO> getMIMSResources(Long id) throws Exception {
+	public List<MediaAVideoVO> getMIMSResources(Long id) throws Exception {
 
-		List<MediaVideoVO> mimsVideoList = mediaVideoQuery.loadAll();
-
+		List<MediaAVideoVO> mimsVideoList = mediaAVideoQuery.loadAll();
+		
 		return mimsVideoList;
 	}
 }

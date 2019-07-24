@@ -1,6 +1,7 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -8,12 +9,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.catalina.User;
+import javax.activation.MimetypesFileTypeMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
@@ -308,4 +309,43 @@ public class MediaAudioService {
 		return entity;
 	}
 	
+	/**
+	 * 根据音频媒资列表批量加载的音频媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午4:03:27
+	 * @param user UserVO 用户信息
+	 * @param List<String> urlList 音频媒资http地址列表
+	 * @param folderId 音频媒资存放路径
+	 * @return List<MediaAudioVO> 音频媒资列表
+	 */
+	public List<MediaAudioPO> addList(UserVO user, List<String> urlList, Long folderId) throws Exception{
+		
+		if (urlList == null || urlList.size() <= 0) return null;
+		
+		String folderType = "audio";
+		
+		List<MediaAudioPO> audios = new ArrayList<MediaAudioPO>();
+		for (String url : urlList) {
+			File file = new File(url);
+			String folderPath = new StringBufferWrapper().append(path.webappPath()).append("upload").append(file.getPath().split("upload")[1]).toString();
+			File localFile = new File(folderPath);
+			File[] fileList = localFile.listFiles();
+			for (File childFile : fileList) {
+				String fileNameSuffix = childFile.getName().split("\\.")[1];
+				if (fileNameSuffix.equals("xml")) {
+					continue;
+				}else {
+					String fileName = childFile.getName();
+					Long size = childFile.length();
+					String uploadTempPath = childFile.getPath();
+					String mimeType = new MimetypesFileTypeMap().getContentType(childFile);
+					
+					MediaAudioPO audio = this.add(user, file.getName(), fileName, size, folderType, mimeType,uploadTempPath);
+					audios.add(audio);
+				}
+			}	
+		}
+		return audios;
+	}
 }

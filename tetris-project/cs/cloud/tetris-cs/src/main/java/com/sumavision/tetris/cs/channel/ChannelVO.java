@@ -11,7 +11,17 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
 	private String remark;
 	
+	private String broadWay;
+	
 	private String broadcastStatus;
+	
+	private String groupId;
+	
+	private String previewUrlIp;
+	
+	private String previewUrlPort;
+	
+	private Integer broadId;
 
 	@Override
 	public ChannelVO set(ChannelPO entity) throws Exception {
@@ -21,7 +31,12 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		.setName(entity.getName())
 		.setDate(entity.getDate())
 		.setRemark(entity.getRemark())
-		.setBroadcastStatus(entity.getBroadcastStatus());
+		.setBroadWay(entity.getBroadWay())
+		.setBroadcastStatus(entity.getBroadcastStatus())
+		.setGroupId(entity.getGroupId())
+		.setPreviewUrlIp(entity.getPreviewUrlIp())
+		.setPreviewUrlPort(entity.getPreviewUrlPort())
+		.setBroadId(entity.getBroadId());
 
 		return this;
 	}
@@ -53,6 +68,15 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		return this;
 	}
 
+	public String getBroadWay() {
+		return broadWay;
+	}
+
+	public ChannelVO setBroadWay(String broadWay) {
+		this.broadWay = broadWay;
+		return this;
+	}
+
 	public String getBroadcastStatus() {
 		return broadcastStatus;
 	}
@@ -60,5 +84,40 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	public ChannelVO setBroadcastStatus(String broadcastStatus) {
 		this.broadcastStatus = broadcastStatus;
 		return this;
+	}
+
+	public String getGroupId() {
+		return groupId;
+	}
+
+	public ChannelVO setGroupId(String groupId) {
+		this.groupId = groupId;
+		return this;
+	}
+
+	public String getPreviewUrlIp() {
+		return previewUrlIp;
+	}
+
+	public ChannelVO setPreviewUrlIp(String previewUrlIp) {
+		this.previewUrlIp = previewUrlIp;
+		return this;
+	}
+
+	public String getPreviewUrlPort() {
+		return previewUrlPort;
+	}
+
+	public ChannelVO setPreviewUrlPort(String previewUrlPort) {
+		this.previewUrlPort = previewUrlPort;
+		return this;
+	}
+
+	public Integer getBroadId() {
+		return broadId;
+	}
+
+	public void setBroadId(Integer broadId) {
+		this.broadId = broadId;
 	}
 }

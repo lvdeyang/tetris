@@ -52,11 +52,14 @@ public class CompleteNotifyService {
 		
 		//回调流程
 		List<String> urlList = new ArrayList<String>();
+		Long folderId = null;
 		for (MediaEditorTaskRatePermissionVO permission : mediaEditorTask.getTranscodes()) {
 			urlList.add(permission.getSaveUrl());
+			folderId = permission.getFolderId();
 		}
 		JSONObject listObject = new JSONObject();
 		listObject.put("urlList", String.join(",", urlList));
+		listObject.put("parentFolderId", folderId);
 		
 		processService.receiveTaskTrigger(mediaEditorTask.getProcessInstanceId(), mediaEditorTask.getAccessPointId(), listObject.toJSONString());
 	}

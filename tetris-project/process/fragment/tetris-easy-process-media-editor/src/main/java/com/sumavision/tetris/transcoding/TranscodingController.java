@@ -13,6 +13,7 @@ import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskQuery;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionQuery;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionService;
+import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionVO;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.CachedHttpServletRequestWrapper;
@@ -81,12 +82,12 @@ public class TranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/task/add")
-	public Object addTask(String transcodeJobs,String __processInstanceId__,
+	public Object addTask(String transcodeJob, Long folderId, String __processInstanceId__,
 			Long __accessPointId__, HttpServletRequest request) throws Exception {
 
-		HashMapWrapper<String, String> ids = addTaskService.add(__processInstanceId__, __accessPointId__, transcodeJobs);
+		HashMapWrapper<String, MediaEditorTaskRatePermissionVO> ids = addTaskService.add(__processInstanceId__, __accessPointId__, transcodeJob ,folderId);
 		
-		return ids != null && ids.size() > 0 ? new HashMapWrapper<String, HashMapWrapper<String, String>>().put("transcodeIds", ids)
+		return ids != null && ids.size() > 0 ? new HashMapWrapper<String, HashMapWrapper<String, MediaEditorTaskRatePermissionVO>>().put("transcodeIds", ids)
 				   .getMap() : null;
 	}
 	
@@ -121,9 +122,10 @@ public class TranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/start/process")
-	public Object start(String transcodeJobs, HttpServletRequest request) throws Exception{
+	public Object start(String transcodeJob, Long folderId, HttpServletRequest request) throws Exception{
 		JSONObject variables = new JSONObject();
-		variables.put("_pa3_transcodeJobs", transcodeJobs);
+		variables.put("_pa3_transcodeJob", transcodeJob);
+		variables.put("_pa3_folderId", folderId);
 		
 		String processInstanceId = processService.startByKey("_media_editor_transcoding_by_qt", variables.toJSONString());
 		

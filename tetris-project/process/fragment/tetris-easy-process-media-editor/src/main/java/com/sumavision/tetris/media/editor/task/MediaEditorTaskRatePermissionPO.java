@@ -26,6 +26,12 @@ public class MediaEditorTaskRatePermissionPO extends AbstractBasePO {
 	
 	/** 存储地址 */
 	private String saveUrl;
+	
+	/** 存储父目录Id */
+	private Long folderId;
+	
+	/** 媒资mimeType */
+	private String mimeType;
 
 	@Column(name = "TASK_ID")
 	public Long getTaskId() {
@@ -61,5 +67,23 @@ public class MediaEditorTaskRatePermissionPO extends AbstractBasePO {
 
 	public void setSaveUrl(String saveUrl) {
 		this.saveUrl = saveUrl;
+	}
+
+	@Column(name = "FOLDER_ID")
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public void setFolderId(Long folderId) {
+		this.folderId = folderId;
+	}
+
+	@Column(name = "MIMETYPE")
+	public String getMimeType() {
+		return mimeType;
+	}
+
+	public void setMimeType(String mimeType) {
+		this.mimeType = mimeType;
 	}
 }

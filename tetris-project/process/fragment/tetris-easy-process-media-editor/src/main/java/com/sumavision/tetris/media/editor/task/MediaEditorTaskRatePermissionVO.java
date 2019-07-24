@@ -17,6 +17,12 @@ public class MediaEditorTaskRatePermissionVO extends AbstractBaseVO<MediaEditorT
 	/** 存储地址 */
 	private String saveUrl;
 	
+	/** 存储目录Id */
+	private Long folderId;
+	
+	/** 媒资mimetype */
+	private String mimeType;
+	
 	@Override
 	public MediaEditorTaskRatePermissionVO set(MediaEditorTaskRatePermissionPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -25,7 +31,9 @@ public class MediaEditorTaskRatePermissionVO extends AbstractBaseVO<MediaEditorT
 		.setTaskId(entity.getTaskId())
 		.setTranscodeId(entity.getTranscodeId())
 		.setSaveUrl(entity.getSaveUrl())
-		.setRate(entity.getRate());
+		.setRate(entity.getRate())
+		.setFolderId(entity.getFolderId())
+		.setMimeType(entity.getMimeType());
 		return this;
 	}
 
@@ -62,6 +70,24 @@ public class MediaEditorTaskRatePermissionVO extends AbstractBaseVO<MediaEditorT
 
 	public MediaEditorTaskRatePermissionVO setSaveUrl(String saveUrl) {
 		this.saveUrl = saveUrl;
+		return this;
+	}
+
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public MediaEditorTaskRatePermissionVO setFolderId(Long folderId) {
+		this.folderId = folderId;
+		return this;
+	}
+
+	public String getMimeType() {
+		return mimeType;
+	}
+
+	public MediaEditorTaskRatePermissionVO setMimeType(String mimeType) {
+		this.mimeType = mimeType;
 		return this;
 	}
 }

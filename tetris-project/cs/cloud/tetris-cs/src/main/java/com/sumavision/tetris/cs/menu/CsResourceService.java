@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.cs.program.ScreenQuery;
 import com.sumavision.tetris.cs.program.ScreenService;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -30,7 +30,7 @@ public class CsResourceService {
 	@Autowired
 	ScreenQuery screenQuery;
 
-	public List<CsResourceVO> addResources(List<MediaVideoVO> resourceList, Long parentId, Long channelId)
+	public List<CsResourceVO> addResources(List<MediaAVideoVO> resourceList, Long parentId, Long channelId)
 			throws Exception {
 		List<CsResourceVO> returnList = new ArrayList<CsResourceVO>();
 

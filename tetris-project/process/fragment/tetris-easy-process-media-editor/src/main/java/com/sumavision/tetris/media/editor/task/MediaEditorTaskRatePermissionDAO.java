@@ -21,8 +21,8 @@ public interface MediaEditorTaskRatePermissionDAO extends BaseDAO<MediaEditorTas
 	 * 
 	 * @return List<String> 流程id
 	 */
-	@Query(value = "select transcode_id from TETRIS_MEDIA_EDITOR_TASK_RATE_PERMISSION where rate not like ?1", nativeQuery = true)
-	public List<String> findTranscodeIdsExceptRate(int rate);
+	@Query(value = "select transcode_id from TETRIS_MEDIA_EDITOR_TASK_RATE_PERMISSION where rate <> '100'", nativeQuery = true)
+	public List<String> findTranscodeIdsExceptComplete();
 	
 	public List<MediaEditorTaskRatePermissionPO> findByTaskId(Long taskId);
 	
@@ -34,9 +34,9 @@ public interface MediaEditorTaskRatePermissionDAO extends BaseDAO<MediaEditorTas
 	 * 
 	 * @return List<MediaEditorTaskRatePermissionPO> 转码任务
 	 */
-	@Query(value = "SELECT permission.id, permission.uuid, permission.update_time, permission.rate, permission.task_id, permission.transcode_id, permission.save_url " +
+	@Query(value = "SELECT permission.id, permission.uuid, permission.update_time, permission.rate, permission.task_id, permission.transcode_id, permission.save_url, permission.folder_id, permission.mimetype " +
 			"FROM TETRIS_MEDIA_EDITOR_TASK_RATE_PERMISSION permission " +
 			"LEFT JOIN TETRIS_MEDIA_EDITOR_TASK task ON permission.task_id=task.id " +
-			"WHERE task.complete_rate not like ?1", nativeQuery = true)
-	public List<MediaEditorTaskRatePermissionPO> findExceptCompleteTask(String rate);
+			"WHERE task.complete_rate <> '100'", nativeQuery = true)
+	public List<MediaEditorTaskRatePermissionPO> findExceptCompleteTask();
 }

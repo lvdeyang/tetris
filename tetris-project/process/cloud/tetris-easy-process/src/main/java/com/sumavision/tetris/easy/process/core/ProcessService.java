@@ -482,6 +482,7 @@ public class ProcessService {
 					ProcessPO process = processDao.findByUuid(processUuid);
 					List<ProcessParamReferencePO> paramReferences = processParamReferenceDao.findByProcessId(process.getId());
 					if(paramReferences!=null && paramReferences.size()>0){
+						Map<String, Object> reverceReferenceVariableMap = new HashMap<String, Object>();
 						for(String reverceVariableMapKey:reverceVariableMapKeys){
 							for(ProcessParamReferencePO paramReference:paramReferences){
 								String scopeReference = paramReference.getReference();
@@ -505,11 +506,12 @@ public class ProcessService {
 									}
 									//设置值
 									for(String keyPath:primaryKeyPaths){
-										reverceVariableMap.put(keyPath, effectValue);
+										reverceReferenceVariableMap.put(keyPath, effectValue);
 									}
 								}
 							}
 						}
+						reverceVariableMap.putAll(reverceReferenceVariableMap);
 					}
 					//有效性校验
 					JSONObject reverceVariableValidateContext = aliFastJsonObject.convertFromHashMap(reverceVariableMap);

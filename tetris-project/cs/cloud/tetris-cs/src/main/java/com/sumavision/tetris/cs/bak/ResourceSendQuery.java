@@ -18,6 +18,15 @@ public class ResourceSendQuery {
 	@Autowired
 	CsResourceQuery csResourceQuery;
 
+	/**
+	 * 根据频道id获取媒资增量列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param channelId 频道id
+	 * @param sava 获取后是否保存入数据库
+	 * @return List<CsResourceVO> 媒资列表
+	 */
 	public List<CsResourceVO> getAddResource(Long channelId, Boolean save) throws Exception {
 		List<CsResourceVO> resources = csResourceQuery.getResourcesFromChannelId(channelId);
 		List<ResourceSendPO> previewResource = resourceSendDao.findByChannelId(channelId);

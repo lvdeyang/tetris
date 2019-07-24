@@ -99,7 +99,7 @@ public class MediaEditorTaskQuery {
 	 * @return List<MediaEditorTaskPO> 任务列表
 	 */
 	public List<MediaEditorTaskPO> getExcepteTemplete(){
-		return mediaEditorTaskDao.findAllExceptTempleteRate("100%");
+		return mediaEditorTaskDao.findAllExceptTempleteRate();
 	}
 	
 	/**

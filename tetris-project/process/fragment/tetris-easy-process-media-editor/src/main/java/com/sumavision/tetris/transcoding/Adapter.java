@@ -17,6 +17,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.xml.XmlUtil;
 import com.sumavision.tetris.transcoding.addTask.requestVO.AddTaskVO;
+import com.sumavision.tetris.transcoding.addTask.requestVO.SourceVO;
 import com.sumavision.tetris.transcoding.addTask.requestVO.TranscodeVO;
 import com.sumavision.tetris.transcoding.addTask.rsponseVO.AddTaskResponseVO;
 import com.sumavision.tetris.transcoding.completeNotify.CompleteNotifyService;
@@ -30,6 +31,14 @@ public class Adapter {
 	@Autowired
 	CompleteNotifyService completeNotifyService;
 
+	/**
+	 * 获取云转码模板列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * 
+	 * @return TemplatesResponseVO xml解析后的数据结构
+	 */
 	public TemplatesResponseVO getTemplate(AddTaskVO getTemplates) {
 		String questXmlString = XmlUtil.toEasyXml(getTemplates, AddTaskVO.class);
 
@@ -41,14 +50,24 @@ public class Adapter {
 		return templatesRespons;
 	}
 
+	/**
+	 * 添加云转码任务<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * 
+	 * @return AddTaskResponseVO xml解析后的数据结构
+	 */
 	public AddTaskResponseVO addTask(AddTaskVO addTask) throws IOException {
 		List<TranscodeVO> transcodes = addTask.getTranscodeJobs().getTranscode();
 		
 		for (TranscodeVO transcode : transcodes) {
-			String sourceHttpUrl = transcode.getSource().getSrcURI().getValue();
-			String sourceFtpUrl = this.changeHttpToFtp(sourceHttpUrl);
-			transcode.getSource().getSrcURI().setValue(sourceFtpUrl);
-			
+			List<SourceVO> sources = transcode.getSource();
+			for (SourceVO source : sources) {
+				String sourceHttpUrl = source.getSrcURI().getValue();
+				String sourceFtpUrl = this.changeHttpToFtp(sourceHttpUrl);
+				source.getSrcURI().setValue(sourceFtpUrl);
+			}
 			String targetHttpUrl = transcode.getTarget().getTargetURI();
 			String targetFtpUrl = this.changeHttpToFtp(targetHttpUrl);
 			transcode.getTarget().setTargetURI(targetFtpUrl);
@@ -63,6 +82,14 @@ public class Adapter {
 		return addTaskResponse;
 	}
 
+	/**
+	 * 获取云转码任务状态<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * 
+	 * @return GetStatusResponseVO xml解析后的数据结构
+	 */
 	public GetStatusResponseVO questStatus(AddTaskVO questStatus) {
 		String questXmlString = XmlUtil.toEasyXml(questStatus, AddTaskVO.class);
 
@@ -73,12 +100,28 @@ public class Adapter {
 		return getStatusResponse;
 	}
 
+	/**
+	 * 云转码任务完成后回调<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * 
+	 * @return
+	 */
 	public void completeNotiry(String xmlString) throws Exception {
 		NotifyResponseVO notifyResponse = XmlUtil.XML2Obj(xmlString, NotifyResponseVO.class);
 
 		completeNotifyService.dealNotify(notifyResponse);
 	}
 
+	/**
+	 * 创建云转码任务时生成唯一任务标识<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * 
+	 * @return String
+	 */
 	public String getTransactionId() {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		Date date = new Date();
@@ -88,6 +131,14 @@ public class Adapter {
 		return transactionId;
 	}
 
+	/**
+	 * http请求地址转ftp<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * 
+	 * @return String
+	 */
 	public String changeHttpToFtp(String httpUrl) throws IOException {
 		URL url = this.getClass().getClassLoader().getResource("profile.json");
 
@@ -103,7 +154,7 @@ public class Adapter {
 
 		String[] split = httpUrl.split(":");
 
-		//有端口的Url地址
+		//没有端口的Url地址
 		if (split.length == 2) {
 			String[] splite2 = split[1].split("//");
 			
@@ -113,7 +164,7 @@ public class Adapter {
 			
 			ftpPath = new StringBuilder("ftp://").append(ftpUserName).append(":").append(ftpPassword).append("@")
 					.append(ip).append(path).toString();
-		//没有端口的url地址
+		//有端口的url地址
 		} else if (split.length == 3) {
 			String ip = split[1].split("//")[1];
 
@@ -126,6 +177,14 @@ public class Adapter {
 		return ftpPath;
 	}
 	
+	/**
+	 * ftp请求地址转http<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * 
+	 * @return String
+	 */
 	public String changeFtpToHttp(String ftpUrl){
 		String httpPath = null;
 		

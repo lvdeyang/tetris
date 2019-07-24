@@ -1,4 +1,4 @@
-package com.sumavision.tetris.mims.app.media.video.api.server;
+package com.sumavision.tetris.mims.app.media.audio.api.server;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,48 +21,50 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoTaskVO;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
-import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoCannotMatchException;
-import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoErrorBeginOffsetException;
-import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
-import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadingException;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioTaskVO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
+import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioCannotMatchException;
+import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioErrorBeginOffsetException;
+import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
+import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 @Controller
-@RequestMapping(value = "/api/server/media/video")
-public class ApiServerMediaVideoController {
-
+@RequestMapping(value = "/api/server/media/audio")
+public class ApiServerMediaAudioController {
 	@Autowired
-	private UserQuery userQuery;
-	
-	@Autowired
-	private MediaVideoService mediaVideoService;
-	
-	@Autowired
-	private MediaVideoDAO mediaVideoDAO;
+	private FolderQuery folderQuery;
 	
 	@Autowired
 	private FolderDAO folderDao;
 	
 	@Autowired
-	private FolderQuery folderQuery;
+	private UserQuery userQuery;
+	
+	@Autowired
+	private MediaAudioService mediaAudioService;
+	
+	@Autowired
+	private MediaAudioDAO mediaAudioDao;
 	
 	/**
-	 * 添加上传视频媒资任务<br/>
+	 * 添加上传音频媒资任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月29日 下午1:44:06
 	 * @param JSONString task{name:文件名称, size:文件大小, mimetype:文件mime类型, lastModified:最后更新时间}
 	 * @param String name 媒资名称
-	 * @return MediaVideoVO 任务信息
+	 * @param JSONString tags 标签数组
+	 * @param JSONString keyWords 关键字数组
+	 * @param String remark 备注
+	 * @param Long folerId 文件夹id		
+	 * @return List<MaterialFileTaskVO> 任务列表 
 	 */
 	@JsonBody
 	@ResponseBody
@@ -72,24 +74,24 @@ public class ApiServerMediaVideoController {
 			String name,
 			HttpServletRequest request) throws Exception{
 		
-		MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class);
+		MediaAudioTaskVO taskParam = JSON.parseObject(task, MediaAudioTaskVO.class);
 		
 		UserVO user = userQuery.current();
 		
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO.toString());
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_AUDIO.toString());
 		
 		if (folder == null) {
 			throw new FolderNotExistException(1l);
 		}
 		
-		MediaVideoPO entity = mediaVideoService.addTask(user, name, null, null, "", taskParam, folder);
+		MediaAudioPO entity = mediaAudioService.addTask(user, name, null, null, "", taskParam, folder);
 		
-		return new MediaVideoVO().set(entity);
+		return new MediaAudioVO().set(entity);
 		
 	}
 	
 	/**
-	 * 视频媒资上传<br/>
+	 * 音频媒资上传<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月2日 下午3:32:40
@@ -102,7 +104,7 @@ public class ApiServerMediaVideoController {
 	 * @param long size 文件大小
 	 * @param String type 文件的mimetype
 	 * @param blob block 文件分片数据
-	 * @return MediaVideoVO 视频媒资
+	 * @return MediaAudioVO 音频媒资
 	 */
 	@JsonBody
 	@ResponseBody
@@ -125,10 +127,10 @@ public class ApiServerMediaVideoController {
 			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
-		MediaVideoPO task = mediaVideoDAO.findByUuid(uuid);
+		MediaAudioPO task = mediaAudioDao.findByUuid(uuid);
 		
 		if(task == null){
-			throw new MediaVideoNotExistException(uuid);
+			throw new MediaAudioNotExistException(uuid);
 		}
 		
 		UserVO user = userQuery.current();
@@ -139,7 +141,7 @@ public class ApiServerMediaVideoController {
 		
 		//状态错误
 		if(!UploadStatus.UPLOADING.equals(task.getUploadStatus())){
-			throw new MediaVideoStatusErrorWhenUploadingException(uuid, task.getUploadStatus());
+			throw new MediaAudioStatusErrorWhenUploadingException(uuid, task.getUploadStatus());
 		}
 		
 		//文件不是一个
@@ -147,7 +149,7 @@ public class ApiServerMediaVideoController {
 				|| lastModified!=task.getLastModified() 
 				|| size!=task.getSize() 
 				|| !type.equals(task.getMimetype())){
-			throw new MediaVideoCannotMatchException(uuid, name, lastModified, size, type, task.getFileName(), 
+			throw new MediaAudioCannotMatchException(uuid, name, lastModified, size, type, task.getFileName(), 
 											   task.getLastModified(), task.getSize(), task.getMimetype());
 		}
 		
@@ -155,7 +157,7 @@ public class ApiServerMediaVideoController {
 		File file = new File(task.getUploadTmpPath());
 		if((!file.exists() && beginOffset!=0l) 
 				|| (file.length() != beginOffset)){
-			throw new MediaVideoErrorBeginOffsetException(uuid, beginOffset, file.length());
+			throw new MediaAudioErrorBeginOffsetException(uuid, beginOffset, file.length());
 		}
 		
 		//分块
@@ -175,10 +177,9 @@ public class ApiServerMediaVideoController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
-			mediaVideoDAO.save(task);
+			mediaAudioDao.save(task);
 		}
 		
-        return new MediaVideoVO().set(task);
+        return new MediaAudioVO().set(task);
 	}
-	
 }

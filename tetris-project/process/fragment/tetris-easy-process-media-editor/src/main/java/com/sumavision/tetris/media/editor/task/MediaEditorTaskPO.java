@@ -39,7 +39,7 @@ public class MediaEditorTaskPO extends AbstractBasePO{
 	private Date createTime;
 	
 	/** 任务进度 */
-	private String completeRate;
+	private int completeRate;
 
 	@Column(name = "USER_ID")
 	public String getUserId() {
@@ -107,11 +107,11 @@ public class MediaEditorTaskPO extends AbstractBasePO{
 	}
 
 	@Column(name = "COMPLETE_RATE")
-	public String getCompleteRate() {
+	public Integer getCompleteRate() {
 		return completeRate;
 	}
 
-	public void setCompleteRate(String completeRate) {
+	public void setCompleteRate(int completeRate) {
 		this.completeRate = completeRate;
 	}
 }

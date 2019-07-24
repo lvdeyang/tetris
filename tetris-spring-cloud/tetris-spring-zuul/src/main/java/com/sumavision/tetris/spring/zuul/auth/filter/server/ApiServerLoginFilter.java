@@ -1,8 +1,10 @@
 package com.sumavision.tetris.spring.zuul.auth.filter.server;
 
 import javax.servlet.http.HttpServletRequest;
+
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
+import com.netflix.zuul.http.HttpServletRequestWrapper;
 import com.sumavision.tetris.auth.login.LoginService;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.uri.UriUtil;
@@ -38,6 +40,14 @@ public class ApiServerLoginFilter extends ZuulFilter{
 			String appId = request.getParameter("appId");
 			String timestamp = request.getParameter("timestamp");
 			String sign = request.getParameter("sign");
+			
+			if (appId == null && timestamp == null && sign == null) {
+				HttpServletRequestWrapper httpServletRequestWrapper = (HttpServletRequestWrapper) request;
+				HttpServletRequest servletRequest = httpServletRequestWrapper.getRequest();
+				appId = servletRequest.getParameter("appId");
+				timestamp = servletRequest.getParameter("timestamp");
+				sign = servletRequest.getParameter("sign");
+			}
 			
 			LoginService loginService = SpringContext.getBean(LoginService.class);
 			

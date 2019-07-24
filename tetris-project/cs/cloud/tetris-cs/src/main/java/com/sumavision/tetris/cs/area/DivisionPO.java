@@ -15,6 +15,7 @@ public class DivisionPO extends AbstractBasePO{
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	/** 未使用(备用为平台的地区数据类型) */
 	private String divisionCode;
 	private Integer divisionLevel;
 	private String divisionName;

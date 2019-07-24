@@ -13,6 +13,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Component
 public class ChannelQuery {
@@ -21,13 +23,18 @@ public class ChannelQuery {
 
 	@Autowired
 	private VersionSendQuery versionSendQuery;
+	
+	@Autowired
+	private UserQuery userQuery;
 
 	public List<ChannelPO> findAll(int currentPage, int pageSize) throws Exception {
+		UserVO user = userQuery.current();
+		
 		Pageable page = new PageRequest(currentPage - 1, pageSize);
-		Page<ChannelPO> channels = channelDao.findAll(page);
+		Page<ChannelPO> channels = channelDao.findAllByGroupId(user.getGroupId(), page);
 		freshBroadStatus(channels.getContent());
 
-		Page<ChannelPO> newChannels = channelDao.findAll(page);
+		Page<ChannelPO> newChannels = channelDao.findAllByGroupId(user.getGroupId(), page);
 		return newChannels.getContent();
 	}
 
@@ -49,25 +56,29 @@ public class ChannelQuery {
 			if (broadId != null && broadId.size() > 0) {
 				JSONObject statusRequestJsonObject = new JSONObject();
 				statusRequestJsonObject.put("ids", broadId);
-				JSONObject response = HttpRequestUtil.httpPost(
-						"http://" + ChannelBroadStatus.getBroadcastIPAndPort() + "/ed/speaker/querySendFile",
-						statusRequestJsonObject);
-				if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
-					JSONArray statusArray = (JSONArray) response.get("data");
-					if (statusArray != null && statusArray.size() > 0) {
-						for (int i = 0; i < statusArray.size(); i++) {
-							JSONObject item = (JSONObject) statusArray.get(i);
-							String id = item.getString("id");
-							if (id != null && !id.isEmpty()) {
-								Long channelId = versionSendQuery.getChannelId(id);
-								if (channelId != null) {
-									ChannelPO channelPO = channelDao.findOne(channelId);
-									if (channelPO != null && item.containsKey("status") && item.get("status") != null) {
-										String status = getStatusFromNum(item.getString("status"));
-										if (!status.isEmpty()) {
-											channelPO.setBroadcastStatus(status);
+				
+				String url = ChannelBroadStatus.getBroadcastIPAndPort();
+				if (!url.isEmpty()) {
+					JSONObject response = HttpRequestUtil.httpPost(
+							"http://" + url + "/ed/speaker/querySendFile",
+							statusRequestJsonObject);
+					if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
+						JSONArray statusArray = (JSONArray) response.get("data");
+						if (statusArray != null && statusArray.size() > 0) {
+							for (int i = 0; i < statusArray.size(); i++) {
+								JSONObject item = (JSONObject) statusArray.get(i);
+								String id = item.getString("id");
+								if (id != null && !id.isEmpty()) {
+									Long channelId = versionSendQuery.getChannelId(id);
+									if (channelId != null) {
+										ChannelPO channelPO = channelDao.findOne(channelId);
+										if (channelPO != null && item.containsKey("status") && item.get("status") != null) {
+											String status = getStatusFromNum(item.getString("status"));
+											if (!status.isEmpty()) {
+												channelPO.setBroadcastStatus(status);
+											}
+											channelDao.save(channelPO);
 										}
-										channelDao.save(channelPO);
 									}
 								}
 							}

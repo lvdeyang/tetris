@@ -14,7 +14,7 @@
                 <div style="position:absolute; left:0; top:0; right:0; bottom:0; padding:20px;">
                     <div style="width:100%; height:100%; position:relative;">
                         <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
-                            <el-button size="small" type="primary" @click="dialog.addProgram.visible = true">
+                            <el-button size="small" type="primary" @click="handleAddProgram()">
                                 <span class="icon-plus" style="margin-right:5px;"></span>
                                 添加
                             </el-button>
@@ -32,55 +32,50 @@
                                     @selection-change="handleSelectionChange">
                                 <el-table-column type="selection" width="55"></el-table-column>
                                 <el-table-column label="频道名称" width="440" prop="name"></el-table-column>
+                                <el-table-column label="播发方式" width="110" prop="broadWay"></el-table-column>
                                 <el-table-column label="播发状态" width="110" prop="broadcastStatus"></el-table-column>
                                 <el-table-column label="备注" width="220" prop="remark"></el-table-column>
                                 <el-table-column label="操作">
                                     <template slot-scope="scope">
-                                        <el-tooltip class="item" effect="dark" content="名称修改" placement="bottom">
+                                        <el-tooltip class="item" effect="dark" content="频道修改" placement="bottom">
                                             <el-button type="text" icon="feather-icon-edit"
-                                                       style="margin:0; font-size:18px; padding:0; margin-right:24px; position:relative; top:1px;"
-                                                       @click="editName(scope)">
+                                                       class="channelManage"
+                                                       @click="editChannel(scope)">
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="目录编辑" placement="bottom">
                                             <el-button type="text" icon="feather-icon-list"
-                                                       style="margin:0; font-size:18px; padding:0; margin-right:24px; position:relative; top:1px;"
+                                                       class="channelManage"
                                                        @click="editMenu(scope)">
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="节目单编辑" placement="bottom">
                                             <el-button type="text" icon="feather-icon-clipboard"
-                                                       style="margin:0; font-size:18px; padding:0; margin-right:24px; position:relative; top:1px;"
+                                                       class="channelManage"
                                                        @click="editProgram(scope)">
                                             </el-button>
                                         </el-tooltip>
-                                        <!--<el-tooltip class="item" effect="dark" content="播发管理" placement="bottom">-->
-                                        <!--<el-button type="text" icon="feather-icon-radio"-->
-                                        <!--style="margin:0; font-size:18px; padding:0; margin-right:20px;"-->
-                                        <!--@click="manageBroad(scope)">-->
-                                        <!--</el-button>-->
-                                        <!--</el-tooltip>-->
-                                        <el-tooltip class="item" effect="dark" content="播发地区管理" placement="bottom">
+                                        <el-tooltip class="item" effect="dark" content="播发地区管理" placement="bottom" v-if="scope.row.broadWay=='终端播发'">
                                             <el-button type="text" icon="feather-icon-globe"
-                                                       style="margin:0; font-size:18px; padding:0; margin-right:20px;"
+                                                       class="channelManage"
                                                        @click="manageBroadcastArea(scope)">
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="开始播发" placement="bottom" v-if="scope.row.broadcastStatus=='未播发'||scope.row.broadcastStatus=='发送完成' || scope.row.broadcastStatus=='发送停止'">
                                             <el-button type="text" icon="feather-icon-play-circle"
-                                                       style="margin:0; font-size:18px; padding:0; margin-right:20px;"
+                                                       class="channelManage"
                                                        @click="startBroadcast(scope)">
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="停止播发" placement="bottom" v-if="scope.row.broadcastStatus=='发送中'">
                                             <el-button type="text" icon="feather-icon-stop-circle"
-                                                       style="margin:0; font-size:18px; padding:0; margin-right:20px;"
+                                                       class="channelManage"
                                                        @click="stopBroadcast(scope)">
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="删除频道" placement="bottom">
                                             <el-button type="text" icon="el-icon-delete"
-                                                       style="margin:0; font-size:18px; padding:0;"
+                                                       class="channelManage"
                                                        @click="rowDelete(scope)"></el-button>
                                         </el-tooltip>
                                     </template>
@@ -109,9 +104,9 @@
                 :visible.sync="dialog.addProgram.visible"
                 width="500px"
                 :before-close="handleAddProgramClose">
-            <div style="height:300px;">
+            <div style="height:350px;">
                 <el-scrollbar style="height:100%;">
-                    <el-form ref="form" label-width="70px">
+                    <el-form ref="form" label-width="80px">
                         <el-form-item label="频道名称">
                             <el-input v-model="dialog.addProgram.name"></el-input>
                         </el-form-item>
@@ -125,6 +120,18 @@
                                     :picker-options="dialog.addProgram.date"
                                     value-format="yyyy-MM-dd HH:mm:ss">
                             </el-date-picker>
+                        </el-form-item>
+                        <el-form-item label="播发方式">
+                            <template>
+                                <el-radio v-model="dialog.addProgram.broadWay" label="轮播能力">轮播能力</el-radio>
+                                <el-radio v-model="dialog.addProgram.broadWay" label="终端播发">终端播发</el-radio>
+                            </template>
+                        </el-form-item>
+                        <el-form-item label="流ip" v-if="dialog.addProgram.broadWay=='轮播能力'">
+                            <el-input v-model="dialog.addProgram.previewUrlIp"></el-input>
+                        </el-form-item>
+                        <el-form-item label="流port" v-if="dialog.addProgram.broadWay=='轮播能力'">
+                            <el-input v-model="dialog.addProgram.previewUrlPort"></el-input>
                         </el-form-item>
                         <el-form-item label="备注">
                             <el-input v-model="dialog.addProgram.remark"></el-input>
@@ -142,20 +149,34 @@
         </el-dialog>
 
         <el-dialog
-                title="修改频道名称"
-                :visible.sync="dialog.editName.visible"
+                title="修改频道"
+                :visible.sync="dialog.editChannel.visible"
                 width="500px"
-                :before-close="handleEditNameClose">
-            <div>
-                <el-input
-                        placeholder="请输入名称"
-                        v-model="dialog.editName.name"
-                        clearable></el-input>
-            </div>
+                :before-close="handleEditChannelClose">
+            <el-form ref="form" label-width="80px">
+                <el-form-item label="频道名称">
+                    <el-input v-model="dialog.editChannel.name"></el-input>
+                </el-form-item>
+                <el-form-item label="播发方式">
+                    <template>
+                        <el-radio v-model="dialog.editChannel.broadWay" label="轮播能力" disabled>轮播能力</el-radio>
+                        <el-radio v-model="dialog.editChannel.broadWay" label="终端播发" disabled>终端播发</el-radio>
+                    </template>
+                </el-form-item>
+                <el-form-item label="流ip" v-if="dialog.editChannel.broadWay=='轮播能力'">
+                    <el-input v-model="dialog.editChannel.previewUrlIp"></el-input>
+                </el-form-item>
+                <el-form-item label="流port" v-if="dialog.editChannel.broadWay=='轮播能力'">
+                    <el-input v-model="dialog.editChannel.previewUrlPort"></el-input>
+                </el-form-item>
+                <el-form-item label="备注">
+                    <el-input v-model="dialog.editChannel.remark"></el-input>
+                </el-form-item>
+            </el-form>
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleEditNameClose">取 消</el-button>
-                <el-button size="medium" type="primary" @click="handleEditNameCommit"
-                           :loading="dialog.editName.loading">确 定
+                <el-button size="medium" @click="handleEditChannelClose">取 消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditChannelCommit"
+                           :loading="dialog.editChannel.loading">确 定
                 </el-button>
             </span>
         </el-dialog>
@@ -399,7 +420,8 @@
                     <el-option
                             v-for="item in dialog.editProgram.options.list"
                             :key="item.id"
-                            :value="item.name">
+                            :value="item.name"
+                            :disabled="(dialog.editProgram.data.broadWay == '轮播能力' && item.disabled)">
                     </el-option>
                 </el-select>
             </template>
@@ -430,6 +452,7 @@
                                 <el-button size="small" type="primary" @click="chooseResources(2*i+j-2)">
                                     选择文件
                                 </el-button>
+                                <el-radio v-model="dialog.editProgram.audioIndex" :label="2*i+j-2" style="margin-left: 5px;"><span class="icon-bullhorn" style="color: white"></span></el-radio>
                             </div>
                         </el-col>
                     </el-row>
@@ -442,6 +465,7 @@
                                            style="margin-left: 10px">
                                     选择文件
                                 </el-button>
+                                <el-radio v-model="dialog.editProgram.audioIndex" :label="1" style="margin-left: 5px;"><span class="icon-bullhorn" style="color: white"></span></el-radio>
                             </div>
                         </el-col>
                         <el-col :span="8">
@@ -452,6 +476,7 @@
                                                    style="margin-left: 10px">
                                             选择文件
                                         </el-button>
+                                        <el-radio v-model="dialog.editProgram.audioIndex" :label="i+1" style="margin-left: 5px;"><span class="icon-bullhorn" style="color: white"></span></el-radio>
                                     </div>
                                 </el-col>
                             </el-row>
@@ -464,6 +489,7 @@
                                            style="margin-left: 10px">
                                     选择文件
                                 </el-button>
+                                <el-radio v-model="dialog.editProgram.audioIndex" :label="i+3" style="margin-left: 5px;"><span class="icon-bullhorn" style="color: white"></span></el-radio>
                             </div>
                         </el-col>
                     </el-row>
@@ -475,6 +501,7 @@
                                 <el-button size="small" type="primary" @click="chooseResources(3*i+j-3)">
                                     选择文件
                                 </el-button>
+                                <el-radio v-model="dialog.editProgram.audioIndex" :label="3*i+j-3" style="margin-left: 5px;"><span class="icon-bullhorn" style="color: white"></span></el-radio>
                             </div>
                         </el-col>
                     </el-row>

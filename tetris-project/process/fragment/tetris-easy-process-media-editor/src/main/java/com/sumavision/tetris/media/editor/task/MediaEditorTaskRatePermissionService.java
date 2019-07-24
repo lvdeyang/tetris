@@ -21,6 +21,13 @@ public class MediaEditorTaskRatePermissionService {
 	@Autowired
 	MediaEditorTaskService mediaEditorTaskService;
 	
+	/**
+	 * 根据转码任务更新流程任务进度<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param map key:转码任务id value:转码任务进度
+	 */
 	public void saveRate(HashMapWrapper<String, Integer> map){
 		if (map == null || map.isEmpty()) return;
 		

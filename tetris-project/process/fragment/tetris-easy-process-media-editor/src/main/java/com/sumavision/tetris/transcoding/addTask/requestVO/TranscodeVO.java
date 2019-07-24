@@ -1,22 +1,24 @@
 package com.sumavision.tetris.transcoding.addTask.requestVO;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 
 public class TranscodeVO {
-	private SourceVO source;
+	private List<SourceVO> source;
 	private TargetVO target;
 	
 	private String id;
 	private String type;
 	private String priority;
 
-	public SourceVO getSource() {
+	public List<SourceVO> getSource() {
 		return source;
 	}
 
 	@XmlElement(name = "Source")
-	public void setSource(SourceVO source) {
+	public void setSource(List<SourceVO> source) {
 		this.source = source;
 	}
 
