@@ -14,6 +14,8 @@ define([
     'mi-frame',
     'mi-user-dialog',
     'mi-subordinate-role-dialog',
+    'process-variable-list-dialog',
+    'process-variable-set-dialog',
     'css!' + window.APPPATH + 'process-design/page-process-design.css'
 ], function(tpl, config, ajax, $, context, commons, BpmnExtJS, Vue){
 
@@ -58,6 +60,18 @@ define([
                     var buff = self.$refs.miSubordinateRoleDialog.getBuffer();
                     buff(roles);
                     close();
+                },
+                onProcessVariableSelected:function(variables, startLoading, endLoading, close){
+                    var self = this;
+                    var buff = self.$refs.miProcessVariableListDialog.getBuffer();
+                    buff(variables);
+                    close();
+                },
+                onProcessVariableSetted:function(variable, close){
+                    var self = this;
+                    var buff = self.$refs.miProcessVariableSetDialog.getBuffer();
+                    buff(variable);
+                    close();
                 }
             },
             mounted:function(){
@@ -67,6 +81,7 @@ define([
                     id:processId
                 }, function(data){
                     var bpmn = data.bpmn;
+                    var userTaskBindVariables = data.userTaskBindVariables;
                     var entries = data.groupEntries;
                     var primaryKey = data.processId;
                     var uuid = data.uuid;
@@ -77,14 +92,16 @@ define([
                         nodeType:['user', 'service', 'gateway'],
                         entries:entries || [],
                         xml:bpmn,
+                        userTaskBindVariables:userTaskBindVariables?$.parseJSON(userTaskBindVariables):null,
                         onReady:function(){
                             console.log('导入成功！');
                         },
-                        onSave:function(xml, endLoading){
+                        onSave:function(xml, userTaskBindVariables, endLoading){
                             var bpmnExtInstance = this;
                             var referenceIds = bpmnExtInstance.queryServiceReferenceIds();
                             ajax.post('/process/save/bpmn/' + processId, {
                                 bpmn:xml,
+                                userTaskBindVariables: $.toJSON(userTaskBindVariables),
                                 accessPointIds: $.toJSON(referenceIds)
                             }, function(data, status){
                                 endLoading();
@@ -136,6 +153,14 @@ define([
                         onBindRoleClick:function(fn, roleIds){
                             self.$refs.miSubordinateRoleDialog.open('/subordinate/role/find/by/company/id/with/except', (roleIds&&roleIds.length>0)?roleIds:null);
                             self.$refs.miSubordinateRoleDialog.setBuffer(fn);
+                        },
+                        onBindVariableClick:function(fn, variableIds){
+                            self.$refs.miProcessVariableListDialog.open('/process/variable/list/all/with/except/'+processId, (variableIds&&variableIds.length>0)?variableIds:null);
+                            self.$refs.miProcessVariableListDialog.setBuffer(fn);
+                        },
+                        onEditVariableClick:function(fn, variable){
+                            self.$refs.miProcessVariableSetDialog.open(variable);
+                            self.$refs.miProcessVariableSetDialog.setBuffer(fn);
                         }
                     });
                 });

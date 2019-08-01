@@ -20,6 +20,24 @@ public class LoginFeignController {
 	private LoginQuery loginQuery;
 	
 	/**
+	 * 强制用户id登录<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月5日 下午5:13:08
+	 * @param Long userId 用户名id
+	 * @return String token
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/do/user/id/login")
+	public Object doUserIdLogin(
+			Long userId,
+			HttpServletRequest request) throws Exception{
+		
+		return loginService.doUserIdLogin(userId);
+	}
+	
+	/**
 	 * 用户名密码登录<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

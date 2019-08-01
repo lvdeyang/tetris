@@ -27,13 +27,17 @@ public class ProcessService {
 	 * <b>日期：</b>2019年1月9日 下午2:41:31
 	 * @param String primaryKey 流程主键
 	 * @param JSONString variables 流程必要变量初始值
+ 	 * @param String category 流程主题
+	 * @param String business 流程承载业务内容
 	 * @return String processInstanceId 流程实例id
 	 */
 	public String startByKey(
 			String primaryKey,
-			String variables) throws Exception{
+			String variables,
+			String category,
+			String business) throws Exception{
 		
-		return JsonBodyResponseParser.parseObject(processFeign.startByKey(primaryKey, variables), String.class);
+		return JsonBodyResponseParser.parseObject(processFeign.startByKey(primaryKey, variables, category, business), String.class);
 	}
 	
 	/**

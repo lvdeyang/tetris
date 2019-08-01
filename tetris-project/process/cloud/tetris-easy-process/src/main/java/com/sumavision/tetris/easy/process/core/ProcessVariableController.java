@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.constant.DataType;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.easy.process.core.exception.ProcessNotExistException;
@@ -104,6 +105,35 @@ public class ProcessVariableController {
 		List<ProcessVariableVO> rows = ProcessVariableVO.getConverter(ProcessVariableVO.class).convert(entities, ProcessVariableVO.class);
 		
 		return rows;
+	}
+	
+	/**
+	 * 查询流程下的所有变量（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月19日 上午11:43:04
+	 * @param Long processId 流程id
+	 * @param JSONArray except 例外id列表
+	 * @return List<ProcessVariableVO> 变量列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/all/with/except/{processId}")
+	public Object listAllWithExcept(
+			@PathVariable Long processId,
+			String except,
+			HttpServletRequest request) throws Exception{
+		List<ProcessVariablePO> entities = null;
+		List<Long> ids = null;
+		if(except != null){
+			ids = JSON.parseArray(except, Long.class);
+		}
+		if(ids!=null && ids.size()>0){
+			entities = processVariableDao.findByProcessIdAndIdNotIn(processId, ids);
+		}else{
+			entities = processVariableDao.findByProcessId(processId);
+		}
+		return ProcessVariableVO.getConverter(ProcessVariableVO.class).convert(entities, ProcessVariableVO.class);
 	}
 	
 	/**

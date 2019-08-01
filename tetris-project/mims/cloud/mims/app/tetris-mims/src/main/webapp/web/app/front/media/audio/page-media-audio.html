@@ -84,10 +84,16 @@
                                 </span>
                             </template>
                         </el-table-column>
-                        <el-table-column label="大小" width="200">
+                        <el-table-column label="大小" width="180">
                             <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
                         </el-table-column>
-                        <el-table-column prop="updateTime" label="创建时间" width="200"></el-table-column>
+                        <el-table-column prop="updateTime" label="创建时间" width="180"></el-table-column>
+                        <el-table-column label="审核状态" width="180">
+                            <template slot-scope="scope">
+                                <el-button v-if="scope.row.processInstanceId" type="text" style="padding:0;" @click="doProcessPreview(scope)">{{scope.row.reviewStatus}}</el-button>
+                                <span v-else>{{scope.row.reviewStatus}}</span>
+                            </template>
+                        </el-table-column>
                     </el-table>
                 </el-scrollbar>
             </div>

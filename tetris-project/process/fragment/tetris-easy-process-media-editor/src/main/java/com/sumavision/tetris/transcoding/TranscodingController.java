@@ -134,7 +134,7 @@ public class TranscodingController {
 		List<String> tagList = (tags == null || tags.isEmpty()) ? new ArrayList<String>() : JSONObject.parseArray(tags, String.class);
 		variables.put("_pa3_tags", StringUtils.join(tagList.toArray(), ","));
 		
-		String processInstanceId = processService.startByKey("_media_editor_transcoding_by_qt", variables.toJSONString());
+		String processInstanceId = processService.startByKey("_media_editor_transcoding_by_qt", variables.toJSONString(), null, null);
 		
 		MediaEditorTaskVO task = mediaEditorTaskQuery.getByProcessId(processInstanceId);
 		

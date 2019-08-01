@@ -74,6 +74,9 @@ public class UserVO{
 	
 	/** 素材库文件夹名称 */
 	private String rootFolderName;
+	
+	/** 业务角色id,以“,”分割 */
+	private String businessRoles;
 
 	public Long getId() {
 		return id;
@@ -282,4 +285,13 @@ public class UserVO{
 		return this;
 	}
 
+	public String getBusinessRoles() {
+		return businessRoles;
+	}
+
+	public UserVO setBusinessRoles(String businessRoles) {
+		this.businessRoles = businessRoles;
+		return this;
+	}
+	
 }

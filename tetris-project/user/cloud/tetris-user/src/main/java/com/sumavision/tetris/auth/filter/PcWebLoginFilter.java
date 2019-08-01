@@ -69,23 +69,22 @@ public class PcWebLoginFilter implements Filter{
 			return;
 		}
 		
-		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);
+		String clientKey = request.getHeader(HttpConstant.HEADER_FEIGN_CLIENT);
+		if(HttpConstant.HEADER_FEIGN_CLIENT_KEY.equals(clientKey)){
+			chain.doFilter(request, response);
+			return;
+		}
 		
+		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);
 		if(token == null){
-			String clientKey = request.getHeader(HttpConstant.HEADER_FEIGN_CLIENT);
-			if(HttpConstant.HEADER_FEIGN_CLIENT_KEY.equals(clientKey)){
-				chain.doFilter(request, response);
-				return;
-			}else{
-				LOG.error("----------------------------");
-				LOG.error(requestUri);
-				jsonResult.put("status", StatusCode.FORBIDDEN.getCode());
-				jsonResult.put("message", "非法访问！");
-				response.setContentType("application/json; charset=UTF-8");
-				PrintWriter writer = response.getWriter();
-				writer.write(jsonResult.toJSONString());
-				writer.close();
-			}
+			LOG.error("----------------------------");
+			LOG.error(requestUri);
+			jsonResult.put("status", StatusCode.FORBIDDEN.getCode());
+			jsonResult.put("message", "非法访问！");
+			response.setContentType("application/json; charset=UTF-8");
+			PrintWriter writer = response.getWriter();
+			writer.write(jsonResult.toJSONString());
+			writer.close();
 		}else{
 			try {
 				userQuery.checkToken(token);

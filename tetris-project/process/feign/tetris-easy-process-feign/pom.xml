@@ -34,8 +34,13 @@
 		   <artifactId>tetris-spring-feign</artifactId>
 		   <version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
-    </dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+	</dependencies>
     
     <dependencyManagement>
         <dependencies>

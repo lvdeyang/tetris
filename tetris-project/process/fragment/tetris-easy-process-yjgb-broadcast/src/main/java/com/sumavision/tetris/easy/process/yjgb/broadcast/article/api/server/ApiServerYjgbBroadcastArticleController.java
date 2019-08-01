@@ -34,7 +34,7 @@ public class ApiServerYjgbBroadcastArticleController {
 		JSONObject variables = new JSONObject();
 		variables.put("_pa1_id", id);
 		
-		return processService.startByKey("_yjgb_generate_article_by_compress_", variables.toJSONString());
+		return processService.startByKey("_yjgb_generate_article_by_compress_", variables.toJSONString(), null, null);
 	}
 	
 }

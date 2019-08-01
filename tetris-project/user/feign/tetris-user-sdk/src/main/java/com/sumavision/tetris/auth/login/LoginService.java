@@ -11,6 +11,18 @@ public class LoginService {
 
 	@Autowired
 	private LoginFeign loginFeign;
+
+	/**
+	 * 强制用户id登录<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月5日 下午5:13:08
+	 * @param Long userId 用户名id
+	 * @return String token
+	 */
+	public String doUserIdLogin(Long userId) throws Exception{
+		return JsonBodyResponseParser.parseObject(loginFeign.doUserIdLogin(userId), String.class);
+	}
 	
 	/**
 	 * 用户名密码登录<br/>

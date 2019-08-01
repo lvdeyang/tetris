@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.activiti.engine.HistoryService;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RuntimeService;
@@ -21,10 +23,12 @@ import org.activiti.engine.task.TaskQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 /**
  * 申请会议室流程示例
@@ -47,6 +51,15 @@ public class IndexController {
 	
 	@Autowired
 	private HistoryService historyService;
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/test")
+	public Object test(HttpServletRequest request) throws Exception{
+		//Thread.sleep(100);
+		System.out.println("成功啦！");
+		return "成功啦！";
+	}
 	
 	/**
 	 * 模拟登陆页面<br/>
@@ -237,7 +250,7 @@ public class IndexController {
 																			.put("time", time)
 																			.getMap();
 		//开始流程
-		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("_80937dfc0bbc4bb2a1c95e6de6d7377f", variables);
+		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("applyMeetingProcess", variables);
 		
 		Task task = taskService.createTaskQuery().processInstanceId(processInstance.getId())
 												 .taskAssignee(username)
@@ -245,7 +258,7 @@ public class IndexController {
 		
 		taskService.complete(task.getId());
 		
-		ModelAndView mv = new ModelAndView("redirect:/home");
+		ModelAndView mv = new ModelAndView("redirect:/demo/home");
 		mv.addObject("username", username);
 		return mv;
 	}
@@ -273,7 +286,7 @@ public class IndexController {
 																			.getMap();
 		taskService.complete(taskId, variables);
 		
-		ModelAndView mv = new ModelAndView("redirect:/home");
+		ModelAndView mv = new ModelAndView("redirect:/demo/home");
 		mv.addObject("username", username);
 		return mv;
 	}
@@ -293,7 +306,7 @@ public class IndexController {
 		
 		runtimeService.deleteProcessInstance(processId, "发起者取消！");
 		
-		ModelAndView mv = new ModelAndView("redirect:/home");
+		ModelAndView mv = new ModelAndView("redirect:/demo/home");
 		mv.addObject("username", username);
 		return mv;
 	}
@@ -324,7 +337,7 @@ public class IndexController {
 																			.getMap();
 		taskService.complete(taskId, variables);
 		
-		ModelAndView mv = new ModelAndView("redirect:/home");
+		ModelAndView mv = new ModelAndView("redirect:/demo/home");
 		mv.addObject("username", username);
 		return mv;
 	}
@@ -353,7 +366,7 @@ public class IndexController {
 		
 		runtimeService.deleteProcessInstance(task.getProcessInstanceId(), username + "审批未通过！");
 		
-		ModelAndView mv = new ModelAndView("redirect:/home");
+		ModelAndView mv = new ModelAndView("redirect:/demo/home");
 		mv.addObject("username", username);
 		return mv;
 	}

@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.folder;
 
+import java.util.Collection;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
@@ -8,6 +9,18 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = FolderPO.class, idClass = Long.class)
 public interface FolderDAO extends BaseDAO<FolderPO>{
 
+	/**
+	 * 根据id查询有权限的企业文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月29日 上午10:26:58
+	 * @param Collection<Long> roleIds 角色id列表
+	 * @param Collection<Long> ids 文件夹id列表
+	 * @return List<FolderPO> 文件夹列表
+	 */
+	@Query(value = "SELECT folder.* FROM mims_folder folder LEFT JOIN mims_folder_role_permission permission ON folder.id=permission.folder_id WHERE permission.role_id IN ?1 AND folder.id IN ?2 AND folder.type=?3", nativeQuery = true)
+	public List<FolderPO> findPermissionCompanyFolderByIdIn(Collection<Long> roleIds, Collection<Long> ids, String type);
+	
 	/**
 	 * 获取用户素材库根文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -80,6 +93,18 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	public List<FolderPO> findByParentIdOrderByNameAsc(Long parentId);
 	
 	/**
+	 * 获取文件夹下有权限的企业文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月29日 上午9:59:29
+	 * @param Collection<Long> roleIds 权限列表
+	 * @param Long parentId 附文件夹id
+	 * @return List<FolderPO> 文件夹列表
+	 */
+	@Query(value = "SELECT folder.* FROM mims_folder folder LEFT JOIN mims_folder_role_permission permission0 ON folder.id=permission0.folder_id WHERE permission0.role_id IN ?1 AND folder.parent_id=?2", nativeQuery = true)
+	public List<FolderPO> findPermissionCompanyFolderByParentIdOrderByNameAsc(Collection<Long> roleIds, Long parentId);
+	
+	/**
 	 * 获取文件夹下的所有子文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -125,9 +150,9 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+ 
 				   "FROM mims_folder folder "+
 				   "LEFT JOIN mims_folder_role_permission permission0 ON folder.id=permission0.folder_id "+
-				   "WHERE permission0.role_id=?1 "+
+				   "WHERE permission0.role_id IN ?1 "+
 				   "AND folder.type=?2", nativeQuery = true)
-	public List<FolderPO> findPermissionCompanyTree(Long roleId, String type);
+	public List<FolderPO> findPermissionCompanyTree(Collection<Long> roleId, String type);
 	
 	/**
 	 * 获取有权限的企业文件夹（带例外）<br/>
@@ -141,11 +166,11 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+ 
 				   "FROM mims_folder folder "+
 				   "LEFT JOIN mims_folder_role_permission permission0 ON folder.id=permission0.folder_id "+
-				   "WHERE permission0.role_id=?1 "+
+				   "WHERE permission0.role_id IN ?1 "+
 				   "AND folder.type=?2 "+
 				   "AND folder.id<>?3 "+
 				   "AND (folder.parent_path IS NULL OR folder.parent_path NOT LIKE ?4)", nativeQuery = true)
-	public List<FolderPO> findPermissionCompanyTreeWithExcept(Long roleId, String type, Long except, String exceptReg);
+	public List<FolderPO> findPermissionCompanyTreeWithExcept(Collection<Long> roleId, String type, Long except, String exceptReg);
 	
 	/**
 	 * 获取企业文件夹下的有权限的子文件夹<br/>
@@ -165,6 +190,10 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 				   "AND folder.parent_id=?2 "+
 				   "AND folder.type=?3", nativeQuery = true)
 	public List<FolderPO> findPermissionCompanyFoldersByParentId(String userId, Long parentId, String type);
+	
+	/*********************************
+	 ********以下代码应该要废掉***********
+	 *********************************/
 	
 	/**
 	 * 获取企业文件夹下的有权限的子文件夹<br/>

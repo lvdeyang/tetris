@@ -175,11 +175,8 @@ public class MediaVideoQuery {
 	 */
 	public List<MediaVideoVO> loadAll() throws Exception{
 		
-		UserVO user = userQuery.current();
-		
 		//TODO 权限校验		
-		Long roleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(user.getUuid()));
-		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(roleId, FolderType.COMPANY_VIDEO.toString());
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){
@@ -208,11 +205,8 @@ public class MediaVideoQuery {
 	 */
 	public List<MediaVideoVO> loadAllFolder() throws Exception{
 		
-		UserVO user = userQuery.current();
-		
 		//TODO 权限校验		
-		Long roleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(user.getUuid()));
-		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(roleId, FolderType.COMPANY_VIDEO.toString());
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){

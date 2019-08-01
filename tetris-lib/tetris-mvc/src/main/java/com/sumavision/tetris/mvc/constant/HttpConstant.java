@@ -20,6 +20,15 @@ public interface HttpConstant {
 	/** feign 调用密钥 */
 	public static final String HEADER_FEIGN_CLIENT_KEY = "4b159799e7ce411386e4cdfc3c8f2c39";
 	
+	/** header internal process client id */
+	public static final String HEADER_PROCESS_CLIENT = "tetris-006";
+	
+	/** process 调用密钥 */
+	public static final String HEADER_PROCESS_CLIENT_KEY = "6acee36b1d0346709ba3701b5d913601";
+	
+	/** process调用，做用户id登录 */
+	public static final String HEADER_PROCESS_DO_USER_ID_LOGIN = "tetris-007";
+	
 	/** session attribute token */
 	public static final String ATTRIBUTE_AUTH_TOKEN = "tetris-003";
 	

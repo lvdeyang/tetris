@@ -80,6 +80,9 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/** 素材库文件夹名称 */
 	private String rootFolderName;
 	
+	/** 业务角色id,以“,”分割 */
+	private String businessRoles;
+	
 	public String getUsername() {
 		return username;
 	}
@@ -266,6 +269,15 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 
 	public UserVO setRootFolderName(String rootFolderName) {
 		this.rootFolderName = rootFolderName;
+		return this;
+	}
+
+	public String getBusinessRoles() {
+		return businessRoles;
+	}
+
+	public UserVO setBusinessRoles(String businessRoles) {
+		this.businessRoles = businessRoles;
 		return this;
 	}
 

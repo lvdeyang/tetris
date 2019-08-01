@@ -48,7 +48,7 @@ public class UserSubordinateRolePermissionQuery {
 	}
 	
 	public Long findRoleIdsByUserId(Long userId)throws Exception {
-		UserSubordinateRolePermissionPO PO = userSubordinateRolePermissionDAO.findByUserId(userId);
+		UserSubordinateRolePermissionPO PO = userSubordinateRolePermissionDAO.findTopByUserId(userId);
 		
 		return PO.getRoleId();
 	}

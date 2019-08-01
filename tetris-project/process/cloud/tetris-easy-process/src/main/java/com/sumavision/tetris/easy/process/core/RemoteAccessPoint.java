@@ -109,7 +109,6 @@ public class RemoteAccessPoint {
 			
 		}
 		
-		System.out.println("调用："+accessPointId);
 	}
 	
 	/**
@@ -134,8 +133,9 @@ public class RemoteAccessPoint {
 		
 		Map<String, Object> processVariables = runtimeService.getVariables(processInstanceId);
 		
-		JSONObject variableContext = (JSONObject)processVariables.get("variable-context");
-		Map<String, String> requestHeaders = (Map<String, String>)processVariables.get("request-headers");
+		JSONObject variableContext = (JSONObject)processVariables.get(InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
+		Map<String, String> requestHeaders = (Map<String, String>)processVariables.get(InternalVariableKey.REQUEST_HEADERS.getVariableKey());
+		String startUserId = processVariables.get(InternalVariableKey.START_USER_ID.getVariableKey()).toString();
 		
 		//加入内置变量：流程实例id
 		if(variableContext.getString(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey()) == null){
@@ -163,7 +163,9 @@ public class RemoteAccessPoint {
 		
 		//加入内置参数
 		paramVariableMap.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), contextVariableMap.get(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey()));
-		paramVariableMap.put(InternalVariableKey.START_USER_ID.getVariableKey(), contextVariableMap.get(InternalVariableKey.START_USER_ID.getVariableKey()));
+		
+		//这个参数先不加了，不需要，本来上下文变量中也没有
+		//paramVariableMap.put(InternalVariableKey.START_USER_ID.getVariableKey(), contextVariableMap.get(InternalVariableKey.START_USER_ID.getVariableKey()));
 		
 		if(AccessPointType.REMOTE_ASYNCHRONOUS.equals(accessPoint.getType())){
 			paramVariableMap.put(InternalVariableKey.ACCESS_POINT_ID.getVariableKey(), accessPoint.getId());
@@ -180,8 +182,13 @@ public class RemoteAccessPoint {
 											  .toString();
 
 		RestAccessPointInvoker invoker = null;
+		
+		//临时解决方案：这个header用于通过老接口的拦截器
 		Header tokenHeader = new BasicHeader(HttpConstant.HEADER_AUTH_TOKEN, requestHeaders.get(HttpConstant.HEADER_AUTH_TOKEN));
-		Header[] headers = new Header[]{tokenHeader};
+		//以下两个header用户通过/api/process拦截器
+		Header processClientHeader = new BasicHeader(HttpConstant.HEADER_PROCESS_CLIENT, HttpConstant.HEADER_PROCESS_CLIENT_KEY);
+		Header doUserIdLoginHeader = new BasicHeader(HttpConstant.HEADER_PROCESS_DO_USER_ID_LOGIN, startUserId);
+		Header[] headers = new Header[]{tokenHeader, processClientHeader, doUserIdLoginHeader};
 		if(AccessPointMethodType.HTTP_METHOD_POST.equals(accessPoint.getMethodType()) && 
 				ParamPackagingMethod.JSON.equals(accessPoint.getParamPackagingMethod())){
 			invoker = new RestAccessPointInvoker(url, paramJson, RestAccessPointInvoker.JSON, headers);
@@ -282,7 +289,7 @@ public class RemoteAccessPoint {
 				contextVariableMap.put(reverseParamMapKey, reverseParamMap.get(reverseParamMapKey));
 			}
 			variableContext = aliFastJsonObject.convertFromHashMap(contextVariableMap);
-			runtimeService.setVariable(processInstanceId, "variable-context", variableContext);
+			runtimeService.setVariable(processInstanceId, InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), variableContext);
 			
 		}catch(Exception e){
 			e.printStackTrace();

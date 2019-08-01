@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
@@ -172,7 +173,7 @@ public class MediaTxtQuery {
 		
 		//TODO 权限校验
 		Long roleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(user.getUuid()));
-		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(roleId, FolderType.COMPANY_TXT.toString());
+		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(new ArrayListWrapper<Long>().add(roleId).getList(), FolderType.COMPANY_TXT.toString());
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){

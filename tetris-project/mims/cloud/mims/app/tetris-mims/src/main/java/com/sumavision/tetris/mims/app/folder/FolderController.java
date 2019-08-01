@@ -334,8 +334,7 @@ public class FolderController {
 		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
 		
-		Long roleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(user.getUuid()));
-		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(roleId, type.toString());
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(type.toString());
 		
 		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
 		
@@ -367,11 +366,10 @@ public class FolderController {
 		
 		List<FolderPO> folderTree = null;
 		
-		Long roleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(user.getUuid()));
 		if(except == null){
-			folderTree = folderDao.findPermissionCompanyTree(roleId, type.toString());
+			folderTree = folderQuery.findPermissionCompanyTree(type.toString());
 		}else{
-			folderTree = folderQuery.findPermissionCompanyTreeWithExcept(roleId, type.toString(), except);
+			folderTree = folderQuery.findPermissionCompanyTreeWithExcept(type.toString(), except);
 		}
 		
 		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);

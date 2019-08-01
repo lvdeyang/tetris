@@ -622,6 +622,15 @@ define([
                             message: '由于您在上传时关闭了页面，需要再次选择相同文件才能续传！'
                         });
                     }
+                },
+                doProcessPreview:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/process/generate/url', {
+                        processInstanceId:row.processInstanceId
+                    }, function(url){
+                        window.open(url, '_blank', 'status=no,menubar=yes,toolbar=no,width=1366,height=580,left=100,top=100');
+                    });
                 }
             },
             created:function(){
@@ -635,15 +644,6 @@ define([
                             initTableRow(rows[i]);
                             self.table.rows.push(rows[i]);
                         }
-                    }
-
-                    if(!breadCrumb.id){
-                        self.$notify({
-                            title: '可访问仓库为空',
-                            message: '管理员可能未给您设置角色',
-                            type: 'warning',
-                            offset: 50
-                        });
                     }
 
                     var items = [breadCrumb];

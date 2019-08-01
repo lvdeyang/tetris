@@ -64,7 +64,7 @@ public class UserSubordinateRolePermissionService {
 				}
 			}
 			if(!finded){
-				UserSubordinateRolePermissionPO permissionUser = userSubordinateRolePermissionDAO.findByUserId(user.getId());
+				UserSubordinateRolePermissionPO permissionUser = userSubordinateRolePermissionDAO.findTopByUserId(user.getId());
 				if (permissionUser != null) {
 					permissionUser.setRoleId(roleId);
 				}else {
@@ -79,17 +79,6 @@ public class UserSubordinateRolePermissionService {
 		
 		userSubordinateRolePermissionDAO.save(permissions);
 		
-//		List<UserSubordinateRolePermissionVO> view_permissions = new ArrayList<UserSubordinateRolePermissionVO>();
-//		for(UserSubordinateRolePermissionPO permission:permissions){
-//			for(UserPO user:users){
-//				if(permission.getUserId().equals(user.getId())){
-//					view_permissions.add(new UserSubordinateRolePermissionVO().set(permission, user));
-//					break;
-//				}
-//			}
-//		}
-//		
-//		return view_permissions;
 		return UserVO.getConverter(UserVO.class).convert(users, UserVO.class);
 	}
 	
