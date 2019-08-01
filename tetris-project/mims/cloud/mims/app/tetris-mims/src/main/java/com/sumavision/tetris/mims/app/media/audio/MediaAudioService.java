@@ -1,6 +1,7 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -8,10 +9,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.activation.MimetypesFileTypeMap;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.commons.util.audio.DoTTSUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
@@ -20,8 +25,12 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioErrorWhenChangeFromTxtException;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
+import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtNotExistException;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
@@ -55,6 +64,9 @@ public class MediaAudioService {
 	
 	@Autowired
 	private MediaSettingsQuery mediaSettingsQuery;
+	
+	@Autowired 
+	private MediaTxtDAO mediaTxtDAO;
 	
 	/**
 	 * 音频媒资上传审核通过<br/>
@@ -203,6 +215,56 @@ public class MediaAudioService {
 	}
 	
 	/**
+	 * 添加音频媒资上传任务(从文本媒资转换)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午3:21:49
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param Long txtId 
+	 * @param FolderPO folder 文件夹
+	 */
+	public MediaAudioPO addTaskFromTxt(
+			UserVO user, 
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			Long txtId, 
+			FolderPO folder) throws Exception{
+		
+		MediaTxtPO txt = mediaTxtDAO.findOne(txtId);
+		
+		if (txt == null) throw new MediaTxtNotExistException(txtId);
+		
+		String audioName = new StringBufferWrapper().append(name).append(".wav").toString();
+		
+		MediaAudioTaskVO task = new MediaAudioTaskVO().setName(audioName);
+		
+		MediaAudioPO audio = addTask(user, name, tags, keyWords, remark, task, folder);
+		
+		//change
+		String txtContent = txt.getContent();
+		String audioPath = audio.getUploadTmpPath();
+		String changeReturn = DoTTSUtil.doTTS(audioPath, txtContent);
+		if (changeReturn != null) {
+			File audioFile = new File(audioPath);
+			audio.setLastModified(audioFile.lastModified());
+			audio.setSize(audioFile.length());
+			audio.setUploadStatus(UploadStatus.COMPLETE);
+			audio.setMimetype(new MimetypesFileTypeMap().getContentType(new File(audioPath)));
+			mediaAudioDao.save(audio);
+			return audio;
+		} else {
+			mediaAudioDao.delete(audio);
+			throw new MediaAudioErrorWhenChangeFromTxtException(txt.getName());
+		}
+	}
+	
+	/**
 	 * 添加音频媒资上传任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -247,7 +309,7 @@ public class MediaAudioService {
 		MediaAudioPO entity = new MediaAudioPO();
 		entity.setLastModified(task.getLastModified());
 		entity.setName(name);
-		entity.setTags("");
+		entity.setTags(StringUtils.join(tags.toArray(), MediaAudioPO.SEPARATOR_TAG));
 		entity.setKeyWords("");
 		entity.setRemarks(remark);
 		entity.setAuthorId(user.getUuid());
@@ -305,6 +367,7 @@ public class MediaAudioService {
 		
 		audio.setName(name);
 		audio.setRemarks(remark);
+		audio.setTags(StringUtils.join(tags.toArray(), MediaAudioPO.SEPARATOR_TAG));
 		mediaAudioDao.save(audio);
 		
 		return audio;
@@ -408,4 +471,43 @@ public class MediaAudioService {
 		return entity;
 	}
 	
+	/**
+	 * 根据音频媒资列表批量加载的音频媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午4:03:27
+	 * @param user UserVO 用户信息
+	 * @param List<String> urlList 音频媒资http地址列表
+	 * @param folderId 音频媒资存放路径
+	 * @return List<MediaAudioVO> 音频媒资列表
+	 */
+	public List<MediaAudioPO> addList(UserVO user, List<String> urlList, Long folderId) throws Exception{
+		
+		if (urlList == null || urlList.size() <= 0) return null;
+		
+		String folderType = "audio";
+		
+		List<MediaAudioPO> audios = new ArrayList<MediaAudioPO>();
+		for (String url : urlList) {
+			File file = new File(url);
+			String folderPath = new StringBufferWrapper().append(path.webappPath()).append("upload").append(file.getPath().split("upload")[1]).toString();
+			File localFile = new File(folderPath);
+			File[] fileList = localFile.listFiles();
+			for (File childFile : fileList) {
+				String fileNameSuffix = childFile.getName().split("\\.")[1];
+				if (fileNameSuffix.equals("xml")) {
+					continue;
+				}else {
+					String fileName = childFile.getName();
+					Long size = childFile.length();
+					String uploadTempPath = childFile.getPath();
+					String mimeType = new MimetypesFileTypeMap().getContentType(childFile);
+					
+					MediaAudioPO audio = this.add(user, file.getName(), fileName, size, folderType, mimeType,uploadTempPath);
+					audios.add(audio);
+				}
+			}	
+		}
+		return audios;
+	}
 }

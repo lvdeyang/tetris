@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
@@ -20,6 +21,7 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtNotExistException;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
 import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -156,6 +158,74 @@ public class MediaTxtQuery {
 																  		 .getMap();
 		
 		return result;
+	}
+	
+	/**
+	 * 加载所有的文本媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return List<MediaTxtVO> 文本媒资列表
+	 */
+	public List<MediaTxtVO> loadAll() throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		Long roleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(user.getUuid()));
+		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(new ArrayListWrapper<Long>().add(roleId).getList(), FolderType.COMPANY_TXT.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		List<MediaTxtPO> txts = mediaTxtDao.findByFolderIdIn(folderIds);
+		
+		List<FolderPO> roots = folderQuery.findRoots(folderTree);
+		
+		List<MediaTxtVO> medias = new ArrayList<MediaTxtVO>();
+		
+		for(FolderPO root:roots){
+			medias.add(new MediaTxtVO().set(root));
+		}
+		
+		packMediaTxtTree(medias, folderTree, txts);
+		
+		return medias;
+	}
+	
+	/**
+	 * 生成文本媒资树<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月31日 上午11:29:34
+	 * @param List<MediaAudioVO> roots 根
+	 * @param List<FolderPO> folders 所有文件夹
+	 * @param List<MediaAudioPO> medias 所有视频媒资
+	 */
+	public void packMediaTxtTree(List<MediaTxtVO> roots, List<FolderPO> folders, List<MediaTxtPO> medias) throws Exception{
+		if(roots == null || roots.size() <= 0){
+			return;
+		}
+		for(MediaTxtVO root: roots){
+			if(root.getType().equals(MediaVideoItemType.FOLDER.toString())){
+				if(root.getChildren() == null) root.setChildren(new ArrayList<MediaTxtVO>());
+				for(FolderPO folder: folders){
+					if(folder.getParentId() != null && folder.getParentId().equals(root.getId())){
+						root.getChildren().add(new MediaTxtVO().set(folder));
+					}
+				}
+				for(MediaTxtPO media: medias){
+					if(media.getFolderId() != null && media.getFolderId().equals(root.getId())){
+						root.getChildren().add(new MediaTxtVO().set(media));
+					}
+				}
+				if(root.getChildren().size() > 0){
+					packMediaTxtTree(root.getChildren(), folders, medias);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -333,7 +403,7 @@ public class MediaTxtQuery {
 		}
 		if(txts!=null && txts.size()>0){
 			for(MediaTxtPO txt:txts){
-				medias.add(new MediaTxtVO().set(txt));
+				medias.add(new MediaTxtVO().set(txt).setContent(null));
 			}
 		}
 		
@@ -343,5 +413,4 @@ public class MediaTxtQuery {
 		
 		return result;
 	}
-	
 }

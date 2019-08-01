@@ -11,3 +11,16 @@
 .programScreen:hover{
     box-shadow: 0 2px 12px 0 rgba(1, 1, 1, 1);
 }
+
+.channelManage{
+    margin:0;
+    font-size:18px;
+    padding:0;
+    margin-right:14px;
+    position:relative;
+    top:1px;
+}
+
+.channelManage:last-child{
+    margin-right: 0;
+}

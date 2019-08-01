@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cs.program;
 
+import java.util.Comparator;
+
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -110,5 +112,17 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		this.time = time;
 	}
 	
-	
+	public static final class ScreenVOOrderComparator implements Comparator<ScreenVO>{
+		@Override
+		public int compare(ScreenVO o1, ScreenVO o2) {
+			
+			if(o1.getIndex() > o2.getIndex()){
+				return 1;
+			}
+			if(o1.getIndex() == o2.getIndex()){
+				return 0;
+			}
+			return -1;
+		}
+	}
 }

@@ -16,6 +16,15 @@ public class AreaService {
 	@Autowired
 	AreaQuery areaQuery;
 	
+	/**
+	 * 设置频道播发地区<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param channelId 频道id
+	 * @param list 地区列表
+	 * @return List<AreaPO> 地区列表
+	 */
 	public List<AreaVO> setCheckArea(Long channelId,List<AreaVO> list) throws Exception{
 		List<AreaVO> returnList = new ArrayList<AreaVO>();
 		List<AreaPO> saveList = new ArrayList<AreaPO>();

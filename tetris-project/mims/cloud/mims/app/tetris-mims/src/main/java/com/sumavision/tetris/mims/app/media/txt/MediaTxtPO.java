@@ -89,7 +89,7 @@ public class MediaTxtPO extends AbstractBasePO{
 
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(name = "CONTENT", columnDefinition = "text")
+	@Column(name = "CONTENT", columnDefinition = "MEDIUMTEXT")
 	public String getContent() {
 		return content;
 	}

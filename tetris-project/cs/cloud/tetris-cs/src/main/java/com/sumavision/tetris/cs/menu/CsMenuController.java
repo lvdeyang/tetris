@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -104,7 +104,7 @@ public class CsMenuController {
 	@RequestMapping(value = "/resource/get/mims")
 	public Object getMIMSResource(Long id,HttpServletRequest request) throws Exception {
 
-		List<MediaVideoVO> resources = resourceQuery.getMIMSResources(id);
+		List<MediaAVideoVO> resources = resourceQuery.getMIMSResources(id);
 
 		return resources;
 	}
@@ -114,7 +114,7 @@ public class CsMenuController {
 	@RequestMapping(value = "/resource/add")
 	public Object addResources(String resourcesListStr,Long parentId,Long channelId, HttpServletRequest request) throws Exception {
 
-		List<MediaVideoVO> resources = JSON.parseArray(resourcesListStr,MediaVideoVO.class);
+		List<MediaAVideoVO> resources = JSON.parseArray(resourcesListStr,MediaAVideoVO.class);
 
 		return resourceService.addResources(resources, parentId,channelId);
 	}

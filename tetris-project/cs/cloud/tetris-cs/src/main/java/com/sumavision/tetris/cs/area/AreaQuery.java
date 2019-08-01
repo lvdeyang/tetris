@@ -28,10 +28,24 @@ public class AreaQuery {
 	@Autowired
 	DivisionDAO divisionDAO;
 
+	/**
+	 * 获取地区根目录(当前以空地区id获取根)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @return List<AreaPO> 地区列表
+	 */
 	public Object getRootList(Long channelId) throws Exception {
 		return getChildList(channelId, "", true);
 	}
 
+	/**
+	 * 获取子地区目录(当前使用的平台地区根id为3204000000，平台数据类型转本地地区数据类型)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @return List<AreaPO> 地区列表
+	 */
 	public Object getChildList(Long channelId, String areaId, Boolean disabled) throws Exception {
 		List<AreaData> allArea;
 		if (areaId.isEmpty()) {
@@ -83,28 +97,46 @@ public class AreaQuery {
 		return getChildDivision("3204000000");
 	}
 
+	/**
+	 * 获取子地区目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @return List<AreaData> 平台的地区数据类型数列
+	 */
 	public List<AreaData> getChildDivision(String areaId) throws Exception {
 		List<AreaData> returnList = new ArrayList<AreaData>();
 
-		JSONObject jsonObject = HttpRequestUtil.httpGet("http://" + ChannelBroadStatus.getBroadcastIPAndPort()
-				+ "/ed/ed/regiondivision/queryDivisionTree?division=" + areaId);
+		String url = ChannelBroadStatus.getBroadcastIPAndPort();
+		if (!url.isEmpty()) {
+			JSONObject jsonObject = HttpRequestUtil
+					.httpGet("http://" + url + "/ed/ed/regiondivision/queryDivisionTree?division=" + areaId);
 
-		if (jsonObject != null && jsonObject.containsKey("divisionTrees") && jsonObject.get("divisionTrees") != null) {
-			JSONArray jsonArray = jsonObject.getJSONArray("divisionTrees");
-			for (int i = 0; i < jsonArray.size(); i++) {
-				JSONObject item = (JSONObject) jsonArray.get(i);
-				AreaData areaData = new AreaData();
-				areaData.setId(item.get("division").toString());
-				areaData.setName(item.get("name").toString());
-				areaData.setType("division");
-				areaData.setSubColumns(new ArrayList<AreaQuery.AreaData>());
-				returnList.add(areaData);
+			if (jsonObject != null && jsonObject.containsKey("divisionTrees")
+					&& jsonObject.get("divisionTrees") != null) {
+				JSONArray jsonArray = jsonObject.getJSONArray("divisionTrees");
+				for (int i = 0; i < jsonArray.size(); i++) {
+					JSONObject item = (JSONObject) jsonArray.get(i);
+					AreaData areaData = new AreaData();
+					areaData.setId(item.get("division").toString());
+					areaData.setName(item.get("name").toString());
+					areaData.setType("division");
+					areaData.setSubColumns(new ArrayList<AreaQuery.AreaData>());
+					returnList.add(areaData);
+				}
 			}
 		}
 
 		return returnList;
 	}
 
+	/**
+	 * 设置目的是否可用(播发过的频道未播发的地区则下次播发不可用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @return List<AreaData> 平台的地区数据类型数列
+	 */
 	private List<AreaVO> setDisabled(Long channelId, List<AreaData> allArea, List<AreaSendPO> abledArea)
 			throws Exception {
 		List<AreaVO> returnList = new ArrayList<AreaVO>();
@@ -132,6 +164,8 @@ public class AreaQuery {
 		return returnList;
 	}
 
+	/**以下为测试使用方法
+	 */
 	public Object getAreaList(Long channelId) throws Exception {
 		List<AreaData> allArea = getAllArea();
 

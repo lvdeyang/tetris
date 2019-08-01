@@ -2,9 +2,10 @@ package com.sumavision.tetris.mims.app.media.txt.api.android;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +69,7 @@ public class ApiAndroidTxtController {
 	private MediaTxtDAO mediaTxtDao;
 	
 	/**
-	 * 加载文件夹下的文本媒资<br/>
+	 * 加载文件夹下的文本媒资()<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
@@ -84,6 +85,25 @@ public class ApiAndroidTxtController {
 			HttpServletRequest request) throws Exception{
 		
 		return mediaTxtQuery.loadForAndroid(folderId);
+	}
+	
+	/**
+	 * 加载文件夹下的文本媒资<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @param folderId 文件夹id
+	 * @return rows List<MediaTxtVO> 文本媒资列表
+	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/preview/{txtId}")
+	public Object preview(
+			@PathVariable Long txtId,
+			HttpServletRequest request) throws Exception{
+		
+		return mediaTxtQuery.queryContent(txtId);
 	}
 	
 	/**
@@ -189,7 +209,7 @@ public class ApiAndroidTxtController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaTxtPO entity = mediaTxtService.addTask(user, name, taskParam, null, null, remark, "", folder);
+		MediaTxtPO entity = mediaTxtService.addTask(user, name, taskParam, null, null, "", "", folder);
 		
 		return new MediaTxtVO().set(entity);
 		
@@ -226,7 +246,7 @@ public class ApiAndroidTxtController {
 		long endOffset = request.getLongValue("endOffset");
 		
 		//参数错误
-		if((beginOffset + endOffset) != blockSize){
+		if((beginOffset + blockSize) != endOffset){
 			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
@@ -280,12 +300,12 @@ public class ApiAndroidTxtController {
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
 			
-			FileReader reader = new FileReader(task.getUploadTmpPath());
+			InputStreamReader reader = new InputStreamReader(new FileInputStream(task.getUploadTmpPath()), "utf-8");
 			BufferedReader bReader = new BufferedReader(reader);
 			String txtString = "";
 			String line;
 			while ((line = bReader.readLine()) != null) {
-				txtString += line;
+				txtString += txtString.isEmpty() ? line : "\n" + line;
 			}
 			task.setContent(txtString);
 			

@@ -15,11 +15,22 @@ public class VersionSendPO extends AbstractBasePO {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/** 频道id */
 	private Long channelId;
+	
+	/** 下发tar包名称 */
 	private String fileName;
+	
+	/** 下发tar包大小 */
 	private String fileSize;
+	
+	/** 下发tar包地址 */
 	private String filePath;
+	
+	/** 播发版本号 */
 	private String version;
+	
+	/** 平台播发id */
 	private String broadId;
 
 	@Column(name = "CHANNEL_ID")

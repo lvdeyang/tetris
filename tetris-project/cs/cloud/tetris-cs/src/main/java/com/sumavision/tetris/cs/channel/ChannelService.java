@@ -2,6 +2,7 @@ package com.sumavision.tetris.cs.channel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +18,11 @@ import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.cs.area.AreaQuery;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
 import com.sumavision.tetris.cs.bak.ResourceSendQuery;
+import com.sumavision.tetris.cs.bak.SendBakService;
 import com.sumavision.tetris.cs.bak.VersionSendPO;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
+import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
+import com.sumavision.tetris.cs.channel.exception.ChannelUdpIpAndPortAlreadyExistException;
 import com.sumavision.tetris.cs.menu.CsMenuQuery;
 import com.sumavision.tetris.cs.menu.CsMenuService;
 import com.sumavision.tetris.cs.menu.CsMenuVO;
@@ -31,6 +35,10 @@ import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.mims.app.media.compress.FileCompressVO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -70,37 +78,71 @@ public class ChannelService {
 
 	@Autowired
 	private MediaCompressService mediaCompressService;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private SendBakService sendBakService;
+	
+	@Autowired
+	private MediaVideoStreamService mediaVideoStreamService;
+	
+	@Autowired
+	private Adapter adapter;
 
-	public ChannelPO add(String name, String date, String remark) throws Exception {
-
+	public ChannelPO add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark) throws Exception {
+		UserVO user = userQuery.current();
+		
 		ChannelPO channel = new ChannelPO();
 		channel.setName(name);
 		channel.setRemark(remark);
 		channel.setDate(date);
+		channel.setBroadWay(BroadWay.fromName(broadWay).getName());
 		channel.setBroadcastStatus("未播发");
+		channel.setGroupId(user.getGroupId());
 		channel.setUpdateTime(new Date());
+		
+		if (BroadWay.fromName(broadWay) == BroadWay.ABILITY_BROAD) {
+			if (channelDao.checkIpAndPortExists(previewUrlIp, previewUrlPort) == null) {
+				MediaVideoStreamVO mediaVideoStream = mediaVideoStreamService.addVideoStreamTask(adapter.getUdpUrlFromIpAndPort(previewUrlIp, previewUrlPort), name);
+				channel.setMediaId(mediaVideoStream.getId());
+				channel.setPreviewUrlIp(previewUrlIp);
+				channel.setPreviewUrlPort(previewUrlPort);
+				channel.setBroadId(adapter.getNewId(channelDao.getAllAbilityId()));
+			}else {
+				throw new ChannelUdpIpAndPortAlreadyExistException();
+			}
+		}
 
 		channelDao.save(channel);
 
-		return channel;
-	}
-
-	public ChannelPO rename(Long id, String name) throws Exception {
-		ChannelPO channel = channelDao.findOne(id);
-		channel.setName(name);
-
-		channelDao.save(channel);
 		return channel;
 	}
 
 	public void remove(Long id) throws Exception {
 		ChannelPO channel = channelDao.findOne(id);
+		if (channel.getMediaId() != null) mediaVideoStreamService.remove(channel.getMediaId());
+		if (!channelQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.DELETE.getRemark());
 		channelDao.delete(channel);
 		csMenuService.removeMenuByChannelId(id);
 		csProgramService.removeProgramByChannelId(id);
+		sendBakService.removeBakFromChannel(id.toString());
 	}
 
-	public ChannelPO edit(ChannelPO channel, String name, String remark) throws Exception {
+	public ChannelPO edit(Long id, String name, String previewUrlIp, String previewUrlPort, String remark) throws Exception {
+		ChannelPO channel = channelDao.findOne(id);
+		if (channel == null) return null;
+		
+		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD) {
+			if (channelDao.checkIpAndPortExists(id, previewUrlIp, previewUrlPort) == null) {
+				channel.setPreviewUrlIp(previewUrlIp);
+				channel.setPreviewUrlPort(previewUrlPort);
+				mediaVideoStreamService.edit(channel.getMediaId(), adapter.getUdpUrlFromIpAndPort(previewUrlIp, previewUrlPort), name);
+			}else {
+				throw new ChannelUdpIpAndPortAlreadyExistException();
+			}
+		}
 		channel.setName(name);
 		channel.setRemark(remark);
 		channel.setUpdateTime(new Date());
@@ -108,8 +150,22 @@ public class ChannelService {
 
 		return channel;
 	}
+	
+	public JSONObject stopAbilityBroadcast(Long channelId) throws Exception{
+		ChannelPO channel = channelDao.findOne(channelId);
+		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
+		
+		if (channelQuery.sendAbilityRequest(BroadAbilityQueryType.STOP, channel, null, null)) {
+			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+			channelDao.save(channel);
+			
+			return getReturnJSON(true, "");
+		}else {
+			return getReturnJSON(false, "请求能力失败");
+		}
+	}
 
-	public JSONObject stopBroadcast(Long channelId) throws Exception {
+	public JSONObject stopTerminalBroadcast(Long channelId) throws Exception {
 		String versionSendNum = versionSendQuery.getBroadId(channelId);
 		if (!versionSendNum.isEmpty()
 				&& getChannelBroadstatus(channelId).equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
@@ -117,56 +173,60 @@ public class ChannelService {
 			List<String> ids = new ArrayList<String>();
 			ids.add(versionSendNum);
 			jsonParam.put("ids", ids);
-			JSONObject response = HttpRequestUtil
-					.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort() + "/ed/speaker/stopSendFile", jsonParam);
-			if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
-				return getReturnJSON(true, "");
-			} else {
-				return getReturnJSON(false, "未知错误，播发失败");
+			String url = ChannelBroadStatus.getBroadcastIPAndPort();
+			if (!url.isEmpty()) {
+				JSONObject response = HttpRequestUtil
+						.httpPost("http://" + url + "/ed/speaker/stopSendFile", jsonParam);
+				if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+					return getReturnJSON(true, "");
+				} else {
+					return getReturnJSON(false, "未知错误，播发失败");
+				}
+			}else {
+				return getReturnJSON(false, "播发地址为空");
 			}
 		} else {
 			return getReturnJSON(false, "当前频道未处于可播发状态");
 		}
 	}
 	
-//	public JSONObject startBroadcast(Long channelId) throws Exception {
-//		CloseableHttpClient httpclient = HttpClients.createDefault();
-//		HttpPost httppost =new HttpPost("http://192.165.56.85:8085/api/server/media/upload");
-//		//httppost.setHeader("Content-Type", "multipart/form-data");
-//		//httppost.setHeader("tetris-001", "54118583a03b45799a58c7de27771652");
-//		MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-//		ContentType contentType = ContentType.create("text/plain",Charset.forName("UTF-8"));
-//		
-//		entityBuilder.addPart("uuid",new StringBody("aaa",contentType));
-//		entityBuilder.addPart("folderType",new StringBody("compress",contentType));
-//		entityBuilder.addPart("type",new StringBody("application/x-tar",contentType));
-//		
-//		String filePath = "C:\\Users\\sms\\Desktop\\duofen.mp4";
-//		InputStream fis = new FileInputStream(new File(filePath));
-//		byte[] bytes = FileCopyUtils.copyToByteArray(fis);
-////		entityBuilder.addBinaryBody("block", bytes);
-//		entityBuilder.addPart("block", new ByteArrayBody(bytes, "duofen.mp4"));
-//		
-//		httppost.setEntity(entityBuilder.build());
-//		httpclient.execute(httppost);
-//		
-//		
-////		String path = "C:\\Users\\sms\\Desktop\\20190510112944";
-//		
-////		String path1 = path + "\\newSubFile";
-////		File file1= new File(path1);
-////		Boolean check;
-////		if (!file1.exists()) {
-////			check = file1.mkdirs();
-////		}
-////		
-////		CopyFileUtil.copyFileUsingFileChannels("C:\\Users\\sms\\Desktop\\newFileTest\\duofen.mp4", path1 + "\\duofen.mp4");
-////		TarUtil.archive(new File(path));
-//		
-//		return getReturnJSON(true, "");
-//	}
+	public JSONObject startAbilityBroadcast(Long channelId) throws Exception{
+		ChannelPO channel = channelDao.findOne(channelId);
+		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
+		
+		boolean response = false;
+		
+		JSONObject output = new JSONObject();
+		output.put("proto-type", "udp-ts");
+		output.put("ipv4", channel.getPreviewUrlIp());
+		output.put("port", channel.getPreviewUrlPort());
+		output.put("vport", "");
+		output.put("aport", "");
+		output.put("scramble", "none");
+		output.put("key", "");
+		switch(channelQuery.broadWay(channelId)){
+			case "new":
+				response = channelQuery.sendAbilityRequest(BroadAbilityQueryType.NEW, channel, abilityProgramText(programQuery.getProgram(channelId)), output);
+				break;
+			case "change":
+				response = channelQuery.sendAbilityRequest(BroadAbilityQueryType.CHANGE, channel, abilityProgramText(programQuery.getProgram(channelId)), output);
+				break;
+			case "cover":
+				response = channelQuery.sendAbilityRequest(BroadAbilityQueryType.COVER, channel, abilityProgramText(programQuery.getProgram(channelId)), output);
+				break;
+		}
+		if (response) {
+			channel.setBroadcastStatus("发送中");
+			channelDao.save(channel);
+			return getReturnJSON(true, "");
+		}else {
+			return getReturnJSON(false, "请求能力失败");
+		}
+	}
 
-	public JSONObject startBroadcast(Long channelId) throws Exception {
+	public JSONObject startTerminalBroadcast(Long channelId) throws Exception {
+		ChannelPO channel = channelDao.findOne(channelId);
+		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
 		// 校验播发状态
 		String broadStatus = getChannelBroadstatus(channelId);
 		if (!broadStatus.isEmpty() && !broadStatus.equals("发送完成")) {
@@ -231,24 +291,29 @@ public class ChannelService {
 		broadJsonObject.put("fileSize", mediaCompressVO.getSize());
 		broadJsonObject.put("regionList", areaVOs);
 
-		JSONObject response = HttpRequestUtil
-				.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort() + "/ed/speaker/startSendFile", broadJsonObject);
+		String url = ChannelBroadStatus.getBroadcastIPAndPort();
+		if (!url.isEmpty()) {
+			JSONObject response = HttpRequestUtil
+					.httpPost("http://" + url + "/ed/speaker/startSendFile", broadJsonObject);
 
-		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
-			// 播发成功处理
+			if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+				// 播发成功处理
 
-			// 备份播发媒资全量
-			resourceSendQuery.getAddResource(channelId, true);
+				// 备份播发媒资全量
+				resourceSendQuery.getAddResource(channelId, true);
 
-			// 备份播发地区
-			areaSendQuery.saveArea(channelId);
+				// 备份播发地区
+				areaSendQuery.saveArea(channelId);
 
-			// 保存播发版本
-			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath);
+				// 保存播发版本
+				versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath);
 
-			return getReturnJSON(true, "");
-		} else {
-			return getReturnJSON(false, "播发未知错误");
+				return getReturnJSON(true, "");
+			} else {
+				return getReturnJSON(false, "播发未知错误");
+			}
+		}else {
+			return getReturnJSON(false, "播发地址为空");
 		}
 	}
 
@@ -263,11 +328,16 @@ public class ChannelService {
 		broadJsonObject.put("fileSize", versionSendPO.getFileSize());
 		broadJsonObject.put("regionList", areaSendQuery.getAreaIdList(channelId));
 
-		JSONObject response = HttpRequestUtil
-				.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort() + "/ed/speaker/startSendFile", broadJsonObject);
+		String url = ChannelBroadStatus.getBroadcastIPAndPort();
+		if (!url.isEmpty()) {
+			JSONObject response = HttpRequestUtil
+					.httpPost("http://" + url + "/ed/speaker/startSendFile", broadJsonObject);
 
-		return (response != null && response.containsKey("result") && response.getString("result").equals("1"))
-				? getReturnJSON(true, "") : getReturnJSON(false, "播发未知错误");
+			return (response != null && response.containsKey("result") && response.getString("result").equals("1"))
+					? getReturnJSON(true, "") : getReturnJSON(false, "播发未知错误");
+		}else {
+			return getReturnJSON(false, "播发服务器地址为空");
+		}
 	}
 
 	private JSONObject getReturnJSON(Boolean ifSuccess, String message) {
@@ -286,19 +356,40 @@ public class ChannelService {
 			ids.add(versionSendNum);
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("ids", ids);
-			JSONObject response = HttpRequestUtil
-					.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort() + "/ed/speaker/querySendFile", jsonObject);
-			if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
-				JSONArray statusArray = (JSONArray) response.get("data");
-				if (statusArray != null && statusArray.size() > 0) {
-					JSONObject item = (JSONObject) statusArray.get(0);
-					status = (item.containsKey("status") && item.get("status") != null)
-							? channelQuery.getStatusFromNum(item.getString("status")) : "";
+			String url = ChannelBroadStatus.getBroadcastIPAndPort();
+			if (!url.isEmpty()) {
+				JSONObject response = HttpRequestUtil
+						.httpPost("http://" + url + "/ed/speaker/querySendFile", jsonObject);
+				if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
+					JSONArray statusArray = (JSONArray) response.get("data");
+					if (statusArray != null && statusArray.size() > 0) {
+						JSONObject item = (JSONObject) statusArray.get(0);
+						status = (item.containsKey("status") && item.get("status") != null)
+								? channelQuery.getStatusFromNum(item.getString("status")) : "";
+					}
 				}
 			}
 		}
 
 		return status;
+	}
+	
+	private List<String> abilityProgramText(ProgramVO program) throws Exception{
+		List<String> returnList = new ArrayList<String>();
+		if (program != null) {
+			for (int i = 1; i <= program.getScreenNum(); i++) {
+				if (program.getScreenInfo() != null && program.getScreenInfo().size() > 0) {
+					List<ScreenVO> screens = program.getScreenInfo();
+					Collections.sort(screens, new ScreenVO.ScreenVOOrderComparator());
+					for (ScreenVO item : program.getScreenInfo()) {
+						if (item.getSerialNum() != i)
+							continue;
+						returnList.add(adapter.changeHttpToFtp(item.getPreviewUrl()));
+					}
+				}
+			}
+		}
+		return returnList;
 	}
 
 	private List<JSONObject> programText(ProgramVO program) throws Exception {
@@ -313,8 +404,8 @@ public class ChannelService {
 							continue;
 						JSONObject schedule = new JSONObject();
 						CsResourceVO resource = csResourceQuery.queryResourceById(item.getResourceId());
-						String[] previewUrl = resource.getPreviewUrl().split("/");
-						schedule.put("fileName", resource.getParentPath() + "/" + previewUrl[previewUrl.length - 1]);
+						String[] previewUrlSplit = resource.getPreviewUrl().split("/");
+						schedule.put("fileName", resource.getParentPath() + "/" + previewUrlSplit[previewUrlSplit.length - 1]);
 						schedule.put("index", item.getIndex());
 						scheduleList.add(schedule);
 					}

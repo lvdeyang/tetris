@@ -17,6 +17,13 @@ public class AreaSendQuery {
 	@Autowired
 	AreaQuery areaQuery;
 
+	/**
+	 * 保存地区(终端播发成功后使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param channelId 频道id
+	 */
 	public void saveArea(Long channelId) throws Exception {
 		List<AreaSendPO> previewList = areaSendDao.findByChannelId(channelId);
 		if (previewList != null && previewList.size() > 0) {
@@ -41,11 +48,27 @@ public class AreaSendQuery {
 		}
 	}
 	
+	/**
+	 * 根据频道id获取频道上次播发的地区列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param channelId 频道id
+	 * @return List<AreaSendPO> 地区列表
+	 */
 	public List<AreaSendPO> getArea(Long channelId){
 		List<AreaSendPO> returnList = areaSendDao.findByChannelId(channelId);
 		return returnList;
 	}
 	
+	/**
+	 * 根据频道id获取频道上次播发的地区id列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param channelId 频道id
+	 * @return List<String> 地区id列表
+	 */
 	public List<String> getAreaIdList(Long channelId){
 		List<String> returnList = new ArrayList<String>();
 		

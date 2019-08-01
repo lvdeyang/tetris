@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.activation.MimetypesFileTypeMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -335,8 +337,8 @@ public class MediaVideoService {
 			Long size,
 			String folderType,
 			String mimeType,
-			String uploadTempPath
-			) throws Exception{
+			String uploadTempPath,
+			Long... folderId) throws Exception{
 		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
@@ -352,7 +354,11 @@ public class MediaVideoService {
 		entity.setFileName(fileName);
 		entity.setSize(size);
 		entity.setMimetype(mimeType);
-		entity.setFolderId(folder.getId());
+		if (folderId != null && folderId.length > 0) {
+			entity.setFolderId(folderId[0]);
+		}else {
+			entity.setFolderId(folder.getId());
+		}
 		entity.setUploadStatus(UploadStatus.COMPLETE);
 		entity.setStoreType(StoreType.LOCAL);
 		entity.setUploadTmpPath(uploadTempPath);
@@ -364,26 +370,43 @@ public class MediaVideoService {
 		return entity;
 	}
 	
-	public List<MediaVideoPO> addList(UserVO user, List<String> urlList) throws Exception{
+	/**
+	 * 根据视频媒资列表批量加载的视频媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午4:03:27
+	 * @param user UserVO 用户信息
+	 * @param List<String> urlList 视频媒资http地址列表
+	 * @param folderId 视频媒资存放路径
+	 * @return List<MediaVideoPO> 视频媒资列表
+	 */
+	public List<MediaVideoPO> addList(UserVO user, List<String> urlList, Long folderId) throws Exception{
 		
 		if (urlList == null || urlList.size() <= 0) return null;
 		
 		String folderType = "video";
-		String mimeType = "video/mp4";
 		
 		List<MediaVideoPO> videos = new ArrayList<MediaVideoPO>();
 		for (String url : urlList) {
 			File file = new File(url);
-			
-			String fileName = file.getName();
-			String name = fileName.split("\\.")[0];
-			String uploadTempPath = new StringBufferWrapper().append(path.webappPath()).append("upload").append(file.getPath().split("upload")[1]).toString();
-			Long size = new File(new StringBufferWrapper().append(uploadTempPath).append(File.separator).append(fileName).toString()).length();
-			
-			MediaVideoPO video = this.add(user, name, fileName, size, folderType, mimeType,uploadTempPath);
-			videos.add(video);
+			String folderPath = new StringBufferWrapper().append(path.webappPath()).append("upload").append(file.getPath().split("upload")[1]).toString();
+			File localFile = new File(folderPath);
+			File[] fileList = localFile.listFiles();
+			for (File childFile : fileList) {
+				String fileNameSuffix = childFile.getName().split("\\.")[1];
+				if (fileNameSuffix.equals("xml")) {
+					continue;
+				}else {
+					String fileName = childFile.getName();
+					Long size = childFile.length();
+					String uploadTempPath = childFile.getPath();
+					String mimeType = new MimetypesFileTypeMap().getContentType(childFile);
+					
+					MediaVideoPO video = this.add(user, file.getName(), fileName, size, folderType, mimeType,uploadTempPath);
+					videos.add(video);
+				}
+			}	
 		}
-		
 		return videos;
 	}
 }

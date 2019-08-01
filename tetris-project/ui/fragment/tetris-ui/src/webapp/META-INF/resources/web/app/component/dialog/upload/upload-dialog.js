@@ -223,6 +223,7 @@ define([
                         self.requires.push(new Type('image/gif', 'gif', MATERIAL_TYPE_IMAGE));
                     }else if(self.requireType[i] === MATERIAL_TYPE_AUDIO){
                         self.requires.push(new Type('audio/mp3', 'mp3', MATERIAL_TYPE_AUDIO));
+                        self.requires.push(new Type('audio/x-wav', 'wav', MATERIAL_TYPE_AUDIO));
                     }else if(self.requireType[i] === MATERIAL_TYPE_VIDEO){
                         self.requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
                         self.requires.push(new Type('video/vnd.dlna.mpeg-tts', 'ts', MATERIAL_TYPE_VIDEO));
@@ -238,6 +239,7 @@ define([
                 self.requires.push(new Type('image/png', 'png', MATERIAL_TYPE_IMAGE));
                 self.requires.push(new Type('image/gif', 'gif', MATERIAL_TYPE_IMAGE));
                 self.requires.push(new Type('audio/mp3', 'mp3', MATERIAL_TYPE_AUDIO));
+                self.requires.push(new Type('audio/x-wav', 'wav', MATERIAL_TYPE_AUDIO));
                 self.requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
                 self.requires.push(new Type('video/vnd.dlna.mpeg-tts', 'ts', MATERIAL_TYPE_VIDEO));
                 self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));

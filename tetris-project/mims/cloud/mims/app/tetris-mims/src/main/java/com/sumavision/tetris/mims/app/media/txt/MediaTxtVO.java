@@ -38,6 +38,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 	
 	private Integer progress;
 	
+	private List<MediaTxtVO> children;
+	
 	public String getContent() {
 		return content;
 	}
@@ -153,6 +155,14 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 	public MediaTxtVO setProgress(Integer progress) {
 		this.progress = progress;
 		return this;
+	}
+
+	public List<MediaTxtVO> getChildren() {
+		return children;
+	}
+
+	public void setChildren(List<MediaTxtVO> children) {
+		this.children = children;
 	}
 
 	@Override

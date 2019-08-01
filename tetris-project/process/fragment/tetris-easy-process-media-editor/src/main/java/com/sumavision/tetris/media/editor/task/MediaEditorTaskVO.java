@@ -29,7 +29,7 @@ public class MediaEditorTaskVO extends AbstractBaseVO<MediaEditorTaskVO, MediaEd
 	private String createTime;
 	
 	/** 任务进度 */
-	private String completeRate;
+	private int completeRate;
 	
 	/** 流程任务下的转码任务id */
 	private List<String> transcodeIds;
@@ -100,11 +100,11 @@ public class MediaEditorTaskVO extends AbstractBaseVO<MediaEditorTaskVO, MediaEd
 		return this;
 	}
 
-	public String getCompleteRate() {
+	public Integer getCompleteRate() {
 		return completeRate;
 	}
 
-	public MediaEditorTaskVO setCompleteRate(String completeRate) {
+	public MediaEditorTaskVO setCompleteRate(int completeRate) {
 		this.completeRate = completeRate;
 		return this;
 	}

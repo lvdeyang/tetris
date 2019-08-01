@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionVO;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskService;
 import com.sumavision.tetris.transcoding.Adapter;
 import com.sumavision.tetris.transcoding.RequestCmdType;
@@ -38,12 +40,11 @@ public class AddTaskService {
 	 * 
 	 * @return List<String> 下成功的转码任务id
 	 */
-	public HashMapWrapper<String, String> add(String __processInstanceId__, Long __accessPointId__,String transcodes) throws Exception{
-		List<TranscodeVO> transcodeVOs = JSONObject.parseArray(transcodes, TranscodeVO.class);
-//		List<TranscodeVO> saveTranscodes = new ArrayList<TranscodeVO>();
-//		saveTranscodes.addAll(transcodeVOs);
+	public HashMapWrapper<String, MediaEditorTaskRatePermissionVO> add(String __processInstanceId__, Long __accessPointId__, String transcode, Long folderId, String tags) throws Exception{
+		TranscodeVO transcodeVO = JSON.parseObject(transcode, TranscodeVO.class);
 		
 		TranscodeJobsVO transcodeJobs = new TranscodeJobsVO();
+		List<TranscodeVO> transcodeVOs = new ArrayListWrapper<TranscodeVO>().add(transcodeVO).getList();
 		transcodeJobs.setTranscode(transcodeVOs);
 		
 		MsgHeaderVO msgHeader = new MsgHeaderVO();
@@ -55,7 +56,7 @@ public class AddTaskService {
 		addTask.setTranscodeJobs(transcodeJobs);
 		
 		AddTaskResponseVO response = adapter.addTask(addTask);
-		return dealAddResponse(transcodeVOs, response.getTranscodeJobs().getTranscodes(), __processInstanceId__, __accessPointId__);
+		return dealAddResponse(transcodeVOs, folderId, tags, response.getTranscodeJobs().getTranscodes(), __processInstanceId__, __accessPointId__);
 	}
 	
 	/**
@@ -66,19 +67,24 @@ public class AddTaskService {
 	 * 
 	 * @return HashMapWrapper<String, Integer> 转码任务id，转码任务进度
 	 */
-	public HashMapWrapper<String, String> dealAddResponse(List<TranscodeVO> requesTranscodes, List<com.sumavision.tetris.transcoding.addTask.rsponseVO.TranscodeVO> responseTranscodes, String __processInstanceId__, Long __accessPointId__) throws Exception{
+	public HashMapWrapper<String, MediaEditorTaskRatePermissionVO> dealAddResponse(List<TranscodeVO> requesTranscodes, Long folderId, String tags, List<com.sumavision.tetris.transcoding.addTask.rsponseVO.TranscodeVO> responseTranscodes, String __processInstanceId__, Long __accessPointId__) throws Exception{
 		if (responseTranscodes == null || responseTranscodes.size() < 0) {
 			return null;
 		}else {
-			HashMapWrapper<String, String> idToUrl = new HashMapWrapper<String, String>();
+			HashMapWrapper<String, MediaEditorTaskRatePermissionVO> idToInfo = new HashMapWrapper<String, MediaEditorTaskRatePermissionVO>();
 			for(com.sumavision.tetris.transcoding.addTask.rsponseVO.TranscodeVO transcode:responseTranscodes){
 				if(transcode.getResultCode() == 0 && transcode.getResultString().equals("OK")){
-					idToUrl.put(transcode.getId(), adapter.changeFtpToHttp(requesTranscodes.get(responseTranscodes.indexOf(transcode)).getTarget().getTargetURI()));
+					MediaEditorTaskRatePermissionVO permissionVO = new MediaEditorTaskRatePermissionVO();
+					TranscodeVO transcodeItem = requesTranscodes.get(responseTranscodes.indexOf(transcode));
+					permissionVO.setSaveUrl(adapter.changeFtpToHttp(transcodeItem.getTarget().getTargetURI()));
+					permissionVO.setFolderId(folderId);
+					permissionVO.setTags(tags);
+					idToInfo.put(transcode.getId(), permissionVO);
 				}
 			}
 			
 			//存数据库
-			mediaEditorTaskService.addMediaEditorTask(__processInstanceId__, __accessPointId__, idToUrl);
+			mediaEditorTaskService.addMediaEditorTask(__processInstanceId__, __accessPointId__, idToInfo);
 			
 			//开启获取任务进度线程
 			if (getStatusHeartbeatThread == null) {
@@ -88,7 +94,7 @@ public class AddTaskService {
 				getStatusHeartbeatThread.setSleep(5000);
 			}
 			
-			return idToUrl;
+			return idToInfo;
 		}
 	}
 }

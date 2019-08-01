@@ -1,6 +1,7 @@
 package com.sumavision.tetris.media.editor.task;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class MediaEditorTaskService {
 	 *            转码id
 	 */
 	public MediaEditorTaskVO addMediaEditorTask(String processInstanceId, Long accessPointId,
-			HashMapWrapper<String, String> transcodes) throws Exception {
+			HashMapWrapper<String, MediaEditorTaskRatePermissionVO> transcodes) throws Exception {
 		UserVO userVO = userQuery.current();
 
 		if (transcodes == null || transcodes.size() <= 0)
@@ -49,7 +50,8 @@ public class MediaEditorTaskService {
 		mediaPO.setStatus(MediaEditorTaskStatus.APPROVED);
 		mediaPO.setProcessInstanceId(processInstanceId);
 		mediaPO.setAccessPointId(accessPointId);
-		mediaPO.setCompleteRate("0%");
+		mediaPO.setCompleteRate(0);
+		mediaPO.setUpdateTime(new Date());
 
 		mediaEditorTaskDAO.save(mediaPO);
 
@@ -57,11 +59,15 @@ public class MediaEditorTaskService {
 		List<String> transcodeIds = new ArrayList<String>();
 		for (String transcodeId : transcodes.keySet()) {
 			transcodeIds.add(transcodeId);
+			MediaEditorTaskRatePermissionVO permission = transcodes.getMap().get(transcodeId);
 			MediaEditorTaskRatePermissionPO permissionPO = new MediaEditorTaskRatePermissionPO();
 			permissionPO.setTaskId(mediaPO.getId());
 			permissionPO.setTranscodeId(transcodeId);
-			permissionPO.setSaveUrl(transcodes.getMap().get(transcodeId));
+			permissionPO.setSaveUrl(permission.getSaveUrl());
+			permissionPO.setFolderId(permission.getFolderId());
 			permissionPO.setRate(0);
+			permissionPO.setUpdateTime(new Date());
+			permissionPO.setTags(permission.getTags());
 			permissions.add(permissionPO);
 		}
 		mediaEditorTaskRatePermissionDAO.save(permissions);
@@ -101,7 +107,7 @@ public class MediaEditorTaskService {
 		if (taskPO == null)
 			return null;
 
-		taskPO.setCompleteRate("100%");
+		taskPO.setCompleteRate(100);
 		mediaEditorTaskDAO.save(taskPO);
 
 		return new MediaEditorTaskVO().set(taskPO)
@@ -116,12 +122,12 @@ public class MediaEditorTaskService {
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
 	 */
 	public void freshMediaEditorStatus() {
-		List<MediaEditorTaskPO> tasks = mediaEditorTaskDAO.findAllExceptTempleteRate("100");
+		List<MediaEditorTaskPO> tasks = mediaEditorTaskDAO.findAllExceptTempleteRate();
 		if (tasks == null || tasks.size() <= 0)
 			return;
 
 		List<MediaEditorTaskRatePermissionPO> permissions = mediaEditorTaskRatePermissionDAO
-				.findExceptCompleteTask("100");
+				.findExceptCompleteTask();
 		if (permissions == null || permissions.size() <= 0)
 			return;
 
@@ -146,7 +152,7 @@ public class MediaEditorTaskService {
 					sum += rate;
 				}
 				int divide = sum / rates.size();
-				task.setCompleteRate(divide + "%");
+				task.setCompleteRate(divide);
 			}
 		}
 

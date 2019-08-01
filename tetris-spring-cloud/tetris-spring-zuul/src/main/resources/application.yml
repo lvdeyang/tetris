@@ -67,7 +67,7 @@ eureka:
   client:
 #注册中心地址
     service-url:
-      defaultZone: http://192.165.56.60:8081/eureka/
+      defaultZone: http://192.165.56.71:8081/eureka/
 #security:
 #  basic:
 #    enabled: false

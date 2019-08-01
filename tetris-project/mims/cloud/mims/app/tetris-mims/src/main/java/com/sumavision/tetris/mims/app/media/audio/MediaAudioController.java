@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -140,7 +141,59 @@ public class MediaAudioController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTask(user, name, null, null, remark, taskParam, folder);
+		List<String> tagList = new ArrayList<String>();
+		if (!tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, null, remark, taskParam, folder);
+		
+		return new MediaAudioVO().set(entity);
+		
+	}
+	
+	/**
+	 * 添加上传图片媒资任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午1:44:06
+	 * @param JSONString task{name:文件名称, size:文件大小, mimetype:文件mime类型, lastModified:最后更新时间}
+	 * @param String name 媒资名称
+	 * @param JSONString tags 标签数组
+	 * @param JSONString keyWords 关键字数组
+	 * @param String remark 备注
+	 * @param Long folerId 文件夹id		
+	 * @return List<MaterialFileTaskVO> 任务列表 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/add/from/txt")
+	public Object addTaskFromTxt(
+			Long txtId,
+			String name,
+            String tags,
+            String keyWords,
+            String remark,
+			Long folderId, 
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		FolderPO folder = folderDao.findOne(folderId);
+		if(folder == null){
+			throw new FolderNotExistException(folderId);
+		}
+		
+		List<String> tagList = new ArrayList<String>();
+		if (!tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		MediaAudioPO entity = mediaAudioService.addTaskFromTxt(user, name, tagList, null, remark, txtId, folder);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -176,7 +229,12 @@ public class MediaAudioController {
 			throw new MediaAudioNotExistException(id);
 		}
 		
-		MediaAudioPO entity = mediaAudioService.editAudio(user, audio, name, null, null, remark);
+		List<String> tagList = new ArrayList<String>();
+		if (!tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		MediaAudioPO entity = mediaAudioService.editAudio(user, audio, name, tagList, null, remark);
 		
 		return new MediaAudioVO().set(entity);
 		

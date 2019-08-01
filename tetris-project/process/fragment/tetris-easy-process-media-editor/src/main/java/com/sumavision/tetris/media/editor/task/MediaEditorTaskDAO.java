@@ -42,8 +42,8 @@ public interface MediaEditorTaskDAO extends BaseDAO<MediaEditorTaskPO>{
 	 * @param String rate 进度
 	 * @return List<Long> 任务id
 	 */
-	@Query(value = "SELECT id FROM TETRIS_MEDIA_EDITOR_TASK WHERE COMPLETE_RATE not like ?1", nativeQuery = true)
-	public List<Long> findAllExceptTempleteRateToId(String rate);
+	@Query(value = "SELECT id FROM TETRIS_MEDIA_EDITOR_TASK WHERE COMPLETE_RATE <> '100'", nativeQuery = true)
+	public List<Long> findAllExceptTempleteRateToId();
 	
 	/**
 	 * 获取所有任务（除某个进度外，主要用于获取未完成任务）<br/>
@@ -53,8 +53,8 @@ public interface MediaEditorTaskDAO extends BaseDAO<MediaEditorTaskPO>{
 	 * @param String rate 进度
 	 * @return List<MediaEditorTaskPO> 任务
 	 */
-	@Query(value = "SELECT * FROM TETRIS_MEDIA_EDITOR_TASK WHERE COMPLETE_RATE not like ?1", nativeQuery = true)
-	public List<MediaEditorTaskPO> findAllExceptTempleteRate(String rate);
+	@Query(value = "SELECT * FROM TETRIS_MEDIA_EDITOR_TASK WHERE COMPLETE_RATE <> '100'", nativeQuery = true)
+	public List<MediaEditorTaskPO> findAllExceptTempleteRate();
 	
 	/**
 	 * 根据流程id获取任务<br/>

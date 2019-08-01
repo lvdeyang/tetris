@@ -41,19 +41,19 @@ public class ChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(String name, String date, String remark, HttpServletRequest request) throws Exception {
+	public Object add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, HttpServletRequest request) throws Exception {
 
-		ChannelPO channel = channelService.add(name, date, remark);
+		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark);
 
 		return new ChannelVO().set(channel);
 	}
 
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/rename")
-	public Object rename(Long id, String name, HttpServletRequest request) throws Exception {
+	@RequestMapping(value = "/edit")
+	public Object rename(Long id, String name, String previewUrlIp, String previewUrlPort, String remark, HttpServletRequest request) throws Exception {
 
-		ChannelPO channel = channelService.rename(id, name);
+		ChannelPO channel = channelService.edit(id, name, previewUrlIp, previewUrlPort, remark);
 
 		return new ChannelVO().set(channel);
 	}
@@ -73,15 +73,29 @@ public class ChannelController {
 	@RequestMapping(value = "/broadcast/start")
 	public Object broadcastStart(Long channelId, HttpServletRequest request) throws Exception {
 
-		return channelService.startBroadcast(channelId);
+		ChannelPO channelPO = channelDao.findOne(channelId);
+		if (channelPO == null) return null;
+		
+		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
+			return channelService.startAbilityBroadcast(channelId);
+		}else {
+			return channelService.startTerminalBroadcast(channelId);
+		}
 	}
 	
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/stop")
 	public Object broadcastStop(Long channelId, HttpServletRequest request) throws Exception {
-
-		return channelService.stopBroadcast(channelId);
+		
+		ChannelPO channelPO = channelDao.findOne(channelId);
+		if (channelPO == null) return null;
+		
+		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
+			return channelService.stopAbilityBroadcast(channelId);
+		}else {
+			return channelService.stopTerminalBroadcast(channelId);
+		}
 	}
 	
 	@JsonBody

@@ -2,12 +2,15 @@ package com.sumavision.tetris.mims.app.media.txt;
 
 import java.io.File;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
@@ -60,6 +63,23 @@ public class MediaTxtController {
 			HttpServletRequest request) throws Exception{
 		
 		return mediaTxtQuery.load(folderId);
+	}
+	
+	/**
+	 * 加载文件夹树<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @param folderId 文件夹id
+	 * @return rows List<MediaTxtVO> 文本媒资列表
+	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/all")
+	public Object loadAll(HttpServletRequest request) throws Exception{
+		
+		return mediaTxtQuery.loadAll();
 	}
 	
 	/**

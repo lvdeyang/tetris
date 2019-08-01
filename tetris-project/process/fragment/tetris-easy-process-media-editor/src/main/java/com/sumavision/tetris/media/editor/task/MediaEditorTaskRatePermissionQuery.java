@@ -19,7 +19,7 @@ public class MediaEditorTaskRatePermissionQuery {
 	 * @return List<String> 转码任务id
 	 */
 	public List<String> getAllTranscodingTaskId(){
-		return mediaEditorTaskRatePermissionDAO.findTranscodeIdsExceptRate(100);
+		return mediaEditorTaskRatePermissionDAO.findTranscodeIdsExceptComplete();
 	}
 	
 	/**

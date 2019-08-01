@@ -53,14 +53,21 @@ define([
                         visible: false,
                         loading: false,
                         name: "",
+                        broadWay: "",
+                        previewUrlIp: "",
+                        previewUrlPort: "",
                         remark: "",
                         date: ""
                     },
-                    editName: {
+                    editChannel: {
                         visible: false,
                         loading: false,
                         data: "",
-                        name: ""
+                        name: "",
+                        broadWay: "",
+                        previewUrlIp: "",
+                        previewUrlPort: "",
+                        remark: ""
                     },
                     editMenu: {
                         visible: false,
@@ -104,10 +111,44 @@ define([
                             }
                         }
                     },
+                    editSchedules: {
+                        visible: false,
+                        data: "",
+                        table: {
+                            loading: false,
+                            page: {
+                                currentPage: 1,
+                                sizes: [10, 15, 20, 50],
+                                size: 10,
+                                total: 0
+                            },
+                            data: [],
+                            multipleSelection: []
+                        },
+                        dialog: {
+                            addSchedule: {
+                                visible: false,
+                                loading: false,
+                                broadDate: "",
+                                remark: ""
+                            },
+                            editSchedule: {
+                                visible: false,
+                                loading: false,
+                                data: {},
+                                broadDate: "",
+                                remark: ""
+                            },
+                            editProgram: {
+
+                            }
+                        }
+                    },
                     editProgram: {
                         visible: false,
                         loading: false,
                         data: "",
+                        audioIndex: "",
                         previewData: {},
                         commitData: {
                             screenNum: "",
@@ -121,13 +162,16 @@ define([
                                 name: "一分屏"
                             }, {
                                 id: 4,
-                                name: "四分屏"
+                                name: "四分屏",
+                                disabled: true
                             }, {
                                 id: 6,
-                                name: "六分屏"
+                                name: "六分屏",
+                                disabled: true
                             }, {
                                 id: 9,
-                                name: "九分屏"
+                                name: "九分屏",
+                                disabled: true
                             }],
                             current: "一分屏"
                         },
@@ -267,10 +311,19 @@ define([
                     //    });
                     //}
                 },
+                handleAddProgram: function(){
+                    var self = this;
+                    self.dialog.addProgram.broadWay = "轮播能力";
+                    self.dialog.addProgram.date = new Date();
+                    self.dialog.addProgram.visible = true;
+                },
                 handleAddProgramClose: function () {
                     var self = this;
                     self.dialog.addProgram.name = "";
                     self.dialog.addProgram.date = "";
+                    self.dialog.addProgram.broadWay = "";
+                    self.dialog.addProgram.previewUrlIp = "";
+                    self.dialog.addProgram.previewUrlPort = "";
                     self.dialog.addProgram.visible = false;
                     self.dialog.addProgram.value = "";
                 },
@@ -280,6 +333,9 @@ define([
                     var newData = {
                         name: self.dialog.addProgram.name,
                         date: self.dialog.addProgram.date,
+                        broadWay: self.dialog.addProgram.broadWay,
+                        previewUrlIp: self.dialog.addProgram.previewUrlIp,
+                        previewUrlPort: self.dialog.addProgram.previewUrlPort,
                         remark: self.dialog.addProgram.remark
                     };
                     ajax.post('/cs/channel/add', newData, function (data, status) {
@@ -292,41 +348,53 @@ define([
                         self.handleAddProgramClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                editName: function (scope) {
+                editChannel: function (scope) {
                     var self = this;
                     var row = scope.row;
-                    self.dialog.editName.data = row;
-                    self.dialog.editName.name = row.name;
-                    self.dialog.editName.visible = true;
+                    self.dialog.editChannel.data = row;
+                    self.dialog.editChannel.name = row.name;
+                    self.dialog.editChannel.broadWay = row.broadWay;
+                    self.dialog.editChannel.previewUrlIp = row.previewUrlIp;
+                    self.dialog.editChannel.previewUrlPort = row.previewUrlPort;
+                    self.dialog.editChannel.remark = row.remark;
+                    self.dialog.editChannel.visible = true;
                 },
-                handleEditNameClose: function () {
+                handleEditChannelClose: function () {
                     var self = this;
-                    self.dialog.editName.visible = false;
-                    self.dialog.editName.data = "";
-                    self.dialog.editName.name = "";
+                    self.dialog.editChannel.visible = false;
+                    self.dialog.editChannel.data = "";
+                    self.dialog.editChannel.name = "";
+                    self.dialog.editChannel.broadWay = "";
+                    self.dialog.editChannel.previewUrlIp = "";
+                    self.dialog.editChannel.previewUrlPort = "";
+                    self.dialog.editChannel.remark = "";
                 },
-                handleEditNameCommit: function () {
+                handleEditChannelCommit: function () {
                     var self = this;
-                    self.dialog.editName.loading = true;
-                    var newName = self.dialog.editName.name;
-                    if (newName == self.dialog.editName.data.name) {
-                        self.dialog.editName.loading = false;
-                        self.handleEditNameClose();
-                        return;
-                    }
+                    self.dialog.editChannel.loading = true;
+                    var newName = self.dialog.editChannel.name;
+                    var newRemark = self.dialog.editChannel.remark;
+                    var newPreviewUrlIp = self.dialog.editChannel.previewUrlIp;
+                    var newPreviewUrlPort = self.dialog.editChannel.previewUrlPort;
                     var questData = {
-                        id: self.dialog.editName.data.id,
-                        name: newName
+                        id: self.dialog.editChannel.data.id,
+                        name: newName,
+                        previewUrlIp: newPreviewUrlIp,
+                        previewUrlPort: newPreviewUrlPort,
+                        remark: newRemark
                     };
-                    ajax.post('/cs/channel/rename', questData, function (data, status) {
-                        self.dialog.editName.loading = false;
+                    ajax.post('/cs/channel/edit', questData, function (data, status) {
+                        self.dialog.editChannel.loading = false;
                         if (status != 200) return;
                         self.$message({
                             message: '保存成功',
                             type: 'success'
                         });
-                        self.dialog.editName.data.name = newName;
-                        self.handleEditNameClose();
+                        self.dialog.editChannel.data.name = newName;
+                        self.dialog.editChannel.data.remark = newRemark;
+                        self.dialog.editChannel.data.previewUrlIp = newPreviewUrlIp;
+                        self.dialog.editChannel.data.previewUrlPort = newPreviewUrlPort;
+                        self.handleEditChannelClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
                 rowDelete: function (scope) {
@@ -681,6 +749,114 @@ define([
                     });
                 },
 
+                editSchedule: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.editSchedules.visible = true;
+                    self.dialog.editSchedules.data = row;
+                    self.loadSchedule();
+                },
+                loadSchedule: function(){
+                    var self = this;
+                    self.dialog.editSchedules.table.loading = true;
+                    self.dialog.editSchedules.table.data.splice(0, self.dialog.editSchedules.table.data.length);
+                    var questData = {
+                        channelId: self.dialog.editSchedules.data.id,
+                        currentPage: self.dialog.editSchedules.table.page.currentPage,
+                        pageSize: self.dialog.editSchedules.table.page.size
+                    };
+                    ajax.post('/cs/schedule/get', questData, function(data, status){
+                        if (status == 200){
+                            if (data.data) {
+                                for(var i=0; i < data.data.length; i++){
+                                    self.dialog.editSchedules.table.data.push(data.data[i]);
+                                }
+                            }
+                            self.dialog.editSchedules.table.page.total = data.total;
+                        }
+                        self.dialog.editSchedules.table.loading = false;
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                handleAddSchedule: function() {
+                    var self = this;
+                    self.dialog.editSchedules.dialog.addSchedule.visible = true;
+                },
+                handleAddScheduleClose: function(){
+                    var self = this;
+                    self.dialog.editSchedules.dialog.addSchedule.visible = false;
+                    self.dialog.editSchedules.dialog.addSchedule.broadDate = "";
+                    self.dialog.editSchedules.dialog.addSchedule.remark = "";
+                },
+                handleAddScheduleCommit: function() {
+                    var self = this;
+                    self.dialog.editSchedules.dialog.addSchedule.loading = true;
+                    var questData = {
+                        channelId: self.dialog.editSchedules.data.id,
+                        broadDate: self.dialog.editSchedules.dialog.addSchedule.broadDate,
+                        remark: self.dialog.editSchedules.dialog.addSchedule.remark
+                    };
+                    ajax.post('/cs/schedule/add', questData, function(data, status){
+                        if (status == 200){
+                            if (self.dialog.editSchedules.table.data.length < self.dialog.editSchedules.table.page.size){
+                                self.dialog.editSchedules.table.data.push(data);
+                            }
+                            self.dialog.editSchedules.table.page.total += 1;
+                        }
+                        self.dialog.editSchedules.dialog.addSchedule.loading = false;
+                        self.handleAddScheduleClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                scheduleEdit: function (scope) {
+                    var self = this;
+                    self.dialog.editSchedules.dialog.editSchedule.data = scope.row;
+                    self.dialog.editSchedules.dialog.editSchedule.broadDate = scope.row.broadDate;
+                    self.dialog.editSchedules.dialog.editSchedule.remark = scope.row.remark;
+                    self.dialog.editSchedules.dialog.editSchedule.visible = true;
+                },
+                handleEditScheduleClose: function(){
+                    var self = this;
+                    self.dialog.editSchedules.dialog.editSchedule.visible = false;
+                    self.dialog.editSchedules.dialog.editSchedule.data = {};
+                    self.dialog.editSchedules.dialog.editSchedule.broadDate = "";
+                    self.dialog.editSchedules.dialog.editSchedule.remark = "";
+                },
+                handleEditScheduleCommit: function(){
+                    var self = this;
+                    self.dialog.editSchedules.dialog.editSchedule.loading = true;
+                    var questData = {
+                        id: self.dialog.editSchedules.dialog.editSchedule.data.id,
+                        broadDate: self.dialog.editSchedules.dialog.editSchedule.broadDate,
+                        remark: self.dialog.editSchedules.dialog.editSchedule.remark
+                    };
+                    ajax.post('/cs/schedule/edit', questData, function(data, status){
+                        if (status == 200){
+                            self.dialog.editSchedules.dialog.editSchedule.data.broadDate = data.broadDate;
+                            self.dialog.editSchedules.dialog.editSchedule.data.remark = data.remark;
+                        }
+                        self.handleEditScheduleClose();
+                        self.dialog.editSchedules.dialog.editSchedule.loading = false;
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                scheduleDelete: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    var index = scope.$index;
+                    self.dialog.editSchedules.table.loading = true;
+                    var questData = {
+                        id: row.id
+                    };
+                    ajax.post('/cs/schedule/remove', questData, function (data, status) {
+                        if (status == 200){
+                            if(self.dialog.editSchedules.table.data.length == self.dialog.editSchedules.table.page.size){
+                                self.loadSchedule();
+                            }else{
+                                self.dialog.editSchedules.table.data.splice(index, 1);
+                            }
+                            self.dialog.editSchedules.table.page.total -= 1;
+                        }
+                        self.dialog.editSchedules.table.loading = false;
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
 
                 editProgram: function (scope) {
                     var self = this;
@@ -765,6 +941,7 @@ define([
                 },
                 handleScreenOptionsChange: function (data) {
                     var self = this;
+                    self.dialog.editProgram.audioIndex = 1;
                     switch (data) {
                         case self.screen.one:
                             self.releaseScreenCommitInfo(1);
@@ -1061,84 +1238,111 @@ define([
                     var questData = {
                         channelId: row.id
                     };
-                    self.loadingText = "正在更新播发状态";
-                    self.loading = true;
-                    ajax.post('/cs/channel/broadcast/status', questData, function (data, status) {
-                        self.loading = false;
-                        self.loadingText = "";
-                        if (status == 200) {
-                            switch (data) {
-                                case "发送中":
-                                {
-                                    self.$message.error("当前频道正在播发，已为您更新播发状态");
-                                    self.getChannelList();
-                                    break;
-                                }
-                                case "":
-                                case "发送完成":
-                                {
-                                    self.$confirm("当前状态正常，是否执行播发任务?", "提示", {
-                                        type: 'wraning',
-                                        confirmButtonText: '确定',
-                                        cancelButtonText: '取消'
-                                    }).then(
-                                        function () {
-                                            self.loading = true;
-                                            self.loadingText = "正在请求播发";
-                                            ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
-                                                self.loading = false;
-                                                if (data.success && status == 200) {
-                                                    self.$message({
-                                                        message: '请求播发成功',
-                                                        type: 'success'
-                                                    });
-                                                } else {
-                                                    self.$message.error(data.message);
-                                                }
+                    if (row.broadWay == "终端播发") {
+                        self.loadingText = "正在更新播发状态";
+                        self.loading = true;
+                        ajax.post('/cs/channel/broadcast/status', questData, function (data, status) {
+                            self.loading = false;
+                            self.loadingText = "";
+                            if (status == 200) {
+                                switch (data) {
+                                    case "发送中":
+                                    {
+                                        self.$message.error("当前频道正在播发，已为您更新播发状态");
+                                        self.getChannelList();
+                                        break;
+                                    }
+                                    case "":
+                                    case "发送完成":
+                                    {
+                                        self.$confirm("当前状态正常，是否执行播发任务?", "提示", {
+                                            type: 'wraning',
+                                            confirmButtonText: '确定',
+                                            cancelButtonText: '取消'
+                                        }).then(
+                                            function () {
+                                                self.loading = true;
+                                                self.loadingText = "正在请求播发";
+                                                ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
+                                                    self.loading = false;
+                                                    if (data.success && status == 200) {
+                                                        self.$message({
+                                                            message: '请求播发成功',
+                                                            type: 'success'
+                                                        });
+                                                    } else {
+                                                        self.$message.error(data.message);
+                                                    }
+                                                    self.getChannelList();
+                                                }, null, ajax.NO_ERROR_CATCH_CODE)
+                                            }
+                                        ).catch(function () {
                                                 self.getChannelList();
-                                            }, null, ajax.NO_ERROR_CATCH_CODE)
-                                        }
-                                    ).catch(function () {
-                                            self.getChannelList();
-                                        });
-                                    break;
-                                }
-                                case "发送停止":
-                                {
-                                    self.$confirm("当前频道播发状态已被停止，是否继续播发任务?", "提示", {
-                                        type: 'wraning',
-                                        confirmButtonText: '确定',
-                                        cancelButtonText: '取消'
-                                    }).then(
-                                        function () {
-                                            self.loading = true;
-                                            self.loadingText = "正在请求播发";
-                                            ajax.post('/cs/channel/broadcast/restart', questData, function (data, status) {
-                                                self.loading = false;
-                                                if (data.success && status == 200) {
-                                                    self.$message({
-                                                        message: '请求播发成功',
-                                                        type: 'success'
-                                                    });
-                                                } else {
-                                                    self.$message.error(data.message);
-                                                }
+                                            });
+                                        break;
+                                    }
+                                    case "发送停止":
+                                    {
+                                        self.$confirm("当前频道播发状态已被停止，是否继续播发任务?", "提示", {
+                                            type: 'wraning',
+                                            confirmButtonText: '确定',
+                                            cancelButtonText: '取消'
+                                        }).then(
+                                            function () {
+                                                self.loading = true;
+                                                self.loadingText = "正在请求播发";
+                                                ajax.post('/cs/channel/broadcast/restart', questData, function (data, status) {
+                                                    self.loading = false;
+                                                    if (data.success && status == 200) {
+                                                        self.$message({
+                                                            message: '请求播发成功',
+                                                            type: 'success'
+                                                        });
+                                                    } else {
+                                                        self.$message.error(data.message);
+                                                    }
+                                                    self.getChannelList();
+                                                }, null, ajax.NO_ERROR_CATCH_CODE)
+                                            }
+                                        ).catch(function () {
                                                 self.getChannelList();
-                                            }, null, ajax.NO_ERROR_CATCH_CODE)
-                                        }
-                                    ).catch(function () {
-                                            self.getChannelList();
-                                        });
-                                    break;
-                                }
-                                default :
-                                {
-                                    self.getChannelList();
-                                    break;
+                                            });
+                                        break;
+                                    }
+                                    default :
+                                    {
+                                        self.getChannelList();
+                                        break;
+                                    }
                                 }
                             }
-                        }
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
+                    }else{
+                        self.$confirm("当前状态正常，是否执行播发任务?", "提示", {
+                            type: 'wraning',
+                            confirmButtonText: '确定',
+                            cancelButtonText: '取消'
+                        }).then(
+                            function () {
+                                self.loading = true;
+                                self.loadingText = "正在请求播发";
+                                ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
+                                    self.loading = false;
+                                    if (data.success && status == 200) {
+                                        self.$message({
+                                            message: '请求播发成功',
+                                            type: 'success'
+                                        });
+                                    } else {
+                                        self.$message.error(data.message);
+                                    }
+                                    self.getChannelList();
+                                }, null, ajax.NO_ERROR_CATCH_CODE)
+                            }
+                        ).catch(function () {
+                                self.getChannelList();
+                            });
+                    }
                 },
                 stopBroadcast: function (scope) {
                     var self = this;

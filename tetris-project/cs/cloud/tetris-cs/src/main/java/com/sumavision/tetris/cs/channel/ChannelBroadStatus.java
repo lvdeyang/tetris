@@ -8,9 +8,6 @@ import org.springframework.util.ResourceUtils;
 import com.alibaba.fastjson.JSONObject;
 
 public abstract class ChannelBroadStatus {
-//	public final static String BROADCAST_IP = "192.165.58.123:8180";
-//	final static String BROADCAST_IP = "10.10.40.189";
-	
 	public static String broadcastIp = "";
 	public static String broadcastPort = "";
 	
@@ -24,15 +21,11 @@ public abstract class ChannelBroadStatus {
 			String json = FileUtils.readFileToString(jsonFile);
 			JSONObject jsonObject = JSONObject.parseObject(json);
 			
-			if (jsonObject.containsKey("broadIp")) {
+			if (jsonObject.containsKey("broadIp") && jsonObject.containsKey("broadPort")) {
 				broadcastIp = jsonObject.getString("broadIp");
-			}else {
-				broadcastIp = "192.165.58.123";
-			}
-			if (jsonObject.containsKey("broadPort")) {
 				broadcastPort = jsonObject.getString("broadPort");
 			}else {
-				broadcastPort = "8081";
+				return "";
 			}
 		}
 		

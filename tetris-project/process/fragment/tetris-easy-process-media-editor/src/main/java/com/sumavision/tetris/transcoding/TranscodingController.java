@@ -1,7 +1,11 @@
 package com.sumavision.tetris.transcoding;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +17,7 @@ import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskQuery;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionQuery;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionService;
+import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionVO;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.CachedHttpServletRequestWrapper;
@@ -81,12 +86,12 @@ public class TranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/task/add")
-	public Object addTask(String transcodeJobs,String __processInstanceId__,
+	public Object addTask(String transcodeJob, Long folderId, String tags, String __processInstanceId__,
 			Long __accessPointId__, HttpServletRequest request) throws Exception {
 
-		HashMapWrapper<String, String> ids = addTaskService.add(__processInstanceId__, __accessPointId__, transcodeJobs);
+		HashMapWrapper<String, MediaEditorTaskRatePermissionVO> ids = addTaskService.add(__processInstanceId__, __accessPointId__, transcodeJob , folderId, tags);
 		
-		return ids != null && ids.size() > 0 ? new HashMapWrapper<String, HashMapWrapper<String, String>>().put("transcodeIds", ids)
+		return ids != null && ids.size() > 0 ? new HashMapWrapper<String, HashMapWrapper<String, MediaEditorTaskRatePermissionVO>>().put("transcodeIds", ids)
 				   .getMap() : null;
 	}
 	
@@ -121,9 +126,13 @@ public class TranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/start/process")
-	public Object start(String transcodeJobs, HttpServletRequest request) throws Exception{
+	public Object start(String transcodeJob, Long folderId, String tags, HttpServletRequest request) throws Exception{
 		JSONObject variables = new JSONObject();
-		variables.put("_pa3_transcodeJobs", transcodeJobs);
+		variables.put("_pa3_transcodeJob", transcodeJob);
+		variables.put("_pa3_folderId", folderId);
+		
+		List<String> tagList = (tags == null || tags.isEmpty()) ? new ArrayList<String>() : JSONObject.parseArray(tags, String.class);
+		variables.put("_pa3_tags", StringUtils.join(tagList.toArray(), ","));
 		
 		String processInstanceId = processService.startByKey("_media_editor_transcoding_by_qt", variables.toJSONString(), null, null);
 		
