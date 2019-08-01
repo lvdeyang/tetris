@@ -14,7 +14,7 @@ spring:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.85
+      ipAddress: localhost
 #  profiles:
 #    active: pro
   datasource:
@@ -67,6 +67,10 @@ server:
 #  address: 192.165.56.71
   port: 8087
 logging:
+  #开启activiti打印sql日志
+  #level: 
+    #com.len.mapper: DEBUG
+    #org.activiti.engine.impl.persistence.entity: trace
   pattern:
     console: "%d - %msg%n" 
     level: INFO 
@@ -80,7 +84,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.85:8081/eureka/
+      defaultZone: http://localhost:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
