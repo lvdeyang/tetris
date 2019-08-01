@@ -30,8 +30,8 @@ public class MediaEditorTaskRatePermissionPO extends AbstractBasePO {
 	/** 存储父目录Id */
 	private Long folderId;
 	
-	/** 媒资mimeType */
-	private String mimeType;
+	/** 媒资标签 */
+	private String tags;
 
 	@Column(name = "TASK_ID")
 	public Long getTaskId() {
@@ -78,12 +78,12 @@ public class MediaEditorTaskRatePermissionPO extends AbstractBasePO {
 		this.folderId = folderId;
 	}
 
-	@Column(name = "MIMETYPE")
-	public String getMimeType() {
-		return mimeType;
+	@Column(name = "TAGS")
+	public String getTags() {
+		return tags;
 	}
 
-	public void setMimeType(String mimeType) {
-		this.mimeType = mimeType;
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 }

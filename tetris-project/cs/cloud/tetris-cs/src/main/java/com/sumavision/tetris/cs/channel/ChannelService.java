@@ -21,6 +21,7 @@ import com.sumavision.tetris.cs.bak.ResourceSendQuery;
 import com.sumavision.tetris.cs.bak.SendBakService;
 import com.sumavision.tetris.cs.bak.VersionSendPO;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
+import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
 import com.sumavision.tetris.cs.channel.exception.ChannelUdpIpAndPortAlreadyExistException;
 import com.sumavision.tetris.cs.menu.CsMenuQuery;
 import com.sumavision.tetris.cs.menu.CsMenuService;
@@ -122,6 +123,7 @@ public class ChannelService {
 	public void remove(Long id) throws Exception {
 		ChannelPO channel = channelDao.findOne(id);
 		if (channel.getMediaId() != null) mediaVideoStreamService.remove(channel.getMediaId());
+		if (!channelQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.DELETE.getRemark());
 		channelDao.delete(channel);
 		csMenuService.removeMenuByChannelId(id);
 		csProgramService.removeProgramByChannelId(id);
@@ -153,10 +155,14 @@ public class ChannelService {
 		ChannelPO channel = channelDao.findOne(channelId);
 		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
 		
-		channel.setBroadcastStatus("发送完成");
-		channelDao.save(channel);
-		
-		return getReturnJSON(true, "");
+		if (channelQuery.sendAbilityRequest(BroadAbilityQueryType.STOP, channel, null, null)) {
+			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+			channelDao.save(channel);
+			
+			return getReturnJSON(true, "");
+		}else {
+			return getReturnJSON(false, "请求能力失败");
+		}
 	}
 
 	public JSONObject stopTerminalBroadcast(Long channelId) throws Exception {
@@ -188,10 +194,8 @@ public class ChannelService {
 		ChannelPO channel = channelDao.findOne(channelId);
 		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
 		
-		JSONObject json = new JSONObject();
-		json.put("id", channel.getBroadId());
-		json.put("cmd", "new");
-		json.put("input", abilityProgramText(programQuery.getProgram(channelId)));
+		boolean response = false;
+		
 		JSONObject output = new JSONObject();
 		output.put("proto-type", "udp-ts");
 		output.put("ipv4", channel.getPreviewUrlIp());
@@ -200,13 +204,24 @@ public class ChannelService {
 		output.put("aport", "");
 		output.put("scramble", "none");
 		output.put("key", "");
-		json.put("output", output);
-		json.put("loop_count", "1");
-		
-		channel.setBroadcastStatus("发送中");
-		channelDao.save(channel);
-		
-		return getReturnJSON(true, json.toJSONString());
+		switch(channelQuery.broadWay(channelId)){
+			case "new":
+				response = channelQuery.sendAbilityRequest(BroadAbilityQueryType.NEW, channel, abilityProgramText(programQuery.getProgram(channelId)), output);
+				break;
+			case "change":
+				response = channelQuery.sendAbilityRequest(BroadAbilityQueryType.CHANGE, channel, abilityProgramText(programQuery.getProgram(channelId)), output);
+				break;
+			case "cover":
+				response = channelQuery.sendAbilityRequest(BroadAbilityQueryType.COVER, channel, abilityProgramText(programQuery.getProgram(channelId)), output);
+				break;
+		}
+		if (response) {
+			channel.setBroadcastStatus("发送中");
+			channelDao.save(channel);
+			return getReturnJSON(true, "");
+		}else {
+			return getReturnJSON(false, "请求能力失败");
+		}
 	}
 
 	public JSONObject startTerminalBroadcast(Long channelId) throws Exception {

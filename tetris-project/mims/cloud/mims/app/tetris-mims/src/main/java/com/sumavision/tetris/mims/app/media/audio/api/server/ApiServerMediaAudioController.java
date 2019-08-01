@@ -3,6 +3,9 @@ package com.sumavision.tetris.mims.app.media.audio.api.server;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -72,6 +75,7 @@ public class ApiServerMediaAudioController {
 	public Object addTask(
 			String task, 
 			String name,
+			String tags,
 			HttpServletRequest request) throws Exception{
 		
 		MediaAudioTaskVO taskParam = JSON.parseObject(task, MediaAudioTaskVO.class);
@@ -84,7 +88,12 @@ public class ApiServerMediaAudioController {
 			throw new FolderNotExistException(1l);
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTask(user, name, null, null, "", taskParam, folder);
+		List<String> tagList = new ArrayList<String>();
+		if (tags != null && !tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, null, "", taskParam, folder);
 		
 		return new MediaAudioVO().set(entity);
 		

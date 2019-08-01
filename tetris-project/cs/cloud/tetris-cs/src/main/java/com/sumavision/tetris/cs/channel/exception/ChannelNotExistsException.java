@@ -10,7 +10,7 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 public class ChannelNotExistsException extends BaseException{
 
-private static final Logger LOG = LoggerFactory.getLogger(ChannelNotExistsException.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ChannelNotExistsException.class);
 	
 	private static final long serialVersionUID = 1L;
 

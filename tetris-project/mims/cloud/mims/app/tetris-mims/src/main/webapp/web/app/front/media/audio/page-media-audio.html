@@ -173,15 +173,35 @@
                     <el-form-item label="媒资名称">
                         <el-input v-model="dialog.addAudio.name"></el-input>
                     </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.addAudio.tags"></el-input>
+                    <el-form-item label="标签">
+                        <!--<el-input v-model="dialog.addAudio.tags"></el-input>-->
+                        <el-tag
+                                :key="simple"
+                                v-for="simple in dialog.addAudio.tags"
+                                style="margin-right:10px;"
+                                closable
+                                :disable-transitions="false"
+                                @close="handleTagRemove(dialog.addAudio.tags, simple)">
+                            {{simple}}
+                        </el-tag>
+                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagAdd" icon="el-icon-edit"> 贴标签</el-button>
                     </el-form-item>
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.addAudio.keyWords"></el-input>
                     </el-form-item>
-                    <el-form-item>
+                    <el-form-item label="添加方式">
+                        <template>
+                            <el-radio v-model="dialog.addAudio.way" label="0">本地音频</el-radio>
+                            <el-radio v-model="dialog.addAudio.way" label="1">文本转换</el-radio>
+                        </template>
+                    </el-form-item>
+                    <el-form-item v-show="dialog.addAudio.way==0">
                         <el-button size="small" type="primary" @click="handleUpload"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
                         <div v-if="dialog.addAudio.task">{{dialog.addAudio.task.name}}</div>
+                    </el-form-item>
+                    <el-form-item v-show="dialog.addAudio.way==1">
+                        <el-button size="small" type="primary" @click="handleExchange"><span class="icon-film" style="margin-right:5px;"></span>选择文本</el-button>
+                        <div v-if="dialog.addAudio.txt">{{dialog.addAudio.txt.name}}</div>
                     </el-form-item>
                     <el-form-item label="备注">
                         <el-input type="textarea" v-model="dialog.addAudio.remark"></el-input>
@@ -208,8 +228,18 @@
                     <el-form-item label="媒资名称">
                         <el-input v-model="dialog.editAudio.name"></el-input>
                     </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.editAudio.tags"></el-input>
+                    <el-form-item label="标签">
+                        <!--<el-input v-model="dialog.editAudio.tags"></el-input>-->
+                        <el-tag
+                                :key="simple"
+                                v-for="simple in dialog.editAudio.tags"
+                                style="margin-right:10px;"
+                                closable
+                                :disable-transitions="false"
+                                @close="handleTagRemove(dialog.editAudio.tags, simple)">
+                            {{simple}}
+                        </el-tag>
+                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagEdit" icon="el-icon-edit"> 贴标签</el-button>
                     </el-form-item>
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.editAudio.keyWords"></el-input>
@@ -235,6 +265,12 @@
 
         <!-- 预览灯箱 -->
         <mi-lightbox ref="Lightbox" @on-txt-save="handleTxtSave"></mi-lightbox>
+
+        <!-- 选择标签对话框 -->
+        <tag-dialog ref="tagDialog" @on-tag-dialog-close="selectedTags"></tag-dialog>
+
+        <!-- 选择文本对话框 -->
+        <mi-txt-dialog ref="selectTxt" @selected-txt="selectedTxt"></mi-txt-dialog>
 
     </template>
 

@@ -40,6 +40,7 @@ require.config({
         'mi-upload-dialog':window.APPPATH + 'component/dialog/upload/upload-dialog',
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
+        'mi-txt-dialog':window.APPPATH + 'front/media/txt/txt-dialog',
 
         /* pages */
 
@@ -53,6 +54,8 @@ require.config({
         'page-media-video':window.APPPATH + 'front/media/video/page-media-video',
         'page-media-video-stream':window.APPPATH + 'front/media/video-stream/page-media-video-stream',
         'page-media-compress':window.APPPATH + 'front/media/compress/page-media-compress',
+        'page-media-tag':window.APPPATH + 'front/media/tag/page-media-tag',
+        'tag-dialog':window.APPPATH + 'front/media/tag/tag-dialog',
 
         'page-check-article':window.APPPATH + 'front/check/article/page-check-article',
         'page-check-audio':window.APPPATH + 'front/check/audio/page-check-audio',

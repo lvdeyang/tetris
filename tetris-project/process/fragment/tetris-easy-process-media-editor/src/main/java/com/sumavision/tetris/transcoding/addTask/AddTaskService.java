@@ -40,7 +40,7 @@ public class AddTaskService {
 	 * 
 	 * @return List<String> 下成功的转码任务id
 	 */
-	public HashMapWrapper<String, MediaEditorTaskRatePermissionVO> add(String __processInstanceId__, Long __accessPointId__, String transcode, Long folderId) throws Exception{
+	public HashMapWrapper<String, MediaEditorTaskRatePermissionVO> add(String __processInstanceId__, Long __accessPointId__, String transcode, Long folderId, String tags) throws Exception{
 		TranscodeVO transcodeVO = JSON.parseObject(transcode, TranscodeVO.class);
 		
 		TranscodeJobsVO transcodeJobs = new TranscodeJobsVO();
@@ -56,7 +56,7 @@ public class AddTaskService {
 		addTask.setTranscodeJobs(transcodeJobs);
 		
 		AddTaskResponseVO response = adapter.addTask(addTask);
-		return dealAddResponse(transcodeVOs, folderId, response.getTranscodeJobs().getTranscodes(), __processInstanceId__, __accessPointId__);
+		return dealAddResponse(transcodeVOs, folderId, tags, response.getTranscodeJobs().getTranscodes(), __processInstanceId__, __accessPointId__);
 	}
 	
 	/**
@@ -67,7 +67,7 @@ public class AddTaskService {
 	 * 
 	 * @return HashMapWrapper<String, Integer> 转码任务id，转码任务进度
 	 */
-	public HashMapWrapper<String, MediaEditorTaskRatePermissionVO> dealAddResponse(List<TranscodeVO> requesTranscodes, Long folderId, List<com.sumavision.tetris.transcoding.addTask.rsponseVO.TranscodeVO> responseTranscodes, String __processInstanceId__, Long __accessPointId__) throws Exception{
+	public HashMapWrapper<String, MediaEditorTaskRatePermissionVO> dealAddResponse(List<TranscodeVO> requesTranscodes, Long folderId, String tags, List<com.sumavision.tetris.transcoding.addTask.rsponseVO.TranscodeVO> responseTranscodes, String __processInstanceId__, Long __accessPointId__) throws Exception{
 		if (responseTranscodes == null || responseTranscodes.size() < 0) {
 			return null;
 		}else {
@@ -78,6 +78,7 @@ public class AddTaskService {
 					TranscodeVO transcodeItem = requesTranscodes.get(responseTranscodes.indexOf(transcode));
 					permissionVO.setSaveUrl(adapter.changeFtpToHttp(transcodeItem.getTarget().getTargetURI()));
 					permissionVO.setFolderId(folderId);
+					permissionVO.setTags(tags);
 					idToInfo.put(transcode.getId(), permissionVO);
 				}
 			}

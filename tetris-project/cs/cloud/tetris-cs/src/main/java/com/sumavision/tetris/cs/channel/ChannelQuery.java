@@ -41,6 +41,26 @@ public class ChannelQuery {
 	public ChannelPO findByChannelId(Long channelId) {
 		return channelDao.findOne(channelId);
 	}
+	
+	public String broadWay(Long channelId){
+		ChannelPO channel = channelDao.findOne(channelId);
+		if (channel.getBroadUrlIp() == null && channel.getBroadUrlPort() == null) {
+			return "new";
+		}else if (channel.getBroadUrlIp().equals(channel.getPreviewUrlIp())
+				&& channel.getBroadUrlPort().equals(channel.getPreviewUrlPort())) {
+			return "cover";
+		}else {
+			return "change";
+		}
+	}
+	
+	public void saveBroad(Long channelId){
+		ChannelPO channel = channelDao.findOne(channelId);
+		if (channel != null) {
+			channel.setBroadUrlIp(channel.getPreviewUrlIp());
+			channel.setBroadUrlPort(channel.getPreviewUrlPort());
+		}
+	}
 
 	private void freshBroadStatus(List<ChannelPO> channelVOs) throws Exception {
 		if (channelVOs != null && channelVOs.size() > 0) {
@@ -86,6 +106,35 @@ public class ChannelQuery {
 					}
 				}
 			}
+		}
+	}
+	
+	public boolean sendAbilityRequest(BroadAbilityQueryType type, ChannelPO channel, List<String> input,JSONObject output){
+		JSONObject request = new JSONObject();
+		request.put("id", channel.getBroadId());
+		if (BroadAbilityQueryType.COVER == type) {
+			request.put("cmd", type.getCmd());
+			request.put("input", input);
+		} else if (BroadAbilityQueryType.NEW == type) {
+			request.put("cmd", type.getCmd());
+			request.put("output", output);
+			request.put("local_ip", "");
+			request.put("loop_count", "1");
+			request.put("input", input);
+		} else if (BroadAbilityQueryType.STOP == type || BroadAbilityQueryType.DELETE == type) {
+			request.put("cmd", type.getCmd());
+		} else if (BroadAbilityQueryType.CHANGE == type) {
+			if (sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) {
+				return sendAbilityRequest(BroadAbilityQueryType.NEW, channel, input, output);
+			} else {
+				return false;
+			}
+		}
+		JSONObject response = HttpRequestUtil.httpPost("http://" + "192.165.58.125" + ":" + "9000", request);
+		if (response != null && response.containsKey("stat") && response.getString("stat").equals("success")) {
+			return true;
+		}else {
+			return false;
 		}
 	}
 

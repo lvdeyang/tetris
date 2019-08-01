@@ -20,8 +20,8 @@ public class MediaEditorTaskRatePermissionVO extends AbstractBaseVO<MediaEditorT
 	/** 存储目录Id */
 	private Long folderId;
 	
-	/** 媒资mimetype */
-	private String mimeType;
+	/** 媒资标签 */
+	private String tags;
 	
 	@Override
 	public MediaEditorTaskRatePermissionVO set(MediaEditorTaskRatePermissionPO entity) throws Exception {
@@ -33,7 +33,7 @@ public class MediaEditorTaskRatePermissionVO extends AbstractBaseVO<MediaEditorT
 		.setSaveUrl(entity.getSaveUrl())
 		.setRate(entity.getRate())
 		.setFolderId(entity.getFolderId())
-		.setMimeType(entity.getMimeType());
+		.setTags(entity.getTags());
 		return this;
 	}
 
@@ -82,12 +82,12 @@ public class MediaEditorTaskRatePermissionVO extends AbstractBaseVO<MediaEditorT
 		return this;
 	}
 
-	public String getMimeType() {
-		return mimeType;
+	public String getTags() {
+		return tags;
 	}
 
-	public MediaEditorTaskRatePermissionVO setMimeType(String mimeType) {
-		this.mimeType = mimeType;
+	public MediaEditorTaskRatePermissionVO setTags(String tags) {
+		this.tags = tags;
 		return this;
 	}
 }

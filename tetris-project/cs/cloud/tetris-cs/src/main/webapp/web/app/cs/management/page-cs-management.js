@@ -111,6 +111,39 @@ define([
                             }
                         }
                     },
+                    editSchedules: {
+                        visible: false,
+                        data: "",
+                        table: {
+                            loading: false,
+                            page: {
+                                currentPage: 1,
+                                sizes: [10, 15, 20, 50],
+                                size: 10,
+                                total: 0
+                            },
+                            data: [],
+                            multipleSelection: []
+                        },
+                        dialog: {
+                            addSchedule: {
+                                visible: false,
+                                loading: false,
+                                broadDate: "",
+                                remark: ""
+                            },
+                            editSchedule: {
+                                visible: false,
+                                loading: false,
+                                data: {},
+                                broadDate: "",
+                                remark: ""
+                            },
+                            editProgram: {
+
+                            }
+                        }
+                    },
                     editProgram: {
                         visible: false,
                         loading: false,
@@ -716,6 +749,114 @@ define([
                     });
                 },
 
+                editSchedule: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.editSchedules.visible = true;
+                    self.dialog.editSchedules.data = row;
+                    self.loadSchedule();
+                },
+                loadSchedule: function(){
+                    var self = this;
+                    self.dialog.editSchedules.table.loading = true;
+                    self.dialog.editSchedules.table.data.splice(0, self.dialog.editSchedules.table.data.length);
+                    var questData = {
+                        channelId: self.dialog.editSchedules.data.id,
+                        currentPage: self.dialog.editSchedules.table.page.currentPage,
+                        pageSize: self.dialog.editSchedules.table.page.size
+                    };
+                    ajax.post('/cs/schedule/get', questData, function(data, status){
+                        if (status == 200){
+                            if (data.data) {
+                                for(var i=0; i < data.data.length; i++){
+                                    self.dialog.editSchedules.table.data.push(data.data[i]);
+                                }
+                            }
+                            self.dialog.editSchedules.table.page.total = data.total;
+                        }
+                        self.dialog.editSchedules.table.loading = false;
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                handleAddSchedule: function() {
+                    var self = this;
+                    self.dialog.editSchedules.dialog.addSchedule.visible = true;
+                },
+                handleAddScheduleClose: function(){
+                    var self = this;
+                    self.dialog.editSchedules.dialog.addSchedule.visible = false;
+                    self.dialog.editSchedules.dialog.addSchedule.broadDate = "";
+                    self.dialog.editSchedules.dialog.addSchedule.remark = "";
+                },
+                handleAddScheduleCommit: function() {
+                    var self = this;
+                    self.dialog.editSchedules.dialog.addSchedule.loading = true;
+                    var questData = {
+                        channelId: self.dialog.editSchedules.data.id,
+                        broadDate: self.dialog.editSchedules.dialog.addSchedule.broadDate,
+                        remark: self.dialog.editSchedules.dialog.addSchedule.remark
+                    };
+                    ajax.post('/cs/schedule/add', questData, function(data, status){
+                        if (status == 200){
+                            if (self.dialog.editSchedules.table.data.length < self.dialog.editSchedules.table.page.size){
+                                self.dialog.editSchedules.table.data.push(data);
+                            }
+                            self.dialog.editSchedules.table.page.total += 1;
+                        }
+                        self.dialog.editSchedules.dialog.addSchedule.loading = false;
+                        self.handleAddScheduleClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                scheduleEdit: function (scope) {
+                    var self = this;
+                    self.dialog.editSchedules.dialog.editSchedule.data = scope.row;
+                    self.dialog.editSchedules.dialog.editSchedule.broadDate = scope.row.broadDate;
+                    self.dialog.editSchedules.dialog.editSchedule.remark = scope.row.remark;
+                    self.dialog.editSchedules.dialog.editSchedule.visible = true;
+                },
+                handleEditScheduleClose: function(){
+                    var self = this;
+                    self.dialog.editSchedules.dialog.editSchedule.visible = false;
+                    self.dialog.editSchedules.dialog.editSchedule.data = {};
+                    self.dialog.editSchedules.dialog.editSchedule.broadDate = "";
+                    self.dialog.editSchedules.dialog.editSchedule.remark = "";
+                },
+                handleEditScheduleCommit: function(){
+                    var self = this;
+                    self.dialog.editSchedules.dialog.editSchedule.loading = true;
+                    var questData = {
+                        id: self.dialog.editSchedules.dialog.editSchedule.data.id,
+                        broadDate: self.dialog.editSchedules.dialog.editSchedule.broadDate,
+                        remark: self.dialog.editSchedules.dialog.editSchedule.remark
+                    };
+                    ajax.post('/cs/schedule/edit', questData, function(data, status){
+                        if (status == 200){
+                            self.dialog.editSchedules.dialog.editSchedule.data.broadDate = data.broadDate;
+                            self.dialog.editSchedules.dialog.editSchedule.data.remark = data.remark;
+                        }
+                        self.handleEditScheduleClose();
+                        self.dialog.editSchedules.dialog.editSchedule.loading = false;
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                scheduleDelete: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    var index = scope.$index;
+                    self.dialog.editSchedules.table.loading = true;
+                    var questData = {
+                        id: row.id
+                    };
+                    ajax.post('/cs/schedule/remove', questData, function (data, status) {
+                        if (status == 200){
+                            if(self.dialog.editSchedules.table.data.length == self.dialog.editSchedules.table.page.size){
+                                self.loadSchedule();
+                            }else{
+                                self.dialog.editSchedules.table.data.splice(index, 1);
+                            }
+                            self.dialog.editSchedules.table.page.total -= 1;
+                        }
+                        self.dialog.editSchedules.table.loading = false;
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
 
                 editProgram: function (scope) {
                     var self = this;

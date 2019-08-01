@@ -34,7 +34,7 @@ public interface MediaEditorTaskRatePermissionDAO extends BaseDAO<MediaEditorTas
 	 * 
 	 * @return List<MediaEditorTaskRatePermissionPO> 转码任务
 	 */
-	@Query(value = "SELECT permission.id, permission.uuid, permission.update_time, permission.rate, permission.task_id, permission.transcode_id, permission.save_url, permission.folder_id, permission.mimetype " +
+	@Query(value = "SELECT permission.id, permission.uuid, permission.update_time, permission.rate, permission.task_id, permission.transcode_id, permission.save_url, permission.folder_id, permission.tags " +
 			"FROM TETRIS_MEDIA_EDITOR_TASK_RATE_PERMISSION permission " +
 			"LEFT JOIN TETRIS_MEDIA_EDITOR_TASK task ON permission.task_id=task.id " +
 			"WHERE task.complete_rate <> '100'", nativeQuery = true)

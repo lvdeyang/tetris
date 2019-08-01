@@ -26,6 +26,10 @@ public class ChannelPO extends AbstractBasePO {
 	private String previewUrlPort;
 	/** 能力播发id */
 	private Integer broadId;
+	/** 上次播发url地址 */
+	private String broadUrlIp;
+	/** 上次播发url端口 */
+	private String broadUrlPort;
 	/** 播发状态 */
 	private String broadcastStatus;
 	/** 用户组织信息 */
@@ -101,6 +105,24 @@ public class ChannelPO extends AbstractBasePO {
 
 	public void setBroadId(Integer broadId) {
 		this.broadId = broadId;
+	}
+
+	@Column(name = "BROAD_URL_IP")
+	public String getBroadUrlIp() {
+		return broadUrlIp;
+	}
+
+	public void setBroadUrlIp(String broadUrlIp) {
+		this.broadUrlIp = broadUrlIp;
+	}
+
+	@Column(name = "BROAD_URL_PORT")
+	public String getBroadUrlPort() {
+		return broadUrlPort;
+	}
+
+	public void setBroadUrlPort(String broadUrlPort) {
+		this.broadUrlPort = broadUrlPort;
 	}
 
 	@Column(name = "BROADCAST_STATUS")

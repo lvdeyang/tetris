@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -195,7 +196,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setMimetype(entity.getMimetype())
 			.setProgress(0)
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString());
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioPO.SEPARATOR_TAG)));
+		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioPO.SEPARATOR_TAG))); else this.tags = new ArrayList<String>();
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaAudioPO.SEPARATOR_KEYWORDS)));	 
 		return this;
 	}

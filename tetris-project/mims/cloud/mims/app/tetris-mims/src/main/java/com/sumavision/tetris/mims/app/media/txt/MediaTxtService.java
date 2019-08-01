@@ -235,6 +235,7 @@ public class MediaTxtService {
 		entity.setPreviewUrl(previewUrl);
 		entity.setSize(task.getSize());
 		entity.setFileName(fileName);
+		if (task.getLastModified() != null) entity.setLastModified(task.getLastModified());
 		mediaTxtDao.save(entity);
 		
 		return entity;

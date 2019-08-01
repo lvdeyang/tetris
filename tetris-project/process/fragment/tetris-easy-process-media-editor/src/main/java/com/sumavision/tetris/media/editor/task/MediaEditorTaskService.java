@@ -59,13 +59,15 @@ public class MediaEditorTaskService {
 		List<String> transcodeIds = new ArrayList<String>();
 		for (String transcodeId : transcodes.keySet()) {
 			transcodeIds.add(transcodeId);
+			MediaEditorTaskRatePermissionVO permission = transcodes.getMap().get(transcodeId);
 			MediaEditorTaskRatePermissionPO permissionPO = new MediaEditorTaskRatePermissionPO();
 			permissionPO.setTaskId(mediaPO.getId());
 			permissionPO.setTranscodeId(transcodeId);
-			permissionPO.setSaveUrl(transcodes.getMap().get(transcodeId).getSaveUrl());
-			permissionPO.setFolderId(transcodes.getMap().get(transcodeId).getFolderId());
+			permissionPO.setSaveUrl(permission.getSaveUrl());
+			permissionPO.setFolderId(permission.getFolderId());
 			permissionPO.setRate(0);
 			permissionPO.setUpdateTime(new Date());
+			permissionPO.setTags(permission.getTags());
 			permissions.add(permissionPO);
 		}
 		mediaEditorTaskRatePermissionDAO.save(permissions);

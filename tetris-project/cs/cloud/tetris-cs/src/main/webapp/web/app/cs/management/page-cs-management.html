@@ -78,6 +78,13 @@
                                                        class="channelManage"
                                                        @click="rowDelete(scope)"></el-button>
                                         </el-tooltip>
+
+                                        <el-tooltip class="item" effect="dark" content="节目单排期" placement="bottom" v-if="user.id==3">
+                                            <el-button type="text" icon="feather-icon-clipboard"
+                                                       class="channelManage"
+                                                       @click="editSchedule(scope)">
+                                            </el-button>
+                                        </el-tooltip>
                                     </template>
                                 </el-table-column>
                             </el-table>
@@ -351,6 +358,144 @@
 
 
         <el-dialog
+            title="节目排期"
+            :visible.sync="dialog.editSchedules.visible"
+            width="1100px"
+            :before-close="handleEditSchedulesClose">
+
+            <el-dialog
+                title="添加"
+                :visible.sync="dialog.editSchedules.dialog.addSchedule.visible"
+                width="550px"
+                append-to-body
+                :before-close="handleAddScheduleClose">
+                <div style="height:150px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-form ref="form" label-width="80px">
+                            <el-form-item label="播发时间">
+                                <el-date-picker
+                                        style="width:100%;"
+                                        v-model="dialog.editSchedules.dialog.addSchedule.broadDate"
+                                        type="datetime"
+                                        placeholder="选择日期时间"
+                                        align="right"
+                                        :picker-options="dialog.editSchedules.dialog.addSchedule.broadDate"
+                                        value-format="yyyy-MM-dd HH:mm:ss">
+                                </el-date-picker>
+                            </el-form-item>
+                            <el-form-item label="备注">
+                                <el-input v-model="dialog.editSchedules.dialog.addSchedule.remark"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </el-scrollbar>
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="dialog.editSchedules.dialog.addSchedule.visible = false">取 消</el-button>
+                    <el-button size="medium" type="primary" @click="handleAddScheduleCommit"
+                               :loading="dialog.editSchedules.dialog.addSchedule.loading">确 定
+                    </el-button>
+                </span>
+            </el-dialog>
+
+            <el-dialog
+                    title="排期修改"
+                    :visible.sync="dialog.editSchedules.dialog.editSchedule.visible"
+                    width="550px"
+                    append-to-body
+                    :before-close="handleEditScheduleClose">
+                <div style="height:150px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-form ref="form" label-width="80px">
+                            <el-form-item label="播发时间">
+                                <el-date-picker
+                                        style="width:100%;"
+                                        v-model="dialog.editSchedules.dialog.editSchedule.broadDate"
+                                        type="datetime"
+                                        placeholder="选择日期时间"
+                                        align="right"
+                                        :picker-options="dialog.editSchedules.dialog.editSchedule.broadDate"
+                                        value-format="yyyy-MM-dd HH:mm:ss">
+                                </el-date-picker>
+                            </el-form-item>
+                            <el-form-item label="备注">
+                                <el-input v-model="dialog.editSchedules.dialog.editSchedule.remark"></el-input>
+                            </el-form-item>
+                        </el-form>
+                    </el-scrollbar>
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="dialog.editSchedules.dialog.editSchedule.visible = false">取 消</el-button>
+                    <el-button size="medium" type="primary" @click="handleEditScheduleCommit"
+                               :loading="dialog.editSchedules.dialog.editSchedule.loading">确 定
+                    </el-button>
+                </span>
+            </el-dialog>
+
+            <div style="width:100%; height:650px; position:relative;">
+                <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
+                    <el-button size="small" type="primary" @click="handleAddSchedule()">
+                        <span class="icon-plus" style="margin-right:5px;"></span>
+                        添加
+                    </el-button>
+                    <el-button size="small" type="warning" @click="">
+                        <span class="icon-trash" style="margin-right:5px;"></span>
+                        删除
+                    </el-button>
+                </div>
+                <div style="position:absolute; left:0; right:0; top:48px; bottom:48px;overflow-y: auto; height: 500px">
+                    <el-table
+                            ref="multipleScheduleTable"
+                            :data="dialog.editSchedules.table.data"
+                            v-loading="dialog.editSchedules.table.loading"
+                            tooltip-effect="dark"
+                            style="width: 100%;"
+                            @selection-change="handleScheduleSelectionChange">
+                        <el-table-column type="selection" width="55"></el-table-column>
+                        <el-table-column label="播发时间" width="220" prop="broadDate"></el-table-column>
+                        <el-table-column label="备注" width="220" prop="remark"></el-table-column>
+                        <el-table-column label="操作">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="排期修改" placement="bottom">
+                                    <el-button type="text" icon="feather-icon-edit"
+                                               class="channelManage"
+                                               @click="scheduleEdit(scope)">
+                                    </el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="节目编辑" placement="bottom">
+                                    <el-button type="text" icon="feather-icon-clipboard"
+                                               class="channelManage"
+                                               @click="">
+                                    </el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除排期" placement="bottom">
+                                    <el-button type="text" icon="el-icon-delete"
+                                               class="channelManage"
+                                               @click="scheduleDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+                <div style="height:48px; width:100%; text-align:right; padding-top:16px; position:absolute; left:0; bottom:0; box-sizing:border-box;">
+                    <el-pagination
+                            background
+                            @size-change=""
+                            @current-change=""
+                            :current-page="dialog.editSchedules.table.page.currentPage"
+                            :page-sizes="dialog.editSchedules.table.page.sizes"
+                            :page-size="dialog.editSchedules.table.page.size"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total="dialog.editSchedules.table.page.total">
+                    </el-pagination>
+                </div>
+            </div>
+
+        </el-dialog>
+
+
+        <el-dialog
                 title="节目单编辑"
                 :visible.sync="dialog.editProgram.visible"
                 width="1100px"
@@ -516,7 +661,7 @@
                     style="width: 350px;height: 450px;overflow: auto">
                 <el-table-column width="30"></el-table-column>
                 <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
-                <el-table-column label="排序" width="80" prop="index"></el-table-column>
+                <el-table-column label="排序" width="60" prop="index"></el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
                         <el-tooltip class="item" effect="dark" content="向上移动"
