@@ -28,6 +28,8 @@ public class ApiServerProcessController {
 	 * <b>日期：</b>2019年1月9日 下午2:41:31
 	 * @param String primaryKey 流程主键
 	 * @param JSONString variables 流程必要变量初始值
+	 * @param String category 流程主题
+	 * @param String business 流程承载业务内容 
 	 * @return String processInstanceId 流程实例id
 	 */
 	@JsonBody
@@ -36,9 +38,11 @@ public class ApiServerProcessController {
 	public Object startByKey(
 			String primaryKey,
 			String variables,
+			String category,
+			String business,
 			HttpServletRequest request) throws Exception{
 		
-		String processInstanceId = processService.startByKey(primaryKey, variables);
+		String processInstanceId = processService.startByKey(primaryKey, variables, category, business);
 		
 		return processInstanceId;
 	}

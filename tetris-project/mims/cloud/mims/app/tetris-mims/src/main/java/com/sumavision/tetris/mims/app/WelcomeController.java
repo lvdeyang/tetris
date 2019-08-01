@@ -7,7 +7,6 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -188,6 +187,11 @@ public class WelcomeController {
 		
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
 		
+		Long folderId = folder.getId();
+		if(FolderType.COMPANY_PICTURE.equals(type) || FolderType.COMPANY_AUDIO.equals(type)){
+			folderId = 0l;
+		}
+		
 		StringBufferWrapper redirectUrl = new StringBufferWrapper().append("http://")
 																   .append(request.getServerName())
 																   .append(":")
@@ -201,7 +205,7 @@ public class WelcomeController {
 			redirectUrl.append("#/page-media-")
 					   .append(type.getWebSuffix())
 					   .append("/")
-					   .append(folder.getId());
+					   .append(folderId);
 		}
 		response.sendRedirect(redirectUrl.toString());
 	}

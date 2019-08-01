@@ -1,6 +1,7 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,6 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.history.audio.HistoryMediaAudioPO;
@@ -87,6 +90,12 @@ public class MediaAudioPO extends AbstractBasePO{
 	
 	/** 文件上传状态 */
 	private UploadStatus uploadStatus;
+	
+	/** 审核状态 */
+	private ReviewStatus reviewStatus;
+	
+	/** 审核流程id */
+	private String processInstanceId;
 
 	@Column(name = "LAST_MODIFIED")
 	public Long getLastModified() {
@@ -261,6 +270,25 @@ public class MediaAudioPO extends AbstractBasePO{
 		this.uploadStatus = uploadStatus;
 	}
 	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "REVIEW_STATUS")
+	public ReviewStatus getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(ReviewStatus reviewStatus) {
+		this.reviewStatus = reviewStatus;
+	}
+
+	@Column(name = "PROCESS_INSTANCE_ID")
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public void setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+	}
+
 	/**
 	 * 转换为历史数据<br/>
 	 * <b>作者:</b>lvdeyang<br/>

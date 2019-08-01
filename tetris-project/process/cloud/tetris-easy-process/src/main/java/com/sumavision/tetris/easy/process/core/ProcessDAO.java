@@ -1,5 +1,7 @@
 package com.sumavision.tetris.easy.process.core;
 
+import java.util.Collection;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -28,7 +30,7 @@ public interface ProcessDAO extends BaseDAO<ProcessPO>{
 	 * @param Pageable page 分页信息
 	 * @return List<ProcessPO> 流程列表
 	 */
-	@Query(value = "SELECT process.ID, process.UUID, process.UPDATE_TIME, process.PROCESS_ID, process.NAME, process.TYPE, process.REMARKS, process.PATH, process.BPMN FROM TETRIS_PROCESS process LEFT JOIN TETRIS_PROCESS_COMPANY_PERMISSION permission ON process.ID=permission.PROCESS_ID WHERE permission.COMPANY_ID=?1 \n#pageable\n",
+	@Query(value = "SELECT process.* FROM TETRIS_PROCESS process LEFT JOIN TETRIS_PROCESS_COMPANY_PERMISSION permission ON process.ID=permission.PROCESS_ID WHERE permission.COMPANY_ID=?1 \n#pageable\n",
 		   countQuery = "SELECT count(process.id) FROM TETRIS_PROCESS process LEFT JOIN TETRIS_PROCESS_COMPANY_PERMISSION permission ON process.id=permission.PROCESS_ID WHERE permission.COMPANY_ID=?1",
 		   nativeQuery = true)
 	public Page<ProcessPO> findByCompanyId(String companyId, Pageable page) throws Exception;
@@ -43,5 +45,32 @@ public interface ProcessDAO extends BaseDAO<ProcessPO>{
 	 */
 	@Query(value = "SELECT count(process.id) FROM TETRIS_PROCESS process LEFT JOIN TETRIS_PROCESS_COMPANY_PERMISSION permission ON process.id=permission.PROCESS_ID WHERE permission.COMPANY_ID=?1", nativeQuery = true)
 	public int countByCompanyId(String companyId);
+	
+	/**
+	 * 查询公司下的流程（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 下午1:10:41
+	 * @param String companyId 公司id
+	 * @param Collection<Long> except 例外流程id列表
+	 * @param Pageable page 分页信息
+	 * @return Page<ProcessPO> 流程列表
+	 */
+	@Query(value = "SELECT process.* FROM TETRIS_PROCESS process LEFT JOIN TETRIS_PROCESS_COMPANY_PERMISSION permission ON process.ID=permission.PROCESS_ID WHERE permission.COMPANY_ID=?1 AND process.ID NOT IN ?2 \n#pageable\n",
+			   countQuery = "SELECT count(process.id) FROM TETRIS_PROCESS process LEFT JOIN TETRIS_PROCESS_COMPANY_PERMISSION permission ON process.id=permission.PROCESS_ID WHERE permission.COMPANY_ID=?1 AND process.ID NOT IN ?2",
+			   nativeQuery = true)
+	public Page<ProcessPO> findByCompanyIdWithExcept(String companyId, Collection<Long> except, Pageable page);
+	
+	/**
+	 * 统计公司下的流程数量（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 下午1:12:26
+	 * @param String companyId 公司id
+	 * @param Collection<Long> except 例外流程id列表
+	 * @return int 流程数量
+	 */
+	@Query(value = "SELECT count(process.id) FROM TETRIS_PROCESS process LEFT JOIN TETRIS_PROCESS_COMPANY_PERMISSION permission ON process.id=permission.PROCESS_ID WHERE permission.COMPANY_ID=?1 AND process.id NOT IN ?2", nativeQuery = true)
+	public int countByCompanyIdWithExcept(String companyId, Collection<Long> except);
 	
 }

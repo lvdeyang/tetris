@@ -36,6 +36,31 @@ public class ProcessPO extends AbstractBasePO{
 	/** bpmn内容 */
 	private String bpmn;
 	
+	/** 
+	 * 用户任务绑定变量 
+	 * {
+	 * 	show:[{
+	 * 	 taskId:"任务id", 
+	 * 	 id:"变量id",
+	 * 	 key:"变量主键", 
+	 * 	 name:"变量名称", 
+	 *   type:"b[|t][|e][|i][|v][|a]}", 
+	 *   typeName:"文本[|大文本][|枚举][|图片][|视频][|音频]",
+	 * 	 redio:[{label:"标签",value:"值"}]
+	 * 	}], 
+	 *  set:[{
+	 *   taskId:"任务id", 
+	 *   id:"变量id",
+	 *   key:"变量主键", 
+	 *   name:"变量名称", 
+	 *   type:"b[|t][|e][|i][|v][|a]}", 
+	 *   typeName:"文本[|大文本][|枚举][|图片][|视频][|音频]",
+	 *   redio:[{label:"标签",value:"值"}]
+	 *  }]
+	 * }
+	 */
+	private String userTaskBindVariables;
+	
 	/** 流程类型 */
 	private ProcessType type;
 	
@@ -82,6 +107,17 @@ public class ProcessPO extends AbstractBasePO{
 
 	public void setBpmn(String bpmn) {
 		this.bpmn = bpmn;
+	}
+
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "USER_TASK_BIND_VARIABLES", columnDefinition = "text")
+	public String getUserTaskBindVariables() {
+		return userTaskBindVariables;
+	}
+
+	public void setUserTaskBindVariables(String userTaskBindVariables) {
+		this.userTaskBindVariables = userTaskBindVariables;
 	}
 
 	@Enumerated(value = EnumType.STRING)

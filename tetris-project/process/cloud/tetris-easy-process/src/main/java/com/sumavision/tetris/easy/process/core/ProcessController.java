@@ -8,6 +8,9 @@ import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.activiti.engine.HistoryService;
+import org.activiti.engine.history.HistoricActivityInstance;
+import org.activiti.engine.history.HistoricProcessInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,6 +49,9 @@ public class ProcessController {
 	private ProcessService processService;
 	
 	@Autowired
+	private HistoryService historyService;
+	
+	@Autowired
 	private RestServiceDAO restServiceDao;
 	
 	@Autowired
@@ -69,19 +75,33 @@ public class ProcessController {
 			int pageSize,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
-		
-		int total = processDao.countByCompanyId(user.getGroupId());
-		
-		List<ProcessPO> entities = processQuery.findByCompanyId(user.getGroupId(), currentPage, pageSize);
-		
-		List<ProcessVO> rows = ProcessVO.getConverter(ProcessVO.class).convert(entities, ProcessVO.class);
-		
-		Map<String, Object> result = new HashMapWrapper<String, Object>().put("total", total)
-																		 .put("rows", rows)
-																		 .getMap();
-		
-		return result;
+		return processQuery.findByComponentId(currentPage, pageSize);
+	}
+	
+	/**
+	 * 分页查询流程（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月24日 下午5:31:49
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @param JSONArray except 例外流程id列表
+	 * @return int total 总数据量
+	 * @return List<ProcessVO> 流程列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/with/except")
+	public Object listWithExcept(
+			int currentPage,
+			int pageSize,
+			String except,
+			HttpServletRequest request) throws Exception{
+		List<Long> ids = null;
+		if(except != null){
+			ids = JSON.parseArray(except, Long.class);
+		}
+		return processQuery.findByCompanyIdWithExcept(currentPage, pageSize, ids);
 	}
 	
 	/**
@@ -199,6 +219,7 @@ public class ProcessController {
 	 * <b>日期：</b>2018年12月26日 上午10:38:52
 	 * @param Long id 流程id
 	 * @return String bpmn 配置文件内容
+	 * @return String userTaskBindVariables 用户任务绑定变量 
 	 * @return String processId 流程主键
 	 * @return String uuid 流程uuid
 	 * @return List<GroupEntryVO> groupEntries 可配置接入点列表
@@ -242,12 +263,45 @@ public class ProcessController {
 		}
 		
 		Map<String, Object> result = new HashMapWrapper<String, Object>().put("bpmn", process.getBpmn())
+																		 .put("userTaskBindVariables", process.getUserTaskBindVariables())
 																		 .put("processId", process.getProcessId())
 																		 .put("uuid", process.getUuid())
 																		 .put("groupEntries", groupEntries)
 																		 .getMap();
 		
 		return result;
+	}
+	
+	/**
+	 * 根据流程实例id查询流程配置文件<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月30日 上午10:14:36
+	 * @param String processInstanceId 流程实例id
+	 * @return String bpmn 流程配置文件
+	 * @return List<String> completeTaskIds 已经执行完成的任务节点
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/bpmn/by/process/instance/id")
+	public Object queryBpmnByProcessInstanceId(
+			String processInstanceId,
+			HttpServletRequest request) throws Exception{
+		HistoricProcessInstance processInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
+		List<HistoricActivityInstance> activityInstances = historyService.createHistoricActivityInstanceQuery().processInstanceId(processInstanceId).list();
+		String processDefinitionKey = processInstance.getProcessDefinitionKey();
+		ProcessPO process = processDao.findByUuid(processDefinitionKey);
+		List<String> completeTaskIds = new ArrayList<String>();
+		if(activityInstances!=null && activityInstances.size()>0){
+			for(HistoricActivityInstance activityInstance:activityInstances){
+				completeTaskIds.add(activityInstance.getActivityId());
+			}
+		}
+		return new HashMapWrapper<String, Object>().put("bpmn", process.getBpmn())
+												   .put("definitionKey", process.getProcessId())
+												   .put("definitionId", process.getUuid())
+												   .put("completeTaskIds", completeTaskIds)
+												   .getMap();
 	}
 	
 	/**
@@ -265,6 +319,7 @@ public class ProcessController {
 	public Object saveBpmn(
 			@PathVariable Long id, 
 			String bpmn,
+			String userTaskBindVariables,
 			String accessPointIds,
 			HttpServletRequest request) throws Exception{
 		
@@ -297,7 +352,7 @@ public class ProcessController {
 			}
 		}
 		
-		processService.saveBpmn(process, bpmn, accessPoints);
+		processService.saveBpmn(process, bpmn, userTaskBindVariables, accessPoints);
 		
 		return null;
 	}
@@ -333,6 +388,110 @@ public class ProcessController {
 		processService.publish(process);
 		
 		return null;
+	}
+	
+	/**
+	 * 查询我的待办事项<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月23日 下午4:16:23
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return long total 总数据量
+	 * @return List<ProcessTaskMyReviewVO> rows 任务列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/my/task/preview")
+	public Object queryMyTaskReview(
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request) throws Exception{
+		return processQuery.queryMyTaskReview(currentPage, pageSize);
+	}
+	
+	/**
+	 * 根据任务定义id和流程实例查询变量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月25日 上午11:26:51
+	 * @param String processInstanceId 流程实例id
+	 * @param String taskDefinitionKey 任务定义id
+	 * @return history
+	 * @return show List<ProcessTaskMyReviewVariableVO> 展示变量
+	 * @return set List<ProcessTaskMyReviewVariableVO> 设置变量
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/variables/by/task/definition/key")
+	public Object queryVariablesByTaskDefinitionKey(
+			String processInstanceId,
+			String taskDefinitionKey,
+			HttpServletRequest request) throws Exception{
+		return processQuery.queryVariablesByTaskDefinitionKey(processInstanceId, taskDefinitionKey);
+	}
+	
+	/**
+	 * 用户任务提交<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月25日 下午4:36:18
+	 * @param String taskId 任务id
+	 * @param JSONArrayString variables 设置变量
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/do/review")
+	public Object doReview(
+			String taskId, 
+			String variables,
+			HttpServletRequest request) throws Exception{
+		processService.doReview(taskId, variables);
+		return null;
+	}
+	
+	/**
+	 * 查询任务历史变量设置<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月31日 上午9:27:25
+	 * @param String processInstanceId 流程实例id
+	 * @param String taskDefinitionKey 任务定义id
+	 * @return String userId 提交用户id
+	 * @return String userNickName 提交用户昵称
+	 * @return String taskId 任务定义id
+	 * @return String type 任务类型
+	 * @return List<ProcessTaskMyReviewVariableVO> variableSet 提交的变量内容
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/task/history")
+	public Object queryTaskHistory(
+			String processInstanceId, 
+			String taskDefinitionKey,
+			HttpServletRequest request) throws Exception{
+		return processQuery.queryTaskHistory(processInstanceId, taskDefinitionKey);
+	}
+	
+	/**
+	 * 查询当前用户发起的流程<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月31日 下午3:34:07
+	 * @param int currentPage 当前页
+	 * @param int pageSize 每页数据量
+	 * @return total int 总数据量
+	 * @return rows List<ProcessMyStartVO> 流程列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/my/start/process")
+	public Object queryMyStartProcess(
+			int currentPage, 
+			int pageSize,
+			HttpServletRequest request) throws Exception{
+		
+		return processQuery.queryMyStartProcess(currentPage, pageSize);
 	}
 	
 }

@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+
+import com.sumavision.tetris.easy.process.core.InternalVariableKey;
 import com.sumavision.tetris.menu.MenuQuery;
 import com.sumavision.tetris.menu.MenuVO;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
@@ -28,6 +30,29 @@ public class WelcomeController {
 	
 	@Autowired
 	private MenuQuery menuQuery;
+	
+	/**
+	 * 展示流程图<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月30日 上午9:06:22
+	 * @param @PathVariable String token 登录token
+	 * @param @PathVariable String sessionId sessionId
+	 * @param @PathVariable String processInstanceId 流程实例id
+	 */
+	@RequestMapping(value = "/index/display/{token}/{sessionId}/{processInstanceId}")
+	public ModelAndView display(
+			@PathVariable String token,
+			@PathVariable String sessionId,
+			@PathVariable String processInstanceId,
+			HttpServletRequest request) throws Exception{
+		ModelAndView mv = null;
+		mv = new ModelAndView("web/process/display/index");
+		mv.addObject(HttpConstant.MODEL_TOKEN, token);
+		mv.addObject(HttpConstant.MODEL_SESSION_ID, sessionId);
+		mv.addObject(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstanceId);
+		return mv;
+	}
 	
 	/**
 	 * 需要登录后访问<br/>

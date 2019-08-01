@@ -1,5 +1,6 @@
 package com.sumavision.tetris.easy.process.core;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -40,5 +41,16 @@ public interface ProcessVariableDAO extends BaseDAO<ProcessVariablePO>{
 	 * @return List<ProcessVariablePO> 变量列表
 	 */
 	public List<ProcessVariablePO> findByProcessId(Long processId);
+	
+	/**
+	 * 查询流程下的所有变量（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月19日 上午11:39:23
+	 * @param Long processId 流程id
+	 * @param Collection<Long> except 例外变量id列表
+	 * @return List<ProcessVariablePO> 变量列表
+	 */
+	public List<ProcessVariablePO> findByProcessIdAndIdNotIn(Long processId, Collection<Long> except);
 	
 }

@@ -25,7 +25,7 @@
 			<option value="2">2小时</option>
 			<option value="3">3小时</option>
 		</select>
-		<a id="do-apply" href="<%=basePath %>apply?username=<%=username %>&time=1">申请会议室</a>	
+		<a id="do-apply" href="<%=basePath %>demo/apply?username=<%=username %>&time=1">申请会议室</a>	
 	<%} %>
 	
 	<%
@@ -54,7 +54,7 @@
 						<td><%=processInfo.get("createTime") %></td> 
 						<td><%=processInfo.get("taskName") %></td> 
 						<td><%=processInfo.get("taskTime") %></td> 
-						<td><a href="<%=basePath %>cancel?username=<%=username %>&processId=<%=processInfo.get("processId") %>">撤销流程</a></td>
+						<td><a href="<%=basePath %>demo/cancel?username=<%=username %>&processId=<%=processInfo.get("processId") %>">撤销流程</a></td>
 				 	</tr>
 				 <%} %>
 		 	</tbody>
@@ -98,15 +98,15 @@
 						</td>
 						<td>
 							<%if(taskInfo.get("startUserId").equals(username)) {%>
-								<a href="<%=basePath %>agree?username=<%=username %>&taskId=<%=taskInfo.get("taskId") %>">再次提交</a>
+								<a href="<%=basePath %>demo/agree?username=<%=username %>&taskId=<%=taskInfo.get("taskId") %>">再次提交</a>
 								&nbsp;&nbsp;
-								<a href="<%=basePath %>cancel?username=<%=username %>&processId=<%=taskInfo.get("processId") %>">撤销流程</a>
+								<a href="<%=basePath %>demo/cancel?username=<%=username %>&processId=<%=taskInfo.get("processId") %>">撤销流程</a>
 							<%}else { %>
-								<a href="<%=basePath %>agree?username=<%=username %>&taskId=<%=taskInfo.get("taskId") %>">同意</a>
+								<a href="<%=basePath %>demo/agree?username=<%=username %>&taskId=<%=taskInfo.get("taskId") %>">同意</a>
 								&nbsp;&nbsp;
-								<a href="<%=basePath %>reject?username=<%=username %>&taskId=<%=taskInfo.get("taskId") %>">驳回</a>
+								<a href="<%=basePath %>demo/reject?username=<%=username %>&taskId=<%=taskInfo.get("taskId") %>">驳回</a>
 								&nbsp;&nbsp;
-								<a href="<%=basePath %>refuse?username=<%=username %>&taskId=<%=taskInfo.get("taskId") %>">拒绝</a>
+								<a href="<%=basePath %>demo/refuse?username=<%=username %>&taskId=<%=taskInfo.get("taskId") %>">拒绝</a>
 							<%} %>
 						</td>
 				 	</tr>
@@ -189,7 +189,7 @@
 		var $time = $('#apply-time');
 		if($time[0]){
 			var $link = $('#do-apply');
-			var basePath = '<%=basePath %>' + 'apply?username=' + '<%=username %>' + '&time=';
+			var basePath = '<%=basePath %>' + 'demo/apply?username=' + '<%=username %>' + '&time=';
 			$time.on('change', function(){
 				var _time = $time.val();
 				$link.attr('href', basePath + _time);

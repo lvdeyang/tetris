@@ -8,19 +8,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
@@ -51,6 +52,101 @@ public class MediaAudioService {
 	
 	@Autowired
 	private FolderDAO folderDao;
+	
+	@Autowired
+	private MediaSettingsQuery mediaSettingsQuery;
+	
+	/**
+	 * 音频媒资上传审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午2:16:01
+	 * @param Long id 媒资id
+	 */
+	public void uploadReviewPassed(Long id) throws Exception{
+		MediaAudioPO media = mediaAudioDao.findOne(id);
+		media.setReviewStatus(null);
+		mediaAudioDao.save(media);
+	}
+	
+	/**
+	 * 音频媒资上传审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午2:16:01
+	 * @param Long id 媒资id
+	 */
+	public void uploadReviewRefuse(Long id) throws Exception{
+		MediaAudioPO media = mediaAudioDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
+		mediaAudioDao.save(media);
+	}
+	
+	/**
+	 * 音频媒资修改审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:01:51
+	 * @param Long id 音频媒资id
+	 * @param String name 媒资名称
+	 * @param String tags 贴标签，以“,”分隔
+	 * @param String keyWords 关键字，以“,”分隔
+	 * @param String remarks 备注
+	 */
+	public void editReviewPassed(
+			Long id,
+			String name,
+			String tags,
+			String keyWords,
+			String remarks) throws Exception{
+		MediaAudioPO media = mediaAudioDao.findOne(id);
+		media.setName(name);
+		media.setTags(tags);
+		media.setKeyWords(keyWords);
+		media.setRemarks(remarks);
+		media.setReviewStatus(null);
+		mediaAudioDao.save(media);
+	}
+	
+	/**
+	 * 音频媒资修改审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:19:16
+	 * @param Long id 音频媒资id
+	 */
+	public void editReviewRefuse(Long id) throws Exception{
+		MediaAudioPO media = mediaAudioDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
+		mediaAudioDao.save(media);
+	}
+	
+	/**
+	 * 音频媒资删除审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:01:51
+	 * @param Long id 音频媒资id
+	 */
+	public void deleteReviewPassed(Long id) throws Exception{
+		MediaAudioPO media = mediaAudioDao.findOne(id);
+		if(media != null){
+			mediaAudioDao.delete(media);
+		}
+	}
+	
+	/**
+	 * 音频媒资删除审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:22:22
+	 * @param Long id 音频媒资id
+	 */
+	public void deleteReviewRefuse(Long id) throws Exception{
+		MediaAudioPO media = mediaAudioDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
+		mediaAudioDao.save(media);
+	}
 	
 	/**
 	 * 音频媒资删除<br/>
@@ -127,6 +223,9 @@ public class MediaAudioService {
 			String remark, 
 			MediaAudioTaskVO task, 
 			FolderPO folder) throws Exception{
+		
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_AUDIO);
+		
 		String separator = File.separator;
 		//临时路径采取/base/companyName/folderuuid/fileNamePrefix/version
 		String webappPath = path.webappPath();
@@ -176,6 +275,7 @@ public class MediaAudioService {
 													  .append(task.getName())
 													  .toString());
 		entity.setUpdateTime(date);
+		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
 		
 		mediaAudioDao.save(entity);
 		

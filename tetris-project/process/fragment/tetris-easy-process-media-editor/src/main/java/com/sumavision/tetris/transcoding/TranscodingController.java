@@ -125,7 +125,7 @@ public class TranscodingController {
 		JSONObject variables = new JSONObject();
 		variables.put("_pa3_transcodeJobs", transcodeJobs);
 		
-		String processInstanceId = processService.startByKey("_media_editor_transcoding_by_qt", variables.toJSONString());
+		String processInstanceId = processService.startByKey("_media_editor_transcoding_by_qt", variables.toJSONString(), null, null);
 		
 		MediaEditorTaskVO task = mediaEditorTaskQuery.getByProcessId(processInstanceId);
 		

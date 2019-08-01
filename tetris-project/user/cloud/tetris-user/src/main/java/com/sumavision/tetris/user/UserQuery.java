@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -24,6 +27,8 @@ import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
+import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionDAO;
+import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionPO;
 import com.sumavision.tetris.system.theme.SystemThemeDAO;
 import com.sumavision.tetris.system.theme.SystemThemePO;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
@@ -41,6 +46,9 @@ public class UserQuery {
 	
 	@Autowired
 	private SystemThemeDAO systemThemeDao;
+	
+	@Autowired
+	private UserSubordinateRolePermissionDAO userSubordinateRolePermissionDao;
 	
 	/**
 	 * 用户登录校验<br/>
@@ -64,6 +72,24 @@ public class UserQuery {
 		}
 		user.setLastModifyTime(now);
 		userDao.save(user);
+		return true;
+	}
+	
+	/**
+	 * 检查当前用户的token是否可用<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月26日 下午3:26:04
+	 * @param UserPO user 用户
+	 * @return boolean token有效性
+	 */
+	public boolean userTokenUseable(UserPO user) throws Exception{
+		if(user.getToken() == null) return false;
+		Date now = new Date();
+		Date timeScope = DateUtil.addMinute(user.getLastModifyTime(), 30);
+		if(!timeScope.after(now)){
+			return false;
+		}
 		return true;
 	}
 	
@@ -142,6 +168,17 @@ public class UserQuery {
 			.setIcon(userEntity.getIcon())
 			.setToken(userEntity.getToken())
 			.setId(userEntity.getId());
+		
+		List<UserSubordinateRolePermissionPO> permissions = userSubordinateRolePermissionDao.findByUserId(userEntity.getId());
+		if(permissions!=null && permissions.size()>0){
+			StringBufferWrapper roleIds = new StringBufferWrapper();
+			for(UserSubordinateRolePermissionPO permission:permissions){
+				roleIds.append(permission.getRoleId()).append(",");
+			}
+			String roles = roleIds.toString();
+			roles = roles.substring(0, roles.length()-1);
+			user.setBusinessRoles(roles);
+		}
 		
 		//加入组织机构信息
 		if(UserClassify.COMPANY.equals(userEntity.getClassify())){

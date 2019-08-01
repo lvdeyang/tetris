@@ -33,5 +33,30 @@ public interface UserSubordinateRolePermissionDAO extends BaseDAO<UserSubordinat
 	public List<UserSubordinateRolePermissionPO> findByRoleIdAndUserIdIn(Long roleId, List<Long> userId);
 	@Query(value = "SELECT role_id from tetris_subordinate_role_permission where user_id=?1", nativeQuery = true)
 	public Long getRoleIdFromUserId(Long userId);
-	public UserSubordinateRolePermissionPO findByUserId(Long userId);
+	
+	/******************************
+	 ******************************
+	 ******************************/
+	
+	/**
+	 * 查询用户的业务授权信息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月23日 下午2:27:01
+	 * @param Long userId 用户id
+	 * @return List<UserSubordinateRolePermissionPO> 权限列表
+	 */
+	public List<UserSubordinateRolePermissionPO> findByUserId(Long userId);
+	
+	/**
+	 * 临时方法，顶替原来做的不对的地方<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月23日 下午3:11:15
+	 * @param Long userId 用户id
+	 * @return UserSubordinateRolePermissionPO 权限
+	 */
+	@Deprecated
+	public UserSubordinateRolePermissionPO findTopByUserId(Long userId);
+	
 }

@@ -16,10 +16,12 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.util.ReflectUtil;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +33,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.json.AliFastJsonObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -88,6 +91,9 @@ public class ProcessService {
 	
 	@Autowired
 	private RuntimeService runtimeService;
+	
+	@Autowired
+	private TaskService taskService;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -166,6 +172,7 @@ public class ProcessService {
 	public ProcessPO saveBpmn(
 			ProcessPO process, 
 			String bpmn,
+			String userTaskBindVariables,
 			Collection<AccessPointPO> accessPoints) throws Exception{
 		
 		List<AccessPointProcessPermissionPO> permissions = accessPointProcessPermissionDao.findByProcessId(process.getId());
@@ -186,6 +193,7 @@ public class ProcessService {
 		}
 		
 		process.setBpmn(bpmn);
+		process.setUserTaskBindVariables(userTaskBindVariables);
 		process.setUpdateTime(new Date());
 		processDao.save(process);
 		
@@ -313,11 +321,15 @@ public class ProcessService {
 	 * <b>日期：</b>2019年1月9日 下午2:41:31
 	 * @param String primaryKey 流程主键
 	 * @param JSONString variables 流程必要变量初始值
+	 * @param String category 流程主题
+	 * @param String business 流程承载业务内容
 	 * @return String processInstanceId 流程实例id
 	 */
 	public String startByKey(
 			String primaryKey,
-			String variables) throws Exception{
+			String variables,
+			String category,
+			String business) throws Exception{
 		
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
 		
@@ -421,19 +433,29 @@ public class ProcessService {
 			}
 		}
 		
-		//内置变量
-		//这个接口里内置变量没办法加入流程实例id
-		//contextVariableMap.put(InternalVariableKey.START_USER_ID.getVariableKey(), user.getUuid());
-		
 		JSONObject finalVariableContext = aliFastJsonObject.convertFromHashMap(contextVariableMap);
 		
-		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid(), new HashMapWrapper<String, Object>().put("variable-context", finalVariableContext).put("request-headers", headers).getMap());
+		//启动流程
+		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid());
 		
 		ProcessInstanceDeploymentPermissionPO permission = new ProcessInstanceDeploymentPermissionPO();
 		permission.setProcessInstanceId(processInstance.getId());
 		permission.setDeploymentId(processInstance.getDeploymentId());
 		permission.setUpdateTime(new Date());
 		processInstanceDeploymentPermissionDao.save(permission);
+		
+		//变量上下文中加入内置变量
+		finalVariableContext.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstance.getId());
+		
+		//设置流程变量
+		runtimeService.setVariables(processInstance.getId(), new HashMapWrapper<String, Object>().put(InternalVariableKey.START_USER_ID.getVariableKey(), user.getUuid())
+																							     .put(InternalVariableKey.START_USER_NICKNAME.getVariableKey(), user.getNickname())
+																							     .put(InternalVariableKey.START_TIME.getVariableKey(), DateUtil.format(new Date(), DateUtil.dateTimePattern))
+																							     .put(InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), finalVariableContext)
+																							     .put(InternalVariableKey.REQUEST_HEADERS.getVariableKey(), headers)
+																							     .put(InternalVariableKey.CATEGORY.getVariableKey(), category)
+																							     .put(InternalVariableKey.BUSINESS.getVariableKey(), business)
+																							     .getMap());
 		
 		return processInstance.getId();
 	}
@@ -456,7 +478,7 @@ public class ProcessService {
 		
 		String processUuid = runtimeService.createProcessInstanceQuery().processInstanceId(__processId__).singleResult().getProcessDefinitionKey();
 		
-		JSONObject variableContext = (JSONObject)processVariables.get("variable-context");
+		JSONObject variableContext = (JSONObject)processVariables.get(InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
 		
 		Map<String, Object> variableMapContext = aliFastJsonObject.convertToHashMap(variableContext);
 		
@@ -531,7 +553,7 @@ public class ProcessService {
 						variableMapContext.put(reverceVariableMapKey, reverceVariableMap.get(reverceVariableMapKey));
 					}
 					variableContext = aliFastJsonObject.convertFromHashMap(variableMapContext);
-					runtimeService.setVariable(__processId__, "variable-context", variableContext);
+					runtimeService.setVariable(__processId__, InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), variableContext);
 				}
 			}
 		}
@@ -541,6 +563,55 @@ public class ProcessService {
 		
 		runtimeService.trigger(execution.getId());
 		
+	}
+	
+	/**
+	 * 用户任务提交<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月25日 下午4:36:18
+	 * @param String taskId 任务id
+	 * @param JSONArrayString variables 设置变量
+	 */
+	@SuppressWarnings("unchecked")
+	public void doReview(String taskId, String variables) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		Object variable = runtimeService.getVariable(task.getProcessInstanceId(), InternalVariableKey.NODE_HISTORY.getVariableKey());
+		List<JSONObject> nodeHistorys = variable==null?new ArrayList<JSONObject>():(List<JSONObject>)variable;
+		JSONObject nodeHistory = null;
+		for(JSONObject existNodeHistory:nodeHistorys){
+			if(existNodeHistory.getString("userId").equals(user.getId().toString()) && 
+					existNodeHistory.getString("taskId").equals(task.getTaskDefinitionKey())){
+				nodeHistory = existNodeHistory;
+				break;
+			}
+		}
+		if(nodeHistory == null){
+			nodeHistory = new JSONObject();
+		}
+		nodeHistory.put("userId", user.getId());
+		nodeHistory.put("userNickName", user.getNickname());
+		nodeHistory.put("taskId", task.getTaskDefinitionKey());
+		nodeHistory.put("type", InternalVariableKey.NODE_YTPE_USER.getVariableKey());
+		
+		if(variables != null){
+			List<JSONObject> setVariables = JSON.parseArray(variables, JSONObject.class);
+			nodeHistory.put("variableSet", setVariables);
+			
+			JSONObject variableContext = (JSONObject)runtimeService.getVariable(task.getProcessInstanceId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
+			for(JSONObject setVariable:setVariables){
+				variableContext.put(setVariable.getString("key"), setVariable.getString("value"));
+			}
+			runtimeService.setVariable(task.getProcessInstanceId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), variableContext);
+		}
+		
+		nodeHistorys.add(nodeHistory);
+		runtimeService.setVariable(task.getProcessInstanceId(), InternalVariableKey.NODE_HISTORY.getVariableKey(), nodeHistorys);
+		
+		taskService.complete(task.getId());
 	}
 	
 }

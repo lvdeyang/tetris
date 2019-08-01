@@ -3,12 +3,12 @@
   <process id="applyMeetingProcess" name="申请会议室流程" isExecutable="true">
     <startEvent id="start" name="Start"></startEvent>
     <userTask id="employee-apply" name="员工提交申请" activiti:assignee="employee"></userTask>
-    <userTask id="manager-approval" name="经理审批" activiti:assignee="manager"></userTask>
+    <userTask id="manager-approval" name="经理审批" activiti:assignee="manager" activiti:candidateUsers="manager" activiti:candidateGroups="manager"></userTask>
     <endEvent id="end" name="End"></endEvent>
     <sequenceFlow id="flow1" sourceRef="start" targetRef="employee-apply"></sequenceFlow>
     <exclusiveGateway id="exclusivegateway1" name="Exclusive Gateway"></exclusiveGateway>
     <sequenceFlow id="flow4" sourceRef="employee-apply" targetRef="exclusivegateway1"></sequenceFlow>
-    <userTask id="ceo-approval" name="CEO审批" activiti:assignee="ceo"></userTask>
+    <userTask id="ceo-approval" name="CEO审批" activiti:assignee="ceo" activiti:candidateUsers="ceo" activiti:candidateGroups="ceo"></userTask>
     <sequenceFlow id="flow7" sourceRef="exclusivegateway1" targetRef="ceo-approval">
       <conditionExpression xsi:type="tFormalExpression"><![CDATA[${time > 1}]]></conditionExpression>
     </sequenceFlow>

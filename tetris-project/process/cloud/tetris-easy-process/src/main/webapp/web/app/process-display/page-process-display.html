@@ -1,0 +1,34 @@
+<div id="process-display" style="width:100%; height:100%; background-color:#fff;">
+    <template>
+        <el-dialog
+                :title="dialog.userTask.title"
+                :visible.sync="dialog.userTask.visible"
+                width="550px"
+                :before-close="handleClose">
+
+            <div style="max-height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form label-width="120px">
+
+                        <el-form-item label="提交用户">
+                            {{dialog.userTask.userNickName}}
+                        </el-form-item>
+
+                        <el-form-item v-if="dialog.userTask.variableSet" v-for="variable in dialog.userTask.variableSet" :key="'_show_'+variable.key" :label="variable.name">
+                            <el-input v-if="variable.type==='b'" v-model="variable.value" style="width:380px;" readonly></el-input>
+                            <el-input v-if="variable.type==='t'" v-model="variable.value" style="width:380px;" type="textarea" readonly rows="4"></el-input>
+                            <el-select v-if="variable.type==='e'" v-model="variable.value" style="width:380px;" disabled>
+                                <el-option v-for="option in variable.radio" :key="'_show_'+variable.key+option.label+'_'+option.value" :label="option.label" :value="option.value">{{option.label}}</el-option>
+                            </el-select>
+                        </el-form-item>
+
+                    </el-form>
+                </el-scrollbar>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button @click="handleClose" size="medium">关闭</el-button>
+            </span>
+        </el-dialog>
+    </template>
+</div>

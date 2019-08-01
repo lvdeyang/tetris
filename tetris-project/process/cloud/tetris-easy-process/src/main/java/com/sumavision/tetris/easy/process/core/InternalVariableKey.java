@@ -12,7 +12,16 @@ public enum InternalVariableKey {
 
 	PROCESS_INSTANCE_ID("__processInstanceId__", "流程实例id"),
 	START_USER_ID("__startUserId__", "启动用户id"),
-	ACCESS_POINT_ID("__accessPointId__", "接入点id");
+	START_USER_NICKNAME("__startUserNickname__", "启动用户昵称"),
+	START_TIME("__startTime__", "启动时间"),
+	ACCESS_POINT_ID("__accessPointId__", "接入点id"),
+	VARIABLE_CONTEXT("__variableContext__", "流程上下文变量"),
+	REQUEST_HEADERS("__requestHeaders__", "http请求头"),
+	NODE_HISTORY("__nodeHistory__", "节点历史记录"),
+	CATEGORY("__category__", "流程主题"),
+	BUSINESS("__business__", "流程承载的业务内容"),
+	NODE_YTPE_USER("__user__", "用户节点类型"),
+	NODE_TYPE_SERVICE("__service__", "服务节点类型");
 	
 	private String variableKey;
 	

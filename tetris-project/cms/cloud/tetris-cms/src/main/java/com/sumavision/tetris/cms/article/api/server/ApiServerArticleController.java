@@ -110,7 +110,7 @@ public class ApiServerArticleController {
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("_pa1_id", id);
 		
-		return processService.startByKey("_yjgb_generate_article_by_compress_", jsonObject.toJSONString());
+		return processService.startByKey("_yjgb_generate_article_by_compress_", jsonObject.toJSONString(), null, null);
 	}
 	
 }

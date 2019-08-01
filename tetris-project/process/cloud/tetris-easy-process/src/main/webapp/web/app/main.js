@@ -43,6 +43,8 @@ require.config({
         'mi-subordinate-role-dialog':window.APPPATH + 'component/dialog/subordinate-role/subordinate-role-dialog',
         'process-variable-dialog':window.APPPATH + 'component/dialog/process-variable/process-variable-dialog',
         'process-param-dialog':window.APPPATH + 'component/dialog/process-param/process-param-dialog',
+        'process-variable-list-dialog':window.APPPATH + 'component/dialog/process-variable-list/process-variable-list-dialog',
+        'process-variable-set-dialog':window.APPPATH + 'component/dialog/process-variable-set/process-variable-set-dialog',
 
         /* pages */
         'page-service-rest':window.APPPATH + 'service/rest/page-service-rest',
@@ -51,7 +53,9 @@ require.config({
         'page-process':window.APPPATH + 'process/page-process',
         'page-process-variable':window.APPPATH + 'process-variable/page-process-variable',
         'page-process-param-reference':window.APPPATH + 'process-param-reference/process-param-reference',
-        'page-process-design':window.APPPATH + 'process-design/page-process-design'
+        'page-process-design':window.APPPATH + 'process-design/page-process-design',
+        'page-process-task-my-review':window.APPPATH + 'process-task-my-review/page-process-task-my-review',
+        'page-process-task-my-start':window.APPPATH + 'process-task-my-start/page-process-task-my-start'
 
     },
     shim:{

@@ -5,9 +5,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 文件夹相关操作（主查询或数据转换）<br/>
@@ -30,6 +35,9 @@ public class FolderQuery {
 	@Autowired
 	private FolderRolePermissionDAO folderRolePermissionDao;
 	
+	@Autowired
+	private UserQuery userQuery;
+	
 	/**
 	 * 根据uuid查找文件夹（内存循环）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -47,6 +55,16 @@ public class FolderQuery {
 			}
 		}
 		return null;
+	}
+	
+	public List<FolderPO> getPermissionParentFolders(FolderPO current, String userId){
+		if(current.getParentPath() == null) return null;
+		Set<Long> parentIds = new HashSet<Long>();
+		String[] path = current.getParentPath().split("/");
+		for(int i=1; i<path.length; i++){
+			parentIds.add(Long.valueOf(path[i]));
+		}
+		return folderDao.findAll(parentIds);
 	}
 	
 	/**
@@ -93,6 +111,48 @@ public class FolderQuery {
 	}
 	
 	/**
+	 * 根据id查询有权限的企业文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月29日 上午10:26:58
+	 * @param Collection<Long> ids 文件夹id列表
+	 * @return List<FolderPO> 文件夹列表
+	 */
+	public List<FolderPO> findPermissionCompanyFolderByIdIn(Collection<Long> ids, String type) throws Exception{
+		UserVO user = userQuery.current();
+		if(user.getBusinessRoles() == null){
+			return null;
+		}else{
+			List<Long> businessRoleIds = JSON.parseArray(new StringBufferWrapper().append("[")
+																				  .append(user.getBusinessRoles())
+																				  .append("]")
+																				  .toString(), Long.class);
+			return folderDao.findPermissionCompanyFolderByIdIn(businessRoleIds, ids, type);
+		}
+	}
+	
+	/**
+	 * 获取文件夹下有权限的企业文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月29日 上午9:59:29
+	 * @param Long parentId 附文件夹id
+	 * @return List<FolderPO> 文件夹列表
+	 */
+	public List<FolderPO> findPermissionCompanyFolderByParentIdOrderByNameAsc(Long parentId) throws Exception{
+		UserVO user = userQuery.current();
+		if(user.getBusinessRoles() == null){
+			return null;
+		}else{
+			List<Long> businessRoleIds = JSON.parseArray(new StringBufferWrapper().append("[")
+																				  .append(user.getBusinessRoles())
+																				  .append("]")
+																				  .toString(), Long.class);
+			return folderDao.findPermissionCompanyFolderByParentIdOrderByNameAsc(businessRoleIds, parentId);
+		}
+	}
+	
+	/**
 	 * 查询素材库文件夹树（带例外）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -120,17 +180,46 @@ public class FolderQuery {
 	}
 	
 	/**
+	 * 获取有权限的企业文件夹<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月29日 上午9:46:19
+	 * @param String type 文件夹类型
+	 * @return List<FolderPO> 文件夹列表
+	 */
+	public List<FolderPO> findPermissionCompanyTree(String type) throws Exception{
+		UserVO user = userQuery.current();
+		if(user.getBusinessRoles() == null){
+			return null;
+		}else{
+			List<Long> businessRoleIds = JSON.parseArray(new StringBufferWrapper().append("[")
+																				  .append(user.getBusinessRoles())
+																				  .append("]")
+																				  .toString(), Long.class);
+			return folderDao.findPermissionCompanyTree(businessRoleIds, type);
+		}
+	} 
+	
+	/**
 	 * 获取有权限的企业文件夹（带例外）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年1月29日 下午2:15:52
-	 * @param String userId 用户id
+	 * <b>日期：</b>2019年7月29日 上午9:41:07
 	 * @param String type 文件夹类型
 	 * @param Long except 例外文件夹id
 	 * @return List<FolderPO> 文件夹列表
 	 */
-	public List<FolderPO> findPermissionCompanyTreeWithExcept(Long roleId, String type, Long except){
-		return folderDao.findPermissionCompanyTreeWithExcept(roleId, type, except, splicePathReg(except));
+	public List<FolderPO> findPermissionCompanyTreeWithExcept(String type, Long except) throws Exception{
+		UserVO user = userQuery.current();
+		if(user.getBusinessRoles() == null){
+			return null;
+		}else{
+			List<Long> businessRoleIds = JSON.parseArray(new StringBufferWrapper().append("[")
+																				  .append(user.getBusinessRoles())
+																				  .append("]")
+																				  .toString(), Long.class);
+			return folderDao.findPermissionCompanyTreeWithExcept(businessRoleIds, type, except, splicePathReg(except));
+		}
 	}
 	
 	/**
@@ -157,6 +246,40 @@ public class FolderQuery {
 			if(!hasNext) break;
 		}
 		return root;
+	}
+	
+	/**
+	 * 生成当前文件夹面包屑路径<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月23日 上午10:56:08
+	 * @param Long folderId 文件夹id
+	 * @return String 面包屑路径
+	 */
+	public String generateFolderBreadCrumb(Long folderId) throws Exception{
+		FolderPO currentFolder = folderDao.findOne(folderId);
+		String parentPath = currentFolder.getParentPath();
+		if(parentPath == null){
+			return new StringBufferWrapper().append("/").append(currentFolder.getName()).toString();
+		}else{
+			String[] parentIds = parentPath.substring(1, parentPath.length()).split("/");
+			List<Long> parentFolderIds = new ArrayList<Long>();
+			for(String parentId:parentIds){
+				parentFolderIds.add(Long.valueOf(parentId));
+			}
+			List<FolderPO> parentFolders = folderDao.findByIdIn(parentFolderIds);
+			StringBufferWrapper breadCrumb = new StringBufferWrapper();
+			for(int i=0; i<parentIds.length; i++){
+				Long currentFolderId = Long.valueOf(parentIds[i]);
+				for(FolderPO folder:parentFolders){
+					if(folder.getId().equals(currentFolderId)){
+						breadCrumb.append("/").append(folder.getName());
+						break;
+					}
+				}
+			}
+			return breadCrumb.toString();
+		}
 	}
 	
 	/**
