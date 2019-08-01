@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cs.schedule;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
@@ -13,4 +15,7 @@ public interface ScheduleDAO extends BaseDAO<SchedulePO>{
 			countQuery = "SELECT COUNT(DISTINCT article.id)  FROM TETRIS_CS_SCHEDULE WHERE channel_id = ?1 ORDER BY broad_date",
 			nativeQuery = true)
 	public Page<SchedulePO> findByChannelId(Long channelId, org.springframework.data.domain.Pageable page);
+	
+	@Query(value = "SELECT * FROM TETRIS_CS_SCHEDULE WHERE channel_id = ?1 ORDER BY broad_date", nativeQuery = true)
+	public List<SchedulePO> findByChannelId(Long channelId);
 }

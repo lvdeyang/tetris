@@ -24,4 +24,10 @@ public class ScheduleQuery {
 				.put("total", schedulePages.getTotalElements())
 				.getMap();
 	}
+	
+	public List<ScheduleVO> getByChannelId(Long channelId) throws Exception {
+		List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
+		
+		return ScheduleVO.getConverter(ScheduleVO.class).convert(schedulePOs, ScheduleVO.class);
+	}
 }

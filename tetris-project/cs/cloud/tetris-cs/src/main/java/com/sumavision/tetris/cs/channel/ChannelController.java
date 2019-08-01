@@ -113,4 +113,14 @@ public class ChannelController {
 
 		return channelService.restartBroadcast(channelId);
 	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broad/test")
+	public Object broadTest(Long channelId, HttpServletRequest request) throws Exception {
+		
+		channelService.testBroad(channelId);
+		
+		return null;
+	}
 }

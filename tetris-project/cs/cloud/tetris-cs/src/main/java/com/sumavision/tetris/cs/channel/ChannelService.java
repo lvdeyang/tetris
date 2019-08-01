@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.cs.area.AreaQuery;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
@@ -22,6 +25,7 @@ import com.sumavision.tetris.cs.bak.SendBakService;
 import com.sumavision.tetris.cs.bak.VersionSendPO;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
 import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
+import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.cs.channel.exception.ChannelUdpIpAndPortAlreadyExistException;
 import com.sumavision.tetris.cs.menu.CsMenuQuery;
 import com.sumavision.tetris.cs.menu.CsMenuService;
@@ -32,6 +36,9 @@ import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
+import com.sumavision.tetris.cs.schedule.ScheduleQuery;
+import com.sumavision.tetris.cs.schedule.ScheduleVO;
+import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
 import com.sumavision.tetris.mims.app.media.compress.FileCompressVO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
@@ -87,6 +94,9 @@ public class ChannelService {
 	
 	@Autowired
 	private MediaVideoStreamService mediaVideoStreamService;
+	
+	@Autowired
+	private ScheduleQuery scheduleQuery;
 	
 	@Autowired
 	private Adapter adapter;
@@ -216,7 +226,7 @@ public class ChannelService {
 				break;
 		}
 		if (response) {
-			channel.setBroadcastStatus("发送中");
+			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
 			channelDao.save(channel);
 			return getReturnJSON(true, "");
 		}else {
@@ -229,7 +239,7 @@ public class ChannelService {
 		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
 		// 校验播发状态
 		String broadStatus = getChannelBroadstatus(channelId);
-		if (!broadStatus.isEmpty() && !broadStatus.equals("发送完成")) {
+		if (!broadStatus.isEmpty() && !broadStatus.equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED)) {
 			return getReturnJSON(false, "当前频道未处于可播发状态");
 		}
 		// 校验播发条件
@@ -604,5 +614,52 @@ public class ChannelService {
 			break;
 		}
 		return returnItem;
+	}
+	
+	public void testBroad(Long channelId) throws Exception {
+		ChannelPO channel = channelDao.findOne(channelId);
+		
+		if (channel == null) {
+			throw new ChannelNotExistsException(channelId);
+		}
+		
+		Long now = DateUtil.getLongDate();
+		
+		List<ScheduleVO> scheduleVOs = scheduleQuery.getByChannelId(channelId);
+		
+		if (scheduleVOs == null) {
+			throw new ScheduleNoneToBroadException(channel.getName());
+		}
+		
+		if (channel.getBroadcastStatus() != ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING) {
+			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
+			channelDao.save(channel);
+		}
+		
+		for (ScheduleVO scheduleVO : scheduleVOs) {
+			Date broadDate = DateUtil.parse(scheduleVO.getBroadDate(), DateUtil.dateTimePattenWithoutSecind);
+			Long broadDateLong = broadDate.getTime();
+			if (broadDateLong > now) {
+				Timer timer = new Timer();
+				timer.schedule(new TimerTask() {
+					
+					@Override
+					public void run() {
+						System.out.println(scheduleVO.getBroadDate() + ";" + DateUtil.now());
+						try {
+							testBroad(channelId);
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+				}, broadDate);
+				break;
+			}
+			
+			if (scheduleVOs.indexOf(scheduleVO) == scheduleVOs.size() - 1) {
+				channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+				channelDao.save(channel);
+			}
+		}
 	}
 }
