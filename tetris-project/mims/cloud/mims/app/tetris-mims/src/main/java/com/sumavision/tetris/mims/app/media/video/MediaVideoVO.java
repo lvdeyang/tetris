@@ -40,6 +40,10 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private String previewUrl;
 	
+	private String reviewStatus;
+	
+	private String processInstanceId;
+	
 	private List<MediaVideoVO> children;
 	
 	public String getName() {
@@ -177,6 +181,24 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		return this;
 	}
 
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public MediaVideoVO setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+		return this;
+	}
+
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public MediaVideoVO setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
 	@Override
 	public MediaVideoVO set(MediaVideoPO entity) throws Exception {
 		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
@@ -194,7 +216,9 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setStyle(MediaVideoItemType.VIDEO.getStyle()[0])
 			.setMimetype(entity.getMimetype())
 			.setProgress(0)
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString());
+			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
+			.setProcessInstanceId(entity.getProcessInstanceId());;
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoPO.SEPARATOR_KEYWORDS)));	 
 		return this;
@@ -212,7 +236,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setRemarks("-")
 			.setType(MediaVideoItemType.FOLDER.toString())
 			.setIcon(MediaVideoItemType.FOLDER.getIcon())
-			.setStyle(MediaVideoItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaVideoItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

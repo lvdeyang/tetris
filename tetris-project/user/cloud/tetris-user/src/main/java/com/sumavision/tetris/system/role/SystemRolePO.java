@@ -2,6 +2,8 @@ package com.sumavision.tetris.system.role;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -25,6 +27,12 @@ public class SystemRolePO extends AbstractBasePO{
 
 	/** 隶属系统角色组 */
 	private Long systemRoleGroupId;
+	
+	/** 角色类型 */
+	private SystemRoleType type;
+	
+	/** 业务角色隶属企业id */
+	private Long companyId;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -51,6 +59,25 @@ public class SystemRolePO extends AbstractBasePO{
 
 	public void setSystemRoleGroupId(Long systemRoleGroupId) {
 		this.systemRoleGroupId = systemRoleGroupId;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "TYPE")
+	public SystemRoleType getType() {
+		return type;
+	}
+
+	public void setType(SystemRoleType type) {
+		this.type = type;
+	}
+
+	@Column(name = "COMPANY_ID")
+	public Long getCompanyId() {
+		return companyId;
+	}
+
+	public void setCompanyId(Long companyId) {
+		this.companyId = companyId;
 	}
 	
 }

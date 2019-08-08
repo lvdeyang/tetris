@@ -27,8 +27,9 @@ import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
-import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionDAO;
-import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionPO;
+import com.sumavision.tetris.system.role.SystemRoleDAO;
+import com.sumavision.tetris.system.role.SystemRolePO;
+import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.theme.SystemThemeDAO;
 import com.sumavision.tetris.system.theme.SystemThemePO;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
@@ -48,7 +49,7 @@ public class UserQuery {
 	private SystemThemeDAO systemThemeDao;
 	
 	@Autowired
-	private UserSubordinateRolePermissionDAO userSubordinateRolePermissionDao;
+	private SystemRoleDAO systemRoleDao;
 	
 	/**
 	 * 用户登录校验<br/>
@@ -169,15 +170,16 @@ public class UserQuery {
 			.setToken(userEntity.getToken())
 			.setId(userEntity.getId());
 		
-		List<UserSubordinateRolePermissionPO> permissions = userSubordinateRolePermissionDao.findByUserId(userEntity.getId());
-		if(permissions!=null && permissions.size()>0){
+		List<SystemRolePO> businessRoles = systemRoleDao.findByUserIdAndType(userEntity.getId(), SystemRoleType.BUSINESS.toString());
+		
+		if(businessRoles!=null && businessRoles.size()>0){
 			StringBufferWrapper roleIds = new StringBufferWrapper();
-			for(UserSubordinateRolePermissionPO permission:permissions){
-				roleIds.append(permission.getRoleId()).append(",");
+			for(SystemRolePO role:businessRoles){
+				roleIds.append(role.getId()).append(",");
 			}
-			String roles = roleIds.toString();
-			roles = roles.substring(0, roles.length()-1);
-			user.setBusinessRoles(roles);
+			String ids = roleIds.toString();
+			ids = ids.substring(0, ids.length()-1);
+			user.setBusinessRoles(ids);
 		}
 		
 		//加入组织机构信息

@@ -225,7 +225,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setRemarks("-")
 			.setType(MediaPictureItemType.FOLDER.toString())
 			.setIcon(MediaPictureItemType.FOLDER.getIcon())
-			.setStyle(MediaPictureItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaPictureItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

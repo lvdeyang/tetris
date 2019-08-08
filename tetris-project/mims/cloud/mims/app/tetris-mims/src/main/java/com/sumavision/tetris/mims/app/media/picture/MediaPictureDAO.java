@@ -45,7 +45,7 @@ public interface MediaPictureDAO extends BaseDAO<MediaPicturePO>{
 	 * @param String authorId 作者id
 	 * @return List<MediaPicturePO> 媒资图片列表
 	 */
-	@Query(value = "SELECT * FROM MIMS_MEDIA_PICTURE WHERE (FOLDER_ID IN ?1 AND UPLOAD_STATUS=?2 AND (REVIEW_STATUS IS NULL OR REVIEW_STATUS NOT IN ?3)) OR AUTHORID=?4", nativeQuery = true)
+	@Query(value = "SELECT * FROM MIMS_MEDIA_PICTURE WHERE FOLDER_ID IN ?1 AND ((UPLOAD_STATUS=?2 AND (REVIEW_STATUS IS NULL OR REVIEW_STATUS NOT IN ?3)) OR AUTHORID=?4)", nativeQuery = true)
 	public List<MediaPicturePO> findByFolderIdInAndUploadStatusAndReviewStatusNotInOrAuthorId(Collection<Long> folderIds, String status, Collection<String> reviewStatus, String authorId);
 	
 	/**

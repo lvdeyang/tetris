@@ -218,7 +218,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setMimetype(entity.getMimetype())
 			.setProgress(0)
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
-			.setReviewStatus(entity.getReviewStatus()==null?"已审核":entity.getReviewStatus().getName())
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId());
 		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioPO.SEPARATOR_TAG))); else this.tags = new ArrayList<String>();
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaAudioPO.SEPARATOR_KEYWORDS)));	 
@@ -237,7 +237,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setRemarks("-")
 			.setType(MediaAudioItemType.FOLDER.toString())
 			.setIcon(MediaAudioItemType.FOLDER.getIcon())
-			.setStyle(MediaAudioItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaAudioItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

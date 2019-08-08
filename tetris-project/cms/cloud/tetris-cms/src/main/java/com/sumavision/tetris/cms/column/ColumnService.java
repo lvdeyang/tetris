@@ -3,19 +3,15 @@ package com.sumavision.tetris.cms.column;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.catalina.User;
-import org.neo4j.cypher.internal.compiler.v2_1.docbuilders.internalDocBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.boolean_expr_return;
 import com.sumavision.tetris.cms.article.ArticleClassifyPermissionDAO;
 import com.sumavision.tetris.cms.article.ArticleClassifyPermissionPO;
 import com.sumavision.tetris.cms.article.ArticleDAO;
@@ -29,7 +25,6 @@ import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.classify.ClassifyVO;
 import com.sumavision.tetris.cms.relation.ColumnRelationArticleDAO;
 import com.sumavision.tetris.cms.relation.ColumnRelationArticlePO;
-import com.sumavision.tetris.cms.relation.ColumnRelationArticleVO;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserVO;

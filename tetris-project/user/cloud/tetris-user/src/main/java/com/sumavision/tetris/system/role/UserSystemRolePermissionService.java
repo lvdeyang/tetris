@@ -71,6 +71,7 @@ public class UserSystemRolePermissionService {
 				permission.setUserId(user.getId());
 				permission.setAutoGeneration(false);
 				permission.setUpdateTime(new Date());
+				permission.setRoleType(role.getType());
 				permissions.add(permission);
 			}
 		}
@@ -128,6 +129,7 @@ public class UserSystemRolePermissionService {
 				permission.setUserId(user.getId());
 				permission.setAutoGeneration(false);
 				permission.setUpdateTime(new Date());
+				permission.setRoleType(role.getType());
 				permissions.add(permission);
 			}
 		}

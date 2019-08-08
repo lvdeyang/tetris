@@ -8,18 +8,18 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
-import com.sumavision.tetris.mims.app.folder.FolderRolePermissionDAO;
-import com.sumavision.tetris.mims.app.folder.FolderRolePermissionPO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
-import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -33,10 +33,7 @@ import com.sumavision.tetris.user.UserVO;
 public class MediaCompressQuery {
 
 	@Autowired
-	private MediaCompressDAO mediaPictureDao;
-	
-	@Autowired
-	private MediaCompressQuery mediaPictureQuery;
+	private MediaCompressDAO mediaCompressDao;
 	
 	@Autowired
 	private FolderDAO folderDao;
@@ -47,11 +44,7 @@ public class MediaCompressQuery {
 	@Autowired
 	private UserQuery userQuery;
 	
-	@Autowired 
-	private SubordinateRoleQuery subordinateRoleQuery;
 	
-	@Autowired
-	private FolderRolePermissionDAO folderRolePermissionDAO;
 	/**
 	 * 根据文件夹id查询文件夹以及图片媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -59,106 +52,82 @@ public class MediaCompressQuery {
 	 * <b>日期：</b>2019年2月26日 下午5:14:37
 	 * @param UserVO user 用户
 	 * @param Long folderId 当前文件夹id
-	 * @return rows List<MediaPictureVO> 媒资项目列表
+	 * @return rows List<MediaCompressVO> 媒资项目列表
 	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
 	 */
 	public Map<String, Object> load(Long folderId) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
-		//TODO 权限校验	
-		Long role = subordinateRoleQuery.queryRolesByUserId(user.getId());
-		if (role == null) {
-			return new HashMapWrapper<String, Object>().put("rows", new ArrayList<MediaCompressVO>())
-			  		 .put("breadCrumb", new FolderBreadCrumbVO())
-			  		 .getMap();
+		List<MediaCompressVO> rows = null;
+		
+		//处理根面包屑
+		FolderBreadCrumbVO breadCrumb = new FolderBreadCrumbVO().setId(0l)
+																.setUuid("0")
+																.setName("根目录")
+																.setType(FolderType.COMPANY_COMPRESS.toString());
+		
+		if(user.getBusinessRoles() == null){
+			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}
-		List<Long> folderIdsList = new ArrayList<Long>();
-		List<FolderRolePermissionPO> list = folderRolePermissionDAO.findByRoleId(role);
-		for (int j = 0; j < list.size(); j++) {
-			folderIdsList.add(list.get(j).getFolderId());
-		}
-		//具有权限的文件夹
-		List<FolderPO> permissFolders = folderDao.findByIdIn(folderIdsList);
-		//按照文件夹类型过滤
-		List<FolderPO> permissFolders1 = new ArrayList<FolderPO>();
-		for (int i = 0; i < permissFolders.size(); i++) {
-			FolderPO po = permissFolders.get(i);
-			if (po.getType() == FolderType.COMPANY_COMPRESS) {
-				permissFolders1.add(po);
+		
+		if(folderId.equals(0l)){
+			List<FolderPO> folders = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_COMPRESS.toString());
+			if(folders==null || folders.size()<=0){
+				return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 			}
-		}
-		if(folderId == null){
-//			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_COMPRESS.toString());
-//			folderId = folder.getId();
+			List<FolderPO> rootFolders = folderQuery.findRoots(folders);
+			rows = new ArrayList<MediaCompressVO>();
+			for(FolderPO folder:rootFolders){
+				MediaCompressVO row = new MediaCompressVO().set(folder);
+				rows.add(row);
+			}
+			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
+		}else{
+			FolderPO current = folderDao.findOne(folderId);
+			if(current == null) throw new FolderNotExistException(folderId);
 			
-			if (permissFolders1.size()>1) {
-				for (int i = 0; i < permissFolders1.size(); i++) {
-					for (int j = 0; j < permissFolders1.size()-i-1; j++) {
-						FolderPO po = permissFolders1.get(j);
-						Integer depth = po.getDepth();
-						FolderPO po1 = permissFolders1.get(j+1);
-						Integer depth1 = po1.getDepth();
-						if (depth>depth1) {
-							permissFolders1.set(j, po1);
-							permissFolders1.set(j+1, po);
-						}
-					}
+			rows = new ArrayList<MediaCompressVO>();
+			
+			//子文件夹
+			List<FolderPO> folders = folderQuery.findPermissionCompanyFolderByParentIdOrderByNameAsc(current.getId());
+			if(folders!=null && folders.size()>0){
+				for(FolderPO folder:folders){
+					MediaCompressVO row = new MediaCompressVO().set(folder);
+					rows.add(row);
 				}
-				folderId = permissFolders1.get(0).getId();
-			}else if (permissFolders1.size()==1) {
-				folderId = permissFolders1.get(0).getId();
-			} else {
-				
 			}
-		}
-		
-		FolderPO current = folderDao.findOne(folderId);
-		
-		if(current == null) throw new FolderNotExistException(folderId);
-		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), current.getId())){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
-		
-		//获取当前文件夹的所有父目录
-		List<FolderPO> parentFolders = folderQuery.getParentFolders(current);
-		
-		List<FolderPO> filteredParentFolders = new ArrayList<FolderPO>();
-		if(parentFolders==null || parentFolders.size()<=0){
-			parentFolders = new ArrayList<FolderPO>();
-		}
-		for(FolderPO parentFolder:parentFolders){
-			if(!FolderType.COMPANY.equals(parentFolder.getType())){
-				filteredParentFolders.add(parentFolder);
+			
+			//文件夹内音频
+			List<MediaCompressPO> compresses = mediaCompressDao.findByFolderIdInAndUploadStatusAndReviewStatusNotInOrAuthorId(
+					new ArrayListWrapper<Long>().add(current.getId()).getList(), 
+					UploadStatus.COMPLETE.toString(), 
+					new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList(),
+					user.getId().toString());
+			if(compresses!=null && compresses.size()>0){
+				for(MediaCompressPO compress:compresses){
+					rows.add(new MediaCompressVO().set(compress));
+				}
 			}
-		}
-		filteredParentFolders.add(current);
-		
-		//生成面包屑数据
-		FolderBreadCrumbVO folderBreadCrumb = folderQuery.generateFolderBreadCrumb(filteredParentFolders);
-		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByRoleId(role.toString(), folderId, FolderType.COMPANY_COMPRESS.toString());
-		
-		List<MediaCompressPO> pictures = mediaPictureQuery.findCompleteByFolderId(current.getId());
-		
-		List<MediaCompressVO> medias = new ArrayList<MediaCompressVO>();
-		if(folders!=null && folders.size()>0){
-			for(FolderPO folder:folders){
-				medias.add(new MediaCompressVO().set(folder));
+			
+			FolderBreadCrumbVO subBreadCrumb = null;
+			if(current.getParentPath() == null){
+				subBreadCrumb = folderQuery.generateFolderBreadCrumb(new ArrayListWrapper<FolderPO>().add(current).getList());
+			}else{
+				List<Long> parentIds = JSON.parseArray(new StringBufferWrapper().append("[")
+																			    .append(current.getParentPath().substring(1, current.getParentPath().length()).replaceAll("/", ","))
+																			    .append("]")
+																			    .toString(), Long.class);
+				List<FolderPO> breadCrumbFolders = folderQuery.findPermissionCompanyFolderByIdIn(parentIds, FolderType.COMPANY_COMPRESS.toString());
+				if(breadCrumbFolders == null){
+					breadCrumbFolders = new ArrayList<FolderPO>();
+				}
+				breadCrumbFolders.add(current);
+				subBreadCrumb = folderQuery.generateFolderBreadCrumb(breadCrumbFolders);
 			}
+			breadCrumb.setNext(subBreadCrumb);
+			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}
-		if(pictures!=null && pictures.size()>0){
-			for(MediaCompressPO picture:pictures){
-				medias.add(new MediaCompressVO().set(picture));
-			}
-		}
-		
-		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
-																  		 .put("breadCrumb", folderBreadCrumb)
-																  		 .getMap();
-		
-		return result;
 	}
 	
 	
@@ -171,7 +140,7 @@ public class MediaCompressQuery {
 	 * @return List<MediaPicturePO> 图片媒资
 	 */
 	public List<MediaCompressPO> findCompleteByFolderId(Long folderId){
-		return mediaPictureDao.findByFolderIdAndUploadStatusOrderByName(folderId, UploadStatus.COMPLETE);
+		return mediaCompressDao.findByFolderIdAndUploadStatusOrderByName(folderId, UploadStatus.COMPLETE);
 	}
 	
 	/**
@@ -183,7 +152,7 @@ public class MediaCompressQuery {
 	 * @return List<MediaPicturePO> 图片媒资
 	 */
 	public List<MediaCompressPO> findCompleteByFolderIds(Collection<Long> folderIds){
-		return mediaPictureDao.findByFolderIdInAndUploadStatus(folderIds, UploadStatus.COMPLETE);
+		return mediaCompressDao.findByFolderIdInAndUploadStatus(folderIds, UploadStatus.COMPLETE);
 	}
 	
 	/**
@@ -195,7 +164,7 @@ public class MediaCompressQuery {
 	 * @return List<MediaPicturePO> 上传任务列表
 	 */
 	public List<MediaCompressPO> findTasksByFolderIds(Collection<Long> folderIds){
-		return mediaPictureDao.findByFolderIdInAndUploadStatus(folderIds, UploadStatus.UPLOADING);
+		return mediaCompressDao.findByFolderIdInAndUploadStatus(folderIds, UploadStatus.UPLOADING);
 	}
 	
 	/**

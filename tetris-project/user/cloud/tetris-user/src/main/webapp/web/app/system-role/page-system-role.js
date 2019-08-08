@@ -286,7 +286,7 @@ define([
                 gotoBindUser:function(scope){
                     var self = this;
                     var row = scope.row;
-                    window.location.hash = '#/page-bind-user/' + row.id + '/' + row.name;
+                    window.location.hash = '#/page-bind-user/' + row.id + '/' + row.name + '/system';
                 },
                 handleRowDelete:function(scope){
                     var self = this;

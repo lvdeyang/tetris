@@ -496,15 +496,6 @@ define([
                         }
                     }
 
-                    if(!breadCrumb.id){
-                        self.$notify({
-                            title: '可访问仓库为空',
-                            message: '管理员可能未给您设置角色',
-                            type: 'warning',
-                            offset: 50
-                        });
-                    }
-
                     var items = [breadCrumb];
                     var current = breadCrumb;
                     while(current.next){

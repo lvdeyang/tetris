@@ -249,6 +249,25 @@ public class FolderQuery {
 	}
 	
 	/**
+	 * 将面包屑数据转换成列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月8日 上午9:12:37
+	 * @param FolderBreadCrumbVO breadCrumb 面包屑数据
+	 * @return List<FolderBreadCrumbVO> 面包屑列表
+	 */
+	public List<FolderBreadCrumbVO> convertFolderBreadCrumbToList(FolderBreadCrumbVO breadCrumb) throws Exception{
+		List<FolderBreadCrumbVO> breadCrumbList = new ArrayList<FolderBreadCrumbVO>();
+		FolderBreadCrumbVO current = breadCrumb;
+		breadCrumbList.add(current);
+		while(current.getNext() != null){
+			current = current.getNext();
+			breadCrumbList.add(current);
+		}
+		return breadCrumbList;
+	}
+	
+	/**
 	 * 生成当前文件夹面包屑路径<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

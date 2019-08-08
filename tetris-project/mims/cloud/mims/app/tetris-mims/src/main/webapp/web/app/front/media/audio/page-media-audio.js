@@ -276,10 +276,23 @@ define([
                         if(typeof done === 'function') done();
                         if(status === 200){
                             var rows = self.table.rows;
-                            for(var i=0; i<rows.length; i++){
-                                if(rows[i].uuid === row.uuid){
-                                    rows.splice(i, 1);
-                                    break;
+                            var deleted = data.deleted;
+                            var processed = data.processed;
+                            if(deleted && deleted.length>0){
+                                for(var i=0; i<rows.length; i++){
+                                    if(rows[i].uuid === row.uuid){
+                                        rows.splice(i, 1);
+                                        break;
+                                    }
+                                }
+                            }
+                            if(processed && processed.length>0){
+                                var newEntity = processed[0];
+                                for(var i=0; i<rows.length; i++){
+                                    if(rows[i].uuid === row.uuid){
+                                        rows.splice(i, 1, newEntity);
+                                        break;
+                                    }
                                 }
                             }
                         }

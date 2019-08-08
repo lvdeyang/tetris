@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.business.role.BusinessRoleQuery;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
@@ -45,8 +46,7 @@ import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
-import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
-import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
+import com.sumavision.tetris.system.role.SystemRoleVO;
 //import com.sumavision.tetris.mims.app.role.RoleDAO;
 //import com.sumavision.tetris.mims.app.role.RolePO;
 //import com.sumavision.tetris.mims.app.role.RoleUserPermissionDAO;
@@ -88,14 +88,6 @@ public class FolderService {
 	
 	@Autowired
 	private MaterialFileService materialFileService;
-	
-	@Autowired
-	SubordinateRoleQuery subordinateRoleQuery;
-//	@Autowired
-//	private RoleDAO roleDao;
-//	
-//	@Autowired
-//	private RoleUserPermissionDAO roleUserPermissionDao;
 	
 	@Autowired
 	private MediaPictureDAO mediaPictureDao;
@@ -150,6 +142,9 @@ public class FolderService {
 	
 	@Autowired
 	private MediaTxtDAO mediaTxtDao;
+	
+	@Autowired
+	private BusinessRoleQuery businessRoleQuery;
 	
 	/**
 	 * 新增私人文件夹<br/>
@@ -216,28 +211,15 @@ public class FolderService {
 		groupPermission.setGroupId(companyId);
 		groupPermission.setUpdateTime(new Date());
 		folderGroupPermissionDao.save(groupPermission);
-		//绑定公司管理员角色
-		SubordinateRoleVO roleVO = subordinateRoleQuery.queryRoleByCompany(companyId);
-		//绑定改用户角色
-		Long userRoleId = subordinateRoleQuery.queryRolesByUserId(Long.parseLong(userId));
 		
-		if(roleVO == null){
-			return folder;
-		}
+		SystemRoleVO roleAdmin = businessRoleQuery.findCompanyAdminRole();
 		
 		FolderRolePermissionPO adminPermission = new FolderRolePermissionPO();
 		adminPermission.setFolderId(folder.getId());
-		adminPermission.setRoleId(roleVO.getId());
+		adminPermission.setRoleId(Long.valueOf(roleAdmin.getId()));
+		adminPermission.setRoleName(roleAdmin.getName());
 		adminPermission.setUpdateTime(new Date());
 		folderRolePermissionDao.save(adminPermission);
-		
-		if (roleVO.getId() != userRoleId) {
-			FolderRolePermissionPO userPermission = new FolderRolePermissionPO();
-			userPermission.setFolderId(folder.getId());
-			userPermission.setRoleId(userRoleId);
-			userPermission.setUpdateTime(new Date());
-			folderRolePermissionDao.save(userPermission);
-		}
 		
 		return folder;
 	}
@@ -546,11 +528,12 @@ public class FolderService {
 		folderGroupPermissionDao.save(permissions0);
 		
 		//生成管理员权限
-		SubordinateRoleVO roleVO = subordinateRoleQuery.queryRoleByCompany(companyId);
+		SystemRoleVO roleAdmin = businessRoleQuery.findCompanyAdminRole();
 		List<FolderRolePermissionPO> permissions1 = new ArrayList<FolderRolePermissionPO>();
 		for(FolderPO copyFolder:totalCopyFolders){
 			FolderRolePermissionPO permission1 = new FolderRolePermissionPO();
-			permission1.setRoleId(roleVO.getId());
+			permission1.setRoleId(Long.valueOf(roleAdmin.getId()));
+			permission1.setRoleName(roleAdmin.getName());
 			permission1.setFolderId(copyFolder.getId());
 			permission1.setUpdateTime(new Date());
 			permissions1.add(permission1);

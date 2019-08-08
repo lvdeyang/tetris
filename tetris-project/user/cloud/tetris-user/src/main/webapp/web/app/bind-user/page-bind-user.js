@@ -21,6 +21,14 @@ define([
 
         var roleId = p.id;
         var roleName = p.name;
+        var type = p.type;
+
+        var activeId = '';
+        if(type === 'system'){
+            activeId = window.BASEPATH + 'index#/page-system-role';
+        }else if(type === 'business'){
+            activeId = window.BASEPATH + 'index#/page-business-role';
+        }
 
         //设置标题
         commons.setTitle(pageId);
@@ -35,7 +43,7 @@ define([
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 roleName:roleName,
-                activeId:window.BASEPATH + 'index#/page-system-role',
+                activeId:activeId,
                 table:{
                     rows:[],
                     pageSize:50,
@@ -64,28 +72,48 @@ define([
                     for(var i=0; i<rows.length; i++){
                         exceptIds.push(rows[i].userId);
                     }
-                    self.$refs.userDialog.open('/user/list/with/except', exceptIds);
+                    if(type === 'system'){
+                        self.$refs.userDialog.open('/user/list/with/except', exceptIds);
+                    }else if(type === 'business'){
+                        self.$refs.userDialog.open('/user/list/company/user/with/except', exceptIds);
+                    }
                 },
-                selectedUsers:function(users, buffer, startLoading, endLoading, done){
+                selectedUsers:function(users, startLoading, endLoading, done){
                     var self = this;
                     var userIds = [];
                     for(var i=0; i<users.length; i++){
                         userIds.push(users[i].id);
                     }
                     startLoading();
-                    ajax.post('/user/system/role/permission/bind/user', {
-                        roleId:roleId,
-                        userIds: $.toJSON(userIds)
-                    }, function(data, status){
-                        endLoading();
-                        if(status !== 200) return;
-                        if(data && data.length>0){
-                            for(var i=0; i<data.length; i++){
-                                self.table.rows.push(data[i]);
+                    if(type === 'system'){
+                        ajax.post('/user/system/role/permission/bind/user', {
+                            roleId:roleId,
+                            userIds: $.toJSON(userIds)
+                        }, function(data, status){
+                            endLoading();
+                            if(status !== 200) return;
+                            if(data && data.length>0){
+                                for(var i=0; i<data.length; i++){
+                                    self.table.rows.push(data[i]);
+                                }
                             }
-                        }
-                        done();
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                            done();
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
+                    }else if(type === 'business'){
+                        ajax.post('/user/business/role/permission/bind/user', {
+                            roleId:roleId,
+                            userIds: $.toJSON(userIds)
+                        }, function(data, status){
+                            endLoading();
+                            if(status !== 200) return;
+                            if(data && data.length>0){
+                                for(var i=0; i<data.length; i++){
+                                    self.table.rows.push(data[i]);
+                                }
+                            }
+                            done();
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
+                    }
                 },
                 handleDelete:function(){
 
@@ -109,17 +137,31 @@ define([
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
-                                ajax.post('/user/system/role/permission/unbind/' + row.id, null, function(data, status){
-                                    instance.confirmButtonLoading = false;
-                                    if(status !== 200) return;
-                                    for(var i=0; i<self.table.rows.length; i++){
-                                        if(self.table.rows[i].id === row.id){
-                                            self.table.rows.splice(i, 1);
-                                            break;
+                                if(type === 'system'){
+                                    ajax.post('/user/system/role/permission/unbind/' + row.id, null, function(data, status){
+                                        instance.confirmButtonLoading = false;
+                                        if(status !== 200) return;
+                                        for(var i=0; i<self.table.rows.length; i++){
+                                            if(self.table.rows[i].id === row.id){
+                                                self.table.rows.splice(i, 1);
+                                                break;
+                                            }
                                         }
-                                    }
-                                    done();
-                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                                        done();
+                                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                                }else if(type === 'business'){
+                                    ajax.post('/user/business/role/permission/unbind/' + row.id, null, function(data, status){
+                                        instance.confirmButtonLoading = false;
+                                        if(status !== 200) return;
+                                        for(var i=0; i<self.table.rows.length; i++){
+                                            if(self.table.rows[i].id === row.id){
+                                                self.table.rows.splice(i, 1);
+                                                break;
+                                            }
+                                        }
+                                        done();
+                                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                                }
                             }else{
                                 instance.confirmButtonLoading = false;
                                 done();
@@ -139,21 +181,39 @@ define([
                 load:function(currentPage){
                     var self = this;
                     self.table.rows.splice(0, self.table.rows.length);
-                    ajax.post('/user/system/role/permission/list/by/roleId', {
-                        roleId:roleId,
-                        currentPage:currentPage,
-                        pageSize:self.table.pageSize
-                    }, function(data){
-                        var total = data.total;
-                        var rows = data.rows;
-                        if(rows && rows.length>0){
-                            for(var i=0; i<rows.length; i++){
-                                self.table.rows.push(rows[i]);
+                    if(type === 'system'){
+                        ajax.post('/user/system/role/permission/list/by/roleId', {
+                            roleId:roleId,
+                            currentPage:currentPage,
+                            pageSize:self.table.pageSize
+                        }, function(data){
+                            var total = data.total;
+                            var rows = data.rows;
+                            if(rows && rows.length>0){
+                                for(var i=0; i<rows.length; i++){
+                                    self.table.rows.push(rows[i]);
+                                }
+                                self.table.total = total;
                             }
-                            self.table.total = total;
-                        }
-                        self.table.currentPage = currentPage;
-                    });
+                            self.table.currentPage = currentPage;
+                        });
+                    }else if(type === 'business'){
+                        ajax.post('/user/business/role/permission/list/by/roleId', {
+                            roleId:roleId,
+                            currentPage:currentPage,
+                            pageSize:self.table.pageSize
+                        }, function(data){
+                            var total = data.total;
+                            var rows = data.rows;
+                            if(rows && rows.length>0){
+                                for(var i=0; i<rows.length; i++){
+                                    self.table.rows.push(rows[i]);
+                                }
+                                self.table.total = total;
+                            }
+                            self.table.currentPage = currentPage;
+                        });
+                    }
                 }
             },
             created:function(){
@@ -169,7 +229,7 @@ define([
     };
 
     var groupList = {
-        path:'/' + pageId + '/:id/:name',
+        path:'/' + pageId + '/:id/:name/:type',
         component:{
             template:'<div id="' + pageId + '" class="page-wrapper"></div>'
         },

@@ -41,6 +41,7 @@ require.config({
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
         'mi-system-role-dialog':window.APPPATH + 'component/dialog/system-role/system-role-dialog',
+        'mi-business-role-dialog':window.APPPATH + 'component/dialog/business-role/business-role-dialog',
         'mi-theme-dialog':window.APPPATH + 'component/dialog/theme/theme-dialog',
 
         /* pages */
@@ -53,8 +54,8 @@ require.config({
         'page-organization':window.APPPATH + 'organization/page-organization',
         'page-organization-personal-settings':window.APPPATH + 'organization-personal-settings/page-organization-personal-settings',
         'page-development-basic':window.APPPATH + 'development/basic/page-development-basic',
-        'page-subordinate-user':window.APPPATH + 'subordinate/user/page-subordinate-user',
-        'page-subordinate-role':window.APPPATH + 'subordinate/role/page-subordinate-role'
+        'page-business-user':window.APPPATH + 'business-user/page-business-user',
+        'page-business-role':window.APPPATH + 'business-role/page-business-role'
     },
     shim:{
         'vue':{

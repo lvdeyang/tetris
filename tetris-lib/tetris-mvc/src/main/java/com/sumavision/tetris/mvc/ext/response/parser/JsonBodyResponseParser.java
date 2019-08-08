@@ -35,7 +35,11 @@ public class JsonBodyResponseParser {
 				throw new BaseException(StatusCode.fromCode(status), response.getString("message"));
 			}
 		}else{
-			return JSON.parseArray(JSON.toJSONString(response.get("data")), clazz);
+			if(response.get("data") == null){
+				return null;
+			}else{
+				return JSON.parseArray(JSON.toJSONString(response.get("data")), clazz);
+			}
 		}
 	}
 	
@@ -58,7 +62,11 @@ public class JsonBodyResponseParser {
 				throw new BaseException(StatusCode.fromCode(status), response.getString("message"));
 			}
 		}else{
-			return JSON.parseObject(JSON.toJSONString(response.get("data")), clazz);
+			if(response.get("data") == null){
+				return null;
+			}else{
+				return JSON.parseObject(JSON.toJSONString(response.get("data")), clazz);
+			}
 		}
 	}
 	

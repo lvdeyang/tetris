@@ -40,6 +40,10 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 	
 	private String previewUrl;
 	
+	private String reviewStatus;
+	
+	private String processInstanceId;
+	
 	private String uploadTmpPath;
 	
 	public String getName() {
@@ -168,6 +172,24 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 		return this;
 	}
 
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public MediaCompressVO setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+		return this;
+	}
+
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public MediaCompressVO setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
 	public String getUploadTmpPath() {
 		return uploadTmpPath;
 	}
@@ -195,7 +217,9 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 			.setMimetype(entity.getMimetype())
 			.setProgress(0)
 			.setUploadTmpPath(entity.getUploadTmpPath())
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append(entity.getPreviewUrl()).toString());
+			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append(entity.getPreviewUrl()).toString())
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
+			.setProcessInstanceId(entity.getProcessInstanceId());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaCompressPO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaCompressPO.SEPARATOR_KEYWORDS)));	 
 		return this;
@@ -213,7 +237,8 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 			.setRemarks("-")
 			.setType(MediaCompressItemType.FOLDER.toString())
 			.setIcon(MediaCompressItemType.FOLDER.getIcon())
-			.setStyle(MediaCompressItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaCompressItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

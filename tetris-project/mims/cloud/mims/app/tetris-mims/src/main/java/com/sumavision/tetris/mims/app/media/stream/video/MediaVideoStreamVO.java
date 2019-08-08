@@ -28,6 +28,10 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 	
 	private String style;
 	
+	private String reviewStatus;
+	
+	private String processInstanceId;
+	
 	public List<String> getPreviewUrl() {
 		return previewUrl;
 	}
@@ -118,6 +122,24 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 		return this;
 	}
 	
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public MediaVideoStreamVO setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+		return this;
+	}
+
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public MediaVideoStreamVO setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
 	@Override
 	public MediaVideoStreamVO set(MediaVideoStreamPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -129,7 +151,9 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 			.setRemarks(entity.getRemarks())
 			.setType(MediaVideoStreamItemType.VIDEO_STREAM.toString())
 			.setIcon(MediaVideoStreamItemType.VIDEO_STREAM.getIcon())
-			.setStyle(MediaVideoStreamItemType.VIDEO_STREAM.getStyle()[0]);
+			.setStyle(MediaVideoStreamItemType.VIDEO_STREAM.getStyle()[0])
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
+			.setProcessInstanceId(entity.getProcessInstanceId());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoStreamPO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoStreamPO.SEPARATOR_KEYWORDS)));	 
 		return this;
@@ -145,7 +169,8 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 			.setRemarks("-")
 			.setType(MediaVideoStreamItemType.FOLDER.toString())
 			.setIcon(MediaVideoStreamItemType.FOLDER.getIcon())
-			.setStyle(MediaVideoStreamItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaVideoStreamItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

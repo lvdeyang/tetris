@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -37,7 +39,6 @@ import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoCannotMatc
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoErrorBeginOffsetException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadCancelException;
-import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
@@ -89,7 +90,7 @@ public class ApiAndroidMediaVideoController {
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
 	 * @param folderId 文件夹id
 	 * @return rows List<MediaVideoVO> 视频媒资列表
-	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 * @return breadCrumb List<FolderBreadCrumbVO> 面包屑数据
 	 */
 	@JsonBody
 	@ResponseBody
@@ -97,8 +98,13 @@ public class ApiAndroidMediaVideoController {
 	public Object load(
 			@PathVariable Long folderId,
 			HttpServletRequest request) throws Exception{
-		
-		return mediaVideoQuery.loadForAndroid(folderId);
+		Map<String, Object> medias = mediaVideoQuery.load(folderId);
+		if(medias.containsKey("breadCrumb") && medias.get("breadCrumb")!=null){
+			FolderBreadCrumbVO breadCrumb = (FolderBreadCrumbVO)medias.get("breadCrumb");
+			List<FolderBreadCrumbVO> breadCrumbList = folderQuery.convertFolderBreadCrumbToList(breadCrumb);
+			medias.put("breadCrumb", breadCrumbList);
+		}
+		return medias;
 	}
 	
 	/**

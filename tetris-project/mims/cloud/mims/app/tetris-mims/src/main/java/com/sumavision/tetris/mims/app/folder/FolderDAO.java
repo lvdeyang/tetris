@@ -140,6 +140,18 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	public List<FolderPO> findCompanyTreeByGroupId(String groupId);
 	
 	/**
+	 * 获取企业特定类型文件夹树<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月8日 下午3:01:44
+	 * @param String groupId 群组id
+	 * @param String type 文件夹类型
+	 * @return List<FolderPO> 文件夹树
+	 */
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name  FROM mims_folder folder LEFT JOIN mims_folder_group_permission permission ON folder.id=permission.folder_id WHERE  permission.group_id=?1 AND folder.type=?2", nativeQuery = true)
+	public List<FolderPO> findCompanyTreeByGroupIdAndType(String groupId, String type);
+	
+	/**
 	 * 获取有权限的企业文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

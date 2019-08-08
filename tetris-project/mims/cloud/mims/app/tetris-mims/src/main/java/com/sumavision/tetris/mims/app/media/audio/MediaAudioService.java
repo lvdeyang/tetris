@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -16,16 +17,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.audio.DoTTSUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.easy.process.core.ProcessQuery;
+import com.sumavision.tetris.easy.process.core.ProcessService;
+import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioErrorWhenChangeFromTxtException;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
@@ -34,7 +44,9 @@ import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtNotExistExcept
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
+import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -65,8 +77,26 @@ public class MediaAudioService {
 	@Autowired
 	private MediaSettingsQuery mediaSettingsQuery;
 	
+	@Autowired
+	private MediaSettingsDAO mediaSettingsDao;
+	
 	@Autowired 
 	private MediaTxtDAO mediaTxtDAO;
+	
+	@Autowired
+	private ProcessQuery processQuery;
+	
+	@Autowired
+	private ProcessService processService;
+	
+	@Autowired
+	private MimsServerPropsQuery serverPropsQuery; 
+	
+	@Autowired
+	private FolderQuery folderQuery;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 音频媒资上传审核通过<br/>
@@ -143,7 +173,42 @@ public class MediaAudioService {
 	public void deleteReviewPassed(Long id) throws Exception{
 		MediaAudioPO media = mediaAudioDao.findOne(id);
 		if(media != null){
-			mediaAudioDao.delete(media);
+			List<MediaAudioPO> audiosCanBeDeleted = new ArrayListWrapper<MediaAudioPO>().add(media).getList();
+			
+			//生成待删除存储文件数据
+			List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaAudios(audiosCanBeDeleted);
+			
+			//删除素材文件元数据
+			mediaAudioDao.deleteInBatch(audiosCanBeDeleted);
+			
+			//保存待删除存储文件数据
+			preRemoveFileDao.save(preRemoveFiles);
+			
+			//调用flush使sql生效
+			preRemoveFileDao.flush();
+			
+			//将待删除存储文件数据押入存储文件删除队列
+			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
+			
+			Set<Long> pictureIds = new HashSet<Long>();
+			for(MediaAudioPO audio:audiosCanBeDeleted){
+				pictureIds.add(audio.getId());
+			}
+			
+			//删除临时文件
+			for(MediaAudioPO audio:audiosCanBeDeleted){
+				List<MediaAudioPO> results = mediaAudioDao.findByUploadTmpPathAndIdNotIn(audio.getUploadTmpPath(), pictureIds);
+				if(results==null || results.size()<=0){
+					File file = new File(new File(audio.getUploadTmpPath()).getParent());
+					File[] children = file.listFiles();
+					if(children != null){
+						for(File sub:children){
+							if(sub.exists()) sub.delete();
+						}
+					}
+					if(file.exists()) file.delete();
+				}
+			}
 		}
 	}
 	
@@ -175,43 +240,98 @@ public class MediaAudioService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月23日 下午3:43:03
 	 * @param Collection<MediaAudioPO> audios 音频媒资列表
+	 * @return deleted List<MediaAudioVO> 删除的数据列表
+	 * @return processed List<MediaAudioVO> 待审核的数据列表
 	 */
-	public void remove(Collection<MediaAudioPO> audios) throws Exception{
+	public Map<String, Object> remove(Collection<MediaAudioPO> audios) throws Exception{
 		
-		//生成待删除存储文件数据
-		List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaAudios(audios);
+		UserVO user = userQuery.current();
 		
-		//删除素材文件元数据
-		mediaAudioDao.deleteInBatch(audios);
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_DELETE_AUDIO);
 		
-		//保存待删除存储文件数据
-		preRemoveFileDao.save(preRemoveFiles);
+		List<MediaAudioPO> audiosCanBeDeleted = new ArrayList<MediaAudioPO>();
+		List<MediaAudioPO> audiosNeedProcess = new ArrayList<MediaAudioPO>();
 		
-		//调用flush使sql生效
-		preRemoveFileDao.flush();
-		
-		//将待删除存储文件数据押入存储文件删除队列
-		storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
-		
-		Set<Long> pictureIds = new HashSet<Long>();
-		for(MediaAudioPO audio:audios){
-			pictureIds.add(audio.getId());
+		if(needProcess){
+			for(MediaAudioPO audio:audios){
+				if(audio.getAuthorId().equals(user.getId().toString()) && 
+						ReviewStatus.REVIEW_UPLOAD_REFUSE.equals(audio.getReviewStatus())){
+					audiosCanBeDeleted.add(audio);
+				}else{
+					audiosNeedProcess.add(audio);
+				}
+			}
+			if(audiosNeedProcess.size() > 0){
+				//开启审核流程
+				Long companyId = Long.valueOf(user.getGroupId());
+				MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_DELETE_AUDIO);
+				Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+				ProcessVO process = processQuery.findById(processId);
+				for(MediaAudioPO audio:audiosNeedProcess){
+					JSONObject variables = new JSONObject();
+					
+					//展示修改后参数
+					variables.put("name", audio.getName());
+					variables.put("tags", audio.getTags());
+					variables.put("keyWords", audio.getKeyWords());
+					variables.put("remark", audio.getRemarks());
+					variables.put("media", serverPropsQuery.generateHttpPreviewUrl(audio.getPreviewUrl()));
+					variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(audio.getFolderId()));
+					
+					//接口参数
+					variables.put("_pa13_id", audio.getId());
+					
+					String category = new StringBufferWrapper().append("删除音频：").append(audio.getName()).toString();
+					String business = new StringBufferWrapper().append("mediaAudio:").append(audio.getId()).toString();
+					String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+					audio.setProcessInstanceId(processInstanceId);
+					audio.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
+				}
+				mediaAudioDao.save(audiosNeedProcess);
+			}
+		}else{
+			audiosCanBeDeleted.addAll(audios);
 		}
 		
-		//删除临时文件
-		for(MediaAudioPO audio:audios){
-			List<MediaAudioPO> results = mediaAudioDao.findByUploadTmpPathAndIdNotIn(audio.getUploadTmpPath(), pictureIds);
-			if(results==null || results.size()<=0){
-				File file = new File(new File(audio.getUploadTmpPath()).getParent());
-				File[] children = file.listFiles();
-				if(children != null){
-					for(File sub:children){
-						if(sub.exists()) sub.delete();
+		if(audiosCanBeDeleted.size() > 0){
+			//生成待删除存储文件数据
+			List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaAudios(audiosCanBeDeleted);
+			
+			//删除素材文件元数据
+			mediaAudioDao.deleteInBatch(audiosCanBeDeleted);
+			
+			//保存待删除存储文件数据
+			preRemoveFileDao.save(preRemoveFiles);
+			
+			//调用flush使sql生效
+			preRemoveFileDao.flush();
+			
+			//将待删除存储文件数据押入存储文件删除队列
+			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
+			
+			Set<Long> pictureIds = new HashSet<Long>();
+			for(MediaAudioPO audio:audiosCanBeDeleted){
+				pictureIds.add(audio.getId());
+			}
+			
+			//删除临时文件
+			for(MediaAudioPO audio:audiosCanBeDeleted){
+				List<MediaAudioPO> results = mediaAudioDao.findByUploadTmpPathAndIdNotIn(audio.getUploadTmpPath(), pictureIds);
+				if(results==null || results.size()<=0){
+					File file = new File(new File(audio.getUploadTmpPath()).getParent());
+					File[] children = file.listFiles();
+					if(children != null){
+						for(File sub:children){
+							if(sub.exists()) sub.delete();
+						}
 					}
+					if(file.exists()) file.delete();
 				}
-				if(file.exists()) file.delete();
 			}
 		}
+		return new HashMapWrapper<String, Object>().put("deleted", MediaAudioVO.getConverter(MediaAudioVO.class).convert(audiosCanBeDeleted, MediaAudioVO.class))
+												   .put("processed", MediaAudioVO.getConverter(MediaAudioVO.class).convert(audiosNeedProcess, MediaAudioVO.class))
+												   .getMap();
 	}
 	
 	/**
@@ -287,6 +407,8 @@ public class MediaAudioService {
 			FolderPO folder) throws Exception{
 		
 		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_AUDIO);
+		String transTags = StringUtils.join(tags.toArray(), MediaAudioPO.SEPARATOR_TAG);
+		String transKeyWords = StringUtils.join(keyWords.toArray(), MediaAudioPO.SEPARATOR_KEYWORDS);
 		
 		String separator = File.separator;
 		//临时路径采取/base/companyName/folderuuid/fileNamePrefix/version
@@ -309,8 +431,8 @@ public class MediaAudioService {
 		MediaAudioPO entity = new MediaAudioPO();
 		entity.setLastModified(task.getLastModified());
 		entity.setName(name);
-		entity.setTags(StringUtils.join(tags.toArray(), MediaAudioPO.SEPARATOR_TAG));
-		entity.setKeyWords("");
+		entity.setTags(transTags);
+		entity.setKeyWords(transKeyWords);
 		entity.setRemarks(remark);
 		entity.setAuthorId(user.getUuid());
 		entity.setAuthorName(user.getNickname());
@@ -364,12 +486,50 @@ public class MediaAudioService {
 			List<String> tags, 
 			List<String> keyWords, 
 			String remark) throws Exception{
-		
-		audio.setName(name);
-		audio.setRemarks(remark);
-		audio.setTags(StringUtils.join(tags.toArray(), MediaAudioPO.SEPARATOR_TAG));
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_EDIT_AUDIO);
+		String transTags = tags==null?"":StringUtils.join(tags.toArray(), MediaAudioPO.SEPARATOR_TAG);
+		String transKeyWords = keyWords==null?"":StringUtils.join(keyWords.toArray(), MediaAudioPO.SEPARATOR_KEYWORDS);
+		if(needProcess){
+			//开启审核流程
+			Long companyId = Long.valueOf(user.getGroupId());
+			MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_EDIT_AUDIO);
+			Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+			ProcessVO process = processQuery.findById(processId);
+			JSONObject variables = new JSONObject();
+			
+			//展示修改后参数
+			variables.put("name", name);
+			variables.put("tags", transTags);
+			variables.put("keyWords", transKeyWords);
+			variables.put("remark", remark);
+			
+			//展示修改前参数
+			variables.put("oldName", audio.getName());
+			variables.put("oldTags", audio.getTags());
+			variables.put("oldKeyWords", audio.getKeyWords());
+			variables.put("oldRemark", audio.getRemarks());
+			variables.put("oldMedia", serverPropsQuery.generateHttpPreviewUrl(audio.getPreviewUrl()));
+			variables.put("oldUploadPath", folderQuery.generateFolderBreadCrumb(audio.getFolderId()));
+			
+			//接口参数
+			variables.put("_pa10_id", audio.getId());
+			variables.put("_pa10_name", name);
+			variables.put("_pa10_tags", transTags);
+			variables.put("_pa10_keyWords", transKeyWords);
+			variables.put("_pa10_remarks", remark);
+			
+			String category = new StringBufferWrapper().append("修改音频：").append(audio.getName()).toString();
+			String business = new StringBufferWrapper().append("mediaAudio:").append(audio.getId()).toString();
+			String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+			audio.setProcessInstanceId(processInstanceId);
+			audio.setReviewStatus(ReviewStatus.REVIEW_EDIT_WAITING);
+		}else{
+			audio.setName(name);
+			audio.setRemarks(remark);
+			audio.setTags(transTags);
+			audio.setKeyWords(transKeyWords);
+		}
 		mediaAudioDao.save(audio);
-		
 		return audio;
 	}
 	

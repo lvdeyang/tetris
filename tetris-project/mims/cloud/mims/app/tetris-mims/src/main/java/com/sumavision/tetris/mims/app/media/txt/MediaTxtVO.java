@@ -34,6 +34,10 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 	
 	private String previewUrl;
 	
+	private String reviewStatus;
+	
+	private String processInstanceId;
+	
 	private Long size;
 	
 	private Integer progress;
@@ -139,6 +143,24 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 		return this;
 	}
 
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public MediaTxtVO setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+		return this;
+	}
+
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public MediaTxtVO setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
 	public Long getSize() {
 		return size;
 	}
@@ -177,6 +199,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setRemarks(entity.getRemarks())
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
+			.setProcessInstanceId(entity.getProcessInstanceId())
 			.setSize(entity.getSize())
 			.setType(MediaTxtItemType.TXT.toString())
 			.setIcon(MediaTxtItemType.TXT.getIcon())
@@ -197,7 +221,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setRemarks("-")
 			.setType(MediaTxtItemType.FOLDER.toString())
 			.setIcon(MediaTxtItemType.FOLDER.getIcon())
-			.setStyle(MediaTxtItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaTxtItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

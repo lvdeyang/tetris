@@ -13,7 +13,7 @@ define([
     'element-ui',
     'mi-frame',
     'mi-user-dialog',
-    'mi-subordinate-role-dialog',
+    'mi-business-role-dialog',
     'process-variable-list-dialog',
     'process-variable-set-dialog',
     'css!' + window.APPPATH + 'process-design/page-process-design.css'
@@ -55,9 +55,8 @@ define([
                     buff(users);
                     close();
                 },
-                onSubordinateRoleSelected:function(roles, startLoading, endLoading, close){
+                selectedRoles:function(roles, buff, startLoading, endLoading, close){
                     var self = this;
-                    var buff = self.$refs.miSubordinateRoleDialog.getBuffer();
                     buff(roles);
                     close();
                 },
@@ -148,11 +147,11 @@ define([
                             self.$refs.miUserDialog.setBuffer(fn);
                         },
                         queryRoles:function(roleIds, fn){
-                            ajax.post('/subordinate/role/find/by/id/in', {ids:$.toJSON(roleIds)}, fn);
+                            ajax.post('/business/role/find/by/id/in', {ids:$.toJSON(roleIds)}, fn);
                         },
                         onBindRoleClick:function(fn, roleIds){
-                            self.$refs.miSubordinateRoleDialog.open('/subordinate/role/find/by/company/id/with/except', (roleIds&&roleIds.length>0)?roleIds:null);
-                            self.$refs.miSubordinateRoleDialog.setBuffer(fn);
+                            self.$refs.businessRoleDialog.open('/business/role/list/with/except/ids', (roleIds&&roleIds.length>0)?roleIds:null);
+                            self.$refs.businessRoleDialog.setBuffer(fn);
                         },
                         onBindVariableClick:function(fn, variableIds){
                             self.$refs.miProcessVariableListDialog.open('/process/variable/list/all/with/except/'+processId, (variableIds&&variableIds.length>0)?variableIds:null);

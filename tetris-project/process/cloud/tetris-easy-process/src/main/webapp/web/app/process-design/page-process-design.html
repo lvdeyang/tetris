@@ -20,7 +20,8 @@
 
         <mi-user-dialog ref="miUserDialog" @on-dialog-close="onUserSelected"></mi-user-dialog>
 
-        <mi-subordinate-role-dialog ref="miSubordinateRoleDialog" @on-dialog-close="onSubordinateRoleSelected"></mi-subordinate-role-dialog>
+        <!-- 选择业务角色 -->
+        <mi-business-role-dialog ref="businessRoleDialog" @on-dialog-close="selectedRoles"></mi-business-role-dialog>
 
         <mi-process-variable-list-dialog ref="miProcessVariableListDialog" @on-dialog-close="onProcessVariableSelected"></mi-process-variable-list-dialog>
 

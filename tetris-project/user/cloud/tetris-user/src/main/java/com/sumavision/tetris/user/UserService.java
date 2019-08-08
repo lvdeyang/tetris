@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.business.role.BusinessRoleService;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.organization.CompanyDAO;
@@ -24,10 +25,7 @@ import com.sumavision.tetris.organization.OrganizationPO;
 import com.sumavision.tetris.organization.OrganizationUserPermissionDAO;
 import com.sumavision.tetris.organization.OrganizationUserPermissionPO;
 import com.sumavision.tetris.organization.exception.CompanyNotExistException;
-import com.sumavision.tetris.subordinate.role.SubordinateRoleClassify;
-import com.sumavision.tetris.subordinate.role.SubordinateRoleService;
-import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
-import com.sumavision.tetris.subordinate.role.UserSubordinateRolePermissionService;
+import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
@@ -86,10 +84,7 @@ public class UserService{
 	private Sha256Encoder sha256Encoder;
 	
 	@Autowired
-	private SubordinateRoleService subordinateRoleService;
-	
-	@Autowired
-	private UserSubordinateRolePermissionService userSubordinateRolePermissionService;
+	private BusinessRoleService businessRoleService;
 	
 	/**
 	 * 添加一个用户<br/>
@@ -154,16 +149,18 @@ public class UserService{
 		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, UserClassify.COMPANY.getName());
 		
 		CompanyVO company = null;
-		SubordinateRoleVO roleAdmin = null;
+		SystemRoleVO adminRole = null;
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//创建公司
 			company = companyService.add(companyName, user);
-			//创建管理员角色
-			roleAdmin = subordinateRoleService.addRoleWithUserId(user, company.getId(), "管理员", SubordinateRoleClassify.INTERNAL_COMPANY_ADMIN_ROLE);
-			//绑定用户和系统角色
-			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(3l).getList());
-			//绑定用户和业务角色
-			userSubordinateRolePermissionService.addUserRolePermission(roleAdmin.getId(), user.getId());
+			
+			//处理公司管理员
+			adminRole = businessRoleService.add(company.getId(), "企业管理员", true);
+			
+			//用户授权
+			//1：授权默认的系统角色
+			//2：授权公司管理员业务角色
+			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(2l).add(Long.valueOf(adminRole.getId())).getList());
 		}
 		
 		//发布用户注册事件
@@ -171,7 +168,7 @@ public class UserService{
 		if(company == null){
 			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
 		}else{
-			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), roleAdmin.getId().toString(), roleAdmin.getName());
+			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), adminRole.getId().toString(), adminRole.getName());
 		}
 		applicationEventPublisher.publishEvent(event);
 		
@@ -214,7 +211,7 @@ public class UserService{
 			//加入公司
 			companyUserPermissionService.add(company, user);
 			//绑定用户和系统角色
-			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(2l).getList());
+			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(3l).getList());
 		}
 		
 		//发布用户注册事件

@@ -28,6 +28,10 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 	
 	private String style;
 	
+	private String reviewStatus;
+	
+	private String processInstanceId;
+	
 	public String getPreviewUrl() {
 		return previewUrl;
 	}
@@ -118,6 +122,24 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 		return this;
 	}
 	
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public MediaAudioStreamVO setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+		return this;
+	}
+
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public MediaAudioStreamVO setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
 	@Override
 	public MediaAudioStreamVO set(MediaAudioStreamPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -130,7 +152,9 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 			.setRemarks(entity.getRemarks())
 			.setType(MediaAudioStreamItemType.AUDIO_STREAM.toString())
 			.setIcon(MediaAudioStreamItemType.AUDIO_STREAM.getIcon())
-			.setStyle(MediaAudioStreamItemType.AUDIO_STREAM.getStyle()[0]);
+			.setStyle(MediaAudioStreamItemType.AUDIO_STREAM.getStyle()[0])
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
+			.setProcessInstanceId(entity.getProcessInstanceId());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioStreamPO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaAudioStreamPO.SEPARATOR_KEYWORDS)));	 
 		return this;
@@ -147,7 +171,8 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 			.setRemarks("-")
 			.setType(MediaAudioStreamItemType.FOLDER.toString())
 			.setIcon(MediaAudioStreamItemType.FOLDER.getIcon())
-			.setStyle(MediaAudioStreamItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaAudioStreamItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

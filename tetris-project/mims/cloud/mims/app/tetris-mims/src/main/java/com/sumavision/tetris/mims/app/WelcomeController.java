@@ -40,7 +40,6 @@ import com.sumavision.tetris.menu.MenuVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
-import com.sumavision.tetris.mims.app.group.ChatQuery;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -52,9 +51,6 @@ public class WelcomeController {
 	
 	@Autowired
 	private MenuQuery menuQuery;
-	
-	//@Autowired
-	private ChatQuery chatQuery;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -116,9 +112,6 @@ public class WelcomeController {
 		
 		appInfo.put("menus", menus);
 		
-		/*List<GroupVO> groups = chatTool.generateOrganization(user.getGroupId(), user.getUuid());
-		appInfo.put("groups", groups);*/
-		
 		return appInfo;
 	}
 	
@@ -179,18 +172,7 @@ public class WelcomeController {
 			HttpServletRequest request, 
 			HttpServletResponse response) throws Exception{
 		
-		UserVO user = userQuery.findByToken(token);
-		
-		//权限校验
-		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
-		
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
-		
-		Long folderId = folder.getId();
-		if(FolderType.COMPANY_PICTURE.equals(type) || FolderType.COMPANY_AUDIO.equals(type)){
-			folderId = 0l;
-		}
 		
 		StringBufferWrapper redirectUrl = new StringBufferWrapper().append("http://")
 																   .append(request.getServerName())
@@ -198,15 +180,11 @@ public class WelcomeController {
 																   .append(request.getServerPort())
 																   .append("/")
 																   .append("index/")
-																   .append(token);
-		if(folder == null){
-			redirectUrl.append("#/page-error/403/").append(URLEncoder.encode(new StringBufferWrapper().append("数据异常，").append(type.getName()).append("根目录丢失，请联系管理员！").toString()));
-		}else{
-			redirectUrl.append("#/page-media-")
-					   .append(type.getWebSuffix())
-					   .append("/")
-					   .append(folderId);
-		}
+																   .append(token)
+																   .append("#/page-media-")
+																   .append(type.getWebSuffix())
+																   .append("/")
+																   .append(0);
 		response.sendRedirect(redirectUrl.toString());
 	}
 	

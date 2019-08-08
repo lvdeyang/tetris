@@ -1,4 +1,4 @@
-package com.sumavision.tetris.mims.app.group;
+/*package com.sumavision.tetris.mims.app.group;
 
 import java.util.List;
 
@@ -6,7 +6,7 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 import com.sumavision.tetris.user.UserVO;
 
-/**
+*//**
  * 用户组/角色<br/>
  * <p>
  * 	1.映射资源层来的用户组-用uuid存groupId<br/>
@@ -15,16 +15,16 @@ import com.sumavision.tetris.user.UserVO;
  * <b>作者:</b>lvdeyang<br/>
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2018年11月19日 下午5:12:12
- */
+ *//*
 public class GroupVO extends AbstractBaseVO<GroupVO, OrganizationPO>{
 	
-	/** 群组名称 */
+	*//** 群组名称 *//*
 	private String name;
 	
-	/** 是否可删除 */
+	*//** 是否可删除 *//*
 	private boolean removeable;
 	
-	/** 群组内用户 */
+	*//** 群组内用户 *//*
 	private List<UserVO> users;
 	
 	public String getName() {
@@ -64,3 +64,4 @@ public class GroupVO extends AbstractBaseVO<GroupVO, OrganizationPO>{
 	}
 	
 }
+*/

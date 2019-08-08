@@ -6,11 +6,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
 /**
@@ -24,9 +26,6 @@ public class SystemRoleQuery {
 
 	@Autowired
 	private SystemRoleDAO systemRoleDao;
-	
-	@Autowired
-	private UserSystemRolePermissionDAO userSystemRolePermissionDao;
 	
 	@Autowired
 	private SystemRoleGroupDAO systemRoleGroupDao;
@@ -56,7 +55,7 @@ public class SystemRoleQuery {
 	 */
 	public Map<String, Object> list(Long groupId, int currentPage, int pageSize) throws Exception{
 		long total = systemRoleDao.count();
-		List<SystemRolePO> roles = findAllOrderByUpdateTimeDesc(groupId, currentPage, pageSize);
+		List<SystemRolePO> roles = findBySystemRoleGroupIdAndTypeOrderByUpdateTimeDesc(groupId, SystemRoleType.SYSTEM, currentPage, pageSize);
 		List<SystemRoleVO> view_roles = new ArrayList<SystemRoleVO>();
 		if(roles!=null && roles.size()>0){
 			for(int i=0; i<roles.size(); i++){
@@ -69,60 +68,20 @@ public class SystemRoleQuery {
 	}
 	
 	/**
-	 * 分页查询系统角色<br/>
+	 * 根据分组和类型查询系统角色<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年1月23日 上午10:20:23
-	 * @param Long systemRoleGroupId 系统角色组id
+	 * <b>日期：</b>2019年8月2日 下午2:06:38
+	 * @param Long systemRoleGroupId 角色组id
+	 * @param SystemRoleType type 角色类型
 	 * @param int currentPage 当前页码
 	 * @param int pageSize 每页数据量
 	 * @return List<SystemRolePO> 系统角色列表
 	 */
-	public List<SystemRolePO> findAllOrderByUpdateTimeDesc(Long systemRoleGroupId, int currentPage, int pageSize){
+	public List<SystemRolePO> findBySystemRoleGroupIdAndTypeOrderByUpdateTimeDesc(Long systemRoleGroupId, SystemRoleType type, int currentPage, int pageSize){
 		Pageable page = new PageRequest(currentPage-1, pageSize);
-		Page<SystemRolePO> roles = systemRoleDao.findAllOrderByUpdateTimeDesc(systemRoleGroupId, page);
+		Page<SystemRolePO> roles = systemRoleDao.findBySystemRoleGroupIdAndTypeOrderByUpdateTimeDesc(systemRoleGroupId, type, page);
 		return roles.getContent();
-	}
-	
-	/**
-	 * 分页查询用户下绑定的系统角色<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年1月21日 下午12:27:08
-	 * @param Long userId 用户id
-	 * @param int currentPage 当前页码
-	 * @param int pageSize 每页数据量
-	 * @return int total 用户绑定的角色数量
-	 * @return List<SystemRoleVO> rows 系统角色列表
-	 */
-	public Map<String, Object> listByUserId(Long userId, int currentPage, int pageSize) throws Exception{
-		int total = userSystemRolePermissionDao.countByUserId(userId);
-		List<SystemRolePO> systemRoles = findByUserId(userId, currentPage, pageSize);
-		List<SystemRoleVO> view_systemRoles = new ArrayList<SystemRoleVO>();
-		if(systemRoles!=null && systemRoles.size()>0){
-			for(SystemRolePO systemRole:systemRoles){
-				view_systemRoles.add(new SystemRoleVO().set(systemRole));
-			}
-		}
-		return new HashMapWrapper<String, Object>().put("total", total)
-												   .put("rows", view_systemRoles)
-												   .getMap();
-	}
-	
-	/**
-	 * 分页查询用户绑定的系统角色<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年1月21日 下午12:19:26
-	 * @param Long userId 用户id
-	 * @param int currentPage 当前页码
-	 * @param int pageSize 每页数据量
-	 * @return List<SystemRolePO> 系统角色列表
-	 */
-	public List<SystemRolePO> findByUserId(Long userId, int currentPage, int pageSize) throws Exception{
-		Pageable page = new PageRequest(currentPage-1, pageSize);
-		Page<SystemRolePO> systemRoles = systemRoleDao.findByUserId(userId, page);
-		return systemRoles.getContent();
 	}
 	
 	/**
@@ -136,13 +95,13 @@ public class SystemRoleQuery {
 	public List<SystemRoleGroupVO> listWithGroupByExceptIds(Collection<String> roleIds) throws Exception{
 		List<SystemRolePO> roles = null;
 		if(roleIds==null || roleIds.size()<=0){
-			roles = systemRoleDao.findAll();
+			roles = systemRoleDao.findByType(SystemRoleType.SYSTEM);
 		}else{
 			Set<Long> transRoleIds = new HashSet<Long>();
 			for(String roleId:roleIds){
 				transRoleIds.add(Long.valueOf(roleId));
 			}
-			roles = systemRoleDao.findByIdNotIn(transRoleIds);
+			roles = systemRoleDao.findByTypeAndIdNotIn(SystemRoleType.SYSTEM, transRoleIds);
 		}
 		return packageSystemRolesWithGroup(roles);
 	}

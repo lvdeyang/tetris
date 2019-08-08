@@ -234,7 +234,12 @@ public class MediaAudioController {
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
-		MediaAudioPO entity = mediaAudioService.editAudio(user, audio, name, tagList, null, remark);
+		List<String> keyWordList = null;
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaAudioPO entity = mediaAudioService.editAudio(user, audio, name, tagList, keyWordList, remark);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -385,8 +390,8 @@ public class MediaAudioController {
 				variables.put("remark", task.getRemarks());
 				variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(task.getFolderId()));
 				variables.put("_pa8_id", task.getId());
-				String category = new StringBufferWrapper().append("上传图片：").append(task.getName()).toString();
-				String business = new StringBufferWrapper().append("mediaPicture:").append(task.getId()).toString();
+				String category = new StringBufferWrapper().append("上传音频：").append(task.getName()).toString();
+				String business = new StringBufferWrapper().append("mediaAudio:").append(task.getId()).toString();
 				String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
 				task.setProcessInstanceId(processInstanceId);
 			}
@@ -505,6 +510,8 @@ public class MediaAudioController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 上午9:07:53
 	 * @param @PathVariable Long id 媒资id
+	 * @return deleted List<MediaAudioVO> 删除的数据列表
+	 * @return processed List<MediaAudioVO> 待审核的数据列表
 	 */
 	@JsonBody
 	@ResponseBody
@@ -525,9 +532,7 @@ public class MediaAudioController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaAudioService.remove(new ArrayListWrapper<MediaAudioPO>().add(media).getList());
-		
-		return null;
+		return mediaAudioService.remove(new ArrayListWrapper<MediaAudioPO>().add(media).getList());
 	}
 	
 	/**

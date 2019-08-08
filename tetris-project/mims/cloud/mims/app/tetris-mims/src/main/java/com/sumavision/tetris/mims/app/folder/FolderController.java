@@ -19,7 +19,6 @@ import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFol
 import com.sumavision.tetris.mims.app.material.MaterialVO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.subordinate.role.SubordinateRoleQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -40,10 +39,7 @@ public class FolderController {
 	private FolderDAO folderDao;
 	
 	@Autowired
-	private SubordinateRoleQuery subordinateRoleQuery;
-	
-	@Autowired
-	private FolderRolePermissionDAO folderRolePermissionDAO;
+	private FolderRolePermissionDAO folderRolePermissionDao;
 	/**
 	 * 创建素材库文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -283,34 +279,34 @@ public class FolderController {
 	}
 	
 	/**
-	 * 获取媒资文件夹树（完整树）<br/>
+	 * 获取特定类型文件夹树以及权限信息<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2018年12月8日 下午2:34:47
-	 * @return List<FolderTreeVO> 根节点
+	 * <b>日期：</b>2019年8月7日 上午11:23:01
+	 * @param Long roleId 角色id
+	 * @param @PathVariable String folderType 文件夹类型
+	 * @return treeNodes List<FolderTreeVO> 文件夹树
+	 * @return permissions List<Long> 权限列表
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/media/tree")
-	public Object mediaTree(HttpServletRequest request) throws Exception{
-		
+	@RequestMapping(value = "/media/tree/with/permissions/{folderType}")
+	public Object meidaTreeWithPermissions(
+			Long roleId,
+			@PathVariable String folderType,
+			HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
-		
-		//TODO 权限校验
-		//根据user->role->folder;
-		Long role = subordinateRoleQuery.queryRolesByUserId(user.getId());
-		List<Long> folderIdsList = new ArrayList<Long>();
-		List<FolderRolePermissionPO> list = folderRolePermissionDAO.findByRoleId(role);
-		for (int j = 0; j < list.size(); j++) {
-			folderIdsList.add(list.get(j).getFolderId());
+		FolderType type = FolderType.fromPrimaryKey(folderType);
+		List<FolderPO> folders = folderDao.findCompanyTreeByGroupIdAndType(user.getGroupId(), type.toString());
+		List<FolderTreeVO> treeNodes = folderQuery.generateFolderTree(folders);
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folder:folders){
+			folderIds.add(folder.getId());
 		}
-		
-		List<FolderPO> folderTree = folderDao.findByIdIn(folderIdsList);
-		//List<FolderPO> folderTree = folderDao.findCompanyTreeByGroupId(user.getGroupId());
-		
-		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
-		
-		return roots;
+		List<Long> permissions = folderRolePermissionDao.permissionDuplicateChecking(roleId, folderIds);
+		return new HashMapWrapper<String, Object>().put("treeNodes", treeNodes)
+												   .put("permissions", permissions)
+												   .getMap();
 	}
 	
 	/**
