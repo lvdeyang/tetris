@@ -173,8 +173,18 @@
                     <el-form-item label="媒资名称">
                         <el-input v-model="dialog.addVideo.name"></el-input>
                     </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.addVideo.tags"></el-input>
+                    <el-form-item label="标签">
+                        <!--<el-input v-model="dialog.addVideo.tags"></el-input>-->
+                        <el-tag
+                                :key="simple"
+                                v-for="simple in dialog.addVideo.tags"
+                                style="margin-right:10px;"
+                                closable
+                                :disable-transitions="false"
+                                @close="handleTagRemove(dialog.addVideo.tags, simple)">
+                            {{simple}}
+                        </el-tag>
+                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagAdd" icon="el-icon-edit"> 贴标签</el-button>
                     </el-form-item>
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.addVideo.keyWords"></el-input>
@@ -208,8 +218,18 @@
                     <el-form-item label="媒资名称">
                         <el-input v-model="dialog.editVideo.name"></el-input>
                     </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.editVideo.tags"></el-input>
+                    <el-form-item label="标签">
+                        <!--<el-input v-model="dialog.addVideo.tags"></el-input>-->
+                        <el-tag
+                                :key="simple"
+                                v-for="simple in dialog.editVideo.tags"
+                                style="margin-right:10px;"
+                                closable
+                                :disable-transitions="false"
+                                @close="handleTagRemove(dialog.editVideo.tags, simple)">
+                            {{simple}}
+                        </el-tag>
+                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagEdit" icon="el-icon-edit"> 贴标签</el-button>
                     </el-form-item>
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.editVideo.keyWords"></el-input>
@@ -232,6 +252,9 @@
 
         <!-- 复制文件 -->
         <mi-folder-dialog ref="copyMediaVideoDialog" @selected-folder="copyMediaVideo"></mi-folder-dialog>
+
+        <!-- 选择标签对话框 -->
+        <tag-dialog ref="tagDialog" @on-tag-dialog-close="selectedTags"></tag-dialog>
 
         <!-- 预览灯箱 -->
         <mi-lightbox ref="Lightbox" @on-txt-save="handleTxtSave"></mi-lightbox>

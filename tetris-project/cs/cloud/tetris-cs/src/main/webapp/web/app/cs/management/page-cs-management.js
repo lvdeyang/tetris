@@ -113,7 +113,7 @@ define([
                     },
                     editSchedules: {
                         visible: false,
-                        data: "",
+                        data: {},
                         table: {
                             loading: false,
                             page: {
@@ -245,6 +245,12 @@ define([
                                 chooseNode: []
                             }
                         }
+                    },
+                    seekBroadcast: {
+                        visible: false,
+                        loading: false,
+                        data: {},
+                        duration: ""
                     },
                     deleteProgram: {
                         visible: false,
@@ -756,6 +762,11 @@ define([
                     self.dialog.editSchedules.data = row;
                     self.loadSchedule();
                 },
+                handleEditSchedulesClose : function () {
+                    var self = this;
+                    self.dialog.editSchedules.visible = false;
+                    self.dialog.editSchedules.data = {};
+                },
                 loadSchedule: function(){
                     var self = this;
                     self.dialog.editSchedules.table.loading = true;
@@ -858,6 +869,31 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
 
+                seekBroadcast: function (scope) {
+                    var self = this;
+                    self.dialog.seekBroadcast.data = scope.row;
+                    self.dialog.seekBroadcast.visible = true;
+                },
+                handleSeekBroadcastClose: function () {
+                    var self = this;
+                    self.dialog.seekBroadcast.loading = false;
+                    self.dialog.seekBroadcast.visible = false;
+                    self.dialog.seekBroadcast.data = {};
+                    self.dialog.seekBroadcast.duration = "";
+                },
+                handleSeekBroadcastCommit: function () {
+                    var self = this;
+                    self.dialog.seekBroadcast.loading = true;
+                    var questData = {
+                        channelId: self.dialog.seekBroadcast.data.id,
+                        duration: self.dialog.seekBroadcast.duration
+                    };
+                    ajax.post('/cs/channel/seek', questData, function(data,status){
+                        self.dialog.seekBroadcast.loading = false;
+                        self.handleSeekBroadcastClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+
                 editProgram: function (scope) {
                     var self = this;
                     self.dialog.editProgram.data = scope.row;
@@ -922,7 +958,7 @@ define([
                         }
                     }
                     var programInfo = {
-                        channelId: self.dialog.editProgram.data.id,
+                        scheduleId: self.dialog.editProgram.data.id,
                         screenNum: self.dialog.editProgram.commitData.screenNum,
                         screenInfo: screenInfo
                     };
@@ -1015,7 +1051,7 @@ define([
                         icon: 'icon-tag',
                         style: 'font-size:15px; position:relative; top:1px; margin-right:1px;'
                     });
-                    var questData = {channelId: self.dialog.editProgram.data.id};
+                    var questData = {channelId: self.dialog.editSchedules.data.id};
                     ajax.post('/cs/menu/list/tree', questData, function (data, status) {
                         self.dialog.editProgram.dialog.chooseResource.tree.loading = false;
                         if (data && data.length > 0) {

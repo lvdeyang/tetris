@@ -7,6 +7,7 @@ public enum BroadAbilityQueryType {
 	DELETE("delete", "删除推流"),
 	STOP("stop", "停止推流"),
 	COVER("cover", "覆盖推流"),
+	SEEK("seek", "跳转"),
 	CHANGE("change", "更换推流");
 	
 	private String cmd;

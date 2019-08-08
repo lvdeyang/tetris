@@ -12,26 +12,37 @@ public class ChannelPO extends AbstractBasePO {
 
 	/** 频道名称 */
 	private String name;
+	
 	/** 频道生效时间 */
 	private String date;
+	
 	/** 频道备注 */
 	private String remark;
+	
 	/** 播发方式 */
 	private String broadWay;
+	
 	/** 视频流媒资id */
 	private Long mediaId;
+	
 	/** 视频流媒资url地址 */
 	private String previewUrlIp;
+	
 	/** 视频流媒资url端口 */
 	private String previewUrlPort;
+	
 	/** 能力播发id */
 	private Integer broadId;
+	
 	/** 上次播发url地址 */
 	private String broadUrlIp;
+	
 	/** 上次播发url端口 */
 	private String broadUrlPort;
+	
 	/** 播发状态 */
 	private String broadcastStatus;
+	
 	/** 用户组织信息 */
 	private String groupId;
 

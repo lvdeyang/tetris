@@ -260,7 +260,7 @@ public class MediaVideoPO extends AbstractBasePO{
 	public void setUploadStatus(UploadStatus uploadStatus) {
 		this.uploadStatus = uploadStatus;
 	}
-	
+
 	/**
 	 * 转换为历史数据<br/>
 	 * <b>作者:</b>lvdeyang<br/>

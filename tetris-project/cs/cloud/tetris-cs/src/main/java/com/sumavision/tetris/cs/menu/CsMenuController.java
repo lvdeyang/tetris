@@ -28,6 +28,14 @@ public class CsMenuController {
 	@Autowired
 	private CsResourceService resourceService;
 
+	/**
+	 * 获取cs媒资目录树<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long channelId 频道id
+	 * @return List<CsMenuVO> cs媒资目录树
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/list/tree")
@@ -38,6 +46,15 @@ public class CsMenuController {
 		return rootColumns;
 	}
 
+	/**
+	 * 添加cs媒资根目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long channelId 频道id
+	 * @param String name 根目录名称
+	 * @return CsMenuVO cs媒资目录
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/root")
@@ -48,6 +65,15 @@ public class CsMenuController {
 		return new CsMenuVO().set(menu);
 	}
 	
+	/**
+	 * 移动cs媒资目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 媒资目录id
+	 * @param Long newParantId 新父目录id
+	 * @return CsMenuVO cs媒资目录
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/move")
@@ -55,10 +81,19 @@ public class CsMenuController {
 
 		CsMenuPO menuPO = csMenuService.topPO(id, newParentId);
 
-		return menuPO;
+		return new CsMenuVO().set(menuPO);
 	}
 
-
+	/**
+	 * 编辑cs媒资目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 目录id
+	 * @param String name 目录新名称
+	 * @param String remark 目录新备注
+	 * @return CsMenuVO cs媒资目录
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/edit")
@@ -66,9 +101,19 @@ public class CsMenuController {
 
 		CsMenuPO menuPO = csMenuService.editPO(id, name, remark);
 
-		return menuPO;
+		return new CsMenuVO().set(menuPO);
 	}
 
+	/**
+	 * 添加cs下属媒资目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 父目录id
+	 * @param Long channelId 频道id
+	 * @param String name 新添加的标签名
+	 * @return CsMenuVO 添加的cs媒资目录
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/append")
@@ -76,9 +121,17 @@ public class CsMenuController {
 
 		CsMenuPO menuPO = csMenuService.appendPO(id, channelId, name);
 
-		return menuPO;
+		return new CsMenuVO().set(menuPO);
 	}
-
+	
+	/**
+	 * 删除cs媒资目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 目录id
+	 * @return CsMenuVO cs媒资目录
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/remove")
@@ -86,9 +139,17 @@ public class CsMenuController {
 
 		CsMenuPO menuPO = csMenuService.removePO(id);
 
-		return menuPO;
+		return new CsMenuVO().set(menuPO);
 	}
 	
+	/**
+	 * 获取cs目录下的媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 目录id
+	 * @return List<CsResourceVO> cs媒资列表
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/resource/get")
@@ -99,6 +160,14 @@ public class CsMenuController {
 		return resources;
 	}
 	
+	/**
+	 * 获取mims的所有音视频媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 目录id
+	 * @return List<MediaAVideoVO> mims媒资列表
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/resource/get/mims")
@@ -109,6 +178,16 @@ public class CsMenuController {
 		return resources;
 	}
 	
+	/**
+	 * 向cs目录添加媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param String resourcesListStr mims媒资列表
+	 * @param Long parentId cs目录id
+	 * @param Long channelId 频道id 
+	 * @return List<CsResourceVO> cs媒资列表
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/resource/add")
@@ -119,6 +198,14 @@ public class CsMenuController {
 		return resourceService.addResources(resources, parentId,channelId);
 	}
 	
+	/**
+	 * 移除cs目录内的媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id cs媒资id
+	 * @return CsResourceVO cs媒资
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/resource/remove")

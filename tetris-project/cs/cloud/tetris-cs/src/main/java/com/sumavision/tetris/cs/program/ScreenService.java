@@ -20,6 +20,14 @@ public class ScreenService {
 	@Autowired
 	private ProgramQuery programQuery;
 	
+	/**
+	 * 编辑媒资排单表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param programVO 分屏信息
+	 * @return List<ScreenVO> 编辑后的媒资排单
+	 */
 	public List<ScreenVO> setScreenInfo(Long programId, List<ScreenVO> screenList) throws Exception {
 		if (programId == null || screenList == null)
 			return null;
@@ -53,11 +61,26 @@ public class ScreenService {
 		return screenVOList;
 	}
 
+	/**
+	 * 根据分屏id删除排单列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param programId 分屏id
+	 */
 	public void removeScreen(Long programId) {
 		List<ScreenPO> screenList = screenDao.findByProgramId(programId);
 		screenDao.deleteInBatch(screenList);
 	}
 	
+	/**
+	 * cs内频道下的媒资id删除时的处理(删除所有有关排单，更新排单顺序)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param channelId 频道id
+	 * @param resourceId cs内的媒资id
+	 */
 	public void dealWithResourceRemove(Long channelId,Long resourceId) throws Exception{
 		ProgramVO program = programQuery.getProgram(channelId);
 		if (program == null) {

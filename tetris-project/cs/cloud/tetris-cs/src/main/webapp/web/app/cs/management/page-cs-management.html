@@ -49,10 +49,16 @@
                                                        @click="editMenu(scope)">
                                             </el-button>
                                         </el-tooltip>
-                                        <el-tooltip class="item" effect="dark" content="节目单编辑" placement="bottom">
+                                        <!--<el-tooltip class="item" effect="dark" content="节目单编辑" placement="bottom">-->
+                                            <!--<el-button type="text" icon="feather-icon-clipboard"-->
+                                                       <!--class="channelManage"-->
+                                                       <!--@click="editProgram(scope)">-->
+                                            <!--</el-button>-->
+                                        <!--</el-tooltip>-->
+                                        <el-tooltip class="item" effect="dark" content="节目单排期" placement="bottom">
                                             <el-button type="text" icon="feather-icon-clipboard"
                                                        class="channelManage"
-                                                       @click="editProgram(scope)">
+                                                       @click="editSchedule(scope)">
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="播发地区管理" placement="bottom" v-if="scope.row.broadWay=='终端播发'">
@@ -73,17 +79,16 @@
                                                        @click="stopBroadcast(scope)">
                                             </el-button>
                                         </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="跳转" placement="bottom" v-if="scope.row.broadWay=='轮播能力'">
+                                            <el-button type="text" icon="icon-double-angle-right"
+                                                       class="channelManage"
+                                                       @click="seekBroadcast(scope)">
+                                            </el-button>
+                                        </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="删除频道" placement="bottom">
                                             <el-button type="text" icon="el-icon-delete"
                                                        class="channelManage"
                                                        @click="rowDelete(scope)"></el-button>
-                                        </el-tooltip>
-
-                                        <el-tooltip class="item" effect="dark" content="节目单排期" placement="bottom" v-if="user.id==3">
-                                            <el-button type="text" icon="feather-icon-clipboard"
-                                                       class="channelManage"
-                                                       @click="editSchedule(scope)">
-                                            </el-button>
                                         </el-tooltip>
                                     </template>
                                 </el-table-column>
@@ -450,8 +455,7 @@
                             :data="dialog.editSchedules.table.data"
                             v-loading="dialog.editSchedules.table.loading"
                             tooltip-effect="dark"
-                            style="width: 100%;"
-                            @selection-change="handleScheduleSelectionChange">
+                            style="width: 100%;">
                         <el-table-column type="selection" width="55"></el-table-column>
                         <el-table-column label="播发时间" width="220" prop="broadDate"></el-table-column>
                         <el-table-column label="备注" width="220" prop="remark"></el-table-column>
@@ -466,7 +470,7 @@
                                 <el-tooltip class="item" effect="dark" content="节目编辑" placement="bottom">
                                     <el-button type="text" icon="feather-icon-clipboard"
                                                class="channelManage"
-                                               @click="">
+                                               @click="editProgram(scope)">
                                     </el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="删除排期" placement="bottom">
@@ -496,10 +500,11 @@
 
 
         <el-dialog
-                title="节目单编辑"
+                title="节目编辑"
                 :visible.sync="dialog.editProgram.visible"
                 width="1100px"
                 :before-close="handleEditProgramClose"
+                append-to-body
                 style="height:100%;overflow-y: hidden">
 
             <el-dialog
@@ -566,7 +571,7 @@
                             v-for="item in dialog.editProgram.options.list"
                             :key="item.id"
                             :value="item.name"
-                            :disabled="(dialog.editProgram.data.broadWay == '轮播能力' && item.disabled)">
+                            :disabled="(dialog.editSchedules.data.broadWay == '轮播能力' && item.disabled)">
                     </el-option>
                 </el-select>
             </template>
@@ -803,6 +808,24 @@
                 <el-button size="medium" @click="handleManageBroadcastAreaClose">取 消</el-button>
                 <el-button size="medium" type="primary" @click="handleManageBroadcastAreaCommit"
                            :loading="dialog.manageBroad.loading">确 定
+                </el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="跳转"
+                :visible.sync="dialog.seekBroadcast.visible"
+                width="500px"
+                :before-close="handleSeekBroadcastClose">
+            <el-form ref="form" label-width="80px">
+                <el-form-item label="跳转量(秒)">
+                    <el-input v-model="dialog.seekBroadcast.duration" type="number"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSeekBroadcastClose">取 消</el-button>
+                <el-button size="medium" type="primary" @click="handleSeekBroadcastCommit"
+                           :loading="dialog.seekBroadcast.loading">确 定
                 </el-button>
             </span>
         </el-dialog>

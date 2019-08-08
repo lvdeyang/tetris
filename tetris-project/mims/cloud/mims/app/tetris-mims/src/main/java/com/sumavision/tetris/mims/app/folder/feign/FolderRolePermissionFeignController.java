@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.mims.app.folder.FolderRolePermissionDAO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.subordinate.role.SubordinateRoleVO;
 
 /**
  * folder角色rest接口<br/>
@@ -39,4 +38,16 @@ public class FolderRolePermissionFeignController {
 		folderRolePermissionDAO.deleteInBatch(folderRolePermissionDAO.findByRoleId(Long.parseLong(roleId)));
 		return null;
 	}
+	
+	/**
+	 * 根据文件夹id获取文件夹信息<br/>
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:30:46
+	 * @param Long folderId 文件夹id
+	 */
+	@RequestMapping(value = "/query")
+	public Object getById(Long folderId, HttpServletRequest request)throws Exception{
+		return folderRolePermissionDAO.findOne(folderId);
+	};
 }

@@ -314,7 +314,7 @@ public class MediaVideoStreamService {
 		
 		List<MediaVideoStreamPO> medias = mediaVideoStreamDao.findAll(mediaIdList);
 		
-		if (medias == null) return; 
+		if (medias == null || medias.isEmpty()) return; 
 		
 		remove(medias);
 	}

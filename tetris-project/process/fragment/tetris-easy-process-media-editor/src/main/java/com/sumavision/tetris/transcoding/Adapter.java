@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -17,8 +16,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.xml.XmlUtil;
 import com.sumavision.tetris.transcoding.addTask.requestVO.AddTaskVO;
-import com.sumavision.tetris.transcoding.addTask.requestVO.SourceVO;
-import com.sumavision.tetris.transcoding.addTask.requestVO.TranscodeVO;
 import com.sumavision.tetris.transcoding.addTask.rsponseVO.AddTaskResponseVO;
 import com.sumavision.tetris.transcoding.completeNotify.CompleteNotifyService;
 import com.sumavision.tetris.transcoding.completeNotify.VO.NotifyResponseVO;
@@ -59,20 +56,6 @@ public class Adapter {
 	 * @return AddTaskResponseVO xml解析后的数据结构
 	 */
 	public AddTaskResponseVO addTask(AddTaskVO addTask) throws IOException {
-		List<TranscodeVO> transcodes = addTask.getTranscodeJobs().getTranscode();
-		
-		for (TranscodeVO transcode : transcodes) {
-			List<SourceVO> sources = transcode.getSource();
-			for (SourceVO source : sources) {
-				String sourceHttpUrl = source.getSrcURI().getValue();
-				String sourceFtpUrl = this.changeHttpToFtp(sourceHttpUrl);
-				source.getSrcURI().setValue(sourceFtpUrl);
-			}
-			String targetHttpUrl = transcode.getTarget().getTargetURI();
-			String targetFtpUrl = this.changeHttpToFtp(targetHttpUrl);
-			transcode.getTarget().setTargetURI(targetFtpUrl);
-		}
-		
 		String questXmlString = XmlUtil.toEasyXml(addTask, AddTaskVO.class);
 
 		String requestTranscoding = HttpRequestUtil.httpXmlPost(RequestUrlType.ADD_TASK_RUL.getUrl(), questXmlString);

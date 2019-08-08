@@ -75,6 +75,9 @@ public class HistoryMediaVideoPO extends AbstractBasePO{
 	/** 媒资图片uuid */
 	private String originUuid;
 	
+	/** 是否是远端媒资 */
+	private Boolean remote;
+	
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -238,4 +241,12 @@ public class HistoryMediaVideoPO extends AbstractBasePO{
 		this.originUuid = originUuid;
 	}
 	
+	@Column(name = "REMOTE")
+	public Boolean getRemote() {
+		return remote;
+	}
+
+	public void setRemote(Boolean remote) {
+		this.remote = remote;
+	}
 }

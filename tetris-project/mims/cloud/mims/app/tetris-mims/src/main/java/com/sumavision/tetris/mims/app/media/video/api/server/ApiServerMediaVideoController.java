@@ -23,7 +23,6 @@ import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeEx
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoTaskVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
@@ -181,4 +180,23 @@ public class ApiServerMediaVideoController {
         return new MediaVideoVO().set(task);
 	}
 	
+	/**
+	 * 添加视频媒资(远程视频媒资)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月6日 下午1:44:06
+	 * @param String name 媒资名称
+	 * @param String httpUrl 媒资预览地址
+	 * @param String ftpUrl 媒资存储ftp路径
+	 * @return MediaAudioVO 视频媒资信息
+	 * @throws Exception 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/add/remote")
+	public Object addFar(String name, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		
+		return mediaVideoService.addTask(user, name, httpUrl, ftpUrl);
+	}
 }

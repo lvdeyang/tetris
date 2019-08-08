@@ -2,6 +2,8 @@ package com.sumavision.tetris.mims.app.media.video;
 
 import java.util.List;
 
+import com.sumavision.tetris.mims.app.media.StoreType;
+
 public class MediaVideoVO{
 	private Long id;
 	
@@ -18,6 +20,10 @@ public class MediaVideoVO{
 	private String version;
 	
 	private String remarks;
+	
+	private StoreType storeType;
+	
+	private String uploadTmpPath;
 	
 	private List<String> tags;
 	
@@ -106,6 +112,24 @@ public class MediaVideoVO{
 
 	public MediaVideoVO setRemarks(String remarks) {
 		this.remarks = remarks;
+		return this;
+	}
+
+	public StoreType getStoreType() {
+		return storeType;
+	}
+
+	public MediaVideoVO setStoreType(StoreType storeType) {
+		this.storeType = storeType;
+		return this;
+	}
+
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaVideoVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
 		return this;
 	}
 

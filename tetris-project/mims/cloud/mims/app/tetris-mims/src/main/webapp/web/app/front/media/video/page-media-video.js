@@ -17,6 +17,7 @@ define([
     'mi-task-view',
     'mi-upload-dialog',
     'mi-lightbox',
+    'tag-dialog',
     'css!' + window.APPPATH + 'front/media/video/page-media-video.css'
 ], function(tpl, config, context, commons, ajax, $, File, Uploader, Vue){
 
@@ -64,7 +65,7 @@ define([
                         visible:false,
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keyWords:'',
                         task:'',
                         loading:false
@@ -74,7 +75,7 @@ define([
                         id:'',
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keyWords:'',
                         loading:false
                     },
@@ -470,7 +471,7 @@ define([
                     var self = this;
                     self.dialog.addVideo.name = '';
                     self.dialog.addVideo.remark = '';
-                    self.dialog.addVideo.tags = '';
+                    self.dialog.addVideo.tags = [];
                     self.dialog.addVideo.keyWords = '';
                     self.dialog.addVideo.task = '';
                     self.dialog.addVideo.visible = false;
@@ -481,7 +482,7 @@ define([
                     var self = this;
                     self.dialog.editVideo.name = '';
                     self.dialog.editVideo.remark = '';
-                    self.dialog.editVideo.tags = '';
+                    self.dialog.editVideo.tags = [];
                     self.dialog.editVideo.keyWords = '';
                     self.dialog.editVideo.visible = false;
                     self.dialog.editVideo.loading = false;
@@ -499,7 +500,7 @@ define([
                     ajax.post('/media/video/task/add', {
                         task: $.toJSON(task),
                         name:self.dialog.addVideo.name,
-                        tags:self.dialog.addVideo.tags,
+                        tags:(self.dialog.addVideo.tags.length > 0) ? self.dialog.addVideo.tags.join(",") : null,
                         keyWords:self.dialog.addVideo.keyWords,
                         remark:self.dialog.addVideo.remark,
                         folderId:self.current.id
@@ -529,7 +530,7 @@ define([
                     self.dialog.editVideo.loading = true;
                     ajax.post('/media/video/task/edit/' + self.dialog.editVideo.id, {
                         name:self.dialog.editVideo.name,
-                        tags:self.dialog.editVideo.tags,
+                        tags:(self.dialog.editVideo.tags.length > 0) ? self.dialog.editVideo.tags.join(",") : null,
                         keyWords:self.dialog.editVideo.keyWords,
                         remark:self.dialog.editVideo.remark
                     }, function(data, status){
@@ -620,6 +621,32 @@ define([
                             title: '提示',
                             message: '由于您在上传时关闭了页面，需要再次选择相同文件才能续传！'
                         });
+                    }
+                },
+                handleTagAdd: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.addVideo.tags);
+                },
+                handleTagEdit: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.editVideo.tags);
+                },
+                selectedTags: function (buff, tags, startLoading, endLoading, close) {
+                    var self = this;
+                    startLoading();
+                    buff.splice(0,buff.length);
+                    for(var i=0; i<tags.length; i++){
+                        buff.push(tags[i].name);
+                    }
+                    endLoading();
+                    close();
+                },
+                handleTagRemove:function(tag, value){
+                    for(var i=0; i<tag.length; i++){
+                        if(tag[i] === value){
+                            tag.splice(i, 1);
+                            break;
+                        }
                     }
                 }
             },

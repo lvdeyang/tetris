@@ -83,7 +83,7 @@ public class ApiQtMediaController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/by/transcoding")
-	public Object addByTranscoding(String urlList, Long parentFolderId, HttpServletRequest request) throws Exception {
+	public Object addByTranscoding(String urlList, Long parentFolderId,String mediaTags, HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
 		
 		List<String> urls = Arrays.asList(urlList.split(","));
@@ -93,9 +93,9 @@ public class ApiQtMediaController {
 		if (folder == null) return null;
 		
 		if(folder.getType() == FolderType.COMPANY_VIDEO){
-			mediaVideoService.addList(user, urls, parentFolderId);
+			mediaVideoService.addList(user, urls, parentFolderId, mediaTags);
 		}else if (folder.getType() == FolderType.COMPANY_AUDIO) {
-			mediaAudioService.addList(user, urls, parentFolderId);
+			mediaAudioService.addList(user, urls, parentFolderId, mediaTags);
 		}
 		
 		return null;

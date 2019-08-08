@@ -1,8 +1,11 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -370,27 +373,47 @@ public class MediaAudioController {
 		
 		if(endOffset == size){
 			//上传完成
-			task.setUploadStatus(UploadStatus.COMPLETE);
-			if(task.getReviewStatus() != null){
-				//开启审核流程
-				Long companyId = Long.valueOf(user.getGroupId());
-				MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_AUDIO);
-				Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
-				ProcessVO process = processQuery.findById(processId);
-				JSONObject variables = new JSONObject();
-				variables.put("name", task.getName());
-				variables.put("tags", task.getTags());
-				variables.put("keyWords", task.getKeyWords());
-				variables.put("media", serverPropsQuery.generateHttpPreviewUrl(task.getPreviewUrl()));
-				variables.put("remark", task.getRemarks());
-				variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(task.getFolderId()));
-				variables.put("_pa8_id", task.getId());
-				String category = new StringBufferWrapper().append("上传图片：").append(task.getName()).toString();
-				String business = new StringBufferWrapper().append("mediaPicture:").append(task.getId()).toString();
-				String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
-				task.setProcessInstanceId(processInstanceId);
+			if (task.getMimetype().equals("text/plain")) {
+				InputStreamReader reader = new InputStreamReader(new FileInputStream(task.getUploadTmpPath()), "utf-8");
+				BufferedReader bReader = new BufferedReader(reader);
+				String txtContent = "";
+				String line;
+				while ((line = bReader.readLine()) != null) {
+					txtContent += txtContent.isEmpty() ? line : "\n" + line;
+				}
+				String tags = task.getTags();
+				List<String> tagList = new ArrayList<String>();
+				if (!tags.isEmpty()) {
+					tagList = Arrays.asList(tags.split(","));
+				}
+				String remark = task.getRemarks();
+				FolderPO folder = folderDao.findOne(task.getFolderId());
+				mediaAudioService.remove(new ArrayListWrapper<MediaAudioPO>().add(task).getList());
+				MediaAudioPO newTask = mediaAudioService.addTaskFromTxt(user, task.getName(), tagList, null, remark, txtContent, folder);
+				return new MediaAudioVO().set(newTask);
+			} else {
+				task.setUploadStatus(UploadStatus.COMPLETE);
+				if(task.getReviewStatus() != null){
+					//开启审核流程
+					Long companyId = Long.valueOf(user.getGroupId());
+					MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_AUDIO);
+					Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+					ProcessVO process = processQuery.findById(processId);
+					JSONObject variables = new JSONObject();
+					variables.put("name", task.getName());
+					variables.put("tags", task.getTags());
+					variables.put("keyWords", task.getKeyWords());
+					variables.put("media", serverPropsQuery.generateHttpPreviewUrl(task.getPreviewUrl()));
+					variables.put("remark", task.getRemarks());
+					variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(task.getFolderId()));
+					variables.put("_pa8_id", task.getId());
+					String category = new StringBufferWrapper().append("上传图片：").append(task.getName()).toString();
+					String business = new StringBufferWrapper().append("mediaPicture:").append(task.getId()).toString();
+					String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+					task.setProcessInstanceId(processInstanceId);
+				}
+				mediaAudioDao.save(task);
 			}
-			mediaAudioDao.save(task);
 		}
 		
         return new MediaAudioVO().set(task);

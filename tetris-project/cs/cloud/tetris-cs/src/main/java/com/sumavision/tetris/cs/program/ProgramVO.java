@@ -7,7 +7,7 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class ProgramVO extends AbstractBaseVO<ProgramVO,ProgramPO>{
 	
-	private Long channelId;
+	private Long scheduleId;
 	private Long screenNum;
 	private List<ScreenVO> screenInfo;
 
@@ -16,18 +16,18 @@ public class ProgramVO extends AbstractBaseVO<ProgramVO,ProgramPO>{
 		this.setId(entity.getId())
 		.setUuid(entity.getUuid())
 		.setUpdateTime(entity.getUpdateTime() == null ? "": DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-		.setChannelId(entity.getChannelId())
+		.setScheduleId(entity.getScheduleId())
 		.setScreenNum(entity.getScreenNum());
 		
 		return this;
 	}
 
-	public Long getChannelId() {
-		return channelId;
+	public Long getScheduleId() {
+		return scheduleId;
 	}
 
-	public ProgramVO setChannelId(Long channelId) {
-		this.channelId = channelId;
+	public ProgramVO setScheduleId(Long scheduleId) {
+		this.scheduleId = scheduleId;
 		return this;
 	}
 

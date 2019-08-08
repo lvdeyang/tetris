@@ -25,9 +25,23 @@ public interface ChannelDAO extends BaseDAO<ChannelPO>{
 			nativeQuery = true)
 	public Page<ChannelPO> findAllByGroupId(String groupId, Pageable pageable);
 	
+	/**
+	 * 判断播发后输出的ip和port是否被使用(仅针对能力播发，修改频道时使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午5:09:08
+	 * @return ChannelPO 频道信息
+	 */
 	@Query(value = "SELECT * FROM TETRIS_CS_CHANNEL WHERE id <> ?1 AND preview_url_ip = ?2 AND preview_url_port = ?3", nativeQuery = true)
 	public ChannelPO checkIpAndPortExists(Long channelId, String previewUrlIp, String previewUrlPort);
 	
+	/**
+	 * 判断播发后输出的ip和port是否被使用(仅针对能力播发，新建频道时使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午5:09:08
+	 * @return ChannelPO 频道信息
+	 */
 	@Query(value = "SELECT * FROM TETRIS_CS_CHANNEL WHERE preview_url_ip = ?1 AND preview_url_port = ?2", nativeQuery = true)
 	public ChannelPO checkIpAndPortExists(String previewUrlIp, String previewUrlPort);
 	

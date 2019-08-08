@@ -18,6 +18,12 @@ import com.sumavision.tetris.cs.channel.exception.ChannelUdpBroadCountIsFullExce
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class Adapter {
+	/**
+	 * 适配：http地址转ftp地址(ftp账号密码在配置文件，默认ftp根目录为../webapps/ROOT)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午11:06:57
+	 */
 	public String changeHttpToFtp(String httpUrl) throws IOException {		
 		File file = ResourceUtils.getFile("classpath:profile.json");
 
@@ -54,12 +60,24 @@ public class Adapter {
 		return ftpPath;
 	}
 	
+	/**
+	 * 适配：根据ip和port生成udp的url<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午11:06:57
+	 */
 	public String getUdpUrlFromIpAndPort(String ip,String port){
 		if (ip == null || port == null) return null;
 		
 		return new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString();
 	}
 	
+	/**
+	 * 适配：根据udp的url获取ip和port<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午11:06:57
+	 */
 	public HashMapWrapper<String, String> getIpAndPortFromUdpUrl(String url){
 		if (url == null || url.isEmpty()) return null;
 		
@@ -73,6 +91,12 @@ public class Adapter {
 				.put("port", port);
 	}
 	
+	/**
+	 * 适配：获取新的能力播发id<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午11:06:57
+	 */
 	public int getNewId(List<Integer> ids) throws Exception{
 		List<Integer> parentList = new ArrayList<Integer>();
 		for (int i = 0; i < 256; i++) {

@@ -19,6 +19,15 @@ public class CsMenuService {
 	@Autowired
 	private CsResourceService csResourceService;
 
+	/**
+	 * 添加cs媒资根目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long channelId 频道id
+	 * @param String name 根目录名称
+	 * @return CsMenuVO cs媒资目录
+	 */
 	public CsMenuPO addRoot(Long channelId, String name) {
 		CsMenuPO menuPO = new CsMenuPO();
 		menuPO.setName(name);
@@ -32,6 +41,15 @@ public class CsMenuService {
 		return menuPO;
 	}
 
+	/**
+	 * 上移一层cs媒资目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 目录id
+	 * @param Long newParentId 新父目录id
+	 * @return CsMenuVO cs媒资目录
+	 */
 	public CsMenuPO topPO(Long id, Long newParentId) {
 		CsMenuPO menuPO = menuDao.findOne(id);
 		if (newParentId == -1) {
@@ -49,6 +67,16 @@ public class CsMenuService {
 		return menuPO;
 	}
 
+	/**
+	 * 编辑cs媒资目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 目录id
+	 * @param String name 目录新名称
+	 * @param String remark 目录新备注
+	 * @return CsMenuPO cs媒资目录
+	 */
 	public CsMenuPO editPO(Long id, String name, String remark) {
 		CsMenuPO menuPO = menuDao.findOne(id);
 		menuPO.setName(name);
@@ -59,10 +87,21 @@ public class CsMenuService {
 		return menuPO;
 	}
 
+	/**
+	 * 添加cs下属媒资目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 父目录id
+	 * @param Long channelId 频道id
+	 * @param String name 新添加的标签名
+	 * @return CsMenuPO 添加的cs媒资目录
+	 */
 	public CsMenuPO appendPO(Long id, Long channelId, String name) {
-		CsMenuPO menuPO = new CsMenuPO();
 		CsMenuPO parentPO = menuDao.findOne(id);
 		String parentPath = parentPO.getParentPath() + "/" + parentPO.getName();
+		
+		CsMenuPO menuPO = new CsMenuPO();
 		menuPO.setName(name);
 		menuPO.setParentId(id);
 		menuPO.setParentPath(parentPath);
@@ -74,13 +113,21 @@ public class CsMenuService {
 		return menuPO;
 	}
 
+	/**
+	 * 删除cs媒资目录(包括目录下的媒资)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id 目录id
+	 * @return CsMenuPO cs媒资目录
+	 */
 	public CsMenuPO removePO(Long menuId) throws Exception {
 		CsMenuPO menuPO = menuDao.findOne(menuId);
 
 		if(menuPO != null){
 			menuDao.delete(menuPO);
-			this.deleteMenuTree(menuId);
 			csResourceService.removeResourcesByMenuId(menuId, menuPO.getChannelId());
+			this.deleteMenuTree(menuId);
 		}else {
 			this.deleteMenuTree(menuId);
 		}
@@ -88,27 +135,38 @@ public class CsMenuService {
 		return menuPO;
 	}
 
+	/**
+	 * 删除cs媒资目录树<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long menuId 目录id
+	 */
 	public void deleteMenuTree(Long menuId) throws Exception {
+		
 		List<CsMenuPO> menus = menuDao.findByParentId(menuId);
-		deleteChidrenMenu(menus, menuId);
-	}
-
-	private void deleteChidrenMenu(List<CsMenuPO> menus, Long menuId) throws Exception {
-		if (menus != null && menus.size() > 0) {
-			for (CsMenuPO menu : menus) {
-				menuDao.delete(menu);
-				this.removePO(menu.getId());
-				csResourceService.removeResourcesByMenuId(menuId, menu.getChannelId());
-			}
+		
+		if (menus == null || menus.isEmpty()) return;
+		
+		for (CsMenuPO menu : menus) {
+			this.removePO(menu.getId());
 		}
 	}
 
+	/**
+	 * 根据频道id删除cs媒资目录树<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long channelId 频道id
+	 */
 	public void removeMenuByChannelId(Long channelId) throws Exception {
 		List<CsMenuPO> menuList = menuDao.findByChannelIdAndParentId(channelId, -1l);
-		if (menuList != null && menuList.size() > 0) {
-			for (int i = 0; i < menuList.size(); i++) {
-				removePO(menuList.get(i).getId());
-			}
+		
+		if (menuList == null || menuList.isEmpty()) return;
+		
+		for (CsMenuPO csMenuPO : menuList) {
+			removePO(csMenuPO.getId());
 		}
 	}
 }

@@ -11,10 +11,18 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionVO;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskService;
+import com.sumavision.tetris.mims.app.folder.FolderQuery;
+import com.sumavision.tetris.mims.app.folder.FolderVO;
+import com.sumavision.tetris.mims.app.media.StoreType;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.transcoding.Adapter;
 import com.sumavision.tetris.transcoding.RequestCmdType;
 import com.sumavision.tetris.transcoding.addTask.requestVO.AddTaskVO;
 import com.sumavision.tetris.transcoding.addTask.requestVO.MsgHeaderVO;
+import com.sumavision.tetris.transcoding.addTask.requestVO.SourceVO;
+import com.sumavision.tetris.transcoding.addTask.requestVO.SrcURIVO;
+import com.sumavision.tetris.transcoding.addTask.requestVO.TargetVO;
 import com.sumavision.tetris.transcoding.addTask.requestVO.TranscodeJobsVO;
 import com.sumavision.tetris.transcoding.addTask.requestVO.TranscodeVO;
 import com.sumavision.tetris.transcoding.addTask.rsponseVO.AddTaskResponseVO;
@@ -25,10 +33,16 @@ import com.sumavision.tetris.transcoding.getStatus.GetStatusHeartbeatThread;
 public class AddTaskService {
 	
 	@Autowired
-	Adapter adapter;
+	private Adapter adapter;
 	
 	@Autowired
-	MediaEditorTaskService mediaEditorTaskService;
+	private MediaEditorTaskService mediaEditorTaskService;
+	
+	@Autowired
+	private MediaAVideoQuery mediaAVideoQuery;
+	
+	@Autowired
+	private FolderQuery folderQuery;
 	
 	private GetStatusHeartbeatThread getStatusHeartbeatThread;
 	
@@ -40,8 +54,39 @@ public class AddTaskService {
 	 * 
 	 * @return List<String> 下成功的转码任务id
 	 */
-	public HashMapWrapper<String, MediaEditorTaskRatePermissionVO> add(String __processInstanceId__, Long __accessPointId__, String transcode, Long folderId, String tags) throws Exception{
-		TranscodeVO transcodeVO = JSON.parseObject(transcode, TranscodeVO.class);
+	public HashMapWrapper<String, MediaEditorTaskRatePermissionVO> add(String __processInstanceId__, Long __accessPointId__, String transcode, String param, String name, Long folderId, String tags) throws Exception{
+		List<TranscodeMediaVO> mediaVOs = JSON.parseArray(transcode, TranscodeMediaVO.class);
+		if (mediaVOs == null || mediaVOs.isEmpty()) return null;
+		
+		TranscodeVO transcodeVO = new TranscodeVO();
+		transcodeVO.setId("");
+		transcodeVO.setType("file");
+		transcodeVO.setPriority("");
+		transcodeVO.setSource(new ArrayListWrapper<SourceVO>().getList());
+		transcodeVO.setTarget(new TargetVO());
+		ArrayListWrapper<String> mediaUuids = new ArrayListWrapper<String>();
+		for (TranscodeMediaVO media : mediaVOs) {
+			mediaUuids.add(media.getUuid());
+		}
+		HashMapWrapper<String, MediaAVideoVO> map = mediaAVideoQuery.getByUuids(mediaUuids.getList());
+		for (TranscodeMediaVO media : mediaVOs) {
+			SrcURIVO src = new SrcURIVO();
+			src.setName("");
+			MediaAVideoVO mediaInfo = map.getMap().get(media.getUuid());
+			if (mediaInfo.getStoreType() == StoreType.REMOTE) {
+				src.setValue(mediaInfo.getUploadTmpPath());
+			}else {
+				src.setValue(adapter.changeHttpToFtp(mediaInfo.getPreviewUrl()));
+			}
+			SourceVO source = new SourceVO();
+			source.setSrcURI(src);
+			source.setStartTime(media.getStartTime());
+			source.setEndTime(media.getEndTime());
+			transcodeVO.getSource().add(source);
+		}
+		FolderVO folder = folderQuery.getById(folderId);
+		transcodeVO.getTarget().setTargetURI(mediaAVideoQuery.buildUrl(folder, name));
+		transcodeVO.getTarget().setTranscodeTargetParams(param);
 		
 		TranscodeJobsVO transcodeJobs = new TranscodeJobsVO();
 		List<TranscodeVO> transcodeVOs = new ArrayListWrapper<TranscodeVO>().add(transcodeVO).getList();
