@@ -15,12 +15,25 @@ public class ScreenPO extends AbstractBasePO {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/** 分屏id */
 	private Long programId;
+	
+	/** 分屏位置 */
 	private Long serialNum;
+	
+	/** 排单顺序 */
 	private Long screenIndex;
+	
+	/** 媒资在cs中的id */
 	private Long resourceId;
+	
+	/** 媒资在mims中的uuid */
 	private String mimsUuid;
+	
+	/** 媒资名称 */
 	private String name;
+	
+	/** 媒资预览地址 */
 	private String previewUrl;
 
 	@Column(name="PROGRAM_ID")

@@ -15,10 +15,19 @@ public class CsMenuPO extends AbstractBasePO {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/** 频道id */
 	private Long ChannelId;
+	
+	/** 目录名称 */
 	private String name;
+	
+	/** 父目录id */
 	private Long parentId;
+	
+	/** 面包片路径 */
 	private String parentPath;
+	
+	/** 备注 */
 	private String remark;
 
 	@Column(name = "CHANNEL_ID")

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +117,12 @@ public class MediaVideoController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaVideoPO entity = mediaVideoService.addTask(user, name, null, null, remark, taskParam, folder);
+		List<String> tagList = new ArrayList<String>();
+		if (!tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		MediaVideoPO entity = mediaVideoService.addTask(user, name, tagList, null, remark, taskParam, folder);
 		
 		return new MediaVideoVO().set(entity);
 		
@@ -148,8 +154,16 @@ public class MediaVideoController {
 		UserVO user = userQuery.current();
 
 		MediaVideoPO video = mediaVideoDao.findOne(id);
+		if (video == null) {
+			throw new MediaVideoNotExistException(id);
+		}
 		
-		MediaVideoPO entity = mediaVideoService.editTask(user, video, name, null, null, remark);
+		List<String> tagList = new ArrayList<String>();
+		if (!tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		MediaVideoPO entity = mediaVideoService.editTask(user, video, name, tagList, null, remark);
 		
 		return new MediaVideoVO().set(entity);
 		

@@ -3,6 +3,7 @@ package com.sumavision.tetris.mims.app.media.avideo;
 import java.util.List;
 
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.mims.app.media.StoreType;
 
 public class MediaAVideoVO {
 	private Long id;
@@ -20,6 +21,10 @@ public class MediaAVideoVO {
 	private String version;
 	
 	private String remarks;
+	
+	private StoreType storeType;
+	
+	private String uploadTmpPath;
 	
 	private List<String> tags;
 	
@@ -104,6 +109,24 @@ public class MediaAVideoVO {
 
 	public String getRemarks() {
 		return remarks;
+	}
+
+	public StoreType getStoreType() {
+		return storeType;
+	}
+
+	public MediaAVideoVO setStoreType(StoreType storeType) {
+		this.storeType = storeType;
+		return this;
+	}
+
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaAVideoVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
+		return this;
 	}
 
 	public MediaAVideoVO setRemarks(String remarks) {

@@ -70,6 +70,7 @@ define([
                         keyWords:'',
                         way:'0',
                         txt:'',
+                        txtTask:'',
                         task:'',
                         loading:false
                     },
@@ -84,6 +85,10 @@ define([
                     },
                     upload:{
                         fileType:['audio'],
+                        multiple:false
+                    },
+                    exchange:{
+                        fileType:['txt'],
                         multiple:false
                     }
                 },
@@ -491,6 +496,7 @@ define([
                     self.dialog.addAudio.keyWords = '';
                     self.dialog.addAudio.way = '0';
                     self.dialog.addAudio.txt = '';
+                    self.dialog.addAudio.txtTask = '';
                     self.dialog.addAudio.task = '';
                     self.dialog.addAudio.visible = false;
                     self.dialog.addAudio.loading = false;
@@ -509,12 +515,17 @@ define([
                 //添加视频媒资任务
                 addMediaAudioTask:function(){
                     var self = this;
-                    if (self.dialog.addAudio.way == '0'){
-                        var task = {
+                    if (self.dialog.addAudio.way == '0' || self.dialog.addAudio.way == '1'){
+                        var task = self.dialog.addAudio.way == '0' ? {
                             name:self.dialog.addAudio.task.name,
                             size:self.dialog.addAudio.task.size,
                             mimetype:self.dialog.addAudio.task.mimetype,
-                            lastModified:self.dialog.addAudio.task.lastModified,
+                            lastModified:self.dialog.addAudio.task.lastModified
+                        } : {
+                            name:self.dialog.addAudio.txtTask.name,
+                            size:self.dialog.addAudio.txtTask.size,
+                            mimetype:self.dialog.addAudio.txtTask.mimetype,
+                            lastModified:self.dialog.addAudio.txtTask.lastModified
                         };
                         self.dialog.addAudio.loading = true;
                         ajax.post('/media/audio/task/add', {
@@ -533,7 +544,7 @@ define([
                                 self.$refs.taskView.open('/media/audio/query/tasks');
                             }
                             var uploadfiles = [];
-                            uploadfiles.push(new File(data.uuid, 0, self.dialog.addAudio.task.file));
+                            uploadfiles.push(new File(data.uuid, 0, self.dialog.addAudio.way == '0' ? self.dialog.addAudio.task.file: self.dialog.addAudio.txtTask.file));
                             var mediaAudioUploader = context.getProp('mediaAudioUploader');
                             if(mediaAudioUploader){
                                 mediaAudioUploader.setContext(self);
@@ -582,7 +593,7 @@ define([
                         self.handleEditAudioClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                //选择文件点击
+                //选择文本仓库点击
                 handleExchange:function(){
                     var self = this;
                     self.$refs.selectTxt.open();
@@ -590,6 +601,23 @@ define([
                 selectedTxt:function(txt, startLoading, endLoading, done){
                     var self = this;
                     self.dialog.addAudio.txt = txt;
+                    done();
+                },
+                //选择本地文本点击
+                handleUploadExchange:function(){
+                    var self = this;
+                    self.$refs.exchangeDialog.open();
+                },
+                exchangeFileSelected:function(files, done){
+                    var self = this;
+                    var file = files[0];
+                    self.dialog.addAudio.txtTask = {
+                        name:file.name,
+                        size:file.size,
+                        mimetype:file.type,
+                        lastModified:file.lastModified,
+                        file:file
+                    };
                     done();
                 },
                 //上传按钮点击

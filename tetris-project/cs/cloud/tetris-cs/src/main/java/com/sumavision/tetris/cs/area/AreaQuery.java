@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.cs.bak.AreaSendPO;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
+import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelBroadStatus;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
 
@@ -107,7 +108,7 @@ public class AreaQuery {
 	public List<AreaData> getChildDivision(String areaId) throws Exception {
 		List<AreaData> returnList = new ArrayList<AreaData>();
 
-		String url = ChannelBroadStatus.getBroadcastIPAndPort();
+		String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
 		if (!url.isEmpty()) {
 			JSONObject jsonObject = HttpRequestUtil
 					.httpGet("http://" + url + "/ed/ed/regiondivision/queryDivisionTree?division=" + areaId);

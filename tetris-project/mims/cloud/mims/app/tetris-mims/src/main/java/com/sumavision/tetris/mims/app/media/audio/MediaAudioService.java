@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.activation.MimetypesFileTypeMap;
+import javax.mail.FolderNotFoundException;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -360,6 +361,18 @@ public class MediaAudioService {
 		
 		if (txt == null) throw new MediaTxtNotExistException(txtId);
 		
+		String txtContent = txt.getContent();
+		
+		return addTaskFromTxt(user, name, tags, keyWords, remark, txtContent, folder);
+	}
+	
+	public MediaAudioPO addTaskFromTxt(UserVO user, 
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			String txtContent, 
+			FolderPO folder) throws Exception{
 		String audioName = new StringBufferWrapper().append(name).append(".wav").toString();
 		
 		MediaAudioTaskVO task = new MediaAudioTaskVO().setName(audioName);
@@ -367,7 +380,6 @@ public class MediaAudioService {
 		MediaAudioPO audio = addTask(user, name, tags, keyWords, remark, task, folder);
 		
 		//change
-		String txtContent = txt.getContent();
 		String audioPath = audio.getUploadTmpPath();
 		String changeReturn = DoTTSUtil.doTTS(audioPath, txtContent);
 		if (changeReturn != null) {
@@ -380,8 +392,43 @@ public class MediaAudioService {
 			return audio;
 		} else {
 			mediaAudioDao.delete(audio);
-			throw new MediaAudioErrorWhenChangeFromTxtException(txt.getName());
+			throw new MediaAudioErrorWhenChangeFromTxtException(name);
 		}
+	}
+	
+	/**
+	 * 添加音频媒资(远程音频媒资)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月6日 下午1:44:06
+	 * @param String name 媒资名称
+	 * @param String httpUrl 媒资预览地址
+	 * @param String ftpUrl 媒资存储ftp路径
+	 * @return MediaAudioVO 音频媒资信息
+	 * @throws Exception 
+	 */
+	public MediaAudioVO addTask(
+			UserVO user,
+			String name,
+			String previewUrl,
+			String ftpUrl) throws Exception{
+		String version = new StringBufferWrapper().append(MediaAudioPO.VERSION_OF_ORIGIN).append(".").append(new Date().getTime()).toString();
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_AUDIO.toString());
+		if (folder == null) throw new FolderNotFoundException();
+		MediaAudioPO mediaAudioPO = new MediaAudioPO();
+		mediaAudioPO.setName(name);
+		mediaAudioPO.setTags("");
+		mediaAudioPO.setKeyWords("");
+		mediaAudioPO.setAuthorId(user.getUuid());
+		mediaAudioPO.setVersion(version);
+		mediaAudioPO.setFolderId(folder.getId());
+		mediaAudioPO.setMimetype("application/x-mpegURL");
+		mediaAudioPO.setUploadStatus(UploadStatus.COMPLETE);
+		mediaAudioPO.setPreviewUrl(previewUrl);
+		mediaAudioPO.setUploadTmpPath(ftpUrl);
+		mediaAudioPO.setStoreType(StoreType.REMOTE);;
+		
+		return new MediaAudioVO().set(mediaAudioPO);
 	}
 	
 	/**
@@ -602,7 +649,9 @@ public class MediaAudioService {
 			Long size,
 			String folderType,
 			String mimeType,
-			String uploadTempPath
+			String uploadTempPath,
+			String tags,
+			Long ... folderId
 			) throws Exception{
 		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
@@ -619,12 +668,17 @@ public class MediaAudioService {
 		entity.setFileName(fileName);
 		entity.setSize(size);
 		entity.setMimetype(mimeType);
-		entity.setFolderId(folder.getId());
+		if (folderId != null && folderId.length > 0) {
+			entity.setFolderId(folderId[0]);
+		}else {
+			entity.setFolderId(folder.getId());
+		}
 		entity.setUploadStatus(UploadStatus.COMPLETE);
 		entity.setStoreType(StoreType.LOCAL);
 		entity.setUploadTmpPath(uploadTempPath);
 		entity.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
 		entity.setUpdateTime(date);
+		entity.setTags(tags);
 		
 		mediaAudioDao.save(entity);
 		
@@ -641,7 +695,7 @@ public class MediaAudioService {
 	 * @param folderId 音频媒资存放路径
 	 * @return List<MediaAudioVO> 音频媒资列表
 	 */
-	public List<MediaAudioPO> addList(UserVO user, List<String> urlList, Long folderId) throws Exception{
+	public List<MediaAudioPO> addList(UserVO user, List<String> urlList, Long folderId, String tags) throws Exception{
 		
 		if (urlList == null || urlList.size() <= 0) return null;
 		
@@ -663,7 +717,7 @@ public class MediaAudioService {
 					String uploadTempPath = childFile.getPath();
 					String mimeType = new MimetypesFileTypeMap().getContentType(childFile);
 					
-					MediaAudioPO audio = this.add(user, file.getName(), fileName, size, folderType, mimeType,uploadTempPath);
+					MediaAudioPO audio = this.add(user, file.getName(), fileName, size, folderType, mimeType,uploadTempPath, tags, folderId);
 					audios.add(audio);
 				}
 			}	

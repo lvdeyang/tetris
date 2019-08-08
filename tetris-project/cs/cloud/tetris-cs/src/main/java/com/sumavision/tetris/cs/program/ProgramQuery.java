@@ -11,10 +11,18 @@ public class ProgramQuery {
 	@Autowired
 	private ScreenQuery screenQuery;
 
-	public ProgramVO getProgram(Long channelId) throws Exception {
+	/**
+	 * 根据排期id获取排期分屏信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param scheduleId 排期id
+	 * @return ProgramVO 分屏信息
+	 */
+	public ProgramVO getProgram(Long scheduleId) throws Exception {
 
 		ProgramVO program = new ProgramVO();
-		ProgramPO programPO = programDao.findByChannelId(channelId);
+		ProgramPO programPO = programDao.findByScheduleId(scheduleId);
 
 		if(programPO == null)
 			return null;

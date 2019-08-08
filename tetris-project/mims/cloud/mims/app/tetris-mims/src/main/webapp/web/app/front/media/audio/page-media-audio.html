@@ -167,6 +167,9 @@
         <!-- 文件上传 -->
         <mi-upload-dialog ref="uploadDialog" @file-selected="fileSelected" :require-type="dialog.upload.fileType" :multiple="dialog.upload.multiple"></mi-upload-dialog>
 
+        <!-- 文本文件转换 -->
+        <mi-upload-dialog ref="exchangeDialog" @file-selected="exchangeFileSelected" :require-type="dialog.exchange.fileType" :multiple="dialog.exchange.multiple"></mi-upload-dialog>
+
         <!-- 添加音频媒资对话框 -->
         <el-dialog
                 title="添加音频"
@@ -198,7 +201,8 @@
                     <el-form-item label="添加方式">
                         <template>
                             <el-radio v-model="dialog.addAudio.way" label="0">本地音频</el-radio>
-                            <el-radio v-model="dialog.addAudio.way" label="1">文本转换</el-radio>
+                            <el-radio v-model="dialog.addAudio.way" label="1">本地文本转换</el-radio>
+                            <el-radio v-model="dialog.addAudio.way" label="2">文本仓库转换</el-radio>
                         </template>
                     </el-form-item>
                     <el-form-item v-show="dialog.addAudio.way==0">
@@ -206,6 +210,10 @@
                         <div v-if="dialog.addAudio.task">{{dialog.addAudio.task.name}}</div>
                     </el-form-item>
                     <el-form-item v-show="dialog.addAudio.way==1">
+                        <el-button size="small" type="primary" @click="handleUploadExchange"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
+                        <div v-if="dialog.addAudio.txtTask">{{dialog.addAudio.txtTask.name}}</div>
+                    </el-form-item>
+                    <el-form-item v-show="dialog.addAudio.way==2">
                         <el-button size="small" type="primary" @click="handleExchange"><span class="icon-film" style="margin-right:5px;"></span>选择文本</el-button>
                         <div v-if="dialog.addAudio.txt">{{dialog.addAudio.txt.name}}</div>
                     </el-form-item>

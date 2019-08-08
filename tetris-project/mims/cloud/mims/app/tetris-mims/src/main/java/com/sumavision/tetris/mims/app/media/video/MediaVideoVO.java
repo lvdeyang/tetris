@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.video;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -23,6 +25,10 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	private String version;
 	
 	private String remarks;
+	
+	private StoreType storeType;
+	
+	private String uploadTmpPath;
 	
 	private List<String> tags;
 	
@@ -97,6 +103,24 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 
 	public MediaVideoVO setRemarks(String remarks) {
 		this.remarks = remarks;
+		return this;
+	}
+
+	public StoreType getStoreType() {
+		return storeType;
+	}
+
+	public MediaVideoVO setStoreType(StoreType storeType) {
+		this.storeType = storeType;
+		return this;
+	}
+
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaVideoVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
 		return this;
 	}
 
@@ -215,11 +239,13 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setIcon(MediaVideoItemType.VIDEO.getIcon())
 			.setStyle(MediaVideoItemType.VIDEO.getStyle()[0])
 			.setMimetype(entity.getMimetype())
+			.setStoreType(entity.getStoreType())
+			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setProgress(0)
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId());;
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG)));
+		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG))); else this.tags = new ArrayList<String>();
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoPO.SEPARATOR_KEYWORDS)));	 
 		return this;
 	}

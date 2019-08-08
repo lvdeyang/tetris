@@ -22,9 +22,17 @@ public class ProgramService {
 	@Autowired
 	private ScreenQuery screenQuery;
 	
+	/**
+	 * 编辑分屏<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param programVO 分屏信息
+	 * @return ProgramVO 编辑后的分屏信息
+	 */
 	public ProgramVO setProgram(ProgramVO programVO) throws Exception {
 
-		ProgramPO programPO = this.setProgramScreenNum(programVO.getChannelId(), programVO.getScreenNum());
+		ProgramPO programPO = this.setProgramScreenNum(programVO.getScheduleId(), programVO.getScreenNum());
 		
 		ProgramVO returnProgramVO = new ProgramVO().set(programPO);
 		
@@ -33,13 +41,22 @@ public class ProgramService {
 		return returnProgramVO;
 	}
 
-	private ProgramPO setProgramScreenNum(Long channelId, Long screenNum) {
-		ProgramPO program = programDao.findByChannelId(channelId);
+	/**
+	 * 修改屏幕数据库<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param scheduleId 排期id
+	 * @param screenNum 分屏数
+	 * @return ProgramPO 分屏信息
+	 */
+	private ProgramPO setProgramScreenNum(Long scheduleId, Long screenNum) {
+		ProgramPO program = programDao.findByScheduleId(scheduleId);
 		if (program != null) {
 			program.setScreenNum(screenNum);
 		}else {
 			program = new ProgramPO();
-			program.setChannelId(channelId);
+			program.setScheduleId(scheduleId);
 			program.setScreenNum(screenNum);
 			program.setUpdateTime(new Date());
 		}
@@ -48,12 +65,28 @@ public class ProgramService {
 		return program;
 	}
 
+	/**
+	 * 修改屏幕媒资排单数据库<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param programId 屏幕id
+	 * @param screenList 排单列表
+	 * @return List<ScreenVO> 媒资排单列表
+	 */
 	private List<ScreenVO> setScreenInfo(Long programId, List<ScreenVO> screenList) throws Exception {
 		return screenService.setScreenInfo(programId, screenList);
 	}
 	
-	public void removeProgramByChannelId(Long channelId) {
-		ProgramPO program = programDao.findByChannelId(channelId);
+	/**
+	 * 删除分屏信息(附带删除排单列表)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param scheduleId 排期id
+	 */
+	public void removeProgramByScheduleId(Long scheduleId) {
+		ProgramPO program = programDao.findByScheduleId(scheduleId);
 		if (program != null) {
 			programDao.delete(program);
 			screenService.removeScreen(program.getId());

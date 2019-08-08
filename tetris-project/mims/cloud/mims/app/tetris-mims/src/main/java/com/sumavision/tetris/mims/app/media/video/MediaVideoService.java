@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import javax.activation.MimetypesFileTypeMap;
+import javax.mail.FolderNotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -108,6 +109,41 @@ public class MediaVideoService {
 	}
 	
 	/**
+	 * 添加视频媒资(远程视频媒资)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月6日 下午1:44:06
+	 * @param String name 媒资名称
+	 * @param String httpUrl 媒资预览地址
+	 * @param String ftpUrl 媒资存储ftp路径
+	 * @return MediaAudioVO 视频媒资信息
+	 * @throws Exception 
+	 */
+	public MediaVideoVO addTask(
+			UserVO user,
+			String name,
+			String previewUrl,
+			String ftpUrl) throws Exception{
+		String version = new StringBufferWrapper().append(MediaVideoPO.VERSION_OF_ORIGIN).append(".").append(new Date().getTime()).toString();
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO.toString());
+		if (folder == null) throw new FolderNotFoundException();
+		MediaVideoPO mediaAudioPO = new MediaVideoPO();
+		mediaAudioPO.setName(name);
+		mediaAudioPO.setTags("");
+		mediaAudioPO.setKeyWords("");
+		mediaAudioPO.setAuthorId(user.getUuid());
+		mediaAudioPO.setVersion(version);
+		mediaAudioPO.setFolderId(folder.getId());
+		mediaAudioPO.setMimetype("application/x-mpegURL");
+		mediaAudioPO.setUploadStatus(UploadStatus.COMPLETE);
+		mediaAudioPO.setPreviewUrl(previewUrl);
+		mediaAudioPO.setUploadTmpPath(ftpUrl);
+		mediaAudioPO.setStoreType(StoreType.REMOTE);
+		
+		return new MediaVideoVO().set(mediaAudioPO);
+	}
+	
+	/**
 	 * 添加视频媒资上传任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -165,7 +201,7 @@ public class MediaVideoService {
 												     .append(task.getName())
 												     .toString();
 		
-		return addTask(user, fileNamePrefix, tags, keyWords, remark, task, folder, version, storePath, previewUrl, date);
+		return addTask(user, name, tags, keyWords, remark, task, folder, version, storePath, previewUrl, date);
 	}
 	
 	/**
@@ -263,6 +299,16 @@ public class MediaVideoService {
 		
 		video.setName(name);
 		video.setRemarks(remark);
+		StringBufferWrapper transTag = new StringBufferWrapper();
+		if(tags!=null && tags.size()>0){
+			for(int i=0; i<tags.size(); i++){
+				transTag.append(tags.get(i));
+				if(i != tags.size()-1){
+					transTag.append(MediaVideoPO.SEPARATOR_TAG);
+				}
+			}
+		}
+		video.setTags(transTag.toString());
 		mediaVideoDao.save(video);
 		
 		return video;
@@ -338,6 +384,7 @@ public class MediaVideoService {
 			String folderType,
 			String mimeType,
 			String uploadTempPath,
+			String tags,
 			Long... folderId) throws Exception{
 		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
@@ -364,6 +411,7 @@ public class MediaVideoService {
 		entity.setUploadTmpPath(uploadTempPath);
 		entity.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
 		entity.setUpdateTime(date);
+		entity.setTags(tags);
 		
 		mediaVideoDao.save(entity);
 		
@@ -380,7 +428,7 @@ public class MediaVideoService {
 	 * @param folderId 视频媒资存放路径
 	 * @return List<MediaVideoPO> 视频媒资列表
 	 */
-	public List<MediaVideoPO> addList(UserVO user, List<String> urlList, Long folderId) throws Exception{
+	public List<MediaVideoPO> addList(UserVO user, List<String> urlList, Long folderId, String tags) throws Exception{
 		
 		if (urlList == null || urlList.size() <= 0) return null;
 		
@@ -402,7 +450,7 @@ public class MediaVideoService {
 					String uploadTempPath = childFile.getPath();
 					String mimeType = new MimetypesFileTypeMap().getContentType(childFile);
 					
-					MediaVideoPO video = this.add(user, file.getName(), fileName, size, folderType, mimeType,uploadTempPath);
+					MediaVideoPO video = this.add(user, file.getName(), fileName, size, folderType, mimeType, uploadTempPath, tags, folderId);
 					videos.add(video);
 				}
 			}	

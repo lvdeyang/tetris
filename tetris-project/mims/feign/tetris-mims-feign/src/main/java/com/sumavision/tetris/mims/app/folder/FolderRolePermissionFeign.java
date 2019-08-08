@@ -27,4 +27,13 @@ public interface FolderRolePermissionFeign {
 	@RequestMapping(value = "/folder/feign/delete/by/role")
 	public JSONObject deleteByRole(@RequestParam("roleId") String roleId)throws Exception;
 	
+	/**
+	 * 根据文件夹id获取文件夹信息<br/>
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:30:46
+	 * @param Long folderId 文件夹id
+	 */
+	@RequestMapping(value = "/folder/feign/query")
+	public JSONObject getById(@RequestParam("folderId") Long folderId)throws Exception;
 }

@@ -1,8 +1,5 @@
 package com.sumavision.tetris.transcoding;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
@@ -86,10 +83,10 @@ public class TranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/task/add")
-	public Object addTask(String transcodeJob, Long folderId, String tags, String __processInstanceId__,
+	public Object addTask(String transcodeJob, String param, String name, Long folderId, String tags, String __processInstanceId__,
 			Long __accessPointId__, HttpServletRequest request) throws Exception {
 
-		HashMapWrapper<String, MediaEditorTaskRatePermissionVO> ids = addTaskService.add(__processInstanceId__, __accessPointId__, transcodeJob , folderId, tags);
+		HashMapWrapper<String, MediaEditorTaskRatePermissionVO> ids = addTaskService.add(__processInstanceId__, __accessPointId__, transcodeJob, param, name, folderId, tags);
 		
 		return ids != null && ids.size() > 0 ? new HashMapWrapper<String, HashMapWrapper<String, MediaEditorTaskRatePermissionVO>>().put("transcodeIds", ids)
 				   .getMap() : null;
@@ -126,13 +123,13 @@ public class TranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/start/process")
-	public Object start(String transcodeJob, Long folderId, String tags, HttpServletRequest request) throws Exception{
+	public Object start(String transcodeJob,String param, String name, Long folderId, String tags, HttpServletRequest request) throws Exception{
 		JSONObject variables = new JSONObject();
 		variables.put("_pa3_transcodeJob", transcodeJob);
+		variables.put("_pa3_param", param);
+		variables.put("_pa3_name", name);
 		variables.put("_pa3_folderId", folderId);
-		
-		List<String> tagList = (tags == null || tags.isEmpty()) ? new ArrayList<String>() : JSONObject.parseArray(tags, String.class);
-		variables.put("_pa3_tags", StringUtils.join(tagList.toArray(), ","));
+		variables.put("_pa3_tags", (tags == null || tags.isEmpty()) ? "" :StringUtils.join(JSONObject.parseArray(tags, String.class).toArray(), ","));
 		
 		String processInstanceId = processService.startByKey("_media_editor_transcoding_by_qt", variables.toJSONString(), null, null);
 		

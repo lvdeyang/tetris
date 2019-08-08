@@ -259,7 +259,7 @@ public class MediaAudioPO extends AbstractBasePO{
 	public void setKeyWords(String keyWords) {
 		this.keyWords = keyWords;
 	}
-	
+
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "UPLOAD_STATUS")
 	public UploadStatus getUploadStatus() {

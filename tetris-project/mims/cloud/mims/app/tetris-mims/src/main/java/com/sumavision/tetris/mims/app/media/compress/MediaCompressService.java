@@ -400,7 +400,7 @@ public class MediaCompressService {
 				String mimeType = "audio/mp3";
 
 				MediaAudioPO audio = mediaAudioService.add(user, name, fileName, size, folderType, mimeType,
-						uploadTempPath);
+						uploadTempPath, "");
 
 				content = new MediaAudioVO().set(audio).getPreviewUrl();
 				templateId = "yjgb_audio";
@@ -412,7 +412,7 @@ public class MediaCompressService {
 				String mimeType = "video/mp4";
 
 				MediaVideoPO video = mediaVideoService.add(user, name, fileName, size, folderType, mimeType,
-						uploadTempPath);
+						uploadTempPath, "");
 
 				content = new MediaVideoVO().set(video).getPreviewUrl();
 				templateId = "yjgb_video";

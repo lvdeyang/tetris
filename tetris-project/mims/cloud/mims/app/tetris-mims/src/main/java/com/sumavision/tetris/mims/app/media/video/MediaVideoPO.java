@@ -268,7 +268,7 @@ public class MediaVideoPO extends AbstractBasePO{
 	public void setUploadStatus(UploadStatus uploadStatus) {
 		this.uploadStatus = uploadStatus;
 	}
-	
+
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "REVIEW_STATUS")
 	public ReviewStatus getReviewStatus() {

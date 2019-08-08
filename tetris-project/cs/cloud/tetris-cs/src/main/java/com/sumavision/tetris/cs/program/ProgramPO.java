@@ -15,16 +15,19 @@ public class ProgramPO extends AbstractBasePO {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	private Long channelId;
+	/** 排期id */
+	private Long scheduleId;
+	
+	/** 分屏数 */
 	private Long screenNum;
 
-	@Column(name="CHANNEL_ID")
-	public Long getChannelId() {
-		return channelId;
+	@Column(name="SCHEDULE_ID")
+	public Long getScheduleId() {
+		return scheduleId;
 	}
 
-	public void setChannelId(Long channelId) {
-		this.channelId = channelId;
+	public void setScheduleId(Long scheduleId) {
+		this.scheduleId = scheduleId;
 	}
 
 	@Column(name="SCREEN_NUM")

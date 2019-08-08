@@ -8,6 +8,7 @@ import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -24,6 +25,10 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	private String version;
 	
 	private String remarks;
+	
+	private StoreType storeType;
+	
+	private String uploadTmpPath;
 	
 	private List<String> tags;
 	
@@ -98,6 +103,24 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 
 	public MediaAudioVO setRemarks(String remarks) {
 		this.remarks = remarks;
+		return this;
+	}
+
+	public StoreType getStoreType() {
+		return storeType;
+	}
+
+	public MediaAudioVO setStoreType(StoreType storeType) {
+		this.storeType = storeType;
+		return this;
+	}
+
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaAudioVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
 		return this;
 	}
 
@@ -216,6 +239,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setIcon(MediaAudioItemType.AUDIO.getIcon())
 			.setStyle(MediaAudioItemType.AUDIO.getStyle()[0])
 			.setMimetype(entity.getMimetype())
+			.setStoreType(entity.getStoreType())
+			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setProgress(0)
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())

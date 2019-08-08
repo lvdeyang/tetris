@@ -1,7 +1,9 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +23,8 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
+import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -44,6 +48,9 @@ public class MediaAudioQuery {
 	
 	@Autowired
 	private FolderQuery folderQuery;
+	
+	@Autowired
+	private Path path;
 	
 	/**
 	 * 根据文件夹id查询文件夹以及音频媒资<br/>
@@ -222,6 +229,19 @@ public class MediaAudioQuery {
 	}
 	
 	/**
+	 * 根据uuid查找媒资音频<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月6日 上午11:52:58
+	 * @param List<String> uuids 音频uuids
+	 * @return List<MediaAudioPO> 查找结果
+	 */
+	public List<MediaAudioPO> questByUuid(List<String> uuids){
+		if(uuids==null || uuids.size()<=0) return null;
+		return mediaAudioDao.findByUuidIn(uuids);
+	}
+	
+	/**
 	 * 生成媒资音频树<br/>
 	 * <b>作者:</b>ldy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -254,4 +274,43 @@ public class MediaAudioQuery {
 		}
 	}
 	
+	
+	/**
+	 * 生成文件存储预览路径(云转码使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月7日 下午4:03:27
+	 * @return String 预览路径
+	 * @throws Exception 
+	 */
+	public String buildUrl(String name, String folderUuid) throws Exception {
+		UserVO user = userQuery.current();
+		
+		String separator = File.separator;
+		String webappPath = path.webappPath();
+		String basePath = new StringBufferWrapper().append(webappPath)
+												   .append("upload")
+												   .append(separator)
+												   .append("tmp")
+												   .append(separator).append(user.getGroupName())
+												   .append(separator).append(folderUuid)
+												   .toString();
+		Date date = new Date();
+		String version = new StringBufferWrapper().append(MediaVideoPO.VERSION_OF_ORIGIN).append(".").append(date.getTime()).toString();
+		String folderPath = new StringBufferWrapper().append(basePath).append(separator).append(name).append(separator).append(version).toString();
+		File file = new File(folderPath);
+		if(!file.exists()) file.mkdirs();
+		//这个地方保证每个任务的路径都不一样
+		Thread.sleep(1);
+		
+		return new StringBufferWrapper().append("upload/tmp/")
+												     .append(user.getGroupName())
+												     .append("/")
+												     .append(folderUuid)
+												     .append("/")
+												     .append(name)
+												     .append("/")
+												     .append(version)
+												     .toString();
+	}
 }

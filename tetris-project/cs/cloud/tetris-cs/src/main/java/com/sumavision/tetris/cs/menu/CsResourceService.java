@@ -34,7 +34,7 @@ public class CsResourceService {
 			throws Exception {
 		List<CsResourceVO> returnList = new ArrayList<CsResourceVO>();
 
-		List<CsResourcePO> aliveResource = resourceDao.findResourceFromMenu(parentId);
+		List<CsResourcePO> aliveResource = resourceDao.findByParentId(parentId);
 
 		CsMenuVO parentMenu = csMenuQuery.getMenuByMenuId(parentId);
 
@@ -76,7 +76,7 @@ public class CsResourceService {
 	}
 
 	public void removeResourcesByMenuId(Long menuId, Long channelId) throws Exception {
-		List<CsResourcePO> resourcePOs = resourceDao.findResourceFromMenu(menuId);
+		List<CsResourcePO> resourcePOs = resourceDao.findByParentId(menuId);
 		if (resourcePOs != null && resourcePOs.size() > 0) {
 			for(CsResourcePO item:resourcePOs){
 				resourceDao.delete(item);
