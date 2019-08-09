@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.audio.DoTTSUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -336,7 +337,7 @@ public class MediaAudioService {
 	}
 	
 	/**
-	 * 添加音频媒资上传任务(从文本媒资转换)<br/>
+	 * 从文本添加音频媒资并启动流程<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月29日 下午3:21:49
@@ -358,42 +359,67 @@ public class MediaAudioService {
 			FolderPO folder) throws Exception{
 		
 		MediaTxtPO txt = mediaTxtDAO.findOne(txtId);
-		
 		if (txt == null) throw new MediaTxtNotExistException(txtId);
-		
 		String txtContent = txt.getContent();
-		
-		return addTaskFromTxt(user, name, tags, keyWords, remark, txtContent, folder);
-	}
-	
-	public MediaAudioPO addTaskFromTxt(UserVO user, 
-			String name, 
-			List<String> tags, 
-			List<String> keyWords, 
-			String remark, 
-			String txtContent, 
-			FolderPO folder) throws Exception{
 		String audioName = new StringBufferWrapper().append(name).append(".wav").toString();
-		
 		MediaAudioTaskVO task = new MediaAudioTaskVO().setName(audioName);
-		
 		MediaAudioPO audio = addTask(user, name, tags, keyWords, remark, task, folder);
 		
-		//change
+		//修改属性
 		String audioPath = audio.getUploadTmpPath();
 		String changeReturn = DoTTSUtil.doTTS(audioPath, txtContent);
-		if (changeReturn != null) {
-			File audioFile = new File(audioPath);
-			audio.setLastModified(audioFile.lastModified());
-			audio.setSize(audioFile.length());
-			audio.setUploadStatus(UploadStatus.COMPLETE);
-			audio.setMimetype(new MimetypesFileTypeMap().getContentType(new File(audioPath)));
-			mediaAudioDao.save(audio);
-			return audio;
-		} else {
-			mediaAudioDao.delete(audio);
+		if(changeReturn == null){
 			throw new MediaAudioErrorWhenChangeFromTxtException(name);
 		}
+		
+		File audioFile = new File(audioPath);
+		audio.setLastModified(audioFile.lastModified());
+		audio.setSize(audioFile.length());
+		audio.setMimetype(new MimetypesFileTypeMap().getContentType(new File(audioPath)));
+		audio.setUploadStatus(UploadStatus.COMPLETE);
+		if(audio.getReviewStatus() != null){
+			//开启审核流程--这里会保存
+			startUploadProcess(audio);
+		}else{
+			mediaAudioDao.save(audio);
+		}
+		
+		return audio;
+	}
+	
+	/**
+	 * 从文本文件转换音频文件<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月9日 上午10:41:12
+	 * @param MediaAudioPO media 上传了文本文件的音频媒资
+	 * @return MediaAudioPO media 转换后的音频媒资
+	 */
+	public MediaAudioPO convertTxtMeidaToAudioMedia(MediaAudioPO media) throws Exception{
+		String txtStorePath = media.getUploadTmpPath();
+		String txtPreviewUrl = media.getPreviewUrl();
+		String txt = FileUtil.readAsString(txtStorePath);
+		String audioFileName = new StringBufferWrapper().append(media.getName()).append(".wav").toString();
+		
+		String audioStorePath = new StringBufferWrapper().append(txtStorePath.replace(media.getFileName(), "")).append(audioFileName).toString();
+		String audioPreviewUrl = new StringBufferWrapper().append(txtPreviewUrl.replace(media.getFileName(), "")).append(audioFileName).toString();
+		
+		String changeReturn = DoTTSUtil.doTTS(audioStorePath, txt);
+		if(changeReturn != null){
+			File audioFile = new File(audioStorePath);
+			media.setLastModified(audioFile.lastModified());
+			media.setSize(audioFile.length());
+			media.setMimetype(new MimetypesFileTypeMap().getContentType(audioFile));
+			media.setSuffix("wav");
+			media.setFileName(audioFileName);
+			media.setPreviewUrl(audioPreviewUrl);
+			media.setUploadTmpPath(audioStorePath);
+			media.setUploadStatus(UploadStatus.COMPLETE);
+		}else{
+			media.setUploadStatus(UploadStatus.ERROR);
+		}
+		mediaAudioDao.save(media);
+		return media;
 	}
 	
 	/**
@@ -426,7 +452,7 @@ public class MediaAudioService {
 		mediaAudioPO.setUploadStatus(UploadStatus.COMPLETE);
 		mediaAudioPO.setPreviewUrl(previewUrl);
 		mediaAudioPO.setUploadTmpPath(ftpUrl);
-		mediaAudioPO.setStoreType(StoreType.REMOTE);;
+		mediaAudioPO.setStoreType(StoreType.REMOTE);
 		
 		return new MediaAudioVO().set(mediaAudioPO);
 	}
@@ -629,7 +655,7 @@ public class MediaAudioService {
 	}
 	
 	/**
-	 * 添加已上传好的媒资任务<br/>
+	 * 添加已上传好的媒资任务--并启动流程<br/>
 	 * <b>作者:</b>ldy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月3日 下午1:34:18
@@ -653,6 +679,8 @@ public class MediaAudioService {
 			String tags,
 			Long ... folderId
 			) throws Exception{
+		
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_AUDIO);
 		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
@@ -679,8 +707,14 @@ public class MediaAudioService {
 		entity.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
 		entity.setUpdateTime(date);
 		entity.setTags(tags);
+		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
 		
-		mediaAudioDao.save(entity);
+		if(needProcess){
+			//启动流程
+			startUploadProcess(entity);
+		}else{
+			mediaAudioDao.save(entity);
+		}
 		
 		return entity;
 	}
@@ -723,5 +757,33 @@ public class MediaAudioService {
 			}	
 		}
 		return audios;
+	}
+	
+	/**
+	 * 启动上传审核流程<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月9日 上午10:54:37
+	 * @param MediaAudioPO audio 音频媒资
+	 */
+	public void startUploadProcess(MediaAudioPO audio) throws Exception{
+		UserVO user = userQuery.current();
+		Long companyId = Long.valueOf(user.getGroupId());
+		MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_AUDIO);
+		Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+		ProcessVO process = processQuery.findById(processId);
+		JSONObject variables = new JSONObject();
+		variables.put("name", audio.getName());
+		variables.put("tags", audio.getTags());
+		variables.put("keyWords", audio.getKeyWords());
+		variables.put("media", serverPropsQuery.generateHttpPreviewUrl(audio.getPreviewUrl()));
+		variables.put("remark", audio.getRemarks());
+		variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(audio.getFolderId()));
+		variables.put("_pa8_id", audio.getId());
+		String category = new StringBufferWrapper().append("上传音频：").append(audio.getName()).toString();
+		String business = new StringBufferWrapper().append("mediaAudio:").append(audio.getId()).toString();
+		String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+		audio.setProcessInstanceId(processInstanceId);
+		mediaAudioDao.save(audio);
 	}
 }

@@ -1,11 +1,8 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -22,14 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.easy.process.core.ProcessQuery;
-import com.sumavision.tetris.easy.process.core.ProcessService;
-import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -44,10 +36,6 @@ import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistEx
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadCancelException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadingException;
-import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
-import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
-import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
-import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
@@ -74,18 +62,6 @@ public class MediaAudioController {
 	
 	@Autowired
 	private MediaAudioDAO mediaAudioDao;
-	
-	@Autowired
-	private MediaSettingsDAO mediaSettingsDao;
-	
-	@Autowired
-	private MimsServerPropsQuery serverPropsQuery; 
-	
-	@Autowired
-	private ProcessQuery processQuery;
-	
-	@Autowired
-	private ProcessService processService;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
@@ -379,63 +355,16 @@ public class MediaAudioController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
+			
+			//如果是从文本文件上传需要转换成音频
+			if(task.getMimetype().equals("text/plain")){
+				mediaAudioService.convertTxtMeidaToAudioMedia(task);
+			}
+			
 			if(task.getReviewStatus() != null){
-				//开启审核流程
-				Long companyId = Long.valueOf(user.getGroupId());
-				MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_AUDIO);
-				Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
-				ProcessVO process = processQuery.findById(processId);
-				JSONObject variables = new JSONObject();
-				variables.put("name", task.getName());
-				variables.put("tags", task.getTags());
-				variables.put("keyWords", task.getKeyWords());
-				variables.put("media", serverPropsQuery.generateHttpPreviewUrl(task.getPreviewUrl()));
-				variables.put("remark", task.getRemarks());
-				variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(task.getFolderId()));
-				variables.put("_pa8_id", task.getId());
-				String category = new StringBufferWrapper().append("上传音频：").append(task.getName()).toString();
-				String business = new StringBufferWrapper().append("mediaAudio:").append(task.getId()).toString();
-				String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
-				task.setProcessInstanceId(processInstanceId);
-			if (task.getMimetype().equals("text/plain")) {
-				InputStreamReader reader = new InputStreamReader(new FileInputStream(task.getUploadTmpPath()), "utf-8");
-				BufferedReader bReader = new BufferedReader(reader);
-				String txtContent = "";
-				String line;
-				while ((line = bReader.readLine()) != null) {
-					txtContent += txtContent.isEmpty() ? line : "\n" + line;
-				}
-				String tags = task.getTags();
-				List<String> tagList = new ArrayList<String>();
-				if (!tags.isEmpty()) {
-					tagList = Arrays.asList(tags.split(","));
-				}
-				String remark = task.getRemarks();
-				FolderPO folder = folderDao.findOne(task.getFolderId());
-				mediaAudioService.remove(new ArrayListWrapper<MediaAudioPO>().add(task).getList());
-				MediaAudioPO newTask = mediaAudioService.addTaskFromTxt(user, task.getName(), tagList, null, remark, txtContent, folder);
-				return new MediaAudioVO().set(newTask);
-			} else {
-				task.setUploadStatus(UploadStatus.COMPLETE);
-				if(task.getReviewStatus() != null){
-					//开启审核流程
-					Long companyId = Long.valueOf(user.getGroupId());
-					MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_AUDIO);
-					Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
-					ProcessVO process = processQuery.findById(processId);
-					JSONObject variables = new JSONObject();
-					variables.put("name", task.getName());
-					variables.put("tags", task.getTags());
-					variables.put("keyWords", task.getKeyWords());
-					variables.put("media", serverPropsQuery.generateHttpPreviewUrl(task.getPreviewUrl()));
-					variables.put("remark", task.getRemarks());
-					variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(task.getFolderId()));
-					variables.put("_pa8_id", task.getId());
-					String category = new StringBufferWrapper().append("上传图片：").append(task.getName()).toString();
-					String business = new StringBufferWrapper().append("mediaPicture:").append(task.getId()).toString();
-					String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
-					task.setProcessInstanceId(processInstanceId);
-				}
+				//开启审核流程--这里会保存媒资
+				mediaAudioService.startUploadProcess(task);
+			}else{
 				mediaAudioDao.save(task);
 			}
 		}
