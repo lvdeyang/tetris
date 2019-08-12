@@ -168,7 +168,34 @@ public class MediaAudioQuery {
 			medias.add(new MediaAudioVO().set(root));
 		}
 		
-		packMediaVideoTree(medias, folderTree, audios);
+		packMediaAudioTree(medias, folderTree, audios);
+		
+		return medias;
+	}
+	
+	/**
+	 * 加载所有的音频媒资目录<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午4:03:27
+	 * @return List<MediaAudioVO> 视频媒资列表
+	 */
+	public List<MediaAudioVO> loadAllFolder() throws Exception{
+		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		List<FolderPO> roots = folderQuery.findRoots(folderTree);
+		List<MediaAudioVO> medias = new ArrayList<MediaAudioVO>();
+		for(FolderPO root:roots){
+			medias.add(new MediaAudioVO().set(root));
+		}
+		
+		packMediaAudioTree(medias, folderTree, new ArrayList<MediaAudioPO>());
 		
 		return medias;
 	}
@@ -286,7 +313,7 @@ public class MediaAudioQuery {
 	 * @param List<FolderPO> folders 所有文件夹
 	 * @param List<MediaAudioPO> medias 所有视频媒资
 	 */
-	public void packMediaVideoTree(List<MediaAudioVO> roots, List<FolderPO> folders, List<MediaAudioPO> medias) throws Exception{
+	public void packMediaAudioTree(List<MediaAudioVO> roots, List<FolderPO> folders, List<MediaAudioPO> medias) throws Exception{
 		if(roots == null || roots.size() <= 0){
 			return;
 		}
@@ -304,7 +331,7 @@ public class MediaAudioQuery {
 					}
 				}
 				if(root.getChildren().size() > 0){
-					packMediaVideoTree(root.getChildren(), folders, medias);
+					packMediaAudioTree(root.getChildren(), folders, medias);
 				}
 			}
 		}
