@@ -129,19 +129,23 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/do/phone/login")
 												   .add("/do/wechat/login")
 												   .add("/after/login/success")
-												   //.add("/system/role/feign/query/internal/role")
 												   .add("/index")
 												   .add("/index/*")
 												   .add("/user/feign/check/token")
 												   .add("/api/server/media/upload")
-												   /*.add("/user/feign/find/by/token")
-												   .add("/login/feign/do/password/login")
-												   .add("/login/feign/query/redirect/url")
-												   .add("/mims/server/props/feign/query/props")
-												   .add("/cms/server/props/feign/query/props")
-												   .add("/user/server/props/feign/query/props")
-												   .add("/menu/server/props/feign/query/props")
-												   .add("/api/*")*/
+												   .add("/user/index/personal/*")
+												   //以下路径系统中不会使用
+												   //访问网关的不拦截
+												   .add("/tetris-spring-eureka/*")
+												   .add("/tetris-spring-zull/*")
+												   .add("/tetris-menu/*")
+												   .add("/tetris-user/*")
+												   .add("/tetris-mims/*")
+												   .add("/tetris-cms/*")
+												   .add("/tetris-easy-process/*")
+												   .add("/tetris-media-editor/*")
+												   .add("/tetris-cs/*")
+												   .add("/demo/*")
 												   .getList();
 	}
 	

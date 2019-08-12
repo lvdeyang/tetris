@@ -92,6 +92,7 @@ public class ChannelQuery {
 			channel.setBroadUrlIp(channel.getPreviewUrlIp());
 			channel.setBroadUrlPort(channel.getPreviewUrlPort());
 		}
+		channelDao.save(channel);
 	}
 
 	/**

@@ -10,11 +10,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.config.server.ServerProps;
+import com.sumavision.tetris.config.server.UserServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.exception.UserNotExistException;
 
 @Controller
 @RequestMapping(value = "/user")
@@ -25,6 +31,9 @@ public class UserController {
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private UserServerPropsQuery userServerPropsQuery;
 	
 	/**
 	 * 查询枚举类型<br/>
@@ -267,6 +276,7 @@ public class UserController {
 			String nickname,
             String mobile,
             String mail,
+            String tags,
             boolean editPassword,
             String oldPassword,
             String newPassword,
@@ -276,7 +286,7 @@ public class UserController {
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, nickname, mobile, mail, editPassword, oldPassword, newPassword, repeat);
+		return userService.edit(id, nickname, mobile, mail, tags, editPassword, oldPassword, newPassword, repeat);
 	}
 	
 	/**
@@ -307,5 +317,49 @@ public class UserController {
 		}else {
 			return null;
 		}
+	}
+	
+	/**
+	 * 查询当前用户详细信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月19日 上午8:29:31
+	 * @return UserVO 用户
+	 * @throws Exception 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query")
+	public Object query(HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		
+		List<UserVO> userInfo = userQuery.findByIdIn(new ArrayListWrapper<Long>().add(user.getId()).getList());
+		
+		if (userInfo == null || userInfo.isEmpty()) throw new UserNotExistException(user.getId()); 
+		
+		return userInfo.get(0);
+	}
+	
+	/**
+	 * 重定向到个人中心<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午3:11:36
+	 * @throws Exception 
+	 */
+	@RequestMapping(value = "/index/personal/{token}")
+	public void queryPersonalUrl(@PathVariable String token, HttpServletRequest request, HttpServletResponse response) throws Exception{
+		ServerProps serverProps = userServerPropsQuery.queryProps();
+		
+		StringBufferWrapper redirectUrl = new StringBufferWrapper().append("http://")
+				   .append(serverProps.getIp())
+				   .append(":")
+				   .append(serverProps.getPort())
+				   .append("/")
+				   .append("index/")
+				   .append(token)
+				   .append("#/page-personal");
+		
+		response.sendRedirect(redirectUrl.toString());
 	}
 }

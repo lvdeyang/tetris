@@ -18,7 +18,7 @@ define([
     'mi-upload-dialog',
     'mi-lightbox',
     'mi-txt-dialog',
-    'tag-dialog',
+    'mi-tag-dialog',
     'css!' + window.APPPATH + 'front/media/audio/page-media-audio.css'
 ], function(tpl, config, context, commons, ajax, $, File, Uploader, Vue){
 

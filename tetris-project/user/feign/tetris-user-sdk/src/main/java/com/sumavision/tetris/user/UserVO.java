@@ -1,5 +1,7 @@
 package com.sumavision.tetris.user;
 
+import java.util.List;
+
 /**
  * 登录用户信息<br/>
  * <p>特殊注明：用uuid字段存储userId</p>
@@ -77,6 +79,9 @@ public class UserVO{
 	
 	/** 业务角色id,以“,”分割 */
 	private String businessRoles;
+	
+	/** 用户标签 */
+	private List<String> tags;
 
 	public Long getId() {
 		return id;
@@ -292,6 +297,14 @@ public class UserVO{
 	public UserVO setBusinessRoles(String businessRoles) {
 		this.businessRoles = businessRoles;
 		return this;
+	}
+
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
 	}
 	
 }

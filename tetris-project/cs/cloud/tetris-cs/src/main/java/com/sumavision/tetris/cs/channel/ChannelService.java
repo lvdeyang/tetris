@@ -36,6 +36,7 @@ import com.sumavision.tetris.cs.menu.CsResourceVO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
+import com.sumavision.tetris.cs.schedule.SchedulePO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
@@ -337,8 +338,9 @@ public class ChannelService {
 		output.put("aport", "");
 		output.put("scramble", "none");
 		output.put("key", "");
-		if (channelQuery.sendAbilityRequest(channelQuery.broadCmd(channelId), channel, abilityProgramText(programQuery.getProgram(scheduleId)), output)) {
-			channelQuery.saveBroad(channelId);
+		BroadAbilityQueryType type = channelQuery.broadCmd(channelId);
+		if (channelQuery.sendAbilityRequest(type, channel, abilityProgramText(programQuery.getProgram(scheduleId)), output)) {
+			if(type != BroadAbilityQueryType.COVER) channelQuery.saveBroad(channelId);
 			return getReturnJSON(true, "");
 		}else {
 			return getReturnJSON(false, "请求能力失败");
@@ -355,6 +357,11 @@ public class ChannelService {
 	public JSONObject startTerminalBroadcast(Long channelId) throws Exception {
 		ChannelPO channel = channelDao.findOne(channelId);
 		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
+		
+		List<ScheduleVO> schedules = scheduleQuery.getByChannelId(channelId);
+		if (schedules == null || schedules.isEmpty()) return getReturnJSON(false, "无分屏信息");
+		Long scheduleId = schedules.get(0).getId();
+		
 		// 校验播发状态
 		String broadStatus = getChannelBroadstatus(channelId);
 		if (!broadStatus.isEmpty() && !broadStatus.equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED)) {
@@ -382,7 +389,7 @@ public class ChannelService {
 		textJson.put("effectTime", effectTime);
 		textJson.put("dir", this.getMenuAndResourcePath(channelId));
 //		textJson.put("files", this.getFilesPath(addResourceList));
-		textJson.put("screens", this.programText(programQuery.getProgram(channelId)));
+		textJson.put("screens", this.programText(programQuery.getProgram(scheduleId)));
 
 		// 打包
 		Date currentTime = new Date();

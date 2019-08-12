@@ -139,6 +139,7 @@ public class MediaVideoService {
 		mediaAudioPO.setPreviewUrl(previewUrl);
 		mediaAudioPO.setUploadTmpPath(ftpUrl);
 		mediaAudioPO.setStoreType(StoreType.REMOTE);
+		mediaVideoDao.save(mediaAudioPO);
 		
 		return new MediaVideoVO().set(mediaAudioPO);
 	}

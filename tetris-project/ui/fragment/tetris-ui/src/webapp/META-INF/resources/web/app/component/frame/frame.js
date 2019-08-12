@@ -155,6 +155,8 @@ define([
                 var self = this;
                 if(index === '2-1'){
                     //个人中心
+                    var token = window.TOKEN;
+                    window.location.href = '/user/index/personal/' + token;
                 }else if(index === '2-2'){
                     //注销登录
                     self.logout();
