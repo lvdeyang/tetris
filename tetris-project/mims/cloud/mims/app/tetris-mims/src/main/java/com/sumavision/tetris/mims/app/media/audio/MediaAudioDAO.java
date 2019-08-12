@@ -79,4 +79,15 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	 */
 	public List<MediaAudioPO> findByUploadTmpPathAndIdNotIn(String tmpPath, Collection<Long> ids);
 	
+	/**
+	 * 根据用户标签获取文件夹下的音频媒资（批量）<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月11日 下午3:21:18
+	 * @param Long folderId 文件夹id
+	 * @param String tags
+	 * @return List<MediaAudioPO> 音频媒资列表
+	 */
+	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO WHERE FOLDER_ID IN ?1 AND tags like CONCAT('%',?2,'%')", nativeQuery = true)
+	public List<MediaAudioPO> findByFolderIdInAndTag(Collection<Long> folderId, String tag);
 }

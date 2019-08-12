@@ -13,6 +13,14 @@ public class TagQuery {
 	@Autowired
 	private TagDAO tagDAO;
 	
+	/**
+	 * 获取标签树<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月11日 下午4:03:27
+	 * @param UserVO user 用户信息
+	 * @return List<TagVO> 标签树
+	 */
 	public List<TagVO> getTagTree(UserVO user) throws Exception{
 		List<TagVO> roots = getRootTag(user);
 		

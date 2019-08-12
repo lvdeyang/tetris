@@ -43,6 +43,7 @@ require.config({
         'mi-system-role-dialog':window.APPPATH + 'component/dialog/system-role/system-role-dialog',
         'mi-business-role-dialog':window.APPPATH + 'component/dialog/business-role/business-role-dialog',
         'mi-theme-dialog':window.APPPATH + 'component/dialog/theme/theme-dialog',
+        'mi-tag-dialog':window.APPPATH + 'component/dialog/mims/tag/mims-tag',
 
         /* pages */
         'page-user':window.APPPATH + 'user/page-user',
@@ -55,7 +56,8 @@ require.config({
         'page-organization-personal-settings':window.APPPATH + 'organization-personal-settings/page-organization-personal-settings',
         'page-development-basic':window.APPPATH + 'development/basic/page-development-basic',
         'page-business-user':window.APPPATH + 'business-user/page-business-user',
-        'page-business-role':window.APPPATH + 'business-role/page-business-role'
+        'page-business-role':window.APPPATH + 'business-role/page-business-role',
+        'page-personal':window.APPPATH + 'personal/page-personal'
     },
     shim:{
         'vue':{

@@ -59,6 +59,13 @@ public class TagController {
 		return tagService.edit(user, id, name, remark);
 	}
 	
+	/**
+	 * 获取标签树<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月11日 下午4:03:27
+	 * @return List<TagVO> 标签树
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/list/get")

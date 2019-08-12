@@ -384,6 +384,7 @@ public class UserService{
 			String nickname,
             String mobile,
             String mail,
+            String tags,
             boolean editPassword,
             String oldPassword,
             String newPassword,
@@ -422,6 +423,7 @@ public class UserService{
 		user.setMobile(mobile);
 		user.setMail(mail);
 		user.setUpdateTime(new Date());
+		if(tags != null) user.setTags(tags);
 		userDao.save(user);
 		
 		return new UserVO().set(user);

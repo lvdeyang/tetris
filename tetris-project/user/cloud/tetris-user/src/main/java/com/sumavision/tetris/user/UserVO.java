@@ -1,5 +1,9 @@
 package com.sumavision.tetris.user;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -82,6 +86,9 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	
 	/** 业务角色id,以“,”分割 */
 	private String businessRoles;
+	
+	/** 用户标签,以“,”分割 */
+	private List<String> tags;
 	
 	public String getUsername() {
 		return username;
@@ -281,6 +288,15 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		return this;
 	}
 
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public UserVO setTags(List<String> tags) {
+		this.tags = tags;
+		return this;
+	}
+
 	@Override
 	public UserVO set(UserPO entity){
 		this.setId(entity.getId())
@@ -294,6 +310,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
 			.setToken(entity.getToken())
 			.setAutoGeneration(entity.isAutoGeneration());
+		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(UserPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
 		return this;
 	}
 	

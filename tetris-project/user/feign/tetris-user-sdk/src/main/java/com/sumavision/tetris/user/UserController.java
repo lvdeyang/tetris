@@ -5,11 +5,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.config.server.ServerProps;
+import com.sumavision.tetris.config.server.UserServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -20,6 +24,9 @@ public class UserController {
 
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private UserServerPropsQuery userServerPropsQuery;
 	
 	/**
 	 * 根据id查询用户<br/>
@@ -72,4 +79,26 @@ public class UserController {
 		return userQuery.listByCompanyIdWithExcept(companyId, exceptIds, currentPage, pageSize);
 	}
 	
+	/**
+	 * 重定向到个人中心<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月4日 下午3:11:36
+	 * @throws Exception 
+	 */
+	@RequestMapping(value = "/index/personal/{token}")
+	public void queryPersonalUrl(@PathVariable String token, HttpServletRequest request, HttpServletResponse response) throws Exception{		
+		ServerProps serverProps = userServerPropsQuery.queryProps();
+		
+		StringBufferWrapper redirectUrl = new StringBufferWrapper().append("http://")
+				   .append(serverProps.getIp())
+				   .append(":")
+				   .append(serverProps.getPort())
+				   .append("/")
+				   .append("index/")
+				   .append(token)
+				   .append("#/page-personal");
+		
+		response.sendRedirect(redirectUrl.toString());
+	}
 }

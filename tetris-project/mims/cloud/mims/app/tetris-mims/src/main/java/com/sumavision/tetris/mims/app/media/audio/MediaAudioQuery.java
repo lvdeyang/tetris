@@ -174,6 +174,42 @@ public class MediaAudioQuery {
 	}
 	
 	/**
+	 * 加载所有的音频媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月11日 下午4:03:27
+	 * @return List<MediaAudioVO> 视频媒资列表
+	 */
+	public List<MediaAudioVO> loadAllByTags() throws Exception{
+		//TODO 权限校验
+		UserVO user = userQuery.current();
+		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
+		
+		List<String> tags = user.getTags();
+		
+		if (tags == null || tags.isEmpty()) return null;
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		List<MediaAudioVO> audios = new ArrayListWrapper<MediaAudioVO>().getList();
+		
+		for (String tag : tags) {
+			List<MediaAudioPO> childAudios = mediaAudioDao.findByFolderIdInAndTag(folderIds, tag);
+			if (childAudios == null || childAudios.isEmpty()) continue;
+			MediaAudioVO audio = new MediaAudioVO();
+			audio.setName(tag);
+			audio.setChildren(MediaAudioVO.getConverter(MediaAudioVO.class).convert(childAudios, MediaAudioVO.class));
+			audios.add(audio);
+		}
+		
+		return audios;
+	}
+	
+	/**
 	 * 查询文件夹下上传完成的音频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

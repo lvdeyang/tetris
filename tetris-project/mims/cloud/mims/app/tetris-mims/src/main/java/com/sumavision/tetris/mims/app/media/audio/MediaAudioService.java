@@ -453,6 +453,8 @@ public class MediaAudioService {
 		mediaAudioPO.setPreviewUrl(previewUrl);
 		mediaAudioPO.setUploadTmpPath(ftpUrl);
 		mediaAudioPO.setStoreType(StoreType.REMOTE);
+		mediaAudioPO.setAuthorName(user.getNickname());
+		mediaAudioDao.save(mediaAudioPO);
 		
 		return new MediaAudioVO().set(mediaAudioPO);
 	}
@@ -480,8 +482,8 @@ public class MediaAudioService {
 			FolderPO folder) throws Exception{
 		
 		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_AUDIO);
-		String transTags = StringUtils.join(tags.toArray(), MediaAudioPO.SEPARATOR_TAG);
-		String transKeyWords = StringUtils.join(keyWords.toArray(), MediaAudioPO.SEPARATOR_KEYWORDS);
+		String transTags = (tags == null || tags.isEmpty()) ? "" : StringUtils.join(tags.toArray(), MediaAudioPO.SEPARATOR_TAG);
+		String transKeyWords = (keyWords == null || keyWords.isEmpty()) ? "" : StringUtils.join(keyWords.toArray(), MediaAudioPO.SEPARATOR_KEYWORDS);
 		
 		String separator = File.separator;
 		//临时路径采取/base/companyName/folderuuid/fileNamePrefix/version

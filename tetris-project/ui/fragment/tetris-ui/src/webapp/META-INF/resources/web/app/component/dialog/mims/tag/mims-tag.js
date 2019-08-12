@@ -2,14 +2,14 @@
  * Created by sms on 2019/7/25.
  */
 define([
-    'text!' + window.APPPATH + 'front/media/tag/tag-dialog.html',
+    'text!' + window.APPPATH + 'component/dialog/mims/tag/mims-tag.html',
     'restfull',
     'jquery',
     'vue',
     'element-ui',
-    'css!' + window.APPPATH + 'front/media/tag/tag-dialog.css'
+    'css!' + window.APPPATH + 'component/dialog/mims/tag/mims-tag.css'
 ], function (tpl, ajax, $, Vue) {
-    var pluginName = 'tag-dialog';
+    var pluginName = 'mi-tag-dialog';
 
     var ON_TAG_DIALOG_CLOSE = 'on-tag-dialog-close';
 

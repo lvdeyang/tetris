@@ -17,7 +17,7 @@ define([
     'mi-task-view',
     'mi-upload-dialog',
     'mi-lightbox',
-    'tag-dialog',
+    'mi-tag-dialog',
     'css!' + window.APPPATH + 'front/media/video/page-media-video.css'
 ], function(tpl, config, context, commons, ajax, $, File, Uploader, Vue){
 

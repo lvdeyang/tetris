@@ -1,6 +1,7 @@
 package com.sumavision.tetris.user;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -169,6 +170,7 @@ public class UserQuery {
 			.setIcon(userEntity.getIcon())
 			.setToken(userEntity.getToken())
 			.setId(userEntity.getId());
+		if(userEntity.getTags() != null && !userEntity.getTags().isEmpty()) user.setTags(Arrays.asList(userEntity.getTags().split(UserPO.SEPARATOR_TAG))); else user.setTags(new ArrayList<String>());
 		
 		List<SystemRolePO> businessRoles = systemRoleDao.findByUserIdAndType(userEntity.getId(), SystemRoleType.BUSINESS.toString());
 		
