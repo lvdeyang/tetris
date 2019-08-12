@@ -125,7 +125,12 @@ public class MediaAudioController {
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, null, remark, taskParam, folder);
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, keyWordList, remark, taskParam, folder);
 		
 		return new MediaAudioVO().set(entity);
 		
