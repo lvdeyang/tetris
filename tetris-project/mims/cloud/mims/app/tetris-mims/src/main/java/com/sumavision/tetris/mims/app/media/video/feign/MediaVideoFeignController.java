@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -65,10 +66,10 @@ public class MediaVideoFeignController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/quest/by/uuid")
-	public Object getByUuids(String uuids){
+	public Object getByUuids(String uuids) throws Exception{
 		List<String> uuidList = JSON.parseArray(uuids, String.class);
 		
-		return mediaVideoQuery.questByUuid(uuidList);
+		return MediaVideoVO.getConverter(MediaVideoVO.class).convert(mediaVideoQuery.questByUuid(uuidList), MediaVideoVO.class);
 	}
 	
 	/**
@@ -79,6 +80,8 @@ public class MediaVideoFeignController {
 	 * @return String 预览路径
 	 * @throws Exception 
 	 */
+	@JsonBody
+	@ResponseBody
 	@RequestMapping(value = "/build/url")
 	public Object buildUrl(String name, String folderUuid, HttpServletRequest request) throws Exception {
 		return mediaVideoQuery.buildUrl(name, folderUuid);

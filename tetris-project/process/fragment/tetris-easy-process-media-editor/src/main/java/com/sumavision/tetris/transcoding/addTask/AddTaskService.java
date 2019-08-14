@@ -61,7 +61,7 @@ public class AddTaskService {
 		TranscodeVO transcodeVO = new TranscodeVO();
 		transcodeVO.setId("");
 		transcodeVO.setType("file");
-		transcodeVO.setPriority("");
+		transcodeVO.setPriority("50");
 		transcodeVO.setSource(new ArrayListWrapper<SourceVO>().getList());
 		transcodeVO.setTarget(new TargetVO());
 		ArrayListWrapper<String> mediaUuids = new ArrayListWrapper<String>();
@@ -85,7 +85,7 @@ public class AddTaskService {
 			transcodeVO.getSource().add(source);
 		}
 		FolderVO folder = folderQuery.getById(folderId);
-		transcodeVO.getTarget().setTargetURI(mediaAVideoQuery.buildUrl(folder, name));
+		transcodeVO.getTarget().setTargetURI(adapter.addTreatyToUrl(mediaAVideoQuery.buildUrl(folder, name)));
 		transcodeVO.getTarget().setTranscodeTargetParams(param);
 		
 		TranscodeJobsVO transcodeJobs = new TranscodeJobsVO();

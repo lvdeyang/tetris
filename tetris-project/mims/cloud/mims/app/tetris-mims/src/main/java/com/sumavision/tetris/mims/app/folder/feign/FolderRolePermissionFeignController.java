@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderRolePermissionDAO;
+import com.sumavision.tetris.mims.app.folder.FolderTreeVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 /**
@@ -20,6 +23,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 public class FolderRolePermissionFeignController {
 	@Autowired
 	private FolderRolePermissionDAO folderRolePermissionDAO;
+	
+	@Autowired
+	private FolderDAO folderDAO;
 	/**
 	 * 瑙ｉ櫎鏂囦欢澶规巿鏉�<br/>
 	 * <p>鍖呮嫭鏂囦欢澶圭殑瀛愭枃浠跺す涓�骞惰В闄ゆ巿鏉�</p>
@@ -45,8 +51,10 @@ public class FolderRolePermissionFeignController {
 	 * <b>日期：</b>2019年6月25日 上午11:30:46
 	 * @param Long folderId 文件夹id
 	 */
+	@JsonBody
+	@ResponseBody
 	@RequestMapping(value = "/query")
 	public Object getById(Long folderId, HttpServletRequest request)throws Exception{
-		return folderRolePermissionDAO.findOne(folderId);
+		return new FolderTreeVO().set(folderDAO.findOne(folderId));
 	};
 }

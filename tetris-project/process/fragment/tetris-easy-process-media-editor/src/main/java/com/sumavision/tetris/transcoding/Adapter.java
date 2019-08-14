@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.xml.XmlUtil;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.transcoding.addTask.requestVO.AddTaskVO;
 import com.sumavision.tetris.transcoding.addTask.rsponseVO.AddTaskResponseVO;
 import com.sumavision.tetris.transcoding.completeNotify.CompleteNotifyService;
@@ -26,7 +27,10 @@ import com.sumavision.tetris.transcoding.getTemplates.VO.TemplatesResponseVO;
 @Transactional(rollbackFor = Exception.class)
 public class Adapter {
 	@Autowired
-	CompleteNotifyService completeNotifyService;
+	private CompleteNotifyService completeNotifyService;
+	
+	@Autowired
+	private MimsServerPropsQuery mimsServerPropsQuery;
 
 	/**
 	 * 获取云转码模板列表<br/>
@@ -57,6 +61,8 @@ public class Adapter {
 	 */
 	public AddTaskResponseVO addTask(AddTaskVO addTask) throws IOException {
 		String questXmlString = XmlUtil.toEasyXml(addTask, AddTaskVO.class);
+		
+		System.out.println(questXmlString);
 
 		String requestTranscoding = HttpRequestUtil.httpXmlPost(RequestUrlType.ADD_TASK_RUL.getUrl(), questXmlString);
 
@@ -189,5 +195,33 @@ public class Adapter {
 		httpPath = new StringBuilder("http://").append(ip).append(":").append(port).append(path).toString();
 		
 		return httpPath;
+	}
+	
+	/**
+	 * 获取url中不带协议的ftp<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月13日 上午11:57:19
+	 * @param url
+	 */
+	public String addTreatyToUrl(String url) throws Exception{
+		String[] split = url.split(":");
+		
+		if (split.length == 1) {
+			URL fileUrl = this.getClass().getClassLoader().getResource("profile.json");
+
+			File file = new File(fileUrl.getPath());
+
+			String json = FileUtils.readFileToString(file);
+			JSONObject jsonObject = JSONObject.parseObject(json);
+
+			String ftpUserName = jsonObject.getString("ftpUserName");
+			String ftpPassword = jsonObject.getString("ftpPassword");
+
+			return new StringBuilder("ftp://").append(ftpUserName).append(":").append(ftpPassword).append("@")
+					.append(mimsServerPropsQuery.queryProps().getIp()).append("/").append(url).toString();
+		}else {
+			return url;
+		}
 	}
 }

@@ -435,8 +435,15 @@ public class ProcessService {
 		
 		JSONObject finalVariableContext = aliFastJsonObject.convertFromHashMap(contextVariableMap);
 		
-		//启动流程
-		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid());
+		//启动流程--并加入变量
+		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid(), new HashMapWrapper<String, Object>().put(InternalVariableKey.START_USER_ID.getVariableKey(), user.getUuid())
+																																	      .put(InternalVariableKey.START_USER_NICKNAME.getVariableKey(), user.getNickname())
+																																	      .put(InternalVariableKey.START_TIME.getVariableKey(), DateUtil.format(new Date(), DateUtil.dateTimePattern))
+																																	      .put(InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), finalVariableContext)
+																																	      .put(InternalVariableKey.REQUEST_HEADERS.getVariableKey(), headers)
+																																	      .put(InternalVariableKey.CATEGORY.getVariableKey(), category)
+																																	      .put(InternalVariableKey.BUSINESS.getVariableKey(), business)
+																																	      .getMap());
 		
 		ProcessInstanceDeploymentPermissionPO permission = new ProcessInstanceDeploymentPermissionPO();
 		permission.setProcessInstanceId(processInstance.getId());
@@ -445,17 +452,11 @@ public class ProcessService {
 		processInstanceDeploymentPermissionDao.save(permission);
 		
 		//变量上下文中加入内置变量
-		finalVariableContext.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstance.getId());
-		
-		//设置流程变量
-		runtimeService.setVariables(processInstance.getId(), new HashMapWrapper<String, Object>().put(InternalVariableKey.START_USER_ID.getVariableKey(), user.getUuid())
-																							     .put(InternalVariableKey.START_USER_NICKNAME.getVariableKey(), user.getNickname())
-																							     .put(InternalVariableKey.START_TIME.getVariableKey(), DateUtil.format(new Date(), DateUtil.dateTimePattern))
-																							     .put(InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), finalVariableContext)
-																							     .put(InternalVariableKey.REQUEST_HEADERS.getVariableKey(), headers)
-																							     .put(InternalVariableKey.CATEGORY.getVariableKey(), category)
-																							     .put(InternalVariableKey.BUSINESS.getVariableKey(), business)
-																							     .getMap());
+		JSONObject existVariableContext = (JSONObject)runtimeService.getVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
+		if(!existVariableContext.containsKey(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey())){
+			existVariableContext.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstance.getId());
+			runtimeService.setVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), existVariableContext);
+		}
 		
 		return processInstance.getId();
 	}
