@@ -44,9 +44,10 @@
                                 <!--<el-tooltip class="item" effect="dark" content="编辑变量" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>-->
-                                <el-tooltip class="item" effect="dark" content="删除变量" placement="bottom-end">
+                                <el-tooltip v-if="scope.row.removeable" class="item" effect="dark" content="删除变量" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0;" @click="handleRowDelete(scope)"></el-button>
                                 </el-tooltip>
+                                <span v-else>-</span>
                             </template>
                         </el-table-column>
                     </el-table>

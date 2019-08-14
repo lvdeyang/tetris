@@ -109,6 +109,7 @@ public class ProcessService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月11日 上午10:29:42
+	 * @param Long templateId 模板id
 	 * @param String type 流程类型
 	 * @param String processId 流程id
 	 * @param String name 流程名称
@@ -116,24 +117,39 @@ public class ProcessService {
 	 * @return ProcessPO 流程定义
 	 */
 	public ProcessPO saveProcess(
+			Long templateId,
 			String type,
 			String processId,
 			String name,
 			String remarks) throws Exception{
 		
-		ProcessPO process = processDao.findByProcessId(processId);
-
-		if(process != null){
-			throw new ProcessIdAlreadyExistException(processId);
+		UserVO user = userQuery.current();
+		
+		ProcessPO template = null;
+		if(templateId != null){
+			template = processDao.findOne(templateId);
+			if(template == null){
+				throw new ProcessNotExistException(templateId);
+			}
 		}
 		
-		UserVO user = userQuery.current();
+		ProcessType processType = ProcessType.fromName(type);
+		
+		ProcessPO process = null;
+		
+		if(processType.equals(ProcessType.PUBLISH)){
+			//去重校验
+			process = processDao.findByProcessId(processId);
+			if(process != null){
+				throw new ProcessIdAlreadyExistException(processId);
+			}
+		}
 		
 		Date updateTime = new Date();
 		
 		process = new ProcessPO();
-		process.setType(ProcessType.fromName(type));
-		process.setProcessId(processId);
+		process.setType(processType);
+		process.setProcessId(processType.equals(ProcessType.TEMPLATE)?null:processId);
 		process.setName(name);
 		process.setRemarks(remarks);
 		process.setPath(new StringBufferWrapper().append("tmp")
@@ -148,6 +164,19 @@ public class ProcessService {
 												 .append(".bpmn")
 												 .toString());
 		process.setUpdateTime(updateTime);
+		
+		if(template != null){
+			String templateBpmn = template.getBpmn();
+			if(templateBpmn != null){
+				templateBpmn = templateBpmn.replaceAll(template.getUuid(), process.getUuid());
+				process.setBpmn(templateBpmn);
+			}
+			String templateUserTaskBindVariables = template.getUserTaskBindVariables();
+			if(templateUserTaskBindVariables != null){
+				process.setUserTaskBindVariables(templateUserTaskBindVariables);
+			}
+		}
+		
 		processDao.save(process);
 		
 		ProcessCompanyPermissionPO permission = new ProcessCompanyPermissionPO();
@@ -155,6 +184,28 @@ public class ProcessService {
 		permission.setCompanyId(user.getGroupId());
 		permission.setUpdateTime(updateTime);
 		processCompanyPermissionDao.save(permission);
+		
+		if(template != null){
+			//复制流程变量
+			List<ProcessVariablePO> existVariables = processVariableDao.findByProcessId(templateId);
+			if(existVariables!=null && existVariables.size()>0){
+				List<ProcessVariablePO> copyVariables = new ArrayList<ProcessVariablePO>();
+				for(ProcessVariablePO variable:existVariables){
+					copyVariables.add(variable.copy(process.getId()));
+				}
+				processVariableDao.save(copyVariables);
+			}
+			
+			//复制流程变量映射
+			List<ProcessParamReferencePO> existParamReferences = processParamReferenceDao.findByProcessId(templateId);
+			if(existParamReferences!=null && existParamReferences.size()>0){
+				List<ProcessParamReferencePO> copyParamReferences = new ArrayList<ProcessParamReferencePO>();
+				for(ProcessParamReferencePO paramReference:existParamReferences){
+					copyParamReferences.add(paramReference.copy(process.getId()));
+				}
+				processParamReferenceDao.save(copyParamReferences);
+			}
+		}
 		
 		return process;
 	}

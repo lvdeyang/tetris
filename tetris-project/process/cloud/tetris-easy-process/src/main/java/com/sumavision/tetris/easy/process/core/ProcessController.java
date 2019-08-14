@@ -37,7 +37,7 @@ import com.sumavision.tetris.user.UserVO;
 public class ProcessController {
 
 	@Autowired
-	private UserQuery userTool;
+	private UserQuery userQuery;
 	
 	@Autowired
 	private ProcessDAO processDao;
@@ -56,6 +56,27 @@ public class ProcessController {
 	
 	@Autowired
 	private AccessPointDAO accessPointDao;
+	
+	/**
+	 * 分页查询流程模板<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月13日 上午11:44:51
+	 * @param int currentPage 当前页
+	 * @param int pageSize 每页数据量
+	 * @return int total 总数据量
+	 * @return List<ProcessVO> 模板列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/template")
+	public Object listTemplate(
+			int currentPage, 
+			int pageSize, 
+			HttpServletRequest request) throws Exception{
+		
+		return processQuery.findProcessTemplates(currentPage, pageSize);
+	}
 	
 	/**
 	 * 分页查询流程<br/>
@@ -109,6 +130,7 @@ public class ProcessController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月24日 下午5:36:40
+	 * @param Long templateId 模板id
 	 * @param String processId 用户自定义流程id
 	 * @param String name 流程名称
 	 * @param String remarks 流程说明
@@ -118,13 +140,14 @@ public class ProcessController {
 	@ResponseBody
 	@RequestMapping(value = "/add")
 	public Object add(
+			Long templateId,
 			String type,
 			String processId,
 			String name,
 			String remarks,
 			HttpServletRequest request) throws Exception{
 		
-		ProcessPO process = processService.saveProcess(type, processId, name, remarks);
+		ProcessPO process = processService.saveProcess(templateId, type, processId, name, remarks);
 		
 		return new ProcessVO().set(process);
 	}
@@ -149,7 +172,7 @@ public class ProcessController {
 			String remarks,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
 		ProcessPO process = processDao.findOne(id);
 		
@@ -178,7 +201,7 @@ public class ProcessController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
 		ProcessPO process = processDao.findOne(id);
 		
@@ -201,11 +224,12 @@ public class ProcessController {
 	@RequestMapping(value = "/query/types")
 	public Object queryTypes(HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
 		Set<String> processTypes = new HashSet<String>();
 		ProcessType[] types = ProcessType.values();
 		for(ProcessType type:types){
+			if(!"0".equals(user.getGroupId()) && type.equals(ProcessType.TEMPLATE)) continue;
 			processTypes.add(type.getName());
 		}
 		
@@ -231,7 +255,7 @@ public class ProcessController {
 			Long id,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
 		ProcessPO process = processDao.findOne(id);
 		
@@ -323,7 +347,7 @@ public class ProcessController {
 			String accessPointIds,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
 		ProcessPO process = processDao.findOne(id);
 		
@@ -371,7 +395,7 @@ public class ProcessController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userTool.current();
+		UserVO user = userQuery.current();
 		
 		ProcessPO process = processDao.findOne(id);
 		

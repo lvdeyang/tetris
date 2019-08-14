@@ -1766,7 +1766,7 @@ define([
             elementRegistry.forEach(function(element){
                 if(element.businessObject &&
                     is(element.businessObject, 'bpmn:Process') &&
-                    element.businessObject.id===processId){
+                    element.businessObject.id==processId){
                     element.businessObject.id = uuid;
                     return false;
                 }

@@ -54,7 +54,7 @@ public class ProcessVO extends AbstractBaseVO<ProcessVO, ProcessPO>{
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setProcessId(entity.getProcessId())
+			.setProcessId(entity.getProcessId()==null?"-":entity.getProcessId())
 			.setName(entity.getName())
 			.setType(entity.getType().getName())
 			.setRemarks(entity.getRemarks());

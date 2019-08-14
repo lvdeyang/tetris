@@ -43,6 +43,9 @@ public class ProcessVariablePO extends AbstractBasePO{
 	/** 流程id */
 	private Long processId;
 	
+	/** 是否自动生成 */
+	private Boolean autoGeneration;
+	
 	@Column(name = "PRIMARY_KEY")
 	public String getPrimaryKey() {
 		return primaryKey;
@@ -96,6 +99,35 @@ public class ProcessVariablePO extends AbstractBasePO{
 
 	public void setProcessId(Long processId) {
 		this.processId = processId;
+	}
+	
+	@Column(name = "AUTO_GENERATION")
+	public Boolean getAutoGeneration() {
+		return autoGeneration;
+	}
+
+	public void setAutoGeneration(Boolean autoGeneration) {
+		this.autoGeneration = autoGeneration;
+	}
+
+	/**
+	 * 从模板变量中复制<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月13日 下午3:10:17
+	 * @param Long processId 目标流程id
+	 * @return ProcessVariablePO 复制后的变量
+	 */
+	public ProcessVariablePO copy(Long processId){
+		ProcessVariablePO entity = new ProcessVariablePO();
+		entity.setName(this.getName());
+		entity.setPrimaryKey(this.getPrimaryKey());
+		entity.setDataType(this.getDataType());
+		entity.setDefaultValue(this.getDefaultValue());
+		entity.setExpressionValue(this.getExpressionValue());
+		entity.setAutoGeneration(true);
+		entity.setProcessId(processId);
+		return entity;
 	}
 	
 }

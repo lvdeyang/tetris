@@ -98,6 +98,29 @@ public class ProcessQuery {
 	}
 	
 	/**
+	 * 分页查询流程模板<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月13日 下午1:19:48
+	 * @param int currentPage 当前页
+	 * @param int pageSize 每页数据
+	 * @return rows List<ProcessVO> 流程列表
+	 * @return total int 总数据量
+	 */
+	public Map<String, Object> findProcessTemplates(int currentPage, int pageSize) throws Exception{
+		long total = processDao.countByType(ProcessType.TEMPLATE);
+		
+		List<ProcessPO> entities = findByType(ProcessType.TEMPLATE, currentPage, pageSize);
+		
+		List<ProcessVO> rows = ProcessVO.getConverter(ProcessVO.class).convert(entities, ProcessVO.class);
+		
+		Map<String, Object> result = new HashMapWrapper<String, Object>().put("total", total)
+																		 .put("rows", rows)
+																		 .getMap();
+		return result;
+	}
+	
+	/**
 	 * 分页查询公司下的流程<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -121,6 +144,23 @@ public class ProcessQuery {
 																		 .put("rows", rows)
 																		 .getMap();
 		return result;
+	}
+	
+	/**
+	 * 根据类型分页查询流程<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月13日 下午1:17:25
+	 * @param ProcessType type 类型
+	 * @param int currentPage 当前页
+	 * @param int pageSize 每页数据量
+	 * @return List<ProcessPO> 流程列表
+	 */
+	public List<ProcessPO> findByType(ProcessType type, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<ProcessPO> pagedEntities = processDao.findByType(type, page);
+		if(pagedEntities != null) return pagedEntities.getContent();
+		return null;
 	}
 	
 	/**

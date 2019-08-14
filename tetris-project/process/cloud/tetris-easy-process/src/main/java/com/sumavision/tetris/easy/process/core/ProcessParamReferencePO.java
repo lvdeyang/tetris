@@ -28,6 +28,9 @@ public class ProcessParamReferencePO extends AbstractBasePO{
 	
 	/** 流程id */
 	private Long processId;
+	
+	/** 是否自动生成 */
+	private Boolean autoGeneration;
 
 	@Column(name = "REFERENCE")
 	public String getReference() {
@@ -56,6 +59,31 @@ public class ProcessParamReferencePO extends AbstractBasePO{
 
 	public void setProcessId(Long processId) {
 		this.processId = processId;
+	}
+
+	@Column(name = "AUTO_GENERATION")
+	public Boolean getAutoGeneration() {
+		return autoGeneration;
+	}
+
+	public void setAutoGeneration(Boolean autoGeneration) {
+		this.autoGeneration = autoGeneration;
+	}
+	
+	/**
+	 * 从模板参数映射中复制<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月13日 下午3:18:34
+	 * @param Long processId 流程id
+	 * @return ProcessParamReferencePO 复制后的参数映射
+	 */
+	public ProcessParamReferencePO copy(Long processId){
+		ProcessParamReferencePO entity = new ProcessParamReferencePO();
+		entity.setReference(this.getReference());
+		entity.setProcessId(processId);
+		entity.setAutoGeneration(true);
+		return entity;
 	}
 	
 }

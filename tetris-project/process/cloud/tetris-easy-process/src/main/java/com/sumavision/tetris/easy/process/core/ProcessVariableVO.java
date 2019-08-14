@@ -115,7 +115,7 @@ public class ProcessVariableVO extends AbstractBaseVO<ProcessVariableVO, Process
 			.setDataType(entity.getDataType().getName())
 			.setDefaultValue(entity.getDefaultValue())
 			.setExpressionValue(entity.getExpressionValue())
-			.setRemoveable(true);
+			.setRemoveable(entity.getAutoGeneration()==null?true:!entity.getAutoGeneration().booleanValue());
 		return this;
 	}
 	

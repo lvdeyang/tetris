@@ -1,6 +1,7 @@
 package com.sumavision.tetris.easy.process.core;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,27 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = ProcessPO.class, idClass = Long.class)
 public interface ProcessDAO extends BaseDAO<ProcessPO>{
 
+	/**
+	 * 根据类型分页查询流程<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月13日 上午11:50:15
+	 * @param ProcessType type 流程类型
+	 * @param Pageable page 分页信息
+	 * @return List<ProcessPO> 流程列表
+	 */
+	public Page<ProcessPO> findByType(ProcessType type, Pageable page);
+	
+	/**
+	 * 根据类型统计流程数量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月13日 上午11:51:31
+	 * @param ProcessType type 流程类型
+	 * @return long 流程数量
+	 */
+	public long countByType(ProcessType type);
+	
 	/**
 	 * 根据自定义流程id查询流程<br/>
 	 * <b>作者:</b>lvdeyang<br/>

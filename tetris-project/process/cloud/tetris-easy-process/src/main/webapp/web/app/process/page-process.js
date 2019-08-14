@@ -40,11 +40,22 @@ define([
                 dialog:{
                     createProcess:{
                         visible:false,
+                        templateId:'',
+                        templateName:'',
                         type:'',
                         processId:'',
                         name:'',
                         remarks:'',
                         loading:false
+                    },
+                    selectTemplate:{
+                        visible:false,
+                        rows:[],
+                        currentPage:0,
+                        pageSizes:[50, 100, 200, 400],
+                        pageSize:50,
+                        total:0,
+                        currentRow:''
                     },
                     editProcess:{
                         visible:false,
@@ -92,6 +103,7 @@ define([
                 handleCreate:function(){
                     var self = this;
                     self.dialog.createProcess.visible = true;
+                    self.dialog.createProcess.type = self.processTypes[0];
                 },
                 handleCreateProcessClose:function(){
                     var self = this;
@@ -105,6 +117,7 @@ define([
                     var self = this;
                     self.dialog.createProcess.loading = true;
                     ajax.post('/process/add', {
+                        templateId:self.dialog.createProcess.templateId,
                         type:self.dialog.createProcess.type,
                         processId:self.dialog.createProcess.processId,
                         name:self.dialog.createProcess.name,
@@ -219,6 +232,64 @@ define([
                         }
                         self.table.currentPage = currentPage;
                     });
+                },
+                templateRowKey:function(row){
+                    return 'template-' + row.uuid;
+                },
+                handleSelectTemplate:function(){
+                    var self = this;
+                    self.dialog.selectTemplate.visible = true;
+                    self.loadTemplate(1);
+                },
+                currentTemplateChange:function(template){
+                    var self = this;
+                    self.dialog.selectTemplate.currentRow = template;
+                },
+                clearTemplate:function(){
+                    var self = this;
+                    self.dialog.createProcess.templateId = '';
+                    self.dialog.createProcess.templateName = '';
+                },
+                handleSelectTemplateClose:function(){
+                    var self = this;
+                    self.dialog.selectTemplate.visible = false;
+                    self.dialog.selectTemplate.currentPage = 0;
+                    self.dialog.selectTemplate.total = 0;
+                    self.dialog.selectTemplate.currentRow = '';
+                    self.dialog.selectTemplate.rows.splice(0, self.dialog.selectTemplate.rows.length);
+                },
+                handleSelectTemplateSubmit:function(){
+                    var self = this;
+                    self.dialog.createProcess.templateId = self.dialog.selectTemplate.currentRow.id;
+                    self.dialog.createProcess.templateName = self.dialog.selectTemplate.currentRow.name;
+                    self.handleSelectTemplateClose();
+                },
+                loadTemplate:function(currentPage){
+                    var self = this;
+                    self.dialog.selectTemplate.rows.splice(0, self.dialog.selectTemplate.rows.length);
+                    ajax.post('/process/list/template', {
+                        currentPage:currentPage,
+                        pageSize:self.dialog.selectTemplate.pageSize
+                    }, function(data){
+                        var rows = data.rows;
+                        var total = data.total;
+                        if(rows && rows.length>0){
+                            for(var i=0; i<rows.length; i++){
+                                self.dialog.selectTemplate.rows.push(rows[i]);
+                            }
+                            self.dialog.selectTemplate.total = total;
+                        }
+                        self.dialog.selectTemplate.currentPage = currentPage;
+                    });
+                },
+                handleTemplateSizeChange:function(size){
+                    var self = this;
+                    self.dialog.selectTemplate.pageSize = size;
+                    self.loadTemplate(1);
+                },
+                handleTemplateCurrentChange:function(pageSize){
+                    var self = this;
+                    self.loadTemplate(pageSize);
                 }
             },
             created:function(){

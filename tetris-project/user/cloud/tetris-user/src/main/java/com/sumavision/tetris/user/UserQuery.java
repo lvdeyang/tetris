@@ -199,6 +199,9 @@ public class UserQuery {
 				user.setThemeUrl(SystemThemePO.DEFAULT_URL);
 			}
 		}else{
+			if(userEntity.isAutoGeneration()){
+				user.setGroupId("0");
+			}
 			user.setCompanyInfo(null);
 			user.setThemeUrl(SystemThemePO.DEFAULT_URL);
 		}
