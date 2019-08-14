@@ -283,6 +283,12 @@ public class ProcessService {
 			accessPointProcessPermissionDao.deleteInBatch(permissions);
 		}
 		
+		//删除流程授权信息
+		List<ProcessCompanyPermissionPO> companyPermissions = processCompanyPermissionDao.findByProcessId(process.getId());
+		if(companyPermissions!=null && companyPermissions.size()>0){
+			processCompanyPermissionDao.deleteInBatch(companyPermissions);
+		}
+		
 		//删除流程变量
 		List<ProcessVariablePO> variables = processVariableDao.findByProcessId(process.getId());
 		if(variables!=null && variables.size()>0){
