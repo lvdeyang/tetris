@@ -157,7 +157,10 @@ public class ChannelService {
 	public void remove(Long id) throws Exception {
 		ChannelPO channel = channelDao.findOne(id);
 		if (channel.getMediaId() != null) mediaVideoStreamService.remove(channel.getMediaId());
-		if (!channelQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.DELETE.getRemark());
+		if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
+			if (channel.getBroadcastStatus() == ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING) stopAbilityBroadcast(id);
+			if (!channelQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.DELETE.getRemark());
+		}
 		channelDao.delete(channel);
 		csMenuService.removeMenuByChannelId(id);
 		scheduleService.removeByChannelId(id);
@@ -288,30 +291,36 @@ public class ChannelService {
 		for (ScheduleVO scheduleVO : scheduleVOs) {
 			Date broadDate = DateUtil.parse(scheduleVO.getBroadDate(), DateUtil.dateTimePattern);
 			Long broadDateLong = broadDate.getTime();
-			if (broadDateLong > now) {
-				Timer timer = new Timer();
-				timer.schedule(new TimerTask() {
+			if (broadDateLong > now || scheduleVOs.indexOf(scheduleVO) == scheduleVOs.size() - 1) {
+				Timer timer = timerMap.get(channelId);
+				if (timer != null) {
+					timer.cancel();
+				}
+				Timer nTimer = new Timer();
+				TimerTask timerTask = new TimerTask() {
 					
 					@Override
 					public void run() {
 						try {
 							if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)){
-								System.out.println(channelId + ":" + scheduleVO.getBroadDate());
-								startAbilityBroadcast(channelId, scheduleVO.getId());
+								if (broadDateLong > now) {
+									System.out.println(channelId + ":" + scheduleVO.getBroadDate());
+									startAbilityBroadcast(channelId, scheduleVO.getId());
+								}
 								startBroad(channelId);
 							}
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
-				}, broadDate);
-				timerMap.put(channelId, timer);
+				};
+				if (broadDateLong > now) {
+					nTimer.schedule(timerTask, broadDate);
+				} else {
+					nTimer.schedule(timerTask, 1000l);
+				}
+				timerMap.put(channelId, nTimer);
 				break;
-			}
-			
-			if (scheduleVOs.indexOf(scheduleVO) == scheduleVOs.size() - 1) {
-				channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
-				channelDao.save(channel);
 			}
 		}
 		

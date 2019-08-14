@@ -451,7 +451,7 @@ public class MediaVideoService {
 					String uploadTempPath = childFile.getPath();
 					String mimeType = new MimetypesFileTypeMap().getContentType(childFile);
 					
-					MediaVideoPO video = this.add(user, file.getName(), fileName, size, folderType, mimeType, uploadTempPath, tags, folderId);
+					MediaVideoPO video = this.add(user, localFile.getParentFile().getName(), fileName, size, folderType, mimeType, uploadTempPath, tags, folderId);
 					videos.add(video);
 				}
 			}	

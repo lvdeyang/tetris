@@ -714,6 +714,7 @@ public class MediaAudioService {
 		if(needProcess){
 			//启动流程
 			startUploadProcess(entity);
+			System.out.println(needProcess);
 		}else{
 			mediaAudioDao.save(entity);
 		}
@@ -753,7 +754,7 @@ public class MediaAudioService {
 					String uploadTempPath = childFile.getPath();
 					String mimeType = new MimetypesFileTypeMap().getContentType(childFile);
 					
-					MediaAudioPO audio = this.add(user, file.getName(), fileName, size, folderType, mimeType,uploadTempPath, tags, folderId);
+					MediaAudioPO audio = this.add(user, localFile.getParentFile().getName(), fileName, size, folderType, mimeType,uploadTempPath, tags, folderId);
 					audios.add(audio);
 				}
 			}	

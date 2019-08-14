@@ -45,6 +45,9 @@ public class MediaVideoStreamQuery {
 	@Autowired
 	private FolderQuery folderQuery;
 	
+	@Autowired
+	private MediaVideoStreamUrlRelationQuery mediaVideoStreamUrlRelationQuery;
+	
 	/**
 	 * 根据文件夹id查询文件夹以及视频流媒资<br/>
 	 * <p>
@@ -110,7 +113,9 @@ public class MediaVideoStreamQuery {
 					user.getId().toString());
 			if(videoStreams!=null && videoStreams.size()>0){
 				for(MediaVideoStreamPO videoStream:videoStreams){
-					rows.add(new MediaVideoStreamVO().set(videoStream));
+					MediaVideoStreamVO videoStreamVO = new MediaVideoStreamVO().set(videoStream);
+					videoStreamVO.setPreviewUrl(mediaVideoStreamUrlRelationQuery.getAllUrlFromStreamId(videoStream.getId()));
+					rows.add(videoStreamVO);
 				}
 			}
 			

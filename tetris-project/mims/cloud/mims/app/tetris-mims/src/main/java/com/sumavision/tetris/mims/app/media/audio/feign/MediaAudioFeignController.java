@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -60,14 +61,15 @@ public class MediaAudioFeignController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年8月6日 下午4:03:27
 	 * @return List<MediaAudioVO> 音频媒资列表
+	 * @throws Exception 
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/quest/by/uuid")
-	public Object getByUuids(String uuids){
+	public Object getByUuids(String uuids) throws Exception{
 		List<String> uuidList = JSON.parseArray(uuids, String.class);
 		
-		return mediaAudioQuery.questByUuid(uuidList);
+		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(mediaAudioQuery.questByUuid(uuidList), MediaAudioVO.class);
 	}
 	
 	/**
@@ -78,6 +80,8 @@ public class MediaAudioFeignController {
 	 * @return String 预览路径
 	 * @throws Exception 
 	 */
+	@JsonBody
+	@ResponseBody
 	@RequestMapping(value = "/build/url")
 	public Object buildUrl(String name, String folderUuid, HttpServletRequest request) throws Exception {
 		return mediaAudioQuery.buildUrl(name, folderUuid);
