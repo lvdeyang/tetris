@@ -36,6 +36,7 @@ import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioErrorWhenChangeFromTxtException;
+import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
@@ -414,6 +415,7 @@ public class MediaAudioService {
 			media.setFileName(audioFileName);
 			media.setPreviewUrl(audioPreviewUrl);
 			media.setUploadTmpPath(audioStorePath);
+			media.setDownloadCount(0l);
 			media.setUploadStatus(UploadStatus.COMPLETE);
 		}else{
 			media.setUploadStatus(UploadStatus.ERROR);
@@ -439,7 +441,7 @@ public class MediaAudioService {
 			String previewUrl,
 			String ftpUrl) throws Exception{
 		String version = new StringBufferWrapper().append(MediaAudioPO.VERSION_OF_ORIGIN).append(".").append(new Date().getTime()).toString();
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_AUDIO.toString());
+		FolderPO folder = folderDao.findCompanyFolderByTypeAndName(user.getGroupId(), FolderType.COMPANY_AUDIO.toString(), "快编目录");
 		if (folder == null) throw new FolderNotFoundException();
 		MediaAudioPO mediaAudioPO = new MediaAudioPO();
 		mediaAudioPO.setName(name);
@@ -448,12 +450,13 @@ public class MediaAudioService {
 		mediaAudioPO.setAuthorId(user.getUuid());
 		mediaAudioPO.setVersion(version);
 		mediaAudioPO.setFolderId(folder.getId());
-		mediaAudioPO.setMimetype("application/x-mpegURL");
+		mediaAudioPO.setMimetype("application/vnd.apple.mpegurl");
 		mediaAudioPO.setUploadStatus(UploadStatus.COMPLETE);
 		mediaAudioPO.setPreviewUrl(previewUrl);
 		mediaAudioPO.setUploadTmpPath(ftpUrl);
 		mediaAudioPO.setStoreType(StoreType.REMOTE);
 		mediaAudioPO.setAuthorName(user.getNickname());
+		mediaAudioPO.setDownloadCount(0l);
 		mediaAudioDao.save(mediaAudioPO);
 		
 		return new MediaAudioVO().set(mediaAudioPO);
@@ -518,6 +521,7 @@ public class MediaAudioService {
 		entity.setFolderId(folder.getId());
 		entity.setUploadStatus(UploadStatus.UPLOADING);
 		entity.setStoreType(StoreType.LOCAL);
+		entity.setDownloadCount(0l);
 		entity.setUploadTmpPath(new StringBufferWrapper().append(folderPath)
 												   .append(separator)
 												   .append(task.getName())
@@ -710,6 +714,7 @@ public class MediaAudioService {
 		entity.setUpdateTime(date);
 		entity.setTags(tags);
 		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
+		entity.setDownloadCount(0l);
 		
 		if(needProcess){
 			//启动流程
@@ -770,6 +775,7 @@ public class MediaAudioService {
 	 * @param MediaAudioPO audio 音频媒资
 	 */
 	public void startUploadProcess(MediaAudioPO audio) throws Exception{
+		mediaAudioDao.save(audio);
 		UserVO user = userQuery.current();
 		Long companyId = Long.valueOf(user.getGroupId());
 		MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_AUDIO);
@@ -788,5 +794,28 @@ public class MediaAudioService {
 		String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
 		audio.setProcessInstanceId(processInstanceId);
 		mediaAudioDao.save(audio);
+	}
+	
+	/**
+	 * 增加下载数<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月15日 下午5:11:49
+	 * @param Long id 下载的音频id
+	 * @return MediaAudioVO 音频
+	 */
+	public MediaAudioVO downloadAdd(Long id) throws Exception {
+		MediaAudioPO media = mediaAudioDao.findOne(id);
+		if(media == null) throw new MediaAudioNotExistException(id);
+		
+		Long downloadCount = media.getDownloadCount();
+		if (media.getDownloadCount() == null) {
+			downloadCount = 1l;
+		} else {
+			downloadCount++;
+		}
+		media.setDownloadCount(downloadCount);
+		mediaAudioDao.save(media);
+		return new MediaAudioVO().set(media);
 	}
 }

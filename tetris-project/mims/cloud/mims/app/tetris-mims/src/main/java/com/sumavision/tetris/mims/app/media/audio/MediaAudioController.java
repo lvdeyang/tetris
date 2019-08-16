@@ -637,6 +637,8 @@ public class MediaAudioController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
+		mediaAudioService.downloadAdd(id);
+		
 		Map<String, String> result = new HashMapWrapper<String, String>().put("name", media.getFileName())
 																		 .put("uri", media.getPreviewUrl())
 																		 .getMap();
@@ -644,4 +646,18 @@ public class MediaAudioController {
 		return result;
 	}
 	
+	/**
+	 * 增加下载数<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月15日 下午5:11:49
+	 * @param Long id 下载的音频id
+	 * @return MediaAudioVO 音频
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/download")
+	public Object downloadAdd(Long id, HttpServletRequest request) throws Exception{
+		return mediaAudioService.downloadAdd(id);
+	}
 }
