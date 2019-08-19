@@ -121,7 +121,7 @@ public class MediaAudioController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if (!tags.isEmpty()) {
+		if (tags!=null && !tags.isEmpty()) {
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
@@ -173,11 +173,16 @@ public class MediaAudioController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if (!tags.isEmpty()) {
+		if (tags!=null && !tags.isEmpty()) {
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTaskFromTxt(user, name, tagList, null, remark, txtId, folder);
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaAudioPO entity = mediaAudioService.addTaskFromTxt(user, name, tagList, keyWordList, remark, txtId, folder);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -214,7 +219,7 @@ public class MediaAudioController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if (!tags.isEmpty()) {
+		if (tags!=null && !tags.isEmpty()) {
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
