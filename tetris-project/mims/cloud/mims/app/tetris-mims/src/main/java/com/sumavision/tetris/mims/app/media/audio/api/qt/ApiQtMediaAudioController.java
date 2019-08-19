@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -16,6 +17,9 @@ public class ApiQtMediaAudioController {
 
 	@Autowired
 	private MediaAudioQuery mediaAudioQuery;
+	
+	@Autowired
+	private MediaAudioService mediaAudioService;
 	
 	/**
 	 * 加载所有的音频媒资<br/>
@@ -60,5 +64,20 @@ public class ApiQtMediaAudioController {
 	@RequestMapping(value = "/load/all/by/tags")
 	public Object loadAllByTags(HttpServletRequest request) throws Exception{
 		return mediaAudioQuery.loadAllByTags();
+	}
+	
+	/**
+	 * 增加下载数<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月15日 下午5:11:49
+	 * @param Long id 下载的音频id
+	 * @return MediaAudioVO 音频
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/download")
+	public Object downloadAdd(Long id, HttpServletRequest request) throws Exception{
+		return mediaAudioService.downloadAdd(id);
 	}
 }

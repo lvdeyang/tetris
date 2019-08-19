@@ -297,6 +297,7 @@ public class FolderQuery {
 					}
 				}
 			}
+			breadCrumb.append("/").append(currentFolder.getName());
 			return breadCrumb.toString();
 		}
 	}

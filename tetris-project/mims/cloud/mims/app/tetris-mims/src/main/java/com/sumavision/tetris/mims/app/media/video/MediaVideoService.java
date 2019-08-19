@@ -16,17 +16,30 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.easy.process.core.ProcessQuery;
+import com.sumavision.tetris.easy.process.core.ProcessService;
+import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
+import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -53,6 +66,154 @@ public class MediaVideoService {
 	
 	@Autowired
 	private Path path;
+	
+	@Autowired
+	private MediaSettingsQuery mediaSettingsQuery;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private MediaSettingsDAO mediaSettingsDao;
+	
+	@Autowired
+	private ProcessQuery processQuery;
+	
+	@Autowired
+	private MimsServerPropsQuery serverPropsQuery;
+	
+	@Autowired
+	private FolderQuery folderQuery;
+	
+	@Autowired
+	private ProcessService processService;
+	
+	/**
+	 * 视频媒资上传审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午2:16:01
+	 * @param Long id 媒资id
+	 */
+	public void uploadReviewPassed(Long id) throws Exception{
+		MediaVideoPO media = mediaVideoDao.findOne(id);
+		media.setReviewStatus(null);
+		mediaVideoDao.save(media);
+	}
+	
+	/**
+	 * 视频媒资上传审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午2:16:01
+	 * @param Long id 媒资id
+	 */
+	public void uploadReviewRefuse(Long id) throws Exception{
+		MediaVideoPO media = mediaVideoDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
+		mediaVideoDao.save(media);
+	}
+	
+	/**
+	 * 视频媒资修改审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:01:51
+	 * @param Long id 视频媒资id
+	 * @param String name 媒资名称
+	 * @param String tags 贴标签，以“,”分隔
+	 * @param String keyWords 关键字，以“,”分隔
+	 * @param String remarks 备注
+	 */
+	public void editReviewPassed(
+			Long id,
+			String name,
+			String tags,
+			String keyWords,
+			String remarks) throws Exception{
+		MediaVideoPO media = mediaVideoDao.findOne(id);
+		media.setName(name);
+		media.setTags(tags);
+		media.setKeyWords(keyWords);
+		media.setRemarks(remarks);
+		media.setReviewStatus(null);
+		mediaVideoDao.save(media);
+	}
+	
+	/**
+	 * 视频媒资修改审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:19:16
+	 * @param Long id 视频媒资id
+	 */
+	public void editReviewRefuse(Long id) throws Exception{
+		MediaVideoPO media = mediaVideoDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
+		mediaVideoDao.save(media);
+	}
+	
+	/**
+	 * 视频媒资删除审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:01:51
+	 * @param Long id 视频媒资id
+	 */
+	public void deleteReviewPassed(Long id) throws Exception{
+		MediaVideoPO media = mediaVideoDao.findOne(id);
+		if(media != null){
+			List<MediaVideoPO> videosCanBeDeleted = new ArrayListWrapper<MediaVideoPO>().add(media).getList();
+			
+			//生成待删除存储文件数据
+			List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaVideos(videosCanBeDeleted);
+			
+			//删除素材文件元数据
+			mediaVideoDao.deleteInBatch(videosCanBeDeleted);
+			
+			//保存待删除存储文件数据
+			preRemoveFileDao.save(preRemoveFiles);
+			
+			//调用flush使sql生效
+			preRemoveFileDao.flush();
+			
+			//将待删除存储文件数据押入存储文件删除队列
+			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
+			
+			Set<Long> videoIds = new HashSet<Long>();
+			for(MediaVideoPO video:videosCanBeDeleted){
+				videoIds.add(video.getId());
+			}
+			
+			//删除临时文件
+			for(MediaVideoPO video:videosCanBeDeleted){
+				List<MediaVideoPO> results = mediaVideoDao.findByUploadTmpPathAndIdNotIn(video.getUploadTmpPath(), videoIds);
+				if(results==null || results.size()<=0){
+					File file = new File(new File(video.getUploadTmpPath()).getParent());
+					File[] children = file.listFiles();
+					if(children != null){
+						for(File sub:children){
+							if(sub.exists()) sub.delete();
+						}
+					}
+					if(file.exists()) file.delete();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 视频媒资删除审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:22:22
+	 * @param Long id 视频媒资id
+	 */
+	public void deleteReviewRefuse(Long id) throws Exception{
+		MediaVideoPO media = mediaVideoDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
+		mediaVideoDao.save(media);
+	}
 	
 	/**
 	 * 视频媒资删除<br/>
@@ -236,6 +397,7 @@ public class MediaVideoService {
 			String previewUrl,
 			Date date) throws Exception{
 		
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_VIDEO);
 		MediaVideoPO entity = new MediaVideoPO();
 		entity.setLastModified(task.getLastModified());
 		entity.setName(name);
@@ -272,6 +434,7 @@ public class MediaVideoService {
 		entity.setUploadTmpPath(storePath);
 		entity.setPreviewUrl(previewUrl);
 		entity.setUpdateTime(date);
+		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
 		mediaVideoDao.save(entity);
 		
 		return entity;
@@ -388,6 +551,8 @@ public class MediaVideoService {
 			String tags,
 			Long... folderId) throws Exception{
 		
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_AUDIO);
+		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
 		
@@ -413,8 +578,17 @@ public class MediaVideoService {
 		entity.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
 		entity.setUpdateTime(date);
 		entity.setTags(tags);
+		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
 		
-		mediaVideoDao.save(entity);
+		if(needProcess){
+			//启动流程
+			startUploadProcess(entity);
+			System.out.println(needProcess);
+		}else{
+			mediaVideoDao.save(entity);
+		}
+		
+		
 		
 		return entity;
 	}
@@ -458,4 +632,33 @@ public class MediaVideoService {
 		}
 		return videos;
 	}
+	
+	/**
+	 * 启动上传审核流程<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月9日 上午10:54:37
+	 * @param MediaVideoPO video 视频媒资
+	 */
+	public void startUploadProcess(MediaVideoPO video) throws Exception{
+		UserVO user = userQuery.current();
+		Long companyId = Long.valueOf(user.getGroupId());
+		MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_VIDEO);
+		Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+		ProcessVO process = processQuery.findById(processId);
+		JSONObject variables = new JSONObject();
+		variables.put("name", video.getName());
+		variables.put("tags", video.getTags());
+		variables.put("keyWords", video.getKeyWords());
+		variables.put("media", serverPropsQuery.generateHttpPreviewUrl(video.getPreviewUrl()));
+		variables.put("remark", video.getRemarks());
+		variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(video.getFolderId()));
+		variables.put("_pa8_id", video.getId());
+		String category = new StringBufferWrapper().append("上传视频：").append(video.getName()).toString();
+		String business = new StringBufferWrapper().append("mediaVideo:").append(video.getId()).toString();
+		String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+		video.setProcessInstanceId(processInstanceId);
+		mediaVideoDao.save(video);
+	}
+	
 }

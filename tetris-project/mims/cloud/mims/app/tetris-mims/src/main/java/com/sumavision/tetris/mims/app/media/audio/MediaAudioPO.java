@@ -88,6 +88,9 @@ public class MediaAudioPO extends AbstractBasePO{
 	/** 关键字， 格式：,分割*/
 	private String keyWords;
 	
+	/** 下载次数 */
+	private Long downloadCount;
+	
 	/** 文件上传状态 */
 	private UploadStatus uploadStatus;
 	
@@ -258,6 +261,15 @@ public class MediaAudioPO extends AbstractBasePO{
 
 	public void setKeyWords(String keyWords) {
 		this.keyWords = keyWords;
+	}
+
+	@Column(name = "DOWNLOAD_COUNT")
+	public Long getDownloadCount() {
+		return downloadCount;
+	}
+
+	public void setDownloadCount(Long downloadCount) {
+		this.downloadCount = downloadCount;
 	}
 
 	@Enumerated(value = EnumType.STRING)

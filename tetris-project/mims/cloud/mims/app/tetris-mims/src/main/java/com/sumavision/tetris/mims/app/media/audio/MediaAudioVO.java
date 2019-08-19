@@ -34,6 +34,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private List<String> keyWords;
 	
+	private Long downloadCount;
+	
 	private String type;
 	
 	private String icon;
@@ -142,6 +144,15 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 	
+	public Long getDownloadCount() {
+		return downloadCount;
+	}
+
+	public MediaAudioVO setDownloadCount(Long downloadCount) {
+		this.downloadCount = downloadCount;
+		return this;
+	}
+
 	public String getType() {
 		return type;
 	}
@@ -241,8 +252,9 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setMimetype(entity.getMimetype())
 			.setStoreType(entity.getStoreType())
 			.setUploadTmpPath(entity.getUploadTmpPath())
+			.setDownloadCount(entity.getDownloadCount())
 			.setProgress(0)
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId());
 		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());

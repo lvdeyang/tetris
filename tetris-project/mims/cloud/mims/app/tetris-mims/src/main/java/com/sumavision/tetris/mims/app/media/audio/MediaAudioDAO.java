@@ -3,6 +3,8 @@ package com.sumavision.tetris.mims.app.media.audio;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
@@ -90,4 +92,15 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	 */
 	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO WHERE FOLDER_ID IN ?1 AND tags like CONCAT('%',?2,'%')", nativeQuery = true)
 	public List<MediaAudioPO> findByFolderIdInAndTag(Collection<Long> folderId, String tag);
+	
+	/**
+	 * <br/>
+	 * <b>作者:</b>sms<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月15日 下午5:33:38
+	 * @param folderId
+	 * @param pageable
+	 * @return
+	 */
+	public Page<MediaAudioPO> findByFolderIdInOrderByDownloadCountDesc(Collection<Long> folderIds, Pageable pageable);
 }

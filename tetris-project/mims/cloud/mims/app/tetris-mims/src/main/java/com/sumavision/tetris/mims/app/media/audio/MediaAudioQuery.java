@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -229,6 +232,7 @@ public class MediaAudioQuery {
 			if (childAudios == null || childAudios.isEmpty()) continue;
 			MediaAudioVO audio = new MediaAudioVO();
 			audio.setName(tag);
+			audio.setType(MediaAudioItemType.FOLDER.toString());
 			audio.setChildren(MediaAudioVO.getConverter(MediaAudioVO.class).convert(childAudios, MediaAudioVO.class));
 			audios.add(audio);
 		}
@@ -375,5 +379,28 @@ public class MediaAudioQuery {
 												     .append("/")
 												     .append(version)
 												     .toString();
+	}
+	
+	/**
+	 * 获取热门列表(下载数排前十的媒资)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月15日 下午5:26:50
+	 * @return List<MediaAudioVO> 热门媒资列表
+	 */
+	public List<MediaAudioVO> loadHotList() throws Exception{
+		//TODO 权限校验
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		Pageable pageable = new PageRequest(0, 10);
+		
+		Page<MediaAudioPO> audios = mediaAudioDao.findByFolderIdInOrderByDownloadCountDesc(folderIds, pageable);
+		
+		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(audios.getContent(), MediaAudioVO.class);
 	}
 }

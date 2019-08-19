@@ -74,7 +74,7 @@
                         <el-form-item v-if="review.show" v-for="variable in review.show" :key="'_show_'+variable.key" :label="variable.name">
                             <el-input v-if="variable.type==='b'" v-model="variable.value" style="width:380px;" readonly></el-input>
                             <div v-if="variable.type==='i'" style="width:120px; height:80px; cursor:pointer;" @click="doPreview(variable.value, 'image')">
-                                <img style="width:100%;" :src="variable.value"/>
+                                <img style="width:100%; max-height:100%;" :src="variable.value"/>
                             </div>
                             <div v-if="variable.type==='v'" style="width:120px; height:80px; cursor:pointer; background-color:#000; text-align:center; line-height:80px;" @click="doPreview(variable.value, 'video')">
                                 <span style="padding:10px 15px; background-color:rgba(255,255,255,.2); border:2px solid #fff; border-radius:12px;">

@@ -273,4 +273,21 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	 * @return List<FolderPO> 文件夹列表
 	 */
 	public List<FolderPO> findByIdIn(List<Long> ids) ;
+	
+	/**
+	 * 根据类型和目录名获取目录(收录存放文件使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月15日 上午9:52:15
+	 * @param String type 目录类型
+	 * @param String name 目录名称
+	 * @return FolderPO 目录信息
+	 */
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "+
+			   "FROM mims_folder folder "+
+			   "LEFT JOIN mims_folder_group_permission permission0 ON folder.id=permission0.folder_id "+ 
+			   "WHERE permission0.group_id=?1 "+
+			   "AND folder.type=?2 "+
+			   "AND folder.name=?3", nativeQuery = true)
+	public FolderPO findCompanyFolderByTypeAndName(String groupId, String type, String name);
 }

@@ -10,10 +10,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioItemType;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
@@ -59,6 +61,8 @@ public class ApiQtMediaController {
 	 * <b>日期：</b>2018年6月4日 下午4:03:27
 	 * @return List<MediaVideoVO> videos 视频媒资列表
 	 * @return List<MediaAudioVO> audios 音频媒资列表
+	 * @return List<MediaAudioVO> recommend 根据标签分类
+	 * @return List<MediaAudioVO> hot 根据下载数量获取
 	 */
 	@JsonBody
 	@ResponseBody
@@ -66,10 +70,24 @@ public class ApiQtMediaController {
 	public Object loadAll(HttpServletRequest request) throws Exception{
 		List<MediaVideoVO> videoVOs = mediaVideoQuery.loadAll();
 		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAll();
+		List<MediaAudioVO> recommend = mediaAudioQuery.loadAllByTags();
+		List<MediaAudioVO> hot = mediaAudioQuery.loadHotList();
+		
+		MediaAudioVO recommendRoot = new MediaAudioVO();
+		recommendRoot.setName("个人推荐");
+		recommendRoot.setType(MediaAudioItemType.FOLDER.toString());
+		recommendRoot.setChildren(recommend);
+		
+		MediaAudioVO hotRoot = new MediaAudioVO();
+		hotRoot.setName("热门推荐");
+		hotRoot.setType(MediaAudioItemType.FOLDER.toString());
+		hotRoot.setChildren(hot);
+		
 		return new HashMapWrapper<String, Object>().put("videos", videoVOs)
 				   .put("audios", audioVOs)
+				   .put("recommend", new ArrayListWrapper<MediaAudioVO>().add(recommendRoot).getList())
+				   .put("hot", new ArrayListWrapper<MediaAudioVO>().add(hotRoot).getList())
 				   .getMap();
 		
 	}
-	
 }
