@@ -102,7 +102,7 @@
                         </el-form-item>
 
                         <el-form-item>
-                            <el-button type="primary" size="medium" @click="doReview">确认</el-button>
+                            <el-button type="primary" size="medium" @click="doReview" :loading="review.loading">确认</el-button>
                         </el-form-item>
 
                     </el-form>

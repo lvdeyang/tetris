@@ -1,5 +1,7 @@
 package com.sumavision.tetris.easy.process.core;
 
+import java.util.Date;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +10,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -66,6 +70,9 @@ public class ProcessPO extends AbstractBasePO{
 	
 	/** 临时配置文件位置 */
 	private String path;
+	
+	/** 发布时间 */
+	private Date publishTime;
 	
 	public ProcessPO(){
 		this.setUuid(new StringBufferWrapper().append("_").append(this.getUuid()).toString());
@@ -137,6 +144,16 @@ public class ProcessPO extends AbstractBasePO{
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "PUBLISH_TIME")
+	public Date getPublishTime() {
+		return publishTime;
+	}
+
+	public void setPublishTime(Date publishTime) {
+		this.publishTime = publishTime;
 	}
 	
 }

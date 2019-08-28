@@ -1,16 +1,14 @@
 package com.sumavision.tetris.mims.app.media.stream.video.feign;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
@@ -67,10 +65,10 @@ public class MediaVideoStreamFeignController {
 	
 	/**
 	 * 视频流媒资删除<br/>
-	 * <b>作者:</b>lzp<br/>
+	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月17日 下午3:43:03
-	 * @param MediaVideoStreamPO videos 视频流媒资列表
+	 * @param Long mediaId 视频流媒资id
 	 */
 	@JsonBody
 	@ResponseBody
@@ -78,11 +76,8 @@ public class MediaVideoStreamFeignController {
 	public Object remove(
 			Long mediaId, 
 			HttpServletRequest request) throws Exception{
-		
 		List<Long> mediaIds = new ArrayListWrapper<Long>().add(mediaId).getList();
-		
-		mediaVideoStreamService.remove(JSON.toJSONString(mediaIds));
-		
+		mediaVideoStreamService.removeByIds(mediaIds);
 		return null;
 	}
 	

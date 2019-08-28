@@ -30,6 +30,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	
 	private String type;
 	
+	private boolean removeable;
+	
 	private String icon;
 	
 	private String style;
@@ -125,6 +127,15 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return this;
 	}
 
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaPictureVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
+		return this;
+	}
+
 	public String getIcon() {
 		return icon;
 	}
@@ -201,6 +212,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaPictureItemType.PICTURE.toString())
+			.setRemoveable(true)
 			.setIcon(MediaPictureItemType.PICTURE.getIcon())
 			.setStyle(MediaPictureItemType.PICTURE.getStyle()[0])
 			.setMimetype(entity.getMimetype())
@@ -224,6 +236,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaPictureItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaPictureItemType.FOLDER.getIcon())
 			.setStyle(MediaPictureItemType.FOLDER.getStyle()[0])
 			.setReviewStatus("-");

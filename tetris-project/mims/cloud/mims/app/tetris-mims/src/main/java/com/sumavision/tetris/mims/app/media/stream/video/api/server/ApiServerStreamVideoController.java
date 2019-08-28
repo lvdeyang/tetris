@@ -16,7 +16,6 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamUrlRelationQuery;
@@ -148,10 +147,7 @@ public class ApiServerStreamVideoController {
 			Long id,
 			HttpServletRequest request) throws Exception{
 		
-		UserVO user = userQuery.current();
-		
 		return  mediaVideoStreamUrlRelationQuery.getUrlFromStreamId(id);
-		
 	}
 	
 	/**
@@ -159,7 +155,7 @@ public class ApiServerStreamVideoController {
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月17日 下午3:43:03
-	 * @param MediaVideoStreamPO videos 视频流媒资列表
+	 * @param JSONString mediaIds 视频流id列表
 	 */
 	@JsonBody
 	@ResponseBody
@@ -167,9 +163,8 @@ public class ApiServerStreamVideoController {
 	public Object remove(
 			String mediaIds, 
 			HttpServletRequest request) throws Exception{
-		
-		mediaVideoStreamService.remove(mediaIds);
-		
+		List<Long> ids = JSON.parseArray(mediaIds, Long.class);
+		mediaVideoStreamService.removeByIds(ids);
 		return null;
 	}
 }

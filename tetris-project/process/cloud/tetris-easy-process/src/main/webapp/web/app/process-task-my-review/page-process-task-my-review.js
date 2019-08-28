@@ -44,7 +44,8 @@ define([
                 review:{
                     history:'',
                     show:'',
-                    set:''
+                    set:'',
+                    loading:false
                 }
             },
             computed:{
@@ -100,12 +101,14 @@ define([
                 },
                 doReview:function(){
                     var self = this;
-
+                    self.review.loading = true;
                     var task = self.table.currentRow;
                     ajax.post('/process/do/review', {
                         taskId:task.taskId,
                         variables: $.toJSON(self.review.set)
-                    }, function(){
+                    }, function(data, status){
+                        self.review.loading = false;
+                        if(status !== 200) return;
                         self.table.currentRow = '';
                         for(var i=0; i<self.table.rows.length; i++){
                             if(self.table.rows[i] === task){
@@ -121,7 +124,7 @@ define([
                             type:'success',
                             message:'操作成功！'
                         });
-                    });
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 processPreview:function(scope){
                     var self = this;

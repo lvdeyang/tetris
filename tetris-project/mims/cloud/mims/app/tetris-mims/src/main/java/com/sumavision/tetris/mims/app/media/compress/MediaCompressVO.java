@@ -30,6 +30,8 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 	
 	private String type;
 	
+	private boolean removeable;
+	
 	private String icon;
 	
 	private String style;
@@ -127,6 +129,15 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 		return this;
 	}
 
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaCompressVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
+		return this;
+	}
+
 	public String getIcon() {
 		return icon;
 	}
@@ -212,6 +223,7 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaCompressItemType.COMPRESS.toString())
+			.setRemoveable(true)
 			.setIcon(MediaCompressItemType.COMPRESS.getIcon())
 			.setStyle(MediaCompressItemType.COMPRESS.getStyle()[0])
 			.setMimetype(entity.getMimetype())
@@ -236,6 +248,7 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaCompressItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaCompressItemType.FOLDER.getIcon())
 			.setStyle(MediaCompressItemType.FOLDER.getStyle()[0])
 			.setReviewStatus("-");

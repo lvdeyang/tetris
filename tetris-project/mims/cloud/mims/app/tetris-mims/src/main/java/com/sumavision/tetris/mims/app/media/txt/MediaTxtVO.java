@@ -28,6 +28,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 	
 	private String type;
 	
+	private boolean removeable;
+	
 	private String icon;
 	
 	private String style;
@@ -113,6 +115,15 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 
 	public MediaTxtVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaTxtVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
 		return this;
 	}
 
@@ -203,6 +214,7 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setProcessInstanceId(entity.getProcessInstanceId())
 			.setSize(entity.getSize())
 			.setType(MediaTxtItemType.TXT.toString())
+			.setRemoveable(true)
 			.setIcon(MediaTxtItemType.TXT.getIcon())
 			.setStyle(MediaTxtItemType.TXT.getStyle()[0]);
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaTxtPO.SEPARATOR_TAG)));
@@ -220,6 +232,7 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setRemarks("-")
 			.setType(MediaTxtItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaTxtItemType.FOLDER.getIcon())
 			.setStyle(MediaTxtItemType.FOLDER.getStyle()[0])
 			.setReviewStatus("-");

@@ -51,7 +51,7 @@
                                 <el-button v-if="scope.row.type==='FOLDER'" type="text" style="padding:0; color:inherit;"><a class="folder-link" :href="'#/page-media-picture/'+scope.row.id">{{scope.row.name}}</a></el-button>
                                 <span v-else>{{scope.row.name}}</span>
                                 <span :style="'float:right; position:relative;' + (scope.row.__hover__?'display:inline-block;':'display:none;')">
-                                    <el-tooltip  v-if="scope.row.type!=='FOLDER'&&!scope.row.reviewStatus||scope.row.reviewStatus==='修改审核拒绝'||scope.row.reviewStatus==='删除审核拒绝'" class="item" effect="dark" content="下载" placement="bottom">
+                                    <el-tooltip v-if="scope.row.type!=='FOLDER'&&!scope.row.reviewStatus||scope.row.reviewStatus==='修改审核拒绝'||scope.row.reviewStatus==='删除审核拒绝'" class="item" effect="dark" content="下载" placement="bottom">
                                         <el-button size="small" type="text" style="padding:0; position:absolute; top:1px; right:87px;" @click="handleDownload(scope)">
                                             <span class="el-icon-download" style="font-size:20px; position:relative; top:1px;"></span>
                                         </el-button>
@@ -61,7 +61,7 @@
                                             <span class="icon-eye-open" style="font-size:18px; position:relative; top:1px;"></span>
                                         </el-button>
                                     </el-tooltip>
-                                    <el-tooltip v-if="!scope.row.reviewStatus||scope.row.reviewStatus.indexOf('拒绝')>=0" class="item" effect="dark" content="删除" placement="bottom">
+                                    <el-tooltip v-if="scope.row.removeable && (scope.row.type==='FOLDER' || !scope.row.reviewStatus||scope.row.reviewStatus.indexOf('拒绝')>=0)" class="item" effect="dark" content="删除" placement="bottom">
                                         <el-button
                                                 size="small"
                                                 type="text"
@@ -70,15 +70,15 @@
                                             <span class="el-icon-delete" style="font-size:18px;"></span>
                                         </el-button>
                                     </el-tooltip>
-                                    <el-dropdown v-if="!scope.row.reviewStatus||scope.row.reviewStatus==='修改审核拒绝'||scope.row.reviewStatus==='删除审核拒绝'" trigger="click" style="position:absolute; right:0; top:2px;" @visible-change="table.tooltip=!table.tooltip" @command="tableOptionsCommand($event, scope)">
+                                    <el-dropdown v-if="(scope.row.removeable&&scope.row.type==='FOLDER')||!scope.row.reviewStatus||scope.row.reviewStatus==='修改审核拒绝'||scope.row.reviewStatus==='删除审核拒绝'" trigger="click" style="position:absolute; right:0; top:2px;" @visible-change="table.tooltip=!table.tooltip" @command="tableOptionsCommand($event, scope)">
                                         <el-tooltip :disabled="table.tooltip" class="item" effect="dark" content="更多" placement="bottom">
                                             <el-button size="small" type="text" style="padding:0;"><span class="el-icon-more-outline" style="font-size:18px;"></span></el-button>
                                         </el-tooltip>
                                         <el-dropdown-menu slot="dropdown">
                                             <el-dropdown-item command="0" v-if="scope.row.type==='FOLDER'">重命名</el-dropdown-item>
                                             <el-dropdown-item command="1" v-if="scope.row.type==='PICTURE'">编辑</el-dropdown-item>
-                                            <el-dropdown-item command="2">移动</el-dropdown-item>
-                                            <el-dropdown-item command="3">复制</el-dropdown-item>
+                                            <!--<el-dropdown-item command="2">移动</el-dropdown-item>
+                                            <el-dropdown-item command="3">复制</el-dropdown-item>-->
                                         </el-dropdown-menu>
                                     </el-dropdown>
                                 </span>

@@ -46,7 +46,7 @@ public class MediaVideoStreamQuery {
 	private FolderQuery folderQuery;
 	
 	@Autowired
-	private MediaVideoStreamUrlRelationQuery mediaVideoStreamUrlRelationQuery;
+	private MediaVideoStreamUrlRelationDAO mediaVideoStreamUrlRelationDao;
 	
 	/**
 	 * 根据文件夹id查询文件夹以及视频流媒资<br/>
@@ -112,9 +112,22 @@ public class MediaVideoStreamQuery {
 					new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList(),
 					user.getId().toString());
 			if(videoStreams!=null && videoStreams.size()>0){
+				List<Long> videoStreamIds = new ArrayList<Long>();
 				for(MediaVideoStreamPO videoStream:videoStreams){
-					MediaVideoStreamVO videoStreamVO = new MediaVideoStreamVO().set(videoStream);
-					videoStreamVO.setPreviewUrl(mediaVideoStreamUrlRelationQuery.getAllUrlFromStreamId(videoStream.getId()));
+					videoStreamIds.add(videoStream.getId());
+				}
+				List<MediaVideoStreamUrlRelationPO> totalUrls = mediaVideoStreamUrlRelationDao.findByVideoStreamIdIn(videoStreamIds);
+				for(MediaVideoStreamPO videoStream:videoStreams){
+					List<String> urls = new ArrayList<String>();
+					if(totalUrls!=null && totalUrls.size()>0){
+						for(MediaVideoStreamUrlRelationPO url:totalUrls){
+							if(url.getVideoStreamId().equals(videoStream.getId())){
+								urls.add(url.getUrl());
+							}
+						}
+					}
+					MediaVideoStreamVO videoStreamVO = new MediaVideoStreamVO().set(videoStream)
+																			   .setPreviewUrl(urls);
 					rows.add(videoStreamVO);
 				}
 			}

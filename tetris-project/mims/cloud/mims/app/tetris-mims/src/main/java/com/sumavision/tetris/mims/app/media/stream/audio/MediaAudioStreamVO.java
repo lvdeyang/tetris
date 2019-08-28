@@ -24,6 +24,8 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 	
 	private String type;
 	
+	private boolean removeable;
+	
 	private String icon;
 	
 	private String style;
@@ -104,6 +106,15 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 		return this;
 	}
 
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaAudioStreamVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
+		return this;
+	}
+
 	public String getIcon() {
 		return icon;
 	}
@@ -151,6 +162,7 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setRemarks(entity.getRemarks())
 			.setType(MediaAudioStreamItemType.AUDIO_STREAM.toString())
+			.setRemoveable(true)
 			.setIcon(MediaAudioStreamItemType.AUDIO_STREAM.getIcon())
 			.setStyle(MediaAudioStreamItemType.AUDIO_STREAM.getStyle()[0])
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
@@ -170,6 +182,7 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setRemarks("-")
 			.setType(MediaAudioStreamItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaAudioStreamItemType.FOLDER.getIcon())
 			.setStyle(MediaAudioStreamItemType.FOLDER.getStyle()[0])
 			.setReviewStatus("-");

@@ -1231,11 +1231,11 @@ public class FolderService {
 			String roleName) throws Exception{
 		FolderPO folder = new FolderPO();
 		folder.setName(new StringBufferWrapper().append(companyName).append("（").append(type.getName()).append("）").toString());
-		folder.setDepth();
 		folder.setType(type);
 		folder.setUpdateTime(new Date());
 		folder.setParentId(parentId);
 		folder.setParentPath(parentPath);
+		folder.setDepth();
 		folderDao.save(folder);
 		FolderGroupPermissionPO permission0 = new FolderGroupPermissionPO();
 		permission0.setFolderId(folder.getId());

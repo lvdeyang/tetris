@@ -36,6 +36,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private String type;
 	
+	private boolean removeable;
+	
 	private String icon;
 	
 	private String style;
@@ -150,6 +152,15 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		this.type = type;
 		return this;
 	}
+	
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaVideoVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
+		return this;
+	}
 
 	public String getIcon() {
 		return icon;
@@ -236,6 +247,7 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaVideoItemType.VIDEO.toString())
+			.setRemoveable(true)
 			.setIcon(MediaVideoItemType.VIDEO.getIcon())
 			.setStyle(MediaVideoItemType.VIDEO.getStyle()[0])
 			.setMimetype(entity.getMimetype())
@@ -261,6 +273,7 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaVideoItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaVideoItemType.FOLDER.getIcon())
 			.setStyle(MediaVideoItemType.FOLDER.getStyle()[0])
 			.setReviewStatus("-");

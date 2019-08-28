@@ -3,6 +3,7 @@ package com.sumavision.tetris.mims.app.media.compress;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,9 +35,14 @@ import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.commons.util.xml.XmlReader;
 import com.sumavision.tetris.commons.util.xml.XmlUtil;
+import com.sumavision.tetris.easy.process.core.ProcessQuery;
+import com.sumavision.tetris.easy.process.core.ProcessService;
+import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
@@ -47,6 +54,10 @@ import com.sumavision.tetris.mims.app.media.compress.api.server.XmlVO.SignatureV
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
@@ -104,7 +115,149 @@ public class MediaCompressService {
 	
 	@Autowired
 	private MediaAudioDAO mediaAudioDAO;
+	
+	@Autowired
+	private MediaSettingsQuery mediaSettingsQuery;
 
+	@Autowired
+	private MediaSettingsDAO mediaSettingsDao;
+	
+	@Autowired
+	private ProcessQuery processQuery;
+	
+	@Autowired
+	private ProcessService processService;
+	
+	@Autowired
+	private FolderQuery folderQuery;
+	
+	/**
+	 * 播发媒资上传审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午2:16:01
+	 * @param Long id 媒资id
+	 */
+	public void uploadReviewPassed(Long id) throws Exception{
+		MediaCompressPO media = mediaCompressDao.findOne(id);
+		media.setReviewStatus(null);
+		mediaCompressDao.save(media);
+	}
+	
+	/**
+	 * 播发媒资上传审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午2:16:01
+	 * @param Long id 媒资id
+	 */
+	public void uploadReviewRefuse(Long id) throws Exception{
+		MediaCompressPO media = mediaCompressDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
+		mediaCompressDao.save(media);
+	}
+	
+	/**
+	 * 播发媒资修改审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:01:51
+	 * @param Long id 播发媒资id
+	 * @param String name 媒资名称
+	 * @param String tags 贴标签，以“,”分隔
+	 * @param String keyWords 关键字，以“,”分隔
+	 * @param String remarks 备注
+	 */
+	public void editReviewPassed(
+			Long id,
+			String name,
+			String tags,
+			String keyWords,
+			String remarks) throws Exception{
+		MediaCompressPO media = mediaCompressDao.findOne(id);
+		media.setName(name);
+		media.setTags(tags);
+		media.setKeyWords(keyWords);
+		media.setRemarks(remarks);
+		media.setReviewStatus(null);
+		mediaCompressDao.save(media);
+	}
+	
+	/**
+	 * 播发媒资修改审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:19:16
+	 * @param Long id 播发媒资id
+	 */
+	public void editReviewRefuse(Long id) throws Exception{
+		MediaCompressPO media = mediaCompressDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
+		mediaCompressDao.save(media);
+	}
+	
+	/**
+	 * 播发媒资删除审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:01:51
+	 * @param Long id 播发媒资id
+	 */
+	public void deleteReviewPassed(Long id) throws Exception{
+		MediaCompressPO media = mediaCompressDao.findOne(id);
+		if(media != null){
+			List<MediaCompressPO> videosCanBeDeleted = new ArrayListWrapper<MediaCompressPO>().add(media).getList();
+			
+			//生成待删除存储文件数据
+			List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaCompresses(videosCanBeDeleted);
+			
+			//删除素材文件元数据
+			mediaCompressDao.deleteInBatch(videosCanBeDeleted);
+			
+			//保存待删除存储文件数据
+			preRemoveFileDao.save(preRemoveFiles);
+			
+			//调用flush使sql生效
+			preRemoveFileDao.flush();
+			
+			//将待删除存储文件数据押入存储文件删除队列
+			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
+			
+			Set<Long> videoIds = new HashSet<Long>();
+			for(MediaCompressPO video:videosCanBeDeleted){
+				videoIds.add(video.getId());
+			}
+			
+			//删除临时文件
+			for(MediaCompressPO video:videosCanBeDeleted){
+				List<MediaCompressPO> results = mediaCompressDao.findByUploadTmpPathAndIdNotIn(video.getUploadTmpPath(), videoIds);
+				if(results==null || results.size()<=0){
+					File file = new File(new File(video.getUploadTmpPath()).getParent());
+					File[] children = file.listFiles();
+					if(children != null){
+						for(File sub:children){
+							if(sub.exists()) sub.delete();
+						}
+					}
+					if(file.exists()) file.delete();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 播发媒资删除审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:22:22
+	 * @param Long id 播发媒资id
+	 */
+	public void deleteReviewRefuse(Long id) throws Exception{
+		MediaCompressPO media = mediaCompressDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
+		mediaCompressDao.save(media);
+	}
+	
 	/**
 	 * 图片媒资删除<br/>
 	 * <p>
@@ -119,49 +272,94 @@ public class MediaCompressService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月23日 下午3:43:03
-	 * 
-	 * @param Collection<MaterialFilePO>
-	 *            materials 素材列表
+	 * @param Collection<MaterialFilePO> compresses 播发媒资列表
 	 */
-	public void remove(Collection<MediaCompressPO> compresses) throws Exception {
+	public Map<String, Object> remove(Collection<MediaCompressPO> compresses) throws Exception {
 
-		// 生成待删除存储文件数据
-		List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaCompresses(compresses);
-
-		// 删除素材文件元数据
-		mediaCompressDao.deleteInBatch(compresses);
-
-		// 保存待删除存储文件数据
-		preRemoveFileDao.save(preRemoveFiles);
-
-		// 调用flush使sql生效
-		preRemoveFileDao.flush();
-
-		// 将待删除存储文件数据押入存储文件删除队列
-		storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
-
-		Set<Long> compressIds = new HashSet<Long>();
-		for (MediaCompressPO compress : compresses) {
-			compressIds.add(compress.getId());
-		}
-
-		// 删除临时文件
-		for (MediaCompressPO compress : compresses) {
-			List<MediaCompressPO> results = mediaCompressDao.findByUploadTmpPathAndIdNotIn(compress.getUploadTmpPath(),
-					compressIds);
-			if (results == null || results.size() <= 0) {
-				File file = new File(new File(compress.getUploadTmpPath()).getParent());
-				File[] children = file.listFiles();
-				if (children != null) {
-					for (File sub : children) {
-						if (sub.exists())
-							sub.delete();
-					}
+		UserVO user = userQuery.current();
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_DELETE_COMPRESS);
+		List<MediaCompressPO> compressCanBeDeleted = new ArrayList<MediaCompressPO>();
+		List<MediaCompressPO> compressNeedProcess = new ArrayList<MediaCompressPO>();
+		
+		if(needProcess){
+			for(MediaCompressPO compress:compresses){
+				if(compress.getAuthorId().equals(user.getId().toString()) && 
+						ReviewStatus.REVIEW_UPLOAD_REFUSE.equals(compress.getReviewStatus())){
+					compressCanBeDeleted.add(compress);
+				}else{
+					compressNeedProcess.add(compress);
 				}
-				if (file.exists())
-					file.delete();
+			}
+			if(compressNeedProcess.size() > 0){
+				//开启审核流程
+				Long companyId = Long.valueOf(user.getGroupId());
+				MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_DELETE_COMPRESS);
+				Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+				ProcessVO process = processQuery.findById(processId);
+				for(MediaCompressPO compress:compressNeedProcess){
+					JSONObject variables = new JSONObject();
+					
+					//展示修改后参数
+					variables.put("name", compress.getName());
+					variables.put("tags", compress.getTags());
+					variables.put("keyWords", compress.getKeyWords());
+					variables.put("remark", compress.getRemarks());
+					variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(compress.getFolderId()));
+					
+					//接口参数
+					variables.put("_pa46_id", compress.getId());
+					
+					String category = new StringBufferWrapper().append("删除播发媒资：").append(compress.getName()).toString();
+					String business = new StringBufferWrapper().append("mediaCompress:").append(compress.getId()).toString();
+					String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+					compress.setProcessInstanceId(processInstanceId);
+					compress.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
+				}
+				mediaCompressDao.save(compressNeedProcess);
+			}
+		}else{
+			compressCanBeDeleted.addAll(compresses);
+		}
+		
+		if(compressCanBeDeleted.size() > 0){
+			//生成待删除存储文件数据
+			List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaCompresses(compressCanBeDeleted);
+			
+			//删除素材文件元数据
+			mediaCompressDao.deleteInBatch(compressCanBeDeleted);
+			
+			//保存待删除存储文件数据
+			preRemoveFileDao.save(preRemoveFiles);
+			
+			//调用flush使sql生效
+			preRemoveFileDao.flush();
+			
+			//将待删除存储文件数据押入存储文件删除队列
+			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
+			
+			Set<Long> compressIds = new HashSet<Long>();
+			for(MediaCompressPO compress:compressCanBeDeleted){
+				compressIds.add(compress.getId());
+			}
+			
+			//删除临时文件
+			for(MediaCompressPO compress:compressCanBeDeleted){
+				List<MediaCompressPO> results = mediaCompressDao.findByUploadTmpPathAndIdNotIn(compress.getUploadTmpPath(), compressIds);
+				if(results==null || results.size()<=0){
+					File file = new File(new File(compress.getUploadTmpPath()).getParent());
+					File[] children = file.listFiles();
+					if(children != null){
+						for(File sub:children){
+							if(sub.exists()) sub.delete();
+						}
+					}
+					if(file.exists()) file.delete();
+				}
 			}
 		}
+		return new HashMapWrapper<String, Object>().put("deleted", MediaCompressVO.getConverter(MediaCompressVO.class).convert(compressCanBeDeleted, MediaCompressVO.class))
+												   .put("processed", MediaCompressVO.getConverter(MediaCompressVO.class).convert(compressNeedProcess, MediaCompressVO.class))
+												   .getMap();
 	}
 
 	/**
@@ -169,25 +367,28 @@ public class MediaCompressService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月29日 下午3:21:49
-	 * 
-	 * @param UserVO
-	 *            user 用户
-	 * @param String
-	 *            name 媒资名称
-	 * @param List<String>
-	 *            tags 标签列表
-	 * @param List<String>
-	 *            keyWords 关键字列表
-	 * @param String
-	 *            remark 备注
-	 * @param MediaVideoTaskVO
-	 *            task 上传任务
-	 * @param FolderPO
-	 *            folder 文件夹
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param MediaVideoTaskVO task 上传任务
+	 * @param FolderPO folder 文件夹
 	 * @return MediaCompressPO 图片媒资
 	 */
-	public MediaCompressPO addTask(UserVO user, String name, List<String> tags, List<String> keyWords, String remark,
-			MediaCompressTaskVO task, FolderPO folder) throws Exception {
+	public MediaCompressPO addTask(
+			UserVO user, 
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark,
+			MediaCompressTaskVO task, 
+			FolderPO folder) throws Exception {
+		
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_COMPRESS);
+		String transTags = (tags == null || tags.isEmpty()) ? "" : StringUtils.join(tags.toArray(), MediaCompressPO.SEPARATOR_TAG);
+		String transKeyWords = (keyWords == null || keyWords.isEmpty()) ? "" : StringUtils.join(keyWords.toArray(), MediaCompressPO.SEPARATOR_KEYWORDS);
+		
 		String separator = File.separator;
 		// 临时路径采取/base/companyName/folderuuid/fileNamePrefix/version
 		String webappPath = path.webappPath();
@@ -208,8 +409,8 @@ public class MediaCompressService {
 		MediaCompressPO entity = new MediaCompressPO();
 		entity.setLastModified(task.getLastModified());
 		entity.setName(name);
-		entity.setTags("");
-		entity.setKeyWords("");
+		entity.setTags(transTags);
+		entity.setKeyWords(transKeyWords);
 		entity.setRemarks(remark);
 		entity.setAuthorId(user.getUuid());
 		entity.setAuthorName(user.getNickname());
@@ -226,7 +427,7 @@ public class MediaCompressService {
 				.append(folder.getUuid()).append("/").append(fileNamePrefix).append("/").append(version).append("/")
 				.append(task.getName()).toString());
 		entity.setUpdateTime(date);
-
+		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
 		mediaCompressDao.save(entity);
 
 		return entity;
@@ -237,25 +438,64 @@ public class MediaCompressService {
 	 * <b>作者:</b>ldy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年3月25日 下午3:19:38
-	 * 
-	 * @param compress
-	 *            图片媒资
-	 * @param name
-	 *            名称
-	 * @param tags
-	 *            标签列表
-	 * @param keyWords
-	 *            关键字列表
-	 * @param remark
-	 *            备注
+	 * @param compress 图片媒资
+	 * @param name 名称
+	 * @param tags 标签列表
+	 * @param keyWords 关键字列表
+	 * @param remark 备注
 	 * @return MediaCompressPO 图片媒资
 	 */
-	public MediaCompressPO editTask(UserVO user, MediaCompressPO compress, String name, List<String> tags,
-			List<String> keyWords, String remark) throws Exception {
+	public MediaCompressPO editTask(
+			UserVO user, 
+			MediaCompressPO compress, 
+			String name, 
+			List<String> tags,
+			List<String> keyWords, 
+			String remark) throws Exception {
 
-		compress.setName(name);
-		compress.setRemarks(remark);
-
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_EDIT_COMPRESS);
+		String transTags = tags==null?"":StringUtils.join(tags.toArray(), MediaPicturePO.SEPARATOR_TAG);
+		String transKeyWords = keyWords==null?"":StringUtils.join(keyWords.toArray(), MediaPicturePO.SEPARATOR_KEYWORDS);
+		
+		if(needProcess){
+			//开启审核流程
+			Long companyId = Long.valueOf(user.getGroupId());
+			MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_EDIT_COMPRESS);
+			Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+			ProcessVO process = processQuery.findById(processId);
+			JSONObject variables = new JSONObject();
+			
+			//展示修改后参数
+			variables.put("name", name);
+			variables.put("tags", transTags);
+			variables.put("keyWords", transKeyWords);
+			variables.put("remark", remark);
+			
+			//展示修改前参数
+			variables.put("oldName", compress.getName());
+			variables.put("oldTags", compress.getTags());
+			variables.put("oldKeyWords", compress.getKeyWords());
+			variables.put("oldRemark", compress.getRemarks());
+			variables.put("oldUploadPath", folderQuery.generateFolderBreadCrumb(compress.getFolderId()));
+			
+			//接口参数
+			variables.put("_pa44_id", compress.getId());
+			variables.put("_pa44_name", name);
+			variables.put("_pa44_tags", transTags);
+			variables.put("_pa44_keyWords", transKeyWords);
+			variables.put("_pa44_remarks", remark);
+			
+			String category = new StringBufferWrapper().append("修改播发媒资：").append(compress.getName()).toString();
+			String business = new StringBufferWrapper().append("mediaCompress:").append(compress.getId()).toString();
+			String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+			compress.setProcessInstanceId(processInstanceId);
+			compress.setReviewStatus(ReviewStatus.REVIEW_EDIT_WAITING);
+		}else{
+			compress.setName(name);
+			compress.setTags(transTags);
+			compress.setKeyWords(transKeyWords);
+			compress.setRemarks(remark);
+		}
 		mediaCompressDao.save(compress);
 		return compress;
 	}
@@ -265,9 +505,7 @@ public class MediaCompressService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月3日 上午11:29:23
-	 * 
-	 * @param MediaCompressPO
-	 *            task 素材上传任务
+	 * @param MediaCompressPO task 素材上传任务
 	 */
 	public void uploadCancel(MediaCompressPO task) throws Exception {
 		File file = new File(new File(task.getUploadTmpPath()).getParent());
@@ -284,11 +522,8 @@ public class MediaCompressService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 下午1:21:15
-	 * 
-	 * @param MediaCompressPO
-	 *            media 待复制的图片媒资
-	 * @param FolderPO
-	 *            target 目标文件夹
+	 * @param MediaCompressPO media 待复制的图片媒资
+	 * @param FolderPO target 目标文件夹
 	 * @return MediaCompressPO 复制后的图片媒资
 	 */
 	public MediaCompressPO copy(MediaCompressPO media, FolderPO target) throws Exception {
@@ -315,9 +550,7 @@ public class MediaCompressService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月3日 下午4:19:44
-	 * 
-	 * @param String
-	 *            path tar包路径
+	 * @param String path tar包路径
 	 * @return String type 文章类型
 	 * @return String name 文章名称
 	 * @return String publishTime 文章发布时间
@@ -536,15 +769,10 @@ public class MediaCompressService {
 
 	/**
 	 * 解析eventType.json<br/>
-	 * <p>
-	 * 详细描述
-	 * </p>
 	 * <b>作者:</b>sm<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月3日 上午9:49:53
-	 * 
-	 * @param String
-	 *            code 分类（栏目）编码
+	 * @param String code 分类（栏目）编码
 	 * @return String code 所在栏目编码
 	 * @return String keyWords 关键字 keyword,keyword,keyword
 	 */
@@ -621,11 +849,8 @@ public class MediaCompressService {
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月3日 上午9:49:53
-	 * 
-	 * @param String
-	 *            jsonString 播发媒资json描述
-	 * @param List<Long>
-	 *            mimsIdList 打包媒资Id列表
+	 * @param String jsonString 播发媒资json描述
+	 * @param List<Long> mimsIdList 打包媒资Id列表
 	 * @return MediaCompressVO 生成的播发媒资
 	 */
 	public MediaCompressVO packageTar(String jsonString, List<FileCompressVO> mimsUuidList) throws Exception {

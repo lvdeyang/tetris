@@ -13,6 +13,8 @@ public class ProcessVO extends AbstractBaseVO<ProcessVO, ProcessPO>{
 	
 	private String remarks;
 	
+	private String publishTime;
+	
 	public String getProcessId() {
 		return processId;
 	}
@@ -48,6 +50,15 @@ public class ProcessVO extends AbstractBaseVO<ProcessVO, ProcessPO>{
 		this.remarks = remarks;
 		return this;
 	}
+	
+	public String getPublishTime() {
+		return publishTime;
+	}
+
+	public ProcessVO setPublishTime(String publishTime) {
+		this.publishTime = publishTime;
+		return this;
+	}
 
 	@Override
 	public ProcessVO set(ProcessPO entity) throws Exception {
@@ -57,7 +68,8 @@ public class ProcessVO extends AbstractBaseVO<ProcessVO, ProcessPO>{
 			.setProcessId(entity.getProcessId()==null?"-":entity.getProcessId())
 			.setName(entity.getName())
 			.setType(entity.getType().getName())
-			.setRemarks(entity.getRemarks());
+			.setRemarks(entity.getRemarks())
+			.setPublishTime(entity.getPublishTime()==null?(ProcessType.TEMPLATE.equals(entity.getType())?"-":"未发布"):DateUtil.format(entity.getPublishTime(), DateUtil.dateTimePattern));
 		return this;
 	}
 

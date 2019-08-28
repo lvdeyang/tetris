@@ -409,9 +409,9 @@ public class ProcessController {
 			throw new UserHasNoPermissionForProcessActionException(user.getUuid(), id, "发布流程。");
 		}
 		
-		processService.publish(process);
+		ProcessPO entity = processService.publish(process);
 		
-		return null;
+		return new ProcessVO().set(entity);
 	}
 	
 	/**

@@ -1,6 +1,8 @@
 package com.sumavision.tetris.mims.app.media.txt;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -118,10 +120,17 @@ public class MediaTxtController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaTxtPO entity = mediaTxtService.addTask(user, name, null, null, remark, content, folder);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
 		
-		return new MediaTxtVO().set(entity);
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
 		
+		return mediaTxtService.addTask(user, name, tagList, keyWordList, remark, content, folder, false);
 	}
 	
 	/**
@@ -153,10 +162,19 @@ public class MediaTxtController {
 		
 		MediaTxtPO txt = mediaTxtDao.findOne(id);
 		
-		MediaTxtPO entity = mediaTxtService.editTask(user, txt, name, null, null, remark, content);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaTxtPO entity = mediaTxtService.editTask(user, txt, name, tagList, keyWordList, remark, content, true);
 		
 		return new MediaTxtVO().set(entity);
-		
 	}
 	
 	/**
@@ -185,9 +203,7 @@ public class MediaTxtController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaTxtService.remove(new ArrayListWrapper<MediaTxtPO>().add(media).getList());
-		
-		return null;
+		return mediaTxtService.remove(new ArrayListWrapper<MediaTxtPO>().add(media).getList());
 	}
 	
 	/**
@@ -324,23 +340,24 @@ public class MediaTxtController {
 		
 		UserVO user = userQuery.current();
 		
-		//TODO 权限校验
-		
 		MediaTxtPO txt = mediaTxtDao.findOne(id);
-		
 		if(txt == null){
 			throw new MediaTxtNotExistException(id);
 		}
 		
-		txt.setContent(content);
-		if (txt.getUploadTmpPath() != null && !txt.getUploadTmpPath().isEmpty()) {
-			File file = new File(txt.getUploadTmpPath());
-			mediaTxtService.writeTxt(file, content);
-			txt.setSize(file.length());
+		List<String> tagList = null;
+		if(txt.getTags() != null){
+			tagList = Arrays.asList(txt.getTags().split(MediaTxtPO.SEPARATOR_TAG));
 		}
-		mediaTxtDao.save(txt);
 		
-		return null;
+		List<String> keyWordList = null;
+		if(txt.getKeyWords() != null){
+			keyWordList = Arrays.asList(txt.getKeyWords().split(MediaTxtPO.SEPARATOR_KEYWORDS));
+		}
+		
+		MediaTxtPO entity = mediaTxtService.editTask(user, txt, txt.getName(), tagList, keyWordList, txt.getRemarks(), content, true);
+		
+		return new MediaTxtVO().set(entity);
 	}
 	
 }

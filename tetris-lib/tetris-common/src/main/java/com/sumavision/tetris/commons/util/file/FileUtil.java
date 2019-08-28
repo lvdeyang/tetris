@@ -2,8 +2,10 @@ package com.sumavision.tetris.commons.util.file;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 
@@ -128,7 +130,33 @@ public class FileUtil {
         return new String(bytes, charset);
     }  
       
-      
+	/**
+	 * 向文件内写入字符串<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月26日 下午3:07:23
+	 * @param String path 文件存储路径
+	 * @param String content 文本内容
+	 */
+	public static File writeString(String path, String content) throws Exception{
+		Writer writer = null;
+		try{
+			File file = new File(path);
+			if(!file.exists()){
+				file.createNewFile();
+			}else{
+				file.delete();
+			}
+			writer = new FileWriter(file);
+			writer.write(content);
+			return file;
+		}finally{
+			if(writer != null){
+				writer.close();
+			}
+		}
+	}
+	
     /**
      * 获取文件的编码格式<br/>
      * <b>作者:</b>lvdeyang<br/>

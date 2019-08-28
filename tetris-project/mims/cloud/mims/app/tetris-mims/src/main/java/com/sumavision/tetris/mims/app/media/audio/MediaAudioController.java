@@ -219,7 +219,7 @@ public class MediaAudioController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if (tags!=null && !tags.isEmpty()) {
+		if(tags != null){
 			tagList = Arrays.asList(tags.split(","));
 		}
 		

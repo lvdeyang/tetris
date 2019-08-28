@@ -246,10 +246,24 @@ define([
                         if (typeof done === 'function') done();
                         if (status === 200) {
                             var rows = self.table.rows;
-                            for (var i = 0; i < rows.length; i++) {
-                                if (rows[i].uuid === row.uuid) {
-                                    rows.splice(i, 1);
-                                    break;
+                            var deleted = data.deleted;
+                            var processed = data.processed;
+                            if(deleted && deleted.length>0) {
+                                for (var i = 0; i < rows.length; i++) {
+                                    if (rows[i].uuid === row.uuid) {
+                                        rows.splice(i, 1);
+                                        break;
+                                    }
+                                }
+                            }
+                            if(processed && processed.length>0){
+                                var newEntity = processed[0];
+                                for(var i=0; i<rows.length; i++){
+                                    if(rows[i].uuid === row.uuid){
+                                        newEntity.previewUrl = rows[i].previewUrl;
+                                        rows.splice(i, 1, newEntity);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -509,6 +523,15 @@ define([
                     if (self.dialog.editVideoStream.urlCount == 1) return;
                     self.dialog.editVideoStream.urlCount--;
                     self.dialog.editVideoStream.previewUrl.splice(i - 1, 1);
+                },
+                doProcessPreview:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/process/generate/url', {
+                        processInstanceId:row.processInstanceId
+                    }, function(url){
+                        window.open(url, '_blank', 'status=no,menubar=yes,toolbar=no,width=1366,height=580,left=100,top=100');
+                    });
                 }
             },
             created: function () {

@@ -21,4 +21,8 @@ public class FolderNotExistException extends BaseException{
 															 .toString());
 	}
 	
+	public FolderNotExistException(String message){
+		super(StatusCode.FORBIDDEN, message);
+	}
+	
 }

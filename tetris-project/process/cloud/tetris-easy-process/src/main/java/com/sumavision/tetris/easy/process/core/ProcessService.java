@@ -319,7 +319,7 @@ public class ProcessService {
 	 * <b>日期：</b>2019年3月25日 下午4:00:47
 	 * @param ProcessPO process 流程
 	 */
-	public void publish(ProcessPO process) throws Exception{
+	public ProcessPO publish(ProcessPO process) throws Exception{
 		
 		File tmpFolders = new File(new StringBufferWrapper().append(path.classPath())
 														    .append(File.separator)
@@ -338,7 +338,6 @@ public class ProcessService {
 		InputStream inputStream = null;
 		
 		try{
-			
 			//写临时文件
 			FileUtils.writeStringToFile(tmpFile, process.getBpmn(), "utf-8");
 			
@@ -347,14 +346,19 @@ public class ProcessService {
 			//发布流程
 			Deployment deployment = repositoryService.createDeployment().addInputStream(process.getPath(), inputStream).deploy();
 			
+			Date publishTime = new Date();
+			
 			ProcessDeploymentPermissionPO permission = new ProcessDeploymentPermissionPO();
-			permission.setUpdateTime(new Date());
+			permission.setUpdateTime(publishTime);
 			permission.setProcessId(process.getId());
 			permission.setName(process.getName());
 			permission.setRemarks(process.getRemarks());
 			permission.setBpmn(process.getBpmn());
 			permission.setDeploymentId(deployment.getId());
 			processDeploymentPermissionDao.save(permission);
+			process.setPublishTime(publishTime);
+			processDao.save(process);
+			return process;
 		}finally{
 			if(inputStream != null) inputStream.close();
 			

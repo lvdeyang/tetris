@@ -24,6 +24,8 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 	
 	private String type;
 	
+	private boolean removeable;
+	
 	private String icon;
 	
 	private String style;
@@ -104,6 +106,15 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 		return this;
 	}
 
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaVideoStreamVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
+		return this;
+	}
+
 	public String getIcon() {
 		return icon;
 	}
@@ -150,6 +161,7 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setRemarks(entity.getRemarks())
 			.setType(MediaVideoStreamItemType.VIDEO_STREAM.toString())
+			.setRemoveable(true)
 			.setIcon(MediaVideoStreamItemType.VIDEO_STREAM.getIcon())
 			.setStyle(MediaVideoStreamItemType.VIDEO_STREAM.getStyle()[0])
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
@@ -168,6 +180,7 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setRemarks("-")
 			.setType(MediaVideoStreamItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaVideoStreamItemType.FOLDER.getIcon())
 			.setStyle(MediaVideoStreamItemType.FOLDER.getStyle()[0])
 			.setReviewStatus("-");

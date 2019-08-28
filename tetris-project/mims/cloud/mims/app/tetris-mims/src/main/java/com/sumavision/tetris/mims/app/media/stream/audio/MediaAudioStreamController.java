@@ -1,5 +1,8 @@
 package com.sumavision.tetris.mims.app.media.stream.audio;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,7 +101,17 @@ public class MediaAudioStreamController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaAudioStreamPO entity = mediaAudioStreamService.addTask(user, name, null, null, remark, previewUrl, folder);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaAudioStreamPO entity = mediaAudioStreamService.addTask(user, name, tagList, keyWordList, remark, previewUrl, folder);
 		
 		return new MediaAudioStreamVO().set(entity);
 		
@@ -136,7 +149,17 @@ public class MediaAudioStreamController {
 			throw new MediaAudioStreamNotExistException(id);
 		}
 		
-		MediaAudioStreamPO entity = mediaAudioStreamService.editTask(user, audioStream, name, null, null, remark, previewUrl);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaAudioStreamPO entity = mediaAudioStreamService.editTask(user, audioStream, name, tagList, keyWordList, remark, previewUrl);
 		
 		return new MediaAudioStreamVO().set(entity);
 		
@@ -168,9 +191,7 @@ public class MediaAudioStreamController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaAudioStreamService.remove(new ArrayListWrapper<MediaAudioStreamPO>().add(media).getList());
-		
-		return null;
+		return mediaAudioStreamService.remove(new ArrayListWrapper<MediaAudioStreamPO>().add(media).getList());
 	}
 	
 	/**

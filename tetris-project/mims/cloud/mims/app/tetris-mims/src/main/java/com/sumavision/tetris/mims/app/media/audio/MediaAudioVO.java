@@ -38,6 +38,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private String type;
 	
+	private boolean removeable;
+	
 	private String icon;
 	
 	private String style;
@@ -162,6 +164,15 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaAudioVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
+		return this;
+	}
+
 	public String getIcon() {
 		return icon;
 	}
@@ -247,6 +258,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaAudioItemType.AUDIO.toString())
+			.setRemoveable(true)
 			.setIcon(MediaAudioItemType.AUDIO.getIcon())
 			.setStyle(MediaAudioItemType.AUDIO.getStyle()[0])
 			.setMimetype(entity.getMimetype())
@@ -273,6 +285,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaAudioItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaAudioItemType.FOLDER.getIcon())
 			.setStyle(MediaAudioItemType.FOLDER.getStyle()[0])
 			.setReviewStatus("-");

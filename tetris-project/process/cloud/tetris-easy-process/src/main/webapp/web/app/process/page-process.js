@@ -93,11 +93,12 @@ define([
                 publishProcess:function(scope){
                     var self = this;
                     var row = scope.row;
-                    ajax.post('/process/publish/' + row.id, null, function(){
+                    ajax.post('/process/publish/' + row.id, null, function(data){
                         self.$message({
                             type:'success',
                             message:'发布成功！'
                         });
+                        row.publishTime = data.publishTime;
                     });
                 },
                 handleCreate:function(){

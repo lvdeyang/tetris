@@ -1,7 +1,6 @@
 package com.sumavision.tetris.mims.app.media.stream.video;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,28 +79,6 @@ public class MediaVideoStreamUrlRelationService {
 		mediaVideoStreamUrlRelationDAO.save(addUrl);
 		
 		return mediaVideoStreamUrlRelationDAO.findByVideoStreamIdOrderByVisitCountAsc(streamId);
-	}
-	
-	/**
-	 * 视频流媒资url整体删除操作<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月17日 上午10:38:08
-	 * @param streamId 视频流媒资id
-	 */
-	public void remove(Long streamId){
-		mediaVideoStreamUrlRelationDAO.removeByStreamId(streamId);
-	}
-	
-	/**
-	 * 视频流媒资url批量整体删除操作<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月17日 上午10:38:08
-	 * @param streamId 视频流媒资id
-	 */
-	public void remove(Collection<Long> videoIds){
-		mediaVideoStreamUrlRelationDAO.removeByStreamIdIn(videoIds);
 	}
 	
 	public List<String> copy(Long streamId, Long newStreamId){

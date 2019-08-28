@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderType;
@@ -49,12 +51,8 @@ import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatus
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamService;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
-import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtService;
-import com.sumavision.tetris.mims.app.media.txt.MediaTxtVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
@@ -140,17 +138,15 @@ public class ApiServerMediaController {
             String remark,
 			HttpServletRequest request) throws Exception{
 		
-		//TODO:暂时自己创建一个UserVO
-//		UserVO user = new UserVO().setGroupId("2")
-//								  .setGroupName("数码视讯")
-//								  .setUuid("119582623823434592de244140fb64cd")
-//								  .setNickname("yjgb");
 		UserVO user = userQuery.current();
 		
 	    FolderType type = FolderType.fromPrimaryKey(folderType);
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
 		if(folder == null){
-			throw new FolderNotExistException(folder.getId());
+			throw new FolderNotExistException(new StringBufferWrapper().append("企业")
+																	   .append(type.getName())
+																	   .append("根文件夹不存在！")
+																	   .toString());
 		}
 		
 		if(type.equals(FolderType.COMPANY_AUDIO)){
@@ -165,15 +161,13 @@ public class ApiServerMediaController {
 			MediaPicturePO entity = mediaPictureService.addTask(user, name, null, null, remark, taskParam, folder);
 			return new MediaPictureVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_TXT)){
-			MediaTxtPO entity = mediaTxtService.addTask(user, name, null, null, remark, task, folder);
-			return new MediaTxtVO().set(entity);
+			return mediaTxtService.addTask(user, name, null, null, remark, task, folder, false);
 		}else if(type.equals(FolderType.COMPANY_VIDEO)){
 			MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class); 
 			MediaVideoPO entity = mediaVideoService.addTask(user, name, null, null, remark, taskParam, folder);
 			return new MediaVideoVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_VIDEO_STREAM)){
-			MediaVideoStreamPO entity = mediaVideoStreamService.addTask(user, name, null, null, remark, task, folder);			
-			return new MediaVideoStreamVO().set(entity);
+			return mediaVideoStreamService.addTask(user, name, null, null, remark, new ArrayListWrapper<String>().add(task).getList(), folder);			
 		}else if(type.equals(FolderType.COMPANY_COMPRESS)){
 			MediaCompressTaskVO taskParam = JSON.parseObject(task, MediaCompressTaskVO.class);
 			MediaCompressPO entity = mediaCompressService.addTask(user, name, null, null, remark, taskParam, folder);

@@ -1,12 +1,10 @@
 package com.sumavision.tetris.mims.app.media.txt.api.android;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
+import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.easy.process.core.ProcessQuery;
+import com.sumavision.tetris.easy.process.core.ProcessService;
+import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
@@ -32,6 +36,9 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtQuery;
@@ -69,6 +76,15 @@ public class ApiAndroidTxtController {
 	
 	@Autowired
 	private MediaTxtDAO mediaTxtDao;
+	
+	@Autowired
+	private MediaSettingsDAO mediaSettingsDao;
+	
+	@Autowired
+	private ProcessQuery processQuery;
+	
+	@Autowired
+	private ProcessService processService;
 	
 	/**
 	 * 加载文件夹下的文本媒资()<br/>
@@ -141,7 +157,17 @@ public class ApiAndroidTxtController {
 		
 		MediaTxtPO txt = mediaTxtDao.findOne(id);
 		
-		MediaTxtPO entity = mediaTxtService.editTaskForAndroid(user, txt, name, null, null, remark);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaTxtPO entity = mediaTxtService.editTask(user, txt, name, tagList, keyWordList, remark, null, false);
 		
 		return new MediaTxtVO().set(entity);
 		
@@ -216,10 +242,17 @@ public class ApiAndroidTxtController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaTxtPO entity = mediaTxtService.addTask(user, name, taskParam, null, null, "", "", folder);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
 		
-		return new MediaTxtVO().set(entity);
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
 		
+		return mediaTxtService.addTask(user, taskParam, name, tagList, keyWordList, remark, folder);
 	}
 	
 	/**
@@ -307,15 +340,27 @@ public class ApiAndroidTxtController {
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
 			
-			InputStreamReader reader = new InputStreamReader(new FileInputStream(task.getUploadTmpPath()), "utf-8");
-			BufferedReader bReader = new BufferedReader(reader);
-			String txtString = "";
-			String line;
-			while ((line = bReader.readLine()) != null) {
-				txtString += txtString.isEmpty() ? line : "\n" + line;
-			}
-			task.setContent(txtString);
+			String content = FileUtil.readAsString(task.getUploadTmpPath());
+			task.setContent(content);
 			
+			if(task.getReviewStatus() != null){
+				Long companyId = Long.valueOf(user.getGroupId());
+				MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_TXT);
+				Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+				ProcessVO process = processQuery.findById(processId);
+				JSONObject variables = new JSONObject();
+				variables.put("name", task.getName());
+				variables.put("tags", task.getTags());
+				variables.put("keyWords", task.getKeyWords());
+				variables.put("media", content);
+				variables.put("remark", task.getRemarks());
+				variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(task.getFolderId()));
+				variables.put("_pa36_id", task.getId());
+				String category = new StringBufferWrapper().append("添加文本媒资：").append(task.getName()).toString();
+				String business = new StringBufferWrapper().append("mediaTxt:").append(task.getId()).toString();
+				String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+				task.setProcessInstanceId(processInstanceId);
+			}
 			mediaTxtDao.save(task);
 		}
 		

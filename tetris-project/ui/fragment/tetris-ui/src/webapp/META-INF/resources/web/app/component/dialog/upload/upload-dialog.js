@@ -232,6 +232,7 @@ define([
                         self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
                     }else if(self.requireType[i] === MATERIAL_TYPE_COMPRESS){
                         self.requires.push(new Type('application/x-zip-compressed', 'zip', MATERIAL_TYPE_COMPRESS));
+                        self.requires.push(new Type('application/zip', 'zip', MATERIAL_TYPE_COMPRESS));
                         self.requires.push(new Type('application/x-tar', 'tar', MATERIAL_TYPE_COMPRESS));
                     }
                 }

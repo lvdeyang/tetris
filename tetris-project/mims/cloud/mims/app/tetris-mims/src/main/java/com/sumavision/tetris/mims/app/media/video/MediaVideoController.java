@@ -159,11 +159,16 @@ public class MediaVideoController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if (!tags.isEmpty()) {
+		if(tags != null){
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
-		MediaVideoPO entity = mediaVideoService.editTask(user, video, name, tagList, null, remark);
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaVideoPO entity = mediaVideoService.editTask(user, video, name, tagList, keyWordList, remark);
 		
 		return new MediaVideoVO().set(entity);
 		
@@ -300,7 +305,13 @@ public class MediaVideoController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
-			mediaVideoDao.save(task);
+			
+			if(task.getReviewStatus() != null){
+				//开启审核流程--这里会保存媒资
+				mediaVideoService.startUploadProcess(task);
+			}else{
+				mediaVideoDao.save(task);
+			}
 		}
 		
         return new MediaVideoVO().set(task);
@@ -415,6 +426,8 @@ public class MediaVideoController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 上午9:07:53
 	 * @param @PathVariable Long id 媒资id
+	 * @return deleted List<MediaVideoVO> 删除的数据列表
+	 * @return processed List<MediaVideoVO> 待审核的数据列表
 	 */
 	@JsonBody
 	@ResponseBody
@@ -435,9 +448,7 @@ public class MediaVideoController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaVideoService.remove(new ArrayListWrapper<MediaVideoPO>().add(media).getList());
-		
-		return null;
+		return mediaVideoService.remove(new ArrayListWrapper<MediaVideoPO>().add(media).getList());
 	}
 	
 	/**

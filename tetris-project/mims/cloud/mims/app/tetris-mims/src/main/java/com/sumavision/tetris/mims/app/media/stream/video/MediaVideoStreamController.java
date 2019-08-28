@@ -1,5 +1,8 @@
 package com.sumavision.tetris.mims.app.media.stream.video;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -101,7 +104,17 @@ public class MediaVideoStreamController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		return  mediaVideoStreamService.addTask(user, name, null, null, remark, JSON.parseArray(previewUrl, String.class), folder);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		return  mediaVideoStreamService.addTask(user, name, tagList, keyWordList, remark, JSON.parseArray(previewUrl, String.class), folder);
 	}
 	
 	/**
@@ -131,12 +144,17 @@ public class MediaVideoStreamController {
 		
 		UserVO user = userQuery.current();
 		
-		MediaVideoStreamPO videoStream = mediaVideoStreamDao.findOne(id);
-		if(videoStream == null){
-			throw new MediaVideoStreamNotExistException(id);
+		List<String> tagList = new ArrayList<String>();
+		if (tags!=null && !tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
 		}
 		
-		return mediaVideoStreamService.editTask(user, videoStream, name, null, null, remark, JSON.parseArray(previewUrl, String.class));
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		return mediaVideoStreamService.editTask(user, id, name, tagList, keyWordList, remark, JSON.parseArray(previewUrl, String.class));
 		
 	}
 	
@@ -166,9 +184,7 @@ public class MediaVideoStreamController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaVideoStreamService.remove(new ArrayListWrapper<MediaVideoStreamPO>().add(media).getList());
-		
-		return null;
+		return mediaVideoStreamService.remove(new ArrayListWrapper<MediaVideoStreamPO>().add(media).getList());
 	}
 	
 	/**
