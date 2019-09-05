@@ -1,13 +1,12 @@
 package com.sumavision.tetris.transcoding;
 
-import java.io.File;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,12 +127,9 @@ public class Adapter {
 	 * 
 	 * @return String
 	 */
-	public String changeHttpToFtp(String httpUrl) throws IOException {
-		URL url = this.getClass().getClassLoader().getResource("profile.json");
-
-		File file = new File(url.getPath());
-
-		String json = FileUtils.readFileToString(file);
+	public String changeHttpToFtp(String httpUrl) throws Exception {
+		
+		String json = readProfile();
 		JSONObject jsonObject = JSONObject.parseObject(json);
 
 		String ftpUserName = jsonObject.getString("ftpUserName");
@@ -208,11 +204,7 @@ public class Adapter {
 		String[] split = url.split(":");
 		
 		if (split.length == 1) {
-			URL fileUrl = this.getClass().getClassLoader().getResource("profile.json");
-
-			File file = new File(fileUrl.getPath());
-
-			String json = FileUtils.readFileToString(file);
+			String json = readProfile();
 			JSONObject jsonObject = JSONObject.parseObject(json);
 
 			String ftpUserName = jsonObject.getString("ftpUserName");
@@ -223,5 +215,31 @@ public class Adapter {
 		}else {
 			return url;
 		}
+	}
+	
+	/**
+	 * 获取profile.json配置<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月5日 下午2:26:47
+	 * @return String json
+	 */
+	public String readProfile() throws Exception{
+		BufferedReader in = null;
+		InputStreamReader reader = null;
+		String json = null;
+		try{
+			in = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("profile.json")));
+			StringBuffer buffer = new StringBuffer();
+			String line = "";
+			while ((line = in.readLine()) != null){
+			    buffer.append(line);
+			}
+			json = buffer.toString();
+		}finally{
+			if(in != null) in.close();
+			if(reader != null) reader.close();
+		}
+		return json;
 	}
 }
