@@ -38,20 +38,8 @@ public class ApiAndroidMediaController {
 	@ResponseBody
 	@RequestMapping(value = "/{folderType}/get/root")
 	public Object getRoot(@PathVariable String folderType, HttpServletRequest request) throws Exception{
-		UserVO user = userQuery.current();
-		
-		FolderType type = FolderType.fromPrimaryKey(folderType);
-		
-		FolderPO folderPO = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
-		
-		if (folderPO != null) {
-			return new HashMapWrapper<String, Object>().put("id", folderPO.getId())
-			  		 .put("name", folderPO.getName())
+		return new HashMapWrapper<String, Object>().put("id", 0)
+			  		 .put("name", "根目录")
 			  		 .getMap();
-		}else {
-			return new HashMapWrapper<String, Object>().put("id", "")
-			  		 .put("name", "")
-			  		 .getMap();
-		}
 	}
 }

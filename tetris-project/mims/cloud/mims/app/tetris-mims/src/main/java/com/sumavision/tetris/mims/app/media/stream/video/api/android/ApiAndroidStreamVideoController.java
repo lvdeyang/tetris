@@ -1,7 +1,9 @@
 package com.sumavision.tetris.mims.app.media.stream.video.api.android;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -10,15 +12,18 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
+import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamDAO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamUrlRelationQuery;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -29,6 +34,9 @@ public class ApiAndroidStreamVideoController {
 	
 	@Autowired
 	MediaVideoStreamQuery mediaVideoStreamQuery;
+	
+	@Autowired
+	private MediaVideoStreamDAO mediaVideoStreamDao;
 	
 	@Autowired
 	MediaVideoStreamService mediaVideoStreamService;
@@ -51,13 +59,23 @@ public class ApiAndroidStreamVideoController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月12日 下午4:03:27
 	 * @return List<MediaVideoStreamVO> 视频流媒资列表
-	 * @throws Exception 
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/load/all")
 	public Object loadAll(HttpServletRequest request) throws Exception{
-		return mediaVideoStreamQuery.loadAllByList();
+		List<FolderPO> folders = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO_STREAM.toString());
+		List<MediaVideoStreamVO> rows = new ArrayList<MediaVideoStreamVO>();
+		if(folders!=null && folders.size()>0){
+			Set<Long> folderIds = new HashSet<Long>();
+			for(FolderPO folder:folders){
+				folderIds.add(folder.getId());
+			}
+			List<MediaVideoStreamPO> entities = mediaVideoStreamDao.findByFolderIdInAndUploadStatus(folderIds, UploadStatus.COMPLETE);
+			rows = MediaVideoStreamVO.getConverter(MediaVideoStreamVO.class).convert(entities, MediaVideoStreamVO.class);
+		}
+		
+		return rows;
 	}
 	
 	/**

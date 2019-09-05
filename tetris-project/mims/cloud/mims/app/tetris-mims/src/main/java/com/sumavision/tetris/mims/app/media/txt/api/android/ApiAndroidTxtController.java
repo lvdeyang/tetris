@@ -33,6 +33,7 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
+import com.sumavision.tetris.mims.app.folder.exception.RootFolderCannotAddMediaException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
@@ -106,6 +107,9 @@ public class ApiAndroidTxtController {
 			FolderBreadCrumbVO breadCrumb = (FolderBreadCrumbVO)medias.get("breadCrumb");
 			List<FolderBreadCrumbVO> breadCrumbList = folderQuery.convertFolderBreadCrumbToList(breadCrumb);
 			medias.put("breadCrumb", breadCrumbList);
+		}
+		if(medias.get("rows") == null){
+			medias.put("rows", new ArrayList<MediaTxtVO>());
 		}
 		return medias;
 	}
@@ -231,6 +235,10 @@ public class ApiAndroidTxtController {
 		
 		MediaTxtTaskVO taskParam = JSON.parseObject(task, MediaTxtTaskVO.class);
 		
+		if(folderId.longValue() == 0l){
+			throw new RootFolderCannotAddMediaException();
+		}
+		
 		UserVO user = userQuery.current();
 		
 		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
@@ -287,7 +295,7 @@ public class ApiAndroidTxtController {
 		
 		//参数错误
 		if((beginOffset + blockSize) != endOffset){
-			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
 		MediaTxtPO task = mediaTxtDao.findByUuid(uuid);
@@ -305,14 +313,6 @@ public class ApiAndroidTxtController {
 		//状态错误
 		if(!UploadStatus.UPLOADING.equals(task.getUploadStatus())){
 			throw new MediaTxtStatusErrorWhenUploadingException(uuid, task.getUploadStatus());
-		}
-		
-		//文件不是一个
-		if(!name.equals(task.getFileName()) 
-				|| lastModified!=task.getLastModified() 
-				|| size!=task.getSize()){
-			throw new MediaTxtCannotMatchException(uuid, name, lastModified, size, task.getFileName(), 
-											   task.getLastModified(), task.getSize());
 		}
 		
 		//文件起始位置错误

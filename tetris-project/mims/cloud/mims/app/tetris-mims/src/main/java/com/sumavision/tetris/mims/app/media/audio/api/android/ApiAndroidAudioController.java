@@ -234,8 +234,8 @@ public class ApiAndroidAudioController {
 		long endOffset = request.getLongValue("endOffset");
 		
 		//参数错误
-		if((beginOffset + endOffset) != blockSize){
-			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+		if((beginOffset + blockSize) != endOffset){
+			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
 		MediaAudioPO task = mediaAudioDao.findByUuid(uuid);

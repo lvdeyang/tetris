@@ -26,6 +26,7 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
+import com.sumavision.tetris.mims.app.folder.exception.RootFolderCannotAddMediaException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
@@ -86,6 +87,9 @@ public class ApiAndroidPictureController {
 			FolderBreadCrumbVO breadCrumb = (FolderBreadCrumbVO)medias.get("breadCrumb");
 			List<FolderBreadCrumbVO> breadCrumbList = folderQuery.convertFolderBreadCrumbToList(breadCrumb);
 			medias.put("breadCrumb", breadCrumbList);
+		}
+		if(medias.get("rows") == null){
+			medias.put("rows", new ArrayList<MediaPictureVO>());
 		}
 		return medias;
 	}
@@ -186,6 +190,10 @@ public class ApiAndroidPictureController {
 		
 		UserVO user = userQuery.current();
 		
+		if(folderId.longValue() == 0l){
+			throw new RootFolderCannotAddMediaException();
+		}
+		
 		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
@@ -234,8 +242,8 @@ public class ApiAndroidPictureController {
 		long endOffset = request.getLongValue("endOffset");
 		
 		//参数错误
-		if((beginOffset + endOffset) != blockSize){
-			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+		if((beginOffset + blockSize) != endOffset){
+			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
 		MediaPicturePO task = mediaPictureDao.findByUuid(uuid);

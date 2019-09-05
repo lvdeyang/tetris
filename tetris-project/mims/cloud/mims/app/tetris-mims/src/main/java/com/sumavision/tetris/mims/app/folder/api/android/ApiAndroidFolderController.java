@@ -59,6 +59,10 @@ public class ApiAndroidFolderController {
 		
 		//TODO 权限校验
 		
+		if(parentFolderId.longValue() == 0l){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.PARENT_CREATE);
+		}
+		
 		FolderPO parent = folderDao.findOne(parentFolderId);
 		
 		if(parent == null){

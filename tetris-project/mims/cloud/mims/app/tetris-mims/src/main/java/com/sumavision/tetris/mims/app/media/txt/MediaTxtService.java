@@ -359,12 +359,13 @@ public class MediaTxtService {
 		entity.setAuthorId(user.getUuid());
 		entity.setAuthorName(user.getNickname());
 		entity.setFolderId(folder.getId());
-		entity.setUploadStatus(UploadStatus.COMPLETE);
+		entity.setUploadStatus(UploadStatus.UPLOADING);
 		entity.setPreviewUrl(previewUrl);
 		entity.setUploadTmpPath(storePath);
 		entity.setSize(task.getSize());
 		entity.setUpdateTime(date);
 		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
+		mediaTxtDao.save(entity);
 		
 		return new MediaTxtVO().set(entity);
 	}

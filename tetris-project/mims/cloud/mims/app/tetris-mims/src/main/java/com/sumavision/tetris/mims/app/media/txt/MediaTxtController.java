@@ -130,7 +130,7 @@ public class MediaTxtController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		return mediaTxtService.addTask(user, name, tagList, keyWordList, remark, content, folder, false);
+		return mediaTxtService.addTask(user, name, tagList, keyWordList, remark, content, folder, true);
 	}
 	
 	/**

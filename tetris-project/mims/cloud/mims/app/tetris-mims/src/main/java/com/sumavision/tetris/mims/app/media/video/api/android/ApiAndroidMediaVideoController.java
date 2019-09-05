@@ -26,6 +26,7 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
+import com.sumavision.tetris.mims.app.folder.exception.RootFolderCannotAddMediaException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
@@ -43,7 +44,7 @@ import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErro
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
-import com.sumavision.tetris.user.UserVO;
+import com.sumavision.tetris.user.UserVO;import javassist.expr.NewArray;
 
 @Controller
 @RequestMapping(value = "/api/android/media/video")
@@ -103,6 +104,9 @@ public class ApiAndroidMediaVideoController {
 			FolderBreadCrumbVO breadCrumb = (FolderBreadCrumbVO)medias.get("breadCrumb");
 			List<FolderBreadCrumbVO> breadCrumbList = folderQuery.convertFolderBreadCrumbToList(breadCrumb);
 			medias.put("breadCrumb", breadCrumbList);
+		}
+		if(medias.get("rows") == null){
+			medias.put("rows", new ArrayList<MediaVideoVO>());
 		}
 		return medias;
 	}
@@ -198,6 +202,10 @@ public class ApiAndroidMediaVideoController {
 		
 		MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class);
 		
+		if(folderId.longValue() == 0l){
+			throw new RootFolderCannotAddMediaException();
+		}
+		
 		UserVO user = userQuery.current();
 		
 		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
@@ -248,8 +256,8 @@ public class ApiAndroidMediaVideoController {
 		long endOffset = request.getLongValue("endOffset");
 		
 		//参数错误
-		if((beginOffset + endOffset) != blockSize){
-			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+		if((beginOffset + blockSize) != endOffset){
+			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
 		MediaVideoPO task = mediaVideoDAO.findByUuid(uuid);
