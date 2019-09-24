@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.folder;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,8 @@ public class FolderController {
 	@Autowired
 	private FolderDAO folderDao;
 	
+	@Autowired
+	private FolderRolePermissionDAO folderRolePermissionDao;
 	/**
 	 * 创建素材库文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -276,26 +279,34 @@ public class FolderController {
 	}
 	
 	/**
-	 * 获取媒资文件夹树（完整树）<br/>
+	 * 获取特定类型文件夹树以及权限信息<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2018年12月8日 下午2:34:47
-	 * @return List<FolderTreeVO> 根节点
+	 * <b>日期：</b>2019年8月7日 上午11:23:01
+	 * @param Long roleId 角色id
+	 * @param @PathVariable String folderType 文件夹类型
+	 * @return treeNodes List<FolderTreeVO> 文件夹树
+	 * @return permissions List<Long> 权限列表
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/media/tree")
-	public Object mediaTree(HttpServletRequest request) throws Exception{
-		
+	@RequestMapping(value = "/media/tree/with/permissions/{folderType}")
+	public Object meidaTreeWithPermissions(
+			Long roleId,
+			@PathVariable String folderType,
+			HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
-		
-		//TODO 权限校验
-		
-		List<FolderPO> folderTree = folderDao.findCompanyTreeByGroupId(user.getGroupId());
-		
-		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
-		
-		return roots;
+		FolderType type = FolderType.fromPrimaryKey(folderType);
+		List<FolderPO> folders = folderDao.findCompanyTreeByGroupIdAndType(user.getGroupId(), type.toString());
+		List<FolderTreeVO> treeNodes = folderQuery.generateFolderTree(folders);
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folder:folders){
+			folderIds.add(folder.getId());
+		}
+		List<Long> permissions = folderRolePermissionDao.permissionDuplicateChecking(roleId, folderIds);
+		return new HashMapWrapper<String, Object>().put("treeNodes", treeNodes)
+												   .put("permissions", permissions)
+												   .getMap();
 	}
 	
 	/**
@@ -319,7 +330,7 @@ public class FolderController {
 		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
 		
-		List<FolderPO> folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), type.toString());
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(type.toString());
 		
 		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
 		
@@ -352,9 +363,9 @@ public class FolderController {
 		List<FolderPO> folderTree = null;
 		
 		if(except == null){
-			folderTree = folderDao.findPermissionCompanyTree(user.getUuid(), type.toString());
+			folderTree = folderQuery.findPermissionCompanyTree(type.toString());
 		}else{
-			folderTree = folderQuery.findPermissionCompanyTreeWithExcept(user.getUuid(), type.toString(), except);
+			folderTree = folderQuery.findPermissionCompanyTreeWithExcept(type.toString(), except);
 		}
 		
 		List<FolderTreeVO> roots = folderQuery.generateFolderTree(folderTree);
@@ -397,7 +408,7 @@ public class FolderController {
 		
 		FolderType type = FolderType.fromPrimaryKey(folderType);
 		
-		FolderPO folder = folderService.addMediaFolder(user.getGroupId(), parent.getId(), folderName, type);
+		FolderPO folder = folderService.addMediaFolder(user.getUuid(), user.getGroupId(), parent.getId(), folderName, type);
 		
 		return new MediaPictureVO().set(folder);
 	}

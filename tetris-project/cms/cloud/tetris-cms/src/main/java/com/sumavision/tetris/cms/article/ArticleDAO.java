@@ -1,6 +1,8 @@
 package com.sumavision.tetris.cms.article;
 
 import java.util.Collection;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -112,14 +114,15 @@ public interface ArticleDAO extends BaseDAO<ArticlePO>{
 					"LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION user ON article.id = user.article_id " +
 					"WHERE article.name LIKE ?1 AND article.author LIKE ?2 AND IF(?3 = '%%', true, region.region_name LIKE ?3) AND IF(?4 = '%%', true, classify.classify_name LIKE ?4) " +
 					"AND IF(?5 = '', true, article.publish_time >= ?5) AND IF(?6 = '', true, article.publish_time <= ?6) " +
-					"AND user.user_id = ?7 \n#pageable\n", 
+					"AND user.user_id = ?7 ORDER BY article.id \n#pageable\n", 
 					countQuery = "SELECT COUNT(DISTINCT article.id) " +
 							"FROM TETRIS_CMS_ARTICLE article " +
 							"LEFT JOIN TETRIS_CMS_ARTICLE_REGION_PERMISSION region ON article.id = region.article_id " +
 							"LEFT JOIN TETRIS_CMS_ARTICLE_CLASSIFY_PERMISSION classify ON article.id = classify.article_id " +
+							"LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION user ON article.id = user.article_id " +
 							"WHERE article.name LIKE ?1 AND article.author LIKE ?2 AND IF(?3 = '%%', true, region.region_name LIKE ?3) AND IF(?4 = '%%', true, classify.classify_name LIKE ?4) " +
 							"AND IF(?5 = '', true, article.publish_time >= ?5) AND IF(?6 = '', true, article.publish_time <= ?6) " +
-							"AND user.user_id = ?7",
+							"AND user.user_id = ?7 ORDER BY article.id",
 					nativeQuery = true)
 	public Page<ArticlePO> findAllWithUserIdBySearch(String name, String author, String region, String classify, String beginTime, String endTime, String userId, Pageable pageable);
 
@@ -145,14 +148,15 @@ public interface ArticleDAO extends BaseDAO<ArticlePO>{
 					"LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION user ON article.id = user.article_id " +
 					"WHERE article.name LIKE ?1 AND article.author LIKE ?2 AND IF(?3 = '%%', true, region.region_name LIKE ?3) AND IF(?4 = '%%', true, classify.classify_name LIKE ?4) " +
 					"AND IF(?5 = '', true, article.publish_time >= ?5) AND IF(?6 = '', true, article.publish_time <= ?6) " +
-					"AND user.group_id = ?7 \n#pageable\n", 
+					"AND user.group_id = ?7 ORDER BY article.id \n#pageable\n", 
 					countQuery = "SELECT COUNT(DISTINCT article.id) " +
 							"FROM TETRIS_CMS_ARTICLE article " +
 							"LEFT JOIN TETRIS_CMS_ARTICLE_REGION_PERMISSION region ON article.id = region.article_id " +
 							"LEFT JOIN TETRIS_CMS_ARTICLE_CLASSIFY_PERMISSION classify ON article.id = classify.article_id " +
+							"LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION user ON article.id = user.article_id " +
 							"WHERE article.name LIKE ?1 AND article.author LIKE ?2 AND IF(?3 = '%%', true, region.region_name LIKE ?3) AND IF(?4 = '%%', true, classify.classify_name LIKE ?4) " +
 							"AND IF(?5 = '', true, article.publish_time >= ?5) AND IF(?6 = '', true, article.publish_time <= ?6) " +
-							"AND user.group_id = ?7",
+							"AND user.group_id = ?7 ORDER BY article.id",
 					nativeQuery = true)
 	public Page<ArticlePO> findAllWithGroupIdBySearch(String name, String author, String region, String classify, String beginTime, String endTime, String groupId, Pageable pageable);
 
@@ -184,4 +188,8 @@ public interface ArticleDAO extends BaseDAO<ArticlePO>{
 			countQuery = "SELECT count(article.id) FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE permission.group_id = ?1",
 			nativeQuery = true)
 	public Page<ArticlePO> findAllByGroupId(String groupId, Pageable pageable);
+	
+	@Query(value = "SELECT article.* FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE article.if_live = True AND permission.group_id = ?1 \n#pageable\n",
+			nativeQuery = true)
+	public List<ArticlePO> findAllByGroupId(String groupId);
 }

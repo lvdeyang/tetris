@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -26,10 +28,10 @@ import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
  */
 public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrapper{
 
-	//设置缓冲区大小，这里是4kb
-	private int bufferSize = 4096;
+	//设置缓冲区大小，这里是40kb
+	private int bufferSize = 1024*40;
 	
-	//设置最大文件尺寸，这里是50MB
+	//设置最大文件尺寸，这里是10MB
 	private long maxSize = 1024*1024*50;
 	
 	private Map<String, Object> params;
@@ -122,11 +124,15 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 	    while (iterator.hasNext()) {
 	       FileItem item = (FileItem) iterator.next();
 	       if(item.isFormField()){
-	    	   this.params.put(item.getFieldName(), item.getString());
+	    	   this.params.put(item.getFieldName(), item.getString("utf-8"));
 	       }else{
 	    	   this.params.put(item.getFieldName(), item);
 	       }
 	    }
+	}
+	
+	public boolean contains(String name){
+		return this.params.containsKey(name);
 	}
 	
 	@Override
@@ -151,6 +157,12 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
 		Object param = this.params.get(name);
 		if(param == null) throw new Exception("参数不存在："+name);
 		return Boolean.parseBoolean(param.toString());
+	}
+	
+	public String getUnDecodeString(String name) throws Exception{
+		Object param = this.params.get(name);
+		if(param == null) throw new Exception("参数不存在："+name);
+		return param.toString();
 	}
 	
 	public String getString(String name) throws Exception{

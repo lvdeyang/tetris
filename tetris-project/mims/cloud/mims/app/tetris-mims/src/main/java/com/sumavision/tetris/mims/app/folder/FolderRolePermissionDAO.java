@@ -12,6 +12,17 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface FolderRolePermissionDAO extends BaseDAO<FolderRolePermissionPO>{
 
 	/**
+	 * 查询文件夹可编辑授权情况<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月12日 下午3:49:29
+	 * @param Long folderId 文件夹id
+	 * @param Boolean autoGeneration 是否可编辑
+	 * @return List<FolderRolePermissionPO> 文件夹授权信息
+	 */
+	public List<FolderRolePermissionPO> findByFolderIdAndAutoGeneration(Long folderId, Boolean autoGeneration);
+	
+	/**
 	 * 根据文件夹查询授权<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -22,6 +33,17 @@ public interface FolderRolePermissionDAO extends BaseDAO<FolderRolePermissionPO>
 	public List<FolderRolePermissionPO> findByFolderId(Long folderId);
 	
 	/**
+	 * 根据文件夹查询授权(过滤管理员角色)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月3日 下午1:36:07
+	 * @param Long folderId 文件夹信息
+	 * @return List<FolderRolePermissionPO> 文件夹授权信息
+	 */
+	@Query(value = "select * from MIMS_FOLDER_ROLE_PERMISSION where folder_id = ?1 AND role_id <> ?2", nativeQuery = true)
+	public List<FolderRolePermissionPO> findByFolderIdExceptRoleId(Long folderId, Long roleId);
+	
+	/**
 	 * 根据文件夹查询授权（批量）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -30,6 +52,16 @@ public interface FolderRolePermissionDAO extends BaseDAO<FolderRolePermissionPO>
 	 * @return List<FolderRolePermissionPO> 权限列表
 	 */
 	public List<FolderRolePermissionPO> findByFolderIdIn(Collection<Long> folderIds);
+	
+	/**
+	 * 根据角色id查询授权<br/>
+	 * <b>作者:</b>ql<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 下午3:37:06
+	 * @param Long roleId 角色id
+	 * @return List<FolderRolePermissionPO> 权限数据
+	 */
+	public List<FolderRolePermissionPO> findByRoleId(Long roleId);
 	
 	/**
 	 * 查询具体授权<br/>

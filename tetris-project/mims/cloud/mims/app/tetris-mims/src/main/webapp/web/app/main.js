@@ -40,6 +40,9 @@ require.config({
         'mi-upload-dialog':window.APPPATH + 'component/dialog/upload/upload-dialog',
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
+        'mi-process-dialog':window.APPPATH + 'component/dialog/process/process-dialog',
+        'mi-tag-dialog':window.APPPATH + 'component/dialog/mims/tag/mims-tag',
+        'mi-txt-dialog':window.APPPATH + 'front/media/txt/txt-dialog',
 
         /* pages */
 
@@ -53,6 +56,8 @@ require.config({
         'page-media-video':window.APPPATH + 'front/media/video/page-media-video',
         'page-media-video-stream':window.APPPATH + 'front/media/video-stream/page-media-video-stream',
         'page-media-compress':window.APPPATH + 'front/media/compress/page-media-compress',
+        'page-media-settings':window.APPPATH + 'front/media/settings/page-media-settings',
+        'page-media-tag':window.APPPATH + 'front/media/tag/page-media-tag',
 
         'page-check-article':window.APPPATH + 'front/check/article/page-check-article',
         'page-check-audio':window.APPPATH + 'front/check/audio/page-check-audio',
@@ -71,20 +76,15 @@ require.config({
         'page-front-organization':window.APPPATH + 'front/organization/page-front-organization',
         'page-front-role':window.APPPATH + 'front/role/page-front-role',
 
+        'page-media-permissions':window.APPPATH + 'front/media/permissions/page-media-permissions',
+
         /* backstage-pages */
         'page-backstage-production-article':window.APPPATH + 'backstage/production/article/page-backstage-production-article',
         'page-backstage-production-audio':window.APPPATH + 'backstage/production/audio/page-backstage-production-audio',
         'page-backstage-production-audio-stream':window.APPPATH + 'backstage/production/audio-stream/page-backstage-production-audio-stream',
         'page-backstage-production-picture':window.APPPATH + 'backstage/production/picture/page-backstage-production-picture',
         'page-backstage-production-video':window.APPPATH + 'backstage/production/video/page-backstage-production-video',
-        'page-backstage-production-video-stream':window.APPPATH + 'backstage/production/video-stream/page-backstage-production-video-stream',
-        'page-backstage-service-rest':window.APPPATH + 'backstage/service/rest/page-backstage-service-rest',
-        'page-backstage-access-point':window.APPPATH + 'backstage/access-point/page-backstage-access-point',
-        'page-backstage-access-point-param':window.APPPATH + 'backstage/access-point-param/page-backstage-access-point-param',
-        'page-backstage-joint-constraint-expression':window.APPPATH + 'backstage/joint-constraint-expression/page-backstage-joint-constraint-expression',
-        'page-backstage-process':window.APPPATH + 'backstage/process/page-backstage-process',
-        'page-backstage-process-variable':window.APPPATH + 'backstage/process-variable/page-backstage-process-variable',
-        'page-backstage-process-design':window.APPPATH + 'backstage/process-design/page-backstage-process-design'
+        'page-backstage-production-video-stream':window.APPPATH + 'backstage/production/video-stream/page-backstage-production-video-stream'
 
     },
     shim:{
@@ -186,6 +186,9 @@ require([
                .setProp('user', appInfo.user)
                .setProp('groups', appInfo.groups || [])
                .setProp('token', window.TOKEN);
+
+        //处理皮肤
+        if(appInfo.user.themeUrl) $('head').prepend('<link rel="stylesheet" type="text/css" href="'+window.BASEPATH + appInfo.user.themeUrl+'"/>');
 
         //解析模板
         menuUtil.parseUrlTemplate(appInfo.menus);

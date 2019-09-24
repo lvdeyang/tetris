@@ -45,4 +45,13 @@ public interface ColumnDAO extends BaseDAO<ColumnPO>{
 	 */
 	@Query(value = "SELECT col.* FROM TETRIS_CMS_COLUMN col LEFT JOIN TETRIS_CMS_COLUMN_USER_PERMISSION permission ON col.id = permission.column_id WHERE permission.user_id = ?1", nativeQuery = true)
 	public List<ColumnPO> findByUserId(String userId);
+	
+	/**
+	 * 父栏目查询子栏目(排序--由小到大)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月8日 下午3:59:34
+	 * @param Long parentColumnId 父栏目id
+	 */
+	public List<ColumnPO> findByParentIdOrderByColumnOrder(Long parentColumnId);
 }

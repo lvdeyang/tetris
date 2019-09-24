@@ -33,10 +33,20 @@ define([
         data:function(){
             return {
                 logo:{
-                    img:window.BASEPATH + 'web/app/icons/logo/logo.png',
-                    collapsed0:'suma',
-                    title:'视频融合平台',
-                    collapsed1:'mims'
+
+                    logoUrl:'',
+                    logoStyle:'',
+                    logoShortName:'',
+                    platformFullName:'',
+                    platformShortName:''
+
+                    /*img:window.BASEPATH + 'web/app/icons/logo/bhlogo.jpg',
+                    /!*collapsed0:'suma',
+                    title:'新媒体应急广播CMS系统',
+                    collapsed1:'mims'*!/
+                    collapsed0:'BH',
+                    title:'新媒体应急广播CMS系统',
+                    collapsed1:'CMS'*/
                 },
                 isCollapsed:false,
                 numberOfMessage:0,
@@ -44,8 +54,10 @@ define([
                 active:'0',
                 footer:{
                     company:{
-                        name:'数码视讯科技股份有限公司',
-                        link:'http://www.sumavision.com/',
+                        //name:'数码视讯科技股份有限公司',
+                        //link:'http://www.sumavision.com/',
+                        name:'北京市博汇科技股份有限公司',
+                        link:'http://www.bohui.com.cn/',
                         time:'2018-2060'
                     },
                     minimize:[
@@ -98,6 +110,7 @@ define([
                         //不跳转只做样式变换
                         self.active = menu.uuid;
                     }
+                    app.loading = false;
                 });
             },
             addMinimize:function(metadata){
@@ -142,6 +155,8 @@ define([
                 var self = this;
                 if(index === '2-1'){
                     //个人中心
+                    var token = window.TOKEN;
+                    window.location.href = '/user/index/personal/' + token;
                 }else if(index === '2-2'){
                     //注销登录
                     self.logout();
@@ -194,6 +209,13 @@ define([
             var groups = self.groups;
             var numbersOfTotalMessage = setGroupInfo(groups);
             if(numbersOfTotalMessage > 0) self.numberOfMessage = numbersOfTotalMessage;
+
+            var user = self.user;
+            self.logo.logoUrl = user.logo;
+            self.logo.logoStyle = user.logoStyle;
+            self.logo.logoShortName = user.logoShortName;
+            self.logo.platformFullName = user.platformFullName;
+            self.logo.platformShortName = user.platformShortName;
         }
     });
 

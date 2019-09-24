@@ -3,6 +3,7 @@ package com.sumavision.tetris.user;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -12,12 +13,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
-import com.sumavision.tetris.user.exception.TokenTimeoutException;
 
 @Component
 public class UserQuery {
@@ -34,13 +35,8 @@ public class UserQuery {
 	 * @return boolean 判断结果
 	 */
 	public boolean checkToken(String token) throws Exception{
-		try {
-			JSONObject response = userFeign.checkToken(token);
-			return JsonBodyResponseParser.parseObject(response, Boolean.class);
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new TokenTimeoutException();
-		}
+		JSONObject response = userFeign.checkToken(token);
+		return JsonBodyResponseParser.parseObject(response, Boolean.class);
 	}
 	
 	/**
@@ -91,6 +87,51 @@ public class UserQuery {
 	public UserVO findByToken(String token) throws Exception{
 		return JsonBodyResponseParser.parseObject(userFeign.findByToken(token), UserVO.class);
 	}
+	
+	/**
+	 * 根据id查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 下午3:33:06
+	 * @param Collection<Long> ids 用户id列表
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> findByIdIn(Collection<Long> ids) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.findByIdIn(JSON.toJSONString(ids)), UserVO.class);
+	}
+	
+	/**
+	 * 分页查询公司下的用户列表（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:17:57
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	public Map<String, Object> listByCompanyIdWithExcept(Long companyId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.listByCompanyIdWithExcept(companyId, JSON.toJSONString(except), currentPage, pageSize), Map.class);
+	}
+	
+	/**
+	 * 修改一个用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月19日 下午4:54:11
+	 * @param Long id 用户id
+	 * @param String tags 修改的标签(全量)
+	 * @return UserVO 修改后的数据
+	 */
+	public UserVO edit(Long id, String tags) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.edit(id, tags), UserVO.class);
+	}
+	
+	/***************************************************
+	 ***************************************************
+	 ***************************************************/
 	
 	/**
 	 * 获取用户组下所有的用户<br/>

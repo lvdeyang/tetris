@@ -19,6 +19,12 @@ public class ProgramController {
 	@Autowired
 	private ProgramService programService;
 	
+	/**
+	 * 获取分屏信息(附带排单列表)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/get")
@@ -29,6 +35,13 @@ public class ProgramController {
 		return program;
 	}
 	
+	/**
+	 * 设置分屏信息(附带排单列表)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param programInfo 整体分屏信息
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/set")

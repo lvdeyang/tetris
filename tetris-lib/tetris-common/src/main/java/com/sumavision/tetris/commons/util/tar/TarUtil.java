@@ -14,6 +14,8 @@ import java.io.LineNumberReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -69,8 +71,30 @@ public abstract class TarUtil {
         archive(srcFile, taos, BASE_DIR);  
   
         taos.flush();  
+        taos.close();
+        
+    }
+    
+    public static void archive(List<File> srcPaths, String dstPath) throws Exception{
+    	
+    	TarArchiveOutputStream taos = new TarArchiveOutputStream(  
+                new FileOutputStream(new File(dstPath)));
+    	
+        if (srcPaths.size() < 1) {  
+            TarArchiveEntry entry = new TarArchiveEntry(dstPath);  
+  
+            taos.putArchiveEntry(entry);  
+            taos.closeArchiveEntry();  
+        }  
+  
+        for (File file : srcPaths) {   
+            archive(file, taos, ""); 
+  
+        }
+        
+        taos.flush();  
         taos.close();  
-    }  
+    }
   
     /** 
      * 归档 
@@ -136,7 +160,7 @@ public abstract class TarUtil {
      *            TarArchiveOutputStream 
      * @param basePath 
      * @throws Exception 
-     */  
+     */ 
     private static void archiveDir(File dir, TarArchiveOutputStream taos,  
             String basePath) throws Exception {  
   
@@ -150,13 +174,19 @@ public abstract class TarUtil {
             taos.closeArchiveEntry();  
         }  
   
-        for (File file : files) {  
-  
-            // 递归归档  
-//            archive(file, taos, basePath + dir.getName() + PATH);  
-            archive(file, taos, basePath + PATH); 
-  
-        }  
+        // 递归归档  
+//        if (first) {
+//        	for (File file : files) { 
+//        		//不带文件目录
+//        		archive(file, taos, basePath + PATH); 
+//        		first = false;
+//            } 
+//		}else {
+			for (File file : files) {  
+    			//带文件目录
+    			archive(file, taos, basePath + dir.getName() + PATH);
+            }
+//		}
     }  
   
     /** 
@@ -183,7 +213,7 @@ public abstract class TarUtil {
          * 如果用WinRAR打开归档包，中文名将显示为乱码 
          * </pre> 
          */  
-        TarArchiveEntry entry = new TarArchiveEntry(dir + file.getName());  
+        TarArchiveEntry entry = new TarArchiveEntry(dir + file.getName());
   
         entry.setSize(file.length());  
   

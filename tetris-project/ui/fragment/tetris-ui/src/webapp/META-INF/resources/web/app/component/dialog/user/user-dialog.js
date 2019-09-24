@@ -100,7 +100,7 @@ define([
                     self.loading = false;
                 };
                 var close = function(){
-                    self.visible =false;
+                    self.handleUserClose();
                 };
                 self.$emit(ON_DIALOG_CLOSE, selected, startLoading, endLoading, close);
             },

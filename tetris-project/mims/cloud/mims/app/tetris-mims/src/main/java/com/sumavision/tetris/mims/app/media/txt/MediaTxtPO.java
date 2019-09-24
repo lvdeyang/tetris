@@ -11,6 +11,8 @@ import javax.persistence.Lob;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -62,6 +64,27 @@ public class MediaTxtPO extends AbstractBasePO{
 	
 	/** 文件上传状态 */
 	private UploadStatus uploadStatus;
+	
+	/** 文件名称 */
+	private String fileName;
+	
+	/** 最后更新时间 */
+	private Long lastModified;
+	
+	/** 预览地址 */
+	private String previewUrl;
+	
+	/** 上传时临时存储位置（storeType.LOCAL时有效） */
+	private String uploadTmpPath;
+	
+	/** 文件大小 */
+	private Long size;
+	
+	/** 审核状态 */
+	private ReviewStatus reviewStatus;
+	
+	/** 审核流程id */
+	private String processInstanceId;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -74,7 +97,7 @@ public class MediaTxtPO extends AbstractBasePO{
 
 	@Lob
 	@Basic(fetch = FetchType.LAZY)
-	@Column(name = "CONTENT", columnDefinition = "text")
+	@Column(name = "CONTENT", columnDefinition = "MEDIUMTEXT")
 	public String getContent() {
 		return content;
 	}
@@ -157,6 +180,70 @@ public class MediaTxtPO extends AbstractBasePO{
 		this.uploadStatus = uploadStatus;
 	}
 	
+	@Column(name = "FILE_NAME")
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	@Column(name = "LAST_MODIFIED")
+	public Long getLastModified() {
+		return lastModified;
+	}
+
+	public void setLastModified(Long lastModified) {
+		this.lastModified = lastModified;
+	}
+
+	@Column(name = "PREVIEW_URL")
+	public String getPreviewUrl() {
+		return previewUrl;
+	}
+
+	public void setPreviewUrl(String previewUrl) {
+		this.previewUrl = previewUrl;
+	}
+
+	@Column(name = "UPLOAD_TMP_PATH")
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public void setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
+	}
+
+	@Column(name = "size")
+	public Long getSize() {
+		return size;
+	}
+
+	public void setSize(Long size) {
+		this.size = size;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "REVIEW_STATUS")
+	public ReviewStatus getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(ReviewStatus reviewStatus) {
+		this.reviewStatus = reviewStatus;
+	}
+
+	@Column(name = "PROCESS_INSTANCE_ID")
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public void setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+	}
+
 	/**
 	 * 复制文本媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -177,6 +264,7 @@ public class MediaTxtPO extends AbstractBasePO{
 		copy_txt.setTags(this.getTags());
 		copy_txt.setKeyWords(this.getKeyWords());
 		copy_txt.setUploadStatus(this.getUploadStatus());
+		copy_txt.setSize(this.getSize());
 		return copy_txt;
 	}
 	

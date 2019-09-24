@@ -14,12 +14,12 @@ public class PasswordErrorException extends BaseException{
 	private static final long serialVersionUID = 1L;
 
 	public PasswordErrorException() {
-		super(StatusCode.FORBIDDEN, "密码错误！");
+		super(StatusCode.FORBIDDEN, "密码错误！", "/web/app/login/login.html");
 		LOG.error("密码错误！");
 	}
 
 	public PasswordErrorException(String username, String password) {
-		super(StatusCode.FORBIDDEN, "密码错误！");
+		super(StatusCode.FORBIDDEN, "密码错误！", "/web/app/login/login.html");
 		LOG.error(DateUtil.now());
 		LOG.error(new StringBufferWrapper().append("密码错误！用户名：")
 										   .append(username)

@@ -32,5 +32,24 @@ public interface MediaVideoFeign {
 	@RequestMapping(value = "/media/video/feign/load/all")
 	public JSONObject loadAll() throws Exception;
 	
+	/**
+	 * 根据uuid获取媒资信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月6日 下午4:03:27
+	 * @return List<MediaVideoVO> 视频媒资列表
+	 */
+	@RequestMapping(value = "/media/video/feign/quest/by/uuid")
+	public JSONObject getByUuids(@RequestParam("uuids") String uuids) throws Exception;
 	
+	/**
+	 * 生成文件存储预览路径(云转码使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月7日 下午4:03:27
+	 * @return String 预览路径
+	 * @throws Exception 
+	 */
+	@RequestMapping(value = "/media/video/feign/build/url")
+	public JSONObject buildUrl(@RequestParam("name") String name, @RequestParam("folderUuid") String folderUuid) throws Exception;
 }

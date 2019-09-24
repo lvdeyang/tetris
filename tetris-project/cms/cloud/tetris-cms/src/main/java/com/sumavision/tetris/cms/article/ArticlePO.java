@@ -53,6 +53,9 @@ public class ArticlePO extends AbstractBasePO{
 	/** 关键字 */
 	private String keywords;
 	
+	/** 是否是直播 */
+	private Boolean ifLive;
+	
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -144,6 +147,14 @@ public class ArticlePO extends AbstractBasePO{
 
 	public void setKeywords(String keywords) {
 		this.keywords = keywords;
+	}
+
+	public Boolean getIfLive() {
+		return ifLive;
+	}
+
+	public void setIfLive(Boolean ifLive) {
+		this.ifLive = ifLive;
 	}
 	
 }

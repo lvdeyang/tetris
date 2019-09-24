@@ -15,9 +15,16 @@ public class AreaPO extends AbstractBasePO {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/** 地区名称 */
 	private String name;
-	private Long AreaId;
+	
+	/** 从平台获取的地区id */
+	private String AreaId;
+	
+	/** 频道id */
 	private Long channelId;
+	
+	/** 父地区id */
 	private Long parentId;
 
 	@Column(name = "NAME")
@@ -30,11 +37,11 @@ public class AreaPO extends AbstractBasePO {
 	}
 
 	@Column(name = "AREA_ID")
-	public Long getAreaId() {
+	public String getAreaId() {
 		return AreaId;
 	}
 
-	public void setAreaId(Long areaId) {
+	public void setAreaId(String areaId) {
 		AreaId = areaId;
 	}
 

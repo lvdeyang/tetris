@@ -15,11 +15,22 @@ public class ResourceSendPO extends AbstractBasePO{
 	 */
 	private static final long serialVersionUID = 1L;
 	
+	/** 媒资名称 */
 	private String name;
+	
+	/** 媒资时常 */
 	private String time;
-	private Long mimsId;
+	
+	/** 媒资在mims中的uuid */
+	private String mimsUuid;
+	
+	/** 媒资program目录结构中的父目录 */
 	private Long parentId;
+	
+	/** 频道id */
 	private Long channelId;
+	
+	/** 媒资预览地址 */
 	private String previewUrl;
 
 	@Column(name = "NAME")
@@ -58,13 +69,13 @@ public class ResourceSendPO extends AbstractBasePO{
 		this.channelId = channelId;
 	}
 
-	@Column(name = "MIMS_ID")
-	public Long getMimsId() {
-		return mimsId;
+	@Column(name = "MIMS_UUID")
+	public String getMimsUuid() {
+		return mimsUuid;
 	}
 
-	public void setMimsId(Long mimsId) {
-		this.mimsId = mimsId;
+	public void setMimsUuid(String mimsUuid) {
+		this.mimsUuid = mimsUuid;
 	}
 
 	@Column(name = "PREVIEW_URL")

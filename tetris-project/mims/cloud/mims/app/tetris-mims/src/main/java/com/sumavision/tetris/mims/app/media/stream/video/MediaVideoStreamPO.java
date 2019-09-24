@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -34,6 +35,7 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 	/** 媒资别名 */
 	private String name;
 	
+//	使用多url的表关联，取消该表的url字段
 	/** 预览地址 */
 	private String previewUrl;
 	
@@ -61,6 +63,12 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 	/** 文件上传状态 */
 	private UploadStatus uploadStatus;
 
+	/** 审核状态 */
+	private ReviewStatus reviewStatus;
+	
+	/** 审核流程id */
+	private String processInstanceId;
+	
 	@Column(name = "NAME")
 	public String getName() {
 		return name;
@@ -153,6 +161,25 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 		this.uploadStatus = uploadStatus;
 	}
 	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "REVIEW_STATUS")
+	public ReviewStatus getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(ReviewStatus reviewStatus) {
+		this.reviewStatus = reviewStatus;
+	}
+
+	@Column(name = "PROCESS_INSTANCE_ID")
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public void setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+	}
+
 	/**
 	 * 复制视频流媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>

@@ -89,7 +89,7 @@ define([
                 gotoBindSystemRole:function(scope){
                     var slef = this;
                     var row = scope.row;
-                    window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname;
+                    window.location.hash = '#/page-bind-system-role/' + row.id + '/' + row.nickname + '/system';
                 },
                 handleCreate:function(){
                     var self = this;

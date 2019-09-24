@@ -2,8 +2,12 @@ package com.sumavision.tetris.mims.app.media.txt;
 
 import java.util.Arrays;
 import java.util.List;
+
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
@@ -24,9 +28,23 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 	
 	private String type;
 	
+	private boolean removeable;
+	
 	private String icon;
 	
 	private String style;
+	
+	private String previewUrl;
+	
+	private String reviewStatus;
+	
+	private String processInstanceId;
+	
+	private Long size;
+	
+	private Integer progress;
+	
+	private List<MediaTxtVO> children;
 	
 	public String getContent() {
 		return content;
@@ -100,6 +118,15 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 		return this;
 	}
 
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaTxtVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
+		return this;
+	}
+
 	public String getIcon() {
 		return icon;
 	}
@@ -118,8 +145,62 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 		return this;
 	}
 	
+	public String getPreviewUrl() {
+		return previewUrl;
+	}
+
+	public MediaTxtVO setPreviewUrl(String previewUrl) {
+		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public MediaTxtVO setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+		return this;
+	}
+
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public MediaTxtVO setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
+	public Long getSize() {
+		return size;
+	}
+
+	public MediaTxtVO setSize(Long size) {
+		this.size = size;
+		return this;
+	}
+
+	public Integer getProgress() {
+		return progress;
+	}
+
+	public MediaTxtVO setProgress(Integer progress) {
+		this.progress = progress;
+		return this;
+	}
+
+	public List<MediaTxtVO> getChildren() {
+		return children;
+	}
+
+	public void setChildren(List<MediaTxtVO> children) {
+		this.children = children;
+	}
+
 	@Override
 	public MediaTxtVO set(MediaTxtPO entity) throws Exception {
+		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
@@ -128,7 +209,12 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setAuthorName(entity.getAuthorName())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setRemarks(entity.getRemarks())
+			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
+			.setProcessInstanceId(entity.getProcessInstanceId())
+			.setSize(entity.getSize())
 			.setType(MediaTxtItemType.TXT.toString())
+			.setRemoveable(true)
 			.setIcon(MediaTxtItemType.TXT.getIcon())
 			.setStyle(MediaTxtItemType.TXT.getStyle()[0]);
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaTxtPO.SEPARATOR_TAG)));
@@ -146,8 +232,10 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setRemarks("-")
 			.setType(MediaTxtItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaTxtItemType.FOLDER.getIcon())
-			.setStyle(MediaTxtItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaTxtItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

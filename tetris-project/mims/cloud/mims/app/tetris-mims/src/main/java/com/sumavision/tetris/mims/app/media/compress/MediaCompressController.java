@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.easy.process.core.ProcessQuery;
+import com.sumavision.tetris.easy.process.core.ProcessService;
+import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -35,8 +41,10 @@ import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressNotE
 import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressStatusErrorWhenUploadCancelException;
 import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressStatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressStatusErrorWhenUploadingException;
-import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureNotExistException;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
@@ -63,6 +71,15 @@ public class MediaCompressController {
 	
 	@Autowired
 	private MediaCompressDAO mediaCompressDao;
+	
+	@Autowired
+	private MediaSettingsDAO mediaSettingsDao;
+	
+	@Autowired
+	private ProcessQuery processQuery;
+	
+	@Autowired
+	private ProcessService processService;
 	
 	/**
 	 * 加载文件夹下的播发媒资<br/>
@@ -121,7 +138,17 @@ public class MediaCompressController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaCompressPO entity = mediaCompressService.addTask(user, name, null, null, remark, taskParam, folder);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaCompressPO entity = mediaCompressService.addTask(user, name, tagList, keyWordList, remark, taskParam, folder);
 		
 		return new MediaCompressVO().set(entity);
 		
@@ -157,7 +184,17 @@ public class MediaCompressController {
 			throw new MediaCompressNotExistException(id);
 		}
 		
-		MediaCompressPO entity = mediaCompressService.editTask(user, compress, name, null, null, remark);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaCompressPO entity = mediaCompressService.editTask(user, compress, name, tagList, keyWordList, remark);
 		
 		return new MediaCompressVO().set(entity);
 		
@@ -240,8 +277,8 @@ public class MediaCompressController {
 		long endOffset = request.getLongValue("endOffset");
 		
 		//参数错误
-		if((beginOffset + endOffset) != blockSize){
-			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+		if((beginOffset + blockSize) != endOffset){
+			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
 		MediaCompressPO task = mediaCompressDao.findByUuid(uuid);
@@ -294,6 +331,24 @@ public class MediaCompressController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
+			if(task.getReviewStatus() != null){
+				//开启审核流程
+				Long companyId = Long.valueOf(user.getGroupId());
+				MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_COMPRESS);
+				Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+				ProcessVO process = processQuery.findById(processId);
+				JSONObject variables = new JSONObject();
+				variables.put("name", task.getName());
+				variables.put("tags", task.getTags());
+				variables.put("keyWords", task.getKeyWords());
+				variables.put("remark", task.getRemarks());
+				variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(task.getFolderId()));
+				variables.put("_pa42_id", task.getId());
+				String category = new StringBufferWrapper().append("上传播发媒资：").append(task.getName()).toString();
+				String business = new StringBufferWrapper().append("mediaCompress:").append(task.getId()).toString();
+				String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+				task.setProcessInstanceId(processInstanceId);
+			}
 			mediaCompressDao.save(task);
 		}
 		
@@ -429,9 +484,7 @@ public class MediaCompressController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaCompressService.remove(new ArrayListWrapper<MediaCompressPO>().add(media).getList());
-		
-		return null;
+		return mediaCompressService.remove(new ArrayListWrapper<MediaCompressPO>().add(media).getList());
 	}
 	
 	/**

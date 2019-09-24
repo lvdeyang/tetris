@@ -2,6 +2,8 @@ package com.sumavision.tetris.system.role;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -24,6 +26,9 @@ public class UserSystemRolePermissionPO extends AbstractBasePO{
 	/** 角色id */
 	private Long roleId;
 	
+	/** 角色类型 */
+	private SystemRoleType roleType;
+	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
 
@@ -43,6 +48,16 @@ public class UserSystemRolePermissionPO extends AbstractBasePO{
 
 	public void setRoleId(Long roleId) {
 		this.roleId = roleId;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "ROLE_TYPE")
+	public SystemRoleType getRoleType() {
+		return roleType;
+	}
+
+	public void setRoleType(SystemRoleType roleType) {
+		this.roleType = roleType;
 	}
 
 	@Column(name = "AUTO_GENERATION")

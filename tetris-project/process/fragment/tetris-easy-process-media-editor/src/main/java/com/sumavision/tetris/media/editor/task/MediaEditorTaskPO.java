@@ -1,6 +1,6 @@
 package com.sumavision.tetris.media.editor.task;
 
-import java.sql.Date;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -32,8 +32,14 @@ public class MediaEditorTaskPO extends AbstractBasePO{
 	/** 流程实例id */
 	private String processInstanceId;
 	
+	/** 节点id */
+	private Long accessPointId;
+	
 	/** 任务创建时间 */
 	private Date createTime;
+	
+	/** 任务进度 */
+	private int completeRate;
 
 	@Column(name = "USER_ID")
 	public String getUserId() {
@@ -80,6 +86,15 @@ public class MediaEditorTaskPO extends AbstractBasePO{
 	public void setProcessInstanceId(String processInstanceId) {
 		this.processInstanceId = processInstanceId;
 	}
+	
+	@Column(name = "ACCESS_POINT_ID")
+	public Long getAccessPointId() {
+		return accessPointId;
+	}
+
+	public void setAccessPointId(Long accessPointId) {
+		this.accessPointId = accessPointId;
+	}
 
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATE_TIME")
@@ -90,5 +105,13 @@ public class MediaEditorTaskPO extends AbstractBasePO{
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
 	}
-	
+
+	@Column(name = "COMPLETE_RATE")
+	public Integer getCompleteRate() {
+		return completeRate;
+	}
+
+	public void setCompleteRate(int completeRate) {
+		this.completeRate = completeRate;
+	}
 }

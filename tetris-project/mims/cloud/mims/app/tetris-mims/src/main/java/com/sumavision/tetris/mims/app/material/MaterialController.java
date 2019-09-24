@@ -259,7 +259,7 @@ public class MaterialController {
 		
 		//参数错误
 		if((endOffset - beginOffset) != blockSize){
-			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
 		MaterialFilePO task = materialFileDao.findByUuid(uuid);

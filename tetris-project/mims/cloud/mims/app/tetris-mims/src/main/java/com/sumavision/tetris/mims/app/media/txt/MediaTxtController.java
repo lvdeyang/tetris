@@ -1,12 +1,18 @@
 package com.sumavision.tetris.mims.app.media.txt;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
@@ -62,6 +68,23 @@ public class MediaTxtController {
 	}
 	
 	/**
+	 * 加载文件夹树<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @param folderId 文件夹id
+	 * @return rows List<MediaTxtVO> 文本媒资列表
+	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/all")
+	public Object loadAll(HttpServletRequest request) throws Exception{
+		
+		return mediaTxtQuery.loadAll();
+	}
+	
+	/**
 	 * 添加上传文本媒资任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -97,10 +120,17 @@ public class MediaTxtController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaTxtPO entity = mediaTxtService.addTask(user, name, null, null, remark, content, folder);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
 		
-		return new MediaTxtVO().set(entity);
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
 		
+		return mediaTxtService.addTask(user, name, tagList, keyWordList, remark, content, folder, true);
 	}
 	
 	/**
@@ -132,10 +162,19 @@ public class MediaTxtController {
 		
 		MediaTxtPO txt = mediaTxtDao.findOne(id);
 		
-		MediaTxtPO entity = mediaTxtService.editTask(user, txt, name, null, null, remark, content);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaTxtPO entity = mediaTxtService.editTask(user, txt, name, tagList, keyWordList, remark, content, true);
 		
 		return new MediaTxtVO().set(entity);
-		
 	}
 	
 	/**
@@ -164,9 +203,7 @@ public class MediaTxtController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaTxtService.remove(new ArrayListWrapper<MediaTxtPO>().add(media).getList());
-		
-		return null;
+		return mediaTxtService.remove(new ArrayListWrapper<MediaTxtPO>().add(media).getList());
 	}
 	
 	/**
@@ -303,18 +340,24 @@ public class MediaTxtController {
 		
 		UserVO user = userQuery.current();
 		
-		//TODO 权限校验
-		
 		MediaTxtPO txt = mediaTxtDao.findOne(id);
-		
 		if(txt == null){
 			throw new MediaTxtNotExistException(id);
 		}
 		
-		txt.setContent(content);
-		mediaTxtDao.save(txt);
+		List<String> tagList = null;
+		if(txt.getTags() != null){
+			tagList = Arrays.asList(txt.getTags().split(MediaTxtPO.SEPARATOR_TAG));
+		}
 		
-		return null;
+		List<String> keyWordList = null;
+		if(txt.getKeyWords() != null){
+			keyWordList = Arrays.asList(txt.getKeyWords().split(MediaTxtPO.SEPARATOR_KEYWORDS));
+		}
+		
+		MediaTxtPO entity = mediaTxtService.editTask(user, txt, txt.getName(), tagList, keyWordList, txt.getRemarks(), content, true);
+		
+		return new MediaTxtVO().set(entity);
 	}
 	
 }

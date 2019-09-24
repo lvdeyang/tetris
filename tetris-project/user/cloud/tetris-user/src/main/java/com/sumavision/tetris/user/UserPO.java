@@ -24,6 +24,9 @@ public class UserPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 	
+	/** 标签分隔符 */
+	public static final String SEPARATOR_TAG = ",";
+	
 	/** 用户名 */
 	private String username;
 	
@@ -50,6 +53,9 @@ public class UserPO extends AbstractBasePO{
 	
 	/** 邮箱 */
 	private String mail;
+	
+	/** 标签 */
+	private String tags;
 	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
@@ -138,6 +144,15 @@ public class UserPO extends AbstractBasePO{
 
 	public void setMail(String mail) {
 		this.mail = mail;
+	}
+
+	@Column(name = "tags")
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 
 	@Column(name = "AUTO_GENERATION")

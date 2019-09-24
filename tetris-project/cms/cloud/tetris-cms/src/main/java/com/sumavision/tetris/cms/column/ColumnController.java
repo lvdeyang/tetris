@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.cms.article.ArticleVO;
+import com.sumavision.tetris.cms.article.exception.UserHasNotPermissionForArticleException;
 import com.sumavision.tetris.cms.column.exception.UserHasNotPermissionForColumnException;
 import com.sumavision.tetris.cms.template.exception.TemplateTagMoveFailException;
 import com.sumavision.tetris.cms.template.exception.TemplateTagNotExistException;
@@ -190,9 +191,28 @@ public class ColumnController {
 		if (col.getParentId() == null)
 			return false;
 
-		columnService.top(col);
+		columnService.top(col,user);
 
 		return true;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/up")
+	public Object up(Long columnId, HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验
+		if(!columnQuery.hasPermission(columnId, user)){
+			throw new UserHasNotPermissionForColumnException(columnId, user);
+		}	
+		
+		ColumnPO col = columnDao.findOne(columnId);
+		if (col == null) {
+			throw new TemplateTagNotExistException(columnId);
+		}
+		
+		return columnService.up(col,user);
 	}
 
 }

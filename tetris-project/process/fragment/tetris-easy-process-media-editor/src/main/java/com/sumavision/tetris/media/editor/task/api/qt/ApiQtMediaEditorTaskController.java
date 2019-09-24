@@ -12,8 +12,8 @@ import com.sumavision.tetris.media.editor.task.MediaEditorTaskStatus;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 
-@Controller
-@RequestMapping(value = "/api/qt/media/editor/task")
+//@Controller
+//@RequestMapping(value = "/api/qt/media/editor/task")
 public class ApiQtMediaEditorTaskController {
 
 	@Autowired

@@ -25,12 +25,16 @@ public interface UserRegisteredFeign {
 	 * @param String userName 用户昵称
 	 * @param String companyId 公司id
 	 * @param String companyName 公司名称
+	 * @param String roleId 管理员角色id
+	 * @param String roleName 管理员角色名称
 	 */
 	@RequestMapping(value = "/event/publish/user/registered")
 	public JSONObject userRegistered(
 			@RequestParam("userId") String userId,
 			@RequestParam("nickname") String nickname,
 			@RequestParam("companyId") String companyId,
-			@RequestParam("companyName") String companyName) throws Exception;
+			@RequestParam("companyName") String companyName,
+			@RequestParam("roleId") String roleId,
+			@RequestParam("roleName") String roleName) throws Exception;
 	
 }

@@ -5,25 +5,35 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.servlet.http.HttpServletRequest;
+
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
 import org.activiti.engine.impl.util.ReflectUtil;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
+import org.activiti.engine.task.Task;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.json.AliFastJsonObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -34,6 +44,7 @@ import com.sumavision.tetris.easy.process.access.point.AccessPointParamPO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionDAO;
 import com.sumavision.tetris.easy.process.access.point.AccessPointProcessPermissionPO;
 import com.sumavision.tetris.easy.process.access.point.ParamDirection;
+import com.sumavision.tetris.easy.process.core.exception.ProcessIdAlreadyExistException;
 import com.sumavision.tetris.easy.process.core.exception.ProcessInUseException;
 import com.sumavision.tetris.easy.process.core.exception.ProcessNotExistException;
 import com.sumavision.tetris.easy.process.core.exception.VariableValueCheckFailedException;
@@ -53,6 +64,9 @@ public class ProcessService {
 	
 	@Autowired
 	private ProcessDAO processDao;
+	
+	@Autowired
+	private ProcessCompanyPermissionDAO processCompanyPermissionDao;
 	
 	@Autowired
 	private ProcessVariableDAO processVariableDao;
@@ -79,6 +93,9 @@ public class ProcessService {
 	private RuntimeService runtimeService;
 	
 	@Autowired
+	private TaskService taskService;
+	
+	@Autowired
 	private UserQuery userQuery;
 	
 	@Autowired
@@ -86,6 +103,112 @@ public class ProcessService {
 	
 	@Autowired
 	private ProcessInstanceDeploymentPermissionDAO processInstanceDeploymentPermissionDao;
+	
+	/**
+	 * 添加流程<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 上午10:29:42
+	 * @param Long templateId 模板id
+	 * @param String type 流程类型
+	 * @param String processId 流程id
+	 * @param String name 流程名称
+	 * @param String remarks 备注
+	 * @return ProcessPO 流程定义
+	 */
+	public ProcessPO saveProcess(
+			Long templateId,
+			String type,
+			String processId,
+			String name,
+			String remarks) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		ProcessPO template = null;
+		if(templateId != null){
+			template = processDao.findOne(templateId);
+			if(template == null){
+				throw new ProcessNotExistException(templateId);
+			}
+		}
+		
+		ProcessType processType = ProcessType.fromName(type);
+		
+		ProcessPO process = null;
+		
+		if(processType.equals(ProcessType.PUBLISH)){
+			//去重校验
+			process = processDao.findByProcessId(processId);
+			if(process != null){
+				throw new ProcessIdAlreadyExistException(processId);
+			}
+		}
+		
+		Date updateTime = new Date();
+		
+		process = new ProcessPO();
+		process.setType(processType);
+		process.setProcessId(processType.equals(ProcessType.TEMPLATE)?null:processId);
+		process.setName(name);
+		process.setRemarks(remarks);
+		process.setPath(new StringBufferWrapper().append("tmp")
+												 .append(File.separator)
+												 .append("processes")
+												 .append(File.separator)
+												 .append(user.getUuid())
+												 .append("-")
+												 .append(processId)
+												 .append("-")
+												 .append(updateTime.getTime())
+												 .append(".bpmn")
+												 .toString());
+		process.setUpdateTime(updateTime);
+		
+		if(template != null){
+			String templateBpmn = template.getBpmn();
+			if(templateBpmn != null){
+				templateBpmn = templateBpmn.replaceAll(template.getUuid(), process.getUuid());
+				process.setBpmn(templateBpmn);
+			}
+			String templateUserTaskBindVariables = template.getUserTaskBindVariables();
+			if(templateUserTaskBindVariables != null){
+				process.setUserTaskBindVariables(templateUserTaskBindVariables);
+			}
+		}
+		
+		processDao.save(process);
+		
+		ProcessCompanyPermissionPO permission = new ProcessCompanyPermissionPO();
+		permission.setProcessId(process.getId());
+		permission.setCompanyId(user.getGroupId());
+		permission.setUpdateTime(updateTime);
+		processCompanyPermissionDao.save(permission);
+		
+		if(template != null){
+			//复制流程变量
+			List<ProcessVariablePO> existVariables = processVariableDao.findByProcessId(templateId);
+			if(existVariables!=null && existVariables.size()>0){
+				List<ProcessVariablePO> copyVariables = new ArrayList<ProcessVariablePO>();
+				for(ProcessVariablePO variable:existVariables){
+					copyVariables.add(variable.copy(process.getId()));
+				}
+				processVariableDao.save(copyVariables);
+			}
+			
+			//复制流程变量映射
+			List<ProcessParamReferencePO> existParamReferences = processParamReferenceDao.findByProcessId(templateId);
+			if(existParamReferences!=null && existParamReferences.size()>0){
+				List<ProcessParamReferencePO> copyParamReferences = new ArrayList<ProcessParamReferencePO>();
+				for(ProcessParamReferencePO paramReference:existParamReferences){
+					copyParamReferences.add(paramReference.copy(process.getId()));
+				}
+				processParamReferenceDao.save(copyParamReferences);
+			}
+		}
+		
+		return process;
+	}
 	
 	/**
 	 * 保存流程的bpmn配置<br/>
@@ -100,6 +223,7 @@ public class ProcessService {
 	public ProcessPO saveBpmn(
 			ProcessPO process, 
 			String bpmn,
+			String userTaskBindVariables,
 			Collection<AccessPointPO> accessPoints) throws Exception{
 		
 		List<AccessPointProcessPermissionPO> permissions = accessPointProcessPermissionDao.findByProcessId(process.getId());
@@ -120,6 +244,7 @@ public class ProcessService {
 		}
 		
 		process.setBpmn(bpmn);
+		process.setUserTaskBindVariables(userTaskBindVariables);
 		process.setUpdateTime(new Date());
 		processDao.save(process);
 		
@@ -158,6 +283,12 @@ public class ProcessService {
 			accessPointProcessPermissionDao.deleteInBatch(permissions);
 		}
 		
+		//删除流程授权信息
+		List<ProcessCompanyPermissionPO> companyPermissions = processCompanyPermissionDao.findByProcessId(process.getId());
+		if(companyPermissions!=null && companyPermissions.size()>0){
+			processCompanyPermissionDao.deleteInBatch(companyPermissions);
+		}
+		
 		//删除流程变量
 		List<ProcessVariablePO> variables = processVariableDao.findByProcessId(process.getId());
 		if(variables!=null && variables.size()>0){
@@ -188,7 +319,7 @@ public class ProcessService {
 	 * <b>日期：</b>2019年3月25日 下午4:00:47
 	 * @param ProcessPO process 流程
 	 */
-	public void publish(ProcessPO process) throws Exception{
+	public ProcessPO publish(ProcessPO process) throws Exception{
 		
 		File tmpFolders = new File(new StringBufferWrapper().append(path.classPath())
 														    .append(File.separator)
@@ -207,7 +338,6 @@ public class ProcessService {
 		InputStream inputStream = null;
 		
 		try{
-			
 			//写临时文件
 			FileUtils.writeStringToFile(tmpFile, process.getBpmn(), "utf-8");
 			
@@ -216,14 +346,19 @@ public class ProcessService {
 			//发布流程
 			Deployment deployment = repositoryService.createDeployment().addInputStream(process.getPath(), inputStream).deploy();
 			
+			Date publishTime = new Date();
+			
 			ProcessDeploymentPermissionPO permission = new ProcessDeploymentPermissionPO();
-			permission.setUpdateTime(new Date());
+			permission.setUpdateTime(publishTime);
 			permission.setProcessId(process.getId());
 			permission.setName(process.getName());
 			permission.setRemarks(process.getRemarks());
 			permission.setBpmn(process.getBpmn());
 			permission.setDeploymentId(deployment.getId());
 			processDeploymentPermissionDao.save(permission);
+			process.setPublishTime(publishTime);
+			processDao.save(process);
+			return process;
 		}finally{
 			if(inputStream != null) inputStream.close();
 			
@@ -247,11 +382,24 @@ public class ProcessService {
 	 * <b>日期：</b>2019年1月9日 下午2:41:31
 	 * @param String primaryKey 流程主键
 	 * @param JSONString variables 流程必要变量初始值
+	 * @param String category 流程主题
+	 * @param String business 流程承载业务内容
 	 * @return String processInstanceId 流程实例id
 	 */
 	public String startByKey(
 			String primaryKey,
-			String variables) throws Exception{
+			String variables,
+			String category,
+			String business) throws Exception{
+		
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		Enumeration<String> headerNames = request.getHeaderNames();
+		while(headerNames.hasMoreElements()){
+			String headerName = headerNames.nextElement();
+			headers.put(headerName, request.getHeader(headerName));
+		}
 		
 		UserVO user = userQuery.current();
 		
@@ -346,19 +494,30 @@ public class ProcessService {
 			}
 		}
 		
-		//内置变量
-		//这个接口里内置变量没办法加入流程实例id
-		//contextVariableMap.put(InternalVariableKey.START_USER_ID.getVariableKey(), user.getUuid());
-		
 		JSONObject finalVariableContext = aliFastJsonObject.convertFromHashMap(contextVariableMap);
 		
-		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid(), new HashMapWrapper<String, Object>().put("variable-context", finalVariableContext).getMap());
+		//启动流程--并加入变量
+		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey(process.getUuid(), new HashMapWrapper<String, Object>().put(InternalVariableKey.START_USER_ID.getVariableKey(), user.getUuid())
+																																	      .put(InternalVariableKey.START_USER_NICKNAME.getVariableKey(), user.getNickname())
+																																	      .put(InternalVariableKey.START_TIME.getVariableKey(), DateUtil.format(new Date(), DateUtil.dateTimePattern))
+																																	      .put(InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), finalVariableContext)
+																																	      .put(InternalVariableKey.REQUEST_HEADERS.getVariableKey(), headers)
+																																	      .put(InternalVariableKey.CATEGORY.getVariableKey(), category)
+																																	      .put(InternalVariableKey.BUSINESS.getVariableKey(), business)
+																																	      .getMap());
 		
 		ProcessInstanceDeploymentPermissionPO permission = new ProcessInstanceDeploymentPermissionPO();
 		permission.setProcessInstanceId(processInstance.getId());
 		permission.setDeploymentId(processInstance.getDeploymentId());
 		permission.setUpdateTime(new Date());
 		processInstanceDeploymentPermissionDao.save(permission);
+		
+		//变量上下文中加入内置变量
+		JSONObject existVariableContext = (JSONObject)runtimeService.getVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
+		if(!existVariableContext.containsKey(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey())){
+			existVariableContext.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstance.getId());
+			runtimeService.setVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), existVariableContext);
+		}
 		
 		return processInstance.getId();
 	}
@@ -379,7 +538,9 @@ public class ProcessService {
 		
 		Map<String, Object> processVariables = runtimeService.getVariables(__processId__);
 		
-		JSONObject variableContext = (JSONObject)processVariables.get("variable-context");
+		String processUuid = runtimeService.createProcessInstanceQuery().processInstanceId(__processId__).singleResult().getProcessDefinitionKey();
+		
+		JSONObject variableContext = (JSONObject)processVariables.get(InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
 		
 		Map<String, Object> variableMapContext = aliFastJsonObject.convertToHashMap(variableContext);
 		
@@ -402,9 +563,10 @@ public class ProcessService {
 					}
 					//处理映射
 					Set<String> reverceVariableMapKeys = reverceVariableMap.keySet();
-					ProcessPO process = processDao.findByUuid(__processId__);
+					ProcessPO process = processDao.findByUuid(processUuid);
 					List<ProcessParamReferencePO> paramReferences = processParamReferenceDao.findByProcessId(process.getId());
 					if(paramReferences!=null && paramReferences.size()>0){
+						Map<String, Object> reverceReferenceVariableMap = new HashMap<String, Object>();
 						for(String reverceVariableMapKey:reverceVariableMapKeys){
 							for(ProcessParamReferencePO paramReference:paramReferences){
 								String scopeReference = paramReference.getReference();
@@ -428,11 +590,12 @@ public class ProcessService {
 									}
 									//设置值
 									for(String keyPath:primaryKeyPaths){
-										reverceVariableMap.put(keyPath, effectValue);
+										reverceReferenceVariableMap.put(keyPath, effectValue);
 									}
 								}
 							}
 						}
+						reverceVariableMap.putAll(reverceReferenceVariableMap);
 					}
 					//有效性校验
 					JSONObject reverceVariableValidateContext = aliFastJsonObject.convertFromHashMap(reverceVariableMap);
@@ -454,7 +617,7 @@ public class ProcessService {
 						variableMapContext.put(reverceVariableMapKey, reverceVariableMap.get(reverceVariableMapKey));
 					}
 					variableContext = aliFastJsonObject.convertFromHashMap(variableMapContext);
-					runtimeService.setVariable(__processId__, "variable-context", variableContext);
+					runtimeService.setVariable(__processId__, InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), variableContext);
 				}
 			}
 		}
@@ -464,6 +627,55 @@ public class ProcessService {
 		
 		runtimeService.trigger(execution.getId());
 		
+	}
+	
+	/**
+	 * 用户任务提交<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月25日 下午4:36:18
+	 * @param String taskId 任务id
+	 * @param JSONArrayString variables 设置变量
+	 */
+	@SuppressWarnings("unchecked")
+	public void doReview(String taskId, String variables) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
+		Object variable = runtimeService.getVariable(task.getProcessInstanceId(), InternalVariableKey.NODE_HISTORY.getVariableKey());
+		List<JSONObject> nodeHistorys = variable==null?new ArrayList<JSONObject>():(List<JSONObject>)variable;
+		JSONObject nodeHistory = null;
+		for(JSONObject existNodeHistory:nodeHistorys){
+			if(existNodeHistory.getString("userId").equals(user.getId().toString()) && 
+					existNodeHistory.getString("taskId").equals(task.getTaskDefinitionKey())){
+				nodeHistory = existNodeHistory;
+				break;
+			}
+		}
+		if(nodeHistory == null){
+			nodeHistory = new JSONObject();
+		}
+		nodeHistory.put("userId", user.getId());
+		nodeHistory.put("userNickName", user.getNickname());
+		nodeHistory.put("taskId", task.getTaskDefinitionKey());
+		nodeHistory.put("type", InternalVariableKey.NODE_YTPE_USER.getVariableKey());
+		
+		if(variables != null){
+			List<JSONObject> setVariables = JSON.parseArray(variables, JSONObject.class);
+			nodeHistory.put("variableSet", setVariables);
+			
+			JSONObject variableContext = (JSONObject)runtimeService.getVariable(task.getProcessInstanceId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
+			for(JSONObject setVariable:setVariables){
+				variableContext.put(setVariable.getString("key"), setVariable.getString("value"));
+			}
+			runtimeService.setVariable(task.getProcessInstanceId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), variableContext);
+		}
+		
+		nodeHistorys.add(nodeHistory);
+		runtimeService.setVariable(task.getProcessInstanceId(), InternalVariableKey.NODE_HISTORY.getVariableKey(), nodeHistorys);
+		
+		taskService.complete(task.getId());
 	}
 	
 }

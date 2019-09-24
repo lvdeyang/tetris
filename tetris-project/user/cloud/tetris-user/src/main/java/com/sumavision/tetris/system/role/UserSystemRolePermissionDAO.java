@@ -44,6 +44,18 @@ public interface UserSystemRolePermissionDAO extends BaseDAO<UserSystemRolePermi
 	public Page<UserSystemRolePermissionPO> findByUserId(Long userId, Pageable page);
 	
 	/**
+	 * 根据用户和角色类型分页查询授权情况
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月2日 下午3:17:10
+	 * @param Long userId 用户id
+	 * @param SystemRoleType roleType 角色类型
+	 * @param Pageable page 分页信息
+	 * @return Page<UserSystemRolePermissionPO> 权限列表
+	 */
+	public Page<UserSystemRolePermissionPO> findByUserIdAndRoleType(Long userId, SystemRoleType roleType, Pageable page);
+	
+	/**
 	 * 统计用户绑定的系统角色数量<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -52,6 +64,17 @@ public interface UserSystemRolePermissionDAO extends BaseDAO<UserSystemRolePermi
 	 * @return int 系统角色数量
 	 */
 	public int countByUserId(Long userId);
+	
+	/**
+	 * 根据用户和角色类型统计授权数量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月2日 下午3:14:45
+	 * @param Long userId 用户id
+	 * @param SystemRoleType roleType 角色类型
+	 * @return 授权数量
+	 */
+	public long countByUserIdAndRoleType(Long userId, SystemRoleType roleType);
 	
 	/**
 	 * 根据角色（批量）获取角色权限<br/>

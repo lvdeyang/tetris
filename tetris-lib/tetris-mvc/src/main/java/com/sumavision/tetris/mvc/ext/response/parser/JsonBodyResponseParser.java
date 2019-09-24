@@ -29,9 +29,17 @@ public class JsonBodyResponseParser {
 	public static <T> List<T> parseArray(JSONObject response, Class<T> clazz) throws Exception{
 		int status = response.getIntValue("status");
 		if(status != StatusCode.SUCCESS.getCode()){
-			throw new BaseException(StatusCode.fromCode(status), response.getString("message"));
+			if(response.containsKey("redirect")){
+				throw new BaseException(StatusCode.fromCode(status), response.getString("message"), response.getString("redirect"));
+			}else{
+				throw new BaseException(StatusCode.fromCode(status), response.getString("message"));
+			}
 		}else{
-			return JSON.parseArray(JSON.toJSONString(response.get("data")), clazz);
+			if(response.get("data") == null){
+				return null;
+			}else{
+				return JSON.parseArray(JSON.toJSONString(response.get("data")), clazz);
+			}
 		}
 	}
 	
@@ -48,9 +56,17 @@ public class JsonBodyResponseParser {
 	public static <T> T parseObject(JSONObject response, Class<T> clazz) throws Exception{
 		int status = response.getIntValue("status");
 		if(status != StatusCode.SUCCESS.getCode()){
-			throw new BaseException(StatusCode.fromCode(status), response.getString("message"));
+			if(response.containsKey("redirect")){
+				throw new BaseException(StatusCode.fromCode(status), response.getString("message"), response.getString("redirect"));
+			}else{
+				throw new BaseException(StatusCode.fromCode(status), response.getString("message"));
+			}
 		}else{
-			return JSON.parseObject(JSON.toJSONString(response.get("data")), clazz);
+			if(response.get("data") == null){
+				return null;
+			}else{
+				return JSON.parseObject(JSON.toJSONString(response.get("data")), clazz);
+			}
 		}
 	}
 	

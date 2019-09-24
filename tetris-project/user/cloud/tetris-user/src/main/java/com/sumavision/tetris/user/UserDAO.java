@@ -21,6 +21,16 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface UserDAO extends BaseDAO<UserPO>{
 	
 	/**
+	 * 根据id查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 下午3:18:07
+	 * @param Collection<Long> ids 用户id列表
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByIdIn(Collection<Long> ids);
+	
+	/**
 	 * 分页查询用户列表<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -109,7 +119,9 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @param Pageable page 分页信息
 	 * @return Page<UserPO> 用户列表
 	 */
-	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.id NOT IN ?2 \n#pageable\n", nativeQuery = true)
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.id NOT IN ?2 \n#pageable\n", 
+		   countQuery = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.id NOT IN ?2 \n#pageable\n",
+		   nativeQuery = true)
 	public Page<UserPO> findByCompanyIdWithExcept(Long companyId, Collection<Long> except, Pageable page);
 	
 	/**
@@ -174,7 +186,7 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @param Long except 例外用户id
 	 * @return UserPO 用户
 	 */
-	@Query(value = "from com.sumavision.tetris.user UserPO user where user.mobile=?1 and user.id<>?2", nativeQuery = true)
+	@Query(value = "from com.sumavision.tetris.user.UserPO user where user.mobile=?1 and user.id<>?2")
 	public UserPO findByMobileWithExcept(String mobile, Long except);
 	
 	/**
@@ -196,7 +208,43 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @param Long except 例外用户id
 	 * @return UserPO 用户
 	 */
-	@Query(value = "from com.sumavision.tetris.user UserPO user where user.mail=?1 and user.id<>?2", nativeQuery = true)
+	@Query(value = "from com.sumavision.tetris.user.UserPO user where user.mail=?1 and user.id<>?2")
 	public UserPO findByMailWithExcept(String mail, Long except);
 	
+	/**
+	 * 分页查询隶属角色下的用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月30日 上午11:10:01
+	 * @param Long companyId 公司id
+	 * @param Pageable page 分页信息
+	 * @return Page<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_subordinate_role_permission permission ON user.id=permission.user_id WHERE permission.role_id=?1 \n#pageable\n", nativeQuery = true)
+	public Page<UserPO> findByRoleId(Long roleId, Pageable page);
+	
+	/**
+	 * 查询角色关联的用户数量（带例外）<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月30日 上午11:14:16
+	 * @param Long roleId 角色id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @return int 用户数量
+	 */
+	@Query(value = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_subordinate_role_permission permission ON user.id=permission.user_id WHERE permission.role_id=?1 AND user.id NOT IN ?2", nativeQuery = true)
+	public int countByRoleIdWithExcept(Long roleId, Collection<Long> except);
+	
+	/**
+	 * 分页查询角色关联的用户（带例外）<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月30日 上午11:10:01
+	 * @param Long roleId 角色id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param Pageable page 分页信息
+	 * @return Page<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_subordinate_role_permission permission ON user.id=permission.user_id WHERE permission.role_id=?1 AND user.id NOT IN ?2 \n#pageable\n", nativeQuery = true)
+	public Page<UserPO> findByRoleIdWithExcept(Long role, Collection<Long> except, Pageable page);
 }

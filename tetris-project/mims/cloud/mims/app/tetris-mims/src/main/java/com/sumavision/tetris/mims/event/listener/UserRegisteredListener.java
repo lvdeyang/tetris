@@ -24,9 +24,11 @@ public class UserRegisteredListener implements ApplicationListener<UserRegistere
 	@Override
 	public void onApplicationEvent(UserRegisteredEvent event){
 		try{
-			if(event.getCompanyId() != null){
+			if(event.getCompanyId() != null&&event.getRoleId() != null){
 				//注册企业网盘
-				folderService.createCompanyDisk(event.getCompanyId(), event.getCompanyName(), event.getUserId());
+				folderService.createCompanyDisk(event.getCompanyId(), event.getCompanyName(), event.getUserId(), event.getRoleId(), event.getRoleName());
+			}else if(event.getCompanyId() != null&&event.getRoleId() == null){
+				//普通用户加入组织
 			}
 			//注册个人网盘
 			folderService.createPersonalDisk(event.getUserId(), event.getNickname());

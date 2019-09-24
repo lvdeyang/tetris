@@ -15,12 +15,25 @@ public class CsResourcePO extends AbstractBasePO {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/** 名称 */
 	private String name;
+	
+	/** 时长 */
 	private String time;
-	private Long mimsId;
+	
+	/** 在mims的uuid */
+	private String mimsUuid;
+	
+	/** 在cs父目录id */
 	private Long parentId;
+	
+	/** 在cs父目录路径 */
 	private String parentPath;
+	
+	/** 频道id */
 	private Long channelId;
+	
+	/** 预览路径 */
 	private String previewUrl;
 
 	@Column(name = "NAME")
@@ -68,13 +81,13 @@ public class CsResourcePO extends AbstractBasePO {
 		this.channelId = channelId;
 	}
 
-	@Column(name = "MIMS_ID")
-	public Long getMimsId() {
-		return mimsId;
+	@Column(name = "MIMS_UUID")
+	public String getMimsUuid() {
+		return mimsUuid;
 	}
 
-	public void setMimsId(Long mimsId) {
-		this.mimsId = mimsId;
+	public void setMimsUuid(String mimsUuid) {
+		this.mimsUuid = mimsUuid;
 	}
 
 	@Column(name = "PREVIEW_URL")

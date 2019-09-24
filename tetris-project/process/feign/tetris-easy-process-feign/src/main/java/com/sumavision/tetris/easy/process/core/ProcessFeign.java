@@ -10,36 +10,95 @@ import com.sumavision.tetris.config.feign.FeignConfiguration;
 public interface ProcessFeign {
 
 	/**
-	 * ¸ù¾İÁ÷³ÌµÄÖ÷¼üÆô¶¯Á÷³Ì<br/>
+	 * æ ¹æ®idæŸ¥è¯¢æµç¨‹<br/>
+	 * <b>ä½œè€…:</b>lvdeyang<br/>
+	 * <b>ç‰ˆæœ¬ï¼š</b>1.0<br/>
+	 * <b>æ—¥æœŸï¼š</b>2019å¹´7æœˆ18æ—¥ ä¸Šåˆ9:36:26
+	 * @param Long id æµç¨‹id
+	 * @return ProcessVO æµç¨‹
+	 */
+	@RequestMapping(value = "/process/feign/find/by/id")
+	public JSONObject findById(@RequestParam("id") Long id);
+	
+	/**
+	 * æ ¹æ®idæŸ¥è¯¢æµç¨‹bpmné…ç½®<br/>
+	 * <b>ä½œè€…:</b>lvdeyang<br/>
+	 * <b>ç‰ˆæœ¬ï¼š</b>1.0<br/>
+	 * <b>æ—¥æœŸï¼š</b>2019å¹´7æœˆ18æ—¥ ä¸Šåˆ9:40:31
+	 * @param Long id æµç¨‹id
+	 * @return String æµç¨‹bpmné…ç½®
+	 */
+	@RequestMapping(value = "/process/feign/find/bpmn/by/id")
+	public JSONObject findBpmnById(@RequestParam("id") Long id);
+	
+	/**
+	 * åˆ†é¡µæŸ¥è¯¢æµç¨‹<br/>
+	 * <b>ä½œè€…:</b>lvdeyang<br/>
+	 * <b>ç‰ˆæœ¬ï¼š</b>1.0<br/>
+	 * <b>æ—¥æœŸï¼š</b>2018å¹´12æœˆ24æ—¥ ä¸‹åˆ5:31:49
+	 * @param int currentPage å½“å‰é¡µç 
+	 * @param int pageSize æ¯é¡µæ•°æ®é‡
+	 * @return int total æ€»æ•°æ®é‡
+	 * @return List<ProcessVO> rows æµç¨‹åˆ—è¡¨
+	 */
+	@RequestMapping(value = "/process/feign/list")
+	public JSONObject list(
+			@RequestParam("currentPage") int currentPage,
+			@RequestParam("pageSize") int pageSize);
+	
+	/**
+	 * åˆ†é¡µæŸ¥è¯¢æµç¨‹ï¼ˆå¸¦ä¾‹å¤–ï¼‰<br/>
+	 * <b>ä½œè€…:</b>lvdeyang<br/>
+	 * <b>ç‰ˆæœ¬ï¼š</b>1.0<br/>
+	 * <b>æ—¥æœŸï¼š</b>2018å¹´12æœˆ24æ—¥ ä¸‹åˆ5:31:49
+	 * @param int currentPage å½“å‰é¡µç 
+	 * @param int pageSize æ¯é¡µæ•°æ®é‡
+	 * @param JSONArray except ä¾‹å¤–æµç¨‹idåˆ—è¡¨
+	 * @return int total æ€»æ•°æ®é‡
+	 * @return List<ProcessVO> æµç¨‹åˆ—è¡¨
+	 */
+	@RequestMapping(value = "/process/feign/list/with/except")
+	public JSONObject listWithExcept(
+			@RequestParam("currentPage") int currentPage,
+			@RequestParam("pageSize") int pageSize,
+			@RequestParam("except") String except);
+	
+	/**
+	 * æ ¹æ®æµç¨‹çš„ä¸»é”®å¯åŠ¨æµç¨‹<br/>
 	 * <p>
-	 * 	´«À´µÄ±äÁ¿·ÖÀà£ºÁ÷³Ì±äÁ¿+½ÓÈëµã²ÎÊı<br/>
-	 * 	½Ó¿ÚÖĞ¶Ô±äÁ¿µÄ´¦Àí£º<br/>
-	 * 		1.½ÓÈëµã²ÎÊı¹ØÁª¹ØÏµ´¦Àí<br/>
-	 * 		2.½ÓÈëµã²ÎÊı¸³ÖµÔ¼ÊøĞ£Ñé<br/>
-	 * 		3.´¦ÀíÁ÷³Ì±äÁ¿ÖĞµÄÒıÓÃÖµ<br/>
-	 * 		4.¼ÓÈëÄÚÖÃ±äÁ¿<br/>
+	 * 	ä¼ æ¥çš„å˜é‡åˆ†ç±»ï¼šæµç¨‹å˜é‡+æ¥å…¥ç‚¹å‚æ•°<br/>
+	 * 	æ¥å£ä¸­å¯¹å˜é‡çš„å¤„ç†ï¼š<br/>
+	 * 		1.æ¥å…¥ç‚¹å‚æ•°å…³è”å…³ç³»å¤„ç†<br/>
+	 * 		2.æ¥å…¥ç‚¹å‚æ•°èµ‹å€¼çº¦æŸæ ¡éªŒ<br/>
+	 * 		3.å¤„ç†æµç¨‹å˜é‡ä¸­çš„å¼•ç”¨å€¼<br/>
+	 * 		4.åŠ å…¥å†…ç½®å˜é‡<br/>
 	 * </p>
-	 * <b>×÷Õß:</b>lvdeyang<br/>
-	 * <b>°æ±¾£º</b>1.0<br/>
-	 * <b>ÈÕÆÚ£º</b>2019Äê1ÔÂ9ÈÕ ÏÂÎç2:41:31
-	 * @param String primaryKey Á÷³ÌÖ÷¼ü
-	 * @param JSONString variables Á÷³Ì±ØÒª±äÁ¿³õÊ¼Öµ
-	 * @return String processInstanceId Á÷³ÌÊµÀıid
+	 * <b>ä½œè€…:</b>lvdeyang<br/>
+	 * <b>ç‰ˆæœ¬ï¼š</b>1.0<br/>
+	 * <b>æ—¥æœŸï¼š</b>2019å¹´1æœˆ9æ—¥ ä¸‹åˆ2:41:31
+	 * @param String primaryKey æµç¨‹ä¸»é”®
+	 * @param JSONString variables æµç¨‹å¿…è¦å˜é‡åˆå§‹å€¼
+	 * @param String category æµç¨‹ä¸»é¢˜
+	 * @param String business æµç¨‹æ‰¿è½½ä¸šåŠ¡å†…å®¹
+	 * @return String processInstanceId æµç¨‹å®ä¾‹id
 	 */
 	@RequestMapping(value = "/process/feign/start/by/key")
 	public JSONObject startByKey(
 			@RequestParam("primaryKey") String primaryKey,
-			@RequestParam("variables") String variables);
+			@RequestParam("variables") String variables,
+			@RequestParam("category") String category,
+			@RequestParam("business") String business);
 	
 	/**
-	 * Òì²½·şÎñ½Úµã»Øµ÷<br/>
-	 * <b>×÷Õß:</b>lvdeyang<br/>
-	 * <b>°æ±¾£º</b>1.0<br/>
-	 * <b>ÈÕÆÚ£º</b>2019Äê3ÔÂ28ÈÕ ÉÏÎç10:58:46
-	 * @param String __processId__ Á÷³ÌÊµÀıid
-	 * @param String __accessPointId__ »Øµ÷½ÓÈëµãid
-	 * @param JSONString variables »Ø´«Á÷³Ì±äÁ¿
+	 * å¼‚æ­¥æœåŠ¡èŠ‚ç‚¹å›è°ƒ<br/>
+	 * <b>ä½œè€…:</b>lvdeyang<br/>
+	 * <b>ç‰ˆæœ¬ï¼š</b>1.0<br/>
+	 * <b>æ—¥æœŸï¼š</b>2019å¹´3æœˆ28æ—¥ ä¸Šåˆ10:58:46
+	 * @param String __processId__ æµç¨‹å®ä¾‹id
+	 * @param String __accessPointId__ å›è°ƒæ¥å…¥ç‚¹id
+	 * @param JSONString variables å›ä¼ æµç¨‹å˜é‡
 	 */
+	@RequestMapping(value = "/process/feign/receive/task/trigger")
 	public JSONObject receiveTaskTrigger(
 			@RequestParam("__processId__") String __processId__,
 			@RequestParam("__accessPointId__") Long __accessPointId__,

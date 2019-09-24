@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.business.role.BusinessRoleService;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.organization.CompanyDAO;
@@ -24,8 +25,10 @@ import com.sumavision.tetris.organization.OrganizationPO;
 import com.sumavision.tetris.organization.OrganizationUserPermissionDAO;
 import com.sumavision.tetris.organization.OrganizationUserPermissionPO;
 import com.sumavision.tetris.organization.exception.CompanyNotExistException;
+import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
+import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.user.exception.MailAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
@@ -54,6 +57,9 @@ public class UserService{
 	private UserSystemRolePermissionDAO userSystemRolePermissionDao;
 	
 	@Autowired
+	private UserSystemRolePermissionService userSystemRolePermissionService;
+	
+	@Autowired
 	private CompanyService companyService;
 	
 	@Autowired
@@ -76,6 +82,9 @@ public class UserService{
 	
 	@Autowired
 	private Sha256Encoder sha256Encoder;
+	
+	@Autowired
+	private BusinessRoleService businessRoleService;
 	
 	/**
 	 * 添加一个用户<br/>
@@ -137,12 +146,21 @@ public class UserService{
             String classify,
             String companyName) throws Exception{
 		
-		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, classify);
+		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, UserClassify.COMPANY.getName());
 		
 		CompanyVO company = null;
+		SystemRoleVO adminRole = null;
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//创建公司
 			company = companyService.add(companyName, user);
+			
+			//处理公司管理员
+			adminRole = businessRoleService.add(company.getId(), "企业管理员", true);
+			
+			//用户授权
+			//1：授权默认的系统角色
+			//2：授权公司管理员业务角色
+			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(2l).add(Long.valueOf(adminRole.getId())).getList());
 		}
 		
 		//发布用户注册事件
@@ -150,7 +168,7 @@ public class UserService{
 		if(company == null){
 			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname());
 		}else{
-			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName());
+			event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), adminRole.getId().toString(), adminRole.getName());
 		}
 		applicationEventPublisher.publishEvent(event);
 		
@@ -192,9 +210,10 @@ public class UserService{
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//加入公司
 			companyUserPermissionService.add(company, user);
+			//绑定用户和系统角色
+			userSystemRolePermissionService.bindSystemRole(user.getId(), new ArrayListWrapper<Long>().add(3l).getList());
 		}
 		
-		//TODO：加company
 		//发布用户注册事件
 		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName());
 		applicationEventPublisher.publishEvent(event);
@@ -365,6 +384,7 @@ public class UserService{
 			String nickname,
             String mobile,
             String mail,
+            String tags,
             boolean editPassword,
             String oldPassword,
             String newPassword,
@@ -403,6 +423,7 @@ public class UserService{
 		user.setMobile(mobile);
 		user.setMail(mail);
 		user.setUpdateTime(new Date());
+		if(tags != null) user.setTags(tags);
 		userDao.save(user);
 		
 		return new UserVO().set(user);

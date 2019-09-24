@@ -1,5 +1,8 @@
 package com.sumavision.tetris.mims.app.media.stream.video;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
@@ -18,7 +22,6 @@ import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.stream.video.exception.MediaVideoStreamNotExistException;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -101,10 +104,17 @@ public class MediaVideoStreamController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaVideoStreamPO entity = mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrl, folder);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
 		
-		return new MediaVideoStreamVO().set(entity);
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
 		
+		return  mediaVideoStreamService.addTask(user, name, tagList, keyWordList, remark, JSON.parseArray(previewUrl, String.class), folder);
 	}
 	
 	/**
@@ -134,14 +144,17 @@ public class MediaVideoStreamController {
 		
 		UserVO user = userQuery.current();
 		
-		MediaVideoStreamPO videoStream = mediaVideoStreamDao.findOne(id);
-		if(videoStream == null){
-			throw new MediaVideoStreamNotExistException(id);
+		List<String> tagList = new ArrayList<String>();
+		if (tags!=null && !tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
 		}
 		
-		MediaVideoStreamPO entity = mediaVideoStreamService.editTask(user, videoStream, name, null, null, remark, previewUrl);
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
 		
-		return new MediaVideoStreamVO().set(entity);
+		return mediaVideoStreamService.editTask(user, id, name, tagList, keyWordList, remark, JSON.parseArray(previewUrl, String.class));
 		
 	}
 	
@@ -171,9 +184,7 @@ public class MediaVideoStreamController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaVideoStreamService.remove(new ArrayListWrapper<MediaVideoStreamPO>().add(media).getList());
-		
-		return null;
+		return mediaVideoStreamService.remove(new ArrayListWrapper<MediaVideoStreamPO>().add(media).getList());
 	}
 	
 	/**
@@ -266,10 +277,10 @@ public class MediaVideoStreamController {
 		//判断是否被复制到其他文件夹中
 		if(target.getId().equals(media.getFolderId())) moved = false;
 		
-		MediaVideoStreamPO copiedMedia  = mediaVideoStreamService.copy(media, target);
+		MediaVideoStreamVO copiedMedia  = mediaVideoStreamService.copyByCountlessUrl(media, target);
 		
 		Map<String, Object> result = new HashMapWrapper<String, Object>().put("moved", moved)
-																		 .put("copied", new MediaVideoStreamVO().set(copiedMedia))
+																		 .put("copied", copiedMedia)
 																		 .getMap();
 		return result;
 	}

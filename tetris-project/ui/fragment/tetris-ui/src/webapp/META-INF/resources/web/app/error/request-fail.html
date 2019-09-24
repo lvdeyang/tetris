@@ -122,6 +122,14 @@
 
         var code = 500;
         var message = '请求失败！';
+        var hash = window.location.hash;
+        if(hash){
+            hash = hash.replace('#', '');
+            hash = decodeURIComponent(decodeURIComponent(hash));
+            hash = hash.split('&&');
+            code = parseInt(hash[0]);
+            message = hash[1];
+        }
 
         var status = null;
         var defaultMessage = null;

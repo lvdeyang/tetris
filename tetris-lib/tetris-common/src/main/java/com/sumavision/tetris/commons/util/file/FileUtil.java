@@ -2,11 +2,12 @@ package com.sumavision.tetris.commons.util.file;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.io.Writer;
+
+import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 
@@ -100,7 +101,7 @@ public class FileUtil {
 	}
 	
 	/**
-	 * 将文件读成字符串<br/>
+	 * 以utf-8编码将文件读成字符串<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月5日 下午3:33:24
@@ -108,13 +109,38 @@ public class FileUtil {
 	 * @return String 文件内容
 	 */
 	public static String readAsString(String path) throws Exception{
+		return readAsString(path, "utf-8");
+	}
+	
+	/**
+	 * 将文件读成字符串<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月5日 下午3:33:24
+	 * @param String path 文件路径
+	 * @param String charset 文件编码
+	 * @return String 文件内容
+	 */
+	public static String readAsString(String path, String charset) throws Exception{
 		InputStream stream = null;
 		try{
 			stream = new FileInputStream(new File(path));
-			return readAsString(stream);
+			return readAsString(stream, charset);
 		}finally{
 			if(stream != null) stream.close();
 		}
+	}
+	
+	/**
+	 * 以utf-8编码将文件读成字符串<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月5日 下午3:29:48
+	 * @param InputStream stream 文件输入流
+	 * @return String 文件内容
+	 */
+	public static String readAsString(InputStream stream) throws Exception{
+		return readAsString(stream, "utf-8");
 	}
 	
 	/**
@@ -123,15 +149,42 @@ public class FileUtil {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月5日 下午3:29:48
 	 * @param InputStream stream 文件输入流
+	 * @param String charset 文件编码
 	 * @return String 文件内容
 	 */
-	public static String readAsString(InputStream stream) throws Exception{  
+	public static String readAsString(InputStream stream, String charset) throws Exception{  
         byte[] bytes = ByteUtil.inputStreamToBytes(stream);
-        String charset = parseCharset(bytes);  
+        //String charset = parseCharset(bytes);  
         return new String(bytes, charset);
     }  
       
-      
+	/**
+	 * 向文件内写入字符串<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月26日 下午3:07:23
+	 * @param String path 文件存储路径
+	 * @param String content 文本内容
+	 */
+	public static File writeString(String path, String content) throws Exception{
+		Writer writer = null;
+		try{
+			File file = new File(path);
+			if(!file.exists()){
+				file.createNewFile();
+			}else{
+				file.delete();
+			}
+			writer = new FileWriter(file);
+			writer.write(content);
+			return file;
+		}finally{
+			if(writer != null){
+				writer.close();
+			}
+		}
+	}
+	
     /**
      * 获取文件的编码格式<br/>
      * <b>作者:</b>lvdeyang<br/>

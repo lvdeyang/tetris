@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -116,7 +117,12 @@ public class MediaVideoController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaVideoPO entity = mediaVideoService.addTask(user, name, null, null, remark, taskParam, folder);
+		List<String> tagList = new ArrayList<String>();
+		if (!tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		MediaVideoPO entity = mediaVideoService.addTask(user, name, tagList, null, remark, taskParam, folder);
 		
 		return new MediaVideoVO().set(entity);
 		
@@ -148,8 +154,21 @@ public class MediaVideoController {
 		UserVO user = userQuery.current();
 
 		MediaVideoPO video = mediaVideoDao.findOne(id);
+		if (video == null) {
+			throw new MediaVideoNotExistException(id);
+		}
 		
-		MediaVideoPO entity = mediaVideoService.editTask(user, video, name, null, null, remark);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaVideoPO entity = mediaVideoService.editTask(user, video, name, tagList, keyWordList, remark);
 		
 		return new MediaVideoVO().set(entity);
 		
@@ -232,8 +251,8 @@ public class MediaVideoController {
 		long endOffset = request.getLongValue("endOffset");
 		
 		//参数错误
-		if((beginOffset + endOffset) != blockSize){
-			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+		if((beginOffset + blockSize) != endOffset){
+			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
 		MediaVideoPO task = mediaVideoDao.findByUuid(uuid);
@@ -286,7 +305,13 @@ public class MediaVideoController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
-			mediaVideoDao.save(task);
+			
+			if(task.getReviewStatus() != null){
+				//开启审核流程--这里会保存媒资
+				mediaVideoService.startUploadProcess(task);
+			}else{
+				mediaVideoDao.save(task);
+			}
 		}
 		
         return new MediaVideoVO().set(task);
@@ -401,6 +426,8 @@ public class MediaVideoController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 上午9:07:53
 	 * @param @PathVariable Long id 媒资id
+	 * @return deleted List<MediaVideoVO> 删除的数据列表
+	 * @return processed List<MediaVideoVO> 待审核的数据列表
 	 */
 	@JsonBody
 	@ResponseBody
@@ -421,9 +448,7 @@ public class MediaVideoController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaVideoService.remove(new ArrayListWrapper<MediaVideoPO>().add(media).getList());
-		
-		return null;
+		return mediaVideoService.remove(new ArrayListWrapper<MediaVideoPO>().add(media).getList());
 	}
 	
 	/**

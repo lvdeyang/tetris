@@ -107,7 +107,7 @@
                                             <span v-if="data.type==='枚举'" class="icon-th-large" style="margin-right:1px; position:relative; left:1px;"></span>
                                             <span v-if="data.type==='数组'" class="icon-list-ol"></span>
                                             <span v-if="data.type==='复杂类型'" class="icon-list-ul"></span>
-                                            <span>{{data.name}}</span>
+                                            <span>{{data.name}}（{{data.primaryKey}}）</span>
                                         </span>
                                         <span>
                                             <!--  || (data.type==='数组' && (!data.sub || data.sub.length<=0)) -->
@@ -147,7 +147,7 @@
                                             <span v-if="data.type==='枚举'" class="icon-th-large" style="margin-right:1px; position:relative; left:1px;"></span>
                                             <span v-if="data.type==='数组'" class="icon-list-ol"></span>
                                             <span v-if="data.type==='复杂类型'" class="icon-list-ul"></span>
-                                            <span>{{data.name}}</span>
+                                            <span>{{data.name}}（{{data.primaryKey}}）</span>
                                         </span>
                                         <span>
                                             <!--  || (data.type==='数组' && (!data.sub || data.sub.length<=0)) -->

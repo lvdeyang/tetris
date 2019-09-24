@@ -10,8 +10,8 @@
     <template>
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
             <div style="margin-bottom:10px;">
-                <el-button type="primary" size="small" @click="dialog.addVideoStream.visible = true"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加视频流</el-button>
-                <el-button type="warning" size="small" @click="dialog.createFolder.visible = true"><span class="icon-folder-open" style="position:relative; right:1px;"></span>&nbsp;新建文件夹</el-button>
+                <el-button type="primary" size="small" @click="dialog.addVideoStream.visible = true" :disabled="!current.id"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加视频流</el-button>
+                <el-button type="warning" size="small" @click="dialog.createFolder.visible = true" :disabled="!current.id"><span class="icon-folder-open" style="position:relative; right:1px;"></span>&nbsp;新建文件夹</el-button>
                 <!--<el-button-group style="margin-left:10px;">
                     <el-button size="small">下载</el-button>
                     <el-button size="small">删除</el-button>
@@ -53,7 +53,7 @@
                                             <span class="icon-eye-open" style="font-size:18px; position:relative; top:1px;"></span>
                                         </el-button>
                                     </el-tooltip>-->
-                                    <el-tooltip class="item" effect="dark" content="删除" placement="bottom">
+                                    <el-tooltip v-if="scope.row.removeable && (scope.row.type==='FOLDER'||!scope.row.reviewStatus||scope.row.reviewStatus.indexOf('拒绝')>=0)" class="item" effect="dark" content="删除" placement="bottom">
                                         <el-button
                                                 size="small"
                                                 type="text"
@@ -62,22 +62,38 @@
                                             <span class="el-icon-delete" style="font-size:18px;"></span>
                                         </el-button>
                                     </el-tooltip>
-                                    <el-dropdown trigger="click" style="position:absolute; right:0; top:2px;" @visible-change="table.tooltip=!table.tooltip" @command="tableOptionsCommand($event, scope)">
+                                    <el-dropdown v-if="(scope.row.removeable&&scope.row.type==='FOLDER')||!scope.row.reviewStatus||scope.row.reviewStatus==='修改审核拒绝'||scope.row.reviewStatus==='删除审核拒绝'" trigger="click" style="position:absolute; right:0; top:2px;" @visible-change="table.tooltip=!table.tooltip" @command="tableOptionsCommand($event, scope)">
                                         <el-tooltip :disabled="table.tooltip" class="item" effect="dark" content="更多" placement="bottom">
                                             <el-button size="small" type="text" style="padding:0;"><span class="el-icon-more-outline" style="font-size:18px;"></span></el-button>
                                         </el-tooltip>
                                         <el-dropdown-menu slot="dropdown">
                                             <el-dropdown-item command="0" v-if="scope.row.type==='FOLDER'">重命名</el-dropdown-item>
                                             <el-dropdown-item command="1" v-if="scope.row.type==='VIDEO_STREAM'">编辑</el-dropdown-item>
-                                            <el-dropdown-item command="2">移动</el-dropdown-item>
-                                            <el-dropdown-item command="3">复制</el-dropdown-item>
+                                            <!--<el-dropdown-item command="2">移动</el-dropdown-item>
+                                            <el-dropdown-item command="3">复制</el-dropdown-item>-->
                                         </el-dropdown-menu>
                                     </el-dropdown>
                                 </span>
                             </template>
                         </el-table-column>
-                        <el-table-column prop="previewUrl" label="流地址" width="400"></el-table-column>
-                        <el-table-column prop="updateTime" label="创建时间" width="200"></el-table-column>
+                        <!--<el-table-column prop="previewUrl" label="流地址" width="400"></el-table-column>-->
+                        <el-table-column label="流地址" width="400">
+                            <template slot-scope="scope" v-if="scope.row.previewUrl && scope.row.previewUrl.length>0">
+                                <el-popover trigger="hover" placement="top">
+                                    <p v-for="(item,i) in scope.row.previewUrl" :key="item.id">地址{{ i+1 }}：{{ item }}</p>
+                                    <div slot="reference" class="name-wrapper">
+                                        <el-tag size="medium">共 {{ scope.row.previewUrl.length }} 条地址</el-tag>
+                                    </div>
+                                </el-popover>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="updateTime" label="创建时间" width="180"></el-table-column>
+                        <el-table-column label="审核状态" width="180">
+                            <template slot-scope="scope">
+                                <el-button v-if="scope.row.processInstanceId" type="text" style="padding:0;" @click="doProcessPreview(scope)">{{scope.row.reviewStatus}}</el-button>
+                                <span v-else>{{scope.row.reviewStatus}}</span>
+                            </template>
+                        </el-table-column>
                     </el-table>
                 </el-scrollbar>
             </div>
@@ -152,7 +168,12 @@
                         <el-input v-model="dialog.addVideoStream.name"></el-input>
                     </el-form-item>
                     <el-form-item label="流地址">
-                        <el-input v-model="dialog.addVideoStream.previewUrl"></el-input>
+                        <el-input v-for="i in dialog.addVideoStream.urlCount" v-model="dialog.addVideoStream.previewUrl[i-1]"  :style="(i==1?'margin-top:0':'margin-top:10px')">
+                            <template slot="append">
+                                <el-button class="icon-plus" circle @click="handleAddVideoStreamAddUrl" v-if="i==1"></el-button>
+                                <el-button class="icon-minus" circle @click="handleAddVideoStreamMinusUrl(i)" v-else></el-button>
+                            </template>
+                        </el-input>
                     </el-form-item>
                     <el-form-item label="贴标签">
                         <el-input v-model="dialog.addVideoStream.tags"></el-input>
@@ -186,7 +207,12 @@
                         <el-input v-model="dialog.editVideoStream.name"></el-input>
                     </el-form-item>
                     <el-form-item label="流地址">
-                        <el-input v-model="dialog.editVideoStream.previewUrl"></el-input>
+                        <el-input v-for="i in dialog.editVideoStream.urlCount" v-model="dialog.editVideoStream.previewUrl[i-1]"  :style="(i==1?'margin-top:0':'margin-top:10px')">
+                            <template slot="append">
+                                <el-button class="icon-plus" circle @click="handleEditVideoStreamAddUrl" v-if="i==1"></el-button>
+                                <el-button class="icon-minus" circle @click="handleEditVideoStreamMinusUrl(i)" v-else></el-button>
+                            </template>
+                        </el-input>
                     </el-form-item>
                     <el-form-item label="贴标签">
                         <el-input v-model="dialog.editVideoStream.tags"></el-input>

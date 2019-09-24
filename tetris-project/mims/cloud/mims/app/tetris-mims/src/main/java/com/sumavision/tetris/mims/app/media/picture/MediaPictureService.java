@@ -1,32 +1,45 @@
 package com.sumavision.tetris.mims.app.media.picture;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.print.attribute.standard.Media;
-
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.easy.process.core.ProcessQuery;
+import com.sumavision.tetris.easy.process.core.ProcessService;
+import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
-import com.sumavision.tetris.mims.app.material.MaterialFilePO;
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
 import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.store.StoreQuery;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
+import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 /**
@@ -52,7 +65,155 @@ public class MediaPictureService {
 	private FolderDAO folderDao;
 	
 	@Autowired
+	private FolderQuery folderQuery;
+	
+	@Autowired
 	private Path path;
+	
+	@Autowired
+	private MediaSettingsQuery mediaSettingsQuery;
+	
+	@Autowired
+	private MediaSettingsDAO mediaSettingsDao;
+	
+	@Autowired
+	private ProcessQuery processQuery;
+	
+	@Autowired
+	private ProcessService processService;
+	
+	@Autowired
+	private MimsServerPropsQuery serverPropsQuery;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	/**
+	 * 图片媒资上传审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午2:16:01
+	 * @param Long id 媒资id
+	 */
+	public void uploadReviewPassed(Long id) throws Exception{
+		MediaPicturePO media = mediaPictureDao.findOne(id);
+		media.setReviewStatus(null);
+		mediaPictureDao.save(media);
+	}
+	
+	/**
+	 * 图片媒资上传审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午2:16:01
+	 * @param Long id 媒资id
+	 */
+	public void uploadReviewRefuse(Long id) throws Exception{
+		MediaPicturePO media = mediaPictureDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_UPLOAD_REFUSE);
+		mediaPictureDao.save(media);
+	}
+	
+	/**
+	 * 图片媒资修改审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:01:51
+	 * @param Long id 图片媒资id
+	 * @param String name 媒资名称
+	 * @param String tags 贴标签，以“,”分隔
+	 * @param String keyWords 关键字，以“,”分隔
+	 * @param String remarks 备注
+	 */
+	public void editReviewPassed(
+			Long id,
+			String name,
+			String tags,
+			String keyWords,
+			String remarks) throws Exception{
+		MediaPicturePO media = mediaPictureDao.findOne(id);
+		media.setName(name);
+		media.setTags(tags);
+		media.setKeyWords(keyWords);
+		media.setRemarks(remarks);
+		media.setReviewStatus(null);
+		mediaPictureDao.save(media);
+	}
+	
+	/**
+	 * 图片媒资修改审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:19:16
+	 * @param Long id 图片媒资id
+	 */
+	public void editReviewRefuse(Long id) throws Exception{
+		MediaPicturePO media = mediaPictureDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_EDIT_REFUSE);
+		mediaPictureDao.save(media);
+	}
+	
+	/**
+	 * 图片媒资删除审核通过<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:01:51
+	 * @param Long id 图片媒资id
+	 */
+	public void deleteReviewPassed(Long id) throws Exception{
+		MediaPicturePO media = mediaPictureDao.findOne(id);
+		if(media != null){
+			List<MediaPicturePO> picturesCanBeDeleted = new ArrayListWrapper<MediaPicturePO>().add(media).getList();
+			
+			//生成待删除存储文件数据
+			List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaPictures(picturesCanBeDeleted);
+			
+			//删除素材文件元数据
+			mediaPictureDao.deleteInBatch(picturesCanBeDeleted);
+			
+			//保存待删除存储文件数据
+			preRemoveFileDao.save(preRemoveFiles);
+			
+			//调用flush使sql生效
+			preRemoveFileDao.flush();
+			
+			//将待删除存储文件数据押入存储文件删除队列
+			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
+			
+			Set<Long> pictureIds = new HashSet<Long>();
+			for(MediaPicturePO picture:picturesCanBeDeleted){
+				pictureIds.add(picture.getId());
+			}
+			
+			//删除临时文件
+			for(MediaPicturePO picture:picturesCanBeDeleted){
+				List<MediaPicturePO> results = mediaPictureDao.findByUploadTmpPathAndIdNotIn(picture.getUploadTmpPath(), pictureIds);
+				if(results==null || results.size()<=0){
+					File file = new File(new File(picture.getUploadTmpPath()).getParent());
+					File[] children = file.listFiles();
+					if(children != null){
+						for(File sub:children){
+							if(sub.exists()) sub.delete();
+						}
+					}
+					if(file.exists()) file.delete();
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 图片媒资删除审核拒绝<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午9:22:22
+	 * @param Long id 图片媒资id
+	 */
+	public void deleteReviewRefuse(Long id) throws Exception{
+		MediaPicturePO media = mediaPictureDao.findOne(id);
+		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
+		mediaPictureDao.save(media);
+	}
 	
 	/**
 	 * 图片媒资删除<br/>
@@ -69,43 +230,98 @@ public class MediaPictureService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月23日 下午3:43:03
 	 * @param Collection<MaterialFilePO> materials 素材列表
+	 * @return deleted List<MediaPictureVO> 删除列表
+	 * @return processed List<MediaPictureVO> 待审核列表
 	 */
-	public void remove(Collection<MediaPicturePO> pictures) throws Exception{
+	public Map<String, Object> remove(Collection<MediaPicturePO> pictures) throws Exception{
 		
-		//生成待删除存储文件数据
-		List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaPictures(pictures);
+		UserVO user = userQuery.current();
 		
-		//删除素材文件元数据
-		mediaPictureDao.deleteInBatch(pictures);
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_DELETE_PICTURE);
 		
-		//保存待删除存储文件数据
-		preRemoveFileDao.save(preRemoveFiles);
+		List<MediaPicturePO> picturesCanBeDeleted = new ArrayList<MediaPicturePO>();
+		List<MediaPicturePO> picturesNeedProcess = new ArrayList<MediaPicturePO>();
 		
-		//调用flush使sql生效
-		preRemoveFileDao.flush();
-		
-		//将待删除存储文件数据押入存储文件删除队列
-		storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
-		
-		Set<Long> pictureIds = new HashSet<Long>();
-		for(MediaPicturePO picture:pictures){
-			pictureIds.add(picture.getId());
+		if(needProcess){
+			for(MediaPicturePO picture:pictures){
+				if(picture.getAuthorId().equals(user.getId().toString()) && 
+						ReviewStatus.REVIEW_UPLOAD_REFUSE.equals(picture.getReviewStatus())){
+					picturesCanBeDeleted.add(picture);
+				}else{
+					picturesNeedProcess.add(picture);
+				}
+			}
+			if(picturesNeedProcess.size() > 0){
+				//开启审核流程
+				Long companyId = Long.valueOf(user.getGroupId());
+				MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_DELETE_PICTURE);
+				Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+				ProcessVO process = processQuery.findById(processId);
+				for(MediaPicturePO picture:picturesNeedProcess){
+					JSONObject variables = new JSONObject();
+					
+					//展示修改后参数
+					variables.put("name", picture.getName());
+					variables.put("tags", picture.getTags());
+					variables.put("keyWords", picture.getKeyWords());
+					variables.put("remark", picture.getRemarks());
+					variables.put("media", serverPropsQuery.generateHttpPreviewUrl(picture.getPreviewUrl()));
+					variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(picture.getFolderId()));
+					
+					//接口参数
+					variables.put("_pa16_id", picture.getId());
+					
+					String category = new StringBufferWrapper().append("删除图片：").append(picture.getName()).toString();
+					String business = new StringBufferWrapper().append("mediaPicture:").append(picture.getId()).toString();
+					String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+					picture.setProcessInstanceId(processInstanceId);
+					picture.setReviewStatus(ReviewStatus.REVIEW_DELETE_WAITING);
+				}
+				mediaPictureDao.save(picturesNeedProcess);
+			}
+		}else{
+			picturesCanBeDeleted.addAll(pictures);
 		}
 		
-		//删除临时文件
-		for(MediaPicturePO picture:pictures){
-			List<MediaPicturePO> results = mediaPictureDao.findByUploadTmpPathAndIdNotIn(picture.getUploadTmpPath(), pictureIds);
-			if(results==null || results.size()<=0){
-				File file = new File(new File(picture.getUploadTmpPath()).getParent());
-				File[] children = file.listFiles();
-				if(children != null){
-					for(File sub:children){
-						if(sub.exists()) sub.delete();
+		if(picturesCanBeDeleted.size() > 0){
+			//生成待删除存储文件数据
+			List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaPictures(picturesCanBeDeleted);
+			
+			//删除素材文件元数据
+			mediaPictureDao.deleteInBatch(picturesCanBeDeleted);
+			
+			//保存待删除存储文件数据
+			preRemoveFileDao.save(preRemoveFiles);
+			
+			//调用flush使sql生效
+			preRemoveFileDao.flush();
+			
+			//将待删除存储文件数据押入存储文件删除队列
+			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
+			
+			Set<Long> pictureIds = new HashSet<Long>();
+			for(MediaPicturePO picture:picturesCanBeDeleted){
+				pictureIds.add(picture.getId());
+			}
+			
+			//删除临时文件
+			for(MediaPicturePO picture:picturesCanBeDeleted){
+				List<MediaPicturePO> results = mediaPictureDao.findByUploadTmpPathAndIdNotIn(picture.getUploadTmpPath(), pictureIds);
+				if(results==null || results.size()<=0){
+					File file = new File(new File(picture.getUploadTmpPath()).getParent());
+					File[] children = file.listFiles();
+					if(children != null){
+						for(File sub:children){
+							if(sub.exists()) sub.delete();
+						}
 					}
+					if(file.exists()) file.delete();
 				}
-				if(file.exists()) file.delete();
 			}
 		}
+		return new HashMapWrapper<String, Object>().put("deleted", MediaPictureVO.getConverter(MediaPictureVO.class).convert(picturesCanBeDeleted, MediaPictureVO.class))
+												   .put("processed", MediaPictureVO.getConverter(MediaPictureVO.class).convert(picturesNeedProcess, MediaPictureVO.class))
+												   .getMap();
 	}
 	
 	/**
@@ -130,6 +346,11 @@ public class MediaPictureService {
 			String remark, 
 			MediaPictureTaskVO task, 
 			FolderPO folder) throws Exception{
+		
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_PICTURE);
+		String transTags = (tags == null || tags.isEmpty()) ? "" : StringUtils.join(tags.toArray(), MediaPicturePO.SEPARATOR_TAG);
+		String transKeyWords = (keyWords == null || keyWords.isEmpty()) ? "" : StringUtils.join(keyWords.toArray(), MediaPicturePO.SEPARATOR_KEYWORDS);
+		
 		String separator = File.separator;
 		//临时路径采取/base/companyName/folderuuid/fileNamePrefix/version
 		String webappPath = path.webappPath();
@@ -152,8 +373,8 @@ public class MediaPictureService {
 		MediaPicturePO entity = new MediaPicturePO();
 		entity.setLastModified(task.getLastModified());
 		entity.setName(name);
-		entity.setTags("");
-		entity.setKeyWords("");
+		entity.setTags(transTags);
+		entity.setKeyWords(transKeyWords);
 		entity.setRemarks(remark);
 		entity.setAuthorId(user.getUuid());
 		entity.setAuthorName(user.getNickname());
@@ -180,6 +401,7 @@ public class MediaPictureService {
 													  .append(task.getName())
 													  .toString());
 		entity.setUpdateTime(date);
+		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
 		
 		mediaPictureDao.save(entity);
 		
@@ -205,10 +427,49 @@ public class MediaPictureService {
 			List<String> tags, 
 			List<String> keyWords, 
 			String remark) throws Exception{
-		
-		picture.setName(name);
-		picture.setRemarks(remark);
-		
+		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_EDIT_PICTURE);
+		String transTags = tags==null?"":StringUtils.join(tags.toArray(), MediaPicturePO.SEPARATOR_TAG);
+		String transKeyWords = keyWords==null?"":StringUtils.join(keyWords.toArray(), MediaPicturePO.SEPARATOR_KEYWORDS);
+		if(needProcess){
+			//开启审核流程
+			Long companyId = Long.valueOf(user.getGroupId());
+			MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_EDIT_PICTURE);
+			Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+			ProcessVO process = processQuery.findById(processId);
+			JSONObject variables = new JSONObject();
+			
+			//展示修改后参数
+			variables.put("name", name);
+			variables.put("tags", transTags);
+			variables.put("keyWords", transKeyWords);
+			variables.put("remark", remark);
+			
+			//展示修改前参数
+			variables.put("oldName", picture.getName());
+			variables.put("oldTags", picture.getTags());
+			variables.put("oldKeyWords", picture.getKeyWords());
+			variables.put("oldRemark", picture.getRemarks());
+			variables.put("oldMedia", serverPropsQuery.generateHttpPreviewUrl(picture.getPreviewUrl()));
+			variables.put("oldUploadPath", folderQuery.generateFolderBreadCrumb(picture.getFolderId()));
+			
+			//接口参数
+			variables.put("_pa14_id", picture.getId());
+			variables.put("_pa14_name", name);
+			variables.put("_pa14_tags", transTags);
+			variables.put("_pa14_keyWords", transKeyWords);
+			variables.put("_pa14_remarks", remark);
+			
+			String category = new StringBufferWrapper().append("修改图片：").append(picture.getName()).toString();
+			String business = new StringBufferWrapper().append("mediaPicture:").append(picture.getId()).toString();
+			String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+			picture.setProcessInstanceId(processInstanceId);
+			picture.setReviewStatus(ReviewStatus.REVIEW_EDIT_WAITING);
+		}else{
+			picture.setName(name);
+			picture.setRemarks(remark);
+			picture.setTags(transTags);
+			picture.setKeyWords(transKeyWords);
+		}
 		mediaPictureDao.save(picture);
 		return picture;
 	}

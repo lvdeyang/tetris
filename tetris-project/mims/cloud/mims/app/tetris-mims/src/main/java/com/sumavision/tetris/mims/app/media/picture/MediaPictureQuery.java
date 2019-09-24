@@ -8,14 +8,17 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderBreadCrumbVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
-import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -33,9 +36,6 @@ public class MediaPictureQuery {
 	private MediaPictureDAO mediaPictureDao;
 	
 	@Autowired
-	private MediaPictureQuery mediaPictureQuery;
-	
-	@Autowired
 	private FolderDAO folderDao;
 	
 	@Autowired
@@ -43,9 +43,13 @@ public class MediaPictureQuery {
 	
 	@Autowired
 	private UserQuery userQuery;
-	
+
 	/**
 	 * 根据文件夹id查询文件夹以及图片媒资<br/>
+	 * <p>
+	 * 	-如果folderId是0：查询有权限的根目录，只返回目录列表
+	 * 	-如果folderId不是0：查询当前文件夹下有权限的目录以及目录下所有的媒资
+	 * </p>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年2月26日 下午5:14:37
@@ -58,61 +62,76 @@ public class MediaPictureQuery {
 		
 		UserVO user = userQuery.current();
 		
-		//TODO 权限校验
+		List<MediaPictureVO> rows = null;
 		
-		if(folderId == null){
-			FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_PICTURE.toString());
-			folderId = folder.getId();
+		//处理根面包屑
+		FolderBreadCrumbVO breadCrumb = new FolderBreadCrumbVO().setId(0l)
+																.setUuid("0")
+																.setName("根目录")
+																.setType(FolderType.COMPANY_PICTURE.toString());
+		
+		if(user.getBusinessRoles() == null){
+			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}
 		
-		FolderPO current = folderDao.findOne(folderId);
-		
-		if(current == null) throw new FolderNotExistException(folderId);
-		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), current.getId())){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
-		
-		//获取当前文件夹的所有父目录
-		List<FolderPO> parentFolders = folderQuery.getParentFolders(current);
-		
-		List<FolderPO> filteredParentFolders = new ArrayList<FolderPO>();
-		if(parentFolders==null || parentFolders.size()<=0){
-			parentFolders = new ArrayList<FolderPO>();
-		}
-		for(FolderPO parentFolder:parentFolders){
-			if(!FolderType.COMPANY.equals(parentFolder.getType())){
-				filteredParentFolders.add(parentFolder);
+		if(folderId.equals(0l)){
+			List<FolderPO> folders = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_PICTURE.toString());
+			if(folders==null || folders.size()<=0){
+				return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 			}
-		}
-		filteredParentFolders.add(current);
-		
-		//生成面包屑数据
-		FolderBreadCrumbVO folderBreadCrumb = folderQuery.generateFolderBreadCrumb(filteredParentFolders);
-		
-		List<FolderPO> folders = folderDao.findPermissionCompanyFoldersByParentId(user.getUuid(), folderId, FolderType.COMPANY_PICTURE.toString());
-		
-		List<MediaPicturePO> pictures = mediaPictureQuery.findCompleteByFolderId(current.getId());
-		
-		List<MediaPictureVO> medias = new ArrayList<MediaPictureVO>();
-		if(folders!=null && folders.size()>0){
-			for(FolderPO folder:folders){
-				medias.add(new MediaPictureVO().set(folder));
+			List<FolderPO> rootFolders = folderQuery.findRoots(folders);
+			rows = new ArrayList<MediaPictureVO>();
+			for(FolderPO folder:rootFolders){
+				MediaPictureVO row = new MediaPictureVO().set(folder);
+				rows.add(row);
 			}
-		}
-		if(pictures!=null && pictures.size()>0){
-			for(MediaPicturePO picture:pictures){
-				medias.add(new MediaPictureVO().set(picture));
+			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
+		}else{
+			FolderPO current = folderDao.findOne(folderId);
+			if(current == null) throw new FolderNotExistException(folderId);
+			
+			rows = new ArrayList<MediaPictureVO>();
+			
+			//子文件夹
+			List<FolderPO> folders = folderQuery.findPermissionCompanyFolderByParentIdOrderByNameAsc(current.getId());
+			if(folders!=null && folders.size()>0){
+				for(FolderPO folder:folders){
+					MediaPictureVO row = new MediaPictureVO().set(folder);
+					rows.add(row);
+				}
 			}
+			
+			//文件夹内图片
+			List<MediaPicturePO> pictures = mediaPictureDao.findByFolderIdInAndUploadStatusAndReviewStatusNotInOrAuthorId(
+					new ArrayListWrapper<Long>().add(current.getId()).getList(), 
+					UploadStatus.COMPLETE.toString(), 
+					new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList(),
+					user.getId().toString());
+			if(pictures!=null && pictures.size()>0){
+				for(MediaPicturePO picture:pictures){
+					rows.add(new MediaPictureVO().set(picture));
+				}
+			}
+			
+			FolderBreadCrumbVO subBreadCrumb = null;
+			if(current.getParentPath() == null){
+				subBreadCrumb = folderQuery.generateFolderBreadCrumb(new ArrayListWrapper<FolderPO>().add(current).getList());
+			}else{
+				List<Long> parentIds = JSON.parseArray(new StringBufferWrapper().append("[")
+																			    .append(current.getParentPath().substring(1, current.getParentPath().length()).replaceAll("/", ","))
+																			    .append("]")
+																			    .toString(), Long.class);
+				List<FolderPO> breadCrumbFolders = folderQuery.findPermissionCompanyFolderByIdIn(parentIds, FolderType.COMPANY_PICTURE.toString());
+				if(breadCrumbFolders == null){
+					breadCrumbFolders = new ArrayList<FolderPO>();
+				}
+				breadCrumbFolders.add(current);
+				subBreadCrumb = folderQuery.generateFolderBreadCrumb(breadCrumbFolders);
+			}
+			breadCrumb.setNext(subBreadCrumb);
+			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}
-		
-		Map<String, Object> result = new HashMapWrapper<String, Object>().put("rows", medias)
-																  		 .put("breadCrumb", folderBreadCrumb)
-																  		 .getMap();
-		
-		return result;
 	}
-	
 	
 	/**
 	 * 查询文件夹下上传完成的图片媒资<br/>

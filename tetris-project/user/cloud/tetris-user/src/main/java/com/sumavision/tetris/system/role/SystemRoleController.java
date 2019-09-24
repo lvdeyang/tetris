@@ -91,6 +91,7 @@ public class SystemRoleController {
 		role.setName(name);
 		role.setUpdateTime(new Date());
 		role.setSystemRoleGroupId(group.getId());
+		role.setType(SystemRoleType.SYSTEM);
 		systemRoleDao.save(role);
 		
 		return new SystemRoleVO().set(role);

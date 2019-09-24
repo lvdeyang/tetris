@@ -162,7 +162,7 @@
                             <!-- 绑定用户 -->
                             <div class="prop-user-binding">
                                 <div class="prop-binding-action">
-                                    <button class="el-button el-button--default el-button--mini" style="padding:3px 6px;"><span class="feather-icon-plus"></span>绑定用户</button>
+                                    <button title="将当前任务分配给指定的用户" class="el-button el-button--default el-button--mini prop-user-binding-add" style="padding:3px 6px;"><span class="feather-icon-plus"></span>绑定用户</button>
                                 </div>
                                 <div class="prop-binding-content">
                                     <table>
@@ -173,10 +173,10 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
+                                            <!--<tr>
                                                 <td></td>
                                                 <td><button class="el-button el-button--text prop-user-binding-delete"><span class="el-icon-delete"></span></button></td>
-                                            </tr>
+                                            </tr>-->
                                         </tbody>
                                     </table>
                                 </div>
@@ -184,7 +184,7 @@
                             <!-- 绑定角色 -->
                             <div class="prop-role-binding">
                                 <div class="prop-binding-action">
-                                    <button class="el-button el-button--default el-button--mini" style="padding:3px 6px;"><span class="feather-icon-plus"></span>绑定角色</button>
+                                    <button title="将当前任务分配给指定的角色" class="el-button el-button--default el-button--mini prop-role-binding-add" style="padding:3px 6px;"><span class="feather-icon-plus"></span>绑定角色</button>
                                 </div>
                                 <div class="prop-binding-content">
                                     <table>
@@ -195,10 +195,62 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
+                                            <!--<tr>
                                                 <td></td>
                                                 <td><button class="el-button el-button--text prop-role-binding-delete"><span class="el-icon-delete"></span></button></td>
-                                            </tr>
+                                            </tr>-->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- 变量展示 -->
+                            <div class="prop-variable-show-binding">
+                                <div class="prop-binding-action">
+                                    <button title="绑定的变量将作为用户审核页面的展示项" class="el-button el-button--default el-button--mini prop-variable-show-binding-add" style="padding:3px 6px;"><span class="feather-icon-plus"></span>变量展示</button>
+                                </div>
+                                <div class="prop-binding-content">
+                                    <table>
+                                        <thead>
+                                        <tr>
+                                            <th>变量</th>
+                                            <th style="width:60px;">类型</th>
+                                            <th style="width:60px;"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <!--<tr>
+                                            <td></td>
+                                            <td>
+                                                <button class="el-button el-button&#45;&#45;text prop-variable-show-binding-edit"><span class="el-icon-edit"></span></button>
+                                                <button class="el-button el-button--text prop-variable-show-binding-delete"><span class="el-icon-delete"></span></button>
+                                            </td>
+                                        </tr>-->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- 变量设置 -->
+                            <div class="prop-variable-set-binding">
+                                <div class="prop-binding-action">
+                                    <button title="绑定的变量将作为用户审核页面的设置项" class="el-button el-button--default el-button--mini prop-variable-set-binding-add" style="padding:3px 6px;"><span class="feather-icon-plus"></span>变量设置</button>
+                                </div>
+                                <div class="prop-binding-content">
+                                    <table>
+                                        <thead>
+                                        <tr>
+                                            <th>变量</th>
+                                            <th style="width:60px;">类型</th>
+                                            <th style="width:60px;"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <!--<tr>
+                                            <td></td>
+                                            <td>
+                                                <button class="el-button el-button&#45;&#45;text prop-variable-set-binding-edit"><span class="el-icon-edit"></span></button>
+                                                <button class="el-button el-button&#45;&#45;text prop-variable-set-binding-delete"><span class="el-icon-delete"></span></button>
+                                            </td>
+                                        </tr>-->
                                         </tbody>
                                     </table>
                                 </div>

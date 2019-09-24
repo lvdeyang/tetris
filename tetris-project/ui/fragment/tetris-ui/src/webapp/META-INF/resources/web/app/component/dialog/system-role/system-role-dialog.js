@@ -34,7 +34,6 @@ define([
             }
         },
         methods:{
-            //�Ի���ر�ʱ��ʼ������
             closed:function(){
                 var self = this;
                 self.tree.data.splice(0, self.tree.data.length);
@@ -43,7 +42,6 @@ define([
             loadNode:function(node, resolve){
 
             },
-            //��Ⱦ����
             render:function(h, scope){
                 var data = scope.data;
                 var icon = 'feather-icon-user';
@@ -53,7 +51,6 @@ define([
                     h('span', null, data.name)
                 ]);
             },
-            //���ļ��жԻ���
             open:function(except){
                 var self = this;
                 ajax.post('/system/role/feign/list/with/group/by/except/ids', {
@@ -67,23 +64,20 @@ define([
                     self.dialog.visible = true;
                 });
             },
-            //��������
             setBuffer:function(data){
                 var self = this;
                 self.__buffer = data;
             },
-            //��ȡ��������
             getBuffer:function(){
                 var self = this;
                 return self.__buffer;
             },
-            //�ļ���ѡ��
             handleOkButton:function(){
                 var self = this;
                 var currentNodes = self.tree.checked;
                 if(!currentNodes){
                     self.$message({
-                        message: '����û��ѡ���ɫ',
+                        message: '您没有选择任何数据！',
                         type: 'warning'
                     });
                 }

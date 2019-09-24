@@ -10,7 +10,7 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 	private Long parentId;
 	private String parentPath;
 	private Long channelId;
-	private Long mimsId;
+	private String mimsUuid;
 	private Long index;
 	private String previewUrl;
 	private Boolean checked = true;
@@ -22,7 +22,7 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 		.setUuid(entity.getUuid())
 		.setName(entity.getName())
 		.setTime(entity.getTime())
-		.setMimsId(entity.getMimsId())
+		.setMimsUuid(entity.getMimsUuid())
 		.setParentId(entity.getParentId())
 		.setParentPath(entity.getParentPath())
 		.setChannelId(entity.getChannelId())
@@ -76,12 +76,12 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 		return this;
 	}
 
-	public Long getMimsId() {
-		return mimsId;
+	public String getMimsUuid() {
+		return mimsUuid;
 	}
 
-	public CsResourceVO setMimsId(Long mimsId) {
-		this.mimsId = mimsId;
+	public CsResourceVO setMimsUuid(String mimsUuid) {
+		this.mimsUuid = mimsUuid;
 		return this;
 	}
 	

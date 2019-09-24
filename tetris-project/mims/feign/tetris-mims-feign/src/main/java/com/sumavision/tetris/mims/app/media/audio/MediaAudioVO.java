@@ -2,6 +2,8 @@ package com.sumavision.tetris.mims.app.media.audio;
 
 import java.util.List;
 
+import com.sumavision.tetris.mims.app.media.StoreType;
+
 public class MediaAudioVO {
 
 	private String name;
@@ -15,6 +17,10 @@ public class MediaAudioVO {
 	private String version;
 	
 	private String remarks;
+	
+	private StoreType storeType;
+	
+	private String uploadTmpPath;
 	
 	private List<String> tags;
 	
@@ -85,6 +91,24 @@ public class MediaAudioVO {
 
 	public MediaAudioVO setRemarks(String remarks) {
 		this.remarks = remarks;
+		return this;
+	}
+
+	public StoreType getStoreType() {
+		return storeType;
+	}
+
+	public MediaAudioVO setStoreType(StoreType storeType) {
+		this.storeType = storeType;
+		return this;
+	}
+
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaAudioVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
 		return this;
 	}
 
@@ -159,7 +183,7 @@ public class MediaAudioVO {
 		this.previewUrl = previewUrl;
 		return this;
 	}
-	
+
 	public List<MediaAudioVO> getChildren() {
 		return children;
 	}

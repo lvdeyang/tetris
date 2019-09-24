@@ -1,20 +1,19 @@
 <div class="frame-wrapper">
+
     <el-container style="width:100%; height:100%">
         <el-aside width="auto; height:100%;">
             <el-scrollbar style="height:100%;">
                 <el-menu :default-active="active"
                          class="aside-menu"
                          :collapse="isCollapsed"
-                         background-color="#37404f"
-                         text-color="#fff"
-                         active-text-color="#ffd04b">
+                         >
                     <div class="platform-logo-wrapper">
                         <div class="platform-logo">
-                            <img :src="logo.img"/>
+                            <img :src="logo.logoUrl" :style="logo.logoStyle"/>
                         </div>
-                        <div class="platform-logo collapse">{{logo.collapsed0}}</div>
-                        <div class="platform-title">{{logo.title}}</div>
-                        <div class="platform-title collapse">{{logo.collapsed1}}</div>
+                        <div class="platform-logo collapse">{{logo.logoShortName}}</div>
+                        <div class="platform-title">{{logo.platformFullName}}</div>
+                        <div class="platform-title collapse">{{logo.platformShortName}}</div>
                     </div>
 
                     <!-- 侧边栏导航 -->
@@ -66,7 +65,7 @@
                         <span class="tag error" v-if="numberOfMessage>0">{{numberOfMessage}}</span>
                     </el-menu-item>
                     <el-submenu class="no-border-bottom-style right" index="2">
-                        <template slot="title"><span v-if="!user.icon" class="icon-user" style="padding:0 5px; margin-right:5px;"></span>{{user.name}}</template>
+                        <template slot="title"><span v-if="!user.icon" class="icon-user" style="padding:0 5px; margin-right:5px;"></span>{{user.nickname}}</template>
                         <el-menu-item index="2-1">个人中心</el-menu-item>
                         <el-menu-item index="2-2">注销登录</el-menu-item>
                     </el-submenu>
@@ -95,8 +94,10 @@
             <div class="frame-footer">
                 <div class="frame-footer-wrapper">
                     <div class="copyright">
+                        <!--<strong>Copyright © {{footer.company.time}}</strong>
+                        &nbsp;版权归<a :href="footer.company.link" class="company" target="_blank">{{footer.company.name}}</a>所有.-->
                         <strong>Copyright © {{footer.company.time}}</strong>
-                        &nbsp;版权归<a :href="footer.company.link" class="company" target="_blank">{{footer.company.name}}</a>所有.
+                        &nbsp;版权归<a :href="user.groupHomeLink" class="company" target="_blank">{{user.groupName}}</a>所有.
                     </div>
                     <div class="minimize">
                         <el-breadcrumb separator="" style="float:right;">

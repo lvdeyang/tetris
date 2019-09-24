@@ -234,7 +234,7 @@ define([
                     if(existRoles && existRoles.length>0){
                         var existRoleIds = [];
                         for(var i=0; i<existRoles.length; i++){
-                            existRoleIds.push(existRoles[i].id);
+                            existRoleIds.push(existRoles[i].roleId);
                         }
                         self.$refs.systemRoleDialog.open(existRoleIds);
                     }else{

@@ -30,6 +30,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	
 	private String type;
 	
+	private boolean removeable;
+	
 	private String icon;
 	
 	private String style;
@@ -39,6 +41,10 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	private Integer progress;
 	
 	private String previewUrl;
+	
+	private String reviewStatus;
+	
+	private String processInstanceId;
 	
 	public String getName() {
 		return name;
@@ -121,6 +127,15 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return this;
 	}
 
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaPictureVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
+		return this;
+	}
+
 	public String getIcon() {
 		return icon;
 	}
@@ -166,6 +181,24 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return this;
 	}
 
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public MediaPictureVO setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+		return this;
+	}
+
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public MediaPictureVO setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
 	@Override
 	public MediaPictureVO set(MediaPicturePO entity) throws Exception {
 		ServerProps props = SpringContext.getBean(ServerProps.class);
@@ -179,11 +212,14 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaPictureItemType.PICTURE.toString())
+			.setRemoveable(true)
 			.setIcon(MediaPictureItemType.PICTURE.getIcon())
 			.setStyle(MediaPictureItemType.PICTURE.getStyle()[0])
 			.setMimetype(entity.getMimetype())
 			.setProgress(0)
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/").append(entity.getPreviewUrl()).toString());
+			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
+			.setProcessInstanceId(entity.getProcessInstanceId());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaPicturePO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaPicturePO.SEPARATOR_KEYWORDS)));	 
 		return this;
@@ -200,8 +236,10 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaPictureItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaPictureItemType.FOLDER.getIcon())
-			.setStyle(MediaPictureItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaPictureItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

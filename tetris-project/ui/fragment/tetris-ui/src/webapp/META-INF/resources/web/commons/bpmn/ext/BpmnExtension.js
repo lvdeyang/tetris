@@ -868,7 +868,7 @@ define([
                                 'bpmn:ServiceTask',
                                 groupEntry.name,
                                 'feather-icon-settings',
-                                '创建' + service.name,
+                                service.name,
                                 null,
                                 service
                             );
@@ -1065,6 +1065,7 @@ define([
         var container = this._container = options.container;
         var entries = this._entries = options.entries;
         var xml = this._xml = options.xml || emptyXml;
+        var userTaskBindVariables = this._userTaskBindVariables = options.userTaskBindVariables || {show:[], set:[]};
         var nodeType = this._nodeType = options.nodeType;
         var onReady = this._onReady = options.onReady;
         var onSave = this._onSave = options.onSave;
@@ -1072,9 +1073,13 @@ define([
         var onDeleteVariable = this._onDeleteVariable = options.onDeleteVariable;
         var queryVariables = this._queryVariables = options.queryVariables;
         var queryUsers = this._queryUsers = options.queryUsers;
-        var totalUsers = this._totalUsers = options.totalUsers;
+        var onBindUserClick = this._onBindUserClick = options.onBindUserClick;
         var queryRoles = this._queryRoles = options.queryRoles;
-        var totalRoles = this._totalRoles = options.totalRoles;
+        var onBindRoleClick = this._onBindRoleClick = options.onBindRoleClick;
+        var onBindVariableClick = this._onBindVariableClick = options.onBindVariableClick;
+        var onEditVariableClick = this._onEditVariableClick = options.onEditVariableClick;
+        var isViewer = this._isViewer = options.isViewer;
+        var completeTaskIds = this._completeTaskIds = options.completeTaskIds;
 
         var $container = $(container);
         var id = container + '-' + new Date().getTime();
@@ -1142,6 +1147,14 @@ define([
             elementRegistry.forEach(function(element){
                 if(!element.businessObject) return;
                 if(!element.businessObject.$attrs) element.businessObject.$attrs = {};
+                if(element.businessObject.candidateUsers){
+                    element.businessObject.$attrs['activiti:candidateUsers'] = element.businessObject.candidateUsers;
+                    delete element.businessObject.candidateUsers;
+                }
+                if(element.businessObject.candidateGroups){
+                    element.businessObject.$attrs['activiti:candidateGroups'] = element.businessObject.candidateGroups;
+                    delete element.businessObject.candidateGroups;
+                }
                 if(element.businessObject.removeable){
                     element.businessObject.$attrs['extension:removeable'] = element.businessObject.removeable;
                     delete element.businessObject.removeable;
@@ -1199,6 +1212,46 @@ define([
             if(typeof onReady === 'function'){
                 onReady.apply(self, []);
             }
+            if(isViewer === true){
+                $('.bpmn-editor-wrapper input').attr('readonly', 'true');
+                $('.bpmn-editor-wrapper textarea').attr('readonly', 'true');
+            }
+
+            if(isViewer===true && completeTaskIds && completeTaskIds.length>0){
+                var connectionElements = [];
+                var modeling = self.get('modeling');
+                elementRegistry.forEach(function(element){
+                    if(element.type === 'bpmn:SequenceFlow') connectionElements.push(element);
+                    var finded = false;
+                    for(var i=0; i<completeTaskIds.length; i++){
+                        if(completeTaskIds[i] === element.id){
+                            finded = true;
+                            break;
+                        }
+                    }
+                    if(finded){
+                        modeling.setColor([element], {
+                            stroke:'#67c23a',
+                            fill:'#f0f9eb'
+                        });
+                    }
+                });
+                for(var i=0; i<completeTaskIds.length; i++){
+                    var sourceRef = completeTaskIds[i];
+                    for(var j=0; j<completeTaskIds.length; j++){
+                        var targetRef = completeTaskIds[j];
+                        if(sourceRef === targetRef) continue;
+                        for(var k=0; k<connectionElements.length; k++){
+                            var connectionElement = connectionElements[k];
+                            if(sourceRef===connectionElement.source.id && targetRef===connectionElement.target.id){
+                                modeling.setColor([connectionElement], {
+                                    stroke:'#67c23a'
+                                });
+                            }
+                        }
+                    }
+                }
+            }
         });
 
         var eventBus = bpmnInstance.get('eventBus');
@@ -1224,7 +1277,7 @@ define([
             var element = e.element;
             var businessObject = element.businessObject;
             if(is(businessObject, 'bpmn:UserTask')){
-                showUserTaskProps.apply($container[0], [element]);
+                showUserTaskProps.apply($container[0], [element, queryUsers, queryRoles, userTaskBindVariables]);
             }else if(is(businessObject, 'bpmn:ServiceTask')){
                 var serviceType = businessObject.$attrs['extension:type'];
                 if(serviceType === 'REMOTE_SYNCHRONOUS'){
@@ -1265,7 +1318,7 @@ define([
             };
             self.export(function(xml){
                 if(typeof onSave === 'function'){
-                    onSave.apply(self, [xml, endLoading]);
+                    onSave.apply(self, [xml, userTaskBindVariables, endLoading]);
                 }
             });
         });
@@ -1383,7 +1436,7 @@ define([
             for(var i=0; i<$trs.length; i++){
                 var $tr = $($trs[i]);
                 if($tr.is('.highlight')){
-                    primaryKey = $tr.data('value');
+                    primaryKey = '__variableContext__.'+$tr.data('value');
                     break;
                 }
             }
@@ -1479,6 +1532,214 @@ define([
             if(typeof onDeleteVariable === 'function') onDeleteVariable(rowId, done);
         });
 
+        //当前选中用户节点id
+        var getCurrentUserTaskElementId = function(){
+            return $container.find('.prop-scope-user-task .node-id').val();
+        };
+
+        //当前选中用户节点
+        var getCurrentUserTaskElement = function(){
+            var nodeId = $container.find('.prop-scope-user-task .node-id').val();
+            var elementRegistry = self.get('elementRegistry');
+            var currentElement = null;
+            elementRegistry.forEach(function(element){
+                if(element.id === nodeId){
+                    currentElement = element;
+                    return false;
+                }
+            });
+            return currentElement;
+        };
+
+        $container.on('click.bpmnJS.ext.prop.panel.user.add', '.prop-user-binding-add', function(){
+            var element = getCurrentUserTaskElement();
+            var bindUsers = element.businessObject.$attrs['activiti:candidateUsers'];
+            onBindUserClick(function(users){
+                var $userContainer = $container.find('.prop-user-binding tbody');
+                if(users && users.length>0){
+                    var userIds = [];
+                    if(element.businessObject.$attrs['activiti:candidateUsers']){
+                        userIds = element.businessObject.$attrs['activiti:candidateUsers'].split(',');
+                    }
+                    for(var i=0; i<users.length; i++){
+                        var $user = $('<tr><td>'+users[i].nickname+'</td><td><button class="el-button el-button--text prop-user-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                        $user.data('bind', users[i]);
+                        $userContainer.append($user);
+                        userIds.push(users[i].id);
+                    }
+                    element.businessObject.$attrs['activiti:candidateUsers'] = userIds.join(',');
+                }
+            }, bindUsers?bindUsers.split(','):null);
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.user.delete', '.prop-user-binding-delete', function(){
+            var $button = $(this);
+            var $user = $button.closest('tr');
+            var user = $user.data('bind');
+            var element = getCurrentUserTaskElement();
+            var bindUsers = element.businessObject.$attrs['activiti:candidateUsers'].split(',');
+            for(var i=0; i<bindUsers.length; i++){
+                if(bindUsers[i] == user.id){
+                    bindUsers.splice(i, 1);
+                    break;
+                }
+            }
+            if(bindUsers.length > 0){
+                element.businessObject.$attrs['activiti:candidateUsers'] = bindUsers.join(',');
+            }else{
+                delete element.businessObject.$attrs['activiti:candidateUsers'];
+            }
+            $user.remove();
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.role.add', '.prop-role-binding-add', function(){
+            var element = getCurrentUserTaskElement();
+            var bindRoles = element.businessObject.$attrs['activiti:candidateGroups'];
+            onBindRoleClick(function(roles){
+                var $roleContainer = $container.find('.prop-role-binding tbody');
+                if(roles && roles.length){
+                    var roleIds = [];
+                    if(element.businessObject.$attrs['activiti:candidateGroups']){
+                        roleIds = element.businessObject.$attrs['activiti:candidateGroups'].split(',');
+                    }
+                    for(var i=0; i<roles.length; i++){
+                        var $role = $('<tr><td>'+roles[i].name+'</td><td><button class="el-button el-button--text prop-role-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                        $role.data('bind', roles[i]);
+                        $roleContainer.append($role);
+                        roleIds.push(roles[i].id);
+                    }
+                    element.businessObject.$attrs['activiti:candidateGroups'] = roleIds.join(',');
+                }
+
+            }, bindRoles?bindRoles.split(','):null);
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.role.delete', '.prop-role-binding-delete', function(){
+            var $button = $(this);
+            var $role = $button.closest('tr');
+            var role = $role.data('bind');
+            var element = getCurrentUserTaskElement();
+            var bindRoles = element.businessObject.$attrs['activiti:candidateGroups'].split(',');
+            for(var i=0; i<bindRoles.length; i++){
+                if(bindRoles[i] == role.id){
+                    bindRoles.splice(i, 1);
+                    break;
+                }
+            }
+            if(bindRoles.length > 0){
+                element.businessObject.$attrs['activiti:candidateGroups'] = bindRoles.join(',');
+            }else{
+                delete element.businessObject.$attrs['activiti:candidateGroups'];
+            }
+            $role.remove();
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.variable.show.add', '.prop-variable-show-binding-add', function(){
+            var nodeId = getCurrentUserTaskElementId();
+            var showVariables = userTaskBindVariables.show;
+            var exceptVariableIds = [];
+            if(showVariables && showVariables.length>0){
+                for(var i=0; i<showVariables.length; i++){
+                    if(showVariables[i].taskId == nodeId){
+                        exceptVariableIds.push(showVariables[i].id);
+                    }
+                }
+            }
+            onBindVariableClick(function(variables){
+                var $variablesShowContainer = $container.find('.prop-variable-show-binding tbody');
+                userTaskBindVariables.show = userTaskBindVariables.show||[];
+                for(var i=0; i<variables.length; i++){
+                    var variableShow = {
+                        taskId:nodeId,
+                        id:variables[i].id,
+                        key:variables[i].primaryKey,
+                        name:variables[i].name
+                    };
+                    userTaskBindVariables.show.push(variableShow);
+                    var $variable =$('<tr><td>'+variableShow.name+'</td><td></td><td><button class="el-button el-button--text prop-variable-show-binding-edit"><span class="el-icon-edit"></span></button><button class="el-button el-button--text prop-variable-show-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                    $variable.data('bind', variableShow);
+                    $variablesShowContainer.append($variable);
+                }
+            }, exceptVariableIds);
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.variable.show.edit', '.prop-variable-show-binding-edit', function(){
+            var $button = $(this);
+            var $variable = $button.closest('tr');
+            var variableShow = $variable.data('bind');
+            onEditVariableClick(function(variable){
+                $($variable.find('td')[1]).text(variable.typeName);
+                $variable.data('bind', variable);
+            }, variableShow);
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.variable.show.delete', '.prop-variable-show-binding-delete', function(){
+            var $button = $(this);
+            var $variable = $button.closest('tr');
+            var variableShow = $variable.data('bind');
+            var showVariables = userTaskBindVariables.show;
+            for(var i=0; i<showVariables.length; i++){
+                if(showVariables[i].taskId==variableShow.taskId && showVariables[i].id==variableShow.id){
+                    showVariables.splice(i, 1);
+                    break;
+                }
+            }
+            $variable.remove();
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.variable.set.add', '.prop-variable-set-binding-add', function(){
+            var nodeId = getCurrentUserTaskElementId();
+            var setVariables = userTaskBindVariables.set;
+            var exceptVariableIds = [];
+            if(setVariables && setVariables.length>0){
+                for(var i=0; i<setVariables.length; i++){
+                    if(setVariables[i].taskId == nodeId){
+                        exceptVariableIds.push(setVariables[i].id);
+                    }
+                }
+            }
+            onBindVariableClick(function(variables){
+                var $variablesSetContainer = $container.find('.prop-variable-set-binding tbody');
+                userTaskBindVariables.set = userTaskBindVariables.set||[];
+                for(var i=0; i<variables.length; i++){
+                    var variableSet = {
+                        taskId:nodeId,
+                        id:variables[i].id,
+                        key:variables[i].primaryKey,
+                        name:variables[i].name
+                    };
+                    userTaskBindVariables.set.push(variableSet);
+                    var $variable =$('<tr><td>'+variableSet.name+'</td><td></td><td><button class="el-button el-button--text prop-variable-show-binding-edit"><span class="el-icon-edit"></span></button><button class="el-button el-button--text prop-variable-show-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                    $variable.data('bind', variableSet);
+                    $variablesSetContainer.append($variable);
+                }
+            }, exceptVariableIds);
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.variable.set.edit', '.prop-variable-set-binding-edit', function(){
+            var $button = $(this);
+            var $variable = $button.closest('tr');
+            var variableShow = $variable.data('bind');
+            onEditVariableClick(function(variable){
+                $($variable.find('td')[1]).text(variable.typeName);
+                $variable.data('bind', variable);
+            }, variableShow);
+        });
+
+        $container.on('click.bpmnJS.ext.prop.panel.variable.set.delete', '.prop-variable-set-binding-delete', function(){
+            var $button = $(this);
+            var $variable = $button.closest('tr');
+            var variableSet = $variable.data('bind');
+            var setVariables = userTaskBindVariables.set;
+            for(var i=0; i<setVariables.length; i++){
+                if(setVariables[i].taskId==variableSet.taskId && setVariables[i].id==variableSet.id){
+                    setVariables.splice(i, 1);
+                    break;
+                }
+            }
+            $variable.remove();
+        });
+
     }
 
     /**
@@ -1505,7 +1766,7 @@ define([
             elementRegistry.forEach(function(element){
                 if(element.businessObject &&
                     is(element.businessObject, 'bpmn:Process') &&
-                    element.businessObject.id===processId){
+                    element.businessObject.id==processId){
                     element.businessObject.id = uuid;
                     return false;
                 }
@@ -1619,9 +1880,64 @@ define([
         $sequenceFlow.show();
     };
 
-    var showUserTaskProps = function(element){
+    var showUserTaskProps = function(element, queryUsers, queryRoles, userTaskBindVariables){
         var $container = $(this);
         var businessObject = element.businessObject;
+        var candidateUsers = businessObject.$attrs['activiti:candidateUsers'];
+        var $userContainer = $container.find('.prop-user-binding tbody');
+        $userContainer.empty();
+        if(candidateUsers){
+            candidateUsers = candidateUsers.split(',');
+            queryUsers(candidateUsers, function(users){
+                if(users && users.length>0){
+                    for(var i=0; i<users.length; i++){
+                        var $user = $('<tr><td>'+users[i].nickname+'</td><td><button class="el-button el-button--text prop-user-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                        $user.data('bind', users[i]);
+                        $userContainer.append($user);
+                    }
+                }
+            });
+        }
+        var candidateGroups = businessObject.$attrs['activiti:candidateGroups'];
+        var $roleContainer = $container.find('.prop-role-binding tbody');
+        $roleContainer.empty();
+        if(candidateGroups){
+            candidateGroups = candidateGroups.split(',');
+            queryRoles(candidateGroups, function(roles){
+                if(roles && roles.length){
+                    for(var i=0; i<roles.length; i++){
+                        var $role = $('<tr><td>'+roles[i].name+'</td><td><button class="el-button el-button--text prop-role-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                        $role.data('bind', roles[i]);
+                        $roleContainer.append($role);
+                    }
+                }
+            });
+        }
+
+        var variablesShow = userTaskBindVariables.show;
+        var $variablesShowContainer = $container.find('.prop-variable-show-binding tbody');
+        $variablesShowContainer.empty();
+        if(variablesShow && variablesShow.length>0){
+            for(var i=0; i<variablesShow.length; i++){
+                if(variablesShow[i].taskId != element.id) continue;
+                var $variable = $('<tr><td>'+variablesShow[i].name+'</td><td>'+(variablesShow[i].typeName||'')+'</td><td><button class="el-button el-button--text prop-variable-show-binding-edit"><span class="el-icon-edit"></span></button><button class="el-button el-button--text prop-variable-show-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                $variable.data('bind', variablesShow[i]);
+                $variablesShowContainer.append($variable);
+            }
+        }
+
+        var variablesSet = userTaskBindVariables.set;
+        var $variablesSetContainer = $container.find('.prop-variable-set-binding tbody');
+        $variablesSetContainer.empty();
+        if(variablesSet && variablesSet.length>0){
+            for(var i=0; i<variablesSet.length; i++){
+                if(variablesSet[i].taskId != element.id) continue;
+                var $variable = $('<tr><td>'+variablesSet[i].name+'</td><td>'+(variablesSet[i].typeName||'')+'</td><td><button class="el-button el-button--text prop-variable-set-binding-edit"><span class="el-icon-edit"></span></button><button class="el-button el-button--text prop-variable-set-binding-delete"><span class="el-icon-delete"></span></button></td></tr>');
+                $variable.data('bind', variablesSet[i]);
+                $variablesSetContainer.append($variable);
+            }$variable
+        }
+
         var $userTask = $container.find('.prop-scope-user-task');
         var $nodeId = $userTask.find('.node-id');
         var $nodeLabel = $userTask.find('.node-label');
@@ -1678,7 +1994,7 @@ define([
         for(var i=0; i<variables.length; i++){
             var tr = '<tr>';
             var variable = variables[i];
-            tr += '<td data-id="'+variable.id+'" title="'+variable.name+'">'+variable.primaryKey+'</td>';
+            tr += '<td data-id="'+variable.id+'" title="'+variable.primaryKey+'">'+variable.name+'</td>';
             //tr += '<td><button class="el-button el-button--text prop-panel-variable-delete"><span class="el-icon-delete"></span></button></td>';
             tr += '</tr>';
             tpl += tr;

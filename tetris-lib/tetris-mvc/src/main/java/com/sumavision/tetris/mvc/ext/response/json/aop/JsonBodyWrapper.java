@@ -103,6 +103,9 @@ public class JsonBodyWrapper {
 				BaseException bex = (BaseException)e;
 				jsonResult.put("status", bex.getCode().getCode());
 				jsonResult.put("message", bex.getMessage());
+				if(bex.getForwardPath() != null){
+					jsonResult.put("redirect", bex.getForwardPath());
+				}
 			}else{
 				jsonResult.put("status", StatusCode.ERROR.getCode());
 				jsonResult.put("message", "服务器端异常");

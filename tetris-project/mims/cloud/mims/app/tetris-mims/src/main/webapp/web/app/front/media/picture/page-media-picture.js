@@ -272,10 +272,23 @@ define([
                         if(typeof done === 'function') done();
                         if(status === 200){
                             var rows = self.table.rows;
-                            for(var i=0; i<rows.length; i++){
-                                if(rows[i].uuid === row.uuid){
-                                    rows.splice(i, 1);
-                                    break;
+                            var deleted = data.deleted;
+                            var processed = data.processed;
+                            if(deleted && deleted.length>0) {
+                                for (var i = 0; i < rows.length; i++) {
+                                    if (rows[i].uuid === row.uuid) {
+                                        rows.splice(i, 1);
+                                        break;
+                                    }
+                                }
+                            }
+                            if(processed && processed.length>0){
+                                var newEntity = processed[0];
+                                for(var i=0; i<rows.length; i++){
+                                    if(rows[i].uuid === row.uuid){
+                                        rows.splice(i, 1, newEntity);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -297,8 +310,8 @@ define([
                             self.dialog.editPicture.id = row.id;
                             self.dialog.editPicture.name = row.name;
                             self.dialog.editPicture.remark = row.remarks;
-                            self.dialog.editPicture.tags = row.tags;
-                            self.dialog.editPicture.keyWords = row.keyWords;
+                            self.dialog.editPicture.tags = typeof row.tags==='string'||!row.tags?row.tags:row.tags.join(',');
+                            self.dialog.editPicture.keyWords = typeof row.keyWords==='string'||!row.keyWords?row.keyWords:row.keyWords.join(',');
                             self.dialog.editPicture.visible = true;
                         }
                     }else if(command === '2'){
@@ -622,6 +635,15 @@ define([
                             message: '由于您在上传时关闭了页面，需要再次选择相同文件才能续传！'
                         });
                     }
+                },
+                doProcessPreview:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/process/generate/url', {
+                        processInstanceId:row.processInstanceId
+                    }, function(url){
+                        window.open(url, '_blank', 'status=no,menubar=yes,toolbar=no,width=1366,height=580,left=100,top=100');
+                    });
                 }
             },
             created:function(){

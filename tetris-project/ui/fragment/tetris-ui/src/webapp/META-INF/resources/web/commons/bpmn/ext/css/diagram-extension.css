@@ -1,6 +1,6 @@
 /* 属性面板 */
 .bpmn-editor-wrapper{width:100%; height:100%; position:relative;}
-.editor-prop-panel{width:250px; position:absolute; z-index:100; right:10px; top:10px; bottom:10px; background-color:#fff;
+.editor-prop-panel{width:300px; position:absolute; z-index:100; right:10px; top:10px; bottom:10px; background-color:#fff;
                       border:1px solid #ebeef5; transition:box-shadow .1s ease-in; border-radius:2px;}
 .editor-prop-panel-wrapper{width:100%; height:100%; position:relative;}
 .editor-prop-panel:hover{box-shadow:0 2px 12px 0 rgba(0,0,0,.1); border-color:#fafafa;}
@@ -20,7 +20,9 @@
 .prop-expression-variable-table,
 .prop-panel-content-var table,
 .prop-user-binding table,
-.prop-role-binding table{width:100%; font-size:14px; border-collapse:collapse;}
+.prop-role-binding table,
+.prop-variable-show-binding table,
+.prop-variable-set-binding table{width:100%; font-size:14px; border-collapse:collapse;}
 .prop-expression-variable-table td,
 .prop-expression-variable-table th,
 .prop-panel-content-var table td,
@@ -28,21 +30,33 @@
 .prop-user-binding table td,
 .prop-user-binding table th,
 .prop-role-binding table td,
-.prop-role-binding table th{text-align:left; line-height:40px; border-bottom:1px solid #ebeef5;}
+.prop-role-binding table th,
+.prop-variable-show-binding table td,
+.prop-variable-show-binding table tr,
+.prop-variable-set-binding table td,
+.prop-variable-set-binding table tr{text-align:left; line-height:40px; border-bottom:1px solid #ebeef5;}
 .prop-expression-variable-table th,
 .prop-panel-content-var table th,
 .prop-user-binding table th,
-.prop-role-binding table th{color:#909399;}
+.prop-role-binding table th,
+.prop-variable-show-binding table th,
+.prop-variable-set-binding table th{color:#909399;}
 .prop-expression-variable-table tr.highlight td{background-color:#f0f7ff;}
 .prop-expression-variable-table tbody tr:hover td{background-color:#f5f7fa; cursor:pointer;}
 .prop-expression-variable-table td{transition:background-color .25s ease;}
 .prop-panel-variable-delete,
 .prop-user-binding-delete,
-.prop-role-binding-delete{padding:0; font-size:18px;}
+.prop-role-binding-delete,
+.prop-variable-show-binding-edit,
+.prop-variable-show-binding-delete,
+.prop-variable-set-binding-edit,
+.prop-variable-set-binding-delete{padding:0; font-size:18px;}
 .prop-scope{display:none;}
-.prop-bindings{position:absolute; top:124px; left:0; right:0; bottom:0;}
-.prop-user-binding{box-sizing:border-box; height:50%; overflow-y:auto; padding:0 10px;}
-.prop-role-binding{box-sizing:border-box; height:50%; overflow-y:auto; padding:0 10px;}
+.prop-bindings{position:absolute; top:124px; left:0; right:0; bottom:0; overflow-y:auto;}
+.prop-user-binding{box-sizing:border-box; padding:0 10px;}
+.prop-role-binding{box-sizing:border-box; padding:0 10px; margin-top:20px;}
+.prop-variable-show-binding{box-sizing:border-box; padding:0 10px; margin-top:20px;}
+.prop-variable-set-binding{box-sizing:border-box; padding:0 10px; margin-top:20px;}
 .sequence-flow-expression-label{font-size:14px; max-width:120px; word-wrap:break-word;}
 .prop-expression-actions{line-height:40px;}
 
@@ -57,7 +71,7 @@
 .editor-tools .separator{float:left; display:inline-block; height:34px; border-left:1px solid #ebeef5; position:relative; top:7px;}
 
 /*  调色板样式 */
-.djs-palette{width:auto !important; max-width:200px; border-color:#ebeef5 !important; display:none; box-sizing:border-box; transition:box-shadow .1s ease-in; background-color:#fff;}
+.djs-palette{width:auto !important; max-width:350px; max-height:560px; overflow-y:auto; border-color:#ebeef5 !important; display:none; box-sizing:border-box; transition:box-shadow .1s ease-in; background-color:#fff;}
 .djs-palette:hover{box-shadow:0 2px 12px 0 rgba(0,0,0,.1); border-color:#fafafa;}
 .djs-palette .group-header{height:30px; line-height:30px; padding:0 10px; border-top:1px solid #ebeef5;}
 .djs-palette .group-header.is-active{border-bottom:1px solid #ebeef5;}

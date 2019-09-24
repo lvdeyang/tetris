@@ -15,10 +15,23 @@ public class VersionSendPO extends AbstractBasePO {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/** 频道id */
 	private Long channelId;
+	
+	/** 下发tar包名称 */
 	private String fileName;
-	private Long fileSize;
+	
+	/** 下发tar包大小 */
+	private String fileSize;
+	
+	/** 下发tar包地址 */
+	private String filePath;
+	
+	/** 播发版本号 */
 	private String version;
+	
+	/** 平台播发id */
+	private String broadId;
 
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -39,12 +52,21 @@ public class VersionSendPO extends AbstractBasePO {
 	}
 
 	@Column(name = "FILE_SIZE")
-	public Long getFileSize() {
+	public String getFileSize() {
 		return fileSize;
 	}
 
-	public void setFileSize(Long fileSize) {
+	public void setFileSize(String fileSize) {
 		this.fileSize = fileSize;
+	}
+	
+	@Column(name = "FILE_PATH")
+	public String getFilePath() {
+		return filePath;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
 	}
 
 	@Column(name = "VERSION")
@@ -54,5 +76,14 @@ public class VersionSendPO extends AbstractBasePO {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+	@Column(name = "BROAD_ID")
+	public String getBroadId() {
+		return broadId;
+	}
+
+	public void setBroadId(String broadId) {
+		this.broadId = broadId;
 	}
 }

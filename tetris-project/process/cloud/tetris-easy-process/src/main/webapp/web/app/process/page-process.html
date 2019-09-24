@@ -41,6 +41,10 @@
                                 prop="remarks">
                         </el-table-column>
                         <el-table-column
+                                label="发布时间"
+                                prop="publishTime">
+                        </el-table-column>
+                        <el-table-column
                                 label="操作"
                                 width="300">
                             <template slot-scope="scope">
@@ -91,6 +95,54 @@
                 width="500px"
                 :before-close="handleCreateProcessClose">
 
+            <el-dialog
+                    width="750px"
+                    title="选择流程模板"
+                    :visible.sync="dialog.selectTemplate.visible"
+                    :before-close="handleSelectTemplateClose"
+                    append-to-body>
+
+                <div style="height:400px; width:100%;">
+                    <div style="width:100%; height:350px;">
+                        <el-table
+                                :data="dialog.selectTemplate.rows"
+                                height="100%"
+                                highlight-current-row
+                                @current-change="currentTemplateChange"
+                                :row-key="templateRowKey"
+                                style="width:100%">
+                            <el-table-column
+                                    label="模板名称"
+                                    prop="name">
+                            </el-table-column>
+                            <el-table-column
+                                    label="备注"
+                                    prop="remarks">
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    <div style="width:100%; height:50px; padding-top:18px; box-sizing:border-box;">
+                        <el-pagination
+                                background
+                                :pager-count="5"
+                                @size-change="handleTemplateSizeChange"
+                                @current-change="handleTemplateCurrentChange"
+                                :current-page="dialog.selectTemplate.currentPage"
+                                :page-sizes="dialog.selectTemplate.pageSizes"
+                                :page-size="dialog.selectTemplate.pageSize"
+                                layout="total, sizes, prev, pager, next, jumper"
+                                :total="dialog.selectTemplate.total">
+                        </el-pagination>
+                    </div>
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="handleSelectTemplateClose">取消</el-button>
+                    <el-button size="medium" type="primary" @click="handleSelectTemplateSubmit">确定</el-button>
+                </span>
+
+            </el-dialog>
+
             <div>
                 <el-form label-width="100px">
                     <el-form-item label="流程类型:">
@@ -103,11 +155,16 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <div style="margin-bottom:5px; color:#F56C6C; text-align:right;">
-                        流程id定义后，不可修改
+                    <div v-if="dialog.createProcess.type==='可发布的'" style="margin-bottom:5px; color:#F56C6C; text-align:right;">
+                        流程id设置后，不可修改
                     </div>
-                    <el-form-item label="自定义流程id:">
-                        <el-input v-model="dialog.createProcess.processId"></el-input>
+                    <el-form-item v-if="dialog.createProcess.type==='可发布的'" label="自定义流程id:">
+                        <el-input v-model="dialog.createProcess.processId" placeholder="格式建议：公司首字母_功能_日期"></el-input>
+                    </el-form-item>
+                    <el-form-item v-if="dialog.createProcess.type==='可发布的'" label="从模板生成:">
+                        <el-input v-model="dialog.createProcess.templateName" placeholder="选择模板" readonly @click.native.stop="handleSelectTemplate">
+                            <el-button slot="append" icon="el-icon-delete" @click.stop="clearTemplate" style="font-size:20px;"></el-button>
+                        </el-input>
                     </el-form-item>
                     <el-form-item label="流程名称:">
                         <el-input v-model="dialog.createProcess.name"></el-input>

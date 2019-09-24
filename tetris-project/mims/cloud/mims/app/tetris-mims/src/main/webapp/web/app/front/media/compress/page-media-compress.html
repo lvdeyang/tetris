@@ -10,8 +10,8 @@
     <template>
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
             <div style="margin-bottom:10px;">
-                <el-button type="primary" size="small" @click="dialog.addCompress.visible = true"><span class="el-icon-upload" style="position:relative; right:1px;"></span>&nbsp;上传</el-button>
-                <el-button type="warning" size="small" @click="dialog.createFolder.visible = true"><span class="icon-folder-open" style="position:relative; right:1px;"></span>&nbsp;新建文件夹</el-button>
+                <el-button type="primary" size="small" @click="dialog.addCompress.visible = true" :disabled="!current.id"><span class="el-icon-upload" style="position:relative; right:1px;"></span>&nbsp;上传</el-button>
+                <el-button type="warning" size="small" @click="dialog.createFolder.visible = true" :disabled="!current.id"><span class="icon-folder-open" style="position:relative; right:1px;"></span>&nbsp;新建文件夹</el-button>
                 <!--<el-button-group style="margin-left:10px;">
                     <el-button size="small">下载</el-button>
                     <el-button size="small">删除</el-button>
@@ -51,12 +51,12 @@
                                 <el-button v-if="scope.row.type==='FOLDER'" type="text" style="padding:0; color:inherit;"><a class="folder-link" :href="'#/page-media-compress/'+scope.row.id">{{scope.row.name}}</a></el-button>
                                 <span v-else>{{scope.row.name}}</span>
                                 <span :style="'float:right; position:relative;' + (scope.row.__hover__?'display:inline-block;':'display:none;')">
-                                    <el-tooltip  v-if="scope.row.type!=='FOLDER'" class="item" effect="dark" content="下载" placement="bottom">
+                                    <el-tooltip v-if="scope.row.type!=='FOLDER'&&!scope.row.reviewStatus||scope.row.reviewStatus==='修改审核拒绝'||scope.row.reviewStatus==='删除审核拒绝'" class="item" effect="dark" content="下载" placement="bottom">
                                         <el-button size="small" type="text" style="padding:0; position:absolute; top:1px; right:57px;" @click="handleDownload(scope)">
                                             <span class="el-icon-download" style="font-size:20px; position:relative; top:1px;"></span>
                                         </el-button>
                                     </el-tooltip>
-                                    <el-tooltip class="item" effect="dark" content="删除" placement="bottom">
+                                    <el-tooltip v-if="scope.row.removeable && (scope.row.type==='FOLDER'||!scope.row.reviewStatus||scope.row.reviewStatus.indexOf('拒绝')>=0)" class="item" effect="dark" content="删除" placement="bottom">
                                         <el-button
                                                 size="small"
                                                 type="text"
@@ -65,15 +65,15 @@
                                             <span class="el-icon-delete" style="font-size:18px;"></span>
                                         </el-button>
                                     </el-tooltip>
-                                    <el-dropdown trigger="click" style="position:absolute; right:0; top:2px;" @visible-change="table.tooltip=!table.tooltip" @command="tableOptionsCommand($event, scope)">
+                                    <el-dropdown v-if="(scope.row.removeable&&scope.row.type==='FOLDER')||!scope.row.reviewStatus||scope.row.reviewStatus==='修改审核拒绝'||scope.row.reviewStatus==='删除审核拒绝'" trigger="click" style="position:absolute; right:0; top:2px;" @visible-change="table.tooltip=!table.tooltip" @command="tableOptionsCommand($event, scope)">
                                         <el-tooltip :disabled="table.tooltip" class="item" effect="dark" content="更多" placement="bottom">
                                             <el-button size="small" type="text" style="padding:0;"><span class="el-icon-more-outline" style="font-size:18px;"></span></el-button>
                                         </el-tooltip>
                                         <el-dropdown-menu slot="dropdown">
                                             <el-dropdown-item command="0" v-if="scope.row.type==='FOLDER'">重命名</el-dropdown-item>
-                                            <el-dropdown-item command="1" v-if="scope.row.type==='PICTURE'">编辑</el-dropdown-item>
-                                            <el-dropdown-item command="2">移动</el-dropdown-item>
-                                            <el-dropdown-item command="3">复制</el-dropdown-item>
+                                            <el-dropdown-item command="1" v-if="scope.row.type==='COMPRESS'">编辑</el-dropdown-item>
+                                            <!--<el-dropdown-item command="2">移动</el-dropdown-item>
+                                            <el-dropdown-item command="3">复制</el-dropdown-item>-->
                                         </el-dropdown-menu>
                                     </el-dropdown>
                                 </span>
@@ -82,7 +82,13 @@
                         <el-table-column label="大小" width="200">
                             <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
                         </el-table-column>
-                        <el-table-column prop="updateTime" label="创建时间" width="200"></el-table-column>
+                        <el-table-column prop="updateTime" label="创建时间" width="180"></el-table-column>
+                        <el-table-column label="审核状态" width="180">
+                            <template slot-scope="scope">
+                                <el-button v-if="scope.row.processInstanceId" type="text" style="padding:0;" @click="doProcessPreview(scope)">{{scope.row.reviewStatus}}</el-button>
+                                <span v-else>{{scope.row.reviewStatus}}</span>
+                            </template>
+                        </el-table-column>
                     </el-table>
                 </el-scrollbar>
             </div>

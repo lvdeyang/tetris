@@ -1,6 +1,7 @@
 package com.sumavision.tetris.user;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -48,4 +49,47 @@ public interface UserFeign {
 	@RequestMapping(value = "/user/feign/find/by/token")
 	public JSONObject findByToken(@RequestParam("token") String token);
 	
+	/**
+	 * 根据id查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 下午3:30:27
+	 * @param JSONArray ids 用户id列表
+	 * @return JSONObject 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/find/by/id/in")
+	public JSONObject findByIdIn(@RequestParam("ids") String ids);
+	
+	/**
+	 * 分页查询公司下的用户列表（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:17:57
+	 * @param Long companyId 公司id
+	 * @param JSONString except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/list/by/{companyId}/with/except")
+	public JSONObject listByCompanyIdWithExcept(
+			@PathVariable("companyId") Long companyId,
+			@RequestParam("except") String except,
+			@RequestParam("currentPage") int currentPage,
+			@RequestParam("pageSize") int pageSize);
+	
+	/**
+	 * 修改一个用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月19日 下午4:54:11
+	 * @param Long id 用户id
+	 * @param String tags 修改的标签(全量)
+	 * @return UserVO 修改后的数据
+	 */
+	@RequestMapping(value = "/user/feign/edit")
+	public JSONObject edit(
+			@RequestParam("id") Long id,
+			@RequestParam("tags") String tags);
 }

@@ -1,6 +1,7 @@
 package com.sumavision.tetris.user;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -27,6 +28,11 @@ import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
+import com.sumavision.tetris.system.role.SystemRoleDAO;
+import com.sumavision.tetris.system.role.SystemRolePO;
+import com.sumavision.tetris.system.role.SystemRoleType;
+import com.sumavision.tetris.system.theme.SystemThemeDAO;
+import com.sumavision.tetris.system.theme.SystemThemePO;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
 
 @Component
@@ -39,6 +45,12 @@ public class UserQuery {
 	
 	@Autowired
 	private CompanyDAO companyDao;
+	
+	@Autowired
+	private SystemThemeDAO systemThemeDao;
+	
+	@Autowired
+	private SystemRoleDAO systemRoleDao;
 	
 	/**
 	 * 用户登录校验<br/>
@@ -62,6 +74,24 @@ public class UserQuery {
 		}
 		user.setLastModifyTime(now);
 		userDao.save(user);
+		return true;
+	}
+	
+	/**
+	 * 检查当前用户的token是否可用<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月26日 下午3:26:04
+	 * @param UserPO user 用户
+	 * @return boolean token有效性
+	 */
+	public boolean userTokenUseable(UserPO user) throws Exception{
+		if(user.getToken() == null) return false;
+		Date now = new Date();
+		Date timeScope = DateUtil.addMinute(user.getLastModifyTime(), 30);
+		if(!timeScope.after(now)){
+			return false;
+		}
 		return true;
 	}
 	
@@ -104,6 +134,23 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 清除当前登录用户缓存<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月22日 上午10:14:26
+	 */
+	public void clearCurrentUser() throws Exception{
+		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
+		String sessionId = request.getHeader(HttpConstant.HEADER_SESSION_ID);
+		if(sessionId != null){
+			HttpSession session = HttpSessionContext.get(sessionId);
+			if(session != null){
+				session.removeAttribute(HttpConstant.ATTRIBUTE_USER);
+			}
+		}
+	}
+	
+	/**
 	 * 根据token查询用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -112,6 +159,7 @@ public class UserQuery {
 	 * @return UserPO 用户
 	 */
 	public UserVO findByToken(String token) throws Exception{
+		if(token == null) return null;
 		UserPO userEntity = userDao.findByToken(token);
 		if(userEntity == null) return null;
 		
@@ -120,13 +168,42 @@ public class UserQuery {
 			.setNickname(userEntity.getNickname())
 			.setClassify(userEntity.getClassify()==null?"":userEntity.getClassify().toString())
 			.setIcon(userEntity.getIcon())
-			.setToken(userEntity.getToken());
+			.setToken(userEntity.getToken())
+			.setId(userEntity.getId());
+		if(userEntity.getTags() != null && !userEntity.getTags().isEmpty()) user.setTags(Arrays.asList(userEntity.getTags().split(UserPO.SEPARATOR_TAG))); else user.setTags(new ArrayList<String>());
+		
+		List<SystemRolePO> businessRoles = systemRoleDao.findByUserIdAndType(userEntity.getId(), SystemRoleType.BUSINESS.toString());
+		
+		if(businessRoles!=null && businessRoles.size()>0){
+			StringBufferWrapper roleIds = new StringBufferWrapper();
+			for(SystemRolePO role:businessRoles){
+				roleIds.append(role.getId()).append(",");
+			}
+			String ids = roleIds.toString();
+			ids = ids.substring(0, ids.length()-1);
+			user.setBusinessRoles(ids);
+		}
 		
 		//加入组织机构信息
 		if(UserClassify.COMPANY.equals(userEntity.getClassify())){
 			CompanyPO company = companyDao.findByUserId(userEntity.getId());
-			user.setGroupId(company.getId().toString())
-				.setGroupName(company.getName());
+			user.setCompanyInfo(company);
+			if(company.getThemeId() != null){
+				SystemThemePO theme = systemThemeDao.findOne(company.getThemeId());
+				if(theme == null){
+					user.setThemeUrl(SystemThemePO.DEFAULT_URL);
+				}else{
+					user.setThemeUrl(theme.getUrl());
+				}
+			}else{
+				user.setThemeUrl(SystemThemePO.DEFAULT_URL);
+			}
+		}else{
+			if(userEntity.isAutoGeneration()){
+				user.setGroupId("0");
+			}
+			user.setCompanyInfo(null);
+			user.setThemeUrl(SystemThemePO.DEFAULT_URL);
 		}
 		
 		return user;
@@ -255,6 +332,7 @@ public class UserQuery {
 	 * @return List<UserVO> rows 用户列表
 	 */
 	public Map<String, Object> listByCompanyIdWithExcept(Long companyId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		if(except == null) return listByCompanyId(companyId, currentPage, pageSize);
 		int total = userDao.countByCompanyIdWithExcept(companyId, except);
 		List<UserPO> users = findByCompanyIdWithExcept(companyId, except, currentPage, pageSize);
 		List<UserVO> view_users = new ArrayList<UserVO>();
@@ -283,6 +361,81 @@ public class UserQuery {
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		Page<UserPO> users = userDao.findByCompanyIdWithExcept(companyId, except, page);
 		return users.getContent();
+	}
+	
+	/**
+	 * 分页查询用户（前端接口，增加管理员过滤，跟隶属角色无关）<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月28日 下午5:32:06
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @param long userId 用户id
+	 * @return List<UserVO> 用户列表
+	 */
+	public Map<String, Object> list(int currentPage, int pageSize,Long userId) throws Exception{
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		List<Long> userList = new ArrayList<Long>();
+		userList.add(userId);
+		if (companyPO != null) {
+			return listByCompanyIdWithExcept(companyPO.getId(), userList, currentPage, pageSize);
+		}else {
+			return null;
+		}
+	}
+	
+	/**
+	 * 分页查询公司下的用户列表（带例外）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 上午11:17:57
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	public Map<String, Object> listByRoleIdWithExcept(Long roleId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		int total = userDao.countByRoleIdWithExcept(roleId, except);
+		List<UserPO> users = findByRoleIdWithExcept(roleId, except, currentPage, pageSize);
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			view_users = UserVO.getConverter(UserVO.class).convert(users, UserVO.class);
+		}
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", view_users)
+												   .getMap();
+	}
+	
+	/**
+	 * 分页查询公司下的用户（带例外）<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月30日 上午11:12:38
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外用户id列表
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByRoleIdWithExcept(Long roleId, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> users = userDao.findByRoleIdWithExcept(roleId, except, page);
+		return users.getContent();
+	}
+	
+	/**
+	 * 根据id查询用户列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月11日 下午3:20:13
+	 * @param Collection<Long> ids 用户id列表
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserVO> findByIdIn(Collection<Long> ids) throws Exception{
+		List<UserPO> entities = userDao.findByIdIn(ids);
+		return UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
 	}
 	
 	/**************************************************************************

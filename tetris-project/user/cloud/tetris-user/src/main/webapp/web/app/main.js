@@ -41,14 +41,23 @@ require.config({
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
         'mi-system-role-dialog':window.APPPATH + 'component/dialog/system-role/system-role-dialog',
+        'mi-business-role-dialog':window.APPPATH + 'component/dialog/business-role/business-role-dialog',
+        'mi-theme-dialog':window.APPPATH + 'component/dialog/theme/theme-dialog',
+        'mi-tag-dialog':window.APPPATH + 'component/dialog/mims/tag/mims-tag',
 
         /* pages */
         'page-user':window.APPPATH + 'user/page-user',
         'page-bind-system-role':window.APPPATH + 'bind-system-role/page-bind-system-role',
         'page-system-role':window.APPPATH + 'system-role/page-system-role',
+        'page-system-theme':window.APPPATH + 'system-theme/page-system-theme',
         'page-bind-user':window.APPPATH + 'bind-user/page-bind-user',
         'page-company':window.APPPATH + 'company/page-company',
-        'page-organization':window.APPPATH + 'organization/page-organization'
+        'page-organization':window.APPPATH + 'organization/page-organization',
+        'page-organization-personal-settings':window.APPPATH + 'organization-personal-settings/page-organization-personal-settings',
+        'page-development-basic':window.APPPATH + 'development/basic/page-development-basic',
+        'page-business-user':window.APPPATH + 'business-user/page-business-user',
+        'page-business-role':window.APPPATH + 'business-role/page-business-role',
+        'page-personal':window.APPPATH + 'personal/page-personal'
     },
     shim:{
         'vue':{
@@ -78,10 +87,11 @@ require([
     'context',
     'menu',
     'config',
+    'jquery',
     'restfull',
     'element-ui',
     'css!' + window.APPPATH + 'reset.css'
-], function(storage, Vue, router, context, menuUtil, config, ajax){
+], function(storage, Vue, router, context, menuUtil, config, $, ajax){
 
     var app = null;
 
@@ -151,6 +161,9 @@ require([
                .setProp('user', appInfo.user)
                .setProp('groups', appInfo.groups || [])
                .setProp('token', window.TOKEN);
+
+        //处理皮肤
+        if(appInfo.user.themeUrl) $('head').prepend('<link rel="stylesheet" type="text/css" href="'+window.BASEPATH + appInfo.user.themeUrl+'"/>');
 
         //解析模板
         menuUtil.parseUrlTemplate(appInfo.menus);

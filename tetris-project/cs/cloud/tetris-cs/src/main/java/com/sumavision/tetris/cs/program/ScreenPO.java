@@ -15,12 +15,25 @@ public class ScreenPO extends AbstractBasePO {
 	 */
 	private static final long serialVersionUID = 1L;
 
+	/** 分屏id */
 	private Long programId;
+	
+	/** 分屏位置 */
 	private Long serialNum;
+	
+	/** 排单顺序 */
 	private Long screenIndex;
+	
+	/** 媒资在cs中的id */
 	private Long resourceId;
-	private Long mimsId;
+	
+	/** 媒资在mims中的uuid */
+	private String mimsUuid;
+	
+	/** 媒资名称 */
 	private String name;
+	
+	/** 媒资预览地址 */
 	private String previewUrl;
 
 	@Column(name="PROGRAM_ID")
@@ -59,13 +72,13 @@ public class ScreenPO extends AbstractBasePO {
 		this.resourceId = resourceId;
 	}
 
-	@Column(name="MIMS_ID")
-	public Long getMimsId() {
-		return mimsId;
+	@Column(name="MIMS_UUID")
+	public String getMimsUuid() {
+		return mimsUuid;
 	}
 
-	public void setMimsId(Long mimsId) {
-		this.mimsId = mimsId;
+	public void setMimsUuid(String mimsUuid) {
+		this.mimsUuid = mimsUuid;
 	}
 
 	@Column(name="NAME")

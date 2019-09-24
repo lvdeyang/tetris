@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -24,11 +26,19 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private String remarks;
 	
+	private StoreType storeType;
+	
+	private String uploadTmpPath;
+	
 	private List<String> tags;
 	
 	private List<String> keyWords;
 	
+	private Long downloadCount;
+	
 	private String type;
+	
+	private boolean removeable;
 	
 	private String icon;
 	
@@ -39,6 +49,10 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	private Integer progress;
 	
 	private String previewUrl;
+	
+	private String reviewStatus;
+	
+	private String processInstanceId;
 	
 	private List<MediaAudioVO> children;
 	
@@ -96,6 +110,24 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 
+	public StoreType getStoreType() {
+		return storeType;
+	}
+
+	public MediaAudioVO setStoreType(StoreType storeType) {
+		this.storeType = storeType;
+		return this;
+	}
+
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaAudioVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
+		return this;
+	}
+
 	public List<String> getTags() {
 		return tags;
 	}
@@ -114,12 +146,30 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 	
+	public Long getDownloadCount() {
+		return downloadCount;
+	}
+
+	public MediaAudioVO setDownloadCount(Long downloadCount) {
+		this.downloadCount = downloadCount;
+		return this;
+	}
+
 	public String getType() {
 		return type;
 	}
 
 	public MediaAudioVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaAudioVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
 		return this;
 	}
 
@@ -168,6 +218,24 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 	
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public MediaAudioVO setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+		return this;
+	}
+
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public MediaAudioVO setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
 	public List<MediaAudioVO> getChildren() {
 		return children;
 	}
@@ -185,17 +253,23 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setAuthorName(entity.getAuthorName())
-			.setSize(entity.getSize().toString())
+			.setSize(entity.getSize() != null ? entity.getSize().toString() : "-")
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaAudioItemType.AUDIO.toString())
+			.setRemoveable(true)
 			.setIcon(MediaAudioItemType.AUDIO.getIcon())
 			.setStyle(MediaAudioItemType.AUDIO.getStyle()[0])
 			.setMimetype(entity.getMimetype())
+			.setStoreType(entity.getStoreType())
+			.setUploadTmpPath(entity.getUploadTmpPath())
+			.setDownloadCount(entity.getDownloadCount())
 			.setProgress(0)
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString());
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioPO.SEPARATOR_TAG)));
+			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
+			.setProcessInstanceId(entity.getProcessInstanceId());
+		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaAudioPO.SEPARATOR_KEYWORDS)));	 
 		return this;
 	}
@@ -211,9 +285,16 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaAudioItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaAudioItemType.FOLDER.getIcon())
-			.setStyle(MediaAudioItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaAudioItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		MediaAudioVO vo=(MediaAudioVO)obj;
+		return this.getId().equals(vo.getId());
+	}
 }

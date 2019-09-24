@@ -26,6 +26,9 @@ public class UserSystemRolePermissionController {
 	private UserSystemRolePermissionQuery userSystemRolePermissionQuery;
 	
 	@Autowired
+	private SystemRoleQuery systemRoleQuery;
+	
+	@Autowired
 	private UserSystemRolePermissionService userSystemRolePermissionService;
 	
 	/**
@@ -52,7 +55,7 @@ public class UserSystemRolePermissionController {
 		
 		//权限校验
 		
-		return userSystemRolePermissionQuery.listByUserId(userId, currentPage, pageSize);
+		return userSystemRolePermissionQuery.listByUserIdAndRoleType(userId, SystemRoleType.SYSTEM, currentPage, pageSize);
 	}
 	
 	/**

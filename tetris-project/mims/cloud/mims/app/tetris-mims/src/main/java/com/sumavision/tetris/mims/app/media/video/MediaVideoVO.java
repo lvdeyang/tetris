@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.video;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -24,11 +26,17 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private String remarks;
 	
+	private StoreType storeType;
+	
+	private String uploadTmpPath;
+	
 	private List<String> tags;
 	
 	private List<String> keyWords;
 	
 	private String type;
+	
+	private boolean removeable;
 	
 	private String icon;
 	
@@ -39,6 +47,10 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	private Integer progress;
 	
 	private String previewUrl;
+	
+	private String reviewStatus;
+	
+	private String processInstanceId;
 	
 	private List<MediaVideoVO> children;
 	
@@ -96,6 +108,24 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		return this;
 	}
 
+	public StoreType getStoreType() {
+		return storeType;
+	}
+
+	public MediaVideoVO setStoreType(StoreType storeType) {
+		this.storeType = storeType;
+		return this;
+	}
+
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaVideoVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
+		return this;
+	}
+
 	public List<String> getTags() {
 		return tags;
 	}
@@ -120,6 +150,15 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 
 	public MediaVideoVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+	
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public MediaVideoVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
 		return this;
 	}
 
@@ -177,6 +216,24 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		return this;
 	}
 
+	public String getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public MediaVideoVO setReviewStatus(String reviewStatus) {
+		this.reviewStatus = reviewStatus;
+		return this;
+	}
+
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public MediaVideoVO setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
 	@Override
 	public MediaVideoVO set(MediaVideoPO entity) throws Exception {
 		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
@@ -185,17 +242,22 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setAuthorName(entity.getAuthorName())
-			.setSize(entity.getSize().toString())
+			.setSize(entity.getSize() != null ? entity.getSize().toString() : "-")
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaVideoItemType.VIDEO.toString())
+			.setRemoveable(true)
 			.setIcon(MediaVideoItemType.VIDEO.getIcon())
 			.setStyle(MediaVideoItemType.VIDEO.getStyle()[0])
 			.setMimetype(entity.getMimetype())
+			.setStoreType(entity.getStoreType())
+			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setProgress(0)
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString());
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG)));
+			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
+			.setProcessInstanceId(entity.getProcessInstanceId());;
+		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoPO.SEPARATOR_KEYWORDS)));	 
 		return this;
 	}
@@ -211,8 +273,10 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaVideoItemType.FOLDER.toString())
+			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaVideoItemType.FOLDER.getIcon())
-			.setStyle(MediaVideoItemType.FOLDER.getStyle()[0]);
+			.setStyle(MediaVideoItemType.FOLDER.getStyle()[0])
+			.setReviewStatus("-");
 		return this;
 	}
 	

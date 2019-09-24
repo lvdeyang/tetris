@@ -40,13 +40,14 @@ public class UserSystemRolePermissionQuery {
 	 * @param Long userId 用户id
 	 * @param int currentPage 当前页码
 	 * @param int pageSize 每页数据量
-	 * @return int total 用户绑定系统角色数量
+	 * @return long total 用户绑定系统角色数量
 	 * @return List<UserSystemRolePermissionVO> rows 系统角色权限列表
 	 */
-	public Map<String, Object> listByUserId(Long userId, int currentPage, int pageSize) throws Exception{
+	public Map<String, Object> listByUserIdAndRoleType(Long userId, SystemRoleType type, int currentPage, int pageSize) throws Exception{
 		
-		int total = userSystemRolePermissionDao.countByUserId(userId);
-		List<UserSystemRolePermissionPO> permissions = findByUserId(userId, currentPage, pageSize);
+		long total = userSystemRolePermissionDao.countByUserIdAndRoleType(userId, type);
+		
+		List<UserSystemRolePermissionPO> permissions = findByUserIdAndRoleType(userId, type, currentPage, pageSize);
 		List<UserSystemRolePermissionVO> rows = new ArrayList<UserSystemRolePermissionVO>();
 		
 		if(permissions!=null && permissions.size()>0){
@@ -76,13 +77,14 @@ public class UserSystemRolePermissionQuery {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年1月19日 下午4:34:45
 	 * @param Long userId 用户id
+	 * @param SystemRoleType roleType 角色类型
 	 * @param int currentPage 当前页码
 	 * @param int pageSize 每页数据量
 	 * @return List<UserSystemRolePermissionPO> 权限列表
 	 */
-	public List<UserSystemRolePermissionPO> findByUserId(Long userId, int currentPage, int pageSize) throws Exception{
+	public List<UserSystemRolePermissionPO> findByUserIdAndRoleType(Long userId, SystemRoleType roleType, int currentPage, int pageSize) throws Exception{
 		Pageable page = new PageRequest(currentPage-1, pageSize);
-		Page<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserId(userId, page);
+		Page<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserIdAndRoleType(userId, roleType, page);
 		return permissions.getContent();
 	}
 	

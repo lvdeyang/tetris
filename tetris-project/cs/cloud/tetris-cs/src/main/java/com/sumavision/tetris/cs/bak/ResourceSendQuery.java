@@ -18,30 +18,42 @@ public class ResourceSendQuery {
 	@Autowired
 	CsResourceQuery csResourceQuery;
 
-	public List<CsResourceVO> saveResource(Long channelId) throws Exception {
+	/**
+	 * 根据频道id获取媒资增量列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param channelId 频道id
+	 * @param sava 获取后是否保存入数据库
+	 * @return List<CsResourceVO> 媒资列表
+	 */
+	public List<CsResourceVO> getAddResource(Long channelId, Boolean save) throws Exception {
 		List<CsResourceVO> resources = csResourceQuery.getResourcesFromChannelId(channelId);
 		List<ResourceSendPO> previewResource = resourceSendDao.findByChannelId(channelId);
 		List<ResourceSendPO> saveResource = new ArrayList<ResourceSendPO>();
 
 		List<CsResourceVO> returnList = new ArrayList<CsResourceVO>();
 
-		resourceSendDao.deleteInBatch(previewResource);
+		if (save) {
+			resourceSendDao.deleteInBatch(previewResource);
+		}
+
 		if (resources != null && resources.size() > 0) {
-			List<Long> mimsIdList = new ArrayList<Long>();
-			Iterator<CsResourceVO> it = resources.iterator();
-			while (it.hasNext()) {
-				CsResourceVO item = it.next();
-				if (mimsIdList.contains(item.getMimsId())) {
-					it.remove();
-				} else {
-					mimsIdList.add(item.getMimsId());
-				}
-			}
+			// List<String> mimsUuidList = new ArrayList<String>();
+			// Iterator<CsResourceVO> it = resources.iterator();
+			// while (it.hasNext()) {
+			// CsResourceVO item = it.next();
+			// if (mimsUuidList.contains(item.getMimsUuid())) {
+			// it.remove();
+			// } else {
+			// mimsUuidList.add(item.getMimsUuid());
+			// }
+			// }
 
 			for (CsResourceVO item : resources) {
 				ResourceSendPO sourceSend = new ResourceSendPO();
 				sourceSend.setChannelId(channelId);
-				sourceSend.setMimsId(item.getMimsId());
+				sourceSend.setMimsUuid(item.getMimsUuid());
 				sourceSend.setName(item.getName());
 				sourceSend.setParentId(item.getParentId());
 				sourceSend.setPreviewUrl(item.getPreviewUrl());
@@ -50,16 +62,21 @@ public class ResourceSendQuery {
 
 				if (previewResource != null && previewResource.size() > 0) {
 					for (int i = 0; i < previewResource.size(); i++) {
-						if (previewResource.get(i).getMimsId() == item.getMimsId()) {
+						if (previewResource.get(i).getMimsUuid().equals(item.getMimsUuid())
+								&& previewResource.get(i).getParentId() == item.getParentId()) {
 							break;
 						}
 						if (i == previewResource.size() - 1) {
 							returnList.add(item);
 						}
 					}
+				} else {
+					returnList.add(item);
 				}
 			}
-			resourceSendDao.save(saveResource);
+			if (save) {
+				resourceSendDao.save(saveResource);
+			}
 		}
 
 		return returnList;

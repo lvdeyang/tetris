@@ -1,6 +1,7 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
 import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -8,6 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.history.audio.HistoryMediaAudioPO;
@@ -85,8 +88,23 @@ public class MediaAudioPO extends AbstractBasePO{
 	/** 关键字， 格式：,分割*/
 	private String keyWords;
 	
+	/** 下载次数 */
+	private Long downloadCount;
+	
 	/** 文件上传状态 */
 	private UploadStatus uploadStatus;
+	
+	/** 审核状态 */
+	private ReviewStatus reviewStatus;
+	
+	/** 审核流程id */
+	private String processInstanceId;
+	
+	/** 是否加密 */
+	private Boolean encryption;
+	
+	/** 加密文件地址 */
+	private String encryptionUrl;
 
 	@Column(name = "LAST_MODIFIED")
 	public Long getLastModified() {
@@ -250,7 +268,16 @@ public class MediaAudioPO extends AbstractBasePO{
 	public void setKeyWords(String keyWords) {
 		this.keyWords = keyWords;
 	}
-	
+
+	@Column(name = "DOWNLOAD_COUNT")
+	public Long getDownloadCount() {
+		return downloadCount;
+	}
+
+	public void setDownloadCount(Long downloadCount) {
+		this.downloadCount = downloadCount;
+	}
+
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "UPLOAD_STATUS")
 	public UploadStatus getUploadStatus() {
@@ -261,6 +288,43 @@ public class MediaAudioPO extends AbstractBasePO{
 		this.uploadStatus = uploadStatus;
 	}
 	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "REVIEW_STATUS")
+	public ReviewStatus getReviewStatus() {
+		return reviewStatus;
+	}
+
+	public void setReviewStatus(ReviewStatus reviewStatus) {
+		this.reviewStatus = reviewStatus;
+	}
+
+	@Column(name = "PROCESS_INSTANCE_ID")
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public void setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
+	}
+
+	@Column(name = "IF_ENCRYPTION")
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public void setEncryption(Boolean encryption) {
+		this.encryption = encryption;
+	}
+
+	@Column(name = "ENCRYPTION_URL")
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public void setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
+	}
+
 	/**
 	 * 转换为历史数据<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -321,6 +385,8 @@ public class MediaAudioPO extends AbstractBasePO{
 		copy_video.setTags(this.getTags());
 		copy_video.setKeyWords(this.getKeyWords());
 		copy_video.setUploadStatus(this.getUploadStatus());
+		copy_video.setEncryption(this.getEncryption());
+		copy_video.setEncryptionUrl(this.getEncryptionUrl());
 		return copy_video;
 	}
 	

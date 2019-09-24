@@ -174,6 +174,7 @@ define([
                 },
                 onProcessVariableAdded:function(variable){
                     var self = this;
+                    self.table.rows.push(variable);
                 }
             },
             created:function(){

@@ -1,0 +1,118 @@
+<mi-frame id="page-process-task-my-review-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">待审核的任务</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>待审核的任务</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%; position:relative;">
+
+            <div style="width:520px; height:100%; position:absolute; left:0; top:0;">
+                <div style="width:100%; height:100%; position:relative; border-right:1px solid #ebeef5;">
+                    <div style="position:absolute; left:0; top:0; bottom:50px; width:100%; padding:10px 10px 0 10px;">
+                        <el-table
+                                height="100%"
+                                :data="table.rows"
+                                :row-key="rowKey"
+                                highlight-current-row
+                                @current-change="currentRowChange"
+                                style="width:100%">
+                            <el-table-column
+                                    fixed
+                                    label="任务名称"
+                                    prop="processName">
+                            </el-table-column>
+                            <el-table-column
+                                    label="到达时间"
+                                    width="100"
+                                    prop="updateTime">
+                            </el-table-column>
+                            <el-table-column
+                                    label="发起时间"
+                                    width="100"
+                                    prop="startTime">
+                            </el-table-column>
+                            <el-table-column
+                                    label="发起人"
+                                    prop="startUser">
+                            </el-table-column>
+                            <el-table-column
+                                    fixed="right"
+                                    width="50"
+                                    label="操作">
+                                <template slot-scope="scope">
+                                    <el-tooltip class="item" effect="dark" content="查看流程" placement="bottom-end">
+                                        <el-button type="text" icon="feather-icon-list" style="font-size:20px; padding:0;" @click.top="processPreview(scope)"></el-button>
+                                    </el-tooltip>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:10px; padding-top:10px;">
+                        <el-pagination
+                                style="float:right;"
+                                :pager-count="5"
+                                background
+                                @current-change="handleCurrentChange"
+                                :current-page="table.currentPage"
+                                :page-size="table.pageSize"
+                                layout="prev, pager, next"
+                                :total="table.total">
+                        </el-pagination>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="table.currentRow" style="height:100%; position:absolute; left:520px; top:0; right:0; padding:10px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form label-width="120px">
+
+                        <el-form-item v-if="review.show" v-for="variable in review.show" :key="'_show_'+variable.key" :label="variable.name">
+                            <el-input v-if="variable.type==='b'" v-model="variable.value" style="width:380px;" readonly></el-input>
+                            <div v-if="variable.type==='i'" style="width:120px; height:80px; cursor:pointer;" @click="doPreview(variable.value, 'image')">
+                                <img style="width:100%; max-height:100%;" :src="variable.value"/>
+                            </div>
+                            <div v-if="variable.type==='v'" style="width:120px; height:80px; cursor:pointer; background-color:#000; text-align:center; line-height:80px;" @click="doPreview(variable.value, 'video')">
+                                <span style="padding:10px 15px; background-color:rgba(255,255,255,.2); border:2px solid #fff; border-radius:12px;">
+                                    <span style="color:rgb(255, 255, 255); font-size:30px; position:relative; top:6px; left:3px;" class="feather-icon-play"></span>
+                                </span>
+                            </div>
+                            <div v-if="variable.type==='a'" style="width:120px; height:80px; cursor:pointer; background-color:#000; text-align:center; line-height:80px;" @click="doPreview(variable.value, 'audio')">
+                                <span style="padding:10px 15px; background-color:rgba(255,255,255,.2); border:2px solid #fff; border-radius:12px;">
+                                    <span style="color:rgb(255, 255, 255); font-size:30px; position:relative; top:6px;" class="feather-icon-music"></span>
+                                </span>
+                            </div>
+                            <el-input v-if="variable.type==='t'" v-model="variable.value" style="width:380px;" type="textarea" readonly rows="4"></el-input>
+                            <el-select v-if="variable.type==='e'" v-model="variable.value" style="width:380px;" disabled>
+                                <el-option v-for="option in variable.radio" :key="'_show_'+variable.key+option.label+'_'+option.value" :label="option.label" :value="option.value">{{option.label}}</el-option>
+                            </el-select>
+                        </el-form-item>
+
+                        <el-form-item v-if="review.set" v-for="variable in review.set" :key="'_set_'+variable.key" :label="variable.name">
+                            <span style="position: absolute; left:-12px; top:-6px; color:red; font-size:18px;">*</span>
+                            <el-input v-if="variable.type==='b'" v-model="variable.value" style="width:380px;"></el-input>
+                            <el-input v-if="variable.type==='t'" v-model="variable.value" style="width:380px;" type="textarea" rows="4"></el-input>
+                            <el-select v-if="variable.type==='e'" v-model="variable.value" style="width:380px;">
+                                <el-option v-for="option in variable.radio" :key="'_set_'+variable.key+option.label+'_'+option.value" :label="option.label" :value="option.value">{{option.label}}</el-option>
+                            </el-select>
+                        </el-form-item>
+
+                        <el-form-item>
+                            <el-button type="primary" size="medium" @click="doReview" :loading="review.loading">确认</el-button>
+                        </el-form-item>
+
+                    </el-form>
+                </el-scrollbar>
+            </div>
+
+        </el-card>
+
+        <mi-lightbox ref="miLightBox"></mi-lightbox>
+
+    </template>
+
+</mi-frame>

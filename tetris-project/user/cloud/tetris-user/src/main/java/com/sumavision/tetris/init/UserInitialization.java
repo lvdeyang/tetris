@@ -13,6 +13,7 @@ import com.sumavision.tetris.system.role.SystemRoleDAO;
 import com.sumavision.tetris.system.role.SystemRoleGroupDAO;
 import com.sumavision.tetris.system.role.SystemRoleGroupPO;
 import com.sumavision.tetris.system.role.SystemRolePO;
+import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.user.UserClassify;
@@ -82,6 +83,7 @@ public class UserInitialization implements SystemInitialization{
 				internalRole = new SystemRolePO();
 				internalRole.setName("管理员");
 				internalRole.setAutoGeneration(true);
+				internalRole.setType(SystemRoleType.SYSTEM);
 				internalRole.setUpdateTime(now);
 				systemRoleDao.save(internalRole);
 			}
@@ -96,6 +98,7 @@ public class UserInitialization implements SystemInitialization{
 				permission = new UserSystemRolePermissionPO();
 				permission.setUserId(internalAdmin.getId());
 				permission.setRoleId(internalRole.getId());
+				permission.setRoleType(internalRole.getType());
 				permission.setAutoGeneration(true);
 				permission.setUpdateTime(now);
 				userSystemRolePermissionDao.save(permission);

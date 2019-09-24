@@ -11,6 +11,8 @@ public class ProcessParamReferenceVO extends AbstractBaseVO<ProcessParamReferenc
 	
 	private Long processId;
 	
+	private boolean removeable;
+	
 	public Set<String> getReference() {
 		return reference;
 	}
@@ -29,13 +31,23 @@ public class ProcessParamReferenceVO extends AbstractBaseVO<ProcessParamReferenc
 		return this;
 	}
 
+	public boolean isRemoveable() {
+		return removeable;
+	}
+
+	public ProcessParamReferenceVO setRemoveable(boolean removeable) {
+		this.removeable = removeable;
+		return this;
+	}
+
 	@Override
 	public ProcessParamReferenceVO set(ProcessParamReferencePO entity) throws Exception {
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setProcessId(entity.getProcessId())
-			.setReference(new HashSet<String>());
+			.setReference(new HashSet<String>())
+			.setRemoveable(entity.getAutoGeneration()==null?true:!entity.getAutoGeneration().booleanValue());
 		if(entity.getReference()!=null && !"".equals(entity.getReference())){
 			String[] primaryKeys = entity.getReference().split(ProcessParamReferencePO.KEY_SEPARATOR);
 			for(String primaryKey:primaryKeys){

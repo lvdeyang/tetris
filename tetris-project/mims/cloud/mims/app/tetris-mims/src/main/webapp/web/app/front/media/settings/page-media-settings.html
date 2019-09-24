@@ -1,0 +1,133 @@
+<mi-frame ref="frame" id="page-media-settings-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">仓库设置</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>仓库设置</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%; position:relative;">
+            <div style="position:absolute; left:0; top:0; right:0; bottom:0; padding:10px; padding-top:20px;">
+                <el-scrollbar style="height:100%;">
+                    <div style="margin-bottom:10px; margin-left:12px;">
+                        <span style="font-size:14px; margin-right:5px;">是否开启媒资审核？</span>
+                        <el-switch
+                                v-model="settings.SWITCH_MEDIA_UPLOAD_REVIEW"
+                                @change="switchMediaUploadReviewChange"
+                                active-color="#13ce66"
+                                active-value="true"
+                                inactive-value="false">
+                        </el-switch>
+                    </div>
+                    <table>
+                        <tr>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">图片上传审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_UPLOAD_PICTURE.name" readonly @click.native="selectProcess('PROCESS_UPLOAD_PICTURE')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">图片修改审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_EDIT_PICTURE.name" readonly @click.native="selectProcess('PROCESS_EDIT_PICTURE')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">图片删除审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_DELETE_PICTURE.name" readonly @click.native="selectProcess('PROCESS_DELETE_PICTURE')"></el-input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">视频上传审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_UPLOAD_VIDEO.name" readonly @click.native="selectProcess('PROCESS_UPLOAD_VIDEO')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">视频修改审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_EDIT_VIDEO.name" readonly @click.native="selectProcess('PROCESS_EDIT_VIDEO')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">视频删除审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_DELETE_VIDEO.name" readonly @click.native="selectProcess('PROCESS_DELETE_VIDEO')"></el-input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">音频上传审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_UPLOAD_AUDIO.name" readonly @click.native="selectProcess('PROCESS_UPLOAD_AUDIO')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">音频修改审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_EDIT_AUDIO.name" readonly @click.native="selectProcess('PROCESS_EDIT_AUDIO')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">音频删除审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_DELETE_AUDIO.name" readonly @click.native="selectProcess('PROCESS_DELETE_AUDIO')"></el-input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">文本上传审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_UPLOAD_TXT.name" readonly @click.native="selectProcess('PROCESS_UPLOAD_TXT')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">文本修改审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_EDIT_TXT.name" readonly @click.native="selectProcess('PROCESS_EDIT_TXT')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">文本删除审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_DELETE_TXT.name" readonly @click.native="selectProcess('PROCESS_DELETE_TXT')"></el-input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">视频流上传审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_UPLOAD_VIDEO_STREAM.name" readonly @click.native="selectProcess('PROCESS_UPLOAD_VIDEO_STREAM')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">视频流修改审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_EDIT_VIDEO_STREAM.name" readonly @click.native="selectProcess('PROCESS_EDIT_VIDEO_STREAM')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">视频流删除审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_DELETE_VIDEO_STREAM.name" readonly @click.native="selectProcess('PROCESS_DELETE_VIDEO_STREAM')"></el-input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">音频流上传审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_UPLOAD_AUDIO_STREAM.name" readonly @click.native="selectProcess('PROCESS_UPLOAD_AUDIO_STREAM')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">音频流修改审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_EDIT_AUDIO_STREAM.name" readonly @click.native="selectProcess('PROCESS_EDIT_AUDIO_STREAM')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">音频流删除审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_DELETE_AUDIO_STREAM.name" readonly @click.native="selectProcess('PROCESS_DELETE_AUDIO_STREAM')"></el-input>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">播发媒资上传审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_UPLOAD_COMPRESS.name" readonly @click.native="selectProcess('PROCESS_UPLOAD_COMPRESS')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">播发媒资修改审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_EDIT_COMPRESS.name" readonly @click.native="selectProcess('PROCESS_EDIT_COMPRESS')"></el-input>
+                            </td>
+                            <td style="width:254px; padding:10px;">
+                                <span style="font-size:14px;">播发媒资删除审核流程：</span>
+                                <el-input style="margin-top:5px;" v-model="settings.PROCESS_DELETE_COMPRESS.name" readonly @click.native="selectProcess('PROCESS_DELETE_COMPRESS')"></el-input>
+                            </td>
+                        </tr>
+                    </table>
+                </el-scrollbar>
+            </div>
+        </el-card>
+
+        <mi-process-dialog ref="miProcessDialog" @on-dialog-close="processSelected"></mi-process-dialog>
+
+    </template>
+
+</mi-frame>

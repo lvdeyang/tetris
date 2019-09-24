@@ -1,5 +1,7 @@
 package com.sumavision.tetris.easy.process.core;
 
+import java.util.Date;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +10,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -36,11 +40,39 @@ public class ProcessPO extends AbstractBasePO{
 	/** bpmn内容 */
 	private String bpmn;
 	
+	/** 
+	 * 用户任务绑定变量 
+	 * {
+	 * 	show:[{
+	 * 	 taskId:"任务id", 
+	 * 	 id:"变量id",
+	 * 	 key:"变量主键", 
+	 * 	 name:"变量名称", 
+	 *   type:"b[|t][|e][|i][|v][|a]}", 
+	 *   typeName:"文本[|大文本][|枚举][|图片][|视频][|音频]",
+	 * 	 redio:[{label:"标签",value:"值"}]
+	 * 	}], 
+	 *  set:[{
+	 *   taskId:"任务id", 
+	 *   id:"变量id",
+	 *   key:"变量主键", 
+	 *   name:"变量名称", 
+	 *   type:"b[|t][|e][|i][|v][|a]}", 
+	 *   typeName:"文本[|大文本][|枚举][|图片][|视频][|音频]",
+	 *   redio:[{label:"标签",value:"值"}]
+	 *  }]
+	 * }
+	 */
+	private String userTaskBindVariables;
+	
 	/** 流程类型 */
 	private ProcessType type;
 	
 	/** 临时配置文件位置 */
 	private String path;
+	
+	/** 发布时间 */
+	private Date publishTime;
 	
 	public ProcessPO(){
 		this.setUuid(new StringBufferWrapper().append("_").append(this.getUuid()).toString());
@@ -84,6 +116,17 @@ public class ProcessPO extends AbstractBasePO{
 		this.bpmn = bpmn;
 	}
 
+	@Lob
+	@Basic(fetch = FetchType.LAZY)
+	@Column(name = "USER_TASK_BIND_VARIABLES", columnDefinition = "text")
+	public String getUserTaskBindVariables() {
+		return userTaskBindVariables;
+	}
+
+	public void setUserTaskBindVariables(String userTaskBindVariables) {
+		this.userTaskBindVariables = userTaskBindVariables;
+	}
+
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "TYPE")
 	public ProcessType getType() {
@@ -101,6 +144,16 @@ public class ProcessPO extends AbstractBasePO{
 
 	public void setPath(String path) {
 		this.path = path;
+	}
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "PUBLISH_TIME")
+	public Date getPublishTime() {
+		return publishTime;
+	}
+
+	public void setPublishTime(Date publishTime) {
+		this.publishTime = publishTime;
 	}
 	
 }

@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cms.article;
 
+import java.util.Date;
 import java.util.List;
 
 import com.sumavision.tetris.cms.classify.ClassifyVO;
@@ -27,8 +28,19 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 	
 	private String articleType;
 	
+	private Boolean ifLive;
+	
 	/** 额外：栏目名称 */
 	private String columnName;
+	
+	/** 额外：栏目id */
+	private Long columnId;
+	
+	/** 额外：历史浏览时间 */
+	private Date watchTime;
+	
+	/** 额外：收藏标识 */
+	private Boolean keep;
 	
 	private List<ClassifyVO> classifies;
 	
@@ -142,6 +154,41 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 		return this;
 	}
 
+	public Boolean getIfLive() {
+		return ifLive;
+	}
+
+	public void setIfLive(Boolean ifLive) {
+		this.ifLive = ifLive;
+	}
+
+	public Long getColumnId() {
+		return columnId;
+	}
+
+	public ArticleVO setColumnId(Long columnId) {
+		this.columnId = columnId;
+		return this;
+	}
+
+	public Date getWatchTime() {
+		return watchTime;
+	}
+
+	public ArticleVO setWatchTime(Date watchTime) {
+		this.watchTime = watchTime;
+		return this;
+	}
+
+	public Boolean getKeep() {
+		return keep;
+	}
+
+	public ArticleVO setKeep(Boolean keep) {
+		this.keep = keep;
+		return this;
+	}
+
 	@Override
 	public ArticleVO set(ArticlePO entity) throws Exception {
 		this.setId(entity.getId())
@@ -154,7 +201,8 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 			.setRemark(entity.getRemark())
 			.setPreviewUrl(entity.getPreviewUrl())
 			.setType(entity.getType().toString())
-			.setArticleType(entity.getType().getName());
+			.setArticleType(entity.getType().getName())
+			.setIfLive(entity.getIfLive());
 		return this;
 	}
 	

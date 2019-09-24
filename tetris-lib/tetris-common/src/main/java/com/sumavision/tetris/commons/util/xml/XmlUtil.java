@@ -8,6 +8,7 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.SAXParserFactory;
@@ -22,7 +23,6 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.XMLFilterImpl;
-
 
 public class XmlUtil{
 	
@@ -92,6 +92,25 @@ public class XmlUtil{
             throw new RuntimeException(e);
         }
 
+	}
+	
+	public static <T> String toEasyXml(T obj,Class<T> clazz){
+		JAXBContext context;
+		try {
+			context = JAXBContext.newInstance(clazz);
+			Marshaller mar = context.createMarshaller();
+//			mar.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+			mar.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+			mar.setProperty(Marshaller.JAXB_FRAGMENT, true);// 是否省略xml头声明信息
+			
+			StringWriter writer = new StringWriter();
+			
+			mar.marshal(obj, writer);
+			
+			return writer.toString();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
         
 	/**

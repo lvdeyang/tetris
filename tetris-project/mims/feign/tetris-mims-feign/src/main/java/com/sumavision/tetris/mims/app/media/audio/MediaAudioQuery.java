@@ -38,4 +38,15 @@ public class MediaAudioQuery {
 		return JsonBodyResponseParser.parseArray(mediaAudioFeign.loadAll(), MediaAudioVO.class);
 	}
 	
+	/**
+	 * 生成文件存储预览路径(云转码使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月7日 下午4:03:27
+	 * @return String 预览路径
+	 * @throws Exception 
+	 */
+	public String buildPreviewUrl(String name, String folderUuid) throws Exception {
+		return JsonBodyResponseParser.parseObject(mediaAudioFeign.buildUrl(name, folderUuid), String.class);
+	}
 }

@@ -6,58 +6,82 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 
 @Component
 public class CsResourceQuery {
 	@Autowired
 	CsResourceDAO csSourceDao;
-	
+
 	@Autowired
-	MediaVideoQuery mediaVideoQuery;
+	MediaAVideoQuery mediaAVideoQuery;
 
+	/**
+	 * 根据cs目录id获取媒资列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long menuId 目录id
+	 * @return List<CsResourceVO> cs媒资列表
+	 */
 	public List<CsResourceVO> queryMenuResources(Long menuId) throws Exception {
-		List<CsResourcePO> resources = csSourceDao.findAll();
+		List<CsResourcePO> resources = csSourceDao.findByParentId(menuId);
 
-		List<CsResourceVO> menuResources = generateMenuResources(resources, menuId);
-
+		List<CsResourceVO> menuResources = new ArrayList<CsResourceVO>();
+		if (resources != null && resources.size() > 0) {
+			for (CsResourcePO item:resources) {
+				menuResources.add(new CsResourceVO().set(item));
+			}
+		}
 		return menuResources;
 	}
-	
-	public CsResourceVO queryResourceById(Long resourceId) throws Exception{
+
+	/**
+	 * 根据cs媒资id获取媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long resourceId 媒资id
+	 * @return CsResourceVO 媒资
+	 */
+	public CsResourceVO queryResourceById(Long resourceId) throws Exception {
 		CsResourcePO resource = csSourceDao.findOne(resourceId);
-		
+
 		return new CsResourceVO().set(resource);
 	}
 
-	private List<CsResourceVO> generateMenuResources(List<CsResourcePO> resources, Long menuId) throws Exception {
-		if (resources == null || resources.size() <= 0)
-			return null;
-		List<CsResourceVO> list = new ArrayList<CsResourceVO>();
-		for (int i = 0; i < resources.size(); i++) {
-			if (resources.get(i).getParentId() == menuId) {
-				list.add(new CsResourceVO().set(resources.get(i)));
-			}
-		}
-		return list;
-	}
-
+	/**
+	 * 根据频道id获取媒资列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long channelId 频道id
+	 * @return List<CsResourceVO> cs媒资列表
+	 */
 	public List<CsResourceVO> getResourcesFromChannelId(Long channelId) throws Exception {
-		List<CsResourcePO> resourcePOList = csSourceDao.findResourceByChannelId(channelId);
+		List<CsResourcePO> resourcePOList = csSourceDao.findByChannelId(channelId);
 		List<CsResourceVO> returnList = new ArrayList<CsResourceVO>();
 		if (resourcePOList != null && resourcePOList.size() > 0) {
-			for(CsResourcePO item : resourcePOList){
+			for (CsResourcePO item : resourcePOList) {
 				returnList.add(new CsResourceVO().set(item));
 			}
 		}
 		return returnList;
 	}
-	
-	public List<MediaVideoVO> getMIMSResources(Long id) throws Exception {
 
-		List<MediaVideoVO> mimsVideoList = mediaVideoQuery.loadAll();
+	/**
+	 * 获取mims的所有音视频媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long id cs目录id
+	 * @return List<MediaAVideoVO> mims媒资列表
+	 */
+	public List<MediaAVideoVO> getMIMSResources(Long id) throws Exception {
 
+		List<MediaAVideoVO> mimsVideoList = mediaAVideoQuery.loadAll();
+		
 		return mimsVideoList;
 	}
 }

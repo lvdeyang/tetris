@@ -20,9 +20,15 @@ public class FolderRolePermissionPO extends AbstractBasePO{
 	/** 角色id */
 	private Long roleId;
 	
+	/** 角色名称 */
+	private String roleName;
+	
 	/** 文件夹id */
 	private Long folderId;
-
+	
+	/** 是否自动生成 */
+	private Boolean autoGeneration;
+	
 	@Column(name = "ROLE_ID")
 	public Long getRoleId() {
 		return roleId;
@@ -32,6 +38,15 @@ public class FolderRolePermissionPO extends AbstractBasePO{
 		this.roleId = roleId;
 	}
 
+	@Column(name = "ROLE_NAME")
+	public String getRoleName() {
+		return roleName;
+	}
+
+	public void setRoleName(String roleName) {
+		this.roleName = roleName;
+	}
+
 	@Column(name = "FOLDER_ID")
 	public Long getFolderId() {
 		return folderId;
@@ -39,6 +54,15 @@ public class FolderRolePermissionPO extends AbstractBasePO{
 
 	public void setFolderId(Long folderId) {
 		this.folderId = folderId;
+	}
+
+	@Column(name = "AUTO_GENERATION")
+	public Boolean getAutoGeneration() {
+		return autoGeneration;
+	}
+
+	public void setAutoGeneration(Boolean autoGeneration) {
+		this.autoGeneration = autoGeneration;
 	}
 
 }

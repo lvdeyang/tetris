@@ -17,6 +17,8 @@ define([
     'mi-task-view',
     'mi-upload-dialog',
     'mi-lightbox',
+    'mi-txt-dialog',
+    'mi-tag-dialog',
     'css!' + window.APPPATH + 'front/media/audio/page-media-audio.css'
 ], function(tpl, config, context, commons, ajax, $, File, Uploader, Vue){
 
@@ -64,8 +66,11 @@ define([
                         visible:false,
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keyWords:'',
+                        way:'0',
+                        txt:'',
+                        txtTask:'',
                         task:'',
                         loading:false
                     },
@@ -74,12 +79,16 @@ define([
                         visible:false,
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keywords:'',
                         loading:false
                     },
                     upload:{
                         fileType:['audio'],
+                        multiple:false
+                    },
+                    exchange:{
+                        fileType:['txt'],
                         multiple:false
                     }
                 },
@@ -272,10 +281,23 @@ define([
                         if(typeof done === 'function') done();
                         if(status === 200){
                             var rows = self.table.rows;
-                            for(var i=0; i<rows.length; i++){
-                                if(rows[i].uuid === row.uuid){
-                                    rows.splice(i, 1);
-                                    break;
+                            var deleted = data.deleted;
+                            var processed = data.processed;
+                            if(deleted && deleted.length>0){
+                                for(var i=0; i<rows.length; i++){
+                                    if(rows[i].uuid === row.uuid){
+                                        rows.splice(i, 1);
+                                        break;
+                                    }
+                                }
+                            }
+                            if(processed && processed.length>0){
+                                var newEntity = processed[0];
+                                for(var i=0; i<rows.length; i++){
+                                    if(rows[i].uuid === row.uuid){
+                                        rows.splice(i, 1, newEntity);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -470,8 +492,11 @@ define([
                     var self = this;
                     self.dialog.addAudio.name = '';
                     self.dialog.addAudio.remark = '';
-                    self.dialog.addAudio.tags = '';
+                    self.dialog.addAudio.tags = [];
                     self.dialog.addAudio.keyWords = '';
+                    self.dialog.addAudio.way = '0';
+                    self.dialog.addAudio.txt = '';
+                    self.dialog.addAudio.txtTask = '';
                     self.dialog.addAudio.task = '';
                     self.dialog.addAudio.visible = false;
                     self.dialog.addAudio.loading = false;
@@ -482,7 +507,7 @@ define([
                     self.dialog.editAudio.id = '';
                     self.dialog.editAudio.name = '';
                     self.dialog.editAudio.remark = '';
-                    self.dialog.editAudio.tags = '';
+                    self.dialog.editAudio.tags = [];
                     self.dialog.editAudio.keyWords = '';
                     self.dialog.editAudio.visible = false;
                     self.dialog.editAudio.loading = false;
@@ -490,39 +515,61 @@ define([
                 //添加视频媒资任务
                 addMediaAudioTask:function(){
                     var self = this;
-                    var task = {
-                        name:self.dialog.addAudio.task.name,
-                        size:self.dialog.addAudio.task.size,
-                        mimetype:self.dialog.addAudio.task.mimetype,
-                        lastModified:self.dialog.addAudio.task.lastModified,
-                    };
-                    self.dialog.addAudio.loading = true;
-                    ajax.post('/media/audio/task/add', {
-                        task: $.toJSON(task),
-                        name:self.dialog.addAudio.name,
-                        tags:self.dialog.addAudio.tags,
-                        keyWords:self.dialog.addAudio.keyWords,
-                        remark:self.dialog.addAudio.remark,
-                        folderId:self.current.id
-                    }, function(data, status){
-                        self.dialog.addAudio.loading = false;
-                        if(status !== 200) return;
-                        if(self.$refs.taskView.isVisible()){
-                            self.$refs.taskView.open([data]);
-                        }else{
-                            self.$refs.taskView.open('/media/audio/query/tasks');
-                        }
-                        var uploadfiles = [];
-                        uploadfiles.push(new File(data.uuid, 0, self.dialog.addAudio.task.file));
-                        var mediaAudioUploader = context.getProp('mediaAudioUploader');
-                        if(mediaAudioUploader){
-                            mediaAudioUploader.setContext(self);
-                            mediaAudioUploader.push(uploadfiles);
-                        }else{
-                            createUploader(self, uploadfiles);
-                        }
-                        self.handleAddAudioClose();
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
+                    if (self.dialog.addAudio.way == '0' || self.dialog.addAudio.way == '1'){
+                        var task = self.dialog.addAudio.way == '0' ? {
+                            name:self.dialog.addAudio.task.name,
+                            size:self.dialog.addAudio.task.size,
+                            mimetype:self.dialog.addAudio.task.mimetype,
+                            lastModified:self.dialog.addAudio.task.lastModified
+                        } : {
+                            name:self.dialog.addAudio.txtTask.name,
+                            size:self.dialog.addAudio.txtTask.size,
+                            mimetype:self.dialog.addAudio.txtTask.mimetype,
+                            lastModified:self.dialog.addAudio.txtTask.lastModified
+                        };
+                        self.dialog.addAudio.loading = true;
+                        ajax.post('/media/audio/task/add', {
+                            task: $.toJSON(task),
+                            name:self.dialog.addAudio.name,
+                            tags:(self.dialog.addAudio.tags.length > 0) ? self.dialog.addAudio.tags.join(',') : null,
+                            keyWords:self.dialog.addAudio.keyWords,
+                            remark:self.dialog.addAudio.remark,
+                            folderId:self.current.id
+                        }, function(data, status){
+                            self.dialog.addAudio.loading = false;
+                            if(status !== 200) return;
+                            if(self.$refs.taskView.isVisible()){
+                                self.$refs.taskView.open([data]);
+                            }else{
+                                self.$refs.taskView.open('/media/audio/query/tasks');
+                            }
+                            var uploadfiles = [];
+                            uploadfiles.push(new File(data.uuid, 0, self.dialog.addAudio.way == '0' ? self.dialog.addAudio.task.file: self.dialog.addAudio.txtTask.file));
+                            var mediaAudioUploader = context.getProp('mediaAudioUploader');
+                            if(mediaAudioUploader){
+                                mediaAudioUploader.setContext(self);
+                                mediaAudioUploader.push(uploadfiles);
+                            }else{
+                                createUploader(self, uploadfiles);
+                            }
+                            self.handleAddAudioClose();
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
+                    }else{
+                        var questData = {
+                            name:self.dialog.addAudio.name,
+                            tags:(self.dialog.addAudio.tags.length > 0) ? self.dialog.addAudio.tags.join(',') : null,
+                            keyWords:self.dialog.addAudio.keyWords,
+                            remark:self.dialog.addAudio.remark,
+                            folderId:self.current.id,
+                            txtId:self.dialog.addAudio.txt.id
+                        };
+                        ajax.post('/media/audio/task/add/from/txt', questData, function(data, status){
+                            self.dialog.addAudio.loading = false;
+                            if(status !== 200) return;
+                            self.table.rows.push(data);
+                            self.handleAddAudioClose();
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
+                    }
                 },
                 //编辑音频媒资任务
                 editMediaAudioTask:function(){
@@ -530,7 +577,7 @@ define([
                     self.dialog.editAudio.loading = true;
                     ajax.post('/media/audio/task/edit/' + self.dialog.editAudio.id, {
                         name:self.dialog.editAudio.name,
-                        tags:self.dialog.editAudio.tags,
+                        tags:(self.dialog.editAudio.tags.length > 0) ? self.dialog.editAudio.tags.join(",") : null,
                         keyWords:self.dialog.editAudio.keyWords,
                         remark:self.dialog.editAudio.remark
                     }, function(data, status){
@@ -545,6 +592,33 @@ define([
                         }
                         self.handleEditAudioClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                //选择文本仓库点击
+                handleExchange:function(){
+                    var self = this;
+                    self.$refs.selectTxt.open();
+                },
+                selectedTxt:function(txt, startLoading, endLoading, done){
+                    var self = this;
+                    self.dialog.addAudio.txt = txt;
+                    done();
+                },
+                //选择本地文本点击
+                handleUploadExchange:function(){
+                    var self = this;
+                    self.$refs.exchangeDialog.open();
+                },
+                exchangeFileSelected:function(files, done){
+                    var self = this;
+                    var file = files[0];
+                    self.dialog.addAudio.txtTask = {
+                        name:file.name,
+                        size:file.size,
+                        mimetype:file.type,
+                        lastModified:file.lastModified,
+                        file:file
+                    };
+                    done();
                 },
                 //上传按钮点击
                 handleUpload:function(){
@@ -621,6 +695,42 @@ define([
                             title: '提示',
                             message: '由于您在上传时关闭了页面，需要再次选择相同文件才能续传！'
                         });
+                    }
+                },
+                doProcessPreview:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/process/generate/url', {
+                        processInstanceId:row.processInstanceId
+                    }, function(url){
+                        window.open(url, '_blank', 'status=no,menubar=yes,toolbar=no,width=1366,height=580,left=100,top=100');
+                    });
+                },
+
+                handleTagAdd: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.addAudio.tags);
+                },
+                handleTagEdit: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.editAudio.tags);
+                },
+                selectedTags: function (buff, tags, startLoading, endLoading, close) {
+                    var self = this;
+                    startLoading();
+                    buff.splice(0,buff.length);
+                    for(var i=0; i<tags.length; i++){
+                        buff.push(tags[i].name);
+                    }
+                    endLoading();
+                    close();
+                },
+                handleTagRemove:function(tag, value){
+                    for(var i=0; i<tag.length; i++){
+                        if(tag[i] === value){
+                            tag.splice(i, 1);
+                            break;
+                        }
                     }
                 }
             },

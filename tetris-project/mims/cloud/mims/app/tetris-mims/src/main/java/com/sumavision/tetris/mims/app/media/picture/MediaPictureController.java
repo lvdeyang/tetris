@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -18,9 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.easy.process.core.ProcessQuery;
+import com.sumavision.tetris.easy.process.core.ProcessService;
+import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -35,6 +41,10 @@ import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureNotExi
 import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatusErrorWhenUploadCancelException;
 import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatusErrorWhenUploadingException;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
+import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
@@ -61,6 +71,18 @@ public class MediaPictureController {
 	
 	@Autowired
 	private MediaPictureDAO mediaPictureDao;
+	
+	@Autowired
+	private MediaSettingsDAO mediaSettingsDao;
+	
+	@Autowired
+	private ProcessQuery processQuery;
+	
+	@Autowired
+	private ProcessService processService;
+	
+	@Autowired
+	private MimsServerPropsQuery serverPropsQuery; 
 	
 	/**
 	 * 加载文件夹下的图片媒资<br/>
@@ -119,7 +141,17 @@ public class MediaPictureController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaPicturePO entity = mediaPictureService.addTask(user, name, null, null, remark, taskParam, folder);
+		List<String> tagList = new ArrayList<String>();
+		if (tags!=null && !tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaPicturePO entity = mediaPictureService.addTask(user, name, tagList, keyWordList, remark, taskParam, folder);
 		
 		return new MediaPictureVO().set(entity);
 		
@@ -155,7 +187,17 @@ public class MediaPictureController {
 			throw new MediaPictureNotExistException(id);
 		}
 		
-		MediaPicturePO entity = mediaPictureService.editTask(user, picture, name, null, null, remark);
+		List<String> tagList = new ArrayList<String>();
+		if(tags != null){
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		List<String> keyWordList = new ArrayList<String>();
+		if(keyWords != null){
+			keyWordList = Arrays.asList(keyWords.split(","));
+		}
+		
+		MediaPicturePO entity = mediaPictureService.editTask(user, picture, name, tagList, keyWordList, remark);
 		
 		return new MediaPictureVO().set(entity);
 		
@@ -238,8 +280,8 @@ public class MediaPictureController {
 		long endOffset = request.getLongValue("endOffset");
 		
 		//参数错误
-		if((beginOffset + endOffset) != blockSize){
-			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+		if((beginOffset + blockSize) != endOffset){
+			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
 		MediaPicturePO task = mediaPictureDao.findByUuid(uuid);
@@ -292,6 +334,25 @@ public class MediaPictureController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
+			if(task.getReviewStatus() != null){
+				//开启审核流程
+				Long companyId = Long.valueOf(user.getGroupId());
+				MediaSettingsPO mediaSettings = mediaSettingsDao.findByCompanyIdAndType(companyId, MediaSettingsType.PROCESS_UPLOAD_PICTURE);
+				Long processId = Long.valueOf(mediaSettings.getSettings().split("@@")[0]);
+				ProcessVO process = processQuery.findById(processId);
+				JSONObject variables = new JSONObject();
+				variables.put("name", task.getName());
+				variables.put("tags", task.getTags());
+				variables.put("keyWords", task.getKeyWords());
+				variables.put("media", serverPropsQuery.generateHttpPreviewUrl(task.getPreviewUrl()));
+				variables.put("remark", task.getRemarks());
+				variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(task.getFolderId()));
+				variables.put("_pa6_id", task.getId());
+				String category = new StringBufferWrapper().append("上传图片：").append(task.getName()).toString();
+				String business = new StringBufferWrapper().append("mediaPicture:").append(task.getId()).toString();
+				String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);
+				task.setProcessInstanceId(processInstanceId);
+			}
 			mediaPictureDao.save(task);
 		}
 		
@@ -407,6 +468,8 @@ public class MediaPictureController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 上午9:07:53
 	 * @param @PathVariable Long id 媒资id
+	 * @return deleted List<MediaPictureVO> 删除列表
+	 * @return processed List<MediaPictureVO> 待审核列表
 	 */
 	@JsonBody
 	@ResponseBody
@@ -427,9 +490,7 @@ public class MediaPictureController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaPictureService.remove(new ArrayListWrapper<MediaPicturePO>().add(media).getList());
-		
-		return null;
+		return mediaPictureService.remove(new ArrayListWrapper<MediaPicturePO>().add(media).getList());
 	}
 	
 	/**

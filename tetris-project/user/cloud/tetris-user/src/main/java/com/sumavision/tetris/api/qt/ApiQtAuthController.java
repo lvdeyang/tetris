@@ -96,15 +96,15 @@ public class ApiQtAuthController {
 			String sessionToken,
 			HttpServletRequest request) throws Exception{
 		
-		HttpSession session = HttpSessionContext.get(sessionToken);
-		if(session == null){
-			throw new ImageVerificationCodeTimeoutException(username);
-		}
-		
-		String existCode = session.getAttribute("verification-code-image").toString();
-		if(!existCode.equals(verificationCode)){
-			throw new ImageVerificationCodeErrorException(username);
-		}
+//		HttpSession session = HttpSessionContext.get(sessionToken);
+//		if(session == null){
+//			throw new ImageVerificationCodeTimeoutException(username);
+//		}
+//		
+//		String existCode = session.getAttribute("verification-code-image").toString();
+//		if(!existCode.equals(verificationCode)){
+//			throw new ImageVerificationCodeErrorException(username);
+//		}
 		
 		String token = loginService.doPasswordLogin(username, password, null);
 		

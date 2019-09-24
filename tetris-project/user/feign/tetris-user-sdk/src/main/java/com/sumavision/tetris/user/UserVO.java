@@ -1,5 +1,7 @@
 package com.sumavision.tetris.user;
 
+import java.util.List;
+
 /**
  * 登录用户信息<br/>
  * <p>特殊注明：用uuid字段存储userId</p>
@@ -48,11 +50,38 @@ public class UserVO{
 	/** 用户隶属组织名称 */
 	private String groupName;
 	
+	/** 用户隶属组织首页地址 */
+	private String groupHomeLink;
+	
+	/** 皮肤链接 */
+	private String themeUrl;
+	
+	/** logo */
+	private String logo;
+	
+	/** logo样式 */
+	private String logoStyle;
+	
+	/** logo缩写 */
+	private String logoShortName;
+	
+	/** 平台全名 */
+	private String platformFullName;
+	
+	/** 平台名称缩写 */
+	private String platformShortName;
+	
 	/** 素材库文件夹id */
 	private Long rootFolderId;
 	
 	/** 素材库文件夹名称 */
 	private String rootFolderName;
+	
+	/** 业务角色id,以“,”分割 */
+	private String businessRoles;
+	
+	/** 用户标签 */
+	private List<String> tags;
 
 	public Long getId() {
 		return id;
@@ -180,6 +209,69 @@ public class UserVO{
 		return this;
 	}
 
+	public String getGroupHomeLink() {
+		return groupHomeLink;
+	}
+
+	public UserVO setGroupHomeLink(String groupHomeLink) {
+		this.groupHomeLink = groupHomeLink;
+		return this;
+	}
+
+	public String getThemeUrl() {
+		return themeUrl;
+	}
+
+	public UserVO setThemeUrl(String themeUrl) {
+		this.themeUrl = themeUrl;
+		return this;
+	}
+
+	public String getLogo() {
+		return logo;
+	}
+
+	public UserVO setLogo(String logo) {
+		this.logo = logo;
+		return this;
+	}
+
+	public String getLogoStyle() {
+		return logoStyle;
+	}
+
+	public UserVO setLogoStyle(String logoStyle) {
+		this.logoStyle = logoStyle;
+		return this;
+	}
+
+	public String getLogoShortName() {
+		return logoShortName;
+	}
+
+	public UserVO setLogoShortName(String logoShortName) {
+		this.logoShortName = logoShortName;
+		return this;
+	}
+
+	public String getPlatformFullName() {
+		return platformFullName;
+	}
+
+	public UserVO setPlatformFullName(String platformFullName) {
+		this.platformFullName = platformFullName;
+		return this;
+	}
+
+	public String getPlatformShortName() {
+		return platformShortName;
+	}
+
+	public UserVO setPlatformShortName(String platformShortName) {
+		this.platformShortName = platformShortName;
+		return this;
+	}
+
 	public Long getRootFolderId() {
 		return rootFolderId;
 	}
@@ -198,4 +290,21 @@ public class UserVO{
 		return this;
 	}
 
+	public String getBusinessRoles() {
+		return businessRoles;
+	}
+
+	public UserVO setBusinessRoles(String businessRoles) {
+		this.businessRoles = businessRoles;
+		return this;
+	}
+
+	public List<String> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<String> tags) {
+		this.tags = tags;
+	}
+	
 }
