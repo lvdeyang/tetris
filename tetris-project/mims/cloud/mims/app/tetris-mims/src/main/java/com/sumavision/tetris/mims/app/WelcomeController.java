@@ -28,8 +28,6 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
-import javassist.expr.NewArray;
-
 @Controller
 @RequestMapping(value = "")
 public class WelcomeController {
