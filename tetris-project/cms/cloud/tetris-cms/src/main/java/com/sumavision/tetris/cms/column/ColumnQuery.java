@@ -115,7 +115,7 @@ public class ColumnQuery {
 						columnVO.setSubscribed(true);
 						rootcolumn.setSubColumnSubscribed(true);
 					}
-					columnVOs.add(new ColumnVO().set(column));
+					columnVOs.add(columnVO);
 				}
 			}
 			if (columnVOs.size() > 0) {

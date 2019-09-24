@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.cs.schedule.ScheduleVO;
+
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ScreenService {
@@ -53,9 +55,9 @@ public class ScreenService {
 				screenPO.setUpdateTime(new Date());
 
 				screenPOList.add(screenPO);
-				screenVOList.add(new ScreenVO().set(screenPO));
 			}
 			screenDao.save(screenPOList);
+			screenVOList.addAll(ScreenVO.getConverter(ScreenVO.class).convert(screenPOList, ScreenVO.class));
 		}
 
 		return screenVOList;

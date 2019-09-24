@@ -197,6 +197,6 @@ public class ApiServerMediaVideoController {
 	public Object addFar(String name, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		return mediaVideoService.addTask(user, name, httpUrl, ftpUrl);
+		return mediaVideoService.addTask(user, name, "", httpUrl, ftpUrl);
 	}
 }

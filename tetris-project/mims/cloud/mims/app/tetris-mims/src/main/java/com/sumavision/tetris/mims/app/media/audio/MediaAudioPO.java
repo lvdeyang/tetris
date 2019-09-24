@@ -99,6 +99,12 @@ public class MediaAudioPO extends AbstractBasePO{
 	
 	/** 审核流程id */
 	private String processInstanceId;
+	
+	/** 是否加密 */
+	private Boolean encryption;
+	
+	/** 加密文件地址 */
+	private String encryptionUrl;
 
 	@Column(name = "LAST_MODIFIED")
 	public Long getLastModified() {
@@ -301,6 +307,24 @@ public class MediaAudioPO extends AbstractBasePO{
 		this.processInstanceId = processInstanceId;
 	}
 
+	@Column(name = "IF_ENCRYPTION")
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public void setEncryption(Boolean encryption) {
+		this.encryption = encryption;
+	}
+
+	@Column(name = "ENCRYPTION_URL")
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public void setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
+	}
+
 	/**
 	 * 转换为历史数据<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -361,6 +385,8 @@ public class MediaAudioPO extends AbstractBasePO{
 		copy_video.setTags(this.getTags());
 		copy_video.setKeyWords(this.getKeyWords());
 		copy_video.setUploadStatus(this.getUploadStatus());
+		copy_video.setEncryption(this.getEncryption());
+		copy_video.setEncryptionUrl(this.getEncryptionUrl());
 		return copy_video;
 	}
 	

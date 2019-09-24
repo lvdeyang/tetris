@@ -53,6 +53,9 @@ public class MediaVideoStreamService {
 	private MediaVideoStreamUrlRelationService mediaVideoStreamUrlRelationService;
 	
 	@Autowired
+	private MediaVideoStreamUrlRelationQuery mediaVideoStreamUrlRelationQuery;
+	
+	@Autowired
 	private MediaVideoStreamUrlRelationDAO mediaVideoStreamUrlRelationDao;
 	
 	@Autowired
@@ -180,11 +183,16 @@ public class MediaVideoStreamService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月17日 下午3:43:03
 	 * @param Collection<Long> ids 视频流id列表
+	 * @return List<MediaVideoStreamVO> 要删除的视频流媒资
 	 */
-	public void removeByIds(Collection<Long> ids) throws Exception{
+	public List<MediaVideoStreamVO> removeByIds(Collection<Long> ids) throws Exception{
 		List<MediaVideoStreamPO> medias = mediaVideoStreamDao.findAll(ids);
-		if (medias == null || medias.isEmpty()) return; 
+		for (MediaVideoStreamPO media : medias) {
+			media.setPreviewUrl(mediaVideoStreamUrlRelationQuery.getUrlFromStreamId(media.getId()));
+		}
+		if (medias == null || medias.isEmpty()) return null; 
 		remove(medias);
+		return MediaVideoStreamVO.getConverter(MediaVideoStreamVO.class).convert(medias, MediaVideoStreamVO.class);
 	}
 	
 	/**

@@ -1,6 +1,6 @@
 package com.sumavision.tetris.mims.app.media.api.qt;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
-import com.sumavision.tetris.mims.app.folder.FolderPO;
-import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioItemType;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
@@ -68,25 +66,32 @@ public class ApiQtMediaController {
 	@ResponseBody
 	@RequestMapping(value = "/va/load/all")
 	public Object loadAll(HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		
 		List<MediaVideoVO> videoVOs = mediaVideoQuery.loadAll();
 		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAll();
-		List<MediaAudioVO> recommend = mediaAudioQuery.loadAllByTags();
-		List<MediaAudioVO> hot = mediaAudioQuery.loadHotList();
+//		List<MediaAudioVO> recommend = mediaAudioQuery.loadAllByUserTags(user);
+//		List<MediaAudioVO> hot = mediaAudioQuery.loadHotList(1);
+		List<MediaAudioVO> recommend = mediaAudioQuery.loadRecommend(user);
 		
+//		MediaAudioVO recommendRoot = new MediaAudioVO();
+//		recommendRoot.setName("个人推荐");
+//		recommendRoot.setType(MediaAudioItemType.FOLDER.toString());
+//		recommendRoot.setChildren(recommend);
+//		
+//		MediaAudioVO hotRoot = new MediaAudioVO();
+//		hotRoot.setName("热门推荐");
+//		hotRoot.setType(MediaAudioItemType.FOLDER.toString());
+//		hotRoot.setChildren(hot);
 		MediaAudioVO recommendRoot = new MediaAudioVO();
-		recommendRoot.setName("个人推荐");
+		recommendRoot.setName("推荐");
 		recommendRoot.setType(MediaAudioItemType.FOLDER.toString());
 		recommendRoot.setChildren(recommend);
-		
-		MediaAudioVO hotRoot = new MediaAudioVO();
-		hotRoot.setName("热门推荐");
-		hotRoot.setType(MediaAudioItemType.FOLDER.toString());
-		hotRoot.setChildren(hot);
 		
 		return new HashMapWrapper<String, Object>().put("videos", videoVOs)
 				   .put("audios", audioVOs)
 				   .put("recommend", new ArrayListWrapper<MediaAudioVO>().add(recommendRoot).getList())
-				   .put("hot", new ArrayListWrapper<MediaAudioVO>().add(hotRoot).getList())
+//				   .put("hot", new ArrayListWrapper<MediaAudioVO>().add(hotRoot).getList())
 				   .getMap();
 		
 	}

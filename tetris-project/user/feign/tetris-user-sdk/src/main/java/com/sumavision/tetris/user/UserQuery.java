@@ -116,6 +116,19 @@ public class UserQuery {
 		return JsonBodyResponseParser.parseObject(userFeign.listByCompanyIdWithExcept(companyId, JSON.toJSONString(except), currentPage, pageSize), Map.class);
 	}
 	
+	/**
+	 * 修改一个用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月19日 下午4:54:11
+	 * @param Long id 用户id
+	 * @param String tags 修改的标签(全量)
+	 * @return UserVO 修改后的数据
+	 */
+	public UserVO edit(Long id, String tags) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.edit(id, tags), UserVO.class);
+	}
+	
 	/***************************************************
 	 ***************************************************
 	 ***************************************************/

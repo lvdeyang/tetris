@@ -39,7 +39,7 @@ public class Adapter {
 	 * 
 	 * @return TemplatesResponseVO xml解析后的数据结构
 	 */
-	public TemplatesResponseVO getTemplate(AddTaskVO getTemplates) {
+	public TemplatesResponseVO getTemplate(AddTaskVO getTemplates) throws Exception{
 		String questXmlString = XmlUtil.toEasyXml(getTemplates, AddTaskVO.class);
 
 		String requestGetTemplates = HttpRequestUtil.httpXmlPost(RequestUrlType.GET_TEMPLETE_NAME_LIST_URL.getUrl(),
@@ -58,7 +58,7 @@ public class Adapter {
 	 * 
 	 * @return AddTaskResponseVO xml解析后的数据结构
 	 */
-	public AddTaskResponseVO addTask(AddTaskVO addTask) throws IOException {
+	public AddTaskResponseVO addTask(AddTaskVO addTask) throws Exception {
 		String questXmlString = XmlUtil.toEasyXml(addTask, AddTaskVO.class);
 		
 		System.out.println(questXmlString);
@@ -78,7 +78,7 @@ public class Adapter {
 	 * 
 	 * @return GetStatusResponseVO xml解析后的数据结构
 	 */
-	public GetStatusResponseVO questStatus(AddTaskVO questStatus) {
+	public GetStatusResponseVO questStatus(AddTaskVO questStatus) throws Exception {
 		String questXmlString = XmlUtil.toEasyXml(questStatus, AddTaskVO.class);
 
 		String requestGetStatus = HttpRequestUtil.httpXmlPost(RequestUrlType.GET_STATUS.getUrl(), questXmlString);
@@ -170,10 +170,10 @@ public class Adapter {
 	 * 
 	 * @return String
 	 */
-	public String changeFtpToHttp(String ftpUrl){
+	public String changeFtpToHttp(String ftpUrl) throws Exception{
 		String httpPath = null;
 		
-		String port = "8085";
+		String port = mimsServerPropsQuery.queryProps().getPort();
 		
 		String[] split;
 		

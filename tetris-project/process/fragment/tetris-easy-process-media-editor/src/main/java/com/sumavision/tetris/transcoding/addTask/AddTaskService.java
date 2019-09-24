@@ -21,6 +21,7 @@ import com.sumavision.tetris.transcoding.RequestCmdType;
 import com.sumavision.tetris.transcoding.addTask.requestVO.AddTaskVO;
 import com.sumavision.tetris.transcoding.addTask.requestVO.MsgHeaderVO;
 import com.sumavision.tetris.transcoding.addTask.requestVO.SourceVO;
+import com.sumavision.tetris.transcoding.addTask.requestVO.SourcesVO;
 import com.sumavision.tetris.transcoding.addTask.requestVO.SrcURIVO;
 import com.sumavision.tetris.transcoding.addTask.requestVO.TargetVO;
 import com.sumavision.tetris.transcoding.addTask.requestVO.TranscodeJobsVO;
@@ -62,13 +63,15 @@ public class AddTaskService {
 		transcodeVO.setId("");
 		transcodeVO.setType("file");
 		transcodeVO.setPriority("50");
-		transcodeVO.setSource(new ArrayListWrapper<SourceVO>().getList());
 		transcodeVO.setTarget(new TargetVO());
 		ArrayListWrapper<String> mediaUuids = new ArrayListWrapper<String>();
 		for (TranscodeMediaVO media : mediaVOs) {
 			mediaUuids.add(media.getUuid());
 		}
 		HashMapWrapper<String, MediaAVideoVO> map = mediaAVideoQuery.getByUuids(mediaUuids.getList());
+		SourcesVO sourcesVO = new SourcesVO();
+		sourcesVO.setName("transcode");
+		sourcesVO.setSource(new ArrayListWrapper<SourceVO>().getList());
 		for (TranscodeMediaVO media : mediaVOs) {
 			SrcURIVO src = new SrcURIVO();
 			src.setName("");
@@ -82,8 +85,9 @@ public class AddTaskService {
 			source.setSrcURI(src);
 			source.setStartTime(media.getStartTime());
 			source.setEndTime(media.getEndTime());
-			transcodeVO.getSource().add(source);
+			sourcesVO.getSource().add(source);
 		}
+		transcodeVO.setSources(sourcesVO);
 		FolderVO folder = folderQuery.getById(folderId);
 		transcodeVO.getTarget().setTargetURI(adapter.addTreatyToUrl(mediaAVideoQuery.buildUrl(folder, name)));
 		transcodeVO.getTarget().setTranscodeTargetParams(param);

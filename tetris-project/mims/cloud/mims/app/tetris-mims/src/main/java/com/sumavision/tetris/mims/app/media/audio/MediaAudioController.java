@@ -642,7 +642,7 @@ public class MediaAudioController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaAudioService.downloadAdd(id);
+		mediaAudioService.downloadAdd(user, id);
 		
 		Map<String, String> result = new HashMapWrapper<String, String>().put("name", media.getFileName())
 																		 .put("uri", media.getPreviewUrl())
@@ -663,6 +663,7 @@ public class MediaAudioController {
 	@ResponseBody
 	@RequestMapping(value = "/download")
 	public Object downloadAdd(Long id, HttpServletRequest request) throws Exception{
-		return mediaAudioService.downloadAdd(id);
+		UserVO user = userQuery.current();
+		return mediaAudioService.downloadAdd(user, id);
 	}
 }

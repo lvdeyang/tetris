@@ -48,6 +48,13 @@ public interface TagDAO extends BaseDAO<TagPO>{
 	@Query(value = "SELECT tag.* FROM TETRIS_TAG tag "
 			+ "LEFT JOIN TETRIS_TAG_GROUP_PERMISSION permission "
 			+ "ON tag.id = permission.tag_id "
+			+ "WHERE permission.group_id = ?1 "
+			+ "AND tag.name in ?2", nativeQuery = true)
+	public List<TagPO> findByNameIn(String groupId, List<String> names);
+	
+	@Query(value = "SELECT tag.* FROM TETRIS_TAG tag "
+			+ "LEFT JOIN TETRIS_TAG_GROUP_PERMISSION permission "
+			+ "ON tag.id = permission.tag_id "
 			+ "WHERE tag.id <> ?1 "
 			+ "AND permission.group_id = ?2 "
 			+ "AND tag.name = ?3", nativeQuery = true)

@@ -1,5 +1,7 @@
 package com.sumavision.tetris.mims.app.media.stream.video.api.server;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -19,6 +21,7 @@ import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFol
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamUrlRelationQuery;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -70,16 +73,14 @@ public class ApiServerStreamVideoController {
 		
 		UserVO user = userQuery.current();
 		
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO_STREAM.toString());
-		Long folderId = folder.getId();
-		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
+		List<FolderPO> folderPOs = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO_STREAM.toString());
+		if (folderPOs == null || folderPOs.isEmpty()) {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
 		List<String> previewUrls = JSON.parseArray(previewUrl,String.class);
 		
-		return  mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrls, folder);
+		return  mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrls, folderPOs.get(0));
 		
 	}
 	
@@ -106,14 +107,12 @@ public class ApiServerStreamVideoController {
 		
 		UserVO user = userQuery.current();
 		
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO_STREAM.toString());
-		Long folderId = folder.getId();
-		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
+		List<FolderPO> folderPOs = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO_STREAM.toString());
+		if (folderPOs == null || folderPOs.isEmpty()) {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		return  mediaVideoStreamService.addTask(user, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folder);
+		return  mediaVideoStreamService.addTask(user, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folderPOs.get(0));
 		
 	}
 	
@@ -129,7 +128,7 @@ public class ApiServerStreamVideoController {
 	@ResponseBody
 	@RequestMapping(value = "/load/all")
 	public Object loadAll(HttpServletRequest request) throws Exception{
-		return mediaVideoStreamQuery.loadAllByList();
+		return mediaVideoStreamQuery.load(0l);
 	}
 	
 	/**
@@ -164,7 +163,34 @@ public class ApiServerStreamVideoController {
 			String mediaIds, 
 			HttpServletRequest request) throws Exception{
 		List<Long> ids = JSON.parseArray(mediaIds, Long.class);
-		mediaVideoStreamService.removeByIds(ids);
+		List<MediaVideoStreamVO> medias = mediaVideoStreamService.removeByIds(ids);
+		
+		List<String> mediaNames = new ArrayList<String>();
+		for (MediaVideoStreamVO media : medias) {
+			List<String> urls = media.getPreviewUrl();
+			if (urls != null && !urls.isEmpty()) {
+				String[] paths = urls.get(0).split("/");
+				String previewUrlFileName = paths[paths.length - 1];
+				String mediaName = previewUrlFileName.split("\\.")[0];
+				mediaNames.add(mediaName);
+			}
+		}
+		if (mediaNames.isEmpty()) return null;
+		
+		String filePath = "/usr/sbin/sumavision/SRS-2.0-R4/srs-2.0-r4/trunk/objs/nginx/html/live";
+		File hlsFile = new File(filePath);
+		if (hlsFile.exists()) {
+			File[] fileList = hlsFile.listFiles();
+			for (File file : fileList) {
+				String fileName = file.getName();
+				for (String mediaName : mediaNames) {
+					if (file.exists() && (fileName.matches(mediaName + "-.*\\.ts") || fileName.equals(mediaName + ".m3u8"))) {
+						file.delete();
+					}
+				}
+			}
+		}
+		
 		return null;
 	}
 }

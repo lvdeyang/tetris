@@ -1,6 +1,7 @@
 package com.sumavision.tetris.cs.schedule;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
@@ -12,6 +13,8 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 	private String broadDate;
 	
 	private String remark;
+	
+	private ProgramVO program;
 
 	public Long getChannelId() {
 		return channelId;
@@ -46,6 +49,15 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 
 	public ScheduleVO setRemark(String remark) {
 		this.remark = remark;
+		return this;
+	}
+
+	public ProgramVO getProgram() {
+		return program;
+	}
+
+	public ScheduleVO setProgram(ProgramVO program) {
+		this.program = program;
 		return this;
 	}
 

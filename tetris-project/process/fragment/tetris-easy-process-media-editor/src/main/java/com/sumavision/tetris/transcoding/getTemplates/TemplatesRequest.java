@@ -27,7 +27,7 @@ public class TemplatesRequest {
 	 * 
 	 * @return List<String> 模板名称列表
 	 */
-	public List<String> getTemplates(){
+	public List<String> getTemplates() throws Exception{
 		MsgHeaderVO msgHeader = new MsgHeaderVO();
 		msgHeader.setTransactionId(adapter.getTransactionId());
 		msgHeader.setCmdType(RequestCmdType.GET_TEMPLATE_NAME_LIST.getTypeName());

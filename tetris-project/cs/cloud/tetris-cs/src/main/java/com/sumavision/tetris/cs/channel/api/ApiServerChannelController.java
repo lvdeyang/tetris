@@ -1,6 +1,4 @@
-package com.sumavision.tetris.cs.channel;
-
-import java.util.List;
+package com.sumavision.tetris.cs.channel.api;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -9,23 +7,29 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.cs.channel.BroadWay;
+import com.sumavision.tetris.cs.channel.ChannelDAO;
+import com.sumavision.tetris.cs.channel.ChannelPO;
+import com.sumavision.tetris.cs.channel.ChannelQuery;
+import com.sumavision.tetris.cs.channel.ChannelService;
+import com.sumavision.tetris.cs.channel.ChannelType;
+import com.sumavision.tetris.cs.channel.ChannelVO;
 import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
-@RequestMapping(value = "/cs/channel")
-public class ChannelController {
-
-	@Autowired
-	private ChannelQuery channelQuery;
-
-	@Autowired
-	private ChannelDAO channelDao;
-
+@RequestMapping(value = "/api/server/cs/channel")
+public class ApiServerChannelController {
 	@Autowired
 	private ChannelService channelService;
-
+	
+	@Autowired
+	private ChannelQuery channelQuery;
+	
+	@Autowired
+	private ChannelDAO channelDao;
+	
 	/**
 	 * 分页获取频道列表<br/>
 	 * <b>作者:</b>lzp<br/>
@@ -41,7 +45,7 @@ public class ChannelController {
 	@RequestMapping(value = "/list")
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
 
-		return channelQuery.findAll(currentPage, pageSize, ChannelType.LOCAL);
+		return channelQuery.findAll(currentPage, pageSize, ChannelType.REMOTE);
 	}
 
 	/**
@@ -61,8 +65,12 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/add")
 	public Object add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, HttpServletRequest request) throws Exception {
+		
+		if (date == null) date = DateUtil.now();
+		if (broadWay == null) broadWay = "轮播能力";
+		if (remark == null) remark = "";
 
-		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.LOCAL);
+		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.REMOTE);
 
 		return new ChannelVO().set(channel);
 	}
@@ -84,6 +92,8 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/edit")
 	public Object rename(Long id, String name, String previewUrlIp, String previewUrlPort, String remark, HttpServletRequest request) throws Exception {
+		
+		if (remark == null) remark = "";
 
 		ChannelPO channel = channelService.edit(id, name, previewUrlIp, previewUrlPort, remark);
 
@@ -117,15 +127,15 @@ public class ChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/start")
-	public Object broadcastStart(Long channelId, HttpServletRequest request) throws Exception {
+	public Object broadcastStart(Long id, HttpServletRequest request) throws Exception {
 
-		ChannelPO channelPO = channelDao.findOne(channelId);
+		ChannelPO channelPO = channelDao.findOne(id);
 		if (channelPO == null) return null;
 		
 		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return channelService.startBroad(channelId);
+			return channelService.startBroad(id);
 		}else {
-			return channelService.startTerminalBroadcast(channelId);
+			return channelService.startTerminalBroadcast(id);
 		}
 	}
 	
@@ -139,15 +149,15 @@ public class ChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/stop")
-	public Object broadcastStop(Long channelId, HttpServletRequest request) throws Exception {
+	public Object broadcastStop(Long id, HttpServletRequest request) throws Exception {
 		
-		ChannelPO channelPO = channelDao.findOne(channelId);
+		ChannelPO channelPO = channelDao.findOne(id);
 		if (channelPO == null) return null;
 		
 		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return channelService.stopAbilityBroadcast(channelId);
+			return channelService.stopAbilityBroadcast(id);
 		}else {
-			return channelService.stopTerminalBroadcast(channelId);
+			return channelService.stopTerminalBroadcast(id);
 		}
 	}
 	
@@ -161,53 +171,18 @@ public class ChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/status")
-	public Object broadcastStatus(Long channelId, HttpServletRequest request) throws Exception {
+	public Object broadcastStatus(Long id, HttpServletRequest request) throws Exception {
 		
-		ChannelPO channelPO = channelDao.findOne(channelId);
+		ChannelPO channelPO = channelDao.findOne(id);
 		if (channelPO == null) {
-			throw new ChannelNotExistsException(channelId);
+			throw new ChannelNotExistsException(id);
 		}
 		
 		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
 			return channelPO.getBroadcastStatus();
 		}
 
-		return channelService.getChannelBroadstatus(channelId);
+		return channelService.getChannelBroadstatus(id);
 	}
 	
-	/**
-	 * 重新播发<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/broadcast/restart")
-	public Object broadcastRestart(Long channelId, HttpServletRequest request) throws Exception {
-
-		return channelService.restartBroadcast(channelId);
-	}
-	
-	/**
-	 * 播发跳转(能力播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 * @param Long duration 跳转量(单位s。支持负值)
-	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/seek")
-	public Object seek(Long channelId, Long duration, HttpServletRequest request) throws Exception {
-		
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) {
-			throw new ChannelNotExistsException(channelId);
-		}
-
-		return channelQuery.sendAbilityRequest(BroadAbilityQueryType.SEEK, channel, duration);
-	}
 }

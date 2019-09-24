@@ -209,6 +209,6 @@ public class ApiServerMediaAudioController {
 	public Object addFar(String name, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		return mediaAudioService.addTask(user, name, httpUrl, ftpUrl);
+		return mediaAudioService.addTask(user, name, "", httpUrl, ftpUrl);
 	}
 }

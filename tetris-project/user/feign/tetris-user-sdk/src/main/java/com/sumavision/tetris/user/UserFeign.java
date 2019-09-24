@@ -1,7 +1,5 @@
 package com.sumavision.tetris.user;
 
-import java.util.Collection;
-
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -81,4 +79,17 @@ public interface UserFeign {
 			@RequestParam("currentPage") int currentPage,
 			@RequestParam("pageSize") int pageSize);
 	
+	/**
+	 * 修改一个用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月19日 下午4:54:11
+	 * @param Long id 用户id
+	 * @param String tags 修改的标签(全量)
+	 * @return UserVO 修改后的数据
+	 */
+	@RequestMapping(value = "/user/feign/edit")
+	public JSONObject edit(
+			@RequestParam("id") Long id,
+			@RequestParam("tags") String tags);
 }

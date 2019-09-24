@@ -20,10 +20,25 @@ public interface ChannelDAO extends BaseDAO<ChannelPO>{
 	 * @param pageable 分页
 	 * @return Page<ChannelPO> 频道列表
 	 */
-	@Query(value = "SELECT channel.* FROM TETRIS_CS_CHANNEL channel WHERE channel.group_id = ?1 \n#pageable\n",
-			countQuery = "SELECT count(channel.id) FROM TETRIS_CS_CHANNEL channel WHERE channel.group_id = ?1",
+	@Query(value = "SELECT channel.* FROM TETRIS_CS_CHANNEL channel WHERE channel.group_id = ?1 AND channel.type = ?2 \n#pageable\n",
+			countQuery = "SELECT count(channel.id) FROM TETRIS_CS_CHANNEL channel WHERE channel.group_id = ?1 AND channel.type = ?2",
 			nativeQuery = true)
-	public Page<ChannelPO> findAllByGroupId(String groupId, Pageable pageable);
+	public Page<ChannelPO> PagefindAllByGroupIdAndType(String groupId, String type, Pageable pageable);
+	
+	@Query(value = "SELECT channel.* FROM tetris_cs_channel channel where channel.group_id = ?1 AND channel.type = ?2", nativeQuery = true)
+	public List<ChannelPO> findAllByGroupIAndType(String groupId, String type);
+	
+	/**
+	 * 根据组织id分页查询频道<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月18日 下午5:09:08
+	 * @param groupId 组织id
+	 * @param pageable 分页
+	 * @return Page<ChannelPO> 频道列表
+	 */
+	@Query(value = "SELECT channel.* FROM TETRIS_CS_CHANNEL channel WHERE channel.group_id = ?1 AND channel.type = ?2 ", nativeQuery = true)
+	public List<ChannelPO> findAllByGroupIdAndType(String groupId, ChannelType type);
 	
 	/**
 	 * 判断播发后输出的ip和port是否被使用(仅针对能力播发，修改频道时使用)<br/>

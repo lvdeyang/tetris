@@ -292,4 +292,9 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		MediaAudioVO vo=(MediaAudioVO)obj;
+		return this.getId().equals(vo.getId());
+	}
 }

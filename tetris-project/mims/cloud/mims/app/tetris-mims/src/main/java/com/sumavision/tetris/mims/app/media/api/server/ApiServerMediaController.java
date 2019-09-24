@@ -3,9 +3,15 @@ package com.sumavision.tetris.mims.app.media.api.server;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.bcel.generic.NEW;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,16 +19,22 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
+import com.sumavision.tetris.mims.app.folder.exception.FolderTypeCannotMatchException;
+import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioTaskVO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
@@ -52,9 +64,12 @@ import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamService;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
+import com.sumavision.tetris.mims.app.media.tag.TagDAO;
+import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoTaskVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
@@ -64,6 +79,7 @@ import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistEx
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
+import com.sumavision.tetris.orm.exception.ErrorTypeException;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -81,10 +97,19 @@ public class ApiServerMediaController {
 	private FolderDAO folderDao;
 	
 	@Autowired
+	private FolderQuery folderQuery;
+	
+	@Autowired
 	private MediaAudioService mediaAudioService;
 	
 	@Autowired
+	private MediaAudioQuery mediaAudioQuery;
+	
+	@Autowired
 	private MediaVideoService mediaVideoService;
+	
+	@Autowired
+	private MediaVideoQuery mediaVideoQuery;
 	
 	@Autowired
 	private MediaPictureService mediaPictureService;
@@ -114,6 +139,9 @@ public class ApiServerMediaController {
 	private MediaCompressDAO mediaCompressDao;
 	
 	@Autowired
+	private TagDAO tagDAO;
+	
+	@Autowired
 	private UserQuery userQuery;
 	/**
 	 * 添加上传任务<br/>
@@ -136,22 +164,43 @@ public class ApiServerMediaController {
 			String folderType,
 			String name,
             String remark,
+            Long folderId,
+            String tagId,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 	    FolderType type = FolderType.fromPrimaryKey(folderType);
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
-		if(folder == null){
-			throw new FolderNotExistException(new StringBufferWrapper().append("企业")
-																	   .append(type.getName())
-																	   .append("根文件夹不存在！")
-																	   .toString());
+	    FolderPO folder;
+	    if (folderId == null) {
+	    	folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
+			if(folder == null){
+				throw new FolderNotExistException(new StringBufferWrapper().append("企业")
+																		   .append(type.getName())
+																		   .append("根文件夹不存在！")
+																		   .toString());
+			}
+		} else {
+			folder = folderDao.findOne(folderId);
+			if(folder == null){
+				throw new FolderNotExistException(new StringBufferWrapper().append("文件夹")
+																		   .append(folderId)
+																		   .append("不存在！")
+																		   .toString());
+			}
+		}
+	    List<Long> tagIds = Arrays.asList(tagId.split(",")).stream().map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+	    List<TagPO> tag = tagDAO.findAll(tagIds);
+	    List<String> tagNames = new ArrayList<String>();
+	    if (tag != null) {
+	    	for (TagPO tagPO : tag) {
+				tagNames.add(tagPO.getName());
+			}
 		}
 		
 		if(type.equals(FolderType.COMPANY_AUDIO)){
 			MediaAudioTaskVO taskParam = JSON.parseObject(task, MediaAudioTaskVO.class);
-			MediaAudioPO entity = mediaAudioService.addTask(user, name, null, null, remark, taskParam, folder);			
+			MediaAudioPO entity = mediaAudioService.addTask(user, name, tagNames, null, remark, taskParam, folder);			
 			return new MediaAudioVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_AUDIO_STREAM)){
 			MediaAudioStreamPO entity = mediaAudioStreamService.addTask(user, name, null, null, remark, task, folder);
@@ -164,7 +213,7 @@ public class ApiServerMediaController {
 			return mediaTxtService.addTask(user, name, null, null, remark, task, folder, false);
 		}else if(type.equals(FolderType.COMPANY_VIDEO)){
 			MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class); 
-			MediaVideoPO entity = mediaVideoService.addTask(user, name, null, null, remark, taskParam, folder);
+			MediaVideoPO entity = mediaVideoService.addTask(user, name, tagNames, null, remark, taskParam, folder);
 			return new MediaVideoVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_VIDEO_STREAM)){
 			return mediaVideoStreamService.addTask(user, name, null, null, remark, new ArrayListWrapper<String>().add(task).getList(), folder);			
@@ -212,8 +261,8 @@ public class ApiServerMediaController {
 		long endOffset = request.getLongValue("endOffset");
 		
 		//参数错误
-		if((beginOffset + blockSize) != endOffset){
-			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+		if((beginOffset + endOffset) != blockSize){
+			new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
 		}
 		
 		if(folderType.equals(FolderType.COMPANY_PICTURE)){
@@ -420,4 +469,182 @@ public class ApiServerMediaController {
 		return null;		
 	}
 	
+	/**
+	 * 删除媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月3日 下午4:50:29
+	 * @param String materialUuids 媒资uuid(由","拼接)
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove")
+	public Object remove(String materialUuids, HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		
+		if (materialUuids == null || materialUuids.isEmpty()) return null;
+		
+		List<String> uuids = Arrays.asList(materialUuids.split(","));
+		
+		List<MediaAudioPO> audios = new ArrayList<MediaAudioPO>();
+		List<MediaVideoPO> videos = new ArrayList<MediaVideoPO>();
+		for (String uuid : uuids) {
+			MediaAudioPO audioPO = mediaAudioDao.findByUuid(uuid);
+			if (audioPO != null) {
+				audios.add(audioPO);
+			} else {
+				MediaVideoPO videoPO = mediaVideoDao.findByUuid(uuid);
+				if (videoPO != null) {
+					videos.add(videoPO);
+				}
+			}
+		}
+		mediaAudioDao.deleteInBatch(audios);
+		mediaVideoDao.deleteInBatch(videos);
+		return "";
+	}
+	
+	/**
+	 * 添加远程媒资(应急广播使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月3日 下午5:24:19
+	 * @param String name 媒资名称
+	 * @param String type 媒资类型
+	 * @param Long tagId 标签id 
+	 * @param String url 媒资地址
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/stream")
+	public Object addRemote(String name, String type, Long tagId, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception {
+		UserVO user = userQuery.current();
+		
+		TagPO tag = tagDAO.findOne(tagId);
+		
+		switch (type) {
+		case "video":
+			return mediaVideoService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
+		case "audio":
+			return mediaAudioService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
+		default:
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据创建时间筛选<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月5日 下午3:08:38
+	 * @param Long startTime 筛选起始时间
+	 * @param Long endTime 筛选终止时间
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/by/time")
+	public Object queryByTime(String startTime, String endTime, HttpServletRequest request) throws Exception {
+		Long startLong = 0l;
+		Long endLong = 32503651200000l;
+		if (startTime != null && !startTime.isEmpty()) {
+			startLong = DateUtil.parse(startTime, DateUtil.dateTimePattern).getTime();
+		}
+		if (endTime != null && !endTime.isEmpty()) {
+			endLong = DateUtil.parse(endTime, DateUtil.dateTimePattern).getTime();
+		}
+		
+		List<Object> returnList = new ArrayListWrapper<Object>()
+				.addAll(mediaVideoQuery.loadByCreateTime(startLong, endLong))
+				.addAll(mediaAudioQuery.loadByCreateTime(startLong, endLong))
+				.getList();
+		
+		return returnList;
+	}
+	
+	/**
+	 * 根据条件查询媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月19日 下午3:17:30
+	 * @param Long id 媒资id
+	 * @param String name 名称(模糊匹配)
+	 * @param String startTime updateTime起始查询
+	 * @param Stinrg endTime updateTime终止查询
+	 * @param Long tagId 标签id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/by/condition")
+	public Object queryByCondition(Long id, String name, String type, String startTime, String endTime, Long tagId, HttpServletRequest request) throws Exception{
+		
+		List<MediaVideoVO> videoVOs = new ArrayList<MediaVideoVO>();
+		List<MediaAudioVO> audioVOs = new ArrayList<MediaAudioVO>();
+		
+		if (type == null || !type.equals("video")) {
+			audioVOs = mediaAudioQuery.loadByCondition(id, name, startTime, endTime, tagId);
+		}
+		
+		if (type == null || !type.equals("audio")) {
+			videoVOs = mediaVideoQuery.loadByCondition(id, name, startTime, endTime, tagId);
+		}
+		
+		return new ArrayListWrapper<Object>()
+				.addAll(videoVOs)
+				.addAll(audioVOs)
+				.getList();
+	}
+	
+	/**
+	 * 获取视频媒资预览地址<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月20日 下午2:44:22
+	 * @param String type 媒资类型
+	 * @param Long id 素材文件id
+	 * @return String name 文件名称
+	 * @return String uri 预览uri
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/download/uri")
+	public Object downloadUri(String type, Long id) throws Exception {
+		
+		Long folderId = null;
+		String name = null;
+		String uri = null;
+		if (type.equals("video")) {
+			MediaVideoPO media = mediaVideoDao.findOne(id);
+			
+			if(media == null){
+				throw new MediaVideoNotExistException(id);
+			}
+			folderId = media.getFolderId();
+			name = media.getFileName();
+			uri = media.getPreviewUrl();
+		} else if (type.equals("audio")) {
+			MediaAudioPO media = mediaAudioDao.findOne(id);
+			
+			if(media == null){
+				throw new MediaVideoNotExistException(id);
+			}
+			folderId = media.getFolderId();
+			name = media.getFileName();
+			uri = media.getPreviewUrl();
+		} else {
+			throw new ErrorTypeException("type",type);
+		}
+		
+		
+		UserVO user = userQuery.current();
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		Map<String, String> result = new HashMapWrapper<String, String>().put("name", name)
+																		 .put("uri", uri)
+																		 .getMap();
+		
+		return result;
+	}
 }

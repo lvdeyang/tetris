@@ -41,6 +41,10 @@ import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
+import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionDAO;
+import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionPO;
+import com.sumavision.tetris.mims.app.media.tag.TagQuery;
+import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
 import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtNotExistException;
@@ -97,6 +101,12 @@ public class MediaAudioService {
 	
 	@Autowired
 	private FolderQuery folderQuery;
+	
+	@Autowired
+	private TagQuery tagQuery;
+	
+	@Autowired
+	private TagDownloadPermissionDAO tagDownloadPermissionDAO;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -320,7 +330,7 @@ public class MediaAudioService {
 			//删除临时文件
 			for(MediaAudioPO audio:audiosCanBeDeleted){
 				List<MediaAudioPO> results = mediaAudioDao.findByUploadTmpPathAndIdNotIn(audio.getUploadTmpPath(), pictureIds);
-				if(results==null || results.size()<=0){
+				if(results==null || results.size()<=0 && audio.getStoreType()!=StoreType.REMOTE){
 					File file = new File(new File(audio.getUploadTmpPath()).getParent());
 					File[] children = file.listFiles();
 					if(children != null){
@@ -438,14 +448,16 @@ public class MediaAudioService {
 	public MediaAudioVO addTask(
 			UserVO user,
 			String name,
+			String tags,
 			String previewUrl,
 			String ftpUrl) throws Exception{
 		String version = new StringBufferWrapper().append(MediaAudioPO.VERSION_OF_ORIGIN).append(".").append(new Date().getTime()).toString();
 		FolderPO folder = folderDao.findCompanyFolderByTypeAndName(user.getGroupId(), FolderType.COMPANY_AUDIO.toString(), "快编目录");
 		if (folder == null) throw new FolderNotFoundException();
 		MediaAudioPO mediaAudioPO = new MediaAudioPO();
+		mediaAudioPO.setUpdateTime(new Date());
 		mediaAudioPO.setName(name);
-		mediaAudioPO.setTags("");
+		mediaAudioPO.setTags(tags);
 		mediaAudioPO.setKeyWords("");
 		mediaAudioPO.setAuthorId(user.getUuid());
 		mediaAudioPO.setVersion(version);
@@ -804,7 +816,7 @@ public class MediaAudioService {
 	 * @param Long id 下载的音频id
 	 * @return MediaAudioVO 音频
 	 */
-	public MediaAudioVO downloadAdd(Long id) throws Exception {
+	public MediaAudioVO downloadAdd(UserVO user, Long id) throws Exception {
 		MediaAudioPO media = mediaAudioDao.findOne(id);
 		if(media == null) throw new MediaAudioNotExistException(id);
 		
@@ -816,6 +828,40 @@ public class MediaAudioService {
 		}
 		media.setDownloadCount(downloadCount);
 		mediaAudioDao.save(media);
-		return new MediaAudioVO().set(media);
+		
+		MediaAudioVO audio = new MediaAudioVO().set(media);
+		List<String> tagNames = audio.getTags();
+		if (tagNames != null && !tagNames.isEmpty()) {
+			List<TagVO> allTag = tagQuery.queryFromNameAndGroupId(user.getGroupId(), tagNames);
+			List<TagDownloadPermissionPO> savePO = new ArrayList<TagDownloadPermissionPO>();
+			List<String> userTag = user.getTags();
+			List<String> userAddTag = new ArrayList<String>();
+			for (TagVO tagVO : allTag) {
+				TagDownloadPermissionPO permission = tagDownloadPermissionDAO.findByUserIdAndTagId(user.getId(), tagVO.getId());
+				if (permission == null) {
+					permission = new TagDownloadPermissionPO();
+					permission.setUpdateTime(new Date());
+					permission.setTagId(tagVO.getId());
+					permission.setType(FolderType.COMPANY_AUDIO.getPrimaryKey());
+					permission.setUserId(user.getId());
+					permission.setDownloadCount(0l);
+				}
+				Long tagDownloadCount = permission.getDownloadCount() + 1;
+				if (tagDownloadCount/10 > 0 && tagDownloadCount % 10 == 0 && !userTag.contains(tagVO.getName())) {
+					userAddTag.add(tagVO.getName());
+				}
+				permission.setDownloadCount(tagDownloadCount);
+				savePO.add(permission);
+			}
+			tagDownloadPermissionDAO.save(savePO);
+			
+			if (!userAddTag.isEmpty()) {
+				userTag.addAll(userAddTag);
+				String newUserTag = StringUtils.join(userTag.toArray(), ",");
+				userQuery.edit(id, newUserTag);
+			}
+		}
+		
+		return audio.set(media);
 	}
 }

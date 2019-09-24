@@ -25,8 +25,14 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.tag.TagDAO;
+import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionDAO;
+import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionPO;
+import com.sumavision.tetris.mims.app.media.tag.TagPO;
+import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -51,6 +57,12 @@ public class MediaAudioQuery {
 	
 	@Autowired
 	private FolderQuery folderQuery;
+	
+	@Autowired
+	private TagDownloadPermissionDAO tagDownloadPermissionDAO;
+	
+	@Autowired
+	private TagDAO tagDAO;
 	
 	@Autowired
 	private Path path;
@@ -181,7 +193,7 @@ public class MediaAudioQuery {
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月27日 下午4:03:27
-	 * @return List<MediaAudioVO> 视频媒资列表
+	 * @return List<MediaAudioVO> 音频媒资列表
 	 */
 	public List<MediaAudioVO> loadAllFolder() throws Exception{
 		
@@ -204,40 +216,227 @@ public class MediaAudioQuery {
 	}
 	
 	/**
-	 * 加载所有的音频媒资<br/>
+	 * 根据创建时间筛选<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年8月11日 下午4:03:27
-	 * @return List<MediaAudioVO> 视频媒资列表
+	 * <b>日期：</b>2019年9月5日 下午3:08:38
+	 * @param Long startTime 筛选起始时间
+	 * @param Long endTime 筛选终止时间
+	 * @return List<MediaAudioVO> 筛选结果
 	 */
-	public List<MediaAudioVO> loadAllByTags() throws Exception{
-		//TODO 权限校验
+	public List<MediaAudioVO> loadByCreateTime(Long startTime, Long endTime) throws Exception{
+		//TODO 权限校验		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
+				
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdIn(folderIds);
+		
+		List<MediaAudioPO> audioPOs = new ArrayList<MediaAudioPO>();
+		for (MediaAudioPO mediaAudioPO : audios) {
+			Long updateTime = mediaAudioPO.getUpdateTime().getTime();
+			if (updateTime >= startTime && updateTime <= endTime) {
+				audioPOs.add(mediaAudioPO);
+			}
+		}
+		
+		return MediaVideoVO.getConverter(MediaAudioVO.class).convert(audioPOs, MediaAudioVO.class);
+	}
+	
+	/**
+	 * 根据条件查询媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月19日 下午3:17:30
+	 * @param Long id 媒资id
+	 * @param String name 名称(模糊匹配)
+	 * @param String startTime updateTime起始查询
+	 * @param Stinrg endTime updateTime终止查询
+	 * @param Long tagId 标签id
+	 * @return List<MediaAudioVO> 查询结果
+	 */
+	public List<MediaAudioVO> loadByCondition(Long id, String name, String startTime, String endTime, Long tagId) throws Exception{
 		UserVO user = userQuery.current();
 		
+		//TODO 权限校验		
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
-		
-		List<String> tags = user.getTags();
-		
-		if (tags == null || tags.isEmpty()) return null;
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){
 			folderIds.add(folderPO.getId());
 		}
 		
-		List<MediaAudioVO> audios = new ArrayListWrapper<MediaAudioVO>().getList();
+		TagPO tag = tagDAO.findByIdAndGroupId(tagId, user.getGroupId());
+		String tagName = tag != null ? tag.getName() : null;
+		
+		List<MediaAudioPO> audios = mediaAudioDao.findByCondition(id, name, startTime, endTime, tagName, folderIds, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
+		
+		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(audios, MediaAudioVO.class);
+	}
+	
+	/**
+	 * 获取推荐列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月11日 上午11:27:52
+	 * @param UserVO user 用户
+	 * @return List<MediaAudioVO> 推荐列表
+	 */
+	public List<MediaAudioVO> loadRecommend(UserVO user) throws Exception{
+		List<MediaAudioVO> recommends = new ArrayList<MediaAudioVO>();
+		
+		//根据用户标签获取媒资列表
+		Map<String, List<MediaAudioVO>> fromUserTags = loadAllByTags(user, user.getTags());
+		if (fromUserTags != null) {
+			List<MediaAudioVO> audios = fromUserTags.get("list");
+			for (MediaAudioVO mediaAudioVO : audios) {
+				if (recommends.size() < 10) {
+					recommends.add(mediaAudioVO);
+				}
+			}
+		}
+		
+		//获取下载量排序列表，依次添加下载量大于0的媒资(去重)
+		int size = recommends.size();
+		for (int i = 1;; i++) {
+			List<MediaAudioVO> fromHot = loadHotList(i);
+			if (fromHot == null || fromHot.isEmpty() || recommends.size() >= size + 10) break;
+			for (MediaAudioVO mediaAudioVO : fromHot) {
+				if (mediaAudioVO.getDownloadCount() == 0) break;
+				if (recommends.size() < size + 10 && !recommends.contains(mediaAudioVO)) {
+					recommends.add(mediaAudioVO);
+				}
+			}
+		}
+		
+		//根据同相同最大下载量标签的其他用户的其他标签获取
+		size = recommends.size();
+		List<MediaAudioVO> otherAudios = loadRecommendFromOthor(user);
+		if (otherAudios != null) {
+			for (MediaAudioVO mediaAudioVO : otherAudios) {
+				if (recommends.size() < size + 10 && !recommends.contains(mediaAudioVO)) {
+					recommends.add(mediaAudioVO);
+				}
+			}
+		}
+		
+		return recommends;
+	}
+	
+	/**
+	 * 根据用户标签加载所有的音频媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月11日 下午4:03:27
+	 * @return List<MediaAudioVO> 视频媒资列表
+	 */
+	public List<MediaAudioVO> loadAllByUserTags(UserVO user) throws Exception{
+		List<String> tags = user.getTags();
+		Map<String, List<MediaAudioVO>> map = loadAllByTags(user, tags);
+		return map == null ? null : map.get("tree");
+	}
+	
+	/**
+	 * 根据标签加载所有的音频媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月11日 下午4:03:27
+	 * @return List<MediaAudioVO> 视频媒资列表
+	 */
+	public Map<String, List<MediaAudioVO>> loadAllByTags(UserVO user, List<String> tags) throws Exception{
+		if (tags == null || tags.isEmpty()) return null;
+		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		ArrayListWrapper<MediaAudioVO> audiosTree = new ArrayListWrapper<MediaAudioVO>();
+		
+		ArrayListWrapper<MediaAudioVO> audiosList = new ArrayListWrapper<MediaAudioVO>();
 		
 		for (String tag : tags) {
-			List<MediaAudioPO> childAudios = mediaAudioDao.findByFolderIdInAndTag(folderIds, tag);
+			List<MediaAudioPO> childAudios = mediaAudioDao.findByFolderIdInAndTagByDownloadCountOrderDesc(folderIds, tag, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
 			if (childAudios == null || childAudios.isEmpty()) continue;
 			MediaAudioVO audio = new MediaAudioVO();
 			audio.setName(tag);
 			audio.setType(MediaAudioItemType.FOLDER.toString());
-			audio.setChildren(MediaAudioVO.getConverter(MediaAudioVO.class).convert(childAudios, MediaAudioVO.class));
-			audios.add(audio);
+			List<MediaAudioVO> audioVOs = MediaAudioVO.getConverter(MediaAudioVO.class).convert(childAudios, MediaAudioVO.class);
+			audio.setChildren(audioVOs);
+			audiosTree.add(audio);
+			audiosList.addAll(audioVOs);
 		}
 		
-		return audios;
+		return new HashMapWrapper<String, List<MediaAudioVO>>().put("tree", audiosTree.getList()).put("list", audiosList.getList()).getMap();
+	}
+	
+	/**
+	 * 获取标签的音频媒资数<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月11日 下午4:03:27
+	 */
+	public void queryCountByTags(UserVO user, List<TagVO> tags) throws Exception{
+		if (tags == null || tags.isEmpty()) return;
+		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		for (TagVO tag : tags) {
+			List<MediaAudioPO> childAudios = mediaAudioDao.findByFolderIdInAndTagByDownloadCountOrderDesc(folderIds, tag.getName(), new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
+			if (childAudios == null || childAudios.isEmpty()) continue;
+			int num = tag.getSubMediaNum();
+			tag.setSubMediaNum(num + childAudios.size());
+		}
+	}
+	
+	/**
+	 * 根据同最高下载量标签的其他用户获取推荐<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月11日 上午11:30:44
+	 * @param UserVO user 用户
+	 * @return List<MediaAudioVO> 推荐列表
+	 */
+	public List<MediaAudioVO> loadRecommendFromOthor(UserVO user) throws Exception{
+		List<MediaAudioVO> returnAudioVos = new ArrayList<MediaAudioVO>();
+		
+		List<TagDownloadPermissionPO> userToTagPermission = tagDownloadPermissionDAO.findByUserIdOrderByDownloadCountDesc(user.getId());
+		if (userToTagPermission == null || userToTagPermission.isEmpty()) return returnAudioVos;
+		for (int i = 0; i < userToTagPermission.size() && i < 5; i++) {
+			Long tagId = userToTagPermission.get(i).getTagId();
+			List<TagDownloadPermissionPO> tagToUserPermission = tagDownloadPermissionDAO.findByTagIdOrderByDownloadCountDesc(tagId);
+			if (tagToUserPermission != null) {
+				for (int j = 0; j < tagToUserPermission.size() && j < 5; j++) {
+					List<TagDownloadPermissionPO> userToTagPermission2 = 
+							tagDownloadPermissionDAO.findByUserIdWithExceptTagIdOrderByDownloadCountDesc(tagToUserPermission.get(j).getUserId(), tagId);
+					if (userToTagPermission2 != null) {
+						List<String> tags = new ArrayList<String>();
+						for (int k = 0; k < userToTagPermission2.size() && k < 2; k++) {
+							TagPO tag = tagDAO.findOne(userToTagPermission2.get(k).getTagId());
+							if (tag == null) continue;
+							tags.add(tag.getName());
+						}
+						Map<String, List<MediaAudioVO>> map = loadAllByTags(user, tags);
+						if (map != null) {
+							List<MediaAudioVO> audios = map.get("list");
+							returnAudioVos.addAll(audios);
+						}
+					}
+				}
+			}
+		}
+		
+		return returnAudioVos;
 	}
 	
 	/**
@@ -386,10 +585,10 @@ public class MediaAudioQuery {
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年8月15日 下午5:26:50
+	 * @param int currentPage 当前页面
 	 * @return List<MediaAudioVO> 热门媒资列表
 	 */
-	public List<MediaAudioVO> loadHotList() throws Exception{
-		//TODO 权限校验
+	public List<MediaAudioVO> loadHotList(int currentPage) throws Exception{
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
 		
 		List<Long> folderIds = new ArrayList<Long>();
@@ -397,7 +596,7 @@ public class MediaAudioQuery {
 			folderIds.add(folderPO.getId());
 		}
 		
-		Pageable pageable = new PageRequest(0, 10);
+		Pageable pageable = new PageRequest(currentPage - 1, 10);
 		
 		Page<MediaAudioPO> audios = mediaAudioDao.findByFolderIdInOrderByDownloadCountDesc(folderIds, pageable);
 		

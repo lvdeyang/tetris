@@ -29,31 +29,31 @@ import com.sumavision.tetris.user.UserVO;
 public class TranscodingController {
 	
 	@Autowired
-	UserQuery userQuery;
+	private UserQuery userQuery;
 
 	@Autowired
-	AddTaskService addTaskService;
+	private AddTaskService addTaskService;
 	
 	@Autowired
-	GetStatusService getStatusService;
+	private GetStatusService getStatusService;
 
 	@Autowired
-	TemplatesRequest templatesRequest;
+	private TemplatesRequest templatesRequest;
 	
 	@Autowired
-	ProcessService processService;
+	private ProcessService processService;
 	
 	@Autowired
-	MediaEditorTaskQuery mediaEditorTaskQuery;
+	private MediaEditorTaskQuery mediaEditorTaskQuery;
 	
 	@Autowired
-	MediaEditorTaskRatePermissionService mediaEditorTaskRatePermissionService;
+	private MediaEditorTaskRatePermissionService mediaEditorTaskRatePermissionService;
 	
 	@Autowired
-	MediaEditorTaskRatePermissionQuery mediaEditorTaskRatePermissionQuery;
+	private MediaEditorTaskRatePermissionQuery mediaEditorTaskRatePermissionQuery;
 	
 	@Autowired
-	Adapter adapter;
+	private Adapter adapter;
 
 	/**
 	 * 获取云转码模板列表<br/>
@@ -66,7 +66,7 @@ public class TranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/template/list")
-	public Object getTemplates(HttpServletRequest request) {
+	public Object getTemplates(HttpServletRequest request) throws Exception {
 		return templatesRequest.getTemplates();
 	}
 

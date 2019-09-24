@@ -3,7 +3,7 @@ package com.sumavision.tetris.transcoding;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum RequestCmdType {
-	ADD_TASK("AddTask"),
+	ADD_TASK("AddTaskWithMultipieces"),
 	GET_TEMPLATE_NAME_LIST("GetTemplateNameList"),
 	GET_STATUS("QueryTask");
 	

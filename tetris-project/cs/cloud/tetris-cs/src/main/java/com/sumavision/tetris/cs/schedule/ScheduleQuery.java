@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cs.schedule;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -10,11 +12,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.cs.program.ProgramQuery;
+import com.sumavision.tetris.cs.program.ProgramVO;
+import com.sumavision.tetris.cs.program.ScreenVO;
+import com.sumavision.tetris.cs.schedule.api.ApiServerScheduleVO;
 
 @Component
 public class ScheduleQuery {
 	@Autowired
 	private ScheduleDAO scheduleDAO;
+	
+	@Autowired
+	private ProgramQuery programQuery;
 	
 	/**
 	 * 获取排期列表<br/>
@@ -31,7 +40,11 @@ public class ScheduleQuery {
 		Pageable page = new PageRequest(currentPage - 1, pageSize);
 		Page<SchedulePO> schedulePages = scheduleDAO.findByChannelId(channelId, page);
 		List<SchedulePO> schedules = schedulePages.getContent();
-		return new HashMapWrapper<String,Object>().put("data", ScheduleVO.getConverter(ScheduleVO.class).convert(schedules, ScheduleVO.class))
+		List<ScheduleVO> scheduleVOs = ScheduleVO.getConverter(ScheduleVO.class).convert(schedules, ScheduleVO.class);
+		for (ScheduleVO scheduleVO : scheduleVOs) {
+			scheduleVO.setProgram(programQuery.getProgram(scheduleVO.getId()));
+		}
+		return new HashMapWrapper<String,Object>().put("data", scheduleVOs)
 				.put("total", schedulePages.getTotalElements())
 				.getMap();
 	}

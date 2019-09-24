@@ -36,7 +36,6 @@ import com.sumavision.tetris.cs.menu.CsResourceVO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
-import com.sumavision.tetris.cs.schedule.SchedulePO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
@@ -118,7 +117,7 @@ public class ChannelService {
 	 * @param String remark 备注
 	 * @return ChannelPO 频道
 	 */
-	public ChannelPO add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark) throws Exception {
+	public ChannelPO add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, ChannelType type) throws Exception {
 		UserVO user = userQuery.current();
 		
 		ChannelPO channel = new ChannelPO();
@@ -129,6 +128,7 @@ public class ChannelService {
 		channel.setBroadcastStatus("未播发");
 		channel.setGroupId(user.getGroupId());
 		channel.setUpdateTime(new Date());
+		channel.setType(type.toString());
 		
 		if (BroadWay.fromName(broadWay) == BroadWay.ABILITY_BROAD) {
 			if (channelDao.checkIpAndPortExists(previewUrlIp, previewUrlPort) == null) {

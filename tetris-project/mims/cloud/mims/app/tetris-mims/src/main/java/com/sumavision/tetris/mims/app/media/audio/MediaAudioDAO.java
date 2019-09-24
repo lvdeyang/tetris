@@ -90,8 +90,8 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	 * @param String tags
 	 * @return List<MediaAudioPO> 音频媒资列表
 	 */
-	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO WHERE FOLDER_ID IN ?1 AND tags like CONCAT('%',?2,'%')", nativeQuery = true)
-	public List<MediaAudioPO> findByFolderIdInAndTag(Collection<Long> folderId, String tag);
+	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO WHERE FOLDER_ID IN ?1 AND tags like CONCAT('%',?2,'%') AND (REVIEW_STATUS IS NULL OR REVIEW_STATUS NOT IN ?3) ORDER BY DOWNLOAD_COUNT DESC", nativeQuery = true)
+	public List<MediaAudioPO> findByFolderIdInAndTagByDownloadCountOrderDesc(Collection<Long> folderId, String tag, Collection<String> reviewStatus);
 	
 	/**
 	 * <br/>
@@ -103,4 +103,26 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	 * @return
 	 */
 	public Page<MediaAudioPO> findByFolderIdInOrderByDownloadCountDesc(Collection<Long> folderIds, Pageable pageable);
+	
+	/**
+	 * 根据条件查询媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月19日 下午3:17:30
+	 * @param Long id 媒资id
+	 * @param String name 名称(模糊匹配)
+	 * @param String startTime updateTime起始查询
+	 * @param Stinrg endTime updateTime终止查询
+	 * @param Long tagId 标签id
+	 * @return List<MediaAudioPO> 查询结果
+	 */
+	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO video WHERE IF(?1 is null, true, video.id = ?1) "
+			+ "AND IF(?2 is null, true, video.name LIKE CONCAT('%',?2,'%')) "
+			+ "AND IF(?3 is null, true, video.update_time >= ?3) "
+			+ "AND IF(?4 is null, true, video.update_time <= ?4) "
+			+ "AND IF(?5 is null, true, video.tags LIKE CONCAT('%',?5,'%')) "
+			+ "AND video.folder_id in ?6 "
+			+ "AND video.review_status is null "
+			+ "OR video.review_status NOT IN ?7", nativeQuery = true)
+	public List<MediaAudioPO> findByCondition(Long id, String name, String startTime, String endTime, String tag, List<Long> folderIds, Collection<String> reviewStatus);
 }

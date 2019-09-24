@@ -1,5 +1,10 @@
 package com.sumavision.tetris.transcoding;
 
+import java.util.Map;
+
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.context.SpringContext;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum RequestUrlType {
@@ -8,11 +13,21 @@ public enum RequestUrlType {
 	GET_STATUS("/mpp/rest/transcode/transcode");
 	
 	private String url;
-	private String ip = "192.165.58.167";
-	private String port = "8180";
 
-	public String getUrl() {
-		return "http://" + ip + ":" + port + url;
+	public String getUrl() throws Exception{
+		Map<String, String> map = getToolInfo();
+		return "http://" + map.get("ip") + ":" + map.get("port") + url;
+	}
+	
+	private Map<String, String> getToolInfo() throws Exception{
+		Adapter adapter = SpringContext.getBean(Adapter.class);
+		
+		String jsonString = adapter.readProfile();
+		JSONObject jsonObject = JSONObject.parseObject(jsonString);
+		return new HashMapWrapper<String, String>()
+				.put("ip", jsonObject.getString("ip"))
+				.put("port", jsonObject.getString("port"))
+				.getMap();
 	}
 
 	private RequestUrlType(String url){

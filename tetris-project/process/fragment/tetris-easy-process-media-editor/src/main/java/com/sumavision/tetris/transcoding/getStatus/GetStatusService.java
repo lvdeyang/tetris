@@ -30,7 +30,7 @@ public class GetStatusService {
 	 * 
 	 * @return HashMapWrapper<String, Integer> 转码任务id，转码任务进度
 	 */
-	public HashMapWrapper<String, Integer> getFromAdapter(List<String> ids) {
+	public HashMapWrapper<String, Integer> getFromAdapter(List<String> ids) throws Exception {
 		if (ids == null || ids.size() <= 0)
 			return null;
 
