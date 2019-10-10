@@ -205,6 +205,9 @@
                             <el-radio v-model="dialog.addAudio.way" label="2">文本仓库转换</el-radio>
                         </template>
                     </el-form-item>
+                    <el-form-item label="是否加密" prop="delivery">
+                        <el-switch v-model="dialog.addAudio.encryption"></el-switch>
+                    </el-form-item>
                     <el-form-item v-show="dialog.addAudio.way==0">
                         <el-button size="small" type="primary" @click="handleUpload"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
                         <div v-if="dialog.addAudio.task">{{dialog.addAudio.task.name}}</div>

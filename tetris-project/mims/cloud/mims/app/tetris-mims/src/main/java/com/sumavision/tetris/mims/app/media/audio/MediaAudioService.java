@@ -37,6 +37,9 @@ import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioErrorWhenChangeFromTxtException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
+import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodeDAO;
+import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodePO;
+import com.sumavision.tetris.mims.app.media.encode.FileEncodeService;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
@@ -111,6 +114,11 @@ public class MediaAudioService {
 	@Autowired
 	private UserQuery userQuery;
 	
+	@Autowired
+	private FileEncodeService fileEncodeService;
+	
+	@Autowired
+	private AudioFileEncodeDAO audioFileEncodeDao;
 	/**
 	 * 音频媒资上传审核通过<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -191,6 +199,15 @@ public class MediaAudioService {
 			//生成待删除存储文件数据
 			List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaAudios(audiosCanBeDeleted);
 			
+			//需要删除的音频媒资的idList
+			List<Long> needRemoveAudioIds = new ArrayList<Long>();
+			for(MediaAudioPO needRemoveAudio: audiosCanBeDeleted){
+				needRemoveAudioIds.add(needRemoveAudio.getId());
+			}
+			
+			//查询音频加密信息
+			List<AudioFileEncodePO> audioFileEncodePOs = audioFileEncodeDao.findByMediaIdIn(needRemoveAudioIds);
+			
 			//删除素材文件元数据
 			mediaAudioDao.deleteInBatch(audiosCanBeDeleted);
 			
@@ -203,14 +220,14 @@ public class MediaAudioService {
 			//将待删除存储文件数据押入存储文件删除队列
 			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
 			
-			Set<Long> pictureIds = new HashSet<Long>();
+			Set<Long> audioIds = new HashSet<Long>();
 			for(MediaAudioPO audio:audiosCanBeDeleted){
-				pictureIds.add(audio.getId());
+				audioIds.add(audio.getId());
 			}
 			
 			//删除临时文件
 			for(MediaAudioPO audio:audiosCanBeDeleted){
-				List<MediaAudioPO> results = mediaAudioDao.findByUploadTmpPathAndIdNotIn(audio.getUploadTmpPath(), pictureIds);
+				List<MediaAudioPO> results = mediaAudioDao.findByUploadTmpPathAndIdNotIn(audio.getUploadTmpPath(), audioIds);
 				if(results==null || results.size()<=0){
 					File file = new File(new File(audio.getUploadTmpPath()).getParent());
 					File[] children = file.listFiles();
@@ -220,6 +237,20 @@ public class MediaAudioService {
 						}
 					}
 					if(file.exists()) file.delete();
+				}
+			}
+			
+			//删除加密文件
+			for(AudioFileEncodePO audioFileEncode:audioFileEncodePOs){
+				List<AudioFileEncodePO> results = audioFileEncodeDao.findByFilePathAndMediaIdNotIn(audioFileEncode.getFilePath(), needRemoveAudioIds);
+				if(results==null || results.size()<=0){
+					File file = new File(new File(audioFileEncode.getFilePath()).getParent());
+					File[] children = file.listFiles();
+					if(children != null){
+						for(File sub: children){
+							if(sub.exists()) sub.delete();
+						}
+					}
 				}
 			}
 		}
@@ -310,8 +341,18 @@ public class MediaAudioService {
 			//生成待删除存储文件数据
 			List<PreRemoveFilePO> preRemoveFiles = storeTool.preRemoveMediaAudios(audiosCanBeDeleted);
 			
+			//需要删除的音频媒资的idList
+			List<Long> needRemoveAudioIds = new ArrayList<Long>();
+			for(MediaAudioPO needRemoveAudio: audiosCanBeDeleted){
+				needRemoveAudioIds.add(needRemoveAudio.getId());
+			}
+			
+			//查询音频加密信息
+			List<AudioFileEncodePO> audioFileEncodePOs = audioFileEncodeDao.findByMediaIdIn(needRemoveAudioIds);
+			
 			//删除素材文件元数据
 			mediaAudioDao.deleteInBatch(audiosCanBeDeleted);
+			audioFileEncodeDao.deleteInBatch(audioFileEncodePOs);
 			
 			//保存待删除存储文件数据
 			preRemoveFileDao.save(preRemoveFiles);
@@ -322,14 +363,15 @@ public class MediaAudioService {
 			//将待删除存储文件数据押入存储文件删除队列
 			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
 			
-			Set<Long> pictureIds = new HashSet<Long>();
+			//复制相关
+			Set<Long> audioIds = new HashSet<Long>();
 			for(MediaAudioPO audio:audiosCanBeDeleted){
-				pictureIds.add(audio.getId());
+				audioIds.add(audio.getId());
 			}
 			
 			//删除临时文件
 			for(MediaAudioPO audio:audiosCanBeDeleted){
-				List<MediaAudioPO> results = mediaAudioDao.findByUploadTmpPathAndIdNotIn(audio.getUploadTmpPath(), pictureIds);
+				List<MediaAudioPO> results = mediaAudioDao.findByUploadTmpPathAndIdNotIn(audio.getUploadTmpPath(), audioIds);
 				if(results==null || results.size()<=0 && audio.getStoreType()!=StoreType.REMOTE){
 					File file = new File(new File(audio.getUploadTmpPath()).getParent());
 					File[] children = file.listFiles();
@@ -339,6 +381,20 @@ public class MediaAudioService {
 						}
 					}
 					if(file.exists()) file.delete();
+				}
+			}
+			
+			//删除加密文件
+			for(AudioFileEncodePO audioFileEncode:audioFileEncodePOs){
+				List<AudioFileEncodePO> results = audioFileEncodeDao.findByFilePathAndMediaIdNotIn(audioFileEncode.getFilePath(), needRemoveAudioIds);
+				if(results==null || results.size()<=0){
+					File file = new File(new File(audioFileEncode.getFilePath()).getParent());
+					File[] children = file.listFiles();
+					if(children != null){
+						for(File sub: children){
+							if(sub.exists()) sub.delete();
+						}
+					}
 				}
 			}
 		}
@@ -367,6 +423,7 @@ public class MediaAudioService {
 			List<String> keyWords, 
 			String remark, 
 			Long txtId, 
+			boolean encryption,
 			FolderPO folder) throws Exception{
 		
 		MediaTxtPO txt = mediaTxtDAO.findOne(txtId);
@@ -374,7 +431,7 @@ public class MediaAudioService {
 		String txtContent = txt.getContent();
 		String audioName = new StringBufferWrapper().append(name).append(".wav").toString();
 		MediaAudioTaskVO task = new MediaAudioTaskVO().setName(audioName);
-		MediaAudioPO audio = addTask(user, name, tags, keyWords, remark, task, folder);
+		MediaAudioPO audio = addTask(user, name, tags, keyWords, remark, encryption, task, folder);
 		
 		//修改属性
 		String audioPath = audio.getUploadTmpPath();
@@ -393,6 +450,9 @@ public class MediaAudioService {
 			startUploadProcess(audio);
 		}else{
 			mediaAudioDao.save(audio);
+			if(audio.getEncryption()){
+				fileEncodeService.encodeAudioFile(audio);
+			}
 		}
 		
 		return audio;
@@ -493,6 +553,7 @@ public class MediaAudioService {
 			List<String> tags, 
 			List<String> keyWords, 
 			String remark, 
+			boolean encryption,
 			MediaAudioTaskVO task, 
 			FolderPO folder) throws Exception{
 		
@@ -534,6 +595,7 @@ public class MediaAudioService {
 		entity.setUploadStatus(UploadStatus.UPLOADING);
 		entity.setStoreType(StoreType.LOCAL);
 		entity.setDownloadCount(0l);
+		entity.setEncryption(encryption);
 		entity.setUploadTmpPath(new StringBufferWrapper().append(folderPath)
 												   .append(separator)
 												   .append(task.getName())
@@ -801,6 +863,7 @@ public class MediaAudioService {
 		variables.put("remark", audio.getRemarks());
 		variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(audio.getFolderId()));
 		variables.put("_pa8_id", audio.getId());
+		variables.put("encryption", audio.getEncryption()? "1":"0");
 		String category = new StringBufferWrapper().append("上传音频：").append(audio.getName()).toString();
 		String business = new StringBufferWrapper().append("mediaAudio:").append(audio.getId()).toString();
 		String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);

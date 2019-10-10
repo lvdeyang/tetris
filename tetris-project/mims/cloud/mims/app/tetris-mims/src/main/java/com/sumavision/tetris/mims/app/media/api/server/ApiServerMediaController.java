@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.bcel.generic.NEW;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -200,7 +199,7 @@ public class ApiServerMediaController {
 		
 		if(type.equals(FolderType.COMPANY_AUDIO)){
 			MediaAudioTaskVO taskParam = JSON.parseObject(task, MediaAudioTaskVO.class);
-			MediaAudioPO entity = mediaAudioService.addTask(user, name, tagNames, null, remark, taskParam, folder);			
+			MediaAudioPO entity = mediaAudioService.addTask(user, name, tagNames, null, remark, false, taskParam, folder);			
 			return new MediaAudioVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_AUDIO_STREAM)){
 			MediaAudioStreamPO entity = mediaAudioStreamService.addTask(user, name, null, null, remark, task, folder);

@@ -195,7 +195,7 @@ public class ApiAndroidAudioController {
 			throw new FolderNotExistException(folderId);
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTask(user, name, null, null, remark, taskParam, folder);
+		MediaAudioPO entity = mediaAudioService.addTask(user, name, null, null, remark, false, taskParam, folder);
 		
 		return new MediaAudioVO().set(entity);
 		

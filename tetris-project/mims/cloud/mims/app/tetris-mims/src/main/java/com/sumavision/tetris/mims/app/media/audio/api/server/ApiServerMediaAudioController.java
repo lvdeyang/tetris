@@ -93,7 +93,7 @@ public class ApiServerMediaAudioController {
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, null, "", taskParam, folder);
+		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, null, "", false, taskParam, folder);
 		
 		return new MediaAudioVO().set(entity);
 		

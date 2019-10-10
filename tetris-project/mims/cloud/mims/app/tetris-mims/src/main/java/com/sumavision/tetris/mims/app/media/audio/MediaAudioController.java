@@ -36,6 +36,9 @@ import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistEx
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadCancelException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadingException;
+import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodeDAO;
+import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodePO;
+import com.sumavision.tetris.mims.app.media.encode.FileEncodeService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
@@ -62,6 +65,12 @@ public class MediaAudioController {
 	
 	@Autowired
 	private MediaAudioDAO mediaAudioDao;
+	
+	@Autowired
+	private AudioFileEncodeDAO audioFileEncodeDao;
+	
+	@Autowired
+	private FileEncodeService fileEncodeService;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
@@ -105,6 +114,7 @@ public class MediaAudioController {
             String keyWords,
             String remark,
 			Long folderId, 
+			boolean encryption,
 			HttpServletRequest request) throws Exception{
 		
 		MediaAudioTaskVO taskParam = JSON.parseObject(task, MediaAudioTaskVO.class);
@@ -130,7 +140,7 @@ public class MediaAudioController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, keyWordList, remark, taskParam, folder);
+		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, keyWordList, remark, encryption, taskParam, folder);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -158,6 +168,7 @@ public class MediaAudioController {
             String tags,
             String keyWords,
             String remark,
+            boolean encryption,
 			Long folderId, 
 			HttpServletRequest request) throws Exception{
 		
@@ -182,7 +193,7 @@ public class MediaAudioController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTaskFromTxt(user, name, tagList, keyWordList, remark, txtId, folder);
+		MediaAudioPO entity = mediaAudioService.addTaskFromTxt(user, name, tagList, keyWordList, remark, txtId, encryption, folder);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -376,6 +387,9 @@ public class MediaAudioController {
 				mediaAudioService.startUploadProcess(task);
 			}else{
 				mediaAudioDao.save(task);
+				if(task.getEncryption()){
+					fileEncodeService.encodeAudioFile(task);
+				}
 			}
 		}
 		
@@ -607,6 +621,14 @@ public class MediaAudioController {
 		if(target.getId().equals(media.getFolderId())) moved = false;
 		
 		MediaAudioPO copiedMedia  = mediaAudioService.copy(media, target);
+		
+		//判断是否加密,加密需要复制加密信息
+		if(media.getEncryption() != null && media.getEncryption()){
+			AudioFileEncodePO audioEncode = audioFileEncodeDao.findByMediaId(media.getId());
+			if(audioEncode != null){
+				fileEncodeService.copy(audioEncode, copiedMedia);
+			}
+		}
 		
 		Map<String, Object> result = new HashMapWrapper<String, Object>().put("moved", moved)
 																		 .put("copied", new MediaAudioVO().set(copiedMedia))
