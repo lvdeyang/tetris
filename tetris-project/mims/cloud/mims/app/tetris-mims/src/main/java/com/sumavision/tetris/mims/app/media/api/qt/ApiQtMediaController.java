@@ -1,6 +1,5 @@
 package com.sumavision.tetris.mims.app.media.api.qt;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,19 +37,10 @@ public class ApiQtMediaController {
 	private UserQuery userQuery;
 	
 	@Autowired
-	private FolderDAO folderDao;
-	
-	@Autowired
 	private MediaVideoQuery mediaVideoQuery;
 	
 	@Autowired
 	private MediaAudioQuery mediaAudioQuery;
-	
-	@Autowired
-	private MediaVideoService mediaVideoService;
-	
-	@Autowired
-	private MediaAudioService mediaAudioService;
 	
 	/**
 	 * 加载所有的视频和音频媒资<br/>
@@ -65,24 +55,13 @@ public class ApiQtMediaController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/va/load/all")
-	public Object loadAll(HttpServletRequest request) throws Exception{
+	public Object loadAllTest(HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
 		List<MediaVideoVO> videoVOs = mediaVideoQuery.loadAll();
 		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAll();
-//		List<MediaAudioVO> recommend = mediaAudioQuery.loadAllByUserTags(user);
-//		List<MediaAudioVO> hot = mediaAudioQuery.loadHotList(1);
-		List<MediaAudioVO> recommend = mediaAudioQuery.loadRecommend(user);
+		List<MediaAudioVO> recommend = mediaAudioQuery.loadRecommendWithWeight(user);
 		
-//		MediaAudioVO recommendRoot = new MediaAudioVO();
-//		recommendRoot.setName("个人推荐");
-//		recommendRoot.setType(MediaAudioItemType.FOLDER.toString());
-//		recommendRoot.setChildren(recommend);
-//		
-//		MediaAudioVO hotRoot = new MediaAudioVO();
-//		hotRoot.setName("热门推荐");
-//		hotRoot.setType(MediaAudioItemType.FOLDER.toString());
-//		hotRoot.setChildren(hot);
 		MediaAudioVO recommendRoot = new MediaAudioVO();
 		recommendRoot.setName("推荐");
 		recommendRoot.setType(MediaAudioItemType.FOLDER.toString());
@@ -91,7 +70,6 @@ public class ApiQtMediaController {
 		return new HashMapWrapper<String, Object>().put("videos", videoVOs)
 				   .put("audios", audioVOs)
 				   .put("recommend", new ArrayListWrapper<MediaAudioVO>().add(recommendRoot).getList())
-//				   .put("hot", new ArrayListWrapper<MediaAudioVO>().add(hotRoot).getList())
 				   .getMap();
 		
 	}

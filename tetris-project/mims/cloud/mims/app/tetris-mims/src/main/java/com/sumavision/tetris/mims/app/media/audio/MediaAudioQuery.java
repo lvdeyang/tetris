@@ -3,6 +3,7 @@ package com.sumavision.tetris.mims.app.media.audio;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -25,6 +27,7 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO.MediaAudioHotOrderComparator;
 import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionPO;
@@ -32,7 +35,6 @@ import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -173,7 +175,7 @@ public class MediaAudioQuery {
 			folderIds.add(folderPO.getId());
 		}
 		
-		List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdIn(folderIds);
+		List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdIn(folderIds, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
 		
 		List<FolderPO> roots = folderQuery.findRoots(folderTree);
 		
@@ -225,25 +227,7 @@ public class MediaAudioQuery {
 	 * @return List<MediaAudioVO> 筛选结果
 	 */
 	public List<MediaAudioVO> loadByCreateTime(Long startTime, Long endTime) throws Exception{
-		//TODO 权限校验		
-		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
-				
-		List<Long> folderIds = new ArrayList<Long>();
-		for(FolderPO folderPO: folderTree){
-			folderIds.add(folderPO.getId());
-		}
-		
-		List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdIn(folderIds);
-		
-		List<MediaAudioPO> audioPOs = new ArrayList<MediaAudioPO>();
-		for (MediaAudioPO mediaAudioPO : audios) {
-			Long updateTime = mediaAudioPO.getUpdateTime().getTime();
-			if (updateTime >= startTime && updateTime <= endTime) {
-				audioPOs.add(mediaAudioPO);
-			}
-		}
-		
-		return MediaVideoVO.getConverter(MediaAudioVO.class).convert(audioPOs, MediaAudioVO.class);
+		return loadByCondition(null, null, DateUtil.format(DateUtil.getDateByMillisecond(startTime), DateUtil.dateTimePattern), DateUtil.format(DateUtil.getDateByMillisecond(endTime), DateUtil.dateTimePattern), null);
 	}
 	
 	/**
@@ -277,53 +261,53 @@ public class MediaAudioQuery {
 		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(audios, MediaAudioVO.class);
 	}
 	
-	/**
-	 * 获取推荐列表<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年9月11日 上午11:27:52
-	 * @param UserVO user 用户
-	 * @return List<MediaAudioVO> 推荐列表
-	 */
-	public List<MediaAudioVO> loadRecommend(UserVO user) throws Exception{
+	public List<MediaAudioVO> loadRecommendWithWeight(UserVO user) throws Exception{
 		List<MediaAudioVO> recommends = new ArrayList<MediaAudioVO>();
-		
+
 		//根据用户标签获取媒资列表
 		Map<String, List<MediaAudioVO>> fromUserTags = loadAllByTags(user, user.getTags());
 		if (fromUserTags != null) {
 			List<MediaAudioVO> audios = fromUserTags.get("list");
 			for (MediaAudioVO mediaAudioVO : audios) {
-				if (recommends.size() < 10) {
+				if (recommends.contains(mediaAudioVO)) {
+					MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
+					audio.setHotWeight(audio.getHotWeight() + 1);
+				} else {
+					mediaAudioVO.setHotWeight(1l);
 					recommends.add(mediaAudioVO);
 				}
 			}
 		}
 		
-		//获取下载量排序列表，依次添加下载量大于0的媒资(去重)
-		int size = recommends.size();
-		for (int i = 1;; i++) {
-			List<MediaAudioVO> fromHot = loadHotList(i);
-			if (fromHot == null || fromHot.isEmpty() || recommends.size() >= size + 10) break;
-			for (MediaAudioVO mediaAudioVO : fromHot) {
-				if (mediaAudioVO.getDownloadCount() == 0) break;
-				if (recommends.size() < size + 10 && !recommends.contains(mediaAudioVO)) {
-					recommends.add(mediaAudioVO);
-				}
+		//获取下载量排序列表，依次添加下载量大于0的媒资(前5权重为2，其余为1)
+		List<MediaAudioVO> fromHot = loadHotList();
+		for (MediaAudioVO mediaAudioVO : fromHot) {
+			if (mediaAudioVO.getDownloadCount() == null || mediaAudioVO.getDownloadCount() == 0) break;
+			if (recommends.contains(mediaAudioVO)) {
+				int hotIndex = fromHot.indexOf(mediaAudioVO);
+				MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
+				if (hotIndex < 5) audio.setHotWeight(audio.getHotWeight() + 2); else audio.setHotWeight(audio.getHotWeight() + 1);
+			} else {
+				mediaAudioVO.setHotWeight(fromHot.indexOf(mediaAudioVO) < 5 ? 2l : 1l);
+				recommends.add(mediaAudioVO);
 			}
 		}
 		
-		//根据同相同最大下载量标签的其他用户的其他标签获取
-		size = recommends.size();
+		//根据同相同最大下载量标签的其他用户的其他标签获取(重复权重均加1)
 		List<MediaAudioVO> otherAudios = loadRecommendFromOthor(user);
-		if (otherAudios != null) {
-			for (MediaAudioVO mediaAudioVO : otherAudios) {
-				if (recommends.size() < size + 10 && !recommends.contains(mediaAudioVO)) {
-					recommends.add(mediaAudioVO);
-				}
+		for (MediaAudioVO mediaAudioVO : otherAudios) {
+			if (recommends.contains(mediaAudioVO)) {
+				MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
+				audio.setHotWeight(audio.getHotWeight() + 1);
+			} else {
+				mediaAudioVO.setHotWeight(1l);
+				recommends.add(mediaAudioVO);
 			}
 		}
 		
-		return recommends;
+		Collections.sort(recommends, new MediaAudioHotOrderComparator());
+		
+		return recommends.size() > 30 ? recommends.subList(0, 29) : recommends;
 	}
 	
 	/**
@@ -425,6 +409,10 @@ public class MediaAudioQuery {
 							TagPO tag = tagDAO.findOne(userToTagPermission2.get(k).getTagId());
 							if (tag == null) continue;
 							tags.add(tag.getName());
+						}
+						if (j == 0) {
+							TagPO tag = tagDAO.findOne(tagId);
+							if (tag != null) tags.add(tag.getName());
 						}
 						Map<String, List<MediaAudioVO>> map = loadAllByTags(user, tags);
 						if (map != null) {
@@ -581,14 +569,14 @@ public class MediaAudioQuery {
 	}
 	
 	/**
-	 * 获取热门列表(下载数排前十的媒资)<br/>
+	 * 获取热门列表<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年8月15日 下午5:26:50
 	 * @param int currentPage 当前页面
 	 * @return List<MediaAudioVO> 热门媒资列表
 	 */
-	public List<MediaAudioVO> loadHotList(int currentPage) throws Exception{
+	public List<MediaAudioVO> loadHotList() throws Exception{
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
 		
 		List<Long> folderIds = new ArrayList<Long>();
@@ -596,10 +584,8 @@ public class MediaAudioQuery {
 			folderIds.add(folderPO.getId());
 		}
 		
-		Pageable pageable = new PageRequest(currentPage - 1, 10);
+		List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdInOrderByDownloadCountDesc(folderIds, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
 		
-		Page<MediaAudioPO> audios = mediaAudioDao.findByFolderIdInOrderByDownloadCountDesc(folderIds, pageable);
-		
-		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(audios.getContent(), MediaAudioVO.class);
+		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(audios, MediaAudioVO.class);
 	}
 }

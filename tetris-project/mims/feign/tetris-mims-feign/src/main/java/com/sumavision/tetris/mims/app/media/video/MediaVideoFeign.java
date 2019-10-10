@@ -43,6 +43,17 @@ public interface MediaVideoFeign {
 	public JSONObject getByUuids(@RequestParam("uuids") String uuids) throws Exception;
 	
 	/**
+	 * 根据id获取媒资信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月9日 下午2:35:54
+	 * @param id 媒资id
+	 * @return MediaVideoVO 音频媒资列表
+	 */
+	@RequestMapping(value = "/media/video/feign/quest/by/id")
+	public JSONObject getById(@RequestParam("id") Long id) throws Exception;
+	
+	/**
 	 * 生成文件存储预览路径(云转码使用)<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

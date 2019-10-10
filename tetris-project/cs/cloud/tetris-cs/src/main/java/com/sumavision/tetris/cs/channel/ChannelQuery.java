@@ -15,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
+import com.sumavision.tetris.cs.config.ServerProps;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -28,6 +29,9 @@ public class ChannelQuery {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private ServerProps serverProps;
 
 	/**
 	 * 分页获取频道列表<br/>
@@ -154,6 +158,21 @@ public class ChannelQuery {
 		}
 	}
 	
+	public String queryLocalPort(Long startPort) throws Exception{
+		List<String> ports = channelDao.findByPreviewUrlIp(serverProps.getIp());
+		if (ports == null || ports.isEmpty()) return startPort.toString();
+		
+		Long returnPort = 0l;
+		for (Long i = startPort; i < startPort + 2000; i++) {
+			String port = i.toString();
+			if (!ports.contains(port)) {
+				return port;
+			}
+		}
+		
+		return returnPort.toString();
+	}
+	
 	public boolean sendAbilityRequest(BroadAbilityQueryType type, ChannelPO channel) throws Exception{
 		return sendAbilityRequest(type, channel, null, null, null);
 	}
@@ -179,35 +198,34 @@ public class ChannelQuery {
 	 * @throws Exception 
 	 */
 	public boolean sendAbilityRequest(BroadAbilityQueryType type, ChannelPO channel, List<String> input, JSONObject output, Long duration) throws Exception{
-//		JSONObject request = new JSONObject();
-//		request.put("id", channel.getBroadId());
-//		if (BroadAbilityQueryType.COVER == type) {
-//			request.put("cmd", type.getCmd());
-//			request.put("input", input);
-//		} else if (BroadAbilityQueryType.NEW == type) {
-//			request.put("cmd", type.getCmd());
-//			request.put("output", output);
-//			request.put("local_ip", "");
-//			request.put("loop_count", "1");
-//			request.put("input", input);
-//		} else if (BroadAbilityQueryType.STOP == type || BroadAbilityQueryType.DELETE == type) {
-//			request.put("cmd", type.getCmd());
-//		} else if (BroadAbilityQueryType.CHANGE == type) {
-//			if (sendAbilityRequest(BroadAbilityQueryType.DELETE, channel)) {
-//				return sendAbilityRequest(BroadAbilityQueryType.NEW, channel, input, output);
-//			} else {
-//				return false;
-//			}
-//		} else if (BroadAbilityQueryType.SEEK == type) {
-//			request.put("cmd", type.getCmd());
-//			request.put("duration", duration);
-//		}
-//		JSONObject response = HttpRequestUtil.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD), request);
-//		if (response != null && response.containsKey("stat") && response.getString("stat").equals("success")) {
+		JSONObject request = new JSONObject();
+		request.put("id", channel.getBroadId());
+		if (BroadAbilityQueryType.COVER == type) {
+			request.put("cmd", type.getCmd());
+			request.put("input", input);
+		} else if (BroadAbilityQueryType.NEW == type) {
+			request.put("cmd", type.getCmd());
+			request.put("output", output);
+			request.put("loop_count", "1");
+			request.put("input", input);
+		} else if (BroadAbilityQueryType.STOP == type || BroadAbilityQueryType.DELETE == type) {
+			request.put("cmd", type.getCmd());
+		} else if (BroadAbilityQueryType.CHANGE == type) {
+			if (sendAbilityRequest(BroadAbilityQueryType.DELETE, channel)) {
+				return sendAbilityRequest(BroadAbilityQueryType.NEW, channel, input, output);
+			} else {
+				return false;
+			}
+		} else if (BroadAbilityQueryType.SEEK == type) {
+			request.put("cmd", type.getCmd());
+			request.put("duration", duration);
+		}
+		JSONObject response = HttpRequestUtil.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD), request);
+		if (response != null && response.containsKey("stat") && response.getString("stat").equals("success")) {
 			return true;
-//		}else {
-//			return false;
-//		}
+		}else {
+			return false;
+		}
 	}
 
 	public String getStatusFromNum(String statusNum) {

@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -27,9 +29,9 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
-import com.sumavision.tetris.mims.app.folder.exception.FolderTypeCannotMatchException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
+import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
@@ -52,6 +54,7 @@ import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressNotE
 import com.sumavision.tetris.mims.app.media.compress.exception.MediaCompressStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureTaskVO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
@@ -65,7 +68,14 @@ import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagPO;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtQuery;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtService;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtVO;
+import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtErrorBeginOffsetException;
+import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtNotExistException;
+import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
@@ -76,11 +86,15 @@ import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoCannotMatc
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoErrorBeginOffsetException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadingException;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
 
 /**
  * 外部Server素材库接口<br/>
@@ -91,6 +105,9 @@ import com.sumavision.tetris.user.UserVO;
 @Controller
 @RequestMapping(value = "/api/server/media")
 public class ApiServerMediaController {
+	
+	@Autowired
+	private ServerProps serverProps;
 	
 	@Autowired
 	private FolderDAO folderDao;
@@ -114,7 +131,13 @@ public class ApiServerMediaController {
 	private MediaPictureService mediaPictureService;
 	
 	@Autowired
+	private MediaPictureQuery mediaPictureQuery;
+	
+	@Autowired
 	private MediaTxtService mediaTxtService;
+	
+	@Autowired
+	private MediaTxtQuery mediaTxtQuery;
 	
 	@Autowired
 	private MediaAudioStreamService mediaAudioStreamService;
@@ -136,6 +159,9 @@ public class ApiServerMediaController {
 	
 	@Autowired
 	private MediaCompressDAO mediaCompressDao;
+	
+	@Autowired
+	private MediaTxtDAO mediaTxtDao;
 	
 	@Autowired
 	private TagDAO tagDAO;
@@ -172,13 +198,14 @@ public class ApiServerMediaController {
 	    FolderType type = FolderType.fromPrimaryKey(folderType);
 	    FolderPO folder;
 	    if (folderId == null) {
-	    	folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), type.toString());
-			if(folder == null){
+	    	List<FolderPO> folders = folderQuery.findPermissionCompanyTree(type.toString());
+			if(folders == null || folders.isEmpty()){
 				throw new FolderNotExistException(new StringBufferWrapper().append("企业")
 																		   .append(type.getName())
 																		   .append("根文件夹不存在！")
 																		   .toString());
 			}
+			folder = folders.get(0);
 		} else {
 			folder = folderDao.findOne(folderId);
 			if(folder == null){
@@ -206,10 +233,10 @@ public class ApiServerMediaController {
 			return new MediaAudioStreamVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_PICTURE)){
 			MediaPictureTaskVO taskParam = JSON.parseObject(task, MediaPictureTaskVO.class);
-			MediaPicturePO entity = mediaPictureService.addTask(user, name, null, null, remark, taskParam, folder);
+			MediaPicturePO entity = mediaPictureService.addTask(user, name, tagNames, null, remark, taskParam, folder);
 			return new MediaPictureVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_TXT)){
-			return mediaTxtService.addTask(user, name, null, null, remark, task, folder, false);
+			return mediaTxtService.addTask(user, name, tagNames, null, remark, task, folder, false);
 		}else if(type.equals(FolderType.COMPANY_VIDEO)){
 			MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class); 
 			MediaVideoPO entity = mediaVideoService.addTask(user, name, tagNames, null, remark, taskParam, folder);
@@ -359,6 +386,8 @@ public class ApiServerMediaController {
 			if(endOffset == size){
 				//上传完成
 				task.setUploadStatus(UploadStatus.COMPLETE);
+				MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+				task.setDuration(multimediaInfo.getDuration());
 				mediaAudioDao.save(task);
 			}
 			
@@ -409,6 +438,8 @@ public class ApiServerMediaController {
 			if(endOffset == size){
 				//上传完成
 				task.setUploadStatus(UploadStatus.COMPLETE);
+				MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+				task.setDuration(multimediaInfo.getDuration());
 				mediaVideoDao.save(task);
 			}
 			
@@ -463,6 +494,49 @@ public class ApiServerMediaController {
 			}
 			
 			return new MediaCompressVO().set(task);
+		} else if (folderType.equals(FolderType.COMPANY_TXT)) {
+			MediaTxtPO task = mediaTxtDao.findByUuid(uuid);
+			
+			if(task == null){
+				throw new MediaTxtNotExistException(uuid);
+			}
+			
+			//状态错误
+			if(!UploadStatus.UPLOADING.equals(task.getUploadStatus())){
+				throw new MediaTxtStatusErrorWhenUploadingException(uuid, task.getUploadStatus());
+			}
+			
+			//文件起始位置错误
+			File file = new File(task.getUploadTmpPath());
+			if((!file.exists() && beginOffset!=0l) 
+					|| (file.length() != beginOffset)){
+				throw new MediaTxtErrorBeginOffsetException(uuid, beginOffset, file.length());
+			}
+			
+			//分块
+			InputStream block = null;
+			FileOutputStream out = null;
+			try{
+				if(!file.exists()) file.createNewFile();
+				block = request.getInputStream("block");
+				byte[] blockBytes = ByteUtil.inputStreamToBytes(block);
+				out = new FileOutputStream(file, true);
+				out.write(blockBytes);
+			}finally{
+				if(block != null) block.close();
+				if(out != null) out.close();
+			}
+			
+			if(endOffset == size){
+				//上传完成
+				task.setUploadStatus(UploadStatus.COMPLETE);
+				
+				String content = FileUtil.readAsString(task.getUploadTmpPath());
+				task.setContent(content);
+				mediaTxtDao.save(task);
+			}
+			
+	        return new MediaTxtVO().set(task);
 		}
 		
 		return null;		
@@ -478,28 +552,39 @@ public class ApiServerMediaController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/remove")
-	public Object remove(String materialUuids, HttpServletRequest request) throws Exception{
+	public Object remove(String deletions, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		if (materialUuids == null || materialUuids.isEmpty()) return null;
+		if (deletions == null || deletions.isEmpty()) return null;
 		
-		List<String> uuids = Arrays.asList(materialUuids.split(","));
+		List<ServerRemoveVO> removeVOs = JSON.parseArray(deletions, ServerRemoveVO.class);
 		
-		List<MediaAudioPO> audios = new ArrayList<MediaAudioPO>();
-		List<MediaVideoPO> videos = new ArrayList<MediaVideoPO>();
-		for (String uuid : uuids) {
-			MediaAudioPO audioPO = mediaAudioDao.findByUuid(uuid);
-			if (audioPO != null) {
-				audios.add(audioPO);
-			} else {
-				MediaVideoPO videoPO = mediaVideoDao.findByUuid(uuid);
-				if (videoPO != null) {
-					videos.add(videoPO);
-				}
+		for (ServerRemoveVO serverRemoveVO : removeVOs) {
+			String type = serverRemoveVO.getType();
+			String idsString = serverRemoveVO.getMaterialIds();
+			if (idsString == null || idsString.isEmpty()) continue;
+			List<Long> ids = Arrays.asList(idsString.split(",")).stream().map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+			switch (type.toLowerCase()) {
+			case "audio":
+				List<MediaAudioPO> audios = mediaAudioDao.findAll(ids);
+				mediaAudioService.remove(audios);
+				break;
+			case "video":
+				List<MediaVideoPO> videos = mediaVideoDao.findAll(ids);
+				mediaVideoService.remove(videos);
+				break;
+			case "picture":
+				List<MediaPicturePO> pictures = mediaPictureDao.findAll(ids);
+				mediaPictureService.remove(pictures);
+				break;
+			case "txt":
+				List<MediaTxtPO> txts = mediaTxtDao.findAll(ids);
+				mediaTxtService.remove(txts);
+			default:
+				break;
 			}
 		}
-		mediaAudioDao.deleteInBatch(audios);
-		mediaVideoDao.deleteInBatch(videos);
+		
 		return "";
 	}
 	
@@ -521,7 +606,7 @@ public class ApiServerMediaController {
 		
 		TagPO tag = tagDAO.findOne(tagId);
 		
-		switch (type) {
+		switch (type.toLowerCase()) {
 		case "video":
 			return mediaVideoService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
 		case "audio":
@@ -552,12 +637,57 @@ public class ApiServerMediaController {
 			endLong = DateUtil.parse(endTime, DateUtil.dateTimePattern).getTime();
 		}
 		
-		List<Object> returnList = new ArrayListWrapper<Object>()
-				.addAll(mediaVideoQuery.loadByCreateTime(startLong, endLong))
-				.addAll(mediaAudioQuery.loadByCreateTime(startLong, endLong))
-				.getList();
+		List<MediaVideoVO> videoVOs = mediaVideoQuery.loadByCreateTime(startLong, endLong);
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadByCreateTime(startLong, endLong);
+		List<MediaPictureVO> mediaPictureVOs = mediaPictureQuery.loadByCreateTime(startLong, endLong);
+		List<MediaTxtVO> mediaTxtVOs = mediaTxtQuery.loadByCreateTime(startLong, endLong);
 		
-		return returnList;
+		HashMapWrapper<String, List<Object>> map = new HashMapWrapper<String, List<Object>>();
+		for (MediaVideoVO mediaVideoVO : videoVOs) {
+			String mimeType = mediaVideoVO.getMimetype();
+			if (mimeType == null || mimeType.isEmpty()) continue;
+			if (map.containsKey(mimeType)) {
+				map.getMap().get(mimeType).add(mediaVideoVO);
+			}else {
+				map.put(mimeType, new ArrayListWrapper<Object>().add(mediaVideoVO).getList());
+			}
+		}
+		
+		for (MediaAudioVO mediaAudioVO : audioVOs) {
+			String mimeType = mediaAudioVO.getMimetype();
+			if (mimeType == null || mimeType.isEmpty()) continue;
+			if (map.containsKey(mimeType)) {
+				map.getMap().get(mimeType).add(mediaAudioVO);
+			}else {
+				map.put(mimeType, new ArrayListWrapper<Object>().add(mediaAudioVO).getList());
+			}
+		}
+		
+		for (MediaPictureVO mediaPictureVO : mediaPictureVOs) {
+			String mimeType = mediaPictureVO.getMimetype();
+			if (mimeType == null || mimeType.isEmpty()) continue;
+			if (map.containsKey(mimeType)) {
+				map.getMap().get(mimeType).add(mediaPictureVO);
+			}else {
+				map.put(mimeType, new ArrayListWrapper<Object>().add(mediaPictureVO).getList());
+			}
+		}
+		
+		for (MediaTxtVO mediaTxtVO : mediaTxtVOs) {
+			String mimeType = "text/plain";
+			if (map.containsKey(mimeType)) {
+				map.getMap().get(mimeType).add(mediaTxtVO);
+			}else {
+				map.put(mimeType, new ArrayListWrapper<Object>().add(mediaTxtVO).getList());
+			}
+		}
+		
+		JSONObject jsonObject = new JSONObject();
+		for (String mimetype : map.getMap().keySet()) {
+			jsonObject.put(mimetype, map.getMap().get(mimetype));
+		}
+		
+		return jsonObject;
 	}
 	
 	/**
@@ -578,18 +708,38 @@ public class ApiServerMediaController {
 		
 		List<MediaVideoVO> videoVOs = new ArrayList<MediaVideoVO>();
 		List<MediaAudioVO> audioVOs = new ArrayList<MediaAudioVO>();
+		List<MediaPictureVO> pictureVOs = new ArrayList<MediaPictureVO>();
+		List<MediaTxtVO> txtVOs = new ArrayList<MediaTxtVO>();
 		
-		if (type == null || !type.equals("video")) {
-			audioVOs = mediaAudioQuery.loadByCondition(id, name, startTime, endTime, tagId);
-		}
-		
-		if (type == null || !type.equals("audio")) {
+		if (type == null) {
 			videoVOs = mediaVideoQuery.loadByCondition(id, name, startTime, endTime, tagId);
+			audioVOs = mediaAudioQuery.loadByCondition(id, name, startTime, endTime, tagId);
+			pictureVOs = mediaPictureQuery.loadByCondition(id, name, startTime, endTime, tagId);
+			txtVOs = mediaTxtQuery.loadByCondition(id, name, startTime, endTime, tagId);
+		} else {
+			switch (type.toLowerCase()) {
+			case "video":
+				videoVOs = mediaVideoQuery.loadByCondition(id, name, startTime, endTime, tagId);
+				break;
+			case "audio":
+				audioVOs = mediaAudioQuery.loadByCondition(id, name, startTime, endTime, tagId);
+				break;
+			case "picture":
+				pictureVOs = mediaPictureQuery.loadByCondition(id, name, startTime, endTime, tagId);
+				break;
+			case "txt":
+				txtVOs = mediaTxtQuery.loadByCondition(id, name, startTime, endTime, tagId);
+				break;
+			default:
+				throw new ErrorTypeException("type",type);
+			}
 		}
 		
 		return new ArrayListWrapper<Object>()
 				.addAll(videoVOs)
 				.addAll(audioVOs)
+				.addAll(pictureVOs)
+				.addAll(txtVOs)
 				.getList();
 	}
 	
@@ -611,28 +761,55 @@ public class ApiServerMediaController {
 		Long folderId = null;
 		String name = null;
 		String uri = null;
-		if (type.equals("video")) {
-			MediaVideoPO media = mediaVideoDao.findOne(id);
-			
-			if(media == null){
+		String duration = "-";
+		
+		StringBufferWrapper stringBufferWrapper = new StringBufferWrapper().append("http://")
+				.append(serverProps.getIp())
+				.append(":")
+				.append(serverProps.getPort())
+				.append("/");
+		
+		switch (type) {
+		case "video":
+			MediaVideoPO video = mediaVideoDao.findOne(id);
+			if(video == null){
 				throw new MediaVideoNotExistException(id);
 			}
-			folderId = media.getFolderId();
-			name = media.getFileName();
-			uri = media.getPreviewUrl();
-		} else if (type.equals("audio")) {
-			MediaAudioPO media = mediaAudioDao.findOne(id);
-			
-			if(media == null){
+			folderId = video.getFolderId();
+			name = video.getFileName();
+			uri = (video.getStoreType() == StoreType.REMOTE) ? video.getPreviewUrl() : stringBufferWrapper.append(video.getPreviewUrl()).toString();
+			if (video.getDuration() != null) duration = video.getDuration().toString();
+			break;
+		case "audio":
+			MediaAudioPO audio = mediaAudioDao.findOne(id);
+			if(audio == null){
 				throw new MediaVideoNotExistException(id);
 			}
-			folderId = media.getFolderId();
-			name = media.getFileName();
-			uri = media.getPreviewUrl();
-		} else {
+			folderId = audio.getFolderId();
+			name = audio.getFileName();
+			uri = (audio.getStoreType() == StoreType.REMOTE) ? audio.getPreviewUrl() : stringBufferWrapper.append(audio.getPreviewUrl()).toString();
+			if (audio.getDuration() != null) duration = audio.getDuration().toString();
+			break;
+		case "picture":
+			MediaPicturePO picture = mediaPictureDao.findOne(id);
+			if(picture == null){
+				throw new MediaVideoNotExistException(id);
+			}
+			folderId = picture.getFolderId();
+			name = picture.getFileName();
+			uri = stringBufferWrapper.append(picture.getPreviewUrl()).toString();
+			break;
+		case "txt":
+			MediaTxtPO txt = mediaTxtDao.findOne(id);
+			if(txt == null){
+				throw new MediaVideoNotExistException(id);
+			}
+			folderId = txt.getFolderId();
+			name = txt.getFileName();
+			uri = stringBufferWrapper.append(txt.getPreviewUrl()).toString();
+		default:
 			throw new ErrorTypeException("type",type);
 		}
-		
 		
 		UserVO user = userQuery.current();
 		
@@ -642,6 +819,7 @@ public class ApiServerMediaController {
 		
 		Map<String, String> result = new HashMapWrapper<String, String>().put("name", name)
 																		 .put("uri", uri)
+																		 .put("duration", duration)
 																		 .getMap();
 		
 		return result;

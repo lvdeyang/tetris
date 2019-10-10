@@ -45,6 +45,7 @@ import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -101,6 +102,9 @@ public class ChannelService {
 	
 	@Autowired
 	private Adapter adapter;
+	
+	@Autowired
+	private MimsServerPropsQuery mimsServerPropsQuery;
 	
 	private Map<Long, Timer> timerMap = new HashMapWrapper<Long, Timer>().getMap();
 
@@ -341,10 +345,16 @@ public class ChannelService {
 		
 		JSONObject output = new JSONObject();
 		output.put("proto-type", "udp-ts");
-		output.put("ipv4", channel.getPreviewUrlIp());
-		output.put("port", channel.getPreviewUrlPort());
-		output.put("vport", "");
-		output.put("aport", "");
+		List<JSONObject> destList = new ArrayList<JSONObject>();
+		JSONObject dest = new JSONObject();
+		dest.put("local_ip", mimsServerPropsQuery.queryProps().getIp());
+		dest.put("ipv4", channel.getPreviewUrlIp());
+		dest.put("port", channel.getPreviewUrlPort());
+		dest.put("vport", "");
+		dest.put("aport", "");
+		destList.add(dest);
+		output.put("dest_list", destList);
+		
 		output.put("scramble", "none");
 		output.put("key", "");
 		BroadAbilityQueryType type = channelQuery.broadCmd(channelId);

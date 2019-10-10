@@ -46,6 +46,9 @@ import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
+
 /**
  * 图片媒资操作（主增删改）<br/>
  * <b>作者:</b>lvdeyang<br/>
@@ -347,7 +350,11 @@ public class MediaVideoService {
 			String previewUrl,
 			String ftpUrl) throws Exception{
 		String version = new StringBufferWrapper().append(MediaVideoPO.VERSION_OF_ORIGIN).append(".").append(new Date().getTime()).toString();
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO.toString());
+		List<FolderPO> folders = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
+		if(folders==null || folders.size()<=0) throw new FolderNotFoundException();
+		List<FolderPO> rootFolders = folderQuery.findRoots(folders);
+		FolderPO folder = rootFolders.get(0);
+//		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO.toString());
 		if (folder == null) throw new FolderNotFoundException();
 		MediaVideoPO mediaVideoPO = new MediaVideoPO();
 		mediaVideoPO.setUpdateTime(new Date());
@@ -670,6 +677,12 @@ public class MediaVideoService {
 		entity.setUpdateTime(date);
 		entity.setTags(tags);
 		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
+		
+		File file = new File(uploadTempPath);
+		if (file.exists() && file.isFile()) {
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			entity.setDuration(multimediaInfo.getDuration());
+		}
 		
 		if(needProcess){
 			//启动流程

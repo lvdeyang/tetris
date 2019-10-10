@@ -82,6 +82,18 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	public List<MediaAudioPO> findByUploadTmpPathAndIdNotIn(String tmpPath, Collection<Long> ids);
 	
 	/**
+	 * 获取文件夹下的音频媒资（批量过滤审核状态）<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月26日 下午3:21:18
+	 * @param Long folderId 文件夹id
+	 * @param Collection<String> reviewStatus 过滤的审核状态
+	 * @return List<MediaAudioPO> 音频媒资列表
+	 */
+	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO WHERE FOLDER_ID IN ?1 AND (REVIEW_STATUS IS NULL OR REVIEW_STATUS NOT IN ?2)", nativeQuery = true)
+	public List<MediaAudioPO> findByFolderIdIn(Collection<Long> folderId, Collection<String> reviewStatus);
+	
+	/**
 	 * 根据用户标签获取文件夹下的音频媒资（批量）<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -95,7 +107,7 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	
 	/**
 	 * <br/>
-	 * <b>作者:</b>sms<br/>
+	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年8月15日 下午5:33:38
 	 * @param folderId
@@ -103,6 +115,17 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	 * @return
 	 */
 	public Page<MediaAudioPO> findByFolderIdInOrderByDownloadCountDesc(Collection<Long> folderIds, Pageable pageable);
+	
+	/**
+	 * <br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月15日 下午5:33:38
+	 * @param folderId
+	 * @return
+	 */
+	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO WHERE FOLDER_ID IN ?1 AND (REVIEW_STATUS IS NULL OR REVIEW_STATUS NOT IN ?2) ORDER BY DOWNLOAD_COUNT DESC", nativeQuery = true)
+	public List<MediaAudioPO> findByFolderIdInOrderByDownloadCountDesc(Collection<Long> folderIds, Collection<String> reviewStatus);
 	
 	/**
 	 * 根据条件查询媒资<br/>

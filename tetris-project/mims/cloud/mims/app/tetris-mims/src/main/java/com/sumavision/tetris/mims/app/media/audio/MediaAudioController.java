@@ -44,6 +44,9 @@ import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
+
 @Controller
 @RequestMapping(value = "/media/audio")
 public class MediaAudioController {
@@ -376,6 +379,9 @@ public class MediaAudioController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
+			
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			task.setDuration(multimediaInfo.getDuration());
 			
 			//如果是从文本文件上传需要转换成音频
 			if(task.getMimetype().equals("text/plain")){

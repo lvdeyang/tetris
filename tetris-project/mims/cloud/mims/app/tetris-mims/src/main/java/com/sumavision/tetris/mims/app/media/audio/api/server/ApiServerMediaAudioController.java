@@ -38,6 +38,9 @@ import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
+
 @Controller
 @RequestMapping(value = "/api/server/media/audio")
 public class ApiServerMediaAudioController {
@@ -186,6 +189,8 @@ public class ApiServerMediaAudioController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			task.setDuration(multimediaInfo.getDuration());
 			mediaAudioDao.save(task);
 		}
 		

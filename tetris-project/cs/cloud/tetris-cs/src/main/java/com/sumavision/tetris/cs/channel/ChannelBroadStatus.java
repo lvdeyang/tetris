@@ -26,7 +26,7 @@ public abstract class ChannelBroadStatus {
 	public static String getBroadcastIPAndPort(BroadWay way) throws Exception{
 		if (way == BroadWay.TERMINAL_BROAD) {
 			if(terminalBroadIp.isEmpty() || terminalBroadPort.isEmpty()){
-				File jsonFile = ResourceUtils.getFile("classpath:broadConfig.json");
+				File jsonFile = ResourceUtils.getFile("classpath:profile.json");
 				String json = FileUtils.readFileToString(jsonFile);
 				JSONObject jsonObject = JSONObject.parseObject(json);
 				
@@ -41,7 +41,7 @@ public abstract class ChannelBroadStatus {
 			return terminalBroadIp + ":" + terminalBroadPort;
 		} else {
 			if(abilityBroadIp.isEmpty() || abilityBroadPort.isEmpty()){
-				File jsonFile = ResourceUtils.getFile("classpath:broadConfig.json");
+				File jsonFile = ResourceUtils.getFile("classpath:profile.json");
 				String json = FileUtils.readFileToString(jsonFile);
 				JSONObject jsonObject = JSONObject.parseObject(json);
 				
@@ -64,7 +64,7 @@ public abstract class ChannelBroadStatus {
 	 * <b>日期：</b>2019年8月1日 上午11:06:57
 	 */
 	public static Boolean getBroadcastIfLocal() throws Exception{
-		File jsonFile = ResourceUtils.getFile("classpath:broadConfig.json");
+		File jsonFile = ResourceUtils.getFile("classpath:profile.json");
 		String json = FileUtils.readFileToString(jsonFile);
 		JSONObject jsonObject = JSONObject.parseObject(json);
 		

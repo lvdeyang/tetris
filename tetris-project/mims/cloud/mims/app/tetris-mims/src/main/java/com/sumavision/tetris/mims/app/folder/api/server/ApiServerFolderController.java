@@ -17,9 +17,17 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtQuery;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/api/server/folder")
@@ -29,11 +37,17 @@ public class ApiServerFolderController {
 	@Autowired
 	private MediaVideoQuery mediaVideoQuery;
 	@Autowired
+	private MediaPictureQuery mediaPictureQuery;
+	@Autowired
+	private MediaTxtQuery mediaTxtQuery;
+	@Autowired
 	private MediaVideoDAO mediaVideoDAO;
 	@Autowired
 	private MediaAudioDAO mediaAudioDAO;
 	@Autowired
 	private FolderDAO folderDAO;
+	@Autowired
+	private UserQuery userQuery;
 	
 	@SuppressWarnings("unchecked")
 	@JsonBody
@@ -70,5 +84,20 @@ public class ApiServerFolderController {
 //		return new HashMapWrapper<String, Object>().put("videos", videos == null ? videos : videos.get("rows"))
 //				   .put("audios", audios == null ? audios : audios.get("rows"))
 //				   .getMap();
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/get/all")
+	public Object getChildren(HttpServletRequest request) throws Exception {
+		
+		UserVO user = userQuery.current();
+		
+		List<MediaVideoVO> videoVOs = mediaVideoQuery.loadAll();
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAll();
+		List<MediaPictureVO> pictureVOs = mediaPictureQuery.loadAll();
+		List<MediaTxtVO> txtVOs = mediaTxtQuery.loadAll();
+		
+		return new ArrayListWrapper<Object>().addAll(videoVOs).addAll(audioVOs).addAll(pictureVOs).addAll(txtVOs).getList();
 	}
 }

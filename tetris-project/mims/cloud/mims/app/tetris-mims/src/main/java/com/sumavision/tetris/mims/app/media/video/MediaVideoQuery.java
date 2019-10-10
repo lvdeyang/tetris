@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -157,7 +158,7 @@ public class MediaVideoQuery {
 			folderIds.add(folderPO.getId());
 		}
 		
-		List<MediaVideoPO> videos = mediaVideoDao.findByFolderIdIn(folderIds);
+		List<MediaVideoPO> videos = mediaVideoDao.findByFolderIdIn(folderIds, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
 		
 		List<FolderPO> roots = folderQuery.findRoots(folderTree);
 		List<MediaVideoVO> medias = new ArrayList<MediaVideoVO>();
@@ -208,25 +209,7 @@ public class MediaVideoQuery {
 	 * @return List<MediaVideoVO> 筛选结果
 	 */
 	public List<MediaVideoVO> loadByCreateTime(Long startTime, Long endTime) throws Exception{
-		//TODO 权限校验		
-		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
-				
-		List<Long> folderIds = new ArrayList<Long>();
-		for(FolderPO folderPO: folderTree){
-			folderIds.add(folderPO.getId());
-		}
-		
-		List<MediaVideoPO> videos = mediaVideoDao.findByFolderIdIn(folderIds);
-		
-		List<MediaVideoPO> videoPOs = new ArrayList<MediaVideoPO>();
-		for (MediaVideoPO mediaVideoPO : videos) {
-			Long updateTime = mediaVideoPO.getUpdateTime().getTime();
-			if (updateTime >= startTime && updateTime <= endTime) {
-				videoPOs.add(mediaVideoPO);
-			}
-		}
-		
-		return MediaVideoVO.getConverter(MediaVideoVO.class).convert(videoPOs, MediaVideoVO.class);
+		return loadByCondition(null, null, DateUtil.format(DateUtil.getDateByMillisecond(startTime), DateUtil.dateTimePattern), DateUtil.format(DateUtil.getDateByMillisecond(endTime), DateUtil.dateTimePattern), null);
 	}
 	
 	/**

@@ -72,6 +72,9 @@ public class MediaVideoPO extends AbstractBasePO{
 	/** 媒资创建时间 */
 	private Date createTime;
 	
+	/** 文件播放时间 */
+	private Long duration;
+	
 	/** 版本号，格式：类型.timestamp, 0.0（原始媒资） 0.1（二次生产媒资）*/
 	private String version;
 	
@@ -214,6 +217,15 @@ public class MediaVideoPO extends AbstractBasePO{
 		this.createTime = createTime;
 	}
 
+	@Column(name = "DURATION")
+	public Long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(Long duration) {
+		this.duration = duration;
+	}
+
 	@Column(name = "VERSION")
 	public String getVersion() {
 		return version;
@@ -310,6 +322,7 @@ public class MediaVideoPO extends AbstractBasePO{
 		history.setMimetype(this.getMimetype());
 		history.setSize(this.getSize());
 		history.setCreateTime(this.getCreateTime());
+		history.setDuration(this.getDuration());
 		history.setVersion(this.getVersion());
 		history.setRemarks(this.getRemarks());
 		history.setTags(this.getTags());
@@ -343,6 +356,7 @@ public class MediaVideoPO extends AbstractBasePO{
 		copy_video.setMimetype(this.getMimetype());
 		copy_video.setSize(this.getSize());
 		copy_video.setCreateTime(this.getCreateTime());
+		copy_video.setDuration(this.getDuration());
 		copy_video.setVersion(this.getVersion());
 		copy_video.setRemarks(this.getRemarks());
 		copy_video.setTags(this.getTags());

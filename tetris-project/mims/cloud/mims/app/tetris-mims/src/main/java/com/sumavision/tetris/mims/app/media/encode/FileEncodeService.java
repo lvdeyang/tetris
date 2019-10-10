@@ -255,11 +255,4 @@ public class FileEncodeService {
 			}
 		}			
 	}
-	
-	public static void main(String[] args) throws Exception{
-		
-//		encodeAudioFile("G:\\M\\Alin.mp3", null);
-		decodeAudioFile("G:\\M\\encode\\Alin_encode.mp3", null);
-		
-	}
 }
