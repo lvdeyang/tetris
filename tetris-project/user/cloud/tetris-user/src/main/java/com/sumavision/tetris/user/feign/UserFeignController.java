@@ -12,7 +12,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserDAO;
+import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserService;
+import com.sumavision.tetris.user.UserVO;
+import com.sumavision.tetris.user.exception.UserNotExistException;
 
 @Controller
 @RequestMapping(value = "/user/feign")
@@ -20,6 +25,12 @@ public class UserFeignController {
 
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private UserDAO userDAO;
+	
+	@Autowired
+	private UserService userService;
 	
 	/**
 	 * 用户登录校验<br/>
@@ -120,4 +131,32 @@ public class UserFeignController {
 		}
 	}
 	
+	/**
+	 * 修改一个用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月19日 下午4:54:11
+	 * @param Long id 用户id
+	 * @param String tags 修改的标签(全量)
+	 * @return UserVO 修改后的数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/edit")
+	public Object edit(
+			Long id,
+            String tags) throws Exception{
+		
+		UserVO userVO = userQuery.current();
+		
+		UserPO userPO = userDAO.findOne(id);
+		
+		if(userPO == null) throw new UserNotExistException(id);
+		
+		UserVO user = new UserVO().set(userPO);
+		
+		//TODO 权限校验
+		
+		return userService.edit(id, user.getNickname(), user.getMobile(), user.getMail(), tags, false, "", "", "");
+	}
 }

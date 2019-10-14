@@ -7,7 +7,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
+import com.sumavision.tetris.mims.app.media.encode.FileEncodeService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -16,6 +19,12 @@ public class ApiProcessAudioController {
 
 	@Autowired
 	private MediaAudioService mediaAudioService;
+	
+	@Autowired
+	private FileEncodeService fileEncodeService;
+	
+	@Autowired
+	private MediaAudioDAO mediaAudioDao;
 	
 	/**
 	 * 上传音频媒资审核通过<br/>
@@ -124,6 +133,25 @@ public class ApiProcessAudioController {
 			Long id,
 			HttpServletRequest request) throws Exception{
 		mediaAudioService.deleteReviewRefuse(id);
+		return null;
+	}
+	
+	/**
+	 * 音频媒资加密<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月25日 上午11:57:52
+	 * @param Long mediaId 音频媒资id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/encode")
+	public Object audioEncode(Long mediaId, HttpServletRequest request) throws Exception{
+		
+		MediaAudioPO audio = mediaAudioDao.findOne(mediaId);
+		
+		fileEncodeService.encodeAudioFile(audio);
+		
 		return null;
 	}
 	

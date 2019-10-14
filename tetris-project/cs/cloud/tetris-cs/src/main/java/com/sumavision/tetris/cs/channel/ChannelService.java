@@ -36,7 +36,6 @@ import com.sumavision.tetris.cs.menu.CsResourceVO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
-import com.sumavision.tetris.cs.schedule.SchedulePO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
@@ -46,6 +45,7 @@ import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -103,6 +103,9 @@ public class ChannelService {
 	@Autowired
 	private Adapter adapter;
 	
+	@Autowired
+	private MimsServerPropsQuery mimsServerPropsQuery;
+	
 	private Map<Long, Timer> timerMap = new HashMapWrapper<Long, Timer>().getMap();
 
 	/**
@@ -118,7 +121,7 @@ public class ChannelService {
 	 * @param String remark 备注
 	 * @return ChannelPO 频道
 	 */
-	public ChannelPO add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark) throws Exception {
+	public ChannelPO add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, ChannelType type) throws Exception {
 		UserVO user = userQuery.current();
 		
 		ChannelPO channel = new ChannelPO();
@@ -129,6 +132,7 @@ public class ChannelService {
 		channel.setBroadcastStatus("未播发");
 		channel.setGroupId(user.getGroupId());
 		channel.setUpdateTime(new Date());
+		channel.setType(type.toString());
 		
 		if (BroadWay.fromName(broadWay) == BroadWay.ABILITY_BROAD) {
 			if (channelDao.checkIpAndPortExists(previewUrlIp, previewUrlPort) == null) {
@@ -341,10 +345,16 @@ public class ChannelService {
 		
 		JSONObject output = new JSONObject();
 		output.put("proto-type", "udp-ts");
-		output.put("ipv4", channel.getPreviewUrlIp());
-		output.put("port", channel.getPreviewUrlPort());
-		output.put("vport", "");
-		output.put("aport", "");
+		List<JSONObject> destList = new ArrayList<JSONObject>();
+		JSONObject dest = new JSONObject();
+		dest.put("local_ip", mimsServerPropsQuery.queryProps().getIp());
+		dest.put("ipv4", channel.getPreviewUrlIp());
+		dest.put("port", channel.getPreviewUrlPort());
+		dest.put("vport", "");
+		dest.put("aport", "");
+		destList.add(dest);
+		output.put("dest_list", destList);
+		
 		output.put("scramble", "none");
 		output.put("key", "");
 		BroadAbilityQueryType type = channelQuery.broadCmd(channelId);

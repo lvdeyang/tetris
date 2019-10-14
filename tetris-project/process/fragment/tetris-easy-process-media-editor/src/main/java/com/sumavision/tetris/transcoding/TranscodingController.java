@@ -66,7 +66,7 @@ public class TranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/template/list")
-	public Object getTemplates(HttpServletRequest request) {
+	public Object getTemplates(HttpServletRequest request) throws Exception {
 		return templatesRequest.getTemplates();
 	}
 

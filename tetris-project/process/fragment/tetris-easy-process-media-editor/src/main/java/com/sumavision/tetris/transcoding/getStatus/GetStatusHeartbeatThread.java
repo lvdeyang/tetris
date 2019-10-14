@@ -37,7 +37,7 @@ public class GetStatusHeartbeatThread extends Thread{
 	 * 
 	 * @return
 	 */
-	private void startHeartbeat(){
+	private void startHeartbeat() throws Exception{
 		if (mediaEditorTaskRatePermissionQuery == null || mediaEditorTaskRatePermissionService == null || getStatusService == null) {
 			mediaEditorTaskRatePermissionQuery = SpringContext.getBean(MediaEditorTaskRatePermissionQuery.class);
 			mediaEditorTaskRatePermissionService = SpringContext.getBean(MediaEditorTaskRatePermissionService.class);

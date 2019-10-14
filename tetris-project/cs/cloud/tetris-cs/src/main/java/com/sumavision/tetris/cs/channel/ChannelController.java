@@ -40,13 +40,8 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/list")
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
-		List<ChannelPO> entities = channelQuery.findAll(currentPage, pageSize);
 
-		List<ChannelVO> channels = ChannelVO.getConverter(ChannelVO.class).convert(entities, ChannelVO.class);
-
-		Long total = channelDao.count();
-
-		return new HashMapWrapper<String, Object>().put("rows", channels).put("total", total).getMap();
+		return channelQuery.findAll(currentPage, pageSize, ChannelType.LOCAL);
 	}
 
 	/**
@@ -67,7 +62,7 @@ public class ChannelController {
 	@RequestMapping(value = "/add")
 	public Object add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, HttpServletRequest request) throws Exception {
 
-		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark);
+		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.LOCAL);
 
 		return new ChannelVO().set(channel);
 	}

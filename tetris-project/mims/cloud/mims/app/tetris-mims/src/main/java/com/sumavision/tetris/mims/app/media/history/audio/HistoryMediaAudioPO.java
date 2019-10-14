@@ -57,6 +57,9 @@ public class HistoryMediaAudioPO extends AbstractBasePO{
 	/** 媒资创建时间 */
 	private Date createTime;
 	
+	/** 文件播放时长 */
+	private Long duration;
+	
 	/** 版本号，格式：类型.timestamp, 0.0（素材） 0.1（媒资）*/
 	private String version;
 	
@@ -182,6 +185,15 @@ public class HistoryMediaAudioPO extends AbstractBasePO{
 
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+
+	@Column(name = "DURATION")
+	public Long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(Long duration) {
+		this.duration = duration;
 	}
 
 	@Column(name = "VERSION")

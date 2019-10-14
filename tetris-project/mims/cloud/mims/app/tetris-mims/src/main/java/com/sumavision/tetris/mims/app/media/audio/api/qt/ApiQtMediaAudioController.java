@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/api/qt/media/audio")
@@ -20,6 +22,9 @@ public class ApiQtMediaAudioController {
 	
 	@Autowired
 	private MediaAudioService mediaAudioService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 加载所有的音频媒资<br/>
@@ -63,7 +68,8 @@ public class ApiQtMediaAudioController {
 	@ResponseBody
 	@RequestMapping(value = "/load/all/by/tags")
 	public Object loadAllByTags(HttpServletRequest request) throws Exception{
-		return mediaAudioQuery.loadAllByTags();
+		UserVO user = userQuery.current();
+		return mediaAudioQuery.loadAllByUserTags(user);
 	}
 	
 	/**
@@ -78,6 +84,7 @@ public class ApiQtMediaAudioController {
 	@ResponseBody
 	@RequestMapping(value = "/download")
 	public Object downloadAdd(Long id, HttpServletRequest request) throws Exception{
-		return mediaAudioService.downloadAdd(id);
+		UserVO user = userQuery.current();
+		return mediaAudioService.downloadAdd(user, id);
 	}
 }

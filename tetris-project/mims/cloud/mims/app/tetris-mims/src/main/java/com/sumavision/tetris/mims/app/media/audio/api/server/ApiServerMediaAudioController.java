@@ -38,6 +38,9 @@ import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
+
 @Controller
 @RequestMapping(value = "/api/server/media/audio")
 public class ApiServerMediaAudioController {
@@ -93,7 +96,7 @@ public class ApiServerMediaAudioController {
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, null, "", taskParam, folder);
+		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, null, "", false, taskParam, folder);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -186,6 +189,8 @@ public class ApiServerMediaAudioController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			task.setDuration(multimediaInfo.getDuration());
 			mediaAudioDao.save(task);
 		}
 		
@@ -209,6 +214,6 @@ public class ApiServerMediaAudioController {
 	public Object addFar(String name, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		return mediaAudioService.addTask(user, name, httpUrl, ftpUrl);
+		return mediaAudioService.addTask(user, name, "", httpUrl, ftpUrl);
 	}
 }

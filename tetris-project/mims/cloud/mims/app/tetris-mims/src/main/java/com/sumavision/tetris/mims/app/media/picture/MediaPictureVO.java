@@ -30,6 +30,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	
 	private String type;
 	
+	private String resourceType;
+	
 	private boolean removeable;
 	
 	private String icon;
@@ -45,6 +47,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	private String reviewStatus;
 	
 	private String processInstanceId;
+	
+	private List<MediaPictureVO> children;
 	
 	public String getName() {
 		return name;
@@ -127,6 +131,15 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return this;
 	}
 
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public MediaPictureVO setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+		return this;
+	}
+
 	public boolean isRemoveable() {
 		return removeable;
 	}
@@ -178,6 +191,15 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 
 	public MediaPictureVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public List<MediaPictureVO> getChildren() {
+		return children;
+	}
+
+	public MediaPictureVO setChildren(List<MediaPictureVO> children) {
+		this.children = children;
 		return this;
 	}
 
@@ -236,6 +258,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaPictureItemType.FOLDER.toString())
+			.setResourceType(entity.getType().toString())
 			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaPictureItemType.FOLDER.getIcon())
 			.setStyle(MediaPictureItemType.FOLDER.getStyle()[0])

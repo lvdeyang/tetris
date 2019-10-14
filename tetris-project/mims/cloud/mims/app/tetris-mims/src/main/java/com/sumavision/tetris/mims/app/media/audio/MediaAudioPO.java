@@ -73,6 +73,9 @@ public class MediaAudioPO extends AbstractBasePO{
 	/** 媒资创建时间 */
 	private Date createTime;
 	
+	/** 文件播放时长 */
+	private Long duration;
+	
 	/** 版本号，格式：类型.timestamp, 0.0（原始媒资） 0.1（二次生产媒资）*/
 	private String version;
 	
@@ -99,6 +102,12 @@ public class MediaAudioPO extends AbstractBasePO{
 	
 	/** 审核流程id */
 	private String processInstanceId;
+	
+	/** 是否加密 */
+	private Boolean encryption;
+	
+	/** 加密文件地址 */
+	private String encryptionUrl;
 
 	@Column(name = "LAST_MODIFIED")
 	public Long getLastModified() {
@@ -218,6 +227,15 @@ public class MediaAudioPO extends AbstractBasePO{
 		this.createTime = createTime;
 	}
 
+	@Column(name = "DURATION")
+	public Long getDuration() {
+		return duration;
+	}
+
+	public void setDuration(Long duration) {
+		this.duration = duration;
+	}
+
 	@Column(name = "VERSION")
 	public String getVersion() {
 		return version;
@@ -301,6 +319,24 @@ public class MediaAudioPO extends AbstractBasePO{
 		this.processInstanceId = processInstanceId;
 	}
 
+	@Column(name = "IF_ENCRYPTION")
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public void setEncryption(Boolean encryption) {
+		this.encryption = encryption;
+	}
+
+	@Column(name = "ENCRYPTION_URL")
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public void setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
+	}
+
 	/**
 	 * 转换为历史数据<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -323,6 +359,7 @@ public class MediaAudioPO extends AbstractBasePO{
 		history.setMimetype(this.getMimetype());
 		history.setSize(this.getSize());
 		history.setCreateTime(this.getCreateTime());
+		history.setDuration(this.getDuration());
 		history.setVersion(this.getVersion());
 		history.setRemarks(this.getRemarks());
 		history.setTags(this.getTags());
@@ -356,11 +393,14 @@ public class MediaAudioPO extends AbstractBasePO{
 		copy_video.setMimetype(this.getMimetype());
 		copy_video.setSize(this.getSize());
 		copy_video.setCreateTime(this.getCreateTime());
+		copy_video.setDuration(this.getDuration());
 		copy_video.setVersion(this.getVersion());
 		copy_video.setRemarks(this.getRemarks());
 		copy_video.setTags(this.getTags());
 		copy_video.setKeyWords(this.getKeyWords());
 		copy_video.setUploadStatus(this.getUploadStatus());
+		copy_video.setEncryption(this.getEncryption());
+		copy_video.setEncryptionUrl(this.getEncryptionUrl());
 		return copy_video;
 	}
 	

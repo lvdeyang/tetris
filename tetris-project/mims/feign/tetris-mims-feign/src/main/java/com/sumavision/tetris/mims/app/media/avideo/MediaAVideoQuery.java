@@ -91,4 +91,15 @@ public class MediaAVideoQuery {
 		
 		parentMedia.getChildren().removeAll(removeList);
 	}
+	
+	public MediaAVideoVO loadByIdAndType(Long id, String type) throws Exception{
+		switch (type.toLowerCase()) {
+		case "video":
+			return JsonBodyResponseParser.parseObject(mediaVideoFeign.getById(id), MediaAVideoVO.class);
+		case "audio":
+			return JsonBodyResponseParser.parseObject(mediaAudioFeign.getById(id), MediaAVideoVO.class);
+		default:
+			return null;
+		}
+	}
 }

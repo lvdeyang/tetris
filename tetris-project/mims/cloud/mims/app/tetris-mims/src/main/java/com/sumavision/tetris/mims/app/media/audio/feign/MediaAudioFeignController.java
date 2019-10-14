@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
+import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -20,6 +23,9 @@ public class MediaAudioFeignController {
 
 	@Autowired
 	private MediaAudioQuery mediaAudioQuery;
+	
+	@Autowired
+	private MediaAudioDAO mediaAudioDAO;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
@@ -70,6 +76,24 @@ public class MediaAudioFeignController {
 		List<String> uuidList = JSON.parseArray(uuids, String.class);
 		
 		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(mediaAudioQuery.questByUuid(uuidList), MediaAudioVO.class);
+	}
+	
+	/**
+	 * 根据id获取媒资信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月9日 下午2:31:07
+	 * @param id 媒资id
+	 * @return MediaAudioVO 媒资信息 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/quest/by/id")
+	public Object getById(Long id) throws Exception{
+		MediaAudioPO audio = mediaAudioDAO.findOne(id);
+		if (audio == null) throw new MediaAudioNotExistException(id);
+		
+		return new MediaAudioVO().set(audio);
 	}
 	
 	/**

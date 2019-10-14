@@ -104,17 +104,15 @@ public class ApiAndroidStreamVideoController {
 		
 		UserVO user = userQuery.current();
 		
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO_STREAM.toString());
-		Long folderId = folder.getId();
-		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
+		List<FolderPO> folderPOs = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO_STREAM.toString());
+		if (folderPOs == null || folderPOs.isEmpty()) {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
 		List<String> previewUrls = new ArrayList<String>();
 		if (previewUrl != null) previewUrls.add(previewUrl);
 		
-		return  mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrls, folder);
+		return  mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrls, folderPOs.get(0));
 		
 	}
 	

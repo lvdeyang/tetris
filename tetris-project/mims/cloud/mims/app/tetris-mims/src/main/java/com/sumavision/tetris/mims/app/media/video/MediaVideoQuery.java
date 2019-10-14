@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -22,6 +23,9 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.tag.TagDAO;
+import com.sumavision.tetris.mims.app.media.tag.TagPO;
+import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -46,6 +50,9 @@ public class MediaVideoQuery {
 	
 	@Autowired
 	private FolderQuery folderQuery;
+	
+	@Autowired
+	private TagDAO tagDAO;
 	
 	@Autowired
 	private Path path;
@@ -151,7 +158,7 @@ public class MediaVideoQuery {
 			folderIds.add(folderPO.getId());
 		}
 		
-		List<MediaVideoPO> videos = mediaVideoDao.findByFolderIdIn(folderIds);
+		List<MediaVideoPO> videos = mediaVideoDao.findByFolderIdIn(folderIds, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
 		
 		List<FolderPO> roots = folderQuery.findRoots(folderTree);
 		List<MediaVideoVO> medias = new ArrayList<MediaVideoVO>();
@@ -190,6 +197,74 @@ public class MediaVideoQuery {
 		packMediaVideoTree(medias, folderTree, new ArrayList<MediaVideoPO>());
 		
 		return medias;
+	}
+	
+	/**
+	 * 根据创建时间筛选<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月5日 下午3:08:38
+	 * @param Long startTime 筛选起始时间
+	 * @param Long endTime 筛选终止时间
+	 * @return List<MediaVideoVO> 筛选结果
+	 */
+	public List<MediaVideoVO> loadByCreateTime(Long startTime, Long endTime) throws Exception{
+		return loadByCondition(null, null, DateUtil.format(DateUtil.getDateByMillisecond(startTime), DateUtil.dateTimePattern), DateUtil.format(DateUtil.getDateByMillisecond(endTime), DateUtil.dateTimePattern), null);
+	}
+	
+	/**
+	 * 根据条件查询媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月19日 下午3:17:30
+	 * @param Long id 媒资id
+	 * @param String name 名称(模糊匹配)
+	 * @param String startTime updateTime起始查询
+	 * @param Stinrg endTime updateTime终止查询
+	 * @param Long tagId 标签id
+	 * @return List<MediaVideoVO> 查询结果
+	 */
+	public List<MediaVideoVO> loadByCondition(Long id, String name, String startTime, String endTime, Long tagId) throws Exception{
+		UserVO user = userQuery.current();
+		
+		//TODO 权限校验		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		TagPO tag = tagDAO.findByIdAndGroupId(tagId, user.getGroupId());
+		String tagName = tag != null ? tag.getName() : null;
+		
+		List<MediaVideoPO> videos = mediaVideoDao.findByCondition(id, name, startTime, endTime, tagName, folderIds, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
+		
+		return MediaVideoVO.getConverter(MediaVideoVO.class).convert(videos, MediaVideoVO.class);
+	}
+	
+	/**
+	 * 获取标签的视频媒资数<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月11日 下午4:03:27
+	 */
+	public void queryCountByTags(UserVO user, List<TagVO> tags) throws Exception{
+		if (tags == null || tags.isEmpty()) return;
+		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		for (TagVO tag : tags) {
+			List<MediaVideoPO> childVideos = mediaVideoDao.findByFolderIdInAndTag(folderIds, tag.getName(), new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
+			if (childVideos == null || childVideos.isEmpty()) continue;
+			int num = tag.getSubMediaNum();
+			tag.setSubMediaNum(num + childVideos.size());
+		}
 	}
 	
 	/**

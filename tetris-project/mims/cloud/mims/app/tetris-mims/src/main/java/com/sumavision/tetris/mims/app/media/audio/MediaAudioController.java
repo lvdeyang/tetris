@@ -36,10 +36,16 @@ import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistEx
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadCancelException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadErrorException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioStatusErrorWhenUploadingException;
+import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodeDAO;
+import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodePO;
+import com.sumavision.tetris.mims.app.media.encode.FileEncodeService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
 
 @Controller
 @RequestMapping(value = "/media/audio")
@@ -62,6 +68,12 @@ public class MediaAudioController {
 	
 	@Autowired
 	private MediaAudioDAO mediaAudioDao;
+	
+	@Autowired
+	private AudioFileEncodeDAO audioFileEncodeDao;
+	
+	@Autowired
+	private FileEncodeService fileEncodeService;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
@@ -105,6 +117,7 @@ public class MediaAudioController {
             String keyWords,
             String remark,
 			Long folderId, 
+			boolean encryption,
 			HttpServletRequest request) throws Exception{
 		
 		MediaAudioTaskVO taskParam = JSON.parseObject(task, MediaAudioTaskVO.class);
@@ -130,7 +143,7 @@ public class MediaAudioController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, keyWordList, remark, taskParam, folder);
+		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, keyWordList, remark, encryption, taskParam, folder);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -158,6 +171,7 @@ public class MediaAudioController {
             String tags,
             String keyWords,
             String remark,
+            boolean encryption,
 			Long folderId, 
 			HttpServletRequest request) throws Exception{
 		
@@ -182,7 +196,7 @@ public class MediaAudioController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		MediaAudioPO entity = mediaAudioService.addTaskFromTxt(user, name, tagList, keyWordList, remark, txtId, folder);
+		MediaAudioPO entity = mediaAudioService.addTaskFromTxt(user, name, tagList, keyWordList, remark, txtId, encryption, folder);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -366,6 +380,9 @@ public class MediaAudioController {
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
 			
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			task.setDuration(multimediaInfo.getDuration());
+			
 			//如果是从文本文件上传需要转换成音频
 			if(task.getMimetype().equals("text/plain")){
 				mediaAudioService.convertTxtMeidaToAudioMedia(task);
@@ -376,6 +393,9 @@ public class MediaAudioController {
 				mediaAudioService.startUploadProcess(task);
 			}else{
 				mediaAudioDao.save(task);
+				if(task.getEncryption()){
+					fileEncodeService.encodeAudioFile(task);
+				}
 			}
 		}
 		
@@ -608,6 +628,14 @@ public class MediaAudioController {
 		
 		MediaAudioPO copiedMedia  = mediaAudioService.copy(media, target);
 		
+		//判断是否加密,加密需要复制加密信息
+		if(media.getEncryption() != null && media.getEncryption()){
+			AudioFileEncodePO audioEncode = audioFileEncodeDao.findByMediaId(media.getId());
+			if(audioEncode != null){
+				fileEncodeService.copy(audioEncode, copiedMedia);
+			}
+		}
+		
 		Map<String, Object> result = new HashMapWrapper<String, Object>().put("moved", moved)
 																		 .put("copied", new MediaAudioVO().set(copiedMedia))
 																		 .getMap();
@@ -642,7 +670,7 @@ public class MediaAudioController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		mediaAudioService.downloadAdd(id);
+		mediaAudioService.downloadAdd(user, id);
 		
 		Map<String, String> result = new HashMapWrapper<String, String>().put("name", media.getFileName())
 																		 .put("uri", media.getPreviewUrl())
@@ -663,6 +691,7 @@ public class MediaAudioController {
 	@ResponseBody
 	@RequestMapping(value = "/download")
 	public Object downloadAdd(Long id, HttpServletRequest request) throws Exception{
-		return mediaAudioService.downloadAdd(id);
+		UserVO user = userQuery.current();
+		return mediaAudioService.downloadAdd(user, id);
 	}
 }

@@ -3,6 +3,7 @@ package com.sumavision.tetris.mims.app.media.stream.video;
 import java.util.Arrays;
 import java.util.List;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -167,7 +168,8 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoStreamPO.SEPARATOR_TAG)));
-		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoStreamPO.SEPARATOR_KEYWORDS)));	 
+		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoStreamPO.SEPARATOR_KEYWORDS)));
+		if (entity.getPreviewUrl() != null) this.setPreviewUrl(new ArrayListWrapper<String>().add(entity.getPreviewUrl()).getList());
 		return this;
 	}
 	

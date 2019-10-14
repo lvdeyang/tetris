@@ -46,6 +46,9 @@ import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
+
 /**
  * 图片媒资操作（主增删改）<br/>
  * <b>作者:</b>lvdeyang<br/>
@@ -311,7 +314,7 @@ public class MediaVideoService {
 			//删除临时文件
 			for(MediaVideoPO video:videosCanBeDeleted){
 				List<MediaVideoPO> results = mediaVideoDao.findByUploadTmpPathAndIdNotIn(video.getUploadTmpPath(), videoIds);
-				if(results==null || results.size()<=0){
+				if(results==null || results.size()<=0 && video.getStoreType()!=StoreType.REMOTE){
 					File file = new File(new File(video.getUploadTmpPath()).getParent());
 					File[] children = file.listFiles();
 					if(children != null){
@@ -336,32 +339,39 @@ public class MediaVideoService {
 	 * @param String name 媒资名称
 	 * @param String httpUrl 媒资预览地址
 	 * @param String ftpUrl 媒资存储ftp路径
+	 * @param String tags 标签
 	 * @return MediaAudioVO 视频媒资信息
 	 * @throws Exception 
 	 */
 	public MediaVideoVO addTask(
 			UserVO user,
 			String name,
+			String tags,
 			String previewUrl,
 			String ftpUrl) throws Exception{
 		String version = new StringBufferWrapper().append(MediaVideoPO.VERSION_OF_ORIGIN).append(".").append(new Date().getTime()).toString();
-		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO.toString());
+		List<FolderPO> folders = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
+		if(folders==null || folders.size()<=0) throw new FolderNotFoundException();
+		List<FolderPO> rootFolders = folderQuery.findRoots(folders);
+		FolderPO folder = rootFolders.get(0);
+//		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO.toString());
 		if (folder == null) throw new FolderNotFoundException();
-		MediaVideoPO mediaAudioPO = new MediaVideoPO();
-		mediaAudioPO.setName(name);
-		mediaAudioPO.setTags("");
-		mediaAudioPO.setKeyWords("");
-		mediaAudioPO.setAuthorId(user.getUuid());
-		mediaAudioPO.setVersion(version);
-		mediaAudioPO.setFolderId(folder.getId());
-		mediaAudioPO.setMimetype("application/x-mpegURL");
-		mediaAudioPO.setUploadStatus(UploadStatus.COMPLETE);
-		mediaAudioPO.setPreviewUrl(previewUrl);
-		mediaAudioPO.setUploadTmpPath(ftpUrl);
-		mediaAudioPO.setStoreType(StoreType.REMOTE);
-		mediaVideoDao.save(mediaAudioPO);
+		MediaVideoPO mediaVideoPO = new MediaVideoPO();
+		mediaVideoPO.setUpdateTime(new Date());
+		mediaVideoPO.setName(name);
+		mediaVideoPO.setTags(tags);
+		mediaVideoPO.setKeyWords("");
+		mediaVideoPO.setAuthorId(user.getUuid());
+		mediaVideoPO.setVersion(version);
+		mediaVideoPO.setFolderId(folder.getId());
+		mediaVideoPO.setMimetype("application/x-mpegURL");
+		mediaVideoPO.setUploadStatus(UploadStatus.COMPLETE);
+		mediaVideoPO.setPreviewUrl(previewUrl);
+		mediaVideoPO.setUploadTmpPath(ftpUrl);
+		mediaVideoPO.setStoreType(StoreType.REMOTE);
+		mediaVideoDao.save(mediaVideoPO);
 		
-		return new MediaVideoVO().set(mediaAudioPO);
+		return new MediaVideoVO().set(mediaVideoPO);
 	}
 	
 	/**
@@ -667,6 +677,12 @@ public class MediaVideoService {
 		entity.setUpdateTime(date);
 		entity.setTags(tags);
 		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
+		
+		File file = new File(uploadTempPath);
+		if (file.exists() && file.isFile()) {
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			entity.setDuration(multimediaInfo.getDuration());
+		}
 		
 		if(needProcess){
 			//启动流程

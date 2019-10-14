@@ -38,7 +38,7 @@ define([
             //打开文件夹对话框
             open:function(){
                 var self = this;
-                self.load(null);
+                self.load(0);
                 self.dialog.visible = true;
             },
             load:function(folderId){

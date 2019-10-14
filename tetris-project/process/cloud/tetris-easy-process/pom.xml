@@ -142,6 +142,13 @@
 		    <version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- 流转码模块（对接应急广播平台） -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-easy-process-stream-transcode</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- 应急广播播发模块 -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>

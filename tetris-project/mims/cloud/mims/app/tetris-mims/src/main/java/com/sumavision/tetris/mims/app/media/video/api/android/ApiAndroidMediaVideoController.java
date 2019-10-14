@@ -44,7 +44,11 @@ import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErro
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
-import com.sumavision.tetris.user.UserVO;import javassist.expr.NewArray;
+import com.sumavision.tetris.user.UserVO;
+
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
+import javassist.expr.NewArray;
 
 @Controller
 @RequestMapping(value = "/api/android/media/video")
@@ -310,6 +314,8 @@ public class ApiAndroidMediaVideoController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			task.setDuration(multimediaInfo.getDuration());
 			mediaVideoDAO.save(task);
 		}
 		

@@ -2,6 +2,7 @@ package com.sumavision.tetris.mims.app.media.audio;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import com.sumavision.tetris.commons.context.SpringContext;
@@ -22,6 +23,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private String createTime;
 	
+	private String duration;
+	
 	private String version;
 	
 	private String remarks;
@@ -36,7 +39,12 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private Long downloadCount;
 	
+	/** 计算热门权重 */
+	private Long hotWeight;
+	
 	private String type;
+	
+	private String resourceType;
 	
 	private boolean removeable;
 	
@@ -89,6 +97,15 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 
 	public MediaAudioVO setCreateTime(String createTime) {
 		this.createTime = createTime;
+		return this;
+	}
+
+	public String getDuration() {
+		return duration;
+	}
+
+	public MediaAudioVO setDuration(String duration) {
+		this.duration = duration;
 		return this;
 	}
 
@@ -155,12 +172,30 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 
+	public Long getHotWeight() {
+		return hotWeight;
+	}
+
+	public MediaAudioVO setHotWeight(Long hotWeight) {
+		this.hotWeight = hotWeight;
+		return this;
+	}
+
 	public String getType() {
 		return type;
 	}
 
 	public MediaAudioVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+	
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public MediaAudioVO setResourceType(String resourceType) {
+		this.resourceType = resourceType;
 		return this;
 	}
 
@@ -255,6 +290,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setAuthorName(entity.getAuthorName())
 			.setSize(entity.getSize() != null ? entity.getSize().toString() : "-")
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
+			.setDuration(entity.getDuration()==null?"-":entity.getDuration().toString())
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaAudioItemType.AUDIO.toString())
@@ -282,9 +318,11 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setAuthorName(entity.getAuthorName())
 			.setSize("-")
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
+			.setDuration("-")
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaAudioItemType.FOLDER.toString())
+			.setResourceType(entity.getType().toString())
 			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaAudioItemType.FOLDER.getIcon())
 			.setStyle(MediaAudioItemType.FOLDER.getStyle()[0])
@@ -292,4 +330,27 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 	
+	@Override
+	public boolean equals(Object obj) {
+		MediaAudioVO vo=(MediaAudioVO)obj;
+		return this.getId().equals(vo.getId());
+	}
+	
+	/**
+	 * 排序(根据热度权重从大到小)
+	 * @author lzp
+	 *
+	 */
+	public static final class MediaAudioHotOrderComparator implements Comparator<MediaAudioVO>{
+		@Override
+		public int compare(MediaAudioVO o1, MediaAudioVO o2) {
+			if(o1.getHotWeight() > o2.getHotWeight()){
+				return -1;
+			}
+			if(o1.getHotWeight() == o2.getHotWeight()){
+				return 0;
+			}
+			return 1;
+		}
+	}
 }

@@ -2,6 +2,7 @@ package com.sumavision.tetris.cs.channel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -12,7 +13,9 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
+import com.sumavision.tetris.cs.config.ServerProps;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -26,6 +29,9 @@ public class ChannelQuery {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private ServerProps serverProps;
 
 	/**
 	 * 分页获取频道列表<br/>
@@ -34,17 +40,19 @@ public class ChannelQuery {
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
 	 * @param Integer currentPage 当前页
 	 * @param Integer pageSize 分页大小
-	 * @return List<ChannelPO> channels 频道列表
+	 * @return Page<ChannelPO> channels 频道列表
 	 */
-	public List<ChannelPO> findAll(int currentPage, int pageSize) throws Exception {
+	public Map<String, Object> findAll(int currentPage, int pageSize, ChannelType type) throws Exception {
 		UserVO user = userQuery.current();
 		
 		Pageable page = new PageRequest(currentPage - 1, pageSize);
-		Page<ChannelPO> channels = channelDao.findAllByGroupId(user.getGroupId(), page);
+		Page<ChannelPO> channels = channelDao.PagefindAllByGroupIdAndType(user.getGroupId(), type.toString(), page);
 		freshBroadStatus(channels.getContent());
-
-		Page<ChannelPO> newChannels = channelDao.findAllByGroupId(user.getGroupId(), page);
-		return newChannels.getContent();
+		
+		Page<ChannelPO> newChannels = channelDao.PagefindAllByGroupIdAndType(user.getGroupId(), type.toString(), page);
+		return new HashMapWrapper<String, Object>().put("rows", ChannelVO.getConverter(ChannelVO.class).convert(newChannels.getContent(), ChannelVO.class))
+				.put("total", newChannels.getTotalElements())
+				.getMap();
 	}
 
 	/**
@@ -150,6 +158,21 @@ public class ChannelQuery {
 		}
 	}
 	
+	public String queryLocalPort(Long startPort) throws Exception{
+		List<String> ports = channelDao.findByPreviewUrlIp(serverProps.getIp());
+		if (ports == null || ports.isEmpty()) return startPort.toString();
+		
+		Long returnPort = 0l;
+		for (Long i = startPort; i < startPort + 2000; i++) {
+			String port = i.toString();
+			if (!ports.contains(port)) {
+				return port;
+			}
+		}
+		
+		return returnPort.toString();
+	}
+	
 	public boolean sendAbilityRequest(BroadAbilityQueryType type, ChannelPO channel) throws Exception{
 		return sendAbilityRequest(type, channel, null, null, null);
 	}
@@ -183,7 +206,6 @@ public class ChannelQuery {
 		} else if (BroadAbilityQueryType.NEW == type) {
 			request.put("cmd", type.getCmd());
 			request.put("output", output);
-			request.put("local_ip", "");
 			request.put("loop_count", "1");
 			request.put("input", input);
 		} else if (BroadAbilityQueryType.STOP == type || BroadAbilityQueryType.DELETE == type) {

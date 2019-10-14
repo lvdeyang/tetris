@@ -22,6 +22,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private String createTime;
 	
+	private String duration;
+	
 	private String version;
 	
 	private String remarks;
@@ -35,6 +37,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	private List<String> keyWords;
 	
 	private String type;
+	
+	private String resourceType;
 	
 	private boolean removeable;
 	
@@ -87,6 +91,15 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 
 	public MediaVideoVO setCreateTime(String createTime) {
 		this.createTime = createTime;
+		return this;
+	}
+
+	public String getDuration() {
+		return duration;
+	}
+
+	public MediaVideoVO setDuration(String duration) {
+		this.duration = duration;
 		return this;
 	}
 
@@ -153,6 +166,15 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		return this;
 	}
 	
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public MediaVideoVO setResourceType(String resourceType) {
+		this.resourceType = resourceType;
+		return this;
+	}
+
 	public boolean isRemoveable() {
 		return removeable;
 	}
@@ -244,6 +266,7 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setAuthorName(entity.getAuthorName())
 			.setSize(entity.getSize() != null ? entity.getSize().toString() : "-")
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
+			.setDuration(entity.getDuration()==null?"-":entity.getDuration().toString())
 			.setVersion(entity.getVersion())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaVideoItemType.VIDEO.toString())
@@ -270,9 +293,11 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setAuthorName(entity.getAuthorName())
 			.setSize("-")
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
+			.setDuration("-")
 			.setVersion("-")
 			.setRemarks("-")
 			.setType(MediaVideoItemType.FOLDER.toString())
+			.setResourceType(entity.getType().toString())
 			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaVideoItemType.FOLDER.getIcon())
 			.setStyle(MediaVideoItemType.FOLDER.getStyle()[0])

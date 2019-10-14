@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.mims.app.media.tag.exception.TagNotExistsException;
 import com.sumavision.tetris.user.UserVO;
 
 @Component
@@ -31,6 +33,14 @@ public class TagQuery {
 		}
 		
 		return roots;
+	}
+	
+	public List<TagVO> getTagTreeByParent(UserVO user, Long parentId) throws Exception {
+		TagPO parent = tagDAO.findOne(parentId);
+		if (parent == null) throw new TagNotExistsException(parentId);
+		
+		TagVO parentVO = new TagVO().set(parent);
+		return new ArrayListWrapper<TagVO>().add(parentVO.setSubColumns(getChildTagTree(user.getGroupId(), parentVO))).getList();
 	}
 	
 	public List<TagVO> getRootTag(UserVO user) throws Exception{
@@ -68,5 +78,11 @@ public class TagQuery {
 		}
 		
 		return tags;
+	}
+	
+	public List<TagVO> queryFromNameAndGroupId(String groupId, List<String> names) throws Exception{
+		List<TagPO> tags = tagDAO.findByNameIn(groupId, names);
+		
+		return TagVO.getConverter(TagVO.class).convert(tags, TagVO.class);
 	}
 }

@@ -1,4 +1,9 @@
 {
+	"terminalBroadIp": "",
+	"terminalBroadPort": "8180",
+	"abilityBroadIp": "192.165.58.125",
+	"abilityBroadPort": "9000",
+	"ifLocal": false,
 	"ftpUserName":"test",
 	"ftpPassword":"123"
-}
+ }

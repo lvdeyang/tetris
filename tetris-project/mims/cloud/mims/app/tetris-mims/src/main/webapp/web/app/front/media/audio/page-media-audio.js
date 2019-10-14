@@ -69,6 +69,7 @@ define([
                         tags:[],
                         keyWords:'',
                         way:'0',
+                        encryption:false,
                         txt:'',
                         txtTask:'',
                         task:'',
@@ -495,6 +496,7 @@ define([
                     self.dialog.addAudio.tags = [];
                     self.dialog.addAudio.keyWords = '';
                     self.dialog.addAudio.way = '0';
+                    self.dialog.addAudio.encode = false;
                     self.dialog.addAudio.txt = '';
                     self.dialog.addAudio.txtTask = '';
                     self.dialog.addAudio.task = '';
@@ -534,7 +536,8 @@ define([
                             tags:(self.dialog.addAudio.tags.length > 0) ? self.dialog.addAudio.tags.join(',') : null,
                             keyWords:self.dialog.addAudio.keyWords,
                             remark:self.dialog.addAudio.remark,
-                            folderId:self.current.id
+                            folderId:self.current.id,
+                            encryption: self.dialog.addAudio.encryption
                         }, function(data, status){
                             self.dialog.addAudio.loading = false;
                             if(status !== 200) return;
@@ -561,6 +564,7 @@ define([
                             keyWords:self.dialog.addAudio.keyWords,
                             remark:self.dialog.addAudio.remark,
                             folderId:self.current.id,
+                            encryption:self.dialog.addAudio.encryption,
                             txtId:self.dialog.addAudio.txt.id
                         };
                         ajax.post('/media/audio/task/add/from/txt', questData, function(data, status){

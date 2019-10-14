@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -20,6 +23,9 @@ public class MediaVideoFeignController {
 
 	@Autowired
 	private MediaVideoQuery mediaVideoQuery;
+	
+	@Autowired
+	private MediaVideoDAO mediaVideoDAO;
 	
 	/**
 	 * 加载文件夹下的视频媒资<br/>
@@ -70,6 +76,24 @@ public class MediaVideoFeignController {
 		List<String> uuidList = JSON.parseArray(uuids, String.class);
 		
 		return MediaVideoVO.getConverter(MediaVideoVO.class).convert(mediaVideoQuery.questByUuid(uuidList), MediaVideoVO.class);
+	}
+	
+	/**
+	 * 根据id获取媒资信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月9日 下午2:32:55
+	 * @param id 媒资id
+	 * @return MediaoVideoPO 媒资信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/quest/by/id")
+	public Object getById(Long id) throws Exception{
+		MediaVideoPO audio = mediaVideoDAO.findOne(id);
+		if (audio == null) throw new MediaVideoNotExistException(id);
+		
+		return new MediaVideoVO().set(audio);
 	}
 	
 	/**

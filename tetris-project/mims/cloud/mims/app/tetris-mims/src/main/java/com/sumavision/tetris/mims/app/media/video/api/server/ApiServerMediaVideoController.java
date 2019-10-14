@@ -35,6 +35,9 @@ import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
+
 @Controller
 @RequestMapping(value = "/api/server/media/video")
 public class ApiServerMediaVideoController {
@@ -174,6 +177,8 @@ public class ApiServerMediaVideoController {
 		if(endOffset == size){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			task.setDuration(multimediaInfo.getDuration());
 			mediaVideoDAO.save(task);
 		}
 		
@@ -197,6 +202,6 @@ public class ApiServerMediaVideoController {
 	public Object addFar(String name, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		return mediaVideoService.addTask(user, name, httpUrl, ftpUrl);
+		return mediaVideoService.addTask(user, name, "", httpUrl, ftpUrl);
 	}
 }

@@ -15,6 +15,8 @@ public class TagVO extends AbstractBaseVO<TagVO, TagPO>{
 	private Boolean disabled = false;
 	
 	private List<TagVO> subColumns;
+	
+	private int subMediaNum;
 
 	public String getName() {
 		return name;
@@ -58,6 +60,15 @@ public class TagVO extends AbstractBaseVO<TagVO, TagPO>{
 
 	public TagVO setSubColumns(List<TagVO> subColumns) {
 		this.subColumns = subColumns;
+		return this;
+	}
+
+	public int getSubMediaNum() {
+		return subMediaNum;
+	}
+
+	public TagVO setSubMediaNum(int subMediaNum) {
+		this.subMediaNum = subMediaNum;
 		return this;
 	}
 
