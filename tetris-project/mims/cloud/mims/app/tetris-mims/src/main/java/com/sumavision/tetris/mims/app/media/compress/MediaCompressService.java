@@ -33,7 +33,7 @@ import com.sumavision.tetris.commons.util.tar.TarUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.commons.util.xml.XmlReader;
+import com.sumavision.tetris.commons.util.xml.XMLReader;
 import com.sumavision.tetris.commons.util.xml.XmlUtil;
 import com.sumavision.tetris.easy.process.core.ProcessQuery;
 import com.sumavision.tetris.easy.process.core.ProcessService;
@@ -715,7 +715,7 @@ public class MediaCompressService {
 				String name = profileName.split("\\.")[0];
 				// 解析xml
 				InputStream xmlStream = new FileInputStream(profile);
-				XmlReader reader = new XmlReader(xmlStream);
+				XMLReader reader = new XMLReader(xmlStream);
 				author = reader.readString("EBD.EBM.MsgBasicInfo.SenderName");
 				publishTime = reader.readString("EBD.EBM.MsgBasicInfo.SendTime");
 				articleName = reader.readString("EBD.EBM.MsgContent.MsgTitle");

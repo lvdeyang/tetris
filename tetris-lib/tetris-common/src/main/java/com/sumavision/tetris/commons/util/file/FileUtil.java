@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 
-import org.springframework.beans.propertyeditors.StringTrimmerEditor;
-
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 
 /**

@@ -94,6 +94,13 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- websocket消息模块 -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-websocket-message</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- eureka依赖 -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
