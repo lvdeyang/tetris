@@ -19,7 +19,7 @@ import com.sumavision.tetris.websocket.core.load.balance.SessionMetadataService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
 @Component
-@ServerEndpoint("/server/{token}")
+@ServerEndpoint("/server/websocket/{token}")
 public class ServerWebsocket {
 
 	private ApplicationConfig applicationConfig;
@@ -63,6 +63,7 @@ public class ServerWebsocket {
      * <b>日期：</b>2019年9月10日 上午11:21:24
      */
     private void initBean(){
+    	if(userQuery == null) userQuery = SpringContext.getBean(UserQuery.class);
 		if(applicationConfig == null) applicationConfig = SpringContext.getBean(ApplicationConfig.class);
 		if(sessionMetadataService == null) sessionMetadataService = SpringContext.getBean(SessionMetadataService.class);
 		if(messageService == null) messageService = SpringContext.getBean(WebsocketMessageService.class);

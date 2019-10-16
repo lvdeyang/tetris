@@ -38,7 +38,7 @@
     //Bearer%2094801d2e-3434-4c60-b6b9-ee9bbfab1b21 158
     $('#login').on('click', function(){
         var token = $('#token').val();
-        webSocket = new WebSocket('ws://192.165.56.71:8085/server/'+token);
+        webSocket = new WebSocket('ws://192.165.56.84:8084/server/websocket/'+token);
         webSocket.onmessage = function(e){
             var message = e.data;
             $('#message-scope').append('<div>'+message+'</div>');
@@ -55,9 +55,9 @@
             return;
         }
         $.ajax({
-            url:'http://192.165.56.71:8085/message/send',
+            url:'http://192.165.56.84:8084/message/send',
             beforeSend: function(request) {
-                request.setRequestHeader('Authorization', decodeURI(token));
+                request.setRequestHeader('tetris-001', decodeURI(token));
             },
             type:'post',
             data:{

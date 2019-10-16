@@ -17,9 +17,6 @@ public class ApplicationConfig{
 	@Value("${server.port}")
 	private String port;
 	
-	@Value("${security.oauth2.resource.user-info-uri}")
-	private String userInfoUrl;
-	
 	@Value("${eureka.client.serviceUrl.defaultZone}")
 	private String eurekaUrl;
 
@@ -29,14 +26,6 @@ public class ApplicationConfig{
 
 	public void setId(String id) {
 		this.id = id;
-	}
-
-	public String getUserInfoUrl() {
-		return userInfoUrl;
-	}
-
-	public void setUserInfoUrl(String userInfoUrl) {
-		this.userInfoUrl = userInfoUrl;
 	}
 
 	public String getIp() {
