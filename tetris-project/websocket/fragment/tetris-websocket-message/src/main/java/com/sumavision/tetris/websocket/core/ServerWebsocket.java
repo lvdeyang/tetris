@@ -40,7 +40,7 @@ public class ServerWebsocket {
     	initBean();
     	UserVO user = userQuery.findByToken(token);
 		sessionMetadataService.add(user, session);
-		messageService.offlineMessage(user.getId());
+		//messageService.offlineMessage(user.getId());
 		System.out.println(new StringBufferWrapper().append("用户：").append(user.getNickname()).append("连上来啦...").toString());
     }
 
