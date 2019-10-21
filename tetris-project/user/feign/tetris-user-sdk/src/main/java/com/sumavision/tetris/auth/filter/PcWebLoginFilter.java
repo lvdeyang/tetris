@@ -145,7 +145,9 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/tetris-easy-process/*")
 												   .add("/tetris-media-editor/*")
 												   .add("/tetris-cs/*")
+												   .add("/tetris-p2p/*")
 												   .add("/demo/*")
+												   .add("/server/websocket/*")
 												   .getList();
 	}
 	
