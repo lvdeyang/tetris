@@ -24,6 +24,16 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	private Integer broadId;
 	
 	private String type;
+	
+	private Boolean encryption;
+	
+	private Boolean autoBroad;
+	
+	private Boolean autoBroadShuffle;
+	
+	private Integer autoBroadDuration;
+	
+	private String autoBroadStart;
 
 	@Override
 	public ChannelVO set(ChannelPO entity) throws Exception {
@@ -39,7 +49,8 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		.setPreviewUrlIp(entity.getPreviewUrlIp())
 		.setPreviewUrlPort(entity.getPreviewUrlPort())
 		.setType(entity.getType())
-		.setBroadId(entity.getBroadId());
+		.setEncryption(entity.getEncryption())
+		.setAutoBroad(entity.getAutoBroad());
 
 		return this;
 	}
@@ -131,6 +142,51 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
 	public ChannelVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public ChannelVO setEncryption(Boolean encryption) {
+		this.encryption = encryption;
+		return this;
+	}
+
+	public Boolean getAutoBroad() {
+		return autoBroad;
+	}
+
+	public ChannelVO setAutoBroad(Boolean autoBroad) {
+		this.autoBroad = autoBroad;
+		return this;
+	}
+
+	public Boolean getAutoBroadShuffle() {
+		return autoBroadShuffle;
+	}
+
+	public ChannelVO setAutoBroadShuffle(Boolean autoBroadShuffle) {
+		this.autoBroadShuffle = autoBroadShuffle;
+		return this;
+	}
+
+	public Integer getAutoBroadDuration() {
+		return autoBroadDuration;
+	}
+
+	public ChannelVO setAutoBroadDuration(Integer autoBroadDuration) {
+		this.autoBroadDuration = autoBroadDuration;
+		return this;
+	}
+
+	public String getAutoBroadStart() {
+		return autoBroadStart;
+	}
+
+	public ChannelVO setAutoBroadStart(String autoBroadStart) {
+		this.autoBroadStart = autoBroadStart;
 		return this;
 	}
 }

@@ -23,6 +23,7 @@ import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
 import org.apache.commons.io.FileUtils;
+import org.neo4j.cypher.internal.compiler.v2_1.perty.docbuilders.catchErrors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -513,12 +514,14 @@ public class ProcessService {
 		processInstanceDeploymentPermissionDao.save(permission);
 		
 		//变量上下文中加入内置变量
-		JSONObject existVariableContext = (JSONObject)runtimeService.getVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
-		if(!existVariableContext.containsKey(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey())){
-			existVariableContext.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstance.getId());
-			runtimeService.setVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), existVariableContext);
+		if(!primaryKey.equals("_yjgb_generate_article_by_compress_")){
+			JSONObject existVariableContext = (JSONObject)runtimeService.getVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
+			if(!existVariableContext.containsKey(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey())){
+				existVariableContext.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstance.getId());
+				runtimeService.setVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), existVariableContext);
+			}
 		}
-		
+	
 		return processInstance.getId();
 	}
 	

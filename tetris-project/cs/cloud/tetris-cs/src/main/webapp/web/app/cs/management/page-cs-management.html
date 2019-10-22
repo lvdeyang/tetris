@@ -67,13 +67,13 @@
                                                        @click="manageBroadcastArea(scope)">
                                             </el-button>
                                         </el-tooltip>
-                                        <el-tooltip class="item" effect="dark" content="开始播发" placement="bottom" v-if="scope.row.broadcastStatus=='未播发'||scope.row.broadcastStatus=='发送完成' || scope.row.broadcastStatus=='发送停止'">
+                                        <el-tooltip class="item" effect="dark" content="开始播发" placement="bottom" v-if="!scope.row.autoBroad && scope.row.broadcastStatus=='未播发'||scope.row.broadcastStatus=='发送完成' || scope.row.broadcastStatus=='发送停止'">
                                             <el-button type="text" icon="feather-icon-play-circle"
                                                        class="channelManage"
                                                        @click="startBroadcast(scope)">
                                             </el-button>
                                         </el-tooltip>
-                                        <el-tooltip class="item" effect="dark" content="停止播发" placement="bottom" v-if="scope.row.broadcastStatus=='发送中'">
+                                        <el-tooltip class="item" effect="dark" content="停止播发" placement="bottom" v-if="!scope.row.autoBroad && scope.row.broadcastStatus=='发送中'">
                                             <el-button type="text" icon="feather-icon-stop-circle"
                                                        class="channelManage"
                                                        @click="stopBroadcast(scope)">
@@ -116,7 +116,7 @@
                 :visible.sync="dialog.addProgram.visible"
                 width="500px"
                 :before-close="handleAddProgramClose">
-            <div style="height:350px;">
+            <div style="height:450px;">
                 <el-scrollbar style="height:100%;">
                     <el-form ref="form" label-width="80px">
                         <el-form-item label="频道名称">
@@ -137,12 +137,42 @@
                             <template>
                                 <el-radio v-model="dialog.addProgram.broadWay" label="轮播能力">轮播能力</el-radio>
                                 <el-radio v-model="dialog.addProgram.broadWay" label="终端播发">终端播发</el-radio>
+                                <el-radio v-model="dialog.addProgram.broadWay" label="PC播发">PC播发</el-radio>
                             </template>
                         </el-form-item>
-                        <el-form-item label="流ip" v-if="dialog.addProgram.broadWay=='轮播能力'">
+                        <el-form-item label="输出加密">
+                            <el-switch v-model="dialog.addProgram.encryption"></el-switch>
+                        </el-form-item>
+                        <template>
+                            <el-form-item label="智能播发" v-if="dialog.addProgram.broadWay == 'PC播发'">
+                                <el-switch v-model="dialog.addProgram.autoBroad" ></el-switch>
+                            </el-form-item>
+                            <el-form-item label="列表乱序" v-if="dialog.addProgram.autoBroad && dialog.addProgram.broadWay == 'PC播发'">
+                                <el-switch v-model="dialog.addProgram.autoBroadShuffle">
+                            </el-switch>
+                            </el-form-item>
+                            <el-form-item v-if="dialog.addProgram.autoBroad && dialog.addProgram.broadWay == 'PC播发'" label="起始时间">
+                                <el-time-picker
+                                    style="width: 100%"
+                                    v-model="dialog.addProgram.autoBroadStart"
+                                    type="time"
+                                    placeholder="选择播发起始时间"
+                                    :picker-options="dialog.addProgram.autoBroadStart"
+                                    value-format="HH:mm:ss">
+                                </el-time-picker>
+                            </el-form-item>
+                            <el-form-item v-if="dialog.addProgram.autoBroad && dialog.addProgram.broadWay == 'PC播发'" label="生效天数">
+                                <el-input-number
+                                        v-model="dialog.addProgram.autoBroadDuration"
+                                        :min="1"
+                                        :max="10">
+                                </el-input-number>
+                            </el-form-item>
+                        </template>
+                        <el-form-item label="输出ip" v-if="dialog.addProgram.broadWay=='轮播能力'">
                             <el-input v-model="dialog.addProgram.previewUrlIp"></el-input>
                         </el-form-item>
-                        <el-form-item label="流port" v-if="dialog.addProgram.broadWay=='轮播能力'">
+                        <el-form-item label="输出port" v-if="dialog.addProgram.broadWay=='轮播能力'">
                             <el-input v-model="dialog.addProgram.previewUrlPort"></el-input>
                         </el-form-item>
                         <el-form-item label="备注">
@@ -173,12 +203,41 @@
                     <template>
                         <el-radio v-model="dialog.editChannel.broadWay" label="轮播能力" disabled>轮播能力</el-radio>
                         <el-radio v-model="dialog.editChannel.broadWay" label="终端播发" disabled>终端播发</el-radio>
+                        <el-radio v-model="dialog.editChannel.broadWay" label="PC播发" disabled>PC播发</el-radio>
                     </template>
                 </el-form-item>
-                <el-form-item label="流ip" v-if="dialog.editChannel.broadWay=='轮播能力'">
+                <el-form-item label="输出加密">
+                    <el-switch v-model="dialog.editChannel.encryption"></el-switch>
+                </el-form-item>
+                <template>
+                    <el-form-item label="智能播发" v-if="dialog.editChannel.broadWay == 'PC播发'">
+                        <el-switch v-model="dialog.editChannel.autoBroad"></el-switch>
+                    </el-form-item>
+                    <el-form-item label="列表乱序" v-if="dialog.editChannel.autoBroad && dialog.editChannel.broadWay == 'PC播发'">
+                        <el-switch v-model="dialog.editChannel.autoBroadShuffle"></el-switch>
+                    </el-form-item>
+                    <el-form-item v-if="dialog.editChannel.autoBroad && dialog.editChannel.broadWay == 'PC播发'" label="起始时间">
+                        <el-time-picker
+                                style="width: 100%"
+                                v-model="dialog.editChannel.autoBroadStart"
+                                type="time"
+                                placeholder="选择播发起始时间"
+                                :picker-options="dialog.editChannel.autoBroadStart"
+                                value-format="HH:mm:ss">
+                        </el-time-picker>
+                    </el-form-item>
+                    <el-form-item v-if="dialog.editChannel.autoBroad && dialog.editChannel.broadWay == 'PC播发'" label="生效天数">
+                        <el-input-number
+                                v-model="dialog.editChannel.autoBroadDuration"
+                                :min="1"
+                                :max="10">
+                        </el-input-number>
+                    </el-form-item>
+                </template>
+                <el-form-item label="输出ip" v-if="dialog.editChannel.broadWay=='轮播能力'">
                     <el-input v-model="dialog.editChannel.previewUrlIp"></el-input>
                 </el-form-item>
-                <el-form-item label="流port" v-if="dialog.editChannel.broadWay=='轮播能力'">
+                <el-form-item label="输出port" v-if="dialog.editChannel.broadWay=='轮播能力'">
                     <el-input v-model="dialog.editChannel.previewUrlPort"></el-input>
                 </el-form-item>
                 <el-form-item label="备注">
@@ -433,18 +492,19 @@
                 <span slot="footer" class="dialog-footer">
                     <el-button size="medium" @click="dialog.editSchedules.dialog.editSchedule.visible = false">取 消</el-button>
                     <el-button size="medium" type="primary" @click="handleEditScheduleCommit"
-                               :loading="dialog.editSchedules.dialog.editSchedule.loading">确 定
+                               :loading="dialog.editSchedules.dialog.editSchedule.loading"
+                            :disabled="dialog.editSchedules.data.autoBroad">确 定
                     </el-button>
                 </span>
             </el-dialog>
 
             <div style="width:100%; height:650px; position:relative;">
                 <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
-                    <el-button size="small" type="primary" @click="handleAddSchedule()">
+                    <el-button size="small" type="primary" @click="handleAddSchedule()" :disabled="dialog.editSchedules.data.autoBroad">
                         <span class="icon-plus" style="margin-right:5px;"></span>
                         添加
                     </el-button>
-                    <el-button size="small" type="warning" @click="">
+                    <el-button size="small" type="warning" @click="" :disabled="dialog.editSchedules.data.autoBroad">
                         <span class="icon-trash" style="margin-right:5px;"></span>
                         删除
                     </el-button>
@@ -476,7 +536,8 @@
                                 <el-tooltip class="item" effect="dark" content="删除排期" placement="bottom">
                                     <el-button type="text" icon="el-icon-delete"
                                                class="channelManage"
-                                               @click="scheduleDelete(scope)"></el-button>
+                                               @click="scheduleDelete(scope)"
+                                            :disabled="dialog.editSchedules.data.autoBroad"></el-button>
                                 </el-tooltip>
                             </template>
                         </el-table-column>
@@ -566,7 +627,8 @@
                 <el-select
                         v-model="dialog.editProgram.options.current"
                         placeholder="请选择分屏"
-                        @change="handleScreenOptionsChange">
+                        @change="handleScreenOptionsChange"
+                        :disabled="dialog.editSchedules.data.autoBroad">
                     <el-option
                             v-for="item in dialog.editProgram.options.list"
                             :key="item.id"
@@ -576,7 +638,7 @@
                 </el-select>
             </template>
             <el-button size="small" type="primary" @click="handleEditProgramCommit"
-                       :loading="dialog.editProgram.loading" style="margin-left: 20px">
+                       :loading="dialog.editProgram.loading" style="margin-left: 20px" :disabled="dialog.editSchedules.data.autoBroad">
                 保 存
             </el-button>
             <el-button size="small" @click="handleEditProgramClose">
@@ -588,7 +650,7 @@
                     <el-row :gutter="0">
                         <el-col>
                             <div class="programScreen" style="height: 380px" @click="clickScreen(1)">
-                                <el-button size="small" type="primary" @click="chooseResources(1)">
+                                <el-button size="small" type="primary" @click="chooseResources(1)" :disabled="dialog.editSchedules.data.autoBroad">
                                     选择文件
                                 </el-button>
                             </div>
@@ -667,7 +729,8 @@
                 <el-table-column width="30"></el-table-column>
                 <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
                 <el-table-column label="排序" width="60" prop="index"></el-table-column>
-                <el-table-column label="操作">
+                <el-table-column label="综合分值" v-if="dialog.editSchedules.data.autoBroad" width="60" prop="hotWeight"></el-table-column>
+                <el-table-column label="操作" v-if="!dialog.editSchedules.data.autoBroad">
                     <template slot-scope="scope">
                         <el-tooltip class="item" effect="dark" content="向上移动"
                                     placement="bottom">

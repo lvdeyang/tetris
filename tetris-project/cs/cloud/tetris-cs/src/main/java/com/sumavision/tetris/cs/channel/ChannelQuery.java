@@ -14,6 +14,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.cs.bak.AbilityInfoSendPO;
+import com.sumavision.tetris.cs.bak.AbilityInfoSendQuery;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
 import com.sumavision.tetris.cs.config.ServerProps;
 import com.sumavision.tetris.user.UserQuery;
@@ -26,6 +28,12 @@ public class ChannelQuery {
 
 	@Autowired
 	private VersionSendQuery versionSendQuery;
+	
+	@Autowired
+	private AbilityInfoSendQuery abilityInfoSendQuery;
+	
+	@Autowired
+	private ChannelAutoBroadInfoDAO channelAutoBroadInfoDAO;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -50,7 +58,20 @@ public class ChannelQuery {
 		freshBroadStatus(channels.getContent());
 		
 		Page<ChannelPO> newChannels = channelDao.PagefindAllByGroupIdAndType(user.getGroupId(), type.toString(), page);
-		return new HashMapWrapper<String, Object>().put("rows", ChannelVO.getConverter(ChannelVO.class).convert(newChannels.getContent(), ChannelVO.class))
+		
+		List<ChannelVO> channelVOs = ChannelVO.getConverter(ChannelVO.class).convert(newChannels.getContent(), ChannelVO.class);
+		for (ChannelVO channelVO : channelVOs) {
+			if (channelVO.getAutoBroad() != null && channelVO.getAutoBroad()) {
+				ChannelAutoBroadInfoPO channelAutoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelVO.getId());
+				if (channelAutoBroadInfoPO != null) {
+					channelVO.setAutoBroadDuration(channelAutoBroadInfoPO.getDuration());
+					channelVO.setAutoBroadStart(channelAutoBroadInfoPO.getStartTime());
+					channelVO.setAutoBroadShuffle(channelAutoBroadInfoPO.getShuffle());
+				}
+			}
+		}
+		
+		return new HashMapWrapper<String, Object>().put("rows", channelVOs)
 				.put("total", newChannels.getTotalElements())
 				.getMap();
 	}
@@ -75,12 +96,14 @@ public class ChannelQuery {
 	 * @param Long channelId 频道id
 	 * @return 下发类型
 	 */
-	public BroadAbilityQueryType broadCmd(Long channelId){
+	public BroadAbilityQueryType broadCmd(Long channelId) throws Exception{
 		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel.getBroadUrlIp() == null && channel.getBroadUrlPort() == null) {
+		AbilityInfoSendPO info = abilityInfoSendQuery.getByChannelId(channelId);
+		if (info == null || (info.getBroadUrlIp() == null && info.getBroadUrlPort() == null)) {
 			return BroadAbilityQueryType.NEW;
-		}else if (channel.getBroadUrlIp().equals(channel.getPreviewUrlIp())
-				&& channel.getBroadUrlPort().equals(channel.getPreviewUrlPort())) {
+		}else if (info.getBroadUrlIp().equals(channel.getPreviewUrlIp())
+				&& info.getBroadUrlPort().equals(channel.getPreviewUrlPort())
+				&& info.getBroadEncryption().equals(channel.getEncryption())) {
 			return BroadAbilityQueryType.COVER;
 		}else {
 			return BroadAbilityQueryType.CHANGE;
@@ -94,13 +117,11 @@ public class ChannelQuery {
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
 	 * @param Long channelId 频道id
 	 */
-	public void saveBroad(Long channelId){
+	public void saveBroad(Long channelId) throws Exception{
 		ChannelPO channel = channelDao.findOne(channelId);
 		if (channel != null) {
-			channel.setBroadUrlIp(channel.getPreviewUrlIp());
-			channel.setBroadUrlPort(channel.getPreviewUrlPort());
+			abilityInfoSendQuery.save(channelId, channel.getPreviewUrlIp(), channel.getPreviewUrlPort(), channel.getEncryption());
 		}
-		channelDao.save(channel);
 	}
 
 	/**
@@ -158,8 +179,9 @@ public class ChannelQuery {
 		}
 	}
 	
-	public String queryLocalPort(Long startPort) throws Exception{
-		List<String> ports = channelDao.findByPreviewUrlIp(serverProps.getIp());
+	public String queryLocalPort(String searchIp, Long startPort) throws Exception{
+		if (searchIp == null || searchIp.isEmpty()) searchIp = serverProps.getIp();
+		List<String> ports = channelDao.findByPreviewUrlIp(searchIp);
 		if (ports == null || ports.isEmpty()) return startPort.toString();
 		
 		Long returnPort = 0l;
@@ -199,7 +221,7 @@ public class ChannelQuery {
 	 */
 	public boolean sendAbilityRequest(BroadAbilityQueryType type, ChannelPO channel, List<String> input, JSONObject output, Long duration) throws Exception{
 		JSONObject request = new JSONObject();
-		request.put("id", channel.getBroadId());
+		request.put("id", abilityInfoSendQuery.getBroadId(channel.getId()));
 		if (BroadAbilityQueryType.COVER == type) {
 			request.put("cmd", type.getCmd());
 			request.put("input", input);

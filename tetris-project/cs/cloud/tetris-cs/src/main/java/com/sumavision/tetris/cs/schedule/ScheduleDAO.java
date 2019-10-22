@@ -12,7 +12,7 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface ScheduleDAO extends BaseDAO<SchedulePO>{
 	
 	@Query(value = "SELECT * FROM TETRIS_CS_SCHEDULE WHERE channel_id = ?1 ORDER BY broad_date \n#pageable\n",
-			countQuery = "SELECT COUNT(DISTINCT article.id)  FROM TETRIS_CS_SCHEDULE WHERE channel_id = ?1 ORDER BY broad_date",
+			countQuery = "SELECT COUNT(DISTINCT id)  FROM TETRIS_CS_SCHEDULE WHERE channel_id = ?1 ORDER BY broad_date",
 			nativeQuery = true)
 	public Page<SchedulePO> findByChannelId(Long channelId, org.springframework.data.domain.Pageable page);
 	

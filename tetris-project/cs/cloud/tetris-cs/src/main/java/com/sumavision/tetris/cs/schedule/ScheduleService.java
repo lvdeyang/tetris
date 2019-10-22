@@ -123,6 +123,45 @@ public class ScheduleService {
 	}
 	
 	/**
+	 * 根据频道id添加排期(自动生成排期节目)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月14日 下午3:45:26
+	 * @param channelId 频道id
+	 * @param broadDate 排期时间
+	 * @param screens 排期节目
+	 * @return
+	 */
+	public ScheduleVO addSchedule(Long channelId, String broadDate, List<ScreenVO> screens) throws Exception {
+		if (screens == null || screens.isEmpty()) return null;
+		
+		ScheduleVO schedule = add(channelId, broadDate, "");
+			
+		Date date = new Date();
+		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
+		for (int i = 0; i < screens.size(); i++) {
+			ScreenVO screen = new ScreenVO();
+			ScreenVO item = screens.get(i);
+			screen.setUpdateTime(date);
+			screen.setSerialNum(1l);
+			screen.setIndex((long)(i+1));
+			screen.setName(item.getName());
+			screen.setPreviewUrl(item.getPreviewUrl());
+			screen.setHotWeight(item.getHotWeight());
+			screenVOs.add(screen);
+		}
+		ProgramVO program = new ProgramVO();
+		program.setScheduleId(schedule.getId());
+		program.setScreenNum(1l);
+		program.setUpdateTime(date);
+		program.setScreenInfo(screenVOs);
+			
+		schedule.setProgram(programService.setProgram(program));
+			
+		return schedule;
+	}
+	
+	/**
 	 * 根据频道id批量添加排期<br/>
 	 * <b>作者:</b>sms<br/>
 	 * <b>版本：</b>1.0<br/>

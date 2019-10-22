@@ -4,7 +4,8 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum BroadWay {
 	TERMINAL_BROAD("终端播发"),
-	ABILITY_BROAD("轮播能力");
+	ABILITY_BROAD("轮播能力"),
+	PC_BROAD("PC播发");
 	
 	private String name;
 

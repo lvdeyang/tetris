@@ -1,7 +1,5 @@
 package com.sumavision.tetris.cs.channel;
 
-import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +7,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/cs/channel")
@@ -25,6 +24,9 @@ public class ChannelController {
 
 	@Autowired
 	private ChannelService channelService;
+	
+	@Autowired
+	private UserQuery userQuery;
 
 	/**
 	 * 分页获取频道列表<br/>
@@ -60,9 +62,25 @@ public class ChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, HttpServletRequest request) throws Exception {
+	public Object add(String name,
+			String date,
+			String broadWay,
+			String previewUrlIp,
+			String previewUrlPort,
+			String remark,
+			Boolean encryption,
+			Boolean autoBroad,
+			Boolean autoBroadShuffle,
+			Integer autoBroadDuration,
+			String autoBroadStart,
+			HttpServletRequest request) throws Exception {
+		UserVO user = userQuery.current();
 
-		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.LOCAL);
+		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.LOCAL, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart);
+		
+		if (BroadWay.fromName(broadWay).equals(BroadWay.PC_BROAD) && autoBroad) {
+			channelService.autoAddScheduleAndStart(channel.getId());
+		}
 
 		return new ChannelVO().set(channel);
 	}
@@ -83,9 +101,24 @@ public class ChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/edit")
-	public Object rename(Long id, String name, String previewUrlIp, String previewUrlPort, String remark, HttpServletRequest request) throws Exception {
+	public Object rename(
+			Long id,
+			String name,
+			String previewUrlIp,
+			String previewUrlPort,
+			String remark,
+			Boolean encryption,
+			Boolean autoBroad,
+			Boolean autoBroadShuffle,
+			Integer autoBroadDuration,
+			String autoBroadStart,
+			HttpServletRequest request) throws Exception {
 
-		ChannelPO channel = channelService.edit(id, name, previewUrlIp, previewUrlPort, remark);
+		ChannelPO channel = channelService.edit(id, name, previewUrlIp, previewUrlPort, remark, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart);
+		
+		if (BroadWay.fromName(channel.getBroadWay()).equals(BroadWay.PC_BROAD) && autoBroad) {
+			channelService.autoAddScheduleAndStart(channel.getId());
+		}
 
 		return new ChannelVO().set(channel);
 	}
@@ -118,15 +151,7 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/start")
 	public Object broadcastStart(Long channelId, HttpServletRequest request) throws Exception {
-
-		ChannelPO channelPO = channelDao.findOne(channelId);
-		if (channelPO == null) return null;
-		
-		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return channelService.startBroad(channelId);
-		}else {
-			return channelService.startTerminalBroadcast(channelId);
-		}
+		return channelService.startBroadcast(channelId);
 	}
 	
 	/**
@@ -140,15 +165,7 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/stop")
 	public Object broadcastStop(Long channelId, HttpServletRequest request) throws Exception {
-		
-		ChannelPO channelPO = channelDao.findOne(channelId);
-		if (channelPO == null) return null;
-		
-		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return channelService.stopAbilityBroadcast(channelId);
-		}else {
-			return channelService.stopTerminalBroadcast(channelId);
-		}
+		return channelService.stopBroadcast(channelId);		
 	}
 	
 	/**

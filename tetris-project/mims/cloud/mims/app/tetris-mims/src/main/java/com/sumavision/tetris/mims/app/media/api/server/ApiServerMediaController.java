@@ -215,12 +215,15 @@ public class ApiServerMediaController {
 																		   .toString());
 			}
 		}
-	    List<Long> tagIds = Arrays.asList(tagId.split(",")).stream().map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-	    List<TagPO> tag = tagDAO.findAll(tagIds);
+	    
 	    List<String> tagNames = new ArrayList<String>();
-	    if (tag != null) {
-	    	for (TagPO tagPO : tag) {
-				tagNames.add(tagPO.getName());
+	    if (tagId != null) {
+	    	List<Long> tagIds = Arrays.asList(tagId.split(",")).stream().map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
+		    List<TagPO> tag = tagDAO.findAll(tagIds);
+		    if (tag != null) {
+		    	for (TagPO tagPO : tag) {
+					tagNames.add(tagPO.getName());
+				}
 			}
 		}
 		

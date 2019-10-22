@@ -16,6 +16,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private String name;
 	private String previewUrl;
 	private String time;
+	private Integer hotWeight;
 
 	@Override
 	public ScreenVO set(ScreenPO entity) throws Exception {
@@ -27,6 +28,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setIndex(entity.getScreenIndex())
 		.setName(entity.getName())
 		.setPreviewUrl(entity.getPreviewUrl())
+		.setHotWeight(entity.getHotWeight())
 		.setMimsUuid(entity.getMimsUuid())
 		.setResourceId(entity.getResourceId());
 		return this;
@@ -112,6 +114,15 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		this.time = time;
 	}
 	
+	public Integer getHotWeight() {
+		return hotWeight;
+	}
+
+	public ScreenVO setHotWeight(Integer hotWeight) {
+		this.hotWeight = hotWeight;
+		return this;
+	}
+
 	public static final class ScreenVOOrderComparator implements Comparator<ScreenVO>{
 		@Override
 		public int compare(ScreenVO o1, ScreenVO o2) {

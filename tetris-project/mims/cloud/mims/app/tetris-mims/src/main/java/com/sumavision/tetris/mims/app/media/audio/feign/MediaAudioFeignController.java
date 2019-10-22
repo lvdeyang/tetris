@@ -16,6 +16,8 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/media/audio/feign")
@@ -26,6 +28,9 @@ public class MediaAudioFeignController {
 	
 	@Autowired
 	private MediaAudioDAO mediaAudioDAO;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
@@ -110,4 +115,12 @@ public class MediaAudioFeignController {
 	public Object buildUrl(String name, String folderUuid, HttpServletRequest request) throws Exception {
 		return mediaAudioQuery.buildUrl(name, folderUuid);
 	};
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/recommend")
+	public Object loadRecommend(HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		return mediaAudioQuery.loadRecommendWithWeight(user);
+	}
 }

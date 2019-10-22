@@ -16,6 +16,7 @@ import com.sumavision.tetris.cms.article.ArticleService;
 import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
 @Controller
@@ -27,6 +28,9 @@ public class ApiServerArticleController {
 
 	@Autowired
 	private ProcessService processService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 添加文章<br/>
@@ -64,11 +68,7 @@ public class ApiServerArticleController {
 			String region, 
 			HttpServletRequest request) throws Exception{
 		
-		//TODO:暂时自己创建一个UserVO
-		UserVO user = new UserVO().setGroupId("2")
-								  .setGroupName("数码视讯")
-								  .setUuid("3")
-								  .setNickname("yjgb");
+		UserVO user = userQuery.current();
 		
 		List<String> columns = JSONArray.parseArray(column, String.class);
 		List<JSONObject> contents = JSONArray.parseArray(content, JSONObject.class);

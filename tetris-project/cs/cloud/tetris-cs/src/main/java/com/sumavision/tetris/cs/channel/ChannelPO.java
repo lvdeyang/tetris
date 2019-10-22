@@ -2,9 +2,8 @@ package com.sumavision.tetris.cs.channel;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.Table;
+
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Table
@@ -33,15 +32,6 @@ public class ChannelPO extends AbstractBasePO {
 	/** 视频流媒资url端口 */
 	private String previewUrlPort;
 	
-	/** 能力播发id */
-	private Integer broadId;
-	
-	/** 上次播发url地址 */
-	private String broadUrlIp;
-	
-	/** 上次播发url端口 */
-	private String broadUrlPort;
-	
 	/** 播发状态 */
 	private String broadcastStatus;
 	
@@ -50,6 +40,12 @@ public class ChannelPO extends AbstractBasePO {
 	
 	/** 频道类型 */
 	private String type;
+	
+	/** 是否加密 */
+	private Boolean encryption;
+	
+	/** 是否自动播发 */
+	private Boolean autoBroad;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -114,33 +110,6 @@ public class ChannelPO extends AbstractBasePO {
 		this.previewUrlPort = previewUrlPort;
 	}
 
-	@Column(name = "BROAD_ID")
-	public Integer getBroadId() {
-		return broadId;
-	}
-
-	public void setBroadId(Integer broadId) {
-		this.broadId = broadId;
-	}
-
-	@Column(name = "BROAD_URL_IP")
-	public String getBroadUrlIp() {
-		return broadUrlIp;
-	}
-
-	public void setBroadUrlIp(String broadUrlIp) {
-		this.broadUrlIp = broadUrlIp;
-	}
-
-	@Column(name = "BROAD_URL_PORT")
-	public String getBroadUrlPort() {
-		return broadUrlPort;
-	}
-
-	public void setBroadUrlPort(String broadUrlPort) {
-		this.broadUrlPort = broadUrlPort;
-	}
-
 	@Column(name = "BROADCAST_STATUS")
 	public String getBroadcastStatus() {
 		return broadcastStatus;
@@ -166,5 +135,23 @@ public class ChannelPO extends AbstractBasePO {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	@Column(name = "ENCTYPTION")
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public void setEncryption(Boolean encryption) {
+		this.encryption = encryption;
+	}
+
+	@Column(name = "AUTO_BROAD")
+	public Boolean getAutoBroad() {
+		return autoBroad;
+	}
+
+	public void setAutoBroad(Boolean autoBroad) {
+		this.autoBroad = autoBroad;
 	}
 }

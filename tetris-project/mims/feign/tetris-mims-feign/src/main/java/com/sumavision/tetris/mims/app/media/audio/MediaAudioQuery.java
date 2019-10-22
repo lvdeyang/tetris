@@ -49,4 +49,15 @@ public class MediaAudioQuery {
 	public String buildPreviewUrl(String name, String folderUuid) throws Exception {
 		return JsonBodyResponseParser.parseObject(mediaAudioFeign.buildUrl(name, folderUuid), String.class);
 	}
+	
+	/**
+	 * 获取热门推荐<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月14日 上午11:20:41
+	 * @return List<MediaAudioVO> 热门视频媒资
+	 */
+	public List<MediaAudioVO> loadRecommend() throws Exception{
+		return JsonBodyResponseParser.parseArray(mediaAudioFeign.loadRecommend(), MediaAudioVO.class);
+	}
 }

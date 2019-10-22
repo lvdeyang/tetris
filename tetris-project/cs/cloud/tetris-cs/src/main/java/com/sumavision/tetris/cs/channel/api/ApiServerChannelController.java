@@ -64,13 +64,13 @@ public class ApiServerChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, HttpServletRequest request) throws Exception {
+	public Object add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, Boolean encryption, HttpServletRequest request) throws Exception {
 		
 		if (date == null) date = DateUtil.now();
 		if (broadWay == null) broadWay = "轮播能力";
 		if (remark == null) remark = "";
 
-		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.REMOTE);
+		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.REMOTE, encryption, false, null, null, null);
 
 		return new ChannelVO().set(channel);
 	}
@@ -91,11 +91,11 @@ public class ApiServerChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/edit")
-	public Object rename(Long id, String name, String previewUrlIp, String previewUrlPort, String remark, HttpServletRequest request) throws Exception {
+	public Object rename(Long id, String name, String previewUrlIp, String previewUrlPort, String remark, Boolean encryption, HttpServletRequest request) throws Exception {
 		
 		if (remark == null) remark = "";
 
-		ChannelPO channel = channelService.edit(id, name, previewUrlIp, previewUrlPort, remark);
+		ChannelPO channel = channelService.edit(id, name, previewUrlIp, previewUrlPort, remark, encryption, false, null, null, null);
 
 		return new ChannelVO().set(channel);
 	}
@@ -133,7 +133,7 @@ public class ApiServerChannelController {
 		if (channelPO == null) return null;
 		
 		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return channelService.startBroad(id);
+			return channelService.startAbilityBroadTimer(id);
 		}else {
 			return channelService.startTerminalBroadcast(id);
 		}

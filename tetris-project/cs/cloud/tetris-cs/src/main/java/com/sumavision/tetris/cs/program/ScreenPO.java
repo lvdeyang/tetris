@@ -35,7 +35,10 @@ public class ScreenPO extends AbstractBasePO {
 	
 	/** 媒资预览地址 */
 	private String previewUrl;
-
+	
+	/** 媒资热度权重 */
+	private Integer hotWeight;
+	
 	@Column(name="PROGRAM_ID")
 	public Long getProgramId() {
 		return programId;
@@ -98,6 +101,13 @@ public class ScreenPO extends AbstractBasePO {
 	public void setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
 	}
-	
-	
+
+	@Column(name = "HOT_WEIGHT")
+	public Integer getHotWeight() {
+		return hotWeight;
+	}
+
+	public void setHotWeight(Integer hotWeight) {
+		this.hotWeight = hotWeight;
+	}
 }

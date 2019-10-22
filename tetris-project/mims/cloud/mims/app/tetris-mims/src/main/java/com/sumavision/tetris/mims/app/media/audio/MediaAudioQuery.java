@@ -264,31 +264,30 @@ public class MediaAudioQuery {
 	public List<MediaAudioVO> loadRecommendWithWeight(UserVO user) throws Exception{
 		List<MediaAudioVO> recommends = new ArrayList<MediaAudioVO>();
 
-		//根据用户标签获取媒资列表
+		//根据用户标签获取媒资列表(每个标签权重为100)
 		Map<String, List<MediaAudioVO>> fromUserTags = loadAllByTags(user, user.getTags());
 		if (fromUserTags != null) {
 			List<MediaAudioVO> audios = fromUserTags.get("list");
 			for (MediaAudioVO mediaAudioVO : audios) {
 				if (recommends.contains(mediaAudioVO)) {
 					MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
-					audio.setHotWeight(audio.getHotWeight() + 1);
+					audio.setHotWeight(audio.getHotWeight() + 100);
 				} else {
-					mediaAudioVO.setHotWeight(1l);
+					mediaAudioVO.setHotWeight(100l);
 					recommends.add(mediaAudioVO);
 				}
 			}
 		}
 		
-		//获取下载量排序列表，依次添加下载量大于0的媒资(前5权重为2，其余为1)
+		//获取下载量排序列表，依次添加下载量大于0的媒资(下载一次为1)
 		List<MediaAudioVO> fromHot = loadHotList();
 		for (MediaAudioVO mediaAudioVO : fromHot) {
 			if (mediaAudioVO.getDownloadCount() == null || mediaAudioVO.getDownloadCount() == 0) break;
 			if (recommends.contains(mediaAudioVO)) {
-				int hotIndex = fromHot.indexOf(mediaAudioVO);
 				MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
-				if (hotIndex < 5) audio.setHotWeight(audio.getHotWeight() + 2); else audio.setHotWeight(audio.getHotWeight() + 1);
+				audio.setHotWeight(audio.getHotWeight() + audio.getDownloadCount());
 			} else {
-				mediaAudioVO.setHotWeight(fromHot.indexOf(mediaAudioVO) < 5 ? 2l : 1l);
+				mediaAudioVO.setHotWeight(mediaAudioVO.getDownloadCount());
 				recommends.add(mediaAudioVO);
 			}
 		}
@@ -298,9 +297,9 @@ public class MediaAudioQuery {
 		for (MediaAudioVO mediaAudioVO : otherAudios) {
 			if (recommends.contains(mediaAudioVO)) {
 				MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
-				audio.setHotWeight(audio.getHotWeight() + 1);
+				audio.setHotWeight(audio.getHotWeight() + 50);
 			} else {
-				mediaAudioVO.setHotWeight(1l);
+				mediaAudioVO.setHotWeight(50l);
 				recommends.add(mediaAudioVO);
 			}
 		}
@@ -396,16 +395,16 @@ public class MediaAudioQuery {
 		
 		List<TagDownloadPermissionPO> userToTagPermission = tagDownloadPermissionDAO.findByUserIdOrderByDownloadCountDesc(user.getId());
 		if (userToTagPermission == null || userToTagPermission.isEmpty()) return returnAudioVos;
-		for (int i = 0; i < userToTagPermission.size() && i < 5; i++) {
+		for (int i = 0; i < userToTagPermission.size() && i < 10; i++) {
 			Long tagId = userToTagPermission.get(i).getTagId();
 			List<TagDownloadPermissionPO> tagToUserPermission = tagDownloadPermissionDAO.findByTagIdOrderByDownloadCountDesc(tagId);
 			if (tagToUserPermission != null) {
-				for (int j = 0; j < tagToUserPermission.size() && j < 5; j++) {
+				for (int j = 0; j < tagToUserPermission.size() && j < 10; j++) {
 					List<TagDownloadPermissionPO> userToTagPermission2 = 
 							tagDownloadPermissionDAO.findByUserIdWithExceptTagIdOrderByDownloadCountDesc(tagToUserPermission.get(j).getUserId(), tagId);
 					if (userToTagPermission2 != null) {
 						List<String> tags = new ArrayList<String>();
-						for (int k = 0; k < userToTagPermission2.size() && k < 2; k++) {
+						for (int k = 0; k < userToTagPermission2.size() && k < 10; k++) {
 							TagPO tag = tagDAO.findOne(userToTagPermission2.get(k).getTagId());
 							if (tag == null) continue;
 							tags.add(tag.getName());

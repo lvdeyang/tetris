@@ -38,6 +38,8 @@ public class MediaAudioVO {
 	
 	private String previewUrl;
 	
+	private Integer hotWeight;
+	
 	private List<MediaAudioVO> children;
 	
 	public String getName() {
@@ -181,6 +183,15 @@ public class MediaAudioVO {
 
 	public MediaAudioVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public Integer getHotWeight() {
+		return hotWeight;
+	}
+
+	public MediaAudioVO setHotWeight(Integer hotWeight) {
+		this.hotWeight = hotWeight;
 		return this;
 	}
 

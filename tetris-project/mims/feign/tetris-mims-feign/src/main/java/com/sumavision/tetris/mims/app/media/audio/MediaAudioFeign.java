@@ -33,6 +33,16 @@ public interface MediaAudioFeign {
 	public JSONObject loadAll() throws Exception;
 	
 	/**
+	 * 获取热门推荐<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月14日 上午11:20:41
+	 * @return List<MediaAudioVO> 热门视频媒资
+	 */
+	@RequestMapping(value = "/media/audio/feign/load/recommend")
+	public JSONObject loadRecommend() throws Exception;
+	
+	/**
 	 * 根据uuid获取媒资信息<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

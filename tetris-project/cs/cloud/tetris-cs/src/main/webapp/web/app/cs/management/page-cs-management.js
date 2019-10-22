@@ -57,6 +57,11 @@ define([
                         previewUrlIp: "",
                         previewUrlPort: "",
                         remark: "",
+                        encryption: false,
+                        autoBroad: false,
+                        autoBroadShuffle: false,
+                        autoBroadDuration: 1,
+                        autoBroadStart: "",
                         date: ""
                     },
                     editChannel: {
@@ -67,7 +72,12 @@ define([
                         broadWay: "",
                         previewUrlIp: "",
                         previewUrlPort: "",
-                        remark: ""
+                        remark: "",
+                        encryption: false,
+                        autoBroad: false,
+                        autoBroadShuffle: false,
+                        autoBroadDuration: 1,
+                        autoBroadStart: ""
                     },
                     editMenu: {
                         visible: false,
@@ -320,7 +330,8 @@ define([
                 handleAddProgram: function(){
                     var self = this;
                     self.dialog.addProgram.broadWay = "轮播能力";
-                    self.dialog.addProgram.date = new Date();
+                    var t = new Date();
+                    self.dialog.addProgram.date = t.getFullYear()+"-"+(t.getMonth()+1)+"-"+t.getDate()+" "+t.getHours()+":"+t.getMinutes()+":"+t.getSeconds();
                     self.dialog.addProgram.visible = true;
                 },
                 handleAddProgramClose: function () {
@@ -330,11 +341,24 @@ define([
                     self.dialog.addProgram.broadWay = "";
                     self.dialog.addProgram.previewUrlIp = "";
                     self.dialog.addProgram.previewUrlPort = "";
+                    self.dialog.addProgram.remark = "";
+                    self.dialog.addProgram.encryption = false;
+                    self.dialog.addProgram.autoBroad = false;
+                    self.dialog.addProgram.autoBroadShuffle = false;
+                    self.dialog.addProgram.autoBroadDuration = 1;
+                    self.dialog.addProgram.autoBroadStart = "";
                     self.dialog.addProgram.visible = false;
                     self.dialog.addProgram.value = "";
                 },
                 handleAddProgramCommit: function () {
                     var self = this;
+                    if (self.dialog.addProgram.autoBroad && !self.dialog.addProgram.autoBroadStart.trim()) {
+                        this.$message({
+                            message: '请选择自动播发起始时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.addProgram.loading = true;
                     var newData = {
                         name: self.dialog.addProgram.name,
@@ -342,6 +366,11 @@ define([
                         broadWay: self.dialog.addProgram.broadWay,
                         previewUrlIp: self.dialog.addProgram.previewUrlIp,
                         previewUrlPort: self.dialog.addProgram.previewUrlPort,
+                        encryption: self.dialog.addProgram.encryption,
+                        autoBroad: self.dialog.addProgram.autoBroad,
+                        autoBroadShuffle: self.dialog.addProgram.autoBroadShuffle,
+                        autoBroadDuration: self.dialog.addProgram.autoBroadDuration,
+                        autoBroadStart: self.dialog.addProgram.autoBroadStart,
                         remark: self.dialog.addProgram.remark
                     };
                     ajax.post('/cs/channel/add', newData, function (data, status) {
@@ -363,6 +392,11 @@ define([
                     self.dialog.editChannel.previewUrlIp = row.previewUrlIp;
                     self.dialog.editChannel.previewUrlPort = row.previewUrlPort;
                     self.dialog.editChannel.remark = row.remark;
+                    self.dialog.editChannel.encryption = row.encryption;
+                    self.dialog.editChannel.autoBroad = row.autoBroad;
+                    self.dialog.editChannel.autoBroadShuffle = row.autoBroadShuffle;
+                    self.dialog.editChannel.autoBroadDuration = row.autoBroadDuration;
+                    self.dialog.editChannel.autoBroadStart = row.autoBroadStart;
                     self.dialog.editChannel.visible = true;
                 },
                 handleEditChannelClose: function () {
@@ -374,34 +408,87 @@ define([
                     self.dialog.editChannel.previewUrlIp = "";
                     self.dialog.editChannel.previewUrlPort = "";
                     self.dialog.editChannel.remark = "";
+                    self.dialog.editChannel.encryption  = false;
+                    self.dialog.editChannel.autoBroad = false;
+                    self.dialog.editChannel.autoBroadShuffle = false;
+                    self.dialog.editChannel.autoBroadDuration = 1;
+                    self.dialog.editChannel.autoBroadStart = "";
                 },
                 handleEditChannelCommit: function () {
                     var self = this;
-                    self.dialog.editChannel.loading = true;
-                    var newName = self.dialog.editChannel.name;
-                    var newRemark = self.dialog.editChannel.remark;
-                    var newPreviewUrlIp = self.dialog.editChannel.previewUrlIp;
-                    var newPreviewUrlPort = self.dialog.editChannel.previewUrlPort;
-                    var questData = {
-                        id: self.dialog.editChannel.data.id,
-                        name: newName,
-                        previewUrlIp: newPreviewUrlIp,
-                        previewUrlPort: newPreviewUrlPort,
-                        remark: newRemark
-                    };
-                    ajax.post('/cs/channel/edit', questData, function (data, status) {
-                        self.dialog.editChannel.loading = false;
-                        if (status != 200) return;
-                        self.$message({
-                            message: '保存成功',
-                            type: 'success'
+                    if (self.dialog.editChannel.autoBroad && (!self.dialog.editChannel.autoBroadStart || !self.dialog.editChannel.autoBroadStart.trim())) {
+                        this.$message({
+                            message: '请选择自动播发起始时间',
+                            type: 'warning'
                         });
-                        self.dialog.editChannel.data.name = newName;
-                        self.dialog.editChannel.data.remark = newRemark;
-                        self.dialog.editChannel.data.previewUrlIp = newPreviewUrlIp;
-                        self.dialog.editChannel.data.previewUrlPort = newPreviewUrlPort;
-                        self.handleEditChannelClose();
-                    }, null, ajax.NO_ERROR_CATCH_CODE)
+                        return;
+                    }
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title: '危险操作',
+                        message: h('div', null, [
+                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class: 'el-message-box__message'}, [
+                                h('p', null, ['此操作将替换该频道先前设置的所有自动播发节目单，是否继续?'])
+                            ])
+                        ]),
+                        type: 'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose: function (action, instance, done) {
+                            instance.confirmButtonLoading = true;
+                            if (action === 'confirm') {
+                                self.dialog.editChannel.loading = true;
+                                var newName = self.dialog.editChannel.name;
+                                var newRemark = self.dialog.editChannel.remark;
+                                var newPreviewUrlIp = self.dialog.editChannel.previewUrlIp;
+                                var newPreviewUrlPort = self.dialog.editChannel.previewUrlPort;
+                                var encryption = self.dialog.editChannel.encryption;
+                                var autoBroad = self.dialog.editChannel.autoBroad;
+                                var autoBroadShuffle = self.dialog.editChannel.autoBroadShuffle;
+                                var autoBroadDuration = self.dialog.editChannel.autoBroadDuration;
+                                var autoBroadStart = self.dialog.editChannel.autoBroadStart;
+                                var questData = {
+                                    id: self.dialog.editChannel.data.id,
+                                    name: newName,
+                                    previewUrlIp: newPreviewUrlIp,
+                                    previewUrlPort: newPreviewUrlPort,
+                                    encryption: encryption,
+                                    autoBroad: autoBroad,
+                                    autoBroadShuffle: autoBroadShuffle,
+                                    autoBroadDuration: autoBroadDuration,
+                                    autoBroadStart: autoBroadStart,
+                                    remark: newRemark
+                                };
+                                ajax.post('/cs/channel/edit', questData, function (data, status) {
+                                    self.dialog.editChannel.loading = false;
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                    if (status != 200) return;
+                                    self.$message({
+                                        message: '保存成功',
+                                        type: 'success'
+                                    });
+                                    self.dialog.editChannel.data.name = newName;
+                                    self.dialog.editChannel.data.remark = newRemark;
+                                    self.dialog.editChannel.data.previewUrlIp = newPreviewUrlIp;
+                                    self.dialog.editChannel.data.previewUrlPort = newPreviewUrlPort;
+                                    self.dialog.editChannel.data.encryption = encryption;
+                                    self.dialog.editChannel.data.autoBroad = autoBroad;
+                                    self.dialog.editChannel.data.autoBroadShuffle = autoBroadShuffle;
+                                    self.dialog.editChannel.data.autoBroadDuration = autoBroadDuration;
+                                    self.dialog.editChannel.data.autoBroadStart = autoBroadStart;
+                                    self.dialog.editChannel.data.broadcastStatus = data.broadcastStatus;
+                                    self.handleEditChannelClose();
+                                }, null, ajax.NO_ERROR_CATCH_CODE)
+                            } else {
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function () {
+                    });
                 },
                 rowDelete: function (scope) {
                     var self = this;

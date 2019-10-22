@@ -36,10 +36,23 @@ public class ApiProcessChannelController {
 	@Autowired
 	private ScheduleService scheduleService;
 	
+	/**
+	 * 流程节点(文件转流)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月21日 下午4:45:02
+	 * @param file_fileToStreamInfo 文件转流参数
+	 * @param file_streamTranscodingInfo 流转码参数(透传)
+	 * @param file_recordInfo 收录参数(透传)
+	 * @param encryption 是否加密
+	 * @return assetPath 文件转流后的udp地址
+	 * @return transcode_streamTranscodingInfo 流转码参数
+	 * @return transcode_recordInfo 收录参数
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(String file_fileToStreamInfo, String file_streamTranscodingInfo, String file_recordInfo, HttpServletRequest request) throws Exception{
+	public Object add(String file_fileToStreamInfo, String file_streamTranscodingInfo, String file_recordInfo, Boolean encryption, HttpServletRequest request) throws Exception{
 		//本地地址和端口，让push的流推到本地，再转码
 		FileToStreamVO vo = JSON.parseObject(file_fileToStreamInfo, FileToStreamVO.class);
 		
@@ -47,9 +60,9 @@ public class ApiProcessChannelController {
 		
 		if (vo.isNeed()) {
 			String ip = vo.getToolIp();
-			String port = channelQuery.queryLocalPort(Long.parseLong(vo.getStartPort()));
+			String port = channelQuery.queryLocalPort(ip, Long.parseLong(vo.getStartPort()));
 			
-			ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播能力", ip, port, "", ChannelType.REMOTE);
+			ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播能力", ip, port, "", ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null);
 			
 			if (channel != null) {
 				ApiServerScheduleVO scheduleVO = new ApiServerScheduleVO();
@@ -58,13 +71,13 @@ public class ApiProcessChannelController {
 					assetPaths.add(vo.getFileUrl());
 				}
 				scheduleVO.setAssetPaths(assetPaths);
-				scheduleVO.setBroadDate(DateUtil.getDateByMillisecond(DateUtil.getLongDate()+1000).toString());
+				scheduleVO.setBroadDate(DateUtil.format(DateUtil.getDateByMillisecond(DateUtil.getLongDate()+1000), DateUtil.dateTimePattern));
 				
 				scheduleService.addSchedules(channel.getId(), new ArrayListWrapper<ApiServerScheduleVO>().add(scheduleVO).getList());
 				
-				channelService.startBroad(channel.getId());
+				channelService.startAbilityBroadTimer(channel.getId());
 				
-				map.put("assetPath", new StringBufferWrapper().append("udp://").append(ip).append(":").append(port));
+				map.put("assetPath", new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString());
 			}
 		}
 		
