@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.UserQuery;
@@ -128,6 +129,34 @@ public class UserFeignController {
 		}else{
 			List<Long> exceptIds = JSON.parseArray(except, Long.class);
 			return userQuery.listByCompanyIdWithExcept(companyId, exceptIds, currentPage, pageSize);
+		}
+	}
+	
+	/**
+	 *  根据用户类型查询公司下的用户列表（带例外）<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午9:41:44
+	 * @param Long companyId 公司id
+	 * @param JSONString except 例外用户id列表
+	 * @param String classify 用户类型
+	 * @return List<UserVO> 用户列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/by/{companyId}/with/except/and/classify")
+	public Object listByCompanyIdWithExceptAndClassify(
+			@PathVariable Long companyId,
+			String except,
+			String classify,
+			HttpServletRequest request) throws Exception{
+		
+		UserClassify userClassify = UserClassify.fromName(classify);
+		if(except == null){
+			return userQuery.listByCompanyIdAndClassify(companyId, userClassify);
+		}else{
+			List<Long> exceptIds = JSON.parseArray(except, Long.class);
+			return userQuery.listByCompanyIdWithExceptAndClassify(companyId, exceptIds, userClassify);
 		}
 	}
 	

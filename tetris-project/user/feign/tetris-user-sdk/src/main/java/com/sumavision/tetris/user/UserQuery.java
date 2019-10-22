@@ -117,6 +117,20 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 根据公司id和类型查询用户列表（带例外）<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:28:37
+	 * @param Long companyId 公司id
+	 * @param String except 例外
+	 * @param String classify 类型
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> listByCompanyIdWithExceptAndClassify(Long companyId, Collection<Long> except, UserClassify classify) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.listByCompanyIdWithExceptAndClassify(companyId, JSON.toJSONString(except), classify.getName()), UserVO.class);
+	}
+	
+	/**
 	 * 修改一个用户<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

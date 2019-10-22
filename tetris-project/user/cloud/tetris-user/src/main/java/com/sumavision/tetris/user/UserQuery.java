@@ -304,6 +304,27 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 根据公司id和类型查询用户列表<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:00:12
+	 * @param Long companyId 公司id
+	 * @param UserClassify classify 用户类型
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> listByCompanyIdAndClassify(Long companyId, UserClassify classify) throws Exception{
+		List<UserPO> users = userDao.findByCompanyIdAndClassfy(companyId, classify);
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			for(UserPO user:users){
+				view_users.add(new UserVO().set(user));
+			}
+		}
+		
+		return view_users;
+	}
+	
+	/**
 	 * 分页查询公司下的用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -344,6 +365,28 @@ public class UserQuery {
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", view_users)
 												   .getMap();
+	}
+	
+	/**
+	 * 根据公司id和类型查询用户列表（带例外）<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:05:54
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外
+	 * @param UserClassify classify 类型
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> listByCompanyIdWithExceptAndClassify(Long companyId, Collection<Long> except, UserClassify classify) throws Exception{
+		if(except == null) return listByCompanyIdAndClassify(companyId, classify);
+		List<UserPO> users = userDao.findByCompanyIdWithExceptAndClassfy(companyId, except, classify.toString());
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			for(UserPO user:users){
+				view_users.add(new UserVO().set(user));
+			}
+		}
+		return view_users;
 	}
 	
 	/**

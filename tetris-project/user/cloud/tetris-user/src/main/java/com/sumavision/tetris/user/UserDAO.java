@@ -247,4 +247,30 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 */
 	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_subordinate_role_permission permission ON user.id=permission.user_id WHERE permission.role_id=?1 AND user.id NOT IN ?2 \n#pageable\n", nativeQuery = true)
 	public Page<UserPO> findByRoleIdWithExcept(Long role, Collection<Long> except, Pageable page);
+	
+	/**
+	 * 查询公司下类型用户<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:09:44
+	 * @param Long companyId 公司id
+	 * @param UserClassify classify 用户类型
+	 * @return List<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.classify=?2 \n#pageable\n", nativeQuery = true)
+	public List<UserPO> findByCompanyIdAndClassfy(Long companyId, UserClassify classify);
+	
+	/**
+	 * 查询公司下类型用户（带例外）<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:09:44
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except
+	 * @param UserClassify classify 用户类型
+	 * @return List<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.id NOT IN ?2 AND user.classify=?3", nativeQuery = true)
+	public List<UserPO> findByCompanyIdWithExceptAndClassfy(Long companyId, Collection<Long> except, String classify);
+	
 }

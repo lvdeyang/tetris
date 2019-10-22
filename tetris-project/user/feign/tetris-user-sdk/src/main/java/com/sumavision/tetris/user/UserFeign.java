@@ -92,4 +92,20 @@ public interface UserFeign {
 	public JSONObject edit(
 			@RequestParam("id") Long id,
 			@RequestParam("tags") String tags);
+	
+	/**
+	 * 根据用户公司id和类型查询用户列表（带例外）<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:17:43
+	 * @param Long companyId 公司id
+	 * @param String except 例外
+	 * @param String classify 类型
+	 * @return List<UserVO> 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/list/by/{companyId}/with/except/and/classify")
+	public JSONObject listByCompanyIdWithExceptAndClassify(
+			@PathVariable("companyId") Long companyId,
+			@RequestParam("except") String except,
+			@RequestParam("classify") String classify);
 }
