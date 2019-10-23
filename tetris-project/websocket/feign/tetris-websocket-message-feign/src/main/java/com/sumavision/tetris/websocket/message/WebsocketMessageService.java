@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
+
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class WebsocketMessageService {
@@ -20,13 +22,11 @@ public class WebsocketMessageService {
 	 * @param String message 推送消息内容
 	 * @param WebsocketMessageType type 消息类型
 	 */
-	public void send(
+	public WebsocketMessageVO send(
 			Long userId, 
 			String message, 
 			WebsocketMessageType type) throws Exception{
-		
-		websocketMessageFeign.send(userId, message, type.toString());
-		
+		return JsonBodyResponseParser.parseObject(websocketMessageFeign.send(userId, message, type.toString()), WebsocketMessageVO.class);
 	}
 	
 }

@@ -31,4 +31,24 @@ public interface WebsocketMessageFeign {
 			@RequestParam("message") String message,
 			@RequestParam("type") String type);
 	
+	/**
+	 * 重发消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月17日 下午4:04:43
+	 * @param Long id 消息id
+	 */
+	@RequestMapping(value = "/message/resend")
+	public JSONObject resend(@RequestParam("id") Long id);
+	
+	/**
+	 * 消费一个消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月14日 下午5:00:24
+	 * @param Long id 消息id
+	 */
+	@RequestMapping(value = "/message/consume")
+	public JSONObject consume(@RequestParam("id") Long id);
+	
 }

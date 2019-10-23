@@ -59,12 +59,14 @@ public class SessionMetadataService {
 	 * <b>日期：</b>2019年9月10日 下午4:52:46
 	 * @param Session session websocket session
 	 */
-	public void remove(Session session) throws Exception{
+	public Long remove(Session session) throws Exception{
 		SessionMetadataPO metadata = sessionMetadataDao.findBySessionId(session.getId());
 		if(metadata != null){
 			sessionMetadataDao.delete(metadata);
 			SessionQueue.getInstance().remove(metadata.getUserId());
+			return metadata.getUserId();
 		}
+		return null;
 	}
 	
 }
