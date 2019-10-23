@@ -1,8 +1,0 @@
-/target/
-/bin/
-/.apt_generated/
-/.settings/
-.classpath
-.factorypath
-.project
-/.idea/
