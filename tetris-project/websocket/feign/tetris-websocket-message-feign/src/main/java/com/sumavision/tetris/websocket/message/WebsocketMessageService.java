@@ -29,4 +29,15 @@ public class WebsocketMessageService {
 		return JsonBodyResponseParser.parseObject(websocketMessageFeign.send(userId, message, type.toString()), WebsocketMessageVO.class);
 	}
 	
+	/**
+	 * 消费消息<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月23日 上午9:29:09
+	 * @param Long id 消息id
+	 */
+	public void consume(Long id) throws Exception{
+		websocketMessageFeign.consume(id);
+	}
+	
 }

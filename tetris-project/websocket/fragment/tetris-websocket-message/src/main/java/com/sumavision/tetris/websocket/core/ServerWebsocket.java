@@ -8,6 +8,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.context.SpringContext;
@@ -15,6 +16,7 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.core.config.ApplicationConfig;
+import com.sumavision.tetris.websocket.core.event.WebsocketSessionClosedEvent;
 import com.sumavision.tetris.websocket.core.load.balance.SessionMetadataService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
@@ -29,6 +31,8 @@ public class ServerWebsocket {
 	private WebsocketMessageService messageService;
 	
 	private UserQuery userQuery;
+	
+	private ApplicationEventPublisher applicationEventPublisher;
 	
 	@OnMessage
     public void onMessage(String message, Session session) throws Exception{
@@ -47,7 +51,9 @@ public class ServerWebsocket {
     @OnClose
     public void onClose(Session session) throws Exception{
     	initBean();
-    	sessionMetadataService.remove(session);
+    	Long userId = sessionMetadataService.remove(session);
+    	WebsocketSessionClosedEvent event = new WebsocketSessionClosedEvent(applicationEventPublisher, userId);
+    	applicationEventPublisher.publishEvent(event);
     }
 	
     @OnError
@@ -67,6 +73,7 @@ public class ServerWebsocket {
 		if(applicationConfig == null) applicationConfig = SpringContext.getBean(ApplicationConfig.class);
 		if(sessionMetadataService == null) sessionMetadataService = SpringContext.getBean(SessionMetadataService.class);
 		if(messageService == null) messageService = SpringContext.getBean(WebsocketMessageService.class);
+		if(applicationEventPublisher == null) applicationEventPublisher = SpringContext.getBean(ApplicationEventPublisher.class);
 	}
     
 }
