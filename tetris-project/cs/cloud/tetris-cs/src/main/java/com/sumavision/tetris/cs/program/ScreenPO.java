@@ -39,6 +39,12 @@ public class ScreenPO extends AbstractBasePO {
 	/** 媒资热度权重 */
 	private Integer hotWeight;
 	
+	/** 媒资下载量 */
+	private Integer downloadCount;
+	
+	/** 媒资时长 */
+	private String duration;
+	
 	@Column(name="PROGRAM_ID")
 	public Long getProgramId() {
 		return programId;
@@ -109,5 +115,23 @@ public class ScreenPO extends AbstractBasePO {
 
 	public void setHotWeight(Integer hotWeight) {
 		this.hotWeight = hotWeight;
+	}
+
+	@Column(name = "DOWNLOAD_COUNT")
+	public Integer getDownloadCount() {
+		return downloadCount;
+	}
+
+	public void setDownloadCount(Integer downloadCount) {
+		this.downloadCount = downloadCount;
+	}
+
+	@Column(name = "DURATION")
+	public String getDuration() {
+		return duration;
+	}
+
+	public void setDuration(String duration) {
+		this.duration = duration;
 	}
 }

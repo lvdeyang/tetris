@@ -1,5 +1,7 @@
 package com.sumavision.tetris.mims.app.media.audio.api.qt;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -38,8 +41,10 @@ public class ApiQtMediaAudioController {
 	@RequestMapping(value = "/load/all")
 	public Object loadAll(HttpServletRequest request) throws Exception{
 		
-		return mediaAudioQuery.loadAll();
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAll();
+		mediaAudioQuery.queryEncodeUrl(audioVOs);
 		
+		return audioVOs;
 	}
 	
 	/**
@@ -54,7 +59,10 @@ public class ApiQtMediaAudioController {
 	@RequestMapping(value = "/load/folder/all")
 	public Object loadAllFolder(HttpServletRequest request) throws Exception{
 		
-		return mediaAudioQuery.loadAllFolder();
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAllFolder();
+		mediaAudioQuery.queryEncodeUrl(audioVOs);
+		
+		return audioVOs;
 	}
 	
 	/**
@@ -69,7 +77,9 @@ public class ApiQtMediaAudioController {
 	@RequestMapping(value = "/load/all/by/tags")
 	public Object loadAllByTags(HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
-		return mediaAudioQuery.loadAllByUserTags(user);
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAllByUserTags(user);
+		mediaAudioQuery.queryEncodeUrl(audioVOs);
+		return audioVOs;
 	}
 	
 	/**

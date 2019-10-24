@@ -79,7 +79,7 @@ public class ChannelController {
 		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.LOCAL, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart);
 		
 		if (BroadWay.fromName(broadWay).equals(BroadWay.PC_BROAD) && autoBroad) {
-			channelService.autoAddScheduleAndStart(channel.getId());
+			channelService.autoAddSchedulesAndStart(channel.getId());
 		}
 
 		return new ChannelVO().set(channel);

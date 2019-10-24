@@ -153,6 +153,8 @@ public class MediaVideoQuery {
 		//TODO 权限校验		
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
 		
+		if (folderTree.isEmpty()) return new ArrayList<MediaVideoVO>();
+		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){
 			folderIds.add(folderPO.getId());

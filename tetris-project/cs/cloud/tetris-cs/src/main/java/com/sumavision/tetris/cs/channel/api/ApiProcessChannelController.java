@@ -79,6 +79,8 @@ public class ApiProcessChannelController {
 				
 				map.put("assetPath", new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString());
 			}
+			
+			Thread.sleep(10000);
 		}
 		
 		return map.put("transcode_streamTranscodingInfo", file_streamTranscodingInfo)

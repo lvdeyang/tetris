@@ -121,6 +121,8 @@ public class MediaAudioFeignController {
 	@RequestMapping(value = "/load/recommend")
 	public Object loadRecommend(HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
-		return mediaAudioQuery.loadRecommendWithWeight(user);
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadRecommendWithWeight(user);
+		mediaAudioQuery.queryEncodeUrl(audioVOs);
+		return audioVOs;
 	}
 }

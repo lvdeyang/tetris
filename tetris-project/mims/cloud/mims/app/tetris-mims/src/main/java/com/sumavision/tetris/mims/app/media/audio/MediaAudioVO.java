@@ -62,6 +62,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private String processInstanceId;
 	
+	private String encryptionUrl;
+	
 	private List<MediaAudioVO> children;
 	
 	public String getName() {
@@ -268,6 +270,15 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 
 	public MediaAudioVO setProcessInstanceId(String processInstanceId) {
 		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public MediaAudioVO setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
 		return this;
 	}
 

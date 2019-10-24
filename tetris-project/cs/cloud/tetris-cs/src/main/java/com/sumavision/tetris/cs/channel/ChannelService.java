@@ -321,6 +321,85 @@ public class ChannelService {
 	}
 	
 	/**
+	 * 一次性下发所有排期<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月23日 上午11:50:24
+	 * @param channelId
+	 * @throws Exception
+	 */
+	public void autoAddSchedulesAndStart(Long channelId) throws Exception {
+		Long now = DateUtil.getLongDate();
+		
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
+			channelDao.save(channel);
+		}
+		
+		ChannelAutoBroadInfoPO autoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelId);
+		if (autoBroadInfoPO == null) return;
+		
+		if (timerMap.containsKey(channel)) timerMap.get(channel).cancel();
+		
+		List<MediaAudioVO> recommends = mediaAudioQuery.loadRecommend();
+		if (recommends == null || recommends.isEmpty()) return;
+		
+		String broadStartTime = new StringBufferWrapper().append(autoBroadInfoPO.getStartDate())
+				.append(" ")
+				.append(autoBroadInfoPO.getStartTime())
+				.toString();
+		Long broadStartTimeLong = DateUtil.parse(broadStartTime, DateUtil.dateTimePattern).getTime() + 30000;
+		Boolean fromToday = now < broadStartTimeLong;
+		
+		List<ScheduleVO> scheduleVOs = new ArrayList<ScheduleVO>();
+		String lastDate = null;
+		for (int i = 0; i < autoBroadInfoPO.getDuration(); i++) {
+			String broadTime = new StringBufferWrapper()
+					.append(DateUtil.addDateStr(autoBroadInfoPO.getStartDate(), i + (fromToday ? 0 : 1)))
+					.append(" ")
+					.append(autoBroadInfoPO.getStartTime())
+					.toString();
+			if (i == autoBroadInfoPO.getDuration() - 1) lastDate = broadTime;
+			if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
+			List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
+			List<ScreenVO> screens = new ArrayList<ScreenVO>();
+			for (MediaAudioVO audio : audios) {
+				ScreenVO screen = new ScreenVO();
+				screen.setName(audio.getName());
+				screen.setPreviewUrl(channel.getEncryption() ? audio.getEncryptionUrl() : audio.getPreviewUrl());
+				screen.setHotWeight(audio.getHotWeight());
+				screen.setDownloadCount(audio.getDownloadCount());
+				screen.setDuration(audio.getDuration());
+				screens.add(screen);
+			}
+			ScheduleVO scheduleVO = scheduleService.addSchedule(channelId, broadTime, screens);
+			scheduleVOs.add(scheduleVO);
+		}
+		
+		System.out.println(JSONObject.toJSONString(scheduleVOs));
+		
+		if (lastDate != null && !lastDate.isEmpty()) {
+			Timer nTimer = new Timer();
+			TimerTask timerTask = new TimerTask() {
+				
+				@Override
+				public void run() {
+					try {
+						channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+						channelDao.save(channel);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			};
+			Long delayTime = (DateUtil.parse(lastDate, DateUtil.dateTimePattern)).getTime() - DateUtil.getLongDate() + 1000;
+			nTimer.schedule(timerTask, delayTime > 0 ? delayTime : 0);
+			timerMap.put(channelId, nTimer);
+		}
+	}
+	
+	/**
 	 * 根据频道id和音频推荐自动生成节目单<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -364,13 +443,15 @@ public class ChannelService {
 				if (recommends == null || recommends.isEmpty()) return;
 				
 				if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
-				List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 9) : recommends;
+				List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
 				List<ScreenVO> screens = new ArrayList<ScreenVO>(); 
 				for (MediaAudioVO audio : audios) {
 					ScreenVO screen = new ScreenVO();
 					screen.setName(audio.getName());
 					screen.setPreviewUrl(audio.getPreviewUrl());
 					screen.setHotWeight(audio.getHotWeight());
+					screen.setDownloadCount(audio.getDownloadCount());
+					screen.setDuration(audio.getDuration());
 					screens.add(screen);
 				}
 				
