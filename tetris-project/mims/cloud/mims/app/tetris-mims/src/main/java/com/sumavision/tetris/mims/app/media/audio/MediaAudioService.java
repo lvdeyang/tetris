@@ -918,11 +918,11 @@ public class MediaAudioService {
 			}
 			tagDownloadPermissionDAO.save(savePO);
 			
-			if (!userAddTag.isEmpty()) {
-				userTag.addAll(userAddTag);
-				String newUserTag = StringUtils.join(userTag.toArray(), ",");
-				userQuery.edit(id, newUserTag);
-			}
+//			if (!userAddTag.isEmpty()) {
+//				userTag.addAll(userAddTag);
+//				String newUserTag = StringUtils.join(userTag.toArray(), ",");
+//				userQuery.edit(id, newUserTag);
+//			}
 		}
 		
 		return audio.set(media);

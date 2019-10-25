@@ -5,6 +5,8 @@ public class FileToStreamVO {
 	private boolean need;
 	/** 文件地址 */
 	private String fileUrl;
+	/** 文件时长 */
+	private String duration;
 	/** 小工具ip */
 	private String toolIp;
 	/** 可用起始端口 */
@@ -30,6 +32,14 @@ public class FileToStreamVO {
 		this.fileUrl = fileUrl;
 	}
 	
+	public String getDuration() {
+		return duration;
+	}
+
+	public void setDuration(String duration) {
+		this.duration = duration;
+	}
+
 	public String getToolIp() {
 		return toolIp;
 	}

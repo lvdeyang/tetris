@@ -148,6 +148,8 @@ public class ScheduleService {
 			screen.setName(item.getName());
 			screen.setPreviewUrl(item.getPreviewUrl());
 			screen.setHotWeight(item.getHotWeight());
+			screen.setDownloadCount(item.getDownloadCount());
+			screen.setDuration(item.getDuration());
 			screenVOs.add(screen);
 		}
 		ProgramVO program = new ProgramVO();

@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,8 +27,11 @@ import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
+import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO.MediaAudioHotOrderComparator;
+import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodePO;
+import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodeQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionPO;
@@ -35,7 +39,9 @@ import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
+import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -61,10 +67,16 @@ public class MediaAudioQuery {
 	private FolderQuery folderQuery;
 	
 	@Autowired
+	private AudioFileEncodeQuery audioFileEncodeQuery;
+	
+	@Autowired
 	private TagDownloadPermissionDAO tagDownloadPermissionDAO;
 	
 	@Autowired
 	private TagDAO tagDAO;
+	
+	@Autowired
+	private ServerProps serverProps;
 	
 	@Autowired
 	private Path path;
@@ -169,6 +181,8 @@ public class MediaAudioQuery {
 		
 		//TODO 权限校验
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
+		
+		if (folderTree.isEmpty()) return new ArrayList<MediaAudioVO>();
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){
@@ -292,8 +306,11 @@ public class MediaAudioQuery {
 			}
 		}
 		
-		//根据同相同最大下载量标签的其他用户的其他标签获取(重复权重均加1)
-		List<MediaAudioVO> otherAudios = loadRecommendFromOthor(user);
+		//根据同相同最大下载量标签的其他用户的其他标签获取(重复权重均加50)
+//		List<MediaAudioVO> otherAudios = loadRecommendFromOthor(user);
+		
+		//遍历所有同组织用户，有下载且A/B用户均没有的标签(该标签所有媒资加50)
+		List<MediaAudioVO> otherAudios = loadRecommendFromOtherUser(user);
 		for (MediaAudioVO mediaAudioVO : otherAudios) {
 			if (recommends.contains(mediaAudioVO)) {
 				MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
@@ -306,7 +323,7 @@ public class MediaAudioQuery {
 		
 		Collections.sort(recommends, new MediaAudioHotOrderComparator());
 		
-		return recommends.size() > 30 ? recommends.subList(0, 29) : recommends;
+		return recommends.size() > 30 ? recommends.subList(0, 30) : recommends;
 	}
 	
 	/**
@@ -409,10 +426,10 @@ public class MediaAudioQuery {
 							if (tag == null) continue;
 							tags.add(tag.getName());
 						}
-						if (j == 0) {
-							TagPO tag = tagDAO.findOne(tagId);
-							if (tag != null) tags.add(tag.getName());
-						}
+//						if (j == 0) {
+//							TagPO tag = tagDAO.findOne(tagId);
+//							if (tag != null) tags.add(tag.getName());
+//						}
 						Map<String, List<MediaAudioVO>> map = loadAllByTags(user, tags);
 						if (map != null) {
 							List<MediaAudioVO> audios = map.get("list");
@@ -424,6 +441,53 @@ public class MediaAudioQuery {
 		}
 		
 		return returnAudioVos;
+	}
+	
+	/**
+	 * 遍历所有同组织用户，有下载且A/B用户均没有的标签<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月22日 下午4:49:15
+	 * @param user
+	 */
+	public List<MediaAudioVO> loadRecommendFromOtherUser(UserVO user) throws Exception {
+		List<MediaAudioVO> returnAudioVOs = new ArrayList<MediaAudioVO>();
+		List<String> localTags = user.getTags();
+
+		List<UserVO> userVOs = userQuery.listByCompanyIdWithExceptAndClassify(Long.parseLong(user.getGroupId()), new ArrayListWrapper<Long>().add(user.getId()).getList(), UserClassify.COMPANY);
+		
+		if(userVOs == null || userVOs.isEmpty()) return returnAudioVOs;
+		
+		for (UserVO userVO : userVOs) {
+			List<String> userTags = userVO.getTags();
+			Long userId = userVO.getId();
+			
+			List<String> sameTags = new ArrayList<String>();
+			for (String tag : userTags) {
+				if (localTags.contains(tag)) {
+					sameTags.add(tag);
+				}
+			}
+			
+			List<TagDownloadPermissionPO> userToTagPermission = tagDownloadPermissionDAO.findByUserIdOrderByDownloadCountDesc(userId);
+			
+			if (userToTagPermission == null || userToTagPermission.isEmpty()) continue;
+			
+			List<String> tags = new ArrayList<String>();
+			for (TagDownloadPermissionPO tagDownloadPermissionPO : userToTagPermission) {
+				TagPO tag = tagDAO.findOne(tagDownloadPermissionPO.getTagId());
+				if (tag == null || sameTags.contains(tag.getName())) continue;
+				tags.add(tag.getName());
+			}
+			
+			Map<String, List<MediaAudioVO>> map = loadAllByTags(user, tags);
+			if (map != null) {
+				List<MediaAudioVO> audios = map.get("list");
+				returnAudioVOs.addAll(audios);
+			}
+		}
+		
+		return returnAudioVOs;
 	}
 	
 	/**
@@ -586,5 +650,30 @@ public class MediaAudioQuery {
 		List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdInOrderByDownloadCountDesc(folderIds, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
 		
 		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(audios, MediaAudioVO.class);
+	}
+	
+	public void queryEncodeUrl(List<MediaAudioVO> audioVOs) throws Exception {
+		//从音频数组中获取id列表
+		List<Long> mediaIds = audioVOs.stream().map(MediaAudioVO::getId).collect(Collectors.toList());
+		List<AudioFileEncodePO> encodePOs = audioFileEncodeQuery.queryFromMediaIds(mediaIds);
+		
+		for (AudioFileEncodePO audioFileEncodePO : encodePOs) {
+			for (MediaAudioVO audioVO : audioVOs) {
+				if (audioVO.getId().equals(audioFileEncodePO.getMediaId())) {
+					String encryptionUrl = audioVO.getStoreType() == StoreType.REMOTE 
+							? audioFileEncodePO.getPreviewUrl() 
+									: new StringBufferWrapper()
+									.append("http://")
+									.append(serverProps.getIp())
+									.append(":")
+									.append(serverProps.getPort())
+									.append("/")
+									.append(audioFileEncodePO.getPreviewUrl())
+									.toString();
+					audioVO.setEncryptionUrl(encryptionUrl);
+					break;
+				}
+			}
+		}
 	}
 }

@@ -40,6 +40,12 @@ public class MediaAudioVO {
 	
 	private Integer hotWeight;
 	
+	private Integer downloadCount;
+	
+	private String encryptionUrl;
+	
+	private String duration;
+	
 	private List<MediaAudioVO> children;
 	
 	public String getName() {
@@ -192,6 +198,33 @@ public class MediaAudioVO {
 
 	public MediaAudioVO setHotWeight(Integer hotWeight) {
 		this.hotWeight = hotWeight;
+		return this;
+	}
+
+	public Integer getDownloadCount() {
+		return downloadCount;
+	}
+
+	public MediaAudioVO setDownloadCount(Integer downloadCount) {
+		this.downloadCount = downloadCount;
+		return this;
+	}
+
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public MediaAudioVO setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
+		return this;
+	}
+
+	public String getDuration() {
+		return duration;
+	}
+
+	public MediaAudioVO setDuration(String duration) {
+		this.duration = duration;
 		return this;
 	}
 

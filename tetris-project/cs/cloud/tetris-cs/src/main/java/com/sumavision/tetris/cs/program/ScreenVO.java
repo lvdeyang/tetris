@@ -17,6 +17,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private String previewUrl;
 	private String time;
 	private Integer hotWeight;
+	private Integer downloadCount;
+	private String duration;
 
 	@Override
 	public ScreenVO set(ScreenPO entity) throws Exception {
@@ -29,6 +31,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setName(entity.getName())
 		.setPreviewUrl(entity.getPreviewUrl())
 		.setHotWeight(entity.getHotWeight())
+		.setDownloadCount(entity.getDownloadCount())
+		.setDuration(entity.getDuration())
 		.setMimsUuid(entity.getMimsUuid())
 		.setResourceId(entity.getResourceId());
 		return this;
@@ -120,6 +124,26 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 
 	public ScreenVO setHotWeight(Integer hotWeight) {
 		this.hotWeight = hotWeight;
+		return this;
+	}
+
+	public Integer getDownloadCount() {
+		return downloadCount;
+	}
+
+
+	public ScreenVO setDownloadCount(Integer downloadCount) {
+		this.downloadCount = downloadCount;
+		return this;
+	}
+
+	public String getDuration() {
+		return duration;
+	}
+
+
+	public ScreenVO setDuration(String duration) {
+		this.duration = duration;
 		return this;
 	}
 

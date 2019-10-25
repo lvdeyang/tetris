@@ -53,6 +53,8 @@ public class ScreenService {
 				screenPO.setName(screenVO.getName());
 				screenPO.setPreviewUrl(screenVO.getPreviewUrl());
 				screenPO.setHotWeight(screenVO.getHotWeight());
+				screenPO.setDownloadCount(screenVO.getDownloadCount());
+				screenPO.setDuration(screenVO.getDuration());
 				screenPO.setUpdateTime(new Date());
 
 				screenPOList.add(screenPO);

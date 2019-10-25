@@ -563,7 +563,7 @@
         <el-dialog
                 title="节目编辑"
                 :visible.sync="dialog.editProgram.visible"
-                width="1100px"
+                width="1140px"
                 :before-close="handleEditProgramClose"
                 append-to-body
                 style="height:100%;overflow-y: hidden">
@@ -571,7 +571,7 @@
             <el-dialog
                     title="目录资源选择"
                     :visible.sync="dialog.editProgram.dialog.chooseResource.visible"
-                    width="1100px"
+                    width="1140px"
                     append-to-body
                     :before-close="handleChooseResourcesClose">
 
@@ -725,11 +725,12 @@
                     tooltip-effect="dark"
                     :data="dialog.editProgram.commitData.currentSerialInfo"
                     :default-sort="{prop:'index',order:'ascending'}"
-                    style="width: 350px;height: 450px;overflow: auto">
+                    style="width: 390px;height: 450px;overflow: auto">
                 <el-table-column width="30"></el-table-column>
                 <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
                 <el-table-column label="排序" width="60" prop="index"></el-table-column>
-                <el-table-column label="综合分值" v-if="dialog.editSchedules.data.autoBroad" width="60" prop="hotWeight"></el-table-column>
+                <el-table-column label="综合分值" v-if="dialog.editSchedules.data.autoBroad" width="90" prop="hotWeight"></el-table-column>
+                <el-table-column label="下载量" v-if="dialog.editSchedules.data.autoBroad" width="70" prop="downloadCount"></el-table-column>
                 <el-table-column label="操作" v-if="!dialog.editSchedules.data.autoBroad">
                     <template slot-scope="scope">
                         <el-tooltip class="item" effect="dark" content="向上移动"

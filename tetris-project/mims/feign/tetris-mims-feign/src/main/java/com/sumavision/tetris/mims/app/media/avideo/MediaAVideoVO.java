@@ -42,6 +42,8 @@ public class MediaAVideoVO {
 	
 	private String previewUrl;
 	
+	private String duration;
+	
 	private List<MediaAVideoVO> children;
 	
 	public Long getId() {
@@ -206,6 +208,15 @@ public class MediaAVideoVO {
 		return this;
 	}
 
+	public String getDuration() {
+		return duration;
+	}
+
+	public MediaAVideoVO setDuration(String duration) {
+		this.duration = duration;
+		return this;
+	}
+
 	public List<MediaAVideoVO> getChildren() {
 		return children;
 	}
@@ -221,6 +232,7 @@ public class MediaAVideoVO {
 		newMedia.uuid = this.uuid;
 		newMedia.name = this.name;
 		newMedia.previewUrl = this.previewUrl;
+		newMedia.duration = this.duration;
 		newMedia.children = new ArrayListWrapper<MediaAVideoVO>().getList();
 		return newMedia;
 	}
