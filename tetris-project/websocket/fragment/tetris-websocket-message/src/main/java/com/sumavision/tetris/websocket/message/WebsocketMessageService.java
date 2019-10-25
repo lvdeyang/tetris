@@ -126,9 +126,11 @@ public class WebsocketMessageService {
 				try{
 					SessionQueue queue = SessionQueue.getInstance();
 					Session session = queue.get(userId);
-					session.getBasicRemote().sendText(message);
-					messageEntity.setConsumed(true);
-					websocketMessageDao.save(messageEntity);
+					if(session != null){
+						session.getBasicRemote().sendText(message);
+						messageEntity.setConsumed(true);
+						websocketMessageDao.save(messageEntity);
+					}
 					return new WebsocketMessageVO().set(messageEntity);
 				}catch(Exception e){
 					throw e;

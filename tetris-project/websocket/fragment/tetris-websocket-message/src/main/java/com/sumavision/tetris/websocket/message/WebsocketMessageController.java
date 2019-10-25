@@ -52,8 +52,7 @@ public class WebsocketMessageController {
 			UserVO user = userQuery.current();
 			fromUserId = user.getId();
 		}
-		websocketMessageService.send(userId, message, WebsocketMessageType.valueOf(type), fromUserId, fromUsername);
-		return null;
+		return websocketMessageService.send(userId, message, WebsocketMessageType.valueOf(type), fromUserId, fromUsername);
 	}
 	
 	/**
