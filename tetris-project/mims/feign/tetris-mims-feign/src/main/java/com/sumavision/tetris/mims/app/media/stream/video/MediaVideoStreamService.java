@@ -1,9 +1,12 @@
 package com.sumavision.tetris.mims.app.media.stream.video;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
@@ -38,8 +41,9 @@ public class MediaVideoStreamService {
 	 * @param Long
 	 *            mediaId 媒资名称
 	 */
-	public Object remove(Long mediaId) throws Exception {
-		return JsonBodyResponseParser.parseObject(mediaVideoStreamFeign.remove(mediaId), JSONObject.class);
+	public Object remove(List<Long> mediaIdList) throws Exception {
+		String mediaIds = JSONArray.toJSONString(mediaIdList);
+		return JsonBodyResponseParser.parseObject(mediaVideoStreamFeign.remove(mediaIds), JSONObject.class);
 	}
 
 	/**

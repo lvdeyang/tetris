@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cs.channel.api;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.cs.channel.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
@@ -69,8 +73,12 @@ public class ApiServerChannelController {
 		if (date == null) date = DateUtil.now();
 		if (broadWay == null) broadWay = "轮播能力";
 		if (remark == null) remark = "";
+		
+		List<BroadAbilityBroadInfoVO> infoVOs = new ArrayListWrapper<BroadAbilityBroadInfoVO>()
+				.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(previewUrlIp).setPreviewUrlPort(previewUrlPort))
+				.getList();
 
-		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.REMOTE, encryption, false, null, null, null);
+		ChannelPO channel = channelService.add(name, date, broadWay, remark, ChannelType.REMOTE, encryption, false, null, null, null, infoVOs);
 
 		return new ChannelVO().set(channel);
 	}
@@ -95,7 +103,11 @@ public class ApiServerChannelController {
 		
 		if (remark == null) remark = "";
 
-		ChannelPO channel = channelService.edit(id, name, previewUrlIp, previewUrlPort, remark, encryption, false, null, null, null);
+		List<BroadAbilityBroadInfoVO> infoVOs = new ArrayListWrapper<BroadAbilityBroadInfoVO>()
+				.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(previewUrlIp).setPreviewUrlPort(previewUrlPort))
+				.getList();
+		
+		ChannelPO channel = channelService.edit(id, name, remark, encryption, false, null, null, null, infoVOs);
 
 		return new ChannelVO().set(channel);
 	}

@@ -657,21 +657,25 @@ public class MediaAudioQuery {
 		List<Long> mediaIds = audioVOs.stream().map(MediaAudioVO::getId).collect(Collectors.toList());
 		List<AudioFileEncodePO> encodePOs = audioFileEncodeQuery.queryFromMediaIds(mediaIds);
 		
-		for (AudioFileEncodePO audioFileEncodePO : encodePOs) {
-			for (MediaAudioVO audioVO : audioVOs) {
-				if (audioVO.getId().equals(audioFileEncodePO.getMediaId())) {
-					String encryptionUrl = audioVO.getStoreType() == StoreType.REMOTE 
-							? audioFileEncodePO.getPreviewUrl() 
-									: new StringBufferWrapper()
-									.append("http://")
-									.append(serverProps.getIp())
-									.append(":")
-									.append(serverProps.getPort())
-									.append("/")
-									.append(audioFileEncodePO.getPreviewUrl())
-									.toString();
-					audioVO.setEncryptionUrl(encryptionUrl);
-					break;
+		for (MediaAudioVO audioVO : audioVOs) {
+			if (audioVO.getChildren() != null && !audioVO.getChildren().isEmpty()) {
+				queryEncodeUrl(audioVO.getChildren());
+			} else {
+				for (AudioFileEncodePO audioFileEncodePO : encodePOs) {
+					if (audioVO.getId().equals(audioFileEncodePO.getMediaId())) {
+						String encryptionUrl = audioVO.getStoreType() == StoreType.REMOTE 
+								? audioFileEncodePO.getPreviewUrl() 
+										: new StringBufferWrapper()
+										.append("http://")
+										.append(serverProps.getIp())
+										.append(":")
+										.append(serverProps.getPort())
+										.append("/")
+										.append(audioFileEncodePO.getPreviewUrl())
+										.toString();
+						audioVO.setEncryptionUrl(encryptionUrl);
+						break;
+					}
 				}
 			}
 		}

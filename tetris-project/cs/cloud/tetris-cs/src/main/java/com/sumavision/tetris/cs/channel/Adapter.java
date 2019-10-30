@@ -1,6 +1,7 @@
 package com.sumavision.tetris.cs.channel;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +37,17 @@ public class Adapter {
 		String ftpPath = null;
 
 		String[] split = httpUrl.split(":");
+		
+		String ip = "";
+		if (jsonObject.getBoolean("useSetIp")) {
+			ip = jsonObject.getString("setIp");
+		}
 
 		//有端口的Url地址
 		if (split.length == 2) {
 			String[] splite2 = split[1].split("//");
 			
-			String ip = splite2[1].substring(0, splite2[1].indexOf("/"));
+			if (ip.isEmpty()) ip = splite2[1].substring(0, splite2[1].indexOf("/"));
 			
 			String path = splite2[1].substring(splite2[1].indexOf("/"));
 			
@@ -49,7 +55,7 @@ public class Adapter {
 					.append(ip).append(path).toString();
 		//没有端口的url地址
 		} else if (split.length == 3) {
-			String ip = split[1].split("//")[1];
+			if (ip.isEmpty())  ip = split[1].split("//")[1];
 
 			String path = split[2].substring(split[2].indexOf("/"));
 
@@ -77,13 +83,22 @@ public class Adapter {
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年8月1日 上午11:06:57
+	 * @throws Exception 
 	 */
-	public HashMapWrapper<String, String> getIpAndPortFromUdpUrl(String url){
+	public HashMapWrapper<String, String> getIpAndPortFromUdpUrl(String url) throws Exception{
 		if (url == null || url.isEmpty()) return null;
 		
 		String[] split = url.split(":");
 		
-		String ip = split[1].split("@")[1];
+		File file = ResourceUtils.getFile("classpath:profile.json");
+		String json = FileUtils.readFileToString(file);
+		JSONObject jsonObject = JSONObject.parseObject(json);
+		String ip;
+		if (jsonObject.getBoolean("useSetIp")) {
+			ip = jsonObject.getString("setIp");
+		} else {
+			ip = split[1].split("@")[1];
+		}
 		
 		String port = split[2];
 		

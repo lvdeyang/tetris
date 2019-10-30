@@ -62,6 +62,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private String processInstanceId;
 	
+	private Boolean encryption;
+	
 	private String encryptionUrl;
 	
 	private List<MediaAudioVO> children;
@@ -273,6 +275,15 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public MediaAudioVO setEncryption(Boolean encryption) {
+		this.encryption = encryption;
+		return this;
+	}
+
 	public String getEncryptionUrl() {
 		return encryptionUrl;
 	}
@@ -313,6 +324,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setDownloadCount(entity.getDownloadCount())
 			.setProgress(0)
+			.setEncryption(entity.getEncryption())
 			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId());

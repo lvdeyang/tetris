@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cs.channel;
 
+import java.util.List;
+
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -17,12 +19,6 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	
 	private String groupId;
 	
-	private String previewUrlIp;
-	
-	private String previewUrlPort;
-	
-	private Integer broadId;
-	
 	private String type;
 	
 	private Boolean encryption;
@@ -34,6 +30,8 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	private Integer autoBroadDuration;
 	
 	private String autoBroadStart;
+	
+	private List<BroadAbilityBroadInfoPO> output;
 
 	@Override
 	public ChannelVO set(ChannelPO entity) throws Exception {
@@ -46,8 +44,6 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		.setBroadWay(entity.getBroadWay())
 		.setBroadcastStatus(entity.getBroadcastStatus())
 		.setGroupId(entity.getGroupId())
-		.setPreviewUrlIp(entity.getPreviewUrlIp())
-		.setPreviewUrlPort(entity.getPreviewUrlPort())
 		.setType(entity.getType())
 		.setEncryption(entity.getEncryption())
 		.setAutoBroad(entity.getAutoBroad());
@@ -106,33 +102,6 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
 	public ChannelVO setGroupId(String groupId) {
 		this.groupId = groupId;
-		return this;
-	}
-
-	public String getPreviewUrlIp() {
-		return previewUrlIp;
-	}
-
-	public ChannelVO setPreviewUrlIp(String previewUrlIp) {
-		this.previewUrlIp = previewUrlIp;
-		return this;
-	}
-
-	public String getPreviewUrlPort() {
-		return previewUrlPort;
-	}
-
-	public ChannelVO setPreviewUrlPort(String previewUrlPort) {
-		this.previewUrlPort = previewUrlPort;
-		return this;
-	}
-
-	public Integer getBroadId() {
-		return broadId;
-	}
-
-	public ChannelVO setBroadId(Integer broadId) {
-		this.broadId = broadId;
 		return this;
 	}
 

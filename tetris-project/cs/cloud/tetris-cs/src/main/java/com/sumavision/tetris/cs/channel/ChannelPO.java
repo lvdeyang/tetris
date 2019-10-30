@@ -23,14 +23,8 @@ public class ChannelPO extends AbstractBasePO {
 	/** 播发方式 */
 	private String broadWay;
 	
-	/** 视频流媒资id */
-	private Long mediaId;
-	
-	/** 视频流媒资url地址 */
-	private String previewUrlIp;
-	
-	/** 视频流媒资url端口 */
-	private String previewUrlPort;
+	/** 播发id */
+	private Integer abilityBroadId;
 	
 	/** 播发状态 */
 	private String broadcastStatus;
@@ -74,6 +68,15 @@ public class ChannelPO extends AbstractBasePO {
 		this.broadWay = broadWay;
 	}
 
+	@Column(name = "ABILITY_BROAD_ID")
+	public Integer getAbilityBroadId() {
+		return abilityBroadId;
+	}
+
+	public void setAbilityBroadId(Integer abilityBroadId) {
+		this.abilityBroadId = abilityBroadId;
+	}
+
 	@Column(name = "REMARK")
 	public String getRemark() {
 		return remark;
@@ -81,33 +84,6 @@ public class ChannelPO extends AbstractBasePO {
 
 	public void setRemark(String remark) {
 		this.remark = remark;
-	}
-
-	@Column(name = "MEDIA_ID")
-	public Long getMediaId() {
-		return mediaId;
-	}
-
-	public void setMediaId(Long mediaId) {
-		this.mediaId = mediaId;
-	}
-
-	@Column(name = "PREVIEW_URL_IP")
-	public String getPreviewUrlIp() {
-		return previewUrlIp;
-	}
-
-	public void setPreviewUrlIp(String previewUrlIp) {
-		this.previewUrlIp = previewUrlIp;
-	}
-
-	@Column(name = "PREVIEW_URL_PORT")
-	public String getPreviewUrlPort() {
-		return previewUrlPort;
-	}
-
-	public void setPreviewUrlPort(String previewUrlPort) {
-		this.previewUrlPort = previewUrlPort;
 	}
 
 	@Column(name = "BROADCAST_STATUS")

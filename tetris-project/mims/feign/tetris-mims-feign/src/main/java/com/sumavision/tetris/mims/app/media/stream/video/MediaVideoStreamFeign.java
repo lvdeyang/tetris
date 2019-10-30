@@ -47,7 +47,7 @@ public interface MediaVideoStreamFeign {
 	 * @param MediaVideoStreamPO videos 视频流媒资列表
 	 */
 	@RequestMapping(value = "/media/video/stream/feign/remove")
-	public JSONObject remove(@RequestParam("mediaId") Long mediaId) throws Exception;
+	public JSONObject remove(@RequestParam("mediaIds") String mediaIds) throws Exception;
 	
 	/** 
 	 * 修改媒资

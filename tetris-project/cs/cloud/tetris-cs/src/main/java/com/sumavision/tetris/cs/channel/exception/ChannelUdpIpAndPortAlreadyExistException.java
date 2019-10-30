@@ -13,11 +13,15 @@ public class ChannelUdpIpAndPortAlreadyExistException extends BaseException{
 	
 	private static final long serialVersionUID = 1L;
 
-	public ChannelUdpIpAndPortAlreadyExistException() {
+	public ChannelUdpIpAndPortAlreadyExistException(String ip, String port) {
 		super(StatusCode.CONFLICT, "已存在相同流ip和流port频道");
 		LOG.error(DateUtil.now());
 		LOG.error(new StringBufferWrapper().append("已存在相同流ip和流port频道!")
-										   .toString());
+				.append("冲突的ip为：")
+				.append(ip)
+				.append("port为：")
+				.append(port)
+				.toString());
 	}
 	
 }

@@ -15,11 +15,11 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.cs.channel.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
-import com.sumavision.tetris.cs.config.ServerProps;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.api.ApiServerScheduleVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -62,7 +62,11 @@ public class ApiProcessChannelController {
 			String ip = vo.getToolIp();
 			String port = channelQuery.queryLocalPort(ip, Long.parseLong(vo.getStartPort()));
 			
-			ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播能力", ip, port, "", ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null);
+			List<BroadAbilityBroadInfoVO> infoVOs = new ArrayListWrapper<BroadAbilityBroadInfoVO>()
+					.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(ip).setPreviewUrlPort(port))
+					.getList();
+			
+			ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播能力", "", ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null, infoVOs);
 			
 			if (channel != null) {
 				ApiServerScheduleVO scheduleVO = new ApiServerScheduleVO();

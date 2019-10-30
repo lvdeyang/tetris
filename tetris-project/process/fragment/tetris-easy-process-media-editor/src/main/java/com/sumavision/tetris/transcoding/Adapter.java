@@ -139,12 +139,15 @@ public class Adapter {
 
 		String[] split = httpUrl.split(":");
 
+		String ip = "";
+		if (jsonObject.getBoolean("useSetIp")) {
+			ip = jsonObject.getString("setIp");
+		}
 		//没有端口的Url地址
 		if (split.length == 2) {
 			String[] splite2 = split[1].split("//");
 			
-			//String ip = splite2[1].substring(0, splite2[1].indexOf("/"));
-			String ip = "192.165.58.123";
+			if (ip.isEmpty()) ip = splite2[1].substring(0, splite2[1].indexOf("/"));
 			
 			String path = splite2[1].substring(splite2[1].indexOf("/"));
 			
@@ -152,8 +155,7 @@ public class Adapter {
 					.append(ip).append(path).toString();
 		//有端口的url地址
 		} else if (split.length == 3) {
-			//String ip = split[1].split("//")[1];
-			String ip = "192.165.58.123";
+			if (ip.isEmpty()) ip = split[1].split("//")[1];
 
 			String path = split[2].substring(split[2].indexOf("/"));
 
@@ -186,8 +188,14 @@ public class Adapter {
 			split = ftpUrl.split("//");
 		}
 		
-		//String ip = split[1].substring(0, split[1].indexOf("/"));
-		String ip = "192.165.58.123";
+		String json = readProfile();
+		JSONObject jsonObject = JSONObject.parseObject(json);
+		String ip;
+		if (jsonObject.getBoolean("useSetIp")) {
+			ip = jsonObject.getString("setIp");
+		} else {
+			ip = split[1].substring(0, split[1].indexOf("/"));
+		}
 		
 		String path = split[1].substring(split[1].indexOf("/"));
 		
@@ -213,8 +221,12 @@ public class Adapter {
 			String ftpUserName = jsonObject.getString("ftpUserName");
 			String ftpPassword = jsonObject.getString("ftpPassword");
 
-			//String ip = mimsServerPropsQuery.queryProps().getIp();
-			String ip = "192.165.58.123";
+			String ip;
+			if (jsonObject.getBoolean("useSetIp")) {
+				ip = jsonObject.getString("setIp");
+			} else {
+				ip = mimsServerPropsQuery.queryProps().getIp();
+			}
 			return new StringBuilder("ftp://").append(ftpUserName).append(":").append(ftpPassword).append("@")
 					.append(ip).append("/").append(url).toString();
 		}else {

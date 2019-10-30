@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cs.channel;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -65,8 +68,7 @@ public class ChannelController {
 	public Object add(String name,
 			String date,
 			String broadWay,
-			String previewUrlIp,
-			String previewUrlPort,
+			String output,
 			String remark,
 			Boolean encryption,
 			Boolean autoBroad,
@@ -75,8 +77,10 @@ public class ChannelController {
 			String autoBroadStart,
 			HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
+		
+		List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs = JSONArray.parseArray(output, BroadAbilityBroadInfoVO.class);
 
-		ChannelPO channel = channelService.add(name, date, broadWay, previewUrlIp, previewUrlPort, remark, ChannelType.LOCAL, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart);
+		ChannelPO channel = channelService.add(name, date, broadWay, remark, ChannelType.LOCAL, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, abilityBroadInfoVOs);
 		
 		if (BroadWay.fromName(broadWay).equals(BroadWay.PC_BROAD) && autoBroad) {
 			channelService.autoAddSchedulesAndStart(channel.getId());
@@ -104,8 +108,7 @@ public class ChannelController {
 	public Object rename(
 			Long id,
 			String name,
-			String previewUrlIp,
-			String previewUrlPort,
+			String output,
 			String remark,
 			Boolean encryption,
 			Boolean autoBroad,
@@ -113,8 +116,10 @@ public class ChannelController {
 			Integer autoBroadDuration,
 			String autoBroadStart,
 			HttpServletRequest request) throws Exception {
+		
+		List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs = JSONArray.parseArray(output, BroadAbilityBroadInfoVO.class);
 
-		ChannelPO channel = channelService.edit(id, name, previewUrlIp, previewUrlPort, remark, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart);
+		ChannelPO channel = channelService.edit(id, name, remark, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, abilityBroadInfoVOs);
 		
 		if (BroadWay.fromName(channel.getBroadWay()).equals(BroadWay.PC_BROAD) && autoBroad) {
 			channelService.autoAddScheduleAndStart(channel.getId());

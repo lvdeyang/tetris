@@ -54,8 +54,8 @@ define([
                         loading: false,
                         name: "",
                         broadWay: "",
-                        previewUrlIp: "",
-                        previewUrlPort: "",
+                        outputCount: 1,
+                        output: [],
                         remark: "",
                         encryption: false,
                         autoBroad: false,
@@ -70,8 +70,8 @@ define([
                         data: "",
                         name: "",
                         broadWay: "",
-                        previewUrlIp: "",
-                        previewUrlPort: "",
+                        outputCount: 1,
+                        output: [],
                         remark: "",
                         encryption: false,
                         autoBroad: false,
@@ -332,6 +332,12 @@ define([
                     self.dialog.addProgram.broadWay = "轮播能力";
                     var t = new Date();
                     self.dialog.addProgram.date = t.getFullYear()+"-"+(t.getMonth()+1)+"-"+t.getDate()+" "+t.getHours()+":"+t.getMinutes()+":"+t.getSeconds();
+                    var output = {
+                        "previewUrlIp" : "",
+                        "previewUrlPort" : ""
+                    };
+                    self.dialog.addProgram.outputCount = 1;
+                    self.dialog.addProgram.output.push(output);
                     self.dialog.addProgram.visible = true;
                 },
                 handleAddProgramClose: function () {
@@ -339,8 +345,8 @@ define([
                     self.dialog.addProgram.name = "";
                     self.dialog.addProgram.date = "";
                     self.dialog.addProgram.broadWay = "";
-                    self.dialog.addProgram.previewUrlIp = "";
-                    self.dialog.addProgram.previewUrlPort = "";
+                    self.dialog.addProgram.outputCount = 1;
+                    self.dialog.addProgram.output.splice(0, self.dialog.addProgram.output.length);
                     self.dialog.addProgram.remark = "";
                     self.dialog.addProgram.encryption = false;
                     self.dialog.addProgram.autoBroad = false;
@@ -349,6 +355,20 @@ define([
                     self.dialog.addProgram.autoBroadStart = "";
                     self.dialog.addProgram.visible = false;
                     self.dialog.addProgram.value = "";
+                },
+                handleAddProgramOutputCount: function (currentValue, oldValue) {
+                    var self = this;
+                    if (self.dialog.addProgram.output.length <= currentValue){
+                        for (var i = 0; i < currentValue - self.dialog.addProgram.output.length; i++) {
+                            var output = {
+                                "previewUrlIp" : "",
+                                "previewUrlPort" : ""
+                            };
+                            self.dialog.addProgram.output.push(output);
+                        }
+                    } else {
+                        self.dialog.addProgram.output.splice(currentValue, self.dialog.addProgram.output.length - currentValue);
+                    }
                 },
                 handleAddProgramCommit: function () {
                     var self = this;
@@ -364,8 +384,7 @@ define([
                         name: self.dialog.addProgram.name,
                         date: self.dialog.addProgram.date,
                         broadWay: self.dialog.addProgram.broadWay,
-                        previewUrlIp: self.dialog.addProgram.previewUrlIp,
-                        previewUrlPort: self.dialog.addProgram.previewUrlPort,
+                        output: self.dialog.addProgram.output,
                         encryption: self.dialog.addProgram.encryption,
                         autoBroad: self.dialog.addProgram.autoBroad,
                         autoBroadShuffle: self.dialog.addProgram.autoBroadShuffle,
@@ -389,8 +408,8 @@ define([
                     self.dialog.editChannel.data = row;
                     self.dialog.editChannel.name = row.name;
                     self.dialog.editChannel.broadWay = row.broadWay;
-                    self.dialog.editChannel.previewUrlIp = row.previewUrlIp;
-                    self.dialog.editChannel.previewUrlPort = row.previewUrlPort;
+                    self.dialog.editChannel.outputCount = row.output.length;
+                    self.dialog.editChannel.output = row.output;
                     self.dialog.editChannel.remark = row.remark;
                     self.dialog.editChannel.encryption = row.encryption;
                     self.dialog.editChannel.autoBroad = row.autoBroad;
@@ -405,8 +424,8 @@ define([
                     self.dialog.editChannel.data = "";
                     self.dialog.editChannel.name = "";
                     self.dialog.editChannel.broadWay = "";
-                    self.dialog.editChannel.previewUrlIp = "";
-                    self.dialog.editChannel.previewUrlPort = "";
+                    self.dialog.editChannel.outputCount = 1;
+                    self.dialog.editChannel.output = [];
                     self.dialog.editChannel.remark = "";
                     self.dialog.editChannel.encryption  = false;
                     self.dialog.editChannel.autoBroad = false;
@@ -442,8 +461,7 @@ define([
                                 self.dialog.editChannel.loading = true;
                                 var newName = self.dialog.editChannel.name;
                                 var newRemark = self.dialog.editChannel.remark;
-                                var newPreviewUrlIp = self.dialog.editChannel.previewUrlIp;
-                                var newPreviewUrlPort = self.dialog.editChannel.previewUrlPort;
+                                var output = self.dialog.editChannel.output;
                                 var encryption = self.dialog.editChannel.encryption;
                                 var autoBroad = self.dialog.editChannel.autoBroad;
                                 var autoBroadShuffle = self.dialog.editChannel.autoBroadShuffle;
@@ -452,8 +470,7 @@ define([
                                 var questData = {
                                     id: self.dialog.editChannel.data.id,
                                     name: newName,
-                                    previewUrlIp: newPreviewUrlIp,
-                                    previewUrlPort: newPreviewUrlPort,
+                                    output: output,
                                     encryption: encryption,
                                     autoBroad: autoBroad,
                                     autoBroadShuffle: autoBroadShuffle,
@@ -472,8 +489,7 @@ define([
                                     });
                                     self.dialog.editChannel.data.name = newName;
                                     self.dialog.editChannel.data.remark = newRemark;
-                                    self.dialog.editChannel.data.previewUrlIp = newPreviewUrlIp;
-                                    self.dialog.editChannel.data.previewUrlPort = newPreviewUrlPort;
+                                    self.dialog.editChannel.data.output = output;
                                     self.dialog.editChannel.data.encryption = encryption;
                                     self.dialog.editChannel.data.autoBroad = autoBroad;
                                     self.dialog.editChannel.data.autoBroadShuffle = autoBroadShuffle;

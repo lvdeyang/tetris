@@ -17,6 +17,7 @@ import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.cs.bak.AbilityInfoSendPO;
 import com.sumavision.tetris.cs.bak.AbilityInfoSendQuery;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
+import com.sumavision.tetris.cs.channel.exception.ChannelUdpIpAndPortAlreadyExistException;
 import com.sumavision.tetris.cs.config.ServerProps;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -34,6 +35,9 @@ public class ChannelQuery {
 	
 	@Autowired
 	private ChannelAutoBroadInfoDAO channelAutoBroadInfoDAO;
+	
+	@Autowired
+	private BroadAbilityBroadInfoDAO broadAbilityBroadInfoDAO;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -97,16 +101,13 @@ public class ChannelQuery {
 	 * @return 下发类型
 	 */
 	public BroadAbilityQueryType broadCmd(Long channelId) throws Exception{
-		ChannelPO channel = channelDao.findOne(channelId);
-		AbilityInfoSendPO info = abilityInfoSendQuery.getByChannelId(channelId);
-		if (info == null || (info.getBroadUrlIp() == null && info.getBroadUrlPort() == null)) {
+		List<AbilityInfoSendPO> info = abilityInfoSendQuery.getByChannelId(channelId);
+		if (info == null || info.isEmpty()) {
 			return BroadAbilityQueryType.NEW;
-		}else if (info.getBroadUrlIp().equals(channel.getPreviewUrlIp())
-				&& info.getBroadUrlPort().equals(channel.getPreviewUrlPort())
-				&& info.getBroadEncryption().equals(channel.getEncryption())) {
-			return BroadAbilityQueryType.COVER;
-		}else {
+		}else if (abilityInfoSendQuery.checkBroadInfoChanged(channelId)) {
 			return BroadAbilityQueryType.CHANGE;
+		}else {
+			return BroadAbilityQueryType.COVER;
 		}
 	}
 	
@@ -120,7 +121,7 @@ public class ChannelQuery {
 	public void saveBroad(Long channelId) throws Exception{
 		ChannelPO channel = channelDao.findOne(channelId);
 		if (channel != null) {
-			abilityInfoSendQuery.save(channelId, channel.getPreviewUrlIp(), channel.getPreviewUrlPort(), channel.getEncryption());
+			abilityInfoSendQuery.save(channelId, channel.getEncryption());
 		}
 	}
 
@@ -221,7 +222,7 @@ public class ChannelQuery {
 	 */
 	public boolean sendAbilityRequest(BroadAbilityQueryType type, ChannelPO channel, List<String> input, JSONObject output, Long duration) throws Exception{
 		JSONObject request = new JSONObject();
-		request.put("id", abilityInfoSendQuery.getBroadId(channel.getId()));
+		request.put("id", channel.getAbilityBroadId());
 		if (BroadAbilityQueryType.COVER == type) {
 			request.put("cmd", type.getCmd());
 			request.put("input", input);

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
@@ -74,10 +75,10 @@ public class MediaVideoStreamFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/remove")
 	public Object remove(
-			Long mediaId, 
+			String mediaIds, 
 			HttpServletRequest request) throws Exception{
-		List<Long> mediaIds = new ArrayListWrapper<Long>().add(mediaId).getList();
-		mediaVideoStreamService.removeByIds(mediaIds);
+		List<Long> mediaIdList = JSONArray.parseArray(mediaIds, Long.class);
+		mediaVideoStreamService.removeByIds(mediaIdList);
 		return null;
 	}
 	

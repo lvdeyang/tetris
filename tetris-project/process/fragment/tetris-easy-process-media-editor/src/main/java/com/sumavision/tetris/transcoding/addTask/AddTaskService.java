@@ -1,5 +1,6 @@
 package com.sumavision.tetris.transcoding.addTask;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionVO;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskService;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
+import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.FolderVO;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
@@ -58,6 +60,7 @@ public class AddTaskService {
 	public HashMapWrapper<String, MediaEditorTaskRatePermissionVO> add(String __processInstanceId__, Long __accessPointId__, String transcode, String param, String name, Long folderId, String tags) throws Exception{
 		List<TranscodeMediaVO> mediaVOs = JSON.parseArray(transcode, TranscodeMediaVO.class);
 		if (mediaVOs == null || mediaVOs.isEmpty()) return null;
+		FolderVO folder = folderQuery.getById(folderId);
 		
 		TranscodeVO transcodeVO = new TranscodeVO();
 		transcodeVO.setId("");
@@ -69,9 +72,15 @@ public class AddTaskService {
 			mediaUuids.add(media.getUuid());
 		}
 		HashMapWrapper<String, MediaAVideoVO> map = mediaAVideoQuery.getByUuids(mediaUuids.getList());
-		SourcesVO sourcesVO = new SourcesVO();
-		sourcesVO.setName("transcode");
-		sourcesVO.setSource(new ArrayListWrapper<SourceVO>().getList());
+		if (folder.getType().equals(FolderType.COMPANY_AUDIO)) {
+			List<SourceVO> sourceVOs = new ArrayList<SourceVO>();
+			transcodeVO.setSource(sourceVOs);
+		} else {
+			SourcesVO sourcesVO = new SourcesVO();
+			sourcesVO.setName("transcode_" + name);
+			sourcesVO.setSource(new ArrayListWrapper<SourceVO>().getList());
+			transcodeVO.setSources(sourcesVO);
+		}
 		for (TranscodeMediaVO media : mediaVOs) {
 			SrcURIVO src = new SrcURIVO();
 			src.setName("");
@@ -85,10 +94,12 @@ public class AddTaskService {
 			source.setSrcURI(src);
 			source.setStartTime(media.getStartTime());
 			source.setEndTime(media.getEndTime());
-			sourcesVO.getSource().add(source);
+			if (folder.getType().equals(FolderType.COMPANY_AUDIO)) {
+				transcodeVO.getSource().add(source);
+			} else {
+				transcodeVO.getSources().getSource().add(source);
+			}
 		}
-		transcodeVO.setSources(sourcesVO);
-		FolderVO folder = folderQuery.getById(folderId);
 		transcodeVO.getTarget().setTargetURI(adapter.addTreatyToUrl(mediaAVideoQuery.buildUrl(folder, name)));
 		transcodeVO.getTarget().setTranscodeTargetParams(param);
 		
@@ -97,7 +108,7 @@ public class AddTaskService {
 		transcodeJobs.setTranscode(transcodeVOs);
 		
 		MsgHeaderVO msgHeader = new MsgHeaderVO();
-		msgHeader.setCmdType(RequestCmdType.ADD_TASK.getTypeName());
+		msgHeader.setCmdType(folder.getType().equals(FolderType.COMPANY_AUDIO) ? RequestCmdType.ADD_TASK_SINGLE.getTypeName() : RequestCmdType.ADD_TASK_MULTI.getTypeName());
 		msgHeader.setTransactionId(adapter.getTransactionId());
 		
 		AddTaskVO addTask = new AddTaskVO();
@@ -136,12 +147,12 @@ public class AddTaskService {
 			mediaEditorTaskService.addMediaEditorTask(__processInstanceId__, __accessPointId__, idToInfo);
 			
 			//开启获取任务进度线程
-			if (getStatusHeartbeatThread == null) {
-				getStatusHeartbeatThread = new GetStatusHeartbeatThread();
-				getStatusHeartbeatThread.start();
-			}else {
-				getStatusHeartbeatThread.setSleep(5000);
-			}
+//			if (getStatusHeartbeatThread == null) {
+//				getStatusHeartbeatThread = new GetStatusHeartbeatThread();
+//				getStatusHeartbeatThread.start();
+//			}else {
+//				getStatusHeartbeatThread.setSleep(5000);
+//			}
 			
 			return idToInfo;
 		}

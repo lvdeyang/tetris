@@ -60,6 +60,9 @@ public interface ChannelDAO extends BaseDAO<ChannelPO>{
 	@Query(value = "SELECT * FROM TETRIS_CS_CHANNEL WHERE preview_url_ip = ?1 AND preview_url_port = ?2", nativeQuery = true)
 	public ChannelPO checkIpAndPortExists(String previewUrlIp, String previewUrlPort);
 	
+	@Query(value = "SELECT broad_id FROM TETRIS_CS_CHANNEL WHERE broad_id is not null", nativeQuery = true)
+	public List<Integer> getAllAbilityId();
+	
 	@Query(value = "SELECT preview_url_port FROM TETRIS_CS_CHANNEL WHERE preview_url_ip = ?1", nativeQuery = true)
 	public List<String> findByPreviewUrlIp(String ip);
 }

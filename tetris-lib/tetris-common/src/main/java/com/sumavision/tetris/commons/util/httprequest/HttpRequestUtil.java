@@ -1,15 +1,30 @@
 package com.sumavision.tetris.commons.util.httprequest;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
+import org.apache.http.Consts;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +43,57 @@ public class HttpRequestUtil {
     public static JSONObject httpPost(String url,JSONObject jsonParam){
         return httpPost(url, jsonParam, false);
     }
- 
+    
+    /**
+     * JSONObject请求<br/>
+     * <b>作者:</b>lzp<br/>
+     * <b>版本：</b>1.0<br/>
+     * <b>日期：</b>2019年10月24日 下午3:36:22
+     * @param url
+     * @param jsonParam
+     * @param noNeedResponse
+     */
+    public static JSONObject httpPost(String url,JSONObject jsonParam, boolean noNeedResponse){
+		return httpPost(url, jsonParam != null ? jsonParam.toJSONString() : "", "application/json", noNeedResponse);
+    }
+    
+    /**
+     * JSONObject请求<br/>
+     * <b>作者:</b>lzp<br/>
+     * <b>版本：</b>1.0<br/>
+     * <b>日期：</b>2019年10月24日 下午3:36:22
+     * @param url
+     * @param jsonParam
+     */
+    public static JSONObject httpFormPost(String url, String jsonParam){
+    	return httpPost(url, jsonParam, "application/x-www-form-urlencoded");
+    }
+    
+    /**
+     * JSONObject请求<br/>
+     * <b>作者:</b>lzp<br/>
+     * <b>版本：</b>1.0<br/>
+     * <b>日期：</b>2019年10月24日 下午3:36:22
+     * @param url
+     * @param jsonParam
+     */
+    public static JSONObject httpJsonPost(String url, String jsonParam){
+    	return httpPost(url, jsonParam, "application/json");
+    }
+    
+    /**
+     * JSONObject请求<br/>
+     * <b>作者:</b>lzp<br/>
+     * <b>版本：</b>1.0<br/>
+     * <b>日期：</b>2019年10月24日 下午3:36:22
+     * @param url
+     * @param jsonParam
+     * @param noNeedResponse
+     */
+    public static JSONObject httpPost(String url, String jsonParam , String contentType){
+		return httpPost(url, jsonParam != null ? jsonParam : "", contentType == null || contentType.isEmpty() ? "application/json" : contentType, false);
+    }
+    
     /**
      * post请求
      * @param url         url地址
@@ -36,18 +101,18 @@ public class HttpRequestUtil {
      * @param noNeedResponse    不需要返回结果
      * @return
      */
-    public static JSONObject httpPost(String url,JSONObject jsonParam, boolean noNeedResponse){
+    public static JSONObject httpPost(String url, String param, String contentType, boolean noNeedResponse){
         //post请求返回结果
 //		DefaultHttpClient httpClient = new DefaultHttpClient();
         HttpClient httpClient = HttpClientBuilder.create().build();
         JSONObject jsonResult = null;
         HttpPost method = new HttpPost(url);
         try {
-            if (null != jsonParam) {
+            if (null != param) {
                 //解决中文乱码问题
-                StringEntity entity = new StringEntity(jsonParam.toJSONString(), "utf-8");
+                StringEntity entity = new StringEntity(param, "utf-8");
                 entity.setContentEncoding("UTF-8");
-                entity.setContentType("application/json");
+                entity.setContentType(contentType == null || contentType.isEmpty() ? "application/json" : contentType);
                 method.setEntity(entity);
             }
             HttpResponse result = httpClient.execute(method);
@@ -107,7 +172,60 @@ public class HttpRequestUtil {
         }
         return xmlResult;
     }
- 
+    
+    public static Map<String,Object> uploadFileByHTTP(File postFile,String postUrl,Map<String,String> postParam){
+        Map<String,Object> resultMap = new HashMap<String,Object>();
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        try{
+            //把一个普通参数和文件上传给下面这个地址    是一个servlet
+            HttpPost httpPost = new HttpPost(postUrl);
+            //把文件转换成流对象FileBody
+            FileBody fundFileBin = new FileBody(postFile);
+            //设置传输参数
+            MultipartEntityBuilder multipartEntity = MultipartEntityBuilder.create();
+            multipartEntity.addPart(postFile.getName(), fundFileBin);//相当于<input type="file" name="media"/>
+            //设计文件以外的参数
+            Set<String> keySet = postParam.keySet();
+            for (String key : keySet) {
+                //相当于<input type="text" name="name" value=name>
+                multipartEntity.addPart(key, new StringBody(postParam.get(key), ContentType.create("text/plain", Consts.UTF_8)));
+            }
+
+            HttpEntity reqEntity =  multipartEntity.build();
+            httpPost.setEntity(reqEntity);
+
+            //发起请求   并返回请求的响应
+            CloseableHttpResponse response = httpClient.execute(httpPost);
+            try {
+                //打印响应状态
+                //log.info(response.getStatusLine());
+                resultMap.put("statusCode", response.getStatusLine().getStatusCode());
+                //获取响应对象
+                HttpEntity resEntity = response.getEntity();
+                if (resEntity != null) {
+                    //打印响应内容
+                    resultMap.put("data", EntityUtils.toString(resEntity,Charset.forName("UTF-8")));
+                }
+                //销毁
+                EntityUtils.consume(resEntity);
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                response.close();
+            }
+        } catch (ClientProtocolException e1) {
+            e1.printStackTrace();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        } finally{
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return resultMap;
+    }
     /**
      * 发送get请求
      * @param url    路径

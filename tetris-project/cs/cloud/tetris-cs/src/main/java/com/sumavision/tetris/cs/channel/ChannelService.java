@@ -28,7 +28,6 @@ import com.sumavision.tetris.cs.bak.VersionSendPO;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
 import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
 import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
-import com.sumavision.tetris.cs.channel.exception.ChannelUdpIpAndPortAlreadyExistException;
 import com.sumavision.tetris.cs.menu.CsMenuQuery;
 import com.sumavision.tetris.cs.menu.CsMenuService;
 import com.sumavision.tetris.cs.menu.CsMenuVO;
@@ -47,8 +46,6 @@ import com.sumavision.tetris.mims.app.media.compress.FileCompressVO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
 import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -102,13 +99,13 @@ public class ChannelService {
 	private ChannelAutoBroadInfoDAO channelAutoBroadInfoDAO;
 	
 	@Autowired
+	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
+	
+	@Autowired
 	private Adapter adapter;
 	
 	@Autowired
 	private MediaCompressService mediaCompressService;
-	
-	@Autowired
-	private MediaVideoStreamService mediaVideoStreamService;
 	
 	@Autowired
 	private MimsServerPropsQuery mimsServerPropsQuery;
@@ -138,15 +135,14 @@ public class ChannelService {
 			String name,
 			String date,
 			String broadWay,
-			String previewUrlIp,
-			String previewUrlPort,
 			String remark,
 			ChannelType type,
 			Boolean encryption,
 			Boolean autoBroad,
 			Boolean autoBroadShuffle,
 			Integer autoBroadDuration,
-			String autoBroadStart) throws Exception {
+			String autoBroadStart,
+			List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs) throws Exception {
 		UserVO user = userQuery.current();
 		
 		ChannelPO channel = new ChannelPO();
@@ -161,18 +157,18 @@ public class ChannelService {
 		channel.setAutoBroad(autoBroad);
 		channel.setType(type.toString());
 		
-		if (BroadWay.fromName(broadWay) == BroadWay.ABILITY_BROAD) {
-			if (channelDao.checkIpAndPortExists(previewUrlIp, previewUrlPort) == null) {
-				MediaVideoStreamVO mediaVideoStream = mediaVideoStreamService.addVideoStreamTask(adapter.getUdpUrlFromIpAndPort(previewUrlIp, previewUrlPort), name);
-				channel.setMediaId(mediaVideoStream.getId());
-				channel.setPreviewUrlIp(previewUrlIp);
-				channel.setPreviewUrlPort(previewUrlPort);
-			}else {
-				throw new ChannelUdpIpAndPortAlreadyExistException();
-			}
+		if (BroadWay.fromName(broadWay) == BroadWay.ABILITY_BROAD || BroadWay.fromName(broadWay) == BroadWay.PC_BROAD) {
+			broadAbilityBroadInfoService.checkIpAndPortExists(null, abilityBroadInfoVOs);
+			channel.setAbilityBroadId(adapter.getNewId(channelDao.getAllAbilityId()));
 		}
 
 		channelDao.save(channel);
+		
+		if (BroadWay.fromName(broadWay) == BroadWay.ABILITY_BROAD || BroadWay.fromName(broadWay) == BroadWay.PC_BROAD) {
+			if (abilityBroadInfoVOs != null && !abilityBroadInfoVOs.isEmpty()) {
+				broadAbilityBroadInfoService.saveInfoList(channel.getId(), abilityBroadInfoVOs);
+			}
+		}
 		
 		if (autoBroad) {
 			ChannelAutoBroadInfoPO autoBroadInfoPO = new ChannelAutoBroadInfoPO();
@@ -197,7 +193,7 @@ public class ChannelService {
 	 */
 	public void remove(Long id) throws Exception {
 		ChannelPO channel = channelDao.findOne(id);
-		if (channel.getMediaId() != null) mediaVideoStreamService.remove(channel.getMediaId());
+		broadAbilityBroadInfoService.remove(id);
 		stopBroadcast(id);
 		if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
 			if (!channelQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.DELETE.getRemark());
@@ -226,14 +222,13 @@ public class ChannelService {
 	public ChannelPO edit(
 			Long id,
 			String name,
-			String previewUrlIp,
-			String previewUrlPort,
 			String remark,
 			Boolean encryption,
 			Boolean autoBroad,
 			Boolean autoBroadShuffle,
 			Integer autoBroadDuration,
-			String autoBroadStart) throws Exception {
+			String autoBroadStart,
+			List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs) throws Exception {
 		ChannelPO channel = channelDao.findOne(id);
 		if (channel == null) return null;
 		
@@ -242,14 +237,9 @@ public class ChannelService {
 			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
 		}
 		
-		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD) {
-			if (channelDao.checkIpAndPortExists(id, previewUrlIp, previewUrlPort) == null) {
-				channel.setPreviewUrlIp(previewUrlIp);
-				channel.setPreviewUrlPort(previewUrlPort);
-				mediaVideoStreamService.edit(channel.getMediaId(), adapter.getUdpUrlFromIpAndPort(previewUrlIp, previewUrlPort), name);
-			}else {
-				throw new ChannelUdpIpAndPortAlreadyExistException();
-			}
+		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD || BroadWay.fromName(channel.getBroadWay()) == BroadWay.PC_BROAD) {
+			broadAbilityBroadInfoService.checkIpAndPortExists(id, abilityBroadInfoVOs);
+			broadAbilityBroadInfoService.saveInfoList(id, abilityBroadInfoVOs);
 		}
 		channel.setName(name);
 		channel.setRemark(remark);
@@ -702,13 +692,18 @@ public class ChannelService {
 		JSONObject output = new JSONObject();
 		output.put("proto-type", "udp-ts");
 		List<JSONObject> destList = new ArrayList<JSONObject>();
-		JSONObject dest = new JSONObject();
-		dest.put("local_ip", ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD).split(":")[0]);
-		dest.put("ipv4", channel.getPreviewUrlIp());
-		dest.put("port", channel.getPreviewUrlPort());
-		dest.put("vport", "");
-		dest.put("aport", "");
-		destList.add(dest);
+		String localIp = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD).split(":")[0];
+		List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs = broadAbilityBroadInfoService.queryFromChannelId(channelId);
+		if (broadAbilityBroadInfoVOs == null || broadAbilityBroadInfoVOs.isEmpty()) return getReturnJSON(false, "无输出");
+		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
+			JSONObject dest = new JSONObject();
+			dest.put("local_ip", localIp);
+			dest.put("ipv4", broadAbilityBroadInfoVO.getPreviewUrlIp());
+			dest.put("port", broadAbilityBroadInfoVO.getPreviewUrlPort());
+			dest.put("vport", "");
+			dest.put("aport", "");
+			destList.add(dest);
+		}
 		output.put("dest_list", destList);
 		
 		output.put("scramble", channel.getEncryption() != null && channel.getEncryption() ? "AES-128" : "none");

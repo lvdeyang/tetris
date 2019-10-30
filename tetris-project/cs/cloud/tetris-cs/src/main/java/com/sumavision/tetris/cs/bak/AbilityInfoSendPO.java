@@ -18,9 +18,6 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 	/** 频道id */
 	private Long channelId;
 	
-	/** 播发id */
-	private Integer broadId;
-	
 	/** 播发输出ip */
 	private String broadUrlIp;
 	
@@ -29,6 +26,12 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 	
 	/** 播发输出是否加密 */
 	private Boolean broadEncryption;
+	
+	/** 视频流媒资id */
+	private Long mediaId;
+	
+	/** 预播发id */
+	private Long previewId;
 
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -39,15 +42,15 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 		this.channelId = channelId;
 	}
 
-	@Column(name = "BROAD_ID")
-	public Integer getBroadId() {
-		return broadId;
+	@Column(name = "PREVIEW_ID")
+	public Long getPreviewId() {
+		return previewId;
 	}
 
-	public void setBroadId(Integer broadId) {
-		this.broadId = broadId;
+	public void setPreviewId(Long previewId) {
+		this.previewId = previewId;
 	}
-
+	
 	@Column(name = "BROAD_URL_IP")
 	public String getBroadUrlIp() {
 		return broadUrlIp;
@@ -73,5 +76,14 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 
 	public void setBroadEncryption(Boolean broadEncryption) {
 		this.broadEncryption = broadEncryption;
+	}
+
+	@Column(name = "MEDIA_ID")
+	public Long getMediaId() {
+		return mediaId;
+	}
+
+	public void setMediaId(Long mediaId) {
+		this.mediaId = mediaId;
 	}
 }
