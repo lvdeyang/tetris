@@ -7,13 +7,12 @@
     <div style="color:#FFF;font-size:18px;font-weight:bold;width:200px;height:70px;
         background:url('../web/app/cms/portal/image/u667.png') no-repeat 0 center;
         position:absolute;margin-left:1000px;top:0px;line-height:70px;padding-left:50px;">{{user.nickname}}
-        <image src="../web/app/cms/portal/image/u669.png" style="width:20px;height:20px;position:absolute;top:25px;margin-left:-78px;"/>
         </div>
-    
+    <image src="../web/app/cms/portal/image/u669.png" style="width:20px;height:20px;position:absolute;top:25px;margin-left:1008px;"/>
     <div id="first-level" style="width:1200px;font-size:16px;height:40px;border-bottom:2px solid #456def;margin-top:20px;">
          <div style="width:120px;text-align:center;float:left;line-height:30px;"><a href="#/page-portal-home">首页</a></div>
          <div v-for="column in columnlist">
-			<div style="width:120px;text-align:center;float:left;line-height:30px;"><a href="#/page-portal-column/{{column.id}}">{{column.name}}</a></div>
+			<div style="width:120px;text-align:center;float:left;line-height:30px;"><a :href="'#/page-portal-column/'+column.id">{{column.name}}</a></div>
 		 </div>
     </div>
 
@@ -25,12 +24,12 @@
 
 
     <div id="second-level">
-    	  <image src="../web/app/cms/portal/image/5.jpg" style="width:660px;height:440px;margin-top:20px;float:left;"/>
+    	  <image :src="firstImage" style="width:660px;height:440px;margin-top:20px;float:left;"/>
 		  <div style="width:500px;height:440px;float:left;margin-top:20px;margin-left:20px;">
 		  
 		      <div v-for="article in newArtices">
 				  <div style="width:100%;height:70px;">
-				      <image src="{{article.thumbnail}}" style="width:20px;height:20px;line-height:65px;float:left;"/>
+				      <image src="../web/app/cms/portal/image/u107.png" style="width:20px;height:20px;line-height:65px;float:left;"/>
 				      <div style="width:430px;height:65px;float:left;margin-left:5px;">
 				          <span style="color:#172caa;font-size:18px;">{{article.name}}</span><br>
 				          <span style="font-size:12px;color:#9f82bb">作者名称:{{article.author}}|已下载:1500</span>
@@ -49,7 +48,7 @@
     	    
     	    <ul style="width:100%;float:left;margin-left:-20px;">
     	       <li v-for="article in hotArticles">
-					<a style="color:black" href="{{article.previewUrl}}">{{article.name}}</a>
+					<a style="color:black" :href="article.previewUrl">{{article.name}}</a>
 			   </li>
     	    </ul>
     	</div>
@@ -58,7 +57,7 @@
                 <span style="font-weight:bold;color:#466cfe">|</span>&nbsp;&nbsp;系统推荐</div> 
              <ul style="width:100%;float:left;margin-left:-20px;">
                <li style="color:#bfbfbf;padding:5px;" v-for="article in recommArticles">
-					<a style="color:black" href="{{article.previewUrl}}">{{article.name}}</a>
+					<a style="color:black" :href="article.previewUrl">{{article.name}}</a>
 			   </li>
     	    </ul>   
              
@@ -69,8 +68,8 @@
             <div style="width:100%;margin-top:30px;">
                 
                 <div v-for="article in downloadArticle">
-				    <a href="{{article.previewUrl}}" style="width:100%;float:left;height:65px;margin-top:10px;">
-		                <image src="{{article.thumbnail}}" style="width:77px;height:65px;float:left"/>
+				    <a :href="article.previewUrl" style="width:100%;float:left;height:65px;margin-top:10px;">
+		                <image :src="article.thumbnail" style="width:77px;height:65px;float:left"/>
 		                <div style="width:160px;float:left;line-height:65px;margin-left:5px;">{{article.name}}</div>
 		                <div style="width:50px;float:left;
 		                padding-left:10px;font-size:10px;line-height:65px;margin-left:5px;background:url('../web/app/cms/portal/image/u270.png') no-repeat 0 center;">

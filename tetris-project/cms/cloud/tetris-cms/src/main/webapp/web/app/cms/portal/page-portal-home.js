@@ -37,7 +37,8 @@ define([
                 newArtices:[],
                 hotArticles:[],
                 recommArticles:[],
-                downloadArticle:[]
+                downloadArticle:[],
+                firstImage:''
                 
             },
             computed:{
@@ -50,8 +51,37 @@ define([
                
             },
             created:function(){
-                //ajax.post('/lad', {}, function(data){	
-                //});
+            	var self = this;
+                ajax.post('/portal/column/list', null, function(data){	
+	            	self.columnlist.splice(0, self.columnlist.length);
+	            	for(var i=0;i<data.length;i++){
+	            		self.columnlist.push(data[i]);
+	            	}
+	            	
+                });
+                
+                ajax.post('/portal/article/new/list', null, function(data){	
+                	if(data.length==0) return;
+                	self.firstImage=data[0].thumbnail;
+	            	self.newArtices.splice(0, self.newArtices.length);
+	            	for(var i=0;i<data.length;i++){
+	            		self.newArtices.push(data[i]);
+	            	}
+	            	
+                });
+                
+                ajax.post('/portal/queryCommand', null, function(data){	
+                	if(data.articles.length==0) return;
+	            	self.recommArticles.splice(0, self.recommArticles.length);
+	            	for(var i=0;i<data.articles.length;i++){
+	            		self.recommArticles.push(data.articles[i]);
+	            	}
+	            	
+                });
+                
+                
+                
+                
             },
             mounted:function(){
 

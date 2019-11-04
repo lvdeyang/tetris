@@ -21,7 +21,7 @@ define([
     var instance = null;
 
     var init = function(params){
-    	alert(params.id);
+    	//alert(params.id);
 
         //设置标题
         commons.setTitle(pageId);
@@ -34,7 +34,7 @@ define([
             data: {
                 user:context.getProp('user'),
                 columnlist:[],
-                newArtices:[],
+                colArtices:[],
                 hotArticles:[],
                 seccolumnlist:[],
                 downloadArticle:[]
@@ -46,17 +46,44 @@ define([
 
             },
             methods:{
+            	
             	switchColumn:function(column){
-            		
+            		var self = this;
+            		ajax.post('/portal/query/'+column.id, null, function(data){	
+		            	self.colArtices.splice(0, self.colArtices.length);
+		            	for(var i=0;i<data.articles.length;i++){
+		            		self.colArtices.push(data.articles[i]);
+		            	}
+		            	
+	                });
             	}
             },
             created:function(){
-                //ajax.post('/lad', {}, function(data){	
-                //});
-            	//var self = this;
-            	//self.lanmu.splice(0, self.lanmu.length);
-            	//self.lanmu.push({id:2, name:b});
-            	//self.lanmu.push({id, 1, name:a});
+            	var self = this;
+                ajax.post('/portal/column/list', null, function(data){	
+	            	self.columnlist.splice(0, self.columnlist.length);
+	            	for(var i=0;i<data.length;i++){
+	            		self.columnlist.push(data[i]);
+	            	}
+	            	
+                });
+                
+                ajax.post('/portal/query/'+params.id, null, function(data){
+                	if(data.subColumns.length==0) return;
+	            	self.seccolumnlist.splice(0, self.seccolumnlist.length);
+	            	for(var i=0;i<data.subColumns.length;i++){
+	            		self.seccolumnlist.push(data.subColumns[i]);
+	            	}
+	            	ajax.post('/portal/query/'+data.subColumns[0].id, null, function(data){	
+		            	self.colArtices.splice(0, self.colArtices.length);
+		            	for(var i=0;i<data.articles.length;i++){
+		            		self.colArtices.push(data.articles[i]);
+		            	}
+		            	
+	                });
+                });
+                
+                
             },
             mounted:function(){
 

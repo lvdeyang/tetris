@@ -46,6 +46,21 @@ public class ArticleQuery {
 		return articles.getContent();
 	}
 	
+	
+	public List<ArticleVO> findAllOrderByUpdateTime(String groupId,int currentPage, int pageSize) throws Exception{
+		
+		
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+	    
+		Page<ArticlePO> articles = articleDao.findAllByGroupId(groupId,page);
+		List<ArticleVO> articleVOs=new ArrayList<ArticleVO>();
+		if(articles.getContent()!=null){
+			articleVOs=ArticleVO.getConverter(ArticleVO.class).convert(articles.getContent(), ArticleVO.class);
+		}
+		return articleVOs;
+	}
+	
+	
 	/**
 	 * 根据用户分页查询文章<br/>
 	 * <b>作者:</b>ldy<br/>
@@ -256,5 +271,8 @@ public class ArticleQuery {
 				
 		return ArticleVO.getConverter(ArticleVO.class).convert(articles, ArticleVO.class);
 	}
+	
+	
+	
 	
 }
