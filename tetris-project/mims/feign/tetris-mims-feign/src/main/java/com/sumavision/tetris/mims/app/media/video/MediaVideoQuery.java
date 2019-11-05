@@ -1,11 +1,13 @@
 package com.sumavision.tetris.mims.app.media.video;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Component
@@ -48,5 +50,17 @@ public class MediaVideoQuery {
 	 */
 	public String buildPreviewUrl(String name, String folderUuid) throws Exception {
 		return JsonBodyResponseParser.parseObject(mediaVideoFeign.buildUrl(name, folderUuid), String.class);
+	}
+	
+	/**
+	 * 根据预览地址查询视频列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:49:17
+	 * @param String previewUrl 预览地址
+	 * @return List<MediaVideoVO> 视频列表
+	 */
+	public List<MediaVideoVO> findByPreviewUrlIn(Collection<String> previewUrls) throws Exception{
+		return JsonBodyResponseParser.parseArray(mediaVideoFeign.findByPreviewUrlIn(JSON.toJSONString(previewUrls)), MediaVideoVO.class);
 	}
 }

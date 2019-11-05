@@ -59,4 +59,14 @@ public interface MediaAudioStreamDAO extends BaseDAO<MediaAudioStreamPO>{
 	 */
 	public List<MediaAudioStreamPO> findByFolderIdIn(Collection<Long> folderId);
 	
+	/**
+	 * 根据预览地址查询音频流<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午11:15:05
+	 * @param Collection<String> previewUrls 预览地址列表
+	 * @return List<MediaAudioStreamPO> 音频流列表
+	 */
+	public List<MediaAudioStreamPO> findByPreviewUrlIn(Collection<String> previewUrls);
+	
 }

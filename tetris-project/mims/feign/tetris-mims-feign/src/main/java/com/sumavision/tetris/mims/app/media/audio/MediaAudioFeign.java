@@ -85,4 +85,16 @@ public interface MediaAudioFeign {
 				@RequestParam("folderType") String folderType,
 				@RequestParam("mimeType") String mimeType,
 				@RequestParam("uploadTempPath") String uploadTempPath) throws Exception;
+	
+	/**
+	 * 根据预览地址查询音频列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:31:15
+	 * @param String previewUrl 预览地址
+	 * @return List<MediaAudioVO> 音频列表
+	 */
+	@RequestMapping(value = "/media/audio/feign/find/by/preview/url/in")
+	public JSONObject findByPreviewUrlIn(@RequestParam("previewUrls") String previewUrls) throws Exception;
+	
 }

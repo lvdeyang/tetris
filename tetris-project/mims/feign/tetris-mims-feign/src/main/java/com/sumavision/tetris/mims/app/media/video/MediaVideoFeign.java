@@ -63,4 +63,16 @@ public interface MediaVideoFeign {
 	 */
 	@RequestMapping(value = "/media/video/feign/build/url")
 	public JSONObject buildUrl(@RequestParam("name") String name, @RequestParam("folderUuid") String folderUuid) throws Exception;
+
+	/**
+	 * 根据预览地址查询视频列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:49:17
+	 * @param String previewUrl 预览地址
+	 * @return List<MediaVideoVO> 视频列表
+	 */
+	@RequestMapping(value = "/media/video/feign/find/by/preview/url/in")
+	public JSONObject findByPreviewUrlIn(@RequestParam("previewUrls") String previewUrls) throws Exception;
+	
 }

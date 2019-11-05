@@ -304,4 +304,17 @@ public class MediaPictureQuery {
 		return null;
 	}
 	
+	/**
+	 * 根据预览地址查询图片列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:34:58
+	 * @param Collection<String> preivewUrls 预览地址列表
+	 * @return List<MediaPictureVO> 图片列表
+	 */
+	public List<MediaPictureVO> findByPreviewUrlIn(Collection<String> previewUrls) throws Exception{
+		List<MediaPicturePO> entities = mediaPictureDao.findByPreviewUrlIn(previewUrls);
+		return MediaPictureVO.getConverter(MediaPictureVO.class).convert(entities, MediaPictureVO.class);
+	}
+	
 }

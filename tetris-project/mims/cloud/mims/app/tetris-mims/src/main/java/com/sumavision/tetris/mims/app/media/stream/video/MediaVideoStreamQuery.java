@@ -18,7 +18,6 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
-import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.user.UserQuery;
@@ -205,6 +204,19 @@ public class MediaVideoStreamQuery {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * 根据预览地址查询视频流<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午11:28:10
+	 * @param Collection<String> previewUrls 预览地址列表
+	 * @return List<MediaVideoStreamVO> 视频流列表
+	 */
+	public List<MediaVideoStreamVO> findByPreviewUrlIn(Collection<String> previewUrls) throws Exception{
+		List<MediaVideoStreamPO> entities = mediaVideoStreamDao.findByPreviewUrlIn(previewUrls);
+		return MediaVideoStreamVO.getConverter(MediaVideoStreamVO.class).convert(entities, MediaVideoStreamVO.class);
 	}
 	
 }

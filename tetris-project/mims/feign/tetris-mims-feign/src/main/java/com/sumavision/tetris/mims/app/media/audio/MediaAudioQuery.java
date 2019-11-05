@@ -1,11 +1,13 @@
 package com.sumavision.tetris.mims.app.media.audio;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Component
@@ -59,5 +61,17 @@ public class MediaAudioQuery {
 	 */
 	public List<MediaAudioVO> loadRecommend() throws Exception{
 		return JsonBodyResponseParser.parseArray(mediaAudioFeign.loadRecommend(), MediaAudioVO.class);
+	}
+	
+	/**
+	 * 根据预览地址查询音频列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:31:15
+	 * @param Collection<String> previewUrls 预览地址列表
+	 * @return List<MediaAudioVO> 音频列表
+	 */
+	public List<MediaAudioVO> findByPreviewUrlIn(Collection<String> previewUrls) throws Exception{
+		return JsonBodyResponseParser.parseArray(mediaAudioFeign.findByPreviewUrlIn(JSON.toJSONString(previewUrls)), MediaAudioVO.class);
 	}
 }

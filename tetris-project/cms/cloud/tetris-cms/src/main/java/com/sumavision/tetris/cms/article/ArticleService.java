@@ -1,6 +1,7 @@
 package com.sumavision.tetris.cms.article;
 
 import java.io.File;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -27,6 +28,16 @@ import com.sumavision.tetris.cms.template.TemplateQuery;
 import com.sumavision.tetris.cms.template.TemplateType;
 import com.sumavision.tetris.cms.template.TemplateVO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserVO;
 
@@ -72,6 +83,24 @@ public class ArticleService {
 	
 	@Autowired
 	private RegionDAO regionDao;
+	
+	@Autowired
+	private ArticleMediaPermissionDAO articleMediaPermissionDao;
+	
+	@Autowired
+	private MediaAudioQuery mediaAudioQuery;
+	
+	@Autowired
+	private MediaVideoQuery mediaVideoQuery;
+	
+	@Autowired
+	private MediaPictureQuery mediaPictureQuery;
+	
+	@Autowired
+	private MediaAudioStreamQuery mediaAudioStreamQuery;
+	
+	@Autowired
+	private MediaVideoStreamQuery mediaVideoStreamQuery;
 
 	/**
 	 * 添加文章<br/>
@@ -225,6 +254,9 @@ public class ArticleService {
 		}
 		
 		addPermission(user, article);
+		
+		//创建文章媒资关联
+		analyseMediasFromModules(article.getId(), JSONArray.parseArray(article.getModules()));
 		
 		return article;
 	}
@@ -526,6 +558,9 @@ public class ArticleService {
 		article.setUpdateTime(new Date());
 		articleDao.save(article);
 		
+		//创建文章媒资关联
+		analyseMediasFromModules(article.getId(), JSONArray.parseArray(article.getModules()));
+		
 		return article;
 	}
 	
@@ -548,6 +583,89 @@ public class ArticleService {
 		articleUserPermissionDao.save(permission);
 		
 		return permission;
+	}
+	
+	/**
+	 * 分析并创建文章和媒资关联<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 下午1:47:33
+	 * @param Long articleId 文章id
+	 * @param JSONArray modules 文章内容
+	 */
+	private void analyseMediasFromModules(Long articleId, JSONArray modules) throws Exception{
+		List<ArticleMediaPermissionPO> permissions = articleMediaPermissionDao.findByArticleId(articleId);
+		if(permissions!=null && permissions.size()>0){
+			articleMediaPermissionDao.deleteInBatch(permissions);
+		}
+		
+		Set<String> linkSuffixes = new HashSet<String>();
+		Set<String> links = new HashSet<String>();
+		for(int i=0; i<modules.size(); i++){
+			JSONObject module = modules.getJSONObject(i);
+			JSONArray medias = module.getJSONObject("template")
+									 .getJSONArray("js");
+			for(int j=0; j<medias.size(); j++){
+				String url = medias.getJSONObject(j).getString("value");
+				String path = new URL(url).getPath();
+				linkSuffixes.add(path.substring(1, path.length()));
+				links.add(url);
+			}
+		}
+		permissions = new ArrayList<ArticleMediaPermissionPO>();
+		List<MediaAudioVO> audios = mediaAudioQuery.findByPreviewUrlIn(linkSuffixes);
+		if(audios!=null && audios.size()>0){
+			for(MediaAudioVO audio:audios){
+				ArticleMediaPermissionPO permission = new ArticleMediaPermissionPO();
+				permission.setArticleId(articleId);
+				permission.setMediaId(audio.getId());
+				permission.setMediaType(MediaType.AUDIO);
+				permissions.add(permission);
+			}
+		}
+		List<MediaPictureVO> pictures = mediaPictureQuery.findByPreviewUrlIn(linkSuffixes);
+		if(pictures!=null && pictures.size()>0){
+			for(MediaPictureVO picture:pictures){
+				ArticleMediaPermissionPO permission = new ArticleMediaPermissionPO();
+				permission.setArticleId(articleId);
+				permission.setMediaId(picture.getId());
+				permission.setMediaType(MediaType.PICTURE);
+				permissions.add(permission);
+			}
+		}
+		List<MediaVideoVO> videos = mediaVideoQuery.findByPreviewUrlIn(linkSuffixes);
+		if(videos!=null && videos.size()>0){
+			for(MediaVideoVO video:videos){
+				ArticleMediaPermissionPO permission = new ArticleMediaPermissionPO();
+				permission.setArticleId(articleId);
+				permission.setMediaId(video.getId());
+				permission.setMediaType(MediaType.VIDEO);
+				permissions.add(permission);
+			}
+		}
+		List<MediaAudioStreamVO> audioStreams = mediaAudioStreamQuery.findByPreviewUrlIn(links);
+		if(audioStreams!=null && audioStreams.size()>0){
+			for(MediaAudioStreamVO audioStream:audioStreams){
+				ArticleMediaPermissionPO permission = new ArticleMediaPermissionPO();
+				permission.setArticleId(articleId);
+				permission.setMediaId(audioStream.getId());
+				permission.setMediaType(MediaType.AUDIO_STREAM);
+				permissions.add(permission);
+			}
+		}
+		List<MediaVideoStreamVO> videoStreams = mediaVideoStreamQuery.findByPreviewUrlIn(links);
+		if(videoStreams!=null && videoStreams.size()>0){
+			for(MediaVideoStreamVO videoStream:videoStreams){
+				ArticleMediaPermissionPO permission = new ArticleMediaPermissionPO();
+				permission.setArticleId(articleId);
+				permission.setMediaId(videoStream.getId());
+				permission.setMediaType(MediaType.VIDEO_STREAM);
+				permissions.add(permission);
+			}
+		}
+		if(permissions.size() > 0){
+			articleMediaPermissionDao.save(permissions);
+		}
 	}
 	
 }

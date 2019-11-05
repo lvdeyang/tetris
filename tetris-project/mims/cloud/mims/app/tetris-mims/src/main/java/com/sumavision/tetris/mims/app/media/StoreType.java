@@ -11,7 +11,10 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum StoreType {
 
 	LOCAL("本地存储"),
-	REMOTE("远端存储");
+	REMOTE("远端存储"),
+	FTP("ftp存储"),
+	HTTP("http存储"),
+	THIRDPART("第三方系统");
 	
 	private String name;
 	
