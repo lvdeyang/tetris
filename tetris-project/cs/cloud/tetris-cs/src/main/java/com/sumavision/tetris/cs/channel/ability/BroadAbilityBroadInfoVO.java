@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.channel;
+package com.sumavision.tetris.cs.channel.ability;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
@@ -12,6 +12,8 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 	private String previewUrlPort;
 	/** 媒资id */
 	private Long mediaId;
+	/** 预播发用户id */
+	private Long userId;
 	
 	public Long getChannelId() {
 		return channelId;
@@ -49,6 +51,15 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 		return this;
 	}
 
+	public Long getUserId() {
+		return userId;
+	}
+
+	public BroadAbilityBroadInfoVO setUserId(Long userId) {
+		this.userId = userId;
+		return this;
+	}
+
 	@Override
 	public BroadAbilityBroadInfoVO set(BroadAbilityBroadInfoPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -56,14 +67,25 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 		.setUpdateTime(entity.getUpdateTime() == null ? "": DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 		.setChannelId(entity.getChannelId())
 		.setMediaId(entity.getMediaId())
-		.setPreviewUrlIp(previewUrlIp)
-		.setPreviewUrlPort(previewUrlPort);
+		.setPreviewUrlIp(entity.getPreviewUrlIp())
+		.setPreviewUrlPort(entity.getPreviewUrlPort())
+		.setUserId(entity.getUserId());
 		return this;
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
 		BroadAbilityBroadInfoVO infoVO = (BroadAbilityBroadInfoVO)obj;
-		return this.getPreviewUrlIp().endsWith(infoVO.getPreviewUrlIp()) && this.getPreviewUrlPort().endsWith(infoVO.getPreviewUrlPort());
+		return (
+				this.getPreviewUrlIp() != null
+				&& this.getPreviewUrlIp().equals(infoVO.getPreviewUrlIp())
+				&& this.getPreviewUrlPort() != null
+				&& this.getPreviewUrlPort().equals(infoVO.getPreviewUrlPort())
+				)
+				|| (
+					this.getUserId() != null && this.getUserId() == infoVO.getUserId()
+					&& this.getPreviewUrlPort() != null
+					&& this.getPreviewUrlPort().equals(infoVO.getPreviewUrlPort())
+					);
 	}
 }

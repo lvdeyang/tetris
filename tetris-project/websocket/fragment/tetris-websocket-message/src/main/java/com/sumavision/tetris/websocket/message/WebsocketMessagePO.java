@@ -4,6 +4,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -53,7 +54,8 @@ public class WebsocketMessagePO extends AbstractBasePO{
 		this.username = username;
 	}
 
-	@Column(name = "MESSAGE")
+	@Lob
+	@Column(name = "MESSAGE", columnDefinition = "LONGTEXT")
 	public String getMessage() {
 		return message;
 	}

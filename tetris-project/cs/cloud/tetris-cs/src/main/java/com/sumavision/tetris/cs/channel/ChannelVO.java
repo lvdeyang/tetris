@@ -3,7 +3,9 @@ package com.sumavision.tetris.cs.channel;
 import java.util.List;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
+import com.sumavision.tetris.user.UserVO;
 
 public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
@@ -31,7 +33,11 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	
 	private String autoBroadStart;
 	
-	private List<BroadAbilityBroadInfoPO> output;
+	private String outputUserPort;
+	
+	private List<BroadAbilityBroadInfoVO> output;
+	
+	private List<UserVO> outputUsers; 
 
 	@Override
 	public ChannelVO set(ChannelPO entity) throws Exception {
@@ -156,6 +162,32 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
 	public ChannelVO setAutoBroadStart(String autoBroadStart) {
 		this.autoBroadStart = autoBroadStart;
+		return this;
+	}
+
+	public String getOutputUserPort() {
+		return outputUserPort;
+	}
+
+	public void setOutputUserPort(String outputUserPort) {
+		this.outputUserPort = outputUserPort;
+	}
+
+	public List<BroadAbilityBroadInfoVO> getOutput() {
+		return output;
+	}
+
+	public ChannelVO setOutput(List<BroadAbilityBroadInfoVO> output) {
+		this.output = output;
+		return this;
+	}
+
+	public List<UserVO> getOutputUsers() {
+		return outputUsers;
+	}
+
+	public ChannelVO setOutputUsers(List<UserVO> outputUsers) {
+		this.outputUsers = outputUsers;
 		return this;
 	}
 }

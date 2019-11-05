@@ -13,11 +13,18 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.cs.bak.AbilityInfoSendPO;
 import com.sumavision.tetris.cs.bak.AbilityInfoSendQuery;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
-import com.sumavision.tetris.cs.channel.exception.ChannelUdpIpAndPortAlreadyExistException;
+import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoDAO;
+import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoPO;
+import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.ability.BroadAbilityQueryType;
+import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
+import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoPO;
+import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
 import com.sumavision.tetris.cs.config.ServerProps;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -73,6 +80,26 @@ public class ChannelQuery {
 					channelVO.setAutoBroadShuffle(channelAutoBroadInfoPO.getShuffle());
 				}
 			}
+			
+			List<BroadAbilityBroadInfoPO> broadAbilityBroadInfoPOs = broadAbilityBroadInfoDAO.findByChannelId(channelVO.getId());
+			List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs = new ArrayList<BroadAbilityBroadInfoVO>();
+			List<UserVO> outputUsers = new ArrayList<UserVO>();
+			for (BroadAbilityBroadInfoPO broadAbilityBroadInfoPO : broadAbilityBroadInfoPOs) {
+				String previewIp = broadAbilityBroadInfoPO.getPreviewUrlIp();
+				String previewPort = broadAbilityBroadInfoPO.getPreviewUrlPort();
+				Long userId = broadAbilityBroadInfoPO.getUserId();
+				if (userId != null) {
+					outputUsers.add(userQuery.findByIdIn(new ArrayListWrapper<Long>().add(userId).getList()).get(0));
+					if (channelVO.getOutputUserPort() == null || channelVO.getOutputUserPort().isEmpty()) channelVO.setOutputUserPort(broadAbilityBroadInfoPO.getPreviewUrlPort());
+				} else {
+					if (previewIp != null && previewPort != null) {
+						broadAbilityBroadInfoVOs.add(new BroadAbilityBroadInfoVO().set(broadAbilityBroadInfoPO));
+					}
+				}
+			}
+			if (broadAbilityBroadInfoVOs.isEmpty()) broadAbilityBroadInfoVOs.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp("").setPreviewUrlPort(""));
+			channelVO.setOutput(broadAbilityBroadInfoVOs);
+			channelVO.setOutputUsers(outputUsers);
 		}
 		
 		return new HashMapWrapper<String, Object>().put("rows", channelVOs)
@@ -122,6 +149,20 @@ public class ChannelQuery {
 		ChannelPO channel = channelDao.findOne(channelId);
 		if (channel != null) {
 			abilityInfoSendQuery.save(channelId, channel.getEncryption());
+		}
+	}
+	
+	/**
+	 * 播发成功后保留播发信息(能力播发)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long channelId 频道id
+	 */
+	public void saveBroad(Long channelId, List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs) throws Exception{
+		ChannelPO channel = channelDao.findOne(channelId);
+		if (channel != null) {
+			abilityInfoSendQuery.save(channelId, channel.getEncryption(), broadAbilityBroadInfoVOs);
 		}
 	}
 
@@ -226,29 +267,34 @@ public class ChannelQuery {
 		if (BroadAbilityQueryType.COVER == type) {
 			request.put("cmd", type.getCmd());
 			request.put("input", input);
+			request.put("stat", 2);
 		} else if (BroadAbilityQueryType.NEW == type) {
 			request.put("cmd", type.getCmd());
 			request.put("output", output);
 			request.put("loop_count", "1");
 			request.put("input", input);
-		} else if (BroadAbilityQueryType.STOP == type || BroadAbilityQueryType.DELETE == type) {
+			request.put("stat", 2);
+		} else if (BroadAbilityQueryType.START == type) {
+			request.put("cmd", type.getCmd());
+		}else if (BroadAbilityQueryType.STOP == type || BroadAbilityQueryType.DELETE == type) {
 			request.put("cmd", type.getCmd());
 		} else if (BroadAbilityQueryType.CHANGE == type) {
 			if (sendAbilityRequest(BroadAbilityQueryType.DELETE, channel)) {
 				return sendAbilityRequest(BroadAbilityQueryType.NEW, channel, input, output);
 			} else {
-				return false;
+				throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.NEW.getRemark());
 			}
 		} else if (BroadAbilityQueryType.SEEK == type) {
 			request.put("cmd", type.getCmd());
 			request.put("duration", duration);
 		}
-		JSONObject response = HttpRequestUtil.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD), request);
-		if (response != null && response.containsKey("stat") && response.getString("stat").equals("success")) {
+		System.out.println(request.toJSONString());
+//		JSONObject response = HttpRequestUtil.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD), request);
+//		if (response != null && response.containsKey("stat") && response.getString("stat").equals("success")) {
 			return true;
-		}else {
-			return false;
-		}
+//		}else {
+//			throw new ChannelAbilityRequestErrorException(type.getRemark());
+//		}
 	}
 
 	public String getStatusFromNum(String statusNum) {

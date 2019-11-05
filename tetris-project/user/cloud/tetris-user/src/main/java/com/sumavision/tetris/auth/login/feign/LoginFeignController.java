@@ -53,10 +53,12 @@ public class LoginFeignController {
 	public Object doPasswordLogin(
 			String username,
 			String password,
+			String ip,
+			String equipType,
 			String verifyCode,
 			HttpServletRequest request) throws Exception{
 		
-		return loginService.doPasswordLogin(username, password, verifyCode);
+		return loginService.doPasswordLogin(username, password, ip, equipType, verifyCode);
 	}
 	
 	/**

@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.schedule.api;
+package com.sumavision.tetris.cs.schedule.api.server;
 
 import java.util.List;
 

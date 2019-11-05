@@ -44,12 +44,12 @@ public class CsResourceService {
 			}
 		}
 
-		if (resourceList != null && resourceList.size() > 0) {
-			for (int i = 0; i < resourceList.size(); i++) {
+		if (resourceList != null && !resourceList.isEmpty()) {
+			for (MediaAVideoVO aVideoVO : resourceList) {
 				if (aliveResource != null && aliveResource.size() > 0) {
 					Boolean alive = false;
 					for (int j = 0; j < aliveResource.size(); j++) {
-						if (aliveResource.get(j).getMimsUuid().equals(resourceList.get(i).getUuid())) {
+						if (aliveResource.get(j).getMimsUuid().equals(aVideoVO.getUuid())) {
 							alive = true;
 							break;
 						}
@@ -59,10 +59,13 @@ public class CsResourceService {
 					}
 				}
 				CsResourcePO resource = new CsResourcePO();
-				resource.setName(resourceList.get(i).getName());
-				resource.setTime("");
-				resource.setPreviewUrl(resourceList.get(i).getPreviewUrl());
-				resource.setMimsUuid(resourceList.get(i).getUuid());
+				resource.setName(aVideoVO.getName());
+				resource.setDuration(aVideoVO.getDuration());
+				resource.setPreviewUrl(aVideoVO.getPreviewUrl());
+				resource.setEncryption(aVideoVO.getEncryption() != null && aVideoVO.getEncryption() ? "true" : "false");
+				resource.setEncryptionUrl(aVideoVO.getEncryptionUrl());
+				resource.setDownloadCount(aVideoVO.getDownloadCount());
+				resource.setMimsUuid(aVideoVO.getUuid());
 				resource.setChannelId(channelId);
 				resource.setParentId(parentId);
 				resource.setParentPath(parentMenu.getParentPath() + "/" + parentMenu.getName());

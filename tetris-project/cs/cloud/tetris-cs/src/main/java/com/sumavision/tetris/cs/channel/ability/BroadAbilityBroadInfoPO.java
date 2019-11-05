@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.channel;
+package com.sumavision.tetris.cs.channel.ability;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -23,6 +23,8 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 	private String previewUrlPort;
 	/** 媒资id */
 	private Long mediaId;
+	/** 预播发用户id */
+	private Long userId;
 	
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -58,5 +60,14 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 
 	public void setMediaId(Long mediaId) {
 		this.mediaId = mediaId;
+	}
+
+	@Column(name = "USER_ID")
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 }

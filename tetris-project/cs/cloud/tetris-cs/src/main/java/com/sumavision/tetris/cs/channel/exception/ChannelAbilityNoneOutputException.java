@@ -8,18 +8,14 @@ import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
-public class ChannelNotExistsException extends BaseException{
-
-	private static final Logger LOG = LoggerFactory.getLogger(ChannelNotExistsException.class);
-	
+public class ChannelAbilityNoneOutputException extends BaseException{
 	private static final long serialVersionUID = 1L;
-
-	public ChannelNotExistsException(Long id) {
-		super(StatusCode.FORBIDDEN, "频道不存在！");
+	private static final Logger LOG = LoggerFactory.getLogger(ChannelAbilityNoneOutputException.class);
+	
+	public ChannelAbilityNoneOutputException() {
+		super(StatusCode.ERROR, "无输出设置");
 		LOG.error(DateUtil.now());
-		LOG.error(new StringBufferWrapper().append("频道不存在！")
-										   .append(id)
-										   .toString());
+		LOG.error(new StringBufferWrapper().append("无输出设置")
+				.toString());
 	}
-
 }

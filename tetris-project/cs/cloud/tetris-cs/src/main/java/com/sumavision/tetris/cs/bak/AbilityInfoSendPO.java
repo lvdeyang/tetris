@@ -24,6 +24,9 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 	/** 播发输出port */
 	private String broadUrlPort;
 	
+	/** 播发用户id */
+	private Long userId;
+	
 	/** 播发输出是否加密 */
 	private Boolean broadEncryption;
 	
@@ -58,6 +61,15 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 
 	public void setBroadUrlIp(String broadUrlIp) {
 		this.broadUrlIp = broadUrlIp;
+	}
+
+	@Column(name = "USER_ID")
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 	@Column(name = "BROAD_URL_PORT")

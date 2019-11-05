@@ -57,7 +57,7 @@ public class ResourceSendQuery {
 				sourceSend.setName(item.getName());
 				sourceSend.setParentId(item.getParentId());
 				sourceSend.setPreviewUrl(item.getPreviewUrl());
-				sourceSend.setTime(item.getTime());
+				sourceSend.setTime(item.getDuration());
 				saveResource.add(sourceSend);
 
 				if (previewResource != null && previewResource.size() > 0) {

@@ -8,18 +8,19 @@ import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
-public class ChannelNotExistsException extends BaseException{
-
-	private static final Logger LOG = LoggerFactory.getLogger(ChannelNotExistsException.class);
+public class ChannelAlreadyStopException extends BaseException{
+	
+private final Logger LOG = LoggerFactory.getLogger(ChannelAlreadyStopException.class);
 	
 	private static final long serialVersionUID = 1L;
 
-	public ChannelNotExistsException(Long id) {
-		super(StatusCode.FORBIDDEN, "频道不存在！");
+	public ChannelAlreadyStopException(String channelName) {
+		super(StatusCode.CONFLICT, "频道当前为已为停止播发状态");
 		LOG.error(DateUtil.now());
-		LOG.error(new StringBufferWrapper().append("频道不存在！")
-										   .append(id)
-										   .toString());
+		LOG.error(new StringBufferWrapper().append("状态冲突!")
+				.append("频道： ")
+				.append(channelName)
+				.append("不可停止")
+				.toString());
 	}
-
 }

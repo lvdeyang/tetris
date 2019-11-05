@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.channel;
+package com.sumavision.tetris.cs.channel.ability;
 
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
@@ -8,7 +8,8 @@ public enum BroadAbilityQueryType {
 	STOP("stop", "停止推流"),
 	COVER("cover", "覆盖推流"),
 	SEEK("seek", "跳转"),
-	CHANGE("change", "更换推流");
+	CHANGE("change", "更换推流"),
+	START("start", "开始推流");
 	
 	private String cmd;
 	private String remark;

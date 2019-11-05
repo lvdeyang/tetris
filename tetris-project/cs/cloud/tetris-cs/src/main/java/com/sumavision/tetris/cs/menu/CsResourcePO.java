@@ -15,12 +15,6 @@ public class CsResourcePO extends AbstractBasePO {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	/** 名称 */
-	private String name;
-	
-	/** 时长 */
-	private String time;
-	
 	/** 在mims的uuid */
 	private String mimsUuid;
 	
@@ -33,8 +27,23 @@ public class CsResourcePO extends AbstractBasePO {
 	/** 频道id */
 	private Long channelId;
 	
+	/** 名称 */
+	private String name;
+	
 	/** 预览路径 */
 	private String previewUrl;
+	
+	/** 时长 */
+	private String duration;
+	
+	/** 媒资下载量 */
+	private Integer downloadCount;
+	
+	/** 媒资是否加密 */
+	private String encryption;
+	
+	/** 媒资加密预览地址 */
+	private String encryptionUrl;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -45,13 +54,13 @@ public class CsResourcePO extends AbstractBasePO {
 		this.name = name;
 	}
 
-	@Column(name = "TIME")
-	public String getTime() {
-		return time;
+	@Column(name = "DURATION")
+	public String getDuration() {
+		return duration;
 	}
 
-	public void setTime(String time) {
-		this.time = time;
+	public void setDuration(String duration) {
+		this.duration = duration;
 	}
 
 	@Column(name = "PARENT_ID")
@@ -97,5 +106,32 @@ public class CsResourcePO extends AbstractBasePO {
 
 	public void setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+	}
+
+	@Column(name = "DOWNLOAD_COUNT")
+	public Integer getDownloadCount() {
+		return downloadCount;
+	}
+
+	public void setDownloadCount(Integer downloadCount) {
+		this.downloadCount = downloadCount;
+	}
+
+	@Column(name = "IF_ENCRYPTION")
+	public String getEncryption() {
+		return encryption;
+	}
+
+	public void setEncryption(String encryption) {
+		this.encryption = encryption;
+	}
+
+	@Column(name = "ENCRYPTION_URL")
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public void setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
 	}
 }

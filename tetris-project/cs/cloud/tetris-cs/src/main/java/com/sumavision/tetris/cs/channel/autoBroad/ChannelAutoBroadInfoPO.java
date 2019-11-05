@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.channel;
+package com.sumavision.tetris.cs.channel.autoBroad;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

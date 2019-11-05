@@ -35,6 +35,8 @@ public interface LoginFeign {
 	public JSONObject doPasswordLogin(
 			@RequestParam("username") String username, 
 			@RequestParam("password") String password, 
+			@RequestParam("ip") String ip,
+			@RequestParam("equipType") String equipType,
 			@RequestParam("verifyCode") String verifyCode) throws Exception;
 	
 	/**

@@ -1,0 +1,4 @@
+.cs-user-dialog .content{height:340px; position:relative;}
+.cs-user-dialog .content-wrapper{width:600px; height:400px; position:absolute; top:-30px; left:0;}
+.cs-user-dialog .tree-wrapper{height:348px; margin-top: 20px; overflow: auto;}
+.cs-user-dialog .footer{height:32px;}

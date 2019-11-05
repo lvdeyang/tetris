@@ -48,6 +48,12 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/** 用户分类 */
 	private String classify;
 	
+	/** 用户当前ip */
+	private String ip;
+	
+	/** 用户设备类型 */
+	private String equipType;
+	
 	/** 发送给当前用户的信息数目 */
 	private Integer numbersOfMessage;
 	
@@ -168,6 +174,24 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 
 	public UserVO setClassify(String classify) {
 		this.classify = classify;
+		return this;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public UserVO setIp(String ip) {
+		this.ip = ip;
+		return this;
+	}
+
+	public String getEquipType() {
+		return equipType;
+	}
+
+	public UserVO setEquipType(String equipType) {
+		this.equipType = equipType;
 		return this;
 	}
 
@@ -309,6 +333,8 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setIcon(entity.getIcon())
 			.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
 			.setToken(entity.getToken())
+			.setIp(entity.getIp())
+			.setEquipType(entity.getEquipType() != null ? entity.getEquipType().toString() : null)
 			.setAutoGeneration(entity.isAutoGeneration());
 		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(UserPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
 		return this;
