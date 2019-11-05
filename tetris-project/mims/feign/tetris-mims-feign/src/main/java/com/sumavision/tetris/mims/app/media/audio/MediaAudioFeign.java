@@ -43,6 +43,15 @@ public interface MediaAudioFeign {
 	public JSONObject loadRecommend() throws Exception;
 	
 	/**
+	 * 获取下载量排名列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 下午4:34:26
+	 */
+	@RequestMapping(value = "/media/audio/feign/load/hot")
+	public JSONObject loadHot() throws Exception;
+	
+	/**
 	 * 根据uuid获取媒资信息<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

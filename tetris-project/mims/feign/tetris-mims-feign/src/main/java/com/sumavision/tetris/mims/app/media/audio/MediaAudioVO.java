@@ -42,6 +42,8 @@ public class MediaAudioVO {
 	
 	private Integer downloadCount;
 	
+	private Boolean encryption;
+	
 	private String encryptionUrl;
 	
 	private String duration;
@@ -208,6 +210,14 @@ public class MediaAudioVO {
 	public MediaAudioVO setDownloadCount(Integer downloadCount) {
 		this.downloadCount = downloadCount;
 		return this;
+	}
+
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public void setEncryption(Boolean encryption) {
+		this.encryption = encryption;
 	}
 
 	public String getEncryptionUrl() {
