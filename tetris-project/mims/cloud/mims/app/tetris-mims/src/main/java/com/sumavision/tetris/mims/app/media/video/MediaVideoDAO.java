@@ -125,4 +125,14 @@ public interface MediaVideoDAO extends BaseDAO<MediaVideoPO>{
 			+ "OR video.review_status NOT IN ?7", nativeQuery = true)
 	public List<MediaVideoPO> findByCondition(Long id, String name, String startTime, String endTime, String tag, List<Long> folderIds, Collection<String> reviewStatus);
 	
+	/**
+	 * 根据预览地址查询视频列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:49:17
+	 * @param Collection<String> previewUrls 预览地址列表
+	 * @return List<MediaVideoPO> 视频列表
+	 */
+	public List<MediaVideoPO> findByPreviewUrlIn(Collection<String> previewUrls);
+	
 }

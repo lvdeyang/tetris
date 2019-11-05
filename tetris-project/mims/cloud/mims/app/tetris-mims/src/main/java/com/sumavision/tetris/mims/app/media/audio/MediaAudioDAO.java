@@ -148,4 +148,14 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 			+ "AND video.review_status is null "
 			+ "OR video.review_status NOT IN ?7", nativeQuery = true)
 	public List<MediaAudioPO> findByCondition(Long id, String name, String startTime, String endTime, String tag, List<Long> folderIds, Collection<String> reviewStatus);
+
+	/**
+	 * 根据预览地址模糊查询音频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:07:27
+	 * @param Collection<String> previewUrls 预览地址列表
+	 * @return List<MediaAudioPO> 音频列表
+	 */
+	public List<MediaAudioPO> findByPreviewUrlIn(Collection<String> previewUrls);
 }

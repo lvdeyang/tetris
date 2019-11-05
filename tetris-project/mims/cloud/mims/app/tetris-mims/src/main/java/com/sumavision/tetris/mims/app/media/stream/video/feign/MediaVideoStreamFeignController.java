@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -102,4 +101,22 @@ public class MediaVideoStreamFeignController {
 			HttpServletRequest request) throws Exception{
 		return mediaVideoStreamService.edit(mediaId, previewUrl, name);
 	}
+	
+	/**
+	 * 根据预览地址查询视频流<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午11:28:10
+	 * @param JSONString previewUrls 预览地址列表
+	 * @return List<MediaVideoStreamVO> 视频流列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/preview/url/in")
+	public Object findByPreviewUrlIn(
+			String previewUrls, 
+			HttpServletRequest request) throws Exception{
+		return mediaVideoStreamQuery.findByPreviewUrlIn(JSONArray.parseArray(previewUrls, String.class));
+	}
+	
 }

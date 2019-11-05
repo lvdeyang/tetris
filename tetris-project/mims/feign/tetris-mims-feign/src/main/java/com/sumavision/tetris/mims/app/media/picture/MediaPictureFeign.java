@@ -21,4 +21,15 @@ public interface MediaPictureFeign {
 	@RequestMapping(value = "/media/picture/feign/load")
 	public JSONObject load(@RequestParam("folderId") Long folderId) throws Exception;
 	
+	/**
+	 * 根据预览地址查询图片列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:34:58
+	 * @param JSONString preivewUrls 预览地址列表
+	 * @return List<MediaPictureVO> 图片列表
+	 */
+	@RequestMapping(value = "/media/picture/feign/find/by/preview/url/in")
+	public JSONObject findByPreviewUrlIn(@RequestParam("previewUrls") String previewUrls) throws Exception;
+	
 }

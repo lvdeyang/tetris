@@ -110,4 +110,22 @@ public class MediaVideoFeignController {
 	public Object buildUrl(String name, String folderUuid, HttpServletRequest request) throws Exception {
 		return mediaVideoQuery.buildUrl(name, folderUuid);
 	};
+	
+	/**
+	 * 根据预览地址查询视频列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:49:17
+	 * @param JSONString previewUrls 预览地址列表
+	 * @return List<MediaVideoVO> 视频列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/preview/url/in")
+	public Object findByPreviewUrlIn(
+			String previewUrls, 
+			HttpServletRequest request) throws Exception{
+		return mediaVideoQuery.findByPreviewUrlIn(JSON.parseArray(previewUrls, String.class));
+	}
+ 	
 }

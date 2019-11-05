@@ -125,4 +125,21 @@ public class MediaAudioFeignController {
 		mediaAudioQuery.queryEncodeUrl(audioVOs);
 		return audioVOs;
 	}
+	
+	/**
+	 * 根据预览地址查询音频列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:17:18
+	 * @param JSONArray previewUrls 预览地址列表
+	 * @return List<MediaAudioVO> 音频列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/preview/url/in")
+	public Object findByPreviewUrlIn(
+			String previewUrls, 
+			HttpServletRequest request) throws Exception{
+		return mediaAudioQuery.findByPreviewUrlIn(JSON.parseArray(previewUrls, String.class));
+	}
 }

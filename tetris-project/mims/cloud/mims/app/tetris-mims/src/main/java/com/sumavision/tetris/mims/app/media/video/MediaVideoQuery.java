@@ -410,4 +410,17 @@ public class MediaVideoQuery {
 												     .append(version)
 												     .toString();
 	}
+	
+	/**
+	 * 根据预览地址查询视频列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:49:17
+	 * @param Collection<String> previewUrls 预览地址列表
+	 * @return List<MediaVideoVO> 视频列表
+	 */
+	public List<MediaVideoVO> findByPreviewUrlIn(Collection<String> previewUrls) throws Exception{
+		List<MediaVideoPO> entities = mediaVideoDao.findByPreviewUrlIn(previewUrls);
+		return MediaVideoVO.getConverter(MediaVideoVO.class).convert(entities, MediaVideoVO.class);
+	}
 }

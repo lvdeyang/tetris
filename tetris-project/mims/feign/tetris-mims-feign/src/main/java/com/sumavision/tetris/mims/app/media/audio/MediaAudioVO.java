@@ -6,6 +6,12 @@ import com.sumavision.tetris.mims.app.media.StoreType;
 
 public class MediaAudioVO {
 
+	private Long id;
+	
+	private String uuid;
+	
+	private String updateTime;
+	
 	private String name;
 	
 	private String authorName;
@@ -48,6 +54,33 @@ public class MediaAudioVO {
 	
 	private List<MediaAudioVO> children;
 	
+	public Long getId() {
+		return id;
+	}
+
+	public MediaAudioVO setId(Long id) {
+		this.id = id;
+		return this;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public MediaAudioVO setUuid(String uuid) {
+		this.uuid = uuid;
+		return this;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public MediaAudioVO setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+		return this;
+	}
+
 	public String getName() {
 		return name;
 	}

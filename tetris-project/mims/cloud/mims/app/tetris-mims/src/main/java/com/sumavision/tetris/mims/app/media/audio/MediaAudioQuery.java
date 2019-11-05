@@ -10,9 +10,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
@@ -679,5 +676,18 @@ public class MediaAudioQuery {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 根据预览地址查询音频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:13:14
+	 * @param Collection<String> previewUrls 预览地址列表
+	 * @return List<MediaAudioVO> 音频列表
+	 */
+	public List<MediaAudioVO> findByPreviewUrlIn(Collection<String> previewUrls) throws Exception{
+		List<MediaAudioPO> entities = mediaAudioDao.findByPreviewUrlIn(previewUrls);
+		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(entities, MediaAudioVO.class);
 	}
 }

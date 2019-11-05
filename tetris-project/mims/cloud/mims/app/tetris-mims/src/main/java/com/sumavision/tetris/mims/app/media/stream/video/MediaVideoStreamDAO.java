@@ -58,4 +58,14 @@ public interface MediaVideoStreamDAO extends BaseDAO<MediaVideoStreamPO>{
 	 */
 	public List<MediaVideoStreamPO> findByFolderIdIn(Collection<Long> folderId);
 	
+	/**
+	 * 根据预览地址查询视频流<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午11:28:10
+	 * @param Collection<String> previewUrls 预览地址列表
+	 * @return List<MediaVideoStreamPO> 视频流列表
+	 */
+	public List<MediaVideoStreamPO> findByPreviewUrlIn(Collection<String> previewUrls);
+	
 }
