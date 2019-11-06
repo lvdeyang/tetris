@@ -27,7 +27,7 @@ import com.sumavision.tetris.mims.app.media.encode.exception.FileNotExitExceptio
 @Transactional(rollbackFor = Exception.class)
 public class FileEncodeService {
 	
-	public static final String AES_KEY = "sumasumasumasuma";
+	public static final String AES_KEY = "0123456789ABCDEF";
 	public static final String IV_KEY = "aaaaaaaaaaaaaaaa";
 	
 	@Autowired

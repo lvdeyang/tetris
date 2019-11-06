@@ -60,7 +60,9 @@ require.config({
         'page-cms-column':window.APPPATH + 'cms/column/page-cms-column',
         'article-dialog':window.APPPATH + 'cms/column/article-dialog',
         'page-cms-region':window.APPPATH + 'cms/region/page-cms-region',
-        'page-cms-classify':window.APPPATH + 'cms/classify/page-cms-classify'
+        'page-cms-classify':window.APPPATH + 'cms/classify/page-cms-classify',
+        'page-portal-home':window.APPPATH + 'cms/portal/page-portal-home',
+        'page-portal-column':window.APPPATH + 'cms/portal/page-portal-column'
 
     },
     shim:{

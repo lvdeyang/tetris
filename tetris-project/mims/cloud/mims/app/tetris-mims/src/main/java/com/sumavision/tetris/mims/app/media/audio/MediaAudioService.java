@@ -59,6 +59,9 @@ import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
+
 /**
  * 音频媒资操作（主增删改）<br/>
  * <b>作者:</b>lvdeyang<br/>
@@ -789,6 +792,12 @@ public class MediaAudioService {
 		entity.setTags(tags);
 		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
 		entity.setDownloadCount(0l);
+		
+		File file = new File(uploadTempPath);
+		if (file.exists() && file.isFile()) {
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			entity.setDuration(multimediaInfo.getDuration());
+		}
 		
 		if(needProcess){
 			//启动流程

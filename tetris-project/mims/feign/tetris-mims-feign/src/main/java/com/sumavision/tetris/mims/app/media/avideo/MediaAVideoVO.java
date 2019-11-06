@@ -42,6 +42,12 @@ public class MediaAVideoVO {
 	
 	private String previewUrl;
 	
+	private Boolean encryption;
+	
+	private String encryptionUrl;
+	
+	private Integer downloadCount;
+	
 	private String duration;
 	
 	private List<MediaAVideoVO> children;
@@ -205,6 +211,33 @@ public class MediaAVideoVO {
 
 	public MediaAVideoVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public MediaAVideoVO setEncryption(Boolean encryption) {
+		this.encryption = encryption;
+		return this;
+	}
+
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public MediaAVideoVO setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
+		return this;
+	}
+
+	public Integer getDownloadCount() {
+		return downloadCount;
+	}
+
+	public MediaAVideoVO setDownloadCount(Integer downloadCount) {
+		this.downloadCount = downloadCount;
 		return this;
 	}
 

@@ -74,4 +74,14 @@ public class MediaAudioQuery {
 	public List<MediaAudioVO> findByPreviewUrlIn(Collection<String> previewUrls) throws Exception{
 		return JsonBodyResponseParser.parseArray(mediaAudioFeign.findByPreviewUrlIn(JSON.toJSONString(previewUrls)), MediaAudioVO.class);
 	}
+	
+	/**
+	 * 获取下载量排名列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 下午4:34:26
+	 */
+	public List<MediaAudioVO> loadHot() throws Exception {
+		return JsonBodyResponseParser.parseArray(mediaAudioFeign.loadHot(), MediaAudioVO.class);
+	}
 }

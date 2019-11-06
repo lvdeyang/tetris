@@ -16,6 +16,7 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioItemType;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
+import com.sumavision.tetris.mims.app.media.encode.FileEncodeService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
@@ -74,5 +75,12 @@ public class ApiQtMediaController {
 				   .put("recommend", new ArrayListWrapper<MediaAudioVO>().add(recommendRoot).getList())
 				   .getMap();
 		
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/encode/key")
+	public Object queryEncodeKey(HttpServletRequest request) throws Exception {
+		return FileEncodeService.AES_KEY;
 	}
 }
