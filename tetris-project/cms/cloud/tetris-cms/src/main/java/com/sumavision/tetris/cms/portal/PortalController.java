@@ -14,12 +14,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sumavision.tetris.cms.article.ArticleDAO;
 import com.sumavision.tetris.cms.article.ArticleMediaPermissionDAO;
 import com.sumavision.tetris.cms.article.ArticleMediaPermissionPO;
+import com.sumavision.tetris.cms.article.ArticlePO;
 import com.sumavision.tetris.cms.article.ArticleQuery;
 import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.column.ColumnDAO;
@@ -120,7 +122,13 @@ public class PortalController {
 	
 	@Autowired
 	ArticleMediaPermissionDAO articleMediaPermissionDAO;
-	
+	/**
+	 * 查询下载量最大的文章<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月6日 下午4:04:07
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/queryhot")
@@ -141,7 +149,13 @@ public class PortalController {
 		return articleVOs;
 
 	}
-	
+	/**
+	 * 查询智能推荐的文章<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月6日 下午4:04:07
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/queryforu")
@@ -160,5 +174,45 @@ public class PortalController {
 		return articleVOs;
 	}
 	
+	/**
+	 * 查询推荐文章<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>Mr<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月6日 下午4:04:07
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/articleInfo/{articleId}")
+	public Object articleInfo(
+			@PathVariable Long articleId,
+			HttpServletRequest request) throws Exception {
+
+		Map<String, Object> ret=new HashMap<String, Object>();
+        ArticlePO articlePO=articleDao.findOne(articleId);
+        ret.put("articleName", articlePO.getName());
+        List<ArticleMediaPermissionPO> amPos=articleMediaPermissionDAO.findByArticleId(articleId);
+        if(amPos!=null&&!amPos.isEmpty()){
+        	MediaAudioVO mediaAudioVO=mediaAudioQuery.getById(amPos.get(0).getMediaId());
+        	ret.put("mediaUrl", mediaAudioVO.getPreviewUrl());
+        }
+		return ret;
+	}
 	
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/download/{articleId}")
+	public Object download(
+			@PathVariable Long articleId,
+			HttpServletRequest request) throws Exception {
+
+        ArticlePO articlePO=articleDao.findOne(articleId);
+        List<ArticleMediaPermissionPO> amPos=articleMediaPermissionDAO.findByArticleId(articleId);
+        if(amPos!=null&&!amPos.isEmpty()){
+        	MediaAudioVO mediaAudioVO=mediaAudioQuery.download(amPos.get(0).getMediaId());
+        	
+        }
+		return null;
+	}
 }

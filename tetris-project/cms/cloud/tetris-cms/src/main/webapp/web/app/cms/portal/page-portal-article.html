@@ -1,5 +1,5 @@
 
-<div id="page-portal-column-wrapper" style="width:100%; height:100%; overflow:auto; position:relative;">
+<div id="page-portal-article-wrapper" style="width:100%; height:100%; overflow:auto; position:relative;">
 <div id="header" style="width:100%;height:60px;background:#2a2a2a"></div>
 <div id="body" style="margin:0 auto;width:1200px;">
     
@@ -14,33 +14,23 @@
     <div id="first-level" style="width:1200px;font-size:16px;height:40px;border-bottom:2px solid #456def;margin-top:20px;">
          <div v-for="column in columnlist">
 			<div style="width:120px;text-align:center;float:left;line-height:30px;">
-			   <a :href="'#/page-portal-column/'+column.id" :style="currentfColumn==column.id?'color:#456def':''">{{column.name}}</a></div>
+			   <a :href="'#/page-portal-column/'+column.id">{{column.name}}</a></div>
 		 </div>
          
     </div>
 
-    <div style="float:left;width:200px;margin-top:30px;font-size:18px;">
-         <div v-for="seccolumn in seccolumnlist">
-			<div style="width:200px;text-align:center;height:40px;line-height:40px;magin-top:10px;">
-			<a :style="currentColumn==seccolumn.id?'color:#456def':''" href="javascript:void(0)" @click="switchColumn(seccolumn)">{{seccolumn.name}}</a></div>
-		 </div>
-    </div>
-    
-    
     <div style="float:left;width:670px;margin-top:20px;">
-          <div  v-for="article in colArtices">
-	          <a :href="'#/page-portal-article/'+article.id">
-	              <div style="width:100%;height:90px;margin-top:10px">
-				      <image :src="article.thumbnail" style="width:115px;height:90px;float:left;"/>
-				      <div style="width:430px;height:90px;float:left;margin-left:15px;padding-top:20px">
-				          <span style="color:#172caa;font-size:18px;">{{article.name}}</span><br>
-				          <span style="font-size:12px;color:#9f82bb">作者名称:{{article.author}}</span>
-				      </div>
-			      </div>
-			  </a>
-		  </div>
+         <div style="width:100%;text-align:center">
+         	{{articleName}}
+         </div>
+         <audio style="width:500px;margin-top:50px;margin-left:85px" :src="mediaUrl" controls="controls" controlsList="nodownload"></audio>
+         <div style="height:20px;"></div>
+         
+         <a @click="download(mediaUrl)"
+             style="display:block;margin:0 auto;font-size:16px;color:#FFF;width:280px;height:30px;line-height:30px;text-align:center;background:#456def;border-radius:20px 20px 20px 20px;">
+                       下载</a>
+
     </div>
-    
     
     
     

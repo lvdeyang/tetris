@@ -84,4 +84,26 @@ public class MediaAudioQuery {
 	public List<MediaAudioVO> loadHot() throws Exception {
 		return JsonBodyResponseParser.parseArray(mediaAudioFeign.loadHot(), MediaAudioVO.class);
 	}
+	
+	/**
+	 * 获取Id媒资<br/>
+	 * <b>作者:</b>Mr<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月6日 下午4:03:27
+	 * @return MediaAudioVO 音频媒资
+	 */
+	public MediaAudioVO getById(Long id) throws Exception{
+		return JsonBodyResponseParser.parseObject(mediaAudioFeign.getById(id), MediaAudioVO.class);
+	}
+	
+	/**
+	 * 下载计数<br/>
+	 * <b>作者:</b>Mr<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月6日 下午4:03:27
+	 * @return MediaAudioVO 音频媒资
+	 */
+	public MediaAudioVO download(Long id) throws Exception{
+		return JsonBodyResponseParser.parseObject(mediaAudioFeign.download(id), MediaAudioVO.class);
+	}
 }

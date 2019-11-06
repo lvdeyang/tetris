@@ -2,7 +2,7 @@
  * Created by lvdeyang on 2018/12/26 0026.
  */
 define([
-    'text!' + window.APPPATH + 'cms/portal/page-portal-home.html',
+    'text!' + window.APPPATH + 'cms/portal/page-portal-column.html',
     'config',
     'jquery',
     'restfull',
@@ -13,14 +13,15 @@ define([
     //'mi-frame',
     //'article-dialog'
     //,
-    'css!' + window.APPPATH + 'cms/portal/page-portal-home.css'
+    'css!' + window.APPPATH + 'cms/portal/page-portal-column.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
 
-    var pageId = 'page-portal-home';
+    var pageId = 'page-portal-column';
 
     var instance = null;
 
-    var init = function(){
+    var init = function(params){
+    	//alert(params.id);
 
         //设置标题
         commons.setTitle(pageId);
@@ -31,16 +32,14 @@ define([
         instance = new Vue({
             el: '#' + pageId + '-wrapper',
             data: {
-                
                 user:context.getProp('user'),
                 columnlist:[],
-                newArtices:[],
+                colArtices:[],
                 hotArticles:[],
-                recommArticles:[],
+                seccolumnlist:[],
                 downloadArticle:[],
-                firstImage:'',
-                firstId:''
-                
+                currentColumn:'',
+                currentfColumn:params.id
             },
             computed:{
 
@@ -49,7 +48,17 @@ define([
 
             },
             methods:{
-               
+            	
+            	switchColumn:function(column){
+            		var self = this;
+            		self.currentColumn = column.id;
+            		ajax.post('/portal/query/'+column.id, null, function(data){	
+		            	self.colArtices.splice(0, self.colArtices.length);
+		            	for(var i=0;i<data.articles.length;i++){
+		            		self.colArtices.push(data.articles[i]);
+		            	}
+	                });
+            	}
             },
             created:function(){
             	var self = this;
@@ -61,25 +70,22 @@ define([
 	            	
                 });
                 
-                ajax.post('/portal/article/new/list', null, function(data){	
-                	if(data.length==0) return;
-                	self.firstImage=data[0].thumbnail;
-                	self.firstId=data[0].id;
-	            	self.newArtices.splice(0, self.newArtices.length);
-	            	for(var i=0;i<data.length;i++){
-	            		self.newArtices.push(data[i]);
+                ajax.post('/portal/query/'+params.id, null, function(data){
+                	if(data.subColumns.length==0) return;
+	            	self.seccolumnlist.splice(0, self.seccolumnlist.length);
+	            	for(var i=0;i<data.subColumns.length;i++){
+	            		self.seccolumnlist.push(data.subColumns[i]);
 	            	}
-	            	
+	            	self.currentColumn = data.subColumns[0].id;
+	            	ajax.post('/portal/query/'+data.subColumns[0].id, null, function(data){	
+		            	self.colArtices.splice(0, self.colArtices.length);
+		            	for(var i=0;i<data.articles.length;i++){
+		            		self.colArtices.push(data.articles[i]);
+		            	}
+		            	
+	                });
                 });
                 
-                ajax.post('/portal/queryCommand', null, function(data){	
-                	if(data.articles.length==0) return;
-	            	self.recommArticles.splice(0, self.recommArticles.length);
-	            	for(var i=0;i<data.articles.length;i++){
-	            		self.recommArticles.push(data.articles[i]);
-	            	}
-	            	
-                });
                 
                 ajax.post('/portal/queryhot', null, function(data){	
                 	if(data.length==0) return;
@@ -99,9 +105,6 @@ define([
 	            	
                 });
                 
-                
-                
-                
             },
             mounted:function(){
 
@@ -115,7 +118,7 @@ define([
     };
 
     var groupList = {
-        path:'/' + pageId,
+        path:'/' + pageId+'/:id',
         component:{
             template:'<div id="' + pageId + '" class="page-wrapper"></div>'
         },
