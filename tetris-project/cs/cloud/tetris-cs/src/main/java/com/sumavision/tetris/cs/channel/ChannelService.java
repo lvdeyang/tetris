@@ -217,7 +217,7 @@ public class ChannelService {
 	public void remove(Long id) throws Exception {
 		ChannelPO channel = channelDao.findOne(id);
 		broadAbilityBroadInfoService.remove(id);
-		if (channel.getBroadWay() == ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING) stopBroadcast(id);
+		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) stopBroadcast(id);
 		if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName()) && !channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT)) {
 			if (!channelQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.DELETE.getRemark());
 		}

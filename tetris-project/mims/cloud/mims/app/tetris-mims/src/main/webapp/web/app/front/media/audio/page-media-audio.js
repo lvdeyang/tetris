@@ -160,7 +160,7 @@ define([
                 //下载文件
                 handleDownload:function(scope){
                     var row = scope.row;
-                    ajax.post('/media/audio/preview/uri/' + row.id, null, function(data){
+                    ajax.post('/media/audio/download/uri/' + row.id, null, function(data){
                         var name = data.name;
                         var uri = data.uri;
                         var a = document.createElement('a');

@@ -289,12 +289,12 @@ public class ChannelQuery {
 			request.put("duration", duration);
 		}
 		System.out.println(request.toJSONString());
-//		JSONObject response = HttpRequestUtil.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD), request);
-//		if (response != null && response.containsKey("stat") && response.getString("stat").equals("success")) {
+		JSONObject response = HttpRequestUtil.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD), request);
+		if (response != null && response.containsKey("stat") && response.getString("stat").equals("success")) {
 			return true;
-//		}else {
-//			throw new ChannelAbilityRequestErrorException(type.getRemark());
-//		}
+		}else {
+			throw new ChannelAbilityRequestErrorException(type.getRemark());
+		}
 	}
 
 	public String getStatusFromNum(String statusNum) {

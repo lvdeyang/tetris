@@ -108,12 +108,11 @@ public class BroadAbilityService {
 		Map<Long, Timer> timerMap = channelService.getTimerMap();
 		ChannelPO channel = channelDao.findOne(channelId);
 		if (channel == null) throw new ChannelNotExistsException(channelId);
-		
+		Timer timer = timerMap.get(channelId);
+		if (timer != null) {
+			timer.cancel();
+		}
 		if (channelQuery.sendAbilityRequest(BroadAbilityQueryType.STOP, channel, null, null)) {
-			Timer timer = timerMap.get(channelId);
-			if (timer != null) {
-				timer.cancel();
-			}
 			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
 			channelDao.save(channel);	
 		}
@@ -131,7 +130,6 @@ public class BroadAbilityService {
 		if (timerMap.containsKey(channel)) timerMap.get(channel).cancel();
 		
 		List<MediaAudioVO> recommends = mediaAudioQuery.loadRecommend();
-		if (recommends == null || recommends.isEmpty()) return;
 		
 		String broadStartTime = new StringBufferWrapper().append(autoBroadInfoPO.getStartDate())
 				.append(" ")
@@ -146,19 +144,21 @@ public class BroadAbilityService {
 					.append(" ")
 					.append(autoBroadInfoPO.getStartTime())
 					.toString();
-			if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
-			List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
 			List<ScreenVO> screens = new ArrayList<ScreenVO>();
-			for (MediaAudioVO audio : audios) {
-				ScreenVO screen = new ScreenVO();
-				screen.setName(audio.getName());
-				screen.setPreviewUrl(audio.getPreviewUrl());
-				screen.setEncryption(audio.getEncryption() != null && audio.getEncryption() ? "true" : "false");
-				screen.setEncryptionUrl(audio.getEncryptionUrl());
-				screen.setHotWeight(audio.getHotWeight());
-				screen.setDownloadCount(audio.getDownloadCount());
-				screen.setDuration(audio.getDuration());
-				screens.add(screen);
+			if (recommends != null && !recommends.isEmpty()) {
+				if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
+				List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
+				for (MediaAudioVO audio : audios) {
+					ScreenVO screen = new ScreenVO();
+					screen.setName(audio.getName());
+					screen.setPreviewUrl(audio.getPreviewUrl());
+					screen.setEncryption(audio.getEncryption() != null && audio.getEncryption() ? "true" : "false");
+					screen.setEncryptionUrl(audio.getEncryptionUrl());
+					screen.setHotWeight(audio.getHotWeight());
+					screen.setDownloadCount(audio.getDownloadCount());
+					screen.setDuration(audio.getDuration());
+					screens.add(screen);
+				}
 			}
 			scheduleService.addSchedule(channelId, broadTime, screens);
 		}
@@ -301,7 +301,8 @@ public class BroadAbilityService {
 					Long nNow = DateUtil.getLongDate();
 					//提前1分钟下发，给推流服务器解析命令的时间
 					Long delayTime = 1l*60*1000;
-					if (broadDateLong > nNow + delayTime){
+					//头一次下发则立即向能力发送请求，避免删除的时候能力没有该条任务存在
+					if (broadDateLong > nNow + delayTime && type != BroadAbilityQueryType.NEW){
 						nTimer.schedule(timerTask, broadDateLong - nNow - delayTime);
 					} else {
 						nTimer.schedule(timerTask, 0);

@@ -164,9 +164,9 @@ public class ScheduleService {
 	 * @return
 	 */
 	public ScheduleVO addSchedule(Long channelId, String broadDate, List<ScreenVO> screens) throws Exception {
-		if (screens == null || screens.isEmpty()) return null;
-		
 		ScheduleVO schedule = add(channelId, broadDate, "");
+		
+		if (screens == null || screens.isEmpty()) return null;
 			
 		Date date = new Date();
 		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();

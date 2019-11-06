@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.xml.XmlUtil;
 import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskQuery;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionQuery;
@@ -21,6 +23,7 @@ import com.sumavision.tetris.mvc.wrapper.CachedHttpServletRequestWrapper;
 import com.sumavision.tetris.transcoding.addTask.AddTaskService;
 import com.sumavision.tetris.transcoding.getStatus.GetStatusService;
 import com.sumavision.tetris.transcoding.getTemplates.TemplatesRequest;
+import com.sumavision.tetris.transcoding.getTemplates.VO.TemplatesResponseVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -154,5 +157,13 @@ public class TranscodingController {
 		UserVO userVO = userQuery.current();
 		
 		return mediaEditorTaskQuery.getTaskTree(userVO);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/test")
+	public Object test(String xml,HttpServletRequest request) throws Exception {
+		HttpRequestUtil.httpXmlPost(RequestUrlType.GET_TEMPLETE_NAME_LIST_URL.getUrl(),xml);
+		return null;
 	}
 }
