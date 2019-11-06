@@ -7,8 +7,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sumavision.tetris.cs.channel.BroadAbilityBroadInfoService;
-import com.sumavision.tetris.cs.channel.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoService;
+import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
 
 @Component
 public class AbilityInfoSendQuery {
@@ -64,6 +64,28 @@ public class AbilityInfoSendQuery {
 			AbilityInfoSendPO abilityInfoSendPO = new AbilityInfoSendPO();
 			abilityInfoSendPO.setChannelId(channelId);
 			abilityInfoSendPO.setUpdateTime(new Date());
+			abilityInfoSendPO.setBroadUrlIp(broadAbilityBroadInfoVO.getPreviewUrlIp());
+			abilityInfoSendPO.setBroadUrlPort(broadAbilityBroadInfoVO.getPreviewUrlPort());
+			abilityInfoSendPO.setBroadEncryption(encryption);
+			abilityInfoSendPO.setPreviewId(broadAbilityBroadInfoVO.getId());
+			abilityInfoSendPO.setMediaId(broadAbilityBroadInfoVO.getMediaId());
+			savePOs.add(abilityInfoSendPO);
+		}
+		
+		abilityInfoSendDAO.save(savePOs);
+	}
+	
+	public void save(Long channelId, Boolean encryption, List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs) throws Exception{
+		abilityInfoSendDAO.deleteByChannelId(channelId);
+		
+		if (broadAbilityBroadInfoVOs == null || broadAbilityBroadInfoVOs.isEmpty()) return;
+		
+		List<AbilityInfoSendPO> savePOs = new ArrayList<AbilityInfoSendPO>();
+		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
+			AbilityInfoSendPO abilityInfoSendPO = new AbilityInfoSendPO();
+			abilityInfoSendPO.setChannelId(channelId);
+			abilityInfoSendPO.setUpdateTime(new Date());
+			abilityInfoSendPO.setUserId(broadAbilityBroadInfoVO.getUserId());
 			abilityInfoSendPO.setBroadUrlIp(broadAbilityBroadInfoVO.getPreviewUrlIp());
 			abilityInfoSendPO.setBroadUrlPort(broadAbilityBroadInfoVO.getPreviewUrlPort());
 			abilityInfoSendPO.setBroadEncryption(encryption);

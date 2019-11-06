@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import com.sumavision.eb.YingJGBCALLDLL;
+//import com.sumavision.eb.YingJGBCALLDLL;
 
 public class SecureServiceXmlUtils {
 	private static boolean openJNTA1313_SUMA = false;
@@ -46,8 +46,8 @@ public class SecureServiceXmlUtils {
             		if(!openJNTA1313_SUMA){
             			synchronized (obj) {
             				if(!openJNTA1313_SUMA){
-            					YingJGBCALLDLL.closeDevice();
-    		            		YingJGBCALLDLL.openDevice(0);
+            					//YingJGBCALLDLL.closeDevice();
+    		            		//YingJGBCALLDLL.openDevice(0);
     		            		openJNTA1313_SUMA = true;    		            		
             				}
 						}
@@ -57,8 +57,8 @@ public class SecureServiceXmlUtils {
             		if(!openJNTA1507_SUMA){
             			synchronized (obj) {
             				if(!openJNTA1507_SUMA){
-    	            			com.sumavision.eb.YingJGBCALLDLL.closeDevice();
-    	            			com.sumavision.eb.YingJGBCALLDLL.openDevice(1);
+    	            			//com.sumavision.eb.YingJGBCALLDLL.closeDevice();
+    	            			//com.sumavision.eb.YingJGBCALLDLL.openDevice(1);
     	            			openJNTA1507_SUMA = true;    	            			
     	            		}
             			}
@@ -69,7 +69,7 @@ public class SecureServiceXmlUtils {
 			} catch (Exception e) {
 			}
             /** 调用密码器库函数验签 */
-            result = YingJGBCALLDLL.platformVerifySignature(1, inData, signatureValue);          
+            //result = YingJGBCALLDLL.platformVerifySignature(1, inData, signatureValue);          
 
         } catch (Exception e) {
         } finally {

@@ -116,14 +116,20 @@
             </el-card>
         </div>
 
+        <!-- 选择播发用户对话框 -->
+        <cs-user-dialog ref="addProgramUserDialog" @on-user-dialog-close="selectedAddProgramUsers"></cs-user-dialog>
+
+        <!-- 选择播发用户对话框 -->
+        <cs-user-dialog ref="editChannelUserDialog" @on-user-dialog-close="selectedEditChannelUsers"></cs-user-dialog>
+
         <el-dialog
                 title="添加频道"
                 :visible.sync="dialog.addProgram.visible"
-                width="500px"
+                width="650px"
                 :before-close="handleAddProgramClose">
-            <div style="height:450px;">
+            <div style="height:500px;">
                 <el-scrollbar style="height:100%;">
-                    <el-form ref="form" label-width="90px">
+                    <el-form ref="form" label-width="100px" style="padding-right: 20px">
                         <el-form-item label="频道名称">
                             <el-input v-model="dialog.addProgram.name"></el-input>
                         </el-form-item>
@@ -140,25 +146,23 @@
                         </el-form-item>
                         <el-form-item label="播发方式">
                             <template>
-                                <el-radio v-model="dialog.addProgram.broadWay" label="轮播能力">轮播能力</el-radio>
+                                <el-radio v-model="dialog.addProgram.broadWay" label="轮播推流">轮播推流</el-radio>
                                 <el-radio v-model="dialog.addProgram.broadWay" label="终端播发">终端播发</el-radio>
-                                <el-radio v-model="dialog.addProgram.broadWay" label="PC播发">PC播发</el-radio>
+                                <el-radio v-model="dialog.addProgram.broadWay" label="下载文件" disabled>下载文件</el-radio>
                             </template>
                         </el-form-item>
-                        <el-form-item label="输出加密">
+                        <el-form-item label="输出加密" v-if="dialog.addProgram.broadWay == '轮播推流'">
                             <el-switch v-model="dialog.addProgram.encryption"></el-switch>
                         </el-form-item>
-                        <template>
-                            <el-form-item label="智能播发" v-if="dialog.addProgram.broadWay == 'PC播发'">
+                        <template v-if="dialog.addProgram.broadWay == '轮播推流'">
+                            <el-form-item label="智能播发">
                                 <el-switch v-model="dialog.addProgram.autoBroad"></el-switch>
                             </el-form-item>
-                            <el-form-item label="列表乱序"
-                                          v-if="dialog.addProgram.autoBroad && dialog.addProgram.broadWay == 'PC播发'">
+                            <el-form-item label="列表乱序" v-if="dialog.addProgram.autoBroad">
                                 <el-switch v-model="dialog.addProgram.autoBroadShuffle">
                                 </el-switch>
                             </el-form-item>
-                            <el-form-item v-if="dialog.addProgram.autoBroad && dialog.addProgram.broadWay == 'PC播发'"
-                                          label="起始时间">
+                            <el-form-item v-if="dialog.addProgram.autoBroad" label="起始时间">
                                 <el-time-picker
                                         style="width: 100%"
                                         v-model="dialog.addProgram.autoBroadStart"
@@ -168,8 +172,7 @@
                                         value-format="HH:mm:ss">
                                 </el-time-picker>
                             </el-form-item>
-                            <el-form-item v-if="dialog.addProgram.autoBroad && dialog.addProgram.broadWay == 'PC播发'"
-                                          label="生效天数">
+                            <el-form-item v-if="dialog.addProgram.autoBroad" label="生效天数">
                                 <el-input-number
                                         v-model="dialog.addProgram.autoBroadDuration"
                                         :min="1"
@@ -177,7 +180,20 @@
                                 </el-input-number>
                             </el-form-item>
                         </template>
-                        <el-form-item v-if="dialog.addProgram.broadWay == '轮播能力'" label="输出数">
+                        <el-form-item v-if="dialog.addProgram.broadWay == '轮播推流'" label="推送播发用户">
+                            <el-tag
+                                    :key="simple.id"
+                                    v-for="simple in dialog.addProgram.outputUsers"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleAddProgramUserRemove(dialog.addProgram.outputUsers, simple)">
+                                {{simple.nickname}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleAddProgramUserSet" icon="el-icon-edit"> 选择PC终端用户</el-button>
+                            <el-input v-model="dialog.addProgram.outputUserPort" placeholder="用户播发端口"></el-input>
+                        </el-form-item>
+                        <el-form-item v-if="dialog.addProgram.broadWay == '轮播推流'" label="流输出数">
                             <el-input-number
                                     v-model="dialog.addProgram.outputCount"
                                     :min="1"
@@ -185,11 +201,11 @@
                                     @change="handleAddProgramOutputCount">
                             </el-input-number>
                         </el-form-item>
-                        <template v-for="i in dialog.addProgram.outputCount" v-if="dialog.addProgram.broadWay=='轮播能力' || dialog.addProgram.broadWay=='PC播发'">
-                            <el-form-item :label="'输出地址 ' + i">
+                        <template v-for="i in dialog.addProgram.outputCount" v-if="dialog.addProgram.broadWay=='轮播推流'">
+                            <el-form-item :label="'流输出地址 ' + i">
                                 <el-input v-model="dialog.addProgram.output[i-1].previewUrlIp"></el-input>
                             </el-form-item>
-                            <el-form-item :label="'输出端口 ' + i">
+                            <el-form-item :label="'流输出端口 ' + i">
                                 <el-input v-model="dialog.addProgram.output[i-1].previewUrlPort"></el-input>
                             </el-form-item>
                         </template>
@@ -211,31 +227,32 @@
         <el-dialog
                 title="修改频道"
                 :visible.sync="dialog.editChannel.visible"
-                width="500px"
+                width="650px"
                 :before-close="handleEditChannelClose">
-            <el-form ref="form" label-width="80px">
+            <div style="height: 500px">
+            <el-scrollbar style="height:100%;">
+            <el-form ref="form" label-width="100px" style="padding-right: 20px">
                 <el-form-item label="频道名称">
                     <el-input v-model="dialog.editChannel.name"></el-input>
                 </el-form-item>
                 <el-form-item label="播发方式">
                     <template>
-                        <el-radio v-model="dialog.editChannel.broadWay" label="轮播能力" disabled>轮播能力</el-radio>
+                        <el-radio v-model="dialog.editChannel.broadWay" label="轮播推流" disabled>轮播推流</el-radio>
                         <el-radio v-model="dialog.editChannel.broadWay" label="终端播发" disabled>终端播发</el-radio>
-                        <el-radio v-model="dialog.editChannel.broadWay" label="PC播发" disabled>PC播发</el-radio>
+                        <el-radio v-model="dialog.editChannel.broadWay" label="下载文件" disabled>下载文件</el-radio>
                     </template>
                 </el-form-item>
                 <el-form-item label="输出加密">
                     <el-switch v-model="dialog.editChannel.encryption"></el-switch>
                 </el-form-item>
-                <template>
-                    <el-form-item label="智能播发" v-if="dialog.editChannel.broadWay == 'PC播发'">
+                <template v-if="dialog.editChannel.broadWay == '轮播推流'">
+                    <el-form-item label="智能播发">
                         <el-switch v-model="dialog.editChannel.autoBroad"></el-switch>
                     </el-form-item>
-                    <el-form-item label="列表乱序"
-                                  v-if="dialog.editChannel.autoBroad && dialog.editChannel.broadWay == 'PC播发'">
+                    <el-form-item label="列表乱序" v-if="dialog.editChannel.autoBroad">
                         <el-switch v-model="dialog.editChannel.autoBroadShuffle"></el-switch>
                     </el-form-item>
-                    <el-form-item v-if="dialog.editChannel.autoBroad && dialog.editChannel.broadWay == 'PC播发'"
+                    <el-form-item v-if="dialog.editChannel.autoBroad"
                                   label="起始时间">
                         <el-time-picker
                                 style="width: 100%"
@@ -246,8 +263,7 @@
                                 value-format="HH:mm:ss">
                         </el-time-picker>
                     </el-form-item>
-                    <el-form-item v-if="dialog.editChannel.autoBroad && dialog.editChannel.broadWay == 'PC播发'"
-                                  label="生效天数">
+                    <el-form-item v-if="dialog.editChannel.autoBroad" label="生效天数">
                         <el-input-number
                                 v-model="dialog.editChannel.autoBroadDuration"
                                 :min="1"
@@ -255,7 +271,28 @@
                         </el-input-number>
                     </el-form-item>
                 </template>
-                <template v-for="i in dialog.editChannel.outputCount" v-if="dialog.editChannel.broadWay=='轮播能力' || dialog.editChannel.broadWay=='PC播发'">
+                <el-form-item v-if="dialog.editChannel.broadWay == '轮播推流'" label="推送播发用户">
+                    <el-tag
+                            :key="simple.id"
+                            v-for="simple in dialog.editChannel.outputUsers"
+                            style="margin-right:10px;"
+                            closable
+                            :disable-transitions="false"
+                            @close="handleEditChannelUserRemove(dialog.editChannel.outputUsers, simple)">
+                        {{simple.nickname}}
+                    </el-tag>
+                    <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleEditChannelUserSet" icon="el-icon-edit"> 选择PC终端用户</el-button>
+                    <el-input v-model="dialog.editChannel.outputUserPort" placeholder="用户播发端口"></el-input>
+                </el-form-item>
+                <el-form-item v-if="dialog.editChannel.broadWay == '轮播推流'" label="流输出数">
+                    <el-input-number
+                            v-model="dialog.editChannel.outputCount"
+                            :min="1"
+                            :max="10"
+                            @change="handleEditChannelOutputCount">
+                    </el-input-number>
+                </el-form-item>
+                <template v-for="i in dialog.editChannel.outputCount" v-if="dialog.editChannel.broadWay=='轮播推流'">
                     <el-form-item :label="'输出地址 ' + i">
                         <el-input v-model="dialog.editChannel.output[i-1].previewUrlIp"></el-input>
                     </el-form-item>
@@ -267,6 +304,8 @@
                     <el-input v-model="dialog.editChannel.remark"></el-input>
                 </el-form-item>
             </el-form>
+            </el-scrollbar>
+            </div>
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleEditChannelClose">取 消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditChannelCommit"
@@ -757,11 +796,11 @@
                 <el-table-column width="30"></el-table-column>
                 <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
                 <el-table-column label="排序" width="60" prop="index"></el-table-column>
-                <el-table-column label="综合分值" v-if="dialog.editSchedules.data.autoBroad" width="90"
-                                 prop="hotWeight"></el-table-column>
-                <el-table-column label="下载量" v-if="dialog.editSchedules.data.autoBroad" width="70"
-                                 prop="downloadCount"></el-table-column>
-                <el-table-column label="操作" v-if="!dialog.editSchedules.data.autoBroad">
+                <template v-if="dialog.editSchedules.data.autoBroad">
+                    <el-table-column :key="Math.random()" label="综合分值" width="90" prop="hotWeight"></el-table-column>
+                    <el-table-column :key="Math.random()" label="下载量" width="70" prop="downloadCount"></el-table-column>
+                </template>
+                <el-table-column :key="Math.random()" label="操作" v-else>
                     <template slot-scope="scope">
                         <el-tooltip class="item" effect="dark" content="向上移动"
                                     placement="bottom">

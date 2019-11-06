@@ -36,6 +36,9 @@ public class ScreenPO extends AbstractBasePO {
 	/** 媒资预览地址 */
 	private String previewUrl;
 	
+	/** 媒资加密预览地址 */
+	private String encryptionUrl;
+	
 	/** 媒资热度权重 */
 	private Integer hotWeight;
 	
@@ -106,6 +109,15 @@ public class ScreenPO extends AbstractBasePO {
 
 	public void setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+	}
+
+	@Column(name = "ENCRYPTION_URL")
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public void setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
 	}
 
 	@Column(name = "HOT_WEIGHT")

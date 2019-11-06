@@ -2,12 +2,12 @@ package com.sumavision.tetris.api.qt;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.sumavision.tetris.api.exception.ImageVerificationCodeErrorException;
-import com.sumavision.tetris.api.exception.ImageVerificationCodeTimeoutException;
+
 import com.sumavision.tetris.api.exception.MobileNotMatchedException;
 import com.sumavision.tetris.api.exception.MobileVerificationCodeErrorException;
 import com.sumavision.tetris.api.exception.MobileVerificationCodeTimeoutException;
@@ -92,6 +92,8 @@ public class ApiQtAuthController {
 	public Object doUsernamePasswordLogin(
 			String username,
 			String password,
+			String ip,
+			String equipType,
 			String verificationCode,
 			String sessionToken,
 			HttpServletRequest request) throws Exception{
@@ -106,7 +108,7 @@ public class ApiQtAuthController {
 //			throw new ImageVerificationCodeErrorException(username);
 //		}
 		
-		String token = loginService.doPasswordLogin(username, password, null);
+		String token = loginService.doPasswordLogin(username, password, ip, equipType, null);
 		
 		return token;
 	}

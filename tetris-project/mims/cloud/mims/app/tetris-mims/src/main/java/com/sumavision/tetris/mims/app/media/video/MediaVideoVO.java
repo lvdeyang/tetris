@@ -56,6 +56,10 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private String processInstanceId;
 	
+	private Boolean encryption;
+	
+	private String encryptionUrl;
+	
 	private List<MediaVideoVO> children;
 	
 	public String getName() {
@@ -247,6 +251,24 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		return this;
 	}
 
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public MediaVideoVO setEncryption(Boolean encryption) {
+		this.encryption = encryption;
+		return this;
+	}
+
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public MediaVideoVO setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
+		return this;
+	}
+
 	public String getProcessInstanceId() {
 		return processInstanceId;
 	}
@@ -278,6 +300,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setProgress(0)
 			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setEncryption(entity.getEncryption() != null && entity.getEncryption() ? true : false)
+			.setEncryptionUrl(entity.getEncryptionUrl())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId());;
 		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());

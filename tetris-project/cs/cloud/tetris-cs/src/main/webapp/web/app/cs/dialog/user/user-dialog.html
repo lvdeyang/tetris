@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<el-dialog
+        class="cs-user-dialog"
+        title="选择用户"
+        width="640px"
+        :visible.sync="visible"
+        :before-close="handleUserClose">
+    <div class="content">
+        <div class="content-wrapper">
+            <el-input placeholder="搜索用户" size="small" suffix-icon="el-icon-search"></el-input>
+            <div class="tree-wrapper">
+                <el-tree
+                        v-loading="loading"
+                        ref="userTree"
+                        :props="props"
+                        :data="data"
+                        node-key="id"
+                        show-checkbox
+                        :default-checked-keys="checkedId"
+                        :expand-on-click-node="false"
+                        default-expand-all
+                        highlight-current>
+                </el-tree>
+            </div>
+        </div>
+    </div>
+
+    <span slot="footer" class="dialog-footer">
+        <div class="footer">
+            <el-button size="small" type="primary" @click="handleUserBindingOk" :loading="loading" style="float: right;">确定</el-button>
+        </div>
+    </span>
+</el-dialog>

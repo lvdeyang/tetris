@@ -15,6 +15,7 @@ import com.sumavision.tetris.user.BasicDevelopmentDAO;
 import com.sumavision.tetris.user.BasicDevelopmentPO;
 import com.sumavision.tetris.user.BasicDevelopmentQuery;
 import com.sumavision.tetris.user.UserDAO;
+import com.sumavision.tetris.user.UserEquipType;
 import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserStatus;
@@ -75,6 +76,8 @@ public class LoginService {
 	public String doPasswordLogin(
 			String username,
 			String password,
+			String ip,
+			String equipType,
 			String verifyCode) throws Exception{
 		
 		UserPO user = userDao.findByUsername(username);
@@ -90,6 +93,8 @@ public class LoginService {
 		user.setStatus(UserStatus.ONLINE);
 		user.setLastModifyTime(new Date());
 		user.setToken(token);
+		user.setIp(ip);
+		if (equipType != null) user.setEquipType(UserEquipType.fromName(equipType));
 		userDao.save(user);
 		
 		return token;

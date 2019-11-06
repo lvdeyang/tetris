@@ -14,6 +14,15 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 	
 	private String remark;
 	
+	/** 下发webSocket时使用，标记下发类型：file;stream */
+	private String mediaType;
+	
+	/** 下发webSocket时使用，标记流udp地址 */
+	private Integer streamUrlPort;
+
+	/** 下发webSocket时使用，如果是加密的，标记密钥 */
+	private String encryptKey;
+	
 	private ProgramVO program;
 
 	public Long getChannelId() {
@@ -49,6 +58,33 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 
 	public ScheduleVO setRemark(String remark) {
 		this.remark = remark;
+		return this;
+	}
+
+	public String getMediaType() {
+		return mediaType;
+	}
+
+	public ScheduleVO setMediaType(String mediaType) {
+		this.mediaType = mediaType;
+		return this;
+	}
+
+	public Integer getStreamUrlPort() {
+		return streamUrlPort;
+	}
+
+	public ScheduleVO setStreamUrlPort(Integer streamUrlPort) {
+		this.streamUrlPort = streamUrlPort;
+		return this;
+	}
+
+	public String getEncryptKey() {
+		return encryptKey;
+	}
+
+	public ScheduleVO setEncryptKey(String encryptKey) {
+		this.encryptKey = encryptKey;
 		return this;
 	}
 

@@ -92,6 +92,8 @@ public class ApiAndroidAuthController {
 	public Object doUsernamePasswordLogin(
 			String username,
 			String password,
+			String ip,
+			String equipType,
 			String verificationCode,
 			String sessionToken,
 			HttpServletRequest request) throws Exception{
@@ -106,7 +108,7 @@ public class ApiAndroidAuthController {
 //			throw new ImageVerificationCodeErrorException(username);
 //		}
 		
-		String token = loginService.doPasswordLogin(username, password, null);
+		String token = loginService.doPasswordLogin(username, password, ip, equipType, null);
 		
 		return token;
 	}

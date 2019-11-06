@@ -148,6 +148,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/tetris-p2p/*")
 												   .add("/demo/*")
 												   .add("/server/websocket/*")
+												   .add("/portal/login")
 												   .getList();
 	}
 	

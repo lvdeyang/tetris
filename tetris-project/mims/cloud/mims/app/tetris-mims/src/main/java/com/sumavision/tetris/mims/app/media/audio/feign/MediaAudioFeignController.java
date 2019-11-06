@@ -62,8 +62,9 @@ public class MediaAudioFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/load/all")
 	public Object loadAll(HttpServletRequest request) throws Exception{
-		
-		return mediaAudioQuery.loadAll();
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAll();
+		mediaAudioQuery.queryEncodeUrl(audioVOs);
+		return audioVOs;
 	}
 	
 	/**
@@ -116,6 +117,12 @@ public class MediaAudioFeignController {
 		return mediaAudioQuery.buildUrl(name, folderUuid);
 	};
 	
+	/**
+	 * 获取推荐列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 下午4:31:41
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/load/recommend")
@@ -142,4 +149,21 @@ public class MediaAudioFeignController {
 			HttpServletRequest request) throws Exception{
 		return mediaAudioQuery.findByPreviewUrlIn(JSON.parseArray(previewUrls, String.class));
 	}
+	
+	/**
+	 * 获取下载量排名列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 下午4:34:26
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/hot")
+	public Object loadHot(HttpServletRequest request) throws Exception {
+		UserVO user = userQuery.current();
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadHotList();
+		mediaAudioQuery.queryEncodeUrl(audioVOs);
+		return audioVOs;
+	}
+	
 }

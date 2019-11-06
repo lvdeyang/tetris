@@ -25,7 +25,7 @@ require.config({
         'menu':window.COMMONSPATH + 'menu/menu',
         'bpmn-ext':window.COMMONSPATH + 'bpmn/ext/BpmnExtension',
         'ace-for-website':window.COMMONSPATH + 'ace/quick-build/ace-for-website',
-        
+
         /* app */
         'config':window.APPPATH + 'config',
         'commons':window.APPPATH + 'commons',
@@ -42,6 +42,9 @@ require.config({
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
         'mi-system-role-dialog':window.APPPATH + 'component/dialog/system-role/system-role-dialog',
+
+        /* dialogs */
+        'cs-user-dialog':window.APPPATH + 'cs/dialog/user/user-dialog',
 
         /* pages */
         'page-cs-management':window.APPPATH + 'cs/management/page-cs-management'

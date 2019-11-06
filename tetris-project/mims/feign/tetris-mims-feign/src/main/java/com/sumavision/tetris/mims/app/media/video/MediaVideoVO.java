@@ -41,6 +41,10 @@ public class MediaVideoVO{
 	
 	private String previewUrl;
 	
+	private Boolean encryption;
+	
+	private String encryptionUrl;
+	
 	private List<MediaVideoVO> children;
 	
 	public Long getId() {
@@ -202,6 +206,24 @@ public class MediaVideoVO{
 
 	public MediaVideoVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public Boolean getEncryption() {
+		return encryption;
+	}
+
+	public MediaVideoVO setEncryption(Boolean encryption) {
+		this.encryption = encryption;
+		return this;
+	}
+
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public MediaVideoVO setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
 		return this;
 	}
 

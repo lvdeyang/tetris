@@ -15,7 +15,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 
 	private String name;
 	private String previewUrl;
-	private String time;
+	private String encryption;
+	private String encryptionUrl;
 	private Integer hotWeight;
 	private Integer downloadCount;
 	private String duration;
@@ -30,6 +31,9 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setIndex(entity.getScreenIndex())
 		.setName(entity.getName())
 		.setPreviewUrl(entity.getPreviewUrl())
+		.setEncryptionUrl(entity.getEncryptionUrl())
+		.setEncryption(entity.getEncryptionUrl() == null || entity.getEncryptionUrl().isEmpty() ? "false" : "true")
+		.setEncryptionUrl(entity.getEncryptionUrl())
 		.setHotWeight(entity.getHotWeight())
 		.setDownloadCount(entity.getDownloadCount())
 		.setDuration(entity.getDuration())
@@ -38,7 +42,6 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		return this;
 	}
 
-	
 	public Long getProgramId() {
 		return programId;
 	}
@@ -86,38 +89,42 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		return this;
 	}
 
-
 	public String getName() {
 		return name;
 	}
-
 
 	public ScreenVO setName(String name) {
 		this.name = name;
 		return this;
 	}
 
-
 	public String getPreviewUrl() {
 		return previewUrl;
 	}
-
 
 	public ScreenVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
 		return this;
 	}
-
-
-	public String getTime() {
-		return time;
-	}
-
-
-	public void setTime(String time) {
-		this.time = time;
-	}
 	
+	public String getEncryption() {
+		return encryption;
+	}
+
+	public ScreenVO setEncryption(String encryption) {
+		this.encryption = encryption;
+		return this;
+	}
+
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public ScreenVO setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
+		return this;
+	}
+
 	public Integer getHotWeight() {
 		return hotWeight;
 	}

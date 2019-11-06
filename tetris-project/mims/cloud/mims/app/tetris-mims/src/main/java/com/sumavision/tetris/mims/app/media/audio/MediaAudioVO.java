@@ -324,7 +324,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setDownloadCount(entity.getDownloadCount())
 			.setProgress(0)
-			.setEncryption(entity.getEncryption())
+			.setEncryption(entity.getEncryption() != null && entity.getEncryption() ? true : false)
 			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId());

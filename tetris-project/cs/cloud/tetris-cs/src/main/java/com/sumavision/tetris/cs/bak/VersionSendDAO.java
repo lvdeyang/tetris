@@ -5,9 +5,11 @@ import java.util.List;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
+@Transactional
 @RepositoryDefinition(domainClass = VersionSendPO.class, idClass = Long.class)
 public interface VersionSendDAO extends BaseDAO<VersionSendPO>{
 	/**
@@ -52,5 +54,5 @@ public interface VersionSendDAO extends BaseDAO<VersionSendPO>{
 	 */
 	@Modifying
 	@Query(value = "delete from TETRIS_CS_SEND_VERSION where channel_id=?1 ", nativeQuery = true)
-	public void removeByChannelId(String channelId);
+	public void deleteByChannelId(Long channelId);
 }

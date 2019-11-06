@@ -13,6 +13,7 @@ public abstract class ChannelBroadStatus {
 	public static String abilityBroadIp = "";
 	public static String abilityBroadPort = "";
 	
+	public final static String CHANNEL_BROAD_STATUS_INIT = "未播发";
 	public final static String CHANNEL_BROAD_STATUS_BROADING = "发送中";
 	public final static String CHANNEL_BROAD_STATUS_BROADED = "发送完成";
 	public final static String CHANNEL_BROAD_STATUS_STOPPED = "发送停止";

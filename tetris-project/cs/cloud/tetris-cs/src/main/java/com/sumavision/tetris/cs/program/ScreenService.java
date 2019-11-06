@@ -52,6 +52,7 @@ public class ScreenService {
 				screenPO.setSerialNum(screenVO.getSerialNum());
 				screenPO.setName(screenVO.getName());
 				screenPO.setPreviewUrl(screenVO.getPreviewUrl());
+				screenPO.setEncryptionUrl(screenVO.getEncryptionUrl());
 				screenPO.setHotWeight(screenVO.getHotWeight());
 				screenPO.setDownloadCount(screenVO.getDownloadCount());
 				screenPO.setDuration(screenVO.getDuration());

@@ -382,9 +382,7 @@ public class UserQuery {
 		List<UserPO> users = userDao.findByCompanyIdWithExceptAndClassfy(companyId, except, classify.toString());
 		List<UserVO> view_users = new ArrayList<UserVO>();
 		if(users!=null && users.size()>0){
-			for(UserPO user:users){
-				view_users.add(new UserVO().set(user));
-			}
+			view_users = UserVO.getConverter(UserVO.class).convert(users, UserVO.class);
 		}
 		return view_users;
 	}

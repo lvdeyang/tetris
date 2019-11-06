@@ -33,10 +33,12 @@ public class LoginController {
 	public void doPasswordLogin(
 			String username,
 			String password,
+			String ip,
+			String equipType,
 			String verifyCode,
 			HttpServletRequest request, 
 			HttpServletResponse response) throws Exception{
-		String token = loginService.doPasswordLogin(username, password, verifyCode);
+		String token = loginService.doPasswordLogin(username, password, ip, equipType, verifyCode);
 		String redirectUrl = loginQuery.queryRedirectUrl(token);
 		response.sendRedirect(redirectUrl);
 	}

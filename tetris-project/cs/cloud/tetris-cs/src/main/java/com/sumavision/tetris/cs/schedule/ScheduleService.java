@@ -8,10 +8,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.cs.channel.ChannelPO;
+import com.sumavision.tetris.cs.channel.ability.BroadAbilityService;
+import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
-import com.sumavision.tetris.cs.schedule.api.ApiServerScheduleVO;
+import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNotExistsException;
 
 @Service
@@ -25,6 +29,9 @@ public class ScheduleService {
 	
 	@Autowired
 	private ProgramService programService;
+	
+	@Autowired
+	private BroadAbilityService broadAbilityService;
 	
 	/**
 	 * 添加排期<br/>
@@ -44,7 +51,31 @@ public class ScheduleService {
 		schedulePO.setRemark(remark);
 		scheduleDAO.save(schedulePO);
 		
+		broadAbilityService.addScheduleDeal(channelId);
+		
 		return new ScheduleVO().set(schedulePO);
+	}
+	
+	/**
+	 * 删除当前时间后的排期<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月3日 下午7:33:45
+	 * @param channelId
+	 * @throws Exception
+	 */
+	public void removeFromNowByChannelId(Long channelId) throws Exception {
+		Long now = DateUtil.getLongDate();
+		List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
+		
+		if (schedulePOs == null || schedulePOs.isEmpty()) return;
+		
+		List<SchedulePO> deletePOs = new ArrayList<SchedulePO>();
+		for (SchedulePO schedulePO : schedulePOs) {
+			Long broadTime = DateUtil.parse(schedulePO.getBroadDate()).getTime();
+			if (broadTime > now) deletePOs.add(schedulePO);
+		}
+		if (!deletePOs.isEmpty()) scheduleDAO.deleteInBatch(deletePOs);
 	}
 	
 	/**

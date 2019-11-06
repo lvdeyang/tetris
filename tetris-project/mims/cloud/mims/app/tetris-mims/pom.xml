@@ -131,6 +131,7 @@
 			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency>
 		
+		<!-- 获取媒资时长 -->
 		<dependency>
 			<groupId>it.sauronsoftware.jave</groupId>
 			<artifactId>it.sauronsoftware.jave</artifactId>

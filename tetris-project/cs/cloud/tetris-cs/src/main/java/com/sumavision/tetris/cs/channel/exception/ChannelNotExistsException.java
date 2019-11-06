@@ -17,7 +17,7 @@ public class ChannelNotExistsException extends BaseException{
 	public ChannelNotExistsException(Long id) {
 		super(StatusCode.FORBIDDEN, "频道不存在！");
 		LOG.error(DateUtil.now());
-		LOG.error(new StringBufferWrapper().append("手机号不存在！")
+		LOG.error(new StringBufferWrapper().append("频道不存在！")
 										   .append(id)
 										   .toString());
 	}
