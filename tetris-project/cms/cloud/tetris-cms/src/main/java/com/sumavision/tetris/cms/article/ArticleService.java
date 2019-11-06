@@ -607,6 +607,9 @@ public class ArticleService {
 									 .getJSONArray("js");
 			for(int j=0; j<medias.size(); j++){
 				String url = medias.getJSONObject(j).getString("value");
+				if(!url.startsWith("http://")){
+					continue;
+				}
 				String path = new URL(url).getPath();
 				linkSuffixes.add(path.substring(1, path.length()));
 				links.add(url);

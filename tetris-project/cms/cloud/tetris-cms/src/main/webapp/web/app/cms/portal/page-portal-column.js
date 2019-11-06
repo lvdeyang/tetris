@@ -37,7 +37,9 @@ define([
                 colArtices:[],
                 hotArticles:[],
                 seccolumnlist:[],
-                downloadArticle:[]
+                downloadArticle:[],
+                currentColumn:'',
+                currentfColumn:params.id
             },
             computed:{
 
@@ -49,12 +51,12 @@ define([
             	
             	switchColumn:function(column){
             		var self = this;
+            		self.currentColumn = column.id;
             		ajax.post('/portal/query/'+column.id, null, function(data){	
 		            	self.colArtices.splice(0, self.colArtices.length);
 		            	for(var i=0;i<data.articles.length;i++){
 		            		self.colArtices.push(data.articles[i]);
 		            	}
-		            	
 	                });
             	}
             },
@@ -74,6 +76,7 @@ define([
 	            	for(var i=0;i<data.subColumns.length;i++){
 	            		self.seccolumnlist.push(data.subColumns[i]);
 	            	}
+	            	self.currentColumn = data.subColumns[0].id;
 	            	ajax.post('/portal/query/'+data.subColumns[0].id, null, function(data){	
 		            	self.colArtices.splice(0, self.colArtices.length);
 		            	for(var i=0;i<data.articles.length;i++){
@@ -83,6 +86,24 @@ define([
 	                });
                 });
                 
+                
+                ajax.post('/portal/queryhot', null, function(data){	
+                	if(data.length==0) return;
+	            	self.downloadArticle.splice(0, self.downloadArticle.length);
+	            	for(var i=0;i<data.length;i++){
+	            		self.downloadArticle.push(data[i]);
+	            	}
+	            	
+                });
+                
+                ajax.post('/portal/queryforu', null, function(data){	
+                	if(data.length==0) return;
+	            	self.hotArticles.splice(0, self.hotArticles.length);
+	            	for(var i=0;i<data.length;i++){
+	            		self.hotArticles.push(data[i]);
+	            	}
+	            	
+                });
                 
             },
             mounted:function(){

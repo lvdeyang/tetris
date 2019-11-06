@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cms.portal;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,12 +18,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sumavision.tetris.cms.article.ArticleDAO;
+import com.sumavision.tetris.cms.article.ArticleMediaPermissionDAO;
+import com.sumavision.tetris.cms.article.ArticleMediaPermissionPO;
 import com.sumavision.tetris.cms.article.ArticleQuery;
+import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.column.ColumnDAO;
 import com.sumavision.tetris.cms.column.ColumnPO;
 import com.sumavision.tetris.cms.column.ColumnQuery;
 import com.sumavision.tetris.cms.column.ColumnService;
 import com.sumavision.tetris.cms.column.ColumnVO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -49,6 +55,9 @@ public class PortalController {
 	
 	@Autowired
 	private ColumnService columnService;
+	
+	@Autowired
+	private MediaAudioQuery mediaAudioQuery;
 	
 	@JsonBody
 	@ResponseBody
@@ -106,6 +115,49 @@ public class PortalController {
 		ColumnVO column = columnService.query(userVO, id, page);
 
 		return column;
+	}
+	
+	
+	@Autowired
+	ArticleMediaPermissionDAO articleMediaPermissionDAO;
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/queryhot")
+	public Object queryHotArticle(
+			HttpServletRequest request) throws Exception {
+		List<MediaAudioVO> mediaAudioVOs= mediaAudioQuery.loadHot();
+		List<ArticleVO> articleVOs=new ArrayList<ArticleVO>();
+		for (MediaAudioVO mediaAudioVO : mediaAudioVOs) {
+			List<ArticleMediaPermissionPO> articleMediaPermissionPOs=articleMediaPermissionDAO.findByMediaId(mediaAudioVO.getId());
+		    if(articleMediaPermissionPOs!=null&&!articleMediaPermissionPOs.isEmpty()){
+		    	ArticleVO articleVO=new ArticleVO();
+		    	articleVO.set(articleDao.findOne(articleMediaPermissionPOs.get(0).getArticleId()));
+		    	articleVO.setMediaDownloadCount(mediaAudioVO.getDownloadCount());
+		    	articleVOs.add(articleVO);
+		    }
+		}
+		
+		return articleVOs;
+
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/queryforu")
+	public Object queryForuArticle(
+			HttpServletRequest request) throws Exception {
+		List<MediaAudioVO> mediaAudioVOs= mediaAudioQuery.loadRecommend();
+		List<ArticleVO> articleVOs=new ArrayList<ArticleVO>();
+		for (MediaAudioVO mediaAudioVO : mediaAudioVOs) {
+			List<ArticleMediaPermissionPO> articleMediaPermissionPOs=articleMediaPermissionDAO.findByMediaId(mediaAudioVO.getId());
+		    if(articleMediaPermissionPOs!=null&&!articleMediaPermissionPOs.isEmpty()){
+		    	ArticleVO articleVO=new ArticleVO();
+		    	articleVO.set(articleDao.findOne(articleMediaPermissionPOs.get(0).getArticleId()));
+		    	articleVOs.add(articleVO);
+		    }
+		}
+		return articleVOs;
 	}
 	
 	

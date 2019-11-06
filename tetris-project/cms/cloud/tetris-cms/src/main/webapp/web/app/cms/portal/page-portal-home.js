@@ -38,7 +38,8 @@ define([
                 hotArticles:[],
                 recommArticles:[],
                 downloadArticle:[],
-                firstImage:''
+                firstImage:'',
+                firstUrl:''
                 
             },
             computed:{
@@ -63,6 +64,7 @@ define([
                 ajax.post('/portal/article/new/list', null, function(data){	
                 	if(data.length==0) return;
                 	self.firstImage=data[0].thumbnail;
+                	self.firstUrl=data[0].previewUrl;
 	            	self.newArtices.splice(0, self.newArtices.length);
 	            	for(var i=0;i<data.length;i++){
 	            		self.newArtices.push(data[i]);
@@ -75,6 +77,24 @@ define([
 	            	self.recommArticles.splice(0, self.recommArticles.length);
 	            	for(var i=0;i<data.articles.length;i++){
 	            		self.recommArticles.push(data.articles[i]);
+	            	}
+	            	
+                });
+                
+                ajax.post('/portal/queryhot', null, function(data){	
+                	if(data.length==0) return;
+	            	self.downloadArticle.splice(0, self.downloadArticle.length);
+	            	for(var i=0;i<data.length;i++){
+	            		self.downloadArticle.push(data[i]);
+	            	}
+	            	
+                });
+                
+                ajax.post('/portal/queryforu', null, function(data){	
+                	if(data.length==0) return;
+	            	self.hotArticles.splice(0, self.hotArticles.length);
+	            	for(var i=0;i<data.length;i++){
+	            		self.hotArticles.push(data[i]);
 	            	}
 	            	
                 });

@@ -18,4 +18,13 @@ public interface ArticleMediaPermissionDAO extends BaseDAO<ArticleMediaPermissio
 	 */
 	public List<ArticleMediaPermissionPO> findByArticleId(Long articleId);
 	
+	/**
+	 * 查询媒资关联的文章<br/>
+	 * <b>作者:</b>Mr<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月6日 上午9:20:54
+	 * @param Long mediaId 媒资id
+	 */
+	public List<ArticleMediaPermissionPO> findByMediaId(Long mediaId);
+	
 }
