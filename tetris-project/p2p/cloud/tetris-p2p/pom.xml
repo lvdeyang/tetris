@@ -78,12 +78,6 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
-		<!-- web socket -->
-		<dependency>
-		    <groupId>org.springframework.boot</groupId>
-		    <artifactId>spring-boot-starter-websocket</artifactId>
-		</dependency>
-		
 		<!-- websocket server feign -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>

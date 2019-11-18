@@ -37,7 +37,7 @@ public class WelcomeController {
 			session = request.getSession();
 			session.setMaxInactiveInterval(HttpConstant.SESSION_TIMEOUT);
 		}
-		mv = new ModelAndView("web/cs/index");
+		mv = new ModelAndView("web/p2p/index");
 		mv.addObject(HttpConstant.MODEL_TOKEN, token);
 		mv.addObject(HttpConstant.MODEL_SESSION_ID, session.getId());
 		return mv;
