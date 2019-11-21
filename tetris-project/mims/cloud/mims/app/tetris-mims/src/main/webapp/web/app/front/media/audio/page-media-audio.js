@@ -157,6 +157,40 @@ define([
                     var self = this;
                     self.dialog.createFolder.folderName = '';
                 },
+                //搜多文件
+                handleQuerySearch:function(queryString, cb) {
+                    var self = this;
+                    if (queryString==undefined) {
+                        cb([]);
+                        return;
+                    }
+                    self.table.rows.splice(0, self.table.rows.length);
+                    if (queryString.trim() == ""){
+                        ajax.post('/media/audio/load/' + self.current.id, null, function(data){
+                            var rows = data.rows;
+                            if(rows && rows.length>0){
+                                for(var i=0; i<rows.length; i++){
+                                    initTableRow(rows[i]);
+                                    self.table.rows.push(rows[i]);
+                                }
+                            }
+                        });
+                    } else {
+                        var questData = {
+                            name: queryString
+                        };
+                        ajax.post('/media/audio/search', questData, function(data){
+                            var rows = data;
+                            if(rows && rows.length>0){
+                                for(var i=0; i<rows.length; i++){
+                                    initTableRow(rows[i]);
+                                    self.table.rows.push(rows[i]);
+                                }
+                            }
+                        });
+                    }
+                    cb([]);
+                },
                 //下载文件
                 handleDownload:function(scope){
                     var row = scope.row;
@@ -167,7 +201,8 @@ define([
                         var event = new MouseEvent('click');
                         a.download = name;
                         a.href = window.BASEPATH + uri;
-                        a.dispatchEvent(event)
+                        a.dispatchEvent(event);
+                        row.downloadCount += 1;
                     });
                 },
                 //预览文件

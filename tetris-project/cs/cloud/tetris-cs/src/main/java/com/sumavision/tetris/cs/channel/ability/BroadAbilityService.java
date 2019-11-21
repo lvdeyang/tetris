@@ -323,7 +323,7 @@ public class BroadAbilityService {
 						channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
 						channelDao.save(channel);
 					} else {
-						nTimer.schedule(timerTask, dealTime - 5000l);
+//						nTimer.schedule(timerTask, dealTime - 5000l);
 					}
 				}
 				timerMap.put(channelId, nTimer);
@@ -370,6 +370,7 @@ public class BroadAbilityService {
 		String localIp = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD).split(":")[0];
 		if (broadAbilityBroadInfoVOs == null || broadAbilityBroadInfoVOs.isEmpty()) throw new ChannelAbilityNoneOutputException();
 		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
+			if (broadAbilityBroadInfoVO.getPreviewUrlIp() == null || broadAbilityBroadInfoVO.getPreviewUrlIp().isEmpty()) continue;
 			JSONObject dest = new JSONObject();
 			dest.put("local_ip", localIp);
 			dest.put("ipv4", broadAbilityBroadInfoVO.getPreviewUrlIp());
@@ -377,6 +378,11 @@ public class BroadAbilityService {
 			dest.put("vport", "");
 			dest.put("aport", "");
 			destList.add(dest);
+		}
+		if (destList.isEmpty()) {
+			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT);
+			channelDao.save(channel);
+			throw new ChannelAbilityNoneOutputException();
 		}
 		output.put("dest_list", destList);
 		

@@ -122,6 +122,9 @@
         <!-- 选择播发用户对话框 -->
         <cs-user-dialog ref="editChannelUserDialog" @on-user-dialog-close="selectedEditChannelUsers"></cs-user-dialog>
 
+        <!-- 预览灯箱 -->
+        <mi-lightbox ref="Lightbox" @on-txt-save="" style="z-index: 3000"></mi-lightbox>
+
         <el-dialog
                 title="添加频道"
                 :visible.sync="dialog.addProgram.visible"
@@ -813,6 +816,13 @@
                             <el-button type="text" icon="feather-icon-chevron-down"
                                        style="margin:0 5px; font-size:18px; padding:0;"
                                        @click="programResourceDown(scope)"></el-button>
+                        </el-tooltip>
+                        <el-tooltip class="item" effect="dark" content="预览"
+                                    placement="bottom">
+                            <el-button type="text" class="icon-eye-open"
+                                       style="margin:0 5px; font-size:18px; padding:0;"
+                                       @click="handlePreview(scope)">
+                            </el-button>
                         </el-tooltip>
                         <el-tooltip class="item" effect="dark" content="删除资源"
                                     placement="bottom">

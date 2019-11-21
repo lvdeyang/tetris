@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
-import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ability.BroadAbilityService;
-import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
@@ -181,6 +179,8 @@ public class ScheduleService {
 			screen.setHotWeight(item.getHotWeight());
 			screen.setDownloadCount(item.getDownloadCount());
 			screen.setDuration(item.getDuration());
+			screen.setEncryption(item.getEncryption());
+			screen.setEncryptionUrl(item.getEncryptionUrl());
 			screenVOs.add(screen);
 		}
 		ProgramVO program = new ProgramVO();

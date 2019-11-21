@@ -22,7 +22,7 @@
                 <el-tooltip class="item" effect="dark" content="展示任务列表" placement="bottom-end">
                     <el-button size="small" style="float:right; width:32px; height:32px; padding:0; text-align:center; line-height:32px;" @click="taskViewShow"><span class="icon-tasks"></span></el-button>
                 </el-tooltip>
-                <el-input placeholder="搜索您的文件" size="small" suffix-icon="el-icon-search" style="float:right; width:300px; margin-right:10px;"></el-input>
+                <el-autocomplete placeholder="搜索您的文件" size="small" suffix-icon="el-icon-search" style="float:right; width:300px; margin-right:10px;" :fetch-suggestions="handleQuerySearch"></el-autocomplete>
             </div>
             <div style="margin-bottom:10px;">
                 <el-breadcrumb separator="/">
@@ -39,6 +39,7 @@
                             @cell-mouse-enter="mouseEnter"
                             @cell-mouse-leave="mouseLeave"
                             tooltip-effect="dark"
+                            :default-sort="{prop:'downloadCount',order:'ascending'}"
                             style="width:100%">
                         <el-table-column type="selection" width="40"></el-table-column>
                         <el-table-column width="40">
@@ -86,6 +87,9 @@
                         </el-table-column>
                         <el-table-column label="大小" width="180">
                             <template slot-scope="scope">{{formatSize(scope.row.size)}}</template>
+                        </el-table-column>
+                        <el-table-column label="下载量" width="180">
+                            <template slot-scope="scope">{{scope.row.downloadCount}}</template>
                         </el-table-column>
                         <el-table-column prop="updateTime" label="创建时间" width="180"></el-table-column>
                         <el-table-column label="审核状态" width="180">

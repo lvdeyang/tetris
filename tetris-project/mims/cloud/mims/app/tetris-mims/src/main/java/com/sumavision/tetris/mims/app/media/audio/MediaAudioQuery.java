@@ -138,7 +138,7 @@ public class MediaAudioQuery {
 			}
 			
 			//文件夹内音频
-			List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdInAndUploadStatusAndReviewStatusNotInOrAuthorId(
+			List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdInAndUploadStatusAndReviewStatusNotInOrAuthorIdOrderByDesc(
 					new ArrayListWrapper<Long>().add(current.getId()).getList(), 
 					UploadStatus.COMPLETE.toString(), 
 					new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList(),

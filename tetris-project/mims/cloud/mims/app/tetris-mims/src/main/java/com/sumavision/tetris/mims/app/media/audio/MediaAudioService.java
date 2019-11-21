@@ -453,7 +453,7 @@ public class MediaAudioService {
 			startUploadProcess(audio);
 		}else{
 			mediaAudioDao.save(audio);
-			if(audio.getEncryption()){
+			if(audio.getEncryption() != null && audio.getEncryption()){
 				fileEncodeService.encodeAudioFile(audio);
 			}
 		}
@@ -490,6 +490,8 @@ public class MediaAudioService {
 			media.setUploadTmpPath(audioStorePath);
 			media.setDownloadCount(0l);
 			media.setUploadStatus(UploadStatus.COMPLETE);
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(audioFile);
+			media.setDuration(multimediaInfo.getDuration());
 		}else{
 			media.setUploadStatus(UploadStatus.ERROR);
 		}
@@ -872,7 +874,7 @@ public class MediaAudioService {
 		variables.put("remark", audio.getRemarks());
 		variables.put("uploadPath", folderQuery.generateFolderBreadCrumb(audio.getFolderId()));
 		variables.put("_pa8_id", audio.getId());
-		variables.put("encryption", audio.getEncryption()? "1":"0");
+		variables.put("encryption", audio.getEncryption() != null && audio.getEncryption()? "1":"0");
 		String category = new StringBufferWrapper().append("上传音频：").append(audio.getName()).toString();
 		String business = new StringBufferWrapper().append("mediaAudio:").append(audio.getId()).toString();
 		String processInstanceId = processService.startByKey(process.getProcessId(), variables.toJSONString(), category, business);

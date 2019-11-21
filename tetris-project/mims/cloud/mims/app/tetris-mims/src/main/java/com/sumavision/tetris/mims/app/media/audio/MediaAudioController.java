@@ -380,12 +380,12 @@ public class MediaAudioController {
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
 			
-			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
-			task.setDuration(multimediaInfo.getDuration());
-			
 			//如果是从文本文件上传需要转换成音频
 			if(task.getMimetype().equals("text/plain")){
 				mediaAudioService.convertTxtMeidaToAudioMedia(task);
+			} else {
+				MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+				task.setDuration(multimediaInfo.getDuration());
 			}
 			
 			if(task.getReviewStatus() != null){
@@ -710,5 +710,25 @@ public class MediaAudioController {
 	public Object downloadAdd(Long id, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		return mediaAudioService.downloadAdd(user, id);
+	}
+	
+	/**
+	 * 根据条件检索<br/>
+	 * <b>作者:</b>sms<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月13日 上午9:52:56
+	 * @param id 媒资id
+	 * @param name 媒资名称包含
+	 * @param startTime 创建起始时间
+	 * @param endTime 创建终止时间
+	 * @param tagId	标签id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/search")
+	public Object search(Long id, String name, String startTime, String endTime, Long tagId, HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadByCondition(id, name, startTime, endTime, tagId);
+		return audioVOs;
 	}
 }

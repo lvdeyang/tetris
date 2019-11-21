@@ -313,7 +313,7 @@ public class UserQuery {
 	 * @return List<UserVO> 用户列表
 	 */
 	public List<UserVO> listByCompanyIdAndClassify(Long companyId, UserClassify classify) throws Exception{
-		List<UserPO> users = userDao.findByCompanyIdAndClassfy(companyId, classify);
+		List<UserPO> users = userDao.findByCompanyIdAndClassfy(companyId, classify.toString());
 		List<UserVO> view_users = new ArrayList<UserVO>();
 		if(users!=null && users.size()>0){
 			for(UserPO user:users){

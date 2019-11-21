@@ -268,7 +268,7 @@ public class ChannelController {
 		UserVO user = userQuery.current();
 		
 		List<UserVO> users = 
-				userQuery.listByCompanyIdWithExceptAndClassify(Long.parseLong(user.getGroupId()), new ArrayListWrapper<Long>().add(user.getId()).getList(), UserClassify.COMPANY);
+				userQuery.listByCompanyIdWithExceptAndClassify(Long.parseLong(user.getGroupId()), null, UserClassify.COMPANY);
 		
 		return users;
 	}

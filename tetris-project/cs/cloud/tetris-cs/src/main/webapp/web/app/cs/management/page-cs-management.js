@@ -11,6 +11,7 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
+    'mi-lightbox',
     'cs-user-dialog',
     'css!' + window.APPPATH + 'cs/management/page-cs-management.css'
 ], function (tpl, config, $, ajax, context, commons, Vue) {
@@ -1145,6 +1146,11 @@ define([
                     self.dialog.editProgram.commitData.screenInfo = [];
                     self.dialog.editProgram.commitData.currentSerialInfo = [];
                     self.dialog.editProgram.options.current = self.screen.one;
+                },
+                handlePreview: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    self.$refs.Lightbox.preview(row.previewUrl, 'audio');
                 },
                 handleEditProgramCommit: function () {
                     var self = this;
