@@ -1,0 +1,4 @@
+#page-system-storage-wrapper *{box-sizing:border-box;}
+#page-system-storage-wrapper .el-form-item__label{line-height:normal; padding-bottom:0;}
+#page-system-storage-wrapper .url-path-form-ip .el-input__inner{border-top-right-radius:0; border-bottom-right-radius:0;}
+#page-system-storage-wrapper .url-path-form-port .el-input-group__prepend{border-top-left-radius:0; border-bottom-left-radius:0; border-left:0;}
