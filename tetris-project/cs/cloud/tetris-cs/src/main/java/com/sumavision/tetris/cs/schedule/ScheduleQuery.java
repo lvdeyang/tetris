@@ -1,7 +1,6 @@
 package com.sumavision.tetris.cs.schedule;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -12,10 +11,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.cs.channel.BroadWay;
+import com.sumavision.tetris.cs.channel.ChannelPO;
+import com.sumavision.tetris.cs.channel.ChannelQuery;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
-import com.sumavision.tetris.cs.program.ProgramVO;
-import com.sumavision.tetris.cs.program.ScreenVO;
-import com.sumavision.tetris.cs.schedule.api.ApiServerScheduleVO;
+import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
 
 @Component
 public class ScheduleQuery {
@@ -24,6 +26,15 @@ public class ScheduleQuery {
 	
 	@Autowired
 	private ProgramQuery programQuery;
+	
+	@Autowired
+	private ChannelQuery channelQuery;
+	
+	@Autowired
+	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
+	
+	@Autowired
+	private MediaEncodeQuery mediaEncodeQuery;
 	
 	/**
 	 * 获取排期列表<br/>
@@ -61,5 +72,48 @@ public class ScheduleQuery {
 		List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
 		
 		return ScheduleVO.getConverter(ScheduleVO.class).convert(schedulePOs, ScheduleVO.class);
+	}
+	
+	/**
+	 * 根据id数列请求排期表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午9:50:10
+	 * @param ids 排期id数列
+	 */
+	public List<ScheduleVO> questSchedulesByChannelId(Long channelId) throws Exception {
+		List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
+		List<ScheduleVO> scheduleVOs = new ArrayList<ScheduleVO>();
+		if (schedulePOs == null || schedulePOs.isEmpty()) return scheduleVOs;
+		scheduleVOs = ScheduleVO.getConverter(ScheduleVO.class).convert(schedulePOs, ScheduleVO.class);
+
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs = broadAbilityBroadInfoService.queryFromChannelId(channelId);
+		
+		String port = "9999";
+		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
+			if (broadAbilityBroadInfoVO.getUserId() != null) {
+				String previewUrlPort = broadAbilityBroadInfoVO.getPreviewUrlPort();
+				if (previewUrlPort != null && !previewUrlPort.isEmpty()){
+					port = previewUrlPort;
+					break;
+				}
+			}
+		}
+		
+		for (ScheduleVO scheduleVO : scheduleVOs) {
+			scheduleVO.setProgram(programQuery.getProgram(scheduleVO.getId()));
+			if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
+				scheduleVO.setMediaType("stream");
+			} else if (channel.getBroadWay().equals(BroadWay.FILE_DOWNLOAD_BROAD)) {
+				scheduleVO.setMediaType("file");
+			}
+			scheduleVO.setStreamUrlPort(Integer.parseInt(port));
+			if (channel.getEncryption() != null && channel.getEncryption()){
+				scheduleVO.setEncryptKey(mediaEncodeQuery.queryKey());
+			}
+		}
+		
+		return scheduleVOs;
 	}
 }

@@ -13,6 +13,7 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -31,6 +32,9 @@ public class MediaAudioFeignController {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private MediaAudioService mediaAudioService;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
@@ -164,6 +168,22 @@ public class MediaAudioFeignController {
 		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadHotList();
 		mediaAudioQuery.queryEncodeUrl(audioVOs);
 		return audioVOs;
+	}
+	
+	/**
+	 * 增加下载数<br/>
+	 * <b>作者:</b>Mr<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月15日 下午5:11:49
+	 * @param Long id 下载的音频id
+	 * @return MediaAudioVO 音频
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/download")
+	public Object downloadAdd(Long id, HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		return mediaAudioService.downloadAdd(user, id);
 	}
 	
 }

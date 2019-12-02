@@ -8,15 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
-import com.sumavision.tetris.cs.schedule.api.ApiServerScheduleVO;
+import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNotExistsException;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ScheduleService {
+	@Autowired
+	private ChannelService channelService;
+	
 	@Autowired
 	private ScheduleQuery scheduleQuery;
 	
@@ -44,7 +49,31 @@ public class ScheduleService {
 		schedulePO.setRemark(remark);
 		scheduleDAO.save(schedulePO);
 		
+		channelService.addScheduleDeal(channelId);
+		
 		return new ScheduleVO().set(schedulePO);
+	}
+	
+	/**
+	 * 删除当前时间后的排期<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月3日 下午7:33:45
+	 * @param channelId
+	 * @throws Exception
+	 */
+	public void removeFromNowByChannelId(Long channelId) throws Exception {
+		Long now = DateUtil.getLongDate();
+		List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
+		
+		if (schedulePOs == null || schedulePOs.isEmpty()) return;
+		
+		List<SchedulePO> deletePOs = new ArrayList<SchedulePO>();
+		for (SchedulePO schedulePO : schedulePOs) {
+			Long broadTime = DateUtil.parse(schedulePO.getBroadDate()).getTime();
+			if (broadTime > now) deletePOs.add(schedulePO);
+		}
+		if (!deletePOs.isEmpty()) scheduleDAO.deleteInBatch(deletePOs);
 	}
 	
 	/**
@@ -66,6 +95,14 @@ public class ScheduleService {
 		return new ScheduleVO().set(schedule);
 	}
 	
+	/**
+	 * 批量删除排期<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月28日 上午11:14:06
+	 * @param List<Long> scheduleIds 排期id列表
+	 * @return List<ScheduleVO> 被删除的排期列表
+	 */
 	public List<ScheduleVO> removeInBatch(List<Long> scheduleIds) throws Exception{
 		if (scheduleIds == null || scheduleIds.isEmpty()) return null;
 		
@@ -133,9 +170,9 @@ public class ScheduleService {
 	 * @return
 	 */
 	public ScheduleVO addSchedule(Long channelId, String broadDate, List<ScreenVO> screens) throws Exception {
-		if (screens == null || screens.isEmpty()) return null;
-		
 		ScheduleVO schedule = add(channelId, broadDate, "");
+		
+		if (screens == null || screens.isEmpty()) return null;
 			
 		Date date = new Date();
 		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
@@ -145,11 +182,16 @@ public class ScheduleService {
 			screen.setUpdateTime(date);
 			screen.setSerialNum(1l);
 			screen.setIndex((long)(i+1));
+			screen.setMimsUuid(item.getMimsUuid());
 			screen.setName(item.getName());
+			screen.setType(item.getType());
+			screen.setMimetype(item.getMimetype());
 			screen.setPreviewUrl(item.getPreviewUrl());
 			screen.setHotWeight(item.getHotWeight());
 			screen.setDownloadCount(item.getDownloadCount());
 			screen.setDuration(item.getDuration());
+			screen.setEncryption(item.getEncryption());
+			screen.setEncryptionUrl(item.getEncryptionUrl());
 			screenVOs.add(screen);
 		}
 		ProgramVO program = new ProgramVO();

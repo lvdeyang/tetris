@@ -29,6 +29,20 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	public List<MediaAudioPO> findByFolderIdInAndUploadStatusAndReviewStatusNotInOrAuthorId(Collection<Long> folderIds, String status, Collection<String> reviewStatus, String authorId);
 	
 	/**
+	 * 获取文件夹下特定上传状态以及特定例外审核状态的音频媒资（批量,根据下载量排序）<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月29日 下午3:33:50
+	 * @param Collection<Long> folderIds 文件夹id列表
+	 * @param UploadStatus status 上传状态
+	 * @param Collection<ReviewStatus> reviewStatus 例外审核状态列表
+	 * @param String authorId 作者id
+	 * @return List<MediaAudioPO> 媒资音频列表
+	 */
+	@Query(value = "SELECT * FROM MIMS_MEDIA_AUDIO WHERE FOLDER_ID IN ?1 AND ((UPLOAD_STATUS=?2 AND (REVIEW_STATUS IS NULL OR REVIEW_STATUS NOT IN ?3)) OR AUTHORID=?4) ORDER BY download_count DESC", nativeQuery = true)
+	public List<MediaAudioPO> findByFolderIdInAndUploadStatusAndReviewStatusNotInOrAuthorIdOrderByDesc(Collection<Long> folderIds, String status, Collection<String> reviewStatus, String authorId);
+	
+	/**
 	 * uuid批量查询<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

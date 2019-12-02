@@ -6,13 +6,18 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 
 	private String name;
-	private String time;
+	private String type;
+	private String mimetype;
+	private String duration;
 	private Long parentId;
 	private String parentPath;
 	private Long channelId;
 	private String mimsUuid;
 	private Long index;
 	private String previewUrl;
+	private Integer downloadCount;
+	private String encryption;
+	private String encryptionUrl;
 	private Boolean checked = true;
 	
 	@Override
@@ -21,11 +26,15 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 		.setUpdateTime(entity.getUpdateTime() == null ? "": DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 		.setUuid(entity.getUuid())
 		.setName(entity.getName())
-		.setTime(entity.getTime())
+		.setType(entity.getType())
+		.setMimetype(entity.getMimetype())
+		.setDuration(entity.getDuration())
 		.setMimsUuid(entity.getMimsUuid())
 		.setParentId(entity.getParentId())
 		.setParentPath(entity.getParentPath())
 		.setChannelId(entity.getChannelId())
+		.setEncryptionUrl(entity.getEncryptionUrl())
+		.setDownloadCount(entity.getDownloadCount())
 		.setPreviewUrl(entity.getPreviewUrl());
 		
 		return this;
@@ -40,12 +49,30 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 		return this;
 	}
 
-	public String getTime() {
-		return time;
+	public String getType() {
+		return type;
 	}
 
-	public CsResourceVO setTime(String time) {
-		this.time = time;
+	public CsResourceVO setType(String type) {
+		this.type = type;
+		return this;
+	}
+
+	public String getMimetype() {
+		return mimetype;
+	}
+
+	public CsResourceVO setMimetype(String mimetype) {
+		this.mimetype = mimetype;
+		return this;
+	}
+
+	public String getDuration() {
+		return duration;
+	}
+
+	public CsResourceVO setDuration(String duration) {
+		this.duration = duration;
 		return this;
 	}
 
@@ -91,6 +118,33 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 
 	public CsResourceVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public Integer getDownloadCount() {
+		return downloadCount;
+	}
+
+	public CsResourceVO setDownloadCount(Integer downloadCount) {
+		this.downloadCount = downloadCount;
+		return this;
+	}
+
+	public String getEncryption() {
+		return encryption;
+	}
+
+	public CsResourceVO setEncryption(String encryption) {
+		this.encryption = encryption;
+		return this;
+	}
+
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public CsResourceVO setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
 		return this;
 	}
 

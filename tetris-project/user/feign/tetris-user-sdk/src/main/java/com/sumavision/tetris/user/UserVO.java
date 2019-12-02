@@ -41,6 +41,12 @@ public class UserVO{
 	/** 用户分类 */
 	private String classify;
 	
+	/** 用户当前ip */
+	private String ip;
+	
+	/** 用户设备类型 */
+	private String equipType;
+	
 	/** 发送给当前用户的信息数目 */
 	private Integer numbersOfMessage;
 	
@@ -179,6 +185,24 @@ public class UserVO{
 
 	public UserVO setClassify(String classify) {
 		this.classify = classify;
+		return this;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public UserVO setIp(String ip) {
+		this.ip = ip;
+		return this;
+	}
+
+	public String getEquipType() {
+		return equipType;
+	}
+
+	public UserVO setEquipType(String equipType) {
+		this.equipType = equipType;
 		return this;
 	}
 

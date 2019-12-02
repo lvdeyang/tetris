@@ -37,8 +37,10 @@ public class LoginService {
 	public String doPasswordLogin(
 			String username,
 			String password,
+			String ip,
+			String equipType,
 			String verifyCode) throws Exception{
-		JSONObject response = loginFeign.doPasswordLogin(username, password, verifyCode);
+		JSONObject response = loginFeign.doPasswordLogin(username, password, ip, equipType, verifyCode);
 		return JsonBodyResponseParser.parseObject(response, String.class);
 	}
 	

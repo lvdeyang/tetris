@@ -106,4 +106,14 @@ public interface MediaAudioFeign {
 	@RequestMapping(value = "/media/audio/feign/find/by/preview/url/in")
 	public JSONObject findByPreviewUrlIn(@RequestParam("previewUrls") String previewUrls) throws Exception;
 	
+	/**
+	 * 下载计数<br/>
+	 * <b>作者:</b>Mr<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午10:31:15
+	 * @param Long id 媒资Id
+	 * @return MediaAudioVO 音频媒资
+	 */
+	@RequestMapping(value = "/media/audio/feign/download")
+	public JSONObject download(@RequestParam("id") Long id) throws Exception;
 }

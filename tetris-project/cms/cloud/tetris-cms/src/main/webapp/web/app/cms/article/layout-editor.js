@@ -143,7 +143,7 @@ define([
                     $el.find('.article-modules .el-scrollbar__view').append($el.find('.drop-area'));
                     self.updateDragIndex();
                 });
-                self.drag.template = template
+                self.drag.template = template;
             },
             templateDrop:function(e){
                 var self = this;
@@ -166,7 +166,7 @@ define([
                     var json = self.translateJSON(template.js);
                     var module = {
                         id:'module_'+new Date().getTime(),
-                        template:template,
+                        template:$.extend(true, {}, template),
                         render:juicer(template.html).render(json)
                     };
                     self.modules.splice(self.drag.index, 0, module);

@@ -77,7 +77,6 @@ require.config({
         'page-front-role':window.APPPATH + 'front/role/page-front-role',
 
         'page-media-permissions':window.APPPATH + 'front/media/permissions/page-media-permissions',
-        'page-storage':window.APPPATH + 'front/storage/page-storage',
 
         /* backstage-pages */
         'page-backstage-production-article':window.APPPATH + 'backstage/production/article/page-backstage-production-article',

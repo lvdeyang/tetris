@@ -63,6 +63,12 @@ public class UserPO extends AbstractBasePO{
 	/** 用户分类 */
 	private UserClassify classify;
 	
+	/** 用户当前ip */
+	private String ip;
+	
+	/** 用户当前设备类型 */
+	private UserEquipType equipType;
+	
 	@Column(name = "USERNAME")
 	public String getUsername() {
 		return username;
@@ -172,6 +178,25 @@ public class UserPO extends AbstractBasePO{
 
 	public void setClassify(UserClassify classify) {
 		this.classify = classify;
+	}
+
+	@Column(name = "ip")
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "EQUIP_TYPE")
+	public UserEquipType getEquipType() {
+		return equipType;
+	}
+
+	public void setEquipType(UserEquipType equipType) {
+		this.equipType = equipType;
 	}
 	
 }

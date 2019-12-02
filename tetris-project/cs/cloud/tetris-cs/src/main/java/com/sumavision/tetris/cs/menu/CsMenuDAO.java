@@ -2,7 +2,6 @@ package com.sumavision.tetris.cs.menu;
 
 import java.util.List;
 
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
@@ -15,4 +14,6 @@ public interface CsMenuDAO extends BaseDAO<CsMenuPO> {
 	public List<CsMenuPO> findByParentId(Long parentId);
 
 	public List<CsMenuPO> findByChannelIdAndParentId(Long channelId, Long parentId);
+	
+	public CsMenuPO findByChannelIdAndParentIdAndName(Long channelId, Long parentId, String name);
 }

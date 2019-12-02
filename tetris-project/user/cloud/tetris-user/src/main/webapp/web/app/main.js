@@ -9,7 +9,7 @@ require.config({
         'jquery':window.LIBPATH + 'frame/jQuery/jquery-2.2.3.min',
         'json':window.LIBPATH + 'frame/jQuery/jquery.json',
         'element-ui':window.LIBPATH + 'ui/element-ui/element-ui-2.4.3.min',
-
+        'd3':window.LIBPATH + 'd3/d3.v5',
         'TweenLite':window.LIBPATH + 'TweenMax/cmd/TweenLite',
 
         /* commons */
@@ -50,6 +50,7 @@ require.config({
         'page-bind-system-role':window.APPPATH + 'bind-system-role/page-bind-system-role',
         'page-system-role':window.APPPATH + 'system-role/page-system-role',
         'page-system-theme':window.APPPATH + 'system-theme/page-system-theme',
+        'page-system-storage':window.APPPATH + 'system-storage/page-system-storage',
         'page-bind-user':window.APPPATH + 'bind-user/page-bind-user',
         'page-company':window.APPPATH + 'company/page-company',
         'page-organization':window.APPPATH + 'organization/page-organization',

@@ -258,7 +258,7 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @return List<UserPO> 用户列表
 	 */
 	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.classify=?2 \n#pageable\n", nativeQuery = true)
-	public List<UserPO> findByCompanyIdAndClassfy(Long companyId, UserClassify classify);
+	public List<UserPO> findByCompanyIdAndClassfy(Long companyId, String classify);
 	
 	/**
 	 * 查询公司下类型用户（带例外）<br/>

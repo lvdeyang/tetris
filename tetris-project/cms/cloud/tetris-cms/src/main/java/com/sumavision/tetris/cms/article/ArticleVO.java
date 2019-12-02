@@ -46,6 +46,8 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 	
 	private List<RegionVO> regions;
 	
+	private int mediaDownloadCount;
+	
 	public String getName() {
 		return name;
 	}
@@ -204,6 +206,14 @@ public class ArticleVO extends AbstractBaseVO<ArticleVO, ArticlePO>{
 			.setArticleType(entity.getType().getName())
 			.setIfLive(entity.getIfLive());
 		return this;
+	}
+
+	public int getMediaDownloadCount() {
+		return mediaDownloadCount;
+	}
+
+	public void setMediaDownloadCount(int mediaDownloadCount) {
+		this.mediaDownloadCount = mediaDownloadCount;
 	}
 	
 }

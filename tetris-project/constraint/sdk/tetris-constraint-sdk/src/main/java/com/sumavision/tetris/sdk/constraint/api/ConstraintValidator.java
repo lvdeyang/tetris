@@ -155,7 +155,11 @@ public class ConstraintValidator {
 		if(params!=null && params.size()>0){
 			Set<String> keys = params.keySet();
 			for(String key:keys){
-				context.setVariable(key, params.getJSONObject(key));
+				try{
+					context.setVariable(key, params.getJSONObject(key));
+				}catch(Exception e){
+					context.setVariable(key, params.get(key));
+				}
 			}
 		}
 		Expression expression = ((TemplateAwareExpressionParser)SpringContext.getBean(SpelExpressionParser.class)).parseExpression(expressionValue);

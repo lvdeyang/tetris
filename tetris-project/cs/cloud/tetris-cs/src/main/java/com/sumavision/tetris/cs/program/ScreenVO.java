@@ -14,8 +14,11 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private Long resourceId;
 
 	private String name;
+	private String type;
+	private String mimetype;
 	private String previewUrl;
-	private String time;
+	private String encryption;
+	private String encryptionUrl;
 	private Integer hotWeight;
 	private Integer downloadCount;
 	private String duration;
@@ -29,7 +32,11 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setSerialNum(entity.getSerialNum())
 		.setIndex(entity.getScreenIndex())
 		.setName(entity.getName())
+		.setType(entity.getType())
+		.setMimetype(entity.getMimetype())
 		.setPreviewUrl(entity.getPreviewUrl())
+		.setEncryption(entity.getEncryptionUrl() == null || entity.getEncryptionUrl().isEmpty() ? "false" : "true")
+		.setEncryptionUrl(entity.getEncryptionUrl())
 		.setHotWeight(entity.getHotWeight())
 		.setDownloadCount(entity.getDownloadCount())
 		.setDuration(entity.getDuration())
@@ -38,7 +45,6 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		return this;
 	}
 
-	
 	public Long getProgramId() {
 		return programId;
 	}
@@ -86,38 +92,60 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		return this;
 	}
 
-
 	public String getName() {
 		return name;
 	}
-
 
 	public ScreenVO setName(String name) {
 		this.name = name;
 		return this;
 	}
 
+	public String getType() {
+		return type;
+	}
+
+	public ScreenVO setType(String type) {
+		this.type = type;
+		return this;
+	}
+
+	public String getMimetype() {
+		return mimetype;
+	}
+
+	public ScreenVO setMimetype(String mimetype) {
+		this.mimetype = mimetype;
+		return this;
+	}
 
 	public String getPreviewUrl() {
 		return previewUrl;
 	}
 
-
 	public ScreenVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
 		return this;
 	}
-
-
-	public String getTime() {
-		return time;
-	}
-
-
-	public void setTime(String time) {
-		this.time = time;
-	}
 	
+	public String getEncryption() {
+		return encryption;
+	}
+
+	public ScreenVO setEncryption(String encryption) {
+		this.encryption = encryption;
+		return this;
+	}
+
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public ScreenVO setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
+		return this;
+	}
+
 	public Integer getHotWeight() {
 		return hotWeight;
 	}

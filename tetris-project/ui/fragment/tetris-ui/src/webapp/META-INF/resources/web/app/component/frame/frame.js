@@ -87,6 +87,9 @@ define([
                     this.isCollapsed = true;
                 }
             },
+            gotoportal:function(){
+            	location.href="http://192.165.56.43:8086/index/"+window.TOKEN+"#/page-portal-home"
+            },
             userGroupToggle:function(){
                 if(this.userGroupShow){
                     this.userGroupShow = false;

@@ -380,12 +380,12 @@ public class MediaAudioController {
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
 			
-			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
-			task.setDuration(multimediaInfo.getDuration());
-			
 			//如果是从文本文件上传需要转换成音频
 			if(task.getMimetype().equals("text/plain")){
 				mediaAudioService.convertTxtMeidaToAudioMedia(task);
+			} else {
+				MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+				task.setDuration(multimediaInfo.getDuration());
 			}
 			
 			if(task.getReviewStatus() != null){
@@ -658,17 +658,34 @@ public class MediaAudioController {
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
 		
-		MediaAudioPO media = mediaAudioDao.findOne(id);
+		MediaAudioPO media = mediaAudioQuery.loadById(id);
 		
-		if(media == null){
-			throw new MediaAudioNotExistException(id);
-		}
+		Map<String, String> result = new HashMapWrapper<String, String>().put("name", media.getFileName())
+																		 .put("uri", media.getPreviewUrl())
+																		 .getMap();
+		
+		return result;
+	}
+	
+	/**
+	 * 获取音频媒资下载地址(区别于预览，添加下载量)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月4日 下午2:44:22
+	 * @param @PathVariable Long id 素材文件id
+	 * @return String name 文件名称
+	 * @return String uri 预览uri
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/download/uri/{id}")
+	public Object downloadUri(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), media.getFolderId())){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
+		MediaAudioPO media = mediaAudioQuery.loadById(id);
 		
 		mediaAudioService.downloadAdd(user, id);
 		
@@ -693,5 +710,25 @@ public class MediaAudioController {
 	public Object downloadAdd(Long id, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		return mediaAudioService.downloadAdd(user, id);
+	}
+	
+	/**
+	 * 根据条件检索<br/>
+	 * <b>作者:</b>sms<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月13日 上午9:52:56
+	 * @param id 媒资id
+	 * @param name 媒资名称包含
+	 * @param startTime 创建起始时间
+	 * @param endTime 创建终止时间
+	 * @param tagId	标签id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/search")
+	public Object search(Long id, String name, String startTime, String endTime, Long tagId, HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadByCondition(id, name, startTime, endTime, tagId);
+		return audioVOs;
 	}
 }

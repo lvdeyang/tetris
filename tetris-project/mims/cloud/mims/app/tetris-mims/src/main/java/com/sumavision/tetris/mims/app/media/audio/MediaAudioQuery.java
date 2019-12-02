@@ -23,10 +23,12 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
+import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO.MediaAudioHotOrderComparator;
+import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
 import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodePO;
 import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodeQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagDAO;
@@ -136,7 +138,7 @@ public class MediaAudioQuery {
 			}
 			
 			//文件夹内音频
-			List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdInAndUploadStatusAndReviewStatusNotInOrAuthorId(
+			List<MediaAudioPO> audios = mediaAudioDao.findByFolderIdInAndUploadStatusAndReviewStatusNotInOrAuthorIdOrderByDesc(
 					new ArrayListWrapper<Long>().add(current.getId()).getList(), 
 					UploadStatus.COMPLETE.toString(), 
 					new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList(),
@@ -165,6 +167,29 @@ public class MediaAudioQuery {
 			breadCrumb.setNext(subBreadCrumb);
 			return new HashMapWrapper<String, Object>().put("rows", rows).put("breadCrumb", breadCrumb).getMap();
 		}
+	}
+	
+	/**
+	 * 根据id获取音频<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月6日 下午3:13:13
+	 * @param id 音频id
+	 */
+	public MediaAudioPO loadById(Long id) throws Exception {
+		MediaAudioPO media = mediaAudioDao.findOne(id);
+		
+		if(media == null){
+			throw new MediaAudioNotExistException(id);
+		}
+		
+		UserVO user = userQuery.current();
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), media.getFolderId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		return media;
 	}
 	
 	/**

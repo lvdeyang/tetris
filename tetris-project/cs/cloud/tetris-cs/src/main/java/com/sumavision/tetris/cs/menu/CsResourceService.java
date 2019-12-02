@@ -35,41 +35,42 @@ public class CsResourceService {
 		List<CsResourceVO> returnList = new ArrayList<CsResourceVO>();
 
 		List<CsResourcePO> aliveResource = resourceDao.findByParentId(parentId);
-
-		CsMenuVO parentMenu = csMenuQuery.getMenuByMenuId(parentId);
-
-		if (aliveResource != null && aliveResource.size() > 0) {
-			for (int i = 0; i < aliveResource.size(); i++) {
-				returnList.add(new CsResourceVO().set(aliveResource.get(i)));
-			}
+		if (aliveResource != null && !aliveResource.isEmpty()) {
+			returnList.addAll(CsResourceVO.getConverter(CsResourceVO.class).convert(aliveResource, CsResourceVO.class));
 		}
 
-		if (resourceList != null && resourceList.size() > 0) {
-			for (int i = 0; i < resourceList.size(); i++) {
-				if (aliveResource != null && aliveResource.size() > 0) {
-					Boolean alive = false;
-					for (int j = 0; j < aliveResource.size(); j++) {
-						if (aliveResource.get(j).getMimsUuid().equals(resourceList.get(i).getUuid())) {
-							alive = true;
-							break;
-						}
-					}
-					if (alive) {
-						continue;
+		if (resourceList == null || resourceList.isEmpty()) return returnList;
+		CsMenuVO parentMenu = csMenuQuery.getMenuByMenuId(parentId);
+		List<CsResourcePO> saveResources = new ArrayList<CsResourcePO>();
+		for (MediaAVideoVO aVideoVO : resourceList) {
+			CsResourcePO newresource = new CsResourcePO();
+			if (aliveResource != null && !aliveResource.isEmpty()) {
+				for (CsResourcePO resource : aliveResource) {
+					if (resource.getMimsUuid().equals(aVideoVO.getUuid())){
+						newresource = resource;
+						break;
 					}
 				}
-				CsResourcePO resource = new CsResourcePO();
-				resource.setName(resourceList.get(i).getName());
-				resource.setTime("");
-				resource.setPreviewUrl(resourceList.get(i).getPreviewUrl());
-				resource.setMimsUuid(resourceList.get(i).getUuid());
-				resource.setChannelId(channelId);
-				resource.setParentId(parentId);
-				resource.setParentPath(parentMenu.getParentPath() + "/" + parentMenu.getName());
-				resource.setUpdateTime(new Date());
-				resourceDao.save(resource);
-				returnList.add(new CsResourceVO().set(resource));
 			}
+			newresource.setMimsUuid(aVideoVO.getUuid());
+			newresource.setName(aVideoVO.getName());
+			newresource.setType(aVideoVO.getType());
+			newresource.setMimetype(aVideoVO.getMimetype());
+			newresource.setDuration(aVideoVO.getDuration());
+			newresource.setPreviewUrl(aVideoVO.getPreviewUrl());
+			newresource.setEncryption(aVideoVO.getEncryption() != null && aVideoVO.getEncryption() ? "true" : "false");
+			newresource.setEncryptionUrl(aVideoVO.getEncryptionUrl());
+			newresource.setDownloadCount(aVideoVO.getDownloadCount());
+			newresource.setMimsUuid(aVideoVO.getUuid());
+			newresource.setChannelId(channelId);
+			newresource.setParentId(parentId);
+			newresource.setParentPath(parentMenu.getParentPath() + "/" + parentMenu.getName());
+			newresource.setUpdateTime(new Date());
+			saveResources.add(newresource);
+		}
+		if (!saveResources.isEmpty()) {
+			resourceDao.save(saveResources);
+			returnList.addAll(CsResourceVO.getConverter(CsResourceVO.class).convert(saveResources, CsResourceVO.class));
 		}
 
 		return returnList;

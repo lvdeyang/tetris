@@ -1,8 +1,4 @@
 {
-	"ftpUserName": "test",
-	"ftpPassword": "123",
 	"ip": "192.165.56.94",
-	"port": "8180",
-	"useSetIp": true,
-	"setIp": "192.165.58.123"
+	"port": "8180"
 }

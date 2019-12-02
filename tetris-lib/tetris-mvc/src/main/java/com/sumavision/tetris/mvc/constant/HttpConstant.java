@@ -44,6 +44,9 @@ public interface HttpConstant {
 	/** session超时时间：30分钟 */
 	public static final int SESSION_TIMEOUT = 30*60;
 	
+	/** token超时时间：4小时 */
+	public static final int TOKEN_TIMEOUT = 4*60*60;
+	
 	/** 临时session超时时间：5秒 */
 	public static final int TEMPORARY_SESSION_TIMEOUT = 5;
 	

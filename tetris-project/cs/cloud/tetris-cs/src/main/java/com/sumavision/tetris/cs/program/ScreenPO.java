@@ -33,8 +33,17 @@ public class ScreenPO extends AbstractBasePO {
 	/** 媒资名称 */
 	private String name;
 	
+	/** 媒资类型 */
+	private String type;
+	
+	/** 媒资的mimetype */
+	private String mimetype;
+	
 	/** 媒资预览地址 */
 	private String previewUrl;
+	
+	/** 媒资加密预览地址 */
+	private String encryptionUrl;
 	
 	/** 媒资热度权重 */
 	private Integer hotWeight;
@@ -98,6 +107,24 @@ public class ScreenPO extends AbstractBasePO {
 	public void setName(String name) {
 		this.name = name;
 	}
+	
+	@Column(name = "TYPE")
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	@Column(name = "MIMETYPE")
+	public String getMimetype() {
+		return mimetype;
+	}
+
+	public void setMimetype(String mimetype) {
+		this.mimetype = mimetype;
+	}
 
 	@Column(name="PREVIEW_URL")
 	public String getPreviewUrl() {
@@ -106,6 +133,15 @@ public class ScreenPO extends AbstractBasePO {
 
 	public void setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+	}
+
+	@Column(name = "ENCRYPTION_URL")
+	public String getEncryptionUrl() {
+		return encryptionUrl;
+	}
+
+	public void setEncryptionUrl(String encryptionUrl) {
+		this.encryptionUrl = encryptionUrl;
 	}
 
 	@Column(name = "HOT_WEIGHT")

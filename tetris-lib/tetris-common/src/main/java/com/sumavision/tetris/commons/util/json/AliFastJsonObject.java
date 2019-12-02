@@ -29,6 +29,7 @@ public class AliFastJsonObject {
 	}
 	
 	private void packMap(String parentKeyPath, JSONObject json, Map<String, Object> map) throws Exception{
+		if(json == null) return;
 		parentKeyPath = parentKeyPath==null?"":parentKeyPath;
 		Set<String> jsonKeys = json.keySet();
 		for(String key:jsonKeys){

@@ -76,8 +76,9 @@ public class ColumnService {
 		columnPO.setUpdateTime(new Date());
 		
 		List<ColumnVO> columnVOs = columnQuery.queryColumnRoot(user);
-		Collections.sort(columnVOs,new ColumnPO.ColumnVOOrderComparator());
+		
 		if (columnVOs != null && columnVOs.size() > 0) {
+			Collections.sort(columnVOs,new ColumnPO.ColumnVOOrderComparator());
 			columnPO.setColumnOrder(columnVOs.get(columnVOs.size()-1).getColumnOrder() + 1);
 		}else{
 			columnPO.setColumnOrder(1l);

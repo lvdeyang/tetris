@@ -1,52 +1,42 @@
 package com.sumavision.tetris.cs.channel;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
-import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-import com.sumavision.tetris.cs.area.AreaQuery;
-import com.sumavision.tetris.cs.bak.AreaSendQuery;
-import com.sumavision.tetris.cs.bak.ResourceSendQuery;
 import com.sumavision.tetris.cs.bak.SendBakService;
-import com.sumavision.tetris.cs.bak.VersionSendPO;
-import com.sumavision.tetris.cs.bak.VersionSendQuery;
+import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
+import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoPO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityQuery;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityQueryType;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityService;
+import com.sumavision.tetris.cs.channel.broad.file.BroadFileBroadInfoService;
+import com.sumavision.tetris.cs.channel.broad.file.BroadFileService;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalService;
 import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
-import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
-import com.sumavision.tetris.cs.menu.CsMenuQuery;
+import com.sumavision.tetris.cs.channel.exception.ChannelAlreadyBroadException;
+import com.sumavision.tetris.cs.channel.exception.ChannelAlreadyStopException;
+import com.sumavision.tetris.cs.channel.exception.ChannelStatusErrorException;
+import com.sumavision.tetris.cs.menu.CsMenuPO;
 import com.sumavision.tetris.cs.menu.CsMenuService;
-import com.sumavision.tetris.cs.menu.CsMenuVO;
-import com.sumavision.tetris.cs.menu.CsResourceQuery;
-import com.sumavision.tetris.cs.menu.CsResourceVO;
-import com.sumavision.tetris.cs.program.ProgramQuery;
-import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
-import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
-import com.sumavision.tetris.cs.schedule.ScheduleVO;
-import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
-import com.sumavision.tetris.mims.app.media.compress.FileCompressVO;
-import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
-import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
-import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
-import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -63,27 +53,6 @@ public class ChannelService {
 	private CsMenuService csMenuService;
 
 	@Autowired
-	private CsMenuQuery csMenuQuery;
-
-	@Autowired
-	private CsResourceQuery csResourceQuery;
-
-	@Autowired
-	private AreaSendQuery areaSendQuery;
-
-	@Autowired
-	private ResourceSendQuery resourceSendQuery;
-
-	@Autowired
-	private VersionSendQuery versionSendQuery;
-
-	@Autowired
-	private ProgramQuery programQuery;
-
-	@Autowired
-	private AreaQuery areaQuery;
-
-	@Autowired
 	private UserQuery userQuery;
 	
 	@Autowired
@@ -93,28 +62,31 @@ public class ChannelService {
 	private ScheduleService scheduleService;
 	
 	@Autowired
-	private ScheduleQuery scheduleQuery;
-	
-	@Autowired
 	private ChannelAutoBroadInfoDAO channelAutoBroadInfoDAO;
 	
 	@Autowired
 	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
 	
 	@Autowired
+	private BroadAbilityService broadAbilityService;
+	
+	@Autowired
+	private BroadAbilityQuery broadAbilityQuery;
+	
+	@Autowired
+	private BroadFileBroadInfoService broadFileBroadInfoService;
+	
+	@Autowired
+	private BroadFileService broadFileService;
+	
+	@Autowired
+	private BroadTerminalService broadTerminalService;
+	
+	@Autowired
 	private Adapter adapter;
 	
 	@Autowired
-	private MediaCompressService mediaCompressService;
-	
-	@Autowired
-	private MimsServerPropsQuery mimsServerPropsQuery;
-	
-	@Autowired
 	private MediaAudioQuery mediaAudioQuery;
-	
-	@Autowired
-	private MediaEncodeQuery mediaEncodeQuery;
 	
 	private Map<Long, Timer> timerMap = new HashMapWrapper<Long, Timer>().getMap();
 
@@ -142,34 +114,49 @@ public class ChannelService {
 			Boolean autoBroadShuffle,
 			Integer autoBroadDuration,
 			String autoBroadStart,
+			String outputUserPort,
+			List<UserVO> outputUserList,
 			List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs) throws Exception {
 		UserVO user = userQuery.current();
 		
+		BroadWay channelBroadWay = BroadWay.fromName(broadWay);
 		ChannelPO channel = new ChannelPO();
 		channel.setName(name);
 		channel.setRemark(remark);
 		channel.setDate(date);
-		channel.setBroadWay(BroadWay.fromName(broadWay).getName());
-		channel.setBroadcastStatus("未播发");
+		channel.setBroadWay(channelBroadWay.getName());
+		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT);
 		channel.setGroupId(user.getGroupId());
 		channel.setUpdateTime(new Date());
 		channel.setEncryption(encryption);
 		channel.setAutoBroad(autoBroad);
 		channel.setType(type.toString());
 		
-		if (BroadWay.fromName(broadWay) == BroadWay.ABILITY_BROAD || BroadWay.fromName(broadWay) == BroadWay.PC_BROAD) {
+		//校验用户是否被占用
+		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
+			broadAbilityBroadInfoService.checkUserUse(null, outputUserList);
+			broadFileBroadInfoService.checkUserUse(null, outputUserList);
+		}
+		
+		//校验ip和端口对是否被占用，设置能力播发id
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
 			broadAbilityBroadInfoService.checkIpAndPortExists(null, abilityBroadInfoVOs);
 			channel.setAbilityBroadId(adapter.getNewId(channelDao.getAllAbilityId()));
 		}
 
 		channelDao.save(channel);
 		
-		if (BroadWay.fromName(broadWay) == BroadWay.ABILITY_BROAD || BroadWay.fromName(broadWay) == BroadWay.PC_BROAD) {
-			if (abilityBroadInfoVOs != null && !abilityBroadInfoVOs.isEmpty()) {
-				broadAbilityBroadInfoService.saveInfoList(channel.getId(), abilityBroadInfoVOs);
-			}
+		//保存播发输出信息
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
+			List<BroadAbilityBroadInfoVO> saveinInfoVOs = new ArrayList<BroadAbilityBroadInfoVO>();
+			if (abilityBroadInfoVOs != null && !abilityBroadInfoVOs.isEmpty()) saveinInfoVOs.addAll(abilityBroadInfoVOs);
+			saveinInfoVOs.addAll(broadAbilityBroadInfoService.changeVO(outputUserList, outputUserPort));
+			broadAbilityBroadInfoService.saveInfoList(channel.getId(), saveinInfoVOs);
+		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
+			broadFileBroadInfoService.saveInfoList(channel.getId(), broadFileBroadInfoService.changeVO(outputUserList));
 		}
 		
+		//保存智能播发信息
 		if (autoBroad) {
 			ChannelAutoBroadInfoPO autoBroadInfoPO = new ChannelAutoBroadInfoPO();
 			autoBroadInfoPO.setUpdateTime(new Date());
@@ -191,19 +178,20 @@ public class ChannelService {
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
 	 * @param Long id 频道id
 	 */
-	public void remove(Long id) throws Exception {
-		ChannelPO channel = channelDao.findOne(id);
-		broadAbilityBroadInfoService.remove(id);
-		stopBroadcast(id);
-		if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			if (!channelQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.DELETE.getRemark());
+	public void remove(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		broadAbilityBroadInfoService.remove(channelId);
+		broadFileBroadInfoService.remove(channelId);
+		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) stopBroadcast(channelId);
+		if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName()) && !channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT)) {
+			if (!broadAbilityQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.DELETE.getRemark());
 		}
 		channelDao.delete(channel);
-		ChannelAutoBroadInfoPO channelAutoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(id);
+		ChannelAutoBroadInfoPO channelAutoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelId);
 		if (channelAutoBroadInfoPO != null) channelAutoBroadInfoDAO.delete(channelAutoBroadInfoPO);
-		csMenuService.removeMenuByChannelId(id);
-		scheduleService.removeByChannelId(id);
-		sendBakService.removeBakFromChannel(id.toString());
+		csMenuService.removeMenuByChannelId(channelId);
+		scheduleService.removeByChannelId(channelId);
+		sendBakService.removeBakFromChannel(channelId);
 	}
 
 	/**
@@ -228,18 +216,30 @@ public class ChannelService {
 			Boolean autoBroadShuffle,
 			Integer autoBroadDuration,
 			String autoBroadStart,
+			String outputUserPort,
+			List<UserVO> outputUserList,
 			List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs) throws Exception {
-		ChannelPO channel = channelDao.findOne(id);
-		if (channel == null) return null;
+		ChannelPO channel = channelQuery.findByChannelId(id);
 		
-		if (channel.getAutoBroad() && !autoBroad && timerMap.containsKey(id)) {
+		if (channel.getAutoBroad() && !autoBroad && channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
 			timerMap.get(id).cancel();
-			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+			stopBroadcast(id);
 		}
 		
-		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD || BroadWay.fromName(channel.getBroadWay()) == BroadWay.PC_BROAD) {
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
+			broadAbilityBroadInfoService.checkUserUse(id, outputUserList);
+			broadFileBroadInfoService.checkUserUse(id, outputUserList);
+		}
+		
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
 			broadAbilityBroadInfoService.checkIpAndPortExists(id, abilityBroadInfoVOs);
-			broadAbilityBroadInfoService.saveInfoList(id, abilityBroadInfoVOs);
+			List<BroadAbilityBroadInfoVO> saveInfoVOs = new ArrayList<BroadAbilityBroadInfoVO>();
+			if (abilityBroadInfoVOs != null) saveInfoVOs.addAll(abilityBroadInfoVOs);
+			saveInfoVOs.addAll(broadAbilityBroadInfoService.changeVO(outputUserList, outputUserPort));
+			broadAbilityBroadInfoService.saveInfoList(id, saveInfoVOs);
+		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
+			broadFileBroadInfoService.saveInfoList(channel.getId(), broadFileBroadInfoService.changeVO(outputUserList));
 		}
 		channel.setName(name);
 		channel.setRemark(remark);
@@ -274,17 +274,35 @@ public class ChannelService {
 	 * <b>日期：</b>2019年10月21日 下午3:56:48
 	 * @param channelId 频道id
 	 */
-	public JSONObject startBroadcast(Long channelId) throws Exception {
-		ChannelPO channelPO = channelDao.findOne(channelId);
-		if (channelPO == null) return null;
-		if (channelPO.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) return getReturnJSON(false, "当前为播发状态");
+	public void startBroadcast(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) throw new ChannelAlreadyBroadException(channel.getName());
 		
-		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return startAbilityBroadTimer(channelId);
-		}else if (channelPO.getBroadWay().equals(BroadWay.PC_BROAD.getName())) {
-			return startPcBroadTimer(channelId);
-		}else {
-			return startTerminalBroadcast(channelId);
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
+			broadAbilityService.startAbilityBroadcast(channelId);
+		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD){
+			broadFileService.startFileBroadcast(channelId);
+		} else {
+			broadTerminalService.startTerminalBroadcast(channelId);
+		}
+	}
+	
+	/**
+	 * 重新播发(当前只终端播发提供该业务)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月27日 下午4:30:47
+	 * @param Long channelId 频道id
+	 */
+	public void restartBroadcast(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_STOPPED))
+			throw new ChannelStatusErrorException(channel.getBroadcastStatus(), "重新播发");
+		
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay == BroadWay.TERMINAL_BROAD) {
+			broadTerminalService.restartBroadcast(channelId);
 		}
 	}
 	
@@ -296,44 +314,56 @@ public class ChannelService {
 	 * @param channelId 频道Id
 	 * @throws Exception
 	 */
-	public JSONObject stopBroadcast(Long channelId) throws Exception {
-		ChannelPO channelPO = channelDao.findOne(channelId);
-		if (channelPO == null) return getReturnJSON(false, "播发频道数据错误");
-		if (!channelPO.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) return getReturnJSON(false, "当前不为播发状态");
+	public void stopBroadcast(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) throw new ChannelAlreadyStopException(channel.getName());
 		
-		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return stopAbilityBroadcast(channelId);
-		}else if (channelPO.getBroadWay().equals(BroadWay.PC_BROAD.getName())){
-			return stopPcBroadcast(channelId);
-		}else {
-			return stopTerminalBroadcast(channelId);
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
+			broadAbilityService.stopAbilityBroadcast(channelId);
+		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
+			broadFileService.stopFileBroadcast(channelId);
+		} else {
+			broadTerminalService.stopTerminalBroadcast(channelId);
 		}
 	}
 	
-	/**
-	 * 一次性下发所有排期<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月23日 上午11:50:24
-	 * @param channelId
-	 * @throws Exception
-	 */
-	public void autoAddSchedulesAndStart(Long channelId) throws Exception {
+	public void seekBroadcast(Long channelId, Long duration) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING))
+			throw new ChannelStatusErrorException(channel.getBroadcastStatus(), "跳转");
+		
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
+			broadAbilityService.seekAbilityBroadcast(channel, duration);
+		}
+	}
+	
+	public void autoAddSchedulesAndBroad(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) stopBroadcast(channelId);
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
+			autoSetSchedule(channelId);
+			startBroadcast(channelId);
+		}
+	}
+	
+	public void autoSetSchedule(Long channelId) throws Exception {
 		Long now = DateUtil.getLongDate();
+		scheduleService.removeFromNowByChannelId(channelId);
 		
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
-			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
-			channelDao.save(channel);
-		}
-		
 		ChannelAutoBroadInfoPO autoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelId);
 		if (autoBroadInfoPO == null) return;
 		
 		if (timerMap.containsKey(channel)) timerMap.get(channel).cancel();
 		
 		List<MediaAudioVO> recommends = mediaAudioQuery.loadRecommend();
-		if (recommends == null || recommends.isEmpty()) return;
+		if (recommends != null && !recommends.isEmpty()){
+			List<MediaAVideoVO> medias = JSONArray.parseArray(JSONArray.toJSONString(recommends), MediaAVideoVO.class);
+			csMenuService.autoAddMenuAndSource(channelId, "audioCommend", medias);
+		}
 		
 		String broadStartTime = new StringBufferWrapper().append(autoBroadInfoPO.getStartDate())
 				.append(" ")
@@ -342,833 +372,463 @@ public class ChannelService {
 		Long broadStartTimeLong = DateUtil.parse(broadStartTime, DateUtil.dateTimePattern).getTime() + 30000;
 		Boolean fromToday = now < broadStartTimeLong;
 		
-		List<ScheduleVO> scheduleVOs = new ArrayList<ScheduleVO>();
-		String lastDate = null;
 		for (int i = 0; i < autoBroadInfoPO.getDuration(); i++) {
 			String broadTime = new StringBufferWrapper()
 					.append(DateUtil.addDateStr(autoBroadInfoPO.getStartDate(), i + (fromToday ? 0 : 1)))
 					.append(" ")
 					.append(autoBroadInfoPO.getStartTime())
 					.toString();
-			if (i == autoBroadInfoPO.getDuration() - 1) lastDate = broadTime;
-			if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
-			List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
 			List<ScreenVO> screens = new ArrayList<ScreenVO>();
-			for (MediaAudioVO audio : audios) {
-				ScreenVO screen = new ScreenVO();
-				screen.setName(audio.getName());
-				screen.setPreviewUrl(channel.getEncryption() ? audio.getEncryptionUrl() : audio.getPreviewUrl());
-				screen.setHotWeight(audio.getHotWeight());
-				screen.setDownloadCount(audio.getDownloadCount());
-				screen.setDuration(audio.getDuration());
-				screens.add(screen);
-			}
-			ScheduleVO scheduleVO = scheduleService.addSchedule(channelId, broadTime, screens);
-			scheduleVOs.add(scheduleVO);
-		}
-		
-		System.out.println(JSONObject.toJSONString(scheduleVOs));
-		
-		if (lastDate != null && !lastDate.isEmpty()) {
-			Timer nTimer = new Timer();
-			TimerTask timerTask = new TimerTask() {
-				
-				@Override
-				public void run() {
-					try {
-						channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
-						channelDao.save(channel);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
-				}
-			};
-			Long delayTime = (DateUtil.parse(lastDate, DateUtil.dateTimePattern)).getTime() - DateUtil.getLongDate() + 1000;
-			nTimer.schedule(timerTask, delayTime > 0 ? delayTime : 0);
-			timerMap.put(channelId, nTimer);
-		}
-	}
-	
-	/**
-	 * 根据频道id和音频推荐自动生成节目单<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月14日 上午11:10:01
-	 * @param user 用户信息
-	 * @param channelId 频道id
-	 */
-	public void autoAddScheduleAndStart(Long channelId) throws Exception{
-		Long now = DateUtil.getLongDate();
-		
-		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
-			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
-			channelDao.save(channel);
-		}
-		
-		ChannelAutoBroadInfoPO autoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelId);
-		if (autoBroadInfoPO == null) return;
-		
-		if (timerMap.containsKey(channel)) timerMap.get(channel).cancel();
-		
-		String date = autoBroadInfoPO.getStartDate();
-		String durationDate = DateUtil.addDateStr(date, autoBroadInfoPO.getDuration() - 1);
-		String durationTime = new StringBufferWrapper().append(durationDate)
-				.append(" ")
-				.append(autoBroadInfoPO.getStartTime())
-				.toString();
-		//生效时间推后一秒防止代码时间导致排期失效
-		Long durationDateLong = DateUtil.parse(durationTime, DateUtil.dateTimePattern).getTime() + 1000;
-		
-		if (now <= durationDateLong) {
-			String todayBroadTime = new StringBufferWrapper().append(DateUtil.getYearmonthDay(new Date()))
-					.append(" ")
-					.append(autoBroadInfoPO.getStartTime())
-					.toString();
-			Long todayBroadTimeLong = DateUtil.parse(todayBroadTime, DateUtil.dateTimePattern).getTime();
-			
-			if (todayBroadTimeLong + 5000 >= now) {
-				List<MediaAudioVO> recommends;
-				recommends = mediaAudioQuery.loadRecommend();
-				if (recommends == null || recommends.isEmpty()) return;
-				
+			if (recommends != null && !recommends.isEmpty()) {
 				if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
 				List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
-				List<ScreenVO> screens = new ArrayList<ScreenVO>(); 
 				for (MediaAudioVO audio : audios) {
 					ScreenVO screen = new ScreenVO();
+					screen.setMimsUuid(audio.getUuid());
 					screen.setName(audio.getName());
 					screen.setPreviewUrl(audio.getPreviewUrl());
+					screen.setEncryption(audio.getEncryption() != null && audio.getEncryption() ? "true" : "false");
+					screen.setEncryptionUrl(audio.getEncryptionUrl());
+					screen.setType(audio.getType());
+					screen.setMimetype(audio.getMimetype());
 					screen.setHotWeight(audio.getHotWeight());
 					screen.setDownloadCount(audio.getDownloadCount());
 					screen.setDuration(audio.getDuration());
 					screens.add(screen);
 				}
-				
-				ScheduleVO scheduleVO = scheduleService.addSchedule(channelId, todayBroadTime, screens);
-				
-				Timer nTimer = new Timer();
-				TimerTask timerTask = new TimerTask() {
-					
-					@Override
-					public void run() {
-						try {
-							startPcBroadcast(channelId, scheduleVO.getId());
-							Long delayTime = DateUtil.getEndDate(DateUtil.getYearmonthDay(DateUtil.parse(todayBroadTime, DateUtil.dateTimePattern))).getTime() - DateUtil.getLongDate() + 1000;
-							Thread.sleep(delayTime > 0 ? delayTime : 0);
-							autoAddScheduleAndStart(channelId);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				};
-				Long nNow = DateUtil.getLongDate();
-				if (nNow >= todayBroadTimeLong) {
-					nTimer.schedule(timerTask, 0);
-				} else {
-					nTimer.schedule(timerTask, todayBroadTimeLong - nNow);
-				}
-				
-				timerMap.put(channelId, nTimer);
-			} else {
-				Timer nTimer = new Timer();
-				TimerTask timerTask = new TimerTask() {
-					
-					@Override
-					public void run() {
-						try {
-							autoAddScheduleAndStart(channelId);
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				};
-				Long delayTime = DateUtil.getEndDate(DateUtil.getYearmonthDay(DateUtil.parse(todayBroadTime, DateUtil.dateTimePattern))).getTime() - DateUtil.getLongDate() + 1000;
-				nTimer.schedule(timerTask, delayTime > 0 ? delayTime : 0);
-				timerMap.put(channelId, nTimer);
 			}
-		} else {
-			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
-			channelDao.save(channel);
+			scheduleService.addSchedule(channelId, broadTime, screens);
 		}
 	}
 	
-	/**
-	 * 停止播发(能力播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 */
-	public JSONObject stopAbilityBroadcast(Long channelId) throws Exception{
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
-		
-		if (channelQuery.sendAbilityRequest(BroadAbilityQueryType.STOP, channel, null, null)) {
-			Timer timer = timerMap.get(channelId);
-			if (timer != null) {
-				timer.cancel();
-			}
-			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
-			channelDao.save(channel);
+	public void addScheduleDeal(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
+			broadAbilityService.addScheduleDeal(channelId);
+		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
 			
-			return getReturnJSON(true, "");
-		}else {
-			return getReturnJSON(false, "请求能力失败");
-		}
-	}
-
-	/**
-	 * 停止播发(终端播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 */
-	public JSONObject stopTerminalBroadcast(Long channelId) throws Exception {
-		String versionSendNum = versionSendQuery.getBroadId(channelId);
-		if (!versionSendNum.isEmpty()
-				&& getChannelBroadstatus(channelId).equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
-			JSONObject jsonParam = new JSONObject();
-			List<String> ids = new ArrayList<String>();
-			ids.add(versionSendNum);
-			jsonParam.put("ids", ids);
-			String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-			if (!url.isEmpty()) {
-				JSONObject response = HttpRequestUtil
-						.httpPost("http://" + url + "/ed/speaker/stopSendFile", jsonParam);
-				if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
-					return getReturnJSON(true, "");
-				} else {
-					return getReturnJSON(false, "未知错误，播发失败");
-				}
-			}else {
-				return getReturnJSON(false, "播发地址为空");
-			}
 		} else {
-			return getReturnJSON(false, "当前频道未处于可播发状态");
-		}
-	}
-	
-	/**
-	 * 停止PC播发<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月21日 下午4:35:37
-	 * @param channelId 频道id
-	 */
-	public JSONObject stopPcBroadcast(Long channelId) throws Exception {
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
-		
-		Timer timer = timerMap.get(channelId);
-		if (timer != null) {
-			timer.cancel();
-		}
-		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
-		channelDao.save(channel);
 			
-		return getReturnJSON(true, "");
+		}
 	}
 	
-	/**
-	 * 开始播发(PC播发，根据排期)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月14日 下午2:25:54
-	 * @param Long channelId 频道id
-	 */
-	public JSONObject startPcBroadTimer(Long channelId) throws Exception {
-		return startAbilityBroadTimer(channelId);
-	}
-	
-	/**
-	 * 开始PC播发<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月14日 下午2:25:54
-	 * @param channelId 频道id
-	 * @param scheduleId 排期id
-	 */
-	public JSONObject startPcBroadcast(Long channelId, Long scheduleId) throws Exception {
-		return getReturnJSON(true, "");
-	}
-	
-	/**
-	 * 开始播发(能力播发，根据排期)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 */
-	public JSONObject startAbilityBroadTimer(Long channelId) throws Exception {
-		ChannelPO channel = channelDao.findOne(channelId);
-		
-		if (channel == null) {
-			throw new ChannelNotExistsException(channelId);
-		}
-		
-		Long now = DateUtil.getLongDate();
-		
-		List<ScheduleVO> scheduleVOs = scheduleQuery.getByChannelId(channelId);
-		
-		if (scheduleVOs == null || scheduleVOs.isEmpty()) {
-			throw new ScheduleNoneToBroadException(channel.getName());
-		}
-		
-		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
-			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
-			channelDao.save(channel);
-		}
-		
-		if (timerMap.containsKey(channelId)) {
-			timerMap.get(channelId).cancel();
-		}
-		for (ScheduleVO scheduleVO : scheduleVOs) {
-			Date broadDate = DateUtil.parse(scheduleVO.getBroadDate(), DateUtil.dateTimePattern);
-			Long broadDateLong = broadDate.getTime();
-			//以防用户选择"此刻"为播发时间的时候，由于手动点击"播发"和程序执行时间导致播发不生效，因此预留5秒。
-			if (broadDateLong + 5000 > now || scheduleVOs.indexOf(scheduleVO) == scheduleVOs.size() - 1) {
-				Timer timer = timerMap.get(channelId);
-				if (timer != null) {
-					timer.cancel();
-				}
-				Timer nTimer = new Timer();
-				TimerTask timerTask = new TimerTask() {
-					
-					@Override
-					public void run() {
-						try {
-							if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)){
-								System.out.println(channelId + ":" + scheduleVO.getBroadDate());
-								if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())){
-									startAbilityBroadcast(channelId, scheduleVO.getId());
-								} else if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-									startPcBroadcast(channelId, scheduleVO.getId());
-								}
-								Long nNow = DateUtil.getLongDate();
-								//如播发时间与此刻间隔小于5s,则延时5秒进入下一个播发，以防排期被二次播发
-								if (broadDateLong < nNow - 5000) {
-									Thread.sleep(nNow - broadDateLong);
-								}
-								startAbilityBroadTimer(channelId);
-							}
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-				};
-				if (broadDateLong + 5000 > now) {
-					Long nNow = DateUtil.getLongDate();
-					nTimer.schedule(timerTask, broadDateLong > nNow ? broadDateLong - nNow : 0);
-				} else {
-					if (channel.getType().equals(ChannelType.REMOTE.toString())) {
-						channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
-						channelDao.save(channel);
-					} else {
-						nTimer.schedule(timerTask, 1000l);
-					}
-				}
-				timerMap.put(channelId, nTimer);
-				break;
-			}
-		}
-		
-		return getReturnJSON(true, ""); 
-	}
-	
-	/**
-	 * 开始播发(能力播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 * @param Long scheduleId 排期id
-	 */
-	public JSONObject startAbilityBroadcast(Long channelId, Long scheduleId) throws Exception{
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
-		
-		JSONObject output = new JSONObject();
-		output.put("proto-type", "udp-ts");
-		List<JSONObject> destList = new ArrayList<JSONObject>();
-		String localIp = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD).split(":")[0];
-		List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs = broadAbilityBroadInfoService.queryFromChannelId(channelId);
-		if (broadAbilityBroadInfoVOs == null || broadAbilityBroadInfoVOs.isEmpty()) return getReturnJSON(false, "无输出");
-		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
-			JSONObject dest = new JSONObject();
-			dest.put("local_ip", localIp);
-			dest.put("ipv4", broadAbilityBroadInfoVO.getPreviewUrlIp());
-			dest.put("port", broadAbilityBroadInfoVO.getPreviewUrlPort());
-			dest.put("vport", "");
-			dest.put("aport", "");
-			destList.add(dest);
-		}
-		output.put("dest_list", destList);
-		
-		output.put("scramble", channel.getEncryption() != null && channel.getEncryption() ? "AES-128" : "none");
-		output.put("key", channel.getEncryption() != null && channel.getEncryption() ? mediaEncodeQuery.queryKey() : "");
-		BroadAbilityQueryType type = channelQuery.broadCmd(channelId);
-		
-		JSONObject responseJSON;
-		if (channelQuery.sendAbilityRequest(type, channel, abilityProgramText(programQuery.getProgram(scheduleId)), output)) {
-			if(type != BroadAbilityQueryType.COVER) channelQuery.saveBroad(channelId);
-			responseJSON = getReturnJSON(true, "");
-		}else {
-			responseJSON = getReturnJSON(false, "请求能力失败");
-		}
-		
-		return responseJSON;
-	}
+//	/**
+//	 * 一次性下发所有排期<br/>
+//	 * <b>作者:</b>lzp<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年10月23日 上午11:50:24
+//	 * @param channelId
+//	 * @throws Exception
+//	 */
+//	public void autoAddSchedulesAndStart(Long channelId) throws Exception {
+//		Long now = DateUtil.getLongDate();
+//		
+//		ChannelPO channel = channelQuery.findByChannelId(channelId);
+//		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+//			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
+//			channelDao.save(channel);
+//		}
+//		
+//		ChannelAutoBroadInfoPO autoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelId);
+//		if (autoBroadInfoPO == null) return;
+//		
+//		if (timerMap.containsKey(channel)) timerMap.get(channel).cancel();
+//		
+//		List<MediaAudioVO> recommends = mediaAudioQuery.loadRecommend();
+//		if (recommends == null || recommends.isEmpty()) return;
+//		
+//		String broadStartTime = new StringBufferWrapper().append(autoBroadInfoPO.getStartDate())
+//				.append(" ")
+//				.append(autoBroadInfoPO.getStartTime())
+//				.toString();
+//		Long broadStartTimeLong = DateUtil.parse(broadStartTime, DateUtil.dateTimePattern).getTime() + 30000;
+//		Boolean fromToday = now < broadStartTimeLong;
+//		
+//		List<ScheduleVO> scheduleVOs = new ArrayList<ScheduleVO>();
+//		String lastDate = null;
+//		for (int i = 0; i < autoBroadInfoPO.getDuration(); i++) {
+//			String broadTime = new StringBufferWrapper()
+//					.append(DateUtil.addDateStr(autoBroadInfoPO.getStartDate(), i + (fromToday ? 0 : 1)))
+//					.append(" ")
+//					.append(autoBroadInfoPO.getStartTime())
+//					.toString();
+//			if (i == autoBroadInfoPO.getDuration() - 1) lastDate = broadTime;
+//			if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
+//			List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
+//			List<ScreenVO> screens = new ArrayList<ScreenVO>();
+//			for (MediaAudioVO audio : audios) {
+//				ScreenVO screen = new ScreenVO();
+//				screen.setName(audio.getName());
+//				screen.setPreviewUrl(channel.getEncryption() ? audio.getEncryptionUrl() : audio.getPreviewUrl());
+//				screen.setHotWeight(audio.getHotWeight());
+//				screen.setDownloadCount(audio.getDownloadCount());
+//				screen.setDuration(audio.getDuration());
+//				screens.add(screen);
+//			}
+//			ScheduleVO scheduleVO = scheduleService.addSchedule(channelId, broadTime, screens);
+//			scheduleVOs.add(scheduleVO);
+//		}
+//		
+//		System.out.println(JSONObject.toJSONString(scheduleVOs));
+//		
+//		if (lastDate != null && !lastDate.isEmpty()) {
+//			Timer nTimer = new Timer();
+//			TimerTask timerTask = new TimerTask() {
+//				
+//				@Override
+//				public void run() {
+//					try {
+//						channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+//						channelDao.save(channel);
+//					} catch (Exception e) {
+//						e.printStackTrace();
+//					}
+//				}
+//			};
+//			Long delayTime = (DateUtil.parse(lastDate, DateUtil.dateTimePattern)).getTime() - DateUtil.getLongDate() + 1000;
+//			nTimer.schedule(timerTask, delayTime > 0 ? delayTime : 0);
+//			timerMap.put(channelId, nTimer);
+//		}
+//	}
+//	
+//	/**
+//	 * 根据频道id和音频推荐自动生成节目单<br/>
+//	 * <b>作者:</b>lzp<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年10月14日 上午11:10:01
+//	 * @param user 用户信息
+//	 * @param channelId 频道id
+//	 */
+//	public void autoAddScheduleAndStart(Long channelId) throws Exception{
+//		Long now = DateUtil.getLongDate();
+//		
+//		ChannelPO channel = channelQuery.findByChannelId(channelId);
+//		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+//			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
+//			channelDao.save(channel);
+//		}
+//		
+//		ChannelAutoBroadInfoPO autoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelId);
+//		if (autoBroadInfoPO == null) return;
+//		
+//		if (timerMap.containsKey(channel)) timerMap.get(channel).cancel();
+//		
+//		String date = autoBroadInfoPO.getStartDate();
+//		String durationDate = DateUtil.addDateStr(date, autoBroadInfoPO.getDuration() - 1);
+//		String durationTime = new StringBufferWrapper().append(durationDate)
+//				.append(" ")
+//				.append(autoBroadInfoPO.getStartTime())
+//				.toString();
+//		//生效时间推后一秒防止代码时间导致排期失效
+//		Long durationDateLong = DateUtil.parse(durationTime, DateUtil.dateTimePattern).getTime() + 1000;
+//		
+//		if (now <= durationDateLong) {
+//			String todayBroadTime = new StringBufferWrapper().append(DateUtil.getYearmonthDay(new Date()))
+//					.append(" ")
+//					.append(autoBroadInfoPO.getStartTime())
+//					.toString();
+//			Long todayBroadTimeLong = DateUtil.parse(todayBroadTime, DateUtil.dateTimePattern).getTime();
+//			
+//			if (todayBroadTimeLong + 5000 >= now) {
+//				List<MediaAudioVO> recommends;
+//				recommends = mediaAudioQuery.loadRecommend();
+//				if (recommends == null || recommends.isEmpty()) return;
+//				
+//				if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
+//				List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
+//				List<ScreenVO> screens = new ArrayList<ScreenVO>(); 
+//				for (MediaAudioVO audio : audios) {
+//					ScreenVO screen = new ScreenVO();
+//					screen.setName(audio.getName());
+//					screen.setPreviewUrl(audio.getPreviewUrl());
+//					screen.setHotWeight(audio.getHotWeight());
+//					screen.setDownloadCount(audio.getDownloadCount());
+//					screen.setDuration(audio.getDuration());
+//					screens.add(screen);
+//				}
+//				
+//				ScheduleVO scheduleVO = scheduleService.addSchedule(channelId, todayBroadTime, screens);
+//				
+//				Timer nTimer = new Timer();
+//				TimerTask timerTask = new TimerTask() {
+//					
+//					@Override
+//					public void run() {
+//						try {
+//							startPcBroadcast(channelId, scheduleVO.getId());
+//							Long delayTime = DateUtil.getEndDate(DateUtil.getYearmonthDay(DateUtil.parse(todayBroadTime, DateUtil.dateTimePattern))).getTime() - DateUtil.getLongDate() + 1000;
+//							Thread.sleep(delayTime > 0 ? delayTime : 0);
+//							autoAddScheduleAndStart(channelId);
+//						} catch (Exception e) {
+//							e.printStackTrace();
+//						}
+//					}
+//				};
+//				Long nNow = DateUtil.getLongDate();
+//				if (nNow >= todayBroadTimeLong) {
+//					nTimer.schedule(timerTask, 0);
+//				} else {
+//					nTimer.schedule(timerTask, todayBroadTimeLong - nNow);
+//				}
+//				
+//				timerMap.put(channelId, nTimer);
+//			} else {
+//				Timer nTimer = new Timer();
+//				TimerTask timerTask = new TimerTask() {
+//					
+//					@Override
+//					public void run() {
+//						try {
+//							autoAddScheduleAndStart(channelId);
+//						} catch (Exception e) {
+//							e.printStackTrace();
+//						}
+//					}
+//				};
+//				Long delayTime = DateUtil.getEndDate(DateUtil.getYearmonthDay(DateUtil.parse(todayBroadTime, DateUtil.dateTimePattern))).getTime() - DateUtil.getLongDate() + 1000;
+//				nTimer.schedule(timerTask, delayTime > 0 ? delayTime : 0);
+//				timerMap.put(channelId, nTimer);
+//			}
+//		} else {
+//			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+//			channelDao.save(channel);
+//		}
+//	}
+//	
+//	/**
+//	 * 停止播发(能力播发)<br/>
+//	 * <b>作者:</b>lzp<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年6月25日 上午11:06:57
+//	 * @param Long channelId 频道id
+//	 */
+//	public JSONObject stopAbilityBroadcast(Long channelId) throws Exception{
+//		ChannelPO channel = channelDao.findOne(channelId);
+//		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
+//		
+//		if (channelQuery.sendAbilityRequest(BroadAbilityQueryType.STOP, channel, null, null)) {
+//			Timer timer = timerMap.get(channelId);
+//			if (timer != null) {
+//				timer.cancel();
+//			}
+//			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+//			channelDao.save(channel);
+//			
+//			return getReturnJSON(true, "");
+//		}else {
+//			return getReturnJSON(false, "请求能力失败");
+//		}
+//	}
+//
+//	/**
+//	 * 停止PC播发<br/>
+//	 * <b>作者:</b>lzp<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年10月21日 下午4:35:37
+//	 * @param channelId 频道id
+//	 */
+//	public JSONObject stopPcBroadcast(Long channelId) throws Exception {
+//		ChannelPO channel = channelDao.findOne(channelId);
+//		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
+//		
+//		Timer timer = timerMap.get(channelId);
+//		if (timer != null) {
+//			timer.cancel();
+//		}
+//		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+//		channelDao.save(channel);
+//			
+//		return getReturnJSON(true, "");
+//	}
+//	
+//	/**
+//	 * 开始播发(PC播发，根据排期)<br/>
+//	 * <b>作者:</b>lzp<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年10月14日 下午2:25:54
+//	 * @param Long channelId 频道id
+//	 */
+//	public JSONObject startPcBroadTimer(Long channelId) throws Exception {
+//		return startAbilityBroadTimer(channelId);
+//	}
+//	
+//	/**
+//	 * 开始PC播发<br/>
+//	 * <b>作者:</b>lzp<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年10月14日 下午2:25:54
+//	 * @param channelId 频道id
+//	 * @param scheduleId 排期id
+//	 */
+//	public JSONObject startPcBroadcast(Long channelId, Long scheduleId) throws Exception {
+//		return getReturnJSON(true, "");
+//	}
+//	
+//	/**
+//	 * 开始播发(能力播发，根据排期)<br/>
+//	 * <b>作者:</b>lzp<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年6月25日 上午11:06:57
+//	 * @param Long channelId 频道id
+//	 */
+//	public JSONObject startAbilityBroadTimer(Long channelId) throws Exception {
+//		ChannelPO channel = channelDao.findOne(channelId);
+//		
+//		if (channel == null) {
+//			throw new ChannelNotExistsException(channelId);
+//		}
+//		
+//		Long now = DateUtil.getLongDate();
+//		
+//		List<ScheduleVO> scheduleVOs = scheduleQuery.getByChannelId(channelId);
+//		
+//		if (scheduleVOs == null || scheduleVOs.isEmpty()) {
+//			throw new ScheduleNoneToBroadException(channel.getName());
+//		}
+//		
+//		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+//			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
+//			channelDao.save(channel);
+//		}
+//		
+//		if (timerMap.containsKey(channelId)) {
+//			timerMap.get(channelId).cancel();
+//		}
+//		for (ScheduleVO scheduleVO : scheduleVOs) {
+//			Date broadDate = DateUtil.parse(scheduleVO.getBroadDate(), DateUtil.dateTimePattern);
+//			Long broadDateLong = broadDate.getTime();
+//			//以防用户选择"此刻"为播发时间的时候，由于手动点击"播发"和程序执行时间导致播发不生效，因此预留5秒。
+//			if (broadDateLong + 5000 > now || scheduleVOs.indexOf(scheduleVO) == scheduleVOs.size() - 1) {
+//				Timer timer = timerMap.get(channelId);
+//				if (timer != null) {
+//					timer.cancel();
+//				}
+//				Timer nTimer = new Timer();
+//				TimerTask timerTask = new TimerTask() {
+//					
+//					@Override
+//					public void run() {
+//						try {
+//							if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)){
+//								System.out.println(channelId + ":" + scheduleVO.getBroadDate());
+//								if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())){
+//									startAbilityBroadcast(channelId, scheduleVO.getId());
+//								} else if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
+//									startPcBroadcast(channelId, scheduleVO.getId());
+//								}
+//								Long nNow = DateUtil.getLongDate();
+//								//如播发时间与此刻间隔小于5s,则延时5秒进入下一个播发，以防排期被二次播发
+//								if (broadDateLong < nNow - 5000) {
+//									Thread.sleep(nNow - broadDateLong);
+//								}
+//								startAbilityBroadTimer(channelId);
+//							}
+//						} catch (Exception e) {
+//							e.printStackTrace();
+//						}
+//					}
+//				};
+//				if (broadDateLong + 5000 > now) {
+//					Long nNow = DateUtil.getLongDate();
+//					nTimer.schedule(timerTask, broadDateLong > nNow ? broadDateLong - nNow : 0);
+//				} else {
+//					if (channel.getType().equals(ChannelType.REMOTE.toString())) {
+//						channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+//						channelDao.save(channel);
+//					} else {
+//						nTimer.schedule(timerTask, 1000l);
+//					}
+//				}
+//				timerMap.put(channelId, nTimer);
+//				break;
+//			}
+//		}
+//		
+//		return getReturnJSON(true, ""); 
+//	}
+//	
+//	/**
+//	 * 开始播发(能力播发)<br/>
+//	 * <b>作者:</b>lzp<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年6月25日 上午11:06:57
+//	 * @param Long channelId 频道id
+//	 * @param Long scheduleId 排期id
+//	 */
+//	public JSONObject startAbilityBroadcast(Long channelId, Long scheduleId) throws Exception{
+//		ChannelPO channel = channelDao.findOne(channelId);
+//		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
+//		
+//		JSONObject output = new JSONObject();
+//		output.put("proto-type", "udp-ts");
+//		List<JSONObject> destList = new ArrayList<JSONObject>();
+//		String localIp = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD).split(":")[0];
+//		List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs = broadAbilityBroadInfoService.queryFromChannelId(channelId);
+//		if (broadAbilityBroadInfoVOs == null || broadAbilityBroadInfoVOs.isEmpty()) return getReturnJSON(false, "无输出");
+//		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
+//			JSONObject dest = new JSONObject();
+//			dest.put("local_ip", localIp);
+//			dest.put("ipv4", broadAbilityBroadInfoVO.getPreviewUrlIp());
+//			dest.put("port", broadAbilityBroadInfoVO.getPreviewUrlPort());
+//			dest.put("vport", "");
+//			dest.put("aport", "");
+//			destList.add(dest);
+//		}
+//		output.put("dest_list", destList);
+//		
+//		output.put("scramble", channel.getEncryption() != null && channel.getEncryption() ? "AES-128" : "none");
+//		output.put("key", channel.getEncryption() != null && channel.getEncryption() ? mediaEncodeQuery.queryKey() : "");
+//		BroadAbilityQueryType type = channelQuery.broadCmd(channelId);
+//		
+//		JSONObject responseJSON;
+//		if (channelQuery.sendAbilityRequest(type, channel, abilityProgramText(programQuery.getProgram(scheduleId)), output)) {
+//			if(type != BroadAbilityQueryType.COVER) channelQuery.saveBroad(channelId);
+//			responseJSON = getReturnJSON(true, "");
+//		}else {
+//			responseJSON = getReturnJSON(false, "请求能力失败");
+//		}
+//		
+//		return responseJSON;
+//	}
+//
+//	private JSONObject getReturnJSON(Boolean ifSuccess, String message) {
+//		JSONObject returnJsonObject = new JSONObject();
+//		returnJsonObject.put("success", ifSuccess);
+//		returnJsonObject.put("message", message);
+//		return returnJsonObject;
+//	}
+//
+//	/**
+//	 * 播发时媒资排表字段内容(能力播发)<br/>
+//	 * <b>作者:</b>lzp<br/>
+//	 * <b>版本：</b>1.0<br/>
+//	 * <b>日期：</b>2019年6月25日 上午11:06:57
+//	 * @param ProgramVO program 分屏信息
+//	 */
+//	private List<String> abilityProgramText(ProgramVO program) throws Exception{
+//		List<String> returnList = new ArrayList<String>();
+//		if (program != null) {
+//			for (int i = 1; i <= program.getScreenNum(); i++) {
+//				if (program.getScreenInfo() != null && program.getScreenInfo().size() > 0) {
+//					List<ScreenVO> screens = program.getScreenInfo();
+//					Collections.sort(screens, new ScreenVO.ScreenVOOrderComparator());
+//					for (ScreenVO item : program.getScreenInfo()) {
+//						if (item.getSerialNum() != i)
+//							continue;
+//						returnList.add(adapter.changeHttpToFtp(item.getPreviewUrl()));
+//					}
+//				}
+//			}
+//		}
+//		return returnList;
+//	}
 
-	/**
-	 * 开始播发(终端播发，有排期后未修改完成)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 */
-	public JSONObject startTerminalBroadcast(Long channelId) throws Exception {
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) return getReturnJSON(false, "播发频道数据错误");
-		
-		List<ScheduleVO> schedules = scheduleQuery.getByChannelId(channelId);
-		if (schedules == null || schedules.isEmpty()) return getReturnJSON(false, "无分屏信息");
-		Long scheduleId = schedules.get(0).getId();
-		
-		// 校验播发状态
-		String broadStatus = getChannelBroadstatus(channelId);
-		if (!broadStatus.isEmpty() && !broadStatus.equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED)) {
-			return getReturnJSON(false, "当前频道未处于可播发状态");
-		}
-		// 校验播发条件
-		List<String> areaVOs = areaQuery.getCheckAreaIdList(channelId);
-		if (areaVOs == null || areaVOs.size() <= 0) {
-			return getReturnJSON(false, "播发地区为空，播发任务自动取消");
-		}
-		// 获取媒资增量
-		List<CsResourceVO> addResourceList = resourceSendQuery.getAddResource(channelId, false);
-		Map<String, CsResourceVO> resourceMap = new HashMap<String, CsResourceVO>();
-		for (CsResourceVO item : addResourceList) {
-			String[] previewUrl = item.getPreviewUrl().split("/");
-			resourceMap.put(previewUrl[previewUrl.length - 1], item);
-		}
-		// 生成json字符串
-		JSONObject textJson = new JSONObject();
-		String newVersion = versionSendQuery.getNewVersion(versionSendQuery.getLastVersion(channelId));
-		String effectTime = "null";
-
-		textJson.put("fileSize", "");
-		textJson.put("version", newVersion);
-		textJson.put("effectTime", effectTime);
-		textJson.put("dir", this.getMenuAndResourcePath(channelId));
-//		textJson.put("files", this.getFilesPath(addResourceList));
-		textJson.put("screens", this.programText(programQuery.getProgram(scheduleId)));
-
-		// 打包
-		Date currentTime = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
-		String dateString = formatter.format(currentTime);
-		textJson.put("file", dateString + ".tar");
-
-		List<String> mimsUuidList = new ArrayList<String>();
-		for (CsResourceVO item : addResourceList) {
-			mimsUuidList.add(item.getMimsUuid());
-		}
-		
-		List<FileCompressVO> fileCompressVOs = new ArrayList<FileCompressVO>();
-		if (addResourceList!= null && addResourceList.size() > 0) {
-			for(CsResourceVO item : addResourceList){
-				fileCompressVOs.add(new FileCompressVO().setPath(item.getParentPath()).setUuid(item.getMimsUuid()));
-			}
-		}
-		
-		MediaCompressVO mediaCompressVO = mediaCompressService.packageTar(textJson.toString(), fileCompressVOs);
-
-		// 请求播发
-		String broadIdString = channelId.toString() + newVersion.split("v")[1];
-		JSONObject broadJsonObject = new JSONObject();
-
-		broadJsonObject.put("id", broadIdString);
-		String filePath = "";
-		if (ChannelBroadStatus.getBroadcastIfLocal()) {
-			filePath = mediaCompressVO.getUploadTmpPath();
-		}else {
-			filePath = mediaCompressVO.getPreviewUrl();
-		}
-		broadJsonObject.put("filePath", filePath);
-		broadJsonObject.put("fileSize", mediaCompressVO.getSize());
-		broadJsonObject.put("regionList", areaVOs);
-
-		String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-		if (!url.isEmpty()) {
-			JSONObject response = HttpRequestUtil
-					.httpPost("http://" + url + "/ed/speaker/startSendFile", broadJsonObject);
-
-			if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
-				// 播发成功处理
-
-				// 备份播发媒资全量
-				resourceSendQuery.getAddResource(channelId, true);
-
-				// 备份播发地区
-				areaSendQuery.saveArea(channelId);
-
-				// 保存播发版本
-				versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath);
-
-				return getReturnJSON(true, "");
-			} else {
-				return getReturnJSON(false, "播发未知错误");
-			}
-		}else {
-			return getReturnJSON(false, "播发地址为空");
-		}
-	}
-
-	/**
-	 * 重新播发(终端播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 */
-	public JSONObject restartBroadcast(Long channelId) throws Exception {
-		JSONObject broadJsonObject = new JSONObject();
-		VersionSendPO versionSendPO = versionSendQuery.getLastVersionSendPO(channelId);
-		if (versionSendPO == null) {
-			return getReturnJSON(false, "当前频道没有被储存的版本信息");
-		}
-		broadJsonObject.put("id", versionSendQuery.getBroadId(channelId));
-		broadJsonObject.put("filePath", versionSendPO.getFilePath());
-		broadJsonObject.put("fileSize", versionSendPO.getFileSize());
-		broadJsonObject.put("regionList", areaSendQuery.getAreaIdList(channelId));
-
-		String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-		if (!url.isEmpty()) {
-			JSONObject response = HttpRequestUtil
-					.httpPost("http://" + url + "/ed/speaker/startSendFile", broadJsonObject);
-
-			return (response != null && response.containsKey("result") && response.getString("result").equals("1"))
-					? getReturnJSON(true, "") : getReturnJSON(false, "播发未知错误");
-		}else {
-			return getReturnJSON(false, "播发服务器地址为空");
-		}
-	}
-
-	private JSONObject getReturnJSON(Boolean ifSuccess, String message) {
-		JSONObject returnJsonObject = new JSONObject();
-		returnJsonObject.put("success", ifSuccess);
-		returnJsonObject.put("message", message);
-		return returnJsonObject;
-	}
-
-	/**
-	 * 查询播发状态(终端播发状态)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 */
-	public String getChannelBroadstatus(Long channelId) throws Exception {
-		String status = "";
-		
-		String versionSendNum = versionSendQuery.getBroadId(channelId);
-		if (!versionSendNum.isEmpty()) {
-			List<String> ids = new ArrayList<String>();
-			ids.add(versionSendNum);
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("ids", ids);
-			String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-			if (!url.isEmpty()) {
-				JSONObject response = HttpRequestUtil
-						.httpPost("http://" + url + "/ed/speaker/querySendFile", jsonObject);
-				if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
-					JSONArray statusArray = (JSONArray) response.get("data");
-					if (statusArray != null && statusArray.size() > 0) {
-						JSONObject item = (JSONObject) statusArray.get(0);
-						status = (item.containsKey("status") && item.get("status") != null)
-								? channelQuery.getStatusFromNum(item.getString("status")) : "";
-					}
-				}
-			}
-		}
-
-		return status;
-	}
-	
-	/**
-	 * 播发时媒资排表字段内容(能力播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param ProgramVO program 分屏信息
-	 */
-	private List<String> abilityProgramText(ProgramVO program) throws Exception{
-		List<String> returnList = new ArrayList<String>();
-		if (program != null) {
-			for (int i = 1; i <= program.getScreenNum(); i++) {
-				if (program.getScreenInfo() != null && program.getScreenInfo().size() > 0) {
-					List<ScreenVO> screens = program.getScreenInfo();
-					Collections.sort(screens, new ScreenVO.ScreenVOOrderComparator());
-					for (ScreenVO item : program.getScreenInfo()) {
-						if (item.getSerialNum() != i)
-							continue;
-						returnList.add(adapter.changeHttpToFtp(item.getPreviewUrl()));
-					}
-				}
-			}
-		}
-		return returnList;
-	}
-
-	/**
-	 * 播发时媒资排表字段内容(终端播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param ProgramVO program 分屏信息
-	 */
-	private List<JSONObject> programText(ProgramVO program) throws Exception {
-		List<JSONObject> returnList = new ArrayList<JSONObject>();
-		if (program != null) {
-			for (int i = 1; i <= program.getScreenNum(); i++) {
-				JSONObject returnItem = this.screenItemInit(program.getScreenNum(), i);
-				List<JSONObject> scheduleList = new ArrayList<JSONObject>();
-				if (program.getScreenInfo() != null && program.getScreenInfo().size() > 0) {
-					for (ScreenVO item : program.getScreenInfo()) {
-						if (item.getSerialNum() != i)
-							continue;
-						JSONObject schedule = new JSONObject();
-						CsResourceVO resource = csResourceQuery.queryResourceById(item.getResourceId());
-						String[] previewUrlSplit = resource.getPreviewUrl().split("/");
-						schedule.put("fileName", resource.getParentPath() + "/" + previewUrlSplit[previewUrlSplit.length - 1]);
-						schedule.put("index", item.getIndex());
-						scheduleList.add(schedule);
-					}
-				}
-				returnItem.put("schedule", scheduleList);
-				returnList.add(returnItem);
-			}
-		}
-		return returnList;
-	}
-
-	/**
-	 * 播发时cs媒资目录树字段内容(终端播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long channelId 频道id
-	 */
-	private List<JSONObject> getMenuAndResourcePath(Long channelId) throws Exception {
-		List<CsMenuVO> menuTree = csMenuQuery.queryMenuTree(channelId);
-		List<JSONObject> dirList = new ArrayList<JSONObject>();
-		if (menuTree != null && menuTree.size() > 0) {
-			dirList = getDirList(menuTree);
-		}
-		return dirList;
-	}
-
-	/**
-	 * 递归获取目录树(终端播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param List<CsMenuVO> parentSubs 目录列表
-	 */
-	private List<JSONObject> getDirList(List<CsMenuVO> parentSubs) throws Exception {
-		List<JSONObject> returnObject = new ArrayList<JSONObject>();
-		if (parentSubs != null && parentSubs.size() > 0) {
-			for (CsMenuVO item : parentSubs) {
-				JSONObject sub = new JSONObject();
-				sub.put("path", item.getParentPath() + "/" + item.getName());
-				sub.put("type", "folder");
-				List<JSONObject> subs = new ArrayList<JSONObject>();
-				subs.addAll(this.getDirList(item.getSubColumns()));
-				subs.addAll(this.getFileList(item.getId()));
-				sub.put("subs", subs);
-				returnObject.add(sub);
-			}
-		}
-		return returnObject;
+	public Map<Long, Timer> getTimerMap() {
+		return timerMap;
 	}
 
-	/**
-	 * 根据目录id获取cs媒资(终端播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long menuId 目录id
-	 */
-	private List<JSONObject> getFileList(Long menuId) throws Exception {
-		List<JSONObject> returnObject = new ArrayList<JSONObject>();
-		List<CsResourceVO> resourceList = csResourceQuery.queryMenuResources(menuId);
-		if (resourceList != null && resourceList.size() > 0) {
-			for (CsResourceVO item : resourceList) {
-				JSONObject resource = new JSONObject();
-				String[] previewUrl = item.getPreviewUrl().split("/");
-				resource.put("path", item.getParentPath() + "/" + previewUrl[previewUrl.length - 1]);
-				resource.put("type", "file");
-				returnObject.add(resource);
-			}
-		}
-		return returnObject;
-	}
-
-	private List<JSONObject> getFilesPath(List<CsResourceVO> files) {
-		List<JSONObject> filesPath = new ArrayList<JSONObject>();
-		if (files != null && files.size() > 0) {
-			for (CsResourceVO item : files) {
-				JSONObject file = new JSONObject();
-				String[] previewUrl = item.getPreviewUrl().split("/");
-				file.put("sourcePath", "./" + previewUrl[previewUrl.length - 1]);
-				file.put("destPath", item.getParentPath() + "/" + previewUrl[previewUrl.length - 1]);
-				filesPath.add(file);
-			}
-		}
-		return filesPath;
-	}
-
-	/**
-	 * 分屏字段内容(终端播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long screenNum 分屏数
-	 * @param int serialNum 屏幕位置
-	 */
-	private JSONObject screenItemInit(Long screenNum, int serialNum) {
-		JSONObject returnItem = new JSONObject();
-		returnItem.put("no", serialNum);
-		switch (screenNum.toString()) {
-		case "1":
-			returnItem.put("width", "100%");
-			returnItem.put("height", "100%");
-			returnItem.put("top", "0%");
-			returnItem.put("left", "0%");
-			break;
-		case "4":
-			returnItem.put("width", "50%");
-			returnItem.put("height", "50%");
-			switch (serialNum) {
-			case 1:
-				returnItem.put("top", "0%");
-				returnItem.put("left", "0%");
-				break;
-			case 2:
-				returnItem.put("top", "0%");
-				returnItem.put("left", "50%");
-				break;
-			case 3:
-				returnItem.put("top", "50%");
-				returnItem.put("left", "0%");
-				break;
-			case 4:
-				returnItem.put("top", "50%");
-				returnItem.put("left", "50%");
-				break;
-			}
-			break;
-		case "6":
-			switch (serialNum) {
-			case 1:
-				returnItem.put("width", "66%");
-				returnItem.put("height", "66%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "0%");
-				break;
-			case 2:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "66%");
-				break;
-			case 3:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "33%");
-				returnItem.put("left", "66%");
-				break;
-			case 4:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "0%");
-				break;
-			case 5:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "33%");
-				break;
-			case 6:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "66%");
-				break;
-			}
-			break;
-		case "9":
-			switch (serialNum) {
-			case 1:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "0%");
-				break;
-			case 2:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "33%");
-				break;
-			case 3:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "66%");
-				break;
-			case 4:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "33%");
-				returnItem.put("left", "0%");
-				break;
-			case 5:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "33%");
-				returnItem.put("left", "33%");
-				break;
-			case 6:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "33%");
-				returnItem.put("left", "66%");
-				break;
-			case 7:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "0%");
-				break;
-			case 8:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "33%");
-				break;
-			case 9:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "66%");
-				break;
-			}
-			break;
-		}
-		return returnItem;
+	public void setTimerMap(Map<Long, Timer> timerMap) {
+		this.timerMap = timerMap;
 	}
 }

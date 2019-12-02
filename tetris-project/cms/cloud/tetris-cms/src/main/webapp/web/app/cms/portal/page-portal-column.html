@@ -1,5 +1,5 @@
 
-<div id="page-portal-column-wrapper">
+<div id="page-portal-column-wrapper" style="width:100%; height:100%; overflow:auto; position:relative;">
 <div id="header" style="width:100%;height:60px;background:#2a2a2a"></div>
 <div id="body" style="margin:0 auto;width:1200px;">
     
@@ -8,12 +8,13 @@
     <div style="color:#FFF;font-size:18px;font-weight:bold;width:200px;height:70px;
         background:url('../web/app/cms/portal/image/u667.png') no-repeat 0 center;
         position:absolute;margin-left:1000px;top:0px;line-height:70px;padding-left:50px;">{{user.nickname}}
-        <image src="../web/app/cms/portal/image/u669.png" style="width:20px;height:20px;position:absolute;top:25px;margin-left:-78px;"/>
         </div>
-    
+        <image src="../web/app/cms/portal/image/u669.png" style="width:20px;height:20px;position:absolute;top:25px;margin-left:1008px;"/>
+    <div style="width:120px;text-align:center;float:left;line-height:30px;"><a href="#/page-portal-home">首页</a></div>
     <div id="first-level" style="width:1200px;font-size:16px;height:40px;border-bottom:2px solid #456def;margin-top:20px;">
          <div v-for="column in columnlist">
-			<div style="width:120px;text-align:center;float:left;line-height:30px;"><a :href="'#/page-portal-column/'+column.id">{{column.name}}</a></div>
+			<div style="width:120px;text-align:center;float:left;line-height:30px;">
+			   <a :href="'#/page-portal-column/'+column.id" :style="currentfColumn==column.id?'color:#456def':''">{{column.name}}</a></div>
 		 </div>
          
     </div>
@@ -21,21 +22,22 @@
     <div style="float:left;width:200px;margin-top:30px;font-size:18px;">
          <div v-for="seccolumn in seccolumnlist">
 			<div style="width:200px;text-align:center;height:40px;line-height:40px;magin-top:10px;">
-			<a href="javascript:void(0)" @click="switchColumn(column)">{{column.name}}</a></div>
+			<a :style="currentColumn==seccolumn.id?'color:#456def':''" href="javascript:void(0)" @click="switchColumn(seccolumn)">{{seccolumn.name}}</a></div>
 		 </div>
     </div>
     
     
     <div style="float:left;width:670px;margin-top:20px;">
-    
-          <div v-for="article in colArtices">
-              <div style="width:100%;height:90px;margin-top:10px">
-			      <image src="{{article.thumbnail}}" style="width:115px;height:90px;float:left;"/>
-			      <div style="width:430px;height:90px;float:left;margin-left:15px;padding-top:20px">
-			          <span style="color:#172caa;font-size:18px;">{{article.name}}</span><br>
-			          <span style="font-size:12px;color:#9f82bb">作者名称:{{article.author}}|已下载:1500</span>
+          <div  v-for="article in colArtices">
+	          <a :href="'#/page-portal-article/'+article.id">
+	              <div style="width:100%;height:90px;margin-top:10px">
+				      <image :src="article.thumbnail" style="width:115px;height:90px;float:left;"/>
+				      <div style="width:430px;height:90px;float:left;margin-left:15px;padding-top:20px">
+				          <span style="color:#172caa;font-size:18px;">{{article.name}}</span><br>
+				          <span style="font-size:12px;color:#9f82bb">作者名称:{{article.author}}</span>
+				      </div>
 			      </div>
-		      </div>
+			  </a>
 		  </div>
     </div>
     
@@ -52,7 +54,7 @@
     	    
     	    <ul style="width:100%;margin-left:-20px;float:left">
     	       <li v-for="article in hotArticles"  style="color:#6283ff;padding:5px;">
-					<a style="color:black" href="{{article.previewUrl}}">{{article.name}}</a>
+					<a style="color:black" :href="'#/page-portal-article/'+article.id">{{article.name}}</a>
 			   </li>
     	       
     	    </ul>
@@ -64,21 +66,15 @@
                 <span style="font-weight:bold;color:#466cfe">|</span>&nbsp;&nbsp;下载排行榜</div>
             <div style="width:100%;margin-top:30px;">
                 <div v-for="article in downloadArticle">
-				    <a href="{{article.previewUrl}}" style="width:100%;float:left;height:65px;margin-top:10px;">
-		                <image src="{{article.thumbnail}}" style="width:77px;height:65px;float:left"/>
+				    <a :href="'#/page-portal-article/'+article.id" style="width:100%;float:left;height:65px;margin-top:10px;">
+		                <image :src="article.thumbnail" style="width:77px;height:65px;float:left"/>
 		                <div style="width:160px;float:left;line-height:65px;margin-left:5px;">{{article.name}}</div>
 		                <div style="width:50px;float:left;
 		                padding-left:10px;font-size:10px;line-height:65px;margin-left:5px;background:url('../web/app/cms/portal/image/u270.png') no-repeat 0 center;">
-		                12500</div>
+		                {{article.mediaDownloadCount}}</div>
 		            </a>
 		            
-		            <a href="{{article.previewUrl}}" style="width:100%;float:left;height:65px;margin-top:10px;">
-		                <image src="{{article.thumbnail}}" style="width:77px;height:65px;float:left"/>
-		                <div style="width:160px;float:left;line-height:65px;margin-left:5px;">{{article.name}}</div>
-		                <div style="width:50px;float:left;
-		                padding-left:10px;font-size:10px;line-height:65px;margin-left:5px;background:url('../web/app/cms/portal/image/u270.png') no-repeat 0 center;">
-		                12500</div>
-		            </a>   
+		 
 		            
 			    </div>
             </div>

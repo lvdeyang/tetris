@@ -16,6 +16,9 @@ public class SendBakService {
 	@Autowired
 	private VersionSendDAO versionSendDAO;
 	
+	@Autowired
+	private AbilityInfoSendDAO abilityInfoSendDAO;
+	
 	/**
 	 * 根据频道id删除所有上次播发保存信息<br/>
 	 * <b>作者:</b>lzp<br/>
@@ -23,9 +26,10 @@ public class SendBakService {
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
 	 * @param channelId 频道id
 	 */
-	public void removeBakFromChannel(String channelId){
-		areaSendDAO.removeByChannelId(channelId);
-		resourceSendDAO.removeByChannelId(channelId);
-		versionSendDAO.removeByChannelId(channelId);
+	public void removeBakFromChannel(Long channelId){
+		areaSendDAO.deleteByChannelId(channelId);
+		resourceSendDAO.deleteByChannelId(channelId);
+		versionSendDAO.deleteByChannelId(channelId);
+		abilityInfoSendDAO.deleteByChannelId(channelId);
 	}
 }

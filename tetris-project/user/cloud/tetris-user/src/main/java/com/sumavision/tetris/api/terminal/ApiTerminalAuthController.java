@@ -72,7 +72,7 @@ public class ApiTerminalAuthController {
 		param.put("code", number);
 		
 		//TODO: 配aliyun
-//		aliSendSmsService.sendSms(mobile, param.toJSONString());
+		aliSendSmsService.sendSms(mobile, param.toJSONString());
 		
 		session.setAttribute("verification-code-phone", number);
 		session.setAttribute("verification-phone", mobile);
@@ -187,6 +187,8 @@ public class ApiTerminalAuthController {
 	public Object doUsernamePasswordLogin(
 			String username,
 			String password,
+			String ip,
+			String equipType,
 			String verificationCode,
 			String sessionToken,
 			HttpServletRequest request) throws Exception{
@@ -201,7 +203,7 @@ public class ApiTerminalAuthController {
 			throw new ImageVerificationCodeErrorException(username);
 		}*/
 		
-		String token = loginService.doPasswordLogin(username, password, null);
+		String token = loginService.doPasswordLogin(username, password, ip, equipType, null);
 		
 		return token;
 	}

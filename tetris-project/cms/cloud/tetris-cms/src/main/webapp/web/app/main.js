@@ -62,7 +62,8 @@ require.config({
         'page-cms-region':window.APPPATH + 'cms/region/page-cms-region',
         'page-cms-classify':window.APPPATH + 'cms/classify/page-cms-classify',
         'page-portal-home':window.APPPATH + 'cms/portal/page-portal-home',
-        'page-portal-column':window.APPPATH + 'cms/portal/page-portal-column'
+        'page-portal-column':window.APPPATH + 'cms/portal/page-portal-column',
+        'page-portal-article':window.APPPATH + 'cms/portal/page-portal-article'
 
     },
     shim:{

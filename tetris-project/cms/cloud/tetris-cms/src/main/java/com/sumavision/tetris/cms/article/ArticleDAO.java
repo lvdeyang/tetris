@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
+
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.boolean_expr_return;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = ArticlePO.class, idClass = Long.class)
@@ -20,6 +22,7 @@ public interface ArticleDAO extends BaseDAO<ArticlePO>{
 	 * @param Pageable page 分页信息
 	 */
 	public Page<ArticlePO> findAll(Pageable page);
+	
 	
 	/**
 	 * 分页查询文章列表（带例外）<br/>
@@ -185,11 +188,16 @@ public interface ArticleDAO extends BaseDAO<ArticlePO>{
 	 * @return Page<ArticlePO> 文章列表
 	 */
 	@Query(value = "SELECT article.* FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE permission.group_id = ?1 \n#pageable\n",
-			countQuery = "SELECT count(article.id) FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE permission.group_id = ?1",
+			countQuery = "SELECT count(article.id) FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE permission.group_id = ?1 orderBy article.updateTime desc",
 			nativeQuery = true)
 	public Page<ArticlePO> findAllByGroupId(String groupId, Pageable pageable);
+	
+	
 	
 	@Query(value = "SELECT article.* FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE article.if_live = True AND permission.group_id = ?1 \n#pageable\n",
 			nativeQuery = true)
 	public List<ArticlePO> findAllByGroupId(String groupId);
+	
+	
+	
 }
