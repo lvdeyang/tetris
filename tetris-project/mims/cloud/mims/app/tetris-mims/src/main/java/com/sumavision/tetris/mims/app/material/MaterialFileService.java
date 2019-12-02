@@ -16,9 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
-import com.sumavision.tetris.mims.app.store.PreRemoveFileDAO;
-import com.sumavision.tetris.mims.app.store.PreRemoveFilePO;
-import com.sumavision.tetris.mims.app.store.StoreQuery;
+import com.sumavision.tetris.mims.app.storage.PreRemoveFileDAO;
+import com.sumavision.tetris.mims.app.storage.PreRemoveFilePO;
+import com.sumavision.tetris.mims.app.storage.StoreQuery;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserVO;
 

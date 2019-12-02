@@ -99,24 +99,76 @@ public class ByteUtil {
         return in2b;
 	}
 	
-	//字节长度
-	private static String getB(byte[] src){
-		return new StringBufferWrapper().append(src.length).append("B").toString();
+	/**
+	 * 字节长度转换B<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月23日 上午10:51:03
+	 * @param int length 字节长度
+	 * @return String B
+	 */
+	private static String getB(long length){
+		return new StringBufferWrapper().append(length).append("B").toString();
 	}
 	
-	//字节长度转换KB
-	private static String getKB(byte[] src){
-		return new StringBufferWrapper().append(src.length/1024).append("KB").toString();
+	/**
+	 * 字节长度转换KB<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月23日 上午10:51:03
+	 * @param int length 字节长度
+	 * @return String KB
+	 */
+	private static String getKB(long length){
+		return new StringBufferWrapper().append(length/1024l).append("KB").toString();
 	}
 	
-	//字节长度转换MB
-	private static String getMB(byte[] src){
-		return new StringBufferWrapper().append(src.length/(1024*1024)).append("M").toString();
+	/**
+	 * 字节长度转换MB<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月23日 上午10:51:03
+	 * @param int length 字节长度
+	 * @return String MB
+	 */
+	private static String getMB(long length){
+		return new StringBufferWrapper().append(length/(1024l*1024l)).append("MB").toString();
 	}
 	
-	//字节长度转换GB
-	private static String getGB(byte[] src){
-		return new StringBufferWrapper().append(src.length/(1024*1024*1024)).append("G").toString();
+	/**
+	 * 字节长度转换GB<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月23日 上午10:51:03
+	 * @param int length 字节长度
+	 * @return String GB
+	 */
+	private static String getGB(long length){
+		return new StringBufferWrapper().append(length/(1024l*1024l*1024l)).append("GB").toString();
+	}
+	
+	/**
+	 * 字节长度转换TB<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月23日 上午10:51:03
+	 * @param int length 字节长度
+	 * @return String TB
+	 */
+	private static String getTB(long length){
+		return new StringBufferWrapper().append(length/(1024l*1024l*1024l*1024l)).append("TB").toString();
+	}
+	
+	/**
+	 * 字节长度转换PB<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月23日 上午10:51:03
+	 * @param int length 字节长度
+	 * @return String PB
+	 */
+	private static String getPB(long length){
+		return new StringBufferWrapper().append(length/(1024l*1024l*1024l*1024l*1024l)).append("PB").toString();
 	}
 	
 	/**
@@ -124,21 +176,36 @@ public class ByteUtil {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月23日 上午10:51:03
-	 * @param byte[] src 
+	 * @param byte[] src 字节
 	 * @return String 格式化长度
 	 */
 	public static String getSize(byte[] src){
-		int length = src.length;
-		if(length < 1024){
-			return getB(src);
-		}else if(length>=1024 && length<1024*1024){
-			return getKB(src);
-		}else if(length>=1024*1024 && length<1024*1024*1024){
-			return getMB(src);
-		}else{
-			return getGB(src);
-		}
+		long length = src.length;
+		return getSize(length);
 	}
 	
+	/**
+	 * 格式化字节长度<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年4月23日 上午10:51:03
+	 * @param int length 字节长度
+	 * @return String 格式化长度
+	 */
+	public static String getSize(long length){
+		if(length < 1024l){
+			return getB(length);
+		}else if(length>=1024l && length<1024l*1024l){
+			return getKB(length);
+		}else if(length>=1024l*1024l && length<1024l*1024l*1024l){
+			return getMB(length);
+		}else if(length>=1024*1024l*1024l && length<1024l*1024l*1024l*1024l){
+			return getGB(length);
+		}else if(length>=1024*1024l*1024l*1024l && length<1024l*1024l*1024l*1024l*1024l){
+			return getTB(length);
+		}else{
+			return getPB(length);
+		}
+	}
 	
 }

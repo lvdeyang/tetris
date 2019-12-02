@@ -1,4 +1,4 @@
-package com.sumavision.tetris.mims.app.store;
+package com.sumavision.tetris.mims.app.storage;
 
 import javax.persistence.Entity;
 import javax.persistence.Table;

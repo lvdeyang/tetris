@@ -12,7 +12,7 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 
 /**
- * 服务端端拦截器<br/>
+ * 第三方服务调用api拦截器<br/>
  * <b>作者:</b>lvdeyang<br/>
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年3月12日 下午1:34:26

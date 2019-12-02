@@ -10,12 +10,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.mims.app.media.tag.TagQuery;
+import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/media/video/feign")
@@ -25,7 +30,16 @@ public class MediaVideoFeignController {
 	private MediaVideoQuery mediaVideoQuery;
 	
 	@Autowired
+	private MediaVideoService mediaVideoService;
+	
+	@Autowired
 	private MediaVideoDAO mediaVideoDAO;
+	
+	@Autowired
+	private TagQuery tagQuery;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 加载文件夹下的视频媒资<br/>
@@ -128,4 +142,24 @@ public class MediaVideoFeignController {
 		return mediaVideoQuery.findByPreviewUrlIn(JSON.parseArray(previewUrls, String.class));
 	}
  	
+	/**
+	 * 添加远程媒资(收录系统使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月3日 下午5:24:19
+	 * @param String name 媒资名称
+	 * @param Long tagId 标签id 
+	 * @param String httpUrl 媒资预览地址
+	 * @param String ftpUrl 媒资ftp地址
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/remote")
+	public Object addRemote(String name, Long tagId, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception {
+		UserVO user = userQuery.current();
+		
+		TagVO tag = tagQuery.queryById(tagId);
+		
+		return mediaVideoService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
+	}
 }

@@ -392,6 +392,9 @@ public class ProcessService {
 			String category,
 			String business) throws Exception{
 		
+		category = category==null?"":category;
+		business = business==null?"":business;
+		
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
 		
 		Map<String, String> headers = new HashMap<String, String>();

@@ -22,9 +22,9 @@ import org.springframework.context.annotation.ComponentScan;
 import com.sumavision.tetris.spring.zuul.auth.filter.ApiFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.MultipartFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.android.ApiAndroidLoginFilter;
-import com.sumavision.tetris.spring.zuul.auth.filter.capture.ApiCaptureLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.process.ApiProcessLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtLoginFilter;
+import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtScheduleLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.server.ApiServerLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.terminal.ApiTerminalLoginFilter;
 
@@ -74,11 +74,6 @@ public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
 	}
 	
 	@Bean
-	public ApiCaptureLoginFilter apiCaptureLoginFilter(){
-		return new ApiCaptureLoginFilter();
-	}
-	
-	@Bean
 	public ApiProcessLoginFilter apiProcessLoginFilter(){
 		return new ApiProcessLoginFilter();
 	}
@@ -86,6 +81,11 @@ public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
 	@Bean
 	public ApiQtLoginFilter apiQtLoginFilter(){
 		return new ApiQtLoginFilter();
+	}
+	
+	@Bean
+	public ApiQtScheduleLoginFilter apiQtScheduleLoginFilter(){
+		return new ApiQtScheduleLoginFilter();
 	}
 	
 	@Bean

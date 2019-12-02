@@ -116,4 +116,21 @@ public interface MediaAudioFeign {
 	 */
 	@RequestMapping(value = "/media/audio/feign/download")
 	public JSONObject download(@RequestParam("id") Long id) throws Exception;
+	
+	/**
+	 * 添加远程媒资(供收录系统使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月2日 下午4:23:53
+	 * @param String name 媒资名称
+	 * @param Long tagId 标签id(可不传)
+	 * @param String httpUrl 预览地址
+	 * @param String ftpUrl ftp下载地址(可不传)
+	 */
+	@RequestMapping(value = "/media/audio/feign/add/remote")
+	public JSONObject addRemote(
+			@RequestParam("name") String name,
+			@RequestParam("tagId") Long tagId,
+			@RequestParam("httpUrl") String httpUrl,
+			@RequestParam("ftpUrl") String ftpUrl) throws Exception;
 }

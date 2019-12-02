@@ -102,8 +102,10 @@ public class WelcomeController {
 		
 		//根目录
 		FolderPO folder = folderDao.findMaterialRootByUserId(user.getUuid());
-		user.setRootFolderId(folder.getId());
-		user.setRootFolderName(folder.getName());
+		if(folder != null){
+			user.setRootFolderId(folder.getId());
+			user.setRootFolderName(folder.getName());
+		}
 		
 		appInfo.put("user", user);
 		
