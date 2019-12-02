@@ -7,8 +7,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoService;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 
 @Component
 public class AbilityInfoSendQuery {

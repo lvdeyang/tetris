@@ -34,6 +34,7 @@ import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.theme.SystemThemeDAO;
 import com.sumavision.tetris.system.theme.SystemThemePO;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
+import com.sumavision.tetris.user.exception.TokenUpdatedException;
 
 @Component
 public class UserQuery {
@@ -64,10 +65,10 @@ public class UserQuery {
 		UserPO user = userDao.findByToken(token);
 		if(user == null){
 			LOG.error(new StringBufferWrapper().append("token 无效：").append(token).toString());
-			throw new TokenTimeoutException();
+			throw new TokenUpdatedException();
 		}
 		Date now = new Date();
-		Date timeScope = DateUtil.addMinute(user.getLastModifyTime(), 30);
+		Date timeScope = DateUtil.addSecond(user.getLastModifyTime(), HttpConstant.TOKEN_TIMEOUT);
 		if(!timeScope.after(now)){
 			LOG.error(new StringBufferWrapper().append("token 超时：").append(token).toString());
 			throw new TokenTimeoutException();
@@ -88,7 +89,7 @@ public class UserQuery {
 	public boolean userTokenUseable(UserPO user) throws Exception{
 		if(user.getToken() == null) return false;
 		Date now = new Date();
-		Date timeScope = DateUtil.addMinute(user.getLastModifyTime(), 30);
+		Date timeScope = DateUtil.addSecond(user.getLastModifyTime(), HttpConstant.TOKEN_TIMEOUT);
 		if(!timeScope.after(now)){
 			return false;
 		}

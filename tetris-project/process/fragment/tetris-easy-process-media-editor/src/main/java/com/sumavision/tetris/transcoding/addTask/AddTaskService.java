@@ -72,15 +72,10 @@ public class AddTaskService {
 			mediaUuids.add(media.getUuid());
 		}
 		HashMapWrapper<String, MediaAVideoVO> map = mediaAVideoQuery.getByUuids(mediaUuids.getList());
-//		if (folder.getType().equals(FolderType.COMPANY_AUDIO)) {
-//			List<SourceVO> sourceVOs = new ArrayList<SourceVO>();
-//			transcodeVO.setSource(sourceVOs);
-//		} else {
 		SourcesVO sourcesVO = new SourcesVO();
 		sourcesVO.setName("transcode_" + name);
 		sourcesVO.setSource(new ArrayListWrapper<SourceVO>().getList());
 		transcodeVO.setSources(sourcesVO);
-//		}
 		for (TranscodeMediaVO media : mediaVOs) {
 			SrcURIVO src = new SrcURIVO();
 			src.setName("");
@@ -94,11 +89,7 @@ public class AddTaskService {
 			source.setSrcURI(src);
 			source.setStartTime(media.getStartTime());
 			source.setEndTime(media.getEndTime());
-//			if (folder.getType().equals(FolderType.COMPANY_AUDIO)) {
-//				transcodeVO.getSource().add(source);
-//			} else {
 			transcodeVO.getSources().getSource().add(source);
-//			}
 		}
 		transcodeVO.getTarget().setTargetURI(adapter.addTreatyToUrl(mediaAVideoQuery.buildUrl(folder, name)));
 		transcodeVO.getTarget().setTranscodeTargetParams(param);
@@ -108,7 +99,6 @@ public class AddTaskService {
 		transcodeJobs.setTranscode(transcodeVOs);
 		
 		MsgHeaderVO msgHeader = new MsgHeaderVO();
-//		msgHeader.setCmdType(folder.getType().equals(FolderType.COMPANY_AUDIO) ? RequestCmdType.ADD_TASK_SINGLE.getTypeName() : RequestCmdType.ADD_TASK_MULTI.getTypeName());
 		msgHeader.setCmdType(RequestCmdType.ADD_TASK_MULTI.getTypeName());
 		msgHeader.setTransactionId(adapter.getTransactionId());
 		

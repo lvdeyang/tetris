@@ -513,13 +513,13 @@ public class ProcessService {
 		processInstanceDeploymentPermissionDao.save(permission);
 		
 		//变量上下文中加入内置变量
-		if(!primaryKey.equals("_yjgb_generate_article_by_compress_")){
+		/*if(!primaryKey.equals("_yjgb_generate_article_by_compress_") && !primaryKey.equals("_file_stream_transcoding_by_server")){
 			JSONObject existVariableContext = (JSONObject)runtimeService.getVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey());
 			if(!existVariableContext.containsKey(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey())){
 				existVariableContext.put(InternalVariableKey.PROCESS_INSTANCE_ID.getVariableKey(), processInstance.getId());
 				runtimeService.setVariable(processInstance.getId(), InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), existVariableContext);
 			}
-		}
+		}*/
 	
 		return processInstance.getId();
 	}
@@ -614,7 +614,19 @@ public class ProcessService {
 						}
 					}
 					
+					//处理引用值
+					List<ProcessVariablePO> variableWithExpressionValue =  processVariableDao.findByProcessIdAndExpressionValueNotNull(process.getId());
+					if(variableWithExpressionValue!=null && variableWithExpressionValue.size()>0){
+						for(ProcessVariablePO variable:variableWithExpressionValue){
+							String value = constraintValidator.getStringValue(reverceVariableValidateContext, variable.getExpressionValue());
+							if(value != null){
+								reverceVariableMap.put(variable.getPrimaryKey(), value);
+							}
+						}
+					}
+					
 					//回写流程变量
+					reverceVariableMapKeys = reverceVariableMap.keySet();
 					for(String reverceVariableMapKey:reverceVariableMapKeys){
 						variableMapContext.put(reverceVariableMapKey, reverceVariableMap.get(reverceVariableMapKey));
 					}

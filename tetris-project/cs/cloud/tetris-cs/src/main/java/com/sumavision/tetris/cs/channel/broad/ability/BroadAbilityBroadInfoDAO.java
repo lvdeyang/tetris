@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.channel.ability;
+package com.sumavision.tetris.cs.channel.broad.ability;
 
 import java.util.List;
 
@@ -25,4 +25,9 @@ public interface BroadAbilityBroadInfoDAO extends BaseDAO<BroadAbilityBroadInfoP
 	@Modifying
 	@Query(value = "DELETE FROM TETRIS_CS_ABILITY_BROAD_INFO WHERE channel_id = ?1", nativeQuery = true)
 	public void deleteByChannelId(Long channelId);
+	
+	
+	@Query(value = "SELECT preview_url_port FROM TETRIS_CS_ABILITY_BROAD_INFO WHERE preview_url_ip = ?1", nativeQuery = true)
+	public List<String> findByPreviewUrlIp(String ip);
+
 }

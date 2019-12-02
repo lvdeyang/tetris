@@ -18,7 +18,7 @@ import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
 import com.sumavision.tetris.cs.channel.ChannelVO;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -144,11 +144,9 @@ public class ApiServerChannelController {
 		ChannelPO channelPO = channelDao.findOne(id);
 		if (channelPO == null) return null;
 		
-		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return channelService.startAbilityBroadTimer(id);
-		}else {
-			return channelService.startTerminalBroadcast(id);
-		}
+		channelService.startBroadcast(id);
+		
+		return "";
 	}
 	
 	/**
@@ -166,11 +164,9 @@ public class ApiServerChannelController {
 		ChannelPO channelPO = channelDao.findOne(id);
 		if (channelPO == null) return null;
 		
-		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return channelService.stopAbilityBroadcast(id);
-		}else {
-			return channelService.stopTerminalBroadcast(id);
-		}
+		channelService.stopBroadcast(id);
+		
+		return "";
 	}
 	
 	/**
@@ -185,16 +181,7 @@ public class ApiServerChannelController {
 	@RequestMapping(value = "/broadcast/status")
 	public Object broadcastStatus(Long id, HttpServletRequest request) throws Exception {
 		
-		ChannelPO channelPO = channelDao.findOne(id);
-		if (channelPO == null) {
-			throw new ChannelNotExistsException(id);
-		}
-		
-		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return channelPO.getBroadcastStatus();
-		}
-
-		return channelService.getChannelBroadstatus(id);
+		return channelQuery.getBroadstatus(id);
 	}
 	
 }

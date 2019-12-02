@@ -53,4 +53,14 @@ public interface ProcessVariableDAO extends BaseDAO<ProcessVariablePO>{
 	 */
 	public List<ProcessVariablePO> findByProcessIdAndIdNotIn(Long processId, Collection<Long> except);
 	
+	/**
+	 * 查询流程下的引用变量述<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月25日 下午2:07:46
+	 * @param Long processId 流程id
+	 * @return List<ProcessVariablePO> 变量列表
+	 */
+	public List<ProcessVariablePO> findByProcessIdAndExpressionValueNotNull(Long processId);
+	
 }

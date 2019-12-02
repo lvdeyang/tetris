@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.activiti.engine.RuntimeService;
 import org.activiti.engine.delegate.DelegateExecution;
 import org.apache.http.Header;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
@@ -84,6 +86,9 @@ public class RemoteAccessPoint {
 	
 	@Autowired
 	private ProcessDAO processDao;
+	
+	@Autowired
+	private ProcessVariableDAO processVariableDao;
 	
 	@Autowired
 	private ProcessParamReferenceDAO processParamReferenceDao;
@@ -283,6 +288,17 @@ public class RemoteAccessPoint {
 				}
 			}
 			
+			//处理引用值
+			List<ProcessVariablePO> variableWithExpressionValue =  processVariableDao.findByProcessIdAndExpressionValueNotNull(process.getId());
+			if(variableWithExpressionValue!=null && variableWithExpressionValue.size()>0){
+				for(ProcessVariablePO variable:variableWithExpressionValue){
+					String value = constraintValidator.getStringValue(validataJsonContext, variable.getExpressionValue());
+					if(value != null){
+						reverseParamMap.put(variable.getPrimaryKey(), value);
+					}
+				}
+			}
+			
 			//回写参数
 			reverseParamMapKeys = reverseParamMap.keySet();
 			for(String reverseParamMapKey:reverseParamMapKeys){
@@ -290,7 +306,6 @@ public class RemoteAccessPoint {
 			}
 			variableContext = aliFastJsonObject.convertFromHashMap(contextVariableMap);
 			runtimeService.setVariable(processInstanceId, InternalVariableKey.VARIABLE_CONTEXT.getVariableKey(), variableContext);
-			
 		}catch(Exception e){
 			e.printStackTrace();
 			throw e;
@@ -354,7 +369,7 @@ public class RemoteAccessPoint {
 			this.url = url;
 			this.params = params;
 			this.dataType = dataType;
-			this.requestConfig = RequestConfig.custom().setSocketTimeout(3000).setConnectTimeout(3000).build();
+			this.requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(5000).build();
 			this.httpClient = HttpClients.custom().setDefaultRequestConfig(requestConfig).build();
 			this.context = HttpClientContext.create();
 			if(cookie != null){

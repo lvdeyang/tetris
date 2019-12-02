@@ -25,6 +25,7 @@ define([
                 },
                 data: [],
                 uri: '',
+                type: '',
                 checked: [],
                 checkedId: [],
                 selected: [],
@@ -32,10 +33,11 @@ define([
             }
         },
         methods: {
-            open: function (uri, checked) {
+            open: function (uri, checked, type) {
                 var self = this;
                 self.visible = true;
                 self.uri = uri;
+                self.type = type;
                 self.checked = checked;
                 for (var i = 0; i < checked.length; i++) {
                     self.checkedId.push(checked[i].id)
@@ -45,10 +47,18 @@ define([
             load: function () {
                 var self = this;
                 var uri = self.uri;
+                var type = self.type;
                 self.data.splice(0, self.data.length);
                 ajax.post(uri, null, function (data) {
-                    if (data && data.length > 0) {
-                        self.data = data.concat();
+                    if (data) {
+                        if (type && data[type]) {
+                            self.data = data[type];
+                        } else {
+                            Object.keys(data).forEach(function(key){
+                                console.log(key,data[key]);
+                                self.data = self.data.concat(data[key]);
+                            });
+                        }
                     }
 
                     self.$nextTick(function () {
@@ -64,7 +74,8 @@ define([
                 self.checked = [];
                 self.checkedId.splice(0, self.checkedId.length);
                 self.selected.splice(0, self.selected.length);
-                self.uri = ""
+                self.uri = "";
+                self.type = "";
             },
             handleUserBindingOk: function () {
                 var self = this;

@@ -33,6 +33,12 @@ public class ScreenPO extends AbstractBasePO {
 	/** 媒资名称 */
 	private String name;
 	
+	/** 媒资类型 */
+	private String type;
+	
+	/** 媒资的mimetype */
+	private String mimetype;
+	
 	/** 媒资预览地址 */
 	private String previewUrl;
 	
@@ -100,6 +106,24 @@ public class ScreenPO extends AbstractBasePO {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+	
+	@Column(name = "TYPE")
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	@Column(name = "MIMETYPE")
+	public String getMimetype() {
+		return mimetype;
+	}
+
+	public void setMimetype(String mimetype) {
+		this.mimetype = mimetype;
 	}
 
 	@Column(name="PREVIEW_URL")

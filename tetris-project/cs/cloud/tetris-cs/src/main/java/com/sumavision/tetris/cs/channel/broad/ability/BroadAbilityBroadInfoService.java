@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.channel.ability;
+package com.sumavision.tetris.cs.channel.broad.ability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,7 @@ import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.exception.ChannelUdpIpAndPortAlreadyExistException;
 import com.sumavision.tetris.cs.channel.exception.ChannelUdpUserIdAlreadyExistException;
+import com.sumavision.tetris.cs.config.ServerProps;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.user.UserVO;
@@ -31,6 +32,30 @@ public class BroadAbilityBroadInfoService {
 	
 	@Autowired
 	private Adapter adapter;
+	
+	@Autowired
+	private ServerProps serverProps;
+	
+	/**
+	 * 预播发用户VO转换<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月27日 下午1:45:37
+	 * @param List<UserVO> users 预播发用户列表
+	 * @param String port 播发端口
+	 * @return
+	 */
+	public List<BroadAbilityBroadInfoVO> changeVO(List<UserVO> users, String port) throws Exception {
+		List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs = new ArrayList<BroadAbilityBroadInfoVO>();
+		if (users != null){
+			for (UserVO user : users) {
+				abilityBroadInfoVOs.add(new BroadAbilityBroadInfoVO()
+						.setUserId(user.getId())
+						.setPreviewUrlPort(port != null && !port.isEmpty() ? port : "9999"));
+			}
+		}
+		return abilityBroadInfoVOs;
+	}
 	
 	/**
 	 * 保存频道的下发信息设置<br/>
@@ -177,5 +202,30 @@ public class BroadAbilityBroadInfoService {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 根据ip查询可用端口(给文件转流提供)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月28日 上午10:27:05
+	 * @param String searchIp 查询的ip
+	 * @param Long startPort 查询的端口
+	 * @param String 可用的首个端口
+	 */
+	public Long queryLocalPort(String searchIp, Long startPort) throws Exception{
+		if (searchIp == null || searchIp.isEmpty()) searchIp = serverProps.getIp();
+		List<String> ports = broadAbilityBroadInfoDAO.findByPreviewUrlIp(searchIp);
+		if (ports == null || ports.isEmpty()) return startPort;
+		
+		Long returnPort = 0l;
+		for (Long i = startPort; i < startPort + 2000; i++) {
+			String port = i.toString();
+			if (!ports.contains(port)) {
+				return i;
+			}
+		}
+		
+		return returnPort;
 	}
 }

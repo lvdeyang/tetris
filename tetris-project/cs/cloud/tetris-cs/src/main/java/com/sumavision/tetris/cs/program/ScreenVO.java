@@ -14,6 +14,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private Long resourceId;
 
 	private String name;
+	private String type;
+	private String mimetype;
 	private String previewUrl;
 	private String encryption;
 	private String encryptionUrl;
@@ -30,8 +32,9 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setSerialNum(entity.getSerialNum())
 		.setIndex(entity.getScreenIndex())
 		.setName(entity.getName())
+		.setType(entity.getType())
+		.setMimetype(entity.getMimetype())
 		.setPreviewUrl(entity.getPreviewUrl())
-		.setEncryptionUrl(entity.getEncryptionUrl())
 		.setEncryption(entity.getEncryptionUrl() == null || entity.getEncryptionUrl().isEmpty() ? "false" : "true")
 		.setEncryptionUrl(entity.getEncryptionUrl())
 		.setHotWeight(entity.getHotWeight())
@@ -95,6 +98,24 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 
 	public ScreenVO setName(String name) {
 		this.name = name;
+		return this;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public ScreenVO setType(String type) {
+		this.type = type;
+		return this;
+	}
+
+	public String getMimetype() {
+		return mimetype;
+	}
+
+	public ScreenVO setMimetype(String mimetype) {
+		this.mimetype = mimetype;
 		return this;
 	}
 

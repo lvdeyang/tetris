@@ -1,7 +1,6 @@
 package com.sumavision.tetris.transcoding;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,8 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.commons.util.xml.XmlUtil;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.transcoding.addTask.requestVO.AddTaskVO;
 import com.sumavision.tetris.transcoding.addTask.rsponseVO.AddTaskResponseVO;
 import com.sumavision.tetris.transcoding.completeNotify.CompleteNotifyService;
@@ -129,38 +130,39 @@ public class Adapter {
 	 */
 	public String changeHttpToFtp(String httpUrl) throws Exception {
 		
-		String json = readProfile();
-		JSONObject jsonObject = JSONObject.parseObject(json);
-
-		String ftpUserName = jsonObject.getString("ftpUserName");
-		String ftpPassword = jsonObject.getString("ftpPassword");
-
 		String ftpPath = null;
 
 		String[] split = httpUrl.split(":");
 
-		String ip = "";
-		if (jsonObject.getBoolean("useSetIp")) {
-			ip = jsonObject.getString("setIp");
-		}
+		ServerProps serverProps = mimsServerPropsQuery.queryProps();
 		//没有端口的Url地址
 		if (split.length == 2) {
 			String[] splite2 = split[1].split("//");
 			
-			if (ip.isEmpty()) ip = splite2[1].substring(0, splite2[1].indexOf("/"));
-			
 			String path = splite2[1].substring(splite2[1].indexOf("/"));
 			
-			ftpPath = new StringBuilder("ftp://").append(ftpUserName).append(":").append(ftpPassword).append("@")
-					.append(ip).append(path).toString();
+			ftpPath = new StringBufferWrapper().append("ftp://").append(serverProps.getFtpUsername())
+					  .append(":")
+					  .append(serverProps.getFtpPassword())
+					  .append("@")
+					  .append(serverProps.getFtpIp())
+					  .append(":")
+					  .append(serverProps.getFtpPort())
+					  .append(path)
+					  .toString();;
 		//有端口的url地址
 		} else if (split.length == 3) {
-			if (ip.isEmpty()) ip = split[1].split("//")[1];
-
 			String path = split[2].substring(split[2].indexOf("/"));
 
-			ftpPath = new StringBuilder("ftp://").append(ftpUserName).append(":").append(ftpPassword).append("@")
-					.append(ip).append(path).toString();
+			ftpPath = new StringBufferWrapper().append("ftp://").append(serverProps.getFtpUsername())
+					  .append(":")
+					  .append(serverProps.getFtpPassword())
+					  .append("@")
+					  .append(serverProps.getFtpIp())
+					  .append(":")
+					  .append(serverProps.getFtpPort())
+					  .append(path)
+					  .toString();
 		}
 
 		return ftpPath;
@@ -183,19 +185,11 @@ public class Adapter {
 		
 		if (ftpUrl.contains("@")) {
 			split = ftpUrl.split("@");
-			
 		}else {
 			split = ftpUrl.split("//");
 		}
 		
-		String json = readProfile();
-		JSONObject jsonObject = JSONObject.parseObject(json);
-		String ip;
-		if (jsonObject.getBoolean("useSetIp")) {
-			ip = jsonObject.getString("setIp");
-		} else {
-			ip = split[1].substring(0, split[1].indexOf("/"));
-		}
+		String ip = mimsServerPropsQuery.queryProps().getFtpIp();
 		
 		String path = split[1].substring(split[1].indexOf("/"));
 		
@@ -215,20 +209,17 @@ public class Adapter {
 		String[] split = url.split(":");
 		
 		if (split.length == 1) {
-			String json = readProfile();
-			JSONObject jsonObject = JSONObject.parseObject(json);
-
-			String ftpUserName = jsonObject.getString("ftpUserName");
-			String ftpPassword = jsonObject.getString("ftpPassword");
-
-			String ip;
-			if (jsonObject.getBoolean("useSetIp")) {
-				ip = jsonObject.getString("setIp");
-			} else {
-				ip = mimsServerPropsQuery.queryProps().getIp();
-			}
-			return new StringBuilder("ftp://").append(ftpUserName).append(":").append(ftpPassword).append("@")
-					.append(ip).append("/").append(url).toString();
+			ServerProps serverProps = mimsServerPropsQuery.queryProps();
+			return new StringBufferWrapper().append("ftp://").append(serverProps.getFtpUsername())
+					  .append(":")
+					  .append(serverProps.getFtpPassword())
+					  .append("@")
+					  .append(serverProps.getFtpIp())
+					  .append(":")
+					  .append(serverProps.getFtpPort())
+					  .append("/")
+					  .append(url)
+					  .toString();
 		}else {
 			return url;
 		}

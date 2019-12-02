@@ -6,6 +6,8 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 
 	private String name;
+	private String type;
+	private String mimetype;
 	private String duration;
 	private Long parentId;
 	private String parentPath;
@@ -24,6 +26,8 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 		.setUpdateTime(entity.getUpdateTime() == null ? "": DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 		.setUuid(entity.getUuid())
 		.setName(entity.getName())
+		.setType(entity.getType())
+		.setMimetype(entity.getMimetype())
 		.setDuration(entity.getDuration())
 		.setMimsUuid(entity.getMimsUuid())
 		.setParentId(entity.getParentId())
@@ -42,6 +46,24 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 
 	public CsResourceVO setName(String name) {
 		this.name = name;
+		return this;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public CsResourceVO setType(String type) {
+		this.type = type;
+		return this;
+	}
+
+	public String getMimetype() {
+		return mimetype;
+	}
+
+	public CsResourceVO setMimetype(String mimetype) {
+		this.mimetype = mimetype;
 		return this;
 	}
 

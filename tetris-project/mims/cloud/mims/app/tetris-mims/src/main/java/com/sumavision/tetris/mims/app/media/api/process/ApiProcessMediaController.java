@@ -29,6 +29,8 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.encode.exception.FileNotExitException;
+import com.sumavision.tetris.mims.app.media.tag.TagDAO;
+import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
@@ -46,6 +48,9 @@ public class ApiProcessMediaController {
 	
 	@Autowired
 	private FolderDAO folderDao;
+	
+	@Autowired
+	private TagDAO tagDAO;
 	
 	@Autowired
 	private MediaVideoService mediaVideoService;
@@ -166,5 +171,42 @@ public class ApiProcessMediaController {
 		thread.start();
 		
 		return null;
+	}
+	
+	/**
+	 * 添加远程媒资(应急广播使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月3日 下午5:24:19
+	 * @param String name 媒资名称
+	 * @param String type 媒资类型
+	 * @param Long tagId 标签id 
+	 * @param String url 媒资地址
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/remote")
+	public Object addRemote(Boolean ifAdd, String name, String type, Long tagId, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception {
+		UserVO user = userQuery.current();
+		
+		if (ifAdd != null && ifAdd) {
+			TagPO tag = null;
+			if (tagId != null) {
+				tag = tagDAO.findOne(tagId);
+			}
+			
+			switch (type.toLowerCase()) {
+			case "video":
+				MediaVideoVO video = mediaVideoService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
+				return new HashMapWrapper<String, Long>().put("id", video.getId()).getMap();
+			case "audio":
+				MediaAudioVO audio = mediaAudioService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
+				return new HashMapWrapper<String, Long>().put("id", audio.getId()).getMap();
+			default:
+				return null;
+			}
+		} else {
+			return null;
+		}
 	}
 }

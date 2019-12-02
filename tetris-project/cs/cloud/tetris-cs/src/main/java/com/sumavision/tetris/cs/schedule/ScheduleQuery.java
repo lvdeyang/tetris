@@ -14,8 +14,8 @@ import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoService;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
 

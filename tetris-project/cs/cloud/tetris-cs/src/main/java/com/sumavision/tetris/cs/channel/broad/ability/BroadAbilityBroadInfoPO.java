@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.channel.ability;
+package com.sumavision.tetris.cs.channel.broad.ability;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

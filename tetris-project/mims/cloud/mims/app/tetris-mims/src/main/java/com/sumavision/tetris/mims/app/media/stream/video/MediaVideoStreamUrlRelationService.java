@@ -2,6 +2,7 @@ package com.sumavision.tetris.mims.app.media.stream.video;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,6 +82,14 @@ public class MediaVideoStreamUrlRelationService {
 		return mediaVideoStreamUrlRelationDAO.findByVideoStreamIdOrderByVisitCountAsc(streamId);
 	}
 	
+	/**
+	 * 复制视频流信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月25日 下午5:02:16
+	 * @param Long streamId 视频流id
+	 * @param Long newStreamId 新的视频流id
+	 */
 	public List<String> copy(Long streamId, Long newStreamId){
 		List<MediaVideoStreamUrlRelationPO> medias = mediaVideoStreamUrlRelationDAO.findByVideoStreamIdOrderByVisitCountAsc(streamId);
 		
@@ -101,5 +110,25 @@ public class MediaVideoStreamUrlRelationService {
 		}else {
 			return new ArrayList<String>();
 		}
+	}
+	
+	/**
+	 * 根据url地址删除数据<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月25日 下午5:28:20
+	 * @param List<String> urls 地址列表
+	 * @return List<Long> url对应的视频流列表id
+	 */
+	public List<Long> remove(List<String> urls) throws Exception {
+		if (urls == null || urls.isEmpty()) return null;
+		
+		List<MediaVideoStreamUrlRelationPO> medias = mediaVideoStreamUrlRelationDAO.findByUrlIn(urls);
+		
+		if (medias == null || medias.isEmpty()) return null;
+		
+		mediaVideoStreamUrlRelationDAO.deleteInBatch(medias);
+		
+		return medias.stream().map(MediaVideoStreamUrlRelationPO::getVideoStreamId).collect(Collectors.toList());
 	}
 }

@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.channel.ability;
+package com.sumavision.tetris.cs.channel.broad.ability;
 
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 

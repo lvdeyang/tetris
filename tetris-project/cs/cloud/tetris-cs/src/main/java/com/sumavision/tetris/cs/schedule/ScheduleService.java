@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityService;
+import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
@@ -20,6 +20,9 @@ import com.sumavision.tetris.cs.schedule.exception.ScheduleNotExistsException;
 @Transactional(rollbackFor = Exception.class)
 public class ScheduleService {
 	@Autowired
+	private ChannelService channelService;
+	
+	@Autowired
 	private ScheduleQuery scheduleQuery;
 	
 	@Autowired
@@ -27,9 +30,6 @@ public class ScheduleService {
 	
 	@Autowired
 	private ProgramService programService;
-	
-	@Autowired
-	private BroadAbilityService broadAbilityService;
 	
 	/**
 	 * 添加排期<br/>
@@ -49,7 +49,7 @@ public class ScheduleService {
 		schedulePO.setRemark(remark);
 		scheduleDAO.save(schedulePO);
 		
-		broadAbilityService.addScheduleDeal(channelId);
+		channelService.addScheduleDeal(channelId);
 		
 		return new ScheduleVO().set(schedulePO);
 	}
@@ -95,6 +95,14 @@ public class ScheduleService {
 		return new ScheduleVO().set(schedule);
 	}
 	
+	/**
+	 * 批量删除排期<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月28日 上午11:14:06
+	 * @param List<Long> scheduleIds 排期id列表
+	 * @return List<ScheduleVO> 被删除的排期列表
+	 */
 	public List<ScheduleVO> removeInBatch(List<Long> scheduleIds) throws Exception{
 		if (scheduleIds == null || scheduleIds.isEmpty()) return null;
 		
@@ -174,7 +182,10 @@ public class ScheduleService {
 			screen.setUpdateTime(date);
 			screen.setSerialNum(1l);
 			screen.setIndex((long)(i+1));
+			screen.setMimsUuid(item.getMimsUuid());
 			screen.setName(item.getName());
+			screen.setType(item.getType());
+			screen.setMimetype(item.getMimetype());
 			screen.setPreviewUrl(item.getPreviewUrl());
 			screen.setHotWeight(item.getHotWeight());
 			screen.setDownloadCount(item.getDownloadCount());

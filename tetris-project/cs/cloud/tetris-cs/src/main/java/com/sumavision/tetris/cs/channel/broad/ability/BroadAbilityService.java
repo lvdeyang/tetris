@@ -1,4 +1,4 @@
-package com.sumavision.tetris.cs.channel.ability;
+package com.sumavision.tetris.cs.channel.broad.ability;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,8 +32,7 @@ import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoPO;
-import com.sumavision.tetris.cs.channel.exception.ChannelAbilityNoneOutputException;
-import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
+import com.sumavision.tetris.cs.channel.exception.ChannelBroadNoneOutputException;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
@@ -53,6 +52,8 @@ import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class BroadAbilityService {
+	@Autowired
+	private BroadAbilityQuery broadAbilityQuery;
 	
 	@Autowired
 	private ChannelDAO channelDao;
@@ -85,9 +86,6 @@ public class BroadAbilityService {
 	private UserQuery userQuery;
 	
 	@Autowired
-	private MediaAudioQuery mediaAudioQuery;
-	
-	@Autowired
 	private MediaEncodeQuery mediaEncodeQuery;
 	
 	@Autowired
@@ -95,6 +93,10 @@ public class BroadAbilityService {
 	
 	public void startAbilityBroadcast(Long channelId) throws Exception {
 		startAbilityBroadTimer(channelId);
+	}
+	
+	public void seekAbilityBroadcast(ChannelPO channel, Long duration) throws Exception {
+		broadAbilityQuery.sendAbilityRequest(BroadAbilityQueryType.SEEK, channel, duration);
 	}
 	
 	/**
@@ -106,69 +108,29 @@ public class BroadAbilityService {
 	 */
 	public void stopAbilityBroadcast(Long channelId) throws Exception{
 		Map<Long, Timer> timerMap = channelService.getTimerMap();
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) throw new ChannelNotExistsException(channelId);
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		Timer timer = timerMap.get(channelId);
 		if (timer != null) {
 			timer.cancel();
 		}
-		if (channelQuery.sendAbilityRequest(BroadAbilityQueryType.STOP, channel, null, null)) {
+		if (broadAbilityQuery.sendAbilityRequest(BroadAbilityQueryType.STOP, channel, null, null)) {
 			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
 			channelDao.save(channel);	
 		}
 	}
 	
-	public void autoSetSchedule(Long channelId) throws Exception {
-		Long now = DateUtil.getLongDate();
-		Map<Long, Timer> timerMap = channelService.getTimerMap();
-		scheduleService.removeFromNowByChannelId(channelId);
-		
-		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		ChannelAutoBroadInfoPO autoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelId);
-		if (autoBroadInfoPO == null) return;
-		
-		if (timerMap.containsKey(channel)) timerMap.get(channel).cancel();
-		
-		List<MediaAudioVO> recommends = mediaAudioQuery.loadRecommend();
-		
-		String broadStartTime = new StringBufferWrapper().append(autoBroadInfoPO.getStartDate())
-				.append(" ")
-				.append(autoBroadInfoPO.getStartTime())
-				.toString();
-		Long broadStartTimeLong = DateUtil.parse(broadStartTime, DateUtil.dateTimePattern).getTime() + 30000;
-		Boolean fromToday = now < broadStartTimeLong;
-		
-		for (int i = 0; i < autoBroadInfoPO.getDuration(); i++) {
-			String broadTime = new StringBufferWrapper()
-					.append(DateUtil.addDateStr(autoBroadInfoPO.getStartDate(), i + (fromToday ? 0 : 1)))
-					.append(" ")
-					.append(autoBroadInfoPO.getStartTime())
-					.toString();
-			List<ScreenVO> screens = new ArrayList<ScreenVO>();
-			if (recommends != null && !recommends.isEmpty()) {
-				if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
-				List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
-				for (MediaAudioVO audio : audios) {
-					ScreenVO screen = new ScreenVO();
-					screen.setName(audio.getName());
-					screen.setPreviewUrl(audio.getPreviewUrl());
-					screen.setEncryption(audio.getEncryption() != null && audio.getEncryption() ? "true" : "false");
-					screen.setEncryptionUrl(audio.getEncryptionUrl());
-					screen.setHotWeight(audio.getHotWeight());
-					screen.setDownloadCount(audio.getDownloadCount());
-					screen.setDuration(audio.getDuration());
-					screens.add(screen);
-				}
-			}
-			scheduleService.addSchedule(channelId, broadTime, screens);
-		}
-	}
-	
+	/**
+	 * 播发时添加<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月28日 上午11:02:56
+	 * @param channelId
+	 * @throws Exception
+	 */
 	public void addScheduleDeal(Long channelId) throws Exception {
 		Long now = DateUtil.getLongDate();
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) throw new ChannelNotExistsException(channelId);
-		if (!channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName()) || channel.getBroadcastStatus() != ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING) return;
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (channel.getBroadcastStatus() != ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING) return;
 		Map<Long, Timer> timerMap = channelService.getTimerMap();
 		if (!timerMap.containsKey(channelId)) return;
 		List<ScheduleVO> scheduleVOs = scheduleQuery.getByChannelId(channelId);
@@ -218,8 +180,7 @@ public class BroadAbilityService {
 		BroadAbilityQueryType type = BroadAbilityQueryType.COVER;
 		
 		Long now = DateUtil.getLongDate();
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) throw new ChannelNotExistsException(channelId);
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		List<ScheduleVO> scheduleVOs = scheduleQuery.getByChannelId(channelId);
 		if (scheduleVOs == null || scheduleVOs.isEmpty()) throw new ScheduleNoneToBroadException(channel.getName());
 		
@@ -361,14 +322,13 @@ public class BroadAbilityService {
 	 * @param type
 	 */
 	private void startSendSchedule(Long channelId, Long scheduleId, List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs, BroadAbilityQueryType type) throws Exception {
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) throw new ChannelNotExistsException(channelId);
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		
 		JSONObject output = new JSONObject();
 		output.put("proto-type", "udp-ts");
 		List<JSONObject> destList = new ArrayList<JSONObject>();
 		String localIp = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD).split(":")[0];
-		if (broadAbilityBroadInfoVOs == null || broadAbilityBroadInfoVOs.isEmpty()) throw new ChannelAbilityNoneOutputException();
+		if (broadAbilityBroadInfoVOs == null || broadAbilityBroadInfoVOs.isEmpty()) throw new ChannelBroadNoneOutputException();
 		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
 			if (broadAbilityBroadInfoVO.getPreviewUrlIp() == null || broadAbilityBroadInfoVO.getPreviewUrlIp().isEmpty()) continue;
 			JSONObject dest = new JSONObject();
@@ -382,15 +342,15 @@ public class BroadAbilityService {
 		if (destList.isEmpty()) {
 			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT);
 			channelDao.save(channel);
-			throw new ChannelAbilityNoneOutputException();
+			throw new ChannelBroadNoneOutputException();
 		}
 		output.put("dest_list", destList);
 		
 		output.put("scramble", channel.getEncryption() != null && channel.getEncryption() ? "AES-128" : "none");
 		output.put("key", channel.getEncryption() != null && channel.getEncryption() ? getKey() : "");
 		
-		if (channelQuery.sendAbilityRequest(type, channel, abilityProgramText(programQuery.getProgram(scheduleId)), output)) {
-			if(type != BroadAbilityQueryType.COVER) channelQuery.saveBroad(channelId, broadAbilityBroadInfoVOs);
+		if (broadAbilityQuery.sendAbilityRequest(type, channel, abilityProgramText(programQuery.getProgram(scheduleId)), output)) {
+			if(type != BroadAbilityQueryType.COVER) broadAbilityQuery.saveBroad(channelId, broadAbilityBroadInfoVOs);
 		}
 	}
 	
@@ -402,9 +362,8 @@ public class BroadAbilityService {
 	 * @param channelId 频道id
 	 */
 	private void startSendStream(Long channelId) throws Exception {
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) throw new ChannelNotExistsException(channelId);
-		channelQuery.sendAbilityRequest(BroadAbilityQueryType.START, channel);
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		broadAbilityQuery.sendAbilityRequest(BroadAbilityQueryType.START, channel);
 	}
 	
 	/**

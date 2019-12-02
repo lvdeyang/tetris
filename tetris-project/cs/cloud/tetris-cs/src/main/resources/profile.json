@@ -3,9 +3,5 @@
 	"terminalBroadPort": "8180",
 	"abilityBroadIp": "192.165.58.123",
 	"abilityBroadPort": "9000",
-	"ifLocal": false,
-	"ftpUserName": "test",
-	"ftpPassword": "123",
-	"useSetIp": false,
-	"setIp": "192.165.58.123"
+	"ifLocal": false
  }
