@@ -1,0 +1,241 @@
+<mi-frame id="page-system-storage-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">存储管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>存储管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加存储</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除存储</el-button>
+
+            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="小工具"
+                                prop="serverGadgetName">
+                        </el-table-column>
+                        <el-table-column
+                                label="备注"
+                                prop="remark">
+                        </el-table-column>
+                        <el-table-column
+                                width="50"
+                                prop="status">
+                            <template slot-scope="scope">
+                                <span v-if="scope.row.status === '在线'" style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
+                                <span v-if="scope.row.status === '离线'" style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="150">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="编辑存储" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="设置存储" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-setting" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowConfig(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除存储" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
+                <el-pagination
+                        style="float:right;"
+                        background
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="table.currentPage"
+                        :page-sizes="table.pageSizes"
+                        :page-size="table.pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="table.total">
+                </el-pagination>
+            </div>
+        </el-card>
+    </template>
+
+    <template>
+
+        <el-dialog
+                title="添加存储"
+                :visible.sync="dialog.createStorage.visible"
+                width="600px"
+                :before-close="handleCreateStorageClose">
+
+            <div style="width:100%; height:400px; position:relative;">
+                <div style="position:absolute; left:-20px; top:-30px; right:-20px; bottom:-30px;">
+                    <div style="width:100%; height:100%; padding:10px 20px;">
+                        <el-scrollbar style="height:100%;">
+                            <el-form label-width="100px" label-position="top">
+                                <el-form-item label="存储名称">
+                                    <el-input v-model="dialog.createStorage.name"></el-input>
+                                </el-form-item>
+                                <el-form-item label="存储根路径">
+                                    <el-input v-model="dialog.createStorage.rootPath"></el-input>
+                                </el-form-item>
+                                <el-form-item label="上传根路径">
+                                    <div clas="url-path-form">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.createStorage.upload.ip" placeholder="IP地址">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.createStorage.upload.protocol" slot="prepend" placeholder="协议">
+                                                <el-option label="ftp://" value="ftp://"></el-option>
+                                            </el-select>
+                                        </el-input>
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.createStorage.upload.port" placeholder="端口">
+                                            <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
+                                            <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
+                                        </el-input>
+                                    </div>
+                                </el-form-item>
+                                <el-form-item label="预览根路径">
+                                    <div clas="url-path-form">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.createStorage.preview.ip" placeholder="IP地址">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.createStorage.preview.protocol" slot="prepend" placeholder="协议">
+                                                <el-option label="http://" value="http://"></el-option>
+                                                <el-option label="https://" value="https://"></el-option>
+                                            </el-select>
+                                        </el-input>
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.createStorage.preview.port" placeholder="端口">
+                                            <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
+                                            <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
+                                        </el-input>
+                                    </div>
+                                </el-form-item>
+                                <el-form-item label="服务器小工具">
+                                    <el-select style="width:100%; float:left;" v-model="dialog.createStorage.serverGadgetType">
+                                        <el-option label="数码视讯小工具" value="SUMAVISION_GADGET"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="小工具控制地址">
+                                    <div clas="url-path-form">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.createStorage.control.ip" placeholder="IP地址">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.createStorage.control.protocol" slot="prepend" placeholder="协议">
+                                                <el-option label="http://" value="http://"></el-option>
+                                                <el-option label="https://" value="https://"></el-option>
+                                            </el-select>
+                                        </el-input>
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.createStorage.control.port" placeholder="端口">
+                                            <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
+                                            <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
+                                        </el-input>
+                                    </div>
+                                </el-form-item>
+                                <el-form-item label="备注">
+                                    <el-input type="textarea" rows="4" v-model="dialog.createStorage.remark"></el-input>
+                                </el-form-item>
+                            </el-form>
+                        </el-scrollbar>
+                    </div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="small" @click="handleCreateStorageClose">取消</el-button>
+                <el-button size="small" type="primary" @click="handleCreateStorageCommit" :loading="dialog.createStorage.loading">确 定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+    <template>
+
+        <el-dialog
+                title="编辑存储"
+                :visible.sync="dialog.editStorage.visible"
+                width="600px"
+                :before-close="handleEditStorageClose">
+
+            <div style="width:100%; height:400px; position:relative;">
+                <div style="position:absolute; left:-20px; top:-30px; right:-20px; bottom:-30px;">
+                    <div style="width:100%; height:100%; padding:10px 20px;">
+                        <el-scrollbar style="height:100%;">
+                            <el-form label-width="100px" label-position="top">
+                                <el-form-item label="存储名称">
+                                    <el-input v-model="dialog.editStorage.name"></el-input>
+                                </el-form-item>
+                                <el-form-item label="存储根路径">
+                                    <el-input v-model="dialog.editStorage.rootPath"></el-input>
+                                </el-form-item>
+                                <el-form-item label="上传根路径">
+                                    <div clas="url-path-form">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.editStorage.upload.ip" placeholder="IP地址">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.editStorage.upload.protocol" slot="prepend" placeholder="协议">
+                                                <el-option label="ftp://" value="ftp://"></el-option>
+                                            </el-select>
+                                        </el-input>
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.editStorage.upload.port" placeholder="端口">
+                                            <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
+                                            <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
+                                        </el-input>
+                                    </div>
+                                </el-form-item>
+                                <el-form-item label="预览根路径">
+                                    <div clas="url-path-form">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.editStorage.preview.ip" placeholder="IP地址">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.editStorage.preview.protocol" slot="prepend" placeholder="协议">
+                                                <el-option label="http://" value="http://"></el-option>
+                                                <el-option label="https://" value="https://"></el-option>
+                                            </el-select>
+                                        </el-input>
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.editStorage.preview.port" placeholder="端口">
+                                            <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
+                                            <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
+                                        </el-input>
+                                    </div>
+                                </el-form-item>
+                                <el-form-item label="服务器小工具">
+                                    <el-select style="width:100%; float:left;" v-model="dialog.editStorage.serverGadgetType">
+                                        <el-option label="数码视讯小工具" value="SUMAVISION_GADGET"></el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item label="小工具控制地址">
+                                    <div clas="url-path-form">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.editStorage.control.ip" placeholder="IP地址">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.editStorage.control.protocol" slot="prepend" placeholder="协议">
+                                                <el-option label="http://" value="http://"></el-option>
+                                                <el-option label="https://" value="https://"></el-option>
+                                            </el-select>
+                                        </el-input>
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.editStorage.control.port" placeholder="端口">
+                                            <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
+                                            <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
+                                        </el-input>
+                                    </div>
+                                </el-form-item>
+                                <el-form-item label="备注">
+                                    <el-input type="textarea" rows="4" v-model="dialog.editStorage.remark"></el-input>
+                                </el-form-item>
+                            </el-form>
+                        </el-scrollbar>
+                    </div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="small" @click="handleEditStorageClose">取消</el-button>
+                <el-button size="small" type="primary" @click="handleEditStorageCommit" :loading="dialog.editStorage.loading">确 定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

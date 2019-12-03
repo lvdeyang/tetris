@@ -11,7 +11,7 @@ import com.sumavision.tetris.mvc.ext.request.RequestUserAgentAnalyzer;
 import com.sumavision.tetris.user.UserQuery;
 
 /**
- * 移动终端用户拦截器<br/>
+ * 安卓门户终端用户(lzp)拦截器<br/>
  * <b>作者:</b>lvdeyang<br/>
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年3月12日 下午1:34:26

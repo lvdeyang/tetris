@@ -35,6 +35,9 @@ public class ChannelPO extends AbstractBasePO {
 	/** 频道类型 */
 	private String type;
 	
+	/** 流程id */
+	private String processInstanceId;
+	
 	/** 是否加密 */
 	private Boolean encryption;
 	
@@ -111,6 +114,15 @@ public class ChannelPO extends AbstractBasePO {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	@Column(name = "PROCESS_INSTANCE_ID")
+	public String getProcessInstanceId() {
+		return processInstanceId;
+	}
+
+	public void setProcessInstanceId(String processInstanceId) {
+		this.processInstanceId = processInstanceId;
 	}
 
 	@Column(name = "ENCTYPTION")

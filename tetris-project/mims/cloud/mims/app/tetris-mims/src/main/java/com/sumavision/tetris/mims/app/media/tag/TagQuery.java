@@ -85,4 +85,16 @@ public class TagQuery {
 		
 		return TagVO.getConverter(TagVO.class).convert(tags, TagVO.class);
 	}
+	
+	public TagVO queryById(Long tagId) throws Exception {
+		if (tagId == null) return null;
+		
+		TagPO tag = tagDAO.findOne(tagId);
+		
+		return tag != null ? new TagVO().set(tag) : null;
+	}
+	
+	public List<TagVO> queryByIds(List<Long> tagIds) throws Exception {
+		return TagVO.getConverter(TagVO.class).convert(tagDAO.findAll(tagIds), TagVO.class);
+	}
 }

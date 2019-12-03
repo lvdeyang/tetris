@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.sumavision.tetris.cs.schedule.ScheduleVO;
-
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class ScreenService {
@@ -38,31 +36,30 @@ public class ScreenService {
 		List<ScreenPO> screenPOList = new ArrayList<ScreenPO>();
 		List<ScreenVO> screenVOList = new ArrayList<ScreenVO>();
 
-		if (screenList.size() > 0) {
-			for (int i = 0; i < screenList.size(); i++) {
-				screenList.get(i).setProgramId(programId);
+		if (screenList.isEmpty()) return screenVOList;
+			for (ScreenVO screenVO : screenList) {
+			screenVO.setProgramId(programId);
+				
+			ScreenPO screenPO = new ScreenPO();
+			screenPO.setProgramId(programId);
+			screenPO.setMimsUuid(screenVO.getMimsUuid());
+			screenPO.setResourceId(screenVO.getResourceId());
+			screenPO.setScreenIndex(screenVO.getIndex());
+			screenPO.setSerialNum(screenVO.getSerialNum());
+			screenPO.setName(screenVO.getName());
+			screenPO.setType(screenVO.getType());
+			screenPO.setMimetype(screenVO.getMimetype());
+			screenPO.setPreviewUrl(screenVO.getPreviewUrl());
+			screenPO.setEncryptionUrl(screenVO.getEncryptionUrl());
+			screenPO.setHotWeight(screenVO.getHotWeight());
+			screenPO.setDownloadCount(screenVO.getDownloadCount());
+			screenPO.setDuration(screenVO.getDuration());
+			screenPO.setUpdateTime(new Date());
 
-				ScreenVO screenVO = screenList.get(i);
-
-				ScreenPO screenPO = new ScreenPO();
-				screenPO.setProgramId(programId);
-				screenPO.setMimsUuid(screenVO.getMimsUuid());
-				screenPO.setResourceId(screenVO.getResourceId());
-				screenPO.setScreenIndex(screenVO.getIndex());
-				screenPO.setSerialNum(screenVO.getSerialNum());
-				screenPO.setName(screenVO.getName());
-				screenPO.setPreviewUrl(screenVO.getPreviewUrl());
-				screenPO.setEncryptionUrl(screenVO.getEncryptionUrl());
-				screenPO.setHotWeight(screenVO.getHotWeight());
-				screenPO.setDownloadCount(screenVO.getDownloadCount());
-				screenPO.setDuration(screenVO.getDuration());
-				screenPO.setUpdateTime(new Date());
-
-				screenPOList.add(screenPO);
-			}
-			screenDao.save(screenPOList);
-			screenVOList.addAll(ScreenVO.getConverter(ScreenVO.class).convert(screenPOList, ScreenVO.class));
+			screenPOList.add(screenPO);
 		}
+		screenDao.save(screenPOList);
+		screenVOList.addAll(ScreenVO.getConverter(ScreenVO.class).convert(screenPOList, ScreenVO.class));
 
 		return screenVOList;
 	}
@@ -95,7 +92,7 @@ public class ScreenService {
 		Long programId = program.getId();
 		List<ScreenPO> screenPOs = screenDao.findByProgramIdAndResourceId(programId, resourceId);
 		screenDao.deleteInBatch(screenPOs);
-		if (screenPOs != null && screenPOs.size() > 0) {
+		if (screenPOs != null && !screenPOs.isEmpty()) {
 			List<ScreenPO> needSaveList = new ArrayList<ScreenPO>();
 			for (int i = screenPOs.size() - 1; i >= 0; i--) {
 				Long serialNum = screenPOs.get(i).getSerialNum();

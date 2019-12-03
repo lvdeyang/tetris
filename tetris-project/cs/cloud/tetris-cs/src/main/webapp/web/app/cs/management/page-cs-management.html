@@ -116,11 +116,11 @@
             </el-card>
         </div>
 
-        <!-- 选择播发用户对话框 -->
-        <cs-user-dialog ref="addProgramUserDialog" @on-user-dialog-close="selectedAddProgramUsers"></cs-user-dialog>
+        <!-- 选择QT播发用户对话框 -->
+        <cs-user-dialog ref="selectUserDialog" @on-user-dialog-close="selectedUsers"></cs-user-dialog>
 
-        <!-- 选择播发用户对话框 -->
-        <cs-user-dialog ref="editChannelUserDialog" @on-user-dialog-close="selectedEditChannelUsers"></cs-user-dialog>
+        <!-- 预览灯箱 -->
+        <mi-lightbox ref="Lightbox" @on-txt-save="" style="z-index: 3000"></mi-lightbox>
 
         <el-dialog
                 title="添加频道"
@@ -129,7 +129,7 @@
                 :before-close="handleAddProgramClose">
             <div style="height:500px;">
                 <el-scrollbar style="height:100%;">
-                    <el-form ref="form" label-width="100px" style="padding-right: 20px">
+                    <el-form ref="form" label-width="120px" style="padding-right: 20px">
                         <el-form-item label="频道名称">
                             <el-input v-model="dialog.addProgram.name"></el-input>
                         </el-form-item>
@@ -148,13 +148,13 @@
                             <template>
                                 <el-radio v-model="dialog.addProgram.broadWay" label="轮播推流">轮播推流</el-radio>
                                 <el-radio v-model="dialog.addProgram.broadWay" label="终端播发">终端播发</el-radio>
-                                <el-radio v-model="dialog.addProgram.broadWay" label="下载文件" disabled>下载文件</el-radio>
+                                <el-radio v-model="dialog.addProgram.broadWay" label="下载文件">下载文件</el-radio>
                             </template>
                         </el-form-item>
                         <el-form-item label="输出加密" v-if="dialog.addProgram.broadWay == '轮播推流'">
                             <el-switch v-model="dialog.addProgram.encryption"></el-switch>
                         </el-form-item>
-                        <template v-if="dialog.addProgram.broadWay == '轮播推流'">
+                        <template v-if="dialog.addProgram.broadWay == '轮播推流' || dialog.addProgram.broadWay == '下载文件'">
                             <el-form-item label="智能播发">
                                 <el-switch v-model="dialog.addProgram.autoBroad"></el-switch>
                             </el-form-item>
@@ -180,18 +180,30 @@
                                 </el-input-number>
                             </el-form-item>
                         </template>
-                        <el-form-item v-if="dialog.addProgram.broadWay == '轮播推流'" label="推送播发用户">
+                        <el-form-item v-if="dialog.addProgram.broadWay == '轮播推流' || dialog.addProgram.broadWay == '下载文件'" label="PC播发用户">
                             <el-tag
                                     :key="simple.id"
-                                    v-for="simple in dialog.addProgram.outputUsers"
+                                    v-for="simple in dialog.addProgram.outputQtUsers"
                                     style="margin-right:10px;"
                                     closable
                                     :disable-transitions="false"
-                                    @close="handleAddProgramUserRemove(dialog.addProgram.outputUsers, simple)">
+                                    @close="handleUserRemove(dialog.addProgram.outputQtUsers, simple)">
                                 {{simple.nickname}}
                             </el-tag>
-                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleAddProgramUserSet" icon="el-icon-edit"> 选择PC终端用户</el-button>
-                            <el-input v-model="dialog.addProgram.outputUserPort" placeholder="用户播发端口"></el-input>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleAddProgramQtUserSet" icon="el-icon-edit"> 选择PC终端用户</el-button>
+                            <el-input v-model="dialog.addProgram.outputUserPort" placeholder="用户播发端口" v-if="dialog.addProgram.broadWay == '轮播推流'"></el-input>
+                        </el-form-item>
+                        <el-form-item v-if="dialog.addProgram.broadWay == '下载文件'" label="PUSH播发用户">
+                            <el-tag
+                                    :key="simple.id"
+                                    v-for="simple in dialog.addProgram.outputPushUsers"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleUserRemove(dialog.addProgram.outputPushUsers, simple)">
+                                {{simple.nickname}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleAddProgramPushUserSet" icon="el-icon-edit"> 选择PUSH终端用户</el-button>
                         </el-form-item>
                         <el-form-item v-if="dialog.addProgram.broadWay == '轮播推流'" label="流输出数">
                             <el-input-number
@@ -231,7 +243,7 @@
                 :before-close="handleEditChannelClose">
             <div style="height: 500px">
             <el-scrollbar style="height:100%;">
-            <el-form ref="form" label-width="100px" style="padding-right: 20px">
+            <el-form ref="form" label-width="120px" style="padding-right: 20px">
                 <el-form-item label="频道名称">
                     <el-input v-model="dialog.editChannel.name"></el-input>
                 </el-form-item>
@@ -242,18 +254,17 @@
                         <el-radio v-model="dialog.editChannel.broadWay" label="下载文件" disabled>下载文件</el-radio>
                     </template>
                 </el-form-item>
-                <el-form-item label="输出加密">
+                <el-form-item label="输出加密" v-if="dialog.editChannel.broadWay == '轮播推流'">
                     <el-switch v-model="dialog.editChannel.encryption"></el-switch>
                 </el-form-item>
-                <template v-if="dialog.editChannel.broadWay == '轮播推流'">
+                <template v-if="dialog.editChannel.broadWay == '轮播推流' || dialog.editChannel.broadWay == '下载文件'">
                     <el-form-item label="智能播发">
                         <el-switch v-model="dialog.editChannel.autoBroad"></el-switch>
                     </el-form-item>
                     <el-form-item label="列表乱序" v-if="dialog.editChannel.autoBroad">
                         <el-switch v-model="dialog.editChannel.autoBroadShuffle"></el-switch>
                     </el-form-item>
-                    <el-form-item v-if="dialog.editChannel.autoBroad"
-                                  label="起始时间">
+                    <el-form-item v-if="dialog.editChannel.autoBroad" label="起始时间">
                         <el-time-picker
                                 style="width: 100%"
                                 v-model="dialog.editChannel.autoBroadStart"
@@ -271,18 +282,29 @@
                         </el-input-number>
                     </el-form-item>
                 </template>
-                <el-form-item v-if="dialog.editChannel.broadWay == '轮播推流'" label="推送播发用户">
+                <el-form-item v-if="dialog.editChannel.broadWay == '轮播推流' || dialog.editChannel.broadWay == '下载文件'" label="PC播发用户">
                     <el-tag
                             :key="simple.id"
-                            v-for="simple in dialog.editChannel.outputUsers"
+                            v-for="simple in dialog.editChannel.outputQtUsers"
                             style="margin-right:10px;"
                             closable
                             :disable-transitions="false"
-                            @close="handleEditChannelUserRemove(dialog.editChannel.outputUsers, simple)">
+                            @close="handleUserRemove(dialog.editChannel.outputQtUsers, simple)">
                         {{simple.nickname}}
                     </el-tag>
-                    <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleEditChannelUserSet" icon="el-icon-edit"> 选择PC终端用户</el-button>
-                    <el-input v-model="dialog.editChannel.outputUserPort" placeholder="用户播发端口"></el-input>
+                    <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleEditChannelQtUserSet" icon="el-icon-edit"> 选择PC终端用户</el-button>
+                    <el-input v-model="dialog.editChannel.outputUserPort" placeholder="用户播发端口" v-if="dialog.editChannel.broadWay == '轮播推流'"></el-input>
+                </el-form-item>
+                <el-form-item v-if="dialog.editChannel.broadWay == '下载文件' && dialog.editChannel.outputPushUsers.length > 0" label="PUSH播发用户">
+                    <el-tag
+                            :key="simple.id"
+                            v-for="simple in dialog.editChannel.outputPushUsers"
+                            style="margin-right:10px;"
+                            :closable="false"
+                            :disable-transitions="false"
+                            @close="handleUserRemove(dialog.editChannel.outputPushUsers, simple)">
+                        {{simple.nickname}}
+                    </el-tag>
                 </el-form-item>
                 <el-form-item v-if="dialog.editChannel.broadWay == '轮播推流'" label="流输出数">
                     <el-input-number
@@ -381,7 +403,7 @@
             <el-container style="height:500px">
                 <el-container style="border-right: 1px solid #eee;width: 550px">
                     <el-header height="40px">
-                        <el-button size="medium" type="primary" @click="addRootTreeNode">添加根节点</el-button>
+                        <el-button size="medium" type="primary" @click="addRootTreeNode" :disabled="dialog.editMenu.data.autoBroad">添加根节点</el-button>
                     </el-header>
 
                     <el-tree
@@ -408,22 +430,22 @@
                                 </span>
                                 <span v-if="data.id !== -1">
                                     <el-button v-if="!node.parent.data.length" type="text" size="mini"
-                                               style="padding:0;" @click.stop="treeNodeTop(node, node.parent.data)">
+                                               style="padding:0;" @click.stop="treeNodeTop(node, node.parent.data)" :disabled="dialog.editMenu.data.autoBroad">
                                         <span style="font-size:15px; position:relative; bottom:1px; left:2px;"
                                               class="icon-arrow-up"></span>
                                     </el-button>
                                     <el-button type="text" size="mini" style="padding:0;"
-                                               @click.stop="treeNodeEdit(node, data)">
+                                               @click.stop="treeNodeEdit(node, data)" :disabled="dialog.editMenu.data.autoBroad">
                                         <span style="font-size:15px; position:relative; bottom:1px; left:2px;"
                                               class="icon-pencil"></span>
                                     </el-button>
                                     <el-button type="text" size="mini" style="padding:0;"
-                                               @click.stop="treeNodeAppend(node, data)">
+                                               @click.stop="treeNodeAppend(node, data)" :disabled="dialog.editMenu.data.autoBroad">
                                         <span style="font-size:16px;" class="icon-plus"></span>
                                     </el-button>
                                     <el-button v-if="!data.autoGeneration" type="text" size="mini"
                                                style="padding:0; margin-left:5px;"
-                                               @click.stop="treeNodeDelete(node, data)">
+                                               @click.stop="treeNodeDelete(node, data)" :disabled="dialog.editMenu.data.autoBroad">
                                         <span style="font-size:16px;" class="icon-trash"></span>
                                     </el-button>
                                 </span>
@@ -435,9 +457,9 @@
                 <el-container>
                     <el-header height="40px">
                         <el-button size="medium" type="primary" @click="loadingMenuResourceTree"
-                                   :disabled="!dialog.editMenu.tree.current">添加资源
+                                   :disabled="!dialog.editMenu.tree.current || dialog.editMenu.data.autoBroad">添加资源
                         </el-button>
-                        <el-button size="medium" type="warning" @click="" :disabled="!dialog.editMenu.tree.current">
+                        <el-button size="medium" type="warning" @click="" :disabled="!dialog.editMenu.tree.current || dialog.editMenu.data.autoBroad">
                             删除资源
                         </el-button>
                     </el-header>
@@ -459,10 +481,16 @@
                                                 <!--<el-table-column label="时长" width="110" prop="time"></el-table-column>-->
                                                 <el-table-column label="操作">
                                                     <template slot-scope="scope">
-                                                        <el-tooltip class="item" effect="dark" content="删除资源"
+                                                        <el-tooltip class="item" effect="dark" content="预览"
                                                                     placement="bottom">
-                                                            <el-button type="text" icon="el-icon-delete"
+                                                            <el-button type="text" icon="icon-eye-open"
                                                                        style="margin:0; font-size:18px; padding:0;"
+                                                                       @click="handlePreview(scope)"></el-button>
+                                                        </el-tooltip>
+                                                        <el-tooltip class="item" effect="dark" content="删除资源"
+                                                                    placement="bottom" v-if="!dialog.editMenu.data.autoBroad">
+                                                            <el-button type="text" icon="el-icon-delete"
+                                                                       style="margin:0 20px; font-size:18px; padding:0;"
                                                                        @click="menuResourceDelete(scope)"></el-button>
                                                         </el-tooltip>
                                                     </template>
@@ -628,7 +656,7 @@
         <el-dialog
                 title="节目编辑"
                 :visible.sync="dialog.editProgram.visible"
-                width="1140px"
+                width="1240px"
                 :before-close="handleEditProgramClose"
                 append-to-body
                 style="height:100%;overflow-y: hidden">
@@ -792,7 +820,7 @@
                     tooltip-effect="dark"
                     :data="dialog.editProgram.commitData.currentSerialInfo"
                     :default-sort="{prop:'index',order:'ascending'}"
-                    style="width: 390px;height: 450px;overflow: auto">
+                    style="width: 490px;height: 450px;overflow: auto">
                 <el-table-column width="30"></el-table-column>
                 <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
                 <el-table-column label="排序" width="60" prop="index"></el-table-column>
@@ -800,26 +828,37 @@
                     <el-table-column :key="Math.random()" label="综合分值" width="90" prop="hotWeight"></el-table-column>
                     <el-table-column :key="Math.random()" label="下载量" width="70" prop="downloadCount"></el-table-column>
                 </template>
-                <el-table-column :key="Math.random()" label="操作" v-else>
+                <el-table-column label="操作">
                     <template slot-scope="scope">
-                        <el-tooltip class="item" effect="dark" content="向上移动"
-                                    placement="bottom">
-                            <el-button type="text" icon="feather-icon-chevron-up"
-                                       style="margin:0 5px 0 0; font-size:18px; padding:0;"
-                                       @click="programResourceUp(scope)"></el-button>
-                        </el-tooltip>
-                        <el-tooltip class="item" effect="dark" content="向下移动"
-                                    placement="bottom">
-                            <el-button type="text" icon="feather-icon-chevron-down"
-                                       style="margin:0 5px; font-size:18px; padding:0;"
-                                       @click="programResourceDown(scope)"></el-button>
-                        </el-tooltip>
-                        <el-tooltip class="item" effect="dark" content="删除资源"
-                                    placement="bottom">
-                            <el-button type="text" icon="el-icon-delete"
-                                       style="margin:0 5px; font-size:18px; padding:0;"
-                                       @click="programResourceDelete(scope)"></el-button>
-                        </el-tooltip>
+                        <template>
+                            <el-tooltip class="item" effect="dark" content="预览"
+                                        placement="bottom">
+                                <el-button type="text" class="icon-eye-open"
+                                           style="margin:0 5px; font-size:18px; padding:0;"
+                                           @click="handlePreview(scope)">
+                                </el-button>
+                            </el-tooltip>
+                        </template>
+                        <template v-if="!dialog.editSchedules.data.autoBroad">
+                            <el-tooltip class="item" effect="dark" content="向上移动"
+                                        placement="bottom">
+                                <el-button type="text" icon="feather-icon-chevron-up"
+                                           style="margin:0 5px 0 0; font-size:18px; padding:0;"
+                                           @click="programResourceUp(scope)"></el-button>
+                            </el-tooltip>
+                            <el-tooltip class="item" effect="dark" content="向下移动"
+                                        placement="bottom">
+                                <el-button type="text" icon="feather-icon-chevron-down"
+                                           style="margin:0 5px; font-size:18px; padding:0;"
+                                           @click="programResourceDown(scope)"></el-button>
+                            </el-tooltip>
+                            <el-tooltip class="item" effect="dark" content="删除资源"
+                                        placement="bottom">
+                                <el-button type="text" icon="el-icon-delete"
+                                           style="margin:0 5px; font-size:18px; padding:0;"
+                                           @click="programResourceDelete(scope)"></el-button>
+                            </el-tooltip>
+                        </template>
                     </template>
                 </el-table-column>
             </el-table>

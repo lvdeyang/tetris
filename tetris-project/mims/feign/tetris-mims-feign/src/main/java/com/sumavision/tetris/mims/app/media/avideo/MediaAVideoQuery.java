@@ -13,6 +13,7 @@ import com.sumavision.tetris.mims.app.folder.FolderVO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioFeign;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoFeign;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
+import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 @Component
 public class MediaAVideoQuery {
@@ -99,7 +100,7 @@ public class MediaAVideoQuery {
 		case "audio":
 			return JsonBodyResponseParser.parseObject(mediaAudioFeign.getById(id), MediaAVideoVO.class);
 		default:
-			return null;
+			throw new ErrorTypeException("mediaType", type);
 		}
 	}
 }

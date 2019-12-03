@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+        html, body{width:100%; height:100%; padding:0; margin:0; overflow:hidden;}
+        body *{box-sizing:border-box;}
+
+        table{width:100%; height:100%; border-collapse:collapse;}
+        table tbody{width:100%; height:100%;}
+        table tbody tr{width:100%; height:50%;}
+        table td{width:50%; height:50%;}
+        .chart-container{overflow:hidden;}
+    </style>
+</head>
+<body>
+    <table>
+        <tbody>
+            <tr>
+                <td>
+                    <div id="container" style="width:100%; height:100%; position:relative;">
+
+                    </div>
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td>&nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+<script type="text/javascript" src="jquery-2.2.3.js"></script>
+<script type="text/javascript" src="d3.v5.js"></script>
+<script type="text/javascript">
+
+    var draw = function(){
+        var $container = d3.select('#container')
+                            .attr('class', 'chart-container');
+
+        var $svg = $container.select('svg');
+        if(!$svg._groups[0][0]){
+            $svg = $container.append('svg');
+        }
+        var width = parseFloat($container._groups[0][0].clientWidth);
+        var height = parseFloat($container._groups[0][0].clientHeight);
+
+        $svg.attr('width', width)
+                .attr('height', height);
+    };
+
+    $(function(){
+        draw();
+    });
+
+    $(window).on('resize', function(){
+        draw();
+    });
+
+    /*window.onload = function(){
+
+        var data = [1, 2, 3, 4, 5, 6, 20, 15, 9, 0];
+
+         var $container = d3.select('#container');
+
+         var $svg = $container.append('svg')
+         .attr('width', '100%')
+         .attr('height', '100%');
+
+         var $g = $svg.append('g');
+
+         var scale_x = d3.scaleLinear()
+         .domain([0, data.length-1])
+         .range([0, $container._groups[0][0].clientWidth]);
+
+         var scale_y = d3.scaleLinear()
+         .domain([0, d3.max(data)])
+         .range([0, $container._groups[0][0].clientHeight]);
+
+         var line_generator = d3.line()
+         .x(function(data, index){return scale_x(index);})
+         .y(function(data){return scale_y(data);});
+
+         var $path = $g.append('path')
+         .attr('d', line_generator(data));
+
+    };*/
+</script>
+</html>

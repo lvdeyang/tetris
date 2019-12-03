@@ -38,4 +38,6 @@ public interface MediaVideoStreamUrlRelationDAO extends BaseDAO<MediaVideoStream
 	@Modifying
 	@Query(value = "delete from MIMS_MEDIA_VIDEO_STREAM_URL_RELATION where video_stream_id in ?1", nativeQuery = true)
 	public void removeByStreamIdIn(Collection<Long> ids);
+	
+	public List<MediaVideoStreamUrlRelationPO> findByUrlIn(Collection<String> urls);
 }

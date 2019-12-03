@@ -173,4 +173,17 @@ public class ApiQtAuthController {
 		return null;
 	}
 	
+	
+	/**
+	 * 提供终端发送心跳方法<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月21日 下午1:45:48
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/heartbeat")
+	public void questHeartbeat(HttpServletRequest request) throws Exception {
+		userQuery.current();
+	}
 }

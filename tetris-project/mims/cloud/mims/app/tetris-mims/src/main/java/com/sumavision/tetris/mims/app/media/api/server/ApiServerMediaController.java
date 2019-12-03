@@ -66,8 +66,9 @@ import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamService;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
-import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagPO;
+import com.sumavision.tetris.mims.app.media.tag.TagQuery;
+import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtQuery;
@@ -164,7 +165,7 @@ public class ApiServerMediaController {
 	private MediaTxtDAO mediaTxtDao;
 	
 	@Autowired
-	private TagDAO tagDAO;
+	private TagQuery tagQuery;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -219,9 +220,9 @@ public class ApiServerMediaController {
 	    List<String> tagNames = new ArrayList<String>();
 	    if (tagId != null) {
 	    	List<Long> tagIds = Arrays.asList(tagId.split(",")).stream().map(s -> Long.parseLong(s.trim())).collect(Collectors.toList());
-		    List<TagPO> tag = tagDAO.findAll(tagIds);
-		    if (tag != null) {
-		    	for (TagPO tagPO : tag) {
+		    List<TagVO> tags = tagQuery.queryByIds(tagIds);
+		    if (tags != null) {
+		    	for (TagVO tagPO : tags) {
 					tagNames.add(tagPO.getName());
 				}
 			}
@@ -607,7 +608,7 @@ public class ApiServerMediaController {
 	public Object addRemote(String name, String type, Long tagId, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
 		
-		TagPO tag = tagDAO.findOne(tagId);
+		TagVO tag = tagQuery.queryById(tagId);
 		
 		switch (type.toLowerCase()) {
 		case "video":

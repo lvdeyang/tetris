@@ -12,7 +12,7 @@ import com.sumavision.tetris.mvc.ext.request.RequestUserAgentAnalyzer;
 import com.sumavision.tetris.user.UserQuery;
 
 /**
- * android采集系统拦截器<br/>
+ * android采集终端(zzb)拦截器<br/>
  * <b>作者:</b>lzp<br/>
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年6月4日 下午1:34:26

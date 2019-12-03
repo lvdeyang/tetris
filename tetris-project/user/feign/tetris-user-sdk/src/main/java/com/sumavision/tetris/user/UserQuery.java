@@ -127,7 +127,7 @@ public class UserQuery {
 	 * @return List<UserVO> 用户列表
 	 */
 	public List<UserVO> listByCompanyIdWithExceptAndClassify(Long companyId, Collection<Long> except, UserClassify classify) throws Exception{
-		return JsonBodyResponseParser.parseArray(userFeign.listByCompanyIdWithExceptAndClassify(companyId, JSON.toJSONString(except), classify.getName()), UserVO.class);
+		return JsonBodyResponseParser.parseArray(userFeign.listByCompanyIdWithExceptAndClassify(companyId, except != null && !except.isEmpty() ? JSON.toJSONString(except) : null, classify.getName()), UserVO.class);
 	}
 	
 	/**

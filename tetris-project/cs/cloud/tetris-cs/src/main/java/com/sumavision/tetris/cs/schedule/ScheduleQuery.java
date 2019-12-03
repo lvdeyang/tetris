@@ -11,10 +11,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoService;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
 
@@ -102,7 +103,11 @@ public class ScheduleQuery {
 		
 		for (ScheduleVO scheduleVO : scheduleVOs) {
 			scheduleVO.setProgram(programQuery.getProgram(scheduleVO.getId()));
-			scheduleVO.setMediaType("file");
+			if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
+				scheduleVO.setMediaType("stream");
+			} else if (channel.getBroadWay().equals(BroadWay.FILE_DOWNLOAD_BROAD)) {
+				scheduleVO.setMediaType("file");
+			}
 			scheduleVO.setStreamUrlPort(Integer.parseInt(port));
 			if (channel.getEncryption() != null && channel.getEncryption()){
 				scheduleVO.setEncryptKey(mediaEncodeQuery.queryKey());

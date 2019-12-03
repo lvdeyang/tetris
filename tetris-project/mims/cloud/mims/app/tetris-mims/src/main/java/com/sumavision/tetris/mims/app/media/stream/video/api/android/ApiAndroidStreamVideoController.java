@@ -12,18 +12,24 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
-import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamDAO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamUrlRelationDAO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamUrlRelationPO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamUrlRelationQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
+import com.sumavision.tetris.mims.app.media.stream.video.exception.MediaVideoStreamAlreadyExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -33,25 +39,31 @@ import com.sumavision.tetris.user.UserVO;
 public class ApiAndroidStreamVideoController {
 	
 	@Autowired
-	MediaVideoStreamQuery mediaVideoStreamQuery;
+	private MediaVideoStreamQuery mediaVideoStreamQuery;
 	
 	@Autowired
 	private MediaVideoStreamDAO mediaVideoStreamDao;
 	
 	@Autowired
-	MediaVideoStreamService mediaVideoStreamService;
+	private MediaVideoStreamService mediaVideoStreamService;
 	
 	@Autowired
-	UserQuery userQuery;
+	private UserQuery userQuery;
 	
 	@Autowired
-	FolderDAO folderDao;
+	private FolderDAO folderDao;
 	
 	@Autowired
-	FolderQuery folderQuery;
+	private FolderQuery folderQuery;
 	
 	@Autowired
-	MediaVideoStreamUrlRelationQuery mediaVideoStreamUrlRelationQuery;
+	private MediaVideoStreamUrlRelationQuery mediaVideoStreamUrlRelationQuery;
+	
+	@Autowired
+	private MediaVideoStreamUrlRelationDAO mediaVideoStreamUrlRelationDAO;
+	
+	@Autowired
+	private ProcessService processService;
 	
 	/**
 	 * 以列表形式获取所有视频流媒资<br/>
@@ -104,16 +116,49 @@ public class ApiAndroidStreamVideoController {
 		
 		UserVO user = userQuery.current();
 		
-		List<FolderPO> folderPOs = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO_STREAM.toString());
-		if (folderPOs == null || folderPOs.isEmpty()) {
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
+		List<String> previewUrls = new ArrayList<String>();
+		if (previewUrl != null) previewUrls.add(previewUrl);
+		List<MediaVideoStreamUrlRelationPO> relationPOs = mediaVideoStreamUrlRelationDAO.findByUrlIn(previewUrls);
+		if (relationPOs != null && !relationPOs.isEmpty()) throw new MediaVideoStreamAlreadyExistException(previewUrl);
+		
+		JSONObject variables = new JSONObject();
+		variables.put("_pa23_previewUrls", JSONArray.toJSONString(previewUrls));
+		variables.put("_pa23_mimsName", name);
+		if (tags != null) variables.put("_pa23_tags", tags);
+		if (keyWords != null) variables.put("_pa23_keyWords", keyWords);
+		if (remark != null) variables.put("_pa23_remark", remark);
+		
+		String processInstanceId = processService.startByKey("_add_media_video_stream_by_android", variables.toJSONString(), null, null);
+		
+		return new HashMapWrapper<String, String>().put("id", processInstanceId).getMap();
+	}
+	
+	/**
+	 * 根据url列表删除视频流媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月25日 下午5:52:47
+	 * @param List<String> previewUrls 视频流媒资url列表 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/delete")
+	public Object deleteTask(
+			Long id,
+			String previewUrl,
+			HttpServletRequest request) throws Exception {
+		UserVO user = userQuery.current();
 		
 		List<String> previewUrls = new ArrayList<String>();
 		if (previewUrl != null) previewUrls.add(previewUrl);
 		
-		return  mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrls, folderPOs.get(0));
+		JSONObject variables = new JSONObject();
+		variables.put("_pa24_liveId", id);
+		variables.put("_pa25_previewUrls", JSONArray.toJSONString(previewUrls));
 		
+		String processInstanceId = processService.startByKey("_delete_media_video_stream_by_android", variables.toJSONString(), null, null);
+		
+		return "";
 	}
 	
 	/**

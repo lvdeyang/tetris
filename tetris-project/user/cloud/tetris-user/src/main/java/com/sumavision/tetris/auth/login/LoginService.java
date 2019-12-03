@@ -2,9 +2,11 @@ package com.sumavision.tetris.auth.login;
 
 import java.util.Date;
 import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import com.sumavision.tetris.auth.login.exception.AppIdCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.SignCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.SignVerifyFailException;
@@ -21,6 +23,7 @@ import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserStatus;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
+import com.sumavision.tetris.user.exception.TokenTimeoutException;
 import com.sumavision.tetris.user.exception.UsernameNotExistException;
 
 @Service
@@ -88,12 +91,30 @@ public class LoginService {
 		
 		if(!user.getPassword().equals(password)) throw new PasswordErrorException(username, password);
 		
-		String token = UUID.randomUUID().toString().replaceAll("-", "");
+		//不支持多地登录(同一用户登录token即重置)
+		//String token = UUID.randomUUID().toString().replaceAll("-", "");
+		
+		//支持多地登录(异地登录返回同一token)
+		boolean result = false;
+		if(user.getToken() != null){
+			try {
+				result = userQuery.checkToken(user.getToken());
+			}catch(TokenTimeoutException e){
+				result = false;
+			}
+		}
+		String token = null;
+		if(result){
+			token = user.getToken();
+		}else{
+			token = UUID.randomUUID().toString().replaceAll("-", "");
+		}
+
 		
 		user.setStatus(UserStatus.ONLINE);
 		user.setLastModifyTime(new Date());
 		user.setToken(token);
-		user.setIp(ip);
+		if (ip != null && !ip.isEmpty()) user.setIp(ip);
 		if (equipType != null) user.setEquipType(UserEquipType.fromName(equipType));
 		userDao.save(user);
 		

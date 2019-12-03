@@ -16,6 +16,8 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
+import com.sumavision.tetris.mims.app.media.tag.TagQuery;
+import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -35,6 +37,9 @@ public class MediaAudioFeignController {
 	
 	@Autowired
 	private MediaAudioService mediaAudioService;
+	
+	@Autowired
+	private TagQuery tagQuery;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
@@ -186,4 +191,24 @@ public class MediaAudioFeignController {
 		return mediaAudioService.downloadAdd(user, id);
 	}
 	
+	/**
+	 * 添加远程媒资(收录系统使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月3日 下午5:24:19
+	 * @param String name 媒资名称
+	 * @param Long tagId 标签id 
+	 * @param String httpUrl 媒资预览地址
+	 * @param String ftpUrl 媒资ftp地址
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/remote")
+	public Object addRemote(String name, Long tagId, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception {
+		UserVO user = userQuery.current();
+		
+		TagVO tag = tagQuery.queryById(tagId);
+		
+		return mediaAudioService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
+	}
 }

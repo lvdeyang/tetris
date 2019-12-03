@@ -1,7 +1,9 @@
 package com.sumavision.tetris.cs.channel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,9 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityQueryType;
-import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
@@ -26,9 +26,6 @@ public class ChannelController {
 
 	@Autowired
 	private ChannelQuery channelQuery;
-
-	@Autowired
-	private ChannelDAO channelDao;
 
 	@Autowired
 	private ChannelService channelService;
@@ -88,17 +85,13 @@ public class ChannelController {
 		List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs = JSONArray.parseArray(output, BroadAbilityBroadInfoVO.class);
 		
 		List<UserVO> outputUserList = new ArrayList<UserVO>();
-		if (outputUsers != null) {
-			outputUserList = JSONArray.parseArray(outputUsers, UserVO.class);
-		}
+		if (outputUsers != null) outputUserList = JSONArray.parseArray(outputUsers, UserVO.class);
 
 		ChannelPO channel = channelService.add(name, date, broadWay, remark, ChannelType.LOCAL, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
 		
-		if (BroadWay.fromName(broadWay).equals(BroadWay.ABILITY_BROAD) && autoBroad) {
-			channelService.autoAddSchedulesAndBroad(channel.getId());
-		}
+		if (!BroadWay.fromName(broadWay).equals(BroadWay.TERMINAL_BROAD) && autoBroad) channelService.autoAddSchedulesAndBroad(channel.getId());
 
-		return new ChannelVO().set(channel).setOutput(abilityBroadInfoVOs).setOutputUsers(outputUserList);
+		return new ChannelVO().set(channel).setOutput(abilityBroadInfoVOs).setOutputUsers(outputUserList).setAutoBroadDuration(autoBroadDuration).setAutoBroadStart(autoBroadStart);
 	}
 
 	/**
@@ -140,7 +133,7 @@ public class ChannelController {
 
 		ChannelPO channel = channelService.edit(id, name, remark, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
 		
-		if (BroadWay.fromName(channel.getBroadWay()).equals(BroadWay.ABILITY_BROAD) && autoBroad) {
+		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.TERMINAL_BROAD && autoBroad) {
 			channelService.autoAddSchedulesAndBroad(channel.getId());
 		}
 
@@ -206,16 +199,7 @@ public class ChannelController {
 	@RequestMapping(value = "/broadcast/status")
 	public Object broadcastStatus(Long channelId, HttpServletRequest request) throws Exception {
 		
-		ChannelPO channelPO = channelDao.findOne(channelId);
-		if (channelPO == null) {
-			throw new ChannelNotExistsException(channelId);
-		}
-		
-		if (channelPO.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName())) {
-			return channelPO.getBroadcastStatus();
-		}
-
-		return channelService.getChannelBroadstatus(channelId);
+		return channelQuery.getBroadstatus(channelId);
 	}
 	
 	/**
@@ -230,7 +214,9 @@ public class ChannelController {
 	@RequestMapping(value = "/broadcast/restart")
 	public Object broadcastRestart(Long channelId, HttpServletRequest request) throws Exception {
 
-		return channelService.restartBroadcast(channelId);
+		channelService.restartBroadcast(channelId);
+		
+		return "";
 	}
 	
 	/**
@@ -245,13 +231,9 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/seek")
 	public Object seek(Long channelId, Long duration, HttpServletRequest request) throws Exception {
+		channelService.seekBroadcast(channelId, duration);
 		
-		ChannelPO channel = channelDao.findOne(channelId);
-		if (channel == null) {
-			throw new ChannelNotExistsException(channelId);
-		}
-
-		return channelQuery.sendAbilityRequest(BroadAbilityQueryType.SEEK, channel, duration);
+		return "";
 	}
 	
 	/**
@@ -268,8 +250,19 @@ public class ChannelController {
 		UserVO user = userQuery.current();
 		
 		List<UserVO> users = 
-				userQuery.listByCompanyIdWithExceptAndClassify(Long.parseLong(user.getGroupId()), new ArrayListWrapper<Long>().add(user.getId()).getList(), UserClassify.COMPANY);
+				userQuery.listByCompanyIdWithExceptAndClassify(Long.parseLong(user.getGroupId()), null, UserClassify.COMPANY);
 		
-		return users;
+		Map<String, List<UserVO>> map = new HashMap<String, List<UserVO>>();
+		for (UserVO userVO : users) {
+			String equipType = userVO.getEquipType() == null ? "" : userVO.getEquipType();
+			if (map.containsKey(equipType)){
+				List<UserVO> userlist = map.get(equipType);
+				userlist.add(userVO);
+			} else {
+				map.put(equipType, new ArrayListWrapper<UserVO>().add(userVO).getList());
+			}
+		}
+		
+		return map;
 	}
 }

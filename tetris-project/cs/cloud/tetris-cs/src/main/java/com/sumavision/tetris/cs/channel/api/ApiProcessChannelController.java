@@ -16,10 +16,10 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.cs.channel.ChannelPO;
-import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -31,10 +31,10 @@ public class ApiProcessChannelController {
 	private ChannelService channelService;
 	
 	@Autowired
-	private ChannelQuery channelQuery;
+	private ScheduleService scheduleService;
 	
 	@Autowired
-	private ScheduleService scheduleService;
+	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
 	
 	/**
 	 * 流程节点(文件转流)<br/>
@@ -60,31 +60,34 @@ public class ApiProcessChannelController {
 		
 		if (vo.isNeed()) {
 			String ip = vo.getToolIp();
-			String port = channelQuery.queryLocalPort(ip, Long.parseLong(vo.getStartPort()));
-			
-			List<BroadAbilityBroadInfoVO> infoVOs = new ArrayListWrapper<BroadAbilityBroadInfoVO>()
-					.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(ip).setPreviewUrlPort(port))
-					.getList();
-			
-			ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播能力", "", ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null, null, null, infoVOs);
-			
-			if (channel != null) {
-				ApiServerScheduleVO scheduleVO = new ApiServerScheduleVO();
-				List<String> assetPaths = new ArrayList<String>();
-				for (int i = 0; i < vo.getPlayCount(); i++) {
-					assetPaths.add(vo.getFileUrl());
+			Long port = broadAbilityBroadInfoService.queryLocalPort(ip, Long.parseLong(vo.getStartPort()));
+			if (port != null && port != 0l) {
+				List<BroadAbilityBroadInfoVO> infoVOs = new ArrayListWrapper<BroadAbilityBroadInfoVO>()
+						.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(ip).setPreviewUrlPort(port.toString()))
+						.getList();
+				
+				ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播能力", "", ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null, null, null, infoVOs);
+				
+				if (channel != null) {
+					ApiServerScheduleVO scheduleVO = new ApiServerScheduleVO();
+					List<String> assetPaths = new ArrayList<String>();
+					for (int i = 0; i < vo.getPlayCount(); i++) {
+						assetPaths.add(vo.getFileUrl());
+					}
+					scheduleVO.setAssetPaths(assetPaths);
+					scheduleVO.setBroadDate(DateUtil.format(DateUtil.getDateByMillisecond(DateUtil.getLongDate()+1000), DateUtil.dateTimePattern));
+					
+					scheduleService.addSchedules(channel.getId(), new ArrayListWrapper<ApiServerScheduleVO>().add(scheduleVO).getList());
+					
+					channelService.startBroadcast(channel.getId());
+					
+					map.put("assetPath", new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString());
 				}
-				scheduleVO.setAssetPaths(assetPaths);
-				scheduleVO.setBroadDate(DateUtil.format(DateUtil.getDateByMillisecond(DateUtil.getLongDate()+1000), DateUtil.dateTimePattern));
 				
-				scheduleService.addSchedules(channel.getId(), new ArrayListWrapper<ApiServerScheduleVO>().add(scheduleVO).getList());
-				
-				channelService.startAbilityBroadTimer(channel.getId());
-				
-				map.put("assetPath", new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString());
+				Thread.sleep(5000);
 			}
-			
-			Thread.sleep(10000);
+		} else {
+			map.put("assetPath", "");
 		}
 		
 		return map.put("transcode_streamTranscodingInfo", file_streamTranscodingInfo)
@@ -92,6 +95,10 @@ public class ApiProcessChannelController {
 				.getMap();
 	}
 	
-	
 	//回调
+	
+//	@JsonBody
+//	@ResponseBody
+//	@RequestMapping(value = "/delete")
+//	public Object delete(String )
 }

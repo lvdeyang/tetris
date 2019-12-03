@@ -72,7 +72,7 @@ public class ApiTerminalAuthController {
 		param.put("code", number);
 		
 		//TODO: 配aliyun
-//		aliSendSmsService.sendSms(mobile, param.toJSONString());
+		aliSendSmsService.sendSms(mobile, param.toJSONString());
 		
 		session.setAttribute("verification-code-phone", number);
 		session.setAttribute("verification-phone", mobile);

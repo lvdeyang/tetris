@@ -27,4 +27,13 @@ public interface ArticleMediaPermissionDAO extends BaseDAO<ArticleMediaPermissio
 	 */
 	public List<ArticleMediaPermissionPO> findByMediaId(Long mediaId);
 	
+	/**
+	 * 根据文章id删除关联<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月13日 下午4:55:52
+	 * @param articleId 文章id
+	 */
+	public void deleteByArticleId(Long articleId);
+	
 }

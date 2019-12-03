@@ -81,10 +81,10 @@ public class ApiServerStreamTranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/task")
-	public Object addTask(String assetPath, boolean record, Integer bePCM, String mediaType, String recordCallback, Integer progNum, String task,HttpServletRequest request) throws Exception{
+	public Object addTask(Long assetId, String assetPath, boolean record, Integer bePCM, String mediaType, String recordCallback, Integer progNum, String task,HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.streamParamFormat(assetPath, record, bePCM, mediaType, recordCallback, progNum, task);
+		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.streamParamFormat(assetId, assetPath, record, bePCM, mediaType, recordCallback, progNum, task);
 		JSONObject variables = new JSONObject();
 		variables.put("_pa17_file_fileToStreamInfo", JSON.toJSONString(processVO.getFileToStreamVO()));
 		variables.put("_pa17_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
@@ -92,7 +92,7 @@ public class ApiServerStreamTranscodingController {
 		
 		String processInstanceId = processService.startByKey("_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
 		
-		return new HashMapWrapper<String, Object>().put("processId", processInstanceId)
+		return new HashMapWrapper<String, Object>().put("id", processInstanceId)
 				.getMap();
 	}
 	
@@ -101,10 +101,15 @@ public class ApiServerStreamTranscodingController {
 	@RequestMapping(value = "/delete/task")
 	public Object deleteTask(String id, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
+
+		JSONObject variables = new JSONObject();
+		variables.put("_pa19_messageId", id);
+		variables.put("_pa21_messageId", id);
 		
-		deleteTaskService.delete(user, Long.valueOf(id));
+		String processInstanceId = processService.startByKey("_delete_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
 		
-		return null;
+		return new HashMapWrapper<String, Object>().put("id", processInstanceId)
+				.getMap();
 	}
 	
 	@JsonBody

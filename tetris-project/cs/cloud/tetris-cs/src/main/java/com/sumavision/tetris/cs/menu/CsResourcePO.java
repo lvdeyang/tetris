@@ -36,6 +36,12 @@ public class CsResourcePO extends AbstractBasePO {
 	/** 时长 */
 	private String duration;
 	
+	/** 媒资类型 */
+	private String type;
+	
+	/** 媒资的mimeType */
+	private String mimetype;
+	
 	/** 媒资下载量 */
 	private Integer downloadCount;
 	
@@ -106,6 +112,24 @@ public class CsResourcePO extends AbstractBasePO {
 
 	public void setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+	}
+
+	@Column(name = "TYPE")
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	@Column(name = "MIMSTYPE")
+	public String getMimetype() {
+		return mimetype;
+	}
+
+	public void setMimetype(String mimetype) {
+		this.mimetype = mimetype;
 	}
 
 	@Column(name = "DOWNLOAD_COUNT")

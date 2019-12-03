@@ -19,6 +19,7 @@ public class ChannelUdpUserIdAlreadyExistException extends BaseException{
 		LOG.error(new StringBufferWrapper().append("预播发用户已被占用!")
 				.append("该用户昵称为：")
 				.append(nickname)
+				.append(";")
 				.append("频道为：")
 				.append(channelName)
 				.toString());

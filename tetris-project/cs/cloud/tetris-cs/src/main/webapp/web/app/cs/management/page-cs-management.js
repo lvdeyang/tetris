@@ -11,6 +11,7 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
+    'mi-lightbox',
     'cs-user-dialog',
     'css!' + window.APPPATH + 'cs/management/page-cs-management.css'
 ], function (tpl, config, $, ajax, context, commons, Vue) {
@@ -55,7 +56,8 @@ define([
                         loading: false,
                         name: "",
                         broadWay: "",
-                        outputUsers: [],
+                        outputQtUsers: [],
+                        outputPushUsers: [],
                         outputUserPort: "",
                         outputCount: 1,
                         output: [],
@@ -73,7 +75,8 @@ define([
                         data: "",
                         name: "",
                         broadWay: "",
-                        outputUsers: [],
+                        outputQtUsers: [],
+                        outputPushUsers: [],
                         outputUserPort: "",
                         outputCount: 1,
                         output: [],
@@ -350,7 +353,8 @@ define([
                     self.dialog.addProgram.name = "";
                     self.dialog.addProgram.date = "";
                     self.dialog.addProgram.broadWay = "";
-                    self.dialog.addProgram.outputUsers = [];
+                    self.dialog.addProgram.outputQtUsers = [];
+                    self.dialog.addProgram.outputPushUsers = [];
                     self.dialog.addProgram.outputUserPort = "";
                     self.dialog.addProgram.outputCount = 1;
                     self.dialog.addProgram.output.splice(0, self.dialog.addProgram.output.length);
@@ -363,6 +367,7 @@ define([
                     self.dialog.addProgram.visible = false;
                     self.dialog.addProgram.value = "";
                 },
+                //添加流输出数的监听
                 handleAddProgramOutputCount: function (currentValue, oldValue) {
                     var self = this;
                     if (self.dialog.addProgram.output.length <= currentValue){
@@ -377,17 +382,21 @@ define([
                         self.dialog.addProgram.output.splice(currentValue, self.dialog.addProgram.output.length - currentValue);
                     }
                 },
-                handleAddProgramUserRemove:function(user, value){
+                handleUserRemove:function(user, value){
                     var index = user.indexOf(value);
                     if(index != -1){
                         user.splice(index, 1);
                     }
                 },
-                handleAddProgramUserSet: function () {
+                handleAddProgramQtUserSet: function () {
                     var self = this;
-                    self.$refs.addProgramUserDialog.open('/cs/channel/quest/user/list', self.dialog.addProgram.outputUsers);
+                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.addProgram.outputQtUsers, "QT");
                 },
-                selectedAddProgramUsers: function (buff, users, startLoading, endLoading, close) {
+                handleAddProgramPushUserSet: function () {
+                    var self = this;
+                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.addProgram.outputPushUsers, "PUSH");
+                },
+                selectedUsers: function (buff, users, startLoading, endLoading, close) {
                     var self = this;
                     startLoading();
                     buff.splice(0,buff.length);
@@ -399,17 +408,17 @@ define([
                 },
                 handleAddProgramCommit: function () {
                     var self = this;
-                    if (self.dialog.addProgram.autoBroad && !self.dialog.addProgram.autoBroadStart.trim()) {
+                    if (self.dialog.addProgram.autoBroad && !self.dialog.addProgram.autoBroadStart) {
                         this.$message({
                             message: '请选择自动播发起始时间',
                             type: 'warning'
                         });
                         return;
                     }
-                    if (self.dialog.addProgram.outputUsers.length <= 0) {
+                    if (self.dialog.addProgram.broadWay == "轮播推流" && self.dialog.addProgram.outputQtUsers.length <= 0) {
                         var noOut = true;
-                        for (var i = 0; i < self.dialog.addProgram.outputUsers.length; i++){
-                            if (self.dialog.addProgram.outputUsers.previewUrlIp.trim() != "" && self.dialog.addProgram.outputUsers.previewUrlPort.trim() != ""){
+                        for (var i = 0; i < self.dialog.addProgram.outputQtUsers.length; i++){
+                            if (self.dialog.addProgram.outputQtUsers.previewUrlIp.trim() != "" && self.dialog.addProgram.outputQtUsers.previewUrlPort.trim() != ""){
                                 noOut = false;
                                 break;
                             }
@@ -422,12 +431,19 @@ define([
                             return;
                         }
                     }
+                    if (self.dialog.addProgram.broadWay == "下载文件" && !self.dialog.addProgram.outputQtUsers.length && !self.dialog.addProgram.outputPushUsers.length){
+                        this.$message({
+                            message: '请选择至少一个播发用户',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.addProgram.loading = true;
                     var newData = {
                         name: self.dialog.addProgram.name,
                         date: self.dialog.addProgram.date,
                         broadWay: self.dialog.addProgram.broadWay,
-                        outputUsers: JSON.stringify(self.dialog.addProgram.outputUsers),
+                        outputUsers: JSON.stringify(self.dialog.addProgram.broadWay == "轮播推流" ? self.dialog.addProgram.outputQtUsers : self.dialog.addProgram.outputQtUsers.concat(self.dialog.addProgram.outputPushUsers)),
                         outputUserPort: self.dialog.addProgram.outputUserPort,
                         output: JSON.stringify(self.dialog.addProgram.output),
                         encryption: self.dialog.addProgram.encryption,
@@ -453,9 +469,23 @@ define([
                     self.dialog.editChannel.data = row;
                     self.dialog.editChannel.name = row.name;
                     self.dialog.editChannel.broadWay = row.broadWay;
-                    self.dialog.editChannel.outputUsers = row.outputUsers;
+                    if (row.broadWay == "下载文件" && row.outputUsers) {
+                        for (var i = 0; i < row.outputUsers.length; i++) {
+                            var item = row.outputUsers[i];
+                            switch(item.equipType) {
+                                case "QT":
+                                    self.dialog.editChannel.outputQtUsers.push(item);
+                                    break;
+                                case "PUSH":
+                                    self.dialog.editChannel.outputPushUsers.push(item);
+                                    break;
+                                default :
+                                    break;
+                            }
+                        }
+                    }
                     self.dialog.editChannel.outputUserPort = row.outputUserPort;
-                    self.dialog.editChannel.outputCount = row.output.length;
+                    if (row.output) self.dialog.editChannel.outputCount = row.output.length;
                     self.dialog.editChannel.output = row.output;
                     self.dialog.editChannel.remark = row.remark;
                     self.dialog.editChannel.encryption = row.encryption;
@@ -485,7 +515,8 @@ define([
                     self.dialog.editChannel.data = "";
                     self.dialog.editChannel.name = "";
                     self.dialog.editChannel.broadWay = "";
-                    self.dialog.editChannel.outputUsers = [];
+                    self.dialog.editChannel.outputQtUsers = [];
+                    self.dialog.editChannel.outputPushUsers = [];
                     self.dialog.editChannel.outputUserPort = "";
                     self.dialog.editChannel.outputCount = 1;
                     self.dialog.editChannel.output = [];
@@ -496,32 +527,17 @@ define([
                     self.dialog.editChannel.autoBroadDuration = 1;
                     self.dialog.editChannel.autoBroadStart = "";
                 },
-                handleEditChannelUserRemove:function(user, value){
-                    var index = user.indexOf(value);
-                    if(index != -1){
-                        user.splice(index, 1);
-                    }
-                },
-                handleEditChannelUserSet: function () {
+                handleEditChannelQtUserSet: function () {
                     var self = this;
-                    self.$refs.editChannelUserDialog.open('/cs/channel/quest/user/list', self.dialog.editChannel.outputUsers);
-                },
-                selectedEditChannelUsers: function (buff, users, startLoading, endLoading, close) {
-                    var self = this;
-                    startLoading();
-                    buff.splice(0,buff.length);
-                    for(var i=0; i<users.length; i++){
-                        buff.push(users[i]);
-                    }
-                    endLoading();
-                    close();
+                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.editChannel.outputQtUsers, "QT");
                 },
                 handleEditChannelCommitSend: function (listener) {
                     var self = this;
                     self.dialog.editChannel.loading = true;
                     var newName = self.dialog.editChannel.name;
                     var newRemark = self.dialog.editChannel.remark;
-                    var outputUsers = self.dialog.editChannel.outputUsers;
+                    var outputQtUsers = self.dialog.editChannel.outputQtUsers;
+                    var outputPushUsers = self.dialog.editChannel.outputPushUsers;
                     var outputUserPort = self.dialog.editChannel.outputUserPort;
                     var output = self.dialog.editChannel.output;
                     var encryption = self.dialog.editChannel.encryption;
@@ -532,7 +548,7 @@ define([
                     var questData = {
                         id: self.dialog.editChannel.data.id,
                         name: newName,
-                        outputUsers: JSON.stringify(outputUsers),
+                        outputUsers: JSON.stringify(outputQtUsers.concat(outputPushUsers)),
                         outputUserPort: outputUserPort,
                         output: JSON.stringify(output),
                         encryption: encryption,
@@ -552,8 +568,7 @@ define([
                         });
                         self.dialog.editChannel.data.name = newName;
                         self.dialog.editChannel.data.remark = newRemark;
-                        self.dialog.editChannel.data.outputUsers = outputUsers;
-                        self.dialog.editChannel.data.outputUserPort = outputUserPort;
+                        self.dialog.editChannel.data.outputUsers = outputQtUsers.concat(outputPushUsers);
                         self.dialog.editChannel.data.output = output;
                         self.dialog.editChannel.data.encryption = encryption;
                         self.dialog.editChannel.data.autoBroad = autoBroad;
@@ -566,6 +581,36 @@ define([
                 },
                 handleEditChannelCommit: function () {
                     var self = this;
+                    if (self.dialog.editChannel.autoBroad && !self.dialog.editChannel.autoBroadStart) {
+                        this.$message({
+                            message: '请选择自动播发起始时间',
+                            type: 'warning'
+                        });
+                        return;
+                    }
+                    if (self.dialog.editChannel.broadWay == "轮播推流" && self.dialog.editChannel.outputQtUsers.length <= 0) {
+                        var noOut = true;
+                        for (var i = 0; i < self.dialog.editChannel.outputQtUsers.length; i++){
+                            if (self.dialog.editChannel.outputQtUsers.previewUrlIp.trim() != "" && self.dialog.editChannel.outputQtUsers.previewUrlPort.trim() != ""){
+                                noOut = false;
+                                break;
+                            }
+                        }
+                        if (noOut) {
+                            this.$message({
+                                message: '请完善至少一个输出或选择一个播发用户',
+                                type: 'warning'
+                            });
+                            return;
+                        }
+                    }
+                    if (self.dialog.editChannel.broadWay == "下载文件" && !self.dialog.editChannel.outputQtUsers.length && !self.dialog.editChannel.outputPushUsers.length){
+                        this.$message({
+                            message: '请选择至少一个播发用户',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     if (self.dialog.editChannel.autoBroad) {
                         if ((!self.dialog.editChannel.autoBroadStart || !self.dialog.editChannel.autoBroadStart.trim())){
                             this.$message({
@@ -1146,6 +1191,15 @@ define([
                     self.dialog.editProgram.commitData.currentSerialInfo = [];
                     self.dialog.editProgram.options.current = self.screen.one;
                 },
+                handlePreview: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    if(row.type == "AUDIO"){
+                        self.$refs.Lightbox.preview(row.previewUrl, 'audio');
+                    }else if(row.type == "VIDEO"){
+                        self.$refs.Lightbox.preview(row.previewUrl, 'video');
+                    }
+                },
                 handleEditProgramCommit: function () {
                     var self = this;
                     self.dialog.editProgram.loading = true;
@@ -1503,13 +1557,11 @@ define([
                                                 self.loadingText = "正在请求播发";
                                                 ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
                                                     self.loading = false;
-                                                    if (data.success && status == 200) {
+                                                    if (status == 200) {
                                                         self.$message({
                                                             message: '请求播发成功',
                                                             type: 'success'
                                                         });
-                                                    } else {
-                                                        self.$message.error(data.message);
                                                     }
                                                     self.getChannelList();
                                                 }, null, ajax.NO_ERROR_CATCH_CODE)
@@ -1531,13 +1583,11 @@ define([
                                                 self.loadingText = "正在请求播发";
                                                 ajax.post('/cs/channel/broadcast/restart', questData, function (data, status) {
                                                     self.loading = false;
-                                                    if (data.success && status == 200) {
+                                                    if (status == 200) {
                                                         self.$message({
                                                             message: '请求播发成功',
                                                             type: 'success'
                                                         });
-                                                    } else {
-                                                        self.$message.error(data.message);
                                                     }
                                                     self.getChannelList();
                                                 }, null, ajax.NO_ERROR_CATCH_CODE)

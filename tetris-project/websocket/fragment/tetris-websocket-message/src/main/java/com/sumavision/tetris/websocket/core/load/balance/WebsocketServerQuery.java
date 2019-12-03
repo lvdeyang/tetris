@@ -34,6 +34,7 @@ public class WebsocketServerQuery {
 		String ip = reader.readString("ipAddr", target);
 		String port = reader.readString("port", target);
 		String addr = new StringBufferWrapper().append("ws://").append(ip).append(":").append(port).append("/server/websocket/").toString();
+		System.out.println(addr);
 		return addr;
 	}
 	

@@ -3,7 +3,7 @@ package com.sumavision.tetris.cs.channel;
 import java.util.List;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
-import com.sumavision.tetris.cs.channel.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 import com.sumavision.tetris.user.UserVO;
 

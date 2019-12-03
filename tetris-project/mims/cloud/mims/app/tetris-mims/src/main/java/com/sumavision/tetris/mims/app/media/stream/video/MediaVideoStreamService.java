@@ -178,6 +178,22 @@ public class MediaVideoStreamService {
 	}
 	
 	/**
+	 * 根据url地址列表删除<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月25日 下午5:35:58
+	 * @param List<String> urls 要删除的地址列表
+	 * @return List<MediaVideoStreamVO> 删除的媒资流列表
+	 */
+	public List<MediaVideoStreamVO> removeByUrls(List<String> urls) throws Exception {
+		List<Long> mediaIds = mediaVideoStreamUrlRelationService.remove(urls);
+		
+		if (mediaIds == null || mediaIds.isEmpty()) return null;
+		
+		return removeByIds(mediaIds);
+	}
+	
+	/**
 	 * 视频流媒资删除(为feign提供)<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

@@ -133,7 +133,7 @@ public class SpringContext implements ApplicationContextAware {
 	 * @return Object 返回requiredType类型对象
 	 * @throws BeansException
 	 */
-	public static Object getBean(String name, Class<?> requiredType)
+	public static <T> T getBean(String name, Class<T> requiredType)
 			throws BeansException {
 		return applicationContext.getBean(name, requiredType);
 	}

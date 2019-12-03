@@ -535,6 +535,7 @@ public class ArticleService {
 			articleRegionPermissionDao.deleteByArticleIdIn(ids);
 			columnRelationArticleDao.deleteByArticleIdIn(ids);
 			articleUserPermissionDao.deleteByArticleIdIn(ids);
+			articleMediaPermissionDao.deleteByArticleId(article.getId());
 			
 			articleDao.delete(article);
 		}

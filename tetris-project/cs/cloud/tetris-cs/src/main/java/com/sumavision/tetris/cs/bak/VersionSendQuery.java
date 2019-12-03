@@ -29,8 +29,10 @@ public class VersionSendQuery {
 		versionPO.setChannelId(channelId);
 		versionPO.setVersion(version);
 		versionPO.setBroadId(broadId);
-		versionPO.setFileName(mediaCompress.getName());
-		versionPO.setFileSize(mediaCompress.getSize());
+		if (mediaCompress != null) {
+			versionPO.setFileName(mediaCompress.getName());
+			versionPO.setFileSize(mediaCompress.getSize());
+		}
 		versionPO.setFilePath(filePath);
 
 		versionSendDao.save(versionPO);
