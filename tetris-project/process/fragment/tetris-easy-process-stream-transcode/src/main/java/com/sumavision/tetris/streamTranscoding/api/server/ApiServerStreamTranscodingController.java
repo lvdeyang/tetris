@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -98,10 +99,10 @@ public class ApiServerStreamTranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete/task")
-	public Object deleteTask(Long id, HttpServletRequest request) throws Exception{
+	public Object deleteTask(String id, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		deleteTaskService.delete(user, id);
+		deleteTaskService.delete(user, Long.valueOf(id));
 		
 		return null;
 	}
@@ -121,7 +122,7 @@ public class ApiServerStreamTranscodingController {
 	
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "delete/output")
+	@RequestMapping(value = "/delete/output")
 	public Object deleteOutput(Long id, String outputParam, HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
 		

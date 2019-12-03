@@ -83,15 +83,15 @@ public class StreamTranscodingTaskService {
 		if (recordCallbackUrl == null || recordCallbackUrl.isEmpty()) return;
 		
 		String url = new StringBufferWrapper().append("http://")
-				.append("ip")
-				.append(":")
-				.append("port")
-				.append(recordCallbackUrl)
-				.append("?uuiqId=")
-				.append(messageId)
-				.append("&assetId=")
-				.append(assetId)
-				.toString();
+											  .append("ip")
+											  .append(":")
+											  .append("port")
+											  .append(recordCallbackUrl)
+											  .append("?uuiqId=")
+											  .append(messageId)
+											  .append("&assetId=")
+											  .append(assetId)
+											  .toString();
 		
 		HttpRequestUtil.httpGet(url);
 	}

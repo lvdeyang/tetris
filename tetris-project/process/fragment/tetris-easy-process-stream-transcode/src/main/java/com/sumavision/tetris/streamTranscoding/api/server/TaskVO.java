@@ -5,7 +5,7 @@ import java.util.List;
 public class TaskVO {
 	/** 输出封装 */
 	private Integer esType;
-	/** 源参数 */
+	/** 输出编码参数 */
 	private CodecParamVO codecParam;
 	/** 输出参数 */
 	private List<OutParamVO> outParam;

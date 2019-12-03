@@ -43,11 +43,12 @@ public class ApiProcessStreamTranscodingController {
 			info.setAssetUrl(assetPath);
 		}
 		
-		Long messageId = null;
+		String messageId = null;
 		if (info.isTranscoding()) {
 			messageId = streamTranscodingAddTaskService.addStreamTask(user, info, recordInfo);
 		}
 		
 		return new HashMapWrapper<String, Object>().put("record_recordInfo", transcode_recordInfo).put("record_messageId", messageId).getMap();
 	}
+
 }
