@@ -14,9 +14,9 @@ public class ChannelUdpBroadCountIsFullException extends BaseException{
 	private static final long serialVersionUID = 1L;
 
 	public ChannelUdpBroadCountIsFullException() {
-		super(StatusCode.CONFLICT, "轮播能力播发的频道已达数量上限");
+		super(StatusCode.CONFLICT, "轮播推流播发的频道已达数量上限");
 		LOG.error(DateUtil.now());
-		LOG.error(new StringBufferWrapper().append("轮播能力播发的频道已达数量上限!")
+		LOG.error(new StringBufferWrapper().append("轮播推流播发的频道已达数量上限!")
 										   .toString());
 	}
 }

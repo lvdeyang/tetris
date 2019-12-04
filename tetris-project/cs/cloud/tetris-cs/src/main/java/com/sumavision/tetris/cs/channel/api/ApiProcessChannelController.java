@@ -20,6 +20,9 @@ import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemoteDAO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemotePO;
+import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -35,6 +38,9 @@ public class ApiProcessChannelController {
 	
 	@Autowired
 	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
+	
+	@Autowired
+	private BroadAbilityRemoteDAO broadAbilityRemoteDAO;
 	
 	/**
 	 * 流程节点(文件转流)<br/>
@@ -52,7 +58,7 @@ public class ApiProcessChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(String file_fileToStreamInfo, String file_streamTranscodingInfo, String file_recordInfo, Boolean encryption, HttpServletRequest request) throws Exception{
+	public Object add(String file_fileToStreamInfo, String file_streamTranscodingInfo, String file_recordInfo, Boolean encryption, String __processInstanceId__, HttpServletRequest request) throws Exception{
 		//本地地址和端口，让push的流推到本地，再转码
 		FileToStreamVO vo = JSON.parseObject(file_fileToStreamInfo, FileToStreamVO.class);
 		
@@ -66,15 +72,25 @@ public class ApiProcessChannelController {
 						.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(ip).setPreviewUrlPort(port.toString()))
 						.getList();
 				
-				ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播能力", "", ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null, null, null, infoVOs);
+				ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播推流", "", ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null, null, null, infoVOs);
 				
 				if (channel != null) {
+					//保存流程信息和回调地址
+					BroadAbilityRemotePO remotePO = new BroadAbilityRemotePO();
+					remotePO.setChannelId(channel.getId());
+					remotePO.setProcessInstanceId(__processInstanceId__);
+					remotePO.setStopCallbackUrl(vo.getStopCallback());
+					broadAbilityRemoteDAO.save(remotePO);
+					
 					ApiServerScheduleVO scheduleVO = new ApiServerScheduleVO();
-					List<String> assetPaths = new ArrayList<String>();
+					List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
 					for (int i = 0; i < vo.getPlayCount(); i++) {
-						assetPaths.add(vo.getFileUrl());
+						ScreenVO screen = new ScreenVO();
+						screen.setPreviewUrl(vo.getFileUrl());
+						screen.setDuration(vo.getDuration());
+						screenVOs.add(screen);
 					}
-					scheduleVO.setAssetPaths(assetPaths);
+					scheduleVO.setScreens(screenVOs);
 					scheduleVO.setBroadDate(DateUtil.format(DateUtil.getDateByMillisecond(DateUtil.getLongDate()+1000), DateUtil.dateTimePattern));
 					
 					scheduleService.addSchedules(channel.getId(), new ArrayListWrapper<ApiServerScheduleVO>().add(scheduleVO).getList());
@@ -95,10 +111,20 @@ public class ApiProcessChannelController {
 				.getMap();
 	}
 	
-	//回调
-	
-//	@JsonBody
-//	@ResponseBody
-//	@RequestMapping(value = "/delete")
-//	public Object delete(String )
+	/**
+	 * 停止文件转流<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月2日 下午5:23:43
+	 * @param String messageId 任务id 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop")
+	public void stop(String messageId, HttpServletRequest request) throws Exception {
+		BroadAbilityRemotePO remotePO = broadAbilityRemoteDAO.findByProcessInstanceId(messageId);
+		if (remotePO != null) {
+			channelService.stopBroadcast(remotePO.getChannelId());
+		}
+	}
 }

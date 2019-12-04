@@ -187,8 +187,8 @@ public interface ArticleDAO extends BaseDAO<ArticlePO>{
 	 * @param pageable 分页
 	 * @return Page<ArticlePO> 文章列表
 	 */
-	@Query(value = "SELECT article.* FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE permission.group_id = ?1 \n#pageable\n",
-			countQuery = "SELECT count(article.id) FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE permission.group_id = ?1 orderBy article.updateTime desc",
+	@Query(value = "SELECT article.* FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE permission.group_id = ?1 order by article.update_time desc \n#pageable\n",
+			countQuery = "SELECT count(article.id) FROM TETRIS_CMS_ARTICLE article LEFT JOIN TETRIS_CMS_ARTICLE_USER_PERMISSION permission ON article.id = permission.article_id WHERE permission.group_id = ?1",
 			nativeQuery = true)
 	public Page<ArticlePO> findAllByGroupId(String groupId, Pageable pageable);
 	

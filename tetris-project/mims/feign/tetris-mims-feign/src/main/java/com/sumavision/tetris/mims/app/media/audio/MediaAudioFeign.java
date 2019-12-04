@@ -3,9 +3,11 @@ package com.sumavision.tetris.mims.app.media.audio;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @FeignClient(name = "tetris-mims", configuration = FeignConfiguration.class)
 public interface MediaAudioFeign {
@@ -133,4 +135,14 @@ public interface MediaAudioFeign {
 			@RequestParam("tagId") Long tagId,
 			@RequestParam("httpUrl") String httpUrl,
 			@RequestParam("ftpUrl") String ftpUrl) throws Exception;
+	
+	/**
+	 * 根据id数组删除媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月4日 上午9:12:35
+	 * @param String ids 预删除媒资id数组的JSON字符串
+	 */
+	@RequestMapping(value = "/media/audio/feign/remove")
+	public JSONObject remove(@RequestParam("ids") String ids) throws Exception;
 }

@@ -223,13 +223,14 @@ public class ScheduleService {
 			
 			Date date = new Date();
 			List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
-			List<String> assetPaths = apiServerScheduleVO.getAssetPaths();
-			for (int i = 0; i < assetPaths.size(); i++) {
+			List<ScreenVO> assetScreens = apiServerScheduleVO.getAssetScreens();
+			for (int i = 0; i < assetScreens.size(); i++) {
 				ScreenVO screen = new ScreenVO();
 				screen.setUpdateTime(date);
 				screen.setSerialNum(1l);
 				screen.setIndex((long)(i+1));
-				screen.setPreviewUrl(assetPaths.get(i));
+				screen.setPreviewUrl(assetScreens.get(i).getPreviewUrl());
+				screen.setDuration(assetScreens.get(i).getDuration());
 				screenVOs.add(screen);
 			}
 			ProgramVO program = new ProgramVO();

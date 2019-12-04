@@ -417,8 +417,8 @@ define([
                     }
                     if (self.dialog.addProgram.broadWay == "轮播推流" && self.dialog.addProgram.outputQtUsers.length <= 0) {
                         var noOut = true;
-                        for (var i = 0; i < self.dialog.addProgram.outputQtUsers.length; i++){
-                            if (self.dialog.addProgram.outputQtUsers.previewUrlIp.trim() != "" && self.dialog.addProgram.outputQtUsers.previewUrlPort.trim() != ""){
+                        for (var i = 0; i < self.dialog.addProgram.output.length; i++){
+                            if (self.dialog.addProgram.output[i].previewUrlIp.trim() != "" && self.dialog.addProgram.output[i].previewUrlPort.trim() != ""){
                                 noOut = false;
                                 break;
                             }
@@ -590,8 +590,8 @@ define([
                     }
                     if (self.dialog.editChannel.broadWay == "轮播推流" && self.dialog.editChannel.outputQtUsers.length <= 0) {
                         var noOut = true;
-                        for (var i = 0; i < self.dialog.editChannel.outputQtUsers.length; i++){
-                            if (self.dialog.editChannel.outputQtUsers.previewUrlIp.trim() != "" && self.dialog.editChannel.outputQtUsers.previewUrlPort.trim() != ""){
+                        for (var i = 0; i < self.dialog.editChannel.output.length; i++){
+                            if (self.dialog.editChannel.output[i].previewUrlIp.trim() != "" && self.dialog.editChannel.output[i].previewUrlPort.trim() != ""){
                                 noOut = false;
                                 break;
                             }

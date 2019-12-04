@@ -16,6 +16,8 @@ public class CodecParamVO {
 	private String acodec;
 	/** 音频采样 */
 	private Long asample;
+	/** 通道数 */
+	private Long achannel;
 	/** 音频输出声道 */
 	private String chLayout;
 	
@@ -75,6 +77,14 @@ public class CodecParamVO {
 		this.asample = asample;
 	}
 	
+	public Long getAchannel() {
+		return achannel;
+	}
+
+	public void setAchannel(Long achannel) {
+		this.achannel = achannel;
+	}
+
 	public String getChLayout() {
 		return chLayout;
 	}

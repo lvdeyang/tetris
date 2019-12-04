@@ -71,12 +71,12 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
-		<!-- p2p-feign
+		<!-- p2p-feign -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
 	  		<artifactId>tetris-p2p-feign</artifactId>
  		 	<version>0.0.1-SNAPSHOT</version>
-		</dependency> -->
+		</dependency>
   	
   		<!-- tetris-ui -->
 		<dependency>

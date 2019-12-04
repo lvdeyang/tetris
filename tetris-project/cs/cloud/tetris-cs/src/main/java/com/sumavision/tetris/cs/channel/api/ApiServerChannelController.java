@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
-import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
@@ -19,7 +18,6 @@ import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
 import com.sumavision.tetris.cs.channel.ChannelVO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
-import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -51,6 +49,21 @@ public class ApiServerChannelController {
 
 		return channelQuery.findAll(currentPage, pageSize, ChannelType.REMOTE);
 	}
+	
+	/**
+	 * 根据id查询频道信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @return ChannelVO channel 频道信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/quest")
+	public Object quest(Long id, HttpServletRequest request) throws Exception {
+
+		return new ChannelVO().set(channelQuery.findByChannelId(id));
+	}
 
 	/**
 	 * 添加频道<br/>
@@ -71,7 +84,7 @@ public class ApiServerChannelController {
 	public Object add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, Boolean encryption, HttpServletRequest request) throws Exception {
 		
 		if (date == null) date = DateUtil.now();
-		if (broadWay == null) broadWay = "轮播能力";
+		if (broadWay == null) broadWay = "轮播推流";
 		if (remark == null) remark = "";
 		
 		List<BroadAbilityBroadInfoVO> infoVOs = new ArrayListWrapper<BroadAbilityBroadInfoVO>()

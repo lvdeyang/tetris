@@ -223,6 +223,21 @@ public class MediaVideoService {
 	}
 	
 	/**
+	 * 根据id数组删除媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月4日 上午9:12:35
+	 * @param List<Long> ids 预删除媒资id数组
+	 * @return deleted List<MediaVideoVO> 删除的数据列表
+	 * @return processed List<MediaVideoVO> 待审核的数据列表
+	 */
+	public Map<String, Object> remove(List<Long> ids) throws Exception {
+		List<MediaVideoPO> mediaVideoPOs = mediaVideoDao.findAll(ids);
+		if (mediaVideoPOs == null || mediaVideoPOs.isEmpty()) return null;
+		return remove(mediaVideoPOs);
+	}
+	
+	/**
 	 * 视频媒资删除<br/>
 	 * <p>
 	 * 	初步设想，考虑到文件夹下可能包含大文件以及文件数量等<br/>

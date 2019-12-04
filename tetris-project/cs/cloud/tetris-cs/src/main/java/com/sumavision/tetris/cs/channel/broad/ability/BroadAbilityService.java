@@ -3,6 +3,7 @@ package com.sumavision.tetris.cs.channel.broad.ability;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -11,15 +12,21 @@ import java.util.stream.Collectors;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.cs.channel.Adapter;
@@ -43,6 +50,8 @@ import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
+import com.sumavision.tetris.mvc.wrapper.CopyHeaderHttpServletRequestWrapper;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -75,6 +84,9 @@ public class BroadAbilityService {
 	
 	@Autowired
 	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
+	
+	@Autowired
+	private BroadAbilityRemoteDAO broadAbilityRemoteDAO;
 	
 	@Autowired
 	private ChannelAutoBroadInfoDAO channelAutoBroadInfoDAO;
@@ -116,6 +128,16 @@ public class BroadAbilityService {
 		if (broadAbilityQuery.sendAbilityRequest(BroadAbilityQueryType.STOP, channel, null, null)) {
 			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
 			channelDao.save(channel);	
+			if (channel.getType().equals(ChannelType.REMOTE.toString())) {
+				BroadAbilityRemotePO remotePO = broadAbilityRemoteDAO.findByChannelId(channelId);
+				if (remotePO == null) return;
+				String url = remotePO.getStopCallbackUrl();
+				if (url != null && !url.isEmpty()) {
+					//回调
+					HttpRequestUtil.httpGet(new StringBufferWrapper().append(url).toString());
+				}
+				channelService.remove(channelId);
+			}
 		}
 	}
 	
@@ -215,6 +237,8 @@ public class BroadAbilityService {
 			if (!webSocketSendUsers.isEmpty()) sendWebSocket(webSocketSendUsers, scheduleVOs, streamUrlPort, channel);
 		}
 		
+		ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+		final CopyHeaderHttpServletRequestWrapper request = new CopyHeaderHttpServletRequestWrapper(attributes.getRequest());
 		if (timerMap.containsKey(channelId)) timerMap.get(channelId).cancel();
 		
 		for (ScheduleVO scheduleVO : scheduleVOs) {
@@ -232,6 +256,7 @@ public class BroadAbilityService {
 						@Override
 						public void run() {
 							try {
+								RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
 								if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)){
 									System.out.println(channelId + ":" + scheduleVO.getBroadDate());
 									startSendSchedule(channelId, scheduleVO.getId(), broadAbilityBroadInfoVOs, queryType);
@@ -247,10 +272,10 @@ public class BroadAbilityService {
 										if (nextBroadTime - 5000l < finishTime) {
 											Thread.sleep(nextBroadTime - 5000l);
 										} else {
-											Thread.sleep(playTime);
+											Thread.sleep(playTime > dealTime ? playTime : dealTime);
 										}
 									} else {
-										Thread.sleep(playTime);
+										Thread.sleep(playTime > dealTime ? playTime : dealTime);
 									}
 									startAbilityBroadTimer(channelId);
 								}
@@ -281,8 +306,9 @@ public class BroadAbilityService {
 						}
 					};
 					if (channel.getType().equals(ChannelType.REMOTE.toString()) || channel.getAutoBroad()) {
-						channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
-						channelDao.save(channel);
+//						channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+//						channelDao.save(channel);
+						channelService.stopBroadcast(channelId);
 					} else {
 //						nTimer.schedule(timerTask, dealTime - 5000l);
 					}

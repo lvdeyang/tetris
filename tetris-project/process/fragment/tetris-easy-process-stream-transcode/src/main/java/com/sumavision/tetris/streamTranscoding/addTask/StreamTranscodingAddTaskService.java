@@ -44,7 +44,7 @@ public class StreamTranscodingAddTaskService {
 	@Autowired
 	private StreamTranscodingTaskOutputPermissionService streamTranscodingTaskOutputPermissionService;
 	
-	public Long addStreamTask(UserVO user, StreamTranscodingVO streamTranscodingVO, RecordVO recordVO) throws Exception{
+	public String addStreamTask(UserVO user, StreamTranscodingVO streamTranscodingVO, RecordVO recordVO) throws Exception{
 		String assetPath = streamTranscodingVO.getAssetUrl();
 		String mediaType = streamTranscodingVO.getMediaType();
 		Integer progNum = streamTranscodingVO.getProgNum();
@@ -61,7 +61,7 @@ public class StreamTranscodingAddTaskService {
 		StreamTranscodingTaskVO taskPO = streamTranscodingTaskService.addTaskForAddInput(user, record, recordCallback, progNum, esType, codecParam.getVcodec(), codecParam.getAcodec(), null);
 		List<StreamTranscodingTaskOutputPermissionVO> permissionVOs = streamTranscodingTaskOutputPermissionService.addPermissions(outParams, taskPO.getId());
 		
-		Long messageId = taskPO.getId();
+		String messageId = taskPO.getId().toString();
 		Long inputId = taskPO.getInputId();
 		Long taskId = 1l;
 		
@@ -126,7 +126,7 @@ public class StreamTranscodingAddTaskService {
 		
 		BodyVO bodyVO = new BodyVO(inputVO, new ArrayListWrapper<TaskVO>().add(taskVO).getList(), outputVOs);
 		
-		MessageVO messageVO = new MessageVO(messageId, bodyVO);
+		MessageVO messageVO = new MessageVO(Long.valueOf(messageId), bodyVO);
 		
 		ResponseVO response = streamTranscodingAdapter.addTask(messageVO);
 		

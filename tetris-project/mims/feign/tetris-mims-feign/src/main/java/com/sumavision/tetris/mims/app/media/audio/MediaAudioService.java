@@ -2,9 +2,9 @@ package com.sumavision.tetris.mims.app.media.audio;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 import com.sumavision.tetris.user.UserVO;
 
@@ -39,5 +39,16 @@ public class MediaAudioService {
 	 */
 	public MediaAudioVO addRemote(String name, Long tagId, String httpUrl, String ftpUrl) throws Exception {
 		return JsonBodyResponseParser.parseObject(mediaAudioFeign.addRemote(name, tagId, httpUrl, ftpUrl), MediaAudioVO.class);
+	}
+	
+	/**
+	 * 根据id数组删除媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月4日 上午9:12:35
+	 * @param String ids 预删除媒资id数组的JSON字符串
+	 */
+	public JSONObject remove(String ids) throws Exception {
+		return JsonBodyResponseParser.parseObject(mediaAudioFeign.remove(ids), JSONObject.class);
 	}
 }

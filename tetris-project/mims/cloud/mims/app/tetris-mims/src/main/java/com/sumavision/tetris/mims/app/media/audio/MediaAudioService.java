@@ -51,6 +51,7 @@ import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
 import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtNotExistException;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.storage.StoreQuery;
@@ -270,6 +271,21 @@ public class MediaAudioService {
 		MediaAudioPO media = mediaAudioDao.findOne(id);
 		media.setReviewStatus(ReviewStatus.REVIEW_DELETE_REFUSE);
 		mediaAudioDao.save(media);
+	}
+	
+	/**
+	 * 根据id数组删除媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月4日 上午9:12:35
+	 * @param List<Long> ids 预删除媒资id数组
+	 * @return deleted List<MediaAudioVO> 删除的数据列表
+	 * @return processed List<MediaAudioVO> 待审核的数据列表
+	 */
+	public Map<String, Object> remove(List<Long> ids) throws Exception {
+		List<MediaAudioPO> mediaAudioPOs = mediaAudioDao.findAll(ids);
+		if (mediaAudioPOs == null || mediaAudioPOs.isEmpty()) return null;
+		return remove(mediaAudioPOs);
 	}
 	
 	/**
