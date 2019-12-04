@@ -28,9 +28,10 @@ public class ApiServerStreamTranscodingService {
 	@Autowired
 	private AddOutputService addOutputService;
 	
-	public StreamTranscodingProcessVO fileParamFormat(String assetPath, boolean record, Integer playCount, String stopCallback, String mediaType, String recordCallback, Integer progNum, String task) throws Exception{
+	public StreamTranscodingProcessVO fileParamFormat(MediaAVideoVO media, boolean record, Integer playCount, String stopCallback, String mediaType, String recordCallback, Integer progNum, String task) throws Exception{
 		FileToStreamVO fileToStreamVO = new FileToStreamVO();
-		fileToStreamVO.setFileUrl(assetPath);
+		fileToStreamVO.setFileUrl(media.getPreviewUrl());
+		fileToStreamVO.setDuration(media.getDuration());
 		fileToStreamVO.setNeed(true);
 		fileToStreamVO.setPlayCount(playCount);
 		fileToStreamVO.setStartPort(streamTranscodingAdapter.getRecordInfo().get("startPort"));

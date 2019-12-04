@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.client.RestTemplate;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -60,13 +59,13 @@ public class ApiServerStreamTranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/task/file")
-	public Object addTaskFile(Long assetId, boolean record, Integer playTime, String mediaType, String recordCallback, Integer progNum, String task, String stopCallBack, HttpServletRequest request) throws Exception{
+	public Object addTaskFile(Long assetId, boolean record, Integer playTime, String mediaType, String recordCallback, Integer progNum, String task, String stopCallback, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
 		MediaAVideoVO media = mediaAVideoQuery.loadByIdAndType(assetId, mediaType);
 		if (media == null) return null;
 		
-		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.fileParamFormat(media.getPreviewUrl(), record, playTime, stopCallBack, mediaType, recordCallback, progNum, task);
+		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.fileParamFormat(media, record, playTime, stopCallback, mediaType, recordCallback, progNum, task);
 		JSONObject variables = new JSONObject();
 		variables.put("_pa17_file_fileToStreamInfo", JSON.toJSONString(processVO.getFileToStreamVO()));
 		variables.put("_pa17_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
@@ -74,7 +73,7 @@ public class ApiServerStreamTranscodingController {
 		
 		String processInstanceId = processService.startByKey("_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
 		
-		return new HashMapWrapper<String, Object>().put("processId", processInstanceId)
+		return new HashMapWrapper<String, Object>().put("id", processInstanceId)
 				.getMap();
 	}
 	
@@ -99,12 +98,13 @@ public class ApiServerStreamTranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete/task")
-	public Object deleteTask(String id, HttpServletRequest request) throws Exception{
+	public Object deleteTask(Long id, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
-
+		
 		JSONObject variables = new JSONObject();
 		variables.put("_pa19_messageId", id);
 		variables.put("_pa21_messageId", id);
+		variables.put("_pa26_messageId", id);
 		
 		String processInstanceId = processService.startByKey("_delete_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
 		
@@ -127,7 +127,7 @@ public class ApiServerStreamTranscodingController {
 	
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/delete/output")
+	@RequestMapping(value = "delete/output")
 	public Object deleteOutput(Long id, String outputParam, HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
 		

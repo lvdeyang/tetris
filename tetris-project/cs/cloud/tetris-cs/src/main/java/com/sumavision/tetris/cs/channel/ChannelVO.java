@@ -38,6 +38,12 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	private List<BroadAbilityBroadInfoVO> output;
 	
 	private List<UserVO> outputUsers; 
+	
+	private String transcodeTemplateId;
+	
+	private String protoType;
+	
+	private String gasketPath;
 
 	@Override
 	public ChannelVO set(ChannelPO entity) throws Exception {
@@ -45,6 +51,9 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		.setUuid(entity.getUuid())
 		.setUpdateTime(entity.getUpdateTime() == null ? "": DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 		.setName(entity.getName())
+		.setTranscodeTemplateId("1")
+		.setProtoType("udp")
+		.setGasketPath("http://192.165.56.85:1234")
 		.setDate(entity.getDate())
 		.setRemark(entity.getRemark())
 		.setBroadWay(entity.getBroadWay())
@@ -54,6 +63,35 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		.setEncryption(entity.getEncryption())
 		.setAutoBroad(entity.getAutoBroad());
 
+		return this;
+	}
+	
+	
+
+	public String getTranscodeTemplateId() {
+		return transcodeTemplateId;
+	}
+
+	public ChannelVO setTranscodeTemplateId(String transcodeTemplateId) {
+		this.transcodeTemplateId = transcodeTemplateId;
+		return this;
+	}
+
+	public String getProtoType() {
+		return protoType;
+	}
+
+	public ChannelVO setProtoType(String protoType) {
+		this.protoType = protoType;
+		return this;
+	}
+
+	public String getGasketPath() {
+		return gasketPath;
+	}
+
+	public ChannelVO setGasketPath(String gasketPath) {
+		this.gasketPath = gasketPath;
 		return this;
 	}
 

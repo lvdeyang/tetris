@@ -22,6 +22,7 @@ import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoServi
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityQuery;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityQueryType;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemoteDAO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityService;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileService;
@@ -66,6 +67,9 @@ public class ChannelService {
 	
 	@Autowired
 	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
+	
+	@Autowired
+	private BroadAbilityRemoteDAO broadAbilityRemoteDAO;
 	
 	@Autowired
 	private BroadAbilityService broadAbilityService;
@@ -181,6 +185,7 @@ public class ChannelService {
 	public void remove(Long channelId) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		broadAbilityBroadInfoService.remove(channelId);
+		broadAbilityRemoteDAO.deleteByChannelId(channelId);
 		broadFileBroadInfoService.remove(channelId);
 		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) stopBroadcast(channelId);
 		if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName()) && !channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT)) {
@@ -316,7 +321,9 @@ public class ChannelService {
 	 */
 	public void stopBroadcast(Long channelId) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) throw new ChannelAlreadyStopException(channel.getName());
+		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) 
+//			throw new ChannelAlreadyStopException(channel.getName());
+			return;
 		
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
 		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
