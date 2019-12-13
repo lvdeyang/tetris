@@ -25,8 +25,8 @@ public interface UserFeign {
 	 * @param String token 登录token
 	 * @return boolean 判断结果
 	 */
-	@RequestMapping(value = "/user/feign/check/token")
-	public JSONObject checkToken(@RequestParam("token") String token);
+	/*@RequestMapping(value = "/user/feign/check/token")
+	public JSONObject checkToken(@RequestParam("token") String token);*/
 	
 	/**
 	 * 获取当前登录用户<br/>

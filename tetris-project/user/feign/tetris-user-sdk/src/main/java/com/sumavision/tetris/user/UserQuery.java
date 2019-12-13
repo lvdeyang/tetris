@@ -34,10 +34,10 @@ public class UserQuery {
 	 * @param String token 登录token
 	 * @return boolean 判断结果
 	 */
-	public boolean checkToken(String token) throws Exception{
+	/*public boolean checkToken(String token) throws Exception{
 		JSONObject response = userFeign.checkToken(token);
 		return JsonBodyResponseParser.parseObject(response, Boolean.class);
-	}
+	}*/
 	
 	/**
 	 * 获取当前登录用户<br/>

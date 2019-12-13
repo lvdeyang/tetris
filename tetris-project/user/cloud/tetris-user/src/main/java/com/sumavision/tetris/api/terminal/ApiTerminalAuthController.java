@@ -13,6 +13,7 @@ import com.sumavision.tetris.api.exception.MobileNotMatchedException;
 import com.sumavision.tetris.api.exception.MobileVerificationCodeErrorException;
 import com.sumavision.tetris.api.exception.MobileVerificationCodeTimeoutException;
 import com.sumavision.tetris.auth.login.LoginService;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.random.RandomMessage;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.lib.aliyun.push.AliSendSmsService;
@@ -28,6 +29,9 @@ import com.sumavision.tetris.user.UserService;
 public class ApiTerminalAuthController {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(ApiTerminalAuthController.class);
+	
+	/** 安卓端门户 */
+	private static final TerminalType TERMINAL_TYPE = TerminalType.ANDROID_PORTAL;
 	
 	@Autowired
 	private RandomMessage randomMessage;
@@ -187,8 +191,6 @@ public class ApiTerminalAuthController {
 	public Object doUsernamePasswordLogin(
 			String username,
 			String password,
-			String ip,
-			String equipType,
 			String verificationCode,
 			String sessionToken,
 			HttpServletRequest request) throws Exception{
@@ -203,7 +205,7 @@ public class ApiTerminalAuthController {
 			throw new ImageVerificationCodeErrorException(username);
 		}*/
 		
-		String token = loginService.doPasswordLogin(username, password, ip, equipType, null);
+		String token = loginService.doPasswordLogin(username, password, request.getRemoteHost(), TERMINAL_TYPE, null);
 		
 		return token;
 	}

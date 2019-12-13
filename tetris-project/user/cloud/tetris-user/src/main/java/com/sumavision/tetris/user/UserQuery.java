@@ -20,6 +20,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.sumavision.tetris.auth.token.TokenDAO;
+import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -45,6 +47,9 @@ public class UserQuery {
 	private UserDAO userDao;
 	
 	@Autowired
+	private TokenDAO tokenDao;
+	
+	@Autowired
 	private CompanyDAO companyDao;
 	
 	@Autowired
@@ -61,7 +66,7 @@ public class UserQuery {
 	 * @param String token 登录token
 	 * @return boolean 判断结果
 	 */
-	public boolean checkToken(String token) throws Exception{
+	/*public boolean checkToken(String token) throws Exception{
 		UserPO user = userDao.findByToken(token);
 		if(user == null){
 			LOG.error(new StringBufferWrapper().append("token 无效：").append(token).toString());
@@ -76,7 +81,7 @@ public class UserQuery {
 		user.setLastModifyTime(now);
 		userDao.save(user);
 		return true;
-	}
+	}*/
 	
 	/**
 	 * 检查当前用户的token是否可用<br/>
@@ -86,7 +91,7 @@ public class UserQuery {
 	 * @param UserPO user 用户
 	 * @return boolean token有效性
 	 */
-	public boolean userTokenUseable(UserPO user) throws Exception{
+	/*public boolean userTokenUseable(UserPO user) throws Exception{
 		if(user.getToken() == null) return false;
 		Date now = new Date();
 		Date timeScope = DateUtil.addSecond(user.getLastModifyTime(), HttpConstant.TOKEN_TIMEOUT);
@@ -94,7 +99,7 @@ public class UserQuery {
 			return false;
 		}
 		return true;
-	}
+	}*/
 	
 	/**
 	 * 获取当前登录用户<br/>
@@ -161,7 +166,11 @@ public class UserQuery {
 	 */
 	public UserVO findByToken(String token) throws Exception{
 		if(token == null) return null;
-		UserPO userEntity = userDao.findByToken(token);
+		
+		TokenPO tokenEntity = tokenDao.findByToken(token);
+		if(tokenEntity == null) return null;
+		
+		UserPO userEntity = userDao.findOne(tokenEntity.getUserId());
 		if(userEntity == null) return null;
 		
 		UserVO user = new UserVO();
@@ -169,8 +178,9 @@ public class UserQuery {
 			.setNickname(userEntity.getNickname())
 			.setClassify(userEntity.getClassify()==null?"":userEntity.getClassify().toString())
 			.setIcon(userEntity.getIcon())
-			.setToken(userEntity.getToken())
-			.setId(userEntity.getId());
+			.setToken(tokenEntity.getToken())
+			.setId(userEntity.getId())
+			.setIp(tokenEntity.getIp());
 		if(userEntity.getTags() != null && !userEntity.getTags().isEmpty()) user.setTags(Arrays.asList(userEntity.getTags().split(UserPO.SEPARATOR_TAG))); else user.setTags(new ArrayList<String>());
 		
 		List<SystemRolePO> businessRoles = systemRoleDao.findByUserIdAndType(userEntity.getId(), SystemRoleType.BUSINESS.toString());

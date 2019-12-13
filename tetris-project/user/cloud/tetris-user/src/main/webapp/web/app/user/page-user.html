@@ -44,8 +44,11 @@
                                 label="操作"
                                 width="250">
                             <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="登录状态" placement="bottom-end">
+                                    <el-button type="text" icon="feather-icon-message-circle" style="font-size:20px; padding:0;" @click="handleTokens(scope)"></el-button>
+                                </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="修改用户" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="绑定角色" placement="bottom-end">
                                     <el-button type="text" icon="feather-icon-lock" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoBindSystemRole(scope)"></el-button>
@@ -214,6 +217,46 @@
                 <el-button size="medium" @click="dialog.editUser.visible = false">取消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditUserSubmit" :loading="dialog.editUser.loading">确定</el-button>
             </span>
+
+        </el-dialog>
+
+        <!-- token展示 -->
+        <el-dialog
+                :title="dialog.tokens.currentUser.nickname"
+                :visible.sync="dialog.tokens.visible"
+                width="600px"
+                :before-close="handleTokensClose">
+
+            <el-table
+                    :data="dialog.tokens.rows"
+                    :row-key="rowKey"
+                    style="width:100%">
+                <el-table-column
+                        width="50"
+                        prop="status">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.status === 'ONLINE'" style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
+                        <span v-if="scope.row.status === 'OFFLINE'" style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
+                    </template>
+                </el-table-column>
+                <el-table-column
+                        label="终端"
+                        prop="type">
+                </el-table-column>
+                <el-table-column
+                        label="ip"
+                        prop="ip">
+                </el-table-column>
+                <el-table-column
+                        label="操作"
+                        width="80">
+                    <template slot-scope="scope">
+                        <el-tooltip class="item" effect="dark" content="强制下线" placement="bottom-end">
+                            <el-button type="text" class="danger" icon="feather-icon-x-circle" style="font-size:20px; padding:0;" @click="handleInvalidToken(scope)"></el-button>
+                        </el-tooltip>
+                    </template>
+                </el-table-column>
+            </el-table>
 
         </el-dialog>
 

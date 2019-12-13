@@ -12,6 +12,7 @@ import com.sumavision.tetris.api.exception.MobileNotMatchedException;
 import com.sumavision.tetris.api.exception.MobileVerificationCodeErrorException;
 import com.sumavision.tetris.api.exception.MobileVerificationCodeTimeoutException;
 import com.sumavision.tetris.auth.login.LoginService;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -21,6 +22,9 @@ import com.sumavision.tetris.user.UserService;
 @RequestMapping(value = "/api/qt/auth")
 public class ApiQtAuthController {
 
+	/** qt快编终端 */
+	private static final TerminalType TERMINAL_TYPE = TerminalType.QT_MEDIA_EDITOR;
+	
 	@Autowired
 	private LoginService loginService;
 	
@@ -92,8 +96,6 @@ public class ApiQtAuthController {
 	public Object doUsernamePasswordLogin(
 			String username,
 			String password,
-			String ip,
-			String equipType,
 			String verificationCode,
 			String sessionToken,
 			HttpServletRequest request) throws Exception{
@@ -108,7 +110,7 @@ public class ApiQtAuthController {
 //			throw new ImageVerificationCodeErrorException(username);
 //		}
 		
-		String token = loginService.doPasswordLogin(username, password, ip, equipType, null);
+		String token = loginService.doPasswordLogin(username, password, request.getRemoteHost(), TERMINAL_TYPE, null);
 		
 		return token;
 	}

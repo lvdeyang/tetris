@@ -331,10 +331,10 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setMobile(entity.getMobile())
 			.setMail(entity.getMail())
 			.setIcon(entity.getIcon())
-			.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
-			.setToken(entity.getToken())
-			.setIp(entity.getIp())
-			.setEquipType(entity.getEquipType() != null ? entity.getEquipType().toString() : null)
+			//.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
+			//.setToken(entity.getToken())
+			//.setIp(entity.getIp())
+			//.setEquipType(entity.getEquipType() != null ? entity.getEquipType().toString() : null)
 			.setAutoGeneration(entity.isAutoGeneration());
 		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(UserPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
 		return this;

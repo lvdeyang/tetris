@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.annotation.Order;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -26,7 +28,6 @@ import com.sumavision.tetris.commons.util.uri.UriUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.request.RequestResouceTypeAnalyzer;
-import com.sumavision.tetris.user.UserQuery;
 
 /**
  * 登录校验<br/>
@@ -45,11 +46,11 @@ public class PcWebLoginFilter implements Filter{
 	
 	private RequestResouceTypeAnalyzer requestResouceTypeAnalyzer = null;
 	
-	private UserQuery userQuery = null;
+	private TokenQuery tokenQuery = null;
 	
 	private void initBean(){
 		if(requestResouceTypeAnalyzer == null) requestResouceTypeAnalyzer = SpringContext.getBean(RequestResouceTypeAnalyzer.class);
-		if(userQuery == null) userQuery = SpringContext.getBean(UserQuery.class);
+		if(tokenQuery == null) tokenQuery = SpringContext.getBean(TokenQuery.class);
 	}
 	
 	@Override
@@ -87,7 +88,7 @@ public class PcWebLoginFilter implements Filter{
 			writer.close();
 		}else{
 			try {
-				userQuery.checkToken(token);
+				tokenQuery.checkToken(token, TerminalType.PC_PLATFORM);
 				chain.doFilter(request, response);
 				return;
 			} catch (Exception e) {

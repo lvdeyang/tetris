@@ -28,6 +28,8 @@ public interface LoginFeign {
 	 * <b>日期：</b>2019年3月5日 下午5:13:08
 	 * @param String username 用户名
 	 * @param String password 密码
+	 * @param String ip 登录终端ip
+	 * @param String terminalType 终端类型
 	 * @param String verifyCode 验证码
 	 * @return String token
 	 */
@@ -36,7 +38,7 @@ public interface LoginFeign {
 			@RequestParam("username") String username, 
 			@RequestParam("password") String password, 
 			@RequestParam("ip") String ip,
-			@RequestParam("equipType") String equipType,
+			@RequestParam("terminalType") String terminalType,
 			@RequestParam("verifyCode") String verifyCode) throws Exception;
 	
 	/**
