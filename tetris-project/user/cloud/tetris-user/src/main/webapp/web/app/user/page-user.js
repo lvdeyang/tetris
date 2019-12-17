@@ -73,6 +73,11 @@ define([
                         newPassword:'',
                         repeat:'',
                         loading:false
+                    },
+                    tokens:{
+                        visible:false,
+                        currentUser:'',
+                        rows:[]
                     }
                 }
             },
@@ -198,6 +203,42 @@ define([
                 handleDelete:function(){
 
                 },
+                handleInvalidToken :function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    ajax.post('/token/invalid', {id:row.id}, function(data){
+                        for(var i=0; i<self.dialog.tokens.rows.length; i++){
+                            if(self.dialog.tokens.rows[i].id === row.id){
+                                self.dialog.tokens.rows.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.$message({
+                            type:'success',
+                            message:'操作成功'
+                        });
+                    });
+                },
+                handleTokens:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.tokens.rows.splice(0, self.dialog.tokens.rows.length);
+                    ajax.post('/token/load', {userId:row.id}, function(data){
+                        self.dialog.tokens.visible = true;
+                        self.dialog.tokens.currentUser = row;
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.dialog.tokens.rows.push(data[i]);
+                            }
+                        }
+                    });
+                },
+                handleTokensClose:function(){
+                    var self = this;
+                    self.dialog.tokens.visible = false;
+                    self.dialog.tokens.currentUser = '';
+                    self.dialog.tokens.rows.splice(0, self.dialog.tokens.rows.length);
+                },
                 handleRowEdit:function(scope){
                     var self = this;
                     var row = scope.row;
@@ -299,6 +340,8 @@ define([
                         var rows = data.rows;
                         if(rows && rows.length>0){
                             for(var i=0; i<rows.length; i++){
+                                rows[i].popvisible = false;
+                                rows[i].tokens = [];
                                 self.table.rows.push(rows[i]);
                             }
                             self.table.total = total;

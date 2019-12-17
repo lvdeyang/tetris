@@ -1,8 +1,5 @@
 package com.sumavision.tetris.auth.login;
 
-import java.util.Date;
-import java.util.UUID;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,12 +9,15 @@ import com.sumavision.tetris.auth.login.exception.SignCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.SignVerifyFailException;
 import com.sumavision.tetris.auth.login.exception.TimestampCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.UnknownAppIdException;
+import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenDAO;
+import com.sumavision.tetris.auth.token.TokenPO;
+import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.user.BasicDevelopmentDAO;
 import com.sumavision.tetris.user.BasicDevelopmentPO;
 import com.sumavision.tetris.user.BasicDevelopmentQuery;
 import com.sumavision.tetris.user.UserDAO;
-import com.sumavision.tetris.user.UserEquipType;
 import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserStatus;
@@ -34,7 +34,13 @@ public class LoginService {
 	private UserDAO userDao;
 	
 	@Autowired
+	private TokenDAO tokenDao;
+	
+	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private TokenQuery tokenQuery;
 	
 	@Autowired
 	private Sha256Encoder sha256Encoder;
@@ -54,25 +60,19 @@ public class LoginService {
 	 * @return String token
 	 */
 	public String doUserIdLogin(Long userId) throws Exception{
-		UserPO user = userDao.findOne(userId);
-		if(userQuery.userTokenUseable(user)){
-			return user.getToken();
-		}else{
-			String token = UUID.randomUUID().toString().replaceAll("-", "");
-			user.setLastModifyTime(new Date());
-			user.setToken(token);
-			userDao.save(user);
-			return token;
-		}
+		TokenPO token = tokenDao.findByUserIdAndType(userId, TerminalType.API);
+		return token.getToken();
 	}
 	
 	/**
-	 * 用户名密码登录<br/>
+	 * 用户名密码登录-支持多终端登录<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年3月5日 下午5:13:08
 	 * @param String username 用户名
 	 * @param String password 密码
+	 * @param String ip 登录ip
+	 * @param TerminalType terminalType 终端类型
 	 * @param String verifyCode 验证码
 	 * @return String token
 	 */
@@ -80,45 +80,36 @@ public class LoginService {
 			String username,
 			String password,
 			String ip,
-			String equipType,
+			TerminalType terminalType,
 			String verifyCode) throws Exception{
 		
 		UserPO user = userDao.findByUsername(username);
-		
 		if(user == null) throw new UsernameNotExistException(username);
-		
 		password = sha256Encoder.encode(password);
-		
 		if(!user.getPassword().equals(password)) throw new PasswordErrorException(username, password);
 		
-		//不支持多地登录(同一用户登录token即重置)
-		//String token = UUID.randomUUID().toString().replaceAll("-", "");
-		
-		//支持多地登录(异地登录返回同一token)
+		TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
 		boolean result = false;
-		if(user.getToken() != null){
-			try {
-				result = userQuery.checkToken(user.getToken());
+		if(token != null){
+			try{
+				result = tokenQuery.checkToken(token);
 			}catch(TokenTimeoutException e){
 				result = false;
 			}
 		}
-		String token = null;
-		if(result){
-			token = user.getToken();
-		}else{
-			token = UUID.randomUUID().toString().replaceAll("-", "");
+		if(!result && token!=null){
+			token.newToken();
+			token.setStatus(UserStatus.ONLINE);
+		}else if(!result && token == null){
+			token = new TokenPO();
+			token.setUserId(user.getId());
+			token.setType(terminalType);
+			token.newToken();
+			token.setStatus(UserStatus.ONLINE);
 		}
-
-		
-		user.setStatus(UserStatus.ONLINE);
-		user.setLastModifyTime(new Date());
-		user.setToken(token);
-		if (ip != null && !ip.isEmpty()) user.setIp(ip);
-		if (equipType != null) user.setEquipType(UserEquipType.fromName(equipType));
-		userDao.save(user);
-		
-		return token;
+		token.setIp(ip);
+		tokenDao.save(token);
+		return token.getToken();
 	}
 	
 	/**
@@ -147,30 +138,16 @@ public class LoginService {
 		String serverSign = basicDevelopmentQuery.sign(appId, timestamp, basicDevelopment.getAppSecret());
 		if(!serverSign.equals(sign)) throw new SignVerifyFailException(appId, timestamp, sign);
 		
-		//自动登录
-		boolean needDoLogin = false;
-		if(basicDevelopment.getToken() == null){
-			needDoLogin = true;
-		}else {
-			try{
-				boolean result = userQuery.checkToken(basicDevelopment.getToken());
-				if(!result) needDoLogin = true;
-			}catch(Exception e){
-				needDoLogin = true;
-			}
+		TokenPO token = tokenDao.findByUserIdAndType(basicDevelopment.getUserId(), TerminalType.API);
+		if(token == null){
+			token = new TokenPO();
+			token.setUserId(basicDevelopment.getUserId());
+			token.setType(TerminalType.API);
+			token.newToken();
+			tokenDao.save(token);
 		}
-		if(needDoLogin){
-			UserPO user = userDao.findOne(basicDevelopment.getUserId());
-			String token = UUID.randomUUID().toString().replaceAll("-", "");
-			user.setLastModifyTime(new Date());
-			user.setToken(token);
-			userDao.save(user);
-			basicDevelopment.setToken(token);
-			basicDevelopmentDao.save(basicDevelopment);
-			return token;
-		}else{
-			return basicDevelopment.getToken();
-		}
+		
+		return token.getToken();
 	}
 	
 	/**
@@ -182,11 +159,11 @@ public class LoginService {
 	 */
 	public void doLogout() throws Exception{
 		UserVO user = userQuery.current();
-		UserPO userEntity = userDao.findOne(Long.valueOf(user.getUuid()));
-		userEntity.setToken(null);
-		userEntity.setLastModifyTime(null);
-		userEntity.setStatus(UserStatus.OFFLINE);
-		userDao.save(userEntity);
+		TokenPO token = tokenDao.findByToken(user.getToken());
+		token.setToken(null);
+		token.setLastModifyTime(null);
+		token.setStatus(UserStatus.OFFLINE);
+		tokenDao.save(token);
 	}
 	
 }

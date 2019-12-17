@@ -8,12 +8,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping(value = "")
 public class LoginController {
 
+	/** pc平台运维端 */
+	private static final TerminalType TERMINAL_TYPE = TerminalType.PC_PLATFORM;
+	
 	@Autowired
 	private LoginService loginService;
 	
@@ -38,7 +42,7 @@ public class LoginController {
 			String verifyCode,
 			HttpServletRequest request, 
 			HttpServletResponse response) throws Exception{
-		String token = loginService.doPasswordLogin(username, password, ip, equipType, verifyCode);
+		String token = loginService.doPasswordLogin(username, password, ip, TERMINAL_TYPE, verifyCode);
 		String redirectUrl = loginQuery.queryRedirectUrl(token);
 		response.sendRedirect(redirectUrl);
 	}

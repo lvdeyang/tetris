@@ -239,9 +239,7 @@ define([
 
                 //加入oauth2令牌
                 var _token = storage.getItem(ajax._conf.authname) || '';
-                console.log('token: ' + _token);
                 var _sessionId = storage.getItem(ajax._conf.sessionIdName) || '';
-                console.log('sessionId: ' + _sessionId);
 
                 //bvc兼容
                 _opt.headers = {Authorization:_token};

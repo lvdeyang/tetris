@@ -26,7 +26,7 @@ public class BasicDevelopmentPO extends AbstractBasePO{
 	public Long userId;
 	
 	/** 登录token */
-	public String token;
+	//public String token;
 
 	@Column(name = "APP_ID")
 	public String getAppId() {
@@ -74,13 +74,13 @@ public class BasicDevelopmentPO extends AbstractBasePO{
 		this.userId = userId;
 	}
 
-	@Column(name = "TOKEN")
+	/*@Column(name = "TOKEN")
 	public String getToken() {
 		return token;
 	}
 
 	public void setToken(String token) {
 		this.token = token;
-	}
+	}*/
 	
 }

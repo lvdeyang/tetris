@@ -165,7 +165,7 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @param String token 用户登录的token
 	 * @return UserPO 用户
 	 */
-	public UserPO findByToken(String token);
+	//public UserPO findByToken(String token);
 	
 	/**
 	 * 根据手机号查询用户<br/>

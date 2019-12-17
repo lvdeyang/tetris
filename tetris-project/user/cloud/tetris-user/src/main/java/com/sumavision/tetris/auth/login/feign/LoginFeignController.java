@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.auth.login.LoginQuery;
 import com.sumavision.tetris.auth.login.LoginService;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -44,6 +45,8 @@ public class LoginFeignController {
 	 * <b>日期：</b>2019年3月5日 下午5:13:08
 	 * @param String username 用户名
 	 * @param String password 密码
+	 * @param String ip ip地址
+	 * @param String terminalType 终端类型
 	 * @param String verifyCode 验证码
 	 * @return String token
 	 */
@@ -54,11 +57,11 @@ public class LoginFeignController {
 			String username,
 			String password,
 			String ip,
-			String equipType,
+			String terminalType,
 			String verifyCode,
 			HttpServletRequest request) throws Exception{
 		
-		return loginService.doPasswordLogin(username, password, ip, equipType, verifyCode);
+		return loginService.doPasswordLogin(username, password, ip, TerminalType.valueOf(terminalType), verifyCode);
 	}
 	
 	/**

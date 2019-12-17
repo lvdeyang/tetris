@@ -6,6 +6,7 @@ import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.http.HttpServletRequestWrapper;
 import com.sumavision.tetris.auth.login.LoginService;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.uri.UriUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -72,7 +73,7 @@ public class ApiServerLoginFilter extends ZuulFilter{
 		HttpServletRequest request = ctx.getRequest();
 		String requestUri = request.getRequestURI();
 		requestUri = requestUri.replace(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
-		if(requestUri.startsWith("/api/server")){
+		if(requestUri.startsWith(TerminalType.API.getUriPrefix())){
 			return true;
 		}else{
 			return false;

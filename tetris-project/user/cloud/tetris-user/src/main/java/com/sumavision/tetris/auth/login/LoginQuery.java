@@ -2,6 +2,9 @@ package com.sumavision.tetris.auth.login;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.sumavision.tetris.auth.token.TokenDAO;
+import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.config.server.ServerProps;
 import com.sumavision.tetris.config.server.UserServerPropsQuery;
@@ -15,6 +18,9 @@ public class LoginQuery {
 
 	@Autowired
 	private UserDAO userDao;
+	
+	@Autowired
+	private TokenDAO tokenDao;
 	
 	@Autowired
 	private UserServerPropsQuery userServerPropsQuery;
@@ -31,9 +37,8 @@ public class LoginQuery {
 	 * @return String 重定向的url
 	 */
 	public String queryRedirectUrl(String token) throws Exception{
-		
-		UserPO user = userDao.findByToken(token);
-		
+		TokenPO tokenEntity = tokenDao.findByToken(token);
+		UserPO user = userDao.findOne(tokenEntity.getUserId());
 		String redirectUrl = null;
 		if(UserClassify.INTERNAL.equals(user.getClassify())){
 			ServerProps props = userServerPropsQuery.queryProps();
@@ -45,7 +50,6 @@ public class LoginQuery {
 			com.sumavision.tetris.mims.config.server.ServerProps props = mimsServerPropsQuery.queryProps();
 			redirectUrl = new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/index/media/picture/").append(token).toString();
 		}
-		
 		return redirectUrl;
 	}
 	

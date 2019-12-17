@@ -1,14 +1,16 @@
 package com.sumavision.tetris.spring.zuul.auth.filter.terminal;
 
 import javax.servlet.http.HttpServletRequest;
+
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
+import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.uri.UriUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.request.RequestUserAgentAnalyzer;
-import com.sumavision.tetris.user.UserQuery;
 
 /**
  * 安卓门户终端用户(lzp)拦截器<br/>
@@ -41,10 +43,10 @@ public class ApiTerminalLoginFilter extends ZuulFilter{
 		
 		//登录校验
 		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);
-		UserQuery userQuery = SpringContext.getBean(UserQuery.class);
+		TokenQuery tokenQuery = SpringContext.getBean(TokenQuery.class);
 		
 		try{
-			boolean result = userQuery.checkToken(token);
+			boolean result = tokenQuery.checkToken(token, TerminalType.ANDROID_PORTAL);
 			if(!result){
 				ctx.setResponseStatusCode(403);
 				ctx.setSendZuulResponse(false);
@@ -64,7 +66,7 @@ public class ApiTerminalLoginFilter extends ZuulFilter{
 		HttpServletRequest request = ctx.getRequest();
 		String requestUri = request.getRequestURI();
 		requestUri = requestUri.replace(new StringBufferWrapper().append("/").append(requestUri.split("/")[1]).toString(), "");
-		if(requestUri.startsWith("/api/terminal")){
+		if(requestUri.startsWith(TerminalType.ANDROID_PORTAL.getUriPrefix())){
 			return true;
 		}else{
 			return false;

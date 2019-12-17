@@ -40,13 +40,13 @@ public class UserPO extends AbstractBasePO{
 	private String icon;
 	
 	/** 用户状态 */
-	private UserStatus status;
+	//private UserStatus status;
 	
 	/** 用户登录的token */
-	private String token;
+	//private String token;
 	
 	/** 操作时间 */
-	private Date lastModifyTime;
+	//private Date lastModifyTime;
 	
 	/** 电话号 */
 	private String mobile;
@@ -64,10 +64,10 @@ public class UserPO extends AbstractBasePO{
 	private UserClassify classify;
 	
 	/** 用户当前ip */
-	private String ip;
+	//private String ip;
 	
 	/** 用户当前设备类型 */
-	private UserEquipType equipType;
+	//private UserEquipType equipType;
 	
 	@Column(name = "USERNAME")
 	public String getUsername() {
@@ -105,7 +105,7 @@ public class UserPO extends AbstractBasePO{
 		this.icon = icon;
 	}
 
-	@Enumerated(value = EnumType.STRING)
+	/*@Enumerated(value = EnumType.STRING)
 	@Column(name = "STATUS")
 	public UserStatus getStatus() {
 		return status;
@@ -113,18 +113,18 @@ public class UserPO extends AbstractBasePO{
 
 	public void setStatus(UserStatus status) {
 		this.status = status;
-	}
+	}*/
 	
-	@Column(name = "TOKEN")
+	/*@Column(name = "TOKEN")
 	public String getToken() {
 		return token;
 	}
 
 	public void setToken(String token) {
 		this.token = token;
-	}
+	}*/
 
-	@Temporal(TemporalType.TIMESTAMP)
+	/*@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_MODIFY_TIME")
 	public Date getLastModifyTime() {
 		return lastModifyTime;
@@ -132,7 +132,7 @@ public class UserPO extends AbstractBasePO{
 
 	public void setLastModifyTime(Date lastModifyTime) {
 		this.lastModifyTime = lastModifyTime;
-	}
+	}*/
 
 	@Column(name = "MOBILE")
 	public String getMobile() {
@@ -180,16 +180,16 @@ public class UserPO extends AbstractBasePO{
 		this.classify = classify;
 	}
 
-	@Column(name = "ip")
+	/*@Column(name = "ip")
 	public String getIp() {
 		return ip;
 	}
 
 	public void setIp(String ip) {
 		this.ip = ip;
-	}
+	}*/
 
-	@Enumerated(value = EnumType.STRING)
+	/*@Enumerated(value = EnumType.STRING)
 	@Column(name = "EQUIP_TYPE")
 	public UserEquipType getEquipType() {
 		return equipType;
@@ -197,6 +197,6 @@ public class UserPO extends AbstractBasePO{
 
 	public void setEquipType(UserEquipType equipType) {
 		this.equipType = equipType;
-	}
+	}*/
 	
 }

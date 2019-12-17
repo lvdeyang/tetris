@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Component
@@ -31,6 +32,8 @@ public class LoginService {
 	 * <b>日期：</b>2019年3月5日 下午5:13:08
 	 * @param String username 用户名
 	 * @param String password 密码
+	 * @param String ip 登陆终端ip
+	 * @param TerminalType terminalType 终端类型
 	 * @param String verifyCode 验证码
 	 * @return String token
 	 */
@@ -38,9 +41,9 @@ public class LoginService {
 			String username,
 			String password,
 			String ip,
-			String equipType,
+			TerminalType terminalType,
 			String verifyCode) throws Exception{
-		JSONObject response = loginFeign.doPasswordLogin(username, password, ip, equipType, verifyCode);
+		JSONObject response = loginFeign.doPasswordLogin(username, password, ip, terminalType.toString(), verifyCode);
 		return JsonBodyResponseParser.parseObject(response, String.class);
 	}
 	

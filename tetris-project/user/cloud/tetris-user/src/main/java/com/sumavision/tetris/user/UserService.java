@@ -277,7 +277,6 @@ public class UserService{
 		user.setPassword(sha256Encoder.encode(password));
 		user.setMobile(mobile);
 		user.setMail(mail);
-		user.setStatus(UserStatus.OFFLINE);
 		user.setAutoGeneration(false);
 		user.setClassify(UserClassify.fromName(classify));
 		user.setUpdateTime(new Date());
