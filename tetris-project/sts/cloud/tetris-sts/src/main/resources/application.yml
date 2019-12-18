@@ -15,14 +15,14 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 10.10.40.24
+      ipAddress: 10.10.40.58
 #  profiles:
 #    active: pro
   datasource:
 #    base:
       url: jdbc:mysql://localhost:3306/sts?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
       username: root
-      password: 281199351yzx
+      password: 123456
       driver-class-name: com.mysql.jdbc.Driver
       initial-size : 10
       min-idle : 20
@@ -66,7 +66,7 @@ spring:
 server:
 #  context-path: /menu 
 #  address: 192.165.56.71
-  port: 18086
+  port: 8558
 logging:
   pattern:
     console: "%d - %msg%n" 
@@ -81,7 +81,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://10.10.40.24:8084/eureka/
+      defaultZone: http://10.10.40.58:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true

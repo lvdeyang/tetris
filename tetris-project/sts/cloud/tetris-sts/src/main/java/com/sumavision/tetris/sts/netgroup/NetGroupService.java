@@ -2,7 +2,8 @@ package com.sumavision.tetris.sts.netgroup;
 
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.sts.common.ErrorCodes;
+import com.sumavision.tetris.sts.exeception.ErrorCodes;
+
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
