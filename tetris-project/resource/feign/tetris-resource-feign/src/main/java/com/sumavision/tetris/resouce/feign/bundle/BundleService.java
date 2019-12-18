@@ -15,9 +15,9 @@ public class BundleService {
 	@Autowired
 	private BundleFeign bundleFeign;
 
-	public List<BundleVO> queryTranscodeDevice() throws Exception {
+	public List<BundleFeignVO> queryTranscodeDevice() throws Exception {
 
-		return JsonBodyResponseParser.parseArray(bundleFeign.queryTranscodeDevice(), BundleVO.class);
+		return JsonBodyResponseParser.parseArray(bundleFeign.queryTranscodeDevice(), BundleFeignVO.class);
 
 	}
 
