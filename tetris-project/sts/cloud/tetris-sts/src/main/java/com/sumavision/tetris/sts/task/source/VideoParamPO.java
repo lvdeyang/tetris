@@ -267,7 +267,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	private Boolean low_latency;
 
 	@Column
-	@XmlAttribute(name = "colorprimaries")
 	public String getColorPrimary() {
 		return colorPrimary;
 	}
@@ -277,7 +276,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "colortransfer")
 	public String getColorTransfer() {
 		return colorTransfer;
 	}
@@ -287,7 +285,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "colorspace")
 	public String getColorSpace() {
 		return colorSpace;
 	}
@@ -297,7 +294,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "colorrange")
 	public String getColorRange() {
 		return colorRange;
 	}
@@ -309,7 +305,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 
 
 	@Column
-	@XmlAttribute(name = "pid")
 	public Integer getPid() {
 		return pid;
 	}
@@ -343,7 +338,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.height = height;
 	}
 	@Column
-	@XmlAttribute(name = "fps")
 	public Float getFps() {
 		return fps;
 	}
@@ -352,7 +346,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.fps = fps;
 	}
 	@Column
-	@XmlAttribute(name = "bitrate")
 	public Long getBitrate() {
 		return bitrate;
 	}
@@ -361,7 +354,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.bitrate = bitrate;
 	}
 	@Column
-	@XmlAttribute(name = "rc-mode")
 	public String getRcMode() {
 		return rcMode;
 	}
@@ -370,7 +362,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.rcMode = rcMode;
 	}
 	@Column
-	@XmlAttribute(name = "resolution")
 	public String getResolution() {
 		return resolution;
 	}
@@ -379,7 +370,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.resolution = resolution;
 	}
 	@Column
-	@XmlAttribute(name = "ratio")
 	public String getRatio() {
 		return ratio;
 	}
@@ -388,7 +378,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.ratio = ratio;
 	}
 	@Column
-	@XmlAttribute(name = "encoding-type")
 	public String getEncodingType() {
 		return encodingType;
 	}
@@ -398,7 +387,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "field_order")
 	public String getFieldOrder() {
 		return fieldOrder;
 	}
@@ -408,7 +396,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "deinterlace")
 	public String getDeinterlace() {
 		return deinterlace;
 	}
@@ -417,7 +404,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.deinterlace = deinterlace;
 	}
 	@Column
-	@XmlAttribute(name = "codec")
 	public String getCodec() {
 		return codec;
 	}
@@ -426,7 +412,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.codec = codec;
 	}
 	@Column
-	@XmlAttribute(name = "profile")
 	public String getProfile() {
 		return profile;
 	}
@@ -435,7 +420,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.profile = profile;
 	}
 	@Column
-	@XmlAttribute(name = "level")
 	public Float getLevel() {
 		return level;
 	}
@@ -444,7 +428,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.level = level;
 	}
 	@Column
-	@XmlAttribute(name = "ref-frames")
 	public Integer getRefFrames() {
 		return refFrames;
 	}
@@ -453,7 +436,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.refFrames = refFrames;
 	}
 	@Column
-	@XmlAttribute(name = "b-frame")
 	public Integer getbFrames() {
 		return bFrames;
 	}
@@ -462,7 +444,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.bFrames = bFrames;
 	}
 	@Column
-	@XmlAttribute(name = "refine")
 	public String getRefine() {
 		return refine;
 	}
@@ -471,7 +452,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.refine = refine;
 	}
 	@Column
-	@XmlAttribute(name = "i-lookahead")
 	public Integer getiLookahead() {
 		return iLookahead;
 	}
@@ -480,7 +460,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.iLookahead = iLookahead;
 	}
 	@Column
-	@XmlAttribute(name = "mbtree-switch")
 	public String getMbtreeSwitch() {
 		return mbtreeSwitch;
 	}
@@ -489,7 +468,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.mbtreeSwitch = mbtreeSwitch;
 	}
 	@Column
-	@XmlAttribute(name = "bframe-adaptive")
 	public String getBframeAdaptive() {
 		return bframeAdaptive;
 	}
@@ -498,7 +476,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.bframeAdaptive = bframeAdaptive;
 	}
 	@Column
-	@XmlAttribute(name = "bframe-reference")
 	public String getBframeReference() {
 		return bframeReference;
 	}
@@ -507,7 +484,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.bframeReference = bframeReference;
 	}
 	@Column
-	@XmlAttribute(name = "ime-range")
 	public Long getImeRange() {
 		return imeRange;
 	}
@@ -516,7 +492,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.imeRange = imeRange;
 	}
 	@Column
-	@XmlAttribute(name = "scenecut")
 	public String getScenecut() {
 		return scenecut;
 	}
@@ -525,7 +500,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.scenecut = scenecut;
 	}
 	@Column
-	@XmlAttribute(name = "entropy-type")
 	public String getEntropyType() {
 		return entropyType;
 	}
@@ -534,7 +508,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.entropyType = entropyType;
 	}
 	@Column
-	@XmlAttribute(name = "black-point")
 	public String getBlackPoint() {
 		return blackPoint;
 	}
@@ -543,7 +516,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.blackPoint = blackPoint;
 	}
 	@Column
-	@XmlAttribute(name = "black-width")
 	public String getBlackWidth() {
 		return blackWidth;
 	}
@@ -552,7 +524,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.blackWidth = blackWidth;
 	}
 	@Column
-	@XmlAttribute(name = "black-height")
 	public String getBlackHeight() {
 		return blackHeight;
 	}
@@ -561,7 +532,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.blackHeight = blackHeight;
 	}
 	@Column
-	@XmlAttribute(name = "auto-blackside")
 	public Integer getAutoBlackSide() {
 		return autoBlackSide;
 	}
@@ -570,7 +540,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.autoBlackSide = autoBlackSide;
 	}
 	@Column
-	@XmlAttribute(name = "cut-point")
 	public String getCutPoint() {
 		return cutPoint;
 	}
@@ -579,7 +548,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.cutPoint = cutPoint;
 	}
 	@Column
-	@XmlAttribute(name = "cut-width")
 	public String getCutWidth() {
 		return cutWidth;
 	}
@@ -588,7 +556,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.cutWidth = cutWidth;
 	}
 	@Column
-	@XmlAttribute(name = "cut-height")
 	public String getCutHeight() {
 		return cutHeight;
 	}
@@ -597,7 +564,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.cutHeight = cutHeight;
 	}
 	@Column
-	@XmlAttribute(name = "brightness")
 	public Integer getBrightness() {
 		return brightness;
 	}
@@ -606,7 +572,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.brightness = brightness;
 	}
 	@Column
-	@XmlAttribute(name = "contrast")
 	public String getContrast() {
 		return contrast;
 	}
@@ -615,7 +580,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.contrast = contrast;
 	}
 	@Column
-	@XmlAttribute(name = "saturation")
 	public String getSaturation() {
 		return saturation;
 	}
@@ -624,7 +588,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.saturation = saturation;
 	}
 	@Column
-	@XmlAttribute(name = "enhance")
 	public String getEnhance() {
 		return enhance;
 	}
@@ -633,7 +596,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.enhance = enhance;
 	}
 	@Column
-	@XmlAttribute(name = "scale-mode")
 	public String getScaleMode() {
 		return scaleMode;
 	}
@@ -642,7 +604,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.scaleMode = scaleMode;
 	}
 	@Column
-	@XmlAttribute(name = "keyint-max")
 	public Integer getKeyintMax() {
 		return keyintMax;
 	}
@@ -660,7 +621,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "vbv-size")
 	public Integer getVbvSize() {
 		return vbvSize;
 	}
@@ -670,7 +630,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "ftp-url")
 	public String getFtpUrl() {
 		return ftpUrl;
 	}
@@ -680,7 +639,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "time-span")
 	public Integer getTimeSpan() {
 		return timeSpan;
 	}
@@ -690,7 +648,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "max-buf")
 	public Integer getMaxBuf() {
 		return maxBuf;
 	}
@@ -700,7 +657,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "jpeg-pre")
 	public String getJpegPre() {
 		return jpegPre;
 	}
@@ -710,7 +666,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "color-enhance")
 	public String getColorEnhance() {
 		return colorEnhance;
 	}
@@ -720,7 +675,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "denoise")
 	public String getDenoise() {
 		return denoise;
 	}
@@ -730,7 +684,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "max-bitrate")
 	public Long getMaxBitrate() {
 		return maxBitrate;
 	}
@@ -740,7 +693,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "pic-struct")
 	public String getPicStruct() {
 		return picStruct;
 	}
@@ -750,7 +702,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "open-gop")
 	public String getOpenGop() {
 		return openGop;
 	}
@@ -759,7 +710,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.openGop = openGop;
 	}
 	@Column
-	@XmlAttribute(name = "sharpen")
 	public String getSharpen() {
 		return sharpen;
 	}
@@ -769,7 +719,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "bit-depth")
 	public Integer getBitDepth() {
 		return bitDepth;
 	}
@@ -779,7 +728,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "deblock")
 	public String getDeblock() {
 		return deblock;
 	}
@@ -789,7 +737,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "gamma")
 	public String getGamma() {
 		return gamma;
 	}
@@ -799,7 +746,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "chroma")
 	public String getChroma() {
 		return chroma;
 	}
@@ -808,7 +754,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.chroma = chroma;
 	}
 	@Column
-	@XmlAttribute(name = "auto-cut")
 	public String getAutoCut() {
 		return autoCut;
 	}
@@ -817,7 +762,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.autoCut = autoCut;
 	}
 	@Column
-	@XmlAttribute(name = "cut-top")
 	public String getCutTop() {
 		return cutTop;
 	}
@@ -826,7 +770,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.cutTop = cutTop;
 	}
 	@Column
-	@XmlAttribute(name = "cut-bottom")
 	public String getCutBottom() {
 		return cutBottom;
 	}
@@ -835,7 +778,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.cutBottom = cutBottom;
 	}
 	@Column
-	@XmlAttribute(name = "cut-left")
 	public String getCutLeft() {
 		return cutLeft;
 	}
@@ -844,7 +786,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.cutLeft = cutLeft;
 	}
 	@Column
-	@XmlAttribute(name = "cut-right")
 	public String getCutRight() {
 		return cutRight;
 	}
@@ -853,7 +794,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.cutRight = cutRight;
 	}
 	@Column
-	@XmlAttribute(name = "black-top")
 	public String getBlackTop() {
 		return blackTop;
 	}
@@ -862,7 +802,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.blackTop = blackTop;
 	}
 	@Column
-	@XmlAttribute(name = "black-bottom")
 	public String getBlackBottom() {
 		return blackBottom;
 	}
@@ -871,7 +810,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.blackBottom = blackBottom;
 	}
 	@Column
-	@XmlAttribute(name = "black-left")
 	public String getBlackLeft() {
 		return blackLeft;
 	}
@@ -880,7 +818,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.blackLeft = blackLeft;
 	}
 	@Column
-	@XmlAttribute(name = "black-right")
 	public String getBlackRight() {
 		return blackRight;
 	}
@@ -890,7 +827,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "cyc-del")
 	public String getCycDel() {
 		return cycDel;
 	}
@@ -900,7 +836,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "idr-frequency")
 	public Integer getIdrFrequency() {
 		return idrFrequency;
 	}
@@ -910,7 +845,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "down-frame-rate")
 	public String getDownFrameRate() {
 		return downFrameRate;
 	}
@@ -920,7 +854,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "chroma-format")
 	public String getChromaFormat() {
 		return chromaFormat;
 	}
@@ -930,7 +863,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "wp")
 	public String getWp() {
 		return wp;
 	}
@@ -940,7 +872,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 
 	@Column
-	@XmlAttribute(name = "tier")
 	public String getTier() {
 		return tier;
 	}
@@ -949,7 +880,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.tier = tier;
 	}
 	@Column
-	@XmlAttribute(name = "sao")
 	public String getSao() {
 		return sao;
 	}
@@ -958,7 +888,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.sao = sao;
 	}
 	@Column
-	@XmlAttribute(name = "amp")
 	public String getAmp() {
 		return amp;
 	}
@@ -968,7 +897,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "decodeMode")
 	public String getDecodeMode() {
 		return decodeMode;
 	}
@@ -977,7 +905,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "keyint_min")
 	public Integer getKeyint_min() {
 		return keyint_min;
 	}
@@ -993,7 +920,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 //		this.keyint_max = keyint_max;
 //	}
 	@Column
-	@XmlAttribute(name = "pixel_format")
 	public String getPixel_format() {
 		return pixel_format;
 	}
@@ -1001,7 +927,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 		this.pixel_format = pixel_format;
 	}
 	@Column
-	@XmlAttribute(name = "low_latency")
 	public Boolean getLow_latency() {
 		return low_latency;
 	}
@@ -1010,7 +935,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "gop_size")
 	public Integer getGop_size() {
 		return gop_size;
 	}
@@ -1019,7 +943,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	}
 	
 	@Column
-	@XmlAttribute(name = "vbv_buffer_size")
 	public Integer getVbv_buffer_size() {
 		return vbv_buffer_size;
 	}
@@ -1029,7 +952,6 @@ public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable
 	
 	
 	@Column
-	@XmlAttribute(name = "codeType")
 	public String getCodeType() {
 		return codeType;
 	}

@@ -1,5 +1,6 @@
 package com.sumavision.tetris.sts.device;
 
+
 import org.hibernate.annotations.Type;
 import org.hibernate.validator.constraints.Length;
 
