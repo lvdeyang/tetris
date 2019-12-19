@@ -2,7 +2,7 @@
  * Created by lzp on 2019/3/16.
  */
 define([
-    'text!' + window.APPPATH + 'task/page-task.html',
+    'text!' + window.APPPATH + 'parameters/page-parameters.html',
     'config',
     'jquery',
     'restfull',
@@ -12,10 +12,10 @@ define([
     'element-ui',
     'mi-frame',
     'mi-lightbox',
-    'css!' + window.APPPATH + 'task/page-task.css'
+    'css!' + window.APPPATH + 'parameters/page-parameters.css'
 ], function (tpl, config, $, ajax, context, commons, Vue) {
 
-    var pageId = 'page-task';
+    var pageId = 'page-parameters';
 
     var init = function () {
 
@@ -33,6 +33,7 @@ define([
                 groups: context.getProp('groups'),
                 loading: false,
                 loadingText: "",
+                activeName: 'first',
                 screen: {
                     one: "一分屏",
                     four: "四分屏",
@@ -49,7 +50,82 @@ define([
                     data: [],
                     multipleSelection: []
                 },
+                task:{
+                	taskGroup: [{
+                        value: '默认分组',
+                        label: '默认分组'
+                      }, {
+                        value: '任务分组1',
+                        label: '任务分组1'
+                      }, {
+                        value: '任务分组2',
+                        label: '任务分组2'
+                      }, {
+                        value: '任务分组3',
+                        label: '任务分组3'
+                    }],
+                    taskTemplate: [{
+                    	value: '任务模板1',
+                        label: '任务模板1'
+                      }, {
+                        value: '任务模板2',
+                        label: '任务模板2'
+                      }, {
+                        value: '任务模板2',
+                        label: '任务模板2'
+                      }, {
+                        value: '任务模板3',
+                        label: '任务模板3'
+                    }],
+                    deviceGroup: [{
+                    	value: '设备分组1',
+                        label: '设备分组1'
+                      }, {
+                        value: '设备分组2',
+                        label: '设备分组2'
+                    }],
+                    deviceNode: [{
+                    	value: '10.10.40.58',
+                        label: '10.10.40.58'
+                      }, {
+                        value: '10.10.40.104',
+                        label: '10.10.40.104'
+                    }],
+                    nCardIndex: [{
+                    	value: 'auto',
+                        label: '自动选卡'
+                      }, {
+                        value: '1',
+                        label: '卡1'
+                      }, {
+                          value: '2',
+                          label: '卡2'
+                    }]
+                },
+                source:{
+                	url:'',
+                	
+                },
+                program:{
+                	programName:'',
+                	videoMsg:'',
+                	audioMsg:'',
+                	programMsg:{
+                		programProvider:'',
+                    	protoType:'',
+                    	programNum:'',
+                    	sourceType:'',
+                    	pmtPid:'',
+                    	pcrPid:''
+                	}
+                },
                 dialog: {
+                	sourceSelect:{
+                		visible:false,
+                		keyword:'',
+                		source:[],
+                		loading:false
+                	},
                 	taskDetail:{
                         visible:false,
                         editPassword:false,
@@ -58,6 +134,16 @@ define([
                         taskGroupName:'分组1',
                         taskType:'转码',
                         loading:false
+                    },
+                    createTask:{
+                        taskName:'',
+                        taskGroupName:'',
+                        taskTemplate:'',
+                        deviceGroup:'',
+                        deviceNode:'',
+                        nCardIndex:'',
+                        useInpub:true,
+                        status:'run'
                     },
                     outputInfo:{
                     	visible:false,
@@ -317,6 +403,16 @@ define([
             computed: {},
             watch: {},
             methods: {
+            	handleSourceSelect: function(){
+            		var self = this;
+            		self.dialog.sourceSelect.keyword = '';
+                    self.dialog.sourceSelect.visible = true;
+            	},
+            	handleSourceSelectClose: function(){
+            		var self = this;
+            		self.dialog.sourceSelect.keyword = '';
+                    self.dialog.sourceSelect.visible = false;
+            	},
             	handleRefreshTask: function(){
             		var self = this;
             		self.loading = true;

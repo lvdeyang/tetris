@@ -1,0 +1,255 @@
+<mi-frame id="page-parameters-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">任务下发参数</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>任务下发参数</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <div style="width:100%; height:100%; position:relative;">
+            <el-card class="box-card" shadow="hover" style="width:100%; height:100%;" v-loading="loading"
+                     :element-loading-text=loadingText>
+                <div style="position:absolute; left:0; top:0; right:0; bottom:0; padding:20px;">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <div style="height:100%; position:absolute; left:0; top:0; width:100%;">
+                            <el-tabs v-model="activeName" @tab-click="handleClick" style="height:100%" >
+    							<el-tab-pane label="输入设定" name="first" >
+            						<el-card class="box-card" size="small">
+ 										<div slot="header" class="clearfix">
+    										<span>任务参数</span>
+  										</div>
+  										<div style="left:0; right:0; top:48px; bottom:0px;overflow-y: auto;overflow-x:hidden;">
+                							<el-row :gutter="20" >
+                								<el-col :span="6">
+                									 任务名称：
+													<el-input placeholder="任务名称" v-model="dialog.createTask.taskName" style="width:180px">	</el-input>
+                								</el-col>
+                								<el-col :span="6">
+                									 任务分组：
+													<el-select v-model="dialog.createTask.taskGroup" placeholder="请选择" style="width:180px">
+														<el-option
+     														v-for="item in task.taskGroup"
+      														:key="item.value"
+      														:label="item.label"
+      														:value="item.value">
+    													</el-option>
+  													</el-select>
+                								</el-col>
+                								<el-col :span="6">
+                									 任务模板：
+													<el-select v-model="dialog.createTask.taskTemplate" placeholder="请选择" style="width:180px">
+														<el-option
+     														v-for="item in task.taskTemplate"
+      														:key="item.value"
+      														:label="item.label"
+      														:value="item.value">
+    													</el-option>
+  													</el-select>
+                								</el-col>
+                								<el-col :span="6">
+                									 设备分组：
+													<el-select v-model="dialog.createTask.deviceGroup" placeholder="请选择" style="width:180px">
+														<el-option
+     														v-for="item in task.deviceGroup"
+      														:key="item.value"
+      														:label="item.label"
+      														:value="item.value">
+    													</el-option>
+  													</el-select>
+                								</el-col>
+                							</el-row>
+                							<el-row :gutter="20" >
+                								<el-col :span="6">
+                									 设备节点：
+													<el-select v-model="dialog.createTask.deviceNode" placeholder="请选择" style="width:180px">
+														<el-option
+     														v-for="item in task.deviceNode"
+      														:key="item.value"
+      														:label="item.label"
+      														:value="item.value">
+    													</el-option>
+  													</el-select>
+                								</el-col>
+                								<el-col :span="6">
+                									 选择N卡：
+													<el-select v-model="dialog.createTask.nCardIndex" placeholder="请选择" style="width:180px">
+														<el-option
+     														v-for="item in task.nCardIndex"
+      														:key="item.value"
+      														:label="item.label"
+      														:value="item.value">
+    													</el-option>
+  													</el-select>
+                								</el-col>
+                								<el-col :span="6">
+                									 任务状态：
+													<el-select v-model="dialog.createTask.status" placeholder="请选择" style="width:180px">
+														<el-option label="运行" value="run"></el-option>
+      													<el-option label="停止" value="stop"></el-option>
+  													</el-select>
+                								</el-col>
+                								<el-col :span="6">
+                									 转换：
+													<el-switch v-model="dialog.createTask.useInpub" ></el-switch>
+                								</el-col>
+                							</el-row>	
+            							</div>
+									</el-card>
+									<el-card class="box-card">
+ 										<div slot="header" class="clearfix">
+    										<span>输入源及节目选择</span>
+  										</div>
+  										<div >
+                							<el-row :gutter="20" >
+                								<el-col :span="20">
+                									 输入源选择：
+													<el-input placeholder="输入源地址" v-model="source.url" style="width:300px" :disabled="true">	</el-input>
+													<el-button  @click="handleSourceSelect()">查询</el-button>
+													<el-button  @click="handleSourceRefresh()">刷新</el-button>
+													<el-button  @click="handleProgramSelect()">节目选择</el-button>
+                								</el-col>
+                							</el-row>
+                							<el-row :gutter="20" >
+                								<el-col :span="8">
+                									 节目：
+													<el-input placeholder="节目名称" v-model="program.programName" style="width:300px" :disabled="true">	</el-input>
+                								</el-col>
+                								<el-col :span="8">
+													视频：
+													<el-input placeholder="视频信息" v-model="program.videoMsg" style="width:300px" :disabled="true">	</el-input>
+                								</el-col>
+												<el-col :span="8">
+													音频：
+													<el-input placeholder="音频信息" v-model="program.audioMsg" style="width:300px" :disabled="true">	</el-input>
+                								</el-col>
+                							</el-row>	
+            							</div>
+									</el-card>
+									<el-card class="box-card">
+ 										<div slot="header" class="clearfix">
+    										<span>节目信息</span>
+  										</div>
+                						<div v-for="o in 4" :key="o" class="text item">
+    										{{'列表内容 ' + o }}
+  										</div>
+                							
+									</el-card>
+    							</el-tab-pane>
+    							<el-tab-pane label="视频参数" name="second">
+    								<div style=" left:0; right:0; top:48px; bottom:0px;overflow-y: auto">
+                            			<h1>sfsfsfsfsfs</h1>
+                        			</div>
+    							</el-tab-pane>
+    							<el-tab-pane label="音频参数" name="third">音频参数</el-tab-pane>
+    							<el-tab-pane label="输出设定" name="fourth">输出设定</el-tab-pane>
+  							</el-tabs>
+                        </div>
+                        
+                        <!-- <div style="height:48px; width:100%; text-align:right; padding-top:16px; position:absolute; left:0; bottom:0; box-sizing:border-box;">
+                            <el-pagination
+                                    background
+                                    @size-change="handleSizeChange"
+                                    @current-change="handlePageCurrentChange"
+                                    :current-page="channel.page.currentPage"
+                                    :page-sizes="channel.page.sizes"
+                                    :page-size="channel.page.size"
+                                    layout="total, sizes, prev, pager, next, jumper"
+                                    :total="channel.page.total">
+                            </el-pagination>
+                        </div> -->
+                    </div>
+                </div>
+            </el-card>
+        </div>
+        
+       
+        
+        <!-- 任务换源对话框 -->
+        <el-dialog
+                title="输入源选择"
+                :visible.sync="dialog.sourceSelect.visible"
+                width="700px"
+                :before-close="handleSourceSelectClose">
+
+            <div>
+                <el-form label-width="100px">
+                    <el-form-item label="关键词:">
+                    	<el-col :span="11">
+                    		<el-input v-model="dialog.sourceSelect.keyword" placeholder="select。。。"></el-input>
+                    	</el-col>
+                    	<el-col :span="11">
+                    		<el-button size="medium" icon="el-icon-search" style="margin-left:30px"></el-button>
+                    	</el-col>
+                    </el-form-item>
+                    <el-form-item>
+                        <div style="left:0; right:0; top:48px; bottom:48px;overflow-y: auto;margin-left:-100px;max-height:200px">
+                        	<el-table
+                                    ref="multipleChannelTable"
+                                    :data="channel.data"
+                                    tooltip-effect="dark"
+                                    style="width: 100%;"
+                                    >
+                            	<el-table-column type="selection" min-width="5%" align="center"></el-table-column>
+                                <el-table-column label="任务名称" min-width="10%" align="center" prop="taskName"></el-table-column>
+                                <el-table-column label="状态" min-width="10%" align="center" prop="status"></el-table-column>
+                                <el-table-column label="分组" min-width="10%" align="center" prop="taskGroupName"></el-table-column>
+                                <el-table-column label="设备组" min-width="10%" align="center" prop="sdmDeviceName"></el-table-column>
+                            </el-table>
+                        </div>
+                    </el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.sourceSelect.visible = false">返回</el-button>
+            </span>
+        </el-dialog>
+        
+        <!-- 盖播对话框 -->
+        <el-dialog
+                title="任务盖播"
+                :visible.sync="dialog.taskCover.visible"
+                width="500px"
+                :before-close="handleOutputInfoClose">
+
+            <div>
+                <el-form label-width="100px">
+                	<el-form-item label="开始时间">
+    					<el-col :span="11">
+      						<el-date-picker type="date" placeholder="开始日期" v-model="dialog.taskCover.startDate" style="width: 100%;"></el-date-picker>
+    					</el-col>
+    					<el-col class="line" :span="2">-</el-col>
+    					<el-col :span="11">
+      						<el-time-picker placeholder="开始时间" v-model="dialog.taskCover.startTime" style="width: 100%;"></el-time-picker>
+    					</el-col>
+  					</el-form-item>
+  					<el-form-item label="结束时间">
+    					<el-col :span="11">
+      						<el-date-picker type="date" placeholder="结束日期" v-model="dialog.taskCover.endDate" style="width: 100%;"></el-date-picker>
+    					</el-col>
+    					<el-col class="line" :span="2">-</el-col>
+    					<el-col :span="11">
+      						<el-time-picker placeholder="结束时间" v-model="dialog.taskCover.endTime" style="width: 100%;"></el-time-picker>
+    					</el-col>
+  					</el-form-item>
+                    <el-form-item label="文件选择">
+    					<el-select v-model="dialog.taskCover.file" placeholder="请选择盖播文件">
+      						<el-option label="区域一" value="shanghai"></el-option>
+      						<el-option label="区域二" value="beijing"></el-option>
+    					</el-select>
+  					</el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.taskCover.visible = false">返回</el-button>
+            </span>
+
+        </el-dialog>
+
+    </template>
+
+</mi-frame>
