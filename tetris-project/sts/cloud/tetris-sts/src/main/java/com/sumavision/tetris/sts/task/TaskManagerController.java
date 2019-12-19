@@ -2,6 +2,10 @@ package com.sumavision.tetris.sts.task;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.capacity.server.CapacityService;
+import com.sumavision.tetris.sts.common.CommonController;
+import com.sumavision.tetris.sts.device.ChannelVideoTypeDao;
+import com.sumavision.tetris.sts.device.ChannelVideoTypePO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
@@ -27,17 +31,26 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Controller
-@RequestMapping(value = "/task")
-public class TaskManagerController{
+@RequestMapping(value = "task")
+public class TaskManagerController extends CommonController {
 	
 	@Autowired
-	private TaskAnalysisService taskAnalysisService;
+	TaskAnalysisService taskAnalysisService;
+
+	@Autowired
+	ChannelVideoTypeDao channelVideoTypeDao;
+
+	@Autowired
+	CapacityService capacityService;
 	
 	@JsonBody
 	@ResponseBody
-	@RequestMapping("/addTask")
-	public Object addTask(@RequestBody JSONObject obj, HttpServletRequest request)  throws Exception{
-		taskAnalysisService.analysisAddTask(obj);
+	@RequestMapping(value = "/addTask", method = RequestMethod.POST)
+	public Object addTask(String obj)  throws Exception{
+		System.out.println(obj);
+		JSONObject addObj = taskAnalysisService.analysisAddTask(JSONObject.parseObject(obj));
+		System.out.println(addObj.toJSONString());
+		capacityService.addTranscode(addObj.toJSONString());
 		return null;
 	}
 
