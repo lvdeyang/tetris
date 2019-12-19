@@ -39,7 +39,7 @@ public interface CapacityFeign {
 	 * @param String transcodeInfo 流转码信息
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/add")
-	public void addTranscode(@RequestParam("transcodeInfo") String transcodeInfo) throws Exception;
+	public JSONObject addTranscode(@RequestParam("transcodeInfo") String transcodeInfo) throws Exception;
 	
 	/**
 	 * 删除流转码<br/>
@@ -49,6 +49,6 @@ public interface CapacityFeign {
 	 * @param String id 流转码任务标识
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/delete")
-	public void deleteTranscode(@RequestParam("id") String id) throws Exception;
+	public JSONObject deleteTranscode(@RequestParam("id") String id) throws Exception;
 	
 }

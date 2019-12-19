@@ -33,7 +33,7 @@ public class CapacityService {
 	 * @param String id 收录标识
 	 */
 	public void deleteRecord(String id) throws Exception{
-		capacityFeign.deleteRecord(id);
+		JsonBodyResponseParser.parseObject(capacityFeign.deleteRecord(id), null);
 	}
 	
 	/**
@@ -44,7 +44,7 @@ public class CapacityService {
 	 * @param String transcodeInfo 流转码信息
 	 */
 	public void addTranscode(String transcodeInfo) throws Exception{
-		capacityFeign.addTranscode(transcodeInfo);
+		JsonBodyResponseParser.parseObject(capacityFeign.addTranscode(transcodeInfo), null);
 	}
 	
 	/**
@@ -55,7 +55,7 @@ public class CapacityService {
 	 * @param String id 任务标识
 	 */
 	public void deleteTranscode(String id) throws Exception{
-		capacityFeign.deleteTranscode(id);
+		JsonBodyResponseParser.parseObject(capacityFeign.deleteTranscode(id), null);
 	}
 	
 }
