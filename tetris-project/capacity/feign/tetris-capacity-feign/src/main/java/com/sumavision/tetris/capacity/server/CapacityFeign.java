@@ -19,7 +19,7 @@ public interface CapacityFeign {
 	 * @return String 收录标识
 	 */
 	@RequestMapping(value = "/capacity/record/feign/add")
-	public JSONObject add(@RequestParam("recordInfo") String recordInfo) throws Exception;
+	public JSONObject addRecord(@RequestParam("recordInfo") String recordInfo) throws Exception;
 	
 	/**
 	 * 停止收录<br/>
@@ -29,6 +29,26 @@ public interface CapacityFeign {
 	 * @param String id 收录标识
 	 */
 	@RequestMapping(value = "/capacity/record/feign/delete")
-	public JSONObject delete(@RequestParam("id") String id) throws Exception;
+	public JSONObject deleteRecord(@RequestParam("id") String id) throws Exception;
+	
+	/**
+	 * 添加流转码<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月16日 上午9:15:20
+	 * @param String transcodeInfo 流转码信息
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/add")
+	public void addTranscode(@RequestParam("transcodeInfo") String transcodeInfo) throws Exception;
+	
+	/**
+	 * 删除流转码<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月16日 上午9:15:51
+	 * @param String id 流转码任务标识
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/delete")
+	public void deleteTranscode(@RequestParam("id") String id) throws Exception;
 	
 }
