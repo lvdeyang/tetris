@@ -11,7 +11,7 @@ import com.sumavision.tetris.sts.device.StreamMediaAuth;
 import com.sumavision.tetris.sts.device.StreamMediaCfg;
 
 @Entity
-@Table
+@Table(name="stream_media")
 public class StreamMediaPO extends CommonPO<StreamMediaPO> implements Serializable {
 
 

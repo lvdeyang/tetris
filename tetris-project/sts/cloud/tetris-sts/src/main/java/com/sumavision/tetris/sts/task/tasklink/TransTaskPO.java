@@ -25,7 +25,7 @@ import com.sumavision.tetris.sts.task.source.VideoParamPO;
 
 
 @Entity
-@Table
+@Table(name="trans_task")
 public class TransTaskPO extends CommonPO<TransTaskPO> implements Serializable{
 
 	/**

@@ -13,7 +13,7 @@ import java.io.Serializable;
 import java.util.List;
 
 @Entity
-@Table
+@Table(name="net_card_info")
 public class NetCardInfoPO extends CommonPO<NetCardInfoPO> implements Serializable{
 	
 	/**

@@ -14,7 +14,7 @@ import com.sumavision.tetris.sts.common.CommonPO;
  *
  */
 @Entity
-@Table
+@Table(name="channel_video_type")
 public class ChannelVideoTypePO  extends CommonPO<ChannelVideoTypePO> implements Serializable{
 	
 	/**

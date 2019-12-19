@@ -34,7 +34,7 @@ import com.sumavision.tetris.sts.task.taskParamTask.NameFiltersFor264265;
 
 
 @Entity
-@Table
+@Table(name="video_param")
 public class VideoParamPO extends CommonPO<VideoParamPO> implements Serializable,Comparable<VideoParamPO>{
 
 	/**

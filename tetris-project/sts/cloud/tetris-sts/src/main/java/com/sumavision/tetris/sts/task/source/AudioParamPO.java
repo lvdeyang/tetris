@@ -18,7 +18,7 @@ import java.io.Serializable;
 
 
 @Entity
-@Table
+@Table(name="audio_param")
 public class AudioParamPO extends CommonPO<AudioParamPO> implements Serializable,Comparable<AudioParamPO>{
 	
 	/**
