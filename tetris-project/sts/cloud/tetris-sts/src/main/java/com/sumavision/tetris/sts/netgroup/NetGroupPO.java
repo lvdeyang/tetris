@@ -10,7 +10,7 @@ import com.sumavision.tetris.sts.common.CommonConstants.NetGroupType;
  * Created by Poemafar on 2019/12/16 13:50
  */
 @Entity
-@Table(name = "TETRIS_STS_NETGROUP")
+@Table(name = "net_group")
 public class NetGroupPO extends CommonPO<NetGroupPO> implements Serializable {
 
     private static final long serialVersionUID = -9164943864838791161L;

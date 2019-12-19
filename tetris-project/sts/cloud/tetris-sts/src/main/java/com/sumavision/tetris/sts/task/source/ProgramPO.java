@@ -10,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.sts.common.CommonPO;
 
 @Entity
-@Table
+@Table(name="program")
 public class ProgramPO extends CommonPO<ProgramPO> implements Serializable, Comparable<ProgramPO>{
 
 

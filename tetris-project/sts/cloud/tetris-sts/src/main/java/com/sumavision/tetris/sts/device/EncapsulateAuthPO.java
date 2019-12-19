@@ -9,7 +9,7 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.sts.common.CommonPO;
 
 @Entity
-@Table
+@Table(name="encapsulate_auth")
 public class EncapsulateAuthPO extends CommonPO<EncapsulateAuthPO> implements Serializable {
 
 
