@@ -1,4 +1,4 @@
-package com.sumavision.tetris.sts.netgroup;
+package com.sumavision.tetris.sts.device.netcard;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

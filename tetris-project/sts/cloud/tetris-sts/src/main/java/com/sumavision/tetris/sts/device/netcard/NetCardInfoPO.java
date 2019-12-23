@@ -1,4 +1,4 @@
-package com.sumavision.tetris.sts.netgroup;
+package com.sumavision.tetris.sts.device.netcard;
 
 
 import javax.persistence.*;

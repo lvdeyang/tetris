@@ -7,7 +7,7 @@ import javax.persistence.*;
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.sts.common.CommonPO;
 import com.sumavision.tetris.sts.device.Authorization;
-import com.sumavision.tetris.sts.device.StreamMediaAuth;
+import com.sumavision.tetris.sts.device.auth.StreamMediaAuth;
 import com.sumavision.tetris.sts.device.StreamMediaCfg;
 
 @Entity

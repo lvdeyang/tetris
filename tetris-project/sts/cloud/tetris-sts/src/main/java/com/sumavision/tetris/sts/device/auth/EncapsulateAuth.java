@@ -1,4 +1,6 @@
-package com.sumavision.tetris.sts.device;
+package com.sumavision.tetris.sts.device.auth;
+
+import com.sumavision.tetris.sts.device.Authorization;
 
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;

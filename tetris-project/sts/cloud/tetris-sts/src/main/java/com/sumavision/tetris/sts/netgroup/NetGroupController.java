@@ -58,5 +58,17 @@ public class NetGroupController extends CommonController {
         return null;
     }
 
+    @JsonBody
+    @RequestMapping(value = "/edit/{id}", method = RequestMethod.POST)
+    @ResponseBody
+    public Object editNetGroup(@PathVariable Long id,String netName,String info,String netType ) throws Exception {
+        NetGroupPO netGroupPO = netGroupService.findOne(id);
+        netGroupPO.setNetName(netName);
+        netGroupPO.setInfo(info);
+        netGroupPO.setNetType(NetGroupType.valueOf(netType));
+        netGroupPO.setUpdateTime(new Date());
+        netGroupService.save(netGroupPO);
+        return netGroupPO;
+    }
 }
 
