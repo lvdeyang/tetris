@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.NameFilter;
 import com.sumavision.tetris.sts.common.NodeIdManageUtil;
 import com.sumavision.tetris.sts.common.CommonConstants.ProtoType;
-import com.sumavision.tetris.sts.device.DeviceChannelAuthDao;
+import com.sumavision.tetris.sts.device.auth.DeviceChannelAuthDao;
 import com.sumavision.tetris.sts.task.createNode.CreateJsonInputNode;
 import com.sumavision.tetris.sts.task.createNode.CreateJsonOutputNode;
 import com.sumavision.tetris.sts.task.createNode.CreateJsonProgramNode;

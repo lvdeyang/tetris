@@ -2,10 +2,7 @@ package com.sumavision.tetris.sts.task;
 
 
 
-import java.text.MessageFormat;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,17 +17,17 @@ import com.sumavision.tetris.sts.common.CommonUtil;
 import com.sumavision.tetris.sts.common.ErrorCodes;
 import com.sumavision.tetris.sts.common.NodeIdManageUtil;
 import com.sumavision.tetris.sts.common.CommonConstants.NodeStatus;
-import com.sumavision.tetris.sts.device.ChannelVideoTypeDao;
-import com.sumavision.tetris.sts.device.ChannelVideoTypePO;
-import com.sumavision.tetris.sts.device.DeviceChannelAuthDao;
-import com.sumavision.tetris.sts.device.DeviceChannelAuthPO;
-import com.sumavision.tetris.sts.device.DeviceGroupDao;
-import com.sumavision.tetris.sts.device.DeviceGroupPO;
-import com.sumavision.tetris.sts.device.DeviceNodeDao;
-import com.sumavision.tetris.sts.device.DeviceNodePO;
+import com.sumavision.tetris.sts.device.auth.ChannelVideoTypeDao;
+import com.sumavision.tetris.sts.device.auth.ChannelVideoTypePO;
+import com.sumavision.tetris.sts.device.auth.DeviceChannelAuthDao;
+import com.sumavision.tetris.sts.device.auth.DeviceChannelAuthPO;
+import com.sumavision.tetris.sts.device.group.DeviceGroupDao;
+import com.sumavision.tetris.sts.device.group.DeviceGroupPO;
+import com.sumavision.tetris.sts.device.node.DeviceNodeDao;
+import com.sumavision.tetris.sts.device.node.DeviceNodePO;
 import com.sumavision.tetris.sts.device.ResolutionBO;
-import com.sumavision.tetris.sts.netgroup.NetCardInfoDao;
-import com.sumavision.tetris.sts.netgroup.NetCardInfoPO;
+import com.sumavision.tetris.sts.device.netcard.NetCardInfoDao;
+import com.sumavision.tetris.sts.device.netcard.NetCardInfoPO;
 import com.sumavision.tetris.sts.task.source.AudioElement;
 import com.sumavision.tetris.sts.task.source.AudioParamPO;
 import com.sumavision.tetris.sts.task.source.InputPO;

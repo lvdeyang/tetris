@@ -26,6 +26,14 @@ public class NetGroupService {
         return netGroupDao.findAll().stream().filter(ng->BooleanUtils.isNotTrue(ng.getBeDelete())).collect(Collectors.toList());
     }
 
+    public NetGroupPO findOne(Long id) throws BaseException {
+        NetGroupPO netGroupPO= netGroupDao.findOne(id);
+        if (netGroupPO == null) {
+            throw new BaseException(StatusCode.FORBIDDEN, ErrorCodes.NETGROUP_NULL);
+        }
+        return netGroupPO;
+    }
+
     @Transactional(rollbackFor = BaseException.class)
     public void save(NetGroupPO netGroupPO) throws BaseException {
         netGroupPO.setCreateTime(new Date());

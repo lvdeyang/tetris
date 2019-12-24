@@ -1,13 +1,11 @@
 package com.sumavision.tetris.sts.device;
 
-import java.io.Serializable;
-
-import javax.persistence.*;
-
-import com.sumavision.tetris.sts.common.CommonConstants.BackType;
 import com.sumavision.tetris.sts.common.CommonConstants.DeviceType;
+import com.sumavision.tetris.sts.common.CommonConstants.BackType;
 import com.sumavision.tetris.sts.common.CommonPO;
 
+import javax.persistence.*;
+import java.io.Serializable;
 
 /**
  * 设备表，目前设备主要分为三种类型：SDM2.0/SDM3.0/Server；每个设备上可能有一个或多个设备节点

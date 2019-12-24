@@ -1,4 +1,4 @@
-package com.sumavision.tetris.sts.device;
+package com.sumavision.tetris.sts.device.node;
 
 
 import org.springframework.data.jpa.repository.Query;

@@ -1,6 +1,4 @@
-package com.sumavision.tetris.sts.device;
-
-import java.util.List;
+package com.sumavision.tetris.sts.device.auth;
 
 import org.springframework.data.repository.RepositoryDefinition;
 

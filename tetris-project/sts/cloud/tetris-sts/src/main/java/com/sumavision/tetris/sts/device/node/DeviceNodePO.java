@@ -1,4 +1,4 @@
-package com.sumavision.tetris.sts.device;
+package com.sumavision.tetris.sts.device.node;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,9 +15,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
-import com.sumavision.tetris.sts.common.CommonConstants.BackType;
 import com.sumavision.tetris.sts.common.CommonConstants.FunUnitStatus;
 import com.sumavision.tetris.sts.common.CommonPO;
+import com.sumavision.tetris.sts.device.auth.DeviceChannelAuthPO;
+import com.sumavision.tetris.sts.device.auth.EncapsulateAuthPO;
 
 @Entity
 @Table(name="device_node")
@@ -47,15 +48,14 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 
 	private Integer position;
 
-	private EncapsulateAuthPO encapsulateAuthPO;
-
-	private BackType encapsulateBackType;
-
+	/**
+	 * 主1，主2
+	 */
 	private Integer backIndex;
 
-	private BackType transBackType;
+	private EncapsulateAuthPO encapsulateAuthPO;
 
-	private FunUnitStatus status;
+	private FunUnitStatus funUnitStatus;
 	
 	private Integer nCardNum;
 	
@@ -64,9 +64,7 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 	private List<DeviceChannelAuthPO> deviceChannelAuthPOs = new ArrayList<DeviceChannelAuthPO>();
 	
 	public DeviceNodePO() {
-		this.encapsulateBackType = BackType.DEFAULT;
-		this.transBackType = BackType.DEFAULT;
-		this.status = FunUnitStatus.NONE;
+		this.funUnitStatus = FunUnitStatus.NONE;
 	}
 
 	@Column
@@ -125,17 +123,6 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 		this.position = position;
 	}
 
-
-	@Column
-	@Enumerated(EnumType.STRING)
-	public BackType getEncapsulateBackType() {
-		return encapsulateBackType;
-	}
-
-	public void setEncapsulateBackType(BackType encapsulateBackType) {
-		this.encapsulateBackType = encapsulateBackType;
-	}
-
 	@Column
 	public Integer getBackIndex() {
 		return backIndex;
@@ -144,18 +131,6 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 	public void setBackIndex(Integer backIndex) {
 		this.backIndex = backIndex;
 	}
-
-	@Column
-	@Enumerated(EnumType.STRING)
-	public BackType getTransBackType() {
-		return transBackType;
-	}
-
-	public void setTransBackType(BackType transBackType) {
-		this.transBackType = transBackType;
-	}
-
-
 
 	@Column
 	public String getVersion() {
@@ -175,7 +150,17 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 	public void setnCardNum(Integer nCardNum) {
 		this.nCardNum = nCardNum;
 	}
-	
+
+	@Column
+	@Enumerated(EnumType.STRING)
+	public FunUnitStatus getFunUnitStatus() {
+		return funUnitStatus;
+	}
+
+	public void setFunUnitStatus(FunUnitStatus funUnitStatus) {
+		this.funUnitStatus = funUnitStatus;
+	}
+
 	@Column
 	public Long getDeviceId() {
 		return deviceId;
@@ -189,8 +174,6 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result
-				+ ((backIndex == null) ? 0 : backIndex.hashCode());
 		result = prime
 				* result
 				+ ((deviceChannelAuthPOs == null) ? 0 : deviceChannelAuthPOs
@@ -205,18 +188,13 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 				* result
 				+ ((encapsulateAuthPO == null) ? 0 : encapsulateAuthPO
 						.hashCode());
-		result = prime
-				* result
-				+ ((encapsulateBackType == null) ? 0 : encapsulateBackType
-						.hashCode());
 		result = prime * result
 				+ ((nCardNum == null) ? 0 : nCardNum.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result
 				+ ((position == null) ? 0 : position.hashCode());
-		result = prime * result + ((status == null) ? 0 : status.hashCode());
-		result = prime * result
-				+ ((transBackType == null) ? 0 : transBackType.hashCode());
+		result = prime * result + ((funUnitStatus == null) ? 0 : funUnitStatus.hashCode());
+
 		result = prime * result + ((version == null) ? 0 : version.hashCode());
 		return result;
 	}
@@ -230,11 +208,6 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 		if (getClass() != obj.getClass())
 			return false;
 		DeviceNodePO other = (DeviceNodePO) obj;
-		if (backIndex == null) {
-			if (other.backIndex != null)
-				return false;
-		} else if (!backIndex.equals(other.backIndex))
-			return false;
 		if (deviceChannelAuthPOs == null) {
 			if (other.deviceChannelAuthPOs != null)
 				return false;
@@ -260,8 +233,6 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 				return false;
 		} else if (!encapsulateAuthPO.equals(other.encapsulateAuthPO))
 			return false;
-		if (encapsulateBackType != other.encapsulateBackType)
-			return false;
 		if (nCardNum == null) {
 			if (other.nCardNum != null)
 				return false;
@@ -272,14 +243,17 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
+		if (backIndex == null) {
+			if (other.backIndex != null)
+				return false;
+		} else if (!backIndex.equals(other.backIndex))
+			return false;
 		if (position == null) {
 			if (other.position != null)
 				return false;
 		} else if (!position.equals(other.position))
 			return false;
-		if (status != other.status)
-			return false;
-		if (transBackType != other.transBackType)
+		if (funUnitStatus != other.funUnitStatus)
 			return false;
 		if (version == null) {
 			if (other.version != null)
@@ -294,9 +268,7 @@ public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable
 		return "DeviceNodePO [name=" + name + ", deviceIp=" + deviceIp
 				+ ", deviceGroupId=" + deviceGroupId + ", deviceId=" + deviceId
 				+ ", position=" + position + ", encapsulateAuthPO="
-				+ encapsulateAuthPO + ", encapsulateBackType="
-				+ encapsulateBackType + ", backIndex=" + backIndex
-				+ ", transBackType=" + transBackType + ", status=" + status
+				+ encapsulateAuthPO  + ", funUnitStatus=" + funUnitStatus+", backIndex=" + backIndex
 				+ ", nCardNum=" + nCardNum + ", version=" + version
 				+ ", deviceChannelAuthPOs=" + deviceChannelAuthPOs + "]";
 	}

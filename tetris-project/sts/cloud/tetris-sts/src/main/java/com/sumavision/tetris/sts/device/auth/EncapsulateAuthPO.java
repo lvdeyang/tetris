@@ -1,4 +1,4 @@
-package com.sumavision.tetris.sts.device;
+package com.sumavision.tetris.sts.device.auth;
 
 import java.io.Serializable;
 

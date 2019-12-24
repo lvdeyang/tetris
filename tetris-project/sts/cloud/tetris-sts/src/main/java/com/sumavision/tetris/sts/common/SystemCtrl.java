@@ -11,8 +11,6 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
-import com.sumavision.tetris.sts.common.CommonConstants.FunUnitType;
-
 /**
  * Created by Lost on 2017/2/6.
  */
@@ -44,37 +42,37 @@ public class SystemCtrl {
         return socketAddress + ":" +  STREAM_MEDIA_DEV_PORT;
     }
 
-    public static String getSocketAddress(String socketAddress , FunUnitType unitType) {
-        switch (unitType) {
-            case TRANS:
-                return getTransAddress(socketAddress);
-            case ENCAPSULATE:
-                return getPacketAddress(socketAddress);
-            case STREAM_MEDIA:
-                return getStreamMediaAddress(socketAddress);
-            case MATRIX:
-                return getMatrixAddress(socketAddress);
-            default:
-                return null;
-        }
-    }
+//    public static String getSocketAddress(String socketAddress , FunUnitType unitType) {
+//        switch (unitType) {
+//            case TRANS:
+//                return getTransAddress(socketAddress);
+//            case ENCAPSULATE:
+//                return getPacketAddress(socketAddress);
+//            case STREAM_MEDIA:
+//                return getStreamMediaAddress(socketAddress);
+//            case MATRIX:
+//                return getMatrixAddress(socketAddress);
+//            default:
+//                return null;
+//        }
+//    }
 
-    public static FunUnitType getFunUnitType(String socketAddress) {
-        try {
-            Integer port = Integer.parseInt(socketAddress.split(":")[1]);
-            if (port.equals(TRANS_DEV_PORT))
-                return FunUnitType.TRANS;
-            else if (port.equals(PACKET_DEV_PORT))
-                return FunUnitType.ENCAPSULATE;
-            else if (port.equals(STREAM_MEDIA_DEV_PORT))
-                return FunUnitType.STREAM_MEDIA;
-            else if (port.equals(MATRIX_DEV_PORT))
-                return FunUnitType.MATRIX;
-            return null;
-        } catch (Exception e) {
-            return null;
-        }
-    }
+//    public static FunUnitType getFunUnitType(String socketAddress) {
+//        try {
+//            Integer port = Integer.parseInt(socketAddress.split(":")[1]);
+//            if (port.equals(TRANS_DEV_PORT))
+//                return FunUnitType.TRANS;
+//            else if (port.equals(PACKET_DEV_PORT))
+//                return FunUnitType.ENCAPSULATE;
+//            else if (port.equals(STREAM_MEDIA_DEV_PORT))
+//                return FunUnitType.STREAM_MEDIA;
+//            else if (port.equals(MATRIX_DEV_PORT))
+//                return FunUnitType.MATRIX;
+//            return null;
+//        } catch (Exception e) {
+//            return null;
+//        }
+//    }
 
     public static Set<String> localIpSet() {
         Set<String> strings = new HashSet<>();
