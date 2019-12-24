@@ -331,13 +331,6 @@ define([
                             deviceNodeId: 0,
             			
             		};
-//            		ajax.post('/task/taskManage/getTasks', newData, function(data, status){
-//            			self.loading = false;
-//            			if (status != 200) return;
-//                        self.channel.data = data.taskVoList;
-//                        self.channel.page.total = data.total;
-//            		})
-            		
             		ajax.post('/task/taskManage/getTasks',newData , function(data, status){
             			self.loading = false;
                         if (status != 200) return;
@@ -475,6 +468,7 @@ define([
             created: function () {
                 var self = this;
 //                self.getChannelList();
+                self.handleRefreshTask();
             },
             mounted: function () {
             	

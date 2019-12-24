@@ -70,10 +70,7 @@ define([
                       }, {
                         value: '任务模板2',
                         label: '任务模板2'
-                      }, {
-                        value: '任务模板2',
-                        label: '任务模板2'
-                      }, {
+                      },{
                         value: '任务模板3',
                         label: '任务模板3'
                     }],
@@ -103,21 +100,30 @@ define([
                     }]
                 },
                 source:{
-                	url:'',
-                	
+                	url:'111',
+                	name:'222',
+//                	data:[{ 'id': 152, 'uuid': 'bd131038854e488883b3de176b0000fa', 'updateTime': '2019-11-03 15:55:38', 'previewUrl': [ 'udp://@192.165.56.84:1234' ], 'name': 'test2', 'authorName': '应急广播管理员用户', 'createTime': '', 'remarks': '', 'tags': [ '' ], 'keyWords': [ '' ], 'igmpv3Status': 'close', 'igmpv3Mode': null, 'igmpv3IpArray': null, 'type': 'VIDEO_STREAM', 'resourceType': null, 'removeable': true, 'icon': 'icon-film', 'style': 'font-size:16px; position:relative; top:1px;', 'reviewStatus': '', 'processInstanceId': null, 'addition': null, 'children': null }]
+                	data:[],
                 },
                 program:{
-                	programName:'',
-                	videoMsg:'',
-                	audioMsg:'',
+                	programName:'DONGFANG HD',
+                	videoMsg:'h264 1920x1080 16:9 25fps 4358kbps',
+                	audioMsg:'mpeg2-audio 48kHz 2channels 183kbps|ac3 48kHz 6channels 625kbps',
                 	programMsg:{
-                		programProvider:'',
-                    	protoType:'',
-                    	programNum:'',
+                		programProvider:'Harmonic',
+                    	protoType:'TSUDP',
+                    	programNum:'4004',
                     	sourceType:'',
-                    	pmtPid:'',
-                    	pcrPid:''
-                	}
+                    	pmtPid:'5378',
+                    	pcrPid:'5376'
+                	},
+                	videoes:[
+                	   {index:1, pid:512, type:'h264', fps:25, width:1920, height:1080, ratio:'16:9'},
+                	   {index:2, pid:513, type:'h264', fps:25, width:1920, height:1080, ratio:'16:9'},
+                	],
+                	audioes:[
+                	    {index:1, pid:514, type:'ac3', sampleRate:4800, channels:6},
+                	]
                 },
                 dialog: {
                 	sourceSelect:{
@@ -141,7 +147,7 @@ define([
                         taskTemplate:'',
                         deviceGroup:'',
                         deviceNode:'',
-                        nCardIndex:'',
+                        nCardIndex:'auto',
                         useInpub:true,
                         status:'run'
                     },
@@ -405,13 +411,34 @@ define([
             methods: {
             	handleSourceSelect: function(){
             		var self = this;
-            		self.dialog.sourceSelect.keyword = '';
+            		self.loading = true;
+            		var newData = {
+            				keyWord: self.dialog.sourceSelect.keyword,
+            		};
+            		ajax.post('/task/source/getVideoStream',newData , function(data, status){
+            			self.loading = false;
+                        if (status != 200) return;
+                        self.source.data = data.rows;
+                    });
                     self.dialog.sourceSelect.visible = true;
             	},
             	handleSourceSelectClose: function(){
             		var self = this;
-            		self.dialog.sourceSelect.keyword = '';
+            		self.source.data = '';
                     self.dialog.sourceSelect.visible = false;
+            	},
+            	handleSourceSelectSubmit: function(){
+            		var self = this;
+            		var selected = this.$refs.multipleSourceSelectTable.store.states.selection;
+            		if(selected.length > 1){
+            			 alert("只可选择一条源作为输入，请重新选择");
+            			 return;
+            		}else if(selected.length === 1){
+            			self.source.name = selected[0].name;
+            			self.source.url = selected[0].previewUrl;
+            			
+            		}
+            		self.dialog.sourceSelect.visible = false;
             	},
             	handleRefreshTask: function(){
             		var self = this;
@@ -425,7 +452,6 @@ define([
                             alarmFlag: null,
                             linkStatus: null,
                             deviceNodeId: 0,
-            			
             		};
 //            		ajax.post('/task/taskManage/getTasks', newData, function(data, status){
 //            			self.loading = false;

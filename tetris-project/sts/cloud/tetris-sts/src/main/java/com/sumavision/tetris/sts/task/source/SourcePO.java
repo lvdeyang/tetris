@@ -29,7 +29,7 @@ import com.sumavision.tetris.sts.common.CommonPO;
  *
  */
 @Entity
-@Table
+@Table(name="source")
 public class SourcePO extends CommonPO<SourcePO> implements Serializable{
 
 	/**

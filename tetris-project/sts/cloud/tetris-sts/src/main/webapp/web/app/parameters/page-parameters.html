@@ -134,10 +134,79 @@
  										<div slot="header" class="clearfix">
     										<span>节目信息</span>
   										</div>
-                						<div v-for="o in 4" :key="o" class="text item">
-    										{{'列表内容 ' + o }}
+  										<div>
+  											<el-row :gutter="20" >
+                								<el-col :span="6">
+                									 节目名称：{{program.programName}}
+                								</el-col>
+                								<el-col :span="6">
+                									 节目提供者：{{program.programMsg.programProvider}}
+                								</el-col>
+                								<el-col :span="6">
+                									 协议类型：{{program.programMsg.protoType}}
+                								</el-col>
+                								<el-col :span="6">
+                									 节目号：{{program.programMsg.programNum}}
+                								</el-col>
+                							</el-row>
+                							<el-row :gutter="20" >
+                								<el-col :span="6">
+                									 pmtPid：{{program.programMsg.pmtPid}}
+                								</el-col>
+                								<el-col :span="6">
+                									 pcrPid：{{program.programMsg.pcrPid}}
+                								</el-col>
+                							</el-row>
   										</div>
-                							
+  										<div v-for="(video,i) in program.videoes" class="text item">
+    										<el-card class="box-card">
+ 												<div slot="header" class="clearfix">
+    												视频轨道{{video.index}}
+  												</div>
+  												<div>
+  													<el-row :gutter="20" >
+                										<el-col :span="4">
+                											 视频pid：{{video.pid}}
+                										</el-col>
+                										<el-col :span="5">
+                											 编码类型：{{video.type}}
+                										</el-col>
+                										<el-col :span="5">
+                									 		帧率：{{video.fps}}
+                										</el-col>
+                										<el-col :span="5">
+                											 分辨率：{{video.width}} x {{video.height}}
+                										</el-col>
+                										<el-col :span="5">
+                											 宽高比：{{video.ratio}}
+                										</el-col>
+                									</el-row>
+                								</div>	
+											</el-card>
+  										</div>
+                						<div v-for="(audio,i) in program.audioes" class="text item">
+    										<el-card class="box-card">
+ 												<div slot="header" class="clearfix">
+    												音频轨道{{audio.index}}
+  												</div>
+  												<div>
+  													<el-row :gutter="20" >
+                										<el-col :span="4">
+                											 音频Pid：{{audio.pid}}
+                										</el-col>
+                										<el-col :span="5">
+                											 编码类型：{{audio.type}}
+                										</el-col>
+                										<el-col :span="5">
+                									 		采用频率：{{audio.sampleRate}}
+                										</el-col>
+                										<el-col :span="5">
+                									 		声道数：{{audio.channels}}
+                										</el-col>
+                									</el-row>
+                								</div>	
+											</el-card>
+  										</div>
 									</el-card>
     							</el-tab-pane>
     							<el-tab-pane label="视频参数" name="second">
@@ -169,11 +238,11 @@
         
        
         
-        <!-- 任务换源对话框 -->
+        <!-- 输入源选择对话框 -->
         <el-dialog
                 title="输入源选择"
                 :visible.sync="dialog.sourceSelect.visible"
-                width="700px"
+                width="800px"
                 :before-close="handleSourceSelectClose">
 
             <div>
@@ -189,16 +258,18 @@
                     <el-form-item>
                         <div style="left:0; right:0; top:48px; bottom:48px;overflow-y: auto;margin-left:-100px;max-height:200px">
                         	<el-table
-                                    ref="multipleChannelTable"
-                                    :data="channel.data"
+                                    ref="multipleSourceSelectTable"
+                                    :data="source.data"
                                     tooltip-effect="dark"
-                                    style="width: 100%;"
+                                    style="width: 100%; min-width:1000px;overflow-x:auto"
                                     >
-                            	<el-table-column type="selection" min-width="5%" align="center"></el-table-column>
-                                <el-table-column label="任务名称" min-width="10%" align="center" prop="taskName"></el-table-column>
-                                <el-table-column label="状态" min-width="10%" align="center" prop="status"></el-table-column>
-                                <el-table-column label="分组" min-width="10%" align="center" prop="taskGroupName"></el-table-column>
-                                <el-table-column label="设备组" min-width="10%" align="center" prop="sdmDeviceName"></el-table-column>
+                            	<el-table-column type="selection" min-width="10%" align="center"></el-table-column>
+                                <el-table-column label="id" min-width="0%" align="center" prop="id" v-if="false"></el-table-column>
+                                <el-table-column label="名称" min-width="10%" align="center" prop="name"></el-table-column>
+                                <el-table-column label="更新时间" min-width="20%" align="center" prop="updateTime"></el-table-column>
+                                <el-table-column label="url" min-width="30%" align="center" prop="previewUrl"></el-table-column>
+                                <el-table-column label="关键词" min-width="15%" align="center" prop="keyWords"></el-table-column>
+                                <el-table-column label="用户" min-width="15%" align="center" prop="authorName"></el-table-column>
                             </el-table>
                         </div>
                     </el-form-item>
@@ -206,7 +277,8 @@
             </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.sourceSelect.visible = false">返回</el-button>
+                <el-button size="medium" @click="dialog.sourceSelect.visible = false">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSourceSelectSubmit">确定</el-button>
             </span>
         </el-dialog>
         

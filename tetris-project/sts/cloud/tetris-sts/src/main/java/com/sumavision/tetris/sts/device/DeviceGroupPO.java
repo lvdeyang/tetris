@@ -18,7 +18,7 @@ import java.io.Serializable;
  * SDM分组是SDM的上级信息
  */
 @Entity
-@Table
+@Table(name="device_group")
 public class DeviceGroupPO extends CommonPO<DeviceGroupPO> implements Serializable{
 
 	/**

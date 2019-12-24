@@ -20,7 +20,7 @@ import com.sumavision.tetris.sts.common.CommonConstants.FunUnitStatus;
 import com.sumavision.tetris.sts.common.CommonPO;
 
 @Entity
-@Table
+@Table(name="device_node")
 public class DeviceNodePO extends CommonPO<DeviceNodePO> implements Serializable{
 
 	

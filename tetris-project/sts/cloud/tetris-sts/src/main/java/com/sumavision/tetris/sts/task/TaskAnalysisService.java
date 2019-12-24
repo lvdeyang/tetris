@@ -84,9 +84,10 @@ public class TaskAnalysisService {
 	@Autowired
 	private NodeUtil nodeUtil;
 	
-	public void analysisAddTask(JSONObject jsonObject) throws Exception{
+	public JSONObject analysisAddTask(JSONObject jsonObject) throws Exception{
 		//服务端参数校验
 		//checkTaskObjAtServer(jsonObject);
+		JSONObject addTaskJsonObject = null;
 		
 		Long taskLinkId = jsonObject.getLong("id");
 		if (taskLinkId == null || taskLinkId == 0) {
@@ -186,14 +187,14 @@ public class TaskAnalysisService {
 					}
 				}
 				
-				JSONObject addTaskJsonObject = new JSONObject();
+				addTaskJsonObject = new JSONObject();
 				addTaskJsonObject.put("task_name", taskLinkPO.getLinkName());
 				addTaskJsonObject.put("device_ip", deviceNodePO.getDeviceIp());
 				addTaskJsonObject.put("task_type", taskLinkPO.getTaskType());
-				addTaskJsonObject.put("task_id", taskLinkId);
-				addTaskJsonObject.put("input_array", nodeUtil.getJsonInputNode(inputPO,programPO).getString("input_array"));
-				addTaskJsonObject.put("task_array", nodeUtil.getJsonTaskNode(transTaskPO).getString("task_array"));
-				addTaskJsonObject.put("output_array", nodeUtil.getJsonOutputNode(outputPOs, inputProgramPO, nodeUtil.getOutputMediaEncodeMessage()).getString("output_array"));
+				addTaskJsonObject.put("task_id", taskLinkPO.getId());
+				addTaskJsonObject.put("input_array", nodeUtil.getJsonInputNode(inputPO,programPO).getJSONArray("input_array"));
+				addTaskJsonObject.put("task_array", nodeUtil.getJsonTaskNode(transTaskPO).getJSONArray("task_array"));
+				addTaskJsonObject.put("output_array", nodeUtil.getJsonOutputNode(outputPOs, inputProgramPO, nodeUtil.getOutputMediaEncodeMessage()).getJSONArray("output_array"));
 				
 				
 //				CreateAddTaskNode createAddTaskNode = new CreateAddTaskNode();
@@ -208,6 +209,7 @@ public class TaskAnalysisService {
 //				nodeUtil.getJsonOutputNode(outputPOs, inputProgramPO, nodeUtil.getOutputMediaEncodeMessage());
 			}
 		}
+		return  addTaskJsonObject;
 	}
 	
 	
