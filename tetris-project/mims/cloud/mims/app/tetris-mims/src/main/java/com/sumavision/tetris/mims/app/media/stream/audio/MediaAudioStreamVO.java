@@ -22,7 +22,15 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 	
 	private List<String> keyWords;
 	
+	private String igmpv3Status;
+	
+	private String igmpv3Mode;
+	
+	private List<String> igmpv3IpArray;
+	
 	private String type;
+	
+	private String resourceType;
 	
 	private boolean removeable;
 	
@@ -33,6 +41,10 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 	private String reviewStatus;
 	
 	private String processInstanceId;
+	
+	private String addition;
+	
+	private List<MediaAudioStreamVO> children;
 	
 	public String getPreviewUrl() {
 		return previewUrl;
@@ -97,12 +109,48 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 		return this;
 	}
 	
+	public String getIgmpv3Status() {
+		return igmpv3Status;
+	}
+
+	public MediaAudioStreamVO setIgmpv3Status(String igmpv3Status) {
+		this.igmpv3Status = igmpv3Status;
+		return this;
+	}
+
+	public String getIgmpv3Mode() {
+		return igmpv3Mode;
+	}
+
+	public MediaAudioStreamVO setIgmpv3Mode(String igmpv3Mode) {
+		this.igmpv3Mode = igmpv3Mode;
+		return this;
+	}
+
+	public List<String> getIgmpv3IpArray() {
+		return igmpv3IpArray;
+	}
+
+	public MediaAudioStreamVO setIgmpv3IpArray(List<String> igmpv3IpArray) {
+		this.igmpv3IpArray = igmpv3IpArray;
+		return this;
+	}
+
 	public String getType() {
 		return type;
 	}
 
 	public MediaAudioStreamVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public MediaAudioStreamVO setResourceType(String resourceType) {
+		this.resourceType = resourceType;
 		return this;
 	}
 
@@ -151,6 +199,24 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 		return this;
 	}
 
+	public String getAddition() {
+		return addition;
+	}
+
+	public MediaAudioStreamVO setAddition(String addition) {
+		this.addition = addition;
+		return this;
+	}
+
+	public List<MediaAudioStreamVO> getChildren() {
+		return children;
+	}
+
+	public MediaAudioStreamVO setChildren(List<MediaAudioStreamVO> children) {
+		this.children = children;
+		return this;
+	}
+
 	@Override
 	public MediaAudioStreamVO set(MediaAudioStreamPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -161,14 +227,18 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 			.setAuthorName(entity.getAuthorName())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setRemarks(entity.getRemarks())
+			.setIgmpv3Status(entity.getIgmpv3Status()==null?"close":entity.getIgmpv3Status())
+			.setIgmpv3Mode(entity.getIgmpv3Mode())
 			.setType(MediaAudioStreamItemType.AUDIO_STREAM.toString())
 			.setRemoveable(true)
 			.setIcon(MediaAudioStreamItemType.AUDIO_STREAM.getIcon())
 			.setStyle(MediaAudioStreamItemType.AUDIO_STREAM.getStyle()[0])
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
-			.setProcessInstanceId(entity.getProcessInstanceId());
+			.setProcessInstanceId(entity.getProcessInstanceId())
+			.setAddition(entity.getAddition());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioStreamPO.SEPARATOR_TAG)));
-		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaAudioStreamPO.SEPARATOR_KEYWORDS)));	 
+		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaAudioStreamPO.SEPARATOR_KEYWORDS)));
+		if(entity.getIgmpv3Ips() != null) this.setIgmpv3IpArray(Arrays.asList(entity.getIgmpv3Ips().split(MediaAudioStreamPO.SEPARATOR_IPS)));
 		return this;
 	}
 	
@@ -182,6 +252,7 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setRemarks("-")
 			.setType(MediaAudioStreamItemType.FOLDER.toString())
+			.setResourceType(entity.getType().toString())
 			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaAudioStreamItemType.FOLDER.getIcon())
 			.setStyle(MediaAudioStreamItemType.FOLDER.getStyle()[0])

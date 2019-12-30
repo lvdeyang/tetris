@@ -5,6 +5,7 @@ import java.util.List;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, MediaVideoStreamPO>{
@@ -23,7 +24,15 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 	
 	private List<String> keyWords;
 	
+	private String igmpv3Status;
+	
+	private String igmpv3Mode;
+	
+	private List<String> igmpv3IpArray;
+	
 	private String type;
+	
+	private String resourceType;
 	
 	private boolean removeable;
 	
@@ -34,6 +43,10 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 	private String reviewStatus;
 	
 	private String processInstanceId;
+	
+	private String addition;
+	
+	private List<MediaVideoStreamVO> children;
 	
 	public List<String> getPreviewUrl() {
 		return previewUrl;
@@ -98,12 +111,48 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 		return this;
 	}
 	
+	public String getIgmpv3Status() {
+		return igmpv3Status;
+	}
+
+	public MediaVideoStreamVO setIgmpv3Status(String igmpv3Status) {
+		this.igmpv3Status = igmpv3Status;
+		return this;
+	}
+
+	public String getIgmpv3Mode() {
+		return igmpv3Mode;
+	}
+
+	public MediaVideoStreamVO setIgmpv3Mode(String igmpv3Mode) {
+		this.igmpv3Mode = igmpv3Mode;
+		return this;
+	}
+
+	public List<String> getIgmpv3IpArray() {
+		return igmpv3IpArray;
+	}
+
+	public MediaVideoStreamVO setIgmpv3IpArray(List<String> igmpv3IpArray) {
+		this.igmpv3IpArray = igmpv3IpArray;
+		return this;
+	}
+
 	public String getType() {
 		return type;
 	}
 
 	public MediaVideoStreamVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+
+	public String getResourceType() {
+		return resourceType;
+	}
+
+	public MediaVideoStreamVO setResourceType(String resourceType) {
+		this.resourceType = resourceType;
 		return this;
 	}
 
@@ -152,6 +201,24 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 		return this;
 	}
 
+	public String getAddition() {
+		return addition;
+	}
+
+	public MediaVideoStreamVO setAddition(String addition) {
+		this.addition = addition;
+		return this;
+	}
+
+	public List<MediaVideoStreamVO> getChildren() {
+		return children;
+	}
+
+	public MediaVideoStreamVO setChildren(List<MediaVideoStreamVO> children) {
+		this.children = children;
+		return this;
+	}
+
 	@Override
 	public MediaVideoStreamVO set(MediaVideoStreamPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -161,15 +228,19 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 			.setAuthorName(entity.getAuthorName())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setRemarks(entity.getRemarks())
+			.setIgmpv3Status(entity.getIgmpv3Status()==null?"close":entity.getIgmpv3Status())
+			.setIgmpv3Mode(entity.getIgmpv3Mode())
 			.setType(MediaVideoStreamItemType.VIDEO_STREAM.toString())
 			.setRemoveable(true)
 			.setIcon(MediaVideoStreamItemType.VIDEO_STREAM.getIcon())
 			.setStyle(MediaVideoStreamItemType.VIDEO_STREAM.getStyle()[0])
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
-			.setProcessInstanceId(entity.getProcessInstanceId());
+			.setProcessInstanceId(entity.getProcessInstanceId())
+			.setAddition(entity.getAddition());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoStreamPO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoStreamPO.SEPARATOR_KEYWORDS)));
 		if (entity.getPreviewUrl() != null) this.setPreviewUrl(new ArrayListWrapper<String>().add(entity.getPreviewUrl()).getList());
+		if(entity.getIgmpv3Ips() != null) this.setIgmpv3IpArray(Arrays.asList(entity.getIgmpv3Ips().split(MediaAudioStreamPO.SEPARATOR_IPS)));
 		return this;
 	}
 	
@@ -182,6 +253,7 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 			.setCreateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setRemarks("-")
 			.setType(MediaVideoStreamItemType.FOLDER.toString())
+			.setResourceType(entity.getType().toString())
 			.setRemoveable(entity.getDepth().intValue()==2?false:true)
 			.setIcon(MediaVideoStreamItemType.FOLDER.getIcon())
 			.setStyle(MediaVideoStreamItemType.FOLDER.getStyle()[0])

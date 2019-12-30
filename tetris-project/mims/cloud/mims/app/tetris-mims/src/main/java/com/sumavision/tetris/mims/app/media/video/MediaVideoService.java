@@ -1,6 +1,10 @@
 package com.sumavision.tetris.mims.app.media.video;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -369,8 +373,8 @@ public class MediaVideoService {
 		if(folders==null || folders.size()<=0) throw new FolderNotFoundException();
 		List<FolderPO> rootFolders = folderQuery.findRoots(folders);
 		FolderPO folder = rootFolders.get(0);
-//		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO.toString());
 		if (folder == null) throw new FolderNotFoundException();
+		
 		MediaVideoPO mediaVideoPO = new MediaVideoPO();
 		mediaVideoPO.setUpdateTime(new Date());
 		mediaVideoPO.setName(name);
@@ -384,9 +388,44 @@ public class MediaVideoService {
 		mediaVideoPO.setPreviewUrl(previewUrl);
 		mediaVideoPO.setUploadTmpPath(ftpUrl);
 		mediaVideoPO.setStoreType(StoreType.REMOTE);
+		if (previewUrl.endsWith(".m3u8")){
+			Long duration = getHlsDuration(previewUrl, null);
+			if (duration != 0l) mediaVideoPO.setDuration(duration);
+		}
 		mediaVideoDao.save(mediaVideoPO);
 		
 		return new MediaVideoVO().set(mediaVideoPO);
+	}
+	
+	/**
+	 * 添加视频媒资上传任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午3:21:49
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param MediaAudioTaskVO task 上传任务
+	 * @param FolderPO folder 文件夹
+	 * @return MediaVideoPO 视频媒资
+	 */
+	public MediaVideoPO addTask(
+			UserVO user, 
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			MediaVideoTaskVO task, 
+			FolderPO folder,
+			String addition) throws Exception{
+		MediaVideoPO mediaVideoPO = addTask(user, name, tags, keyWords, remark, task, folder);
+		if (addition != null) {
+			mediaVideoPO.setAddition(addition);
+			mediaVideoDao.save(mediaVideoPO);
+		}
+		return mediaVideoPO;
 	}
 	
 	/**
@@ -779,4 +818,31 @@ public class MediaVideoService {
 		mediaVideoDao.save(video);
 	}
 	
+	/**
+	 * 读取远程m3u8文件获取播放时长<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月11日 上午11:19:14
+	 * @param String uri m3u8远程地址
+	 * @param String encode 编码格式
+	 * @return Long 时长
+	 */
+	public Long getHlsDuration(String uri, String encode) throws Exception {
+		Long duration = 0l;
+		URL url = new URL(uri);
+		InputStream is = url.openStream();
+		BufferedReader br = new BufferedReader(new InputStreamReader(is, encode != null && !encode.isEmpty() ? encode : "utf-8"));
+		String sLine = null;
+		try {
+			while ((sLine = br.readLine()) != null) {
+				if (sLine.startsWith("#EXTINF:")) {
+					duration = duration + (long)(Double.parseDouble(sLine.split("#EXTINF:")[1].split(",")[0]) * 1000);
+				}
+			}
+		} catch (Exception e) {
+		} finally {
+			br.close();
+		}
+		return duration;
+	}
 }

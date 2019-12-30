@@ -130,6 +130,8 @@ public class Adapter {
 	 */
 	public String changeHttpToFtp(String httpUrl) throws Exception {
 		
+		if (httpUrl.endsWith(".m3u8")) return httpUrl;
+		
 		String ftpPath = null;
 
 		String[] split = httpUrl.split(":");

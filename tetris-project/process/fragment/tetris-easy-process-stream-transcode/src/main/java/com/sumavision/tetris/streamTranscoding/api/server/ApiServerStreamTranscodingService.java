@@ -7,10 +7,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
-import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
+import com.sumavision.tetris.orm.exception.ErrorTypeException;
 import com.sumavision.tetris.streamTranscoding.StreamTranscodingAdapter;
 import com.sumavision.tetris.streamTranscoding.addOutput.AddOutputService;
+import com.sumavision.tetris.streamTranscoding.exception.MediaStreamHasNoPreviewUrlException;
 import com.sumavision.tetris.streamTranscodingProcessVO.FileToStreamVO;
 import com.sumavision.tetris.streamTranscodingProcessVO.RecordVO;
 import com.sumavision.tetris.streamTranscodingProcessVO.StreamTranscodingProcessVO;
@@ -23,12 +28,24 @@ public class ApiServerStreamTranscodingService {
 	private StreamTranscodingAdapter streamTranscodingAdapter;
 	
 	@Autowired
-	private MediaAVideoQuery mediaAVideoQuery;
+	private MediaVideoStreamQuery mediaVideoStreamQuery;
+	
+	@Autowired
+	private MediaAudioStreamQuery mediaAudioStreamQuery;
 	
 	@Autowired
 	private AddOutputService addOutputService;
 	
-	public StreamTranscodingProcessVO fileParamFormat(MediaAVideoVO media, boolean record, Integer playCount, String stopCallback, String mediaType, String recordCallback, Integer progNum, String task) throws Exception{
+	public StreamTranscodingProcessVO fileParamFormat(
+			MediaAVideoVO media,
+			boolean record,
+			Integer playCount,
+			String stopCallback,
+			String mediaType,
+			String recordCallback,
+			Integer progNum,
+			String task,
+			String inputParam) throws Exception{
 		FileToStreamVO fileToStreamVO = new FileToStreamVO();
 		fileToStreamVO.setFileUrl(media.getPreviewUrl());
 		fileToStreamVO.setDuration(media.getDuration());
@@ -44,6 +61,10 @@ public class ApiServerStreamTranscodingService {
 		streamTranscodingVO.setBePCM(0);
 		streamTranscodingVO.setMediaType(mediaType);
 		streamTranscodingVO.setProgNum(progNum);
+		if (inputParam != null && !inputParam.isEmpty()) {
+			InputParamVO inputParamVO = JSON.parseObject(inputParam, InputParamVO.class);
+			streamTranscodingVO.setInputParam(inputParamVO);
+		}
 		TaskVO taskVO = JSON.parseObject(task, TaskVO.class);
 		List<OutParamVO> outParamVOs = taskVO.getOutParam();
 		
@@ -67,14 +88,35 @@ public class ApiServerStreamTranscodingService {
 				.setRecordVO(recordVO);
 	}
 	
-	public StreamTranscodingProcessVO streamParamFormat(Long assetId, String assetPath, boolean record, Integer bePCM, String mediaType, String recordCallback, Integer progNum, String task) throws Exception{
+	public StreamTranscodingProcessVO streamParamFormat(
+			Long assetId,
+			String assetPath,
+			boolean record,
+			Integer bePCM,
+			String mediaType,
+			String recordCallback,
+			Integer progNum,
+			String task,
+			String inputParam) throws Exception{
 		FileToStreamVO fileToStreamVO = new FileToStreamVO();
 		fileToStreamVO.setNeed(false);
 		
 		StreamTranscodingVO streamTranscodingVO = new StreamTranscodingVO();
 		if ((assetPath == null || assetPath.isEmpty()) && assetId != null) {
-			MediaAVideoVO media = mediaAVideoQuery.loadByIdAndType(assetId, mediaType);
-			assetPath = media.getPreviewUrl();
+			switch (mediaType.toLowerCase()) {
+			case "video":
+				MediaVideoStreamVO mediaVideoStreamVO = mediaVideoStreamQuery.findById(assetId);
+				List<String> urls = mediaVideoStreamVO.getPreviewUrl();
+				if (urls == null || urls.isEmpty()) throw new MediaStreamHasNoPreviewUrlException(assetId);
+				assetPath = mediaVideoStreamVO.getPreviewUrl().get(0);
+				break;
+			case "audio":
+				MediaAudioStreamVO mediaAudioStreamVO = mediaAudioStreamQuery.findById(assetId);
+				assetPath = mediaAudioStreamVO.getPreviewUrl();
+				break;
+			default:
+				throw new ErrorTypeException("mediaType", mediaType);
+			}
 		}
 		streamTranscodingVO.setAssetUrl(assetPath);
 		streamTranscodingVO.setNeedRecordOutput(record);
@@ -82,6 +124,10 @@ public class ApiServerStreamTranscodingService {
 		streamTranscodingVO.setMediaType(mediaType);
 		streamTranscodingVO.setProgNum(progNum);
 		streamTranscodingVO.setTranscoding(true);
+		if (inputParam != null && !inputParam.isEmpty()) {
+			InputParamVO inputParamVO = JSON.parseObject(inputParam, InputParamVO.class);
+			streamTranscodingVO.setInputParam(inputParamVO);
+		}
 		TaskVO taskVO = JSON.parseObject(task, TaskVO.class);
 		List<OutParamVO> outParamVOs = taskVO.getOutParam();
 		

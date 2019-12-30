@@ -100,7 +100,7 @@ public class ApiProcessChannelController {
 					map.put("assetPath", new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString());
 				}
 				
-				Thread.sleep(5000);
+				Thread.sleep(3000);
 			}
 		} else {
 			map.put("assetPath", "");
@@ -121,10 +121,11 @@ public class ApiProcessChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/stop")
-	public void stop(String messageId, HttpServletRequest request) throws Exception {
+	public Object stop(String messageId, HttpServletRequest request) throws Exception {
 		BroadAbilityRemotePO remotePO = broadAbilityRemoteDAO.findByProcessInstanceId(messageId);
 		if (remotePO != null) {
 			channelService.stopBroadcast(remotePO.getChannelId());
 		}
+		return null;
 	}
 }

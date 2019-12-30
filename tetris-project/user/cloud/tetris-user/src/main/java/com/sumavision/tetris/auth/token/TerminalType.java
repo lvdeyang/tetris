@@ -15,6 +15,7 @@ public enum TerminalType {
 	ANDROID_PORTAL("安卓门户", "/api/terminal", 4*60*60),
 	ANDROID_COLLECTING("安卓采集终端", "/api/android", 4*60*60),
 	QT_MEDIA_EDITOR("qt快编软件", "/api/qt", 4*60*60),
+	QT_POLLING("qt轮询软件", "/api/polling", 4*60*60),
 	QT_CATALOGUE("qt编单软件", "/api/scheduel", 4*60*60),
 	API("api调用", "/api/server", 0);
 	

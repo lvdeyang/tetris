@@ -1,0 +1,146 @@
+<el-dialog
+        class="program-scree"
+        title="节目编辑"
+        width="1240px"
+        :visible.sync="visible"
+        :before-close="handleClose">
+
+    <el-dialog
+            title="目录资源选择"
+            :visible.sync="dialog.chooseResource.visible"
+            width="1140px"
+            append-to-body
+            :before-close="handleChooseResourcesClose">
+
+        <el-container>
+            <el-aside style="border-right: 1px solid #eee;width: 550px">
+                <el-tree
+                        :loading="dialog.chooseResource.tree.loading"
+                        ref="resourceTree"
+                        :props="dialog.chooseResource.tree.props"
+                        :data="dialog.chooseResource.tree.data"
+                        node-key="id"
+                        :expand-on-click-node="false"
+                        :current-node-key="dialog.chooseResource.tree.current"
+                        default-expand-all
+                        @current-change="currentResourceTreeNodeChange"
+                        highlight-current
+                        style="padding: 20px;height: 500px;overflow-y:auto">
+                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
+                                  slot-scope="{node, data}">
+                                <span style="font-size:14px;">
+                                    <span>{{data.name}}</span>
+                                </span>
+                            </span>
+                </el-tree>
+            </el-aside>
+            <el-container style="margin-left: 20px">
+                <el-table
+                        ref="resourceTable"
+                        :data="dialog.chooseResource.resources.data"
+                        tooltip-effect="dark"
+                        @selection-change="handleResourceCheckChange"
+                        :row-key="getRowKeys"
+                        style="width: 100%;height: 580px;overflow-y: auto">
+                    <el-table-column type="selection" width="30" reserve-selection></el-table-column>
+                    <el-table-column label="媒资名称" width="280" prop="name"></el-table-column>
+                    <!--<el-table-column label="时长(毫秒)" width="110" prop="duration"></el-table-column>-->
+                </el-table>
+            </el-container>
+        </el-container>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="handleChooseResourcesClose">取 消</el-button>
+            <el-button size="medium" type="primary" @click="handleChooseResourcesCommit"
+                       :loading="dialog.chooseResource.loading">确 定
+            </el-button>
+        </span>
+    </el-dialog>
+
+    <el-container>
+        <el-header>
+            <el-select
+                    v-model="options.currentName"
+                    placeholder="请选择分屏"
+                    @change="handleScreenOptionsChange"
+                    :disabled="channelData.autoBroad">
+                <el-option
+                        v-for="item in options.list"
+                        :key="item.id"
+                        :value="item.name">
+                </el-option>
+            </el-select>
+            <el-button size="small" type="primary" @click="handleCommit"
+                       :loading="loading" style="margin-left: 20px"
+                       :disabled="channelData.autoBroad">
+                保 存
+            </el-button>
+            <el-button size="small" @click="handleClose">
+                关 闭
+            </el-button>
+        </el-header>
+        <el-main>
+            <div style="position: relative; padding: 230px 300px; display: inline-block;">
+                <div class="screen"
+                     v-if="options.current && options.current.screen"
+                     v-for="item in options.current.screen"
+                     :style="item"
+                     :class="{choosed : options.currentScreen == item}"
+                     @click="handleScreenChoose(item,$event)">
+                    <el-button class="chooseFile" size="small" type="primary" @click="chooseResources(item)">
+                        选择文件
+                    </el-button>
+                </div>
+            </div>
+
+            <el-table
+                    ref="programTable"
+                    tooltip-effect="dark"
+                    :data="options.currentScreen.data"
+                    :check-strictly = "checkStrictly"
+                    :default-sort="{prop:'index',order:'ascending'}"
+                    style="width: 490px;height: 450px;overflow: auto;display: inline-block;">
+                <el-table-column width="30"></el-table-column>
+                <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
+                <el-table-column label="排序" width="60" prop="index"></el-table-column>
+                <template v-if="channelData.autoBroad">
+                    <el-table-column :key="Math.random()" label="综合分值" width="90" prop="hotWeight"></el-table-column>
+                    <el-table-column :key="Math.random()" label="下载量" width="70" prop="downloadCount"></el-table-column>
+                </template>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <template>
+                            <el-tooltip class="item" effect="dark" content="预览"
+                                        placement="bottom">
+                                <el-button type="text" class="icon-eye-open"
+                                           style="margin:0 5px; font-size:18px; padding:0;"
+                                           @click="handlePreview(scope)">
+                                </el-button>
+                            </el-tooltip>
+                        </template>
+                        <template v-if="!channelData.autoBroad">
+                            <el-tooltip class="item" effect="dark" content="向上移动"
+                                        placement="bottom">
+                                <el-button type="text" icon="feather-icon-chevron-up"
+                                           style="margin:0 5px 0 0; font-size:18px; padding:0;"
+                                           @click="programResourceUp(scope)"></el-button>
+                            </el-tooltip>
+                            <el-tooltip class="item" effect="dark" content="向下移动"
+                                        placement="bottom">
+                                <el-button type="text" icon="feather-icon-chevron-down"
+                                           style="margin:0 5px; font-size:18px; padding:0;"
+                                           @click="programResourceDown(scope)"></el-button>
+                            </el-tooltip>
+                            <el-tooltip class="item" effect="dark" content="删除资源"
+                                        placement="bottom">
+                                <el-button type="text" icon="el-icon-delete"
+                                           style="margin:0 5px; font-size:18px; padding:0;"
+                                           @click="programResourceDelete(scope)"></el-button>
+                            </el-tooltip>
+                        </template>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-main>
+    </el-container>
+</el-dialog>

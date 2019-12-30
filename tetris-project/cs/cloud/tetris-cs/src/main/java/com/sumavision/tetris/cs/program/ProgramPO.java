@@ -18,9 +18,12 @@ public class ProgramPO extends AbstractBasePO {
 	/** 排期id */
 	private Long scheduleId;
 	
+	/** 分屏id */
+	private Long screenId;
+	
 	/** 分屏数 */
 	private Long screenNum;
-
+	
 	@Column(name="SCHEDULE_ID")
 	public Long getScheduleId() {
 		return scheduleId;
@@ -28,6 +31,15 @@ public class ProgramPO extends AbstractBasePO {
 
 	public void setScheduleId(Long scheduleId) {
 		this.scheduleId = scheduleId;
+	}
+
+	@Column(name = "SCREEN_ID")
+	public Long getScreenId() {
+		return screenId;
+	}
+
+	public void setScreenId(Long screenId) {
+		this.screenId = screenId;
 	}
 
 	@Column(name="SCREEN_NUM")

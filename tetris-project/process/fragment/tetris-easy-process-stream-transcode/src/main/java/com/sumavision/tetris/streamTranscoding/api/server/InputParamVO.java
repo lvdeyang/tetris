@@ -1,39 +1,36 @@
 package com.sumavision.tetris.streamTranscoding.api.server;
 
 public class InputParamVO {
-	private Integer videoPid;
-	private Integer audioPid;
-	private String videoCodec;
-	private String audioCodec;
-	private Integer programNum;
-	public Integer getVideoPid() {
-		return videoPid;
+	/** 采样率 */
+	private String sourSample;
+	
+	/** 音频采样类型 */
+	private String sourPrecision;
+	
+	/** 声道布局 */
+	private String sourChannel;
+	
+	public String getSourSample() {
+		return sourSample;
 	}
-	public void setVideoPid(Integer videoPid) {
-		this.videoPid = videoPid;
+	
+	public void setSourSample(String sourSample) {
+		this.sourSample = sourSample;
 	}
-	public Integer getAudioPid() {
-		return audioPid;
+	
+	public String getSourPrecision() {
+		return sourPrecision;
 	}
-	public void setAudioPid(Integer audioPid) {
-		this.audioPid = audioPid;
+	
+	public void setSourPrecision(String sourPrecision) {
+		this.sourPrecision = sourPrecision;
 	}
-	public String getVideoCodec() {
-		return videoCodec;
+	
+	public String getSourChannel() {
+		return sourChannel;
 	}
-	public void setVideoCodec(String videoCodec) {
-		this.videoCodec = videoCodec;
-	}
-	public String getAudioCodec() {
-		return audioCodec;
-	}
-	public void setAudioCodec(String audioCodec) {
-		this.audioCodec = audioCodec;
-	}
-	public Integer getProgramNum() {
-		return programNum;
-	}
-	public void setProgramNum(Integer programNum) {
-		this.programNum = programNum;
+	
+	public void setSourChannel(String sourChannel) {
+		this.sourChannel = sourChannel;
 	}
 }

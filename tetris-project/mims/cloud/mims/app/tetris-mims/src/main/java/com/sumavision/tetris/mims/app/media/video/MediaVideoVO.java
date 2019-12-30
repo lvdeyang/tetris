@@ -60,6 +60,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private String encryptionUrl;
 	
+	private String addition;
+	
 	private List<MediaVideoVO> children;
 	
 	public String getName() {
@@ -278,6 +280,15 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		return this;
 	}
 
+	public String getAddition() {
+		return addition;
+	}
+
+	public MediaVideoVO setAddition(String addition) {
+		this.addition = addition;
+		return this;
+	}
+
 	@Override
 	public MediaVideoVO set(MediaVideoPO entity) throws Exception {
 		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
@@ -303,7 +314,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setEncryption(entity.getEncryption() != null && entity.getEncryption() ? true : false)
 			.setEncryptionUrl(entity.getEncryptionUrl())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
-			.setProcessInstanceId(entity.getProcessInstanceId());;
+			.setProcessInstanceId(entity.getProcessInstanceId())
+			.setAddition(entity.getAddition());
 		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoPO.SEPARATOR_KEYWORDS)));	 
 		return this;

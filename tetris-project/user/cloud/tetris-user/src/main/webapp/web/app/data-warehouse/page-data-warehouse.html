@@ -1,0 +1,130 @@
+<mi-frame id="page-data-warehouse-wrapper" :menus="menus" :user="user" :groups="groups" :active-id="activeId">
+
+    <template slot="title">数据仓库</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>数据仓库</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <div style="width:100%; height:100%; position:relative;">
+            <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+                <div style="box-sizing:border-box; width:420px; position:absolute; left:0; top:0; bottom:0; padding:10px; border-right:1px solid #ebeef5;">
+                    <div style="width:100%; height:100%; position:relative">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                    v-loading="tree.loading"
+                                    ref="projectTree"
+                                    :props = "tree.props"
+                                    :data = "tree.data"
+                                    node-key="uuid"
+                                    :current-node-key="tree.current"
+                                    check-strictly
+                                    :expand-on-click-node="false"
+                                    default-expand-all
+                                    highlight-current
+                                    @current-change="currentTreeNodeChange">
+
+                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
+                                <span style="font-size:14px;">
+                                    <el-tooltip class="item" effect="light" :content="'信息：' + data.description" placement="bottom">
+                                        <span>{{data.name}}</span>
+                                    </el-tooltip>
+                                     <!--<span>{{data.name}}</span>-->
+                                </span>
+                                <span>
+                                    <el-button type="text" size="mini" style="padding:0; margin-left:5px;" @click.stop="treeNodeDelete(node, data)">
+                                        <span style="font-size:16px;" class="icon-trash"></span>
+                                    </el-button>
+                                </span>
+                              </span>
+                            </el-tree>
+                        </el-scrollbar>
+                        <el-button type="primary" size="medium" circle style="position:absolute; left:-15px; bottom:-15px; box-shadow:0 2px 12px 0 rgba(0,0,0,1);" @click="handleAddProject" icon="el-icon-plus"></el-button>
+                    </div>
+                </div>
+                <div v-if="tree.current" style="box-sizing:border-box; position:absolute; left:420px; top:0; right:0; bottom:0; padding:10px;">
+                    <el-button type="primary" size="small" @click="handleAddData"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加备份</el-button>
+                    <el-scrollbar style="height:100%;">
+                        <el-table
+                                :data="table.rows"
+                                :row-key="rowKey"
+                                style="width:100%">
+                            <el-table-column
+                                    type="selection"
+                                    width="55">
+                            </el-table-column>
+                            <el-table-column
+                                    label="备份名称"
+                                    prop="name">
+                            </el-table-column>
+                            <el-table-column
+                                    label="目录地址"
+                                    prop="path">
+                            </el-table-column>
+                            <el-table-column
+                                    label="操作"
+                                    width="250">
+                                <template slot-scope="scope">
+                                    <el-tooltip effect="dark" content="下载" placement="bottom-end">
+                                        <el-button type="text" icon="el-icon-download" style="font-size:20px; padding:0;" @click="handleDownload(scope)"></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip effect="dark" content="删除" placement="bottom-end">
+                                        <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleDeleteData(scope)"></el-button>
+                                    </el-tooltip>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-scrollbar>
+                </div>
+            </el-card>
+        </div>
+
+        <el-dialog
+                title="添加项目"
+                width="500px"
+                :visible.sync="dialog.addProject.visible"
+                @close="handleAddProjectClose">
+            <el-form ref="addProjectForm" label-width="80px">
+                <el-form-item label="项目名称">
+                    <el-input v-model="dialog.addProject.name" placeholder="请输入项目名称"></el-input>
+                </el-form-item>
+                <el-form-item label="英文标识">
+                    <el-input v-model="dialog.addProject.path" placeholder="请输入项目英文标识" onkeyup="this.value=this.value.replace(/[^\w_]/g,'');"></el-input>
+                </el-form-item>
+                <el-form-item label="项目说明">
+                    <el-input v-model="dialog.addProject.remark"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.addProject.visible = false">取 消</el-button>
+                <el-button size="medium" type="primary" :loading="dialog.addProject.loading" @click="handleAddProjectCommit">确 定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="添加备份"
+                width="500px"
+                :visible.sync="dialog.addData.visible"
+                @close="handleAddDataClose">
+            <el-form ref="addDataForm" label-width="100px">
+                <el-form-item label="备份文件名称">
+                    <el-input v-model="dialog.addData.name" placeholder="请输入备份文件名称"></el-input>
+                </el-form-item>
+                <el-form-item label="备份说明">
+                    <el-input v-model="dialog.addData.remark"></el-input>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.addData.visible = false">取 消</el-button>
+                <el-button size="medium" @click="handleAddDataCommit" type="primary" :loading="dialog.addData.loading">确 定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

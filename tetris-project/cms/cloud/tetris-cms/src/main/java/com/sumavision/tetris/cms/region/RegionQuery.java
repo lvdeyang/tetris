@@ -7,8 +7,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONArray;
-import com.sumavision.tetris.cms.region.exception.UserHasNotPermissionForRegionException;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserVO;
 
@@ -139,4 +137,56 @@ public class RegionQuery {
 		return true;
 	}
 	
+	/**
+	 * 根据地区信息获取最底层有效ip<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月17日 下午2:55:31
+	 * @param UserVO user 用户信息
+	 * @param String province 省份
+	 * @param String city 城市
+	 * @param String district 地区
+	 * @return RegionVO 有效ip的地区信息
+	 */
+	public RegionVO queryIp(UserVO user,  String province, String city, String district) throws Exception {
+		String groupId = user.getGroupId();
+		if (groupId == null) return null;
+		
+		if (district != null && !district.isEmpty()) {
+			RegionPO regionPO = queryIp(groupId, district);
+			return regionPO == null ? queryIp(user, province, city, null) : new RegionVO().set(regionPO);
+		} else if (city != null && !city.isEmpty()) {
+			RegionPO regionPO = queryIp(groupId, city);
+			return regionPO == null ? queryIp(user, province, null, null) : new RegionVO().set(regionPO);
+		} else if (province != null && !province.isEmpty()) {
+			RegionPO regionPO = queryIp(groupId, province);
+			return regionPO == null ? null : new RegionVO().set(regionPO);
+		}else {
+			return null;
+		}
+	}
+	
+	private RegionPO queryIp(String groupId, String regionName) throws Exception {
+		RegionPO region = null;
+		
+		if (regionName != null && !regionName.isEmpty()) {
+			List<RegionPO> regions = regionDao.findByGroupIdAndName(groupId, regionName);
+			if (!regions.isEmpty()) {
+				RegionPO first = regions.get(0);
+				if (regions.size() == 1) {
+					if (first.getIp() != null && !first.getIp().isEmpty()){
+						region = first;
+					}
+				} else {
+					for (RegionPO regionPO : regions) {
+						if (regionPO.getIp() != null && !regionPO.getIp().isEmpty()) {
+							region = regionPO;
+						}
+					}
+				}
+			}
+		}
+		
+		return region;
+	}
 }

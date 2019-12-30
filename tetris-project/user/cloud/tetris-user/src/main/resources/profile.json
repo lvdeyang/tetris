@@ -1,0 +1,6 @@
+{
+	"dataWarehouseIp": "192.165.58.123",
+	"dataWarehousePort": "8090",
+	"dataWarehouseUsername": "testUser",
+	"dataWarehousePassword": "test@@123456"
+ }

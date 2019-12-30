@@ -1,0 +1,29 @@
+.program-scree .content{height:340px; position:relative;}
+.program-scree .content-wrapper{width:600px; height:400px; position:absolute; top:-30px; left:0;}
+.program-scree .tree-wrapper{height:348px; margin-top: 20px; overflow: auto;}
+.program-scree .footer{height:32px;}
+
+.screen{
+    border: 1px solid #ebeef5;
+    transition: .3s;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color:#777;
+    /*padding-top: 20px;*/
+    /*padding-left: 20px;*/
+    position: absolute;
+    display: inline-block;
+}
+
+.screen:hover{
+    box-shadow: inset 0 2px 12px 0 rgba(1, 1, 1, 1);
+}
+
+.screen.choosed{
+    background-color:#408294;
+}
+
+.chooseFile{
+    margin-top: 20px;
+    margin-left: 20px;
+}

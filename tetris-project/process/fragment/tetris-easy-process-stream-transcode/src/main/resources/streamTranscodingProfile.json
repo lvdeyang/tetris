@@ -1,11 +1,9 @@
 {
-	"ftpUserName":"test",
-	"ftpPassword":"123",
-	"toolIp":"192.165.56.112",
-	"toolPort":"8800",
-	"cmsIp":"10.10.40.182",
-	"cmsPort":"8580",
-	"udpStartPort":15000,
-	"recordIp":"10.10.40.116",
-	"recordPort":"80"
+	"toolIp": "10.10.40.125",
+	"toolPort": "8800",
+	"cmsIp": "10.10.40.182",
+	"cmsPort": "8580",
+	"udpStartPort": 15000,
+	"recordIp": "10.10.40.116",
+	"recordPort": "80"
 }

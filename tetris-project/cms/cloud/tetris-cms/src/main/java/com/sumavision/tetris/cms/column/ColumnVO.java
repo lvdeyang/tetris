@@ -10,6 +10,7 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 
 	private String name;
 	private String code;
+	private String thumbnail;
 	private Long parentId;
 	/** 额外：标记订阅  */
 	private Boolean subscribed;
@@ -35,6 +36,15 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 
 	public ColumnVO setCode(String code) {
 		this.code = code;
+		return this;
+	}
+
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public ColumnVO setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
 		return this;
 	}
 
@@ -99,6 +109,7 @@ public class ColumnVO extends AbstractBaseVO<ColumnVO, ColumnPO>{
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setName(entity.getName())
 			.setCode(entity.getCode())
+			.setThumbnail(entity.getThumbnail())
 			.setColumnOrder(entity.getColumnOrder())
 			.setParentId(entity.getParentId());
 		return this;

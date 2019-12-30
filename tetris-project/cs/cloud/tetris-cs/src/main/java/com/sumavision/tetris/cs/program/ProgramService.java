@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cs.program;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -32,12 +33,27 @@ public class ProgramService {
 	 */
 	public ProgramVO setProgram(ProgramVO programVO) throws Exception {
 
-		ProgramPO programPO = this.setProgramScreenNum(programVO.getScheduleId(), programVO.getScreenNum());
+		ProgramPO programPO = this.setProgramScreenNum(programVO.getScheduleId(), programVO.getScreenNum(), programVO.getScreenId());
 		
 		ProgramVO returnProgramVO = new ProgramVO().set(programPO);
 		
 		returnProgramVO.setScreenInfo(this.setScreenInfo(programPO.getId(), programVO.getScreenInfo()));
 
+		return returnProgramVO;
+	}
+	
+	public ProgramVO setProgram(Long scheduleId, TemplateVO templateVO) throws Exception {
+		ProgramPO programPO = setProgramScreenNum(scheduleId, templateVO.getScreenNum(), templateVO.getId());
+		ProgramVO returnProgramVO = new ProgramVO().set(programPO);
+		
+		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
+		List<TemplateScreenVO> templateScreenVOs = templateVO.getScreen();
+		for (TemplateScreenVO templateScreenVO : templateScreenVOs) {
+			if (templateScreenVO.getData() != null) screenVOs.addAll(templateScreenVO.getData());
+		}
+		
+		returnProgramVO.setScreenInfo(this.setScreenInfo(programPO.getId(), screenVOs));
+		
 		return returnProgramVO;
 	}
 
@@ -50,14 +66,16 @@ public class ProgramService {
 	 * @param screenNum 分屏数
 	 * @return ProgramPO 分屏信息
 	 */
-	private ProgramPO setProgramScreenNum(Long scheduleId, Long screenNum) {
+	private ProgramPO setProgramScreenNum(Long scheduleId, Long screenNum, Long screenId) {
 		ProgramPO program = programDao.findByScheduleId(scheduleId);
 		if (program != null) {
 			program.setScreenNum(screenNum);
+			program.setScreenId(screenId);
 		}else {
 			program = new ProgramPO();
 			program.setScheduleId(scheduleId);
 			program.setScreenNum(screenNum);
+			program.setScreenId(screenId);
 			program.setUpdateTime(new Date());
 		}
 		programDao.save(program);

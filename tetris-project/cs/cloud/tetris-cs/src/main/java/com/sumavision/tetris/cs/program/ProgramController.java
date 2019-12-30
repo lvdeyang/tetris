@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -45,12 +46,13 @@ public class ProgramController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/set")
-	public Object programSet(String programInfo,HttpServletRequest request) throws Exception {
+	public Object programSet(Long scheduleId, String programInfo,HttpServletRequest request) throws Exception {
 		
-		ProgramVO program = JSONObject.parseObject(programInfo,ProgramVO.class);
+//		ProgramVO program = JSONObject.parseObject(programInfo,ProgramVO.class);
+//		ProgramVO retrunProgram = programService.setProgram(program);
 		
-		ProgramVO retrunProgram = programService.setProgram(program);
+		TemplateVO templateVO = JSON.parseObject(programInfo, TemplateVO.class);
 		
-		return retrunProgram;
+		return programService.setProgram(scheduleId, templateVO);
 	}
 }

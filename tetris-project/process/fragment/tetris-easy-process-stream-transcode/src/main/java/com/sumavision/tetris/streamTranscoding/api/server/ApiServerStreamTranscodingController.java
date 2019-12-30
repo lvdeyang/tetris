@@ -1,5 +1,6 @@
 package com.sumavision.tetris.streamTranscoding.api.server;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -59,17 +60,27 @@ public class ApiServerStreamTranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/task/file")
-	public Object addTaskFile(Long assetId, boolean record, Integer playTime, String mediaType, String recordCallback, Integer progNum, String task, String stopCallback, HttpServletRequest request) throws Exception{
+	public Object addTaskFile(
+			Long assetId,
+			boolean record,
+			Integer playTime,
+			String mediaType,
+			String recordCallback,
+			Integer progNum,
+			String task,
+			String stopCallback,
+			String inputParam,
+			HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
 		MediaAVideoVO media = mediaAVideoQuery.loadByIdAndType(assetId, mediaType);
 		if (media == null) return null;
 		
-		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.fileParamFormat(media, record, playTime, stopCallback, mediaType, recordCallback, progNum, task);
+		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.fileParamFormat(media, record, playTime, stopCallback, mediaType, recordCallback, progNum, task, inputParam);
 		JSONObject variables = new JSONObject();
-		variables.put("_pa17_file_fileToStreamInfo", JSON.toJSONString(processVO.getFileToStreamVO()));
-		variables.put("_pa17_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
-		variables.put("_pa17_file_recordInfo", JSON.toJSONString(processVO.getRecordVO()));
+		variables.put("_pa51_file_fileToStreamInfo", JSON.toJSONString(processVO.getFileToStreamVO()));
+		variables.put("_pa51_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
+		variables.put("_pa51_file_recordInfo", JSON.toJSONString(processVO.getRecordVO()));
 		
 		String processInstanceId = processService.startByKey("_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
 		
@@ -80,14 +91,24 @@ public class ApiServerStreamTranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/task")
-	public Object addTask(Long assetId, String assetPath, boolean record, Integer bePCM, String mediaType, String recordCallback, Integer progNum, String task,HttpServletRequest request) throws Exception{
+	public Object addTask(
+			Long assetId,
+			String assetPath,
+			boolean record,
+			Integer bePCM,
+			String mediaType,
+			String recordCallback,
+			Integer progNum,
+			String task,
+			String inputParam,
+			HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.streamParamFormat(assetId, assetPath, record, bePCM, mediaType, recordCallback, progNum, task);
+		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.streamParamFormat(assetId, assetPath, record, bePCM, mediaType, recordCallback, progNum, task, inputParam);
 		JSONObject variables = new JSONObject();
-		variables.put("_pa17_file_fileToStreamInfo", JSON.toJSONString(processVO.getFileToStreamVO()));
-		variables.put("_pa17_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
-		variables.put("_pa17_file_recordInfo", JSON.toJSONString(processVO.getRecordVO()));
+		variables.put("_pa51_file_fileToStreamInfo", JSON.toJSONString(processVO.getFileToStreamVO()));
+		variables.put("_pa51_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
+		variables.put("_pa51_file_recordInfo", JSON.toJSONString(processVO.getRecordVO()));
 		
 		String processInstanceId = processService.startByKey("_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
 		
@@ -100,14 +121,15 @@ public class ApiServerStreamTranscodingController {
 	@RequestMapping(value = "/delete/task")
 	public Object deleteTask(Long id, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
+		System.out.println("start:" + new Date());
 		
 		JSONObject variables = new JSONObject();
-		variables.put("_pa19_messageId", id);
-		variables.put("_pa21_messageId", id);
-		variables.put("_pa26_messageId", id);
+		variables.put("_pa52_messageId", id);
+		variables.put("_pa54_messageId", id);
+		variables.put("_pa55_messageId", id);
 		
 		String processInstanceId = processService.startByKey("_delete_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
-		
+		System.out.println("end:" + new Date());
 		return new HashMapWrapper<String, Object>().put("id", processInstanceId)
 				.getMap();
 	}

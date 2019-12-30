@@ -51,7 +51,7 @@ import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtDAO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtPO;
 import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtNotExistException;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.storage.StoreQuery;
@@ -81,6 +81,9 @@ public class MediaAudioService {
 	
 	@Autowired
 	private MediaAudioDAO mediaAudioDao;
+	
+	@Autowired
+	private MediaVideoService mediaVideoService;
 	
 	@Autowired
 	private Path path;
@@ -550,9 +553,44 @@ public class MediaAudioService {
 		mediaAudioPO.setStoreType(StoreType.REMOTE);
 		mediaAudioPO.setAuthorName(user.getNickname());
 		mediaAudioPO.setDownloadCount(0l);
+		if (previewUrl.endsWith(".m3u8")) {
+			Long duration = mediaVideoService.getHlsDuration(previewUrl, null);
+			if (duration != 0l) mediaAudioPO.setDuration(duration);
+		}
 		mediaAudioDao.save(mediaAudioPO);
 		
 		return new MediaAudioVO().set(mediaAudioPO);
+	}
+	
+	/**
+	 * 添加音频媒资上传任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午3:21:49
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param MediaAudioTaskVO task 上传任务
+	 * @param FolderPO folder 文件夹
+	 */
+	public MediaAudioPO addTask(
+			UserVO user, 
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			boolean encryption,
+			MediaAudioTaskVO task, 
+			FolderPO folder,
+			String addition) throws Exception{
+		MediaAudioPO mediaAudioPO = addTask(user, name, tags, keyWords, remark, encryption, task, folder);
+		if (addition != null){
+			mediaAudioPO.setAddition(addition);
+			mediaAudioDao.save(mediaAudioPO);
+		}
+		return mediaAudioPO;
 	}
 	
 	/**

@@ -66,6 +66,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private String encryptionUrl;
 	
+	private String addition;
+	
 	private List<MediaAudioVO> children;
 	
 	public String getName() {
@@ -293,6 +295,15 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 		return this;
 	}
 
+	public String getAddition() {
+		return addition;
+	}
+
+	public MediaAudioVO setAddition(String addition) {
+		this.addition = addition;
+		return this;
+	}
+
 	public List<MediaAudioVO> getChildren() {
 		return children;
 	}
@@ -327,7 +338,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setEncryption(entity.getEncryption() != null && entity.getEncryption() ? true : false)
 			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
-			.setProcessInstanceId(entity.getProcessInstanceId());
+			.setProcessInstanceId(entity.getProcessInstanceId())
+			.setAddition(entity.getAddition());
 		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaAudioPO.SEPARATOR_KEYWORDS)));	 
 		return this;

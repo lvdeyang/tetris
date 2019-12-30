@@ -48,6 +48,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	
 	private String processInstanceId;
 	
+	private String addition;
+	
 	private List<MediaPictureVO> children;
 	
 	public String getName() {
@@ -221,6 +223,15 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return this;
 	}
 
+	public String getAddition() {
+		return addition;
+	}
+
+	public MediaPictureVO setAddition(String addition) {
+		this.addition = addition;
+		return this;
+	}
+
 	@Override
 	public MediaPictureVO set(MediaPicturePO entity) throws Exception {
 		ServerProps props = SpringContext.getBean(ServerProps.class);
@@ -241,7 +252,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setProgress(0)
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
-			.setProcessInstanceId(entity.getProcessInstanceId());
+			.setProcessInstanceId(entity.getProcessInstanceId())
+			.setAddition(entity.getAddition());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaPicturePO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaPicturePO.SEPARATOR_KEYWORDS)));	 
 		return this;

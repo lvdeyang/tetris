@@ -46,6 +46,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 	
 	private Integer progress;
 	
+	private String addition;
+	
 	private List<MediaTxtVO> children;
 	
 	public String getContent() {
@@ -201,6 +203,15 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 		return this;
 	}
 
+	public String getAddition() {
+		return addition;
+	}
+
+	public MediaTxtVO setAddition(String addition) {
+		this.addition = addition;
+		return this;
+	}
+
 	public List<MediaTxtVO> getChildren() {
 		return children;
 	}
@@ -227,7 +238,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setType(MediaTxtItemType.TXT.toString())
 			.setRemoveable(true)
 			.setIcon(MediaTxtItemType.TXT.getIcon())
-			.setStyle(MediaTxtItemType.TXT.getStyle()[0]);
+			.setStyle(MediaTxtItemType.TXT.getStyle()[0])
+			.setAddition(entity.getAddition());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaTxtPO.SEPARATOR_TAG)));
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaTxtPO.SEPARATOR_KEYWORDS)));	 
 		return this;

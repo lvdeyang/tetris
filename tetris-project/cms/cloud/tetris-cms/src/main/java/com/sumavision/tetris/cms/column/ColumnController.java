@@ -92,7 +92,7 @@ public class ColumnController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/update/{id}")
-	public Object update(@PathVariable Long id, String name, String code, String remark, HttpServletRequest request)
+	public Object update(@PathVariable Long id, String name, String code, String thumbnail, String remark, HttpServletRequest request)
 			throws Exception {
 
 		UserVO user = userQuery.current();
@@ -107,7 +107,7 @@ public class ColumnController {
 			throw new TemplateTagNotExistException(id);
 		}
 
-		columnPO = columnService.update(columnPO, name, code, remark);
+		columnPO = columnService.update(columnPO, name, code, thumbnail, remark);
 
 		return new ColumnVO().set(columnPO);
 	}

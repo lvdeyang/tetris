@@ -265,4 +265,18 @@ public class ChannelController {
 		
 		return map;
 	}
+	
+	/**
+	 * 获取分屏模板<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月11日 下午5:20:27
+	 * @param Long id 频道id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/template")
+	public Object questTemplate(Long channelId, Long scheduleId, HttpServletRequest request) throws Exception {
+		return channelQuery.getTemplate(channelId, scheduleId);
+	}
 }

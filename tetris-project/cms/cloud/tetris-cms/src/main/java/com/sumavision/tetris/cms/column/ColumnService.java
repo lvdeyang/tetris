@@ -120,10 +120,11 @@ public class ColumnService {
 		return columnPO;
 	}
 
-	public ColumnPO update(ColumnPO columnPO, String name, String code, String remark) throws Exception {
+	public ColumnPO update(ColumnPO columnPO, String name, String code, String thumbnail, String remark) throws Exception {
 
 		columnPO.setName(name);
 		columnPO.setCode(code);
+		columnPO.setThumbnail(thumbnail);
 		columnPO.setRemark(remark);
 		columnPO.setUpdateTime(new Date());
 		columnDao.save(columnPO);

@@ -122,11 +122,11 @@ public class ApiAndroidStreamVideoController {
 		if (relationPOs != null && !relationPOs.isEmpty()) throw new MediaVideoStreamAlreadyExistException(previewUrl);
 		
 		JSONObject variables = new JSONObject();
-		variables.put("_pa23_previewUrls", JSONArray.toJSONString(previewUrls));
-		variables.put("_pa23_mimsName", name);
-		if (tags != null) variables.put("_pa23_tags", tags);
-		if (keyWords != null) variables.put("_pa23_keyWords", keyWords);
-		if (remark != null) variables.put("_pa23_remark", remark);
+		variables.put("_pa49_previewUrls", JSONArray.toJSONString(previewUrls));
+		variables.put("_pa49_mimsName", name);
+		if (tags != null) variables.put("_pa49_tags", tags);
+		if (keyWords != null) variables.put("_pa49_keyWords", keyWords);
+		if (remark != null) variables.put("_pa49_remark", remark);
 		
 		String processInstanceId = processService.startByKey("_add_media_video_stream_by_android", variables.toJSONString(), null, null);
 		
@@ -153,8 +153,8 @@ public class ApiAndroidStreamVideoController {
 		if (previewUrl != null) previewUrls.add(previewUrl);
 		
 		JSONObject variables = new JSONObject();
-		variables.put("_pa24_liveId", id);
-		variables.put("_pa25_previewUrls", JSONArray.toJSONString(previewUrls));
+		variables.put("_pa57_liveId", id);
+		variables.put("_pa50_previewUrls", JSONArray.toJSONString(previewUrls));
 		
 		String processInstanceId = processService.startByKey("_delete_media_video_stream_by_android", variables.toJSONString(), null, null);
 		

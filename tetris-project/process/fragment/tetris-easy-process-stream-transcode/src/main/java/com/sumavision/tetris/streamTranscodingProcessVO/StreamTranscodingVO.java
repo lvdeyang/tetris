@@ -1,5 +1,6 @@
  package com.sumavision.tetris.streamTranscodingProcessVO;
 
+import com.sumavision.tetris.streamTranscoding.api.server.InputParamVO;
 import com.sumavision.tetris.streamTranscoding.api.server.TaskVO;
 
 public class StreamTranscodingVO {
@@ -17,6 +18,8 @@ public class StreamTranscodingVO {
 	private Integer bePCM;
 	/** 任务信息 */
 	private TaskVO taskVO;
+	/** 输入信息 */
+	private InputParamVO inputParam;
 	
 	public boolean isTranscoding() {
 		return isTranscoding;
@@ -72,5 +75,13 @@ public class StreamTranscodingVO {
 
 	public void setTaskVO(TaskVO taskVO) {
 		this.taskVO = taskVO;
+	}
+
+	public InputParamVO getInputParam() {
+		return inputParam;
+	}
+
+	public void setInputParam(InputParamVO inputParam) {
+		this.inputParam = inputParam;
 	}
 }

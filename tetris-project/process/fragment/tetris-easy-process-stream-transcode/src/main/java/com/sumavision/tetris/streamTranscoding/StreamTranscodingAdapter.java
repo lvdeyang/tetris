@@ -11,8 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.commons.util.xml.XmlUtil;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.streamTranscoding.addTask.requestVO.MessageVO;
 import com.sumavision.tetris.streamTranscoding.addTask.responseVO.ResponseVO;
 
@@ -81,11 +83,9 @@ public class StreamTranscodingAdapter {
 	 */
 	public String changeHttpToFtp(String httpUrl) throws Exception {
 		
-		String json = readProfile();
-		JSONObject jsonObject = JSONObject.parseObject(json);
-
-		String ftpUserName = jsonObject.getString("ftpUserName");
-		String ftpPassword = jsonObject.getString("ftpPassword");
+		if (httpUrl.endsWith(".m3u8")) return httpUrl;
+		
+		ServerProps serverProps = mimsServerPropsQuery.queryProps();
 
 		String ftpPath = null;
 
@@ -95,20 +95,30 @@ public class StreamTranscodingAdapter {
 		if (split.length == 2) {
 			String[] splite2 = split[1].split("//");
 			
-			String ip = splite2[1].substring(0, splite2[1].indexOf("/"));
-			
 			String path = splite2[1].substring(splite2[1].indexOf("/"));
 			
-			ftpPath = new StringBuilder("ftp://").append(ftpUserName).append(":").append(ftpPassword).append("@")
-					.append(ip).append(path).toString();
+			ftpPath = new StringBufferWrapper().append("ftp://").append(serverProps.getFtpUsername())
+					  .append(":")
+					  .append(serverProps.getFtpPassword())
+					  .append("@")
+					  .append(serverProps.getFtpIp())
+					  .append(":")
+					  .append(serverProps.getFtpPort())
+					  .append(path)
+					  .toString();
 		//有端口的url地址
 		} else if (split.length == 3) {
-			String ip = split[1].split("//")[1];
-
 			String path = split[2].substring(split[2].indexOf("/"));
 
-			ftpPath = new StringBuilder("ftp://").append(ftpUserName).append(":").append(ftpPassword).append("@")
-					.append(ip).append(path).toString();
+			ftpPath = new StringBufferWrapper().append("ftp://").append(serverProps.getFtpUsername())
+					  .append(":")
+					  .append(serverProps.getFtpPassword())
+					  .append("@")
+					  .append(serverProps.getFtpIp())
+					  .append(":")
+					  .append(serverProps.getFtpPort())
+					  .append(path)
+					  .toString();
 		}
 
 		return ftpPath;
@@ -156,14 +166,19 @@ public class StreamTranscodingAdapter {
 		String[] split = url.split(":");
 		
 		if (split.length == 1) {
-			String json = readProfile();
-			JSONObject jsonObject = JSONObject.parseObject(json);
+			ServerProps serverProps = mimsServerPropsQuery.queryProps();
 
-			String ftpUserName = jsonObject.getString("ftpUserName");
-			String ftpPassword = jsonObject.getString("ftpPassword");
-
-			return new StringBuilder("ftp://").append(ftpUserName).append(":").append(ftpPassword).append("@")
-					.append(mimsServerPropsQuery.queryProps().getIp()).append("/").append(url).toString();
+			return new StringBuilder("ftp://")
+					.append(serverProps.getFtpUsername())
+					.append(":")
+					.append(serverProps.getFtpPassword())
+					.append("@")
+					.append(serverProps.getFtpIp())
+					.append(":")
+					.append(serverProps.getFtpPort())
+					.append("/")
+					.append(url)
+					.toString();
 		}else {
 			return url;
 		}

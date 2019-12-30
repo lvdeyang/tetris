@@ -22,7 +22,6 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
@@ -78,7 +77,7 @@ public class ApiProcessStreamVideoController {
 		List<String> previewUrlList = new ArrayList<String>();
 		if (previewUrls != null) previewUrlList = JSONArray.parseArray(previewUrls, String.class);
 		
-		MediaVideoStreamVO media = mediaVideoStreamService.addTask(user, mimsName, null, null, remark, previewUrlList, folderPOs.get(0));
+		mediaVideoStreamService.addTask(user, mimsName, null, null, remark, previewUrlList, folderPOs.get(0));
 		
 		String separator = File.separator;
 		String webappPath = path.webappPath();
