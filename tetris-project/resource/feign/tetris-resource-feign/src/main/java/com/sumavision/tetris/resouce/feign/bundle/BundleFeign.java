@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
 
-@FeignClient(name = "tetris-resource", configuration = FeignConfiguration.class, path = "suma-venus-resource")
+@FeignClient(name = "suma-venus-resource", configuration = FeignConfiguration.class, path = "suma-venus-resource")
 public interface BundleFeign {
 
 	/**
@@ -15,5 +15,11 @@ public interface BundleFeign {
 	 */
 	@RequestMapping(value = "/feign/bundle/queryTranscodeDevice", method = RequestMethod.POST)
 	public JSONObject queryTranscodeDevice() throws Exception;
+
+	/**
+	 * 查询设备的授权<br/>
+	 */
+	@RequestMapping(value = "/feign/bundle/queryAuth", method = RequestMethod.POST)
+	public JSONObject queryAuth(String bundle_id) throws Exception;
 
 }
