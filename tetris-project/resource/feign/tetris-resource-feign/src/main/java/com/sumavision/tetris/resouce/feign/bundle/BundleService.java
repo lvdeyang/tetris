@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -18,12 +18,20 @@ public class BundleService {
 
 	public List<BundleFeignVO> queryTranscodeDevice() throws Exception {
 
-		return JsonBodyResponseParser.parseArray(bundleFeign.queryTranscodeDevice(), BundleFeignVO.class);
+		return JSON.parseArray(bundleFeign.queryTranscodeDevice(), BundleFeignVO.class);
 
+	}
+	
+	public BundleFeignVO queryDeviceByBundleId(String bundleId) throws Exception{
+		return JSON.parseObject(bundleFeign.queryDeviceByBundleId(bundleId), BundleFeignVO.class);
+
+		
 	}
 
 	public JSONObject queryAuth(String bundle_id) throws Exception {
 		return bundleFeign.queryAuth(bundle_id);
 	}
+	
+
 
 }
