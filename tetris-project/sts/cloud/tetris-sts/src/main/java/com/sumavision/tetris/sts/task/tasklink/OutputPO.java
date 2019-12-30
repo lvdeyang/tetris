@@ -3,11 +3,7 @@ package com.sumavision.tetris.sts.task.tasklink;
 
 import java.io.Serializable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.sts.common.CommonConstants.ProtoType;
@@ -28,6 +24,7 @@ import com.sumavision.tetris.sts.task.outputBO.TsUdpBO;
 
 
 @Entity
+@Table(name="output")
 public class OutputPO extends CommonPO<OutputPO> implements Serializable{
 
 

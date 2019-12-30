@@ -1,4 +1,4 @@
-package com.sumavision.tetris.sts.device;
+package com.sumavision.tetris.sts.device.auth;
 
 import java.io.Serializable;
 
@@ -22,7 +22,7 @@ import com.sumavision.tetris.sts.common.CommonPO;
  *
  */
 @Entity
-@Table
+@Table(name="device_channel_auth")
 public class DeviceChannelAuthPO  extends CommonPO<DeviceChannelAuthPO> implements Serializable, Cloneable, Comparable<DeviceChannelAuthPO>{
 
 	/**

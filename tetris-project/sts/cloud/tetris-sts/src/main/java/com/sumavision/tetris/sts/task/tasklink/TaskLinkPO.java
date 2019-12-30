@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name="TaskLinkPO")
+@Table(name="task_link")
 public class TaskLinkPO extends CommonPO<TaskLinkPO> implements Serializable{
 
 	

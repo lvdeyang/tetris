@@ -18,7 +18,7 @@ import com.sumavision.tetris.sts.common.CommonConstants.ProtoType;
 import com.sumavision.tetris.sts.common.CommonPO;
 
 @Entity
-@Table
+@Table(name="input")
 public class InputPO extends CommonPO<InputPO> implements Serializable{
 
 	

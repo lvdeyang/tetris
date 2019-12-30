@@ -1,0 +1,294 @@
+<mi-frame id="page-task-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">任务管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>任务管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <div style="width:100%; height:100%; position:relative;">
+            <el-card class="box-card" shadow="hover" style="width:100%; height:100%;" v-loading="loading"
+                     :element-loading-text=loadingText>
+                <div style="position:absolute; left:0; top:0; right:0; bottom:0; padding:20px;">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
+                            <el-button size="small" type="primary" @click="handleAddTask()">
+                                <span class="el-icon-plus" style="margin-right:5px;"></span>
+                                添加任务
+                            </el-button>
+                            <el-button size="small" type="primary" @click="handleAddGroupTask()">
+                                <span class="el-icon-plus" style="margin-right:5px;"></span>
+                                添加分组
+                            </el-button>
+                            <el-button size="small" type="primary" @click="handleDelGroupTask()">
+                                <span class="el-icon-delete" style="margin-right:5px;"></span>
+                                删除分组
+                            </el-button>
+                            <el-button size="small" type="primary" @click="handleImportTask()">
+                                <span class="el-icon-download" style="margin-right:5px;"></span>
+                                导入
+                            </el-button>
+                            <el-button size="small" type="primary" @click="handleExportTask()">
+                                <span class="el-icon-upload2" style="margin-right:5px;"></span>
+                                导出
+                            </el-button>
+                            <el-dropdown split-button size="small" type="primary" @click="handleClick">
+                                <span class="el-icon-menu" style="margin-right:5px;"></span>
+                                批量操作
+                                <el-dropdown-menu slot="dropdown">
+    								<el-dropdown-item>重启任务</el-dropdown-item>
+    								<el-dropdown-item>停止任务</el-dropdown-item>
+    								<el-dropdown-item>删除任务</el-dropdown-item>
+    								<el-dropdown-item divided>台标字幕</el-dropdown-item>
+  									</el-dropdown-menu>
+                            </el-dropdown>
+                            <el-button size="small" type="primary" style="float:right" @click="handleRefreshTask()">
+                                <span class="el-icon-refresh" style="margin-right:5px;"></span>
+                                刷新
+                            </el-button>
+                        </div>
+                        <div style="position:absolute; left:0; right:0; top:48px; bottom:48px;overflow-y: auto">
+                            <el-table
+                                    ref="multipleChannelTable"
+                                    :data="channel.data"
+                                    tooltip-effect="dark"
+                                    style="width: 100%"
+                                    >
+                                <el-table-column type="selection" min-width="5%" align="center"></el-table-column>
+                                <el-table-column label="任务名称" min-width="10%" align="center" prop="taskName"></el-table-column>
+                                <el-table-column label="状态" min-width="10%" align="center" prop="status"></el-table-column>
+                                <el-table-column label="分组" min-width="10%" align="center" prop="taskGroupName"></el-table-column>
+                                <el-table-column label="设备组" min-width="10%" align="center" prop="sdmDeviceName"></el-table-column>
+                                <el-table-column label="任务节点IP" min-width="10%" align="center" prop="taskDeviceIp"></el-table-column>
+                                <el-table-column label="输入源名称" min-width="10%" align="center" prop="sourceName"></el-table-column>
+                                <el-table-column label="节目名称" min-width="15%" align="center" prop="programName"></el-table-column>
+                                <el-table-column label="操作" min-width="20%" align="center">
+                                    <template slot-scope="scope">
+                                        <el-tooltip class="item" effect="dark" content="详情" placement="bottom">
+                                            <el-button type="text" icon="el-icon-tickets"
+                                                       class="channelManage"
+                                                       @click="handleRowDetail(scope)">
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="修改" placement="bottom">
+                                            <el-button type="text" icon="feather-icon-edit"
+                                                       class="channelManage"
+                                                       @click="handleRowEdit(scope)">
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="删除" placement="bottom">
+                                            <el-button type="text" icon="el-icon-delete"
+                                                       class="channelManage"
+                                                       @click="handleRowDelete(scope)">
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="输出" placement="bottom">
+                                            <el-button type="text" icon="el-icon-picture-outline"
+                                                       class="channelManage"
+                                                       @click="handleRowOutputInfo(scope)">
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="换源" placement="bottom">
+                                            <el-button type="text" icon="el-icon-refresh"
+                                                       class="channelManage"
+                                                       @click="handleRowExchangeProgram(scope)">
+                                            </el-button>
+                                        </el-tooltip>
+                                        <el-tooltip class="item" effect="dark" content="盖播" placement="bottom">
+                                            <el-button type="text" icon="el-icon-document"
+                                                       class="channelManage"
+                                                       @click="handleRowCover(scope)">
+                                            </el-button>
+                                        </el-tooltip>
+                                    </template>
+                                </el-table-column>
+                            </el-table>
+                        </div>
+                        <div style="height:48px; width:100%; text-align:right; padding-top:16px; position:absolute; left:0; bottom:0; box-sizing:border-box;">
+                            <el-pagination
+                                    background
+                                    @size-change="handleSizeChange"
+                                    @current-change="handlePageCurrentChange"
+                                    :current-page="channel.page.currentPage"
+                                    :page-sizes="channel.page.sizes"
+                                    :page-size="channel.page.size"
+                                    layout="total, sizes, prev, pager, next, jumper"
+                                    :total="channel.page.total">
+                            </el-pagination>
+                        </div>
+                    </div>
+                </div>
+            </el-card>
+        </div>
+        
+        <!-- 任务详情对话框 -->
+        <el-dialog
+                title="任务详情"
+                :visible.sync="dialog.taskDetail.visible"
+                width="500px"
+                :before-close="handleTaskDetailClose">
+
+            <div>
+                <el-form label-width="100px">
+                    <el-form-item label="任务编号:">
+                        <el-input v-model="dialog.taskDetail.taskId"></el-input>
+                    </el-form-item>
+                    <el-form-item label="任务名称:">
+                        <el-input v-model="dialog.taskDetail.taskName"></el-input>
+                    </el-form-item>
+                    <el-form-item label="任务分组:">
+                        <el-input v-model="dialog.taskDetail.taskGroupName"></el-input>
+                    </el-form-item>
+                    <el-form-item label="任务类型:">
+                        <el-input v-model="dialog.taskDetail.taskType"></el-input>
+                    </el-form-item>
+                    <el-form-item label="开始时间:">
+                        <el-input v-model="dialog.taskDetail.startTime"></el-input>
+                    </el-form-item>
+                    <el-form-item label="任务状态:">
+                        <el-input v-model="dialog.taskDetail.status"></el-input>
+                    </el-form-item>
+                    <el-form-item label="输入源名称:">
+                        <el-input v-model="dialog.taskDetail.sourceName"></el-input>
+                    </el-form-item>
+                    <el-form-item label="节目名称:">
+                        <el-input v-model="dialog.taskDetail.programName"></el-input>
+                    </el-form-item>
+                    <el-form-item label="当前源:">
+                        <el-input v-model="dialog.taskDetail.curSource"></el-input>
+                    </el-form-item>
+                    <el-form-item label="当前节目:">
+                        <el-input v-model="dialog.taskDetail.curProgram"></el-input>
+                    </el-form-item>
+                    <el-form-item label="盖播文件:">
+                        <el-input v-model="dialog.taskDetail.coverFile"></el-input>
+                    </el-form-item>
+                    <el-form-item label="盖播开始时间:">
+                        <el-input v-model="dialog.taskDetail.coverStartTime"></el-input>
+                    </el-form-item>
+                    <el-form-item label="盖播结束时间:">
+                        <el-input v-model="dialog.taskDetail.coverStopTime"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.taskDetail.visible = false">返回</el-button>
+            </span>
+
+        </el-dialog>
+        
+        <!-- 输出详情对话框 -->
+        <el-dialog
+                title="任务输出"
+                :visible.sync="dialog.outputInfo.visible"
+                width="500px"
+                :before-close="handleOutputInfoClose">
+
+            <div>
+                <el-form label-width="100px">
+                    <el-form-item label="输出:">
+                        <el-input v-model="dialog.outputInfo.output"></el-input>
+                    </el-form-item>
+                    <el-form-item label="URL:">
+                        <el-input type="textarea" v-model="dialog.outputInfo.url"></el-input>
+                    </el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.outputInfo.visible = false">返回</el-button>
+            </span>
+
+        </el-dialog>
+        
+        <!-- 任务换源对话框 -->
+        <el-dialog
+                title="任务换源"
+                :visible.sync="dialog.exchangeProgram.visible"
+                width="700px"
+                :before-close="handleExchangeProgramClose">
+
+            <div>
+                <el-form label-width="100px">
+                    <el-form-item label="关键词:">
+                    	<el-col :span="11">
+                    		<el-input v-model="dialog.exchangeProgram.keyword" placeholder="select。。。"></el-input>
+                    	</el-col>
+                    	<el-col :span="11">
+                    		<el-button size="medium" icon="el-icon-search" style="margin-left:30px"></el-button>
+                    	</el-col>
+                    </el-form-item>
+                    <el-form-item>
+                        <div style="left:0; right:0; top:48px; bottom:48px;overflow-y: auto;margin-left:-100px;max-height:200px">
+                        	<el-table
+                                    ref="multipleChannelTable"
+                                    :data="channel.data"
+                                    tooltip-effect="dark"
+                                    style="width: 100%;"
+                                    >
+                            	<el-table-column type="selection" min-width="5%" align="center"></el-table-column>
+                                <el-table-column label="任务名称" min-width="10%" align="center" prop="taskName"></el-table-column>
+                                <el-table-column label="状态" min-width="10%" align="center" prop="status"></el-table-column>
+                                <el-table-column label="分组" min-width="10%" align="center" prop="taskGroupName"></el-table-column>
+                                <el-table-column label="设备组" min-width="10%" align="center" prop="sdmDeviceName"></el-table-column>
+                            </el-table>
+                        </div>
+                    </el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.exchangeProgram.visible = false">返回</el-button>
+            </span>
+
+        </el-dialog>
+        
+        <!-- 盖播对话框 -->
+        <el-dialog
+                title="任务盖播"
+                :visible.sync="dialog.taskCover.visible"
+                width="500px"
+                :before-close="handleOutputInfoClose">
+
+            <div>
+                <el-form label-width="100px">
+                	<el-form-item label="开始时间">
+    					<el-col :span="11">
+      						<el-date-picker type="date" placeholder="开始日期" v-model="dialog.taskCover.startDate" style="width: 100%;"></el-date-picker>
+    					</el-col>
+    					<el-col class="line" :span="2">-</el-col>
+    					<el-col :span="11">
+      						<el-time-picker placeholder="开始时间" v-model="dialog.taskCover.startTime" style="width: 100%;"></el-time-picker>
+    					</el-col>
+  					</el-form-item>
+  					<el-form-item label="结束时间">
+    					<el-col :span="11">
+      						<el-date-picker type="date" placeholder="结束日期" v-model="dialog.taskCover.endDate" style="width: 100%;"></el-date-picker>
+    					</el-col>
+    					<el-col class="line" :span="2">-</el-col>
+    					<el-col :span="11">
+      						<el-time-picker placeholder="结束时间" v-model="dialog.taskCover.endTime" style="width: 100%;"></el-time-picker>
+    					</el-col>
+  					</el-form-item>
+                    <el-form-item label="文件选择">
+    					<el-select v-model="dialog.taskCover.file" placeholder="请选择盖播文件">
+      						<el-option label="区域一" value="shanghai"></el-option>
+      						<el-option label="区域二" value="beijing"></el-option>
+    					</el-select>
+  					</el-form-item>
+                </el-form>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="dialog.taskCover.visible = false">返回</el-button>
+            </span>
+
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

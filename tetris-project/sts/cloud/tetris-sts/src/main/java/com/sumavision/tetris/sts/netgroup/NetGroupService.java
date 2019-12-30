@@ -2,7 +2,8 @@ package com.sumavision.tetris.sts.netgroup;
 
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.sts.common.ErrorCodes;
+import com.sumavision.tetris.sts.exeception.ErrorCodes;
+
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,14 @@ public class NetGroupService {
 
     public List<NetGroupPO> findAll(){
         return netGroupDao.findAll().stream().filter(ng->BooleanUtils.isNotTrue(ng.getBeDelete())).collect(Collectors.toList());
+    }
+
+    public NetGroupPO findOne(Long id) throws BaseException {
+        NetGroupPO netGroupPO= netGroupDao.findOne(id);
+        if (netGroupPO == null) {
+            throw new BaseException(StatusCode.FORBIDDEN, ErrorCodes.NETGROUP_NULL);
+        }
+        return netGroupPO;
     }
 
     @Transactional(rollbackFor = BaseException.class)

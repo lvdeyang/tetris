@@ -15,7 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.NameFilter;
 import com.sumavision.tetris.sts.common.NodeIdManageUtil;
 import com.sumavision.tetris.sts.common.CommonConstants.ProtoType;
-import com.sumavision.tetris.sts.device.DeviceChannelAuthDao;
+import com.sumavision.tetris.sts.device.auth.DeviceChannelAuthDao;
 import com.sumavision.tetris.sts.task.createNode.CreateJsonInputNode;
 import com.sumavision.tetris.sts.task.createNode.CreateJsonOutputNode;
 import com.sumavision.tetris.sts.task.createNode.CreateJsonProgramNode;
@@ -85,11 +85,473 @@ public class NodeUtil {
 	//记录创建output时生成OutputNodeId，方便回滚删除时使用
 	private List<String> delOutputNodeIds;
 
-	public JSONObject getJsonInputNode(InputPO inputPO) {
+	
+	public ArrayList<InputNode> getInputArray(InputPO inputPO, ProgramPO programPO){
+		SourcePO sourcePO = sourceDao.findOne(inputPO.getSourceId());
+		ArrayList<InputNode> inputNodes = new ArrayList<InputNode>();
+		InputNode inputNode = new InputNode();
+		InputNodeNormalMap normal_map = new InputNodeNormalMap();
+		inputNode.setNormal_map(normal_map);
+		
+		//program_array
+		ArrayList<InputProgramBO> program_array = new ArrayList<InputProgramBO>();
+		InputProgramBO createInputProgramBO = new InputProgramBO();
+		createInputProgramBO.setName(programPO.getProgramName());
+		createInputProgramBO.setPcr_pid(programPO.getPcrPid());
+		createInputProgramBO.setProgram_number(programPO.getProgramNum());
+		createInputProgramBO.setProvider(programPO.getProgramProvider());
+		createInputProgramBO.setPmt_pid(programPO.getPmtPid());
+		// 暂时协议没有pmt
+//		createInputProgramBO.setSubtitle_array(JSON.parseArray(programPO.getSubtitleJson(), ProgramSubtitleBO.class));
+//		createInputProgramBO.setAudio_array(JSON.parseArray(programPO.getAudioJson(), ProgramAudioBO.class));
+//		createInputProgramBO.setVideo_array(JSON.parseArray(programPO.getVideoJson(), ProgramVideoBO.class));
+
+		//decode_mode修改，后续在页面上添加后修改
+		List<InputProgramVideoBO> video_array = JSON.parseArray(programPO.getVideoJson(), InputProgramVideoBO.class);
+		for (InputProgramVideoBO programVideoBO : video_array) {
+			programVideoBO.setDecode_mode("cpu");
+			programVideoBO.setNv_card_idx(0);
+		}
+		
+		List<InputProgramAudioBO> audio_array = JSON.parseArray(programPO.getAudioJson(), InputProgramAudioBO.class);
+		for (InputProgramAudioBO programAudioBO : audio_array) {
+			programAudioBO.setDecode_mode("cpu");
+		}
+		
+		if (programPO.getSubtitleJson()!=null) {
+			List<InputProgramSubtitleBO> subtitle_array = JSON.parseArray(programPO.getSubtitleJson(), InputProgramSubtitleBO.class);
+			for (InputProgramSubtitleBO programSubtitleBO : subtitle_array) {
+				programSubtitleBO.setDecode_mode("cpu");
+			}
+			createInputProgramBO.setSubtitle_array(subtitle_array);
+		}
+		
+		createInputProgramBO.setAudio_array(audio_array);
+		createInputProgramBO.setVideo_array(video_array);
+		
+		program_array.add(createInputProgramBO);
+		
+		inputNode.setProgram_array(program_array);
+		inputNode.setId(inputPO.getNodeId().toString());
+		inputNode.setInputCommon(getInputCommon(sourcePO));
+		inputNodes.add(inputNode);
+		return inputNodes;
+	}
+	
+	
+	
+	public ArrayList<TaskNode> getTaskArray(TransTaskPO transTaskPO){
+		SourcePO sourcePO = sourceDao.findOne(transTaskPO.getSourceId());
+		outputMediaEncodeMessage = new OutputMediaEncodeMessage();
+		delTaskNodeIds = new ArrayList<String>();
+		ArrayList<TaskNode> task_array = new ArrayList<TaskNode>();
+		List<NameFilter> nameFilters = new ArrayList<NameFilter>();
+		
+		Integer cardNumber = deviceChannelAuthDao.findOne(transTaskPO.getDeviceChannelId()).getCardNumber();
+		ProgramPO programPO = programDao.findBySourceIdAndNum(transTaskPO.getSourceId(), transTaskPO.getProgramNum());
+		
+		List<VideoParamPO> videoParamPOList = new ArrayList<VideoParamPO>(transTaskPO.getVideoParams());
+		List<AudioParamPO> audioParamPOList = new ArrayList<AudioParamPO>(transTaskPO.getAudioParams());
+		Collections.sort(videoParamPOList);
+		Collections.sort(audioParamPOList);
+		if (videoParamPOList.size() >= 1) {
+			//确定创建任务时，创建几个video和audio
+			Map<Integer, Boolean> videoPidMap = getVideoPidMap(programPO.getVideoElements(), videoParamPOList);
+			
+			ArrayList<String> videoEncodeId = new ArrayList<String>();
+			ArrayList<String> videoTaskId = new ArrayList<String>();
+		
+			for (VideoElement videoElement : programPO.getVideoElements()) {
+				if (!videoPidMap.get(videoElement.getPid())) {
+					continue;
+				}
+				
+				TaskNode videoTaskNode = new TaskNode();
+				videoTaskNode.setId(nodeIdManageUtil.getNewNodeId().toString());
+				if (transTaskPO.getTaskType()==0) {
+					//网关任务
+					videoTaskNode.setType("passby");
+				}else {
+					videoTaskNode.setType("video");
+				}
+				videoTaskNode.setSourceCommon(getSourceCommon(transTaskPO, videoElement.getPid()));
+				delTaskNodeIds.add(videoTaskNode.getId());
+				
+				if (transTaskPO.getTaskType() == 1) {
+					NameFilter sourceCommonNameFilter = new NameFilter() {
+						@Override
+						public String process(Object object, String name, Object value) {
+							// TODO Auto-generated method stub
+							if (value instanceof SourceCommon) {
+								return "raw_source";
+							}
+							return name;
+						}
+					};
+					nameFilters.add(sourceCommonNameFilter);
+				}else {
+					NameFilter sourceCommonNameFilter = new NameFilter() {
+						@Override
+						public String process(Object object, String name, Object value) {
+							// TODO Auto-generated method stub
+							if (value instanceof SourceCommon) {
+								switch (sourcePO.getSourceType()) {
+							        case PASSBY:
+										return "passby_source";
+									case SDI:
+										return "raw_source";
+									case STREAM:
+										return "es_source";
+									default:
+										return "es_source";
+								}
+							}
+							return name;
+						}
+					};
+					nameFilters.add(sourceCommonNameFilter);
+				}
+				
+
+				if (transTaskPO.getTaskType() == 1) {
+					ArrayList<DecodeProcess> decode_process_array = new ArrayList<DecodeProcess>();
+					DecodeProcess decodeProcess = new DecodeProcess();
+					// 去交错plat参数暂时默认cpu，后期需要在集群中添加该功能cpu/msdk/cuda
+//					TaskDeinterlaceBO deinterlace = new TaskDeinterlaceBO(programPO.getDeinterlaceMode(), "cpu", cardNumber);
+//					decodeProcess.setDeinterlace(deinterlace);
+					decode_process_array.add(decodeProcess);
+					videoTaskNode.setDecode_process_array(decode_process_array);
+				}
+
+				ArrayList<Encode> encode_array = new ArrayList<Encode>();
+				for (VideoParamPO videoParamPO : videoParamPOList) {
+					if (videoElement.getPid().equals(videoParamPO.getPid())) {
+						Encode encode = new Encode();
+						encode.setEncode_id(nodeIdManageUtil.getNewNodeId().toString());
+						videoEncodeId.add(encode.getEncode_id());
+						videoTaskId.add(videoTaskNode.getId());
+						
+						if (transTaskPO.getTaskType() == 1) {
+							NameFiltersFor264265 nameFiltersFor264265 = getEncodeCommon(transTaskPO, videoParamPO, null);
+							encode.setEncodeCommon(nameFiltersFor264265.getEncodeCommon());
+							nameFilters.addAll(nameFiltersFor264265.getNameFilters());
+							NameFilter nameFilter = new NameFilter() {
+								@Override
+								public String process(Object object, String name, Object value) {
+									// TODO Auto-generated method stub
+									if (value instanceof EncodeVideoCommon) {
+										switch (videoParamPO.getCodec()) {
+									        case "h264":
+												return "h264";
+											case "h265":
+												return "hevc";
+											case "mpeg2":
+											case "mpeg2-video":
+												return "mpeg2";
+											case "avs":
+												return "avs_plus";
+										}
+									}
+									return name;
+								}
+							};
+							nameFilters.add(nameFilter);
+							
+							ArrayList<TaskEncodeProcess> process_array = new ArrayList<TaskEncodeProcess>();
+							
+							TaskEncodeProcess osdTaskEncodeProcess = null;
+							TaskEncodeProcess enhanceTaskEncodeProcess = new TaskEncodeProcess();
+							TaskEncodeProcess scaleTaskEncodeProcess = new TaskEncodeProcess();
+							TaskEncodeProcess cutTaskEncodeProcess = new TaskEncodeProcess();
+							//osd
+							String osdJsonStr = videoParamPO.getOsdJson();
+							List<OsdCfgBO> osdList = OsdCfgBO.transFromJson(osdJsonStr);
+							if (null != osdList && osdList.size()>=1) {
+								osdTaskEncodeProcess = new TaskEncodeProcess();
+								ArrayList<TaskOsdBO> osd = new ArrayList<TaskOsdBO>();
+								ArrayList<TaskSubtitleBO> subtile = new ArrayList<TaskSubtitleBO>();
+								ArrayList<TaskLogoBO> logo = new ArrayList<TaskLogoBO>();
+								ArrayList<TaskFuzzyBO> fuzzy = new ArrayList<TaskFuzzyBO>();
+								for (OsdCfgBO osdBo : osdList) {
+									if (osdBo.getOsdType().contains("logo")) {
+										// 1表示cpu优先，选择cpu优先还是内存优先，集群暂时未开发
+										TaskLogoBO taskLogoBO = new TaskLogoBO(
+												osdBo.getPosition(), osdBo.getZone(),
+												osdBo.getPicUrl() == null ? null : osdBo.getPicUrl().replace("ftp://", ""),
+												1);
+										logo.add(taskLogoBO);
+									} else if (osdBo.getOsdType().contains("subtitle")) {
+										Boolean showBkg = false;
+										Boolean showOutline = false;
+										if (osdBo.getShowBkg().equals("Yes")) {
+											showBkg = true;
+										}
+										if (osdBo.getShowOutLine().equals("Yes")) {
+											showOutline = true;
+										}
+										TaskSubtitleBO taskSubtitleBO = new TaskSubtitleBO(
+												osdBo.getTrackType(),
+												osdBo.getTextContent(),
+												osdBo.getFontType(), osdBo.getPosition(),
+												osdBo.getZone(), osdBo.getFontColor(),
+												osdBo.getTrackSpeed().intValue(),
+												osdBo.getFontSize(), showBkg, showOutline,
+												osdBo.getBkgColor(),
+												osdBo.getOutLineColor());
+										subtile.add(taskSubtitleBO);
+									} else {
+										//5表示mosaic_radius范围为5，集群暂未开发
+										TaskFuzzyBO taskFuzzyBO = new TaskFuzzyBO(
+												osdBo.getPosition(), 
+												osdBo.getZone(), 
+												osdBo.getFuzzyEffect(), 
+												5);
+										fuzzy.add(taskFuzzyBO);
+									}
+								}
+								TaskOsdBO taskOsdBO = new TaskOsdBO(subtile, logo, fuzzy);
+								osd.add(taskOsdBO);
+								osdTaskEncodeProcess.setOsd(osd);
+							}
+							
+							//enhance 图像增强
+//							TaskEnhanceBO enhance = new TaskEnhanceBO(
+//									videoParamPO.getBrightness(), 
+//									Integer.parseInt(videoParamPO.getContrast()), 
+//									Integer.parseInt(videoParamPO.getSaturation()), 
+//									videoParamPO.getDenoise(), 
+//									videoParamPO.getSharpen(), 
+//									videoParamPO.getColorSpace(), 
+//									videoParamPO.getColorTransfer(), 
+//									videoParamPO.getColorPrimary(), 
+//									videoParamPO.getColorRange());
+							TaskScaleBO scale = new TaskScaleBO(
+									videoParamPO.getWidth(), 
+									videoParamPO.getHeight(), 
+									"cpu", 
+									videoParamPO.getScaleMode(), 
+									videoParamPO.getRatio(), 
+									cardNumber);
+//							if (null!=videoParamPO.getCutRight()) {
+//								TaskCutBO cut = new TaskCutBO(
+//										Integer.parseInt(videoParamPO.getCutRight())-Integer.parseInt(videoParamPO.getCutLeft()), 
+//										Integer.parseInt(videoParamPO.getCutBottom())-Integer.parseInt(videoParamPO.getCutTop()), 
+//										Integer.parseInt(videoParamPO.getCutLeft()), 
+//										Integer.parseInt(videoParamPO.getCutTop()));
+//								cutTaskEncodeProcess.setCut(cut);
+//							}
+//							
+//							enhanceTaskEncodeProcess.setEnhance(enhance);
+							scaleTaskEncodeProcess.setScale(scale);
+							
+							if (osdTaskEncodeProcess!=null) {
+								process_array.add(osdTaskEncodeProcess);
+							}
+							process_array.add(enhanceTaskEncodeProcess);
+							process_array.add(scaleTaskEncodeProcess);
+							process_array.add(cutTaskEncodeProcess);
+							encode.setProcess_array(process_array);
+						}else {
+							encode.setEncodeCommon(new EncodePassbyBO());
+							NameFilter nameFilter = new NameFilter() {
+								@Override
+								public String process(Object object, String name, Object value) {
+									// TODO Auto-generated method stub
+									if (transTaskPO.getTaskType() == 0) {
+										return "passby";
+									}
+									return name;
+								}
+							};
+							nameFilters.add(nameFilter);
+						}
+						
+						encode_array.add(encode);
+					}
+				}
+				videoTaskNode.setEncode_array(encode_array);
+				task_array.add(videoTaskNode);
+			}
+			outputMediaEncodeMessage.setVideoEncodeId(videoEncodeId);
+			outputMediaEncodeMessage.setVideoTaskId(videoTaskId);
+		}
+		
+		
+		if (audioParamPOList.size() >= 1) {
+			ArrayList<String> audioEncodeId = new ArrayList<String>();
+			ArrayList<String> audioTaskId = new ArrayList<String>();
+			//确定创建任务时，创建几个audio
+			Map<Integer, Boolean> audioPidMap = getAudioPidMap(programPO.getAudioElements(), audioParamPOList);
+			
+			for (AudioElement audioElement : programPO.getAudioElements()) {
+				if (!audioPidMap.get(audioElement.getPid())) {
+					continue;
+				}
+				
+				TaskNode audioTaskNode = new TaskNode();
+				audioTaskNode.setId(nodeIdManageUtil.getNewNodeId().toString());
+				if (transTaskPO.getTaskType() == 1) {
+					audioTaskNode.setType("audio");
+				}else {
+					audioTaskNode.setType("passby");
+				}
+				
+				audioTaskNode.setSourceCommon(getSourceCommon(transTaskPO, audioElement.getPid()));
+				delTaskNodeIds.add(audioTaskNode.getId());
+				
+				ArrayList<Encode> encode_array = new ArrayList<Encode>();
+				for (AudioParamPO audioParamPO : audioParamPOList) {
+					ArrayList<TaskEncodeProcess> process_array = new ArrayList<TaskEncodeProcess>();
+					Encode encode = new Encode();
+					encode.setEncode_id(nodeIdManageUtil.getNewNodeId().toString());
+					audioEncodeId.add(encode.getEncode_id());
+					audioTaskId.add(audioTaskNode.getId());
+					if (transTaskPO.getTaskType() == 1) {
+						NameFiltersFor264265 nameFiltersFor264265 = getEncodeCommon(transTaskPO, null, audioParamPO);
+						encode.setEncodeCommon(nameFiltersFor264265.getEncodeCommon());
+						nameFilters.addAll(nameFiltersFor264265.getNameFilters());
+						
+						NameFilter nameFilter = new NameFilter() {
+							@Override
+							public String process(Object object, String name, Object value) {
+								// TODO Auto-generated method stub
+								if (value instanceof EncodeAudioCommon) {
+									switch (audioParamPO.getCodec()) {
+										case "aac":
+										case "he-aac":
+										case "he-aac-v2":
+								            return "aac";
+								        case "mp3":
+								            return "mp3";
+								        case "mpeg2-audio":
+								        case "mp2":
+								        	 return "mp2";
+								        case "dra":
+								            return "dra";
+								        case "ac3":
+								        case "eac3":
+								            return "dolby";
+									}
+								}
+								return name;
+							}
+						};
+						nameFilters.add(nameFilter);
+						TaskEncodeProcess audioTaskEncodeProcess = new TaskEncodeProcess(); 
+//						AudioProcessBO audioProcessBO = new AudioProcessBO(
+//								audioParamPO.getSample().intValue(), 
+//								audioParamPO.getCodec(), 
+//								audioParamPO.getVolume().intValue(), 
+//								audioParamPO.getChLayout(), 
+//								audioParamPO.getDenoise(), 
+//								audioParamPO.getAudioDupMode(), 
+//								audioParamPO.getSample().intValue(),
+//								audioParamPO.getAgcGain());
+//						audioTaskEncodeProcess.setAudioProcess(audioProcessBO);
+//						
+						AudioResampleBO resample = new AudioResampleBO(audioParamPO.getSample().intValue(), audioParamPO.getChLayout(), "s16");
+						audioTaskEncodeProcess.setResample(resample);
+						
+						process_array.add(audioTaskEncodeProcess);
+						encode.setProcess_array(process_array);
+						
+					}else {
+						encode.setEncodeCommon(new EncodePassbyBO());
+						NameFilter nameFilter = new NameFilter() {
+							@Override
+							public String process(Object object, String name, Object value) {
+								// TODO Auto-generated method stub
+								if (transTaskPO.getTaskType() == 0) {
+									return "passby";
+								}
+								return name;
+							}
+						};
+						nameFilters.add(nameFilter);
+					}
+					encode_array.add(encode);
+				}
+				audioTaskNode.setEncode_array(encode_array);
+				task_array.add(audioTaskNode);
+			}
+			outputMediaEncodeMessage.setAudioEncodeId(audioEncodeId);
+			outputMediaEncodeMessage.setAudioTaskId(audioTaskId);
+		}
+			
+		List<SubtitleElement> programSubtitles = programDao.findBySourceIdAndNum(transTaskPO.getSourceId(), transTaskPO.getProgramNum()).getSubtitleElements();
+		if (programSubtitles!=null && programSubtitles.size() >= 1) {
+			ArrayList<String> subtitleEncodeId = new ArrayList<String>();
+			ArrayList<String> subtitleTaskId = new ArrayList<String>();
+			for (SubtitleElement subtitleElement : programSubtitles) {
+				TaskNode subtitleTaskNode = new TaskNode();
+				subtitleTaskNode.setId(nodeIdManageUtil.getNewNodeId().toString());
+				delTaskNodeIds.add(subtitleTaskNode.getId());
+				//字幕轨无编码
+				subtitleEncodeId.add("");
+				subtitleTaskId.add(subtitleTaskNode.getId());
+				
+				if (transTaskPO.getTaskType() == 1) {
+					subtitleTaskNode.setType("subtitle");
+				}else {
+					subtitleTaskNode.setType("passby");
+				}
+				
+				subtitleTaskNode.setSourceCommon(getSourceCommon(transTaskPO, programSubtitles.get(0).getPid()));
+				task_array.add(subtitleTaskNode);
+			}
+			outputMediaEncodeMessage.setSubtitleEncodeId(subtitleEncodeId);
+			outputMediaEncodeMessage.setSubtitleTaskId(subtitleTaskId);
+		}
+		
+		return task_array;
+	}
+	
+	
+	
+	public JSONObject getJsonInputNode(InputPO inputPO, ProgramPO programPO) {
 		SourcePO sourcePO = sourceDao.findOne(inputPO.getSourceId());
 		CreateJsonInputNode createInputNode = new CreateJsonInputNode();
 		ArrayList<InputNode> inputNodes = new ArrayList<InputNode>();
 		InputNode inputNode = new InputNode();
+		
+		ArrayList<InputProgramBO> program_array = new ArrayList<InputProgramBO>();
+
+		InputProgramBO createInputProgramBO = new InputProgramBO();
+		createInputProgramBO.setName(programPO.getProgramName());
+		createInputProgramBO.setPcr_pid(programPO.getPcrPid());
+		createInputProgramBO.setProgram_number(programPO.getProgramNum());
+		createInputProgramBO.setProvider(programPO.getProgramProvider());
+		createInputProgramBO.setPmt_pid(programPO.getPmtPid());
+		// 暂时协议没有pmt
+//		createInputProgramBO.setSubtitle_array(JSON.parseArray(programPO.getSubtitleJson(), ProgramSubtitleBO.class));
+//		createInputProgramBO.setAudio_array(JSON.parseArray(programPO.getAudioJson(), ProgramAudioBO.class));
+//		createInputProgramBO.setVideo_array(JSON.parseArray(programPO.getVideoJson(), ProgramVideoBO.class));
+
+		//decode_mode修改，后续在页面上添加后修改
+		List<InputProgramVideoBO> video_array = JSON.parseArray(programPO.getVideoJson(), InputProgramVideoBO.class);
+		for (InputProgramVideoBO programVideoBO : video_array) {
+			programVideoBO.setDecode_mode("cpu");
+			programVideoBO.setNv_card_idx(0);
+		}
+		
+		List<InputProgramAudioBO> audio_array = JSON.parseArray(programPO.getAudioJson(), InputProgramAudioBO.class);
+		for (InputProgramAudioBO programAudioBO : audio_array) {
+			programAudioBO.setDecode_mode("cpu");
+		}
+		
+		if (programPO.getSubtitleJson()!=null) {
+			List<InputProgramSubtitleBO> subtitle_array = JSON.parseArray(programPO.getSubtitleJson(), InputProgramSubtitleBO.class);
+			for (InputProgramSubtitleBO programSubtitleBO : subtitle_array) {
+				programSubtitleBO.setDecode_mode("cpu");
+			}
+			createInputProgramBO.setSubtitle_array(subtitle_array);
+		}
+		
+		createInputProgramBO.setAudio_array(audio_array);
+		createInputProgramBO.setVideo_array(video_array);
+		program_array.add(createInputProgramBO);
+		inputNode.setProgram_array(program_array);
+		
 		InputNodeNormalMap normal_map = new InputNodeNormalMap();
 		inputNode.setNormal_map(normal_map);
 		inputNode.setId(inputPO.getNodeId().toString());
@@ -98,6 +560,8 @@ public class NodeUtil {
 		createInputNode.setInput_array(inputNodes);
 		return getCreateInputNode(createInputNode, sourcePO.getProtoType());
 	}
+	
+	
 	
 //	public JSONObject getJsonDelInputNode(InputPO inputPO){
 //		DelJsonInputNode delJsonInputNode = new DelJsonInputNode();

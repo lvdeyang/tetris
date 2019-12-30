@@ -2,6 +2,7 @@ package com.sumavision.tetris.sts.task;
 
 import java.util.ArrayList;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.sts.task.taskParamInput.InputNode;
 import com.sumavision.tetris.sts.task.taskParamOutput.OutputNode;
 import com.sumavision.tetris.sts.task.taskParamTask.TaskNode;
@@ -21,7 +22,7 @@ public class CreateAddTaskNode {
 	private Long task_id;
 	
 	/**输入参数 */
-	private ArrayList<InputNode> input_array;
+	private JSONObject input_array;
 	
 	/**任务参数 */
 	private ArrayList<TaskNode> task_array;
@@ -61,11 +62,13 @@ public class CreateAddTaskNode {
 		this.task_id = task_id;
 	}
 
-	public ArrayList<InputNode> getInput_array() {
+
+
+	public JSONObject getInput_array() {
 		return input_array;
 	}
 
-	public void setInput_array(ArrayList<InputNode> input_array) {
+	public void setInput_array(JSONObject input_array) {
 		this.input_array = input_array;
 	}
 

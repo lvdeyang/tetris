@@ -108,4 +108,31 @@ public interface UserFeign {
 			@PathVariable("companyId") Long companyId,
 			@RequestParam("except") String except,
 			@RequestParam("classify") String classify);
+	
+	/**
+	 * 查询所有用户基本信息<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 上午9:19:30
+	 * @return List<UserVO> 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/query/all/user/baseInfo")
+	public JSONObject queryAllUserBaseInfo(
+			@RequestParam("currentPage") int currentPage,
+			@RequestParam("pageSize") int pageSize);
+	
+	/**
+	 * 根据用户名模糊查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午1:23:37
+	 * @param String userName 用户名
+	 * @return List<UserVO> 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/query/users/by/name/like")
+	public JSONObject queryUsersByNameLike(
+			@RequestParam("userName") String userName,
+			@RequestParam("except") String except,
+			@RequestParam("currentPage") int currentPage,
+			@RequestParam("pageSize") int pageSize);
 }

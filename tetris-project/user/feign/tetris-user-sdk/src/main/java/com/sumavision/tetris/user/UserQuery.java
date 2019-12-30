@@ -143,6 +143,29 @@ public class UserQuery {
 		return JsonBodyResponseParser.parseObject(userFeign.edit(id, tags), UserVO.class);
 	}
 	
+	/**
+	 * 查询所有用户信息<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 上午9:22:21
+	 * @return List<UserVO> 用户列表
+	 */
+	public Map<String, Object> queryAllUserBaseInfo(int currentPage, int pageSize) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.queryAllUserBaseInfo(currentPage, pageSize), Map.class);
+	}
+	
+	/**
+	 * 根据用户名模糊查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午1:25:58
+	 * @param String userName 用户名
+	 * @return List<UserVO> 用户列表
+	 */
+	public Map<String, Object> queryUsersByNameLike(String userName, String except, int currentPage, int pageSize) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.queryUsersByNameLike(userName, except, currentPage, pageSize), Map.class);
+	}
+	
 	/***************************************************
 	 ***************************************************
 	 ***************************************************/

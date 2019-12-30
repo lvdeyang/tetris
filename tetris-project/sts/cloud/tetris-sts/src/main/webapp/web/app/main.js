@@ -47,6 +47,8 @@ require.config({
 
         /* pages */
         'page-config':window.APPPATH+'config/page-config',
+        'page-task':window.APPPATH+'task/page-task',
+        'page-parameters':window.APPPATH+'parameters/page-parameters',
     },
     shim:{
         'vue':{

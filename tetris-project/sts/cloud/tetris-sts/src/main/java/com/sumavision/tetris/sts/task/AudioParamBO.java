@@ -3,12 +3,13 @@ package com.sumavision.tetris.sts.task;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class AudioParamBO implements Serializable{
+import com.sumavision.tetris.sts.task.source.AudioParamPO;
 
+public class AudioParamBO implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 8308128072930869398L;
+	private static final long serialVersionUID = -234538095816951415L;
 
 	private Integer pid;
 	
@@ -16,21 +17,70 @@ public class AudioParamBO implements Serializable{
 	
 	private String codec;
 	
-	private Integer bitrate;
+	private Long sample;
 	
-	//采样频率
-	private Integer sample_rate;
+	private Long bitrate;
 	
-	private Integer sample_fmt;
+	private Long volume;
 	
-	private Integer sample_byte;
+	private String agcGain;
 	
-	private String channel_layout;
+	private String audioDupMode;
 	
-	private String type;
+	private String chLayout;
 	
-	//g711a、g711u 默认时长
-	private Integer ptime;
+	private String denoise;
+
+	public AudioParamPO transToAudioParamPO(){
+		AudioParamPO audioParamPO = new AudioParamPO();
+		audioParamPO.setPid(pid);
+		audioParamPO.setTrackId(trackId);
+		audioParamPO.setCodec(codec);
+		audioParamPO.setSample(sample);
+		audioParamPO.setBitrate(bitrate);
+		audioParamPO.setVolume(volume);
+		audioParamPO.setAgcGain(agcGain);
+		audioParamPO.setAudioDupMode(audioDupMode);
+		audioParamPO.setChLayout(chLayout);
+		audioParamPO.setDenoise(denoise);
+		
+		return audioParamPO;
+	}
+
+
+	public boolean keyParamCompare(Object o) {
+		if (this == o) return true;
+		if (!(o instanceof AudioParamBO)) return false;
+		AudioParamBO that = (AudioParamBO) o;
+		return trackId == that.trackId &&
+				Objects.equals(pid, that.pid) &&
+				Objects.equals(codec, that.codec) &&
+				Objects.equals(sample, that.sample) &&
+				Objects.equals(bitrate, that.bitrate) &&
+				Objects.equals(volume, that.volume) &&
+				Objects.equals(agcGain, that.agcGain) &&
+				Objects.equals(audioDupMode, that.audioDupMode) &&
+				Objects.equals(chLayout, that.chLayout) &&
+				Objects.equals(denoise, that.denoise);
+	}
+
+	@Override
+	public int hashCode() {
+
+		return Objects.hash(pid, trackId, codec, sample, bitrate, volume, agcGain, audioDupMode, chLayout, denoise);
+	}
+
+	public int getTrackId() {
+		return trackId;
+	}
+
+
+
+	public void setTrackId(int trackId) {
+		this.trackId = trackId;
+	}
+
+
 
 	public Integer getPid() {
 		return pid;
@@ -38,14 +88,6 @@ public class AudioParamBO implements Serializable{
 
 	public void setPid(Integer pid) {
 		this.pid = pid;
-	}
-
-	public int getTrackId() {
-		return trackId;
-	}
-
-	public void setTrackId(int trackId) {
-		this.trackId = trackId;
 	}
 
 	public String getCodec() {
@@ -56,61 +98,64 @@ public class AudioParamBO implements Serializable{
 		this.codec = codec;
 	}
 
-	public Integer getBitrate() {
+	public Long getSample() {
+		return sample;
+	}
+
+	public void setSample(Long sample) {
+		this.sample = sample;
+	}
+
+	public Long getBitrate() {
 		return bitrate;
 	}
 
-	public void setBitrate(Integer bitrate) {
+	public void setBitrate(Long bitrate) {
 		this.bitrate = bitrate;
 	}
 
-	public Integer getSample_rate() {
-		return sample_rate;
+	public Long getVolume() {
+		return volume;
 	}
 
-	public void setSample_rate(Integer sample_rate) {
-		this.sample_rate = sample_rate;
+	public void setVolume(Long volume) {
+		this.volume = volume;
 	}
 
-	public Integer getSample_fmt() {
-		return sample_fmt;
+	public String getAgcGain() {
+		return agcGain;
 	}
 
-	public void setSample_fmt(Integer sample_fmt) {
-		this.sample_fmt = sample_fmt;
+	public void setAgcGain(String agcGain) {
+		this.agcGain = agcGain;
 	}
 
-	public Integer getSample_byte() {
-		return sample_byte;
+	public String getAudioDupMode() {
+		return audioDupMode;
 	}
 
-	public void setSample_byte(Integer sample_byte) {
-		this.sample_byte = sample_byte;
+	public void setAudioDupMode(String audioDupMode) {
+		this.audioDupMode = audioDupMode;
 	}
 
-	public String getChannel_layout() {
-		return channel_layout;
+	public String getChLayout() {
+		return chLayout;
 	}
 
-	public void setChannel_layout(String channel_layout) {
-		this.channel_layout = channel_layout;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
-	}
-
-	public Integer getPtime() {
-		return ptime;
-	}
-
-	public void setPtime(Integer ptime) {
-		this.ptime = ptime;
+	public void setChLayout(String chLayout) {
+		this.chLayout = chLayout;
 	}
 
 
+
+	public String getDenoise() {
+		return denoise;
+	}
+
+
+
+	public void setDenoise(String denoise) {
+		this.denoise = denoise;
+	}
+	
 }
