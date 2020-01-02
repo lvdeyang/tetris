@@ -28,6 +28,6 @@ public interface BundleFeign {
 	 * 查询设备的授权<br/>
 	 */
 	@RequestMapping(value = "/feign/bundle/queryAuth", method = RequestMethod.POST)
-	public JSONObject queryAuth(String bundle_id) throws Exception;
+	public JSONObject queryAuth(@RequestParam(value = "bundle_id")String bundle_id) throws Exception;
 
 }
