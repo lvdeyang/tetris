@@ -85,6 +85,9 @@ public class MediaTxtPO extends AbstractBasePO{
 	
 	/** 审核流程id */
 	private String processInstanceId;
+	
+	/** 附加字段 */
+	private String addition;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -244,6 +247,15 @@ public class MediaTxtPO extends AbstractBasePO{
 		this.processInstanceId = processInstanceId;
 	}
 
+	@Column(name = "ADDITION")
+	public String getAddition() {
+		return addition;
+	}
+
+	public void setAddition(String addition) {
+		this.addition = addition;
+	}
+
 	/**
 	 * 复制文本媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -265,6 +277,7 @@ public class MediaTxtPO extends AbstractBasePO{
 		copy_txt.setKeyWords(this.getKeyWords());
 		copy_txt.setUploadStatus(this.getUploadStatus());
 		copy_txt.setSize(this.getSize());
+		copy_txt.setAddition(this.getAddition());
 		return copy_txt;
 	}
 	

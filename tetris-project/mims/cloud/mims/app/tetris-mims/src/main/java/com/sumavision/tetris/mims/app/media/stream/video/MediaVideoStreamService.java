@@ -194,7 +194,7 @@ public class MediaVideoStreamService {
 	}
 	
 	/**
-	 * 视频流媒资删除(为feign提供)<br/>
+	 * 视频流媒资删除<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月17日 下午3:43:03
@@ -298,7 +298,38 @@ public class MediaVideoStreamService {
 	 * @param FolderPO folder 文件夹
 	 * @return MediaVideoStreamPO 视频流媒资
 	 */
-	public MediaVideoStreamVO addTask(
+	public MediaVideoStreamPO addTask(
+			UserVO user, 
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			List<String> previewUrl,
+			FolderPO folder,
+			String addition) throws Exception{
+		MediaVideoStreamPO mediaVideoStreamPO = addTask(user, name, tags, keyWords, remark, previewUrl, folder);
+		if (addition != null) {
+			mediaVideoStreamPO.setAddition(addition);
+			mediaVideoStreamDao.save(mediaVideoStreamPO);
+		}
+		return mediaVideoStreamPO;
+	}
+	
+	/**
+	 * 添加视频流媒资上传任务(多url)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月17日 下午3:21:49
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param List<String> previewUrl 视频流地址
+	 * @param FolderPO folder 文件夹
+	 * @return MediaVideoStreamPO 视频流媒资
+	 */
+	public MediaVideoStreamPO addTask(
 			UserVO user, 
 			String name, 
 			List<String> tags, 
@@ -347,7 +378,7 @@ public class MediaVideoStreamService {
 			mediaVideoStreamDao.save(entity);
 		}
 		
-		return new MediaVideoStreamVO().set(entity).setPreviewUrl(previewUrl);
+		return entity;
 	}
 	
 	/**
@@ -491,23 +522,57 @@ public class MediaVideoStreamService {
 	}
 	
 	/**
-	 * 添加视频流媒资上传任务(为feign提供)<br/>
+	 * 添加视频流媒资上传任务<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月29日 下午3:21:49
 	 * @param String name 媒资名称
 	 * @param String previewUrl 视频流地址
+	 * @param String tag 标签名称
 	 * @return MediaVideoStreamVO 视频流媒资
 	 */
 	public MediaVideoStreamVO addVideoStreamTask(
 			String previewUrl, 
+			String tag,
+			String name,
+			String addition) throws Exception{
+		
+		if (addition == null) return addVideoStreamTask(previewUrl, tag, name);
+		
+		UserVO user = userQuery.current();
+		
+		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO_STREAM.toString());
+		
+		MediaVideoStreamPO mediaVideoStreamPO = addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folder);
+		
+		mediaVideoStreamPO.setAddition(addition);
+		mediaVideoStreamDao.save(mediaVideoStreamPO);
+		
+		return new MediaVideoStreamVO().set(mediaVideoStreamPO).setPreviewUrl(new ArrayListWrapper<String>().add(previewUrl).getList());
+	}
+	
+	/**
+	 * 添加视频流媒资上传任务<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午3:21:49
+	 * @param String name 媒资名称
+	 * @param String previewUrl 视频流地址
+	 * @param String tag 标签名称
+	 * @return MediaVideoStreamVO 视频流媒资
+	 */
+	public MediaVideoStreamVO addVideoStreamTask(
+			String previewUrl, 
+			String tag,
 			String name) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO_STREAM.toString());
 		
-		return  addTask(user, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folder);
+		MediaVideoStreamPO mediaVideoStreamPO = addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folder);
+		
+		return new MediaVideoStreamVO().set(mediaVideoStreamPO).setPreviewUrl(new ArrayListWrapper<String>().add(previewUrl).getList());
 	}
 	
 	/** 

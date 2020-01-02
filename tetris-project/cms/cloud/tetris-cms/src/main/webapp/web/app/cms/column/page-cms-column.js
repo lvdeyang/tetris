@@ -11,6 +11,7 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
+    'mi-image-dialog',
     'article-dialog',
     'css!' + window.APPPATH + 'cms/column/page-cms-column.css'
 ], function(tpl, config, $, ajax, context, commons, Vue){
@@ -52,6 +53,7 @@ define([
                         data:'',
                         name:'',
                         code:'',
+                        thumbnail:'',
                         remark:''
                     },
                     selectTag:{
@@ -234,6 +236,15 @@ define([
                         }
                     }).catch(function(){});
                 },
+                selectedThumbnail:function(url, buff, startLoading, endLoading, done){
+                    buff.thumbnail = url;
+                    done();
+                },
+                handleSelectThumbnail:function(buff){
+                    var self = this;
+                    self.$refs.selectThumbnail.setBuffer(buff);
+                    self.$refs.selectThumbnail.open();
+                },
                 handleEditTagClose:function(){
                     var self = this;
                     self.dialog.editTag.data = '';
@@ -248,12 +259,14 @@ define([
                     ajax.post('/cms/column/update/' + self.dialog.editTag.data.id, {
                         name:self.dialog.editTag.name,
                         code:self.dialog.editTag.code,
+                        thumbnail:self.dialog.editTag.thumbnail,
                         remark:self.dialog.editTag.remark
                     }, function(data, status){
                         self.loading.tree = false;
                         if(status !== 200) return;
                         self.dialog.editTag.data.name = data.name;
                         self.dialog.editTag.data.code = data.code;
+                        self.dialog.editTag.data.thumbnail = data.thumbnail;
                         self.dialog.editTag.data.remark = data.remark;
                         self.handleEditTagClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);

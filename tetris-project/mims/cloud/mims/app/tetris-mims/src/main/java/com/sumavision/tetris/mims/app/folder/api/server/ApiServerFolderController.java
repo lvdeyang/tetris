@@ -20,6 +20,10 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtQuery;
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
@@ -40,6 +44,10 @@ public class ApiServerFolderController {
 	private MediaPictureQuery mediaPictureQuery;
 	@Autowired
 	private MediaTxtQuery mediaTxtQuery;
+	@Autowired
+	private MediaVideoStreamQuery mediaVideoStreamQuery;
+	@Autowired
+	private MediaAudioStreamQuery mediaAudioStreamQuery;
 	@Autowired
 	private MediaVideoDAO mediaVideoDAO;
 	@Autowired
@@ -97,7 +105,9 @@ public class ApiServerFolderController {
 		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAll();
 		List<MediaPictureVO> pictureVOs = mediaPictureQuery.loadAll();
 		List<MediaTxtVO> txtVOs = mediaTxtQuery.loadAll();
+		List<MediaVideoStreamVO> videoStreamVOs = mediaVideoStreamQuery.loadAll();
+		List<MediaAudioStreamVO> audioStreamVOs = mediaAudioStreamQuery.loadAll();
 		
-		return new ArrayListWrapper<Object>().addAll(videoVOs).addAll(audioVOs).addAll(pictureVOs).addAll(txtVOs).getList();
+		return new ArrayListWrapper<Object>().addAll(videoVOs).addAll(audioVOs).addAll(pictureVOs).addAll(txtVOs).addAll(videoStreamVOs).addAll(audioStreamVOs).getList();
 	}
 }

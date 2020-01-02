@@ -72,4 +72,15 @@ public interface MediaVideoStreamFeign {
 	 */
 	@RequestMapping(value = "/media/video/stream/feign/find/by/preview/url/in")
 	public JSONObject findByPreviewUrlIn(@RequestParam("previewUrls") String previewUrls);
+	
+	/**
+	 * 根据id查询音频流<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午11:15:05
+	 * @param JSONString previewUrls 预览地址列表
+	 * @return MediaAudioStreamVO 音频流列表
+	 */
+	@RequestMapping(value = "/media/video/stream/feign/find/by/id")
+	public JSONObject findById(@RequestParam("id") Long id) throws Exception;
 }

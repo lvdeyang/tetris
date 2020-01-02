@@ -102,6 +102,9 @@ public class MediaPicturePO extends AbstractBasePO{
 	/** 审核流程id */
 	private String processInstanceId;
 	
+	/** 附加字段 */
+	private String addition;
+	
 	@Column(name = "LAST_MODIFIED")
 	public Long getLastModified() {
 		return lastModified;
@@ -294,6 +297,15 @@ public class MediaPicturePO extends AbstractBasePO{
 		this.processInstanceId = processInstanceId;
 	}
 
+	public String getAddition() {
+		return addition;
+	}
+
+	@Column(name = "ADDITION")
+	public void setAddition(String addition) {
+		this.addition = addition;
+	}
+
 	/**
 	 * 转换为历史数据<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -354,6 +366,7 @@ public class MediaPicturePO extends AbstractBasePO{
 		copy_picture.setTags(this.getTags());
 		copy_picture.setKeyWords(this.getKeyWords());
 		copy_picture.setUploadStatus(this.getUploadStatus());
+		copy_picture.setAddition(this.getAddition());
 		return copy_picture;
 	}
 	

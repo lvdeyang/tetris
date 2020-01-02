@@ -381,7 +381,7 @@ public class RemoteAccessPoint {
 				this.headers = headers;
 			}
 	        this.retryInterval = 3000;
-	        this.retryTimes = 10;
+	        this.retryTimes = 1;
 	        this.currentRetry = 1;
 		}
 		

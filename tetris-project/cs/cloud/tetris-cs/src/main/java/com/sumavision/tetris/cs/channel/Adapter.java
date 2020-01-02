@@ -1,5 +1,7 @@
 package com.sumavision.tetris.cs.channel;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +28,8 @@ public class Adapter {
 	 * <b>日期：</b>2019年8月1日 上午11:06:57
 	 */
 	public String changeHttpToFtp(String httpUrl) throws Exception {		
+		System.out.println("httpUrl:" + httpUrl + ";" + httpUrl.endsWith(".m3u8"));
+		if (httpUrl.endsWith(".m3u8")) return httpUrl;
 
 		String ftpPath = null;
 
@@ -113,5 +117,31 @@ public class Adapter {
 		parentList.removeAll(ids);
 		if (parentList.isEmpty()) throw new ChannelUdpBroadCountIsFullException();
 		return parentList.get(0);
+	}
+	
+	/**
+	 * 获取template.json配置<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月5日 下午2:26:47
+	 * @return String json
+	 */
+	public String readTemplate() throws Exception{
+		BufferedReader in = null;
+		InputStreamReader reader = null;
+		String json = null;
+		try{
+			in = new BufferedReader(new InputStreamReader(this.getClass().getClassLoader().getResourceAsStream("template.json")));
+			StringBuffer buffer = new StringBuffer();
+			String line = "";
+			while ((line = in.readLine()) != null){
+			    buffer.append(line);
+			}
+			json = buffer.toString();
+		}finally{
+			if(in != null) in.close();
+			if(reader != null) reader.close();
+		}
+		return json;
 	}
 }

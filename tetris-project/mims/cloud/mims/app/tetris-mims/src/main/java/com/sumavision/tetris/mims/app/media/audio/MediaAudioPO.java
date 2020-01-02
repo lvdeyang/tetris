@@ -108,6 +108,9 @@ public class MediaAudioPO extends AbstractBasePO{
 	
 	/** 加密文件地址 */
 	private String encryptionUrl;
+	
+	/** 附加字段(给其他服务提供) */
+	private String addition;
 
 	@Column(name = "LAST_MODIFIED")
 	public Long getLastModified() {
@@ -337,6 +340,15 @@ public class MediaAudioPO extends AbstractBasePO{
 		this.encryptionUrl = encryptionUrl;
 	}
 
+	@Column(name = "ADDITION")
+	public String getAddition() {
+		return addition;
+	}
+
+	public void setAddition(String addition) {
+		this.addition = addition;
+	}
+
 	/**
 	 * 转换为历史数据<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -401,6 +413,7 @@ public class MediaAudioPO extends AbstractBasePO{
 		copy_video.setUploadStatus(this.getUploadStatus());
 		copy_video.setEncryption(this.getEncryption());
 		copy_video.setEncryptionUrl(this.getEncryptionUrl());
+		copy_video.setAddition(this.getAddition());
 		return copy_video;
 	}
 	

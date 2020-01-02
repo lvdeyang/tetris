@@ -60,7 +60,7 @@ public class MediaVideoStreamFeignController {
 			String name,
 			HttpServletRequest request) throws Exception{
 		
-		return  mediaVideoStreamService.addVideoStreamTask(previewUrl, name);
+		return  mediaVideoStreamService.addVideoStreamTask(previewUrl, "", name);
 	}
 	
 	/**
@@ -100,6 +100,23 @@ public class MediaVideoStreamFeignController {
 			String name,
 			HttpServletRequest request) throws Exception{
 		return mediaVideoStreamService.edit(mediaId, previewUrl, name);
+	}
+	
+	/**
+	 * 根据id查询视频流<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午11:28:10
+	 * @param JSONString previewUrls 预览地址列表
+	 * @return List<MediaVideoStreamVO> 视频流列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/id")
+	public Object findById(
+			Long id, 
+			HttpServletRequest request) throws Exception{
+		return mediaVideoStreamQuery.findById(id);
 	}
 	
 	/**

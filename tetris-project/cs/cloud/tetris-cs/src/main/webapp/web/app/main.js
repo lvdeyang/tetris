@@ -45,6 +45,7 @@ require.config({
 
         /* dialogs */
         'cs-user-dialog':window.APPPATH + 'cs/dialog/user/user-dialog',
+        'program-screen':window.APPPATH + 'cs/dialog/program/program-screen',
 
         /* pages */
         'page-cs-management':window.APPPATH + 'cs/management/page-cs-management'

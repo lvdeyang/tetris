@@ -1,7 +1,14 @@
 package com.sumavision.tetris.commons.util.httprequest;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -14,6 +21,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -105,8 +113,10 @@ public class HttpRequestUtil {
         //post请求返回结果
 //		DefaultHttpClient httpClient = new DefaultHttpClient();
         HttpClient httpClient = HttpClientBuilder.create().build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
         JSONObject jsonResult = null;
         HttpPost method = new HttpPost(url);
+        method.setConfig(requestConfig);
         try {
             if (null != param) {
                 //解决中文乱码问题
@@ -128,6 +138,7 @@ public class HttpRequestUtil {
                     }
                     /**把json字符串转换成json对象**/
                     jsonResult = JSONObject.parseObject(str);
+                    System.out.println(jsonResult);
                 } catch (Exception e) {
                     logger.error("post请求提交失败:" + url, e);
                 }
@@ -136,6 +147,46 @@ public class HttpRequestUtil {
             logger.error("post请求提交失败:" + url, e);
         }
         return jsonResult;
+    }
+    
+    public static void downloadTask(String url, String param, String filePath) throws Exception {
+    	CloseableHttpClient httpClient = HttpClients.createDefault();
+    	HttpPost post = new HttpPost(url);
+    	RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        post.setConfig(requestConfig);
+        StringEntity entity = new StringEntity(param, "utf-8");
+        entity.setContentEncoding("UTF-8");
+        entity.setContentType("application/json");
+        post.setEntity(entity);
+		
+		CloseableHttpResponse response = httpClient.execute(post);
+		File file = new File(filePath);
+		File folder = file.getParentFile();
+		if(!folder.exists()) folder.mkdirs();
+		if(!file.exists()) file.createNewFile();
+		InputStream in = null;
+		OutputStream out = null;
+		InputStreamReader inputStreamReader = null;
+		BufferedReader reader = null;
+		FileWriter fileWriter = null;
+		BufferedWriter writer = null;
+		try{
+			if(response.getStatusLine().getStatusCode() == 200){
+				in = response.getEntity().getContent();
+				out = new FileOutputStream(file);
+				byte[] buff = new byte[100];  
+		        int rc = 0;  
+		        while ((rc = in.read(buff, 0, 100)) > 0) {  
+		        	out.write(buff, 0, rc);  
+		        } 
+				out.flush();
+			}else{
+			}
+		}finally{
+			if(in != null) in.close();
+			if(out != null) out.close();
+			EntityUtils.consume(response.getEntity());
+		}
     }
     
     /**

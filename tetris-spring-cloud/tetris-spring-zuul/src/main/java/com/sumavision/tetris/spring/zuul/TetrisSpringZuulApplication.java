@@ -24,6 +24,7 @@ import com.sumavision.tetris.spring.zuul.auth.filter.MultipartFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.android.ApiAndroidLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.process.ApiProcessLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtLoginFilter;
+import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtPollingLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtScheduleLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.server.ApiServerLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.terminal.ApiTerminalLoginFilter;
@@ -86,6 +87,11 @@ public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
 	@Bean
 	public ApiQtScheduleLoginFilter apiQtScheduleLoginFilter(){
 		return new ApiQtScheduleLoginFilter();
+	}
+	
+	@Bean
+	public ApiQtPollingLoginFilter apiQtPollingLoginFilter(){
+		return new ApiQtPollingLoginFilter();
 	}
 	
 	@Bean

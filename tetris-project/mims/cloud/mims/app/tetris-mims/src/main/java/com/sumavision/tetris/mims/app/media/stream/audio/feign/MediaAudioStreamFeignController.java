@@ -37,6 +37,23 @@ public class MediaAudioStreamFeignController {
 	}
 	
 	/**
+	 * 根据id查询音频流<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午11:15:05
+	 * @param JSONString previewUrls 预览地址列表
+	 * @return List<MediaAudioStreamVO> 音频流列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/id")
+	public Object findById(
+			Long id, 
+			HttpServletRequest request) throws Exception{
+		return mediaAudioStreamQuery.findById(id);
+	}
+	
+	/**
 	 * 根据预览地址查询音频流<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

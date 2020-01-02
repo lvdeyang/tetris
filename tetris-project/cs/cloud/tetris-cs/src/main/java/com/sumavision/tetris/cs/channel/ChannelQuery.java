@@ -10,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
@@ -40,6 +42,9 @@ public class ChannelQuery {
 	
 	@Autowired
 	private BroadAbilityBroadInfoDAO broadAbilityBroadInfoDAO;
+	
+	@Autowired
+	private Adapter adapter;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -140,6 +145,47 @@ public class ChannelQuery {
 		} else {
 			return channel.getBroadcastStatus();
 		}
+	}
+	
+	/**
+	 * 读配置文件获取分屏模板<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月11日 下午5:33:21
+	 * @param Long channelId 频道Id
+	 * @return JSONArray 分屏模板数组
+	 */
+	public JSONArray getTemplate(Long channelId, Long scheduleId) throws Exception {
+		ChannelPO channel = findByChannelId(channelId);
+		JSONArray template = new JSONArray();
+		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD) {
+			template.add(oneScreen());
+		} else {
+			String templateString = adapter.readTemplate();
+			if (templateString == null || templateString.isEmpty()){
+				template.add(oneScreen());
+			}  else {
+				template = JSONArray.parseArray(templateString);
+			}
+		}
+		return template;
+	}
+	
+	private JSONObject oneScreen() {
+		JSONObject object = new JSONObject();
+		object.put("id", 1);
+		object.put("name", "一分屏");
+		object.put("screenNum", 1);
+		JSONArray screen = new JSONArray();
+		JSONObject screenObject = new JSONObject();
+		screenObject.put("no", 1);
+		screenObject.put("width", "100%");
+		screenObject.put("height", "100%");
+		screenObject.put("top", "0%");
+		screenObject.put("left", "0%");
+		screen.add(screenObject);
+		object.put("screen", screen);
+		return object;
 	}
 
 	/**

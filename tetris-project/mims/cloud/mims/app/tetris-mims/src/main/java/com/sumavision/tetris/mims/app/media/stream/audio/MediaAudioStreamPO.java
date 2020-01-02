@@ -32,6 +32,9 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 	/** 关键字分隔符 */
 	public static final String SEPARATOR_KEYWORDS = ",";
 	
+	/** igmpv3ip分隔符 */
+	public static final String SEPARATOR_IPS = ",";
+	
 	/** 媒资别名 */
 	private String name;
 	
@@ -59,6 +62,15 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 	/** 关键字， 格式：,分割*/
 	private String keyWords;
 	
+	/** igmpv3状态 */
+	private String igmpv3Status;
+	
+	/** igmpv3过滤模式 */
+	private String igmpv3Mode;
+	
+	/** igmpv3可编辑ip列表，格式：,分割 */
+	private String igmpv3Ips;
+	
 	/** 文件上传状态 */
 	private UploadStatus uploadStatus;
 	
@@ -67,6 +79,9 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 	
 	/** 审核流程id */
 	private String processInstanceId;
+	
+	/** 附加字段 */
+	private String addition;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -141,6 +156,33 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 		this.folderId = folderId;
 	}
 
+	@Column(name = "IGMPV3_STATUS")
+	public String getIgmpv3Status() {
+		return igmpv3Status;
+	}
+
+	public void setIgmpv3Status(String igmpv3Status) {
+		this.igmpv3Status = igmpv3Status;
+	}
+
+	@Column(name = "IGMPV3_MODE")
+	public String getIgmpv3Mode() {
+		return igmpv3Mode;
+	}
+
+	public void setIgmpv3Mode(String igmpv3Mode) {
+		this.igmpv3Mode = igmpv3Mode;
+	}
+
+	@Column(name = "IGMPV3_IPS")
+	public String getIgmpv3Ips() {
+		return igmpv3Ips;
+	}
+
+	public void setIgmpv3Ips(String igmpv3Ips) {
+		this.igmpv3Ips = igmpv3Ips;
+	}
+
 	@Column(name = "KEY_WORDS")
 	public String getKeyWords() {
 		return keyWords;
@@ -179,6 +221,15 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 		this.processInstanceId = processInstanceId;
 	}
 
+	public String getAddition() {
+		return addition;
+	}
+
+	@Column(name = "ADDITION")
+	public void setAddition(String addition) {
+		this.addition = addition;
+	}
+
 	/**
 	 * 复制音频流媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -199,6 +250,10 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 		copy_audioStream.setTags(this.getTags());
 		copy_audioStream.setKeyWords(this.getKeyWords());
 		copy_audioStream.setUploadStatus(this.getUploadStatus());
+		copy_audioStream.setIgmpv3Status(this.getIgmpv3Ips());
+		copy_audioStream.setIgmpv3Mode(this.getIgmpv3Mode());
+		copy_audioStream.setIgmpv3Ips(this.getIgmpv3Ips());
+		copy_audioStream.setAddition(this.getAddition());
 		return copy_audioStream;
 	}
 	

@@ -385,7 +385,40 @@ public class MediaTxtService {
 	 * @param boolean saveFile 是否保存文件
 	 * @return MediaTxtVO 文本媒资
 	 */
-	public MediaTxtVO addTask(
+	public MediaTxtPO addTask(
+			UserVO user,
+			String name,
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			String content,
+			FolderPO folder,
+			boolean saveFile,
+			String addition) throws Exception{
+		MediaTxtPO mediaTxtPO = addTask(user, name, tags, keyWords, remark, content, folder, saveFile);
+		if (addition != null) {
+			mediaTxtPO.setAddition(addition);
+			mediaTxtDao.save(mediaTxtPO);
+		}
+		return mediaTxtPO;
+	}
+	
+	/**
+	 * 添加文本媒资上传任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午3:21:49
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param String content 文本内容
+	 * @param FolderPO folder 文件夹
+	 * @param boolean saveFile 是否保存文件
+	 * @return MediaTxtPO 文本媒资
+	 */
+	public MediaTxtPO addTask(
 			UserVO user,
 			String name,
 			List<String> tags, 
@@ -463,7 +496,7 @@ public class MediaTxtService {
 			mediaTxtDao.save(entity);
 		}
 		
-		return new MediaTxtVO().set(entity);
+		return entity;
 	}
 	
 	/**

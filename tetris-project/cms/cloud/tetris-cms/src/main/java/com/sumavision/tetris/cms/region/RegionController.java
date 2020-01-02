@@ -116,7 +116,7 @@ public class RegionController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/update/{id}")
-	public Object update(@PathVariable Long id, String name, String code, HttpServletRequest request)
+	public Object update(@PathVariable Long id, String name, String code, String ip, HttpServletRequest request)
 			throws Exception {
 
 		UserVO user = userQuery.current();
@@ -131,7 +131,7 @@ public class RegionController {
 			throw new RegionNotExistException(id);
 		}
 		
-		regionPO = regionService.update(regionPO, name, code);
+		regionPO = regionService.update(regionPO, name, code, ip);
 
 		return new RegionVO().set(regionPO);
 	}

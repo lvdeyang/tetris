@@ -58,7 +58,8 @@ require.config({
         'page-development-basic':window.APPPATH + 'development/basic/page-development-basic',
         'page-business-user':window.APPPATH + 'business-user/page-business-user',
         'page-business-role':window.APPPATH + 'business-role/page-business-role',
-        'page-personal':window.APPPATH + 'personal/page-personal'
+        'page-personal':window.APPPATH + 'personal/page-personal',
+        'page-data-warehouse':window.APPPATH + 'data-warehouse/page-data-warehouse'
     },
     shim:{
         'vue':{

@@ -1,0 +1,84 @@
+[
+	{
+		"id": 1,
+		"name": "一分屏",
+		"screenNum": 1,
+		"screen": [{
+			"no": 1,
+			"width": "100%",
+			"height": "100%",
+			"top": "0%",
+			"left": "0%"
+		}]
+	},{
+		"id": 2,
+		"name": "四分屏",
+		"screenNum": 4,
+		"screen": [{
+			"no": 1,
+			"width": "50%",
+			"height": "50%",
+			"top": "0%",
+			"left": "0%"
+		},{
+			"no": 2,
+			"width": "50%",
+			"height": "50%",
+			"top": "0%",
+			"left": "50%"
+		},{
+			"no": 3,
+			"width": "50%",
+			"height": "50%",
+			"top": "50%",
+			"left": "0%"
+		},{
+			"no": 4,
+			"width": "50%",
+			"height": "50%",
+			"top": "50%",
+			"left": "50%"
+		}]
+	},{
+		"id": 3,
+		"name": "六分屏",
+		"screenNum": 6,
+		"screen": [{
+			"no": 1,
+			"width": "66%",
+			"height": "66%",
+			"top": "0%",
+			"left": "0%"
+		},{
+			"no": 2,
+			"width": "34%",
+			"height": "33%",
+			"top": "0%",
+			"left": "66%"
+		},{
+			"no": 3,
+			"width": "34%",
+			"height": "33%",
+			"top": "33%",
+			"left": "66%"
+		},{
+			"no": 4,
+			"width": "33%",
+			"height": "34%",
+			"top": "66%",
+			"left": "0%"
+		},{
+			"no": 5,
+			"width": "33%",
+			"height": "34%",
+			"top": "66%",
+			"left": "33%"
+		},{
+			"no": 6,
+			"width": "34%",
+			"height": "34%",
+			"top": "66%",
+			"left": "66%"
+		}]
+	}
+]

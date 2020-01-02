@@ -61,6 +61,13 @@ public class LoginService {
 	 */
 	public String doUserIdLogin(Long userId) throws Exception{
 		TokenPO token = tokenDao.findByUserIdAndType(userId, TerminalType.API);
+		if(token == null){
+			token = new TokenPO();
+			token.newToken();
+			token.setUserId(userId);
+			token.setType(TerminalType.API);
+			tokenDao.save(token);
+		}
 		return token.getToken();
 	}
 	

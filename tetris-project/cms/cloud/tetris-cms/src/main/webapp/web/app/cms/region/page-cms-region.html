@@ -66,12 +66,15 @@
                 width="500px"
                 :before-close="handleEditTagClose">
 
-            <el-form ref="form" label-width="70px">
+            <el-form ref="form" label-width="90px">
                 <el-form-item label="地区名称">
                     <el-input v-model="dialog.editTag.name"></el-input>
                 </el-form-item>
                 <el-form-item label="地区编号">
                     <el-input v-model="dialog.editTag.code"></el-input>
+                </el-form-item>
+                <el-form-item label="服务器地址">
+                    <el-input v-model="dialog.editTag.ip"></el-input>
                 </el-form-item>
             </el-form>
 

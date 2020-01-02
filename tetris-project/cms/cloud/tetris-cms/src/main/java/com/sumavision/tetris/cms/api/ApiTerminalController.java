@@ -19,8 +19,12 @@ import com.sumavision.tetris.cms.article.ArticleVO;
 import com.sumavision.tetris.cms.column.ColumnQuery;
 import com.sumavision.tetris.cms.column.ColumnService;
 import com.sumavision.tetris.cms.column.ColumnVO;
+import com.sumavision.tetris.cms.region.RegionQuery;
+import com.sumavision.tetris.cms.region.RegionVO;
 import com.sumavision.tetris.cms.relation.ColumnRelationArticleService;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -47,10 +51,16 @@ public class ApiTerminalController {
 	private ColumnRelationArticleService columnRelationArticleService;
 	
 	@Autowired
+	private RegionQuery regionQuery;
+	
+	@Autowired
 	private ArticleDAO articleDAO;
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private MimsServerPropsQuery mimsServerPropsQuery;
 
 	/**
 	 * 根据组织id查询目录<br/>
@@ -156,6 +166,34 @@ public class ApiTerminalController {
 		ColumnVO column = columnService.queryCommand(user, page);
 
 		return column;
+	}
+	
+	/**
+	 * 根据地区信息获取服务器ip<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月17日 下午1:52:46
+	 * @param groupId
+	 * @param province
+	 * @param city
+	 * @param istrict
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/queryRegion/server")
+	public Object queryRegionServer(
+			String groupId,
+			String province,
+			String city,
+			String district,
+			HttpServletRequest request) throws Exception {
+		UserVO user = new UserVO().setGroupId(groupId);
+		RegionVO regionVO = regionQuery.queryIp(user, province, city, district);
+		if (regionVO == null || regionVO.getIp() == null || regionVO.getIp().isEmpty()) return mimsServerPropsQuery.queryProps().getIp();
+		return regionVO.getIp();
 	}
 	
 	/**

@@ -89,10 +89,11 @@ public class RegionService {
 	 * @param code 编号
 	 * @return RegionPO 地区
 	 */
-	public RegionPO update(RegionPO regionPO, String name, String code) throws Exception {
+	public RegionPO update(RegionPO regionPO, String name, String code, String ip) throws Exception {
 
 		regionPO.setName(name);
 		regionPO.setCode(code);
+		regionPO.setIp(ip);
 		regionPO.setUpdateTime(new Date());
 		regionDao.save(regionPO);
 

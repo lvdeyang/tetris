@@ -124,12 +124,26 @@
                 width="500px"
                 :before-close="handleEditTagClose">
 
-            <el-form ref="form" label-width="70px">
+            <el-form ref="form" label-width="90px">
                 <el-form-item label="栏目名称">
                     <el-input v-model="dialog.editTag.name"></el-input>
                 </el-form-item>
                 <el-form-item label="栏目编号">
                     <el-input v-model="dialog.editTag.code"></el-input>
+                </el-form-item>
+                <el-form-item label="栏目缩略图">
+                    <table>
+                        <tr>
+                            <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                <img v-if="dialog.editTag.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.editTag.thumbnail" />
+                            </td>
+                            <td style="width:100px; vertical-align:middle;">
+                                <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.editTag)">
+                                    <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                </el-button>
+                            </td>
+                        </tr>
+                    </table>
                 </el-form-item>
                 <el-form-item label="备注">
                     <el-input type="textarea" v-model="dialog.editTag.remark"></el-input>
@@ -144,6 +158,9 @@
 
         <!-- 上架对话框 -->
         <article-dialog ref="articleDialog" @on-article-dialog-close="selectedArticles"></article-dialog>
+
+        <!-- 选择图片对话框 -->
+        <mi-image-dialog ref="selectThumbnail" @selected-image="selectedThumbnail"></mi-image-dialog>
 
     </template>
 

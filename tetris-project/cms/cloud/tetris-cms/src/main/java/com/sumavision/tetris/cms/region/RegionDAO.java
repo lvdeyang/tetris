@@ -55,4 +55,10 @@ public interface RegionDAO extends BaseDAO<RegionPO>{
 	@Query(value = "SELECT region.* FROM TETRIS_CMS_REGION region LEFT JOIN TETRIS_CMS_REGION_USER_PERMISSION permission ON region.id = permission.region_id WHERE permission.group_id = ?1", nativeQuery = true)
 	public List<RegionPO> findByGroupId(String groupId);
 	
+	@Query(value = "SELECT region.* FROM TETRIS_CMS_REGION region "
+			+ "LEFT JOIN TETRIS_CMS_REGION_USER_PERMISSION permission "
+			+ "ON region.id = permission.region_id "
+			+ "WHERE permission.group_id = ?1 "
+			+ "AND region.name LIKE CONCAT('%', ?2 '%')", nativeQuery = true)
+	public List<RegionPO> findByGroupIdAndName(String groupId, String name);
 }

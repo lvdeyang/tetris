@@ -1,9 +1,13 @@
 package com.sumavision.tetris.cs.channel.broad.ability;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -12,18 +16,15 @@ import java.util.stream.Collectors;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
@@ -38,7 +39,6 @@ import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
-import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoPO;
 import com.sumavision.tetris.cs.channel.exception.ChannelBroadNoneOutputException;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
@@ -47,10 +47,7 @@ import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
-import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
-import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
-import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
 import com.sumavision.tetris.mvc.wrapper.CopyHeaderHttpServletRequestWrapper;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 import com.sumavision.tetris.user.UserQuery;
@@ -129,13 +126,6 @@ public class BroadAbilityService {
 			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
 			channelDao.save(channel);	
 			if (channel.getType().equals(ChannelType.REMOTE.toString())) {
-				BroadAbilityRemotePO remotePO = broadAbilityRemoteDAO.findByChannelId(channelId);
-				if (remotePO == null) return;
-				String url = remotePO.getStopCallbackUrl();
-				if (url != null && !url.isEmpty()) {
-					//回调
-					HttpRequestUtil.httpGet(new StringBufferWrapper().append(url).toString());
-				}
 				channelService.remove(channelId);
 			}
 		}
@@ -294,22 +284,29 @@ public class BroadAbilityService {
 						nTimer.schedule(timerTask, 0);
 					}
 				} else {
-					TimerTask timerTask = new TimerTask() {
-						
-						@Override
-						public void run() {
-							try {
-								startAbilityBroadTimer(channelId);
-							} catch (Exception e) {
-								e.printStackTrace();
-							}
+					System.out.println("排期单遍历结束");
+					if (channel.getType().equals(ChannelType.REMOTE.toString())) {
+						BroadAbilityRemotePO remotePO = broadAbilityRemoteDAO.findByChannelId(channelId);
+						if (remotePO == null) return;
+						String url = remotePO.getStopCallbackUrl();
+						System.out.println("回调：" + url);
+						if (url != null && !url.isEmpty()) {
+							HttpRequestUtil.httpGet(new StringBufferWrapper().append(url).toString());
 						}
-					};
-					if (channel.getType().equals(ChannelType.REMOTE.toString()) || channel.getAutoBroad()) {
-//						channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
-//						channelDao.save(channel);
+					} else if (channel.getAutoBroad()){
 						channelService.stopBroadcast(channelId);
 					} else {
+//						TimerTask timerTask = new TimerTask() {
+//							
+//							@Override
+//							public void run() {
+//								try {
+//									startAbilityBroadTimer(channelId);
+//								} catch (Exception e) {
+//									e.printStackTrace();
+//								}
+//							}
+//						};
 //						nTimer.schedule(timerTask, dealTime - 5000l);
 					}
 				}

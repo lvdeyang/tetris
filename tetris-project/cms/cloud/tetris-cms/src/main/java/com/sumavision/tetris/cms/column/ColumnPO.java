@@ -30,6 +30,9 @@ public class ColumnPO extends AbstractBasePO{
 	/** 栏目备注 */
 	private String remark;
 	
+	/** 栏目缩略图 */
+	private String thumbnail;
+	
 	/** 父栏目id */
 	private Long parentId;
 	
@@ -66,6 +69,15 @@ public class ColumnPO extends AbstractBasePO{
 		this.remark = remark;
 	}
 	
+	@Column(name = "THUMBNAIL")
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
 	@Column(name = "COLUMN_ORDER")
 	public Long getColumnOrder() {
 		return columnOrder;

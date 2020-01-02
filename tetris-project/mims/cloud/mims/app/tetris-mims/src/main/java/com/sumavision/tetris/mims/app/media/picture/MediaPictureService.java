@@ -34,6 +34,7 @@ import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.storage.StoreQuery;
@@ -322,6 +323,37 @@ public class MediaPictureService {
 		return new HashMapWrapper<String, Object>().put("deleted", MediaPictureVO.getConverter(MediaPictureVO.class).convert(picturesCanBeDeleted, MediaPictureVO.class))
 												   .put("processed", MediaPictureVO.getConverter(MediaPictureVO.class).convert(picturesNeedProcess, MediaPictureVO.class))
 												   .getMap();
+	}
+	
+	/**
+	 * 添加图片媒资上传任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午3:21:49
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param MediaVideoTaskVO task 上传任务
+	 * @param FolderPO folder 文件夹
+	 * @return MediaPicturePO 图片媒资
+	 */
+	public MediaPicturePO addTask(
+			UserVO user, 
+			String name, 
+			List<String> tags, 
+			List<String> keyWords, 
+			String remark, 
+			MediaPictureTaskVO task, 
+			FolderPO folder,
+			String addition) throws Exception{
+		MediaPicturePO mediaPicturePO = addTask(user, name, tags, keyWords, remark, task, folder);
+		if (addition != null) {
+			mediaPicturePO.setAddition(addition);
+			mediaPictureDao.save(mediaPicturePO);
+		}
+		return mediaPicturePO;
 	}
 	
 	/**

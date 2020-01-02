@@ -63,9 +63,12 @@ import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureErrorB
 import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureNotExistException;
 import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamService;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
@@ -144,7 +147,13 @@ public class ApiServerMediaController {
 	private MediaAudioStreamService mediaAudioStreamService;
 	
 	@Autowired
+	private MediaAudioStreamQuery mediaAudioStreamQuery;
+	
+	@Autowired
 	private MediaVideoStreamService mediaVideoStreamService;
+	
+	@Autowired
+	private MediaVideoStreamQuery mediaVideoStreamQuery;
 	
 	@Autowired
 	private MediaCompressService mediaCompressService;
@@ -192,6 +201,7 @@ public class ApiServerMediaController {
             String remark,
             Long folderId,
             String tagId,
+            String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -230,23 +240,24 @@ public class ApiServerMediaController {
 		
 		if(type.equals(FolderType.COMPANY_AUDIO)){
 			MediaAudioTaskVO taskParam = JSON.parseObject(task, MediaAudioTaskVO.class);
-			MediaAudioPO entity = mediaAudioService.addTask(user, name, tagNames, null, remark, false, taskParam, folder);			
+			MediaAudioPO entity = mediaAudioService.addTask(user, name, tagNames, null, remark, false, taskParam, folder, addition);			
 			return new MediaAudioVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_AUDIO_STREAM)){
-			MediaAudioStreamPO entity = mediaAudioStreamService.addTask(user, name, null, null, remark, task, folder);
+			MediaAudioStreamPO entity = mediaAudioStreamService.addTask(user, name, null, null, remark, task, folder, addition);
 			return new MediaAudioStreamVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_PICTURE)){
 			MediaPictureTaskVO taskParam = JSON.parseObject(task, MediaPictureTaskVO.class);
-			MediaPicturePO entity = mediaPictureService.addTask(user, name, tagNames, null, remark, taskParam, folder);
+			MediaPicturePO entity = mediaPictureService.addTask(user, name, tagNames, null, remark, taskParam, folder, addition);
 			return new MediaPictureVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_TXT)){
-			return mediaTxtService.addTask(user, name, tagNames, null, remark, task, folder, false);
+			MediaTxtPO entity = mediaTxtService.addTask(user, name, tagNames, null, remark, task, folder, false, addition);
+			return new MediaTxtVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_VIDEO)){
 			MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class); 
-			MediaVideoPO entity = mediaVideoService.addTask(user, name, tagNames, null, remark, taskParam, folder);
+			MediaVideoPO entity = mediaVideoService.addTask(user, name, tagNames, null, remark, taskParam, folder, addition);
 			return new MediaVideoVO().set(entity);
 		}else if(type.equals(FolderType.COMPANY_VIDEO_STREAM)){
-			return mediaVideoStreamService.addTask(user, name, null, null, remark, new ArrayListWrapper<String>().add(task).getList(), folder);			
+			return mediaVideoStreamService.addTask(user, name, null, null, remark, new ArrayListWrapper<String>().add(task).getList(), folder, addition);			
 		}else if(type.equals(FolderType.COMPANY_COMPRESS)){
 			MediaCompressTaskVO taskParam = JSON.parseObject(task, MediaCompressTaskVO.class);
 			MediaCompressPO entity = mediaCompressService.addTask(user, name, null, null, remark, taskParam, folder);
@@ -584,6 +595,13 @@ public class ApiServerMediaController {
 			case "txt":
 				List<MediaTxtPO> txts = mediaTxtDao.findAll(ids);
 				mediaTxtService.remove(txts);
+				break;
+			case "videostream":
+				mediaVideoStreamService.removeByIds(ids);
+				break;
+			case "audiostream":
+				mediaAudioStreamService.removeByIds(ids);
+				break;
 			default:
 				break;
 			}
@@ -605,16 +623,20 @@ public class ApiServerMediaController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/stream")
-	public Object addRemote(String name, String type, Long tagId, String httpUrl, String ftpUrl, HttpServletRequest request) throws Exception {
+	public Object addRemote(String name, String type, Long tagId, String httpUrl, String ftpUrl, String addition, HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
 		
 		TagVO tag = tagQuery.queryById(tagId);
 		
 		switch (type.toLowerCase()) {
-		case "video":
-			return mediaVideoService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
-		case "audio":
-			return mediaAudioService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
+//		case "video":
+//			return mediaVideoService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
+//		case "audio":
+//			return mediaAudioService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
+		case "videostream":
+			return mediaVideoStreamService.addVideoStreamTask(httpUrl, tag == null ? "" : tag.getName(), name, addition);
+		case "audiostream":
+			return mediaAudioStreamService.addAudioStreamTask(httpUrl, tag == null ? "" : tag.getName(), name, addition);
 		default:
 			return null;
 		}
@@ -645,6 +667,8 @@ public class ApiServerMediaController {
 		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadByCreateTime(startLong, endLong);
 		List<MediaPictureVO> mediaPictureVOs = mediaPictureQuery.loadByCreateTime(startLong, endLong);
 		List<MediaTxtVO> mediaTxtVOs = mediaTxtQuery.loadByCreateTime(startLong, endLong);
+		List<MediaVideoStreamVO> mediaVideoStreamVOs = mediaVideoStreamQuery.loadByCreateTime(startLong, endLong);
+		List<MediaAudioStreamVO> mediaAudioStreamVOs = mediaAudioStreamQuery.loadByCreateTime(startLong, endLong);
 		
 		HashMapWrapper<String, List<Object>> map = new HashMapWrapper<String, List<Object>>();
 		for (MediaVideoVO mediaVideoVO : videoVOs) {
@@ -686,6 +710,24 @@ public class ApiServerMediaController {
 			}
 		}
 		
+		for (MediaVideoStreamVO mediaVideoStreamVO : mediaVideoStreamVOs) {
+			String mimeType = "application/x-mpegURL";
+			if (map.containsKey(mimeType)) {
+				map.getMap().get(mimeType).add(mediaVideoStreamVO);
+			}else {
+				map.put(mimeType, new ArrayListWrapper<Object>().add(mediaVideoStreamVO).getList());
+			}
+		}
+		
+		for (MediaAudioStreamVO mediaAudioStreamVO : mediaAudioStreamVOs) {
+			String mimeType = "application/x-mpegURL";
+			if (map.containsKey(mimeType)) {
+				map.getMap().get(mimeType).add(mediaAudioStreamVO);
+			}else {
+				map.put(mimeType, new ArrayListWrapper<Object>().add(mediaAudioStreamVO).getList());
+			}
+		}
+		
 		JSONObject jsonObject = new JSONObject();
 		for (String mimetype : map.getMap().keySet()) {
 			jsonObject.put(mimetype, map.getMap().get(mimetype));
@@ -714,12 +756,16 @@ public class ApiServerMediaController {
 		List<MediaAudioVO> audioVOs = new ArrayList<MediaAudioVO>();
 		List<MediaPictureVO> pictureVOs = new ArrayList<MediaPictureVO>();
 		List<MediaTxtVO> txtVOs = new ArrayList<MediaTxtVO>();
+		List<MediaVideoStreamVO> videoStreamVOs = new ArrayList<MediaVideoStreamVO>();
+		List<MediaAudioStreamVO> audioStreamVOs = new ArrayList<MediaAudioStreamVO>();
 		
 		if (type == null) {
 			videoVOs = mediaVideoQuery.loadByCondition(id, name, startTime, endTime, tagId);
 			audioVOs = mediaAudioQuery.loadByCondition(id, name, startTime, endTime, tagId);
 			pictureVOs = mediaPictureQuery.loadByCondition(id, name, startTime, endTime, tagId);
 			txtVOs = mediaTxtQuery.loadByCondition(id, name, startTime, endTime, tagId);
+			videoStreamVOs = mediaVideoStreamQuery.loadByCondition(id, name, startTime, endTime, tagId);
+			audioStreamVOs = mediaAudioStreamQuery.loadByCondition(id, name, startTime, endTime, tagId);
 		} else {
 			switch (type.toLowerCase()) {
 			case "video":
@@ -734,6 +780,12 @@ public class ApiServerMediaController {
 			case "txt":
 				txtVOs = mediaTxtQuery.loadByCondition(id, name, startTime, endTime, tagId);
 				break;
+			case "videostream":
+				videoStreamVOs = mediaVideoStreamQuery.loadByCondition(id, name, startTime, endTime, tagId);
+				break;
+			case "audiostream":
+				audioStreamVOs = mediaAudioStreamQuery.loadByCondition(id, name, startTime, endTime, tagId);
+				break;
 			default:
 				throw new ErrorTypeException("type",type);
 			}
@@ -744,6 +796,8 @@ public class ApiServerMediaController {
 				.addAll(audioVOs)
 				.addAll(pictureVOs)
 				.addAll(txtVOs)
+				.addAll(videoStreamVOs)
+				.addAll(audioStreamVOs)
 				.getList();
 	}
 	
@@ -811,6 +865,16 @@ public class ApiServerMediaController {
 			folderId = txt.getFolderId();
 			name = txt.getFileName();
 			uri = stringBufferWrapper.append(txt.getPreviewUrl()).toString();
+			break;
+		case "videostream":
+			MediaVideoStreamVO videoStreamVO = mediaVideoStreamQuery.findById(id);
+			name = videoStreamVO.getName();
+			uri = videoStreamVO.getPreviewUrl().isEmpty() ? "" : videoStreamVO.getPreviewUrl().get(0);
+			break;
+		case "audiostream":
+			MediaAudioStreamVO audioStreamVO = mediaAudioStreamQuery.findById(id);
+			name = audioStreamVO.getName();
+			uri = audioStreamVO.getPreviewUrl();
 		default:
 			throw new ErrorTypeException("type",type);
 		}

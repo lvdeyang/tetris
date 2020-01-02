@@ -114,7 +114,9 @@ public class MediaVideoStreamController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		return  mediaVideoStreamService.addTask(user, name, tagList, keyWordList, remark, JSON.parseArray(previewUrl, String.class), folder);
+		List<String> previewUrls = JSON.parseArray(previewUrl, String.class);
+		MediaVideoStreamPO mediaVideoStreamPO = mediaVideoStreamService.addTask(user, name, tagList, keyWordList, remark, previewUrls, folder);
+		return new MediaVideoStreamVO().set(mediaVideoStreamPO).setPreviewUrl(previewUrls);
 	}
 	
 	/**

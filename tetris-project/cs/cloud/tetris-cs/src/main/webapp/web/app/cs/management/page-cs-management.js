@@ -13,6 +13,7 @@ define([
     'mi-frame',
     'mi-lightbox',
     'cs-user-dialog',
+    'program-screen',
     'css!' + window.APPPATH + 'cs/management/page-cs-management.css'
 ], function (tpl, config, $, ajax, context, commons, Vue) {
 
@@ -29,6 +30,9 @@ define([
         new Vue({
             el: '#' + pageId + '-wrapper',
             data: {
+                test: {
+                    visible: false
+                },
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
@@ -298,6 +302,7 @@ define([
                 },
                 multiDelete: function () {
                     var self = this;
+
                     //if (self.channel.multipleSelection.length > 0) {
                     //    var h = self.$createElement;
                     //    self.$msgbox({
@@ -1141,56 +1146,6 @@ define([
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
 
-                editProgram: function (scope) {
-                    var self = this;
-                    self.dialog.editProgram.data = scope.row;
-                    self.getPreviewScreenData();
-                    self.dialog.editProgram.visible = true;
-                },
-                getPreviewScreenData: function () {
-                    //获取之前的屏幕配置信息,设置初始显示分屏信息;
-                    var self = this;
-
-                    var questData = {id: self.dialog.editProgram.data.id};
-                    ajax.post('/cs/program/get', questData, function (data, status) {
-                        if (status != 200 || !data) {
-                            self.dialog.editProgram.options.current = self.screen.one;
-                            self.releaseScreenCommitInfo(1);
-                        } else {
-                            self.dialog.editProgram.previewData = data;
-                            switch (data.screenNum) {
-                                case 1:
-                                    self.dialog.editProgram.options.current = self.screen.one;
-                                    self.handleScreenOptionsChange(self.screen.one);
-                                    break;
-                                case 4:
-                                    self.dialog.editProgram.options.current = self.screen.four;
-                                    self.handleScreenOptionsChange(self.screen.four);
-                                    break;
-                                case 6:
-                                    self.dialog.editProgram.options.current = self.screen.six;
-                                    self.handleScreenOptionsChange(self.screen.six);
-                                    break;
-                                case 9:
-                                    self.dialog.editProgram.options.current = self.screen.nine;
-                                    self.handleScreenOptionsChange(self.screen.nine);
-                                    break;
-                            }
-                        }
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
-                },
-                handleEditProgramClose: function () {
-                    var self = this;
-                    self.dialog.editProgram.visible = false;
-                    self.dialog.editProgram.commitData.screenNum = 1;
-                    self.dialog.editProgram.data = "";
-                    self.dialog.editProgram.previewData = {};
-                    self.dialog.editProgram.commitData.screenNum = "";
-                    self.dialog.editProgram.commitData.currentSerialNum = "";
-                    self.dialog.editProgram.commitData.screenInfo = [];
-                    self.dialog.editProgram.commitData.currentSerialInfo = [];
-                    self.dialog.editProgram.options.current = self.screen.one;
-                },
                 handlePreview: function (scope) {
                     var self = this;
                     var row = scope.row;
@@ -1200,243 +1155,10 @@ define([
                         self.$refs.Lightbox.preview(row.previewUrl, 'video');
                     }
                 },
-                handleEditProgramCommit: function () {
+                editProgram: function (scope) {
                     var self = this;
-                    self.dialog.editProgram.loading = true;
-                    var screenInfo = [];
-                    for (var i = 0; i < self.dialog.editProgram.commitData.screenInfo.length; i++) {
-                        var item = self.dialog.editProgram.commitData.screenInfo[i];
-                        if (item.subColumns && item.subColumns.length > 0) {
-                            for (var j = 0; j < item.subColumns.length; j++) {
-                                item.subColumns[j].serialNum = item.serialNum;
-                                screenInfo.push(item.subColumns[j])
-                            }
-                        }
-                    }
-                    var programInfo = {
-                        scheduleId: self.dialog.editProgram.data.id,
-                        screenNum: self.dialog.editProgram.commitData.screenNum,
-                        screenInfo: screenInfo
-                    };
-                    var questData = {
-                        programInfo: JSON.stringify(programInfo)
-                    };
-                    ajax.post('/cs/program/set', questData, function (data, status) {
-                        self.dialog.editProgram.loading = false;
-                        if (status != 200) return;
-                        self.$message({
-                            message: '保存成功',
-                            type: 'success'
-                        });
-                        self.dialog.editProgram.previewData = data;
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
-                },
-                handleScreenOptionsChange: function (data) {
-                    var self = this;
-                    self.dialog.editProgram.audioIndex = 1;
-                    switch (data) {
-                        case self.screen.one:
-                            self.releaseScreenCommitInfo(1);
-                            break;
-                        case self.screen.four:
-                            self.releaseScreenCommitInfo(4);
-                            break;
-                        case self.screen.six:
-                            self.releaseScreenCommitInfo(6);
-                            break;
-                        case self.screen.nine:
-                            self.releaseScreenCommitInfo(9);
-                            break;
-                    }
-                    self.clickScreen(1);
-                },
-                releaseScreenCommitInfo: function (num) {
-                    var self = this;
-                    self.dialog.editProgram.commitData.screenNum = num;
-                    self.dialog.editProgram.commitData.screenInfo.splice(0, self.dialog.editProgram.commitData.screenInfo.length);
-                    self.dialog.editProgram.commitData.currentSerialInfo.splice(0, self.dialog.editProgram.commitData.currentSerialInfo.length);
-                    var i = 0;
-                    var data = {};
-                    if (self.dialog.editProgram.previewData.screenNum != num) {
-                        for (i = 0; i < num; i++) {
-                            data = {
-                                serialNum: i + 1,
-                                subColumns: []
-                            };
-                            self.dialog.editProgram.commitData.screenInfo.push(data);
-                        }
-                    } else {
-                        for (i = 0; i < num; i++) {
-                            data = {
-                                serialNum: i + 1,
-                                subColumns: []
-                            };
-                            for (var j = 0; j < self.dialog.editProgram.previewData.screenInfo.length; j++) {
-                                if (self.dialog.editProgram.previewData.screenInfo[j].serialNum == data.serialNum) {
-                                    data.subColumns.push(self.dialog.editProgram.previewData.screenInfo[j]);
-                                }
-                            }
-                            self.dialog.editProgram.commitData.screenInfo.push(data);
-                        }
-                    }
-                },
-                clickScreen: function (serialNum) {
-                    var self = this;
-                    self.dialog.editProgram.commitData.currentSerialNum = serialNum;
-                    for (var i = 0; i < self.dialog.editProgram.commitData.screenInfo.length; i++) {
-                        var item = self.dialog.editProgram.commitData.screenInfo[i];
-                        if (item.serialNum == serialNum) {
-                            self.dialog.editProgram.commitData.currentSerialInfo = item.subColumns;
-                            break;
-                        }
-                    }
-                },
-                chooseResources: function (serialNum) {
-                    var self = this;
-                    self.dialog.editProgram.dialog.chooseResource.visible = true;
-                    self.loadProgramMenuTree();
-                },
-                loadProgramMenuTree: function () {
-                    var self = this;
-                    self.dialog.editProgram.dialog.chooseResource.tree.loading = true;
-                    self.dialog.editProgram.dialog.chooseResource.tree.data.splice(0, self.dialog.editProgram.dialog.chooseResource.tree.data.length);
-                    self.dialog.editProgram.dialog.chooseResource.tree.data.push({
-                        id: -1,
-                        uuid: '-1',
-                        name: '资源目录',
-                        icon: 'icon-tag',
-                        style: 'font-size:15px; position:relative; top:1px; margin-right:1px;'
-                    });
-                    var questData = {channelId: self.dialog.editSchedules.data.id};
-                    ajax.post('/cs/menu/list/tree', questData, function (data, status) {
-                        self.dialog.editProgram.dialog.chooseResource.tree.loading = false;
-                        if (data && data.length > 0) {
-                            for (var i = 0; i < data.length; i++) {
-                                self.dialog.editProgram.dialog.chooseResource.tree.data.push(data[i]);
-                            }
-                        }
-                        self.currentProgramMenuNode(self.dialog.editProgram.dialog.chooseResource.tree.data[0]);
-                    }, null, ajax.NO_ERROR_CATCH_CODE);
-                },
-                currentProgramResourceTreeNodeChange: function (data) {
-                    var self = this;
-                    self.currentProgramMenuNode(data);
-                },
-                currentProgramMenuNode: function (data) {
-                    var self = this;
-                    if (!data || data.id == -1) {
-                        self.dialog.editProgram.dialog.chooseResource.tree.current = '';
-                        if (self.dialog.editProgram.dialog.chooseResource.resources.data)
-                            self.dialog.editProgram.dialog.chooseResource.resources.data.splice(0, self.dialog.editProgram.dialog.chooseResource.resources.data.length);
-                        return;
-                    }
-                    self.dialog.editProgram.dialog.chooseResource.tree.current = data;
-                    self.$nextTick(function () {
-                        self.$refs.programResourceTree.setCurrentKey(data.uuid);
-                    });
-                    self.loadingProgramMenuResource();
-                },
-                loadingProgramMenuResource: function () {
-                    var self = this;
-                    if (self.dialog.editProgram.dialog.chooseResource.resources.data)
-                        self.dialog.editProgram.dialog.chooseResource.resources.data.splice(0, self.dialog.editProgram.dialog.chooseResource.resources.data.length);
-                    var questData = {
-                        id: self.dialog.editProgram.dialog.chooseResource.tree.current.id
-                    };
-                    ajax.post('/cs/menu/resource/get', questData, function (data, status) {
-                        if (status != 200) return;
-                        if (data && data.length > 0) {
-                            for (var i = 0; i < data.length; i++) {
-                                self.dialog.editProgram.dialog.chooseResource.resources.data.push(data[i])
-                            }
-                        }
-                    }, null, ajax.NO_ERROR_CATCH_CODE)
-                },
-                handleProgramMenuResourceCheckChange: function (val) {
-                    var self = this;
-                    self.dialog.editProgram.dialog.chooseResource.resources.chooses = val;
-                },
-                getRowKeys: function (row) {
-                    return row.id;
-                },
-                handleChooseResourcesClose: function () {
-                    var self = this;
-                    self.dialog.editProgram.dialog.chooseResource.visible = false;
-                    self.dialog.editProgram.dialog.chooseResource.resources.chooses = [];
-                    this.$refs.programResourceTable.clearSelection();
-                },
-                handleChooseResourcesCommit: function () {
-                    var self = this;
-                    self.dialog.editProgram.dialog.chooseResource.loading = true;
-
-                    var chooseResources = self.dialog.editProgram.dialog.chooseResource.resources.chooses;
-                    if (chooseResources && chooseResources.length > 0) {
-                        for (var i = 0; i < chooseResources.length; i++) {
-                            chooseResources[i].index = self.dialog.editProgram.commitData.currentSerialInfo.length + 1;
-                            chooseResources[i].resourceId = chooseResources[i].id;
-                            self.dialog.editProgram.commitData.currentSerialInfo.push(chooseResources[i])
-                        }
-                        for (var j = 0; j < self.dialog.editProgram.commitData.screenInfo.length; j++) {
-                            if (self.dialog.editProgram.commitData.screenInfo[j].serialNum == self.dialog.editProgram.commitData.currentSerialNum) {
-                                self.dialog.editProgram.commitData.screenInfo[j].subColumns = self.dialog.editProgram.commitData.currentSerialInfo;
-                                break;
-                            }
-                        }
-                    }
-                    self.dialog.editProgram.dialog.chooseResource.loading = false;
-                    self.handleChooseResourcesClose();
-                },
-                programResourceUp: function (scope) {
-                    var self = this;
-                    var row = scope.row;
-                    var index = row.index;
-                    if (index == 1 || !self.dialog.editProgram.commitData.currentSerialInfo || self.dialog.editProgram.commitData.currentSerialInfo.length <= 1) return;
-                    for (var i = 0; i < self.dialog.editProgram.commitData.currentSerialInfo.length; i++) {
-                        var item = self.dialog.editProgram.commitData.currentSerialInfo[i];
-                        if (item.index == index - 1) {
-                            item.index += 1;
-                            break;
-                        }
-                    }
-                    row.index -= 1;
-                    this.$refs.programTable.sort('index', 'ascending');
-                },
-                programResourceDown: function (scope) {
-                    var self = this;
-                    var row = scope.row;
-                    var index = row.index;
-                    if (!self.dialog.editProgram.commitData.currentSerialInfo) return;
-                    var length = self.dialog.editProgram.commitData.currentSerialInfo.length;
-                    if (index == length || length <= 1) return;
-                    for (var i = 0; i < length; i++) {
-                        var item = self.dialog.editProgram.commitData.currentSerialInfo[i];
-                        if (item.index == index + 1) {
-                            item.index -= 1;
-                            break;
-                        }
-                    }
-                    row.index += 1;
-                    this.$refs.programTable.sort('index', 'ascending');
-                },
-                programResourceDelete: function (scope) {
-                    var self = this;
-                    var row = scope.row;
-                    for (var i = 0; i < self.dialog.editProgram.commitData.screenInfo.length; i++) {
-                        if (self.dialog.editProgram.commitData.currentSerialNum == self.dialog.editProgram.commitData.screenInfo[i].serialNum) {
-                            var index = 0;
-                            for (var j = 0; j < self.dialog.editProgram.commitData.screenInfo[i].subColumns.length; j++) {
-                                if (row.id == self.dialog.editProgram.commitData.screenInfo[i].subColumns[j].id) {
-                                    index = j;
-                                    break;
-                                }
-                            }
-                            self.dialog.editProgram.commitData.screenInfo[i].subColumns.splice(index, 1);
-                            for (var m = 0; m < self.dialog.editProgram.commitData.screenInfo[i].subColumns.length; m++) {
-                                self.dialog.editProgram.commitData.screenInfo[i].subColumns[m].index = m + 1;
-                            }
-                            break;
-                        }
-                    }
+                    self.test.visible = true;
+                    self.$refs.programScreen.open('/cs/channel/template', self.dialog.editSchedules.data, scope.row);
                 },
 
 
