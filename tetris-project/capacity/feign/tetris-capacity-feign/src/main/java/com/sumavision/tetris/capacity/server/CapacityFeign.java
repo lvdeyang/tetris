@@ -51,4 +51,14 @@ public interface CapacityFeign {
 	@RequestMapping(value = "/capacity/transcode/feign/delete")
 	public JSONObject deleteTranscode(@RequestParam("id") String id) throws Exception;
 	
+	/**
+	 * 刷源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 下午5:10:24
+	 * @param String analysisInput 源信息
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/analysis/input")
+	public JSONObject analysisInput(@RequestParam("analysisInput") String analysisInput) throws Exception;
+	
 }
