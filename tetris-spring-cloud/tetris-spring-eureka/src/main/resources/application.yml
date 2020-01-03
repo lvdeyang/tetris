@@ -31,6 +31,12 @@ spring:
       test-on-borrow : true
       time-between-eviction-runs-millis : 600000
       min-evictable-idle-time-millis : 3600000   
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database: MYSQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update      
 feign: 
   hystrix: 
    enabled: true    

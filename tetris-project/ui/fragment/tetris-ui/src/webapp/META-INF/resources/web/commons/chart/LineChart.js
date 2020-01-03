@@ -1,5 +1,5 @@
 /**
- * 条形图
+ * 折线图
  * 作者：lvdeyang
  * {
  *     id:'图表id',
@@ -54,6 +54,13 @@ function LineChart(config){
          .dispatchEvent()
          .legend();
 }
+
+/**
+ * 销毁折线图
+ */
+LineChart.prototype.destroy = function(){
+    this.config.$el.selectAll('.'+this.classes.wrapper).remove();
+};
 
 /**
  * 初始绘制
@@ -170,12 +177,13 @@ LineChart.prototype.draw = function(){
             data:config.data[i]
         };
         this.lines.push(line);
-        var line_generator = d3.line()
-            .x(function(d){return scaleX(d);})
-            .y(function(d, index){return scaleY(line.data.y[index]);});
-        if(line.data.curve) line_generator.curve(d3.curveMonotoneX);
-        line.generator = line_generator;
-
+        line.generator = function(line, x){
+            var line_generator = d3.line()
+                .x(function(d){return scaleX(d);})
+                .y(function(d, index){return scaleY(line.data.y[index]);});
+            if(line.data.curve) line_generator.curve(d3.curveMonotoneX);
+            return line_generator(x);
+        };
         var lineGroupClass = this.classes.lineGroupPrefix+config.id+'-'+i,
             pathClass = this.classes.pathPrefix+config.id+'-'+i;
         line.$lineGroup = $svg.append('g').classed(lineGroupClass, true);
@@ -184,7 +192,7 @@ LineChart.prototype.draw = function(){
             return 'translate('+config.margin+', '+5+')';
         });
 
-        line.$path.attr('d', line_generator(line.data.x))
+        line.$path.attr('d', line.generator(line, line.data.x))
             .style('fill', 'none')
             .style('stroke', line.data.color);
 
@@ -374,7 +382,7 @@ LineChart.prototype.reDrawLines = function(){
         line.$lineGroup.attr('transform', function(){
             return 'translate('+config.margin+', '+5+')';
         });
-        line.$path.attr('d', line.generator(line.data.x));
+        line.$path.attr('d', line.generator(line, line.data.x));
         if(line.data.points){
             line.$lineGroup.selectAll('circle')
                 .data(line.data.x)

@@ -53,6 +53,13 @@ function StackedBarChart(config){
 }
 
 /**
+ * Ïú»Ù¶ÑµþÌõÐÎÍ¼
+ */
+StackedBarChart.prototype.destroy = function(){
+    this.config.$el.selectAll('.'+this.classes.wrapper).remove();
+};
+
+/**
  * Í¼Àý
  */
 StackedBarChart.prototype.legend = function(){
@@ -236,10 +243,10 @@ StackedBarChart.prototype.domainX = function(){
 StackedBarChart.prototype.domainY = function(data){
     var range = [];
     var total = [];
-    for(var i=0; i<data.y.length; i++){
+    for(var i=0; i<data.x.length; i++){
         var value = 0;
-        for(var j=0; j<data.y[i].values.length; j++){
-            value += data.y[i].values[j];
+        for(var j=0; j<data.y.length; j++){
+            value += data.y[j].values[i];
         }
         total.push(value);
     }

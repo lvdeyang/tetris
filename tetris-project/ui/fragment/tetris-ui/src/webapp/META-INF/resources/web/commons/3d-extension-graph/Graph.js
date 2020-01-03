@@ -1,5 +1,6 @@
 /**
- * {
+ * $el:dom对象,
+ * levels:[{
  *  id:'level0',
  *  groups:[{
  *      id:'spring-eureka',
@@ -11,68 +12,17 @@
  *          }]
  *      }]
  *  }]
+ * }],
+ * theme:皮肤,
+ * event:{
+ *  serverSelected:function(){}
  * }
  */
-function Graph($el, levels, theme){
+function Graph($el, levels, theme, event){
 
     var data = levels;
 
-    if(!theme){
-        theme = {
-            normal:{
-                scene:{
-                    backgroundColor:0xeeeeee
-                },
-                group:{
-                    lineColor:0x777777
-                },
-                type:{
-                    backgroundColor:0xffffff,
-                    color:0x777777
-                },
-                server:{
-                    surfaceColor:0xffffff,
-                    lineColor:0x777777,
-                    label:{
-                        backgroundColor:0xffffff,
-                        lineColor:0x777777,
-                        color:0x777777
-                    },
-                    connection:{
-                        lineColor:0x777777
-                    }
-                }
-            },
-            mouseover:{
-                server:{
-                    surfaceColor:0xeeeeee,
-                    lineColor:0x000000,
-                    label:{
-                        backgroundColor:0xeeeeee,
-                        lineColor:0x000000,
-                        color:0x000000
-                    },
-                    connection: {
-                        lineColor: 0x000000
-                    }
-                }
-            },
-            click:{
-                server:{
-                    surfaceColor:0x67c23a,
-                    lineColor:0x539c2f,
-                    label:{
-                        backgroundColor:0x67c23a,
-                        lineColor:0x539c2f,
-                        color:0xffffff
-                    },
-                    connection: {
-                        lineColor: 0x539c2f
-                    }
-                }
-            }
-        };
-    }
+    theme = theme || Graph.prototype.defaultTheme;
 
     //层级间距
     this.levelSpace = {x:50, y:80};
@@ -190,7 +140,7 @@ function Graph($el, levels, theme){
 
     this.scene = new Scene({
         $el:$el,
-        backgroundColor:theme.normal.scene.backgroundColor,
+        backgroundColor:theme.scene.backgroundColor,
         camera:{
             x:56,
             y:247,
@@ -215,7 +165,7 @@ function Graph($el, levels, theme){
             x:group.x,
             y:group.y,
             z:group.z,
-            lineColor:theme.normal.group.lineColor,
+            lineColor:theme.group.lineColor,
             dashSize:5,
             gapSize:5
         }));
@@ -229,14 +179,15 @@ function Graph($el, levels, theme){
             x:type.x,
             y:type.y,
             z:type.z,
-            backgroundColor:theme.normal.type.backgroundColor,
+            backgroundColor:theme.type.backgroundColor,
             text:type.name,
             fontSize:type.fontSize,
-            color:theme.normal.type.color
+            color:theme.type.color
         }));
     }
     for(var i=0; i<loopServers.length; i++){
         var server = loopServers[i];
+        var colors = theme.server[server.status.toLowerCase()];
         var _3server = new Server({
             data:server,
             width:server.width,
@@ -246,81 +197,93 @@ function Graph($el, levels, theme){
             y:server.y,
             z:server.z,
             icon:server.icon,
-            surfaceColor:theme.normal.server.surfaceColor,
-            lineColor:theme.normal.server.lineColor,
+            surfaceColor:colors.normal.surfaceColor,
+            lineColor:colors.normal.lineColor,
             label:{
                 props:['ip'],
-                backgroundColor:theme.normal.server.label.backgroundColor,
-                lineColor:theme.normal.server.label.lineColor,
-                color:theme.normal.server.label.color
+                backgroundColor:colors.normal.label.backgroundColor,
+                lineColor:colors.normal.label.lineColor,
+                color:colors.normal.label.color
             },
             connection:{
-                lineColor:theme.normal.server.connection.lineColor
+                lineColor:colors.normal.connection.lineColor
             }
         });
         _3Objs.push(_3server);
         $(_3server).on('click', function(){
-            if(!this.config.data.current){
+            var self = this;
+            var done = function(){
                 for(var j=0; j<loopServers.length; j++){
+                    var colors = theme.server[loopServers[j].status.toLowerCase()];
                     if(loopServers[j].current){
                         loopServers[j].current = false;
                         loopServers[j].THREE.setColor({
-                            surfaceColor:theme.normal.server.surfaceColor,
-                            lineColor:theme.normal.server.lineColor,
+                            surfaceColor:colors.normal.surfaceColor,
+                            lineColor:colors.normal.lineColor,
                             label:{
-                                backgroundColor:theme.normal.server.label.backgroundColor,
-                                lineColor:theme.normal.server.label.lineColor,
-                                color:theme.normal.server.label.color
+                                backgroundColor:colors.normal.label.backgroundColor,
+                                lineColor:colors.normal.label.lineColor,
+                                color:colors.normal.label.color
                             },
                             connection: {
-                                lineColor:theme.normal.server.connection.lineColor
+                                lineColor:colors.normal.connection.lineColor
                             }
                         });
                     }
                 }
-                this.setColor({
-                    surfaceColor:theme.click.server.surfaceColor,
-                    lineColor:theme.click.server.lineColor,
+                var colors = theme.server[self.config.data.status.toLowerCase()];
+                self.setColor({
+                    surfaceColor:colors.click.surfaceColor,
+                    lineColor:colors.click.lineColor,
                     label:{
-                        backgroundColor:theme.click.server.label.backgroundColor,
-                        lineColor:theme.click.server.label.lineColor,
-                        color:theme.click.server.label.color
+                        backgroundColor:colors.click.label.backgroundColor,
+                        lineColor:colors.click.label.lineColor,
+                        color:colors.click.label.color
                     },
                     connection: {
-                        lineColor: theme.click.server.connection.lineColor
+                        lineColor:colors.click.connection.lineColor
                     }
                 });
-                this.config.data.current = true;
+                self.config.data.current = true;
+            };
+            if(!self.config.data.current){
+                if(typeof event.serverSelected === 'function'){
+                    event.serverSelected(self.config.data, done);
+                }else{
+                    done();
+                }
             }
         });
         $(_3server).on('mouseover', function(){
+            var colors = theme.server[this.config.data.status.toLowerCase()];
             if(!this.config.data.current){
                 this.setColor({
-                    surfaceColor:theme.mouseover.server.surfaceColor,
-                    lineColor:theme.mouseover.server.lineColor,
+                    surfaceColor:colors.mouseover.surfaceColor,
+                    lineColor:colors.mouseover.lineColor,
                     label:{
-                        backgroundColor:theme.mouseover.server.label.backgroundColor,
-                        lineColor:theme.mouseover.server.label.lineColor,
-                        color:theme.mouseover.server.label.color
+                        backgroundColor:colors.mouseover.label.backgroundColor,
+                        lineColor:colors.mouseover.label.lineColor,
+                        color:colors.mouseover.label.color
                     },
                     connection: {
-                        lineColor: theme.mouseover.server.connection.lineColor
+                        lineColor:colors.mouseover.connection.lineColor
                     }
                 });
             }
         });
         $(_3server).on('mouseout', function(){
+            var colors = theme.server[this.config.data.status.toLowerCase()];
             if(!this.config.data.current){
                 this.setColor({
-                    surfaceColor:theme.normal.server.surfaceColor,
-                    lineColor:theme.normal.server.lineColor,
+                    surfaceColor:colors.normal.surfaceColor,
+                    lineColor:colors.normal.lineColor,
                     label:{
-                        backgroundColor:theme.normal.server.label.backgroundColor,
-                        lineColor:theme.normal.server.label.lineColor,
-                        color:theme.normal.server.label.color
+                        backgroundColor:colors.normal.label.backgroundColor,
+                        lineColor:colors.normal.label.lineColor,
+                        color:colors.normal.label.color
                     },
                     connection: {
-                        lineColor:theme.normal.server.connection.lineColor
+                        lineColor:colors.normal.connection.lineColor
                     }
                 });
             }
@@ -338,7 +301,145 @@ function Graph($el, levels, theme){
         }
     }
     this.scene.addAll(_3Objs);
+    this.theme = theme;
+    this.data = {
+        levels:loopLevels,
+        groups:loopGroups,
+        types:loopTypes,
+        servers:loopServers
+    };
 }
+
+/**
+ * 更新服务状态
+ * @param servers {id:'服务实例id', status:'状态'}
+ */
+Graph.prototype.refreshServerStatus = function(servers){
+    var theme = this.theme;
+    var existServers = this.data.servers;
+    for(var i=0; i<existServers.length; i++){
+        var existServer = existServers[i];
+        for(var j=0; j<servers.length; j++){
+            var server = servers[j];
+            if(existServer.id===server.id && existServer.status!==server.status){
+                existServer.status = server.status;
+                var colors = theme.server[existServer.status.toLowerCase()];
+                if(existServer.current){
+                    colors = colors.click;
+                }else{
+                    colors = colors.normal;
+                }
+                existServer.THREE.setColor({
+                    surfaceColor:colors.surfaceColor,
+                    lineColor:colors.lineColor,
+                    label:{
+                        backgroundColor:colors.label.backgroundColor,
+                        lineColor:colors.label.lineColor,
+                        color:colors.label.color
+                    },
+                    connection: {
+                        lineColor:colors.connection.lineColor
+                    }
+                });
+                break;
+            }
+        }
+    }
+};
+
+/**
+ * 默认皮肤
+ */
+Graph.prototype.defaultTheme = {
+    scene:{
+        backgroundColor:0xf4f4f5
+    },
+    group:{
+        lineColor:0xd3d4d6
+    },
+    type:{
+        backgroundColor:0xffffff,
+        color:0x909399
+    },
+    server:{
+        up:{
+            normal:{
+                surfaceColor:0xf0f9eb,
+                lineColor:0xc2e7b0,
+                label:{
+                    backgroundColor:0xf0f9eb,
+                    lineColor:0xc2e7b0,
+                    color:0x67c23a
+                },
+                connection: {
+                    lineColor: 0xc2e7b0
+                }
+            },
+            mouseover:{
+                surfaceColor:0xcff7b8,
+                lineColor:0x9ede7f,
+                label:{
+                    backgroundColor:0xcff7b8,
+                    lineColor:0x9ede7f,
+                    color:0x53c51a
+                },
+                connection: {
+                    lineColor: 0x9ede7f
+                }
+            },
+            click:{
+                surfaceColor:0x67c23a,
+                lineColor:0x4d9c25,
+                label:{
+                    backgroundColor:0x67c23a,
+                    lineColor:0x4d9c25,
+                    color:0xffffff
+                },
+                connection: {
+                    lineColor: 0x4d9c25
+                }
+            }
+        },
+        down:{
+            normal:{
+                surfaceColor:0xfef0f0,
+                lineColor:0xfbc4c4,
+                label:{
+                    backgroundColor:0xfef0f0,
+                    lineColor:0xfbc4c4,
+                    color:0xf56c6c
+                },
+                connection: {
+                    lineColor: 0xfbc4c4
+                }
+            },
+            mouseover:{
+                surfaceColor:0xfbd7d7,
+                lineColor:0xf7a5a5,
+                label:{
+                    backgroundColor:0xfbd7d7,
+                    lineColor:0xf7a5a5,
+                    color:0xf55656
+                },
+                connection: {
+                    lineColor: 0xf7a5a5
+                }
+            },
+            click:{
+                surfaceColor:0xf56c6c,
+                lineColor:0xd45454,
+                label:{
+                    backgroundColor:0xf56c6c,
+                    lineColor:0xd45454,
+                    color:0xffffff
+                },
+                connection: {
+                    lineColor: 0xd45454
+                }
+            }
+        }
+    }
+};
 
 /**
  * 修改尺寸重绘

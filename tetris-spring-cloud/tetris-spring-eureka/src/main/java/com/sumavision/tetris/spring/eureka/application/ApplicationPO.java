@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -15,7 +16,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>日期：</b>2019年12月20日 下午5:18:22
  */
 @Entity
-@Table(name = "TETRIS_EUREKA_APPLICATION")
+@Table(name = "TETRIS_EUREKA_APPLICATION", uniqueConstraints = {@UniqueConstraint(columnNames={"INSTANCE_ID"})})
 public class ApplicationPO extends AbstractBasePO{
 
 	/** 这是一个常量的说明 */
@@ -37,7 +38,7 @@ public class ApplicationPO extends AbstractBasePO{
 	private String securePort;
 	
 	/** 服务状态 */
-	private String status;
+	private ApplicationStatus status;
 	
 	/** 默认 8910 */
 	private String gadgetPort;
@@ -89,11 +90,11 @@ public class ApplicationPO extends AbstractBasePO{
 
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "STATUS")
-	public String getStatus() {
+	public ApplicationStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(ApplicationStatus status) {
 		this.status = status;
 	}
 

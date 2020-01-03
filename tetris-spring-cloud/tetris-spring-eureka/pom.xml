@@ -85,11 +85,6 @@
 			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency>
 
-		<dependency>
-			<groupId>xalan</groupId>
-			<artifactId>xalan</artifactId>
-			<version>2.7.1</version>
-		</dependency>
     </dependencies>
 
     <dependencyManagement>

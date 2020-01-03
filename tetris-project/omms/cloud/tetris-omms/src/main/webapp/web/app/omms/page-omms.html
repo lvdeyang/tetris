@@ -10,35 +10,133 @@
     <template>
 
         <div style="width:100%; height:100%; position:relative;">
-            <!--<el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
-            </el-card>-->
             <div style="position:absolute; left:0; top:0; width:100%; height:100%;">
                 <div style="width:100%; height:100%" id="graph-container"></div>
             </div>
-            <div style="width:20%; height:100%; position:absolute; left:0; top:0;">
+            <div v-if="server.selected" style="width:20%; height:100%; position:absolute; left:0; top:0;">
                 <div style="width:100%; height:100%; position:relative;">
-                    <div style="width:100%; height:250px; background-color:#fff;"></div>
-                    <div style="width:100%; position:absolute; top:260px; left:0; bottom:0;">
+                    <div style="width:100%; height:250px; background-color:#fff; position:relative;" class="omms-server-info-tab-wrapper">
+                        <el-tabs type="card" >
+                            <el-tab-pane label="基本信息" name="0">
+                                <div style="position:absolute; left:0; top:31px; right:0; bottom:0; padding:0 10px; border:1px solid #e4e7ed; border-radius:0 0 4px 4px; border-top:0;">
+                                    <el-scrollbar style="height:100%;">
+                                        <table style="width:100%; font-size:14px;">
+                                            <tbody>
+                                                <tr>
+                                                    <th style="width:45px; padding:10px 0; text-align:right;">服务：</th>
+                                                    <td>
+                                                        <template v-if="server.data.id.indexOf('tetris-spring-eureka')>=0">
+                                                            注册中心
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-spring-zuul')>=0">
+                                                            网关服务
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-user')>=0">
+                                                            用户服务
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-menu')>=0">
+                                                            菜单服务
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-mims')>=0">
+                                                            媒资服务
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-easy-process')>=0">
+                                                            流程引擎
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-cs')>=0">
+                                                            轮播服务
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-cms')>=0">
+                                                            内容管理
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-p2p')>=0">
+                                                            点对点
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-capacity')>=0">
+                                                            能力接入
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('tetris-omms')>=0">
+                                                            运维管理
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('protocol-conversion-stream-media')>=0">
+                                                            流媒体
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('protocol-conversion-file-transcoding')>=0">
+                                                            文件转码
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('protocol-conversion-stream-transcoding')>=0">
+                                                            流转码
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('protocol-conversion-record')>=0">
+                                                            收录
+                                                        </template>
+                                                        <template v-if="server.data.id.indexOf('protocol-conversion-packaging')>=0">
+                                                            软封装
+                                                        </template>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="width:45px; padding:10px 0; text-align:right;">ip：</th>
+                                                    <td>{{server.data.ip}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="width:45px; padding:10px 0; text-align:right;">状态：</th>
+                                                    <td>{{server.data.status==='UP'?'运行中':server.data.status==='DOWN'?'宕机':'无状态'}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="width:45px; padding:10px 0; text-align:right;">cpu：</th>
+                                                    <td>{{server.data.cpuName}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="width:45px; padding:10px 0; text-align:right;">位置：</th>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </el-scrollbar>
+                                </div>
+                            </el-tab-pane>
+                            <el-tab-pane label="服务升级" name="1">
+                                <div style="position:absolute; left:0; top:31px; right:0; bottom:0; padding:0 10px; border:1px solid #e4e7ed; border-radius:0 0 4px 4px; border-top:0;">
+                                    <el-scrollbar style="height:100%;">
+                                        <table style="width:100%; font-size:14px;">
+                                            <tbody>
+                                                <tr>
+                                                    <th style="width:45px; padding:10px 0; text-align:right;">版本：</th>
+                                                    <td></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </el-scrollbar>
+                                </div>
+                            </el-tab-pane>
+                        </el-tabs>
+                    </div>
+                    <div style="width:100%; position:absolute; top:260px; left:0; bottom:0; border-radius:4px; background-color:#fff; border:1px solid #e4e7ed;">
                         <div style="width:100%; height:100%; position:relative;">
-                            <div style="width:100%; height:50%; background-color:#fff;" id="cpu-line"></div>
-                            <div style="width:100%; height:50%; background-color:#fff;" id="memory-line"></div>
+                            <div style="width:100%; height:50%;" id="cpu-line"></div>
+                            <div style="width:100%; height:50%;" id="memory-line"></div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div style="width:20%; height:100%; position:absolute; right:0; top:0;">
+            <div v-if="server.selected" style="width:20%; height:100%; position:absolute; right:0; top:0;">
                 <div style="width:100%; height:100%; position:relative;">
-                    <div style="width:100%; height:250px; background-color:#fff;" id="hard-disk-space"></div>
-                    <div style="width:100%; position:absolute; top:260px; left:0; bottom:0;">
+                    <div style="width:100%; height:250px; background-color:#fff; border-radius:4px; border:1px solid #e4e7ed;" id="hard-disk-space"></div>
+                    <div style="width:100%; position:absolute; top:260px; left:0; bottom:0; background-color:#fff; border-radius:4px; border:1px solid #e4e7ed;">
                         <div style="width:100%; height:100%; position:relative;">
-                            <div style="width:100%; height:50%; background-color:#fff" id="network-upload-traffic"></div>
-                            <div style="width:100%; height:50%; background-color:#fff;" id="network-download-traffic"></div>
+                            <div style="width:100%; height:50%;" id="network-upload-traffic"></div>
+                            <div style="width:100%; height:50%;" id="network-download-traffic"></div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
+    </template>
+
+    <template v-if="isDanger">
+        <audio :src="basePath+'web/app/omms/danger.mp3'" autoplay loop style="display:none;"></audio>
     </template>
 
 </mi-frame>
