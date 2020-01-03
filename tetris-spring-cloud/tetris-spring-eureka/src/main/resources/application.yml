@@ -3,7 +3,7 @@ server:
 
 eureka:
   instance:
-    hostname: 192.165.56.85
+    hostname: 192.165.56.71
   # 关闭自我保护机制，保证不可用服务及时踢出
   server:
     enableSelfPreservation: false
@@ -17,6 +17,26 @@ eureka:
 spring:
   application:
     name: tetris-spring-eureka
+  datasource:
+    base:
+      url: jdbc:mysql://localhost:3306/eureka?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+      username: root
+      password: sumavisionrd
+      driver-class-name: com.mysql.jdbc.Driver
+      initial-size : 10
+      min-idle : 20
+      max-active : 100
+      validation-query : SELECT 1
+      test-while-idle : true
+      test-on-borrow : true
+      time-between-eviction-runs-millis : 600000
+      min-evictable-idle-time-millis : 3600000   
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database: MYSQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update      
 feign: 
   hystrix: 
    enabled: true    

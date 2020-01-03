@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.web.MultipartAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.ComponentScan;
 @ServletComponentScan(basePackages = {"com.sumavision.tetris"})
 @EnableFeignClients("com.sumavision.tetris")
 @SpringBootApplication
+@EnableCaching
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
 @EnableEurekaServer
 public class TetrisSpringEurekaApplication extends SpringBootServletInitializer{
