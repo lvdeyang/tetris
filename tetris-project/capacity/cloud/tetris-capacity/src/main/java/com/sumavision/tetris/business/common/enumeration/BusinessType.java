@@ -4,6 +4,9 @@ public enum BusinessType {
 
 	YJGB,
 	LIVE,
-	RECORD;
+	RECORD,
+	TRANSCODE,
+	BVC,
+	TEST;
 	
 }
