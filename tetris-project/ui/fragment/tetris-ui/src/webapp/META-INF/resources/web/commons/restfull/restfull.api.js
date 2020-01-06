@@ -234,6 +234,9 @@ define([
                                 window.location.href = window.BASEPATH + 'web/app/error/request-fail.html';
                             }
                         }
+                    },
+                    complete:function(xhr, textStatus){
+                        xhr = null;
                     }
                 });
 

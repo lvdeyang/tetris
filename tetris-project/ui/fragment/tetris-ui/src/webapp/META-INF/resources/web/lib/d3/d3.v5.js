@@ -18425,4 +18425,6 @@
 
     Object.defineProperty(exports, '__esModule', { value: true });
 
+    if(!window.d3) window.d3 = exports;
+
 }));
