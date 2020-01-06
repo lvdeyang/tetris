@@ -11,10 +11,12 @@ public class StreamTranscodingVO {
 	private String mediaType;
 	/** 节目号 */
 	private Integer progNum;
-	/** 音频源pcm */
+	/** 音频源pcm 0-udp_ts;1-udp_pcm;3-rtp_es */
 	private Integer bePCM;
 	/** 任务信息 */
 	private TaskVO taskVO;
+	/** 输入参数 */
+	private InputParamVO inputParam;
 	
 	public boolean isTranscoding() {
 		return isTranscoding;
@@ -70,5 +72,13 @@ public class StreamTranscodingVO {
 
 	public void setTaskVO(TaskVO taskVO) {
 		this.taskVO = taskVO;
+	}
+
+	public InputParamVO getInputParam() {
+		return inputParam;
+	}
+
+	public void setInputParam(InputParamVO inputParam) {
+		this.inputParam = inputParam;
 	}
 }
