@@ -10,8 +10,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
-import com.sumavision.tetris.cs.channel.BroadWay;
-import com.sumavision.tetris.cs.channel.ChannelBroadStatus;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
@@ -43,18 +41,16 @@ public class BroadTerminalQuery {
 			ids.add(versionSendNum);
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("ids", ids);
-			String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-			if (!url.isEmpty()) {
-				JSONObject response = HttpRequestUtil
-						.httpPost("http://" + url + "/ed/speaker/querySendFile", jsonObject);
-				if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
-					JSONArray statusArray = (JSONArray) response.get("data");
-					if (statusArray != null && statusArray.size() > 0) {
-						JSONObject item = (JSONObject) statusArray.get(0);
-						status = (item.containsKey("status") && item.get("status") != null)
-								? channelQuery.getStatusFromNum(item.getString("status")) : "";
-					}
+			JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.QUERY_SEND_FILE.getUrl(), jsonObject);
+			if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
+				JSONArray statusArray = (JSONArray) response.get("data");
+				if (statusArray != null && statusArray.size() > 0) {
+					JSONObject item = (JSONObject) statusArray.get(0);
+					status = (item.containsKey("status") && item.get("status") != null)
+							? channelQuery.getStatusFromNum(item.getString("status")) : "";
 				}
+//			} else {
+//				throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.QUERY_SEND_FILE.getAction(), response.getString("message"));
 			}
 		}
 
@@ -82,33 +78,30 @@ public class BroadTerminalQuery {
 			JSONObject statusRequestJsonObject = new JSONObject();
 			statusRequestJsonObject.put("ids", broadId);
 			
-			String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-			if (!url.isEmpty()) {
-				JSONObject response = HttpRequestUtil.httpPost(
-						"http://" + url + "/ed/speaker/querySendFile",
-						statusRequestJsonObject);
-				if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
-					JSONArray statusArray = (JSONArray) response.get("data");
-					if (statusArray != null && statusArray.size() > 0) {
-						for (int i = 0; i < statusArray.size(); i++) {
-							JSONObject item = (JSONObject) statusArray.get(i);
-							String id = item.getString("id");
-							if (id != null && !id.isEmpty()) {
-								Long channelId = versionSendQuery.getChannelId(id);
-								if (channelId != null) {
-									ChannelPO channelPO = channelDao.findOne(channelId);
-									if (channelPO != null && item.containsKey("status") && item.get("status") != null) {
-										String status = channelQuery.getStatusFromNum(item.getString("status"));
-										if (!status.isEmpty()) {
-											channelPO.setBroadcastStatus(status);
-										}
-										channelDao.save(channelPO);
+			JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.QUERY_SEND_FILE.getUrl(),statusRequestJsonObject);
+			if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
+				JSONArray statusArray = (JSONArray) response.get("data");
+				if (statusArray != null && statusArray.size() > 0) {
+					for (int i = 0; i < statusArray.size(); i++) {
+						JSONObject item = (JSONObject) statusArray.get(i);
+						String id = item.getString("id");
+						if (id != null && !id.isEmpty()) {
+							Long channelId = versionSendQuery.getChannelId(id);
+							if (channelId != null) {
+								ChannelPO channelPO = channelDao.findOne(channelId);
+								if (channelPO != null && item.containsKey("status") && item.get("status") != null) {
+									String status = channelQuery.getStatusFromNum(item.getString("status"));
+									if (!status.isEmpty()) {
+										channelPO.setBroadcastStatus(status);
 									}
+									channelDao.save(channelPO);
 								}
 							}
 						}
 					}
 				}
+//			} else {
+//				throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.QUERY_SEND_FILE.getAction(), response.getString("message"));
 			}
 		}
 	}

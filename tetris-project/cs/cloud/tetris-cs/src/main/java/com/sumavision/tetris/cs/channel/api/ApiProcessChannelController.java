@@ -58,7 +58,7 @@ public class ApiProcessChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(String file_fileToStreamInfo, String file_streamTranscodingInfo, String file_recordInfo, Boolean encryption, String __processInstanceId__, HttpServletRequest request) throws Exception{
+	public Object add(String file_assetPath, String file_fileToStreamInfo, String file_streamTranscodingInfo, String file_recordInfo, Boolean encryption, String __processInstanceId__, HttpServletRequest request) throws Exception{
 		//本地地址和端口，让push的流推到本地，再转码
 		FileToStreamVO vo = JSON.parseObject(file_fileToStreamInfo, FileToStreamVO.class);
 		
@@ -86,7 +86,7 @@ public class ApiProcessChannelController {
 					List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
 					for (int i = 0; i < vo.getPlayCount(); i++) {
 						ScreenVO screen = new ScreenVO();
-						screen.setPreviewUrl(vo.getFileUrl());
+						screen.setPreviewUrl((file_assetPath == null || file_assetPath.isEmpty()) ? vo.getFileUrl() : file_assetPath);
 						screen.setDuration(vo.getDuration());
 						screenVOs.add(screen);
 					}
@@ -95,7 +95,7 @@ public class ApiProcessChannelController {
 					
 					scheduleService.addSchedules(channel.getId(), new ArrayListWrapper<ApiServerScheduleVO>().add(scheduleVO).getList());
 					
-					channelService.startBroadcast(channel.getId());
+					channelService.startBroadcast(channel.getId(), null);
 					
 					map.put("assetPath", new StringBufferWrapper().append("udp://@").append(ip).append(":").append(port).toString());
 				}

@@ -155,6 +155,19 @@ public class BroadAbilityBroadInfoService {
 	}
 	
 	/**
+	 * 根据用户id获取下发信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月6日 下午5:10:59
+	 * @param List<Long> userIds 用户id数组
+	 * @return List<BroadAbilityBroadInfoVO> 下发信息
+	 */
+	public List<BroadAbilityBroadInfoVO> queryFromUserIds(List<Long> userIds) throws Exception {
+		List<BroadAbilityBroadInfoPO> infoPOs = broadAbilityBroadInfoDAO.findByUserIdIn(userIds);
+		return BroadAbilityBroadInfoVO.getConverter(BroadAbilityBroadInfoVO.class).convert(infoPOs, BroadAbilityBroadInfoVO.class);
+	}
+	
+	/**
 	 * 查询ip和端口对是否被占用<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

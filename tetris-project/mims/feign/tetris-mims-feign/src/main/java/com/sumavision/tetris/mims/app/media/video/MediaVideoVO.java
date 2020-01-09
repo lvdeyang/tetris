@@ -25,6 +25,8 @@ public class MediaVideoVO{
 	
 	private String uploadTmpPath;
 	
+	private Long folderId;
+	
 	private List<String> tags;
 	
 	private List<String> keyWords;
@@ -134,6 +136,15 @@ public class MediaVideoVO{
 
 	public MediaVideoVO setUploadTmpPath(String uploadTmpPath) {
 		this.uploadTmpPath = uploadTmpPath;
+		return this;
+	}
+
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public MediaVideoVO setFolderId(Long folderId) {
+		this.folderId = folderId;
 		return this;
 	}
 

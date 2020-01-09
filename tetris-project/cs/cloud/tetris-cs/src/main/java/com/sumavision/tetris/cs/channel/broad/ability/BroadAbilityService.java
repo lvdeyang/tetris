@@ -1,10 +1,5 @@
 package com.sumavision.tetris.cs.channel.broad.ability;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -12,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collectors;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -38,13 +32,11 @@ import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
-import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
 import com.sumavision.tetris.cs.channel.exception.ChannelBroadNoneOutputException;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
-import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
 import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
@@ -77,16 +69,10 @@ public class BroadAbilityService {
 	private ScheduleQuery scheduleQuery;
 	
 	@Autowired
-	private ScheduleService scheduleService;
-	
-	@Autowired
 	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
 	
 	@Autowired
 	private BroadAbilityRemoteDAO broadAbilityRemoteDAO;
-	
-	@Autowired
-	private ChannelAutoBroadInfoDAO channelAutoBroadInfoDAO;
 	
 	@Autowired
 	private Adapter adapter;
@@ -326,7 +312,7 @@ public class BroadAbilityService {
 	 */
 	private void sendWebSocket(List<UserVO> userVOs, List<ScheduleVO> scheduleVOs, String port, ChannelPO channel) throws Exception {
 		if (userVOs == null || userVOs.isEmpty() || scheduleVOs == null || scheduleVOs.isEmpty()) return;
-		List<Long> scheduleIds = scheduleVOs.stream().map(ScheduleVO::getId).collect(Collectors.toList());
+//		List<Long> scheduleIds = scheduleVOs.stream().map(ScheduleVO::getId).collect(Collectors.toList());
 		JSONObject jsonObject = new JSONObject();
 		jsonObject.put("channelId", channel.getId());
 		for (UserVO userVO : userVOs) {

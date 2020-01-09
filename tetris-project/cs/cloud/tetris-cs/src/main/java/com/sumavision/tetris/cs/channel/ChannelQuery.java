@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
@@ -103,7 +102,7 @@ public class ChannelQuery {
 				List<UserVO> outputUsers = new ArrayList<UserVO>();
 				List<BroadFileBroadInfoVO> broadFileBroadInfoPOs = broadFileBroadInfoService.queryFromChannelId(channelVO.getId());
 				for (BroadFileBroadInfoVO broadFileBroadInfoVO : broadFileBroadInfoPOs) {
-					outputUsers.add(userQuery.findByIdIn(new ArrayListWrapper<Long>().add(broadFileBroadInfoVO.getUserId()).getList()).get(0));
+					outputUsers.add(userQuery.findByIdIn(new ArrayListWrapper<Long>().add(broadFileBroadInfoVO.getUserId()).getList()).get(0).setEquipType(broadFileBroadInfoVO.getUserEquipType()));
 				}
 				channelVO.setOutputUsers(outputUsers);
 			}
@@ -157,35 +156,7 @@ public class ChannelQuery {
 	 */
 	public JSONArray getTemplate(Long channelId, Long scheduleId) throws Exception {
 		ChannelPO channel = findByChannelId(channelId);
-		JSONArray template = new JSONArray();
-		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD) {
-			template.add(oneScreen());
-		} else {
-			String templateString = adapter.readTemplate();
-			if (templateString == null || templateString.isEmpty()){
-				template.add(oneScreen());
-			}  else {
-				template = JSONArray.parseArray(templateString);
-			}
-		}
-		return template;
-	}
-	
-	private JSONObject oneScreen() {
-		JSONObject object = new JSONObject();
-		object.put("id", 1);
-		object.put("name", "一分屏");
-		object.put("screenNum", 1);
-		JSONArray screen = new JSONArray();
-		JSONObject screenObject = new JSONObject();
-		screenObject.put("no", 1);
-		screenObject.put("width", "100%");
-		screenObject.put("height", "100%");
-		screenObject.put("top", "0%");
-		screenObject.put("left", "0%");
-		screen.add(screenObject);
-		object.put("screen", screen);
-		return object;
+		return adapter.getAllTemplate(BroadWay.fromName(channel.getBroadWay()));
 	}
 
 	/**

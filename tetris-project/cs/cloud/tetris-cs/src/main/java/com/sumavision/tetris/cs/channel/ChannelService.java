@@ -29,9 +29,7 @@ import com.sumavision.tetris.cs.channel.broad.file.BroadFileService;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalService;
 import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
 import com.sumavision.tetris.cs.channel.exception.ChannelAlreadyBroadException;
-import com.sumavision.tetris.cs.channel.exception.ChannelAlreadyStopException;
 import com.sumavision.tetris.cs.channel.exception.ChannelStatusErrorException;
-import com.sumavision.tetris.cs.menu.CsMenuPO;
 import com.sumavision.tetris.cs.menu.CsMenuService;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
@@ -277,9 +275,10 @@ public class ChannelService {
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月21日 下午3:56:48
-	 * @param channelId 频道id
+	 * @param Long channelId 频道id
+	 * @param Stirng resourceIds 播发手选资源数组 
 	 */
-	public void startBroadcast(Long channelId) throws Exception {
+	public void startBroadcast(Long channelId, String resourceIds) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) throw new ChannelAlreadyBroadException(channel.getName());
 		
@@ -289,7 +288,7 @@ public class ChannelService {
 		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD){
 			broadFileService.startFileBroadcast(channelId);
 		} else {
-			broadTerminalService.startTerminalBroadcast(channelId);
+			broadTerminalService.startTerminalBroadcast(channelId, resourceIds);
 		}
 	}
 	
@@ -352,7 +351,7 @@ public class ChannelService {
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
 		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
 			autoSetSchedule(channelId);
-			startBroadcast(channelId);
+			startBroadcast(channelId, null);
 		}
 	}
 	

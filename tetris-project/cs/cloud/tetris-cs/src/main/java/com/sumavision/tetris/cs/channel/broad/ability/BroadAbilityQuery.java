@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.cs.bak.AbilityInfoSendPO;
 import com.sumavision.tetris.cs.bak.AbilityInfoSendQuery;
 import com.sumavision.tetris.cs.channel.BroadWay;
@@ -21,8 +22,24 @@ public class BroadAbilityQuery {
 	private AbilityInfoSendQuery abilityInfoSendQuery;
 	
 	@Autowired
+	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
+	
+	@Autowired
 	private ChannelDAO channelDao;
 
+	/**
+	 * 根据用户id获取播发信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月6日 下午5:10:08
+	 * @param Long userId 用户id
+	 * @return List<BroadAbilityBroadInfoVO> 播发信息
+	 */
+	public Long getChannelIdFromUser(Long userId) throws Exception {
+		List<BroadAbilityBroadInfoVO> broadInfoVOs = broadAbilityBroadInfoService.queryFromUserIds(new ArrayListWrapper<Long>().add(userId).getList());
+		return (broadInfoVOs == null || broadInfoVOs.isEmpty()) ? null : broadInfoVOs.get(0).getChannelId();
+	}
+	
 	/**
 	 * 根据频道id查询能力播发下发类型<br/>
 	 * <b>作者:</b>lzp<br/>

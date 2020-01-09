@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.mims.app.media.MediaQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
@@ -47,7 +49,6 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/list")
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
-
 		return channelQuery.findAll(currentPage, pageSize, ChannelType.LOCAL);
 	}
 
@@ -167,8 +168,8 @@ public class ChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/start")
-	public Object broadcastStart(Long channelId, HttpServletRequest request) throws Exception {
-		channelService.startBroadcast(channelId);
+	public Object broadcastStart(Long channelId, String resourceIds, HttpServletRequest request) throws Exception {
+		channelService.startBroadcast(channelId, resourceIds);
 		return "";
 	}
 	

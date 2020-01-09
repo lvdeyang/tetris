@@ -552,6 +552,13 @@ define([
                 //添加视频媒资任务
                 addMediaAudioTask:function(){
                     var self = this;
+                    if (!self.dialog.addAudio.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     if (self.dialog.addAudio.way == '0' || self.dialog.addAudio.way == '1'){
                         var task = self.dialog.addAudio.way == '0' ? {
                             name:self.dialog.addAudio.task.name,
@@ -613,6 +620,13 @@ define([
                 //编辑音频媒资任务
                 editMediaAudioTask:function(){
                     var self = this;
+                    if (!self.dialog.editAudio.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.editAudio.loading = true;
                     ajax.post('/media/audio/task/edit/' + self.dialog.editAudio.id, {
                         name:self.dialog.editAudio.name,

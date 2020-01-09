@@ -41,9 +41,23 @@ public class CsMenuController {
 	@RequestMapping(value = "/list/tree")
 	public Object listTree(Long channelId, HttpServletRequest request) throws Exception {
 
-		List<CsMenuVO> rootColumns = csMenuQuery.queryMenuTree(channelId);
+		return csMenuQuery.queryMenuTree(channelId);
+	}
+	
+	/**
+	 * 获取cs媒资目录树(包括目录下媒资)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long channelId 频道id
+	 * @return List<CsMenuVO> cs媒资目录树
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/tree/with/resource")
+	public Object listTreeWithResource(Long channelId, HttpServletRequest request) throws Exception {
 
-		return rootColumns;
+		return csMenuQuery.queryMenuTreeWithResource(channelId);
 	}
 
 	/**

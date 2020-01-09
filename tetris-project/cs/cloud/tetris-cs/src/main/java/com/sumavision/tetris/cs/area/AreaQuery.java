@@ -14,6 +14,7 @@ import com.sumavision.tetris.cs.bak.AreaSendQuery;
 import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelBroadStatus;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalQueryType;
 
 @Component
 public class AreaQuery {
@@ -37,7 +38,7 @@ public class AreaQuery {
 	 * @return List<AreaPO> 地区列表
 	 */
 	public Object getRootList(Long channelId) throws Exception {
-		return getChildList(channelId, "", true);
+		return getChildList(channelId, "", false);
 	}
 
 	/**
@@ -108,23 +109,18 @@ public class AreaQuery {
 	public List<AreaData> getChildDivision(String areaId) throws Exception {
 		List<AreaData> returnList = new ArrayList<AreaData>();
 
-		String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-		if (!url.isEmpty()) {
-			JSONObject jsonObject = HttpRequestUtil
-					.httpGet("http://" + url + "/ed/ed/regiondivision/queryDivisionTree?division=" + areaId);
+		JSONObject jsonObject = HttpRequestUtil.httpGet(BroadTerminalQueryType.QUERY_DIVISION_TREE.getUrl() + "?division=" + areaId);
 
-			if (jsonObject != null && jsonObject.containsKey("divisionTrees")
-					&& jsonObject.get("divisionTrees") != null) {
-				JSONArray jsonArray = jsonObject.getJSONArray("divisionTrees");
-				for (int i = 0; i < jsonArray.size(); i++) {
-					JSONObject item = (JSONObject) jsonArray.get(i);
-					AreaData areaData = new AreaData();
-					areaData.setId(item.get("division").toString());
-					areaData.setName(item.get("name").toString());
-					areaData.setType("division");
-					areaData.setSubColumns(new ArrayList<AreaQuery.AreaData>());
-					returnList.add(areaData);
-				}
+		if (jsonObject != null && jsonObject.containsKey("divisionTrees") && jsonObject.get("divisionTrees") != null) {
+			JSONArray jsonArray = jsonObject.getJSONArray("divisionTrees");
+			for (int i = 0; i < jsonArray.size(); i++) {
+				JSONObject item = (JSONObject) jsonArray.get(i);
+				AreaData areaData = new AreaData();
+				areaData.setId(item.get("division").toString());
+				areaData.setName(item.get("name").toString());
+				areaData.setType("division");
+				areaData.setSubColumns(new ArrayList<AreaQuery.AreaData>());
+				returnList.add(areaData);
 			}
 		}
 
