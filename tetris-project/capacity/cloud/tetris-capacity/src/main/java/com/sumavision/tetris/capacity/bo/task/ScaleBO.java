@@ -16,8 +16,6 @@ public class ScaleBO {
 	
 	private String mode = "slow";
 	
-	private String ratio;
-	
 	private Integer nv_card_idx = 0;
 
 	public Integer getWidth() {
@@ -53,15 +51,6 @@ public class ScaleBO {
 
 	public ScaleBO setMode(String mode) {
 		this.mode = mode;
-		return this;
-	}
-
-	public String getRatio() {
-		return ratio;
-	}
-
-	public ScaleBO setRatio(String ratio) {
-		this.ratio = ratio;
 		return this;
 	}
 

@@ -8,13 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.cs.channel.Adapter;
 import com.sumavision.tetris.cs.channel.ChannelBroadStatus;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
-import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalService;
 import com.sumavision.tetris.cs.channel.exception.ChannelBroadNoneOutputException;
+import com.sumavision.tetris.cs.menu.CsResourceQuery;
+import com.sumavision.tetris.cs.menu.CsResourceVO;
+import com.sumavision.tetris.cs.program.ProgramQuery;
+import com.sumavision.tetris.cs.program.ProgramVO;
+import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNoneToBroadException;
@@ -35,7 +42,13 @@ public class BroadFileService {
 	private ScheduleQuery scheduleQuery;
 	
 	@Autowired
-	private BroadTerminalService broadTerminalService;
+	private ProgramQuery programQuery;
+	
+	@Autowired
+	private CsResourceQuery csResourceQuery;
+	
+	@Autowired
+	private Adapter adapter;
 	
 	@Autowired
 	private BroadFileBroadInfoService broadFileBroadInfoService;
@@ -116,5 +129,64 @@ public class BroadFileService {
 		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
 			startFileBroadcast(channelId);
 		}
+	}
+	
+	public Long getChannelIdFromUser(Long userId) throws Exception {
+		List<BroadFileBroadInfoVO> broadInfoVOs = broadFileBroadInfoService.queryFromUserIds(new ArrayListWrapper<Long>().add(userId).getList());
+		return (broadInfoVOs == null || broadInfoVOs.isEmpty()) ? null : broadInfoVOs.get(0).getChannelId();
+	}
+	
+	public JSONObject getNewBroadJSON(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		JSONObject textJson = new JSONObject();
+
+//		textJson.put("file", "");
+//		textJson.put("fileSize", "");
+		JSONArray scheduleJsons = new JSONArray();
+		List<ScheduleVO> schedules = scheduleQuery.getByChannelId(channelId);
+		if (schedules == null || schedules.isEmpty()) throw new ScheduleNoneToBroadException(channel.getName());
+		for (ScheduleVO schedule : schedules) {
+			JSONObject jsonObject = new JSONObject();
+			jsonObject.put("effectTime", schedule.getBroadDate());
+			jsonObject.put("screens", this.programText(channel, programQuery.getProgram(schedule.getId())));
+			scheduleJsons.add(jsonObject);
+		}
+		
+		textJson.put("schedules", scheduleJsons);
+		return textJson;
+	}
+	
+	/**
+	 * 播发时媒资排表字段内容(终端播发)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param ProgramVO program 分屏信息
+	 */
+	private List<JSONObject> programText(ChannelPO channel, ProgramVO program) throws Exception {
+		List<JSONObject> returnList = new ArrayList<JSONObject>();
+		if (program != null) {
+			JSONObject useTemplate = adapter.screenTemplate(program.getScreenNum());
+			if (useTemplate == null) return null;
+			for (int i = 1; i <= program.getScreenNum(); i++) {
+				JSONObject returnItem = adapter.serial(useTemplate, i);
+				List<JSONObject> scheduleList = new ArrayList<JSONObject>();
+				if (program.getScreenInfo() != null && program.getScreenInfo().size() > 0) {
+					for (ScreenVO item : program.getScreenInfo()) {
+						if (item.getSerialNum() != i)
+							continue;
+						JSONObject schedule = new JSONObject();
+						CsResourceVO resource = csResourceQuery.queryResourceById(item.getResourceId());
+						schedule.put("name", resource.getName());
+						schedule.put("previewUrl", resource.getPreviewUrl());
+						schedule.put("index", item.getIndex());
+						scheduleList.add(schedule);
+					}
+				}
+				returnItem.put("program", scheduleList);
+				returnList.add(returnItem);
+			}
+		}
+		return returnList;
 	}
 }

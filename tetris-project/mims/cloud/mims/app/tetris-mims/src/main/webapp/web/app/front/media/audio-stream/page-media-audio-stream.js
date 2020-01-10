@@ -458,6 +458,13 @@ define([
                 //添加音频流媒资任务
                 addMediaAudioStreamTask:function(){
                     var self = this;
+                    if (!self.dialog.addAudioStream.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.addAudioStream.loading = true;
                     ajax.post('/media/audio/stream/task/add', {
                         previewUrl:self.dialog.addAudioStream.previewUrl,
@@ -476,6 +483,13 @@ define([
                 //编辑音频流媒资任务
                 editMediaAudioStreamTask:function(){
                     var self = this;
+                    if (!self.dialog.editAudioStream.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.editAudioStream.loading = true;
                     ajax.post('/media/audio/stream/task/edit/' + self.dialog.editAudioStream.id, {
                         previewUrl:self.dialog.editAudioStream.previewUrl,

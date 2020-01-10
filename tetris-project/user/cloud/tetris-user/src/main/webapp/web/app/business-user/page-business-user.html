@@ -28,6 +28,10 @@
                                 prop="nickname">
                         </el-table-column>
                         <el-table-column
+                                label="号码"
+                                prop="userno">
+                        </el-table-column>
+                        <el-table-column
                                 label="状态"
                                 prop="status">
                         </el-table-column>
@@ -88,6 +92,9 @@
                         </el-form-item>
                         <el-form-item label="账号:">
                             <el-input v-model="dialog.createUser.username"></el-input>
+                        </el-form-item>
+                        <el-form-item label="号码:">
+                            <el-input v-model="dialog.createUser.userno"></el-input>
                         </el-form-item>
                         <el-form-item label="密码:">
                             <el-input type="password" v-model="dialog.createUser.password"></el-input>

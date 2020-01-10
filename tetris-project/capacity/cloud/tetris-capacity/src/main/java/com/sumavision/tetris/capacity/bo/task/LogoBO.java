@@ -6,6 +6,7 @@ package com.sumavision.tetris.capacity.bo.task;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年10月30日 上午8:45:05
  */
+@Deprecated
 public class LogoBO {
 
 	private String position;

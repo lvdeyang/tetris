@@ -19,7 +19,6 @@ define([
             return {
                 visible: false,
                 loading: false,
-                checkStrictly: true,
                 channelData: {},
                 scheduleData: {},
                 url: '',
@@ -106,11 +105,8 @@ define([
                 var self = this;
                 self.options.currentScreen = item;
                 if (!item.data) {
-                    item.data = [];
+                    Vue.set(item, 'data', []);
                 }
-                self.$nextTick(function () {
-                    self.checkStrictly = false;
-                });
             },
             handlePreview: function (scope) {
                 var self = this;
@@ -240,9 +236,6 @@ define([
                 self.dialog.chooseResource.visible = false;
                 self.dialog.chooseResource.resources.chooses = [];
                 this.$refs.resourceTable.clearSelection();
-                self.$nextTick(function () {
-                    self.checkStrictly = false;
-                });
             },
             handleChooseResourcesCommit: function () {
                 var self = this;
@@ -282,7 +275,6 @@ define([
                 var self = this;
                 self.visible = false;
                 self.loading = false;
-                self.checkStrictly = true;
                 self.channelData = {};
                 self.scheduleData = {};
                 self.url = '';

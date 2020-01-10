@@ -14,6 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.organization.CompanyDAO;
+import com.sumavision.tetris.organization.CompanyPO;
 
 /**
  * 用户系统角色查询<br/>
@@ -29,6 +31,9 @@ public class SystemRoleQuery {
 	
 	@Autowired
 	private SystemRoleGroupDAO systemRoleGroupDao;
+	
+	@Autowired
+	private CompanyDAO companyDao;
 	
 	/**
 	 * 查询系统内置角色<br/>
@@ -206,6 +211,30 @@ public class SystemRoleQuery {
 			}
 		}
 		return view_roles;
+	}
+	
+	/**
+	 * 查询用户所属公司下的业务角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 上午11:12:20
+	 * @param Long userId 用户id
+	 * @return List<SystemRoleVO>
+	 */
+	public List<SystemRoleVO> queryAllRoles(Long userId) throws Exception{
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		if(companyPO != null){
+			List<SystemRolePO> roles = systemRoleDao.findByCompanyId(companyPO.getId());
+			List<SystemRoleVO> view_roles = new ArrayList<SystemRoleVO>();
+			if(roles!=null && roles.size()>0){
+				for(SystemRolePO role:roles){
+					view_roles.add(new SystemRoleVO().set(role));
+				}
+			}
+			return view_roles;
+		}else{
+			return null;
+		}
 	}
 	
 }

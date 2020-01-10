@@ -85,6 +85,7 @@ define([
 
                 if (checkedNodes && checkedNodes.length > 0) {
                     for (var i = 0; i < checkedNodes.length; i++) {
+                        Vue.set(checkedNodes[i], 'equipType', self.type);
                         selected.push(checkedNodes[i]);
                     }
                 } else {

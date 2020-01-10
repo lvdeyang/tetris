@@ -23,7 +23,7 @@ public class TaskInputPO extends AbstractBasePO{
 	
 	private String input;
 	
-	/** 保证源的唯一性，udp_ts: ip@port; rtmp: url */
+	/** 保证源的唯一性，yjgb: ip@port; 直播: url; 收录: url */
 	private String uniq;
 	
 	/** 计数 */

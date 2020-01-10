@@ -10,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
@@ -52,12 +53,12 @@ public class RoomController {
 		List<RoomPeerVO> peers = new ArrayList<RoomPeerVO>();
 		
 		//获取所有用户
-		List<UserVO> users = userQuery.listByCompanyIdWithExceptAndClassify(Long.valueOf(user.getGroupId()), new ArrayListWrapper<Long>().add(user.getId()).getList(), UserClassify.COMPANY);
+		List<UserVO> users = userQuery.listByCompanyIdWithExceptAndClassify(Long.valueOf(user.getGroupId()), "安卓采集终端", new ArrayListWrapper<Long>().add(user.getId()).getList(), UserClassify.COMPANY);
 		for(UserVO userVO: users){
 			RoomPeerVO peer = new RoomPeerVO();
 			peer.setId(userVO.getId())
 				.setName(userVO.getNickname())
-				.setIsOnline(userVO.getStatus().equals("在线")? true: false);
+				.setIsOnline(userVO.getStatus() == null || userVO.getStatus().equals("OFFLINE")? false: true);
 			peers.add(peer);
 		}
 		

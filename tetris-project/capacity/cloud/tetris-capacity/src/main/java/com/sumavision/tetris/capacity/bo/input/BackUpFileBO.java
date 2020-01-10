@@ -10,8 +10,8 @@ public class BackUpFileBO {
 
 	private String url;
 	
-	private String md5;
-
+	private String select_index;
+	
 	public String getUrl() {
 		return url;
 	}
@@ -21,13 +21,13 @@ public class BackUpFileBO {
 		return this;
 	}
 
-	public String getMd5() {
-		return md5;
+	public String getSelect_index() {
+		return select_index;
 	}
 
-	public BackUpFileBO setMd5(String md5) {
-		this.md5 = md5;
+	public BackUpFileBO setSelect_index(String select_index) {
+		this.select_index = select_index;
 		return this;
 	}
-	
+
 }

@@ -27,6 +27,9 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/** 用户昵称 */
 	private String nickname;
 	
+	/** 用户号码 */
+	private String userno;
+	
 	/** 头像 */
 	private String icon;
 	
@@ -111,6 +114,15 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 
 	public UserVO setNickname(String nickname) {
 		this.nickname = nickname;
+		return this;
+	}
+
+	public String getUserno() {
+		return userno;
+	}
+
+	public UserVO setUserno(String userno) {
+		this.userno = userno;
 		return this;
 	}
 
@@ -331,6 +343,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setMobile(entity.getMobile())
 			.setMail(entity.getMail())
 			.setIcon(entity.getIcon())
+			.setUserno(entity.getUserno())
 			//.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
 			//.setToken(entity.getToken())
 			//.setIp(entity.getIp())

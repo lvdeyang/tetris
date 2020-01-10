@@ -19,7 +19,7 @@
                                 <span class="icon-plus" style="margin-right:5px;"></span>
                                 添加
                             </el-button>
-                            <el-button size="small" type="warning" @click="multiDelete()">
+                            <el-button size="small" type="warning" style="display: none" @click="multiDelete()">
                                 <span class="icon-trash" style="margin-right:5px;"></span>
                                 删除
                             </el-button>
@@ -122,7 +122,11 @@
         <!-- 预览灯箱 -->
         <mi-lightbox ref="Lightbox" @on-txt-save="" style="z-index: 3000"></mi-lightbox>
 
+        <!-- 节目编辑 -->
         <cs-program-screen ref="programScreen" @preview="handlePreview"></cs-program-screen>
+
+        <!-- 资源选择 -->
+        <cs-media-picker-dialog ref="mediaPicker" @on-media-picker-close="handleMediaPickerClose"></cs-media-picker-dialog>
 
         <el-dialog
                 title="添加频道"
@@ -379,7 +383,7 @@
                         ref="menuResourceTree"
                         :props="dialog.editMenu.dialog.chooseResource.tree.props"
                         :data="dialog.editMenu.dialog.chooseResource.tree.data"
-                        node-key="id"
+                        node-key="type + id"
                         :check-strictly=false
                         show-checkbox
                         @check="handleMenuResourceCheckChange"
@@ -595,7 +599,7 @@
             <div style="width:100%; height:650px; position:relative;">
                 <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
                     <el-button size="small" type="primary" @click="handleAddSchedule()"
-                               :disabled="dialog.editSchedules.data.autoBroad">
+                               :disabled="dialog.editSchedules.data.autoBroad || (dialog.editSchedules.data.broadWay=='终端播发' && dialog.editSchedules.table.data.length >= 1)">
                         <span class="icon-plus" style="margin-right:5px;"></span>
                         添加
                     </el-button>

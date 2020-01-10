@@ -20,6 +20,9 @@ public class UserVO{
 	/** 用户名 */
 	private String nickname;
 	
+	/** 用户号码 */
+	private String userno;
+	
 	/** 头像 */
 	private String icon;
 	
@@ -122,6 +125,15 @@ public class UserVO{
 
 	public UserVO setNickname(String nickname) {
 		this.nickname = nickname;
+		return this;
+	}
+
+	public String getUserno() {
+		return userno;
+	}
+
+	public UserVO setUserno(String userno) {
+		this.userno = userno;
 		return this;
 	}
 

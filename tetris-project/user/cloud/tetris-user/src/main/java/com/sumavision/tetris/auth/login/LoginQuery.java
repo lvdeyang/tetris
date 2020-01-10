@@ -50,6 +50,7 @@ public class LoginQuery {
 			com.sumavision.tetris.mims.config.server.ServerProps props = mimsServerPropsQuery.queryProps();
 			redirectUrl = new StringBufferWrapper().append("http://").append(props.getFtpIp()).append(":").append(props.getPort()).append("/index/media/picture/").append(token).toString();
 		}
+		
 		return redirectUrl;
 	}
 	

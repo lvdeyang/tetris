@@ -9,6 +9,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.DigestUtils;
 
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 
@@ -22,6 +23,15 @@ import sun.misc.BASE64Encoder;
  * <b>日期：</b>2019年3月5日 下午5:35:23
  */
 public class MessageEncoder {
+	
+	@Component
+	public static class Md5Encoder{
+		
+		public String encode(String message) throws Exception{
+			return DigestUtils.md5DigestAsHex(message.getBytes());
+		}
+		
+	}
 
 	/**
 	 * Sha256编码器<br/>

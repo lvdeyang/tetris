@@ -10,8 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
-import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoPO;
-import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.channel.exception.ChannelUdpUserIdAlreadyExistException;
 import com.sumavision.tetris.user.UserVO;
 
@@ -146,6 +144,19 @@ public class BroadFileBroadInfoService {
 	 */
 	public List<BroadFileBroadInfoVO> queryFromChannelId(Long channelId) throws Exception {
 		List<BroadFileBroadInfoPO> infoPOs = broadFileBroadInfoDAO.findByChannelId(channelId);
+		return BroadFileBroadInfoVO.getConverter(BroadFileBroadInfoVO.class).convert(infoPOs, BroadFileBroadInfoVO.class);
+	}
+	
+	/**
+	 * 根据用户Id查询下发信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月6日 下午4:45:07
+	 * @param List<Long> userIds 用户Id数组
+	 * @return List<BroadFileBroadInfoVO> 下发信息
+	 */
+	public List<BroadFileBroadInfoVO> queryFromUserIds(List<Long> userIds) throws Exception {
+		List<BroadFileBroadInfoPO> infoPOs = broadFileBroadInfoDAO.findByUserIdIn(userIds);
 		return BroadFileBroadInfoVO.getConverter(BroadFileBroadInfoVO.class).convert(infoPOs, BroadFileBroadInfoVO.class);
 	}
 }

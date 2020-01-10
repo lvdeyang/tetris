@@ -456,6 +456,13 @@ define([
                 //添加文本媒资任务
                 addMediaTxtTask:function(){
                     var self = this;
+                    if (!self.dialog.addTxt.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.addTxt.loading = true;
                     ajax.post('/media/txt/task/add', {
                         content:self.dialog.addTxt.content,
@@ -474,6 +481,13 @@ define([
                 //编辑文本媒资任务
                 editMediaTxtTask:function(){
                     var self = this;
+                    if (!self.dialog.editTxt.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.editTxt.loading = true;
                     ajax.post('/media/txt/task/edit/' + self.dialog.editTxt.id, {
                         content:self.dialog.editTxt.content,

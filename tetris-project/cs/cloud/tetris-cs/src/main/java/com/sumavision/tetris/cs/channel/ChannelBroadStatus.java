@@ -39,7 +39,7 @@ public abstract class ChannelBroadStatus {
 				}
 			}
 			
-			return terminalBroadIp + ":" + terminalBroadPort;
+			return terminalBroadPort.isEmpty() ? terminalBroadIp : terminalBroadIp + ":" + terminalBroadPort;
 		} else {
 			if(abilityBroadIp.isEmpty() || abilityBroadPort.isEmpty()){
 				File jsonFile = ResourceUtils.getFile("classpath:profile.json");

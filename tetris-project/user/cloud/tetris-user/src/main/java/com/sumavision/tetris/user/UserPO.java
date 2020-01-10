@@ -36,6 +36,9 @@ public class UserPO extends AbstractBasePO{
 	/** 用户昵称 */
 	private String nickname;
 	
+	/** 用户号码 */
+	private String userno;
+	
 	/** 用户头像 */
 	private String icon;
 	
@@ -94,6 +97,15 @@ public class UserPO extends AbstractBasePO{
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	@Column(name = "USERNO")
+	public String getUserno() {
+		return userno;
+	}
+
+	public void setUserno(String userno) {
+		this.userno = userno;
 	}
 
 	@Column(name = "ICON")

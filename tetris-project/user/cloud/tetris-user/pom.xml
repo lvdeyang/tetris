@@ -80,11 +80,18 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
-		<!-- mims-feign -->
+		<!-- mims-feign 
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-mims-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
+		
+		<!-- resource-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+		  	<artifactId>tetris-resource-feign</artifactId>
+		  	<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
 		<!-- tetris-ui -->

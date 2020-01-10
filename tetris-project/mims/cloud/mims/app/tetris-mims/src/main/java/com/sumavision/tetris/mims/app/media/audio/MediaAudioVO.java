@@ -33,6 +33,8 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	
 	private String uploadTmpPath;
 	
+	private Long folderId;
+	
 	private List<String> tags;
 	
 	private List<String> keyWords;
@@ -148,6 +150,15 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 
 	public MediaAudioVO setUploadTmpPath(String uploadTmpPath) {
 		this.uploadTmpPath = uploadTmpPath;
+		return this;
+	}
+
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public MediaAudioVO setFolderId(Long folderId) {
+		this.folderId = folderId;
 		return this;
 	}
 
@@ -325,6 +336,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setDuration(entity.getDuration()==null?"-":entity.getDuration().toString())
 			.setVersion(entity.getVersion())
+			.setFolderId(entity.getFolderId())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaAudioItemType.AUDIO.toString())
 			.setRemoveable(true)

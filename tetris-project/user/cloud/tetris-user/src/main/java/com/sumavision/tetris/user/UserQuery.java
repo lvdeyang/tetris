@@ -3,7 +3,6 @@ package com.sumavision.tetris.user;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -20,9 +19,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
 import com.sumavision.tetris.auth.token.TokenPO;
-import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -35,8 +34,6 @@ import com.sumavision.tetris.system.role.SystemRolePO;
 import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.theme.SystemThemeDAO;
 import com.sumavision.tetris.system.theme.SystemThemePO;
-import com.sumavision.tetris.user.exception.TokenTimeoutException;
-import com.sumavision.tetris.user.exception.TokenUpdatedException;
 
 @Component
 public class UserQuery {
@@ -399,6 +396,42 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 根据公司id和类型查询用户列表（带例外,类型 ）<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:05:54
+	 * @param Long companyId 公司id
+	 * @param Collection<Long> except 例外
+	 * @param UserClassify classify 类型
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> listByCompanyIdWithExceptAndClassify(Long companyId, String terminalType, Collection<Long> except, UserClassify classify) throws Exception{
+		if(except == null) return listByCompanyIdAndClassify(companyId, classify);
+		List<UserPO> users = userDao.findByCompanyIdWithExceptAndClassfy(companyId, except, classify.toString());
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		TerminalType type = null;
+		if (terminalType != null && !terminalType.isEmpty()) type = TerminalType.fromName(terminalType);
+		if(users!=null && users.size()>0){
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserPO user:users){
+				userIds.add(user.getId());
+			}
+			List<TokenPO> tokenPOs = tokenDao.findByUserIdInAndType(userIds, type);
+			for(UserPO user:users){
+				UserVO userVO = new UserVO().set(user);
+				for(TokenPO tokenPO: tokenPOs){
+					if(tokenPO.getUserId().equals(user.getId())){
+						userVO.setStatus(tokenPO.getStatus().toString());
+						break;
+					}
+				}
+				view_users.add(userVO);
+			}
+		}
+		return view_users;
+	}
+	
+	/**
 	 * 分页查询公司下的用户（带例外）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -488,6 +521,213 @@ public class UserQuery {
 	public List<UserVO> findByIdIn(Collection<Long> ids) throws Exception{
 		List<UserPO> entities = userDao.findByIdIn(ids);
 		return UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
+	}
+	
+	/**
+	 * 分页查询所有用户（同一公司下）<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午5:37:56
+	 * @param Long userId 用户id
+	 * @param int currentPage 
+	 * @param int pageSize
+	 * @return Map<String, Object>
+	 */
+	public Map<String, Object> queryAllUserBaseInfo(Long userId, int currentPage, int pageSize) throws Exception{
+		
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		if (companyPO != null) {
+			return listByCompanyId(companyPO.getId(), currentPage, pageSize);
+		}else {
+			return null;
+		}
+	}
+	
+	/**
+	 * 获取用户所属公司下的所有用户信息<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月31日 下午1:56:24
+	 * @param Long userId 用户id
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> queryAllUserBaseInfo(Long userId) throws Exception{
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		if (companyPO != null) {
+			List<UserPO> users = userDao.findByCompanyId(companyPO.getId());
+			List<UserVO> view_users = new ArrayList<UserVO>();
+			if(users!=null && users.size()>0){
+				for(UserPO user:users){
+					view_users.add(new UserVO().set(user));
+				}
+			}
+			return view_users;
+		}else {
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据用户名模糊查询分页<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 上午10:53:46
+	 * @param String userName 用户名
+	 * @return List<UserVO> 用户列表
+	 */
+	public Map<String, Object> queryUsersByNameLike(Long userId, String userName, List<Long> exceptIds, int currentPage, int pageSize) throws Exception{
+		
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		List<Long> userList = new ArrayList<Long>();
+		userList.add(userId);
+		if (companyPO != null) {
+			return listByCompanyIdAndLikeNameWithExcept(companyPO.getId(), userName, exceptIds, currentPage, pageSize);
+		}else {
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据用户名模糊查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 上午10:08:55
+	 * @param Long userId 用户id
+	 * @param String userName 用户名
+	 * @return List<UserVO> 
+	 */
+	public List<UserVO> queryUsersByNameLike(Long userId, String userName) throws Exception{
+		
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		if (companyPO != null) {
+			List<UserPO> users = userDao.findByCompanyIdAndLikeNickName(companyPO.getId(), new StringBufferWrapper().append("%")
+					                                                                                                .append(userName)
+					                                                                                                .append("%")
+					                                                                                                .toString());
+			List<UserVO> view_users = new ArrayList<UserVO>();
+			if(users!=null && users.size()>0){
+				for(UserPO user:users){
+					view_users.add(new UserVO().set(user));
+				}
+			}
+			return view_users;
+		}else {
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据用户昵称查询用户--同一公司下<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 下午2:16:46
+	 * @param Long userId 登录用户id
+	 * @param String userName 用户名
+	 * @return UserVO
+	 */
+	public UserVO queryUserByName(Long userId, String userName) throws Exception{
+		
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		if(companyPO != null){
+			UserPO user = userDao.findByCompanyIdAndNickName(companyPO.getId(), userName);
+			return new UserVO().set(user);
+		}else{
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据用户号码查询用户--同一公司下<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 下午7:05:18
+	 * @param Long userId 用户id
+	 * @param String userno 用户号码
+	 * @return UserVO
+	 */
+	public UserVO queryUserByUserno(Long userId, String userno) throws Exception{
+		
+		CompanyPO companyPO = companyDao.findByUserId(userId);
+		if(companyPO != null){
+			UserPO user = userDao.findByCompanyIdAndUserno(companyPO.getId(), userno);
+			return new UserVO().set(user);
+		}else{
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据角色id查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月3日 上午11:07:59
+	 * @param Long roleId 角色id
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> queryUsersByRole(Long roleId) throws Exception{
+		
+		List<UserPO> users = userDao.findByRoleId(roleId);
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			for(UserPO user:users){
+				view_users.add(new UserVO().set(user));
+			}
+		}
+		return view_users;
+	}
+	
+	/**
+	 * 根据用户名分页查询（同一公司下）-- 带例外<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午5:47:56
+	 * @param Long companyId 公司id
+	 * @param String userName 用户名
+	 * @param Collection<Long> except 例外
+	 * @param currentPage
+	 * @param pageSize
+	 * @return Map<String, Object>
+	 */
+	public Map<String, Object> listByCompanyIdAndLikeNameWithExcept(Long companyId, String userName, Collection<Long> except, int currentPage, int pageSize) throws Exception{
+		if(except == null) return listByCompanyIdAndLikeName(companyId, userName, currentPage, pageSize);
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> pageUsers = userDao.findByCompanyIdAndLikeNameWithExcept(companyId, userName, except, page);
+		List<UserPO> users = pageUsers.getContent();
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			for(UserPO user:users){
+				view_users.add(new UserVO().set(user));
+			}
+		}
+		return new HashMapWrapper<String, Object>().put("total", pageUsers.getTotalElements())
+												   .put("rows", view_users)
+												   .getMap();
+	}
+	
+	/**
+	 * 根据用户名分页查询（同一公司下）<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午5:44:58
+	 * @param Long companyId 公司id
+	 * @param String userName 用户名
+	 * @param int currentPage
+	 * @param int pageSize
+	 * @return Map<String, Object>
+	 */
+	public Map<String, Object> listByCompanyIdAndLikeName(Long companyId, String userName, int currentPage, int pageSize) throws Exception{
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> pageUsers = userDao.findByCompanyIdAndLikeName(companyId, userName, page);
+		List<UserPO> users = pageUsers.getContent();
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			for(UserPO user:users){
+				view_users.add(new UserVO().set(user));
+			}
+		}
+		return new HashMapWrapper<String, Object>().put("total", pageUsers.getTotalElements())
+												   .put("rows", view_users)
+												   .getMap();
 	}
 	
 	/**************************************************************************

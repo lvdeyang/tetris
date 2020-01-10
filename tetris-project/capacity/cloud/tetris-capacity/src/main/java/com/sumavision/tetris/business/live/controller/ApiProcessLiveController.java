@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.service.LockService;
+import com.sumavision.tetris.business.common.service.RedisLock;
 import com.sumavision.tetris.business.live.service.StreamPassbyService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -83,32 +84,23 @@ public class ApiProcessLiveController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/test")
-	public Object test(HttpServletRequest request) throws Exception{
+	public Object test(String name, HttpServletRequest request) throws Exception{
 		
 		final TaskInputDAO dao = taskInputDao;
 		
-		for(int i=0; i<10; i++){
+		for(int i=0; i<2; i++){
 			final int ii = i;
 			new Thread(new Runnable() {
 				
 				@Override
 				public void run() {
-					TaskInputPO input1 = dao.findByTaskUuid("123");
-					try {
-						Thread.sleep(20);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					input1.setCount(ii);
-					try{
-						System.out.println("-------"+ii+"======"+taskInputDao.save(input1).getCount());
-					}catch(ObjectOptimisticLockingFailureException e){
-						System.out.println("---失败----"+ii);
-					}
-					
+					lockService.test(ii);
 				}
 			}).start();
 		}
+//		System.out.println(name + new Date().getTime());
+//		lockService.test1(name);
+//		System.out.println(name + new Date().getTime());
 		
 		return null;
 	}

@@ -154,4 +154,36 @@ public class SystemRoleFeignController {
 		return systemRoleQuery.queryInternalRole();
 	}
 	
+	/**
+	 * 查询用户所属公司的所有角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 上午11:13:35
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/all/roles")
+	public Object queryAllRoles(HttpServletRequest request) throws Exception{
+		
+		UserVO userVO = userQuery.current();
+		
+		return systemRoleQuery.queryAllRoles(userVO.getId());
+	}
+	
+	/**
+	 * 根据用户查询角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月3日 下午4:51:17
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/roles/by/user")
+	public Object queryRolesByUserId(Long userId, HttpServletRequest request) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		return systemRoleQuery.queryUserRoles(userId.toString());
+	}
+	
 }

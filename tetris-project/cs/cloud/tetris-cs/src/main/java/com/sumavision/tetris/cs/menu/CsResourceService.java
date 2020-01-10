@@ -34,24 +34,27 @@ public class CsResourceService {
 			throws Exception {
 		List<CsResourceVO> returnList = new ArrayList<CsResourceVO>();
 
-		List<CsResourcePO> aliveResource = resourceDao.findByParentId(parentId);
+		List<CsResourcePO> aliveResourcePOs = resourceDao.findByParentId(parentId);
+		List<CsResourceVO> aliveResource = CsResourceVO.getConverter(CsResourceVO.class).convert(aliveResourcePOs, CsResourceVO.class);
 		if (aliveResource != null && !aliveResource.isEmpty()) {
-			returnList.addAll(CsResourceVO.getConverter(CsResourceVO.class).convert(aliveResource, CsResourceVO.class));
+			returnList.addAll(aliveResource);
 		}
 
 		if (resourceList == null || resourceList.isEmpty()) return returnList;
 		CsMenuVO parentMenu = csMenuQuery.getMenuByMenuId(parentId);
 		List<CsResourcePO> saveResources = new ArrayList<CsResourcePO>();
 		for (MediaAVideoVO aVideoVO : resourceList) {
-			CsResourcePO newresource = new CsResourcePO();
-			if (aliveResource != null && !aliveResource.isEmpty()) {
-				for (CsResourcePO resource : aliveResource) {
+			Boolean alive = false;
+			if (aliveResource != null && !aliveResource.isEmpty()){
+				for (CsResourceVO resource : aliveResource) {
 					if (resource.getMimsUuid().equals(aVideoVO.getUuid())){
-						newresource = resource;
+						alive = true;
 						break;
 					}
 				}
 			}
+			if (alive) continue;
+			CsResourcePO newresource = new CsResourcePO();
 			newresource.setMimsUuid(aVideoVO.getUuid());
 			newresource.setName(aVideoVO.getName());
 			newresource.setType(aVideoVO.getType());

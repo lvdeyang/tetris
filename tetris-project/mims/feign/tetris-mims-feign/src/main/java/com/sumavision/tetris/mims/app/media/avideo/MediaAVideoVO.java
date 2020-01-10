@@ -26,6 +26,8 @@ public class MediaAVideoVO {
 	
 	private String uploadTmpPath;
 	
+	private Long folderId;
+	
 	private List<String> tags;
 	
 	private List<String> keyWords;
@@ -139,6 +141,15 @@ public class MediaAVideoVO {
 
 	public MediaAVideoVO setRemarks(String remarks) {
 		this.remarks = remarks;
+		return this;
+	}
+
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public MediaAVideoVO setFolderId(Long folderId) {
+		this.folderId = folderId;
 		return this;
 	}
 
@@ -266,6 +277,7 @@ public class MediaAVideoVO {
 		newMedia.name = this.name;
 		newMedia.previewUrl = this.previewUrl;
 		newMedia.duration = this.duration;
+		newMedia.folderId = this.folderId;
 		newMedia.children = new ArrayListWrapper<MediaAVideoVO>().getList();
 		return newMedia;
 	}
