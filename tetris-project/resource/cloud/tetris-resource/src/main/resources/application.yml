@@ -1,0 +1,82 @@
+server:
+    #contextPath : /suma-venus-resource
+    port : 8887
+
+spring:
+    application:
+        name: tetris-resource
+    cloud:
+        client:
+            ipAddress : 192.165.56.84
+        inetutils:
+            preferred-networks: 192.165.56.84
+
+    #datasource        
+    datasource:
+        #resource datasource
+        resource:
+            url: jdbc:mysql://localhost:3306/venus_resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+            username : root
+            password : sumavisionrd
+            driver-class-name : com.mysql.jdbc.Driver
+            keep-alive : true
+            initial-size : 10
+            min-idle : 20
+            max-active : 500
+            validation-query : SELECT 1
+            test-while-idle : true
+            time-between-eviction-runs-millis : 600000
+            min-evictable-idle-time-millis : 600000
+            test-on-borrow : true
+    #jpa
+    jpa:
+        database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+        database: MYSQL
+        show-sql: false
+        hibernate:
+            ddl-auto: update                    
+                    
+    #http
+    http:
+        multipart:
+            enabled : true
+            max-file-size : 1000Mb
+            max-request-size : 1000Mb
+            
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://192.165.56.84:8081/eureka/
+  instance:
+    prefer-ip-address: true
+    ip-address: 192.165.56.84
+    lease-renewal-interval-in-seconds : 3
+    lease-expiration-duration-in-seconds : 10
+    
+#security:
+#  oauth2:
+#    resource:
+#     id: suma-venus-resource-wjw
+#      prefer-token-info: false
+#      user-info-uri: http://192.165.56.140:8881/uaa/users/current
+
+ribbon:  
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
+
+connectCenterLayerID: suma-venus-access-lianwang
+businessMode: vod
+
+feign: 
+  hystrix: 
+   enabled: true    
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          thread: 
+            timeoutInMilliseconds: 5000
+          strategy: SEMAPHORE  
