@@ -273,4 +273,66 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.id NOT IN ?2 AND user.classify=?3", nativeQuery = true)
 	public List<UserPO> findByCompanyIdWithExceptAndClassfy(Long companyId, Collection<Long> except, String classify);
 	
+	/**
+	 * 根据用户名模糊查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 上午10:33:20
+	 * @param String userName 用户名
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByUsernameLike(String userName);
+	
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.username LIKE ?2 \n#pageable\n", nativeQuery = true)
+	public Page<UserPO> findByCompanyIdAndLikeName(Long companyId, String userName, Pageable page);
+	
+	/**
+	 * 根据用户名模糊查询同一公司下的用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 上午10:03:20
+	 * @param Long companyId 公司id
+	 * @param String userName 用户名
+	 * @return List<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.nickname LIKE ?2", nativeQuery = true)
+	public List<UserPO> findByCompanyIdAndLikeNickName(Long companyId, String userName);
+	
+	/**
+	 * 根据用户昵称查询用户--同一公司下<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 下午2:13:01
+	 * @param Long companyId 公司id
+	 * @param String userName 用户昵称
+	 * @return UserPO
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.nickname = ?2", nativeQuery = true)
+	public UserPO findByCompanyIdAndNickName(Long companyId, String userName);
+	
+	/**
+	 * 根据用户号码查询用户--同一公司下<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 下午7:00:50
+	 * @param Long companyId 公司id
+	 * @param String userno 用户号码
+	 * @return UserPO 用户信息
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.userno = ?2", nativeQuery = true)
+	public UserPO findByCompanyIdAndUserno(Long companyId, String userno);
+	
+	/**
+	 * 根据角色id查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月3日 上午11:05:53
+	 * @param Long roleId 角色id
+	 * @return List<UserPO>
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_user_system_role_permission permission ON user.id=permission.user_id WHERE permission.role_id=?1", nativeQuery = true)
+	public List<UserPO> findByRoleId(Long roleId);
+	
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.username LIKE ?2 AND user.id NOT IN ?3 \n#pageable\n", nativeQuery = true)
+	public Page<UserPO> findByCompanyIdAndLikeNameWithExcept(Long companyId, String userName, Collection<Long> except, Pageable page);
 }

@@ -206,6 +206,7 @@ public class UserController {
 	public Object add(
 			String nickname,
             String username,
+            String userno,
             String password,
             String repeat,
             String mobile,
@@ -219,12 +220,12 @@ public class UserController {
 		//TODO 权限校验
 		
 		if(classify.equals(UserClassify.NORMAL.getName())){
-			return userService.add(nickname, username, password, repeat, mobile, mail, classify, true);
+			return userService.add(nickname, username, userno, password, repeat, mobile, mail, classify, true);
 		}else if(classify.equals(UserClassify.COMPANY.getName())){
 			if(companyId!=null && companyName==null){
-				return userService.add(nickname, username, password, repeat, mobile, mail, classify, companyId);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, classify, companyId);
 			}else if(companyName!=null && companyId==null){
-				return userService.add(nickname, username, password, repeat, mobile, mail, classify, companyName);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, classify, companyName);
 			}
 		}
 		return null;

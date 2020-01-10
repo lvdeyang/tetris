@@ -104,6 +104,7 @@ public class UserService{
 	public UserVO add(
 			String nickname,
             String username,
+            String userno,
             String password,
             String repeat,
             String mobile,
@@ -111,7 +112,7 @@ public class UserService{
             String classify,
             boolean emit) throws Exception{
 		
-		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, classify);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, classify);
 		
 		if(emit){
 			//发布用户注册事件
@@ -139,6 +140,7 @@ public class UserService{
 	public UserVO add(
 			String nickname,
             String username,
+            String userno,
             String password,
             String repeat,
             String mobile,
@@ -146,7 +148,7 @@ public class UserService{
             String classify,
             String companyName) throws Exception{
 		
-		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, UserClassify.COMPANY.getName());
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, UserClassify.COMPANY.getName());
 		
 		CompanyVO company = null;
 		SystemRoleVO adminRole = null;
@@ -192,6 +194,7 @@ public class UserService{
 	public UserVO add(
 			String nickname,
             String username,
+            String userno,
             String password,
             String repeat,
             String mobile,
@@ -205,7 +208,7 @@ public class UserService{
 			throw new CompanyNotExistException(companyId);
 		}
 		
-		UserPO user = addUser(nickname, username, password, repeat, mobile, mail, classify);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, classify);
 		
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//加入公司
@@ -215,7 +218,7 @@ public class UserService{
 		}
 		
 		//发布用户注册事件
-		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName());
+		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), company.getId().toString(), company.getName(), user.getUserno());
 		applicationEventPublisher.publishEvent(event);
 		
 		return new UserVO().set(user);
@@ -238,6 +241,7 @@ public class UserService{
 	private UserPO addUser(
 			String nickname,
             String username,
+            String userno,
             String password,
             String repeat,
             String mobile,
@@ -274,6 +278,7 @@ public class UserService{
 		user = new UserPO();
 		user.setNickname(nickname);
 		user.setUsername(username);
+		user.setUserno(userno);
 		user.setPassword(sha256Encoder.encode(password));
 		user.setMobile(mobile);
 		user.setMail(mail);

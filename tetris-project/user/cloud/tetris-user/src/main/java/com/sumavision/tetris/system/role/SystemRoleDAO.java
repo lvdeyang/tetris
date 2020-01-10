@@ -154,4 +154,14 @@ public interface SystemRoleDAO extends BaseDAO<SystemRolePO>{
 	@Query(value = "SELECT * FROM TETRIS_USER_SYSTEM_ROLE WHERE COMPANY_ID=?1 AND AUTO_GENERATION=1", nativeQuery = true)
 	public SystemRolePO findCompanyAdminRole(Long companyId);
 	
+	/**
+	 * 查询公司下的角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 上午11:02:40
+	 * @param Long companyId 公司id
+	 * @return List<SystemRolePO>
+	 */
+	public List<SystemRolePO> findByCompanyId(Long companyId);
+	
 }
