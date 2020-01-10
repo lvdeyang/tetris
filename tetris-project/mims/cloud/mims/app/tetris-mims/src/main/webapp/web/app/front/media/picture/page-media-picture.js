@@ -503,6 +503,13 @@ define([
                 //添加图片媒资任务
                 addMediaPictureTask:function(){
                     var self = this;
+                    if (!self.dialog.addPicture.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     var task = {
                         name:self.dialog.addPicture.task.name,
                         size:self.dialog.addPicture.task.size,
@@ -540,6 +547,13 @@ define([
                 //编辑图片媒资任务
                 editMediaPictureTask:function(){
                     var self = this;
+                    if (!self.dialog.editPicture.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.editPicture.loading = true;
                     ajax.post('/media/picture/task/edit/' + self.dialog.editPicture.id, {
                         name:self.dialog.editPicture.name,

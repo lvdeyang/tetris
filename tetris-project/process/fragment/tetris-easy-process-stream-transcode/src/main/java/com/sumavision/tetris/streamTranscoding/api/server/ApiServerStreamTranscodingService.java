@@ -1,12 +1,16 @@
 package com.sumavision.tetris.streamTranscoding.api.server;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamQuery;
 import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
@@ -15,6 +19,9 @@ import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 import com.sumavision.tetris.streamTranscoding.StreamTranscodingAdapter;
 import com.sumavision.tetris.streamTranscoding.addOutput.AddOutputService;
+import com.sumavision.tetris.streamTranscoding.editor.TranscodeExtensionParamPermissionDAO;
+import com.sumavision.tetris.streamTranscoding.editor.TranscodeExtensionParamPermissionPO;
+import com.sumavision.tetris.streamTranscoding.editor.TranscodeMediaVO;
 import com.sumavision.tetris.streamTranscoding.exception.MediaStreamHasNoPreviewUrlException;
 import com.sumavision.tetris.streamTranscodingProcessVO.FileToStreamVO;
 import com.sumavision.tetris.streamTranscodingProcessVO.RecordVO;
@@ -35,6 +42,9 @@ public class ApiServerStreamTranscodingService {
 	
 	@Autowired
 	private AddOutputService addOutputService;
+	
+	@Autowired
+	private TranscodeExtensionParamPermissionDAO transcodeExtensionParamPermissionDAO;
 	
 	public StreamTranscodingProcessVO fileParamFormat(
 			MediaAVideoVO media,
@@ -86,6 +96,28 @@ public class ApiServerStreamTranscodingService {
 		return new StreamTranscodingProcessVO().setFileToStreamVO(fileToStreamVO)
 				.setStreamTranscodingVO(streamTranscodingVO)
 				.setRecordVO(recordVO);
+	}
+	
+	public Map<String, String> ifMediaEdit(MediaAVideoVO media) throws Exception {
+		Map<String, String> map = new HashMap<String, String>();
+		if (media == null) return null;
+		String[] mediaSplit = media.getPreviewUrl().split("\\.");
+		String end = mediaSplit[mediaSplit.length - 1];
+		TranscodeExtensionParamPermissionPO permissionPO = transcodeExtensionParamPermissionDAO.findByExtension(end);
+		if (permissionPO == null) return null;
+		TranscodeMediaVO transcodeMediaVO = new TranscodeMediaVO();
+		transcodeMediaVO.setUuid(media.getUuid());
+		transcodeMediaVO.setStartTime(0l);
+		transcodeMediaVO.setEndTime(Long.parseLong(media.getDuration()));
+		map.put("transcodeJob", JSONArray.toJSONString(new ArrayListWrapper<TranscodeMediaVO>().add(transcodeMediaVO).getList()));
+		map.put("param", permissionPO.getParam());
+		if (media.getName().endsWith(end)) {
+			map.put("name", media.getName().split("\\." + end)[0]);
+		} else {
+			map.put("name", media.getName());
+		}
+		map.put("folderId", media.getFolderId().toString());
+		return map;
 	}
 	
 	public StreamTranscodingProcessVO streamParamFormat(

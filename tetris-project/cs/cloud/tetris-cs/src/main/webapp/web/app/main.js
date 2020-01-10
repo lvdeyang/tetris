@@ -46,6 +46,7 @@ require.config({
         /* dialogs */
         'cs-user-dialog':window.APPPATH + 'cs/dialog/user/user-dialog',
         'program-screen':window.APPPATH + 'cs/dialog/program/program-screen',
+        'cs-media-picker':window.APPPATH + 'cs/dialog/mediaPicker/media-picker-dialog',
 
         /* pages */
         'page-cs-management':window.APPPATH + 'cs/management/page-cs-management'

@@ -152,6 +152,7 @@ define([
                 var self = this;
                 var accept = '';
                 for(var i=0; i<self.requires.length; i++){
+                    if (self.requireType[0] === "video") return '';
                     accept += self.requires[i].mimetype;
                     if(i !== self.requires.length-1){
                         accept += ',';

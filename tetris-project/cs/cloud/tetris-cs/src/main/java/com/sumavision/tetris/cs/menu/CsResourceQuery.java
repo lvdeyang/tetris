@@ -50,6 +50,18 @@ public class CsResourceQuery {
 
 		return new CsResourceVO().set(resource);
 	}
+	
+	/**
+	 * 根据id批量获取媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月8日 上午9:19:28
+	 * @param List<Long> resourceIds 媒资id数组
+	 */
+	public List<CsResourceVO> queryResourceByIds(List<Long> resourceIds) throws Exception {
+		List<CsResourcePO> resourcePOs = csSourceDao.findAll(resourceIds);
+		return CsResourceVO.getConverter(CsResourceVO.class).convert(resourcePOs, CsResourceVO.class);
+	}
 
 	/**
 	 * 根据频道id获取媒资列表<br/>
@@ -61,13 +73,7 @@ public class CsResourceQuery {
 	 */
 	public List<CsResourceVO> getResourcesFromChannelId(Long channelId) throws Exception {
 		List<CsResourcePO> resourcePOList = csSourceDao.findByChannelId(channelId);
-		List<CsResourceVO> returnList = new ArrayList<CsResourceVO>();
-		if (resourcePOList != null && resourcePOList.size() > 0) {
-			for (CsResourcePO item : resourcePOList) {
-				returnList.add(new CsResourceVO().set(item));
-			}
-		}
-		return returnList;
+		return CsResourceVO.getConverter(CsResourceVO.class).convert(resourcePOList, CsResourceVO.class);
 	}
 
 	/**

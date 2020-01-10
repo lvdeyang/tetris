@@ -481,6 +481,13 @@ define([
                 //添加图片媒资任务
                 addMediaCompressTask:function(){
                     var self = this;
+                    if (!self.dialog.addCompress.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     var task = {
                         name:self.dialog.addCompress.task.name,
                         size:self.dialog.addCompress.task.size,
@@ -518,6 +525,13 @@ define([
                 //编辑图片媒资任务
                 editMediaCompressTask:function(){
                     var self = this;
+                    if (!self.dialog.editCompress.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.editCompress.loading = true;
                     ajax.post('/media/compress/task/edit/' + self.dialog.editCompress.id, {
                         name:self.dialog.editCompress.name,

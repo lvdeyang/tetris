@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.cs.area.AreaQuery;
@@ -18,11 +19,12 @@ import com.sumavision.tetris.cs.bak.AreaSendQuery;
 import com.sumavision.tetris.cs.bak.ResourceSendQuery;
 import com.sumavision.tetris.cs.bak.VersionSendPO;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
-import com.sumavision.tetris.cs.channel.BroadWay;
+import com.sumavision.tetris.cs.channel.Adapter;
 import com.sumavision.tetris.cs.channel.ChannelBroadStatus;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
+import com.sumavision.tetris.cs.channel.exception.ChannelAlreadyStopException;
 import com.sumavision.tetris.cs.channel.exception.ChannelTerminalNoneAreaException;
 import com.sumavision.tetris.cs.channel.exception.ChannelTerminalRequestErrorException;
 import com.sumavision.tetris.cs.menu.CsMenuQuery;
@@ -79,14 +81,18 @@ public class BroadTerminalService {
 	@Autowired
 	private MediaCompressService mediaCompressService;
 	
+	@Autowired
+	private Adapter adapter;
+	
 	/**
 	 * 开始播发(终端播发，有排期后未修改完成)<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
 	 * @param Long channelId 频道id
+	 * @param String 资源id数组
 	 */
-	public JSONObject startTerminalBroadcast(Long channelId) throws Exception {
+	public JSONObject startTerminalBroadcast(Long channelId, String resourceIds) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		
 		List<ScheduleVO> schedules = scheduleQuery.getByChannelId(channelId);
@@ -97,7 +103,15 @@ public class BroadTerminalService {
 		List<String> areaVOs = areaQuery.getCheckAreaIdList(channelId);
 		if (areaVOs == null || areaVOs.size() <= 0) throw new ChannelTerminalNoneAreaException();
 		// 获取媒资增量
-		List<CsResourceVO> addResourceList = resourceSendQuery.getAddResource(channelId, false);
+		//List<CsResourceVO> addResourceList = resourceSendQuery.getAddResource(channelId, false);
+		//获取媒资全量或手选资源
+		List<CsResourceVO> addResourceList = new ArrayList<CsResourceVO>();
+		if (resourceIds == null || resourceIds.isEmpty()){
+			addResourceList = csResourceQuery.getResourcesFromChannelId(channelId);
+		} else {
+			List<Long> resourceIdList = JSONArray.parseArray(resourceIds, Long.class);
+			addResourceList = csResourceQuery.queryResourceByIds(resourceIdList);
+		}
 		Map<String, CsResourceVO> resourceMap = new HashMap<String, CsResourceVO>();
 		for (CsResourceVO item : addResourceList) {
 			String[] previewUrl = item.getPreviewUrl().split("/");
@@ -150,31 +164,25 @@ public class BroadTerminalService {
 		broadJsonObject.put("fileSize", mediaCompressVO.getSize());
 		broadJsonObject.put("regionList", areaVOs);
 
-		String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-		if (!url.isEmpty()) {
-			JSONObject response = HttpRequestUtil
-					.httpPost("http://" + url + "/ed/speaker/startSendFile", broadJsonObject);
+		JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.START_SEND_FILE.getUrl(), broadJsonObject);
 
-			if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
-				// 播发成功处理
-				channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
-				channelDAO.save(channel);
+		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+			// 播发成功处理
+			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
+			channelDAO.save(channel);
 
-				// 备份播发媒资全量
-				resourceSendQuery.getAddResource(channelId, true);
+			// 备份播发媒资全量
+			resourceSendQuery.getAddResource(channelId, true);
 
-				// 备份播发地区
-				areaSendQuery.saveArea(channelId);
+			// 备份播发地区
+			areaSendQuery.saveArea(channelId);
 
-				// 保存播发版本
-				versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath);
+			// 保存播发版本
+			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath);
 
-				return getReturnJSON(true, "");
-			} else {
-				throw new ChannelTerminalRequestErrorException("开始播发");
-			}
-		}else {
-			throw new ChannelTerminalRequestErrorException("开始播发");
+			return getReturnJSON(true, "");
+		} else {
+			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.START_SEND_FILE.getAction(), response.getString("message"));
 		}
 	}
 	
@@ -220,22 +228,18 @@ public class BroadTerminalService {
 		JSONObject broadJsonObject = new JSONObject();
 		VersionSendPO versionSendPO = versionSendQuery.getLastVersionSendPO(channelId);
 		if (versionSendPO == null) {
-			return getReturnJSON(false, "当前频道没有被储存的版本信息");
+			throw new ChannelTerminalRequestErrorException("重新播发", "当前频道没有被储存的版本信息");
 		}
 		broadJsonObject.put("id", versionSendQuery.getBroadId(channelId));
 		broadJsonObject.put("filePath", versionSendPO.getFilePath());
 		broadJsonObject.put("fileSize", versionSendPO.getFileSize());
 		broadJsonObject.put("regionList", areaSendQuery.getAreaIdList(channelId));
 
-		String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-		if (!url.isEmpty()) {
-			JSONObject response = HttpRequestUtil
-					.httpPost("http://" + url + "/ed/speaker/startSendFile", broadJsonObject);
-
-			return (response != null && response.containsKey("result") && response.getString("result").equals("1"))
-					? getReturnJSON(true, "") : getReturnJSON(false, "播发未知错误");
-		}else {
-			return getReturnJSON(false, "播发服务器地址为空");
+		JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.RESTART_SEND_FILE.getUrl(), broadJsonObject);
+		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+			return getReturnJSON(true, "");
+		} else {
+			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.RESTART_SEND_FILE.getAction(), response.getString("message"));
 		}
 	}
 	
@@ -254,20 +258,15 @@ public class BroadTerminalService {
 			List<String> ids = new ArrayList<String>();
 			ids.add(versionSendNum);
 			jsonParam.put("ids", ids);
-			String url = ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.TERMINAL_BROAD);
-			if (!url.isEmpty()) {
-				JSONObject response = HttpRequestUtil
-						.httpPost("http://" + url + "/ed/speaker/stopSendFile", jsonParam);
-				if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
-					return getReturnJSON(true, "");
-				} else {
-					return getReturnJSON(false, "未知错误，播发失败");
-				}
-			}else {
-				return getReturnJSON(false, "播发地址为空");
+			jsonParam.put("stopFlag", false);
+			JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.STOP_SEND_FILE.getUrl(), jsonParam);
+			if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+				return getReturnJSON(true, "");
+			} else {
+				throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.STOP_SEND_FILE.getAction(), response.getString("message"));
 			}
 		} else {
-			return getReturnJSON(false, "当前频道未处于可播发状态");
+			throw new ChannelAlreadyStopException(channelQuery.findByChannelId(channelId).getName());
 		}
 	}
 	
@@ -288,8 +287,10 @@ public class BroadTerminalService {
 	private List<JSONObject> programText(ProgramVO program) throws Exception {
 		List<JSONObject> returnList = new ArrayList<JSONObject>();
 		if (program != null) {
+			JSONObject useTemplate = adapter.screenTemplate(program.getScreenNum());
+			if (useTemplate == null) return null;
 			for (int i = 1; i <= program.getScreenNum(); i++) {
-				JSONObject returnItem = this.screenItemInit(program.getScreenNum(), i);
+				JSONObject returnItem = adapter.serial(useTemplate, i);
 				List<JSONObject> scheduleList = new ArrayList<JSONObject>();
 				if (program.getScreenInfo() != null && program.getScreenInfo().size() > 0) {
 					for (ScreenVO item : program.getScreenInfo()) {
@@ -372,159 +373,17 @@ public class BroadTerminalService {
 		return returnObject;
 	}
 	
-	private List<JSONObject> getFilesPath(List<CsResourceVO> files) {
-		List<JSONObject> filesPath = new ArrayList<JSONObject>();
-		if (files != null && files.size() > 0) {
-			for (CsResourceVO item : files) {
-				JSONObject file = new JSONObject();
-				String[] previewUrl = item.getPreviewUrl().split("/");
-				file.put("sourcePath", "./" + previewUrl[previewUrl.length - 1]);
-				file.put("destPath", item.getParentPath() + "/" + previewUrl[previewUrl.length - 1]);
-				filesPath.add(file);
-			}
-		}
-		return filesPath;
-	}
-	
-	/**
-	 * 分屏字段内容(终端播发)<br/>
-	 * <b>作者:</b>lzp<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年6月25日 上午11:06:57
-	 * @param Long screenNum 分屏数
-	 * @param int serialNum 屏幕位置
-	 */
-	private JSONObject screenItemInit(Long screenNum, int serialNum) {
-		JSONObject returnItem = new JSONObject();
-		returnItem.put("no", serialNum);
-		switch (screenNum.toString()) {
-		case "1":
-			returnItem.put("width", "100%");
-			returnItem.put("height", "100%");
-			returnItem.put("top", "0%");
-			returnItem.put("left", "0%");
-			break;
-		case "4":
-			returnItem.put("width", "50%");
-			returnItem.put("height", "50%");
-			switch (serialNum) {
-			case 1:
-				returnItem.put("top", "0%");
-				returnItem.put("left", "0%");
-				break;
-			case 2:
-				returnItem.put("top", "0%");
-				returnItem.put("left", "50%");
-				break;
-			case 3:
-				returnItem.put("top", "50%");
-				returnItem.put("left", "0%");
-				break;
-			case 4:
-				returnItem.put("top", "50%");
-				returnItem.put("left", "50%");
-				break;
-			}
-			break;
-		case "6":
-			switch (serialNum) {
-			case 1:
-				returnItem.put("width", "66%");
-				returnItem.put("height", "66%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "0%");
-				break;
-			case 2:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "66%");
-				break;
-			case 3:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "33%");
-				returnItem.put("left", "66%");
-				break;
-			case 4:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "0%");
-				break;
-			case 5:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "33%");
-				break;
-			case 6:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "66%");
-				break;
-			}
-			break;
-		case "9":
-			switch (serialNum) {
-			case 1:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "0%");
-				break;
-			case 2:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "33%");
-				break;
-			case 3:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "0%");
-				returnItem.put("left", "66%");
-				break;
-			case 4:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "33%");
-				returnItem.put("left", "0%");
-				break;
-			case 5:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "33%");
-				returnItem.put("left", "33%");
-				break;
-			case 6:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "33%");
-				returnItem.put("top", "33%");
-				returnItem.put("left", "66%");
-				break;
-			case 7:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "0%");
-				break;
-			case 8:
-				returnItem.put("width", "33%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "33%");
-				break;
-			case 9:
-				returnItem.put("width", "34%");
-				returnItem.put("height", "34%");
-				returnItem.put("top", "66%");
-				returnItem.put("left", "66%");
-				break;
-			}
-			break;
-		}
-		return returnItem;
-	}
+//	private List<JSONObject> getFilesPath(List<CsResourceVO> files) {
+//		List<JSONObject> filesPath = new ArrayList<JSONObject>();
+//		if (files != null && files.size() > 0) {
+//			for (CsResourceVO item : files) {
+//				JSONObject file = new JSONObject();
+//				String[] previewUrl = item.getPreviewUrl().split("/");
+//				file.put("sourcePath", "./" + previewUrl[previewUrl.length - 1]);
+//				file.put("destPath", item.getParentPath() + "/" + previewUrl[previewUrl.length - 1]);
+//				filesPath.add(file);
+//			}
+//		}
+//		return filesPath;
+//	}
 }
