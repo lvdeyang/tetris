@@ -68,4 +68,24 @@ public interface SystemRoleFeign {
 	 */
 	@RequestMapping(value = "/system/role/feign/query/internal/role")
 	public JSONObject queryInternalRole() throws Exception;
+	
+	/**
+	 * 查询所有角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 上午11:17:02
+	 * @return List<SystemRoleVO>
+	 */
+	@RequestMapping(value = "/system/role/feign/query/all/roles")
+	public JSONObject queryAllRoles() throws Exception;
+	
+	/**
+	 * 查询用户角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月3日 下午4:52:46
+	 * @param Long userId 用户id
+	 */
+	@RequestMapping(value = "/system/role/feign/query/roles/by/user")
+	public JSONObject queryRolesByUserId(Long userId) throws Exception;
 }

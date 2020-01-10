@@ -8,7 +8,7 @@ public class BackUpPassByBO {
 	private String mode;
 	
 	/** 选中索引 */
-	private String select_index;
+	private String select_index = "0";
 	
 	/** 输入id */
 	private String input_id;

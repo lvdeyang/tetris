@@ -18,6 +18,8 @@ public class UserRegisteredEvent extends ApplicationEvent{
 	
 	private String roleName;
 	
+	private String userno;
+	
 	public String getUserId() {
 		return userId;
 	}
@@ -42,6 +44,10 @@ public class UserRegisteredEvent extends ApplicationEvent{
 		return roleName;
 	}
 	
+	public String getUserno() {
+		return userno;
+	}
+
 	public UserRegisteredEvent(
 			Object source, 
 			String userId, 
@@ -59,6 +65,23 @@ public class UserRegisteredEvent extends ApplicationEvent{
 		this.companyName = companyName;
 		this.roleId = roleId;
 		this.roleName = roleName;
+	}
+	
+	public UserRegisteredEvent(
+			Object source, 
+			String userId, 
+			String nickname, 
+			String companyId, 
+			String companyName,
+			String userno) {
+		
+		super(source);
+		
+		this.userId = userId;
+		this.nickname = nickname;
+		this.companyId = companyId;
+		this.companyName = companyName;
+		this.userno = userno;
 	}
 	
 	public UserRegisteredEvent(

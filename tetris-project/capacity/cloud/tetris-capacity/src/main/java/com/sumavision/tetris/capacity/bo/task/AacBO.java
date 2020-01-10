@@ -8,6 +8,7 @@ package com.sumavision.tetris.capacity.bo.task;
  */
 public class AacBO extends BaseAudioEncodeBO<AacBO>{
 	
+	/** 协议中该字段去了，这里留着看映射关系 */
 	private Integer channels = 1;
 
 	/** 声道布局，stereo等 */

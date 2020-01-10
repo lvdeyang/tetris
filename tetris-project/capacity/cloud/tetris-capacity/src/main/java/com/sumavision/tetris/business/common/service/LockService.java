@@ -23,10 +23,14 @@ import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.request.AllRequest;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
+import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+
+import javassist.bytecode.analysis.ControlFlow.Catcher;
+import redis.clients.jedis.Jedis;
 
 @Transactional(rollbackFor = Exception.class)
 @Service
@@ -43,7 +47,54 @@ public class LockService {
 	
 	@Autowired
 	private ResponseService responseService;
+	
+	@Autowired
+	private CapacityProps capacityProps;
 
+	public void test(int ii){
+		TaskInputPO input1 = taskInputDao.findByTaskUuidAndType("123", BusinessType.TEST);
+		try {
+			Thread.sleep(20);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		input1.setCount(ii);
+		try{
+			System.out.println("-------"+ii+"======"+taskInputDao.save(input1).getCount());
+			Thread.sleep(2000);
+		}catch(ObjectOptimisticLockingFailureException e){
+			System.out.println("---失败----"+ii);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void test1(String uniq) throws Exception{
+		TaskInputPO input = taskInputDao.selectByUniq(uniq);
+//		TaskInputPO input = taskInputDao.selectByInput(uniq);
+		if(input == null){
+			System.out.println("insert");
+			input = new TaskInputPO();
+			input.setUpdateTime(new Date());
+			input.setUniq(uniq);
+			input.setType(BusinessType.TEST);
+			taskInputDao.save(input);
+			
+			Thread.sleep(10000);
+		}else {
+			System.out.println("update");
+			input.setUpdateTime(new Date());
+			input.setUniq(uniq);
+			input.setType(BusinessType.TEST);
+			taskInputDao.save(input);
+			
+//			System.out.println("delete");
+//			taskInputDao.delete(input);
+			
+			Thread.sleep(10000);
+		}
+	}
+	
 	/**
 	 * 应急广播业务调用<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -154,7 +205,7 @@ public class LockService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -167,7 +218,7 @@ public class LockService {
 			
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest);
+				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 
 			} catch (Exception e) {
 				
@@ -216,7 +267,7 @@ public class LockService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -229,7 +280,7 @@ public class LockService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest);
+				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 
 			} catch (Exception e) {
 				
@@ -254,7 +305,7 @@ public class LockService {
 	@Deprecated
 	public TaskOutputPO delete(String taskUuid) throws Exception {
 		
-		TaskOutputPO output = taskOutputDao.findByTaskUuid(taskUuid);
+		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, null);
 		
 		if(output != null){
 			
@@ -284,7 +335,7 @@ public class LockService {
 						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputs).getList());
 					}
 				
-					capacityService.deleteAllAddMsgId(allRequest);
+					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 					
 					output.setOutput(null);
 					output.setTask(null);

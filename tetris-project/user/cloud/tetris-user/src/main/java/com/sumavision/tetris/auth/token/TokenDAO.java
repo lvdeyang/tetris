@@ -1,5 +1,6 @@
 package com.sumavision.tetris.auth.token;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.repository.RepositoryDefinition;
@@ -29,6 +30,8 @@ public interface TokenDAO extends BaseDAO<TokenPO>{
 	 * @return TokenPO token对象
 	 */
 	public TokenPO findByUserIdAndType(Long userId, TerminalType type);
+	
+	public List<TokenPO> findByUserIdInAndType(Collection<Long> userIds, TerminalType type);
 	
 	/**
 	 * 根据token代码和终端类型查询token<br/>

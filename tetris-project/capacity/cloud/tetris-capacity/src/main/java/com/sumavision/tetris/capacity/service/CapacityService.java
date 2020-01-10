@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.sumavision.tetris.capacity.bo.request.AddTaskEncodeRequest;
 import com.sumavision.tetris.capacity.bo.request.AllRequest;
 import com.sumavision.tetris.capacity.bo.request.CreateInputsRequest;
@@ -49,7 +50,6 @@ import com.sumavision.tetris.capacity.util.http.HttpUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class CapacityService {
 	
 	@Autowired
@@ -104,14 +104,14 @@ public class CapacityService {
 	 * @param AllRequest all
 	 * @return AllResponse  
 	 */
-	public AllResponse createAllAddMsgId(AllRequest all) throws Exception{
+	public AllResponse createAllAddMsgId(AllRequest all, String ip, Long port) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		all.setMsg_id(msg_id);
 		
-		System.out.println(JSONObject.toJSONString(all));
+		System.out.println("create:  " + JSONObject.toJSONString(all));
 		
-		return createAll(all);
+		return createAll(all, ip, port);
 	}
 	
 	/**
@@ -122,16 +122,16 @@ public class CapacityService {
 	 * @param AllRequest all
 	 * @return AllResponse  
 	 */
-	private AllResponse createAll(AllRequest all) throws Exception{
+	private AllResponse createAll(AllRequest all, String ip, Long port) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
-										      .append(capacityProps.getPort())
+										      .append(port)
 										      .append(UrlConstant.URL_COMBINE)
 										      .toString();
 		
-		JSONObject request = JSONObject.parseObject(JSON.toJSONString(all));
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(all, SerializerFeature.DisableCircularReferenceDetect));
 		
 		JSONObject resp = HttpUtil.httpPost(url, request);
 		
@@ -148,14 +148,14 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月28日 下午2:47:06
 	 * @param AllRequest all
 	 */
-	public void deleteAllAddMsgId(AllRequest all) throws Exception{
+	public void deleteAllAddMsgId(AllRequest all, String ip, Long port) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		all.setMsg_id(msg_id);
 		
-		System.out.println(JSONObject.toJSONString(all));
+		System.out.println("delete:  " + JSONObject.toJSONString(all));
 		
-		deleteAll(all);
+		deleteAll(all, ip, port);
 	}
 	
 	/**
@@ -165,12 +165,12 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月28日 下午3:20:44
 	 * @param AllRequest all
 	 */
-	private void deleteAll(AllRequest all) throws Exception{
+	private void deleteAll(AllRequest all, String ip, Long port) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
-										      .append(capacityProps.getPort())
+										      .append(port)
 										      .append(UrlConstant.URL_COMBINE)
 										      .toString();
 		
@@ -216,7 +216,7 @@ public class CapacityService {
 										      .append(UrlConstant.URL_INPUT)
 										      .toString();
 		
-		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input));
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input, SerializerFeature.DisableCircularReferenceDetect));
 		
 		JSONObject resp = HttpUtil.httpPost(url, request);
 		
@@ -352,7 +352,7 @@ public class CapacityService {
 										      .append(UrlConstant.URL_INPUT_PROGRAM)
 										      .toString();
 
-		JSONObject request = JSONObject.parseObject(JSON.toJSONString(program));
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(program, SerializerFeature.DisableCircularReferenceDetect));
 		
 		JSONObject res = HttpUtil.httpPost(url, request);
 		
@@ -480,11 +480,11 @@ public class CapacityService {
 	 * @param String inputId
 	 * @return AnalysisResponse 
 	 */
-	public AnalysisResponse getAnalysis(String inputId) throws Exception{
+	public AnalysisResponse getAnalysis(String inputId, String ip) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		
-		return getAnalysis(inputId, msg_id);
+		return getAnalysis(inputId, msg_id, ip);
 		
 	}
 	
@@ -496,10 +496,10 @@ public class CapacityService {
 	 * @param String msg_id 消息id
 	 * @return AnalysisResponse 刷源返回
 	 */
-	private AnalysisResponse getAnalysis(String inputId, String msg_id) throws Exception{
+	private AnalysisResponse getAnalysis(String inputId, String msg_id, String ip) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_INPUT)
@@ -594,7 +594,7 @@ public class CapacityService {
 										      .append(UrlConstant.URL_TASK)
 										      .toString();
 
-		JSONObject request = JSONObject.parseObject(JSON.toJSONString(task));
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(task, SerializerFeature.DisableCircularReferenceDetect));
 		
 		JSONObject res = HttpUtil.httpPost(url, request);
 		
@@ -678,7 +678,7 @@ public class CapacityService {
 										      .append(UrlConstant.URL_TASK_ENCODE)
 										      .toString();
 
-		JSONObject request = JSONObject.parseObject(JSON.toJSONString(encode));
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(encode, SerializerFeature.DisableCircularReferenceDetect));
 		
 		JSONObject res = HttpUtil.httpPost(url, request);
 		
@@ -1012,7 +1012,7 @@ public class CapacityService {
 										      .append(UrlConstant.URL_OUTPUT)
 										      .toString();
 		
-		JSONObject request = JSONObject.parseObject(JSON.toJSONString(output));
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(output, SerializerFeature.DisableCircularReferenceDetect));
 
 		JSONObject res = HttpUtil.httpPost(url, request);
 		
@@ -1230,6 +1230,75 @@ public class CapacityService {
 		
 		HttpUtil.httpDelete(url, json);
 		
+	}
+	
+	/**
+	 * 获取授权<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月5日 下午2:39:50
+	 */
+	public JSONObject getAuthorizationAddMsgId(String ip, Long port) throws Exception{
+		
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+		
+		return getAuthorization(msg_id, ip, port);
+	}
+	
+	/**
+	 * 获取授权<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月5日 下午2:27:54
+	 */
+	private JSONObject getAuthorization(String msg_id, String ip, Long port) throws Exception{
+		
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+											  .append(ip)
+											  .append(":")
+											  .append(port)
+											  .append(UrlConstant.URL_AUTHORIZATION)
+											  .append("?msg_id=")
+											  .append(msg_id)
+											  .toString();
+		
+		return HttpUtil.httpGet(url);
+	}
+	
+	/**
+	 * 更改节目备份源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月25日 上午11:48:39
+	 * @param String inputId 输入id(back_up)
+	 * @param String index 索引
+	 * @param String ip 能力ip
+	 * @param Long port 能力端口
+	 * @return ResultCodeResponse
+	 */
+	public ResultCodeResponse changeBackUp(String inputId, String index, String ip, Long port) throws Exception{
+		
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+		
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+											  .append(ip)
+											  .append(":")
+											  .append(port)
+											  .append(UrlConstant.URL_INPUT)
+											  .append("/")
+											  .append(inputId)
+											  .append(UrlConstant.URL_TASK_SOURCE_INDEX)
+											  .toString();
+		
+		JSONObject post = new JSONObject();
+		post.put("msg_id", msg_id);
+		post.put("select_index", index);
+		
+		JSONObject res = HttpUtil.httpPost(url, post);
+		
+		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
+		
+		return response;
 	}
 	
 }

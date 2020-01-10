@@ -6,6 +6,7 @@ import java.net.URLDecoder;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
@@ -48,10 +49,14 @@ public class HttpUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
         JSONObject jsonResult = null;
         HttpPost method = new HttpPost(url);
+        method.setConfig(RequestConfig.custom().setConnectTimeout(5000)
+        		                               .setConnectionRequestTimeout(1000)
+        		                               .setSocketTimeout(5000)
+        		                               .build());
         try {
             if (null != jsonParam) {
                 //解决中文乱码问题
-                StringEntity entity = new StringEntity(JSONObject.toJSONString(jsonParam), "utf-8");
+                StringEntity entity = new StringEntity(JSONObject.toJSONString(jsonParam, SerializerFeature.DisableCircularReferenceDetect), "utf-8");
                 entity.setContentEncoding("UTF-8");
                 entity.setContentType("application/json");
                 method.setEntity(entity);
@@ -91,10 +96,14 @@ public class HttpUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
         JSONObject jsonResult = null;
         HttpPut method = new HttpPut(url);
+        method.setConfig(RequestConfig.custom().setConnectTimeout(5000)
+              .setConnectionRequestTimeout(1000)
+              .setSocketTimeout(5000)
+              .build());
         try {
             if (null != jsonParam) {
                 //解决中文乱码问题
-                StringEntity entity = new StringEntity(JSONObject.toJSONString(jsonParam), "utf-8");
+                StringEntity entity = new StringEntity(JSONObject.toJSONString(jsonParam, SerializerFeature.DisableCircularReferenceDetect), "utf-8");
                 entity.setContentEncoding("UTF-8");
                 entity.setContentType("application/json");
                 method.setEntity(entity);
@@ -131,10 +140,14 @@ public class HttpUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
         JSONObject jsonResult = null;
         HttpPatch method = new HttpPatch(url);
+        method.setConfig(RequestConfig.custom().setConnectTimeout(5000)
+              .setConnectionRequestTimeout(1000)
+              .setSocketTimeout(5000)
+              .build());
         try {
             if (null != jsonParam) {
                 //解决中文乱码问题
-                StringEntity entity = new StringEntity(JSONObject.toJSONString(jsonParam), "utf-8");
+                StringEntity entity = new StringEntity(JSONObject.toJSONString(jsonParam, SerializerFeature.DisableCircularReferenceDetect), "utf-8");
                 entity.setContentEncoding("UTF-8");
                 entity.setContentType("application/json");
                 method.setEntity(entity);
@@ -171,10 +184,14 @@ public class HttpUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
         JSONObject jsonResult = null;
         HttpDeleteWithBody method = new HttpDeleteWithBody(url);
+        method.setConfig(RequestConfig.custom().setConnectTimeout(5000)
+              .setConnectionRequestTimeout(1000)
+              .setSocketTimeout(5000)
+              .build());
         try {
             if (null != jsonParam) {
                 //解决中文乱码问题
-                StringEntity entity = new StringEntity(JSONObject.toJSONString(jsonParam), "utf-8");
+                StringEntity entity = new StringEntity(JSONObject.toJSONString(jsonParam, SerializerFeature.DisableCircularReferenceDetect), "utf-8");
                 entity.setContentEncoding("UTF-8");
                 entity.setContentType("application/json");
                 method.setEntity(entity);

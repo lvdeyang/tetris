@@ -34,6 +34,7 @@ import com.sumavision.tetris.capacity.bo.response.AllResponse;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
+import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -56,6 +57,9 @@ public class RecordService {
 	
 	@Autowired
 	private ResponseService responseService;
+	
+	@Autowired
+	private CapacityProps capacityProps;
 	
 	/**
 	 * 创建收录<br/>
@@ -147,7 +151,7 @@ public class RecordService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -160,8 +164,9 @@ public class RecordService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest);
-
+				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				throw e;
+				
 			} catch (Exception e) {
 				
 				if(!(e instanceof ConstraintViolationException)){
@@ -208,7 +213,7 @@ public class RecordService {
 				
 				taskOutputDao.save(output);
 				
-				if(input.getCount().equals(0)){
+				if(input.getCount().equals(1)){
 					
 					allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
 
@@ -217,7 +222,7 @@ public class RecordService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -230,8 +235,9 @@ public class RecordService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest);
-
+				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				throw e;
+				
 			} catch (Exception e) {
 				
 				if(!(e instanceof ObjectOptimisticLockingFailureException)){
@@ -253,7 +259,7 @@ public class RecordService {
 	 */
 	public TaskOutputPO delete(String taskUuid) throws Exception {
 		
-		TaskOutputPO output = taskOutputDao.findByTaskUuid(taskUuid);
+		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.RECORD);
 		
 		if(output != null){
 			
@@ -285,7 +291,7 @@ public class RecordService {
 						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 					}
 				
-					capacityService.deleteAllAddMsgId(allRequest);
+					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 					
 					output.setOutput(null);
 					output.setTask(null);
@@ -505,6 +511,7 @@ public class RecordService {
 				hls_record.getMedia_array().add(media);
 			}
 		}
+		output.setHls_record(hls_record);
 		
 		return output;
 	}
