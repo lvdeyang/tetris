@@ -58,4 +58,16 @@ public class CapacityService {
 		JsonBodyResponseParser.parseObject(capacityFeign.deleteTranscode(id), null);
 	}
 	
+	/**
+	 * 刷源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 下午5:11:50
+	 * @param String analysisInput
+	 * @return String
+	 */
+	public String analysisInput(String analysisInput) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.analysisInput(analysisInput), String.class);
+	}
+	
 }
