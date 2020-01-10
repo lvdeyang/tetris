@@ -20,6 +20,7 @@ import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.common.service.LockService;
 import com.sumavision.tetris.business.yjgb.vo.CodecParamVO;
+import com.sumavision.tetris.business.yjgb.vo.InputParamVO;
 import com.sumavision.tetris.business.yjgb.vo.MimsVO;
 import com.sumavision.tetris.business.yjgb.vo.OutParamVO;
 import com.sumavision.tetris.business.yjgb.vo.RecordVO;
@@ -30,6 +31,8 @@ import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramAudioBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramVideoBO;
+import com.sumavision.tetris.capacity.bo.input.RtpEsBO;
+import com.sumavision.tetris.capacity.bo.input.UdpPcmBO;
 import com.sumavision.tetris.capacity.bo.output.BaseMediaBO;
 import com.sumavision.tetris.capacity.bo.output.CommonTsOutputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
@@ -150,7 +153,7 @@ public class TransformService {
 	
 	/**
 	 * 添加任务流程 -- 一个输入，多个任务，多个输出，
-	 *             输入计数+1（并发），
+	 *   (乐观锁)    输入计数+1（并发），
 	 *             输出直接存储（不管并发）
 	 *             说明：联合unique校验insert（ip和port关联）； 数据行锁（乐观锁version）校验update<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -218,7 +221,7 @@ public class TransformService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -231,8 +234,9 @@ public class TransformService {
 			
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest);
-
+				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				throw e;
+				
 			} catch (Exception e) {
 				
 				if(!(e instanceof ConstraintViolationException)){
@@ -294,7 +298,7 @@ public class TransformService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -307,8 +311,9 @@ public class TransformService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest);
-
+				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				throw e;
+				
 			} catch (Exception e) {
 				
 				if(!(e instanceof ObjectOptimisticLockingFailureException)){
@@ -370,7 +375,6 @@ public class TransformService {
 		
 		return mimsVO;
 	}
-	
 
 	/**
 	 * 删除任务流程 -- 输入计数减 一（并发）
@@ -384,7 +388,7 @@ public class TransformService {
 	 */
 	public TaskOutputPO delete(String taskUuid) throws Exception {
 		
-		TaskOutputPO output = taskOutputDao.findByTaskUuid(taskUuid);
+		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.YJGB);
 		
 		if(output != null){
 			
@@ -416,7 +420,7 @@ public class TransformService {
 						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputs).getList());
 					}
 				
-					capacityService.deleteAllAddMsgId(allRequest);
+					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 					
 					output.setOutput(null);
 					output.setTask(null);
@@ -447,7 +451,7 @@ public class TransformService {
 	 */
 	public void addStreamOutput(String id, List<OutParamVO> outputParams) throws Exception{
 		
-		TaskOutputPO output = taskOutputDao.findByTaskUuid(id);
+		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(id, BusinessType.YJGB);
 		
 		if(output == null){
 			throw new BaseException(StatusCode.ERROR, "任务不存在在！");
@@ -487,7 +491,7 @@ public class TransformService {
 	 */
 	public void deleteStreamOutput(String id, List<OutParamVO> outputParams) throws Exception{
 		
-		TaskOutputPO taskPO = taskOutputDao.findByTaskUuid(id);
+		TaskOutputPO taskPO = taskOutputDao.findByTaskUuidAndType(id, BusinessType.YJGB);
 		
 		if(taskPO == null){
 			throw new BaseException(StatusCode.ERROR, "任务不存在在！");
@@ -536,7 +540,7 @@ public class TransformService {
 	 */
 	public void recordCallback(String id, String mimsId) throws Exception{
 		
-		TaskOutputPO task = taskOutputDao.findByTaskUuid(id);
+		TaskOutputPO task = taskOutputDao.findByTaskUuidAndType(id, BusinessType.YJGB);
 		
 		if(task != null){
 			if(task.isRecord() && task.getRecordCallbackUrl() != null){
@@ -548,7 +552,10 @@ public class TransformService {
 													  .append(mimsId)
 													  .append("&mediaType=")
 													  .append(task.getMediaType())
-													  .toString();		
+													  .toString();	
+				
+				System.out.println("回调打印:" + url);
+				
 				HttpUtil.httpGet(url);
 			}
 			
@@ -573,20 +580,73 @@ public class TransformService {
 												  .append(id)
 												  .toString();
 		
+		Integer bePcm = streamTranscodingVO.getBePCM();
 		String sourceUrl = streamTranscodingVO.getAssetUrl();
-		if(!sourceUrl.startsWith("udp")){
-			throw new BaseException(StatusCode.FORBIDDEN, "源地址不是udp！");
+		
+		InputBO inputBO = new InputBO();
+		if(bePcm.equals(0)){
+			
+			//udp_ts			
+			String sourceIp = sourceUrl.split("@")[1].split(":")[0];
+			
+			int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
+			
+			CommonTsBO udp_ts = new CommonTsBO().setSource_ip(sourceIp)
+												.setSource_port(sourcePort);
+			
+			inputBO.setId(inputId)
+				   .setUdp_ts(udp_ts);
+		}else if(bePcm.equals(1)){
+			
+			//udp_pcm
+			String sourceIp = sourceUrl.split("@")[1].split(":")[0];
+			
+			int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
+			
+			InputParamVO inputParam = streamTranscodingVO.getInputParam();
+			
+			String sampleFmt = "u8";
+			if(inputParam.getSourPrecision().equals(8l)){
+				sampleFmt = "u8";
+			}else if(inputParam.getSourPrecision().equals(16l)){
+				sampleFmt = "s16";
+			}
+			
+			String channelLayout = "mono";
+			if(inputParam.getSourChannel().equals(1l)){
+				channelLayout = "mono";
+			}else if(inputParam.getSourChannel().equals(2l)){
+				channelLayout = "stereo";
+			}
+			
+			UdpPcmBO udp_pcm = new UdpPcmBO().setSource_ip(sourceIp)
+											 .setSource_port(sourcePort)
+											 .setSample_rate(inputParam.getSourSample().intValue())
+											 .setSample_fmt(sampleFmt)
+											 .setChannel_layout(channelLayout);
+			
+			inputBO.setId(inputId)
+				   .setUdp_pcm(udp_pcm);
+			
+		}else if(bePcm.equals(2)){
+			
+			//TODO：暂时不管
+		}else if(bePcm.equals(3)){
+			
+			//rtp_es
+			String sourceIp = sourceUrl.split("@")[1].split(":")[0];
+			
+			int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
+			
+			String type = streamTranscodingVO.getMediaType();
+			
+			RtpEsBO rtp_es = new RtpEsBO().setLocal_port(sourcePort)
+					 					  .setType(type)
+					 					  .setCodec("auto");
+			
+			inputBO.setId(inputId)
+				   .setRtp_es(rtp_es);
 		}
-		
-		String sourceIp = sourceUrl.split("@")[1].split(":")[0];
-		
-		int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
-		
-		CommonTsBO udp_ts = new CommonTsBO().setSource_ip(sourceIp)
-											.setSource_port(sourcePort);
-		
-		InputBO inputBO = new InputBO().setId(inputId)
-									   .setUdp_ts(udp_ts);
 		
 		if(streamTranscodingVO.getProgNum() == null){
 			//单节目流--不刷源
@@ -744,8 +804,7 @@ public class TransformService {
 			int height = (codecParam.getVresolution() == null || codecParam.getVresolution().equals("")) ? 1080 : Integer.valueOf(codecParam.getVresolution().split("x")[1]).intValue();
 			
 			ScaleBO scale = new ScaleBO().setWidth(width)
-										 .setHeight(height)
-										 .setRatio(codecParam.getVratio() == null? null: codecParam.getVratio());
+										 .setHeight(height);
 			PreProcessingBO video_decode_processing = new PreProcessingBO().setScale(scale);
 			videoEncode.getProcess_array().add(video_decode_processing);
 			

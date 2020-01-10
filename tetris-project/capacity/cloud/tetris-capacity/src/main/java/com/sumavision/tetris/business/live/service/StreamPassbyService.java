@@ -35,6 +35,7 @@ import com.sumavision.tetris.capacity.bo.response.AllResponse;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
+import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -58,13 +59,13 @@ public class StreamPassbyService {
 	private ResponseService responseService;
 	
 	@Autowired
-	private LockService lockService;
-	
-	@Autowired
 	private TaskOutputDAO taskOutputDao;
 	
 	@Autowired
 	private TaskInputDAO taskInputDao;
+	
+	@Autowired
+	private CapacityProps capacityProps;
 	
 	/**
 	 * 透传<br/>
@@ -179,7 +180,7 @@ public class StreamPassbyService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -192,8 +193,9 @@ public class StreamPassbyService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest);
-
+				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				throw e;
+				
 			} catch (Exception e) {
 				
 				if(!(e instanceof ConstraintViolationException)){
@@ -240,7 +242,7 @@ public class StreamPassbyService {
 				
 				taskOutputDao.save(output);
 				
-				if(input.getCount().equals(0)){
+				if(input.getCount().equals(1)){
 					
 					allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
 
@@ -249,7 +251,7 @@ public class StreamPassbyService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest);
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -262,8 +264,9 @@ public class StreamPassbyService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest);
-
+				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				throw e;
+				
 			} catch (Exception e) {
 				
 				if(!(e instanceof ObjectOptimisticLockingFailureException)){
@@ -301,7 +304,7 @@ public class StreamPassbyService {
 	 */
 	public TaskOutputPO delete(String taskUuid) throws Exception {
 		
-		TaskOutputPO output = taskOutputDao.findByTaskUuid(taskUuid);
+		TaskOutputPO output = taskOutputDao.findByTaskUuidAndType(taskUuid, BusinessType.LIVE);
 		
 		if(output != null){
 			
@@ -333,7 +336,7 @@ public class StreamPassbyService {
 						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 					}
 				
-					capacityService.deleteAllAddMsgId(allRequest);
+					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
 					
 					output.setOutput(null);
 					output.setTask(null);
@@ -469,7 +472,7 @@ public class StreamPassbyService {
 		OutputIndexBO index = new OutputIndexBO().setIndex(0);
 		
 		OutputMediaGroupBO media = new OutputMediaGroupBO().setVideo(0)
-																.setAudio(new ArrayListWrapper<OutputIndexBO>().add(index).getList());
+														   .setAudio(new ArrayListWrapper<OutputIndexBO>().add(index).getList());
 		
 		OutputStorageBO storage = new OutputStorageBO().setUrl(storageUrl);
 		

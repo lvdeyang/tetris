@@ -52,4 +52,7 @@ public class UrlConstant {
 	/** 全部 */
 	public static final String URL_ENTIRETY = "/v0.0/entireties";
 	
+	/** 授权 */
+	public static final String URL_AUTHORIZATION = "/v0.0/authorization";
+	
 }

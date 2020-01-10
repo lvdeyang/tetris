@@ -6,6 +6,7 @@ package com.sumavision.tetris.capacity.bo.task;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2019年10月30日 上午8:33:19
  */
+@Deprecated
 public class SubtitleBO {
 
 	/** 滚动方向 left/right */

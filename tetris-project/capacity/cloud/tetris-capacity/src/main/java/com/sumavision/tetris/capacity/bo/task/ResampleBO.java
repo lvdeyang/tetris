@@ -9,12 +9,13 @@ package com.sumavision.tetris.capacity.bo.task;
 public class ResampleBO {
 
 	/** 采样率 16-96000 */
-	private Integer sample_rate;
+	private Integer sample_rate = 44100;
 	
-	private Integer channels;
+	/** 协议中该字段去了，这里留着看映射关系 */
+	private Integer channels = 1;
 	
 	/** 声道布局  mono/stereo */
-	private String channel_layout ;
+	private String channel_layout = "mono";
 	
 	/** 采样位数 u8/u8_planner/s16/s16_planner/s32/s32_planner
 	 *  /flt/flt_planner/dbl/dbl_palnner

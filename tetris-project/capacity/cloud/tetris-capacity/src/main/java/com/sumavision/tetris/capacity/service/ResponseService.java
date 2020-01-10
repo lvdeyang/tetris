@@ -31,7 +31,6 @@ import com.sumavision.tetris.capacity.exception.TaskResponseErrorException;
  * <b>日期：</b>2019年11月20日 上午9:41:26
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class ResponseService {
 	
 	@Autowired

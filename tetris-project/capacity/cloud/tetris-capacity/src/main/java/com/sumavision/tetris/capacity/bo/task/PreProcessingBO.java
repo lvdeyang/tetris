@@ -17,13 +17,26 @@ public class PreProcessingBO {
 	/** 裁剪 */
 	private CutBO cut;
 	
-	private OsdBO osd;
+	/** 文本osd */
+	private TextOsdBO text_osd;
+	
+	/** 静态图片osd */
+	private PictureOsdBO static_pic_osd;
+	
+	/** 动态图片osd */
+	private PictureOsdBO dynamic_pic_osd;
+	
+	/** 模糊 */
+	private FuzzyBO fuzzy;
 	
 	/** 图像增强 */
 	private EnhanceBO enhance;
 	
 	/** 重采样 */
 	private ResampleBO resample;
+	
+	/** 帧率变换 */
+	private FpsConvertBO fps_convert;
 
 	public DeinterlaceBO getDeinterlace() {
 		return deinterlace;
@@ -52,12 +65,30 @@ public class PreProcessingBO {
 		return this;
 	}
 
-	public OsdBO getOsd() {
-		return osd;
+	public TextOsdBO getText_osd() {
+		return text_osd;
 	}
 
-	public PreProcessingBO setOsd(OsdBO osd) {
-		this.osd = osd;
+	public PreProcessingBO setText_osd(TextOsdBO text_osd) {
+		this.text_osd = text_osd;
+		return this;
+	}
+
+	public PictureOsdBO getStatic_pic_osd() {
+		return static_pic_osd;
+	}
+
+	public PreProcessingBO setStatic_pic_osd(PictureOsdBO static_pic_osd) {
+		this.static_pic_osd = static_pic_osd;
+		return this;
+	}
+
+	public PictureOsdBO getDynamic_pic_osd() {
+		return dynamic_pic_osd;
+	}
+
+	public PreProcessingBO setDynamic_pic_osd(PictureOsdBO dynamic_pic_osd) {
+		this.dynamic_pic_osd = dynamic_pic_osd;
 		return this;
 	}
 
@@ -70,12 +101,30 @@ public class PreProcessingBO {
 		return this;
 	}
 
+	public FuzzyBO getFuzzy() {
+		return fuzzy;
+	}
+
+	public PreProcessingBO setFuzzy(FuzzyBO fuzzy) {
+		this.fuzzy = fuzzy;
+		return this;
+	}
+
 	public ResampleBO getResample() {
 		return resample;
 	}
 
 	public PreProcessingBO setResample(ResampleBO resample) {
 		this.resample = resample;
+		return this;
+	}
+
+	public FpsConvertBO getFps_convert() {
+		return fps_convert;
+	}
+
+	public PreProcessingBO setFps_convert(FpsConvertBO fps_convert) {
+		this.fps_convert = fps_convert;
 		return this;
 	}
 	

@@ -23,6 +23,13 @@ public class TaskOutputPO extends AbstractBasePO{
 	
 	private String output;
 	
+	private String capacityIp;
+	
+	private BusinessType type;
+	
+	/** **************
+	 *    yjgb使用          *
+	 ** ************ */
 	/** 是否录制 */
 	private boolean isRecord = false;
 	
@@ -35,8 +42,6 @@ public class TaskOutputPO extends AbstractBasePO{
 	/** 录制完成回调地址 */
 	private String recordCallbackUrl;
 	
-	private BusinessType type;
-
 	public String getTaskUuid() {
 		return taskUuid;
 	}
@@ -110,6 +115,14 @@ public class TaskOutputPO extends AbstractBasePO{
 
 	public void setType(BusinessType type) {
 		this.type = type;
+	}
+
+	public String getCapacityIp() {
+		return capacityIp;
+	}
+
+	public void setCapacityIp(String capacityIp) {
+		this.capacityIp = capacityIp;
 	}
 	
 }
