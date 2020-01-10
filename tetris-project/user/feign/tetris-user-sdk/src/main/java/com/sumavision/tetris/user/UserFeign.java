@@ -94,6 +94,23 @@ public interface UserFeign {
 			@RequestParam("tags") String tags);
 	
 	/**
+	 * 根据用户公司id和类型查询用户列表（带例外-类型）<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:17:43
+	 * @param Long companyId 公司id
+	 * @param String except 例外
+	 * @param String classify 类型
+	 * @return List<UserVO> 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/list/by/{companyId}/with/except/and/type/and/classify")
+	public JSONObject listByCompanyIdWithExceptAndClassify(
+			@PathVariable("companyId") Long companyId,
+			@RequestParam("terminalType") String terminalType,
+			@RequestParam("except") String except,
+			@RequestParam("classify") String classify);
+	
+	/**
 	 * 根据用户公司id和类型查询用户列表（带例外）<br/>
 	 * <b>作者:</b>ldy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -110,14 +127,39 @@ public interface UserFeign {
 			@RequestParam("classify") String classify);
 	
 	/**
-	 * 查询所有用户基本信息<br/>
+	 * 分页查询所有用户基本信息<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年12月24日 上午9:19:30
 	 * @return List<UserVO> 用户列表
 	 */
-	@RequestMapping(value = "/user/feign/query/all/user/baseInfo")
+	@RequestMapping(value = "/user/feign/query/all/user/baseInfo/by/page")
 	public JSONObject queryAllUserBaseInfo(
+			@RequestParam("currentPage") int currentPage,
+			@RequestParam("pageSize") int pageSize);
+	
+	/**
+	 * 查询所有用户基本信息<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月31日 下午1:59:55
+	 * @return List<UserVO> 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/query/all/user/baseInfo")
+	public JSONObject queryAllUserBaseInfo();
+	
+	/**
+	 * 根据用户名模糊查询分页<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午1:23:37
+	 * @param String userName 用户名
+	 * @return List<UserVO> 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/query/users/by/name/like/by/page")
+	public JSONObject queryUsersByNameLike(
+			@RequestParam("userName") String userName,
+			@RequestParam("except") String except,
 			@RequestParam("currentPage") int currentPage,
 			@RequestParam("pageSize") int pageSize);
 	
@@ -130,9 +172,49 @@ public interface UserFeign {
 	 * @return List<UserVO> 用户列表
 	 */
 	@RequestMapping(value = "/user/feign/query/users/by/name/like")
-	public JSONObject queryUsersByNameLike(
-			@RequestParam("userName") String userName,
-			@RequestParam("except") String except,
-			@RequestParam("currentPage") int currentPage,
-			@RequestParam("pageSize") int pageSize);
+	public JSONObject queryUsersByNameLike(@RequestParam("userName") String userName);
+	
+	/**
+	 * 根据用户名查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午1:23:37
+	 * @param String userName 用户名
+	 * @return List<UserVO> 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/query/user/by/name")
+	public JSONObject queryUserByName(@RequestParam("userName") String userName);
+	
+	/**
+	 * 根据用户id查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午1:23:37
+	 * @param Long id 用户名
+	 * @return UserVO 用户
+	 */
+	@RequestMapping(value = "/user/feign/query/user/by/id")
+	public JSONObject queryUserById(@RequestParam("id") Long id);
+	
+	/**
+	 * 根据用户号码查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 下午7:20:34
+	 * @param String userno 用户号码
+	 * @return UserVO 用户
+	 */
+	@RequestMapping(value = "/user/feign/query/user/by/no")
+	public JSONObject queryUserByNo(@RequestParam("userno") String userno);
+	
+	/**
+	 * 根据角色查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月3日 上午11:12:26
+	 * @param Long roleId 角色id
+	 * @return List<UserVO> 用户
+	 */
+	@RequestMapping(value = "/user/feign/query/user/by/role")
+	public JSONObject queryUserByRole(@RequestParam("roleId") Long roleId);
 }

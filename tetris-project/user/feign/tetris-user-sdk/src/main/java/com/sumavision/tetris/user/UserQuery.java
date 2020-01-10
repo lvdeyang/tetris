@@ -131,6 +131,20 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 根据公司id和类型查询用户列表（带例外-类型）<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:28:37
+	 * @param Long companyId 公司id
+	 * @param String except 例外
+	 * @param String classify 类型
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> listByCompanyIdWithExceptAndClassify(Long companyId, String terminalType, Collection<Long> except, UserClassify classify) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.listByCompanyIdWithExceptAndClassify(companyId, terminalType, except != null && !except.isEmpty() ? JSON.toJSONString(except) : null, classify.getName()), UserVO.class);
+	}
+	
+	/**
 	 * 修改一个用户<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -155,7 +169,18 @@ public class UserQuery {
 	}
 	
 	/**
-	 * 根据用户名模糊查询<br/>
+	 * 查询所有用户信息<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月31日 下午2:01:49
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> queryAllUserBaseInfo() throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.queryAllUserBaseInfo(), UserVO.class);
+	}
+	
+	/**
+	 * 根据用户名模糊查询--分页<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年12月24日 下午1:25:58
@@ -164,6 +189,66 @@ public class UserQuery {
 	 */
 	public Map<String, Object> queryUsersByNameLike(String userName, String except, int currentPage, int pageSize) throws Exception{
 		return JsonBodyResponseParser.parseObject(userFeign.queryUsersByNameLike(userName, except, currentPage, pageSize), Map.class);
+	}
+	
+	/**
+	 * 根据用户名模糊查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午1:25:58
+	 * @param String userName 用户名
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> queryUsersByNameLike(String userName) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.queryUsersByNameLike(userName), UserVO.class);
+	}
+	
+	/**
+	 * 根据用户名查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午1:25:58
+	 * @param String userName 用户名
+	 * @return UserVO 用户
+	 */
+	public UserVO queryUserByName(String userName) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.queryUserByName(userName), UserVO.class);
+	}
+	
+	/**
+	 * 根据用户id查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月24日 下午1:25:58
+	 * @param Long id 用户id
+	 * @return UserVO 用户
+	 */
+	public UserVO queryUserById(Long id) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.queryUserById(id), UserVO.class);
+	}
+	
+	/**
+	 * 根据用户号码查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 下午7:21:55
+	 * @param String userno 用户号码
+	 * @return UserVO 用户
+	 */
+	public UserVO queryUserByNo(String userno) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.queryUserByNo(userno), UserVO.class);
+	}
+	
+	/**
+	 * 根据角色查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月3日 上午11:15:03
+	 * @param Long roleId jueseid
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> queryUsersByRole(Long roleId) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.queryUserByRole(roleId), UserVO.class);
 	}
 	
 	/***************************************************

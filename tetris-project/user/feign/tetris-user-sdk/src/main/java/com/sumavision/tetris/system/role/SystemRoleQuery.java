@@ -1,5 +1,6 @@
 package com.sumavision.tetris.system.role;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -97,6 +98,29 @@ public class SystemRoleQuery {
 	 */
 	public SystemRoleVO queryInternalRole() throws Exception{
 		return JsonBodyResponseParser.parseObject(systemRoleFeign.queryInternalRole(), SystemRoleVO.class);
+	}
+	
+	/**
+	 * 查询所有角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 上午11:21:24
+	 * @return List<SystemRoleVO>
+	 */
+	public List<SystemRoleVO> queryAllRoles() throws Exception{
+		return JsonBodyResponseParser.parseArray(systemRoleFeign.queryAllRoles(), SystemRoleVO.class);
+	}
+	
+	/**
+	 * 根据用户查询角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月3日 下午4:53:58
+	 * @param Long userId 用户id
+	 * @return List<SystemRoleVO>
+	 */
+	public List<SystemRoleVO> queryRolesByUser(Long userId) throws Exception{
+		return JsonBodyResponseParser.parseArray(systemRoleFeign.queryRolesByUserId(userId), SystemRoleVO.class);
 	}
 	
 }
