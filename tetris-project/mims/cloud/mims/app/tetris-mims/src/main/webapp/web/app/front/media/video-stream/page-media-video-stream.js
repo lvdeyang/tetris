@@ -464,6 +464,13 @@ define([
                 //添加视频流媒资任务
                 addMediaVideoStreamTask: function () {
                     var self = this;
+                    if (!self.dialog.addVideoStream.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.addVideoStream.loading = true;
                     ajax.post('/media/video/stream/task/add', {
                         previewUrl: JSON.stringify(self.dialog.addVideoStream.previewUrl),
@@ -482,6 +489,13 @@ define([
                 //编辑视频流媒资任务
                 editMediaVideoStreamTask: function () {
                     var self = this;
+                    if (!self.dialog.editVideoStream.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.editVideoStream.loading = true;
                     ajax.post('/media/video/stream/task/edit/' + self.dialog.editVideoStream.id, {
                         previewUrl: JSON.stringify(self.dialog.editVideoStream.previewUrl),

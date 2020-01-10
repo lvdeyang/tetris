@@ -1,0 +1,40 @@
+<el-dialog
+        class="cs-media-picker-dialog"
+        title="资源选择"
+        :visible.sync="visible"
+        width="550px"
+        append-to-body
+        :before-close="handleMediaPickerClose">
+    <div class="content">
+        <div class="content-wrapper">
+            <el-button size="medium" @click="handleInverse" style="margin-top: 20px;">反 选</el-button>
+            <div class="tree-wrapper">
+                <el-tree
+                        v-loading="tree.loading"
+                        ref="mediaPickerTree"
+                        :props="tree.props"
+                        :data="tree.data"
+                        node-key="uuid"
+                        :default-checked-keys="checkedUuid"
+                        :check-strictly=false
+                        show-checkbox
+                        @check="handleMediaPickerCheckChange"
+                        :expand-on-click-node="false"
+                        default-expand-all
+                        highlight-current
+                        style="padding: 20px;max-height: 400px;overflow-y:auto">
+                    <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
+                          slot-scope="{node, data}">
+                            <span style="font-size:14px;">
+                                 <span>{{data.name}}</span>
+                            </span>
+                    </span>
+                </el-tree>
+            </div>
+        </div>
+    </div>
+    <span slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="handleMediaPickerClose">取 消</el-button>
+        <el-button size="medium" type="primary" @click="handleMediaPickerCommit" :loading="loading">确 定</el-button>
+    </span>
+</el-dialog>

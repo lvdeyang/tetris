@@ -28,6 +28,8 @@ public class MediaAudioVO {
 	
 	private String uploadTmpPath;
 	
+	private Long folderId;
+	
 	private List<String> tags;
 	
 	private List<String> keyWords;
@@ -152,6 +154,15 @@ public class MediaAudioVO {
 
 	public MediaAudioVO setUploadTmpPath(String uploadTmpPath) {
 		this.uploadTmpPath = uploadTmpPath;
+		return this;
+	}
+
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public MediaAudioVO setFolderId(Long folderId) {
+		this.folderId = folderId;
 		return this;
 	}
 

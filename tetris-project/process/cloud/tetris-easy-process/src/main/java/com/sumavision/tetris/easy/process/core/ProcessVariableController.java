@@ -161,6 +161,8 @@ public class ProcessVariableController {
 		
 		UserVO user = userTool.current();
 		
+		if("".equals(expressionValue)) expressionValue = null;
+		
 		ProcessPO process = processDao.findOne(processId);
 		
 		if(process == null){

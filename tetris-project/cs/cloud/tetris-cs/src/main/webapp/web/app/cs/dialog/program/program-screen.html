@@ -97,13 +97,12 @@
                     ref="programTable"
                     tooltip-effect="dark"
                     :data="options.currentScreen.data"
-                    :check-strictly = "checkStrictly"
                     :default-sort="{prop:'index',order:'ascending'}"
                     style="width: 490px;height: 450px;overflow: auto;display: inline-block;">
                 <el-table-column width="30"></el-table-column>
                 <el-table-column label="媒资名称" width="120" prop="name"></el-table-column>
                 <el-table-column label="排序" width="60" prop="index"></el-table-column>
-                <template v-if="channelData.autoBroad">
+                    <template v-if="channelData.autoBroad">
                     <el-table-column :key="Math.random()" label="综合分值" width="90" prop="hotWeight"></el-table-column>
                     <el-table-column :key="Math.random()" label="下载量" width="70" prop="downloadCount"></el-table-column>
                 </template>

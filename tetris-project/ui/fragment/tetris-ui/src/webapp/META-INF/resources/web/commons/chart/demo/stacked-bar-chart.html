@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<link rel="stylesheet" type="text/css" href="../chart.css"/>
+<style type="text/css">
+    html, body{width:100%; height:100%; padding:0; margin:0; overflow:hidden; background-color:#eee;}
+    body *{box-sizing:border-box;}
+    .cell{width:50%; height:50%; float:left;}
+</style>
+<body>
+    <div class="cell">
+        <div id="container" style="width:100%; height:100%; position:relative; background-color:#fff;">
+
+        </div>
+    </div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+    <div class="cell"></div>
+</body>
+<script type="text/javascript" src="lib/d3.v5.js"></script>
+<script type="text/javascript" src="lib/jquery-2.2.3.js"></script>
+<script type="text/javascript" src="../StackedBarChart.js"></script>
+<script type="text/javascript" src="lib/date.ext.js"></script>
+<script type="text/javascript">
+    $(function(){
+        var domain = ['硬盘1', '硬盘2', '硬盘3'];
+        var bar = new StackedBarChart({
+            id:'a',
+            $el:$('#container')[0],
+            title:'堆叠条形图',
+            margin:40,
+            x:{
+                domain:domain
+            },
+            y:{
+                type:'basic',
+                ticks:5,
+                format:function(d){
+                    return d/1000+'G';
+                }
+            },
+            data:{
+                x:domain,
+                y:[{
+                    color:'red',
+                    name:'占用',
+                    values:[1000, 500, 1000]
+                },{
+                    color:'grey',
+                    name:'空闲',
+                    values:[5000, 1000, 300]
+                }]
+            }
+        });
+
+        $(window).on('resize.chart', function(){
+            bar.resize().drawRect();
+        });
+    });
+
+
+</script>
+</html>

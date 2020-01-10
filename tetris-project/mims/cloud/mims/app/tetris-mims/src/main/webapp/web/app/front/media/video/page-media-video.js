@@ -503,6 +503,13 @@ define([
                 //添加视频媒资任务
                 addMediaVideoTask:function(){
                     var self = this;
+                    if (!self.dialog.addVideo.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     var task = {
                         name:self.dialog.addVideo.task.name,
                         size:self.dialog.addVideo.task.size,
@@ -540,6 +547,13 @@ define([
                 //编辑视频媒资任务
                 editMediaVideoTask:function(){
                     var self = this;
+                    if (!self.dialog.editVideo.name) {
+                        self.$message({
+                            message: '您还没有为资源命名',
+                            type: 'warning'
+                        });
+                        return;
+                    }
                     self.dialog.editVideo.loading = true;
                     ajax.post('/media/video/task/edit/' + self.dialog.editVideo.id, {
                         name:self.dialog.editVideo.name,

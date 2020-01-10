@@ -157,7 +157,7 @@ public class ApiServerChannelController {
 		ChannelPO channelPO = channelDao.findOne(id);
 		if (channelPO == null) return null;
 		
-		channelService.startBroadcast(id);
+		channelService.startBroadcast(id, null);
 		
 		return "";
 	}

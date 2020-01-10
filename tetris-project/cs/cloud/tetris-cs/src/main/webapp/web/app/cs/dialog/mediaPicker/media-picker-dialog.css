@@ -1,0 +1,4 @@
+.cs-media-picker-dialog .content{height:450px; position:relative;}
+.cs-media-picker-dialog .content-wrapper{width:500px; height:400px; position:absolute; top:-30px; left:0;}
+.cs-media-picker-dialog .tree-wrapper{overflow: auto;}
+.cs-media-picker-dialog .footer{height:32px;}
