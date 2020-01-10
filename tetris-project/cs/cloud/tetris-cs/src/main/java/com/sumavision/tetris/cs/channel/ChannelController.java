@@ -49,7 +49,7 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/list")
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
-		return channelQuery.findAll(currentPage, pageSize, ChannelType.LOCAL);
+		return channelQuery.findAll(currentPage, pageSize, ChannelType.REMOTE);
 	}
 
 	/**

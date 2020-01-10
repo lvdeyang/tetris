@@ -2,6 +2,7 @@ package com.sumavision.tetris.streamTranscoding.api.server;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -82,6 +83,18 @@ public class ApiServerStreamTranscodingController {
 		variables.put("_pa51_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
 		variables.put("_pa51_file_recordInfo", JSON.toJSONString(processVO.getRecordVO()));
 		
+		//判断是否文件转码
+		Map<String, String> map = ApiServerStreamTranscodingService.ifMediaEdit(media);
+		if (map != null) {
+			variables.put("ifMediaEdit", true);
+			variables.put("_pa60_transcodeJob", map.get("transcodeJob"));
+			variables.put("_pa60_param", map.get("param"));
+			variables.put("_pa60_name", map.get("name"));
+			variables.put("_pa60_folderId", map.get("folderId"));
+		} else {
+			variables.put("ifMediaEdit", false);
+		}
+		
 		String processInstanceId = processService.startByKey("_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
 		
 		return new HashMapWrapper<String, Object>().put("id", processInstanceId)
@@ -109,6 +122,7 @@ public class ApiServerStreamTranscodingController {
 		variables.put("_pa51_file_fileToStreamInfo", JSON.toJSONString(processVO.getFileToStreamVO()));
 		variables.put("_pa51_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
 		variables.put("_pa51_file_recordInfo", JSON.toJSONString(processVO.getRecordVO()));
+		variables.put("ifMediaEdit", false);
 		
 		String processInstanceId = processService.startByKey("_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
 		

@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.feign;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
@@ -24,6 +26,7 @@ import com.sumavision.tetris.mims.app.media.txt.MediaTxtVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 @Controller
@@ -47,6 +50,9 @@ public class ApiFeignMediaController {
 	
 	@Autowired
 	private MediaAudioStreamQuery mediaAudioStreamQuery;
+	
+	@Autowired
+	private Path path;
 	
 	/**
 	 * 根据条件查询媒资<br/>
@@ -111,5 +117,37 @@ public class ApiFeignMediaController {
 				.addAll(videoStreamVOs)
 				.addAll(audioStreamVOs)
 				.getList();
+	}
+	
+	/**
+	 * 从http目录获取目录下资源http地址(云转码使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月10日 上午9:04:08
+	 * @param String url 目录地址
+	 * @return String 文件http地址
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/by/url")
+	public Object getFileFromDir(String url, HttpServletRequest request) throws Exception{
+		String fileUrl = null;
+		if (url != null && !url.isEmpty()){
+			File file = new File(url);
+			String folderPath = new StringBufferWrapper().append(path.webappPath()).append("upload").append(file.getPath().split("upload")[1]).toString();
+			File localFile = new File(folderPath);
+			File[] fileList = localFile.listFiles();
+			for (File childFile : fileList) {
+				String fileNameSuffix = childFile.getName().split("\\.")[1];
+				if (fileNameSuffix.equals("xml")) {
+					continue;
+				}else {
+					String fileName = childFile.getName();
+					fileUrl = new StringBufferWrapper().append(url).append("/").append(fileName).toString();
+					break;
+				}
+			}
+		}
+		return fileUrl;
 	}
 }

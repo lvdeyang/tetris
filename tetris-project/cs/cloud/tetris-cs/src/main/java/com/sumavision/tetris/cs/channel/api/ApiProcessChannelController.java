@@ -25,6 +25,7 @@ import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemotePO;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
+import com.sumavision.tetris.mims.app.media.MediaQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -41,6 +42,9 @@ public class ApiProcessChannelController {
 	
 	@Autowired
 	private BroadAbilityRemoteDAO broadAbilityRemoteDAO;
+	
+	@Autowired
+	private MediaQuery mediaQuery;
 	
 	/**
 	 * 流程节点(文件转流)<br/>
@@ -86,7 +90,7 @@ public class ApiProcessChannelController {
 					List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
 					for (int i = 0; i < vo.getPlayCount(); i++) {
 						ScreenVO screen = new ScreenVO();
-						screen.setPreviewUrl((file_assetPath == null || file_assetPath.isEmpty()) ? vo.getFileUrl() : file_assetPath);
+						screen.setPreviewUrl((file_assetPath == null || file_assetPath.isEmpty()) ? vo.getFileUrl() : mediaQuery.queryByUrl(file_assetPath));
 						screen.setDuration(vo.getDuration());
 						screenVOs.add(screen);
 					}

@@ -29,4 +29,16 @@ public interface MediaFeign {
 			@RequestParam("startTime") String startTime,
 			@RequestParam("endTime") String endTime,
 			@RequestParam("tagId") Long tagId) throws Exception;
+	
+	/**
+	 * 从http目录获取目录下资源http地址(云转码使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月10日 上午9:04:08
+	 * @param String url 目录地址
+	 * @return String 文件http地址
+	 */
+	@RequestMapping(value = "/media/feign/query/by/url")
+	public JSONObject queryByUrl(
+			@RequestParam("url") String url) throws Exception;
 }
