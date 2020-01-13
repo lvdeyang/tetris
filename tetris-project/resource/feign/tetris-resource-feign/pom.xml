@@ -32,6 +32,13 @@
 		   <artifactId>tetris-spring-feign</artifactId>
 		   <version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<!-- user-feign -->
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-user-feign</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 	</dependencies>
   
