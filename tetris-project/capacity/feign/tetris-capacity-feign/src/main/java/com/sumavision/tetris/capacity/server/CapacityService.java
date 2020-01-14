@@ -70,4 +70,26 @@ public class CapacityService {
 		return JsonBodyResponseParser.parseObject(capacityFeign.analysisInput(analysisInput), String.class);
 	}
 	
+	/**
+	 * 设置告警地址<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月13日 下午3:03:15
+	 * @param String capacityIp 能力ip
+	 */
+	public void setAlarmUrl(String capacityIp) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.setAlarmUrl(capacityIp), null);
+	}
+	
+	/**
+	 * 设置心跳地址<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月14日 上午11:10:50
+	 * @param String capacityIp 能力ip
+	 */
+	public void setHeartbeatUrl(String capacityIp, String heartbeatUrl) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.setHeartbeatUrl(capacityIp, heartbeatUrl), null);
+	}
+	
 }

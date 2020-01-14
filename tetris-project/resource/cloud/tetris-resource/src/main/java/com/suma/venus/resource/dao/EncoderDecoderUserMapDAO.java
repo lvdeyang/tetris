@@ -9,4 +9,6 @@ public interface EncoderDecoderUserMapDAO extends CommonDao<EncoderDecoderUserMa
 
 	public EncoderDecoderUserMap findByUserId(Long userId);
 	
+	public EncoderDecoderUserMap findByUserName(String userName);
+	
 }
