@@ -11,7 +11,11 @@ import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -32,6 +36,12 @@ public class UserQueryService {
 	
 	@Autowired
 	private PrivilegeDAO privilegeDao;
+	
+	@Autowired
+	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
+	
+	@Autowired
+	private BundleDao bundleDao;
 	
 	/**
 	 * 当前用户<br/>
@@ -228,6 +238,42 @@ public class UserQueryService {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * 根据用户名查询编码器<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月14日 上午11:41:26
+	 * @param String userName 用户名
+	 * @return BundlePO
+	 */
+	public BundlePO queryEncoderByUserName(String userName) throws Exception{
+		
+		EncoderDecoderUserMap map = encoderDecoderUserMapDao.findByUserName(userName);
+		if(map != null && map.getEncodeBundleId() != null){
+			return bundleDao.findByBundleId(map.getEncodeBundleId());
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * 根据用户名查询解码器<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月14日 上午11:41:26
+	 * @param String userName 用户名
+	 * @return BundlePO
+	 */
+	public BundlePO queryDecoderByUserName(String userName) throws Exception{
+		
+		EncoderDecoderUserMap map = encoderDecoderUserMapDao.findByUserName(userName);
+		if(map != null && map.getDecodeBundleId() != null){
+			return bundleDao.findByBundleId(map.getDecodeBundleId());
+		}
+		
+		return null;
 	}
 	
 	/**

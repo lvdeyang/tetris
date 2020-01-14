@@ -11,9 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +26,6 @@ import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.base.bo.AccessNodeBO;
 import com.suma.venus.resource.base.bo.BaseChannelParamTemplateBody;
 import com.suma.venus.resource.base.bo.BundleBody;
@@ -42,7 +41,7 @@ import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.ScreenBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
-import com.suma.venus.resource.base.bo.UserPrivilegeBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.constant.VenusParamConstant;
 import com.suma.venus.resource.constant.VenusParamConstant.ParamScope;
 import com.suma.venus.resource.constant.VenusParamConstant.ParamType;
@@ -154,6 +153,7 @@ public class ResourceService {
 	
 	@Autowired
 	private UserQueryService userQueryService;
+	
 
 	/** 通过userId查询具有权限的user */
 	public List<UserBO> queryUserresByUserId(Long userId) {
@@ -512,13 +512,14 @@ public class ResourceService {
 	/** 根据username查询关联的编码器bundle **/
 	public BundlePO queryEncoderByUsername(String username) {
 		try {
-			Map<String, UserBO> userMap = userFeign.queryUserInfo(username);
-			if (null == userMap || userMap.isEmpty() || null == userMap.get("user")) {
-				return null;
-			}
-
-			String encoderId = userMap.get("user").getEncoderId();
-			return bundleDao.findByBundleId(encoderId);
+//			Map<String, UserBO> userMap = userFeign.queryUserInfo(username);
+//			if (null == userMap || userMap.isEmpty() || null == userMap.get("user")) {
+//				return null;
+//			}
+//
+//			String encoderId = userMap.get("user").getEncoderId();
+			//return bundleDao.findByBundleId(encoderId);
+			return userQueryService.queryEncoderByUserName(username);
 		} catch (Exception e) {
 			LOGGER.error("Fail to query encoder by username : " + username, e);
 			return null;
@@ -529,13 +530,14 @@ public class ResourceService {
 	public BundlePO queryDecoderByUsername(String username) {
 		try {
 			//TODO
-			Map<String, UserBO> userMap = userFeign.queryUserInfo(username);
-			if (null == userMap || userMap.isEmpty() || null == userMap.get("user")) {
-				return null;
-			}
+			//Map<String, UserBO> userMap = userFeign.queryUserInfo(username);
+			//if (null == userMap || userMap.isEmpty() || null == userMap.get("user")) {
+			//	return null;
+			//}
 
-			String decoderId = userMap.get("user").getDecoderId();
-			return bundleDao.findByBundleId(decoderId);
+			//String decoderId = userMap.get("user").getDecoderId();
+			//return bundleDao.findByBundleId(decoderId);
+			return userQueryService.queryDecoderByUserName(username);
 		} catch (Exception e) {
 			LOGGER.error("Fail to query decoder by username : " + username, e);
 			return null;
