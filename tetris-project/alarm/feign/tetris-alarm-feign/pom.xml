@@ -36,8 +36,8 @@
 		</dependency>
 		
 		<dependency>
-			<groupId>com.suma.venus</groupId>
-			<artifactId>venus-message-service</artifactId>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-activemq-service</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
