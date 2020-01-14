@@ -1,0 +1,590 @@
+<template>
+	<section>
+
+    <el-tabs v-model="activeTabName" @tab-click="handleTabClick" style="float:left; width:100%;">
+      <el-tab-pane label="绑定资源用户" name="BindResource"></el-tab-pane>
+      <el-tab-pane label="绑定虚拟资源" name="BindVirtualResource"></el-tab-pane>
+    </el-tabs>
+
+    <el-card style="float:left;margin-top:10px;width:20%;font-size: 18px;" body-style="padding:0px">
+      <el-table ref="roleTable" :data="roles" highlight-current-row v-loading="roleTableLoading" @current-change="handleRoleTableRowChange" style="width: 100%;">
+        <el-table-column prop="name" label="角色名" sortable>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+
+    <el-card style="float:left;margin-left:50px;margin-top:10px;width:70%;" body-style="padding:0px">
+
+      <div slot="header" class="clearfix">
+        <!--
+        <span style="float: left;font-size: 18px;">设备资源</span>
+        <el-select v-model="filters.bindType" placeholder="选择绑定状态" style="float: left;margin-left: 50px;width:120px;">
+          <el-option v-for="item in bindTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+          </el-option>
+        </el-select>
+        <el-select v-model="filters.deviceModel" placeholder="选择资源类型" style="float: left;margin-left: 30px;width:120px;">
+          <el-option v-for="item in deviceModelOptions" :key="item.value" :label="item.label" :value="item.value">
+          </el-option>
+        </el-select>
+                -->
+        <el-input size="small" v-model="filters.keyword" style="float: left;margin-left: 30px;width:200px;" placeholder="关键字" ></el-input>
+
+        <el-button size="small" type="info" @click="getResources" style="float: left;margin-left: 30px;">查询设备</el-button>
+        <el-button size="small" type="info" @click="getUsers" style="float: left;margin-left: 30px;">查询用户</el-button>
+        <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20" ></el-input>
+        <!--<el-button type="info" @click="getResources" style="float: left;margin-left: 30px;">查询</el-button>-->
+
+      </div>
+
+      <!--资源列表-->
+      <el-table :data="resources" v-show="resourceTableShow" v-loading="resourceTableLoading" style="width: 100%;">
+        <el-table-column type="index" width="100"></el-table-column>
+        <el-table-column prop="name" label="名称" width="200" sortable>
+        </el-table-column>
+        <el-table-column prop="deviceModel" label="资源类型" width="200" sortable>
+        </el-table-column>
+        <!--<el-table-column prop="bundleId" label="资源ID" width="350"  sortable>-->
+        <!--</el-table-column>-->
+        <el-table-column prop="username" label="设备账号" width="270" >
+        </el-table-column>
+        <el-table-column width="150" :render-header="renderCheckReadHeader" >
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasReadPrivilege" @change="handleCheckReadChange(scope.row)"></el-checkbox>
+          </template>
+        </el-table-column>
+
+        <el-table-column width="150" :render-header="renderCheckWriteHeader" >
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasWritePrivilege" @change="handleCheckWriteChange(scope.row)"></el-checkbox>
+          </template>
+        </el-table-column>
+      </el-table>
+
+
+      <!--用户列表-->
+      <el-table :data="users" v-show="userTableShow" v-loading="userTableLoading" style="width: 100%;">
+        <el-table-column type="index" width="100"></el-table-column>
+        <el-table-column prop="name" label="名称" width="200" sortable>
+        </el-table-column>
+        <el-table-column prop="userNo" label="用户编号" width="270" >
+        </el-table-column>
+        <el-table-column width="150" :render-header="renderCheckReadHeader">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasReadPrivilege" @change="handleCheckReadChange(scope.row)"></el-checkbox>
+          </template>
+        </el-table-column>
+
+        <el-table-column width="150" :render-header="renderCheckWriteHeader">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasWritePrivilege" @change="handleCheckWriteChange(scope.row)"></el-checkbox>
+          </template>
+        </el-table-column>
+
+        <el-table-column width="150" :render-header="renderCheckHJHeader">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasHJPrivilege" @change="handleCheckHJChange(scope.row)"></el-checkbox>
+          </template>
+        </el-table-column>
+
+      </el-table>
+
+      <!--工具条-->
+      <el-col :span="24" class="toolbar">
+        <el-button type="primary" @click="submitPrivilege">提交</el-button>
+        <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :total="total" style="float:right;">
+        </el-pagination>
+      </el-col>
+
+    </el-card>
+
+	</section>
+</template>
+
+<script type="text/ecmascript-6">
+	import { getAllRoles,getDeviceModels,getBundlesOfRole,submitBundlePrivilege,getUsersOfRole,submitUserresPrivilege} from '../../api/api';
+
+	export default {
+		data() {
+			return {
+        activeTabName : "BindResource",
+        roles : [
+          ],
+        currentRoleRow : null,
+				resources: [
+				  ],
+        bindTypeOptions : [
+          {
+            value : "all",
+            label : "全部"
+          },
+          {
+            value : "binded",
+            label : "已绑定"
+          },
+          {
+            value : "unbinded",
+            label : "未绑定"
+          }
+        ],
+        deviceModelOptions : [],
+        filters: {
+          deviceModel : '',
+          keyword: '',
+          bindType : 'all',
+          countPerPage : ''
+        },
+				total: 0,
+				pageNum: 1,
+        countPerPage : 20,
+        roleTableLoading : false,
+        resourceTableLoading: false,
+        prevReadChecks : [],//之前的录制权限
+        prevWriteChecks : [],//之前的点播权限
+        prevHJChecks : [],
+        readChecks : [],//新的录制权限
+        writeChecks : [],//新的点播权限
+        HJchecks : [],
+        detailDialogVisible : false,
+        detailInfos : [],
+        users : [],
+        userTableLoading : false,
+        resourceTableShow : true,
+        userTableShow : false,
+        checkReadAll : false,
+        checkWriteAll : false,
+        checkHJAll : false
+			}
+		},
+		methods: {
+      handleTabClick(tab, event) {
+        if("BindResource" !== tab.name){
+          this.$router.push('/' + tab.name);
+        }
+      },
+      handleRoleTableRowChange : function(val){
+        this.currentRoleRow = val;
+        //TODO 选中角色，查询资源
+        if(this.resourceTableShow){
+          this.getResources();
+        }else if(this.userTableShow){
+          this.getUsers();
+        }
+
+      },
+      renderCheckReadHeader : function(h, data){//自定义特殊表格头单元
+        return (
+          <el-checkbox v-model={this.checkReadAll} onChange={this.handleCheckReadAllChange}>录制</el-checkbox>
+        )
+      },
+      renderCheckWriteHeader : function(h, data){//自定义特殊表格头单元
+        return (
+          <el-checkbox v-model={this.checkWriteAll} onChange={this.handleCheckWriteAllChange}>点播</el-checkbox>
+        )
+      },
+      renderCheckHJHeader :  function(h, data){//自定义特殊表格头单元
+        return (
+          <el-checkbox v-model={this.checkHJAll} onChange={this.handleCheckHJAllChange}>呼叫</el-checkbox>
+      )
+      },
+      handleCheckReadAllChange : function(val){
+        if(this.resourceTableShow){//设备
+          if(val){
+            for (let resource of this.resources){
+              this.readChecks.push(resource.bundleId);
+              resource.hasReadPrivilege = true;
+            }
+          } else {
+            this.readChecks = [];
+            for (let resource of this.resources){
+              resource.hasReadPrivilege = false;
+            }
+          }
+        }else if(this.userTableShow){//用户
+          if(val){
+            for(let user of this.users){
+              this.readChecks.push(user.userNo);
+              user.hasReadPrivilege = true;
+            }
+          }else{
+            this.readChecks = [];
+            for (let user of this.users){
+              user.hasReadPrivilege = false;
+            }
+          }
+        }
+      },
+      handleCheckWriteAllChange : function(val){
+        if(this.resourceTableShow){//设备
+          if(val){
+            for (let resource of this.resources){
+              this.writeChecks.push(resource.bundleId);
+              resource.hasWritePrivilege = true;
+            }
+          } else {
+            this.writeChecks = [];
+            for (let resource of this.resources){
+              resource.hasWritePrivilege = false;
+            }
+          }
+        } else if(this.userTableShow){ //用户
+          if(val){
+            for(let user of this.users){
+              this.writeChecks.push(user.userNo);
+              user.hasWritePrivilege = true;
+            }
+          } else {
+            this.writeChecks = [];
+            for (let user of this.users){
+              user.hasWritePrivilege = false;
+            }
+          }
+        }
+      },
+      handleCheckHJAllChange : function(val){
+        if(this.userTableShow){//用户
+          if(val){
+            for(let user of this.users){
+              this.HJchecks.push(user.userNo);
+              user.hasHJPrivilege = true;
+            }
+          } else {
+            this.HJchecks = [];
+            for(let user of this.users){
+              user.hasHJPrivilege = false;
+            }
+          }
+        }
+      },
+      handleCheckReadChange : function(row){
+        if(this.resourceTableShow){
+          if(row.hasReadPrivilege){
+            this.readChecks.push(row.bundleId);
+            //全选判断
+            if(this.readChecks.length === this.resources.length){
+              this.checkReadAll = true;
+            }
+          } else {
+            this.readChecks.splice(this.readChecks.indexOf(row.bundleId),1);
+            this.checkReadAll = false;
+          }
+        }else if(this.userTableShow){
+          if(row.hasReadPrivilege){
+            this.readChecks.push(row.userNo);
+            //全选判断
+            if(this.readChecks.length === this.users.length){
+              this.checkReadAll = true;
+            }
+          } else {
+            this.readChecks.splice(this.readChecks.indexOf(row.userNo),1);
+            this.checkReadAll = false;
+          }
+        }
+      },
+      handleCheckWriteChange : function(row){
+        if(this.resourceTableShow){
+          if(row.hasWritePrivilege){
+            this.writeChecks.push(row.bundleId);
+            if(this.writeChecks.length === this.resources.length){
+              this.checkWriteAll = true;
+            }
+          } else {
+            this.writeChecks.splice(this.writeChecks.indexOf(row.bundleId),1);
+            this.checkWriteAll = false;
+          }
+        }else if(this.userTableShow){
+          if(row.hasWritePrivilege){
+            this.writeChecks.push(row.userNo);
+            //全选判断
+            if(this.writeChecks.length === this.users.length){
+              this.checkWriteAll = true;
+            }
+          } else {
+            this.writeChecks.splice(this.writeChecks.indexOf(row.userNo),1);
+            this.checkWriteAll = false;
+          }
+        }
+
+      },
+      handleCheckHJChange : function(row){
+        if(this.userTableShow) {
+          if (row.hasHJPrivilege) {
+            this.HJchecks.push(row.userNo);
+            //全选判断
+            if(this.HJchecks.length === this.users.length){
+              this.checkHJAll = true;
+            }
+          } else {
+            this.HJchecks.splice(this.HJchecks.indexOf(row.userNo), 1);
+            this.checkHJAll = false;
+          }
+        }
+      },
+			//获取角色列表
+      getRoles : function() {
+				let param = {
+				};
+
+        this.roleTableLoading = true;
+        getAllRoles(param).then( res => {
+          if(res.errMsg){
+            this.$message({
+              message: res.errMsg,
+              type: 'error'
+            });
+          }else{
+            this.roles = res.roles;
+          }
+
+          this.roleTableLoading = false;
+        });
+			},
+      //获取资源类型
+      getDeviceModels : function(){
+        getDeviceModels().then(res => {
+          if(!res.errMsg && res.deviceModels){
+            this.deviceModelOptions.push({
+              value : "",
+              label : "全部类型"
+            });
+            for(let deviceModel of res.deviceModels){
+              let deviceModelOption = {
+                value : deviceModel,
+                label : deviceModel
+              };
+              this.deviceModelOptions.push(deviceModelOption);
+            }
+          }
+        });
+      },
+      //获取资源列表
+      getResources : function(){
+        if(!this.currentRoleRow){
+          this.$message({
+            message: "请先选择角色",
+            type: 'error'
+          });
+          return;
+        }
+        this.resourceTableShow = true;
+        this.userTableShow = false;
+        this.prevReadChecks = [];
+        this.prevWriteChecks = [];
+        this.readChecks = [];
+        this.writeChecks = [];
+        this.checkReadAll = false;
+        this.checkWriteAll = false;
+        this.checkHJAll = false;
+        this.countPerPage = 20;
+        if(/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)){
+          this.countPerPage = parseInt(this.filters.countPerPage);
+        }
+
+        let param = {
+          roleId : this.currentRoleRow.id,
+          bindType: this.filters.bindType,
+          deviceModel : this.filters.deviceModel,
+          keyword : this.filters.keyword,
+          pageNum : this.pageNum,
+          countPerPage : this.countPerPage
+        };
+        this.resourceTableLoading = true;
+        getBundlesOfRole(param).then((res) => {
+          if (res.errMsg) {
+            this.$message({
+              message: res.errMsg,
+              type: 'error'
+            });
+          } else {
+            this.total = res.total;
+            this.resources = res.resources;
+            for (let resource of this.resources){
+              if(resource.hasReadPrivilege){
+                this.prevReadChecks.push(resource.bundleId);
+                this.readChecks.push(resource.bundleId);
+              }
+              if(resource.hasWritePrivilege){
+                this.prevWriteChecks.push(resource.bundleId);
+                this.writeChecks.push(resource.bundleId);
+              }
+            }
+
+            //全选判断
+            if(this.readChecks.length === this.resources.length){
+              this.checkReadAll = true;
+            }
+            if(this.writeChecks.length === this.resources.length){
+              this.checkWriteAll = true;
+            }
+
+          }
+
+        	this.resourceTableLoading = false;
+        });
+      },
+      //资源列表分页
+      handleCurrentPageChange(val) {
+        this.pageNum = val;
+        if(this.resourceTableShow){
+          this.getResources();
+        } else {
+          this.getUsers();
+        }
+      },
+      getUsers : function(){
+        if(!this.currentRoleRow){
+          this.$message({
+            message: "请先选择角色",
+            type: 'error'
+          });
+          return;
+        }
+
+        this.resourceTableShow = false;
+        this.userTableShow = true;
+        this.prevReadChecks = [];
+        this.prevWriteChecks = [];
+        this.readChecks = [];
+        this.writeChecks = [];
+        this.prevHJChecks = [];
+        this.HJchecks = [];
+        this.checkReadAll = false;
+        this.checkWriteAll = false;
+        this.checkHJAll = false;
+        this.countPerPage = 20;
+        if(/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)){
+          this.countPerPage = parseInt(this.filters.countPerPage);
+        }
+        let param = {
+          roleId : this.currentRoleRow.id,
+          keyword : this.filters.keyword,
+          pageNum : this.pageNum,
+          countPerPage : this.countPerPage
+        };
+        this.userTableLoading = true;
+        getUsersOfRole(param).then((res) => {
+          if (res.errMsg) {
+            this.$message({
+              message: res.errMsg,
+              type: 'error'
+            });
+          } else {
+            this.total = res.total;
+            this.users = res.users;
+            for (let user of this.users){
+              if(user.hasReadPrivilege){
+                this.prevReadChecks.push(user.userNo);
+                this.readChecks.push(user.userNo);
+              }
+              if(user.hasWritePrivilege){
+                this.prevWriteChecks.push(user.userNo);
+                this.writeChecks.push(user.userNo);
+              }
+              if(user.hasHJPrivilege){
+                this.prevHJChecks.push(user.userNo);
+                this.HJchecks.push(user.userNo);
+              }
+            }
+
+            //全选判断
+            if(this.readChecks.length === this.users.length){
+              this.checkReadAll = true;
+            }
+            if(this.writeChecks.length === this.users.length){
+              this.checkWriteAll = true;
+            }
+            if(this.HJchecks.length === this.users.length){
+              this.checkHJAll = true;
+            }
+
+          }
+
+          this.userTableLoading = false;
+        });
+
+      },
+      //提交资源权限
+      submitPrivilege : function(){
+        if(this.resourceTableShow){
+          let param = {
+            roleId : this.currentRoleRow.id,
+            prevReadChecks : this.prevReadChecks.join(","),
+            prevWriteChecks: this.prevWriteChecks.join(","),
+            readChecks : this.readChecks.join(","),
+            writeChecks : this.writeChecks.join(",")
+          };
+
+          this.resourceTableLoading = true;
+          submitBundlePrivilege(param).then((res) => {
+            if(res.errMsg){
+              this.$message({
+                message: res.errMsg,
+                type: 'error'
+              });
+            } else {
+              this.$message({
+                message: "提交成功",
+                type: 'success'
+              });
+              //更新prevChecks
+              this.prevReadChecks = [].concat(this.readChecks);
+              this.prevWriteChecks = [].concat(this.writeChecks);
+            }
+            this.resourceTableLoading = false;
+          });
+        }else if(this.userTableShow){
+          let param = {
+            roleId : this.currentRoleRow.id,
+            prevReadChecks : this.prevReadChecks.join(","),
+            prevWriteChecks: this.prevWriteChecks.join(","),
+            prevHJChecks: this.prevHJChecks.join(","),
+            readChecks : this.readChecks.join(","),
+            writeChecks : this.writeChecks.join(","),
+            hjChecks : this.HJchecks.join(",")
+          };
+          this.userTableLoading = true;
+          submitUserresPrivilege(param).then((res) => {
+            if(res.errMsg){
+              this.$message({
+                message: res.errMsg,
+                type: 'error'
+              });
+            } else {
+              this.$message({
+                message: "提交成功",
+                type: 'success'
+              });
+              //更新prevChecks
+              this.prevReadChecks = [].concat(this.readChecks);
+              this.prevWriteChecks = [].concat(this.writeChecks);
+              this.prevHJChecks = [].concat(this.HJchecks);
+            }
+            this.userTableLoading = false;
+          });
+        }
+
+
+      }
+		},
+		mounted() {
+      var self = this;
+      self.$nextTick(function(){
+        self.$parent.$parent.$parent.$parent.$parent.setActive('/BindResource');
+      });
+		  this.getDeviceModels();
+		  this.getRoles();
+		}
+	}
+
+</script>
+
+<style>
+  .clearfix:before,
+  .clearfix:after {
+    display: table;
+    content: "";
+  }
+  .clearfix:after {
+    clear: both
+  }
+</style>

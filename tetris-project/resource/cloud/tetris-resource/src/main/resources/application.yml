@@ -7,9 +7,9 @@ spring:
         name: tetris-resource
     cloud:
         client:
-            ipAddress : 192.165.56.84
+            ipAddress : 192.165.56.77
         inetutils:
-            preferred-networks: 192.165.56.84
+            preferred-networks: 192.165.56.77
 
     #datasource        
     datasource:
@@ -46,10 +46,10 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.84:8081/eureka/
+      defaultZone: http://192.165.56.77:8081/eureka/
   instance:
     prefer-ip-address: true
-    ip-address: 192.165.56.84
+    ip-address: 192.165.56.77
     lease-renewal-interval-in-seconds : 3
     lease-expiration-duration-in-seconds : 10
     
