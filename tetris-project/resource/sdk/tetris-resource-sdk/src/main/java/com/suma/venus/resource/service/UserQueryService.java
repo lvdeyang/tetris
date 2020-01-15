@@ -287,6 +287,7 @@ public class UserQueryService {
 	public UserBO singleUserVo2Bo(UserVO userVO) throws Exception{
 		
 		UserBO userBO = new UserBO();
+		userBO.setUser(userVO);
 		userBO.setId(userVO.getId());
 		userBO.setName(userVO.getNickname());
 		userBO.setLevel(0);
