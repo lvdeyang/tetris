@@ -11,13 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
-import com.suma.venus.resource.base.bo.ResultBO;
-import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
@@ -25,11 +21,10 @@ import com.suma.venus.resource.dao.ScreenRectTemplateDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
-import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
-import com.sumavision.tetris.commons.util.encoder.MessageEncoder;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Md5Encoder;
 

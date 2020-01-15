@@ -2,7 +2,7 @@
  * Created by lvdeyang on 2018/12/24 0024.
  */
 define([
-    'text!' + window.APPPATH + 'omms/page-omms.html',
+    'text!' + window.APPPATH + 'omms/monitor/service/page-omms-monitor-service.html',
     'config',
     'jquery',
     'restfull',
@@ -15,11 +15,11 @@ define([
     'element-ui',
     'mi-frame',
     'date',
-    'css!' + window.APPPATH + 'omms/page-omms.css',
+    'css!' + window.APPPATH + 'omms/monitor/service/page-omms-monitor-service.css',
     'css!' + window.COMMONSPATH + 'chart/chart.css'
 ], function(tpl, config, $, ajax, context, commons, Vue, Graph, LineChart, StackedBarChart){
 
-    var pageId = 'page-omms';
+    var pageId = 'page-omms-monitor-service';
 
     var charts = {};
 
@@ -76,7 +76,7 @@ define([
             },
             mounted:function(){
                 var self = this;
-                ajax.post('/graph/data', null, function(data){
+                ajax.post('/monitor/service/graph/data', null, function(data){
                     self.isDanger = data.isDanger;
                     var levels = data.levels;
                     var graph = new Graph($('#graph-container'), levels, null, {
@@ -94,7 +94,7 @@ define([
                             self.server.data.status = server.status;
                             self.server.selected = true;
                             self.$nextTick(function(){
-                                ajax.post('/server/status', {instanceId:server.id}, function(data){
+                                ajax.post('/monitor/service/gadget/status', {instanceId:server.id}, function(data){
                                     self.server.data.cpuName = data.cpu.name;
                                     var cpuUsage = parseFloat(data.cpu.usage);
                                     var memoryTotal = (parseInt(data.memory.total)/1024).toFixed(1);
@@ -235,7 +235,7 @@ define([
                                     charts.networkDownloadTrafficLine = networkDownloadTrafficLine;
 
                                     self.server.interval = setInterval(function(){
-                                        ajax.post('/server/status', {instanceId:server.id}, function(data){
+                                        ajax.post('/monitor/service/gadget/status', {instanceId:server.id}, function(data){
                                             domain.push(new Date().format(self.formater));
                                             cpuLine.config.data[0].y.push(parseFloat(data.cpu.usage));
                                             memoryLine.config.data[0].y.push((parseInt(data.memory.used)/1024).toFixed(1));
@@ -317,7 +317,7 @@ define([
                         }
                     });
                     self.interval = setInterval(function(){
-                        ajax.post('/graph/refresh/status', null, function(data){
+                        ajax.post('/monitor/service/refresh/status', null, function(data){
                             self.isDanger = data.isDanger;
                             graph.refreshServerStatus(data.servers);
                         });

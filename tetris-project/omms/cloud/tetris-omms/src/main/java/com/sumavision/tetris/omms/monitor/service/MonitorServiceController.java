@@ -1,25 +1,42 @@
-package com.sumavision.tetris.omms.graph;
+package com.sumavision.tetris.omms.monitor.service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.omms.graph.GroupType;
+import com.sumavision.tetris.omms.graph.GroupVO;
+import com.sumavision.tetris.omms.graph.LevelVO;
+import com.sumavision.tetris.omms.graph.ServerType;
+import com.sumavision.tetris.omms.graph.ServerVO;
+import com.sumavision.tetris.omms.graph.TypeVO;
+import com.sumavision.tetris.omms.monitor.service.exception.ApplicationNotFoundException;
+import com.sumavision.tetris.omms.monitor.service.exception.GadgetRequestFailException;
 import com.sumavision.tetris.spring.eureka.application.ApplicationQuery;
 import com.sumavision.tetris.spring.eureka.application.ApplicationStatus;
 import com.sumavision.tetris.spring.eureka.application.ApplicationVO;
 
 @Controller
-@RequestMapping(value = "/graph")
-public class GraphController {
+@RequestMapping(value = "/monitor/service")
+public class MonitorServiceController {
 
 	@Autowired
 	private ApplicationQuery applicationQuery;
@@ -34,8 +51,8 @@ public class GraphController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/data")
-	public Object data(HttpServletRequest request) throws Exception{
+	@RequestMapping(value = "/graph/data")
+	public Object graphData(HttpServletRequest request) throws Exception{
 		boolean isDanger = false;
 		List<LevelVO> levels = new ArrayListWrapper<LevelVO>().add(new LevelVO().setId("level0").setName("第一层").setGroups(new ArrayList<GroupVO>()))
 															  .add(new LevelVO().setId("level1").setName("第二层").setGroups(new ArrayList<GroupVO>()))
@@ -127,4 +144,47 @@ public class GraphController {
 												   .put("servers", servers)
 												   .getMap();
 	}
+	
+	/**
+	 * 获取服务器（小工具）状态<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月30日 下午1:17:46
+	 * @param String instanceId 服务实例id
+	 * @return 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/gadget/status")
+	public Object gadgetStatus(
+			String instanceId, 
+			HttpServletRequest request) throws Exception{
+		ApplicationVO application = applicationQuery.findByInstanceId(instanceId);
+		if(application != null){
+			CloseableHttpClient httpclient = null;
+			CloseableHttpResponse response = null;
+			try{
+				String url = new StringBufferWrapper().append("http://").append(application.getIp()).append(":").append(application.getGadgetPort()).append("/action/get_capability_info").toString();
+				httpclient = HttpClients.createDefault();
+				HttpPost httpPost = new HttpPost(url);
+				response = httpclient.execute(httpPost);
+				if(response.getStatusLine().getStatusCode() == 200){
+		        	HttpEntity entity = response.getEntity();
+		        	String status = FileUtil.readAsString(entity.getContent());
+		 	        EntityUtils.consume(entity);
+		 	        return JSON.parseObject(status);
+		        }else{
+		        	throw new GadgetRequestFailException(application.getIp(), application.getGadgetPort());
+		        }
+			}catch(Exception e){
+				throw new GadgetRequestFailException(application.getIp(), application.getGadgetPort());
+			}finally{
+				if(response != null) response.close();
+				if(httpclient != null) httpclient.close();
+			}
+		}else{
+			throw new ApplicationNotFoundException(instanceId);
+		}
+	}
+	
 }

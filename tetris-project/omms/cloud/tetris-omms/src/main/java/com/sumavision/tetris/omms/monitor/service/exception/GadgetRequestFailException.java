@@ -1,4 +1,4 @@
-package com.sumavision.tetris.omms.graph.exception;
+package com.sumavision.tetris.omms.monitor.service.exception;
 
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
