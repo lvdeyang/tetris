@@ -1,0 +1,27 @@
+<div class="zk-header">
+    <div class="content">
+        <div class="leftTime">
+            <p>天文 <span class="date">{{date}}</span></p>
+            <p>时间 <span class="time">{{time}}</span></p>
+        </div>
+        <div class="leftTime">
+            <p>作战 <span class="date">2016-09-23</span></p>
+            <p>时间 <span class="time">12 :32 :43</span></p>
+
+        </div>
+        <div class="center">
+            <span style="font-size: 24px;font-weight:bold">北部军区320连作战指挥系统</span>
+        </div>
+        <div class="right">
+            <span class="icon-user" style="font-size: 30px;position: absolute;left: 40px;top:28px;"></span>
+            <div style="position: absolute;top:0;left: 70px;height: 100%;width: 140px;overflow:hidden;">
+                <span class="username">{{user.name}}</span>
+            </div>
+        </div>
+        <div class="right">
+            <span class="setting icon-cog" @click="showSettings" title="系统设置"></span>
+            <span class="setting icon-th-large" title="系统管理" style="margin-right: 10px"></span>
+            <span class="setting icon-off" title="退出"></span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,170 @@
+<div class="bvc2-monitor-file" style="width:100%; height:100%; position:relative; box-sizing:border-box; background-color:#fff;">
+
+    <div class="monitor92-l02" style="width:100%; height:100%; position:relative;">
+        <div style="width:381px;height:100%; border-right:1px solid #ebeef5; background-color:#fff;">
+            <div style="width:100%; height:100%; position:relative; border:1px solid transparent;">
+                <div class="monitor92-m01 monitor92-f03 monitor92-h4" style="line-height:40px; text-align:center; border-bottom:1px solid #ebeef5;">
+                    已导入文件
+                </div>
+                <div style="position:absolute; left:0; top:41px; right:0; bottom:0; padding:10px;" v-loading="tree.loading">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                ref="vodTree"
+                                node-key="id"
+                                highlight-current
+                                :expand-on-click-node="false"
+                                :default-expand-all="true"
+                                :data="tree.data"
+                                :props="tree.props">
+                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; font-size:14px; padding-right:8px;" slot-scope="{node, data}">
+                                <span>
+                                    <el-radio v-if="data.type==='FOLDER'" v-model="tree.currentFolder" :label="data">
+                                        <span :class="data.icon" style="position:relative; top:1px;"></span>
+                                        <span style="position:relative; top:1px;">{{node.label}}</span>
+                                    </el-radio>
+                                    <span v-else>
+                                        <span :class="data.icon"></span>
+                                        <span>{{node.label}}</span>
+                                    </span>
+                                </span>
+                                <span>
+                                    <el-tooltip class="item" effect="dark" content="下架" placement="right">
+                                        <el-button v-if="hasResource(data)" style="font-size:16px; position:relative; top:1px;" type="text" icon="el-icon-delete" @click="handleNodeDelete(data, node)"></el-button>
+                                        <el-button v-else style="font-size:16px; position:relative; top:1px;" type="text" icon="el-icon-delete" disabled></el-button>
+                                    </el-tooltip>
+                                </span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </div>
+        </div>
+        <div style="height:100%; position:absolute; left:381px; top:0; right:0; padding:10px;">
+            <div style="width:100%; height:100%; position:relative;">
+                <div style="height:52px; width:100%; position:relative;">
+                    <el-tooltip class="item" effect="dark" content="选择目录" placement="bottom">
+                        <el-button size="small" @click="handleSelectFolder" type="primary" style="width:36px; height:36px; line-height:36px; padding:0; text-align:center; font-size:16px;" round><span class="icon-table"></span></el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="dark" content="批量上架" placement="bottom">
+                        <el-button v-if="tree.currentFolder && table.selectRows && table.selectRows.length>0" size="small" @click="handleUploadBatch" type="primary" style="width:36px; height:36px; line-height:36px; padding:0; text-align:center; font-size:16px;" round><span class="icon-cloud-upload"></span></el-button>
+                        <el-button v-else size="small" type="primary" style="width:36px; height:36px; line-height:36px; padding:0; text-align:center; font-size:16px;" round disabled><span class="icon-cloud-upload"></span></el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="dark" content="输入临时目录" placement="bottom">
+                        <el-button size="small" @click="editTmpPath" type="primary" style="width:36px; height:36px; line-height:36px; padding:0; text-align:center; font-size:16px;" round><span class="icon-edit" style="position:relative; left:1px;"></span></el-button>
+                    </el-tooltip>
+                    <el-tooltip class="item" effect="dark" content="查询" placement="bottom">
+                        <el-button size="small" @click="handleQuery" type="primary" style="width:36px; height:36px; line-height:36px; padding:0; text-align:center; font-size:16px;" round><span class="icon-search"></span></el-button>
+                    </el-tooltip>
+                    <div style="position:absolute; left:205px; height:40px; top:0; right:0;">
+                        <el-input v-if="table.tmpPath" v-model="table.fullPath" placeholder="请输入内容"></el-input>
+                        <span style="line-height:40px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap" v-else>{{table.fullPath}}</span>
+                    </div>
+                </div>
+                <div style="position:absolute; left:0; top:52px; bottom:52px; right:0;">
+                    <el-table
+                            height="100%"
+                            :data="table.data"
+                            stripe
+                            @selection-change="selectUploadChange"
+                            style="width: 100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                prop="name"
+                                label="别名">
+                        </el-table-column>
+                        <el-table-column
+                                prop="fullPath"
+                                label="全路径">
+                        </el-table-column>
+                        <el-table-column
+                                fixed="right"
+                                label="操作"
+                                width="200">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="上架资源" placement="bottom">
+                                    <el-button  v-if="tree.currentFolder" type="text" style="padding:0; font-size:20px; position:relative; top:1px;" @click="handleUpload(scope)"><span class="icon-cloud-upload"></span></el-button>
+                                    <el-button  v-else type="text" style="padding:0; font-size:20px; position:relative; top:1px;" disabled><span class="icon-cloud-upload"></span></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+                <div style="height:52px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-top:10px;">
+                    <el-pagination
+                            style="float:right;"
+                            background
+                            @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange"
+                            :current-page="table.page.currentPage"
+                            :page-sizes="[20, 50, 100, 500, 1000]"
+                            :page-size="table.page.pageSize"
+                            layout="total, sizes, prev, pager, next, jumper"
+                            :total="table.page.total">
+                    </el-pagination>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <template>
+
+        <el-dialog
+                title="选择外部文件夹"
+                :visible.sync="dialog.selectFolder.visible"
+                width="700px"
+                :before-close="handleSelectFolderClose">
+
+            <div style="width:100%; height:400px; position:relative;">
+                <div style="position:absolute; left:0px; top:-30px; bottom:-30px; right:0px;">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <div style="position:absolute; left:0; top:0; right:0; bottom:52px;">
+                            <el-table
+                                    :data="dialog.selectFolder.table.data"
+                                    height="100%"
+                                    highlight-current-row
+                                    @current-change="currentFolderChange"
+                                    style="width:100%">
+
+                                <el-table-column
+                                        label="别名"
+                                        prop="name">
+                                </el-table-column>
+                                <el-table-column
+                                        label="全路径"
+                                        prop="fullPath">
+                                </el-table-column>
+                                <el-table-column
+                                        label="创建人"
+                                        prop="createUsername">
+                                </el-table-column>
+
+                            </el-table>
+                        </div>
+                        <div style="height:52px; position:absolute; left:0; right:0; bottom:0; padding-top:10px;">
+                            <el-pagination
+                                    style="float:right;"
+                                    background
+                                    @current-change="handleSelectFolderCurrentChange"
+                                    :current-page="dialog.selectFolder.table.page.currentPage"
+                                    :page-size="20"
+                                    layout="total, prev, pager, next, jumper"
+                                    :total="dialog.selectFolder.table.page.total">
+                            </el-pagination>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button  size="medium" @click="handleSelectFolderClose">取消</el-button>
+                <el-button  size="medium" type="primary" @click="handleSelectFolderCommit">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+    </template>
+
+</div>

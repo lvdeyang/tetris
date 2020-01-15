@@ -1,0 +1,36 @@
+
+<el-dialog title="设置看会权限" class="bvc2-dialog-authorization-list" :visible.sync="dialogVisible">
+    <div class="bvc2-tree-authorization-list-search" style="width: 300px">
+        <el-input placeholder="输入关键字进行过滤"  size="mini" clearable v-model="filterText">
+            <span slot="prefix" class="el-input__icon el-icon-search"></span>
+        </el-input>
+    </div>
+    <div class="bvc2-tree-authorization-list" style="height:550px;">
+        <div class="group-members" v-loading="treeLoading">
+            <el-tree
+                    ref="$authorizationTree"
+                    :data="data"
+
+                    show-checkbox
+
+                    node-key="key"
+                    :default-checked-keys="checked"
+                    :default-expand-all="defaultExpandAll"
+                    :props="defaultProps"
+                    :filter-node-method="filterNode"
+
+                    :render-content="renderContent"
+                    @node-expand="nodeExpand"
+                    @node-collapse="nodeCollapse"
+
+                    >
+            </el-tree>
+        </div>
+    </div>
+
+    <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="saveWatchAuthorization">设 置</el-button>
+        <el-button @click="dialogVisible = false">取 消</el-button>
+    </span>
+</el-dialog>
+

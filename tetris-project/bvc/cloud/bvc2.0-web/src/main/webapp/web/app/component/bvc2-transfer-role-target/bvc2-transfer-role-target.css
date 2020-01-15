@@ -1,0 +1,3 @@
+.bvc2-transfer-role-target .el-transfer-panel{ width: 300px !important; height: 400px;}
+.bvc2-transfer-role-target .el-checkbox-group{ height: 300px;}
+.el-transfer-panel__item.el-checkbox .el-checkbox__label {overflow: unset}

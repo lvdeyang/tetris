@@ -1,0 +1,29 @@
+<div class="bvc2-tree-member-channel-encode">
+    <div class="bvc2-tree-member-channel-encode-count">在线: {{group.onlineCount}} / 总数: {{group.totalCount}}</div>
+    <div class="bvc2-tree-member-channel-encode-search">
+        <el-input placeholder="输入关键字过滤"  size="mini" clearable v-model="filterText">
+            <span slot="prefix" class="el-input__icon el-icon-search"></span>
+        </el-input>
+    </div>
+    <div class="bvc2-tree-member-channel-encode-data">
+        <el-tree
+                ref="tree"
+                :data="data"
+
+                node-key="key"
+                :default-checked-keys="checked"
+                :default-expand-all="defaultExpandAll"
+                :props="defaultProps"
+
+                :filter-node-method="filterNode"
+                :render-content="renderContent"
+                @node-expand="nodeExpand"
+                @node-collapse="nodeCollapse"
+                draggable
+                :allow-drop="allowDrop"
+                :allow-drag="allowDrag"
+                @node-drag-start="handleDragStart"
+                >
+        </el-tree>
+    </div>
+</div>
