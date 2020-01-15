@@ -21,7 +21,10 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSONArray;
@@ -67,6 +71,7 @@ import com.suma.venus.resource.util.EquipSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.BundleVO.CoderType;
 import com.suma.venus.resource.vo.ChannelSchemeVO;
+import com.sumavision.tetris.capacity.server.CapacityService;
 
 @Controller
 @RequestMapping("/bundle")
@@ -126,18 +131,29 @@ public class BundleManageController extends ControllerBase {
 	@Autowired
 	private EquipSyncLdapUtils equipSyncLdapUtils;
 
+	@Autowired
+	private CapacityService capacityService;
+
+	@Value("${spring.cloud.client.ipAddress}")
+	private String clientIP;
+
+	@Value("${server.port}")
+	private String port;
+
 	private final int EXTRAINFO_START_COLUMN = 11;
 
 	@RequestMapping(value = "/add", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> add(@RequestParam("bundle") String bundle, @RequestParam("extraInfoVOList") String extraInfoVOList) {
+	public Map<String, Object> add(@RequestParam("bundle") String bundle,
+			@RequestParam("extraInfoVOList") String extraInfoVOList) {
 		Map<String, Object> data = makeAjaxData();
-		//TODO: 没有事务
+		// TODO: 没有事务
 		try {
 			BundleVO bundleVO = JSONObject.parseObject(bundle, BundleVO.class);
 			List<ExtraInfoPO> extraInfos = JSONArray.parseArray(extraInfoVOList, ExtraInfoPO.class);
 			BundlePO bundlePO = bundleVO.toPO();
-			bundlePO.setBundleType(channelTemplateService.findByDeviceModel(bundlePO.getDeviceModel()).get(0).getBundleType());
+			bundlePO.setBundleType(
+					channelTemplateService.findByDeviceModel(bundlePO.getDeviceModel()).get(0).getBundleType());
 			/** 针对合屏混音设备，需设置音频/视频编码最大路数 */
 			if ("mixer".equalsIgnoreCase(bundlePO.getDeviceModel())) {
 				bundlePO.setMaxAudioSrcCnt(VenusParamConstant.MIXER_MAX_AUDIO_SRC_CNT);
@@ -193,14 +209,25 @@ public class BundleManageController extends ControllerBase {
 			// 按照模板最大通道数自动生成能力配置
 			if ("jv210".equals(bundlePO.getDeviceModel())) {
 				if (CoderType.ENCODER.equals(bundleVO.getCoderType())) {
-					channelSchemeDao.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO.getBundleId()));
+					channelSchemeDao
+							.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO.getBundleId()));
 				} else if (CoderType.DECODER.equals(bundleVO.getCoderType())) {
-					channelSchemeDao.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
+					channelSchemeDao
+							.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
 				} else {
 					bundleService.configDefaultAbility(bundlePO);
 				}
 			} else {
 				bundleService.configDefaultAbility(bundlePO);
+			}
+
+			if ("transcode".equals(bundlePO.getDeviceModel())) {
+
+				capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(),
+						"http://" + clientIP + ":" + port + "/api/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+
+				capacityService.setAlarmUrl(bundlePO.getDeviceIp());
+
 			}
 
 			data.put("bundleId", bundlePO.getBundleId());
@@ -216,15 +243,19 @@ public class BundleManageController extends ControllerBase {
 	// TODO 这个查询逻辑需要修改。。。
 	@RequestMapping(value = "/query", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> query(@RequestParam("deviceModel") String deviceModel, @RequestParam(name = "sourceType", required = false) String sourceType,
-			@RequestParam(name = "userId", required = false) Long userId, @RequestParam("keyword") String keyword, @RequestParam(name = "pageNum") Integer pageNum,
+	public Map<String, Object> query(@RequestParam("deviceModel") String deviceModel,
+			@RequestParam(name = "sourceType", required = false) String sourceType,
+			@RequestParam(name = "userId", required = false) Long userId, @RequestParam("keyword") String keyword,
+			@RequestParam(name = "pageNum") Integer pageNum,
 			@RequestParam(name = "countPerPage") Integer countPerPage) {
 		Map<String, Object> data = makeAjaxData();
 		try {
-			List<BundlePO> bundlePOs1 = bundleService.queryByUserIdAndDevcieModelAndKeyword(userId, deviceModel, sourceType, keyword);
+			List<BundlePO> bundlePOs1 = bundleService.queryByUserIdAndDevcieModelAndKeyword(userId, deviceModel,
+					sourceType, keyword);
 
 			// 过滤掉devicemodel为空的数据 ??
-			List<BundlePO> bundlePOs = bundlePOs1.stream().filter(b -> (null != b.getDeviceModel())).collect(Collectors.toList());
+			List<BundlePO> bundlePOs = bundlePOs1.stream().filter(b -> (null != b.getDeviceModel()))
+					.collect(Collectors.toList());
 
 			List<BundleVO> bundles = new ArrayList<BundleVO>();
 			int from = (pageNum - 1) * countPerPage;
@@ -303,7 +334,7 @@ public class BundleManageController extends ControllerBase {
 //
 //			// 如果有用户绑定了设备作为编码器或者解码器，需要通知用户侧解除绑定
 //			try {
-				//TODO:新做
+		// TODO:新做
 //				userFeign.unbindEncoderAndDecoder(bundleId);
 //			} catch (Exception e) {
 //				LOGGER.error("Communication Error : Fail to unbind encoder and decoder ; bundleId = " + bundleId);
@@ -347,7 +378,8 @@ public class BundleManageController extends ControllerBase {
 
 	@RequestMapping("/setAccessLayer")
 	@ResponseBody
-	public Map<String, Object> setAccessLayer(@RequestParam(value = "bundleId") String bundleId, @RequestParam(value = "accessLayerId") String accessLayerId) {
+	public Map<String, Object> setAccessLayer(@RequestParam(value = "bundleId") String bundleId,
+			@RequestParam(value = "accessLayerId") String accessLayerId) {
 		Map<String, Object> data = makeAjaxData();
 
 		// TODO layerid可以为空么？
@@ -415,7 +447,8 @@ public class BundleManageController extends ControllerBase {
 				bundleService.save(bundle);
 
 				// 发送离线告警消息
-				//AlarmOprlogClientService.getInstance().triggerAlarm(AlarmCodeConstant.BUNDLE_OFFLINE_CODE, bundleId, null, new Date());
+				// AlarmOprlogClientService.getInstance().triggerAlarm(AlarmCodeConstant.BUNDLE_OFFLINE_CODE,
+				// bundleId, null, new Date());
 			}
 		} catch (Exception e) {
 			LOGGER.error("Fail to logout Resource : ", e);
@@ -440,7 +473,8 @@ public class BundleManageController extends ControllerBase {
 //			}
 
 			// 清除bundle上被锁定的channel
-			List<ChannelSchemePO> channelSchemePOs = channelSchemeService.findByBundleIdAndChannelStatus(bundleId, LockStatus.BUSY);
+			List<ChannelSchemePO> channelSchemePOs = channelSchemeService.findByBundleIdAndChannelStatus(bundleId,
+					LockStatus.BUSY);
 			for (ChannelSchemePO channelSchemePO : channelSchemePOs) {
 				channelSchemePO.setChannelStatus(LockStatus.IDLE);
 				channelSchemePO.setOperateIndex(channelSchemePO.getOperateIndex() + 1);
@@ -476,10 +510,12 @@ public class BundleManageController extends ControllerBase {
 
 	@RequestMapping("/modifyExtraInfo")
 	@ResponseBody
-	public Map<String, Object> modifyExtraInfo(@RequestParam(value = "bundleId") String bundleId, @RequestParam(value = "bundleName") String bundleName,
-			@RequestParam(value = "deviceIp") String deviceIp, @RequestParam(value = "devicePort") Integer devicePort, @RequestParam(value = "extraInfos") String extraInfos) {
-		LOGGER.info(
-				"modifyExtraInfo, bundleId=" + bundleId + " ,bundleName=" + bundleName + " ,deviceIp=" + deviceIp + " ,devicePort=" + devicePort + " ,extraInfos=" + extraInfos);
+	public Map<String, Object> modifyExtraInfo(@RequestParam(value = "bundleId") String bundleId,
+			@RequestParam(value = "bundleName") String bundleName, @RequestParam(value = "deviceIp") String deviceIp,
+			@RequestParam(value = "devicePort") Integer devicePort,
+			@RequestParam(value = "extraInfos") String extraInfos) {
+		LOGGER.info("modifyExtraInfo, bundleId=" + bundleId + " ,bundleName=" + bundleName + " ,deviceIp=" + deviceIp
+				+ " ,devicePort=" + devicePort + " ,extraInfos=" + extraInfos);
 
 		Map<String, Object> data = makeAjaxData();
 		try {
@@ -708,33 +744,30 @@ public class BundleManageController extends ControllerBase {
 					bundlePO.setDevicePort(Integer.valueOf(portCell.getStringCellValue()));
 				}
 
-				/*if (null != username && !username.isEmpty()) {
-					// 通知用户权限服务创建虚拟用户
-					Boolean beDevice = BundlePO.beDeviceBundle(bundlePO.getDeviceModel());
-					UserResultBO userResult = userFeign.createVirtualUser(bundlePO.getUsername(), bundlePO.getOnlinePassword(), beDevice);
-					if (null == userResult || null == userResult.getUserId()) {
-						LOGGER.error("Fail to add bundle : Create username Error --> " + bundlePO.getUsername());
-						continue;
-					}
-
-					// 通知用户权限服务创建虚拟角色
-					RoleResultBO roleResult = userFeign.createVirtualRole(bundlePO.getUsername());
-					if (null == roleResult || null == roleResult.getRoleId()) {
-						LOGGER.error("Fail to add bundle : Create user role Error --> " + bundlePO.getUsername());
-						continue;
-					}
-
-					// 绑定虚拟角色和bundle权限
-					RoleAndResourceIdBO roleAndResourceIdBO = new RoleAndResourceIdBO();
-					roleAndResourceIdBO.setRoleId(roleResult.getRoleId());
-					roleAndResourceIdBO.setResourceCodes(new ArrayList<String>());
-					roleAndResourceIdBO.getResourceCodes().add(bundlePO.getBundleId());
-					ResultBO bindResult = userFeign.bindRolePrivilege(roleAndResourceIdBO);
-					if (null == bindResult || !bindResult.isResult()) {
-						LOGGER.error("Fail to add bundle : Bind user role Error --> " + bundlePO.getUsername());
-						continue;
-					}
-				}*/
+				/*
+				 * if (null != username && !username.isEmpty()) { // 通知用户权限服务创建虚拟用户 Boolean
+				 * beDevice = BundlePO.beDeviceBundle(bundlePO.getDeviceModel()); UserResultBO
+				 * userResult = userFeign.createVirtualUser(bundlePO.getUsername(),
+				 * bundlePO.getOnlinePassword(), beDevice); if (null == userResult || null ==
+				 * userResult.getUserId()) {
+				 * LOGGER.error("Fail to add bundle : Create username Error --> " +
+				 * bundlePO.getUsername()); continue; }
+				 * 
+				 * // 通知用户权限服务创建虚拟角色 RoleResultBO roleResult =
+				 * userFeign.createVirtualRole(bundlePO.getUsername()); if (null == roleResult
+				 * || null == roleResult.getRoleId()) {
+				 * LOGGER.error("Fail to add bundle : Create user role Error --> " +
+				 * bundlePO.getUsername()); continue; }
+				 * 
+				 * // 绑定虚拟角色和bundle权限 RoleAndResourceIdBO roleAndResourceIdBO = new
+				 * RoleAndResourceIdBO(); roleAndResourceIdBO.setRoleId(roleResult.getRoleId());
+				 * roleAndResourceIdBO.setResourceCodes(new ArrayList<String>());
+				 * roleAndResourceIdBO.getResourceCodes().add(bundlePO.getBundleId()); ResultBO
+				 * bindResult = userFeign.bindRolePrivilege(roleAndResourceIdBO); if (null ==
+				 * bindResult || !bindResult.isResult()) {
+				 * LOGGER.error("Fail to add bundle : Bind user role Error --> " +
+				 * bundlePO.getUsername()); continue; } }
+				 */
 
 				bundleService.save(bundlePO);
 
@@ -747,10 +780,12 @@ public class BundleManageController extends ControllerBase {
 					Cell decoderCell = row.getCell(8);
 					if (null != encoderCell && "是".equals(encoderCell.getStringCellValue())) {
 						// 编码器
-						channelSchemeDao.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO.getBundleId()));
+						channelSchemeDao
+								.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO.getBundleId()));
 					} else if (null != decoderCell && "是".equals(decoderCell.getStringCellValue())) {
 						// 解码器
-						channelSchemeDao.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
+						channelSchemeDao
+								.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
 					} else {
 						// 按照jv210模板自动生成能力配置
 						bundleService.configDefaultAbility(bundlePO);
@@ -828,7 +863,8 @@ public class BundleManageController extends ControllerBase {
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-			headers.setContentDispositionFormData("attachment", new String((fileName + ".xls").getBytes("UTF-8"), "iso-8859-1"));
+			headers.setContentDispositionFormData("attachment",
+					new String((fileName + ".xls").getBytes("UTF-8"), "iso-8859-1"));
 
 			return new ResponseEntity<byte[]>(os.toByteArray(), headers, HttpStatus.CREATED);
 
@@ -931,6 +967,29 @@ public class BundleManageController extends ControllerBase {
 			}
 		}
 		return workbook;
+	}
+
+	private JSONObject restTemplatePutAndReturn(String url, String heartBeatUrl) {
+		RestTemplate restTemplate = new RestTemplate();
+
+		Map<String, String> paramters = new HashMap<>();
+
+		paramters.put("msg_id", "test333");
+		paramters.put("heartbeat_url", heartBeatUrl);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		String str = null;
+
+		str = JSONObject.toJSONString(paramters);
+
+		HttpEntity<String> entity = new HttpEntity<>(str, headers);
+
+		ResponseEntity<String> resultEntity = restTemplate.exchange(url, HttpMethod.PUT, entity, String.class);
+
+		return JSONObject.parseObject(resultEntity.getBody());
+
 	}
 
 }
