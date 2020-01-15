@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
 
-@FeignClient(name = "suma-venus-resource", configuration = FeignConfiguration.class, path = "suma-venus-resource")
+@FeignClient(name = "tetris-resource", configuration = FeignConfiguration.class)
 public interface BundleFeign {
 
 	/**
