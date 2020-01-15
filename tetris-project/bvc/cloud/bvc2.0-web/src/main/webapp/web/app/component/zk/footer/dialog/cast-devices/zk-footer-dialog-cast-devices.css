@@ -1,0 +1,6 @@
+/* reset */
+html, body{overflow:hidden;}
+.zk-footer-dialog-cast-devices,
+.zk-footer-dialog-cast-devices *{box-sizing:border-box!important;}
+
+.zk-footer-dialog-cast-devices .no-scroll-x .el-scrollbar__wrap{overflow-x:hidden; border-bottom:1px solid #ebebeb;}

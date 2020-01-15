@@ -1,0 +1,13 @@
+/* reset */
+html, body{overflow:hidden;}
+.zk-header *{box-sizing:border-box!important;}
+.zk-header .el-scrollbar__wrap{overflow-x: hidden;}
+
+.header-button{display:inline-block; width:40px; height:40px; line-height:40px; text-align:center;}
+.header-button{cursor:pointer; transition:background-color .1s ease-in;}
+.header-button:hover{background-color:rgba(0,0,0,.3);}
+
+#desktop-icons td{width:80px; height:90px; text-align:center; vertical-align:middle;}
+#desktop-icons td:hover{border:1px solid rgba(255, 255, 255, 0.25); background-color:rgba(239, 255, 236, 0.25); border-radius:2px;}
+
+.zk-header .el-badge__content{min-width:18px; height:18px; line-height:18px; border-radius:9px; padding:0; top:8px; left:-2px; border-width:0; display:inline-block;}

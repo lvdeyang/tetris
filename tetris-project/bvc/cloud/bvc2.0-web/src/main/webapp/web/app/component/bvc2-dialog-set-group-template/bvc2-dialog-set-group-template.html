@@ -1,0 +1,47 @@
+<el-dialog
+		class="bvc2-dialog-set-group-template"
+		width="400px"
+		height="200px"
+		style="line-height: 0; text-align: center"
+		title="设置设备组模板"
+		:visible.sync="setTemplateVisible"
+		:close-on-click-modal="false">
+	<el-form>
+	
+		<el-form-item label="参数方案" style="margin-left:40px">
+			<el-select v-model="tplIds.avtplId" placeholder="请选择参数方案" style="margin-left:-15px">
+				<el-option v-for="avtpl in avtpls"
+							:key="avtpl.value"
+							:label="avtpl.label" 
+							:value="avtpl.value">
+				</el-option>
+			</el-select>
+		</el-form-item>
+		
+		<el-form-item label="会议模板" style="margin-left:40px">
+			<el-select v-model="tplIds.systemTplId" placeholder="请选择会议模板" style="margin-left:-15px">
+				<el-option v-for="systemTpl in systemtpls"
+							:key="systemTpl.value" 
+							:label="systemTpl.label"
+							:value="systemTpl.value">
+				</el-option>
+			</el-select>
+		</el-form-item>
+
+		<el-form-item label="看会权限" style="margin-left:40px">
+			<el-select v-model="tplIds.authtplId" placeholder="看会权限模板（可不选）" style="margin-left:-15px">
+				<el-option v-for="authtpl in authtpls"
+						   :key="authtpl.value"
+						   :label="authtpl.label"
+						   :value="authtpl.value">
+				</el-option>
+			</el-select>
+		</el-form-item>
+	</el-form>
+	
+	<div slot="footer" class="dialog-footer">
+		<el-button @click="setTemplateVisible=false">取消</el-button>
+		<el-button type="primary" @click="setTemplate":loading="style.setTemplate.isLoading">{{style.setTemplate.text}}</el-button>
+	</div>
+	
+</el-dialog>

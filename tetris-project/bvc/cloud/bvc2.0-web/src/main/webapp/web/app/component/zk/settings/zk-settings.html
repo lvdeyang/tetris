@@ -1,0 +1,84 @@
+<div class="zk-settings" style="width:100%; height:100%; background-color:#fff; position:relative; padding:20px;">
+    <el-tabs tab-position="left" style="height:100%;">
+        <el-tab-pane label="呼叫设置">
+            <div style="padding-left:20px;">
+                <div style="margin-bottom:40px;">
+                    <div style="font-size:20px; margin-bottom:20px;">呼叫应答方式</div>
+                    <div>
+                        <el-radio-group v-model="callResponseMode" @change="handleCallResponseModeChange">
+                            <el-radio label="0">手动</el-radio>
+                            <el-radio label="1">自动</el-radio>
+                        </el-radio-group>
+                    </div>
+                </div>
+            </div>
+        </el-tab-pane>
+        <!--<el-tab-pane label="通话设置">
+            <div style="padding-left:20px;">
+                <div style="margin-bottom:40px;">
+                    <div style="font-size:20px; margin-bottom:20px;">点播方式</div>
+                    <div>
+                        <el-radio v-model="vodMode" label="0">单播</el-radio>
+                        <el-radio v-model="vodMode" label="1">组播</el-radio>
+                    </div>
+                </div>
+            </div>
+        </el-tab-pane>-->
+        <el-tab-pane label="视频转发">
+            <div style="padding-left:20px;">
+                <div style="margin-bottom:40px;">
+                    <div style="font-size:20px; margin-bottom:20px;">视频转发应答方式</div>
+                    <div>
+                        <el-radio-group v-model="videoSendAnswerMode" @change="handleVideoSendAnswerModeChange">
+                            <el-radio label="0">手动</el-radio>
+                            <el-radio label="1">自动</el-radio>
+                        </el-radio-group>
+                    </div>
+                </div>
+            </div>
+        </el-tab-pane>
+        <!--<el-tab-pane label="指挥会议">
+            <div style="padding-left:20px;">
+                <div style="margin-bottom:40px;">
+                    <div style="font-size:20px; margin-bottom:20px;">启动模式</div>
+                    <div>
+                        <el-radio v-model="commandMeetingAutoStart" label="0">手动</el-radio>
+                        <el-radio v-model="commandMeetingAutoStart" label="1">自动</el-radio>
+                    </div>
+                </div>
+                <div style="margin-bottom:40px;">
+                    <div style="font-size:20px; margin-bottom:20px;">字幕设置</div>
+                    <div>
+                        <el-radio v-model="subtitle" label="0">启用</el-radio>
+                        <el-radio v-model="subtitle" label="1">禁用</el-radio>
+                    </div>
+                </div>
+                <div style="margin-bottom:40px;">
+                    <div style="font-size:20px; margin-bottom:20px;">可见范围</div>
+                    <div>
+                        <el-radio v-model="visibleRange" label="0">组内用户</el-radio>
+                        <el-radio v-model="visibleRange" label="1">全网用户</el-radio>
+                    </div>
+                </div>
+                <div style="margin-bottom:40px;">
+                    <div style="font-size:20px; margin-bottom:20px;">录像模式</div>
+                    <div>
+                        <el-radio v-model="recordMode" label="0">手动</el-radio>
+                        <el-radio v-model="recordMode" label="1">自动</el-radio>
+                    </div>
+                </div>
+            </div>
+        </el-tab-pane>-->
+        <!--<el-tab-pane label="专向设置">
+            <div style="padding-left:20px;">
+                <div style="margin-bottom:40px;">
+                    <div style="font-size:20px; margin-bottom:20px;">专向方式</div>
+                    <div>
+                        <el-radio v-model="dedicatedMode" label="0">隐音视频专向</el-radio>
+                        <el-radio v-model="dedicatedMode" label="1">隐声音专向</el-radio>
+                    </div>
+                </div>
+            </div>
+        </el-tab-pane>-->
+    </el-tabs>
+</div>

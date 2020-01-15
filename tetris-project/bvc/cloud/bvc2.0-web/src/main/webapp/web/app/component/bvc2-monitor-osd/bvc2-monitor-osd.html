@@ -1,0 +1,207 @@
+<div class="bvc2-monitor-osd" style="width:100%; height:100%; padding-left:10px; padding-right:10px; box-sizing:border-box; background-color:#fff;">
+    <div style="width:100%; height:100%; position:relative;">
+        <div class="monitor92-l02" style="width:450px; height:100%; border-right:1px solid rgb(235, 238, 245);">
+            <div style="width:100%; height:100%; position:relative;">
+                <div style="width:100%; height:52px; padding-top:10px;">
+                    <el-button size="small" @click="handleAddOsd" type="primary">添加字幕</el-button>
+                    <!--<el-button size="small" type="danger">删除字幕</el-button>-->
+                </div>
+                <div style="position:absolute; left:0; top:52px;right:0; bottom:52px; padding-right:10px;">
+                    <el-table
+                            :data="table.osd.data"
+                            height="100%"
+                            highlight-current-row
+                            @current-change="osdCurrentChange"
+                            style="width: 100%">
+                        <!--<el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>-->
+                        <el-table-column
+                                fixed
+                                prop="name"
+                                label="名称">
+                        </el-table-column>
+                        <el-table-column
+                                fixed="right"
+                                label="操作"
+                                width="120">
+                            <template slot-scope="scope">
+                                <el-button type="text" icon="el-icon-edit" style="padding:0; font-size:20px; position:relative; top:1px;" @click.stop="osdRowEdit(scope)"></el-button>
+                                <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:20px; position:relative; top:1px;" @click.stop="osdRowDelete(scope)"></el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+                <div style="height:52px; width:100%; position:absolute; right:0; bottom:0; padding-top:10px;">
+                    <el-pagination
+                            style="float:right;"
+                            background
+                            @size-change="handleOsdSizeChange"
+                            @current-change="handleOsdCurrentChange"
+                            :current-page="table.osd.page.currentPage"
+                            :page-size="table.osd.page.pageSize"
+                            layout="prev, pager, next"
+                            :total="table.osd.page.total">
+                    </el-pagination>
+                </div>
+            </div>
+        </div>
+        <div style="position:absolute; left:450px; top:0; right:0; bottom:0;" v-if="table.osd.currentOsd">
+            <div style="width:100%; height:100%; position:relative; padding-left:10px; padding-right:10px;">
+                <div style="width:100%; height:52px; padding-top:10px;">
+                    <el-button size="small" @click="handleAddLayer" type="primary">添加图层</el-button>
+                    <!--<el-button size="small" type="danger">删除图层</el-button>-->
+                </div>
+                <div style="position:absolute; left:10px; top:52px;right:0; bottom:0;">
+                    <el-table
+                            height="100%"
+                            :data="table.layer.data"
+                            style="width: 100%">
+                        <!--<el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>-->
+                        <el-table-column
+                                fixed
+                                prop="subtitleName"
+                                label="字幕名称">
+                        </el-table-column>
+                        <el-table-column
+                                fixed
+                                prop="subtitleUsername"
+                                label="字幕创建人">
+                        </el-table-column>
+                        <el-table-column
+                                fixed
+                                prop="x"
+                                label="横坐标百分比">
+                        </el-table-column>
+                        <el-table-column
+                                fixed
+                                prop="y"
+                                label="纵坐标百分比">
+                        </el-table-column>
+                        <el-table-column
+                                fixed
+                                prop="layerIndex"
+                                label="图层顺序">
+                        </el-table-column>
+                        <el-table-column
+                                fixed="right"
+                                label="操作"
+                                width="220">
+                            <template slot-scope="scope">
+                                <el-button v-if="scope.row.type==='SUBTITLE'" type="text" icon="icon-edit" style="padding:0; font-size:19px; position:relative; top:2px;" @click.stop="layerRowEdit(scope)"></el-button>
+                                <el-button v-else type="text" icon="icon-edit" style="padding:0; font-size:19px; position:relative; top:2px;" disabled></el-button>
+                                <el-button type="text" icon="icon-trash" style="padding:0; font-size:19px; position:relative; top:1px;" @click.stop="layerRowDelete(scope)"></el-button>
+                                <el-button type="text" icon=" icon-arrow-up" style="padding:0; font-size:18px; position:relative;" @click.stop="layerRowUp(scope)" v-if="scope.row.layerIndex!==0"></el-button>
+                                <el-button type="text" icon=" icon-arrow-up" style="padding:0; font-size:18px; position:relative;" @click.stop="layerRowUp(scope)" v-else disabled></el-button>
+                                <el-button type="text" icon="icon-arrow-down" style="padding:0; font-size:18px; position:relative;" @click.stop="layerRowDown(scope)" v-if="scope.row.layerIndex!==table.layer.data.length-1"></el-button>
+                                <el-button type="text" icon="icon-arrow-down" style="padding:0; font-size:18px; position:relative;" @click.stop="layerRowDown(scope)" v-else disabled></el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <template>
+
+        <el-dialog
+                title="添加osd"
+                :visible.sync="dialog.addOsd.visible"
+                width="500px"
+                :before-close="handleAddOsdClose">
+
+            <el-input v-model="dialog.addOsd.name" placeholder="起个名吧！" style="width:100%;"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button  size="medium" @click="dialog.addOsd.visible = false">取消</el-button>
+                <el-button  size="medium" type="primary" @click="handleAddOsdCommit" :loading="dialog.addOsd.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+                title="修改osd"
+                :visible.sync="dialog.editOsd.visible"
+                width="500px"
+                :before-close="handleEditOsdClose">
+
+            <el-input v-model="dialog.editOsd.name" placeholder="起个名吧！" style="width:100%;"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button  size="medium" @click="dialog.editOsd.visible = false">取消</el-button>
+                <el-button  size="medium" type="primary" @click="handleEditOsdCommit" :loading="dialog.editOsd.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+                title="添加图层"
+                :visible.sync="dialog.addLayer.visible"
+                width="500px"
+                :before-close="handleAddLayerClose">
+
+            <bvc2-dialog-single-subtitle ref="addLayerSelectSubtitleDialog" @selected-subtitle="selectedSubtitleWhenAddLayer"></bvc2-dialog-single-subtitle>
+
+            <el-form label-width="120px">
+                <el-form-item label="图层类型">
+                    <el-select v-model="dialog.addLayer.layerType" placeholder="请选择" style="width:100%;">
+                        <el-option
+                                v-for="type in layerTypes"
+                                :key="type"
+                                :label="type"
+                                :value="type">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="选择字幕">
+                    <el-input v-if="dialog.addLayer.layerType!=='字幕'" v-model="dialog.addLayer.subtitleName" disabled></el-input>
+                    <el-input v-else v-model="dialog.addLayer.subtitleName" readonly placeholder="点击我！" @click.native="handleAddLayerSelectSubtitle"></el-input>
+                </el-form-item>
+                <el-form-item label="横坐标百分比">
+                    <el-input-number size="medium" :min="0" :max="100" v-model="dialog.addLayer.x"></el-input-number>
+                </el-form-item>
+                <el-form-item label="纵坐标百分比">
+                    <el-input-number size="medium" :min="0" :max="100" v-model="dialog.addLayer.y"></el-input-number>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button  size="medium" @click="handleAddLayerClose">取消</el-button>
+                <el-button  size="medium" type="primary" @click="handleAddLayerCommit" :loading="dialog.addLayer.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+        <el-dialog
+                title="修改图层"
+                :visible.sync="dialog.editLayer.visible"
+                width="500px"
+                :before-close="handleEditLayerClose">
+
+            <bvc2-dialog-single-subtitle ref="editLayerSelectSubtitleDialog" @selected-subtitle="selectedSubtitleWhenEditLayer"></bvc2-dialog-single-subtitle>
+
+            <el-form label-width="120px">
+                <el-form-item label="选择字幕">
+                    <el-input v-model="dialog.editLayer.subtitleName" readonly placeholder="点击我！" @click.native="handleEditLayerSelectSubtitle"></el-input>
+                </el-form-item>
+                <el-form-item label="横坐标百分比">
+                    <el-input-number size="medium" :min="0" :max="100" v-model="dialog.editLayer.x"></el-input-number>
+                </el-form-item>
+                <el-form-item label="纵坐标百分比">
+                    <el-input-number size="medium" :min="0" :max="100" v-model="dialog.editLayer.y"></el-input-number>
+                </el-form-item>
+            </el-form>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button  size="medium" @click="handleEditLayerClose">取消</el-button>
+                <el-button  size="medium" type="primary" @click="handleEditLayerCommit" :loading="dialog.editLayer.loading">确定</el-button>
+            </span>
+
+        </el-dialog>
+
+    </template>
+</div>

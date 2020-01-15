@@ -1,0 +1,913 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BookmarkManager">
+    <bookmark url="file://$PROJECT_DIR$/web/app/component/zk/business/zk-business.css" line="45" />
+    <bookmark url="file://$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/cloud-control/leader-cloud-control.jsp" line="100" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" readonly="true" id="fd3741db-d3c7-4551-a04a-0ae9951748af" name="Default" comment="" />
+    <ignored path="webapp.iws" />
+    <ignored path=".idea/workspace.xml" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FavoritesManager">
+    <favorites_list name="webapp" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="zk-business.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/zk/business/zk-business.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="311" column="25" selection-start-line="311" selection-start-column="25" selection-end-line="311" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="leader-forward.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/forward/leader-forward.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="193" column="78" selection-start-line="193" selection-start-column="78" selection-end-line="193" selection-end-column="80" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="bvc2-monitor-terminal-live-t.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/bvc2-monitor-live/terminal/bvc2-monitor-terminal-live-t.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="865" column="78" selection-start-line="865" selection-start-column="78" selection-end-line="865" selection-end-column="78" />
+              <folding>
+                <marker date="1577957210793" expanded="true" signature="9632:9641" placeholder="..." />
+                <marker date="1577957210793" expanded="true" signature="34836:34922" placeholder="..." />
+                <marker date="1577957210793" expanded="true" signature="36976:37062" placeholder="..." />
+                <marker date="1577957210793" expanded="true" signature="38044:38130" placeholder="..." />
+                <marker date="1577957210793" expanded="true" signature="84313:84322" placeholder="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="bvc2-monitor-terminal-live.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/bvc2-monitor-live/terminal/bvc2-monitor-terminal-live.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="865" column="78" selection-start-line="865" selection-start-column="78" selection-end-line="865" selection-end-column="78" />
+              <folding>
+                <marker date="1577957210770" expanded="true" signature="9630:9639" placeholder="..." />
+                <marker date="1577957210770" expanded="true" signature="34834:34920" placeholder="..." />
+                <marker date="1577957210770" expanded="true" signature="36974:37060" placeholder="..." />
+                <marker date="1577957210770" expanded="true" signature="38042:38128" placeholder="..." />
+                <marker date="1577957210770" expanded="true" signature="83283:83292" placeholder="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="leader-order.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/order/leader-order.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="82" column="86" selection-start-line="82" selection-start-column="86" selection-end-line="82" selection-end-column="86" />
+              <folding>
+                <element signature="e#3420#5412#0" expanded="false" />
+                <element signature="e#5997#7572#0" expanded="false" />
+                <element signature="e#7866#8623#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="rightBar.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="265" column="80" selection-start-line="265" selection-start-column="80" selection-end-line="265" selection-end-column="80" />
+              <folding>
+                <element signature="e#19115#19399#0" expanded="false" />
+                <element signature="e#19460#20053#0" expanded="false" />
+                <element signature="e#23052#25582#0" expanded="false" />
+                <element signature="e#27006#28906#0" expanded="false" />
+                <element signature="e#28951#30251#0" expanded="false" />
+                <element signature="e#30287#31178#0" expanded="false" />
+                <element signature="e#46131#48606#0" expanded="false" />
+                <element signature="e#48636#48774#0" expanded="false" />
+                <element signature="e#53040#53592#0" expanded="false" />
+                <element signature="e#53091#53169#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="rightBar自己模拟折叠事件.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar自己模拟折叠事件.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="242" column="103" selection-start-line="242" selection-start-column="103" selection-end-line="242" selection-end-column="103" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="zk-business-forward.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/zk/business/forward/zk-business-forward.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="205" column="80" selection-start-line="205" selection-start-column="80" selection-end-line="205" selection-end-column="80" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="call-user.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/callUser/call-user.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="90" column="42" selection-start-line="90" selection-start-column="42" selection-end-line="90" selection-end-column="42" />
+              <folding>
+                <element signature="e#2203#2978#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="bvc2-monitor-record.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/web/app/component/bvc2-monitor-record/bvc2-monitor-record.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="1.495283">
+              <caret line="288" column="47" selection-start-line="288" selection-start-column="47" selection-end-line="288" selection-end-column="47" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="CSS File" />
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>cooperativeCommand</find>
+      <find>groupType</find>
+      <find>groupId</find>
+      <find>commandForward</find>
+      <find>onVodResourceCheckChange</find>
+      <find>tree.resource.select</find>
+      <find>tree.record.select</find>
+      <find>tree.device.select</find>
+      <find>handleForwardStopAll</find>
+      <find>members</find>
+      <find>self.group</find>
+      <find>/command/record/query</find>
+      <find>self.table</find>
+      <find>handleRowRemove</find>
+      <find>icon-</find>
+      <find>icon</find>
+      <find>option-button</find>
+      <find>layoutChange</find>
+      <find>customIcon</find>
+      <find>buttons.filterOnline</find>
+      <find>/zk/business</find>
+      <find>filterOnline</find>
+      <find>currentTab</find>
+      <find>refreshInstitution</find>
+      <find>websocket</find>
+      <find>router.js</find>
+      <find>router</find>
+      <find>parsePageId</find>
+      <find>callUser</find>
+      <find>handleContextMenuShow</find>
+    </findStrings>
+    <replaceStrings>
+      <replace />
+      <replace>r</replace>
+      <replace>/zk-leader</replace>
+    </replaceStrings>
+    <dirStrings>
+      <dir>F:\SVN\bvc2.0-integration-it3.1\bvc2.0-web\src\main\webapp\web\lib</dir>
+      <dir>F:\SVN\bvc2.0-integration-it3.1\bvc2.0-web\src\main\webapp\web\commons\date</dir>
+      <dir>F:\SVN\bvc2.0-integration-it3.1\bvc2.0-web\src\main\webapp</dir>
+    </dirStrings>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/web/app/icons/rightIcons/style.css" />
+        <option value="$PROJECT_DIR$/web/app/component/zk/footer/zk-footer.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/cast-devices/zk-footer-dialog-cast-devices.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk/footer/dialog/cast-devices/zk-footer-dialog-cast-devices.js" />
+        <option value="$PROJECT_DIR$/web/app/zk-leader/cast-devices/main.js" />
+        <option value="$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/cast-devices/leader-cast-devices.jsp" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/cloud-control/zk-footer-dialog-cloud-control.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk/footer/dialog/cloud-control/zk-footer-dialog-cloud-control.js" />
+        <option value="$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/cloud-control/leader-cloud-control.jsp" />
+        <option value="$PROJECT_DIR$/web/app/zk-leader/cloud-control/main.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/cloud-control/leader-cloud-control.css" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/callUser/leader-cooperation.js" />
+        <option value="$PROJECT_DIR$/web/app/zk-leader/callUser/main.js" />
+        <option value="$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/callUser/leader-cooperation.jsp" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/add-member/add-member.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/cast-devices/leader-cast-devices.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/cloud-control/leader-cloud-control.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/cooperation/leader-cooperation.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/send-message/leader-send-message.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/settings/leader-settings.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/callUser/call-user.css" />
+        <option value="$PROJECT_DIR$/web/app/component/zk/business/forward/zk-business-forward.html" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/order/leader-forward.js" />
+        <option value="$PROJECT_DIR$/web/app/zk-leader/order/main.js" />
+        <option value="$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/order/leader-order.jsp" />
+        <option value="$PROJECT_DIR$/web/app/icons/commandBtns/style.css" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/footer/historyMessage.css" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/footer/historyMessage.html" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/footer/historyMessage.js" />
+        <option value="$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/footer/history-message.jsp" />
+        <option value="$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/index/right-bar.jsp" />
+        <option value="$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/header/zk-leader-header.jsp" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/cast-devices/leader-cast-devices.css" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/order/leader-order.css" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar.css" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar.html" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/order/leader-order.html" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/callUser/call-user.html" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/cast-devices/leader-cast-devices.html" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/cloud-control/leader-cloud-control.html" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/header/leader-header.html" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/header/leader-header.css" />
+        <option value="$PROJECT_DIR$/web/app/component/bvc2-monitor-live/terminal/bvc2-monitor-terminal-live-t.js" />
+        <option value="$PROJECT_DIR$/web/app/component/bvc2-monitor-live/terminal/bvc2-monitor-terminal-live.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/forward/leader-forward.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk/business/forward/zk-business-forward.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/callUser/call-user.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/order/leader-order.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar自己模拟折叠事件.js" />
+        <option value="$PROJECT_DIR$/web/app/component/zk/business/zk-business.js" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" />
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+  </component>
+  <component name="NamedScopeManager">
+    <order />
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1056" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
+    <OptionsSetting value="true" id="Add" />
+    <OptionsSetting value="true" id="Remove" />
+    <OptionsSetting value="true" id="Checkout" />
+    <OptionsSetting value="true" id="Update" />
+    <OptionsSetting value="true" id="Status" />
+    <OptionsSetting value="true" id="Edit" />
+    <ConfirmationsSetting value="0" id="Add" />
+    <ConfirmationsSetting value="0" id="Remove" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+    </navigator>
+    <panes>
+      <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="webapp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="Scratches" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="HbShouldOpenHtmlAsHb" value="" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+    <property name="FullScreen" value="false" />
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="F:\SVN\bvc2.0-integration-it3.1\bvc2.0-web\src\main\webapp\web\app\icons\commandBtns" />
+      <recent name="F:\SVN\bvc2.0-integration-it3.1\bvc2.0-web\src\main\webapp\WEB-INF\jsp\web\bvc\zk-leader" />
+      <recent name="F:\SVN\bvc2.0-integration-it3.1\bvc2.0-web\src\main\webapp\web\app\zk-leader" />
+      <recent name="F:\SVN\bvc2.0-integration-it3.1\bvc2.0-web\src\main\webapp\web\app\component\zk-leader\order" />
+      <recent name="F:\SVN\bvc2.0-integration-it3.1\bvc2.0-web\src\main\webapp\web\app\component\zk-leader" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="F:\SVN\bvc2.0-integration-it3.1\bvc2.0-web\src\main\webapp\web\app\icons\myFonts" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="ruleStates">
+      <list>
+        <RuleState>
+          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
+        </RuleState>
+        <RuleState>
+          <option name="name" value="StatusDashboardGroupingRule" />
+        </RuleState>
+      </list>
+    </option>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application">
+      <method />
+    </configuration>
+    <configuration default="true" type="DartUnitRunConfigurationType" factoryName="DartUnit">
+      <method />
+    </configuration>
+    <configuration default="true" type="JavaScriptTestRunnerKarma" factoryName="Karma" config-file="">
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
+      <method />
+    </configuration>
+    <configuration default="true" type="JsTestDriver-test-runner" factoryName="JsTestDriver">
+      <setting name="configLocationType" value="CONFIG_FILE" />
+      <setting name="settingsFile" value="" />
+      <setting name="serverType" value="INTERNAL" />
+      <setting name="preferredDebugBrowser" value="Chrome" />
+      <method />
+    </configuration>
+    <configuration default="true" type="NodeJSConfigurationType" factoryName="Node.js" working-dir="">
+      <method />
+    </configuration>
+    <configuration default="true" type="cucumber.js" factoryName="Cucumber.js">
+      <option name="cucumberJsArguments" value="" />
+      <option name="executablePath" />
+      <option name="filePath" />
+      <method />
+    </configuration>
+    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <pass-parent-envs>true</pass-parent-envs>
+      <envs />
+      <method />
+    </configuration>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false" />
+  <component name="SvnConfiguration" cleanupOnStartRun="true">
+    <configuration>C:\Users\Administrator\AppData\Roaming\Subversion</configuration>
+    <supportedVersion>125</supportedVersion>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="fd3741db-d3c7-4551-a04a-0ae9951748af" name="Default" comment="" />
+      <created>1555465436444</created>
+      <option name="number" value="Default" />
+      <updated>1555465436444</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="false" />
+    <layout>
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.20442571" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2594655" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24973147" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+    </layout>
+    <layout-to-restore>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.0015864621" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Docker" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32885906" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+    </layout-to-restore>
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <option name="time" value="29" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="XPathView.XPathProjectComponent">
+    <history />
+    <find-history />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk/business/forward/zk-business-forward.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="51" column="38" selection-start-line="51" selection-start-column="38" selection-end-line="51" selection-end-column="38" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/order/leader-order.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="103" column="153" selection-start-line="103" selection-start-column="153" selection-end-line="103" selection-end-column="153" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/zk-leader/order/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="58" column="17" selection-start-line="58" selection-start-column="17" selection-end-line="58" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/forward/leader-forward.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="54" column="28" selection-start-line="54" selection-start-column="28" selection-end-line="54" selection-end-column="28" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/footer/historyMessage.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="31" column="7" selection-start-line="31" selection-start-column="7" selection-end-line="31" selection-end-column="7" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/footer/historyMessage.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="24" column="39" selection-start-line="24" selection-start-column="39" selection-end-line="24" selection-end-column="39" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/footer/history-message.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="68" column="0" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/index/right-bar.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="85" column="54" selection-start-line="85" selection-start-column="54" selection-end-line="85" selection-end-column="54" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk/business/zk-business.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="179" column="89" selection-start-line="178" selection-start-column="15" selection-end-line="179" selection-end-column="89" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#!!top" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/commons.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/config.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="248" column="49" selection-start-line="248" selection-start-column="49" selection-end-line="248" selection-end-column="49" />
+          <folding>
+            <element signature="e#14788#22474#0" expanded="false" />
+            <element signature="e#18443#21976#0" expanded="false" />
+            <element signature="e#23063#23377#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/commons/context/context.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/commons/date/date.ext.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/commons/page/page-wrapper.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/commons/qt/QtContext.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="117" column="37" selection-start-line="117" selection-start-column="37" selection-end-line="117" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/commons/restfull/restfull.api.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/commons/storage/storage.ext.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/commons/string/string.ext.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk/business/zk-business.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="93" column="53" selection-start-line="93" selection-start-column="53" selection-end-line="93" selection-end-column="53" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk/hidden/zk-hidden.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="157" column="47" selection-start-line="157" selection-start-column="47" selection-end-line="157" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk/footer/zk-footer.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/footer/historyMessage.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="182" column="35" selection-start-line="182" selection-start-column="35" selection-end-line="182" selection-end-column="35" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/lib/extral/extral.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/demo/demo01.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="18" column="57" selection-start-line="18" selection-start-column="57" selection-end-line="18" selection-end-column="57" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/lib/frame/vue/vue-router-3.0.1.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/zk/hidden/main.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/commons/router/router.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="92" column="41" selection-start-line="92" selection-start-column="41" selection-end-line="92" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/jv210/config/page-jv210-config.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="13" column="22" selection-start-line="13" selection-start-column="22" selection-end-line="13" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WEB-INF/jsp/web/bvc/zk-leader/header/zk-leader-header.jsp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="87" column="87" selection-start-line="87" selection-start-column="87" selection-end-line="87" selection-end-column="87" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/cast-devices/leader-cast-devices.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="11" column="14" selection-start-line="11" selection-start-column="14" selection-end-line="11" selection-end-column="14" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/order/leader-order.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="38" column="8" selection-start-line="38" selection-start-column="8" selection-end-line="38" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="178" column="0" selection-start-line="178" selection-start-column="0" selection-end-line="178" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="222" column="79" selection-start-line="222" selection-start-column="79" selection-end-line="222" selection-end-column="79" />
+          <folding>
+            <element signature="n#style#0;n#span#0;n#span#0;n#el-tree#0;n#el-scrollbar#0;n#div#0;n#el-tab-pane#0;n#el-tabs#0;n#div#1;n#div#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#span#0;n#el-tree#0;n#el-scrollbar#0;n#div#0;n#el-tab-pane#1;n#el-tabs#0;n#div#1;n#div#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#span#0;n#el-tree#0;n#el-scrollbar#0;n#div#0;n#el-tab-pane#2;n#el-tabs#0;n#div#1;n#div#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#span#0;n#el-tree#0;n#el-scrollbar#0;n#div#0;n#el-tab-pane#3;n#el-tabs#0;n#div#1;n#div#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#span#0;n#el-tree#0;n#el-scrollbar#0;n#div#0;n#el-tab-pane#4;n#el-tabs#0;n#div#1;n#div#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#div#0;n#div#1;n#div#0;n#div#0;n#!!top" expanded="false" />
+            <element signature="n#div#0;n#div#0;n#div#2;n#div#0;n#div#0;n#!!top" expanded="false" />
+            <element signature="n#div#1;n#div#0;n#div#2;n#div#0;n#div#0;n#!!top" expanded="false" />
+            <element signature="n#style#0;n#span#0;n#span#0;n#el-tree#0;n#el-scrollbar#0;n#div#0;n#div#2;n#div#0;n#div#2;n#div#0;n#div#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/order/leader-order.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="108" column="57" selection-start-line="108" selection-start-column="57" selection-end-line="108" selection-end-column="57" />
+          <folding>
+            <element signature="n#div#0;n#el-tab-pane#3;n#el-tabs#0;n#div#1;n#div#0;n#!!top" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/callUser/call-user.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="26" column="65" selection-start-line="26" selection-start-column="65" selection-end-line="26" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/cast-devices/leader-cast-devices.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="45" column="69" selection-start-line="45" selection-start-column="69" selection-end-line="45" selection-end-column="69" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/cloud-control/leader-cloud-control.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/cloud-control/leader-cloud-control.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="85" column="96" selection-start-line="85" selection-start-column="96" selection-end-line="85" selection-end-column="96" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#div#2;n#div#0;n#div#1;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#el-button#0;n#el-scrollbar#0;n#div#1;n#div#2;n#div#0;n#div#1;n#div#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/header/leader-header.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="23" column="33" selection-start-line="23" selection-start-column="33" selection-end-line="23" selection-end-column="33" />
+          <folding>
+            <element signature="n#style#0;n#span#0;n#div#2;n#div#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#0;n#div#3;n#div#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#div#0;n#div#3;n#div#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="n#style#0;n#span#1;n#div#4;n#div#0;n#div#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/header/leader-header.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="101" column="62" selection-start-line="101" selection-start-column="62" selection-end-line="101" selection-end-column="62" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/bvc2-monitor-live/terminal/bvc2-monitor-terminal-live-t.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="865" column="78" selection-start-line="865" selection-start-column="78" selection-end-line="865" selection-end-column="78" />
+          <folding>
+            <marker date="1577957210793" expanded="true" signature="9632:9641" placeholder="..." />
+            <marker date="1577957210793" expanded="true" signature="34836:34922" placeholder="..." />
+            <marker date="1577957210793" expanded="true" signature="36976:37062" placeholder="..." />
+            <marker date="1577957210793" expanded="true" signature="38044:38130" placeholder="..." />
+            <marker date="1577957210793" expanded="true" signature="84313:84322" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/bvc2-monitor-live/terminal/bvc2-monitor-terminal-live.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="865" column="78" selection-start-line="865" selection-start-column="78" selection-end-line="865" selection-end-column="78" />
+          <folding>
+            <marker date="1577957210770" expanded="true" signature="9630:9639" placeholder="..." />
+            <marker date="1577957210770" expanded="true" signature="34834:34920" placeholder="..." />
+            <marker date="1577957210770" expanded="true" signature="36974:37060" placeholder="..." />
+            <marker date="1577957210770" expanded="true" signature="38042:38128" placeholder="..." />
+            <marker date="1577957210770" expanded="true" signature="83283:83292" placeholder="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/forward/leader-forward.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="193" column="78" selection-start-line="193" selection-start-column="78" selection-end-line="193" selection-end-column="80" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk/business/forward/zk-business-forward.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="205" column="80" selection-start-line="205" selection-start-column="80" selection-end-line="205" selection-end-column="80" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/callUser/call-user.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="90" column="42" selection-start-line="90" selection-start-column="42" selection-end-line="90" selection-end-column="42" />
+          <folding>
+            <element signature="e#2203#2978#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar自己模拟折叠事件.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="242" column="103" selection-start-line="242" selection-start-column="103" selection-end-line="242" selection-end-column="103" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/order/leader-order.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="82" column="86" selection-start-line="82" selection-start-column="86" selection-end-line="82" selection-end-column="86" />
+          <folding>
+            <element signature="e#3420#5412#0" expanded="false" />
+            <element signature="e#5997#7572#0" expanded="false" />
+            <element signature="e#7866#8623#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk-leader/index/rightBar.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="265" column="80" selection-start-line="265" selection-start-column="80" selection-end-line="265" selection-end-column="80" />
+          <folding>
+            <element signature="e#19115#19399#0" expanded="false" />
+            <element signature="e#19460#20053#0" expanded="false" />
+            <element signature="e#23052#25582#0" expanded="false" />
+            <element signature="e#27006#28906#0" expanded="false" />
+            <element signature="e#28951#30251#0" expanded="false" />
+            <element signature="e#30287#31178#0" expanded="false" />
+            <element signature="e#46131#48606#0" expanded="false" />
+            <element signature="e#48636#48774#0" expanded="false" />
+            <element signature="e#53040#53592#0" expanded="false" />
+            <element signature="e#53091#53169#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/zk/business/zk-business.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="311" column="25" selection-start-line="311" selection-start-column="25" selection-end-line="311" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/web/app/component/bvc2-monitor-record/bvc2-monitor-record.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="1.495283">
+          <caret line="288" column="47" selection-start-line="288" selection-start-column="47" selection-end-line="288" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
