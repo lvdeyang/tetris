@@ -61,4 +61,25 @@ public interface CapacityFeign {
 	@RequestMapping(value = "/capacity/transcode/feign/analysis/input")
 	public JSONObject analysisInput(@RequestParam("analysisInput") String analysisInput) throws Exception;
 	
+	/**
+	 * 设置告警地址<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月13日 下午3:00:44
+	 * @param String capacityIp 能力ip
+	 */
+	@RequestMapping(value = "/capacity/alarm/feign/set/alarmUrl")
+	public JSONObject setAlarmUrl(@RequestParam("capacityIp") String capacityIp) throws Exception;
+	
+	/**
+	 * 设置心跳地址<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月14日 上午11:09:52
+	 * @param String capacityIp 能力ip
+	 */
+	@RequestMapping(value = "/capacity/heartbeat/feign/set/heartbeatUrl")
+	public JSONObject setHeartbeatUrl(
+			@RequestParam("capacityIp") String capacityIp,
+			@RequestParam("heartbeatUrl") String heartbeatUrl) throws Exception;
 }
