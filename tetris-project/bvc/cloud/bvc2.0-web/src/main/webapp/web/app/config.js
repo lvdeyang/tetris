@@ -18,7 +18,7 @@ define(function(){
             header_session_id:'tetris-002',
             //url:查询菜单
             //queryRouterUrl :'https://www.easy-mock.com/mock/5c35432c90862b0b0cf5042f/example/queryRouter'
-            queryRouterUrl: useLocalRouteConst?'http://' + requestIp +':8885/privilege/queryMenu':'http://192.165.56.77:8887/privilege/queryMenu',
+            //queryRouterUrl: useLocalRouteConst?'http://' + requestIp +':8885/privilege/queryMenu':'http://192.165.56.77:8887/privilege/queryMenu',
             url2600: 'http://192.165.56.153',
             signalUrl:'http://192.165.56.84:8099/index'
         },

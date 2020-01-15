@@ -22,6 +22,7 @@ require.config({
 
         'config':window.APPPATH + 'config',
         'commons':window.APPPATH + 'commons',
+        'menu':window.COMMONSPATH + 'menu/menu',
 
         /* components */
         'bvc2-header':window.APPPATH + 'component/bvc2-header/bvc2-header',
@@ -199,26 +200,23 @@ require([
     'vue',
     'router',
     'context',
-    'menu',
     'config',
-    'jquery',
+    'menu',
     'restfull',
     'commons',
     'element-ui',
     'bvc2-monitor-call'
-], function(storage, Vue, router, context, config, ajax, commons){
+], function(storage, Vue, router, context, config, menuUtil, ajax, commons){
 
     var app = null;
 
     //缓存token
-//    storage.setItem(config.ajax.authname, window.TOKEN);
     storage.setItem(config.ajax.header_auth_token, window.TOKEN);
     storage.setItem(config.ajax.header_session_id, window.SESSIONID);
 
     //初始化ajax
     ajax.init({
         login:config.ajax.login,
-//        authname:config.ajax.authname,
         authname:config.ajax.header_auth_token,
         sessionIdName:config.ajax.header_session_id,
         debug:config.ajax.debug,
@@ -254,7 +252,12 @@ require([
         }
     });
 
-    ajax.get('/prepare/app', null, function(user){
+    ajax.get('/prepare/app', null, function(data){
+    	var user = data.user;
+    	var menus = data.menus;
+    	menuUtil.parseUrlTemplate(menus);
+        commons.data = menus;
+    	
         //初始化全局vue实例
         app = new Vue({
             router:router,
@@ -428,59 +431,11 @@ require([
         }
     };
 
-    ajax.getExtral(config.ajax.queryRouterUrl, null, function(data){
-        if(config.useLocalRouteConst){
-            if(data.vueRouters && data.vueRouters.length > 0){
-                for(var i=0; i < data.vueRouters.length; i++){
-                    changeUrlFunction(data.vueRouters[i]);
-                }
-            }
-        }
-        parseUrlTemplate(data.vueRouters);
-        generatePath(data.vueRouters);
-        commons.data = data.vueRouters;
-    });
-    
-  //解析菜单链接模板
-    function parseUrlTemplate (menus){
-      if(menus && menus.length>0){
-        for(var i=0; i<menus.length; i++){
-          var menu = menus[i];
-          //插入变量
-          if(menu.link){
-            menu.link = setValue(menu.link);
-          }
-          if(menu.sub && menu.sub.length>0){
-            parseUrlTemplate(menu.sub);
-          }
-        }
-      }
-    }
-
-    //生成path，用于active
-    function generatePath(menus){
-      if(menus && menus.length>0){
-        for(var i=0; i<menus.length; i++){
-          var menu = menus[i];
-          menu.path = menu.title;
-          if(menu.link){
-            if(menu.link.indexOf("?token") != -1){
-              menu.path = menu.link.split("#")[1].split("?")[0];
-            }
-          }
-          if(menu.sub && menu.sub.length>0){
-            generatePath(menu.sub);
-          }
-        }
-      }
-    }
-
-
     //用户心跳--25秒一次
-    ajax.post('/heart/beat', null, function(){}, null, [404, 403, 408, 409, 500]);
+    /*ajax.post('/heart/beat', null, function(){}, null, [404, 403, 408, 409, 500]);
     var interval_heartBeat = setInterval(function(){
         ajax.post('/heart/beat', null, function(){}, null, [404, 403, 408, 409, 500]);
-    }, 25000);
+    }, 25000);*/
 
     //设备状态轮询--四秒一次
     var interval_deviceStatus = setInterval(function(){
