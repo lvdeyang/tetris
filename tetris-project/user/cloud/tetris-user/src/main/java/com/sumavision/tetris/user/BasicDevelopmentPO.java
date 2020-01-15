@@ -3,6 +3,7 @@ package com.sumavision.tetris.user;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.AES;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
