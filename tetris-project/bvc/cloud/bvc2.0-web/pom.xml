@@ -1,0 +1,277 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.3.RELEASE</version>
+		<relativePath />
+	</parent>
+	<!-- <parent>
+		<groupId>com.sumavision.bvc</groupId>
+		<artifactId>bvc2.0-integration</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent> -->
+	
+	<groupId>com.sumavision.bvc</groupId>
+	<artifactId>bvc2.0-web</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<thymeleaf.version>3.0.7.RELEASE</thymeleaf.version>
+		<thymeleaf-layout-dialect.version>2.0.0</thymeleaf-layout-dialect.version>
+	</properties>	
+	
+	<packaging>war</packaging>
+	<name>bvc2.0-web</name>
+	<url>http://maven.apache.org</url>
+	<dependencies>
+		<!-- <dependency>
+			<groupId>com.sumavision.bvc</groupId>
+			<artifactId>bvc2.0-service</artifactId>			
+		</dependency> -->
+
+		<!--用于编译jsp -->
+		<dependency>
+			<groupId>org.apache.tomcat.embed</groupId>
+			<artifactId>tomcat-embed-jasper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<!--swagger -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>2.7.0</version>
+		</dependency>
+
+		<!-- eureka依赖 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+			<version>1.3.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-feign</artifactId>
+			<version>1.3.0.RELEASE</version>
+		</dependency>
+		
+
+		<!-- Spring boot 引用Thymeleaf模板依赖包（Thymeleaf模板如果不适用，这里也可以不添加这段配置，Thymeleaf模板使用在下面会讲到） -->
+		<!-- <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+		</dependency> -->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<!-- <dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-autoconfigure</artifactId>
+			<optional>true</optional>
+		</dependency> -->
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<exclusions>  
+                <exclusion>  
+                    <groupId>org.springframework.boot</groupId>  
+                    <artifactId>spring-boot-starter-tomcat</artifactId>  
+                </exclusion>  
+            </exclusions>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+		</dependency>
+		
+		<dependency>
+		  <groupId>org.apache.poi</groupId>
+		  <artifactId>poi-ooxml</artifactId>
+		  <version>3.10.1</version>
+		</dependency>
+		
+		<!-- <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-oauth2</artifactId>
+			<version>1.2.0.RELEASE</version>
+		</dependency> -->
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
+		
+		<!-- 来自service -->		
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- <dependency>
+			<groupId>com.sumavision.bvc</groupId>
+			<artifactId>bvc2.0-entity</artifactId>
+		</dependency> -->
+
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+			<version>1</version>
+		</dependency>
+		<!--query dsl -->
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.querydsl</groupId>
+			<artifactId>querydsl-apt</artifactId>
+		</dependency>
+		<!-- 消息组件 
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-activemq-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>-->
+
+		<dependency>
+			<groupId>com.suma.venus</groupId>
+			<artifactId>tetris-resource-sdk</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency> -->
+
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+		</dependency>
+		
+		<dependency>  
+	        <groupId>org.apache.httpcomponents</groupId>  
+	        <artifactId>httpasyncclient</artifactId>  
+	        <version>4.1.3</version>  
+	    </dependency>
+	    
+	    <dependency>
+			<groupId>com.sumavision</groupId>
+			<artifactId>suma-venus-alarmoprlog-client</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- websocket -->
+		<!-- <dependency>
+			<groupId>com.sumavision.tetris</groupId>
+    		<artifactId>tetris-websocket-message</artifactId>
+   			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
+	    
+	    <dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-websocket-message-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	    
+	    <!-- 集成测试  这个不许删除！！！ -->
+		<!-- <dependency>
+			<groupId>com.sumavision.tetris.tool</groupId>
+			<artifactId>tetris-tool-test-flow-client</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
+		
+		<!-- 来自entity -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		
+		<dependency><!-- mysql-connector-java -->
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.4</version>
+		</dependency>
+		
+		<!-- 来自platform -->
+		<dependency>
+			<groupId>net.sf.json-lib</groupId>
+			<artifactId>json-lib</artifactId>
+			<version>2.4</version>
+			<classifier>jdk15</classifier>
+		</dependency>
+		<dependency>
+		  <groupId>net.sf.json-lib</groupId>
+		  <artifactId>json-lib</artifactId>
+		  <version>2.4</version>
+		  <classifier>jdk15-sources</classifier>
+		</dependency>
+		<!-- <dependency>
+			<groupId>platform</groupId>
+			<artifactId>platform-base</artifactId>
+			<version>1.0.10-SNAPSHOT</version>
+		</dependency> -->
+		
+		<!-- 引入资源层查询 -->
+		<!-- <dependency>
+			<groupId>com.suma.venus</groupId>
+		    <artifactId>venus-resource-orm</artifactId>
+		    <version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
+
+		<dependency>
+		    <groupId>org.jsoup</groupId>
+		    <artifactId>jsoup</artifactId>
+		    <version>1.12.1</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.sumavision.tetris</groupId>
+		    <artifactId>tetris-ui</artifactId>
+		    <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+	</dependencies>
+	<build>
+		<finalName>bvc2.0-web</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>

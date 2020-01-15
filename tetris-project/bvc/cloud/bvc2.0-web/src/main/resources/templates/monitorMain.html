@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta charset="utf-8" />
+    <title>融合通信平台</title>
+    <meta name="description" content="overview &amp; stats" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <!-- bootstrap & fontawesome -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.css}" />
+    <link rel="stylesheet" th:href="@{/font-awesome/4.5.0/css/font-awesome.min.css}" />
+    <!-- page specific plugin styles -->
+    <!-- text fonts -->
+    <link rel="stylesheet" th:href="@{/css/fonts.googleapis.com.css}" />
+    <!-- splitScreen -->
+    <link rel="stylesheet" th:href="@{/css/splitScreen.css}" />
+    <!-- monitorMain -->
+    <link rel="stylesheet" th:href="@{/css/monitorMain.css}" />
+</head>
+
+<body class="monitor_skin">
+    <div id="navbar" class="navbar navbar-default monitorNav">
+        <div class="navbar-container monitorNavContainer" id="navbar-container">
+            <div class="navbar-header pull-left">
+                <img class="top-logo" th:src="@{/images/monitor/top-logo.png}" />
+                <strong class="titleName">融合通信平台</strong>
+            </div>
+            <div class="navbar-buttons navbar-header monitorButtons" role="navigation" id="monitor-head">
+                <ul class="nav navbar-nav" id="monitor" @mouseover="overMonitorShow()" @mouseout="outMonitorHide()">
+                    <div v-if="monitorHover">
+                        <a class="pointer"><img th:src="@{/images/monitor/top-mon-f.png}" /></a>
+                    </div>
+                    <div v-else>
+                        <img th:src="@{/images/monitor/top-mon.png}" />
+                    </div>
+                </ul>
+                <ul class="nav navbar-nav" id="forward" @mouseover="overFowardShow()" @mouseout="outFowardHide()">
+                    <div v-if="forwardHover">
+                        <a class="pointer"><img th:src="@{/images/monitor/top-for-f.png}" /></a>
+                    </div>
+                    <div v-else>
+                        <img th:src="@{/images/monitor/top-for.png}" />
+                    </div>
+                </ul>
+                <ul class="nav navbar-nav" id="replay" @mouseover="overRetShow()" @mouseout="outRetHide()">
+                    <div v-if=" retHover ">
+                        <a class="pointer"><img th:src="@{/images/monitor/top-ret-f.png} "/></a>
+                    </div>
+                    <div v-else>
+                        <img th:src="@{/images/monitor/top-ret.png} " />
+                    </div>
+                </ul>
+            </div>
+            <div class="navbar-buttons navbar-header pull-right" style="height: 90px;" role="navigation ">
+                <ul class="dropdown nav navbar-nav " >
+                    <a href="javascript:void() " class="dropdown-toggle userinfo" data-toggle="dropdown">
+                             <img th:src="@{/images/monitor/top-per.png} " />
+                        <strong  class="loginName">小王</strong>
+                            <span class="caret"></span>
+                        </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a href="<%=basePath%>form/alarmController/currentAlarm" class="currentAlarm">个人信息</a>
+                        </li>
+                        <li>
+                            <a href="<%=basePath%>form/alarmController/historyAlarm" class="historyAlarm">退出登陆</a>
+                        </li>
+                    </ul>
+                </ul>
+                <ul class="nav navbar-nav bell">
+                    <img th:src="@{/images/monitor/top-bell.png}" class="bellImage" />
+                </ul>
+                <ul class="nav navbar-nav fullscreen">
+                    <img th:src="@{/images/monitor/top-ful-ent.png}" class="fullscreenImage" />
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-headd -->
+        <div class="main-container" id="main-container">
+            <div id="sidebar" class="sidebar responsive monitorLeft">
+                <!-- 搜索DIV -->
+                <div class="search serchBar monitorSearch">
+                    <form>
+                        <input type="text" class="form-control" placeholder="请输入搜索内容...">
+                        <button type="submit"></button>
+                    </form>
+                    <div id="sortDiv" class="dropdown" @mouseover="overSortShow()" @mouseout="outSortHide()">
+                        <div class="sortStrategy dropdown-toggle" data-toggle="dropdown">
+                            <span class="sortTitle">按分组排序</span>
+                            <span v-if="sortHover">
+                                <img th:src="@{/images/monitor/lef-sor-s.png}" class="sortImage" />
+                            </span>
+                            <span v-else>
+                                <img th:src="@{/images/monitor/lef-sor.png}" class="sortImage" />
+                            </span>
+                        </div>
+                        <ul class="dropdown-menu" style="margin-left: 160px;margin-top: 22px;min-width: 40px;text-align: right;">
+                            <li>
+                                <a href="" class="currentAlarm">分组</a>
+                            </li>
+                            <li>
+                                <a href="" class="historyAlarm">编号</a>
+                            </li>
+                            <li>
+                                <a href="" class="historyAlarm">类型</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="pannel-group terminalGroup" id="accordion">
+                    <!--IPC -->
+                    <div class="panel panel-default groupPanel">
+                        <div class="groupHead">
+                            <h4 class="panel-title">
+                                    <a data-toggle="collapse" 
+                                       href="#collapseIPC">
+                                       <img th:src="@{/images/monitor/lef-che-dow-s.png}" />&nbsp;&nbsp;<span class="groupTitle">IPC</span>
+                                    </a>
+                                </h4>
+                        </div>
+                        <div id="collapseIPC" class="panel-collapse collapse in">
+                            <div class="panel-body groupHead">
+                                <ul><img th:src="@{/images/monitor/lef-ter-she.png}" />&nbsp;&nbsp;<span class="groupItem">摄像头58.56</span></ul>
+                                <ul><img th:src="@{/images/monitor/lef-ter-she.png}" />&nbsp;&nbsp;<span class="groupItem">摄像头58.43</span></ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!--终端 -->
+                    <!--  <div class="panel panel-warning groupPanel">
+                        <div class="groupHead">
+                            <h4 class="panel-title">
+                                    <a data-toggle="collapse" 
+                                        href="#collapseTerminal">
+                                        <img th:src="@{/images/monitor/lef-che-dow-s.png}" />&nbsp;&nbsp;<span class="groupTitle">终端</span>
+                                </h4>
+                        </div>
+                        <div id="collapseTerminal" class="panel-collapse collapse in">
+                            <div class="panel-body groupBody">
+                                <ul><img th:src="@{/images/monitor/lef-ter-ji.png}" />&nbsp;&nbsp;<span class="groupItem">机顶盒</span></ul>
+                                <ul><img th:src="@{/images/monitor/lef-ter-shu.png}" />&nbsp;&nbsp;<span class="groupItem">9550J</span></ul>
+                            </div>
+                        </div>
+                    </div> -->
+                    <!--虚拟终端 -->
+                    <!--     <div class="panel panel-warning groupPanel">
+                        <div class="groupHead">
+                            <h4 class="panel-title">
+                                    <a data-toggle="collapse" 
+                                        href="#collapseVirtual">
+                                        <img th:src="@{/images/monitor/lef-che-dow-s.png}" />&nbsp;&nbsp;<span class="groupTitle">虚拟终端</span>
+                                </h4>
+                        </div>
+                        <div id="collapseVirtual" class="panel-collapse collapse in">
+                            <div class="panel-body groupBody">
+                                <ul><img th:src="@{/images/monitor/lef-ter-he.png}" />&nbsp;&nbsp;<span class="groupItem">终端</span></ul>
+                                <ul><img th:src="@{/images/monitor/lef-ter-he.png}" />&nbsp;&nbsp;<span class="groupItem">终端</span></ul>
+                            </div>
+                        </div>
+                    </div>  -->
+                </div>
+            </div>
+            <div class="monitorSplit">
+                <div>
+                    <div class="fp-4-1-2X2 fp-box" ondragover="allowDrop(event)" ondrop="drop(event)"></div>
+                    <div class="fp-4-2-2X2 fp-box"></div>
+                </div>
+                <div>
+                    <div class="fp-4-3-2X2 fp-box"></div>
+                    <div class="fp-4-4-2X2 fp-box"></div>
+                </div>
+            </div>
+            <div class="monitorRight" id="rightFunction">
+                <ul id="clearFuction" @mouseover="overClearShow()" @mouseout="outClearHide()">
+                    <div v-if="clearHover">
+                        <a class="pointer"><img th:src="@{/images/monitor/rig-cle-f.png}" class="clearImage"/></a>
+                    </div>
+                    <div v-else>
+                        <img th:src="@{/images/monitor/rig-cle.png}" class="clearImage" />
+                    </div>
+                </ul>
+                <ul id="splitNumFuntion" rel="popover" data-toggle="popover" data-placement="left" data-content="" @mouseover="overSplitNumShow()" @mouseout="outSplitNumHide()">
+                    <div v-if="spitNumHover">
+                        <a class="pointer"><img th:src="@{/images/monitor/rig-num-f.png}" class="splitNumImage" /></a>
+                    </div>
+                    <div v-else>
+                        <img th:src="@{/images/monitor/rig-num.png}" class="splitNumImage" />
+                    </div>
+                </ul>
+                <!-- 存放分屏的样式 -->
+                <div id="splitBody" style="width: 288px;height: 280px;display: none;">
+                    <div>
+                        <div style="display:inline">
+                            <img th:src="@{/images/monitor/rig-num-1.png}">
+                        </div>
+                        <div style="display:inline">
+                            <img th:src="@{/images/monitor/rig-num-2.png}">
+                        </div>
+                        <div style="display:inline">
+                            <img th:src="@{/images/monitor/rig-num-4.png}">
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display:inline">
+                            <img th:src="@{/images/monitor/rig-num-6.png}">
+                        </div>
+                        <div style="display:inline">
+                            <img th:src="@{/images/monitor/rig-num-9.png}">
+                        </div>
+                        <div style="display:inline">
+                            <img th:src="@{/images/monitor/rig-num-16.png}">
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display:inline">
+                            <img th:src="@{/images/monitor/rig-num-25.png}">
+                        </div>
+                    </div>
+                </div>
+                <div class="moreFuction">
+                    <ul>
+                        <img th:src="@{/images/monitor/rig-mor.png}" class="moreFunctImage" />
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /.nav-list -->
+    </div>
+    </div>
+    <!-- /.main-container -->
+    <!-- basic scripts -->
+    <!--[if !IE]> -->
+    <script th:src="@{/js/jquery-2.1.4.min.js}"></script>
+    <!-- <![endif]-->
+    <!--[if IE]>
+    <script th:src="@{/js/jquery-1.11.3.min.js}"></script>
+<![endif]-->
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <!-- page specific plugin scripts -->
+    <!--[if lte IE 8]>
+          <script src="assets/js/excanvas.min.js"></script>
+        <![endif]-->
+    <!-- 引入vue框架 -->
+    <script th:src="@{/js/vue.js}"></script>
+    <!-- 引入 图片变化的js-->
+    <script th:src="@{/js/monitor/graphChange.js}"></script>
+    <!-- inline scripts related to this page -->
+    <script th:inline="javascript">
+    $(function() {
+        //$("[data-toggle='popover']").popover();
+        $('#splitNumFuntion').popover({
+            html: true,
+            container: 'body',
+            content: function() {
+                $('.popover').css({ 'position': 'relative', 'left': '-250px', 'top': '-10px', 'width': '450px' });
+                return $('#splitBody').html();
+            }
+        });
+
+    });
+
+    function allowDrop(ev) {
+        ev.preventDefault();
+    }
+
+    function drag(ev) {
+        ev.dataTransfer.setData("Text", ev.target.id);
+    }
+    //放下，ajax请求后台
+    function drop(ev) {
+        ev.preventDefault();
+        var data = ev.dataTransfer.getData("Text");
+        //ev.target.appendChild(document.getElementById(data));
+        var preview = {};
+        preview.bundleId = 'ee4ffce28db844498e06b798b164592c';
+        preview.location = '1';
+        preview.splitNumber = '4';
+        var previewJson = JSON.stringify(preview);
+
+        $.ajax({
+            url: 'http://localhost:8080/demo/preview/add',
+            type: "POST",
+            data: {
+                'previewJson': previewJson,
+            },
+            //contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            cache: false,
+            //async:false,
+            success: function(ret) {
+                flag = ret;
+            }
+        });
+    }
+    </script>
+</body>
+
+</html>

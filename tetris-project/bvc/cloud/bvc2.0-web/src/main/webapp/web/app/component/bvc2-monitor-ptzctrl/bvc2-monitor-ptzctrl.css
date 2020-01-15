@@ -1,0 +1,6 @@
+/* reset */
+.bvc2-monitor-ptzctrl *{box-sizing:border-box!important;}
+.bvc2-monitor-ptzctrl .el-scrollbar__wrap{overflow-x: hidden;}
+.el-tag.active{background-color:#66b1ff; color:#fff;}
+.el-tag{cursor:pointer;}
+.el-tag{margin-left:10px; margin-bottom:10px;}

@@ -1,21 +1,21 @@
 server:
     #contextPath : /suma-venus-resource
-    port : 8887
+    port : 8093
 
 spring:
     application:
         name: tetris-resource
     cloud:
         client:
-            ipAddress : 192.165.56.84
+            ipAddress : 192.165.56.71
         inetutils:
-            preferred-networks: 192.165.56.84
+            preferred-networks: 192.165.56.71
 
     #datasource        
     datasource:
         #resource datasource
         resource:
-            url: jdbc:mysql://localhost:3306/venus_resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+            url: jdbc:mysql://192.165.56.84:3306/venus_resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
             username : root
             password : sumavisionrd
             driver-class-name : com.mysql.jdbc.Driver
@@ -46,10 +46,10 @@ spring:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.84:8081/eureka/
+      defaultZone: http://192.165.56.71:8081/eureka/
   instance:
     prefer-ip-address: true
-    ip-address: 192.165.56.84
+    ip-address: 192.165.56.71
     lease-renewal-interval-in-seconds : 3
     lease-expiration-duration-in-seconds : 10
     

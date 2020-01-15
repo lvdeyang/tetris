@@ -1,0 +1,204 @@
+<div class="bvc2-monitor-record" style="width:100%; height:100%; padding-left:10px; padding-right:10px; box-sizing:border-box; background-color:#fff;">
+    <div style="width:100%; height:100%; position:relative;">
+        <div style="width:100%; height:52px; padding-top:10px; box-sizing:border-box;">
+            <el-button size="small" @click="handleAddRecord" type="primary">添加录制</el-button>
+            <!--<el-button size="small" type="danger">停止录制</el-button>-->
+            <el-select size="small" v-model="condition.mode" placeholder="切换录制模式" style="width:150px; margin-left:10px;">
+                <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
+                <el-option key="SCHEDULING" label="排期录制" value="SCHEDULING"></el-option>
+            </el-select>
+            <el-input size="small" placeholder="筛选设备" v-model="condition.deviceName" :readonly="true" style="width:150px; margin-left:10px;" @click.native="handleSelectDevice"></el-input>
+            <el-date-picker
+                    size="small"
+                    v-model="condition.timeScope"
+                    type="datetimerange"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    :default-time="['12:00:00']"
+                    style="margin-left:10px;">
+            </el-date-picker>
+        </div>
+        <div style="width:100%; position:absolute; left:0; top:50px; bottom:52px; background-color:#fff;">
+            <el-table
+                    height="100%"
+                    :data="table.data"
+                    stripe
+                    style="width: 100%">
+                <!--<el-table-column
+                        type="selection"
+                        width="55">
+                </el-table-column>-->
+                <el-table-column
+                        fixed
+                        prop="fileName"
+                        label="文件名">
+                </el-table-column>
+                <el-table-column
+                        prop="videoSource"
+                        label="视频源">
+                </el-table-column>
+                <el-table-column
+                        prop="audioSource"
+                        label="音频源">
+                </el-table-column>
+                <el-table-column
+                        prop="startTime"
+                        label="开始时间"
+                        width="200">
+                </el-table-column>
+                <el-table-column
+                        prop="endTime"
+                        label="结束时间"
+                        width="200">
+                </el-table-column>
+                <el-table-column
+                        prop="mode"
+                        label="录制模式"
+                        width="100">
+                </el-table-column>
+                <el-table-column
+                        prop="type"
+                        label="录制类型"
+                        width="100">
+                </el-table-column>
+                <el-table-column
+                        prop="recordUsername"
+                        label="用户名">
+                </el-table-column>
+                <el-table-column
+                        fixed="right"
+                        label="操作"
+                        width="100">
+                    <template slot-scope="scope">
+                        <el-tooltip class="item" effect="dark" content="停止任务" placement="bottom">
+                            <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:20px; position:relative; top:1px;" @click="rowDelete(scope)"></el-button>
+                        </el-tooltip>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </div>
+        <div style="width:100%; height:52px; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-top:10px;">
+            <el-pagination
+                    style="float:right;"
+                    background
+                    @size-change="handleSizeChange"
+                    @current-change="handleCurrentChange"
+                    :current-page="table.page.currentPage"
+                    :page-sizes="[20, 50, 100, 500, 1000]"
+                    :page-size="table.page.pageSize"
+                    layout="total, sizes, prev, pager, next, jumper"
+                    :total="table.page.total">
+            </el-pagination>
+        </div>
+    </div>
+    <template>
+        <el-dialog
+                title="添加录制任务"
+                :visible.sync="dialog.addRecord.visible"
+                width="862px"
+                :before-close="handleAddRecordClose">
+
+            <div style="width:100%; height:400px; position:relative;">
+                <div style="position:absolute; top:-30px; bottom:-30px; left:-20px; right:-20px;">
+                    <div class="monitor92-padding-top10" style="width:100%; height:100%; box-sizing:border-box; padding-left:10px; padding-right:10px; position:relative;">
+                        <div style="width:400px;height:100%; border:1px solid #ebebeb;">
+                            <el-scrollbar style="height:100%;">
+                                <el-tree
+                                        :data="dialog.addRecord.tree.data"
+                                        :props="dialog.addRecord.tree.props">
+                                    <span class="custom-tree-node" slot-scope="{node, data}">
+                                        <el-radio v-if="data.type==='CHANNEL' && data.id.indexOf('Video')>=0" v-model="dialog.addRecord.tree.currentVideo" :label="data.param">
+                                            <span :class="data.icon" :style="data.style"></span>
+                                            <span>{{node.label}}</span>
+                                        </el-radio>
+                                        <el-radio v-else-if="data.type==='CHANNEL' && data.id.indexOf('Audio')>=0" v-model="dialog.addRecord.tree.currentAudio" :label="data.param">
+                                            <span :class="data.icon" :style="data.style"></span>
+                                            <span>{{node.label}}</span>
+                                        </el-radio>
+                                        <el-radio v-else-if="data.type==='BUNDLE' && data.param.indexOf('XT')>=0" v-model="dialog.addRecord.tree.currentXtDevice" :label="data.param">
+                                            <span :class="data.icon" :style="data.style"></span>
+                                            <span>{{node.label}}</span>
+                                        </el-radio>
+                                        <el-radio v-else-if="data.type==='USER'" v-model="dialog.addRecord.tree.currentUser" :label="data.param">
+                                            <span :class="data.icon" :style="data.style"></span>
+                                            <span>{{node.label}}</span>
+                                        </el-radio>
+                                        <span v-else>
+                                            <span :class="data.icon" :style="data.style"></span>
+                                            <span>{{node.label}}</span>
+                                        </span>
+                                    </span>
+                                </el-tree>
+                            </el-scrollbar>
+                        </div>
+                        <div class="monitor92-top10" style="position:absolute; left:420px; right:10px; top:0; bottom:0; border:1px solid #ebebeb;">
+                            <div style="width:100%; height:100%; position:relative; padding:10px 15px;">
+                                <el-form label-width="0">
+                                    <el-form-item style="margin-bottom:10px;">
+                                        <el-select size="medium" v-model="dialog.addRecord.mode" placeholder="切换录制模式" @change="addRecordModeChange" style="width:150px;">
+                                            <el-option key="MANUAL" label="手动录制" value="MANUAL"></el-option>
+                                            <el-option key="SCHEDULING" label="排期录制" value="SCHEDULING"></el-option>
+                                        </el-select>
+                                    </el-form-item>
+                                    <el-form-item style="margin-bottom:10px;">
+                                        <el-input size="medium" v-model="dialog.addRecord.fileName" placeholder="请输入文件名称"></el-input>
+                                    </el-form-item>
+                                    <el-form-item v-if="dialog.addRecord.mode==='SCHEDULING'" style="margin-bottom:10px;">
+                                        <el-date-picker
+                                                size="medium"
+                                                v-model="dialog.addRecord.timeScope"
+                                                type="datetimerange"
+                                                start-placeholder="开始日期"
+                                                end-placeholder="结束日期"
+                                                :default-time="['12:00:00']">
+                                        </el-date-picker>
+                                    </el-form-item>
+                                </el-form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddRecordClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddRecordCommit" :loading="dialog.addRecord.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="筛选设备"
+                :visible.sync="dialog.selectDevice.visible"
+                width="420px"
+                :before-close="handleSelectDeviceClose">
+
+            <div style="width:100%; height:400px; position:relative;">
+                <div class="monitor92-padding-top10" style="position:absolute; top:-30px; bottom:-30px; left:-20px; right:-20px; padding-left:10px; padding-right:10px;">
+                    <div style="width:100%; height:100%; box-sizing:border-box; position:relative; border:1px solid #ebebeb;">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                    :data="dialog.selectDevice.tree.data"
+                                    :props="dialog.selectDevice.tree.props">
+                                    <span class="custom-tree-node" slot-scope="{node, data}">
+                                        <el-radio v-if="data.type==='BUNDLE' || data.type==='USER'" v-model="dialog.selectDevice.tree.currentDevice" :label="data.param">
+                                            <span :class="data.icon" :style="data.style"></span>
+                                            <span>{{node.label}}</span>
+                                        </el-radio>
+                                        <span v-else>
+                                            <span :class="data.icon"></span>
+                                            <span>{{node.label}}</span>
+                                        </span>
+                                    </span>
+                            </el-tree>
+                        </el-scrollbar>
+                    </div>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSelectDeviceClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSelectDeviceCommit" :loading="dialog.selectDevice.loading">确定</el-button>
+            </span>
+        </el-dialog>
+    </template>
+</div>

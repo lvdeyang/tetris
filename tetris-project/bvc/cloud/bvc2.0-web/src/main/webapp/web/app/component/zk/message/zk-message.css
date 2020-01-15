@@ -1,0 +1,11 @@
+/* reset */
+html, body{overflow:hidden;}
+.zk-message,
+.zk-message *{box-sizing:border-box!important;}
+.zk-message .el-scrollbar__wrap{overflow-x: hidden;}
+
+.zk-message .text-button{color:#fff;}
+.zk-message .text-button:hover{color:#e3e3e3;}
+.zk-message .text-button:active{color:#fff;}
+
+.zk-message .filter-button.active{background:#909399!important; border-color:#909399!important;}
