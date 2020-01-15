@@ -1,6 +1,6 @@
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">
-
+         
 	<!-- 约束缓存，永不过期 -->
     <cache name="constraintCache" 
     	   eternal="true" 

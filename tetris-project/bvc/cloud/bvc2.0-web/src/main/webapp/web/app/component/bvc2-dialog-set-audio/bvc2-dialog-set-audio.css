@@ -1,0 +1,4 @@
+.bvc2-dialog-set-audio .el-dialog__body{padding: 10px 20px;}
+.bvc2-dialog-set-audio .volume{padding: 0 0 12px 0; overflow: hidden;}
+.bvc2-dialog-set-audio .volume .demonstration{float: left; font-size: 16px; line-height: 37px; width: 5%;}
+.bvc2-dialog-set-audio .volume .el-slider{float: left; width: 90%; margin-left: 5%;}

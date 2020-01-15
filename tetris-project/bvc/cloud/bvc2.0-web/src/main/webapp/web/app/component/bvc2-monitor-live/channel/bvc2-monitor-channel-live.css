@@ -1,0 +1,4 @@
+/* reset */
+.bvc2-monitor-channel-live *{box-sizing:border-box!important;}
+.bvc2-monitor-channel-live .el-scrollbar__wrap{overflow-x: hidden;}
+.bvc2-monitor-channel-live-osd-tooltip{max-width:220px; word-break:break-all;}

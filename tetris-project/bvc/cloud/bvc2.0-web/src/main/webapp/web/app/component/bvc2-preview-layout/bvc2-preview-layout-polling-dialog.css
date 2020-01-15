@@ -1,0 +1,6 @@
+#bvc2-preview-layout-polling-list-dialog-wrapper{text-align:center;}
+#bvc2-preview-layout-polling-list-dialog-wrapper .el-dialog__header{text-align:left;}
+#bvc2-preview-layout-polling-list-dialog-wrapper .el-dialog__body{padding-top:0; padding-bottom:0;}
+#bvc2-preview-layout-polling-list-dialog-wrapper .el-transfer-panel{width:300px;}
+#bvc2-preview-layout-polling-list-dialog-wrapper .el-transfer-panel__body{height:320px;}
+#bvc2-preview-layout-polling-list-dialog-wrapper .el-transfer-panel__list.is-filterable{height:250px;}

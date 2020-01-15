@@ -1,0 +1,5 @@
+/* reset */
+.bvc2-monitor-playback *{box-sizing:border-box!important;}
+.bvc2-monitor-playback .el-scrollbar__wrap{overflow-x: hidden;}
+.bvc2-monitor-playback thead{display:none;}
+.bvc2-monitor-playback-tooltip{max-width:250px!important; word-wrap:break-word!important;}

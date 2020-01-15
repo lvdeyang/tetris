@@ -1,0 +1,28 @@
+<div class="update-spokesman">
+    <div class="group-members" v-loading="treeLoading">
+        <el-tree
+            :data="members"
+            node-key="key"
+            default-expand-all
+            @node-drag-start="handleDragStart"
+            :props="defaultProps"
+            :render-content="renderContent"
+            draggable
+            :allow-drop="allowDrop"
+            :allow-drag="allowDrag">
+        </el-tree>
+    </div>
+    <div class="group-role" v-loading="cardLoading">
+        <el-row :gutter="10" style="margin:0;">
+            <el-col v-for="(role, index) in roles" :span="12" :key="role.id">
+                <el-card shadow="hover" :style="cardMargin(index)">
+                    <div slot="header" class="clearfix">
+                        <span>{{role.name}}</span>
+                        <el-button style="position:absolute; top:.75em; right:.75em; padding:0;" type="text" @click="removeSpokesmanMember(role)">清空</el-button>
+                    </div>
+                    <div @drop="spokesmanSet($event, role)" @dragover="allowNativeDrop($event)">{{role.members.length>0?role.members[0].bundleName:'未设置'}}</div>
+                </el-card>
+            </el-col>
+        </el-row>
+    </div>
+</div>

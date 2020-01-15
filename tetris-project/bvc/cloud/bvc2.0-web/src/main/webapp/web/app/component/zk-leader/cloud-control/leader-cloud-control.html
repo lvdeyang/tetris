@@ -1,0 +1,138 @@
+<div class="bvc2-monitor-ptzctrl">
+    <div class="title">云台控制</div>
+    <div id="dialog" style="width:780px; height:450px; position:absolute;top:70px;left:45px;">
+        <div style="width:100%; height:100%;overflow: hidden">
+            <div style="height:40px; width:82%; text-align:right;">
+                速度：
+                <span style="display:inline-block; width:50px;">
+                                <el-input
+                                        size="mini"
+                                        v-model="speed">
+                                </el-input>
+                            </span>
+            </div>
+            <div style="height:200px; width:100%;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="width:250px; height:200px;">
+                        <div style="width:100%; height:100%; position:relative;left:50px;">
+                            <div style="width:250px; height:50px;">
+                                <el-button class="define"
+                                           style="width:100%; height:100%; border-radius:50px 50px 0 0; font-size:28px;"
+                                           icon="el-icon-arrow-up"
+                                           @mousedown.native="vertical('UP')"></el-button>
+                            </div>
+                            <div style="width:50px; height:100px; position:absolute; left:0; top:50px;">
+                                <el-button class="define"
+                                           style="width:100%; height:100%; border-radius:0; padding:0; font-size:28px;"
+                                           icon="el-icon-arrow-left"
+                                           @mousedown.native="horizontal('LEFT')"></el-button>
+                            </div>
+                            <div style="width:150px; height:100px; position:absolute; left:50px; top:50px;"></div>
+                            <div style="width:50px; height:100px; position:absolute; top:50px; right:0;">
+                                <el-button class="define"
+                                           style="width:100%; height:100%; border-radius:0; padding:0; font-size:28px;"
+                                           icon="el-icon-arrow-right"
+                                           @mousedown.native="horizontal('RIGHT')"></el-button>
+                            </div>
+                            <div style="width:250px; height:50px; position:absolute; left:0; bottom:0;">
+                                <el-button class="define"
+                                           style="width:100%; height:100%; border-radius: 0 0 50px 50px; font-size:28px;"
+                                           icon="el-icon-arrow-down"
+                                           @mousedown.native="vertical('DOWN')"></el-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width:240px; position:absolute; right:40px; top:10px; bottom:10px;">
+                        <div style="height:60px; width:100%; text-align:center; padding-top:15px;">
+                                        <span style="display:inline-block;">
+                                            <el-button
+                                                    style="width:30px; height:30px; border-radius:100%; padding:0; float:left;"
+                                                    type="normal" icon="el-icon-minus"
+                                                    @mousedown.native="zoom('OUT')"></el-button>
+                                            <span style="float:left; line-height:30px; padding:0 30px;">镜头变倍</span>
+                                            <el-button style="width:30px; height:30px; border-radius:100%; padding:0;"
+                                                       type="normal" icon="el-icon-plus"
+                                                       @mousedown.native="zoom('IN')"></el-button>
+                                        </span>
+                        </div>
+                        <div style="height:60px; width:100%; text-align:center; padding-top:15px;">
+                                        <span style="display:inline-block;">
+                                            <el-button
+                                                    style="width:30px; height:30px; border-radius:100%; padding:0; float:left;"
+                                                    type="normal" icon="el-icon-minus"
+                                                    @mousedown.native="focus('NEAR')"></el-button>
+                                            <span style="float:left; line-height:30px; padding:0 30px;">聚焦远近</span>
+                                            <el-button style="width:30px; height:30px; border-radius:100%; padding:0;"
+                                                       type="normal" icon="el-icon-plus"
+                                                       @mousedown.native="focus('FAR')"></el-button>
+                                        </span>
+                        </div>
+                        <div style="height:60px; width:100%; text-align:center; padding-top:15px;">
+                                        <span style="display:inline-block;">
+                                            <el-button
+                                                    style="width:30px; height:30px; border-radius:100%; padding:0; float:left;"
+                                                    type="normal" icon="el-icon-minus"
+                                                    @mousedown.native="aperture('MINUS')"></el-button>
+                                            <span style="float:left; line-height:30px; padding:0 30px;">光圈缩放</span>
+                                            <el-button style="width:30px; height:30px; border-radius:100%; padding:0;"
+                                                       type="normal" icon="el-icon-plus"
+                                                       @mousedown.native="aperture('PLUS')"></el-button>
+                                        </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="height:260px; width:100%;">
+                <div style="padding:20px 20px 10px; font-size:18px; color:#fff;font-weight: bold">预置点设置</div>
+                <div style="width:100%; height:200px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tag
+                                v-if="point.removeable"
+                                :class="point.__active?'active':''"
+                                style="position:relative; top:1px;"
+                                :key="point.id"
+                                v-for="point in points"
+                                closable
+                                :disable-transitions="false"
+                                @close="handlePointRemove(point)"
+                                @click.native="handlePointInvoke(point)">
+                            {{point.name}}
+                        </el-tag>
+                        <el-tag
+                                v-else
+                                :class="point.__active?'active':''"
+                                style="position:relative; top:1px;"
+                                :key="point.id"
+                                v-for="point in points"
+                                closable
+                                :disable-transitions="false"
+                                @close="handlePointRemove(point)"
+                                @click.native="handlePointInvoke(point)">
+                            {{point.name}}
+                        </el-tag>
+                        <el-button class="addClick" size="small"
+                                   style="margin-left:10px; height:40px; line-height:40px; padding-top:0; padding-bottom:0;font-size: 18px"
+                                   @click="handlePointAdd">+ 添加预置点
+                        </el-button>
+                    </el-scrollbar>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="close" @click="closeDialog">
+        <img src="../../../../../images/zk-leader/close.png" alt="">
+    </div>
+
+    <el-dialog
+            title="添加预置点"
+            :visible.sync="dialog.addPoint.visible"
+            width="400px"
+            :before-close="handleAddPointClose">
+        <el-input v-model="dialog.addPoint.name" placeholder="起个名吧" style="width:100%;"></el-input>
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="handleAddPointClose">取消</el-button>
+            <el-button size="medium" type="primary" @click="handleAddPointCommit"
+                       :loading="dialog.addPoint.loading">确定</el-button>
+        </span>
+    </el-dialog>
+</div>

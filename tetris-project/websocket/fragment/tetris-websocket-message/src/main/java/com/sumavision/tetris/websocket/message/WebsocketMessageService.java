@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -266,6 +267,23 @@ public class WebsocketMessageService {
 		}
 	}
 	
+	/**
+	 * 批量消费临时消息,消费后不会再向前端推消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月21日 下午4:16:56
+	 * @param Collection<Long> ids 消息id列表
+	 */
+	public void consumeAll(Collection<Long> ids) throws Exception{
+		List<WebsocketMessagePO> messages = websocketMessageDao.findAll(ids);
+		if(messages!=null && messages.size()>0){
+			for(WebsocketMessagePO message:messages){
+				message.setConsumed(true);
+			}
+			websocketMessageDao.save(messages);
+		}
+	}
+
 	/**
 	 * 消费一个消息<br/>
 	 * <b>作者:</b>lvdeyang<br/>

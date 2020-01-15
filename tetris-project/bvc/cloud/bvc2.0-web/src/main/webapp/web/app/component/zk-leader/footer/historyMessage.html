@@ -1,0 +1,47 @@
+<div class="message">
+    <!--切分屏按钮-->
+    <div class="screenCtrl">
+        <div title="1屏" @click="layoutChange(0)">
+            <img v-if="!buttons.one" :src="baseUrl+'images/zk-leader/btns/one.png'"/>
+            <img v-else :src="baseUrl+'images/zk-leader/btns/oneActive.png'"/>
+        </div>
+        <div title="2屏">
+            <img v-if="!buttons.two" :src="baseUrl+'images/zk-leader/btns/two.png'"/>
+            <img v-else :src="baseUrl+'images/zk-leader/btns/twoActive.png'"/>
+        </div>
+        <div title="4屏" @click="layoutChange(1)">
+            <img v-if="!buttons.four" :src="baseUrl+'images/zk-leader/btns/four.png'"/>
+            <img v-else :src="baseUrl+'images/zk-leader/btns/fourActive.png'"/>
+        </div>
+        <div title="6屏" @click="layoutChange(2)">
+            <img v-if="!buttons.six" :src="baseUrl+'images/zk-leader/btns/six.png'"/>
+            <img v-else :src="baseUrl+'images/zk-leader/btns/sixActive.png'"/>
+        </div>
+        <div title="9屏" @click="layoutChange(3)">
+            <img v-if="!buttons.nine" :src="baseUrl+'images/zk-leader/btns/nine.png'"/>
+            <img v-else :src="baseUrl+'images/zk-leader/btns/nineActive.png'"/>
+        </div>
+        <div title="16屏" @click="layoutChange(4)">
+            <img v-if="!buttons.sixteen" :src="baseUrl+'images/zk-leader/btns/sixteen.png'"/>
+            <img v-else :src="baseUrl+'images/zk-leader/btns/sixteenActive.png'"/>
+        </div>
+    </div>
+    <!--历史消息-->
+    <div class="msgBg">
+        <img src="../../../../../images/zk-leader/msg.png" alt="">
+    </div>
+    <!--滚动消息-->
+    <div class="msgContent">
+        <ul v-if="callBoard.length>0" class="animating">
+            <li v-for="(item,index) in callBoard" :key="index">{{item}}</li>
+        </ul>
+        <ul v-else>
+            <li>暂无消息</li>
+        </ul>
+        <div class="tagMessage">
+            <img src="../../../../../images/zk-leader/history.png" alt="" @click="showMessagePanel">
+        </div>
+    </div>
+    <!--底部折叠按钮-->
+    <el-button @click="showOrHide">》折叠列表</el-button>
+</div>

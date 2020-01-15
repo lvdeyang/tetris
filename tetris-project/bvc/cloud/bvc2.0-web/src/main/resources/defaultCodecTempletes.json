@@ -1,0 +1,170 @@
+[
+    {
+        "defaultType": "STB1",
+        "name": "机顶盒模板1",
+        "videoFormat": "h264",
+        "videoFormat2": "h264",
+        "audioFormat": "aac",
+        "gears": [
+            {
+                "name": "三档",
+                "videoBitRate": "1000000",
+                "videoBitRate2": "1000000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "3"
+            },{
+                "name": "二档",
+                "videoBitRate": "1000000",
+                "videoBitRate2": "1000000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "2"
+            },{
+                "name": "一档",
+                "videoBitRate": "1000000",
+                "videoBitRate2": "1000000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "1"
+            }
+        ]
+    },
+    {
+        "defaultType": "MEETING1",
+        "name": "大会模板1",
+        "videoFormat": "h264",
+        "videoFormat2": "h264",
+        "audioFormat": "aac",
+        "gears": [
+            {
+                "name": "三档",
+                "videoBitRate": "4000000",
+                "videoBitRate2": "4000000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "3"
+            },{
+                "name": "二档",
+                "videoBitRate": "1000000",
+                "videoBitRate2": "1000000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "2"
+            },{
+                "name": "一档",
+                "videoBitRate": "1000000",
+                "videoBitRate2": "1000000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "1"
+            }
+        ]
+    },
+    {
+        "defaultType": "PLAYER1",
+        "name": "播放器模板1",
+        "videoFormat": "h264",
+        "videoFormat2": "h264",
+        "audioFormat": "aac",
+        "gears": [
+            {
+                "name": "三档",
+                "videoBitRate": "1000000",
+                "videoBitRate2": "1000000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "3"
+            }
+        ]
+    },
+    {
+        "defaultType": "VOD1",
+        "name": "点播模板1",
+        "videoFormat": "h264",
+        "videoFormat2": "h264",
+        "audioFormat": "aac",
+        "gears": [
+            {
+                "name": "三档",
+                "videoBitRate": "2000000",
+                "videoBitRate2": "2000000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "3"
+            }
+        ]
+    },
+    {
+        "defaultType": "COMMAND1",
+        "name": "指挥模板1",
+        "videoFormat": "h264",
+        "videoFormat2": "h264",
+        "audioFormat": "aac",
+        "gears": [
+            {
+                "name": "三档",
+                "videoBitRate": "1000000",
+                "videoBitRate2": "1000000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "3"
+            }
+        ]
+    },
+    {
+        "defaultType": "MOBILE1",
+        "name": "手机终端模板1",
+        "videoFormat": "h264",
+        "videoFormat2": "h264",
+        "audioFormat": "aac",
+        "gears": [
+            {
+                "name": "三档",
+                "videoBitRate": "500000",
+                "videoBitRate2": "500000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "3"
+            },{
+                "name": "二档",
+                "videoBitRate": "300000",
+                "videoBitRate2": "300000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "2"
+            },{
+                "name": "一档",
+                "videoBitRate": "300000",
+                "videoBitRate2": "300000",
+                "VideoResolution": "1920x1080",
+                "VideoResolution2": "1920x1080",
+                "fps": "25.0",
+                "AudioBitRate": "64000",
+                "level": "1"
+            }
+        ]
+    }
+]

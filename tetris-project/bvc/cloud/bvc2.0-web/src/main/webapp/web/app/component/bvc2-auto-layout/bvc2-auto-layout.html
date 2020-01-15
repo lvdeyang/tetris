@@ -1,0 +1,113 @@
+<div class="bvc2-auto-layout">
+    <div class="bvc2-auto-layout-tool-bar">
+        <div class="bvc2-auto-layout-tool-bar-wrapper">
+            <span class="tool-bar-item">
+                <el-select size="small" v-model="layout.row" @change="rowChange">
+                    <el-option
+                            v-for="rowOption in options.rowOptions"
+                            :key="rowOption.value"
+                            :label="rowOption.label"
+                            :value="rowOption.value"/>
+                </el-select>
+            </span>
+            <span class="tool-bar-item-times">&times;</span>
+            <span class="tool-bar-item">
+                <el-select size="small" v-model="layout.column" @change="columnChange">
+                    <el-option
+                            v-for="columnOption in options.columnOptions"
+                            :key="columnOption.value"
+                            :label="columnOption.label"
+                            :value="columnOption.value"/>
+                </el-select>
+            </span>
+            <span class="tool-bar-title">{{(!config.name?'无':config.name) + '-' + (!video.name?'无':video.name)}}</span>
+            <span v-if="screenLayout == 'ppt模式'" class="tool-bar-item" style="right: 135px;">
+                <el-button type="primary" @click="choseSmallScreen" style="background-color: #24292D; border-color:#5C676D; padding-top: 8px; padding-bottom: 8px;">小屏</el-button>
+            </span>
+            <span class="tool-bar-item">
+                <el-select size="small" v-model="screenLayout" >
+                    <el-option
+                            v-for="option in layoutmodes"
+                            :key="option.value"
+                            :label="option.label"
+                            :value="option.value" />
+                </el-select>
+            </span>
+
+        </div>
+    </div>
+    <div class="bvc2-auto-layout-wrapper">
+        <div class="bvc2-auto-layout-container"></div>
+    </div>
+    <div class="bvc2-auto-layout-buttons">
+        <table>
+            <tr>
+                <td v-if="config.__businessType==='scheme'" :class="style.play.isLoading?'disabled':''" @click="play">
+                    <el-button type="text" :loading="style.play.isLoading">
+                        <span :style="style.play.isLoading?'display:none':''" class="button-icon icon-play"></span>
+                        执行方案
+                    </el-button>
+                </td>
+                <td :class="style.forward.isLoading?'disabled':''" @click="forward">
+                    <el-button type="text" :loading="style.forward.isLoading">
+                        <span :style="style.forward.isLoading?'display:none':''" class="button-icon icon-external-link"></span>
+                        设置转发
+                    </el-button>
+                </td>
+                <td v-if="config.__businessType==='scheme'" :class="style.startRecord.isLoading?'disabled':''" @click="startRecord">
+                    <el-button v-if="video.record" type="text" :loading="style.startRecord.isLoading" style="color:#85ce61;">
+                        <span :style="style.startRecord.isLoading?'display:none':''" class="button-icon icon-facetime-video"></span>
+                        开始录制
+                    </el-button>
+                    <el-button v-else type="text" :loading="style.startRecord.isLoading">
+                        <span :style="style.startRecord.isLoading?'display:none':''" class="button-icon icon-facetime-video"></span>
+                        开始录制
+                    </el-button>
+                </td>
+                <td v-if="config.__businessType==='scheme'" :class="style.stopRecord.isLoading?'disabled':''" @click="stopRecord">
+                    <el-button v-if="video.record" type="text" :loading="style.stopRecord.isLoading" style="color:#f56c6c;">
+                        <span :style="style.stopRecord.isLoading?'display:none':''" class="button-icon icon-facetime-video"></span>
+                        停止录制
+                    </el-button>
+                    <el-button v-else type="text" :loading="style.stopRecord.isLoading">
+                        <span :style="style.stopRecord.isLoading?'display:none':''" class="button-icon icon-facetime-video"></span>
+                        停止录制
+                    </el-button>
+                </td>
+                <td :class="style.reset.isLoading?'disabled':''" @click="reset">
+                    <el-button type="text" :loading="style.reset.isLoading">
+                        <span :style="style.reset.isLoading?'display:none':''" class="button-icon icon-undo"></span>
+                        重置视频
+                    </el-button>
+                </td>
+                <td :class="style.saveScheme.isLoading?'disabled':''" @click="save">
+                    <el-button type="text" :loading="style.saveScheme.isLoading">
+                        <span :style="style.saveScheme.isLoading?'display:none':''" class="button-icon icon-save"></span>
+                        保存视频
+                    </el-button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <bvc2-dialog-set-forward
+            ref="setForward"
+            :members="members"
+            :values="values"
+            :roles="roles"
+            :roleValues="roleValues"
+            :video="video"
+            ></bvc2-dialog-set-forward>
+
+    <el-dialog title="配置小屏" class="dialog-set-small-screen" :visible.sync="dialog.smallScreen.visible">
+        <bvc2-set-small-screen
+                ref="smallScreen"
+                :small="small"
+                :members="memberstree"
+                @modify-small="modifySmall">
+        </bvc2-set-small-screen>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="dialog.smallScreen.visible = false">关闭</el-button>
+        </span>
+    </el-dialog>
+</div>

@@ -1,0 +1,532 @@
+html,body{
+    background-color: transparent;
+}
+#app {
+    overflow: hidden;
+}
+
+ul, li, div {
+    padding: 0;
+    margin: 0;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.right-bar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 370px;
+    height: 730px;
+    overflow: hidden;
+}
+
+/* 右侧tab和菜单 start */
+.tabBar {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 370px;
+}
+
+/*顶部切换标题*/
+.switch {
+    position: absolute;
+    right: 0;
+    width: 324px;
+    height: 50px;
+    border-radius: 12px 12px 0 0;
+    background: #52cffb21;
+    z-index: 1;
+}
+
+.switch li {
+    display: inline-block;
+    width: 49%;
+    font-size: 20px;
+    font-weight: bold;
+    height: 50px;
+    line-height: 50px;
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid #000;
+    background: #204a6b;
+    color: #fff;
+    text-align: center;
+}
+
+.highLight {
+    position: absolute;
+    top: 0;
+    left: 16px;
+    width: 120px;
+    height: 4px;
+    border-radius: 3px;
+    background-color: #00e9ff;
+    display: block;
+}
+
+li.focusLight {
+    color: #00e9ff;
+    background: none;
+}
+
+/*左侧的导航选项标题*/
+.el-tabs__nav {
+    top: 50px;
+}
+
+/*给这5个标题加滚动条*/
+.el-tabs__nav-scroll {
+    overflow: auto;
+}
+
+/*给滚动条修改默认样式*/
+.el-tabs__nav-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.el-tabs__nav-scroll::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.el-tabs__nav-scroll::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    border-radius: 0;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/*tab右侧自动加载的滚动条*/
+.el-tabs__nav-wrap::after {
+    background-color: #204a6b;
+}
+
+/* 禁止横向滚动条 */
+.firstMenu .el-scrollbar__wrap,.secondMenu .el-scrollbar__wrap{
+    overflow-x: hidden;
+}
+
+.is-horizontal {
+    display: none;
+}
+
+.el-tabs--left .el-tabs__header.is-left {
+    margin-right: 0;
+}
+
+.firstMenu{
+    position: absolute;
+    top: 50px;
+    bottom: 0;
+    left: 0;
+    width: 370px;
+}
+.el-tabs__content{
+    height: 100%;
+    background: #52cffb21;
+    border-radius: 0 0 12px 12px;
+}
+
+/*树的外层的容器 必须给高度，滚动条才起作用*/
+.scrollTab {
+    height: 500px;
+}
+
+.el-tabs__item {
+    margin: 2px 0;
+    padding: 0;
+    width: 50px;
+    height: 120px;
+    background-color: #204a6b;
+    border-radius: 10px 0 0 10px;
+}
+
+.fontPic {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.is-left .is-active {
+    background-color: #f8a036;
+}
+
+/* 树形组件开始 */
+.el-tree {
+    width: 320px;
+    background-color: transparent;
+}
+
+/* 菜单最外层级 */
+.el-tree-node {
+    margin: 1px 0 0;
+}
+
+/* 树形组件的标题文字,自定义 span*/
+.headline {
+    width: 100%;
+    color: #cfdae6;
+    font-family: "Microsoft YaHei";
+    font-size: 20px;
+    line-height: 30px;
+    background-color: #2d4e6899;
+}
+
+.headFont {
+    color: #cfdae6;
+    font-size: 20px;
+}
+
+/*复选框的样式*/
+.el-checkbox__inner {
+    border: 1px solid #7590A3;
+    background-color: transparent;
+}
+
+.el-tree-node__content {
+    padding-left: 0;
+    height: 60px;
+    border-bottom: 1px solid #0a1432;
+    border-radius: 0 10px 0 0;
+}
+
+.is-expanded .el-tree-node__children .el-tree-node__content {
+    background: transparent;
+}
+
+.el-tree-node__content:hover {
+    background-color: #173D5C;
+}
+
+/* 点击的那个层级，颜色较暗，能看出来按下的效果 */
+.el-tree-node:focus > .el-tree-node__content {
+    background-color: #133549;
+    box-shadow: 0 0 54px #6a65a2 inset;
+}
+
+/* 展开层级结构，的每一级的样式 */
+.el-tree-node:focus > .el-tree-node__children .el-tree-node__content {
+    background-color: transparent;
+}
+
+/*展开的层级的背景色*/
+.is-expanded .el-tree-node__children {
+    background-color: transparent;
+}
+
+/*悬浮按钮*/
+.folder {
+    position: absolute;
+    bottom: 22px;
+    left: 0;
+    z-index: 10;
+    width: 50px;
+    height: 20px;
+}
+
+/*折叠的按钮*/
+.el-radio-button__inner {
+    padding: 12px 17px;
+    background-color: #204a6b;
+    border: 0;
+    border-radius: 10px 0 0 10px;
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+}
+
+.el-radio-button:first-child .el-radio-button__inner {
+    border: 0;
+}
+
+.el-radio-button__inner:hover {
+    color: #fff;
+}
+
+/*右侧底部按钮*/
+.ball {
+    position: absolute;
+    right: 120px;
+    bottom: 22px;
+    width: 100px;
+    height: 100px;
+    line-height: 140px;
+    text-align: center;
+    background: radial-gradient(circle at 100px 100px, #5cabff, #104f64);
+    border-radius: 50%;
+    overflow: hidden;
+    transition: 400ms cubic-bezier(.06, .55, .97, .78);
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* 呼吸灯样式 start */
+.animating {
+    animation: breathe 2500ms ease-in-out alternate infinite;
+}
+
+@-webkit-keyframes breathe {
+    0% {
+        opacity: .5;
+        box-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
+    }
+
+    100% {
+        opacity: 1;
+        box-shadow: 0 1px 30px rgba(59, 255, 255, 1);
+    }
+}
+
+.ball.activeBall {
+    position: absolute;
+    width: 360px;
+    height: 360px;
+    bottom: -177px;
+    left: 31px;
+    background: #173d5c59;
+    text-align: right;
+    clip-path: ellipse(54% 67% at 54% 53%);
+}
+
+.activeBall .circle_bottom {
+    width: 380px;
+    height: 120px;
+    background-color: transparent;
+}
+
+/*.closeIcon {*/
+    /*font-size: 70px;*/
+    /*color: #fff;*/
+/*}*/
+
+/* 控制点击后的图标和内容的显示 start */
+/*.ball.activeBall .closeIcon {*/
+    /*transform: rotate(45deg);*/
+    /*position: absolute;*/
+    /*right: 47px;*/
+    /*top: 44px;*/
+/*}*/
+
+/*.ball.activeBall .footer {*/
+    /*display: block;*/
+/*}*/
+
+/* 控制点击后的图标和内容的显示 end */
+
+/* 底部图标 */
+.footer {
+    position: absolute;
+    left: 50px;
+    bottom: 0;
+    width: 320px;
+    height: 180px;
+    background-color: #173d5c;
+    border-radius: 0 0 12px 12px;
+}
+
+.customIcon {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    line-height: 72px;
+    text-align: center;
+    border-radius: 12px;
+    background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
+}
+
+.customIcon.disable {
+    background: gray;
+}
+
+.icon1 {
+    top: 20px;
+    left: 32px;
+}
+
+.icon2 {
+    top: 20px;
+    left: 130px;
+}
+
+.icon3 {
+    top: 20px;
+    right: 35px;
+}
+
+.icon4 {
+    top: 100px;
+    left: 32px;
+}
+
+.icon5 {
+    top: 100px;
+    left: 130px;
+}
+
+.icon6{
+    top: 100px;
+    right: 35px;
+}
+
+.customIcon i {
+    font-size: 30px;
+    color: #fff;
+}
+
+.context-menu {
+    position: fixed;
+    right: 0;
+    background-color: #163D5C;
+    border-radius: 10px;
+    box-shadow: 0 1px 5px 0 rgba(95, 91, 91, 0.38);
+    font-size: 16px;
+    color: #C7D2DD;
+    z-index: 12;
+}
+
+.context-menu .header {
+    padding: 5px 60px;
+    max-width: 150px;
+    font-weight: 700;
+    border-bottom: 1px solid #e4e7ed;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.menu .menuIcon {
+    margin-right: 20px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #00ECFF;
+}
+
+.context-menu .menu {
+    padding: 10px 15px;
+    border-bottom: 1px solid #000;
+}
+
+.context-menu .menu:not(.disable):hover {
+    background-color: #409eff;
+    color: #fff;
+}
+
+.context-menu .menu.disable {
+    cursor: not-allowed;
+    color: #c0c4cc;
+}
+
+/*第二部分 指挥工作台*/
+.secondMenu {
+    position: absolute;
+    top: 51px;
+    bottom: 0;
+    left: 46px;
+    padding: 18px 15px;
+    width: 290px;
+    background-color: #52cffb21;
+    border-radius: 0 0 12px 12px;
+}
+
+.status {
+    width: 97px;
+    line-height: 30px;
+    background-color: #e3626438;
+    border: 1px solid #e36264;
+    border-radius: 15px;
+    color: #e36264;
+    text-align: center;
+    font-weight: bold;
+}
+
+.status i {
+    margin-right: 8px;
+}
+
+.status.start {
+    color: #00ff14;
+    background-color: #3dff2538;
+    border-color: #3dff2538;
+}
+
+.status.pause {
+    color: #ffc800;
+    background-color: #ffb22538;
+    border-color: #ffb22538;
+}
+
+.status.remind {
+    color: #00fff3;
+    background-color: #05ffff38;
+    border-color: #62cbe3;
+}
+
+.status.stop {
+    color: #e36264;
+}
+
+/*下拉框样式修改*/
+.el-input--small .el-input__inner {
+    background-color: #204a6b9e;
+    border: none;
+    height: 40px;
+    line-height: 40px;
+    font-size: 18px;
+    color: #fff;
+}
+
+/*箭头的样式*/
+.el-select .el-input .el-select__caret {
+    margin-right: 12px;
+    font-size: 22px;
+    color: #00e8fe;
+}
+
+/*下拉展开的面板*/
+.el-select-dropdown{
+    background-color:#204a6b;
+    border: none;
+}
+.el-select-group__title{
+    font-size: 18px;
+    color: #fff;
+}
+.el-select-dropdown__item{
+    font-size: 18px;
+    color: #00e9ff;
+}
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover{
+    background-color: #204a6b;
+}
+
+.btnContainer{
+    position:absolute;
+    padding: 12px 10px;
+    width:300px;
+    height:216px;
+    bottom:0;
+    left:0;
+    background-color:#173d5c;
+    border-radius: 0 0 12px 12px;
+}
+.option-button{
+    float: left;
+    margin: 5px 7px;
+    width: 60px;
+    height: 60px;
+}
+.option-button img{
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+

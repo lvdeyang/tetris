@@ -1,0 +1,11 @@
+/* reset */
+html, body{overflow:hidden;}
+.zk-business-command-message,
+.zk-business-command-message *{box-sizing:border-box!important;}
+.zk-business-command-message .el-scrollbar__wrap{overflow-x: hidden;}
+
+.zk-business-command-message .el-tabs__content{position:static;}
+.zk-business-command-message .message-content textarea{height:100%; border-radius:0;}
+.zk-business-command-message .el-dialog{width:100%; height:100%; margin:0!important; position:relative;}
+.zk-business-command-message .el-dialog__footer{position:absolute; bottom:0; left:0; width:100%;}
+.zk-business-command-message .dialog-body{position:absolute; top:54px; bottom:62px; left:0; right:0; padding:0 20px;}
