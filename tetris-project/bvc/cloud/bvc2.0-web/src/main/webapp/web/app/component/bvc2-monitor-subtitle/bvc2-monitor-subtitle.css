@@ -1,0 +1,4 @@
+/* reset */
+.bvc2-monitor-subtitle *{box-sizing:border-box!important;}
+.bvc2-monitor-subtitle .el-scrollbar__wrap{overflow-x: hidden;}
+.bvc2-monitor-subtitle .el-textarea__inner{font-size:inherit!important; color:inherit!important; font-family:inherit!important;}

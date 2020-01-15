@@ -1,0 +1,112 @@
+html,body{
+    background-color: transparent;
+}
+.message {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 90px;
+}
+.screenCtrl{
+    position: absolute;
+    padding-left: 15px;
+    top:0;
+    left: 0;
+    width: 230px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    color: #fff;
+    font-size: 20px;
+    background: url("../../../../../images/zk-leader/splitScreen.png") no-repeat center;
+    background-size: 100% 100%;
+}
+.screenCtrl div{
+    float: left;
+    width: 26px;
+    height: 22px;
+    margin: 14px 5px;
+}
+
+.msgBg{
+    position: absolute;
+    top:10px;
+    left: 290px;
+    z-index: 1;
+}
+.msgContent {
+    position: absolute;
+    left: 350px;
+    top: 15px;
+    padding-left: 150px;
+    width: 600px;
+    height: 70px;
+    font-size: 16px;
+    color: #00e9ff;
+    background: url("../../../../../images/zk-leader/msgContent.png") no-repeat center;
+    overflow: hidden;
+}
+
+ul, li {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.msgContent li{
+    line-height: 23px;
+}
+.animating{
+    animation: wordsLoop 5s linear infinite normal;
+}
+
+.note {
+    line-height: 20px;
+}
+
+.tagMessage {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+}
+img{
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.el-button{
+    position: absolute;
+    padding: 18px;
+    top:5px;
+    right: 0;
+    background: #204a6b;
+    border-radius: 10px 0 0 10px;
+    border: 0;
+    font-weight: bold;
+    font-size: 18px;
+    color: #00e9ff;
+}
+.el-button:active,.el-button:hover,.el-button:focus {
+    color: #00e9ff;
+    background-color: #204a6b;
+    outline: 0;
+}
+
+@keyframes wordsLoop {
+    0% {
+        transform: translateY(65px);
+        -webkit-transform: translateY(65px);
+    }
+    50%{
+        transform: translateY(0);
+        -webkit-transform: translateY(0);
+    }
+    100% {
+        transform: translateY(-70px);
+        -webkit-transform: translateY(-70px);
+    }
+}
+
+

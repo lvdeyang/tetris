@@ -135,6 +135,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/user/feign/check/token")
 												   .add("/api/server/media/upload")
 												   .add("/user/index/personal/*")
+												   .add("/")
 												   //以下路径系统中不会使用
 												   //访问网关的不拦截
 												   .add("/tetris-spring-eureka/*")

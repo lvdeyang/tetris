@@ -1,0 +1,87 @@
+<div id="page-group-virtual-source-wrapper" class="page-wrapper">
+    <!--<bvc2-header-->
+    <!--:links="header.links"-->
+    <!--:user="header.user"></bvc2-header>-->
+    <bvc-headerbar :sysusername="header.user.name" :routes="shortCutsRoutes" :active="active"></bvc-headerbar>
+    <div class="page-body-new" style="padding:0;">
+        <el-container style="width:100%; height:100%">
+            <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
+            <el-main style="padding:15px;">
+                <div class="bvc2-card">
+                    <div class="bvc2-card-head no-border" @click="itemBack">
+                        <div class="icon-reply">返回</div>
+                    </div>
+                    <div class="bvc2-card-body">
+                        <!-- 表 -->
+                        <bvc2-system-table-base
+                                :buttoncreate="table.buttonCreate"
+                                :buttonremove="table.buttonRemove"
+                                :columns="table.columns"
+                                :options="table.options"
+                                :load="table.load"
+                                :save="table.save"
+                                :update="table.update"
+                                :remove="table.remove"
+                                :removebatch="table.removebatch"
+                                :pk="table.pk"
+                                @row-add-save_after="afterAdd"
+                                @edit-layout="editLayout"></bvc2-system-table-base>
+                    </div>
+                </div>
+            </el-main>
+        </el-container>
+    </div>
+    <el-dialog
+            class="bvc2-dialog-auto-layout"
+            width="60%"
+            title="虚拟源设置"
+            :visible.sync="dialog.show"
+            @close="dialogClose">
+        <div style="width:100%; height:550px; position:relative;">
+            <div style="width:300px; height:100%; border:1px solid #ebeef5; overflow:auto; box-sizing:border-box;">
+                <el-tree
+                        :data="dialog.tree.data"
+                        :props="dialog.tree.defaultProps"
+                        node-key="key"
+                        :default-expand-all="dialog.tree.defaultExpandAll"
+
+                        :render-content="renderContent"
+                        @node-expand="nodeExpand"
+                        @node-collapse="nodeCollapse"
+                        draggable
+                        :allow-drop="allowDrop"
+                        :allow-drag="allowDrag"
+                        @node-drag-start="handleDragStart"
+                        ></el-tree>
+            </div>
+            <div style="position:absolute; left:300px; top:0; right:0; bottom:0">
+                <div class="bvc2-dialog-auto-layout-tool-bar">
+                    <span class="tool-bar-item">
+                        <el-select size="mini" v-model="layout.row" @change="rowChange">
+                            <el-option
+                                    v-for="rowOption in options.rowOptions"
+                                    :key="rowOption.value"
+                                    :label="rowOption.label"
+                                    :value="rowOption.value"/>
+                        </el-select>
+                    </span>
+                        <span class="tool-bar-item-times">&times;</span>
+                    <span class="tool-bar-item">
+                        <el-select size="mini" v-model="layout.column" @change="columnChange">
+                            <el-option
+                                    v-for="columnOption in options.columnOptions"
+                                    :key="columnOption.value"
+                                    :label="columnOption.label"
+                                    :value="columnOption.value"/>
+                        </el-select>
+                    </span>
+                </div>
+                <div style="position:relative; width:100%; height:500px" id="layout-auto-wrapper" class="bvc2-dialog-auto-layout-editor"></div>
+            </div>
+        </div>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialog.show = false">取 消</el-button>
+            <el-button type="primary" @click="saveLayout">确 定</el-button>
+        </div>
+    </el-dialog>
+</div>

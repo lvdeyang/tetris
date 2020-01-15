@@ -1,0 +1,42 @@
+<div id="page-authorization-list-wrapper" class="page-wrapper">
+    <!--<bvc2-header-->
+    <!--:links="header.links"-->
+    <!--:user="header.user"></bvc2-header>-->
+    <bvc-headerbar :sysusername="header.user.name" :routes="shortCutsRoutes" :active="active"></bvc-headerbar>
+    <div class="page-body-new">
+        <!--<div class="page-body" style="padding:0;">-->
+        <el-container style="width:100%; height:100%">
+            <!--<el-aside width="auto;">-->
+            <!--<bvc2-system-nav-side :active="side.active"></bvc2-system-nav-side>-->
+            <!--</el-aside>-->
+            <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
+            <el-main style="padding:15px;">
+                <div class="bvc2-card">
+                    <div class="bvc2-card-head no-border"></div>
+                    <div class="bvc2-card-body">
+                        <!-- 表 -->
+                        <bvc2-system-table-base
+                                :buttoncreate="table.buttonCreate"
+                                :buttonremove="table.buttonRemove"
+                                :columns="table.columns"
+                                :options="table.options"
+                                :load="table.load"
+                                :save="table.save"
+                                :update="table.update"
+                                :remove="table.remove"
+                                :removebatch="table.removebatch"
+                                :pk="table.pk"
+                                @edit-authorization="editAuthorization"></bvc2-system-table-base>
+                    </div>
+                </div>
+            </el-main>
+        </el-container>
+
+        <bvc2-dialog-authorization-list
+                ref="$systemAuthorization"
+                :group="authorization.row"
+                :query="authorization.query"
+                :save="authorization.save">
+        </bvc2-dialog-authorization-list>
+    </div>
+</div>

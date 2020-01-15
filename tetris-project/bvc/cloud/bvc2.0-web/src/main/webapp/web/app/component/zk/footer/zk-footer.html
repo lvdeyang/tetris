@@ -1,0 +1,17 @@
+<div class="zk-footer" style="width:100%; height:80px; background-color:#fff; line-height:40px; padding:5px 20px; box-sizing:border-box;">
+    <div class="bvc2-layout-buttons" style="width:auto; float:left;">
+        <div :class="buttonClass(index)" v-for="(button, index) in buttons" :data-index="index" @click="layoutChange">
+            <div class="bvc2-layout-button-icon"></div>
+            <div class="bvc2-layout-button-text">{{button.text}}</div>
+        </div>
+    </div>
+    <!--<div style="height:70px; margin-left:30px; float:left;">
+        <div style="line-height:normal; position:relative; top:19px;">
+            <span style="line-height:normal; border:1px solid #E3E8EB; padding:7px 10px; border-radius:3px; font-size:12px; float:left;">
+                当前方案：{{currentScheme.id?currentScheme.name:'未选择'}}
+            </span>
+            <el-button type="warning" size="small" style="float:left; margin-left:10px;" @click="changeScheme">方案切换</el-button>
+            <el-button type="primary" size="small" style="float:left;" @click="saveScheme">方案另存</el-button>
+        </div>
+    </div>-->
+</div>

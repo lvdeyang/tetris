@@ -1,0 +1,12 @@
+<el-transfer
+		class="bvc2-transfer-authority-target"
+		ref="transfer"
+		v-model="value"
+		style="text-align: left; margin-left: 25px"
+		:data="data"
+		:props="defaultProps"
+		:titles="['可选录制','已选录制']"
+		:button-texts="['删除','添加']"
+		@change="handleChange"
+		@left-check-change="leftCheckChange"
+		></el-transfer>

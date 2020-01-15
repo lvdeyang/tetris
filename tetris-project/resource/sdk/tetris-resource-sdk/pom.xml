@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+	
+	<!-- <parent>
+		<groupId>com.suma.venus</groupId>
+		<artifactId>resource-parent</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent> -->
+	
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.3.RELEASE</version>
+		<relativePath/>
+	</parent>
+    
+    <groupId>com.suma.venus</groupId>
+    <artifactId>tetris-resource-sdk</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>tetris-resource-sdk</name>
+    <packaging>war</packaging>
+         
+    <properties>
+    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+    </properties>
+
+    <dependencies>
+		<!-- <dependency>
+			<groupId>com.suma.venus</groupId>
+			<artifactId>venus-resource-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
+
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- 导入Mysql数据库链接jar包 -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        
+        <!-- 阿里druid连接池 -->
+		<dependency>
+		   <groupId>com.alibaba</groupId>
+		   <artifactId>druid-spring-boot-starter</artifactId>
+		   <version>1.1.10</version>
+		</dependency>
+		
+		<dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+             <exclusions>  
+                <exclusion>  
+                    <groupId>org.springframework.boot</groupId>  
+                    <artifactId>spring-boot-starter-tomcat</artifactId>  
+                </exclusion>  
+            </exclusions>  
+        </dependency>
+        
+        <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+			<version>1.3.0.RELEASE</version>
+		</dependency>
+        
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        
+       	<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
+			<optional>true</optional>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		
+		<!-- <dependency>
+			<groupId>com.sumavision</groupId>
+			<artifactId>suma-venus-alarmoprlog-client</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
+		
+		 <!-- <dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-oauth2</artifactId>
+			<version>1.2.0.RELEASE</version>
+		</dependency> -->
+		
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi</artifactId>
+		    <version>3.9</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.poi</groupId>
+		    <artifactId>poi-ooxml</artifactId>
+		    <version>3.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jta-narayana</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+		    <artifactId>tetris-menu-feign</artifactId>
+		    <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+   	 		<artifactId>tetris-user-feign</artifactId>
+    		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- tetris-ui -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+    		<artifactId>tetris-ui</artifactId>
+    		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- activeMq相关 -->
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-core</artifactId>
+			<version>5.7.0</version>
+		</dependency>
+
+	 	<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-activemq-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+    </dependencies>
+    
+    <build>
+		<finalName>venus-resource-web</finalName>
+
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin </artifactId>
+			</plugin>
+		</plugins>
+    </build>
+
+</project>

@@ -1,0 +1,45 @@
+<div class="bvc2-auto-layout-polling-manage-dialog" id="bvc2-auto-layout-polling-manage-dialog">
+    <!--<div class="bvc2-audo-layout-polling-manage-dialog-search">-->
+    <!--<el-input placeholder="名称过滤" size="mini" clearable v-model="search">-->
+    <!--<span slot="prefix" class="el-input__icon el-icon-search"></span>-->
+    <!--</el-input>-->
+    <!--</div>-->
+    <el-dialog
+            title="轮询管理"
+            :visible.sync="dialogVisible"
+            width="60%"
+            :before-close="handleClose">
+        <div class="bvc2-audo-layout-polling-manage-dialog-data">
+            <div class="bvc2-audo-layout-polling-manage-dialog-data-wrapper">
+
+                <el-table height="100%" :data="data">
+                <!--</el-table><el-table height="100%" :data="rows.filter(data => !search || data.name.toLowerCase().includes(search.toLowerCase()))" highlight-current-row>-->
+                    <el-table-column label="轮询源" :render-content="renderFunc">
+                        <span slot-scope="scope">
+                            <span>{{scope.row.name}}</span>
+                        </span>
+                    </el-table-column>
+                    <el-table-column label="隐藏/显示" width="120">
+                        <span slot-scope="scope">
+                            <el-switch v-model="scope.row.visible" class="el-switch screen-config-polling-visible"
+                                       active-value="VISIBLE" inactive-value="INVISIBLE" active-value="VISIBLE">
+                            </el-switch>
+                        </span>
+                    </el-table-column>
+                    <el-table-column fixed="right" label="切换至该画面" width="160">
+                        <span slot-scope="scope">
+                            <el-tooltip class="item" effect="dark" content="立即切换" placement="bottom">
+                                <el-button type="text" @click="pollingSwitchToIndex(scope, scope.row)"><span class="icon-fast-forward icon-large"></span></el-button>
+                            </el-tooltip>
+                        </span>
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+        <span slot="footer" class="dialog-footer">
+            <el-button @click="handleCancelClick">取 消</el-button>
+            <el-button type="primary" @click="saveManagement">确 定</el-button>
+        </span>
+    </el-dialog>
+
+</div>

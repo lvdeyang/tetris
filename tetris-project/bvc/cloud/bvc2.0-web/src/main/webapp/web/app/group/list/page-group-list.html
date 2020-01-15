@@ -1,0 +1,92 @@
+<div id="page-group-list-wrapper" class="page-wrapper">
+    <!--<bvc2-header-->
+            <!--:links="header.links"-->
+            <!--:user="header.user"></bvc2-header>-->
+    <bvc-headerbar :sysusername="header.user.name" :routes="shortCutsRoutes" :active="active"></bvc-headerbar>
+    <div class="page-body-new">
+    <!--<div class="page-body">-->
+        <el-container style="width:100%; height:100%">
+            <bvc-sidebar :routes="shortCutsRoutes" :active="active" :menurouter="menurouter"></bvc-sidebar>
+            <el-main style="padding:15px;">
+                <el-row :gutter="15" type="flex" style="width:100%; height:100%;">
+                    <el-col :xs="6" :sm="6" :md="4" :lg="4" :xl="4">
+                        <div class="bvc2-card">
+                            <div class="bvc2-card-head">
+                                <span>设备列表</span>
+                            </div>
+                            <div class="bvc2-card-body">
+                                <!-- 会议成员树 -->
+                                <component :is ="sourcelist" ref="$sourceList" :members="members" :checkedmembers="checked" :group="group"></component>
+
+                            </div>
+                        </div>
+                    </el-col>
+                    <el-col :xs="18" :sm="18" :md="20" :lg="20" :xl="20">
+                        <div class="bvc2-card">
+                            <div class="bvc2-card-head no-border">
+                                <span class="version" style="float:right; padding-right:10px">版本：{{version}}</span>
+                                <el-button type="primary" style="padding: 10px !important; margin-top: 15px; margin-left: 255px;" @click="quickGroup"><span class="el-icon-zoom-in" style="margin-right:5px;"></span> 一键组会 </el-button>
+                            </div>
+                            <div class="bvc2-card-body">
+                                <!-- 表 -->
+                                <bvc2-system-table-base
+                                        ref="$groupList"
+                                        :buttoncreate="table.buttonCreate"
+                                        :buttonremove="table.buttonRemove"
+                                        :options="table.options"
+                                        :search="table.search"
+                                        :breadcrumb="table.breadcrumb"
+                                        :columns="table.columns"
+                                        :load="table.load"
+                                        :save="table.save"
+                                        :update="table.update"
+                                        :remove="table.remove"
+                                        :removebatch="table.removebatch"
+                                        :pk="table.pk"
+                                        :highlight="table.highlight"
+                                        @row-click = "rowClick"
+                                        @row-create_before = "rowCreateBefore"
+                                        @row-create = "rowCreate"
+                                        @row-add-save_before = "rowAddSaveBefore"
+                                        @row-add-save_after = "rowAddSaveAfter"
+                                        @row-add-cancel = "rowAddCancel"
+                                        @row-edit = "rowEdit"
+                                        @row-edit-save_before = "rowEditSaveBefore"
+                                        @row-edit-save_after = "rowEditSaveAfter"
+                                        @row-edit-cancel = "rowEditCancel"
+                                        @row-remove_after = "rowRemoveAfter"
+                                        @edit-role="editRole"
+                                        @enter-group="enterGroup"
+                                        @refresh-group="refreshGroup"
+                                        @edit-group-param="editGroupParam"
+                                        @role-update="roleUpdate"
+                                        @reset-group="resetGroup"></bvc2-system-table-base>
+                            </div>
+                        </div>
+                    </el-col>
+                </el-row>
+            </el-main>
+        </el-container>
+
+        <bvc2-dialog-edit-role
+            ref="$editRole"
+            :roles="roles"
+            :members="roleMembers"
+            @save-role="saveRole"
+            ></bvc2-dialog-edit-role>
+ 
+        <bvc2-dialog-set-group-template
+        	ref="setGroupTpls"
+        	:systemtpls="systemtpls"
+        	:avtpls="avtpls"
+            :authtpls="authtpls"
+        	:createrow='createrow'
+        	></bvc2-dialog-set-group-template>
+
+        <bvc2-dialog-quick-group
+            ref="$quickGroup"
+            @quick-group="quickGroupSave"
+            ></bvc2-dialog-quick-group>
+
+    </div>
+</div>
