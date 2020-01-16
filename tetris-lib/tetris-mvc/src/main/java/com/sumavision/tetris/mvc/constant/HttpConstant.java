@@ -23,6 +23,9 @@ public interface HttpConstant {
 	/** header internal process client id */
 	public static final String HEADER_PROCESS_CLIENT = "tetris-006";
 	
+	/** 从zuul跳转过来获取请求终端的ip */
+	public static final String HEADER_REAL_IP_FROM_ZUUL = "tetris-007";
+	
 	/** process 调用密钥 */
 	public static final String HEADER_PROCESS_CLIENT_KEY = "6acee36b1d0346709ba3701b5d913601";
 	
