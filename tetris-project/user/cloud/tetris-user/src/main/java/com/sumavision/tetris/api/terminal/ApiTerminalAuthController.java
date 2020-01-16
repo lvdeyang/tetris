@@ -204,8 +204,9 @@ public class ApiTerminalAuthController {
 		if(!existCode.equals(verificationCode)){
 			throw new ImageVerificationCodeErrorException(username);
 		}*/
-		
-		String token = loginService.doPasswordLogin(username, password, request.getRemoteHost(), TERMINAL_TYPE, null);
+		String ip = request.getHeader(HttpConstant.HEADER_REAL_IP_FROM_ZUUL);
+		if(ip == null) ip = request.getRemoteHost();
+		String token = loginService.doPasswordLogin(username, password, ip, TERMINAL_TYPE, null);
 		
 		return token;
 	}

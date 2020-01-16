@@ -34,7 +34,7 @@ public class ApiFilter extends ZuulFilter{
 		
 		//zuul调用client 密钥
 		ctx.addZuulRequestHeader(HttpConstant.HEADER_FEIGN_CLIENT, HttpConstant.HEADER_FEIGN_CLIENT_KEY);
-		
+		ctx.addZuulRequestHeader(HttpConstant.HEADER_REAL_IP_FROM_ZUUL, request.getRemoteHost());
 		return null;
 
 	}
