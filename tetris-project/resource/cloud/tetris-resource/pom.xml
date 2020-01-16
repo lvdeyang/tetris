@@ -92,13 +92,13 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
+		<!-- 
 		<dependency>
 			<groupId>com.suma.venus</groupId>
 			<artifactId>venus-message-service</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-		
+		 -->
 		<!-- <dependency>
 			<groupId>com.sumavision</groupId>
 			<artifactId>suma-venus-alarmoprlog-client</artifactId>
