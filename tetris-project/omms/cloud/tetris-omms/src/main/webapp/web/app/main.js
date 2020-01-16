@@ -48,7 +48,7 @@ require.config({
         'mi-sub-title':window.APPPATH + 'component/sub-title/sub-title',
 
         /* pages */
-        'page-omms-monitor-service':window.APPPATH + 'omms/monitor/service/page-omms-monitor-service'
+        'page-omms':window.APPPATH + 'omms/page-omms'
 
     },
     shim:{

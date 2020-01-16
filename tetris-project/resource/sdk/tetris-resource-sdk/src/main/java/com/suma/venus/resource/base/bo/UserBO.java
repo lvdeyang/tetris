@@ -1,10 +1,6 @@
 package com.suma.venus.resource.base.bo;
 
-import com.sumavision.tetris.user.UserVO;
-
 public class UserBO {
-	
-	private UserVO user;
 
 	private Long id;
 
@@ -37,14 +33,6 @@ public class UserBO {
 	private String folderUuid;
 
 	private Integer folderIndex;
-	
-	public UserVO getUser() {
-		return user;
-	}
-
-	public void setUser(UserVO user) {
-		this.user = user;
-	}
 
 	public Long getId() {
 		return id;

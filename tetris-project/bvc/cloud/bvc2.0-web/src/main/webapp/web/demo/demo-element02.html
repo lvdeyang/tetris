@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue的模板示例—穿梭框</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style type="text/css">
+        .transfer-footer {
+            margin-left: 150px;
+            padding: 6px 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <el-transfer
+                ref="transfer"
+                v-model="value"
+                :data="data"
+                :props="defaultProps"
+                :titles="['设备列表','已选设备']"
+                :button-texts="['删除设备','添加设备']"
+                :render-content="renderContent"
+
+        >
+            <el-button class="transfer-footer" slot="left-footer" size="small" style="display: none">操作</el-button>
+            <el-button class="transfer-footer" slot="right-footer" size="small">保存</el-button>
+        </el-transfer>
+    </div>
+
+</body>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script type="text/javascript" src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script type="text/javascript">
+
+    var a = new Vue({
+        el: '#app',
+        data:{
+            value:['1','2'],
+            data: [
+                {
+                    id:'1',
+                    name:'设备1'
+                },{
+                    id:'2',
+                    name:'设备2'
+                },{
+                    id:'3',
+                    name:'设备3'
+                },{
+                    id:'4',
+                    name:'设备4'
+                },{
+                    id:'5',
+                    name:'设备5'
+                },{
+                    id:'6',
+                    name:'设备6'
+                },{
+                    id:'7',
+                    name:'设备7'
+                },{
+                    id:'8',
+                    name:'设备8'
+                },{
+                    id:'9',
+                    name:'设备9'
+                },{
+                    id:'10',
+                    name:'设备10'
+                },{
+                    id:'11',
+                    name:'设备11'
+                }
+            ],
+            defaultProps: {
+                key: 'id',
+                label: 'name'
+            }
+        },
+        methods: {
+            renderContent:function(h, option){
+                return h('span', {}, [option.id + '-' + option.name]);
+            },
+            getSelect:function(){
+                var value = this.value;
+
+                var target = [];
+                for(var i=0; i<value.length; i++){
+                    for(var j=0; j<this.data.length; j++){
+                        if(value[i] == this.data[j].id){
+                            target.push(this.data[j]);
+                            break;
+                        }
+                    }
+                }
+
+                return target;
+            }
+        }
+    });
+
+</script>
+</html>

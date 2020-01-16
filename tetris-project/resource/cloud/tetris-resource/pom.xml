@@ -29,7 +29,12 @@
     </properties>
 
     <dependencies>
-    
+		<!-- <dependency>
+			<groupId>com.suma.venus</groupId>
+			<artifactId>venus-resource-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
+		
 		<dependency>
 			<groupId>com.suma.venus</groupId>
 			<artifactId>tetris-resource-sdk</artifactId>
@@ -87,7 +92,13 @@
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		
+		<!-- 
+		<dependency>
+			<groupId>com.suma.venus</groupId>
+			<artifactId>venus-message-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		 -->
 		<!-- <dependency>
 			<groupId>com.sumavision</groupId>
 			<artifactId>suma-venus-alarmoprlog-client</artifactId>
@@ -126,6 +137,12 @@
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
    	 		<artifactId>tetris-user-feign</artifactId>
+    		<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+   	 		<artifactId>tetris-capacity-feign</artifactId>
     		<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		

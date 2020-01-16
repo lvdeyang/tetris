@@ -59,7 +59,7 @@
   // import apiConfig from '../../../config/api.config';
   // let requestIP = document.location.host.split(":")[0];
 
-  let basePath = process.env.RESOURCE_ROOT + '/suma-venus-resource'
+  let basePath = process.env.RESOURCE_ROOT
   
   export default {
       name: "templateManage",

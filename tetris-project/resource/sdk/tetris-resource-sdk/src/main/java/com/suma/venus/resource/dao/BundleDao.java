@@ -27,16 +27,18 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public List<BundlePO> findByAccessNodeUid(String accessNodeUid);
 
 	public List<BundlePO> findByFolderId(Long folderId);
-	
+
+	public List<BundlePO> findByDeviceIp(String deviceIp);
+
 	public List<BundlePO> findBySourceType(SOURCE_TYPE sourceType);
 
 	public List<BundlePO> findByBundleTypeAndExtraBindId(String bundleType, String extraBindId);
-	
+
 	public BundlePO findByUsername(String username);
-	
+
 	@Query("select bundle from BundlePO bundle where bundle.bundleId in ?1")
 	public List<BundlePO> findInBundleIds(List<String> bundleIds);
-	
+
 	@Query("select bundle from BundlePO bundle where bundle.bundleType=?1 and bundle.extraBindId is null")
 	public List<BundlePO> findByBundleTypeAndExtraBindIdIsNull(String bundleType);
 
@@ -89,7 +91,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public Set<String> queryBundleIdByNameLikeAndSourceType(String name, SOURCE_TYPE sourceType);
 
 	@Query("select distinct b.bundleId from BundlePO b where b.deviceModel=?1 and (b.bundleName like %?2% or b.username like %?2%) and b.sourceType=?3")
-	public Set<String> queryBundleIdByDeviceModelAndNameLikeAndSourceType(String deviceModel, String name, SOURCE_TYPE sourceType);
+	public Set<String> queryBundleIdByDeviceModelAndNameLikeAndSourceType(String deviceModel, String name,
+			SOURCE_TYPE sourceType);
 
 	/** 查询状态为未同步 需要向ldap服务器同步的设备信息 **/
 	@Query("select b from BundlePO b where b.deviceModel='jv210' and (b.bundleAlias!='播放器' or b.bundleAlias is null) "
@@ -127,13 +130,11 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	@Query("select b from BundlePO b where b.deviceModel='jv210' and (b.bundleAlias!='播放器' or b.bundleAlias is null) and (b.sourceType='SYSTEM' or b.sourceType is null)")
 	public List<BundlePO> findLocalDevsForCleanUpLdap();
 
-
 	@Query("select b from BundlePO b where (b.bundleAlias!='播放器' or b.bundleAlias is null) and (b.sourceType='SYSTEM' or b.sourceType is null)")
 	public List<BundlePO> findLocalDevs();
-	
-	@Query(value = "SELECT DISTINCT bundle.* FROM bundlepo bundle LEFT JOIN channel_schemepo channel ON bundle.bundle_id = channel.bundle_id WHERE bundle.bundle_name LIKE ?1 AND bundle.bundle_id LIKE ?2 AND bundle.user_name LIKE ?3 AND bundle.device_ip LIKE ?4 And bundle.device_model = ?5 AND channel.channel_name = ?6 \n#pageable\n",
-					countQuery = "SELECT DISTINCT COUNT(bundle.id) FROM BUNDLEPO bundle WHERE bundle.bundle_name LIKE ?1 AND bundle.bundle_id LIKE ?2 AND bundle.user_name LIKE ?3 AND bundle.device_ip LIKE ?4 And bundle.device_model = ?5 AND channel.channel_name = ?6",
-					nativeQuery = true)
-	public Page<BundlePO> findBySearch(String bundleName, String bundleId, String bundleNo, String ip, String deviceModel, String channelName, Pageable page);
+
+	@Query(value = "SELECT DISTINCT bundle.* FROM bundlepo bundle LEFT JOIN channel_schemepo channel ON bundle.bundle_id = channel.bundle_id WHERE bundle.bundle_name LIKE ?1 AND bundle.bundle_id LIKE ?2 AND bundle.user_name LIKE ?3 AND bundle.device_ip LIKE ?4 And bundle.device_model = ?5 AND channel.channel_name = ?6 \n#pageable\n", countQuery = "SELECT DISTINCT COUNT(bundle.id) FROM BUNDLEPO bundle WHERE bundle.bundle_name LIKE ?1 AND bundle.bundle_id LIKE ?2 AND bundle.user_name LIKE ?3 AND bundle.device_ip LIKE ?4 And bundle.device_model = ?5 AND channel.channel_name = ?6", nativeQuery = true)
+	public Page<BundlePO> findBySearch(String bundleName, String bundleId, String bundleNo, String ip,
+			String deviceModel, String channelName, Pageable page);
 
 }
