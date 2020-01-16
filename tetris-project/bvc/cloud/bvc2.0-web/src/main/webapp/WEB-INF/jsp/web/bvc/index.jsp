@@ -4,15 +4,8 @@
 	String host = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
 	String scheme = request.getContextPath();
 	String basePath = host + scheme + "/";
-	//String token = request.getParameter("token");
-	//String scope = request.getParameter("scope");
-	String token = (String)request.getAttribute("token");
-	token = token==null?"":token;
-	String scope = (String)request.getAttribute("scope");
-	scope = scope==null?"":scope;
-	String sessionId = (String)request.getAttribute("sessionId");
-	sessionId = sessionId==null?"":sessionId;
-	
+	String token = request.getParameter("token");
+	String scope = request.getParameter("scope");
 %>
 <!DOCTYPE HTML>
 <html lang="zh-cmn-Hans">
@@ -132,7 +125,6 @@
         window.APPPATH = 'web/app/';
         window.COMMONSPATH = 'web/commons/';
         window.TOKEN = '<%=token%>';
-        window.SESSIONID = '<%=sessionId%>';
         window.SCOPE = '<%=scope%>';
     </script>
 

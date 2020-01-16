@@ -10,9 +10,6 @@ public class BaseException extends Exception{
 
 	private static final long serialVersionUID = 1L;
 	
-	//协议码
-	private String protocol;
-	
 	//状态码
 	private StatusCode code;
 	
@@ -28,14 +25,6 @@ public class BaseException extends Exception{
 		super(message);
 		this.code = code;
 		this.forwardPath = forwardPath;
-	}
-	
-	public String getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
 	}
 	
 	public StatusCode getCode(){
