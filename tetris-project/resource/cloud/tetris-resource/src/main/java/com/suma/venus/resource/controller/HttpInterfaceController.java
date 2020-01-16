@@ -1521,12 +1521,16 @@ public class HttpInterfaceController {
 
 	/** 接收bundle直接发过来的心跳 **/
 	// TODO
-	@RequestMapping(method = RequestMethod.GET, value = "/bundleHeartBeat")
+	@RequestMapping(method = RequestMethod.GET, value = "/thirdpart/bundleHeartBeat")
 	@ResponseBody
 	public void receiveBundleHeartBeat(@RequestParam(value = "bundle_ip") String bundle_ip) {
 		LOGGER.info("receive bundle heartBeat, bundle_ip=" + bundle_ip);
 
-		bundleHeartBeatService.addBundleStatus(bundle_ip, System.currentTimeMillis());
+		String regexString = ".*(\\d{3}(\\.\\d{1,3}){3}).*";
+		String IPString = bundle_ip.replaceAll(regexString, "$1");
+		LOGGER.info("receive bundle heartBeat, IPString=" + IPString);
+
+		bundleHeartBeatService.addBundleStatus(IPString, System.currentTimeMillis());
 	}
 
 	/** 为ldap用户创建一个编码器 */

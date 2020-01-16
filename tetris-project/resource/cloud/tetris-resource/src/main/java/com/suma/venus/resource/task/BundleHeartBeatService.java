@@ -53,7 +53,7 @@ public class BundleHeartBeatService {
 			bundleDao.save(bundlePO);
 		}
 
-		if (bunldeStatusMap.size() == 0) {
+		if (bunldeStatusMap.size() == 0 && t != null) {
 			// TODO
 			t.cancel(true);
 		}

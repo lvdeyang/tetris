@@ -67,6 +67,7 @@ import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ChannelTemplateService;
 import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.FolderService;
+import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.util.EquipSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.BundleVO.CoderType;
@@ -121,6 +122,9 @@ public class BundleManageController extends ControllerBase {
 	@Autowired
 	private ChannelSchemeDao channelSchemeDao;
 
+	@Autowired
+	private BundleHeartBeatService bundleHeartBeatService;
+
 	/*
 	 * @Autowired private ChannelTemplateDao channelTemplateDao;
 	 */
@@ -149,6 +153,8 @@ public class BundleManageController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		// TODO: 没有事务
 		try {
+			LOGGER.info("add bundle=" + JSONObject.toJSONString(bundle));
+
 			BundleVO bundleVO = JSONObject.parseObject(bundle, BundleVO.class);
 			List<ExtraInfoPO> extraInfos = JSONArray.parseArray(extraInfoVOList, ExtraInfoPO.class);
 			BundlePO bundlePO = bundleVO.toPO();
@@ -224,7 +230,8 @@ public class BundleManageController extends ControllerBase {
 			if ("transcode".equals(bundlePO.getDeviceModel())) {
 
 				capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(),
-						"http://" + clientIP + ":" + port + "/api/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+						"http://10.10.40.207:8082/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip="
+								+ bundlePO.getDeviceIp());
 
 				capacityService.setAlarmUrl(bundlePO.getDeviceIp());
 
@@ -340,6 +347,8 @@ public class BundleManageController extends ControllerBase {
 //				LOGGER.error("Communication Error : Fail to unbind encoder and decoder ; bundleId = " + bundleId);
 //			}
 //		}
+
+		bundleHeartBeatService.removeBundleStatus(bundle.getDeviceIp());
 
 		bundleService.delete(bundle);
 
