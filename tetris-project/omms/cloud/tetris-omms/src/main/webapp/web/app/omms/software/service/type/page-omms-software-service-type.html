@@ -20,6 +20,18 @@
                             :data="table.rows"
                             :row-key="rowKey"
                             style="width:100%">
+                        <el-table-column type="expand">
+                            <template slot-scope="scope">
+                                <el-form ref="form" label-width="80px" size="mini">
+                                    <el-form-item label="安装路径">
+
+                                    </el-form-item>
+                                    <el-form-item label="安装路径">
+
+                                    </el-form-item>
+                                </el-form>
+                            </template>
+                        </el-table-column>
                         <el-table-column
                                 type="selection"
                                 width="55">
