@@ -20,7 +20,7 @@
     <artifactId>tetris-resource-sdk</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>tetris-resource-sdk</name>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
          
     <properties>
     	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -141,8 +141,6 @@
     </dependencies>
     
     <build>
-		<finalName>venus-resource-web</finalName>
-
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
