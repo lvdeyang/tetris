@@ -61,7 +61,10 @@ zuul:
       serviceId: tetris-mims
     tetris-cms:
       path: /tetris-cms/**
-      serviceId: tetris-cms    
+      serviceId: tetris-cms
+    tetris-resource:
+      path: /tetris-resource/**
+      serviceId: tetris-resource    
 eureka:
 #客户端
   client:

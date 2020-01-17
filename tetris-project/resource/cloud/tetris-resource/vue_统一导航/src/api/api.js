@@ -131,3 +131,5 @@ export const queryUserBindBundles = params => { return axiosInstance.post(`${bas
 export const setUserBindBundles = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/bind`, qs.stringify(params)).then(res => res.data) }
 export const queryEncoders = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/query/encoders`, qs.stringify(params)).then(res => res.data) }
 export const queryDecoders = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/query/decoders`, qs.stringify(params)).then(res => res.data) }
+
+export const logout = params => { return axiosInstance.post(`${basePath}/do/logout`, qs.stringify(params)).then(res => res.data) }

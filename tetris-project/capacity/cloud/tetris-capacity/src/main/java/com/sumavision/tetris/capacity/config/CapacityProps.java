@@ -13,6 +13,12 @@ public class CapacityProps {
 	
 	@Value("${port}")
 	private Long port;
+	
+	@Value("${zuul.ip}")
+	private String zuulIp;
+	
+	@Value("${zuul.port}")
+	private String zuulPort;
 
 	public String getIp() {
 		return ip;
@@ -20,6 +26,14 @@ public class CapacityProps {
 
 	public Long getPort() {
 		return port;
+	}
+
+	public String getZuulIp() {
+		return zuulIp;
+	}
+
+	public String getZuulPort() {
+		return zuulPort;
 	}
 	
 }

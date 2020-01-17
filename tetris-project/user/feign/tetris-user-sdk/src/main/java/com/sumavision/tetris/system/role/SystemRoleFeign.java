@@ -87,5 +87,5 @@ public interface SystemRoleFeign {
 	 * @param Long userId 用户id
 	 */
 	@RequestMapping(value = "/system/role/feign/query/roles/by/user")
-	public JSONObject queryRolesByUserId(Long userId) throws Exception;
+	public JSONObject queryRolesByUserId(@RequestParam("userId") Long userId) throws Exception;
 }

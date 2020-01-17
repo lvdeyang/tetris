@@ -35,6 +35,9 @@ public interface HttpConstant {
 	/** session attribute user */
 	public static final String ATTRIBUTE_USER = "tetris-004";
 	
+	/** 从zuul跳转过来获取请求终端的ip */
+	public static final String HEADER_REAL_IP_FROM_ZUUL = "tetris-008";
+	
 	/** model token */
 	public static final String MODEL_TOKEN = "token";
 	
