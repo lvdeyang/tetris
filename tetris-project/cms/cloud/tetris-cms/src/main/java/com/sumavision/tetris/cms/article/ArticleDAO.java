@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.boolean_expr_return;
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
 @RepositoryDefinition(domainClass = ArticlePO.class, idClass = Long.class)
