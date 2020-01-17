@@ -93,12 +93,6 @@
 			<scope>provided</scope>
 		</dependency>
 		
-		<dependency>
-			<groupId>com.suma.venus</groupId>
-			<artifactId>venus-message-service</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-		
 		<!-- <dependency>
 			<groupId>com.sumavision</groupId>
 			<artifactId>suma-venus-alarmoprlog-client</artifactId>
@@ -148,18 +142,18 @@
 		</dependency>
 		
 		<!-- activeMq相关 -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-core</artifactId>
 			<version>5.7.0</version>
-		</dependency>
+		</dependency> -->
 
 		<!-- https://mvnrepository.com/artifact/org.apache.activemq/activemq-pool -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.apache.activemq</groupId>
 			<artifactId>activemq-pool</artifactId>
 			<version>5.15.1</version>
-		</dependency>
+		</dependency> -->
 		
 		<!-- ldap -->
 		<dependency>
