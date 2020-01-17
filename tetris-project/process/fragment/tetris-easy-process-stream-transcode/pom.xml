@@ -72,7 +72,7 @@
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-easy-process-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		
 		<dependency>
