@@ -7,7 +7,7 @@
   	<groupId>com.sumavision.tetris</groupId>
   	<artifactId>tetris-p2p-feign</artifactId>
   	<version>0.0.1-SNAPSHOT</version>
-  	<packaging>war</packaging>
+  	<packaging>jar</packaging>
 
  	<name>tetris-p2p-feign</name>
 	
