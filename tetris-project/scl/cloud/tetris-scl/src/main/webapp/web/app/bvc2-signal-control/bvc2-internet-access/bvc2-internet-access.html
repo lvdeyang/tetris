@@ -1,0 +1,79 @@
+<div id="bvc2-internet-access-wrapper" class="page-wrapper" style="width:100%; height:100%; padding:10px; box-sizing:border-box;">
+    <bvc2-header
+            :links="header.links"
+            :user="header.user"></bvc2-header>
+    <div class="page-body">
+        <el-container style="width:100%; height:100%">
+            <bvc2-nav-side :active="active"></bvc2-nav-side>
+            <el-main style="padding:0 15px 0 15px;">
+                <div style="width:100%; height:100%; position: relative;">
+                    <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
+                        <el-button size="small" type="primary" @click="dialog.addInterAccess.visible = true"><span class="icon-plus" style="margin-right:5px;"></span>添加网口</el-button>
+                        <el-button size="small" type="warning"><span class="icon-trash" style="margin-right:5px;"></span>删除网口</el-button>
+                    </div>
+                    <div style="position:absolute; left:0; right:0; top:48px; bottom:0; overflow: auto">
+                        <el-table
+                                :data="table.data"
+                                tooltip-effect="dark"
+                                style="width: 100%; height: 100%;">
+                            <el-table-column
+                                    type="selection"
+                                    width="55">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="address"
+                                    label="地址">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="type"
+                                    label="类型">
+                            </el-table-column>
+                            <el-table-column
+                                    label="操作"
+                                    width="250">
+                                <template slot-scope="scope">
+                                    <el-tooltip class="item" effect="dark" content="编辑" placement="bottom">
+                                        <el-button type="text" icon="el-icon-edit" style="margin:0; font-size:18px; padding:0; margin-right:20px;" @click="rowEdit(scope)"></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip class="item" effect="dark" content="删除" placement="bottom">
+                                        <el-button type="text" icon="el-icon-delete" style="margin:0; font-size:18px; padding:0;" @click="rowDelete(scope)"></el-button>
+                                    </el-tooltip>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </div>
+            </el-main>
+        </el-container>
+
+        <!-- 添加网口对话框 -->
+        <el-dialog
+                title="添加网口"
+                :visible.sync="dialog.addInterAccess.visible"
+                width="350px"
+                :before-close="handleAddInterAccessClose">
+            <div style="height:175px;">
+                <el-form ref="form" label-width="70px">
+                    <el-form-item label="地址">
+                        <el-input v-model="dialog.addInterAccess.address"></el-input>
+                    </el-form-item>
+                    <el-form-item label="类型">
+                        <el-select v-model="dialog.addInterAccess.type" placeholder="请选择">
+                            <el-option
+                                    v-for="item in type"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-form>
+            </div>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="handleAddInterAccessClose">取 消</el-button>
+            <el-button size="medium" type="primary" @click="handleAddInterAccessCommit" :loading="dialog.addInterAccess.loading">确 定</el-button>
+        </span>
+        </el-dialog>
+    </div>
+</div>

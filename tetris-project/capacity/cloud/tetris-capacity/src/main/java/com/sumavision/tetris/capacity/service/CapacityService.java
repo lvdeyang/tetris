@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -1299,6 +1298,74 @@ public class CapacityService {
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
 		
 		return response;
+	}
+	
+	/**
+	 * 设置告警地址请求<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月13日 下午1:46:57
+	 * @param String ip 能力ip
+	 * @param Long port 能力port
+	 * @param String alarmUrl 告警url
+	 * @return ResultCodeResponse
+	 */
+	public ResultCodeResponse putAlarmUrl(String ip, Long port, String alarmUrl) throws Exception{
+		
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+		
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+											  .append(ip)
+											  .append(":")
+											  .append(port)
+											  .append(UrlConstant.URL_ALARM)
+											  .toString();
+		
+		JSONObject put = new JSONObject();
+		put.put("msg_id", msg_id);
+		put.put("alarm_url", alarmUrl);
+		put.put("max_count", 100);
+		
+		JSONObject res = HttpUtil.httpPut(url, put);
+		
+		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
+		
+		return response;
+											  
+	}
+	
+	/**
+	 * 设置心跳地址请求<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月14日 上午11:51:24
+	 * @param String ip 能力ip
+	 * @param Long port 能力端口
+	 * @param String heartbeatUrl 心跳地址
+	 * @return ResultCodeResponse
+	 */
+	public ResultCodeResponse putHeartbeatUrl(String ip, Long port, String heartbeatUrl) throws Exception{
+		
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+		
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+											  .append(ip)
+											  .append(":")
+											  .append(port)
+											  .append(UrlConstant.URL_HEARTBEAT)
+											  .toString();
+		
+		JSONObject put = new JSONObject();
+		put.put("msg_id", msg_id);
+		put.put("heartbeat_url", heartbeatUrl);
+		put.put("span_second", 10);
+		
+		JSONObject res = HttpUtil.httpPut(url, put);
+		
+		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
+		
+		return response;
+											  
 	}
 	
 }

@@ -14,4 +14,6 @@ import java.lang.annotation.ElementType;
 @Target(ElementType.METHOD)  
 public @interface JsonBody {
 
+	boolean contentLength() default false;
+	
 }

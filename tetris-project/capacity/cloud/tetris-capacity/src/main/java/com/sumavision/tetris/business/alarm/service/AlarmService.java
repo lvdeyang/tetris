@@ -1,0 +1,95 @@
+package com.sumavision.tetris.business.alarm.service;
+
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
+import com.sumavision.tetris.business.api.vo.AlarmVO;
+import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
+import com.sumavision.tetris.capacity.config.CapacityProps;
+import com.sumavision.tetris.capacity.config.ServerProps;
+import com.sumavision.tetris.capacity.service.CapacityService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+
+@Service
+@Transactional(rollbackFor = Exception.class)
+public class AlarmService {
+	
+	@Autowired
+	private CapacityService capacityService;
+	
+	@Autowired
+	private CapacityProps capacityProps;
+	
+	@Autowired
+	private ServerProps serverProps;
+	
+	@Autowired
+	private AlarmFeignClientService alarmFeignClientService;
+
+	/**
+	 * 设置能力告警地址<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月13日 下午2:50:30
+	 * @param String ip 能力ip
+	 */
+	public void setAlarmUrl(String ip) throws Exception{
+		
+		String alarmUrl = new StringBufferWrapper().append("http://")
+												   .append(capacityProps.getZuulIp())
+												   .append(":")
+												   .append(capacityProps.getZuulPort())
+												   .append("/tetris-capacity/api/thirdpart/capacity/alarm/notify")
+												   .toString();
+		
+		ResultCodeResponse response = capacityService.putAlarmUrl(ip, capacityProps.getPort(), alarmUrl);
+		if(response.getResult_code().equals("1")){
+			throw new BaseException(StatusCode.ERROR, "url格式错误");
+		}
+	}
+	
+	/**
+	 * 告警通知<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月14日 上午10:39:07
+	 * @param String capacityIp 能力ip
+	 * @param AlarmVO alarm 告警参数
+	 */
+	public void alarmNotify(String capacityIp, AlarmVO alarm) throws Exception{
+		
+		String alarmCode = alarm.getCodec();
+		String alarmObj = null;
+		if(alarm.getInput_trigger() != null){
+			alarmObj = JSONObject.toJSONString(alarm.getInput_trigger());
+		}
+		if(alarm.getTask_trigger() != null){
+			alarmObj = JSONObject.toJSONString(alarm.getTask_trigger());
+		}
+		if(alarm.getOutput_trigger() != null){
+			alarmObj = JSONObject.toJSONString(alarm.getOutput_trigger());
+		}
+		if(alarm.getLicense_trigger() != null){
+			alarmObj = JSONObject.toJSONString(alarm.getLicense_trigger());
+		}
+		
+		if(alarm.getStatus().equals("on")){
+			alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj, null, false, new Date());
+		}
+		if(alarm.getStatus().equals("off")){
+			alarmFeignClientService.recoverAlarm(alarmCode, capacityIp, alarmObj, null, new Date());
+		}
+		if(alarm.getStatus().equals("once")){
+			alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj, null, true, new Date());
+		}
+		
+	}
+	
+}

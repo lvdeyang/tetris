@@ -1,0 +1,94 @@
+<div id="bvc2-task-control-wrapper" class="page-wrapper" style="width:100%; height:100%; padding:10px; box-sizing:border-box;">
+    <bvc2-header
+            :links="header.links"
+            :user="header.user"></bvc2-header>
+    <div class="page-body">
+        <el-container style="width:100%; height:100%">
+            <bvc2-nav-side :active="active"></bvc2-nav-side>
+            <el-main style="padding:0 15px 0 15px;">
+                <div style="width:100%; height:100%; position: relative;">
+                    <div style="width:100%; height:40px; position:relative;">
+                        <el-radio-group v-model="currentTab" size="small">
+                            <el-radio-button label="main">主机</el-radio-button>
+                            <el-radio-button label="backup">备机</el-radio-button>
+                        </el-radio-group>
+                        <el-button style="float: right;" v-loading="button.resume.loading" size="small" type="primary" @click="resumeTaskButton">任务恢复</el-button>
+                    </div>
+                    <div style="position:absolute; top:40px; left:0; right:0; bottom:60px;">
+                        <el-table
+                                :data="table.data"
+                                tooltip-effect="dark"
+                                height="100%"
+                                border
+                                style="width: 100%;">
+                            <el-table-column
+                                    prop="taskId"
+                                    label="任务号"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="ip"
+                                    label="集群ip"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="dstIp"
+                                    label="目的ip"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="dstPort"
+                                    label="目的端口"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    label="源Ip"
+                                    width="200">
+                                <template slot-scope="scope">
+                                    <el-input v-model="scope.row.srcIp"></el-input>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    label="源端口"
+                                    width="100">
+                                <template slot-scope="scope">
+                                    <el-input v-model="scope.row.srcPort"></el-input>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    prop="message"
+                                    label="任务信息"
+                                    width="200">
+                            </el-table-column>
+                            <el-table-column
+                                    fixed="right"
+                                    label="操作">
+                                <template slot-scope="scope">
+                                    <el-tooltip class="item" effect="dark" content="重置" placement="bottom">
+                                        <el-button type="text" icon="icon-repeat" style="margin: 0; font-size:18px; padding:0;" @click="rowRepeatTask(scope)"></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip class="item" effect="dark" content="切换任务" placement="bottom">
+                                        <el-button type="text" icon="icon-hand-up" style="margin-left: 15px; font-size:18px; padding:0;" @click="rowSwitchTask(scope)"></el-button>
+                                    </el-tooltip>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    <div style="position:absolute; left:0; bottom:0; width: 100%; height: 60px;">
+                        <el-pagination
+                                style="line-height:normal; height:32px; display:inline-block; float:right; position:relative; top:14px; right:10px;"
+                                background
+                                @size-change="handleSizeChange"
+                                @current-change="handleCurrentChange"
+                                :current-page="currentPage"
+                                :page-sizes="pageSizes"
+                                :page-size="pageSize"
+                                layout="total, sizes, prev, pager, next, jumper"
+                                :total="total">
+                        </el-pagination>
+                    </div>
+                </div>
+            </el-main>
+        </el-container>
+    </div>
+</div>
