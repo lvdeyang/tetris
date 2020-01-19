@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.suma.venus.resource.base.bo.LockChannelRespParam;
+import com.sumavision.tetris.config.feign.FeignConfiguration;
 
 
 /**
@@ -18,8 +19,7 @@ import com.suma.venus.resource.base.bo.LockChannelRespParam;
  * @Copyright: 2018 Sumavision. All rights reserved. 
  * 注意：本内容仅限于北京数码视讯科技股份有限公司内部传阅，禁止外泄以及用于其他的商业目的
  */
-@FeignClient(name="suma-venus-resource")
-@RequestMapping(value="/suma-venus-resource/api")
+@FeignClient(name="tetris-resource", configuration = FeignConfiguration.class)
 public interface LiveAndAssetAuthServiceClient {
 	
 	/**
@@ -27,7 +27,7 @@ public interface LiveAndAssetAuthServiceClient {
 	 * @param setUserAuthByUsernames
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/setUserAuthByUsernames")
+	@RequestMapping(value = "/api/setUserAuthByUsernames")
 	public LockChannelRespParam setUserAuthByUsernames(@RequestBody Object bo);	
 	
 }

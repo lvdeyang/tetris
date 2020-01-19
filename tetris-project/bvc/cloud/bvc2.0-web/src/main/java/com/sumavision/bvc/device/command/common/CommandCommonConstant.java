@@ -9,7 +9,7 @@ package com.sumavision.bvc.device.command.common;
 public class CommandCommonConstant {
 	
 	/** 管理员用户名 */
-	public static final String USER_NAME= "Admin";
+	public static final String USER_NAME= "应急广播管理员用户";
 	
 	/** 呼叫消息 */
 	public static final String MESSAGE_CALL = "callUser";

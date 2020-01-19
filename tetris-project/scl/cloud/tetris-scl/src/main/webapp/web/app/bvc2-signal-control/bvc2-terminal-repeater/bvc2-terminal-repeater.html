@@ -1,0 +1,152 @@
+<div id="bvc2-terminal-repeater-wrapper" class="page-wrapper" style="width:100%; height:100%; padding:10px; box-sizing:border-box;">
+    <bvc2-header
+            :links="header.links"
+            :user="header.user"></bvc2-header>
+    <div class="page-body">
+        <el-container style="width:100%; height:100%">
+            <bvc2-nav-side :active="active"></bvc2-nav-side>
+            <el-main style="padding:0 15px 0 15px;">
+                <div style="width:100%; height:100%; position: relative;">
+                    <div style="box-sizing:border-box; height: 40px; position:absolute; left:0; top:0; bottom:0; border-right:1px solid #ebeef5;">
+                        <el-button v-loading="button.create.loading" size="small" type="primary" @click="generateTaskButton">同步任务</el-button>
+                    </div>
+                    <div style="box-sizing:border-box; height: 40px; position:absolute; left:100px; top:0; bottom:0; border-right:1px solid #ebeef5;">
+                        <el-button v-loading="button.create.loading" size="small" type="primary" @click="removeTaskButton">销毁任务</el-button>
+                    </div>
+                    <div style="box-sizing:border-box; height: 40px; position:absolute; left:200px; top:0; bottom:0; border-right:1px solid #ebeef5;">
+                        <span style="font-size: 14px; line-height: 2;">总任务数:{{task.total}} / 成功数:{{task.success}}</span>
+                    </div>
+                    <div style="box-sizing:border-box; width:400px; position:absolute; left:0; top:40px; bottom:0; border-right:1px solid #ebeef5;">
+                        <div style="width:100%; height:100%; position:relative">
+                            <el-tree
+                                    v-loading="tree.loading"
+                                    ref="repeaterTree"
+                                    :props = "tree.props"
+                                    :data = "tree.data"
+                                    node-key="uuid"
+                                    :render-content="renderContent"
+                                    :current-node-key="tree.current"
+                                    check-strictly
+                                    :expand-on-click-node="false"
+                                    default-expand-all
+                                    highlight-current
+                                    @current-change="currentTreeNodeChange"
+                                    style="height: 100%;">
+
+                            </el-tree>
+                        </div>
+                    </div>
+                    <div v-if="tree.current" style="box-sizing:border-box; position:absolute; left:400px; top:0; right:0; bottom:0; padding-left:10px;">
+                        <div style="width:100%; height:100%; position:relative;">
+                            <div style="height:54px;">
+                                <el-button size="small" type="primary" @click="bindTerminal"><span class="icon-plus" style="margin-right:5px;"></span>终端绑定</el-button>
+                                <el-button size="small" type="warning" @click="unbindTerminal"><span class="icon-trash" style="margin-right:5px;"></span>终端解绑</el-button>
+                                <el-button size="small" type="primary" style="float: right" @click="updateTerminal"><span class="icon-refresh" style="margin-right:5px;"></span>刷新终端</el-button>
+                            </div>
+                            <div style="position:absolute; top:54px; left:0; right:0; bottom:0;">
+                                <el-table
+                                        :data="table.data"
+                                        height="100%"
+                                        @selection-change="handleSelectionChange"
+                                        style="width:100%;">
+                                    <el-table-column
+                                            type="selection"
+                                            width="55">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="bundleName"
+                                            sortable
+                                            label="终端名称">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="deviceModel"
+                                            sortable
+                                            label="终端类型">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="layerId"                                            sortable
+                                            label="接入层id">
+                                    </el-table-column>
+                                    <el-table-column
+                                            width="280">
+                                        <template slot="header" slot-scope="scope">
+                                            <el-input
+                                                    v-model="search"
+                                                    size="mini"
+                                                    placeholder="输入关键字搜索"/>
+                                        </template>
+                                        <template slot-scope="scope">
+                                            <el-tooltip class="item" effect="dark" content="解绑" placement="bottom">
+                                                <el-button type="text" icon="icon-trash" style="margin:0; font-size:18px; padding:0; margin-right:15px;" @click="rowDelete(scope)"></el-button>
+                                            </el-tooltip>
+                                        </template>
+                                    </el-table-column>
+                                </el-table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </el-main>
+        </el-container>
+    </div>
+
+    <el-dialog
+            class="terminal-dialog"
+            title="终端绑定"
+            :visible.sync="dialog.visible"
+            width="740px"
+            :before-close="handleTerminalClose">
+
+        <div class="content" style="height:340px; position:relative;">
+            <div class="content-wrapper" style="width:700px; height:400px; position:absolute; top:-30px; left:0;">
+                <el-input  v-model="dialog.search" placeholder="搜索终端" size="small" suffix-icon="el-icon-search"></el-input>
+                <div class="table-wrapper" style="height: 368px;">
+                    <el-table
+                            :data="dialog.rows.filter(data => !dialog.search || data.bundleName.includes(dialog.search))"
+                            style="width:100%"
+                            height="100%"
+                            @selection-change="handleTerminalSelectionChange"
+                            tooltip-effect="dark">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="终端名称"
+                                prop="bundleName"
+                                width="200">
+                        </el-table-column>
+                        <el-table-column
+                                label="终端类型"
+                                prop="deviceModel"
+                                width="100">
+                        </el-table-column>
+                        <el-table-column
+                                prop="layerId"
+                                label="接入层id">
+                        </el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <!--<div style="position:absolute; left:0; bottom:0; width: 100%; height: 60px;">-->
+                <!--<el-pagination-->
+                        <!--style="line-height:normal; height:32px; display:inline-block; float:right; position:relative; top:14px; right:10px;"-->
+                        <!--background-->
+                        <!--@size-change="bindHandleSizeChange"-->
+                        <!--@current-change="bindHandleCurrentChange"-->
+                        <!--:current-page="bind.currentPage"-->
+                        <!--:page-sizes="bind.pageSizes"-->
+                        <!--:page-size="bind.pageSize"-->
+                        <!--layout="total, sizes, prev, pager, next, jumper"-->
+                        <!--:total="bind.total">-->
+                <!--</el-pagination>-->
+            <!--</div>-->
+        </div>
+
+        <span slot="footer" class="dialog-footer">
+            <div class="footer" style="height: 32px;">
+                <el-button size="small" type="primary" @click="handleTerminalBindingOk" :loading="dialog.loading" style="float:right;">绑 定</el-button>
+            </div>
+        </span>
+    </el-dialog>
+</div>

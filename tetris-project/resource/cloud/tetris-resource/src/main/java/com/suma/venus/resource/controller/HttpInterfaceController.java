@@ -102,6 +102,7 @@ import com.suma.venus.resource.service.ExtraInfoService;
 import com.suma.venus.resource.service.ResourceService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.WorkNodeService;
+import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.util.XMLBeanUtils;
 
 /**
@@ -121,7 +122,7 @@ public class HttpInterfaceController {
 
 	@Autowired
 	private UserQueryFeign userFeign;
-	
+
 	@Autowired
 	private UserQueryService userQueryService;
 
@@ -175,7 +176,10 @@ public class HttpInterfaceController {
 
 	@Autowired
 	private SerInfoDao serInfoDao;
-	
+
+	@Autowired
+	private BundleHeartBeatService bundleHeartBeatService;
+
 	// 联网中心消息服务注册ID
 	@Value("${connectCenterLayerID:suma-venus-access-lianwang}")
 	private String connectCenterLayerID;
@@ -191,7 +195,8 @@ public class HttpInterfaceController {
 	// 记录分段notify消息的map
 	private static ConcurrentHashMap<String, Map<Integer, String>> notifyXmlFragMap = new ConcurrentHashMap<>();
 
-	@RequestMapping(method = RequestMethod.POST, value = "/lockChannel", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/lockChannel", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public LockChannelRespParam lockChannel(@RequestBody LockChannelRequest lockChannelRequest) {
 		LOGGER.info("Lock Channel Request : " + JSONObject.toJSONString(lockChannelRequest));
@@ -203,9 +208,11 @@ public class HttpInterfaceController {
 			// 失败响应
 			resp = new LockChannelRespParam();
 			if (String.valueOf(ErrorCode.CHANNEL_BUSY).equals(e.getMessage())) {
-				resp.setLock_channel_response(new ReleaseChannelResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL, ErrorCode.CHANNEL_BUSY));
+				resp.setLock_channel_response(new ReleaseChannelResponseBody(
+						com.suma.venus.resource.base.bo.ResponseBody.FAIL, ErrorCode.CHANNEL_BUSY));
 			} else {
-				resp.setLock_channel_response(new ReleaseChannelResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL));
+				resp.setLock_channel_response(
+						new ReleaseChannelResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL));
 			}
 		}
 
@@ -213,7 +220,8 @@ public class HttpInterfaceController {
 		return resp;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/releaseChannel", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/releaseChannel", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public ReleaseChannelRespParam releaseChannel(@RequestBody ReleaseChannelRequest releaseChannelRequest) {
 		LOGGER.info("Release Channel Request : " + JSONObject.toJSONString(releaseChannelRequest));
@@ -224,7 +232,8 @@ public class HttpInterfaceController {
 			LOGGER.error(e.toString());
 			// 失败响应
 			resp = new ReleaseChannelRespParam();
-			resp.setRelease_channel_response(new ReleaseChannelResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL));
+			resp.setRelease_channel_response(
+					new ReleaseChannelResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL));
 		}
 
 		LOGGER.info("Release Channel Response : " + JSONObject.toJSONString(resp));
@@ -248,7 +257,8 @@ public class HttpInterfaceController {
 		return resp;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/batchLockBundle", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/batchLockBundle", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	@Deprecated
 	public BatchLockBundleRespParam batchLockBundle(@RequestBody BatchLockBundleParam batchLockBundleParam) {
@@ -313,7 +323,8 @@ public class HttpInterfaceController {
 	}
 
 	// TODO
-	@RequestMapping(method = RequestMethod.POST, value = "/batchLockBundleNew", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/batchLockBundleNew", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public BatchLockBundleRespParam batchLockBundleNew(@RequestBody BatchLockBundleParam batchLockBundleParam) {
 		LOGGER.info("batch_lock_bundle_request : " + JSONObject.toJSONString(batchLockBundleParam));
@@ -338,7 +349,8 @@ public class HttpInterfaceController {
 		return resp;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/releaseBundle", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/releaseBundle", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public LockBundleRespParam releaseBundle(@RequestBody LockBundleParam releaseParam) {
 		LOGGER.info("release_bundle_request : " + JSONObject.toJSONString(releaseParam));
@@ -355,7 +367,8 @@ public class HttpInterfaceController {
 		return resp;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/batchReleaseBundle", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/batchReleaseBundle", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	@Deprecated
 	public BatchLockBundleRespParam batchReleaseBundle(@RequestBody BatchLockBundleParam batchReleaseParam) {
@@ -417,7 +430,8 @@ public class HttpInterfaceController {
 		return resp;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/batchReleaseBundleNew", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/batchReleaseBundleNew", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public BatchLockBundleRespParam batchReleaseBundleNew(@RequestBody BatchLockBundleParam batchReleaseParam) {
 		LOGGER.info("release_bundle_request : " + JSONObject.toJSONString(batchReleaseParam));
@@ -442,8 +456,9 @@ public class HttpInterfaceController {
 		return resp;
 	}
 
-	//TODO:不知道哪里用到了
-	@RequestMapping(method = RequestMethod.POST, value = "/createResource", produces = { "application/json;charset=UTF-8" })
+	// TODO:不知道哪里用到了
+	@RequestMapping(method = RequestMethod.POST, value = "/createResource", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public CreateResourceRespParam createResource(@RequestBody CreateResourceRequest createResourceRequest) {
 		CreateResourceRespParam resp = null;
@@ -458,7 +473,8 @@ public class HttpInterfaceController {
 		return resp;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/deleteResource", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/deleteResource", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public DeleteResourceRespParam deleteResource(@RequestBody DeleteResourceRequest deleteResourceRequest) {
 		DeleteResourceRespParam resp = null;
@@ -478,7 +494,8 @@ public class HttpInterfaceController {
 	}
 
 	/** 对外接口：创建bundle */
-	@RequestMapping(method = RequestMethod.POST, value = "/createBundle", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/createBundle", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public Map<String, Object> createBundle(@RequestBody CreateBundleRequest createBundleRequest) {
 		Map<String, Object> data = new HashMap<String, Object>();
@@ -494,7 +511,8 @@ public class HttpInterfaceController {
 	}
 
 	/** 对外接口：删除bundle */
-	@RequestMapping(method = RequestMethod.POST, value = "/deleteBundle", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/deleteBundle", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public DeleteBundleResponse deleteBundle(@RequestBody DeleteBundleRequest request) {
 		DeleteBundleResponse response = new DeleteBundleResponse();
@@ -506,11 +524,15 @@ public class HttpInterfaceController {
 				try {
 					ResultBO deleteVirtualUserResult = userFeign.delVirtualUser(bundle.getUsername());
 					if (!deleteVirtualUserResult.isResult()) {
-						LOGGER.error("Communication success but Fail to delete user of bundle; username = " + bundle.getUsername());
+						LOGGER.error("Communication success but Fail to delete user of bundle; username = "
+								+ bundle.getUsername());
 					}
 				} catch (Exception e) {
-					LOGGER.error("Communication Error : Fail to delete user of bundle; username = " + bundle.getUsername(), e);
-					response.setDelete_bundle_response(new com.suma.venus.resource.base.bo.ResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL));
+					LOGGER.error(
+							"Communication Error : Fail to delete user of bundle; username = " + bundle.getUsername(),
+							e);
+					response.setDelete_bundle_response(new com.suma.venus.resource.base.bo.ResponseBody(
+							com.suma.venus.resource.base.bo.ResponseBody.FAIL));
 					return response;
 				}
 
@@ -534,10 +556,12 @@ public class HttpInterfaceController {
 			// 删除设备账号对应的黑名单
 			bundleLoginBlackListDao.deleteByLoginId(bundle.getCurrentLoginId());
 
-			response.setDelete_bundle_response(new com.suma.venus.resource.base.bo.ResponseBody(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS));
+			response.setDelete_bundle_response(new com.suma.venus.resource.base.bo.ResponseBody(
+					com.suma.venus.resource.base.bo.ResponseBody.SUCCESS));
 		} catch (Exception e) {
 			LOGGER.error("Fail to delete bundle by request : " + JSONObject.toJSONString(request));
-			response.setDelete_bundle_response(new com.suma.venus.resource.base.bo.ResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL));
+			response.setDelete_bundle_response(new com.suma.venus.resource.base.bo.ResponseBody(
+					com.suma.venus.resource.base.bo.ResponseBody.FAIL));
 		}
 
 		return response;
@@ -545,7 +569,8 @@ public class HttpInterfaceController {
 
 	/** 为用户设置直播/点播资源权限 **/
 	@Deprecated
-	@RequestMapping(method = RequestMethod.POST, value = "/setUserAuthByUsernames", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/setUserAuthByUsernames", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public ResultBO setUserAuthByUsernames(@RequestBody SetUserAuthBO request) {
 		LOGGER.info("Set User Auth by usernames request : " + JSONObject.toJSONString(request));
@@ -560,14 +585,16 @@ public class HttpInterfaceController {
 				/** 删除该直播/点播资源权限 */
 				String resourceId = null;
 				if (null != request.getCid()) {
-					VirtualResourcePO resource = virtualResourceDao.findTopByAttrNameAndAttrValue("cid", request.getCid());
+					VirtualResourcePO resource = virtualResourceDao.findTopByAttrNameAndAttrValue("cid",
+							request.getCid());
 					if (null == resource) {
 						result.setErrMsg("不存在该直播资源");
 						return result;
 					}
 					resourceId = resource.getResourceId();
 				} else {
-					VirtualResourcePO resource = virtualResourceDao.findTopByAttrNameAndAttrValue("pid", request.getPid());
+					VirtualResourcePO resource = virtualResourceDao.findTopByAttrNameAndAttrValue("pid",
+							request.getPid());
 					if (null == resource) {
 						result.setErrMsg("不存在该点播资源");
 						return result;
@@ -584,14 +611,16 @@ public class HttpInterfaceController {
 				/** 为用户设置直播/点播资源权限 */
 				String resourceId = null;
 				if (null != request.getCid()) {
-					VirtualResourcePO resource = virtualResourceDao.findTopByAttrNameAndAttrValue("cid", request.getCid());
+					VirtualResourcePO resource = virtualResourceDao.findTopByAttrNameAndAttrValue("cid",
+							request.getCid());
 					if (null == resource) {
 						result.setErrMsg("不存在该直播资源");
 						return result;
 					}
 					resourceId = resource.getResourceId();
 				} else {
-					VirtualResourcePO resource = virtualResourceDao.findTopByAttrNameAndAttrValue("pid", request.getPid());
+					VirtualResourcePO resource = virtualResourceDao.findTopByAttrNameAndAttrValue("pid",
+							request.getPid());
 					if (null == resource) {
 						result.setErrMsg("不存在该点播资源");
 						return result;
@@ -602,9 +631,9 @@ public class HttpInterfaceController {
 				for (String username : request.getUsernames()) {
 //					Map<String, UserBO> userMap = userFeign.queryUserInfo(username);
 					UserBO userBO = userQueryService.queryUserByUserName(username);
-					
+
 //					if (null == userMap || userMap.isEmpty() || null == userMap.get("user")) {
-					if(userBO == null){
+					if (userBO == null) {
 						result.setErrMsg("用户名" + username + "不存在");
 						return result;
 					}
@@ -638,7 +667,8 @@ public class HttpInterfaceController {
 	 * @param request
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/deleteLiveChannel", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/deleteLiveChannel", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public ResultBO deleteLiveChannel(@RequestBody SetUserAuthBO request) {
 		LOGGER.info("Delete live channel request : " + JSONObject.toJSONString(request));
@@ -662,14 +692,17 @@ public class HttpInterfaceController {
 		return result;
 	}
 
-	//TODO：重写（监听用户事件重写）
+	// TODO：重写（监听用户事件重写）
 	/** 添加用户接口，资源层创建对应的10几个个播放器 **/
-	@RequestMapping(method = RequestMethod.POST, value = "/createUserBundle", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/createUserBundle", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
-	public ResultBO createUserBundle(@RequestParam(value = "username") String username, @RequestParam(value = "userNo") String userNo,
-			@RequestParam(value = "password") String password, @RequestParam(value = "roleId") Long roleId,
+	public ResultBO createUserBundle(@RequestParam(value = "username") String username,
+			@RequestParam(value = "userNo") String userNo, @RequestParam(value = "password") String password,
+			@RequestParam(value = "roleId") Long roleId,
 			@RequestParam(value = "accessLayerId", required = false) String accessLayerId) {
-		LOGGER.info("Create User Bundle Request with username:" + username + " and password:" + password + " and roleId:" + roleId);
+		LOGGER.info("Create User Bundle Request with username:" + username + " and password:" + password
+				+ " and roleId:" + roleId);
 		ResultBO result = new ResultBO();
 		try {
 			List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
@@ -731,7 +764,8 @@ public class HttpInterfaceController {
 	}
 
 	/** 删除用户接口，资源层删除对应的十几个播放器 **/
-	@RequestMapping(method = RequestMethod.POST, value = "/deleteUserBundle", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/deleteUserBundle", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public ResultBO deleteUserBundle(@RequestParam(value = "userNo") String userNo) {
 		ResultBO result = new ResultBO();
@@ -771,7 +805,8 @@ public class HttpInterfaceController {
 	}
 
 	/** 批量重置bundle */
-	@RequestMapping(method = RequestMethod.POST, value = "/batchClearBundles", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/batchClearBundles", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public Map<String, Object> batchClearBundles(@RequestBody List<String> bundleIdList) {
 		LOGGER.info("batch clear Bundles Request : " + JSONObject.toJSONString(bundleIdList));
@@ -824,7 +859,8 @@ public class HttpInterfaceController {
 			}
 
 			// 恢复离线告警
-			//AlarmOprlogClientService.getInstance().recoverAlarm(AlarmCodeConstant.BUNDLE_OFFLINE_CODE, bundleId, null, new Date());
+			// AlarmOprlogClientService.getInstance().recoverAlarm(AlarmCodeConstant.BUNDLE_OFFLINE_CODE,
+			// bundleId, null, new Date());
 
 			respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS);
 		} catch (Exception e) {
@@ -862,7 +898,8 @@ public class HttpInterfaceController {
 			}
 
 			// 发送告警消息
-			//AlarmOprlogClientService.getInstance().triggerAlarm(AlarmCodeConstant.BUNDLE_OFFLINE_CODE, bundleId, null, new Date());
+			// AlarmOprlogClientService.getInstance().triggerAlarm(AlarmCodeConstant.BUNDLE_OFFLINE_CODE,
+			// bundleId, null, new Date());
 
 			respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS);
 		} catch (Exception e) {
@@ -903,7 +940,7 @@ public class HttpInterfaceController {
 
 			// 校验用户名密码
 			if (!"播放器".equals(bundle.getBundleAlias()) && !SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {// 播放器bundle和ldap的设备不进行用户微服务鉴权
-				boolean check = bundleService.checkBundleAndPassword(bundle, password); 
+				boolean check = bundleService.checkBundleAndPassword(bundle, password);
 				if (!check) {
 					LOGGER.error("Fail to check username and password : 设备账号名或密码错误");
 					respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.FAIL);
@@ -943,7 +980,8 @@ public class HttpInterfaceController {
 	}
 
 	/** 处理用户特征bundle认证请求 */
-	@RequestMapping(method = RequestMethod.POST, value = "/access/userBundleCertify", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/access/userBundleCertify", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public UserBundleCertifyResp userBundleCertify(@RequestBody UserBundleCertifyRequest request) {
 		LOGGER.info("User Bundle Certify Request : " + JSONObject.toJSONString(request));
@@ -986,7 +1024,7 @@ public class HttpInterfaceController {
 				respBody.setError_message("用户名或密码错误");
 				return resp;
 			}
-			
+
 			String bundleId = bundle.getBundleId();
 			/** 更新bundle信息 */
 			if (!bundleModel.equalsIgnoreCase(bundle.getDeviceModel())) {
@@ -1031,7 +1069,7 @@ public class HttpInterfaceController {
 			businessLayers.add(new BusinessLayerBody(DEFAULT_BUSSINESS_LAYER_ID, "bvc"));
 			respBody.setBusiness_layers(businessLayers);
 			respBody.setUserId(bundle.getId());
-			//respBody.setUser_extra_info(checkResult.getExtraInfo());
+			// respBody.setUser_extra_info(checkResult.getExtraInfo());
 			respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
@@ -1079,7 +1117,8 @@ public class HttpInterfaceController {
 	}
 
 	/** 处理收到的获取bundle整体信息的请求消息 */
-	@RequestMapping(method = RequestMethod.POST, value = "/access/getBatchBundleInfos", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/access/getBatchBundleInfos", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public Map<String, Object> getBatchBundleInfos(@RequestBody List<String> bundleIdList) {
 		LOGGER.info("Get batch BundleInfos Request : " + JSONObject.toJSONString(bundleIdList));
@@ -1130,9 +1169,11 @@ public class HttpInterfaceController {
 	 * @param password
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/auth/access_token", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/auth/access_token", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
-	public GetTokenResultBO loginAndGetToken(@RequestParam(value = "username") String username, @RequestParam(value = "password") String password) {
+	public GetTokenResultBO loginAndGetToken(@RequestParam(value = "username") String username,
+			@RequestParam(value = "password") String password) {
 		LOGGER.info("User login request--> username is " + username + " and password is " + password);
 		GetTokenResultBO result = new GetTokenResultBO();
 		try {
@@ -1197,8 +1238,10 @@ public class HttpInterfaceController {
 	 */
 	@RequestMapping(method = RequestMethod.GET, value = "/auth/assert", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
-	public TokenResultBO checkAssertPrivilege(@RequestParam(value = "access_token") String access_token, @RequestParam(value = "token_type") String token_type,
-			@RequestParam(value = "pid", required = false) String pid, @RequestParam(value = "cid", required = false) String cid) {
+	public TokenResultBO checkAssertPrivilege(@RequestParam(value = "access_token") String access_token,
+			@RequestParam(value = "token_type") String token_type,
+			@RequestParam(value = "pid", required = false) String pid,
+			@RequestParam(value = "cid", required = false) String cid) {
 		TokenResultBO result = new TokenResultBO();
 		try {
 			VirtualResourcePO virtualResource = null;
@@ -1214,7 +1257,8 @@ public class HttpInterfaceController {
 			}
 
 			if (null == virtualResource) {
-				LOGGER.info("User with token:" + access_token + "has no auth of pid=" + pid + " or cid=" + cid + ": this assert data not exist");
+				LOGGER.info("User with token:" + access_token + "has no auth of pid=" + pid + " or cid=" + cid
+						+ ": this assert data not exist");
 				result.setStatus(TokenResultBO.CODE_NO_AUTH);
 				result.setErrorMessage("无权限");
 				return result;
@@ -1235,7 +1279,8 @@ public class HttpInterfaceController {
 			} else {
 				result.setStatus(TokenResultBO.CODE_NO_AUTH);
 				result.setErrorMessage("无权限");
-				LOGGER.info("User with token:" + access_token + "has no auth of pid=" + pid + " or cid=" + cid + ": no auth");
+				LOGGER.info("User with token:" + access_token + "has no auth of pid=" + pid + " or cid=" + cid
+						+ ": no auth");
 			}
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
@@ -1246,7 +1291,8 @@ public class HttpInterfaceController {
 		return result;
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/notifyUserAndDevice", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/notifyUserAndDevice", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public JSONObject notifyUserAndDevice(@RequestBody JSONObject requestJson) {
 		LOGGER.info("notifyUserAndDevice request : " + requestJson.toJSONString());
@@ -1299,7 +1345,8 @@ public class HttpInterfaceController {
 						for (DeviceStatusXML dev : devlist) {
 							BundlePO bundle = bundleDao.findByUsername(dev.getDevid());
 							if (null != bundle) {
-								ONLINE_STATUS status = dev.getStatus() == 1 ? ONLINE_STATUS.ONLINE : ONLINE_STATUS.OFFLINE;
+								ONLINE_STATUS status = dev.getStatus() == 1 ? ONLINE_STATUS.ONLINE
+										: ONLINE_STATUS.OFFLINE;
 								if (status != bundle.getOnlineStatus()) {
 									bundle.setOnlineStatus(status);
 									toUpdateBundles.add(bundle);
@@ -1339,7 +1386,8 @@ public class HttpInterfaceController {
 					}
 
 					List<SerInfoPO> serInfoPOs = serInfoDao.findBySourceType(SOURCE_TYPE.SYSTEM);
-					statusXMLUtil.sendAllResourcesXmlMessage(serInfoPOs, localDevs, localUserBOs, connectCenterLayerID, 1500);
+					statusXMLUtil.sendAllResourcesXmlMessage(serInfoPOs, localDevs, localUserBOs, connectCenterLayerID,
+							1500);
 				}
 			} catch (Exception e) {
 				LOGGER.error("", e);
@@ -1387,7 +1435,7 @@ public class HttpInterfaceController {
 			}
 			AuthNotifyXml authNotifyXml = XMLBeanUtils.xmlToBean(xml, AuthNotifyXml.class);
 			String userNo = authNotifyXml.getUserid();
-			//UserBO userBO = userFeign.queryUserInfoByUserNo(userNo).get("user");
+			// UserBO userBO = userFeign.queryUserInfoByUserNo(userNo).get("user");
 			UserBO userBO = userQueryService.queryUserByUserNo(userNo);
 			if (PrivilegeStatusBO.OPR_ADD.equals(authNotifyXml.getOperation())) {
 				bindUserPrivilegeFromXml(authNotifyXml, userBO.getId());
@@ -1464,6 +1512,20 @@ public class HttpInterfaceController {
 			unbindUserPrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(authUserNo + "-hj", false));
 		}
 		userFeign.unbindUserPrivilege(unbindUserPrivilegeBO);
+	}
+
+	/** 接收bundle直接发过来的心跳 **/
+	// TODO
+	@RequestMapping(method = RequestMethod.GET, value = "/thirdpart/bundleHeartBeat")
+	@ResponseBody
+	public void receiveBundleHeartBeat(@RequestParam(value = "bundle_ip") String bundle_ip) {
+		LOGGER.info("receive bundle heartBeat, bundle_ip=" + bundle_ip);
+
+		String regexString = ".*(\\d{3}(\\.\\d{1,3}){3}).*";
+		String IPString = bundle_ip.replaceAll(regexString, "$1");
+		LOGGER.info("receive bundle heartBeat, IPString=" + IPString);
+
+		bundleHeartBeatService.addBundleStatus(IPString, System.currentTimeMillis());
 	}
 
 	/** 为ldap用户创建一个编码器 */
@@ -1601,11 +1663,14 @@ public class HttpInterfaceController {
 	}
 
 	/** 添加ldap用户接口，资源层创建对应的10几个个播放器 **/
-	@RequestMapping(method = RequestMethod.POST, value = "/createLdapUserBundle", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/createLdapUserBundle", produces = {
+			"application/json;charset=UTF-8" })
 	@ResponseBody
-	public ResultBO createLdapUserBundle(@RequestParam(value = "username") String username, @RequestParam(value = "userNo") String userNo,
-			@RequestParam(value = "password") String password, @RequestParam(value = "roleId") Long roleId) {
-		LOGGER.info("Create LdapUser Bundle Request with username:" + username + " and password:" + password + " and roleId:" + roleId);
+	public ResultBO createLdapUserBundle(@RequestParam(value = "username") String username,
+			@RequestParam(value = "userNo") String userNo, @RequestParam(value = "password") String password,
+			@RequestParam(value = "roleId") Long roleId) {
+		LOGGER.info("Create LdapUser Bundle Request with username:" + username + " and password:" + password
+				+ " and roleId:" + roleId);
 		ResultBO result = new ResultBO();
 		try {
 			List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
@@ -1667,7 +1732,7 @@ public class HttpInterfaceController {
 		return result;
 	}
 
-	private boolean checkPrivilege(String resourceId, Long userId) throws Exception{
+	private boolean checkPrivilege(String resourceId, Long userId) throws Exception {
 		UserAndResourceIdBO userIdAndResourceIds = new UserAndResourceIdBO();
 		userIdAndResourceIds.setUserId(userId);
 		userIdAndResourceIds.setResourceCodes(new ArrayList<String>());
@@ -1682,6 +1747,7 @@ public class HttpInterfaceController {
 	}
 
 	private com.suma.venus.resource.base.bo.ResponseBody createFailRespBody(Integer errorCode) {
-		return new com.suma.venus.resource.base.bo.ResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL, errorCode);
+		return new com.suma.venus.resource.base.bo.ResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL,
+				errorCode);
 	}
 }

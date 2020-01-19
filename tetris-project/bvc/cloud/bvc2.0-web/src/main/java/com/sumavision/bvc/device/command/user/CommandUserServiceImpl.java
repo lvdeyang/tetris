@@ -12,7 +12,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.dao.UserLiveCallDAO;
@@ -39,6 +38,7 @@ import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -58,8 +58,8 @@ public class CommandUserServiceImpl {
 	@Autowired 
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
 	
-	@Autowired 
-	private ResourceService resourceService;
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
 	
 	@Autowired
 	private ResourceBundleDAO resourceBundleDao;
@@ -98,7 +98,7 @@ public class CommandUserServiceImpl {
 		userInfo.setLayoutSchemes(new ArrayList<CommandGroupUserLayoutShemePO>());
 		
 		//从资源层获取播放器
-		List<PlayerBundleBO> allPlayers = resourceService.queryPlayerBundlesByUserId(userId);
+		List<PlayerBundleBO> allPlayers = resourceQueryUtil.queryPlayerBundlesByUserId(userId);
 		
 		if(userInfo.getPlayers() == null) userInfo.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
 		for(int i = 0; i < PlayerSplitLayout.SPLIT_16.getPlayerCount(); i++){
@@ -202,7 +202,7 @@ public class CommandUserServiceImpl {
 		
 		//被呼叫
 		//编码
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(calledUser.getEncoderId()).getList());
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(calledUser.getId())).getList());
 		if(calledEncoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(calledUser.getName());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
@@ -216,7 +216,7 @@ public class CommandUserServiceImpl {
 		
 		//呼叫方
 		//编码
-		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(callUser.getEncoderId()).getList());
+		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(callUser.getId())).getList());
 		if(callEncoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(callUser.getName());
 		BundlePO callEncoderBundleEntity = callEncoderBundleEntities.get(0);
 		
@@ -328,7 +328,7 @@ public class CommandUserServiceImpl {
 		
 		//被呼叫
 		//编码
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(calledUser.getEncoderId()).getList());
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(calledUser.getId())).getList());
 		if(calledEncoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(calledUser.getName());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
@@ -338,7 +338,7 @@ public class CommandUserServiceImpl {
 		
 		//呼叫方
 		//编码
-		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(callUser.getEncoderId()).getList());
+		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(callUser.getId())).getList());
 		if(callEncoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(callUser.getName());
 		BundlePO callEncoderBundleEntity = callEncoderBundleEntities.get(0);
 				

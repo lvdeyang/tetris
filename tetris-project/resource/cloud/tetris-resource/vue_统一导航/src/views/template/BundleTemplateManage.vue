@@ -15,6 +15,7 @@
           class="upload-demo"
           :action=uploadUrl
           name="filePoster"
+          :headers="myHeaders"
           :show-file-list="false"
           :on-success="uploadSuccess"
           :on-error="uploadError"
@@ -59,8 +60,8 @@
   // import apiConfig from '../../../config/api.config';
   // let requestIP = document.location.host.split(":")[0];
 
-  let basePath = process.env.RESOURCE_ROOT + '/suma-venus-resource'
-  
+  let basePath = process.env.RESOURCE_ROOT
+
   export default {
       name: "templateManage",
       data() {
@@ -77,8 +78,11 @@
             children: 'children',
             label: 'label',
           },
-          // uploadUrl : "http://" + requestIP + ":8887/template/import",
+          // uploadUrl : "http://" + requestIP + ":8887/suma-venus-resource/template/import",
           uploadUrl : basePath + "/template/import",
+          myHeaders : {
+              'tetris-001': sessionStorage.getItem('token')
+          }
         }
       },
       methods:{

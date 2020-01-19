@@ -1,0 +1,33 @@
+<div class="bvc2-header">
+    <div class="left">
+        <span class="suma-logo"></span>
+        <span class="bvc-name">信令控制平台</span>
+    </div>
+    <div class="middle">
+        <a v-for="link in links" :class="link.isActive?'bvc2-header-link active':'bvc2-header-link'" :href="link.href">
+            <span class="bvc2-header-link-icon" v-if="link.icon">
+                <span :class="link.icon"></span>
+            </span>
+            <span class="bvc2-header-link-icon" v-else>标</span>
+            <span class="bvc2-header-link-text">{{link.text}}</span>
+        </a>
+    </div>
+    <div class="right">
+        <!--<span class="bvc2-header-per">-->
+            <!--<span class="bvc2-header-per-icon"></span>-->
+            <!--&lt;!&ndash;<el-dropdown trigger="click" @command="handleCommand">&ndash;&gt;-->
+                <!--<span class="el-dropdown-link">-->
+                    <!--{{user.name}}<i class="el-icon-arrow-down el-icon&#45;&#45;right"></i>-->
+                <!--</span>-->
+                <!--&lt;!&ndash;<el-dropdown-menu slot="dropdown">&ndash;&gt;-->
+                    <!--&lt;!&ndash;<el-dropdown-item command="0">访问权限</el-dropdown-item>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<el-dropdown-item command="1">注销登录</el-dropdown-item>&ndash;&gt;-->
+                <!--&lt;!&ndash;</el-dropdown-menu>&ndash;&gt;-->
+            <!--&lt;!&ndash;</el-dropdown>&ndash;&gt;-->
+        <!--</span>-->
+        <!--<a class="bvc2-header-bell"><span class="bvc2-header-bell-icon"></span><span class="bvc2-header-bell-mark">1</span></a>-->
+        <!--<a class="bvc2-header-full-ent"><span class="bvc2-header-full-ent-icon"></span></a>-->
+        <span class="bvc-version">V1.0.0.94992 /</span>
+        <span class="bvc-layer">{{layerId}}</span>
+    </div>
+</div>
