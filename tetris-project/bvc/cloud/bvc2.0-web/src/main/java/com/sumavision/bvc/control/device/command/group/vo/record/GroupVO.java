@@ -3,7 +3,6 @@ package com.sumavision.bvc.control.device.command.group.vo.record;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 
 
