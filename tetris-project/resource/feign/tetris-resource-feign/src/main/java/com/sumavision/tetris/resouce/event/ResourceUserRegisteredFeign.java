@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
 
-@FeignClient(name = "suma-venus-resource", configuration = FeignConfiguration.class)
+@FeignClient(name = "tetris-resource", configuration = FeignConfiguration.class)
 public interface ResourceUserRegisteredFeign {
 
-	@RequestMapping(value = "/suma-venus-resource/event/publish/user/registered")
+	@RequestMapping(value = "/event/publish/user/registered")
 	public JSONObject userRegistered(
 			@RequestParam("userId") String userId,
 			@RequestParam("nickname") String nickname,
