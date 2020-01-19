@@ -76,7 +76,7 @@
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-easy-process-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 		
 		<!-- tetris-ui -->
@@ -115,6 +115,7 @@
 			<plugin>
 		       	<groupId>org.apache.maven.plugins</groupId>
 		        <artifactId>maven-compiler-plugin</artifactId>
+		        <version>2.3.2</version>
 		        <configuration>
 		            <source>1.8</source>
 		            <target>1.8</target>
