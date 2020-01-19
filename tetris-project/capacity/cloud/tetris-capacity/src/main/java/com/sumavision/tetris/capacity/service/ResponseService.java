@@ -5,9 +5,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.netflix.infix.lang.infix.antlr.EventFilterParser.null_predicate_return;
 import com.sumavision.tetris.capacity.bo.request.DeleteInputsRequest;
 import com.sumavision.tetris.capacity.bo.request.DeleteOutputsRequest;
 import com.sumavision.tetris.capacity.bo.request.DeleteTasksRequest;

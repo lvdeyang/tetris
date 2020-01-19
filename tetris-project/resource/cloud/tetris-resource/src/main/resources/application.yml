@@ -15,7 +15,7 @@ spring:
     datasource:
         #resource datasource
         resource:
-            url: jdbc:mysql://192.165.56.84:3306/venus_resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+            url: jdbc:mysql://192.165.56.84:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
             username : root
             password : sumavisionrd
             driver-class-name : com.mysql.jdbc.Driver

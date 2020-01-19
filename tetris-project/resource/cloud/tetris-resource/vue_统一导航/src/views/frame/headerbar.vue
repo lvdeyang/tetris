@@ -23,13 +23,13 @@
 				Version：1.3.0_95731
 			</div>
 			<div class="logout-icon-wrapper notice-wrapper" @click="logout" @mouseenter="exitHover(true)" @mouseleave="exitHover(false)"  >
-				<img class="logout-icon" v-if="!showExitHover" src="~assets/exit.png"> 
-				<img class="logout-icon" v-if="showExitHover" src="~assets/exit-h.png"> 
+				<img class="logout-icon" v-if="!showExitHover" src="~assets/exit.png">
+				<img class="logout-icon" v-if="showExitHover" src="~assets/exit-h.png">
 			</div>
 
 			<div class="reminder-icon-wrapper notice-wrapper" @mouseenter="remindHover(true)" @mouseleave="remindHover(false)">
 				<img class="reminder-icon" v-if="!showRemindHover" src="~assets/remind.png">
-				<img class="reminder-icon" v-if="showRemindHover" src="~assets/remind-h.png"> 
+				<img class="reminder-icon" v-if="showRemindHover" src="~assets/remind-h.png">
 			</div>
 
 			<div class="notice-wrapper">
@@ -42,6 +42,7 @@
 <script type="text/ecmascript-6">
   import routerConfig from '../../../config/router.config.js'
   import bus from '../../router/util/menuMsgBus.js'
+  import { logout} from '../../api/api';
 
 	export default {
 	name: 'headerbar',
@@ -73,16 +74,21 @@
 			this.$confirm('确认退出吗?', '提示', {
 			//type: 'warning'
 				}).then(() => {
-					sessionStorage.removeItem('token');
-					// _this.$router.push('/main');
-					var loginUrlTemp = process.env.USER_ROOT + '/vue';
-					
-					if (loginUrlTemp.indexOf('__requestIP__') !== -1) {
-						var requestIP = document.location.host.split(':')[0];
-						loginUrlTemp = loginUrlTemp.replace('__requestIP__', requestIP)
-					}
 
-					window.location.href = loginUrlTemp;
+          logout(null).then(res => {
+            window.location.href = '/web/app/login/login.html';
+          });
+
+//					sessionStorage.removeItem('token');
+//					// _this.$router.push('/main');
+//					var loginUrlTemp = process.env.USER_ROOT + '/vue';
+//
+//					if (loginUrlTemp.indexOf('__requestIP__') !== -1) {
+//						var requestIP = document.location.host.split(':')[0];
+//						loginUrlTemp = loginUrlTemp.replace('__requestIP__', requestIP)
+//					}
+//
+//					window.location.href = '/web/app/login/login.html';
 				}).catch(() => {
 			});
 		},
@@ -101,7 +107,7 @@
             } else {
                 this.isCollapsed = true;
 			}
-			
+
 			bus.$emit("collapseMenuEvent", this.isCollapsed);
 		},
 	},
@@ -118,14 +124,14 @@
 			height: 50px;
 
 			.collapsed-icon-wrapper{
-				width:56px; 
-				padding-top:5px; 
-				height:100%; 
+				width:56px;
+				padding-top:5px;
+				height:100%;
 				float:left;
 				//background-color: #07aaff;
-				
+
 				.collapsed-icon{
-					margin-left:18px; 
+					margin-left:18px;
 				}
 			}
 			.collapsed-icon-wrapper:hover{
@@ -133,15 +139,15 @@
 			}
 
 			.logo-wrapper{
-				margin-left:10px; 
-				height:100%; 
+				margin-left:10px;
+				height:100%;
 				float:left;
 				.logo-img{
 					margin-top:5px
 				}
 			}
 			.notice-wrapper{
-				height:100%; 
+				height:100%;
 				float:right;
 				margin-right:20px;
 				.logout-icon{
@@ -157,7 +163,7 @@
 				.userinfo-icon{
 					width: 30px;
 					height: 30px;
-					vertical-align:middle; 
+					vertical-align:middle;
 					padding-right:3px
 				}
 			}

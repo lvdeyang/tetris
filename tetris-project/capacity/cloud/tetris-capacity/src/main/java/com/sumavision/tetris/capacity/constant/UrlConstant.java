@@ -55,4 +55,10 @@ public class UrlConstant {
 	/** 授权 */
 	public static final String URL_AUTHORIZATION = "/v0.0/authorization";
 	
+	/** 告警 */
+	public static final String URL_ALARM = "/v0.0/alarmurl";
+	
+	/** 心跳 */
+	public static final String URL_HEARTBEAT = "/v0.0/heartbeaturl";
+	
 }
