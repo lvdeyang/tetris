@@ -791,7 +791,7 @@ public class HttpInterfaceController {
 	}
 
 	/** 处理bundle_online_request消息 */
-	@RequestMapping(method = RequestMethod.POST, value = "/access/bundleOnline", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/bundleOnline", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public BundleOnlineResp bundleOnline(@RequestBody BundleOnlineRequest request) {
 		LOGGER.info("Bundle online request : " + JSONObject.toJSONString(request));
@@ -836,7 +836,7 @@ public class HttpInterfaceController {
 	}
 
 	/** 处理bundle_offline_notify */
-	@RequestMapping(method = RequestMethod.POST, value = "/access/bundleOffline", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/bundleOffline", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public BundleOfflineResponse bundleOffline(@RequestBody BundleOfflineRequest request) {
 		String bundleId = request.getBundle_offline_request().getBundle_id();
@@ -873,7 +873,7 @@ public class HttpInterfaceController {
 	}
 
 	/** 处理设备特征bundle认证请求 */
-	@RequestMapping(method = RequestMethod.POST, value = "/access/deviceBundleCertify", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/deviceBundleCertify", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public DeviceBundleCertifyResp deviceBundleCertify(@RequestBody DeviceBundleCertifyRequest request) {
 		LOGGER.info("Device Bundle Certify Request : " + JSONObject.toJSONString(request));
@@ -1059,7 +1059,7 @@ public class HttpInterfaceController {
 	}
 
 	/** 处理收到的获取bundle整体信息的请求消息 */
-	@RequestMapping(method = RequestMethod.POST, value = "/access/getBundleInfo", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/getBundleInfo", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public Map<String, Object> getBundleInfo(@RequestBody GetBundleInfoRequest request) {
 		LOGGER.info("Get Bundle Info Request : " + JSONObject.toJSONString(request));
@@ -1095,7 +1095,7 @@ public class HttpInterfaceController {
 	}
 
 	/** 接入层心跳 */
-	@RequestMapping(method = RequestMethod.POST, value = "/access/layerHeartbeat", produces = { "application/json;charset=UTF-8" })
+	@RequestMapping(method = RequestMethod.POST, value = "/thirdpart/layerHeartbeat", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public LayerHeartBeatResponse layerHeartBeat(@RequestBody LayerHeartBeatRequest request) {
 		// LOGGER.info("Layer heartbeat Request : " +

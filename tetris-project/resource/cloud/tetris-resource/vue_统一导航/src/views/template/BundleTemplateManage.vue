@@ -77,7 +77,7 @@
             children: 'children',
             label: 'label',
           },
-          // uploadUrl : "http://" + requestIP + ":8887/suma-venus-resource/template/import",
+          // uploadUrl : "http://" + requestIP + ":8887/template/import",
           uploadUrl : basePath + "/template/import",
         }
       },
