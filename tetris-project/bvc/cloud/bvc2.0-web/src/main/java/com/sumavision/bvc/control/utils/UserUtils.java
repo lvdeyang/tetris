@@ -60,7 +60,7 @@ public class UserUtils {
 		Object user = session.getAttribute(USER_IN_SESSION);
 		if(user == null){
 //			String username = SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString();
-//			Map<String, UserBO> users = userFeign.queryUserInfo(username);
+//			Map<String, UserBO> users = userQueryService.queryUserInfo(username);
 //			if(users==null || users.size()<=0 || users.get("user")==null){
 //				throw new UserDroppedException(username);
 //			}
@@ -98,7 +98,7 @@ public class UserUtils {
 	 */
 	public UserBO queryUserById(Long userId) throws Exception{
 		try{
-//			Map<String, UserBO> resultMap = userFeign.queryUserInfoById(userId);
+//			Map<String, UserBO> resultMap = userQueryService.queryUserInfoById(userId);
 //			if(resultMap==null || resultMap.size()<=0 || resultMap.get("user")==null) return null;
 //			return resultMap.get("user");
 			

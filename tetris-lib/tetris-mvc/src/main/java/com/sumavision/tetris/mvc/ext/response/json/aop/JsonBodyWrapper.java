@@ -1,6 +1,7 @@
 package com.sumavision.tetris.mvc.ext.response.json.aop;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -15,8 +16,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.ext.response.json.exception.NoCallbackFoundForJsonBodyInDebugModeException;
 import com.sumavision.tetris.mvc.ext.response.json.exception.NoRequestFoundForJsonBodyInDebugModeException;
+import com.sumavision.tetris.mvc.ext.response.json.exception.NoResponseFoundForJsonBodyInContentLengthConfigureException;
 import com.sumavision.tetris.mvc.wrapper.UrlDecoderHttpServletRequestWrapper;
 
 /**
@@ -39,6 +42,8 @@ public class JsonBodyWrapper {
 	
 	@Around("jsonBody()")
 	public Object wrap(ProceedingJoinPoint joinPoint) throws Exception{
+		
+		//boolean contentLength = jsonBody.contentLength();
 		
 		//json返回
 		JSONObject jsonResult = new JSONObject();
@@ -65,6 +70,23 @@ public class JsonBodyWrapper {
 			String target = joinPoint.toString();
 			throw new NoRequestFoundForJsonBodyInDebugModeException(target.substring(13, target.length()-1));
 		}
+		
+		//需要返回contentLength时需要传入HttpServletResponse
+		HttpServletResponse response = null;
+		
+		/*if(contentLength){
+			for(Object arg: args){
+				if(arg instanceof HttpServletResponse){
+					response = (HttpServletResponse)arg;
+					break;
+				}
+			}
+		}
+		
+		if(contentLength && response == null){
+			String target = joinPoint.toString();
+			throw new NoResponseFoundForJsonBodyInContentLengthConfigureException(target.substring(13, target.length()-1));
+		}*/
 		
 		//jsonp回调
 		String jsonp = null;
@@ -120,8 +142,15 @@ public class JsonBodyWrapper {
 		}
 		
 		if(DEBUG){
-			return jsonpResult.toString();
+			String jsonpResponseBody = jsonpResult.toString();
+			/*if(contentLength){
+				response.addHeader("Content-Length", String.valueOf(jsonpResponseBody.getBytes().length));
+			}*/
+			return jsonpResponseBody;
 		}else{
+			/*if(contentLength){
+				response.addHeader("Content-Length", String.valueOf(jsonResult.toJSONString().getBytes().length));
+			}*/
 			return jsonResult;
 		}
 	}

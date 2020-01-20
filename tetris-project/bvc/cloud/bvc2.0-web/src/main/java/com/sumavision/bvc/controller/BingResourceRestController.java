@@ -22,6 +22,7 @@ import com.suma.venus.resource.base.bo.UnbindUserPrivilegeBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.feign.UserQueryFeign;
+import com.suma.venus.resource.service.UserQueryService;
 import com.sumavision.aop.annotation.WebLog;
 import com.sumavision.bvc.common.RestResult;
 import com.sumavision.bvc.common.RestResultGenerator;
@@ -36,6 +37,9 @@ public class BingResourceRestController {
 
 	@Autowired
 	UserQueryFeign userRomoteService;
+
+	@Autowired
+	UserQueryService userQueryService;
 
 	@RequestMapping(value = "queryAllUser")
 	@ResponseBody

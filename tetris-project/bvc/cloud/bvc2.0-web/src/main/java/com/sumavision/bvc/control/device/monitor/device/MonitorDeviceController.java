@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
@@ -28,6 +30,7 @@ import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.ChannelBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -40,6 +43,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 public class MonitorDeviceController {
 
 	@Autowired
+	private CommonQueryUtil commonQueryUtil;
+
+	@Autowired
 	private UserUtils userUtils;
 	
 	@Autowired
@@ -50,6 +56,9 @@ public class MonitorDeviceController {
 	
 	@Autowired
 	private BundleDao bundleDao;
+	
+	@Autowired
+	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
 	
 	@Autowired
 	private MonitorLiveCommons monitorLiveCommons;
@@ -102,11 +111,17 @@ public class MonitorDeviceController {
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId);
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user : users){
+			userIds.add(user.getId());
+		}
+		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
-				   (!"ldap".equals(user.getCreater()) && user.getEncoderId()!=null && user.getDecoderId()!=null)){
+				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
+				   (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null && userMap.getDecodeBundleId()!=null)){
 					filteredUsers.add(user);
 				}
 			}
@@ -167,9 +182,15 @@ public class MonitorDeviceController {
 		
 		//查询有权限的用户
 		List<UserBO> userEntities = resourceService.queryUserresByUserId(userId);
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user : userEntities){
+			userIds.add(user.getId());
+		}
+		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 		if(userEntities!=null && userEntities.size()>0){
 			for(UserBO userEntity:userEntities){
-				nodes.add(new TreeNodeVO().set(userEntity));
+				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, userEntity.getId());
+				nodes.add(new TreeNodeVO().set(userEntity, userMap));
 			}
 		}
 		
@@ -207,15 +228,15 @@ public class MonitorDeviceController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		UserBO user = userUtils.queryUserById(userId);
+//		UserBO user = userUtils.queryUserById(userId);
 		
-		PlayerBundleBO entity = resourceService.querySpecifiedPlayerBundle(userId);
+		PlayerBundleBO entity = resourceQueryUtil.querySpecifiedPlayerBundle(userId);
 		
 		//播放器不存在
 		if(entity == null) return null;
 		
-		//用户绑定的不是播放器
-		if(!entity.getBundleId().equals(user.getDecoderId())) return null;
+		//只要能查到，就一定是播放器
+		//if(!entity.getBundleId().equals(resourceQueryUtil.queryDecodeBundleIdByUserId(userId))) return null;
 		
 		String clientIp = request.getHeader("X-Real-IP");
 		clientIp = (clientIp==null||"".equals(clientIp))?request.getRemoteAddr():clientIp;
@@ -279,7 +300,7 @@ public class MonitorDeviceController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		List<PlayerBundleBO> entities = resourceService.queryPlayerBundlesByUserId(userId);
+		List<PlayerBundleBO> entities = resourceQueryUtil.queryPlayerBundlesByUserId(userId);
 		
 		String clientIp = request.getHeader("X-Real-IP");
 		clientIp = (clientIp==null||"".equals(clientIp))?request.getRemoteAddr():clientIp;
@@ -436,9 +457,15 @@ public class MonitorDeviceController {
 		List<UserBO> filteredUsers = new ArrayList<UserBO>();
 		if(type==0 || type==2){
 			List<UserBO> users = resourceService.queryUserresByUserId(userId);
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserBO user : users){
+				userIds.add(user.getId());
+			}
+			List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 			if(users!=null && users.size()>0){
 				for(UserBO user:users){
-					if("ldap".equals(user.getCreater()) || (!"ldap".equals(user.getCreater())&&user.getEncoderId()!=null)){
+					EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+					if("ldap".equals(user.getCreater()) || (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null)){
 						filteredUsers.add(user);
 					}
 				}
@@ -707,9 +734,15 @@ public class MonitorDeviceController {
 		
 		//往里装用户
 		if(users!=null && users.size()>0){
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserBO user : users){
+				userIds.add(user.getId());
+			}
+			List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 			for(UserBO user:users){
 				if(user.getFolderId()!=null && root.getId().equals(user.getFolderId().toString())){
-					TreeNodeVO userNode = new TreeNodeVO().set(user);
+					EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+					TreeNodeVO userNode = new TreeNodeVO().set(user, userMap);
 					root.getChildren().add(userNode);
 				}
 			}

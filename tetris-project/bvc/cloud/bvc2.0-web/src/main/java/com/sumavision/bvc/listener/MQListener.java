@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.util.WebUtils;
 
-import com.suma.venus.alarmoprlog.client.AlarmOprlogClientService;
+//import com.suma.venus.alarmoprlog.client.AlarmOprlogClientService;
 import com.suma.venus.message.service.MessageService;
 import com.sumavision.bvc.mq.MQCallBackService;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -130,14 +130,14 @@ public class MQListener implements ServletContextListener {
 		log.info("name = " + name + ", sourceID = " + sourceID + ", localIp = " + localIp + ", messageService = " + messageService);
 		
 		try {
-			AlarmOprlogClientService.initClient(name, sourceID, localIp, messageService);
+//			AlarmOprlogClientService.initClient(name, sourceID, localIp, messageService);
 			//订阅“设备离线”告警
-			executesubscribeAlarm("11010001", "设备离线");
+//			executesubscribeAlarm("11010001", "设备离线");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}		
-		log.info("==============initListener alarm finish=================");
-		log.info("alarmOprlogClientService.instance = " + AlarmOprlogClientService.getInstance());
+//		log.info("==============initListener alarm finish=================");
+//		log.info("alarmOprlogClientService.instance = " + AlarmOprlogClientService.getInstance());
 	}	
 
 	/**
@@ -212,17 +212,17 @@ public class MQListener implements ServletContextListener {
 
 	}
 
-	private void executesubscribeAlarm(String alarmCode, String alarmName){
-		new Thread(null, null, "subscribeAlarm-" + alarmCode){
-			@Override
-			public void run() {				
-				try {
-					AlarmOprlogClientService.getInstance().subscribeAlarm(alarmCode);
-				} catch (Exception e) {
-					e.printStackTrace();
-					log.error("告警代码为 " + alarmCode + " 的 " + alarmName + " 告警订阅失败");
-				}				
-			}
-		}.start();
-	}
+//	private void executesubscribeAlarm(String alarmCode, String alarmName){
+//		new Thread(null, null, "subscribeAlarm-" + alarmCode){
+//			@Override
+//			public void run() {				
+//				try {
+//					AlarmOprlogClientService.getInstance().subscribeAlarm(alarmCode);
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//					log.error("告警代码为 " + alarmCode + " 的 " + alarmName + " 告警订阅失败");
+//				}				
+//			}
+//		}.start();
+//	}
 }

@@ -40,13 +40,13 @@ public interface DictionaryDAO extends MetBaseDAO<DictionaryPO>{
 	public DictionaryPO findByDicTypeAndCode(DicType dicType, String code);
 	
 	/*
-	 * Í¨¹ıÃû³ÆÇ°×ººÍÀàĞÍ²éÕÒ
+	 * é€šè¿‡åç§°å‰ç¼€å’Œç±»å‹æŸ¥æ‰¾
 	 */
 	@Query("select dic from DictionaryPO dic where dic.content like ?1% and dic.dicType = ?2")
 	public List<DictionaryPO> findByContentPrefixAndDicType(String contentPrefix, DicType dicType);
 	
 	/*
-	 * Í¨¹ıÃû³ÆÇ°×º¡¢ÀàĞÍ¡¢À¸Ä¿µÈ¼¶²éÕÒ
+	 * é€šè¿‡åç§°å‰ç¼€ã€ç±»å‹ã€æ ç›®ç­‰çº§æŸ¥æ‰¾
 	 */
 	@Query("select dic from DictionaryPO dic where dic.content like ?1% and dic.dicType = ?2 and dic.servLevel = ?3 ")
 	public List<DictionaryPO> findByContentPrefixAndDicTypeAndServLevel(String contentPrefix, DicType dicType, ServLevel servLevel);

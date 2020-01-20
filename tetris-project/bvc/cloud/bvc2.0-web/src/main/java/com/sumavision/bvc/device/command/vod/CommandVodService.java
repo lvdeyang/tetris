@@ -34,6 +34,7 @@ import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
@@ -50,6 +51,9 @@ public class CommandVodService {
 
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
 
 	@Autowired
 	private ResourceService resourceService;
@@ -163,7 +167,7 @@ public class CommandVodService {
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
 		//被点播--编码
-		List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(vodUser.getEncoderId()).getList());
+		List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(vodUser.getId())).getList());
 		if(encoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(user.getName());
 		BundlePO encoderBundleEntity = encoderBundleEntities.get(0);
 		
@@ -374,7 +378,7 @@ public class CommandVodService {
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
 		//被点播--编码
-		List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(user.getEncoderId()).getList());
+		List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId())).getList());
 		BundlePO encoderBundleEntity = encoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> encoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(encoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);

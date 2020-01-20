@@ -41,6 +41,7 @@
                     class="upload-demo"
                     :action=uploadUrl
                     name="filePoster"
+                    :headers="myHeaders"
                     :show-file-list="false"
                     :on-success="uploadSuccess"
                     :on-error="uploadError"
@@ -187,7 +188,7 @@
             syncEquipInfToLdap, cleanUpEquipInfo} from '../../api/api';
     // let requestIP = document.location.host.split(":")[0];
 
-    let basePath = process.env.RESOURCE_ROOT + '/suma-venus-resource'
+    let basePath = process.env.RESOURCE_ROOT
 
     export default {
         data() {
@@ -217,6 +218,9 @@
             newAccessNodeUid: "",
             // uploadUrl : "http://" + requestIP + ":8887/suma-venus-resource/bundle/import",
             uploadUrl: basePath + "/bundle/import",
+            myHeaders : {
+                          'tetris-001': sessionStorage.getItem('token')
+                      },
 
             sourceTypeOptions: [
                 {

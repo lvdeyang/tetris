@@ -15,6 +15,7 @@ import com.sumavision.bvc.BO.LockChannelRequest;
 import com.sumavision.bvc.BO.ReleaseChannelRequest;
 import com.sumavision.bvc.device.resource.bo.CreateResourceBO;
 import com.sumavision.bvc.device.resource.bo.LiveChannelResourceBO;
+import com.sumavision.tetris.config.feign.FeignConfiguration;
 
 
 /**
@@ -27,8 +28,9 @@ import com.sumavision.bvc.device.resource.bo.LiveChannelResourceBO;
  * @Copyright: 2018 Sumavision. All rights reserved. 
  * 注意：本内容仅限于北京数码视讯科技股份有限公司内部传阅，禁止外泄以及用于其他的商业目的
  */
-@FeignClient(name="suma-venus-resource")
-@RequestMapping(value="/suma-venus-resource/api")
+@FeignClient(name="tetris-resource", configuration = FeignConfiguration.class)
+//@FeignClient(name="tetris-resource")
+//@RequestMapping(value="/tetris-resource/api")
 public interface ResourceServiceClient {
 	
 	/**
@@ -36,7 +38,7 @@ public interface ResourceServiceClient {
 	 * @param lockChannelRequest
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/lockChannel")
+	@RequestMapping(value = "/api/lockChannel")
 	public LockChannelRespParam lockChannel(@RequestBody LockChannelRequest lockChannelRequest);
 	
 	/**
@@ -44,7 +46,7 @@ public interface ResourceServiceClient {
 	 * @param releaseChannelRequest
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/releaseChannel")
+	@RequestMapping(value = "/api/releaseChannel")
 	public ReleaseChannelRespParam releaseChannel(@RequestBody ReleaseChannelRequest releaseChannelRequest);
 	
 	/**
@@ -52,7 +54,7 @@ public interface ResourceServiceClient {
 	 * @param lockParam
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/lockBundle")
+	@RequestMapping(value = "/api/lockBundle")
 	public LockBundleRespParam lockBundle(@RequestBody LockBundleParam lockParam);
 	
 	/**
@@ -60,7 +62,7 @@ public interface ResourceServiceClient {
 	 * @param releaseParam
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/releaseBundle")
+	@RequestMapping(value = "/api/releaseBundle")
 	public LockBundleRespParam releaseBundle(@RequestBody LockBundleParam releaseParam);
 	
 	/**
@@ -68,7 +70,7 @@ public interface ResourceServiceClient {
 	 * @param batchLockBundleParam
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/batchLockBundleNew")
+	@RequestMapping(value = "/api/batchLockBundleNew")
 	public BatchLockBundleRespParam batchLockBundle(@RequestBody BatchLockBundleParam batchLockBundleParam);
 	
 	/**
@@ -76,7 +78,7 @@ public interface ResourceServiceClient {
 	 * @param batchReleaseParam
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/batchReleaseBundleNew")
+	@RequestMapping(value = "/api/batchReleaseBundleNew")
 	public BatchLockBundleRespParam batchReleaseBundle(@RequestBody BatchLockBundleParam batchReleaseParam);
 	
 	/**
@@ -84,9 +86,9 @@ public interface ResourceServiceClient {
 	 * @param createResource
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/createResource")
+	@RequestMapping(value = "/api/createResource")
 	public Object createResource(@RequestBody CreateResourceBO createResourceBO);
 	
-	@RequestMapping(method = RequestMethod.POST, value = "/deleteLiveChannel")
+	@RequestMapping(value = "/api/deleteLiveChannel")
 	public Object deleteLiveChannel(@RequestBody LiveChannelResourceBO liveChannelResourceBO);
 }

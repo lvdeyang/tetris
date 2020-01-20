@@ -110,7 +110,7 @@ public class MeetingEntityUtil {
 	
 	public static JSONObject codecParamForCdnJoiner(JSONObject common_codec_param){
 		String audio_paramStr = JSON.toJSONString(common_codec_param.getJSONObject("audio_param"), SerializerFeature.DisableCircularReferenceDetect);
-		JSONObject audio_param = JSON.parseObject(audio_paramStr, Object.class);
+		JSONObject audio_param = JSON.parseObject(audio_paramStr);
 		audio_param.remove("gain");		
 		
 		JSONObject video_param = new JSONObject();
@@ -1048,7 +1048,7 @@ public class MeetingEntityUtil {
 			List<OutConnMediaMuxPO> rtmpPOs = outConnMediaMuxDao.getByRecordUuid(uuid);
 			for(OutConnMediaMuxPO rtmpPO : rtmpPOs){
 				String jsonStr = JSON.toJSONString(aOutConnMediaMuxSet, SerializerFeature.DisableCircularReferenceDetect);
-				JSONObject newRtmp = JSON.parseObject(jsonStr, Object.class);//(JSONObject) aOutConnMediaMuxSet.clone();
+				JSONObject newRtmp = JSON.parseObject(jsonStr);//(JSONObject) aOutConnMediaMuxSet.clone();
 				newRtmp.put("uuid", rtmpPO.getUuid());
 				newRtmp.put("layerId", rtmpPO.getLayerId());
 				newRtmp.put("bundleId", rtmpPO.getBundleId());
