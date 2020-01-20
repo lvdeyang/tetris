@@ -23,6 +23,8 @@ define([
 
     var charts = {};
 
+    var vueInstance = null;
+
     var init = function(){
 
         //设置标题
@@ -31,7 +33,7 @@ define([
         var $page = document.getElementById(pageId);
         $page.innerHTML = tpl;
 
-        new Vue({
+        vueInstance = new Vue({
             el: '#' + pageId + '-wrapper',
             data: {
                 basePath:window.BASEPATH,
@@ -343,7 +345,8 @@ define([
     };
 
     var destroy = function(){
-
+        if(vueInstance.interval) clearInterval(vueInstance.interval);
+        if(vueInstance.server.interval) clearInterval(vueInstance.server.interval);
     };
 
     var groupList = {
