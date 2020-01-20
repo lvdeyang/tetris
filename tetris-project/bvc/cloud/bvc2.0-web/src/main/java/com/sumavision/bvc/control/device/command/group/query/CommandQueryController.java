@@ -20,9 +20,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.service.ResourceService;
@@ -47,6 +49,7 @@ import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.ChannelBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -64,6 +67,9 @@ public class CommandQueryController {
 	private ResourceQueryUtil resourceQueryUtil;
 	
 	@Autowired
+	private CommonQueryUtil commonQueryUtil;
+	
+	@Autowired
 	private ResourceService resourceService;
 	
 	@Autowired
@@ -77,6 +83,9 @@ public class CommandQueryController {
 	
 	@Autowired
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
+	
+	@Autowired
+	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
@@ -103,12 +112,18 @@ public class CommandQueryController {
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId);
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user : users){
+			userIds.add(user.getId());
+		}
+		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
 //				   (!"ldap".equals(user.getCreater()) && user.getEncoderId()!=null)){// && user.getDecoderId()!=null)){
-					(!"ldap".equals(user.getCreater()) && user.getEncoderId()!=null) && !user.getEncoderId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
+					(!"ldap".equals(user.getCreater()) && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
 					if(filterMode == 0
 							|| filterMode == 1 && user.isLogined()
 							|| filterMode == 2 && !user.isLogined()){
@@ -163,11 +178,17 @@ public class CommandQueryController {
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId);
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user : users){
+			userIds.add(user.getId());
+		}
+		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
-				   (!"ldap".equals(user.getCreater()) && user.getEncoderId()!=null) && !user.getEncoderId().equals("")){// && user.getDecoderId()!=null)){
+				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
+				   (!"ldap".equals(user.getCreater()) && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){// && user.getDecoderId()!=null)){
 					if(!memberUserIds.contains(user.getId())){
 						filteredUsers.add(user);
 					}
@@ -581,9 +602,15 @@ public class CommandQueryController {
 		
 		//往里装用户
 		if(users!=null && users.size()>0){
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserBO user : users){
+				userIds.add(user.getId());
+			}
+			List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 			for(UserBO user:users){
 				if(user.getFolderId()!=null && root.getId().equals(user.getFolderId().toString())){
-					TreeNodeVO userNode = new TreeNodeVO().set(user);
+					EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+					TreeNodeVO userNode = new TreeNodeVO().set(user, userMap);
 					root.getChildren().add(userNode);
 				}
 			}

@@ -15,7 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.basic.dao.BasicRoleDAO;
@@ -61,6 +63,7 @@ import com.sumavision.bvc.device.group.bo.ForwardSetBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
@@ -111,6 +114,9 @@ public class CommandBasicServiceImpl {
 	private ResourceChannelDAO resourceChannelDao;
 	
 	@Autowired
+	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
+	
+	@Autowired
 	private ResourceService resourceService;
 	
 	@Autowired
@@ -133,6 +139,9 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private CommonQueryUtil commonQueryUtil;
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;	
@@ -169,13 +178,22 @@ public class CommandBasicServiceImpl {
 		if(creatorUserBo.getFolderUuid() == null){
 			throw new UserHasNoFolderException(creatorUserBo.getName());
 		}
-		List<BundlePO> creatorBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(creatorUserBo.getEncoderId()).getList());
-		if(creatorBundleEntities.size() == 0){
-			throw new UserHasNoAvailableEncoderException(creatorUserBo.getName());
-		}
 		
+		//确保成员中有创建者
 		if(!userIdList.contains(creatorUserId)){
 			userIdList.add(creatorUserId);
+		}
+		
+		//获取所有用户的编解码器map
+		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIdList);
+		
+		EncoderDecoderUserMap creatorUserMap = commonQueryUtil.queryUserMapById(userMaps, creatorUserId);
+		if(creatorUserMap == null){
+			throw new UserHasNoAvailableEncoderException(creatorUserBo.getName());
+		}
+		List<BundlePO> creatorBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(creatorUserMap.getEncodeBundleId()).getList());
+		if(creatorBundleEntities.size() == 0){
+			throw new UserHasNoAvailableEncoderException(creatorUserBo.getName());
 		}
 		
 		//指挥组重名校验
@@ -234,7 +252,8 @@ public class CommandBasicServiceImpl {
 		//从List<UserBO>取出bundleId列表，注意判空；给UserBO中的folderId赋值
 		List<String> bundleIds = new ArrayList<String>();
 		for(UserBO user : commandUserBos){
-			bundleIds.add(user.getEncoderId());
+			EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+			bundleIds.add(userMap.getEncodeBundleId());
 			for(FolderPO folder : allFolders){
 				if(folder.getUuid().equals(user.getFolderUuid())){
 					user.setFolderId(folder.getId());
@@ -251,9 +270,10 @@ public class CommandBasicServiceImpl {
 		//通过视频编码通道来校验编码器是否可用
 		if(videoEncode1Channels.size() < commandUserBos.size()){
 			for(UserBO user : commandUserBos){
+				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());				
 				boolean hasChannel = false;
 				for(ChannelSchemeDTO channel : videoEncode1Channels){
-					if(channel.getBundleId().equals(user.getEncoderId())){
+					if(userMap.getEncodeBundleId()!=null && channel.getBundleId().equals(userMap.getEncodeBundleId())){
 						hasChannel = true;
 						break;
 					}
@@ -273,6 +293,7 @@ public class CommandBasicServiceImpl {
 //		BasicRolePO chairmanRole = basicRoleDao.findByName("主席");
 //		BasicRolePO memberRole = basicRoleDao.findByName("指挥员");
 		for(UserBO user : commandUserBos){
+			EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
 			//注意判断主席
 			CommandGroupMemberPO memberPO = new CommandGroupMemberPO();
 			if(chairmanUserId.equals(user.getId())){
@@ -295,7 +316,7 @@ public class CommandBasicServiceImpl {
 			
 //			//遍历bundle
 			for(BundlePO bundle : srcBundleEntities){
-				if(user.getEncoderId().equals(bundle.getBundleId())){
+				if(userMap.getEncodeBundleId().equals(bundle.getBundleId())){
 					memberPO.setSrcBundleId(bundle.getBundleId());
 					memberPO.setSrcBundleName(bundle.getBundleName());
 					memberPO.setSrcBundleType(bundle.getDeviceModel());
@@ -307,7 +328,7 @@ public class CommandBasicServiceImpl {
 			
 			//遍历视频通道
 			for(ChannelSchemeDTO videoChannel : videoEncode1Channels){
-				if(user.getEncoderId().equals(videoChannel.getBundleId())){
+				if(userMap.getEncodeBundleId().equals(videoChannel.getBundleId())){
 					memberPO.setSrcVideoChannelId(videoChannel.getChannelId());
 					break;
 				}
@@ -315,7 +336,7 @@ public class CommandBasicServiceImpl {
 			
 			//遍历音频通道
 			for(ChannelSchemeDTO audioChannel : audioEncode1Channels){
-				if(user.getEncoderId().equals(audioChannel.getBundleId())){
+				if(userMap.getEncodeBundleId().equals(audioChannel.getBundleId())){
 					memberPO.setSrcAudioChannelId(audioChannel.getChannelId());
 					break;
 				}
@@ -1155,10 +1176,17 @@ public class CommandBasicServiceImpl {
 //				}
 //			}
 			
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserBO user : commandUserBos){
+				userIds.add(user.getId());
+			}
+			List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
+			
 			//从List<UserBO>取出bundleId列表，注意判空；给UserBO中的folderId赋值
 			List<String> bundleIds = new ArrayList<String>();
 			for(UserBO user : commandUserBos){
-				bundleIds.add(user.getEncoderId());
+				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+				bundleIds.add(userMap.getEncodeBundleId());
 				for(FolderPO folder : allFolders){
 					if(folder.getUuid().equals(user.getFolderUuid())){
 						user.setFolderId(folder.getId());
@@ -1175,9 +1203,10 @@ public class CommandBasicServiceImpl {
 			//通过视频编码通道来校验编码器是否可用
 			if(videoEncode1Channels.size() < commandUserBos.size()){
 				for(UserBO user : commandUserBos){
+					EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
 					boolean hasChannel = false;
 					for(ChannelSchemeDTO channel : videoEncode1Channels){
-						if(channel.getBundleId().equals(user.getEncoderId())){
+						if(channel.getBundleId().equals(userMap.getEncodeBundleId())){
 							hasChannel = true;
 							break;
 						}
@@ -1205,6 +1234,7 @@ public class CommandBasicServiceImpl {
 //			BasicRolePO chairmanRole = basicRoleDao.findByName("主席");
 //			BasicRolePO memberRole = basicRoleDao.findByName("指挥员");
 			for(UserBO user : commandUserBos){
+				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
 				CommandGroupMemberPO memberPO = new CommandGroupMemberPO();
 				//关联指挥员角色
 //				memberPO.setRoleId(memberRole.getId());
@@ -1217,7 +1247,7 @@ public class CommandBasicServiceImpl {
 				
 				//遍历bundle
 				for(BundlePO bundle : srcBundleEntities){
-					if(user.getEncoderId().equals(bundle.getBundleId())){
+					if(userMap.getEncodeBundleId().equals(bundle.getBundleId())){
 						memberPO.setSrcBundleId(bundle.getBundleId());
 						memberPO.setSrcBundleName(bundle.getBundleName());
 						memberPO.setSrcBundleType(bundle.getDeviceModel());
@@ -1229,7 +1259,7 @@ public class CommandBasicServiceImpl {
 				
 				//遍历视频通道
 				for(ChannelSchemeDTO videoChannel : videoEncode1Channels){
-					if(user.getEncoderId().equals(videoChannel.getBundleId())){
+					if(userMap.getEncodeBundleId().equals(videoChannel.getBundleId())){
 						memberPO.setSrcVideoChannelId(videoChannel.getChannelId());
 						break;
 					}
@@ -1237,7 +1267,7 @@ public class CommandBasicServiceImpl {
 				
 				//遍历音频通道
 				for(ChannelSchemeDTO audioChannel : audioEncode1Channels){
-					if(user.getEncoderId().equals(audioChannel.getBundleId())){
+					if(userMap.getEncodeBundleId().equals(audioChannel.getBundleId())){
 						memberPO.setSrcAudioChannelId(audioChannel.getChannelId());
 						break;
 					}

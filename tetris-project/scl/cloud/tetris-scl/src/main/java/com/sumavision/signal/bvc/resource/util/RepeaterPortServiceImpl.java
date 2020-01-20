@@ -3,8 +3,6 @@ package com.sumavision.signal.bvc.resource.util;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.sun.jersey.client.impl.CopyOnWriteHashMap;
-
 /**
  * 转发器网口端口链路维护<br/>
  * <b>作者:</b>wjw<br/>

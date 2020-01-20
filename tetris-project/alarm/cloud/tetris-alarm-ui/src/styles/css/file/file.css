@@ -1,0 +1,75 @@
+
+.filelist{
+    border-left: 1px solid #434857;
+}
+
+.filelist-last{
+    border-left: 1px solid #434857;
+}
+.href{
+    color: inherit;
+    text-decoration: none;
+}
+.href:hover{
+    text-decoration: none;
+    cursor: pointer;
+}
+.c-1{
+    margin-left: 24px;
+}
+
+.c-2{
+    margin-left: 25px;
+}
+
+.active{
+    background-color: #c8c6c6;
+}
+
+.folder{
+    position: relative;
+    line-height: 1.5rem;
+    /*text-transform: uppercase;*/
+    border-left: 1px solid #434857;
+}
+
+.folder:before {
+    position: absolute;
+    top: 50%;
+    display: block;
+    content: '';
+    width: 16px;
+    height: 1px;
+    /*border-bottom: 1px solid #434857;*/
+    background-color: #434857;
+}
+
+.folder i:first-child{
+    margin-left: 16px;
+}
+
+.file{
+    position: relative;
+    line-height: 1.5rem;
+    /*text-transform: uppercase;*/
+}
+
+.file:before {
+    position: absolute;
+    top: 0%;
+    display: block;
+    content: "";
+    width: 17px;
+    height: .75rem;
+    border-left: 1px solid #434857;
+    border-bottom: 1px solid #434857;
+    /*background-color: #434857;*/
+}
+
+.file i:first-child{
+    margin-left: 17px;
+}
+
+.treedom{
+    white-space:nowrap;
+}

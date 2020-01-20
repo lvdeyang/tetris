@@ -372,6 +372,7 @@ public class ResourceService {
 	}
 
 	/** 根据userId查询16个播放器资源 **/
+	@Deprecated
 	public List<PlayerBundleBO> queryPlayerBundlesByUserId(Long userId) {
 		List<PlayerBundleBO> playerBundles = new ArrayList<>();
 		List<BundlePO> playerBundlePOs = bundleService.queryPlayerBundlesByUserId(userId);
@@ -400,6 +401,7 @@ public class ResourceService {
 	}
 
 	/** 根据userId查询第17个播放器资源 **/
+	@Deprecated
 	public PlayerBundleBO querySpecifiedPlayerBundle(Long userId) {
 		List<BundlePO> playerBundlePOs = bundleService.queryPlayerBundlesByUserId(userId);
 		for (BundlePO bundlePO : playerBundlePOs) {

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.sumavision.tetris</groupId>
+	<artifactId>tetris-alarm</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>war</packaging>
+
+	<name>tetris-alarm</name>
+	<description>alarm and oprlog service</description>
+
+	<!-- 
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>2.0.3.RELEASE</version>
+		<relativePath />
+	</parent>
+ 	-->
+ 	 
+ 	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.3.RELEASE</version>
+		<relativePath/>
+	</parent>
+	
+ 	
+ 	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<!-- <spring-cloud.version>Finchley.RELEASE</spring-cloud.version> -->
+		<spring-cloud.version>Dalston.RELEASE</spring-cloud.version>
+	</properties>
+
+	<dependencies>
+		<!--
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		 -->
+		
+		<!-- 
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+		</dependency>
+		 -->
+		 
+		<!-- eureka依赖 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-eureka</artifactId>
+		</dependency>
+			
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		
+		<!-- 
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-oauth2</artifactId>
+		</dependency>
+		 -->
+		
+		<!--
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		-->
+		
+		<!-- 导入Mysql数据库链接jar包 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid-spring-boot-starter</artifactId>
+			<version>1.1.10</version>
+		</dependency>
+		
+		
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>1.1.9</version>
+		</dependency>
+		
+		<!--
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.47</version>
+		</dependency>
+		-->
+
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+		<!-- 
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-activemq-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		 -->
+		 
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-alarm-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>3.9</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.9</version>
+		</dependency>
+			
+	
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-common</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-mvc</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- 
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-orm</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		 -->
+		
+		<!-- user-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-user-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+				<!-- user-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-menu-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- tetris-ui -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-ui</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.springframework.cloud</groupId>
+				<artifactId>spring-cloud-dependencies</artifactId>
+				<version>${spring-cloud.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<packagingExcludes>
+						**/classes/suma/venus/alarmoplog/controller/*.*
+					</packagingExcludes>
+					<warSourceExcludes>
+						**/classes/suma/venus/alarmoplog/controller/*.*
+					</warSourceExcludes>
+				</configuration>
+			</plugin>
+		</plugins>
+
+	</build>
+	<!-- <build> <plugins> <plugin> <groupId>org.springframework.boot</groupId> 
+		<artifactId>spring-boot-maven-plugin</artifactId> <executions> <execution> 
+		<goals> <goal>repackage</goal> </goals> </execution> </executions> <configuration> 
+		<packagingExcludes> WEB-INF/classes/com/suma/venus/alarmoprlog/WebSocketConfig.*, 
+		</packagingExcludes> </configuration> </plugin> </plugins> </build> -->
+
+</project>

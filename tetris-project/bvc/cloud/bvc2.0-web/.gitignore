@@ -6,4 +6,5 @@
 .factorypath
 .project
 /.idea/
+/src/main/webapp/.idea/
 lombok-1.16.10.jar

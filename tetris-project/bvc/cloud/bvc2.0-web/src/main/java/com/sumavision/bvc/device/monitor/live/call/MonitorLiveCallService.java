@@ -11,7 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
+import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
@@ -63,6 +65,9 @@ public class MonitorLiveCallService {
 
 	@Autowired
 	private ResourceChannelDAO resourceChannelDao;
+
+	@Autowired
+	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
 	
 	@Autowired
 	private MonitorLiveCommons commons;
@@ -103,7 +108,8 @@ public class MonitorLiveCallService {
 		String networkLayerId = commons.queryNetworkLayerId();
 		
 		//被叫用户设备
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUser.getEncoderId()).getList());
+		EncoderDecoderUserMap localUserMap = encoderDecoderUserMapDao.findByUserId(localUser.getId());
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getEncodeBundleId()).getList());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> calledEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -112,7 +118,7 @@ public class MonitorLiveCallService {
 		List<ChannelSchemeDTO> calledEncoderAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
 		ChannelSchemeDTO calledEncoderAudioChannel = calledEncoderAudioChannels.get(0);
 		
-		List<BundlePO> calledDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUser.getDecoderId()).getList());
+		List<BundlePO> calledDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getDecodeBundleId()).getList());
 		BundlePO calledDecoderBundleEntity = calledDecoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> calledDecoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledDecoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.DECODE_VIDEO);
@@ -267,7 +273,8 @@ public class MonitorLiveCallService {
 		String networkLayerId = commons.queryNetworkLayerId();
 		
 		//被叫用户设备
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUser.getEncoderId()).getList());
+		EncoderDecoderUserMap localUserMap = encoderDecoderUserMapDao.findByUserId(localUser.getId());
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getEncodeBundleId()).getList());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> calledEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -276,7 +283,7 @@ public class MonitorLiveCallService {
 		List<ChannelSchemeDTO> calledEncoderAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
 		ChannelSchemeDTO calledEncoderAudioChannel = calledEncoderAudioChannels.get(0);
 		
-		List<BundlePO> calledDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUser.getDecoderId()).getList());
+		List<BundlePO> calledDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getDecodeBundleId()).getList());
 		BundlePO calledDecoderBundleEntity = calledDecoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> calledDecoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledDecoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.DECODE_VIDEO);
@@ -399,7 +406,8 @@ public class MonitorLiveCallService {
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
 		//被叫用户设备
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(calledUser.getEncoderId()).getList());
+		EncoderDecoderUserMap calledUserMap = encoderDecoderUserMapDao.findByUserId(calledUser.getId());
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(calledUserMap.getEncodeBundleId()).getList());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> calledEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -408,7 +416,7 @@ public class MonitorLiveCallService {
 		List<ChannelSchemeDTO> calledEncoderAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
 		ChannelSchemeDTO calledEncoderAudioChannel = calledEncoderAudioChannels.get(0);
 		
-		List<BundlePO> calledDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(calledUser.getDecoderId()).getList());
+		List<BundlePO> calledDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(calledUserMap.getDecodeBundleId()).getList());
 		BundlePO calledDecoderBundleEntity = calledDecoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> calledDecoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledDecoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.DECODE_VIDEO);
@@ -418,7 +426,8 @@ public class MonitorLiveCallService {
 		ChannelSchemeDTO calledDecoderAudioChannel = calledDecoderAudioChannels.get(0);
 		
 		//主叫用户设备
-		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(callUser.getEncoderId()).getList());
+		EncoderDecoderUserMap callUserMap = encoderDecoderUserMapDao.findByUserId(callUser.getId());
+		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(callUserMap.getEncodeBundleId()).getList());
 		BundlePO callEncoderBundleEntity = callEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> callEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(callEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -427,7 +436,7 @@ public class MonitorLiveCallService {
 		List<ChannelSchemeDTO> callEncoderAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(callEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
 		ChannelSchemeDTO callEncoderAudioChannel = callEncoderAudioChannels.get(0);
 		
-		List<BundlePO> callDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(callUser.getDecoderId()).getList());
+		List<BundlePO> callDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(callUserMap.getDecodeBundleId()).getList());
 		BundlePO callDecoderBundleEntity = callDecoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> callDecoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(callDecoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.DECODE_VIDEO);
@@ -507,7 +516,8 @@ public class MonitorLiveCallService {
 		String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
 		
 		//主叫用户设备
-		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUser.getEncoderId()).getList());
+		EncoderDecoderUserMap localUserMap = encoderDecoderUserMapDao.findByUserId(localUser.getId());
+		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getEncodeBundleId()).getList());
 		BundlePO callEncoderBundleEntity = callEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> callEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(callEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -516,7 +526,7 @@ public class MonitorLiveCallService {
 		List<ChannelSchemeDTO> callEncoderAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(callEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
 		ChannelSchemeDTO callEncoderAudioChannel = callEncoderAudioChannels.get(0);
 		
-		List<BundlePO> callDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUser.getDecoderId()).getList());
+		List<BundlePO> callDecoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getDecodeBundleId()).getList());
 		BundlePO callDecoderBundleEntity = callDecoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> callDecoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(callDecoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.DECODE_VIDEO);
