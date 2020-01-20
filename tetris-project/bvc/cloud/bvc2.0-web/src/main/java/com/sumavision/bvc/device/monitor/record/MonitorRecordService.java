@@ -30,6 +30,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.AvtplNotFoundException;
 import com.sumavision.bvc.device.monitor.exception.UserHashNoPermissionToStopMonitorRecordException;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
@@ -77,6 +78,9 @@ public class MonitorRecordService {
 	
 	@Autowired
 	private ResourceChannelDAO resourceChannelDao;
+	
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
 	
 	@Autowired
 	private MonitorLiveCommons commons;
@@ -334,7 +338,7 @@ public class MonitorRecordService {
 			String userno) throws Exception{
 		
 		//用户绑定的编码器
-		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(user.getEncoderId()).getList());
+		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId())).getList());
 		BundlePO srcBundleEntity = srcBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> srcVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);

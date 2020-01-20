@@ -1232,7 +1232,7 @@ public class MeetingEntity {
 		List<OutConnMediaMuxPO> rtmpPOs = outConnMediaMuxDao.getByRecordUuid(uuid);
 		for(OutConnMediaMuxPO rtmpPO : rtmpPOs){
 			String jsonStr = JSON.toJSONString(aOutConnMediaMuxSet, SerializerFeature.DisableCircularReferenceDetect);
-			JSONObject newRtmp = JSON.parseObject(jsonStr, Object.class);//(JSONObject) aOutConnMediaMuxSet.clone();
+			JSONObject newRtmp = JSON.parseObject(jsonStr);//, Object.class);//(JSONObject) aOutConnMediaMuxSet.clone();
 			newRtmp.put("uuid", rtmpPO.getUuid());
 			newRtmp.put("layerId", rtmpPO.getLayerId());
 			newRtmp.put("bundleId", rtmpPO.getBundleId());

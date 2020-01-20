@@ -34,6 +34,7 @@ import com.sumavision.bvc.device.command.secret.CommandSecretServiceImpl;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.enumeration.CodecParamType;
 import com.sumavision.bvc.device.group.service.util.MeetingUtil;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.AvtplNotFoundException;
 import com.sumavision.bvc.device.system.AvtplService;
 import com.sumavision.bvc.system.dao.AvtplDAO;
@@ -78,6 +79,9 @@ public class CommandCommonServiceImpl {
 	
 	@Autowired
 	private MeetingUtil meetingUtil;
+	
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
 	
 	@Autowired
 	private ResourceService resourceService;
@@ -459,7 +463,7 @@ public class CommandCommonServiceImpl {
 				commandGroupUserPlayerDao.deleteInBatch(players);
 				
 				//重新从资源层获取播放器
-				List<PlayerBundleBO> allPlayers = resourceService.queryPlayerBundlesByUserId(userId);				
+				List<PlayerBundleBO> allPlayers = resourceQueryUtil.queryPlayerBundlesByUserId(userId);				
 				if(userInfo.getPlayers() == null) userInfo.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
 				for(int i = 0; i < PlayerSplitLayout.SPLIT_16.getPlayerCount(); i++){
 					CommandGroupUserPlayerPO player = new CommandGroupUserPlayerPO().set(allPlayers.get(i));

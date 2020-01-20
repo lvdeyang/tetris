@@ -165,6 +165,7 @@ public class BundleService extends CommonService<BundlePO> {
 	}
 
 	/** 根据userId查询播放器资源的bundleId **/
+	@Deprecated
 	public List<String> queryPlayerBundleIdsByUserId(Long userId) {
 		try {
 			List<String> playerBundleIds = bundleDao.findAllPlayerBundleIds();
@@ -182,6 +183,7 @@ public class BundleService extends CommonService<BundlePO> {
 	}
 
 	/** 根据userId查询播放器资源bundle **/
+	@Deprecated
 	public List<BundlePO> queryPlayerBundlesByUserId(Long userId) {
 		List<String> bundleIds = queryPlayerBundleIdsByUserId(userId);
 		if (!bundleIds.isEmpty()) {

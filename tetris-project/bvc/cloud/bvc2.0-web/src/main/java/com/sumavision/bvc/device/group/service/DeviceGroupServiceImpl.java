@@ -271,12 +271,12 @@ public class DeviceGroupServiceImpl {
 		if(GroupType.MEETING.equals(GroupType.fromName(type))){
 			List<DictionaryPO> dicPO = conn_dictionary.findByContentPrefixAndDicType("会议_", DicType.LIVE);
 			if(dicPO.size() == 0){
-				throw new BaseException(StatusCode.FORBIDDEN, "请先建立“会议_”开头的直播栏目");
+//				throw new BaseException(StatusCode.FORBIDDEN, "请先建立“会议_”开头的直播栏目");
 			}
 		}else if(GroupType.MONITOR.equals(GroupType.fromName(type))){
 			List<DictionaryPO> dicPO = conn_dictionary.findByContentPrefixAndDicType("监控_", DicType.LIVE);
 			if(dicPO.size() == 0){
-				throw new BaseException(StatusCode.FORBIDDEN, "请先建立“监控_”开头的直播栏目");
+//				throw new BaseException(StatusCode.FORBIDDEN, "请先建立“监控_”开头的直播栏目");
 			}
 		}
 		

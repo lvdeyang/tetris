@@ -16,7 +16,6 @@ import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
@@ -29,6 +28,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.AvtplNotFoundException;
 import com.sumavision.bvc.device.monitor.exception.UserHasNoPermissionToRemoveLiveDeviceException;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
@@ -88,9 +88,6 @@ public class MonitorLiveService {
 	private ExecuteBusinessProxy executeBusiness;
 	
 	@Autowired
-	private ResourceService resourceService;
-	
-	@Autowired
 	private BundleDao bundleDao;
 	
 	@Autowired
@@ -98,6 +95,9 @@ public class MonitorLiveService {
 	
 	@Autowired
 	private ResourceChannelDAO resourceChannelDao;
+	
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
 	
 	/**
 	 * 点播本地用户<br/>
@@ -142,9 +142,10 @@ public class MonitorLiveService {
 			Long userId) throws Exception{
 		
 		if(localUser == null) throw new UserCannotBeFoundException();
-		if(localUser.getEncoderId() == null) throw new UserEncoderCannotBeFoundException();
+		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(localUser.getId());
+		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		
-		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUser.getEncoderId()).getList());
+		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(encoderId).getList());
 		BundlePO srcBundleEntity = srcBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> srcVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -208,7 +209,8 @@ public class MonitorLiveService {
 			String userno) throws Exception{
 		
 		if(xtUser == null) throw new UserCannotBeFoundException();
-		if(xtUser.getEncoderId() == null) throw new UserEncoderCannotBeFoundException();
+		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(xtUser.getId());
+		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		
 		AvtplPO targetAvtpl = null;
 		AvtplGearsPO targetGear = null;
@@ -227,7 +229,7 @@ public class MonitorLiveService {
 		
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
-		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(xtUser.getEncoderId()).getList());
+		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(encoderId).getList());
 		BundlePO srcBundleEntity = srcBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> srcVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -339,7 +341,8 @@ public class MonitorLiveService {
 			String userno) throws Exception{
 		
 		if(xtUser == null) throw new UserCannotBeFoundException();
-		if(xtUser.getEncoderId() == null) throw new UserEncoderCannotBeFoundException();
+		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(xtUser.getId());
+		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		
 		AvtplPO targetAvtpl = null;
 		AvtplGearsPO targetGear = null;
@@ -358,7 +361,7 @@ public class MonitorLiveService {
 		
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
-		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(xtUser.getEncoderId()).getList());
+		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(encoderId).getList());
 		BundlePO srcBundleEntity = srcBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> srcVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -847,7 +850,7 @@ public class MonitorLiveService {
 	 * @param Long userId 用户id
 	 */
 	public void removeAllWebplayerLive(Long userId, String userno) throws Exception{
-		List<PlayerBundleBO> webplayers = resourceService.queryPlayerBundlesByUserId(userId);
+		List<PlayerBundleBO> webplayers = resourceQueryUtil.queryPlayerBundlesByUserId(userId);
 		if(webplayers==null || webplayers.size()<=0) return;
 		
 		Set<String> bundleIds = new HashSet<String>();

@@ -64,6 +64,19 @@ public class ResourceBundleDAO{
 	}
 	
 	/**
+	 * @Title: 根据UserId查询，BundlePO中有userId的都是播放器，因此该方法实质上是在查询某个用户的播放器<br/> 
+	 * @param userId
+	 * @return List<BundlePO>
+	 */
+	public List<BundlePO> findByUserId(Long userId){
+		if(userId == null) return null;
+		//TODO：清空hibernate一级缓存，暂时先这样写
+		resourceEntityManager.clear();
+		List<BundlePO> bundles = gainResultList("from BundlePO where userId = ?1", BundlePO.class, userId, null, null, null);
+		return bundles;
+	}
+	
+	/**
 	 * 根据号码查询设备<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

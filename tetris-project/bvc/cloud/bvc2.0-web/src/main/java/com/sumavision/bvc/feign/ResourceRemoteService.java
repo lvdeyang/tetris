@@ -11,16 +11,17 @@ import com.suma.venus.resource.bo.DeleteBundleRequest;
 import com.suma.venus.resource.bo.DeleteBundleResponse;
 import com.suma.venus.resource.bo.UpdateBundleRequest;
 import com.suma.venus.resource.bo.UpdateBundleResponse;
+import com.sumavision.tetris.config.feign.FeignConfiguration;
 
-
-@FeignClient(name="suma-venus-resource")
-@RequestMapping(value="/suma-venus-resource/api")
+@FeignClient(name="tetris-resource", configuration = FeignConfiguration.class)
+//@FeignClient(name="tetris-resource")
+//@RequestMapping(value="/tetris-resource/api")
 public interface ResourceRemoteService {
-	@RequestMapping(value ="/createBundle",method=RequestMethod.POST)
+	@RequestMapping(value ="/api/createBundle",method=RequestMethod.POST)
 	public CreateBundleResponse createBundle(@RequestBody CreateBundleRequest createBundleRequest);
 	//public  String createBundle(@RequestParam("createRequestString")String resourceRequestString);
-	@RequestMapping(value ="/updateBundle",method=RequestMethod.POST)
+	@RequestMapping(value ="/api/updateBundle",method=RequestMethod.POST)
 	 public UpdateBundleResponse updateBundle(@RequestBody UpdateBundleRequest request);
-	@RequestMapping(value ="/deleteBundle",method=RequestMethod.POST)
+	@RequestMapping(value ="/api/deleteBundle",method=RequestMethod.POST)
 	public DeleteBundleResponse deleteBundle(@RequestBody DeleteBundleRequest request);		
 }
