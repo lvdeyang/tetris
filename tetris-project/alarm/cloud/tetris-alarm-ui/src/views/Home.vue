@@ -555,7 +555,7 @@ export default {
     var self = this
     var menus = self.menus
 
-    // console.log('home.vue, menus=' + menus)
+    console.log('home.vue, menus=' + JSON.stringify(menus))
     console.log('home.vue, loginUrl-' + self.loginUrl)
 
     var activeId = self.activeId

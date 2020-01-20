@@ -1,6 +1,5 @@
 package com.sumavision.tetris.alarm.clientservice.http;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.alarm.bo.AlarmParamBO;
 import com.sumavision.tetris.alarm.bo.http.OprlogParamBO;
 import com.sumavision.tetris.alarm.bo.http.SubscribeParamBO;
@@ -164,7 +164,16 @@ public class AlarmFeignClientService {
 			subscribeRequestParam.setAlarmNotifyPattern("NOTIFY_NORMAL");
 		}
 
-		alarmFeign.subscribeAlarm(subscribeRequestParam);
+		JSONObject jsonObject = alarmFeign.subscribeAlarm(subscribeRequestParam);
+
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = jsonObject.getObject("data", Map.class);
+
+		if (StringUtils.isEmpty(map.get("errMsg"))) {
+			return;
+		}
+
+		throw new Exception();
 
 	}
 
@@ -186,9 +195,16 @@ public class AlarmFeignClientService {
 		subscribeRequestParam.setAlarmCode(alarmCode);
 		subscribeRequestParam.setSourceService(sourceServiceIP);
 
-		alarmFeign.unSubscribeAlarm(subscribeRequestParam);
+		JSONObject jsonObject = alarmFeign.unSubscribeAlarm(subscribeRequestParam);
 
-		// TODO
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = jsonObject.getObject("data", Map.class);
+
+		if (StringUtils.isEmpty(map.get("errMsg"))) {
+			return;
+		}
+
+		throw new Exception();
 	}
 
 	/**
@@ -217,10 +233,16 @@ public class AlarmFeignClientService {
 			oprlogParamBO.setOprTime(oprTime);
 		}
 
-		alarmFeign.sendOprlog(oprlogParamBO);
+		JSONObject jsonObject = alarmFeign.sendOprlog(oprlogParamBO);
 
-		// TODO
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = jsonObject.getObject("data", Map.class);
 
+		if (StringUtils.isEmpty(map.get("errMsg"))) {
+			return;
+		}
+
+		throw new Exception();
 	}
 
 	public static AlarmFeignClientService getAlarmClientService() {
