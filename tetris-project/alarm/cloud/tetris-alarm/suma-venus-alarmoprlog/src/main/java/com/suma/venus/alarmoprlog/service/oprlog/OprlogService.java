@@ -19,9 +19,8 @@ import org.springframework.util.StringUtils;
 
 import com.suma.venus.alarmoprlog.orm.dao.IOprlogDAO;
 import com.suma.venus.alarmoprlog.orm.entity.OprlogPO;
-import com.suma.venus.alarmoprlog.service.oprlog.vo.OprlogVO;
 import com.suma.venus.alarmoprlog.service.oprlog.vo.QueryOprlogVO;
-import com.suma.venus.alarmoprlog.util.DateUtil;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 
 /**
  * 
