@@ -33,6 +33,14 @@
         <el-input v-model="nodeForm.downloadPort" style="width: 200px;" placeholder="录制资源下载端口，可不填"></el-input>
       </el-form-item>
 
+      <el-form-item label="监控地址" prop="monitorUrl">
+        <el-input v-model="nodeForm.monitorUrl" style="width: 200px;" placeholder="监控页面地址，可不填"></el-input>
+      </el-form-item>
+
+      <el-form-item label="网管地址" prop="netUrl">
+        <el-input v-model="nodeForm.netUrl" style="width: 200px;" placeholder="网管页面地址，可不填"></el-input>
+      </el-form-item>
+
       <!--<el-form-item label="访问地址" prop="url">-->
         <!--<el-input v-model="nodeForm.url" style="width: 200px;"></el-input>-->
       <!--</el-form-item>-->
@@ -138,7 +146,9 @@
           type : "",
           name : "",
           ip : "",
-          nodeUid : ""
+          nodeUid : "",
+          monitorUrl:'',
+          netUrl:''
         },
         rules : {
           type: [

@@ -3,7 +3,7 @@ const merge = require('webpack-merge')
 const prodEnv = require('./prod.env')
 
 //重要
-const useLocalRouteConst = true
+const useLocalRouteConst = false
 
 module.exports = merge(prodEnv, {
   NODE_ENV: '"development"',

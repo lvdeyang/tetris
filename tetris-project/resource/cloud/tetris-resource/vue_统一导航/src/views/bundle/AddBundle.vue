@@ -35,6 +35,10 @@
         <el-input v-model="bundleForm.bundleName" style="width: 200px;"></el-input>
       </el-form-item>
 
+      <el-form-item size="small" label="设备分组" prop="bundleFolderName">
+        <el-input v-model="bundleForm.bundleFolderName" style="width: 200px;" readOnly @click.native="handleChangeFolder"></el-input>
+      </el-form-item>
+
       <el-form-item size="small" label="设备账号" prop="username">
         <el-input v-model="bundleForm.username" style="width: 200px;"></el-input>
       </el-form-item>
@@ -49,7 +53,7 @@
 
       <!-- TODO -->
       <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210'" label="接入层UID" prop="accessNodeUid">
-        <el-input v-model="bundleForm.accessNodeUid" style="width: 200px;"></el-input>
+        <el-input v-model="bundleForm.accessNodeUid" style="width: 200px;" readOnly @click.native="handleSelectLayerNode"></el-input>
       </el-form-item>
 
       <el-form-item size="small" label="设备IP">
@@ -75,16 +79,101 @@
       </div>
 
     </el-form>
+    <template>
+      <el-dialog
+              title="选择分组"
+              :visible.sync="dialog.changeFolder.visible"
+              width="650px"
+              :before-close="handleChangeFolderClose">
+          <div style="height:500px; position:relative;">
+            <el-scrollbar style="height:100%;">
+              <el-tree
+                ref="changeFolderTree"
+                :props = "dialog.changeFolder.tree.props"
+                :data = "dialog.changeFolder.tree.data"
+                node-key="id"
+                check-strictly
+                :expand-on-click-node="false"
+                default-expand-all
+                highlight-current
+                @current-change="currentTreeNodeChange">
 
+                  <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
+                    <span style="font-size:14px;">
+                       <span class="icon-folder-close"></span>
+                       <span>{{data.name}}</span>
+                    </span>
+                    <span>
+                      <el-button type="text" size="mini" style="padding:0;" @click.stop="treeNodeAppend(node, data)">
+                        <span style="font-size:16px;" class="icon-plus"></span>
+                      </el-button>
+                    </span>
+                    </span>
+
+              </el-tree>
+            </el-scrollbar>
+          </div>
+          <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="handleChangeFolderClose">取消</el-button>
+            <el-button size="medium" type="primary" @click="handleChangeFolderCommit">确定</el-button>
+          </span>
+      </el-dialog>
+
+      <el-dialog
+              title="添加分组"
+              :visible.sync="dialog.addFolder.visible"
+              width="450px"
+              :before-close="handleAddFolderClose">
+          <el-form label-width="110px">
+            <el-form-item label="分组名称">
+              <el-input v-model="dialog.addFolder.folderName"></el-input>
+            </el-form-item>
+            <el-form-item label="是否同步ldap">
+              <el-select v-model="dialog.addFolder.toLdap">
+                <el-option
+                  key="是"
+                  label="是"
+                  value="是">
+                  是
+                </el-option>
+                <el-option
+                  key="否"
+                  label="否"
+                  value="否">
+                  否
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-form>
+          <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="handleAddFolderClose">取消</el-button>
+            <el-button size="medium" type="primary" @click="handleAddFolderCommit">确定</el-button>
+          </span>
+      </el-dialog>
+
+    </template>
+
+    <template>
+
+      <selectLayerNode ref="selectLayerNode" @layer-node-selected="layerNodeSelected"></selectLayerNode>
+
+    </template>
   </section>
 </template>
 
 <script type="text/ecmascript-6">
-  import {getDeviceModels,addBundle} from '../../api/api';
+  import {
+    getDeviceModels,
+    addBundle,
+    queryFolderTree,
+    addFolder} from '../../api/api';
+
+  import selectLayerNode from '../layernode/SelectLayerNode'
 
   export default {
     name: "AddBundle",
-    data(){
+    components: { selectLayerNode },
+    data:function(){
       var validatePass = (rule, value, callback) => {
         if (value === '') {
           callback(new Error('请输入密码'));
@@ -115,7 +204,9 @@
           onlinePassword : "",
           checkPass : "",
           bundleAlias : "",
-          accessLayerUid : "",
+          accessNodeUid : "",
+          bundleFolderId:null,
+          bundleFolderName:'根目录',
           deviceAddr : {
             deviceIp : "",
             devicePort : 5060
@@ -184,11 +275,47 @@
             label : "大屏设备",
             value : "VenusVideoMatrix"
           },
-        ]
+        ],
+        dialog:{
+          changeFolder:{
+            visible:false,
+            tree:{
+              props:{
+                label: 'name',
+                children: 'children'
+              },
+              expandOnClickNode:false,
+              data:[/*{
+                "id": 1,
+                "name": "根目录",
+                "toLdap": true,
+                "children":[{
+                  "id": 1,
+                  "name": "目录1",
+                  "toLdap": true,
+                  "children":[]
+                },{
+                  "id": 2,
+                  "name": "目录2",
+                  "toLdap": true,
+                  "children":[]
+                }]
+              }*/],
+              current:''
+            },
+          },
+          addFolder:{
+            visible:false,
+            parent:'',
+            parentNode:'',
+            folderName:'',
+            toLdap:'否'
+          }
+        }
       };
     },
     methods : {
-      handleTabClick(tab, event) {
+      handleTabClick:function(tab, event) {
         if("AddBundle" !== tab.name){
           this.$router.push('/' + tab.name);
         }
@@ -217,6 +344,8 @@
       },
       reset : function(){
         this.$refs["bundleForm"].resetFields();
+        this.bundleForm.bundleFolderId = null;
+        this.bundleForm.bundleFolderName = '根目录';
       },
       submit : function(){
         if(!this.validateBaseInfo()){
@@ -282,10 +411,83 @@
           }
         }
         return true;
+      },
+      handleChangeFolder:function(){
+        var self = this;
+        self.dialog.changeFolder.visible = true;
+        queryFolderTree().then(res => {
+          if(res.status === 200){
+            self.dialog.changeFolder.tree.data.splice(0, self.dialog.changeFolder.tree.data.length);
+            if(res.data && res.data.length>0){
+              for(var i=0; i<res.data.length; i++){
+                self.dialog.changeFolder.tree.data.push(res.data[i]);
+              }
+            }
+          }else{
+            self.$message({
+              type:'error',
+              message:res.message
+            });
+          }
+        });
+      },
+      handleChangeFolderClose:function(){
+        var self = this;
+        self.dialog.changeFolder.visible = false;
+        self.dialog.changeFolder.tree.data.splice(0, self.dialog.changeFolder.tree.data.length);
+        self.dialog.changeFolder.tree.current = '';
+      },
+      handleChangeFolderCommit:function(){
+        var self = this;
+        self.bundleForm.bundleFolderId = self.dialog.changeFolder.tree.current.id;
+        self.bundleForm.bundleFolderName = self.dialog.changeFolder.tree.current.name;
+        self.handleChangeFolderClose();
+      },
+      currentTreeNodeChange:function(data, node){
+        var self = this;
+        self.dialog.changeFolder.tree.current = data;
+      },
+      treeNodeAppend:function(node, data){
+        var self = this;
+        self.dialog.addFolder.parent = data;
+        self.dialog.addFolder.parentNode = node;
+        self.dialog.addFolder.visible = true;
+      },
+      handleAddFolderClose:function(){
+        var self = this;
+        self.dialog.addFolder.parent = '';
+        self.dialog.addFolder.parentNode = '';
+        self.dialog.addFolder.visible = false;
+        self.dialog.addFolder.folderName = '';
+        self.dialog.addFolder.toLdap = '否';
+      },
+      handleAddFolderCommit:function(){
+        var self = this;
+        addFolder({
+          name:self.dialog.addFolder.folderName,
+          parentId:self.dialog.addFolder.parent.id,
+          toLdap:self.dialog.addFolder.toLdap==='是'?true:false
+        }).then(res => {
+          self.dialog.addFolder.parent.children = self.dialog.addFolder.parent.children || [];
+          if(!res.errMsg){
+            self.dialog.addFolder.parent.children.push(res.folder);
+            self.$refs.changeFolderTree.append(res.folder, self.dialog.addFolder.parentNode);
+            self.handleAddFolderClose();
+          }
+        });
+      },
+      handleSelectLayerNode:function(){
+        var self = this;
+        self.$refs.selectLayerNode.show();
+      },
+      layerNodeSelected:function(layerNode, done){
+        var self = this;
+        self.bundleForm.accessNodeUid = layerNode.nodeUid;
+        done();
       }
     },
-    mounted() {
-    var self = this;
+    mounted:function() {
+      var self = this;
       this.$nextTick(function(){
         self.$parent.$parent.$parent.$parent.$parent.setActive('/BundleManage');
       });
