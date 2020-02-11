@@ -81,6 +81,7 @@ export const deleteNodes = params => { return axiosInstance.post(`${basePath}/la
 export const saveNode = params => { return axiosInstance.post(`${basePath}/layernode/save`, qs.stringify(params)).then(res => res.data) }
 export const getNodeById = params => { return axiosInstance.post(`${basePath}/layernode/getNode`, qs.stringify(params)).then(res => res.data) }
 
+export const queryFolderTree = params => {return axiosInstance.post(`${basePath}/folder/query/tree`, qs.stringify(params)).then(res => res.data)}
 export const addFolder = params => { return axiosInstance.post(`${basePath}/folder/add`, qs.stringify(params)).then(res => res.data) }
 export const deleteFolder = params => { return axiosInstance.post(`${basePath}/folder/delete`, qs.stringify(params)).then(res => res.data) }
 export const initFolderTree = params => { return axiosInstance.post(`${basePath}/folder/initTree`, qs.stringify(params)).then(res => res.data) }
