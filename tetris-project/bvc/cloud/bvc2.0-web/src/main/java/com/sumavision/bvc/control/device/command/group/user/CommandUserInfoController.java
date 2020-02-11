@@ -31,6 +31,7 @@ import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -53,6 +54,9 @@ public class CommandUserInfoController {
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
 	
 	@Autowired
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
@@ -134,7 +138,7 @@ public class CommandUserInfoController {
 		UserVO user = userUtils.getUserFromSession(request);		
 		
 		//获取播放器
-		List<PlayerBundleBO> entities = resourceService.queryPlayerBundlesByUserId(user.getId());
+		List<PlayerBundleBO> entities = resourceQueryUtil.queryPlayerBundlesByUserId(user.getId());
 		
 		String clientIp = request.getHeader("X-Real-IP");
 		clientIp = (clientIp==null||"".equals(clientIp))?request.getRemoteAddr():clientIp;

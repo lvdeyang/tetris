@@ -26,6 +26,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.UserHasNoPermissionToRemoveLiveUserException;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.device.monitor.live.LiveType;
@@ -90,6 +91,9 @@ public class MonitorLiveUserService {
 	private MonitorLiveCommons commons;
 	
 	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
+	
+	@Autowired
 	private ResourceService resourceService;
 	
 	@Autowired
@@ -115,7 +119,8 @@ public class MonitorLiveUserService {
 			String userno) throws Exception{
 		
 		if(user == null) throw new UserCannotBeFoundException();
-		if(user.getEncoderId() == null) throw new UserEncoderCannotBeFoundException();
+		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
+		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		authorize(user.getId(), userId);
 		
 		//参数模板
@@ -128,7 +133,7 @@ public class MonitorLiveUserService {
 		String networkLayerId = commons.queryNetworkLayerId();
 		
 		//本地用户绑定编码器
-		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(user.getEncoderId()).getList());
+		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(encoderId).getList());
 		BundlePO srcBundleEntity = srcBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> srcVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -224,7 +229,8 @@ public class MonitorLiveUserService {
 			String userno) throws Exception{
 		
 		if(user == null) throw new UserCannotBeFoundException();
-		if(user.getEncoderId() == null) throw new UserEncoderCannotBeFoundException();
+		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
+		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		authorize(user.getId(), userId);
 		
 		//参数模板
@@ -234,7 +240,7 @@ public class MonitorLiveUserService {
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
 		//本地用户绑定编码器
-		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(user.getEncoderId()).getList());
+		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(encoderId).getList());
 		BundlePO srcBundleEntity = srcBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> srcVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(srcBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);

@@ -20,6 +20,8 @@ public interface FolderDao extends CommonDao<FolderPO>{
 	
 	public List<FolderPO> findByParentPath(String parentPath);
 	
+	public List<FolderPO> findByParentPathAndFolderType(String parentPath, String folderType);
+	
 	public FolderPO findByName(String name);
 
 	public FolderPO findTopByUuid(String uuid);

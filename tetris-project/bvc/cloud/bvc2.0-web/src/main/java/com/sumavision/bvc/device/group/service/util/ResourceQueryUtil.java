@@ -9,14 +9,22 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.ChannelSchemeDao;
+import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.dao.FolderDao;
+import com.suma.venus.resource.dao.VirtualResourceDao;
+import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.ScreenRectTemplatePO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
+import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.service.UserQueryService;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
@@ -42,6 +50,12 @@ public class ResourceQueryUtil {
 	
 	@Autowired
 	private BundleDao nativeBundleDao;
+
+	@Autowired
+	private ChannelSchemeDao channelSchemeDao;
+
+	@Autowired
+	private WorkNodeDao workNodeDao;
 	
 	@Autowired
 	private ResourceChannelDAO channelDao;
@@ -50,7 +64,13 @@ public class ResourceQueryUtil {
 	private ResourceScreenDAO screenDao;
 	
 	@Autowired
+	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
+	
+	@Autowired
 	private UserQueryFeign userFeign;
+	
+	@Autowired
+	UserQueryService userQueryService;
 	
 	/**
 	 * @Title 根据id集合查询整个文件夹树<br/> 注意对结果判空！
@@ -140,7 +160,8 @@ public class ResourceQueryUtil {
 	 */
 	private Set<String> queryUseableBundleIds(Long userId) throws Exception{
 		//获取用户权限
-		ResourceIdListBO bo = userFeign.queryResourceByUserId(userId);
+//		ResourceIdListBO bo = userFeign.queryResourceByUserId(userId);
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
 		
 		Set<String> bundleIds = new HashSet<String>();
 		if(null != bo && null != bo.getResourceCodes()){
@@ -270,6 +291,82 @@ public class ResourceQueryUtil {
 		}
 		
 		return bundleBos;
+	}
+	
+	public String queryEncodeBundleIdByUserId(Long userId){
+		if(userId == null) return null;
+		EncoderDecoderUserMap userMap = encoderDecoderUserMapDao.findByUserId(userId);
+		if(userMap == null) return null;
+		return userMap.getEncodeBundleId();
+	}
+	
+	public String queryDecodeBundleIdByUserId(Long userId){
+		if(userId == null) return null;
+		EncoderDecoderUserMap userMap = encoderDecoderUserMapDao.findByUserId(userId);
+		if(userMap == null) return null;
+		return userMap.getDecodeBundleId();
+	}
+	
+	/** 根据userId查询播放器资源bundle **/
+	public List<PlayerBundleBO> queryPlayerBundlesByUserId(Long userId) {
+		List<PlayerBundleBO> playerBundles = new ArrayList<>();
+		List<BundlePO> playerBundlePOs = bundleDao.findByUserId(userId);
+		if (playerBundlePOs == null) {
+			return playerBundles;
+		}
+		for (BundlePO bundlePO : playerBundlePOs) {
+			// 过滤掉第17个播放器
+			if (bundlePO.getUsername().endsWith("_17")) {
+				continue;
+			}
+			PlayerBundleBO playerBundle = new PlayerBundleBO();
+			playerBundle.setBundleId(bundlePO.getBundleId());
+			playerBundle.setBundleNum(bundlePO.getBundleNum());
+			playerBundle.setBundleName(bundlePO.getBundleName());
+			playerBundle.setUsername(bundlePO.getUsername());
+			playerBundle.setPassword(bundlePO.getOnlinePassword());
+			playerBundle.setBundleType(bundlePO.getBundleType());
+			playerBundle.setChannelIds(channelSchemeDao.findChannelIdsByBundleId(bundlePO.getBundleId()));
+			playerBundle.setAccessLayerId(bundlePO.getAccessNodeUid());
+			WorkNodePO accessLayer = workNodeDao.findByNodeUid(bundlePO.getAccessNodeUid());
+			if (null != accessLayer) {
+				playerBundle.setAccessLayerIp(accessLayer.getIp());
+				playerBundle.setAccessLayerPort(accessLayer.getPort());
+			}
+			playerBundles.add(playerBundle);
+		}
+		return playerBundles;
+	}
+	
+	/** 根据userId查询第17个播放器资源 **/
+	public PlayerBundleBO querySpecifiedPlayerBundle(Long userId) {
+//		List<BundlePO> bundles = bundleDao.findByUserId(userId);
+//		List<BundlePO> playerBundlePOs = bundleService.queryPlayerBundlesByUserId(userId);
+		List<BundlePO> playerBundlePOs = bundleDao.findByUserId(userId);
+		if (playerBundlePOs == null) {
+			return null;
+		}
+		for (BundlePO bundlePO : playerBundlePOs) {
+			// 过滤出第17个播放器
+			if (bundlePO.getUsername().endsWith("_17")) {
+				PlayerBundleBO playerBundle = new PlayerBundleBO();
+				playerBundle.setBundleId(bundlePO.getBundleId());
+				playerBundle.setBundleNum(bundlePO.getBundleNum());
+				playerBundle.setBundleName(bundlePO.getBundleName());
+				playerBundle.setUsername(bundlePO.getUsername());
+				playerBundle.setPassword(bundlePO.getOnlinePassword());
+				playerBundle.setBundleType(bundlePO.getBundleType());
+				playerBundle.setChannelIds(channelSchemeDao.findChannelIdsByBundleId(bundlePO.getBundleId()));
+				playerBundle.setAccessLayerId(bundlePO.getAccessNodeUid());
+				WorkNodePO accessLayer = workNodeDao.findByNodeUid(bundlePO.getAccessNodeUid());
+				if (null != accessLayer) {
+					playerBundle.setAccessLayerIp(accessLayer.getIp());
+					playerBundle.setAccessLayerPort(accessLayer.getPort());
+				}
+				return playerBundle;
+			}
+		}
+		return null;
 	}
 	
 }

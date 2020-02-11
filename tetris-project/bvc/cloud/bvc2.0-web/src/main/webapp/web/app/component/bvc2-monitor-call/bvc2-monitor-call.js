@@ -225,6 +225,7 @@ define([
             }
         },
         created:function(){
+        	//return;
             var self = this;
             ajax.post('/monitor/device/find/user/binding/player', null, function(data){
                 self.$embed = $('<embed width="100%" height="100%" style="z-index:0" type="application/media-suma-lightlive"/>');

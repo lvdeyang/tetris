@@ -2,9 +2,13 @@ package com.sumavision.bvc.control.device.group.vo.tree;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeIcon;
@@ -33,6 +37,9 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 *
  */
 public class TreeNodeVO {
+	
+	@Autowired
+	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
 	
 	/** 根目录节点id */
 	public static final long FOLDERID_ROOT = -1l;
@@ -253,15 +260,52 @@ public class TreeNodeVO {
 	 * @param UserBO user 用户数据
 	 * @return TreeNodeVO 树节点
 	 */
+	@Deprecated
 	public TreeNodeVO set(UserBO user){
+		EncoderDecoderUserMap userMap = encoderDecoderUserMapDao.findByUserId(user.getId());
+		return this.set(user, userMap);
+//		this.setId(user.getId().toString())
+//			.setName(user.getName())
+//			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("userId", user.getId())
+//																			.put("username", user.getName())
+//																			.put("userno", user.getUserNo())
+//																			.put("creater", user.getCreater())
+//																			.put("encoderId", userMap==null?null:userMap.getEncodeBundleId())
+//																			.put("decoderId", userMap==null?null:userMap.getDecodeBundleId())
+//																		    .getMap()))
+//			.setType(TreeNodeType.USER)
+//			.setIcon(TreeNodeIcon.SPOKESMAN.getName())
+//			.setKey(new StringBufferWrapper().append(this.generateKey()).append("@@").append(user.getCreater()).toString());
+//		
+//		if(user.isLogined()){
+//			this.setStyle("color:#0dcc19;");
+//			this.setBundleStatus("bundle-online");
+//		}else{
+//			this.setBundleStatus("bundle-offline");
+//		}
+//			
+//		return this;
+	}
+	
+	/**
+	 * 创建用户节点<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月16日 下午5:19:33
+	 * @param user 用户数据
+	 * @param userMap 编解码器信息，有判空
+	 * @return TreeNodeVO 树节点
+	 */
+	public TreeNodeVO set(UserBO user, EncoderDecoderUserMap userMap){
 		this.setId(user.getId().toString())
 			.setName(user.getName())
 			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("userId", user.getId())
 																			.put("username", user.getName())
 																			.put("userno", user.getUserNo())
 																			.put("creater", user.getCreater())
-																			.put("encoderId", user.getEncoderId())
-																			.put("decoderId", user.getDecoderId())
+																			.put("encoderId", userMap==null?null:userMap.getEncodeBundleId())
+																			.put("decoderId", userMap==null?null:userMap.getDecodeBundleId())
 																		    .getMap()))
 			.setType(TreeNodeType.USER)
 			.setIcon(TreeNodeIcon.SPOKESMAN.getName())

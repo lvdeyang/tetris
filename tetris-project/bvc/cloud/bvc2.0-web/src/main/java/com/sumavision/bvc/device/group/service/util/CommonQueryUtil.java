@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.sumavision.bvc.common.group.dao.CommonGroupDAO;
 import com.sumavision.bvc.common.group.po.CommonAvtplGearsPO;
 import com.sumavision.bvc.common.group.po.CommonAvtplPO;
@@ -1966,5 +1967,21 @@ public class CommonQueryUtil {
 		}
 		
 		return _dsts;
+	}
+	
+	/**
+	 * 根据userId获取EncoderDecoderUserMap<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月14日 下午8:14:19
+	 */
+	public EncoderDecoderUserMap queryUserMapById(Collection<EncoderDecoderUserMap> userMaps, Long userId){
+		if(userMaps == null) return null;
+		for(EncoderDecoderUserMap userMap : userMaps){
+			if(userMap.getUserId().equals(userId)){
+				return userMap;
+			}
+		}
+		return null;
 	}
 }

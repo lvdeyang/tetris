@@ -35,6 +35,7 @@ require.config({
         'Graph':window.COMMONSPATH + '3d-extension-graph/Graph',
         'LineChart':window.COMMONSPATH + 'chart/LineChart',
         'StackedBarChart':window.COMMONSPATH + 'chart/StackedBarChart',
+        'ace-for-shell':window.COMMONSPATH + 'ace/quick-build/ace-for-shell',
 
         /* app */
         'config':window.APPPATH + 'config',
@@ -46,6 +47,7 @@ require.config({
         /* component */
         'mi-frame':window.APPPATH + 'component/frame/frame',
         'mi-sub-title':window.APPPATH + 'component/sub-title/sub-title',
+
 
         /* pages */
         'page-omms-monitor-service':window.APPPATH + 'omms/monitor/service/page-omms-monitor-service',

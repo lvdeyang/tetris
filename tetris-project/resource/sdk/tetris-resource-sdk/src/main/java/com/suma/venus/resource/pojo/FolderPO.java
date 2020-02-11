@@ -125,7 +125,7 @@ public class FolderPO extends CommonPO<FolderPO> {
 	public void setSourceType(SOURCE_TYPE sourceType) {
 		this.sourceType = sourceType;
 	}
-
+	
 	@Type(type = "yes_no")
 	@Column
 	public Boolean getBeBvcRoot() {

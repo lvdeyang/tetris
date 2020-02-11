@@ -1,5 +1,6 @@
 package com.sumavision.bvc.control.device.command.group.system;
 
+import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,6 +13,7 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.system.AllForwardBO;
 import com.sumavision.bvc.device.command.system.CommandSystemServiceImpl;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -52,6 +54,27 @@ public class CommandSystemController {
 		return JSON.toJSONString(new HashMapWrapper<String, Object>()
 				.put("total", allForwards.size())
 				.put("rows", allForwards)
+				.getMap());
+	}
+	
+	/**
+	 * 获取系统时间<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月15日 下午4:15:25
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/time/get")
+	public Object getSystemTime(HttpServletRequest request) throws Exception{
+		Date date = new Date();
+		String systemTime = DateUtil.format(date, DateUtil.dateTimePattern);
+		return JSON.toJSONString(new HashMapWrapper<String, Object>()
+				.put("systemTime", systemTime)
 				.getMap());
 	}
 	
