@@ -24,8 +24,8 @@ import com.suma.venus.alarmoprlog.orm.entity.AlarmPO;
 import com.suma.venus.alarmoprlog.orm.entity.RawAlarmPO;
 import com.suma.venus.alarmoprlog.orm.entity.AlarmPO.EAlarmStatus;
 import com.suma.venus.alarmoprlog.service.alarm.vo.QueryAlarmVO;
-import com.suma.venus.alarmoprlog.util.DateUtil;
 import com.sumavision.tetris.alarm.bo.AlarmParamBO;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 
 @Service
 public class AlarmService {
