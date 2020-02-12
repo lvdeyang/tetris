@@ -1,0 +1,25 @@
+ .code-scope{width:100%;}
+.code-scope .el-form-item{margin-bottom:10px;}
+.code-scope>div{border:1px solid #eaeefb;}
+
+.code-scope .action-bar{height:40px; line-height:40px; text-align:center;}
+.code-scope .action-bar .el-button{color:#d3dce6; transition:color .1s ease-out;}
+.code-scope .action-bar .el-button:hover{color:#409eff;}
+
+.code-scope .editor{transition:height .1s ease-out;}
+
+.code-scope.show .action-bar{border-top:1px solid #eaeefb;}
+.code-scope .action-bar>span:first-child{display:inline;}
+.code-scope .action-bar>span:last-child{display:none;}
+.code-scope.show .action-bar>span:first-child{display:none;}
+.code-scope.show .action-bar>span:last-child{display:inline;}
+
+.code-scope .action-bar .action-edit-code{display:inline;}
+.code-scope .action-bar .action-save-code{display:none;}
+.code-scope.edit .action-bar .action-edit-code{display:none;}
+.code-scope.edit .action-bar .action-save-code{display:inline;}
+
+.el-button.column-settings{color:#d3dce6; transition:color .1s ease-out;}
+.el-button.column-settings .feather-icon-edit{display:none;}
+.el-button.column-settings:hover{color:#409eff;}
+.el-button.column-settings:hover .feather-icon-edit{display:inline;}

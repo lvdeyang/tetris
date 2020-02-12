@@ -155,7 +155,7 @@
 
         <el-dialog title="设置接入" :visible.sync="setAccessLayerVisible" width="30%">
             <div style="margin-top:10px;">
-                <el-input v-model="newAccessNodeUid" placeholder="输入接入层ID" style="width: 400px;">
+                <el-input v-model="newAccessNodeUid" placeholder="输入接入层ID" style="width: 400px;" readOnly @click.native="handleSelectLayerNode">
                     <template slot="prepend">接入层ID</template>
                 </el-input>
             </div>
@@ -180,7 +180,14 @@
             </div>
         </el-dialog>
 
+        <template>
+
+            <selectLayerNode ref="selectLayerNode" @layer-node-selected="layerNodeSelected"></selectLayerNode>
+
+        </template>
+
     </section>
+
 </template>
 
 <script type="text/ecmascript-6">
@@ -188,9 +195,12 @@
             syncEquipInfToLdap, cleanUpEquipInfo} from '../../api/api';
     // let requestIP = document.location.host.split(":")[0];
 
+    import selectLayerNode from '../layernode/SelectLayerNode';
+
     let basePath = process.env.RESOURCE_ROOT
 
     export default {
+        components: { selectLayerNode },
         data() {
         return {
             activeTabName: "BundleManage",
@@ -240,6 +250,15 @@
         }
     },
     methods: {
+        handleSelectLayerNode:function(){
+            var self = this;
+            self.$refs.selectLayerNode.show();
+        },
+        layerNodeSelected:function(row, done){
+            var self = this;
+            self.newAccessNodeUid = row.nodeUid;
+            done();
+        },
         handleTabClick(tab, event)
         {
             if ("BundleManage" !== tab.name) {

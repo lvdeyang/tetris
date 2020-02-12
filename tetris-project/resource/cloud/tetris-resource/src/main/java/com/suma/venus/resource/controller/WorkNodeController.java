@@ -29,14 +29,20 @@ public class WorkNodeController extends ControllerBase {
 
 	@RequestMapping("/query")
 	@ResponseBody
-	public Map<String, Object> query(@RequestParam(name = "type") String type, @RequestParam(name = "keyword") String keyword) {
+	public Map<String, Object> query(@RequestParam(name = "type", required=false) String type, @RequestParam(name = "keyword", required=false) String keyword) {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			List<WorkNodePO> poList = workNodeService.findAll();
+			if(type == null){
+				type = "";
+			}
 			if (!type.isEmpty()) {
 				poList.retainAll(workNodeService.findByType(NodeType.fromString(type)));
 			}
 
+			if(keyword == null){
+				keyword ="";
+			}
 			if (!keyword.isEmpty()) {
 				poList.retainAll(workNodeService.findByNameLike(keyword));
 			}

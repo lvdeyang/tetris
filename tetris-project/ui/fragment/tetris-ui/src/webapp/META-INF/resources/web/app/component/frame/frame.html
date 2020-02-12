@@ -37,8 +37,8 @@
                                         <i :class="sub0.icon" :style="sub0.style"></i>
                                         <span slot="title">{{sub0.title}}</span>
                                     </template>
-                                    <template v-for="(sub1, index1) in sub0.sub" @click="goto(sub1)">
-                                        <el-menu-item :index="sub1.uuid">
+                                    <template v-for="(sub1, index1) in sub0.sub">
+                                        <el-menu-item :index="sub1.uuid" @click="goto(sub1)">
                                             <i :class="sub1.icon" :style="sub1.style"></i>
                                             <span slot="title">{{sub1.title}}</span>
                                         </el-menu-item>
