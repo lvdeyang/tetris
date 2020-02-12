@@ -67,6 +67,9 @@ ribbon:
 connectCenterLayerID: suma-venus-access-lianwang
 businessMode: vod
 
+checkBundleHeartBeatFreq: 3000
+checkBundleHeartBeatTimeout: 15000
+
 feign: 
   hystrix: 
    enabled: true    

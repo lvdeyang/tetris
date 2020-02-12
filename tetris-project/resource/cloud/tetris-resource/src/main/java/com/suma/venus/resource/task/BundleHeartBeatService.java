@@ -1,5 +1,6 @@
 package com.suma.venus.resource.task;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -10,12 +11,14 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
+import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 
 @Component
 public class BundleHeartBeatService {
@@ -23,10 +26,17 @@ public class BundleHeartBeatService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BundleHeartBeatService.class);
 
 	// 检测设备心跳动作的频率
-	private final long freqTime = 5 * 1000;
+	@Value("${checkBundleHeartBeatFreq}")
+	private long freqTime;
+	
+	@Value("${checkBundleHeartBeatTimeout}")
+	private long timeout;
 
 	@Autowired
 	BundleDao bundleDao;
+
+	@Autowired
+	AlarmFeignClientService alarmFeignClientService;
 
 	// 记录系统中设备的最后心跳信息
 	private final ConcurrentHashMap<String, Long> bunldeStatusMap = new ConcurrentHashMap<String, Long>();
@@ -84,6 +94,14 @@ public class BundleHeartBeatService {
 			bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
 			bundleDao.save(bundlePO);
 
+			try {
+				alarmFeignClientService.recoverAlarm("11011000", bundle_ip, bundle_ip, null,
+						Calendar.getInstance().getTime());
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}
 
 		bunldeStatusMap.put(bundle_ip, currentTime);
@@ -91,7 +109,8 @@ public class BundleHeartBeatService {
 		// TODO 判断是否需要启动线程
 		if (threadFlag) {
 			LOGGER.info("new thread");
-			BundleHeartBeatMonitorThread thread = new BundleHeartBeatMonitorThread(this);
+			BundleHeartBeatMonitorThread thread = new BundleHeartBeatMonitorThread(this, alarmFeignClientService,
+					timeout);
 			t = pool.scheduleAtFixedRate(thread, freqTime, freqTime, TimeUnit.MILLISECONDS);
 		}
 	}
