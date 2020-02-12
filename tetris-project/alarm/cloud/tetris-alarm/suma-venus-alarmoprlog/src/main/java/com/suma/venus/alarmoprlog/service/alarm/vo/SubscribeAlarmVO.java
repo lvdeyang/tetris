@@ -8,8 +8,10 @@ import java.util.List;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.ObjectUtils;
 
+import com.alibaba.fastjson.annotation.JSONField;
 import com.suma.venus.alarmoprlog.orm.entity.SubscribeAlarmPO;
 import com.suma.venus.alarmoprlog.orm.entity.AlarmInfoPO.EAlarmLevel;
+import com.suma.venus.alarmoprlog.orm.entity.SubscribeAlarmPO.EAlarmNotifyMethod;
 import com.suma.venus.alarmoprlog.orm.entity.SubscribeAlarmPO.EAlarmNotifyPattern;
 
 public class SubscribeAlarmVO {
@@ -28,11 +30,16 @@ public class SubscribeAlarmVO {
 
 	private String subsObj;
 
-	private String dstId;
-
+	// private String dstId;
+	
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date subsTime;
 
-	private EAlarmNotifyPattern alarmNotifyMode;
+	private EAlarmNotifyPattern alarmNotifyPattern;
+	
+	private EAlarmNotifyMethod alarmNotifyMethod;
+	
+	private String callbackUrl;
 
 	public static SubscribeAlarmVO transFromPO(SubscribeAlarmPO po) {
 
@@ -118,12 +125,28 @@ public class SubscribeAlarmVO {
 		this.subsObj = subsObj;
 	}
 
-	public String getDstId() {
-		return dstId;
+	public EAlarmNotifyPattern getAlarmNotifyPattern() {
+		return alarmNotifyPattern;
 	}
 
-	public void setDstId(String dstId) {
-		this.dstId = dstId;
+	public void setAlarmNotifyPattern(EAlarmNotifyPattern alarmNotifyPattern) {
+		this.alarmNotifyPattern = alarmNotifyPattern;
+	}
+
+	public EAlarmNotifyMethod getAlarmNotifyMethod() {
+		return alarmNotifyMethod;
+	}
+
+	public void setAlarmNotifyMethod(EAlarmNotifyMethod alarmNotifyMethod) {
+		this.alarmNotifyMethod = alarmNotifyMethod;
+	}
+
+	public String getCallbackUrl() {
+		return callbackUrl;
+	}
+
+	public void setCallbackUrl(String callbackUrl) {
+		this.callbackUrl = callbackUrl;
 	}
 
 	public Date getSubsTime() {
@@ -134,12 +157,6 @@ public class SubscribeAlarmVO {
 		this.subsTime = subsTime;
 	}
 
-	public void setAlarmNotifyMode(EAlarmNotifyPattern alarmNotifyMode) {
-		this.alarmNotifyMode = alarmNotifyMode;
-	}
 
-	public EAlarmNotifyPattern getAlarmNotifyMode() {
-		return alarmNotifyMode;
-	}
 
 }

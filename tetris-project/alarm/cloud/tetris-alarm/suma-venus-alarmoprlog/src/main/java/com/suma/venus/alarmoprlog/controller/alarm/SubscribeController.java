@@ -133,6 +133,35 @@ public class SubscribeController {
 
 	}
 
+	@RequestMapping(value = "/del", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> del(@RequestParam(value = "id", required = true) Long id) {
+
+		// TODO ajax请求遇到跨域问题 未解决,现在为post表单方式
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		try {
+			SubscribeAlarmPO subscribeAlarmPO = subscribeAlarmDAO.findOne(id);
+			if (subscribeAlarmPO == null) {
+				data.put("errMsg", "参数错误");
+				return data;
+			}
+			
+			subscribeAlarmDAO.delete(subscribeAlarmPO);
+
+		} catch (Exception e) {
+			data.put("errMsg", "内部错误");
+			return data;
+		}
+
+	
+
+		LOGGER.info("----------delsubscribe finish");
+		data.put("errMsg", "");
+		return data;
+
+	}
+
 	/**
 	 * 按告警编码查询订阅信息
 	 * 
