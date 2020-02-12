@@ -84,4 +84,26 @@ public class ServiceTypeController {
 		return serviceTypeService.oneButtonCreate();
 	}
 	
+	/**
+	 * 保存服务类型字段<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月10日 上午11:14:13
+	 * @param Long id 服务类型id
+	 * @param String columnKey 字段索引
+	 * @param String columnValue 字段值
+	 * @return 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/save/column")
+	public Object saveColumn(
+			HttpServletRequest request,
+			Long id,
+			String columnKey,
+			String columnValue) throws Exception{
+		serviceTypeService.saveColumn(id, columnKey, columnValue);
+		return null;
+	}
+	
 }

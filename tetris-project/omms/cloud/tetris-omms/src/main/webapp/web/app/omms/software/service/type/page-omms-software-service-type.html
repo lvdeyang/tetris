@@ -43,16 +43,16 @@
                         <el-form label-width="86px" label-position="left">
                             <el-form-item style="margin-bottom:0;" :label="columns.name.name+':'"><span style="cursor:not-allowed; color:#d3dce6;">{{columns.name.value}}</span></el-form-item>
                             <el-form-item style="margin-bottom:0;" :label="columns.installationDirectory.name+':'">
-                                <el-button class="column-settings" type="text" style="padding:0; margin:0;"><span class="feather-icon-edit" @click="editColumn(columns.installationDirectory)"></span>{{columns.installationDirectory.value || '设置内容'}}</el-button>
+                                <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn('installationDirectory', columns.installationDirectory)"><span class="feather-icon-edit"></span>{{columns.installationDirectory.value || '设置内容'}}</el-button>
                             </el-form-item>
                             <el-form-item style="margin-bottom:0;" :label="columns.logFile.name+':'">
-                                <el-button class="column-settings" type="text" style="padding:0; margin:0;"><span class="feather-icon-edit" @click="editColumn(columns.logFile)"></span>{{columns.logFile.value || '设置内容'}}</el-button>
+                                <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn('logFile', columns.logFile)"><span class="feather-icon-edit"></span>{{columns.logFile.value || '设置内容'}}</el-button>
                             </el-form-item>
                         </el-form>
                         <div v-for="editor in editors" :class="'code-scope '+editor.name">
                             <el-form label-width="86px" label-position="left">
                                 <el-form-item :label="columns[editor.name].name+':'">
-                                    <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn(columns[editor.name])"><span class="feather-icon-edit"></span>{{columns[editor.name].path || '设置内容'}}</el-button>
+                                    <el-button class="column-settings" type="text" style="padding:0; margin:0;" @click="editColumn(editor.name, columns[editor.name])"><span class="feather-icon-edit"></span>{{columns[editor.name].path || '设置内容'}}</el-button>
                                 </el-form-item>
                             </el-form>
                             <div>
@@ -84,7 +84,21 @@
     </template>
 
     <template>
-
+        <el-dialog
+                :title="dialog.editColumn.column.name"
+                :visible.sync="dialog.editColumn.visible"
+                width="500px"
+                :before-close="handleEditColumnClose">
+            <el-form label-position="top">
+                <el-form-item>
+                    <el-input v-model="dialog.editColumn.column.value"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditColumnClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditColumnCommit">确定</el-button>
+            </span>
+        </el-dialog>
     </template>
 
 </mi-frame>
