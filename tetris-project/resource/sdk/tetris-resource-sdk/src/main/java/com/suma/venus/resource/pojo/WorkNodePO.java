@@ -45,6 +45,12 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
 	 */
 	private String url;
 	
+	/** 网管url */
+	private String netUrl;
+	
+	/** 监控url */
+	private String monitorUrl;
+	
 	/**最后一次心跳时间*/
 	private String lastHeartBeatTime;
 	
@@ -193,5 +199,23 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
 
 	public void setDownloadPort(Integer downloadPort) {
 		this.downloadPort = downloadPort;
+	}
+
+	@Column
+	public String getNetUrl() {
+		return netUrl;
+	}
+
+	public void setNetUrl(String netUrl) {
+		this.netUrl = netUrl;
+	}
+
+	@Column
+	public String getMonitorUrl() {
+		return monitorUrl;
+	}
+
+	public void setMonitorUrl(String monitorUrl) {
+		this.monitorUrl = monitorUrl;
 	}
 }

@@ -42,6 +42,10 @@
         <template slot-scope="scope">
           <el-button type="text" @click="handleModify(scope.row)" size="small">修改</el-button>
           <el-button type="text" @click="handleDelete(scope.row)" size="small">删除</el-button>
+          <el-button type="text" @click="gotoMonitor(scope.row)" size="small" v-if="scope.row.monitorUrl">监控</el-button>
+          <el-button type="text" size="small" v-else disabled>监控</el-button>
+          <el-button type="text" @click="gotoAdmin(scope.row)" size="small" v-if="scope.row.netUrl">网管</el-button>
+          <el-button type="text" size="small" v-else disabled>网管</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -156,6 +160,14 @@
       }
     },
     methods: {
+      gotoMonitor:function(row){
+        var self = this;
+        window.open(row.monitorUrl);
+      },
+      gotoAdmin:function(row){
+        var self = this;
+        window.open(row.netUrl);
+      },
       handleTabClick(tab, event) {
         if("LayernodeManage" !== tab.name){
           this.$router.push('/' + tab.name);

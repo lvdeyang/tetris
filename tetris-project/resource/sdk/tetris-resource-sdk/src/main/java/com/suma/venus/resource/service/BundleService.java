@@ -412,7 +412,7 @@ public class BundleService extends CommonService<BundlePO> {
 				bundlePO.setUsername(userNo + "_" + i);
 				//bundlePO.setOnlinePassword(password);
 				bundlePO.setBundleId(BundlePO.createBundleId());
-				bundlePO.setDeviceModel("jv210");
+				bundlePO.setDeviceModel("player");
 				bundlePO.setBundleType("VenusTerminal");
 				bundlePO.setBundleAlias("播放器");
 				bundlePO.setBundleNum(userNo + "_" + i);
@@ -423,12 +423,13 @@ public class BundleService extends CommonService<BundlePO> {
 				bundlePOs.add(bundlePO);
 				bundleIds.add(bundlePO.getBundleId());
 
+				configDefaultAbility(bundlePO);
 				// 配置两路解码通道(音频解码和视频解码各一路)
-				channelSchemePOs.addAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
+				//channelSchemePOs.addAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
 			}
 			
 			//创建机顶盒设备 -- 先注掉
-			/* BundlePO bundlePO = new BundlePO();
+			BundlePO bundlePO = new BundlePO();
 			bundlePO.setBundleName(username + "_机顶盒");
 			bundlePO.setUsername("机顶盒_" + userNo);
 			//bundlePO.setOnlinePassword(password);
@@ -442,7 +443,7 @@ public class BundleService extends CommonService<BundlePO> {
 
 			bundlePOs.add(bundlePO);
 			bundleIds.add(bundlePO.getBundleId());
-			configDefaultAbility(bundlePO); */
+			configDefaultAbility(bundlePO);
 
 			// 保存数据库
 			bundleDao.save(bundlePOs);
