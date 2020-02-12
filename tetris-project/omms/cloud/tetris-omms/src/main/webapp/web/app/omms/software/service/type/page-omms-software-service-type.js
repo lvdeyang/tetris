@@ -185,7 +185,20 @@ define([
                 },
                 handleEditColumnCommit:function(){
                     var self = this;
-
+                    ajax.post('/service/type/save/column', {
+                        id:self.tree.current.id,
+                        columnKey:self.dialog.editColumn.key,
+                        columnValue:self.dialog.editColumn.column.value
+                    }, function(data){
+                        var column = self.columns[self.dialog.editColumn.key];
+                        if(column.path===''|| column.path){
+                            column.path = self.dialog.editColumn.column.value;
+                        }else{
+                            column.value = self.dialog.editColumn.column.value;
+                        }
+                        self.handleEditColumnClose();
+                        console.log(self.tree.current);
+                    });
                 }
             },
             mounted:function(){
