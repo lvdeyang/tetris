@@ -72,4 +72,37 @@ public class ServiceTypeService {
 		}
 	}
 	
+	/**
+	 * 保存服务类型字段<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月10日 上午11:19:14
+	 * @param Long id 服务类型id
+	 * @param String columnKey 字段key
+	 * @param String columnValue 字段值
+	 */
+	public void saveColumn(Long id, String columnKey, String columnValue) throws Exception{
+		ServiceTypePO entity = serviceTypeDao.findOne(id);
+		if("name".equals(columnKey)){
+			entity.setName(columnValue);
+		}else if("installationDirectory".equals(columnKey)){
+			entity.setInstallationDirectory(columnValue);
+		}else if("installScript".equals(columnKey)){
+			entity.setInstallScript(columnValue);
+		}else if("installScriptPath".equals(columnKey)){
+			entity.setInstallScriptPath(columnValue);
+		}else if("startupScript".equals(columnKey)){
+			entity.setStartupScript(columnValue);
+		}else if("startupScriptPath".equals(columnKey)){
+			entity.setStartupScriptPath(columnValue);
+		}else if("shutdownScript".equals(columnKey)){
+			entity.setShutdownScript(columnValue);
+		}else if("shutdownScriptPath".equals(columnKey)){
+			entity.setShutdownScriptPath(columnValue);
+		}else if("logFile".equals(columnKey)){
+			entity.setLogFile(columnValue);
+		}
+		serviceTypeDao.save(entity);
+	}
+	
 }

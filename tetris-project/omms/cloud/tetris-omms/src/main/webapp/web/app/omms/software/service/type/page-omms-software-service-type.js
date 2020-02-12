@@ -89,7 +89,7 @@ define([
                 dialog:{
                     editColumn:{
                         visible:false,
-                        value:'',
+                        key:'',
                         column:''
                     }
                 },
@@ -122,10 +122,34 @@ define([
                     self.columns.installationDirectory.value = data.params.installationDirectory;
                     self.columns.logFile.value = data.params.logFile;
                     self.columns.installScript.value = data.params.installScript;
+                    for(var i=0; i<self.editors.length; i++){
+                        if(self.editors[i].name === 'installScript'){
+                            if(self.editors[i].editor){
+                                self.editors[i].editor.setValue(self.columns.installScript.value);
+                            }
+                            break;
+                        }
+                    }
                     self.columns.installScript.path = data.params.installScriptPath;
                     self.columns.startupScript.value = data.params.startupScript;
+                    for(var i=0; i<self.editors.length; i++){
+                        if(self.editors[i].name === 'startupScript'){
+                            if(self.editors[i].editor){
+                                self.editors[i].editor.setValue(self.columns.startupScript.value);
+                            }
+                            break;
+                        }
+                    }
                     self.columns.startupScript.path = data.params.startupScriptPath;
                     self.columns.shutdownScript.value = data.params.shutdownScript;
+                    for(var i=0; i<self.editors.length; i++){
+                        if(self.editors[i].name === 'shutdownScript'){
+                            if(self.editors[i].editor){
+                                self.editors[i].editor.setValue(self.columns.shutdownScript.value);
+                            }
+                            break;
+                        }
+                    }
                     self.columns.shutdownScript.path = data.params.shutdownScriptPath;
                 },
                 oneButtonCreate:function(){
@@ -147,8 +171,21 @@ define([
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
-                editColumn:function(column){
+                editColumn:function(columnKey, column){
                     var self = this;
+                    self.dialog.editColumn.visible = true;
+                    self.dialog.editColumn.key = columnKey;
+                    self.dialog.editColumn.column = column;
+                },
+                handleEditColumnClose:function(){
+                    var self = this;
+                    self.dialog.editColumn.visible = false;
+                    self.dialog.editColumn.key = '';
+                    self.dialog.editColumn.column = '';
+                },
+                handleEditColumnCommit:function(){
+                    var self = this;
+
                 }
             },
             mounted:function(){
@@ -165,7 +202,7 @@ define([
 
                 self.$nextTick(function(){
 
-                    $('.code-scope').on('click.action.show.code', '.action-bar .action-show-code', function(){
+                    $('#page-omms-software-service-type-wrapper').on('click.action.show.code', '.action-bar .action-show-code', function(){
                         var $codeScope = $(this).closest('.code-scope');
                         var $editor = $codeScope.find('.editor');
                         $codeScope.toggleClass('show');
@@ -195,7 +232,7 @@ define([
                         }
                     });
 
-                    $('.code-scope').on('click.action.hide.code', '.action-bar .action-hide-code', function(){
+                    $('#page-omms-software-service-type-wrapper').on('click.action.hide.code', '.action-bar .action-hide-code', function(){
                         var $codeScope = $(this).closest('.code-scope');
                         for(var i=0; i<self.editors.length; i++){
                             var editor = self.editors[i];
@@ -219,7 +256,7 @@ define([
                         }
                     });
 
-                    $('.code-scope').on('click.action.edit.code', '.action-bar .action-edit-code', function(){
+                    $('#page-omms-software-service-type-wrapper').on('click.action.edit.code', '.action-bar .action-edit-code', function(){
                         var $codeScope = $(this).closest('.code-scope');
                         $codeScope.toggleClass('edit');
                         for(var i=0; i<self.editors.length; i++){
@@ -231,7 +268,7 @@ define([
                         }
                     });
 
-                    $('.code-scope').on('click.action.save.code', '.action-bar .action-save-code', function(){
+                    $('#page-omms-software-service-type-wrapper').on('click.action.save.code', '.action-bar .action-save-code', function(){
                         var $codeScope = $(this).closest('.code-scope');
                         for(var i=0; i<self.editors.length; i++){
                             var editor = self.editors[i];
@@ -246,7 +283,7 @@ define([
                         }
                     });
 
-                    $('.code-scope').on('click.action.slide.unit.length', '.action-bar .action-slide-unit-length', function(){
+                    $('#page-omms-software-service-type-wrapper').on('click.action.slide.unit.length', '.action-bar .action-slide-unit-length', function(){
                         var $codeScope = $(this).closest('.code-scope');
                         for(var i=0; i<self.editors.length; i++){
                             var editor = self.editors[i];
