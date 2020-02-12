@@ -197,7 +197,6 @@ define([
                             column.value = self.dialog.editColumn.column.value;
                         }
                         self.handleEditColumnClose();
-                        console.log(self.tree.current);
                     });
                 }
             },
