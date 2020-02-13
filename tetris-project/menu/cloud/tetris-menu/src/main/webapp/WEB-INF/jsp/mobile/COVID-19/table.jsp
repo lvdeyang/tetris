@@ -142,7 +142,8 @@
                     circle
                     :total="table.page.total"
                     :current.sync="table.page.currentPage"
-                    :page-size="table.page.pageSize"></mu-pagination>
+                    :page-size="table.page.pageSize"
+                    @change="currentPageChange"></mu-pagination>
             </mu-flex>
         </div>
     </div>
