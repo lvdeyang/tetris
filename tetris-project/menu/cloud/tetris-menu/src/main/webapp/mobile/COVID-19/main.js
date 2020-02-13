@@ -28,7 +28,8 @@ $(function(){
                 stayInHubeiSince20200101:'false',
                 coughOrFever:'false',
                 timeForWork:'',
-                closingTime:''
+                closingTime:'',
+                temperature:''
             }
         },
         methods:{

@@ -67,6 +67,9 @@ public class Covid19RegisterStatisticsPO extends AbstractBasePO{
 	
 	/** 离开单位时间 */
 	private Date closingTime;
+	
+	/** 体温 */
+	private String temperature;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -204,6 +207,15 @@ public class Covid19RegisterStatisticsPO extends AbstractBasePO{
 
 	public void setClosingTime(Date closingTime) {
 		this.closingTime = closingTime;
+	}
+
+	@Column(name = "TEMPERATURE")
+	public String getTemperature() {
+		return temperature;
+	}
+
+	public void setTemperature(String temperature) {
+		this.temperature = temperature;
 	}
 	
 }

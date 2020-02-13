@@ -49,7 +49,8 @@ public class Covid19RegisterStatisticsService {
 			Boolean contactWithSuspectedOrConfirmedPatientsAfter20200101,
 			Boolean stayInHubeiSince20200101,
 			Boolean coughOrFever,
-			Date timeForWork) throws Exception{
+			Date timeForWork,
+			String temperature) throws Exception{
 		
 		Covid19RegisterStatisticsPO entity = new Covid19RegisterStatisticsPO();
 		entity.setUpdateTime(new Date());
@@ -67,6 +68,7 @@ public class Covid19RegisterStatisticsService {
 		entity.setStayInHubeiSince20200101(stayInHubeiSince20200101);
 		entity.setCoughOrFever(coughOrFever);
 		entity.setTimeForWork(timeForWork);
+		entity.setTemperature(temperature);
 		covid19RegisterStatisticsDao.save(entity);
 		return entity;
 	}
@@ -97,7 +99,8 @@ public class Covid19RegisterStatisticsService {
 			Boolean contactWithSuspectedOrConfirmedPatientsAfter20200101,
 			Boolean stayInHubeiSince20200101,
 			Boolean coughOrFever,
-			Date closingTime) throws Exception{
+			Date closingTime,
+			String temperature) throws Exception{
 		Covid19RegisterStatisticsPO entity = covid19RegisterStatisticsDao.findOne(id);
 		entity.setName(name);
 		entity.setAge(age);
@@ -113,6 +116,7 @@ public class Covid19RegisterStatisticsService {
 		entity.setStayInHubeiSince20200101(stayInHubeiSince20200101);
 		entity.setCoughOrFever(coughOrFever);
 		entity.setClosingTime(closingTime);
+		entity.setTemperature(temperature);
 		covid19RegisterStatisticsDao.save(entity);
 		return entity;
 	} 
