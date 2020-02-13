@@ -38,6 +38,7 @@ $(function(){
             load:function(currentPage){
                 var self = this;
                 self.table.data.splice(0, self.table.data.length);
+                self.table.loading = true;
                 $.post(BASEPATH + 'covid19/register/statistics/load', {
                     currentPage:currentPage,
                     pageSize:self.table.page.pageSize
@@ -52,10 +53,21 @@ $(function(){
                             }
                         }
                         self.table.page.total = total;
+                        self.table.page.currentPage = currentPage;
                     }else{
                         self.$toast.error(response.message);
                     }
+                    self.$nextTick(function(){
+                        self.table.loading = false;
+                    });
                 });
+            },
+            currentPageChange:function(currentPage){
+                var self = this;
+                self.load(currentPage);
+                /*if(self.table.page.currentPage != currentPage){
+                    self.load(currentPage);
+                }*/
             }
         },
         mounted:function(){
