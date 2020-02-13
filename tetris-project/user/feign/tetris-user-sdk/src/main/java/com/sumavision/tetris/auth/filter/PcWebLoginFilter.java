@@ -152,6 +152,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/demo/*")
 												   .add("/server/websocket/*")
 												   .add("/portal/login")
+												   .add("/covid19/register/statistics/*")
 												   .getList();
 	}
 	
