@@ -50,6 +50,7 @@ import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
@@ -66,6 +67,7 @@ import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
+import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.LockBundleParamPO;
 import com.suma.venus.resource.pojo.LockChannelParamPO;
 import com.suma.venus.resource.pojo.LockScreenParamPO;
@@ -154,6 +156,8 @@ public class ResourceService {
 	@Autowired
 	private UserQueryService userQueryService;
 	
+	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
 
 	/** 通过userId查询具有权限的user */
 	public List<UserBO> queryUserresByUserId(Long userId) {
@@ -165,14 +169,21 @@ public class ResourceService {
 				return userresList;
 			}
 			Map<String, UserBO> allUserMap = new HashMap<String, UserBO>();
-			for (UserBO userBO : allUsers) {
-				if (null != userBO.getFolderUuid()) {
-					FolderPO folder = folderDao.findTopByUuid(userBO.getFolderUuid());
-					if (null != folder) {
-						userBO.setFolderId(folder.getId());
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserBO user: allUsers){
+				userIds.add(user.getId());
+			}
+			List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(userIds);
+			for(UserBO user: allUsers){
+				for(FolderUserMap map: folderUserMaps){
+					if(user.getId().equals(map.getUserId())){
+						user.setFolderId(map.getFolderId());
+						user.setFolderIndex(map.getFolderIndex().intValue());
+						user.setFolderUuid(map.getFolderUuid());
+						break;
 					}
 				}
-				allUserMap.put(userBO.getUserNo(), userBO);
+				allUserMap.put(user.getUserNo(), user);
 			}
 
 			Set<String> userNoSet = new HashSet<String>();
