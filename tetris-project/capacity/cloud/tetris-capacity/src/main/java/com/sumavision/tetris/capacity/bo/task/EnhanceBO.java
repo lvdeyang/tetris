@@ -7,6 +7,10 @@ package com.sumavision.tetris.capacity.bo.task;
  * <b>日期：</b>2019年10月30日 上午8:54:35
  */
 public class EnhanceBO {
+	
+	private String plat = "cpu";
+	
+	private Integer nv_card_idx;
 
 	/** 亮度 -255-255 */
 	private Integer brightness;
@@ -34,6 +38,24 @@ public class EnhanceBO {
 	
 	/** 色彩范围 limited/full */
 	private String colorrange;
+
+	public String getPlat() {
+		return plat;
+	}
+
+	public EnhanceBO setPlat(String plat) {
+		this.plat = plat;
+		return this;
+	}
+
+	public Integer getNv_card_idx() {
+		return nv_card_idx;
+	}
+
+	public EnhanceBO setNv_card_idx(Integer nv_card_idx) {
+		this.nv_card_idx = nv_card_idx;
+		return this;
+	}
 
 	public Integer getBrightness() {
 		return brightness;
