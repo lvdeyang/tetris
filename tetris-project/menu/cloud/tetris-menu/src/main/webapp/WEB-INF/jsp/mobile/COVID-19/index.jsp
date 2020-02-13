@@ -119,7 +119,7 @@
                 <mu-form-item label="户籍地址（详细到房间号）">
                     <mu-text-field multi-line :rows="2" :rows-max="2" v-model="form.homeAddress" :disabled="editForm?false:true"></mu-text-field>
                 </mu-form-item>
-                <mu-form-item label="居住地址（详细到房间号）">
+                <mu-form-item label="现居地址（详细到房间号）">
                     <mu-text-field multi-line :rows="2" :rows-max="2" v-model="form.liveAddress" :disabled="editForm?false:true"></mu-text-field>
                 </mu-form-item>
                 <mu-form-item label="单位地址（详细到房间号）">
@@ -143,6 +143,9 @@
                 <mu-form-item label="近期有无咳嗽发烧症状">
                     <mu-radio v-model="form.coughOrFever" value="true" label="有" :disabled="editForm?false:true"></mu-radio>
                     <mu-radio v-model="form.coughOrFever" value="false" label="无" :disabled="editForm?false:true"></mu-radio>
+                </mu-form-item>
+                <mu-form-item label="体温">
+                    <mu-text-field v-model="form.temperature" type="number" :disabled="editForm?false:true"></mu-text-field>
                 </mu-form-item>
                 <mu-form-item v-if="status===2||status===3">{{'上班时间：'+form.timeForWork}}</mu-form-item>
                 <mu-form-item v-if="status===3">{{'下班时间：'+form.closingTime}}</mu-form-item>

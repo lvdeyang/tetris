@@ -8,20 +8,21 @@ $(function(){
                     columns: [
                         {title:'姓名', name:'name'},
                         {title:'日期', name:'updateTime'},
+                        {title:'体温', name:'temperature'},
                         {title:'年龄', name:'age'},
                         {title:'单位', name:'company'},
                         {title:'部门', name:'department'},
                         {title:'电话', name:'phone'},
-                        {title:'家庭住址', name:'homeAddress'},
+                        {title:'户籍地址', name:'homeAddress'},
                         {title:'现居地址', name:'liveAddress'},
-                        {title:'工作地址', name:'workAddress'},
+                        {title:'单位地址', name:'workAddress'},
                         {title:'前往单位出行方式', name:'wayOfWork'},
                         {title:'2020年1月1后有无去过武汉', name:'beenToWuhanAfter20200101'},
                         {title:'2020年1月1后有无接触疑似确诊病人', name:'contactWithSuspectedOrConfirmedPatientsAfter20200101'},
                         {title:'自2020年1月1日起，在湖北省停留', name:'stayInHubeiSince20200101'},
                         {title:'近期有无咳嗽发烧症状', name:'coughOrFever'},
-                        {title:'进入单位时间', name:'timeForWork'},
-                        {title:'离开单位时间', name:'closingTime'}
+                        {title:'上班时间', name:'timeForWork'},
+                        {title:'下班时间', name:'closingTime'}
                     ],
                     data:[],
                     page:{

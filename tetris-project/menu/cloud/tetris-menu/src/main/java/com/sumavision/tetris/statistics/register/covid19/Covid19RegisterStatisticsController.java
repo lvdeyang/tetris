@@ -104,6 +104,7 @@ public class Covid19RegisterStatisticsController {
 			Boolean contactWithSuspectedOrConfirmedPatientsAfter20200101,
 			Boolean stayInHubeiSince20200101,
 			Boolean coughOrFever,
+			String temperature,
 			HttpServletRequest request) throws Exception{
 		
 		Covid19RegisterStatisticsPO entity = covid19RegisterStatisticsService.save(
@@ -120,7 +121,8 @@ public class Covid19RegisterStatisticsController {
 				contactWithSuspectedOrConfirmedPatientsAfter20200101, 
 				stayInHubeiSince20200101, 
 				coughOrFever, 
-				new Date());
+				new Date(),
+				temperature);
 		
 		return new Covid19RegisterStatisticsVO().set(entity);
 	}
@@ -154,6 +156,7 @@ public class Covid19RegisterStatisticsController {
 			Boolean contactWithSuspectedOrConfirmedPatientsAfter20200101,
 			Boolean stayInHubeiSince20200101,
 			Boolean coughOrFever,
+			String temperature,
 			HttpServletRequest request) throws Exception{
 		
 		Covid19RegisterStatisticsPO entity = covid19RegisterStatisticsService.close(
@@ -171,7 +174,8 @@ public class Covid19RegisterStatisticsController {
 				contactWithSuspectedOrConfirmedPatientsAfter20200101,
 				stayInHubeiSince20200101,
 				coughOrFever,
-				new Date());
+				new Date(),
+				temperature);
 		
 		return new Covid19RegisterStatisticsVO().set(entity);
 	}

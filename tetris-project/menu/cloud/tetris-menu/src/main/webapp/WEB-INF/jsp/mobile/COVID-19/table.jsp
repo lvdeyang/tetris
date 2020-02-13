@@ -102,6 +102,10 @@
                 <template slot-scope="scope">
                     <td>{{scope.row.name}}</td>
                     <td>{{scope.row.updateTime.split(' ')[0]}}</td>
+                    <td>
+                        <span v-if="scope.row.temperature && parseFloat(scope.row.temperature)>37.2" style="color:#f44336;">{{scope.row.temperature}}</span>
+                        <span v-else>{{scope.row.temperature}}</span>
+                    </td>
                     <td>{{scope.row.age}}岁</td>
                     <td>{{scope.row.company}}</td>
                     <td>{{scope.row.department}}</td>

@@ -49,6 +49,9 @@ public class Covid19RegisterStatisticsVO extends AbstractBaseVO<Covid19RegisterS
 	
 	/** 离开单位时间 */
 	private String closingTime;
+	
+	/** 体温 */
+	private String temperature;
 
 	public String getName() {
 		return name;
@@ -185,6 +188,15 @@ public class Covid19RegisterStatisticsVO extends AbstractBaseVO<Covid19RegisterS
 		this.closingTime = closingTime;
 		return this;
 	}
+	
+	public String getTemperature() {
+		return temperature;
+	}
+
+	public Covid19RegisterStatisticsVO setTemperature(String temperature) {
+		this.temperature = temperature;
+		return this;
+	}
 
 	@Override
 	public Covid19RegisterStatisticsVO set(Covid19RegisterStatisticsPO entity) throws Exception {
@@ -204,7 +216,8 @@ public class Covid19RegisterStatisticsVO extends AbstractBaseVO<Covid19RegisterS
 			.setStayInHubeiSince20200101(entity.getStayInHubeiSince20200101())
 			.setCoughOrFever(entity.getCoughOrFever())
 			.setTimeForWork(entity.getTimeForWork()==null?"":DateUtil.format(entity.getTimeForWork(), DateUtil.defaultTimePattern))
-			.setClosingTime(entity.getClosingTime()==null?"":DateUtil.format(entity.getClosingTime(), DateUtil.defaultTimePattern));
+			.setClosingTime(entity.getClosingTime()==null?"":DateUtil.format(entity.getClosingTime(), DateUtil.defaultTimePattern))
+			.setTemperature(entity.getTemperature());
 		return this;
 	}
 	
