@@ -2,6 +2,7 @@ package com.sumavision.tetris.statistics.register.covid19;
 
 
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -19,6 +21,42 @@ public class Covid19RegisterStatisticsController {
 
 	@Autowired
 	private Covid19RegisterStatisticsService covid19RegisterStatisticsService;
+	
+	@Autowired
+	private Covid19RegisterStatisticsQuery covid19RegisterStatisticsQuery;
+	
+	@Autowired
+	private Covid19RegisterStatisticsDAO covid19RegisterStatisticsDao;
+	
+	@RequestMapping(value = "/table")
+	public ModelAndView table(HttpServletRequest request) throws Exception{
+		ModelAndView mv = new ModelAndView("mobile/COVID-19/table");
+		return mv;
+	}
+	
+	/**
+	 * 分页查询数据<br/>
+	 * <b>作者:</b>吕德阳<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月13日 下午4:23:43
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return long total 总数据量
+	 * @return List<Covid19RegisterStatisticsVO> rows 数据列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load")
+	public Object load(
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request) throws Exception{
+		List<Covid19RegisterStatisticsVO> rows = covid19RegisterStatisticsQuery.findAll(currentPage, pageSize);
+		long total = covid19RegisterStatisticsDao.count();
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", rows)
+												   .getMap();
+	}
 	
 	@RequestMapping(value = "/home")
 	public ModelAndView home() throws Exception{
