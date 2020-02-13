@@ -978,6 +978,54 @@ public class HttpInterfaceController {
 		LOGGER.info("Device Bundle Certify Response : " + JSONObject.toJSONString(resp));
 		return resp;
 	}
+	
+	/** 获取用户下唯一机顶盒 */
+	@RequestMapping(method = RequestMethod.POST, value = "/access/getUserBundle", produces = {
+			"application/json;charset=UTF-8" })
+	@ResponseBody
+	public UserBundleCertifyResp getUserBundle(@RequestBody UserBundleCertifyRequest request) throws Exception{
+		
+		UserBO userBO = userQueryService.current();
+		
+		String username = request.getUser_bundle_certify_request().getUsername();
+		String password = request.getUser_bundle_certify_request().getPassword();
+		String bundleModel = request.getUser_bundle_certify_request().getBundle_model();
+		String bundleType = request.getUser_bundle_certify_request().getBundle_type();
+		String certify_id = request.getUser_bundle_certify_request().getSerial_num();
+		UserBundleCertifyResp resp = new UserBundleCertifyResp();
+		BundleCertifyResponseBody respBody = new BundleCertifyResponseBody();
+		respBody.setUsername(username);
+		resp.setUser_bundle_certify_response(respBody);
+		
+		BundlePO bundle = bundleDao.findByUserIdAndDeviceModel(userBO.getId(), "tvos");
+		
+		// 更新bundle上当前登陆的设备账号标识ID
+		bundle.setCurrentLoginId(certify_id);
+		bundle.setOnlineStatus(ONLINE_STATUS.ONLINE);
+		bundleService.save(bundle);
+		
+		String bundleId = bundle.getBundleId();
+
+		String ca_num = request.getUser_bundle_certify_request().getCa_num();
+		saveUserBundleExtraInfo(bundleId, "ca_num", ca_num);
+		saveUserBundleExtraInfo(bundleId, "serial_num", certify_id);
+
+		respBody.setBundle_id(bundleId);
+		/** bundle_extra_info */
+		List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleId(bundleId);
+		if (!extraInfos.isEmpty()) {
+			JSONObject bundleExtraInfoJson = new JSONObject();
+			for (ExtraInfoPO extraInfoPO : extraInfos) {
+				bundleExtraInfoJson.put(extraInfoPO.getName(), extraInfoPO.getValue());
+			}
+			respBody.setBundle_extra_info(bundleExtraInfoJson.toJSONString());
+		}
+		respBody.setUserId(bundle.getId());
+		// respBody.setUser_extra_info(checkResult.getExtraInfo());
+		respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS);
+		
+		return resp;
+	}
 
 	/** 处理用户特征bundle认证请求 */
 	@RequestMapping(method = RequestMethod.POST, value = "/access/userBundleCertify", produces = {
