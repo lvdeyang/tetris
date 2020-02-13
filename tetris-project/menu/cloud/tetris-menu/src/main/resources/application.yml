@@ -66,6 +66,9 @@ server:
 #  context-path: /menu 
 #  address: 192.165.56.71
   port: 8083
+  jsp-servlet: 
+    init-parameters: 
+      development: true
 logging:
   pattern:
     console: "%d - %msg%n" 
