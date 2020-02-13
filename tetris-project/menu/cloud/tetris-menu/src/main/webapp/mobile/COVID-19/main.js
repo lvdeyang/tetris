@@ -47,7 +47,8 @@ $(function(){
                         self.editForm = false;
                     }else{
                         if(localCache.closingTime){
-                            self.status = 3;
+                            //self.status = 3;
+                            self.status = 1;
                             self.editForm = false;
                         }else{
                             self.status = 2;
@@ -125,7 +126,8 @@ $(function(){
                     if(response.status === 200){
                         var data = response.data;
                         localStorage.setItem(self.key, $.toJSON(data));
-                        self.status = 3;
+                        //self.status = 3;
+                        self.status = 1;
                         self.editForm = false;
                         self.form.closingTime = data.closingTime;
                     }else{
