@@ -64,10 +64,9 @@ $(function(){
             },
             currentPageChange:function(currentPage){
                 var self = this;
-                self.load(currentPage);
-                /*if(self.table.page.currentPage != currentPage){
+                if(self.table.page.currentPage != currentPage){
                     self.load(currentPage);
-                }*/
+                }
             }
         },
         mounted:function(){
