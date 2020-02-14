@@ -1,0 +1,152 @@
+<mi-frame id="page-omms-hardware-server-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">服务器管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>服务器管理</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加用户</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除用户</el-button>
+
+            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.data"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="ip"
+                                prop="ip">
+                        </el-table-column>
+                        <el-table-column
+                                label="小工具端口"
+                                prop="gadgetPort">
+                        </el-table-column>
+                        <el-table-column
+                                label="创建者"
+                                prop="creator">
+                        </el-table-column>
+                        <el-table-column
+                                label="创建时间"
+                                width="180"
+                                prop="createTime">
+                        </el-table-column>
+                        <el-table-column
+                                label="备注"
+                                prop="remark">
+                        </el-table-column>
+                        <el-table-column
+                                width="50">
+                            <template slot-scope="scope">
+                                <span v-if="scope.row.status === '在线'" style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#67c23a; border-color:#67c23a; position:relative; top:2px;"></span>
+                                <span v-if="scope.row.status === '离线'" style="display:inline-block; width:20px; height:20px; border-radius:100%; background-color:#f56c6c; border-color:#f56c6c; position:relative; top:2px;"></span>
+                            </template>
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="250">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="修改服务器" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowEdit(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除服务器" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
+                <el-pagination
+                        style="float:right;"
+                        background
+                        @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange"
+                        :current-page="table.currentPage"
+                        :page-sizes="table.pageSizes"
+                        :page-size="table.pageSize"
+                        layout="total, sizes, prev, pager, next, jumper"
+                        :total="table.total">
+                </el-pagination>
+            </div>
+
+        </el-card>
+
+    </template>
+
+    <template>
+
+        <el-dialog
+                title="添加服务器"
+                :visible.sync="dialog.addServer.visible"
+                width="500px"
+                :before-close="handleAddServerClose">
+            <el-form label-width="100px">
+                <el-form-item label="名称:">
+                    <el-input v-model="dialog.addServer.name"></el-input>
+                </el-form-item>
+                <el-form-item label="ip:">
+                    <el-input v-model="dialog.addServer.ip"></el-input>
+                </el-form-item>
+                <el-form-item label="小工具端口:">
+                    <el-input v-model="dialog.addServer.gadgetPort"></el-input>
+                </el-form-item>
+                <el-form-item label="创建者:">
+                    <el-input v-model="dialog.addServer.creator"></el-input>
+                </el-form-item>
+                <el-form-item label="备注:">
+                    <el-input type="textarea" v-model="dialog.addServer.remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddServerClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddServerSubmit">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="修改服务器"
+                :visible.sync="dialog.editServer.visible"
+                width="500px"
+                :before-close="handleEditServerClose">
+            <el-form label-width="100px">
+                <el-form-item label="名称:">
+                    <el-input v-model="dialog.editServer.name"></el-input>
+                </el-form-item>
+                <el-form-item label="ip:">
+                    <el-input v-model="dialog.editServer.ip"></el-input>
+                </el-form-item>
+                <el-form-item label="小工具端口:">
+                    <el-input v-model="dialog.editServer.gadgetPort"></el-input>
+                </el-form-item>
+                <el-form-item label="创建者:">
+                    <el-input v-model="dialog.editServer.creator"></el-input>
+                </el-form-item>
+                <el-form-item label="备注:">
+                    <el-input type="textarea" v-model="dialog.editServer.remark"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditServerClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditServerSubmit">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

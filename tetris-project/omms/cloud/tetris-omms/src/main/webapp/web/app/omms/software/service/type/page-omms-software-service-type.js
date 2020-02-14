@@ -209,6 +209,10 @@ define([
                         }
                         self.handleEditColumnClose();
                         self.tree.current.params[param.columnKey] = param.columnValue;
+                        self.$message({
+                            type:'success',
+                            message:'保存成功'
+                        });
                     });
                 }
             },
@@ -299,9 +303,19 @@ define([
                             if($codeScope.hasClass(editor.name)){
                                 var value = editor.editor.getValue();
                                 self.columns[editor.name].value = value;
-                                console.log(self.columns[editor.name].value);
-                                $codeScope.toggleClass('edit');
-                                editor.editor.setReadOnly(true);
+                                ajax.post('/service/type/save/column', {
+                                    id:self.tree.current.id,
+                                    columnKey:editor.name,
+                                    columnValue:value
+                                }, function(data){
+                                    self.tree.current.params[editor.name] = self.columns[editor.name].value;
+                                    $codeScope.toggleClass('edit');
+                                    editor.editor.setReadOnly(true);
+                                    self.$message({
+                                        type:'success',
+                                        message:'保存成功'
+                                    });
+                                });
                                 break;
                             }
                         }
