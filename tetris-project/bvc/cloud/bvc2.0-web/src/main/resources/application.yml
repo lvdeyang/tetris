@@ -1,6 +1,6 @@
 spring:
   application:
-    name: suma-bvc-business-zsy
+    name: tetirs-bvc-business
   cloud:
 #    config:
 #      uri: http://localhost:8769

@@ -123,7 +123,7 @@ public class CommandQueryController {
 				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
 				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
 //				   (!"ldap".equals(user.getCreater()) && user.getEncoderId()!=null)){// && user.getDecoderId()!=null)){
-					(!"ldap".equals(user.getCreater()) && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
+					(!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
 					if(filterMode == 0
 							|| filterMode == 1 && user.isLogined()
 							|| filterMode == 2 && !user.isLogined()){
