@@ -10,7 +10,6 @@ spring:
             ipAddress : 192.165.56.77
         inetutils:
             preferred-networks: 192.165.56.77
-
     #datasource        
     datasource:
         #resource datasource

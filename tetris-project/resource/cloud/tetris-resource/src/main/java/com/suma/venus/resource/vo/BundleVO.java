@@ -33,6 +33,8 @@ public class BundleVO {
 	
 	private String lockStatus;
 	
+	private String bundleFolderId;
+	
 	private CoderType coderType;
 	
 	private SOURCE_TYPE sourceType;
@@ -51,6 +53,7 @@ public class BundleVO {
 			po.setDevicePort(this.getDeviceAddr().getDevicePort());
 		}
 		po.setAccessNodeUid(this.getAccessNodeUid());
+		po.setFolderId(this.getBundleFolderId() == null?null: Long.valueOf(this.getBundleFolderId()));
 		return po;
 	}
 	
@@ -69,6 +72,7 @@ public class BundleVO {
 		vo.setLockStatus(po.getLockStatus().toString());
 		vo.setDeviceAddr(new DeviceAddrVO(po.getDeviceIp(),po.getDevicePort()));
 		vo.setSourceType(po.getSourceType());
+		vo.setBundleFolderId(po.getFolderId() == null? null: po.getFolderId().toString());
 		return vo;
 	}
 	
@@ -204,6 +208,14 @@ public class BundleVO {
 
 	public void setSourceType(SOURCE_TYPE sourceType) {
 		this.sourceType = sourceType;
+	}
+
+	public String getBundleFolderId() {
+		return bundleFolderId;
+	}
+
+	public void setBundleFolderId(String bundleFolderId) {
+		this.bundleFolderId = bundleFolderId;
 	}
 	
 }

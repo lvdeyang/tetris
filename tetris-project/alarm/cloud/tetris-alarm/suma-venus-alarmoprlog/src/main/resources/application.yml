@@ -1,0 +1,60 @@
+server:
+  port: 8092
+  # servlet:
+    # context-path: /suma-venus-alarmoprlog
+  
+spring:
+  application:
+    name: tetris-alarm
+  cloud:
+    inetutils:
+      preferred-networks: 10.10.40.27
+  datasource:
+     url: jdbc:mysql://10.10.40.207:3306/alarm?characterEncoding=utf-8&useUnicode=true
+     username: sumadb
+     password: Sumavision@300079
+     driver-class-name: com.mysql.jdbc.Driver
+     driverClassName: com.mysql.jdbc.Driver
+     druid:
+      initial-size: 10
+      min-idle: 20
+      max-active: 100
+      validation-query : SELECT 1
+      test-while-idle : true
+      time-between-eviction-runs-millis : 600000
+      min-evictable-idle-time-millis : 3600000
+    
+  jpa:
+    database: mysql
+    show-sql: true
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+          
+
+eureka:
+  instance:
+    lease-expiration-duration-in-seconds: 10
+    lease-renewal-interval-in-seconds: 3
+    preferIpAddress: true
+    ipAddress: 10.10.40.27
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}:@project.version@
+  client:
+    serviceUrl:
+      defaultZone:  http://10.10.40.207:8081/eureka/
+
+
+#security:
+#  oauth2:
+#    resource:
+#      #指定resource的唯一标识
+#      id: suma-venus-alarmoprlog
+#      #是否使用token info
+#      prefer-token-info: false
+#      #指定user info的URI
+#      user-info-uri: http://10.10.40.115:8881/uaa/users/current
+
+
+   

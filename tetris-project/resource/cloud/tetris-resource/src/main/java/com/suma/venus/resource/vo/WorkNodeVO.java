@@ -24,6 +24,10 @@ public class WorkNodeVO{
 	
 	private String url;
 	
+	private String netUrl;
+	
+	private String monitorUrl;
+	
 	/**录制资源下载端口**/
 	private Integer downloadPort;
 
@@ -114,6 +118,22 @@ public class WorkNodeVO{
 
 	public void setDownloadPort(Integer downloadPort) {
 		this.downloadPort = downloadPort;
+	}
+
+	public String getNetUrl() {
+		return netUrl;
+	}
+
+	public void setNetUrl(String netUrl) {
+		this.netUrl = netUrl;
+	}
+
+	public String getMonitorUrl() {
+		return monitorUrl;
+	}
+
+	public void setMonitorUrl(String monitorUrl) {
+		this.monitorUrl = monitorUrl;
 	}
 	
 }

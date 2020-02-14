@@ -7,6 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,9 @@ import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.util.DepartSyncLdapUtils;
 import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.FolderTreeVO;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 /**
  * 分组管理controller
@@ -351,6 +356,33 @@ public class FolderManageController extends ControllerBase {
 		}
 
 		return data;
+	}
+	
+	/**
+	 * 查询文件夹树（不包含设备用户）<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月10日 下午1:47:14
+	 * @return List<FolderTreeVO>
+	 */
+	@JsonBody
+	@RequestMapping(value = "/query/tree", method = RequestMethod.POST)
+	@ResponseBody
+	public Object queryTree(HttpServletRequest request) throws Exception{
+		
+		List<FolderPO> rootFolders = folderDao.findByParentPathAndFolderType(null, null);
+		if (rootFolders.isEmpty()) {
+			throw new BaseException(StatusCode.ERROR, "数据库错误，没有根节点！");
+		}
+		List<FolderTreeVO> tree = new LinkedList<FolderTreeVO>();
+		for (FolderPO rootFolderPO : rootFolders) {
+			FolderTreeVO rootTreeVO = createFolderNodeFromFolderPO(rootFolderPO);
+			rootTreeVO.setChildren(createFolderChildrenTreeNodes(rootFolderPO.getId()));
+			tree.add(rootTreeVO);
+		}
+		
+		return tree;
+		
 	}
 
 	@RequestMapping(value = "/queryBundlesWithoutFolder", method = RequestMethod.POST)
@@ -1044,6 +1076,35 @@ public class FolderManageController extends ControllerBase {
 
 		}*/
 
+	}
+	
+	/**
+	 * 获取文件夹<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月10日 下午2:19:09
+	 * @param parentId
+	 * @return
+	 */
+	private List<FolderTreeVO> createFolderChildrenTreeNodes(Long parentId) {
+		List<FolderTreeVO> children = new LinkedList<FolderTreeVO>();
+		try {
+
+			// 添加子分组节点(递归)
+			List<FolderPO> childrenPO = folderService.findByParentId(parentId);
+			for (FolderPO childFolder : childrenPO) {
+				FolderTreeVO folderNodeVO = createFolderNodeFromFolderPO(childFolder);
+				folderNodeVO.setChildren(createFolderChildrenTreeNodes(childFolder.getId()));
+				children.add(folderNodeVO);
+			}
+
+			Collections.sort(children, Comparator.comparing(FolderTreeVO::getFolderIndex));
+
+		} catch (Exception e) {
+			LOGGER.error("Fail to creat folder tree children", e);
+		}
+		
+		return children;
 	}
 
 	private List<FolderTreeVO> createChildrenTreeNodes(Long parentId) {

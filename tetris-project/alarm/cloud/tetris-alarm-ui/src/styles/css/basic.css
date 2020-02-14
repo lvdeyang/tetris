@@ -1,0 +1,29 @@
+.w_7{
+    width: 70px;
+}
+
+.w_12{
+    width: 120px;
+}
+
+.w_13{
+    width: 130px;
+}
+
+.w_14{
+    width: 140px;
+}
+
+.pt1px{
+    padding-top: 1px;
+}
+
+.pt2px{
+    padding-top: 2px;
+}
+.lay-bottom{
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+}
