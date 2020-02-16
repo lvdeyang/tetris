@@ -104,17 +104,22 @@
                 <mu-form-item label="姓名">
                     <mu-text-field v-model="form.name" :disabled="editForm?false:true"></mu-text-field>
                 </mu-form-item>
-                <mu-form-item label="年龄">
-                    <mu-text-field v-model="form.age" type="number" :disabled="editForm?false:true"></mu-text-field>
-                </mu-form-item>
-                <mu-form-item label="单位名称">
-                    <mu-text-field multi-line :rows="2" :rows-max="2" v-model="form.company" :disabled="editForm?false:true"></mu-text-field>
-                </mu-form-item>
-                <mu-form-item label="部门">
-                    <mu-text-field v-model="form.department" :disabled="editForm?false:true"></mu-text-field>
-                </mu-form-item>
                 <mu-form-item label="手机号码">
                     <mu-text-field v-model="form.phone" :disabled="editForm?false:true"></mu-text-field>
+                </mu-form-item>
+
+                <mu-form-item label="单位部门">
+                    <mu-text-field multi-line :rows="2" :rows-max="2" v-model="form.company" :disabled="editForm?false:true"></mu-text-field>
+                </mu-form-item>
+                <mu-form-item label="工作房间号">
+                    <mu-text-field v-model="form.department" :disabled="editForm?false:true"></mu-text-field>
+                </mu-form-item>
+                <mu-form-item label="体温">
+                    <mu-text-field v-model="form.temperature" type="number" :disabled="editForm?false:true"></mu-text-field>
+                </mu-form-item>
+
+                <!--<mu-form-item label="年龄">
+                    <mu-text-field v-model="form.age" type="number" :disabled="editForm?false:true"></mu-text-field>
                 </mu-form-item>
                 <mu-form-item label="户籍地址（详细到房间号）">
                     <mu-text-field multi-line :rows="2" :rows-max="2" v-model="form.homeAddress" :disabled="editForm?false:true"></mu-text-field>
@@ -143,10 +148,8 @@
                 <mu-form-item label="近期有无咳嗽发烧症状">
                     <mu-radio v-model="form.coughOrFever" value="true" label="有" :disabled="editForm?false:true"></mu-radio>
                     <mu-radio v-model="form.coughOrFever" value="false" label="无" :disabled="editForm?false:true"></mu-radio>
-                </mu-form-item>
-                <mu-form-item label="体温">
-                    <mu-text-field v-model="form.temperature" type="number" :disabled="editForm?false:true"></mu-text-field>
-                </mu-form-item>
+                </mu-form-item>-->
+
                 <mu-form-item v-if="status===2||status===3">{{'上班时间：'+form.timeForWork}}</mu-form-item>
                 <mu-form-item v-if="status===3">{{'下班时间：'+form.closingTime}}</mu-form-item>
                 <mu-form-item>
