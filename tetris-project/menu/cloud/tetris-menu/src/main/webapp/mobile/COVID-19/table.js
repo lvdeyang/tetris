@@ -66,9 +66,7 @@ $(function(){
             },
             currentPageChange:function(currentPage){
                 var self = this;
-                if(self.table.page.currentPage != currentPage){
-                    self.load(currentPage);
-                }
+                self.load(currentPage);
             }
         },
         mounted:function(){
