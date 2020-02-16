@@ -148,13 +148,13 @@
                 <mu-form-item label="近期有无咳嗽发烧症状">
                     <mu-radio v-model="form.coughOrFever" value="true" label="有" :disabled="editForm?false:true"></mu-radio>
                     <mu-radio v-model="form.coughOrFever" value="false" label="无" :disabled="editForm?false:true"></mu-radio>
-                </mu-form-item>-->
-
+                </mu-form-item>
                 <mu-form-item v-if="status===2||status===3">{{'上班时间：'+form.timeForWork}}</mu-form-item>
-                <mu-form-item v-if="status===3">{{'下班时间：'+form.closingTime}}</mu-form-item>
+                <mu-form-item v-if="status===3">{{'下班时间：'+form.closingTime}}</mu-form-item>-->
+
                 <mu-form-item>
-                    <mu-button color="success" :disabled="(status===0||status===1)?false:true" @click="handleTimeForWork">上班打卡</mu-button>
-                    <mu-button color="error" :disabled="(status===2)?false:true" @click="handleClosingTime">下班打卡</mu-button>
+                    <mu-button color="success" :disabled="(status===0||status===1)?false:true" @click="handleTimeForWork">进入</mu-button>
+                    <!--<mu-button color="error" :disabled="(status===2)?false:true" @click="handleClosingTime">下班打卡</mu-button>-->
                 </mu-form-item>
             </mu-form>
         </mu-container>
