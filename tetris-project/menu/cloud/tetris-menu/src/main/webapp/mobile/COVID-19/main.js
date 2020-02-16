@@ -15,7 +15,7 @@ $(function(){
             form:{
                 id:'',
                 name:'',
-                age:'',
+                age:0,
                 company:'',
                 department:'',
                 phone:'',
