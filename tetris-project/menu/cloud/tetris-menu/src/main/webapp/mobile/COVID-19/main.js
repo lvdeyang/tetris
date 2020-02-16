@@ -108,6 +108,7 @@ $(function(){
             },
             handleTimeForWork:function(){
                 var self = this;
+                if(!self.form.age) self.form.age = 0;
                 $.post(BASEPATH+'covid19/register/statistics/save', self.form, function(response){
                     if(response.status === 200){
                         var data = response.data;
