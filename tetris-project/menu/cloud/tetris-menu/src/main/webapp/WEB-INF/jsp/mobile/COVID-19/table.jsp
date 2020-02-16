@@ -106,10 +106,12 @@
                         <span v-if="scope.row.temperature && parseFloat(scope.row.temperature)>37.2" style="color:#f44336;">{{scope.row.temperature}}</span>
                         <span v-else>{{scope.row.temperature}}</span>
                     </td>
-                    <td>{{scope.row.age}}岁</td>
                     <td>{{scope.row.company}}</td>
                     <td>{{scope.row.department}}</td>
                     <td>{{scope.row.phone}}</td>
+
+                    <!--
+                    <td>{{scope.row.age}}岁</td>
                     <td>{{scope.row.homeAddress}}</td>
                     <td>{{scope.row.liveAddress}}</td>
                     <td>{{scope.row.workAddress}}</td>
@@ -130,6 +132,7 @@
                         <span v-if="scope.row.coughOrFever" style="color:#f44336;">是</span>
                         <span v-else>否</span>
                     </td>
+                    -->
                     <td>{{scope.row.timeForWork}}</td>
                     <td>{{scope.row.closingTime}}</td>
                 </template>
