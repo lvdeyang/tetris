@@ -1,7 +1,6 @@
 package com.sumavision.tetris.cs.program;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,24 +36,8 @@ public class ScreenService {
 		List<ScreenVO> screenVOList = new ArrayList<ScreenVO>();
 
 		if (screenList.isEmpty()) return screenVOList;
-			for (ScreenVO screenVO : screenList) {
-			screenVO.setProgramId(programId);
-				
-			ScreenPO screenPO = new ScreenPO();
-			screenPO.setProgramId(programId);
-			screenPO.setMimsUuid(screenVO.getMimsUuid());
-			screenPO.setResourceId(screenVO.getResourceId());
-			screenPO.setScreenIndex(screenVO.getIndex());
-			screenPO.setSerialNum(screenVO.getSerialNum());
-			screenPO.setName(screenVO.getName());
-			screenPO.setType(screenVO.getType());
-			screenPO.setMimetype(screenVO.getMimetype());
-			screenPO.setPreviewUrl(screenVO.getPreviewUrl());
-			screenPO.setEncryptionUrl(screenVO.getEncryptionUrl());
-			screenPO.setHotWeight(screenVO.getHotWeight());
-			screenPO.setDownloadCount(screenVO.getDownloadCount());
-			screenPO.setDuration(screenVO.getDuration());
-			screenPO.setUpdateTime(new Date());
+		for (ScreenVO screenVO : screenList) {
+			ScreenPO screenPO = ScreenVO.getPO(screenVO, programId);
 
 			screenPOList.add(screenPO);
 		}

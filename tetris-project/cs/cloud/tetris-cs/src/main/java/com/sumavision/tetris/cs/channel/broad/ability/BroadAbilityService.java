@@ -19,6 +19,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
@@ -32,7 +33,11 @@ import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
+import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
+import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoPO;
+import com.sumavision.tetris.cs.channel.broad.file.BroadFileBroadInfoService;
 import com.sumavision.tetris.cs.channel.exception.ChannelBroadNoneOutputException;
+import com.sumavision.tetris.cs.channel.exception.ChannelBroadNoneScheduleException;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
@@ -72,7 +77,13 @@ public class BroadAbilityService {
 	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
 	
 	@Autowired
+	private BroadFileBroadInfoService broadFileBroadInfoService;
+	
+	@Autowired
 	private BroadAbilityRemoteDAO broadAbilityRemoteDAO;
+	
+	@Autowired
+	private ChannelAutoBroadInfoDAO channelAutoBroadInfoDAO;
 	
 	@Autowired
 	private Adapter adapter;
@@ -85,6 +96,85 @@ public class BroadAbilityService {
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
+	
+	/**
+	 * 添加频道<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param String name 频道名称
+	 * @param String date 日期
+	 * @param String broadWay 播发方式(参考BroadWay枚举)
+	 * @param ChannelTyep type 平台添加还是其他服务添加
+	 * @param Boolean encryption 是否加密播发(仅限轮播推流)
+	 * @param Boolean autoBroad 是否智能播发
+	 * @param Boolean autoBroadShuffle 是否乱序(仅限智能播发)
+	 * @param Integer autoBroadDuration 生效时长(仅限智能播发，单位：天)
+	 * @param String autoBroadStart 智能播发生效时间(仅限智能播发)
+	 * @param String outputUserPort 能力的输出地址port(仅限轮播推流)
+	 * @param List<UserVO> outputUserList 预播发的用户列表
+	 * List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs 预播发的ip和port对(仅限轮播推流)
+	 * @param String remark 备注
+	 * @return ChannelPO 频道
+	 */
+	public ChannelPO add(
+			UserVO user,
+			String name,
+			String date,
+			String broadWay,
+			String remark,
+			ChannelType type,
+			Boolean encryption,
+			Boolean autoBroad,
+			Boolean autoBroadShuffle,
+			Integer autoBroadDuration,
+			String autoBroadStart,
+			String outputUserPort,
+			List<UserVO> outputUserList,
+			List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs) throws Exception {
+		BroadWay channelBroadWay = BroadWay.fromName(broadWay);
+		ChannelPO channel = new ChannelPO();
+		channel.setName(name);
+		channel.setRemark(remark);
+		channel.setDate(date);
+		channel.setBroadWay(channelBroadWay.getName());
+		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT);
+		channel.setGroupId(user.getGroupId());
+		channel.setUpdateTime(new Date());
+		channel.setEncryption(encryption);
+		channel.setAutoBroad(autoBroad);
+		channel.setType(type.toString());
+		
+		//校验用户是否被占用
+		broadAbilityBroadInfoService.checkUserUse(null, outputUserList);
+		broadFileBroadInfoService.checkUserUse(null, outputUserList);
+		
+		//校验ip和端口对是否被占用，设置轮播推流id
+		broadAbilityBroadInfoService.checkIpAndPortExists(null, abilityBroadInfoVOs);
+		channel.setAbilityBroadId(adapter.getNewId(channelDao.getAllAbilityId()));
+
+		channelDao.save(channel);
+		
+		//保存播发输出信息
+		List<BroadAbilityBroadInfoVO> saveinInfoVOs = new ArrayList<BroadAbilityBroadInfoVO>();
+		if (abilityBroadInfoVOs != null && !abilityBroadInfoVOs.isEmpty()) saveinInfoVOs.addAll(abilityBroadInfoVOs);
+		saveinInfoVOs.addAll(broadAbilityBroadInfoService.changeVO(outputUserList, outputUserPort));
+		broadAbilityBroadInfoService.saveInfoList(channel.getId(), saveinInfoVOs);
+		
+		//保存智能播发信息
+		if (autoBroad) {
+			ChannelAutoBroadInfoPO autoBroadInfoPO = new ChannelAutoBroadInfoPO();
+			autoBroadInfoPO.setUpdateTime(new Date());
+			autoBroadInfoPO.setChannelId(channel.getId());
+			autoBroadInfoPO.setShuffle(autoBroadShuffle);
+			autoBroadInfoPO.setDuration(autoBroadDuration);
+			autoBroadInfoPO.setStartTime(autoBroadStart);
+			autoBroadInfoPO.setStartDate(DateUtil.getYearmonthDay(new Date()));
+			channelAutoBroadInfoDAO.save(autoBroadInfoPO);
+		}
+
+		return channel;
+	}
 	
 	public void startAbilityBroadcast(Long channelId) throws Exception {
 		startAbilityBroadTimer(channelId);
@@ -128,7 +218,7 @@ public class BroadAbilityService {
 	public void addScheduleDeal(Long channelId) throws Exception {
 		Long now = DateUtil.getLongDate();
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (channel.getBroadcastStatus() != ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING) return;
+		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) return;
 		Map<Long, Timer> timerMap = channelService.getTimerMap();
 		if (!timerMap.containsKey(channelId)) return;
 		List<ScheduleVO> scheduleVOs = scheduleQuery.getByChannelId(channelId);
@@ -181,6 +271,7 @@ public class BroadAbilityService {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		List<ScheduleVO> scheduleVOs = scheduleQuery.getByChannelId(channelId);
 		if (scheduleVOs == null || scheduleVOs.isEmpty()) throw new ScheduleNoneToBroadException(channel.getName());
+		String forwardStatus = channel.getBroadcastStatus();
 		
 		List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs = broadAbilityBroadInfoService.queryFromChannelId(channelId);
 		List<UserVO> webSocketSendUsers = new ArrayList<UserVO>();
@@ -188,7 +279,7 @@ public class BroadAbilityService {
 		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
 			Long userId = broadAbilityBroadInfoVO.getUserId();
 			if (userId != null) {
-				List<UserVO> userVOs = userQuery.findByIdIn(new ArrayListWrapper<Long>().add(userId).getList());
+				List<UserVO> userVOs = userQuery.findByIdInAndType(new ArrayListWrapper<Long>().add(userId).getList(), TerminalType.QT_MEDIA_EDITOR.getName());
 				if (userVOs != null && !userVOs.isEmpty()) {
 					UserVO user = userVOs.get(0);
 					webSocketSendUsers.add(user);
@@ -197,8 +288,8 @@ public class BroadAbilityService {
 				}
 			}
 		}
-		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
-			switch (channel.getBroadcastStatus()) {
+		if (!forwardStatus.equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+			switch (forwardStatus) {
 			case ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED:
 				type = BroadAbilityQueryType.CHANGE;
 				break;
@@ -206,7 +297,7 @@ public class BroadAbilityService {
 				type = BroadAbilityQueryType.NEW;
 				break;
 			default:
-				throw new ErrorTypeException("播发状态", channel.getBroadcastStatus());
+				throw new ErrorTypeException("播发状态", forwardStatus);
 			}
 			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
 			channelDao.save(channel);
@@ -294,6 +385,11 @@ public class BroadAbilityService {
 //							}
 //						};
 //						nTimer.schedule(timerTask, dealTime - 5000l);
+						if (forwardStatus.equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT)) {
+							channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT);
+							channelDao.save(channel);
+							throw new ChannelBroadNoneScheduleException();
+						}
 					}
 				}
 				timerMap.put(channelId, nTimer);

@@ -9,6 +9,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
@@ -19,6 +21,8 @@ import com.sumavision.tetris.cs.channel.ChannelType;
 import com.sumavision.tetris.cs.channel.ChannelVO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/api/server/cs/channel")
@@ -31,6 +35,9 @@ public class ApiServerChannelController {
 	
 	@Autowired
 	private ChannelDAO channelDao;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 分页获取频道列表<br/>
@@ -91,7 +98,7 @@ public class ApiServerChannelController {
 				.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(previewUrlIp).setPreviewUrlPort(previewUrlPort))
 				.getList();
 
-		ChannelPO channel = channelService.add(name, date, broadWay, remark, ChannelType.REMOTE, encryption, false, null, null, null, null, null, infoVOs);
+		ChannelPO channel = channelService.add(name, date, broadWay, remark, null, null, ChannelType.REMOTE, encryption, false, null, null, null, null, null, infoVOs);
 
 		return new ChannelVO().set(channel);
 	}
@@ -120,7 +127,7 @@ public class ApiServerChannelController {
 				.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(previewUrlIp).setPreviewUrlPort(previewUrlPort))
 				.getList();
 		
-		ChannelPO channel = channelService.edit(id, name, remark, encryption, false, null, null, null, null, null, infoVOs);
+		ChannelPO channel = channelService.edit(id, name, remark, null, null, encryption, false, null, null, null, null, null, infoVOs);
 
 		return new ChannelVO().set(channel);
 	}
@@ -196,5 +203,4 @@ public class ApiServerChannelController {
 		
 		return channelQuery.getBroadstatus(id);
 	}
-	
 }

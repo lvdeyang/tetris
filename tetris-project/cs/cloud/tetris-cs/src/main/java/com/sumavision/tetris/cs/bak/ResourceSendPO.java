@@ -32,6 +32,15 @@ public class ResourceSendPO extends AbstractBasePO{
 	
 	/** 媒资预览地址 */
 	private String previewUrl;
+	
+	/** 媒资频点 */
+	private String freq;
+	
+	/** 媒资音频pid */
+	private String audioPid;
+	
+	/** 媒资视频pid */
+	private String videoPid;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -85,5 +94,32 @@ public class ResourceSendPO extends AbstractBasePO{
 
 	public void setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+	}
+
+	@Column(name = "FREQ")
+	public String getFreq() {
+		return freq;
+	}
+
+	public void setFreq(String freq) {
+		this.freq = freq;
+	}
+
+	@Column(name = "AUDIO_PID")
+	public String getAudioPid() {
+		return audioPid;
+	}
+
+	public void setAudioPid(String audioPid) {
+		this.audioPid = audioPid;
+	}
+
+	@Column(name = "VIDEO_PID")
+	public String getVideoPid() {
+		return videoPid;
+	}
+
+	public void setVideoPid(String videoPid) {
+		this.videoPid = videoPid;
 	}
 }

@@ -585,7 +585,7 @@ define([
                         name:file.name,
                         size:file.size,
                         mimetype:file.type,
-                        lastModified:file.lastModified,
+                        lastModified:file.lastModified || file.lastModifiedDate.getTime(),
                         file:file
                     };
                     self.dialog.addPicture.task = task;
@@ -627,7 +627,7 @@ define([
                                         return;
                                     }
                                     if(file.name!==data.name
-                                        || file.lastModified!==data.lastModified
+                                        || (file.lastModified||file.lastModifiedDate.getTime())!==data.lastModified
                                         || file.size!==data.size
                                         || file.type!==data.mimetype){
                                         self.$message.error('您选择的文件与当前任务的文件不同！');

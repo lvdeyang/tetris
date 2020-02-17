@@ -104,7 +104,7 @@
         var formData = new FormData();
         formData.append('uuid', uuid);
         formData.append('name', encodeURI(file.name));
-        formData.append('lastModified', file.lastModified);
+        formData.append('lastModified', file.lastModified || file.lastModifiedDate.getTime());
         formData.append('beginOffset', beginOffset);
         formData.append('endOffset', endOffset);
         formData.append('blockSize', endOffset - beginOffset);

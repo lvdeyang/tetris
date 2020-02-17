@@ -6,15 +6,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.TimerTask;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.cs.area.AreaQuery;
+import com.sumavision.tetris.cs.area.AreaService;
+import com.sumavision.tetris.cs.area.AreaVO;
 import com.sumavision.tetris.cs.bak.SendBakService;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoPO;
@@ -26,15 +31,21 @@ import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemoteDAO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityService;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileService;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoService;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalLevelType;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalService;
 import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
 import com.sumavision.tetris.cs.channel.exception.ChannelAlreadyBroadException;
 import com.sumavision.tetris.cs.channel.exception.ChannelStatusErrorException;
+import com.sumavision.tetris.cs.menu.CsMenuPO;
 import com.sumavision.tetris.cs.menu.CsMenuService;
+import com.sumavision.tetris.cs.menu.CsResourceService;
+import com.sumavision.tetris.cs.menu.CsResourceVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -50,6 +61,15 @@ public class ChannelService {
 
 	@Autowired
 	private CsMenuService csMenuService;
+	
+	@Autowired
+	private CsResourceService csResourceService;
+	
+	@Autowired
+	private AreaService areaService;
+	
+	@Autowired
+	private AreaQuery areaQuery;
 
 	@Autowired
 	private UserQuery userQuery;
@@ -82,6 +102,9 @@ public class ChannelService {
 	private BroadFileService broadFileService;
 	
 	@Autowired
+	private BroadTerminalBroadInfoService broadTerminalBroadInfoService;
+	
+	@Autowired
 	private BroadTerminalService broadTerminalService;
 	
 	@Autowired
@@ -89,6 +112,9 @@ public class ChannelService {
 	
 	@Autowired
 	private MediaAudioQuery mediaAudioQuery;
+	
+	@Autowired
+	private MediaAVideoQuery mediaAVideoQuery;
 	
 	private Map<Long, Timer> timerMap = new HashMapWrapper<Long, Timer>().getMap();
 
@@ -100,8 +126,17 @@ public class ChannelService {
 	 * @param String name 频道名称
 	 * @param String date 日期
 	 * @param String broadWay 播发方式(参考BroadWay枚举)
-	 * @param String previewUrlIp 能力的输出地址ip(仅限能力播发)
-	 * @param String previewUrlPort 能力的输出地址port(仅限能力播发)
+	 * @param String level 播发优先级(仅限终端播发)
+	 * @param Boolean hasFile 是否携带文件播发(仅限终端播发)
+	 * @param ChannelTyep type 平台添加还是其他服务添加
+	 * @param Boolean encryption 是否加密播发(仅限轮播推流)
+	 * @param Boolean autoBroad 是否智能播发
+	 * @param Boolean autoBroadShuffle 是否乱序(仅限智能播发)
+	 * @param Integer autoBroadDuration 生效时长(仅限智能播发，单位：天)
+	 * @param String autoBroadStart 智能播发生效时间(仅限智能播发)
+	 * @param String outputUserPort 能力的输出地址port(仅限轮播推流)
+	 * @param List<UserVO> outputUserList 预播发的用户列表
+	 * List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs 预播发的ip和port对(仅限轮播推流)
 	 * @param String remark 备注
 	 * @return ChannelPO 频道
 	 */
@@ -110,6 +145,8 @@ public class ChannelService {
 			String date,
 			String broadWay,
 			String remark,
+			String level,
+			Boolean hasFile,
 			ChannelType type,
 			Boolean encryption,
 			Boolean autoBroad,
@@ -140,7 +177,7 @@ public class ChannelService {
 			broadFileBroadInfoService.checkUserUse(null, outputUserList);
 		}
 		
-		//校验ip和端口对是否被占用，设置能力播发id
+		//校验ip和端口对是否被占用，设置轮播推流id
 		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
 			broadAbilityBroadInfoService.checkIpAndPortExists(null, abilityBroadInfoVOs);
 			channel.setAbilityBroadId(adapter.getNewId(channelDao.getAllAbilityId()));
@@ -156,6 +193,8 @@ public class ChannelService {
 			broadAbilityBroadInfoService.saveInfoList(channel.getId(), saveinInfoVOs);
 		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
 			broadFileBroadInfoService.saveInfoList(channel.getId(), broadFileBroadInfoService.changeVO(outputUserList));
+		} else {
+			broadTerminalBroadInfoService.saveInfo(channel.getId(), level, hasFile);
 		}
 		
 		//保存智能播发信息
@@ -193,6 +232,7 @@ public class ChannelService {
 		ChannelAutoBroadInfoPO channelAutoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelId);
 		if (channelAutoBroadInfoPO != null) channelAutoBroadInfoDAO.delete(channelAutoBroadInfoPO);
 		csMenuService.removeMenuByChannelId(channelId);
+		areaService.removeByChannelId(channelId);
 		scheduleService.removeByChannelId(channelId);
 		sendBakService.removeBakFromChannel(channelId);
 	}
@@ -205,8 +245,8 @@ public class ChannelService {
 	 * @param Long id 频道id
 	 * @param String name 频道名称
 	 * @param String broadWay 播发方式(参考BroadWay枚举)
-	 * @param String previewUrlIp 能力的输出地址ip(仅限能力播发)
-	 * @param String previewUrlPort 能力的输出地址port(仅限能力播发)
+	 * @param String previewUrlIp 能力的输出地址ip(仅限轮播推流)
+	 * @param String previewUrlPort 能力的输出地址port(仅限轮播推流)
 	 * @param String remark 备注
 	 * @return ChannelVO 频道
 	 */
@@ -214,6 +254,8 @@ public class ChannelService {
 			Long id,
 			String name,
 			String remark,
+			String level,
+			Boolean hasFile,
 			Boolean encryption,
 			Boolean autoBroad,
 			Boolean autoBroadShuffle,
@@ -243,6 +285,9 @@ public class ChannelService {
 			broadAbilityBroadInfoService.saveInfoList(id, saveInfoVOs);
 		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
 			broadFileBroadInfoService.saveInfoList(channel.getId(), broadFileBroadInfoService.changeVO(outputUserList));
+		} else {
+			broadTerminalBroadInfoService.saveInfo(channel.getId(), level, hasFile);
+			areaQuery.checkAreaUsed(channel.getId(), false);
 		}
 		channel.setName(name);
 		channel.setRemark(remark);
@@ -307,6 +352,21 @@ public class ChannelService {
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
 		if (channelBroadWay == BroadWay.TERMINAL_BROAD) {
 			broadTerminalService.restartBroadcast(channelId);
+		}
+	}
+	
+	/**
+	 * 资源目录同步到终端<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月15日 上午11:49:20
+	 * @param Long channelId 频道id
+	 */
+	public void updateToTerminal(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
+		if (channelBroadWay == BroadWay.TERMINAL_BROAD) {
+			broadTerminalService.updateToTerminal(channelId);
 		}
 	}
 	
@@ -389,18 +449,7 @@ public class ChannelService {
 				if (autoBroadInfoPO.getShuffle()) Collections.shuffle(recommends);
 				List<MediaAudioVO> audios = recommends.size() > 10 ? recommends.subList(0, 10) : recommends;
 				for (MediaAudioVO audio : audios) {
-					ScreenVO screen = new ScreenVO();
-					screen.setMimsUuid(audio.getUuid());
-					screen.setName(audio.getName());
-					screen.setPreviewUrl(audio.getPreviewUrl());
-					screen.setEncryption(audio.getEncryption() != null && audio.getEncryption() ? "true" : "false");
-					screen.setEncryptionUrl(audio.getEncryptionUrl());
-					screen.setType(audio.getType());
-					screen.setMimetype(audio.getMimetype());
-					screen.setHotWeight(audio.getHotWeight());
-					screen.setDownloadCount(audio.getDownloadCount());
-					screen.setDuration(audio.getDuration());
-					screens.add(screen);
+					screens.add(new ScreenVO().getFromAudioVO(audio));
 				}
 			}
 			scheduleService.addSchedule(channelId, broadTime, screens);
@@ -416,6 +465,93 @@ public class ChannelService {
 			
 		} else {
 			
+		}
+	}
+	
+	/**
+	 * 根据应急广播下发tar包创建push终端播发<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月19日 下午2:14:48
+	 * @param String name 频道名
+	 * @param String author 作者
+	 * @param String publishTime 创建时间
+	 * @param String remark 备注
+	 * @param String keywords 关键字
+	 * @param String contents 内容
+	 * @param String regions 地区
+	 * @param UsuerVO user 创建者
+	 */
+	public void generateWithInternalTemplate(
+			String name,
+			String author,
+			String publishTime,
+			String remark,
+			String keywords,
+			List<JSONObject> contents,
+			List<String> regions,
+			UserVO user) throws Exception {
+		//创建频道
+		ChannelPO channel = broadTerminalService.add(user, name, publishTime, remark, BroadTerminalLevelType.ESPECIALLY.getName(), true, ChannelType.LOCAL, false, false);
+		Long channelId = channel.getId();
+		
+		//创建目录结构
+		CsMenuPO menu = csMenuService.addRoot(channelId, "yjgbPush");
+		List<String> videoUrlList = new ArrayList<String>();
+		List<String> audioUrlList = new ArrayList<String>();
+		List<MediaAVideoVO> resourceList = new ArrayList<MediaAVideoVO>();
+		for (JSONObject content : contents) {
+			if (content.getString("type").equals("yjgb_video")) {
+				videoUrlList.add(content.getString("value"));
+			} else if (content.getString("type").equals("yjgb_audio")) {
+				audioUrlList.add(content.getString("value"));
+			}
+		}
+		if (!videoUrlList.isEmpty()) resourceList.addAll(mediaAVideoQuery.findByPreviewUrlIn(videoUrlList, "video"));
+		if (!audioUrlList.isEmpty()) resourceList.addAll(mediaAVideoQuery.findByPreviewUrlIn(audioUrlList, "audio"));
+		List<CsResourceVO> resourceVOs = csResourceService.addResources(resourceList, menu.getId(), channelId);
+		
+		//添加排期
+		Long duration = 3000l;
+		List<ScreenVO> screens = new ArrayList<ScreenVO>();
+		for (int i = 0; i < resourceVOs.size(); i++) {
+			CsResourceVO resource = resourceVOs.get(i);
+			screens.add(new ScreenVO().getFromCsResourceVO(resource).setIndex(i+1l).setSerialNum(1l));
+			String mediaDuration = resource.getDuration();
+			if (mediaDuration != null && !mediaDuration.isEmpty() && mediaDuration.equals("-")) duration += Long.parseLong(mediaDuration);
+		}
+		scheduleService.addSchedule(channelId, publishTime, screens);
+		
+		//设置地区
+		List<AreaVO> areaList = new ArrayList<AreaVO>();
+		for (String region : regions) {
+			areaList.add(new AreaVO().setAreaId(region).setChannelId(channelId));
+		}
+		areaService.setCheckArea(channelId, areaList, true);
+		
+		//开始播发
+		startBroadcast(channelId, null);
+		
+		//定时停止播发，3s预留给终端开始播发时下载tar包
+		if (duration != 3000l) {
+			if (timerMap.containsKey(channelId)) {
+				Timer timer = timerMap.get(channelId);
+				if (timer != null) {
+					timer.cancel();
+				}
+			}
+			Timer timer = new Timer();
+			timer.schedule(new TimerTask() {
+				
+				@Override
+				public void run() {
+					try {
+						stopBroadcast(channelId);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}, duration);
 		}
 	}
 	
@@ -603,7 +739,7 @@ public class ChannelService {
 //	}
 //	
 //	/**
-//	 * 停止播发(能力播发)<br/>
+//	 * 停止播发(轮播推流)<br/>
 //	 * <b>作者:</b>lzp<br/>
 //	 * <b>版本：</b>1.0<br/>
 //	 * <b>日期：</b>2019年6月25日 上午11:06:57
@@ -672,7 +808,7 @@ public class ChannelService {
 //	}
 //	
 //	/**
-//	 * 开始播发(能力播发，根据排期)<br/>
+//	 * 开始播发(轮播推流，根据排期)<br/>
 //	 * <b>作者:</b>lzp<br/>
 //	 * <b>版本：</b>1.0<br/>
 //	 * <b>日期：</b>2019年6月25日 上午11:06:57
@@ -755,7 +891,7 @@ public class ChannelService {
 //	}
 //	
 //	/**
-//	 * 开始播发(能力播发)<br/>
+//	 * 开始播发(轮播推流)<br/>
 //	 * <b>作者:</b>lzp<br/>
 //	 * <b>版本：</b>1.0<br/>
 //	 * <b>日期：</b>2019年6月25日 上午11:06:57

@@ -2,6 +2,7 @@ package com.sumavision.tetris.cs.area;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -9,26 +10,34 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.cs.area.exception.ChannelTerminalAreaAlreadyUseException;
+import com.sumavision.tetris.cs.area.exception.ChannelTerminalAreaAlreadyUseForbiddenException;
 import com.sumavision.tetris.cs.bak.AreaSendPO;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
-import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelBroadStatus;
+import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoPO;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoQuery;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalQueryType;
 
 @Component
 public class AreaQuery {
 	@Autowired
-	AreaDAO areaDao;
+	private AreaDAO areaDao;
 
 	@Autowired
-	ChannelQuery channelQuery;
+	private ChannelQuery channelQuery;
 
 	@Autowired
-	AreaSendQuery areaSendQuery;
+	private AreaSendQuery areaSendQuery;
+	
+	@Autowired
+	private BroadTerminalBroadInfoQuery BroadTerminalBroadInfoQuery;
 
 	@Autowired
-	DivisionDAO divisionDAO;
+	private DivisionDAO divisionDAO;
 
 	/**
 	 * 获取地区根目录(当前以空地区id获取根)<br/>
@@ -126,6 +135,81 @@ public class AreaQuery {
 
 		return returnList;
 	}
+	
+	/**
+	 * 根据频道id获取发布地区<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月14日 上午9:42:28
+	 * @param Long channelId 频道id
+	 * @return List<AreaVO> 发布地区数组
+	 */
+	public List<AreaVO> findByChannelId(Long channelId) throws Exception {
+		List<AreaPO> areaPOs = areaDao.findByChannelId(channelId);
+		return AreaVO.getConverter(AreaVO.class).convert(areaPOs, AreaVO.class);
+	}
+	
+	/**
+	 * 校验地区占用情况<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月13日 下午5:51:00
+	 * @param Long channelId 频道Id
+	 * @param List<AreaVO> areaVOs 地区列表
+	 */
+	public void checkAreaUsed(Long channelId, Boolean forceSet) throws Exception {
+		List<AreaVO> areaVOs = findByChannelId(channelId);
+		checkAreaUsed(channelId, areaVOs, false);
+	}
+	
+	/**
+	 * 校验地区占用情况<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月13日 下午5:51:00
+	 * @param Long channelId 频道Id
+	 * @param List<AreaVO> areaVOs 地区列表
+	 */
+	public void checkAreaUsed(Long channelId, List<AreaVO> areaVOs, Boolean forceSet) throws Exception {
+		if (areaVOs == null || areaVOs.isEmpty()) return;
+		List<String> areaIds = areaVOs.stream().map(AreaVO::getAreaId).collect(Collectors.toList());
+		BroadTerminalBroadInfoPO broadInfoPO = BroadTerminalBroadInfoQuery.findByChannelId(channelId);
+		String level = null;
+		if (broadInfoPO != null) level = broadInfoPO.getLevel();
+		List<AreaPO> usedArea = null;
+		if (level == null) {
+			usedArea = areaDao.findByAreaIdInWithExceptChannelId(areaIds, channelId);
+		} else {
+			usedArea = areaDao.findByAreaIdInWithExceptChannelId(areaIds, channelId, level); 
+		}
+		if (usedArea != null && !usedArea.isEmpty()) {
+			if (forceSet != null && forceSet) {
+				areaDao.deleteInBatch(usedArea);
+			} else {
+				StringBufferWrapper info = new StringBufferWrapper().append("预播发地区已被占用!");
+				Boolean forbidden = false;
+				for (AreaPO areaPO : usedArea) {
+					String areaName = areaPO.getName();
+					ChannelPO channel = channelQuery.findByChannelId(areaPO.getChannelId());
+					String channelName = channel.getName();
+					info.append("被占用地区为：")
+					.append(areaName)
+					.append(";占用的频道为：")
+					.append(channelName)
+					.append(";");
+					if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+						info.append("(频道正在播发);");
+						forbidden = true;
+					}
+				}
+				if (forbidden) {
+					throw new ChannelTerminalAreaAlreadyUseForbiddenException(info.toString());
+				} else {
+					throw new ChannelTerminalAreaAlreadyUseException(info.toString());
+				}
+			}
+		}
+	}
 
 	/**
 	 * 设置目的是否可用(播发过的频道未播发的地区则下次播发不可用)<br/>
@@ -221,9 +305,7 @@ public class AreaQuery {
 		List<AreaVO> returnList = new ArrayList<AreaVO>();
 		List<AreaPO> areaList = areaDao.findByChannelId(channelId);
 		if (areaList != null && areaList.size() > 0) {
-			for (AreaPO item : areaList) {
-				returnList.add(new AreaVO().set(item));
-			}
+			returnList = AreaVO.getConverter(AreaVO.class).convert(areaList, AreaVO.class);
 		}
 		return returnList;
 	}
