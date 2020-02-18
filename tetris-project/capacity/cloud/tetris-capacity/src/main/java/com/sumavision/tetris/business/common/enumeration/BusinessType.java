@@ -7,6 +7,8 @@ public enum BusinessType {
 	RECORD,
 	TRANSCODE,
 	BVC,
+	DIRECTOR,
+	COVER,
 	TEST;
 	
 }
