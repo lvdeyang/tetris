@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
-import com.sumavision.tetris.mims.app.media.MediaQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
@@ -49,7 +48,7 @@ public class ChannelController {
 	@ResponseBody
 	@RequestMapping(value = "/list")
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
-		return channelQuery.findAll(currentPage, pageSize, ChannelType.REMOTE);
+		return channelQuery.findAll(currentPage, pageSize, ChannelType.LOCAL);
 	}
 
 	/**
@@ -75,6 +74,8 @@ public class ChannelController {
 			String outputUserPort,
 			String output,
 			String remark,
+			String level,
+			Boolean hasFile,
 			Boolean encryption,
 			Boolean autoBroad,
 			Boolean autoBroadShuffle,
@@ -88,11 +89,11 @@ public class ChannelController {
 		List<UserVO> outputUserList = new ArrayList<UserVO>();
 		if (outputUsers != null) outputUserList = JSONArray.parseArray(outputUsers, UserVO.class);
 
-		ChannelPO channel = channelService.add(name, date, broadWay, remark, ChannelType.LOCAL, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
+		ChannelPO channel = channelService.add(name, date, broadWay, remark, level, hasFile, ChannelType.LOCAL, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
 		
 		if (!BroadWay.fromName(broadWay).equals(BroadWay.TERMINAL_BROAD) && autoBroad) channelService.autoAddSchedulesAndBroad(channel.getId());
 
-		return new ChannelVO().set(channel).setOutput(abilityBroadInfoVOs).setOutputUsers(outputUserList).setAutoBroadDuration(autoBroadDuration).setAutoBroadStart(autoBroadStart);
+		return new ChannelVO().set(channel).setOutput(abilityBroadInfoVOs).setOutputUsers(outputUserList).setAutoBroadDuration(autoBroadDuration).setAutoBroadStart(autoBroadStart).setLevel(level).setHasFile(hasFile);
 	}
 
 	/**
@@ -118,6 +119,8 @@ public class ChannelController {
 			String outputUserPort,
 			String output,
 			String remark,
+			String level,
+			Boolean hasFile,
 			Boolean encryption,
 			Boolean autoBroad,
 			Boolean autoBroadShuffle,
@@ -132,7 +135,7 @@ public class ChannelController {
 			outputUserList = JSONArray.parseArray(outputUsers, UserVO.class);
 		}
 
-		ChannelPO channel = channelService.edit(id, name, remark, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
+		ChannelPO channel = channelService.edit(id, name, remark, level, hasFile, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
 		
 		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.TERMINAL_BROAD && autoBroad) {
 			channelService.autoAddSchedulesAndBroad(channel.getId());
@@ -221,6 +224,24 @@ public class ChannelController {
 	}
 	
 	/**
+	 * 同步资源目录到终端<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月15日 上午11:34:28
+	 * @param Long channelId 频道id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/update/to/terminal")
+	public Object updateToTerminal(Long channelId, HttpServletRequest request) throws Exception {
+		channelService.updateToTerminal(channelId);
+		return null;
+	}
+	
+	/**
 	 * 播发跳转(能力播发)<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -251,7 +272,7 @@ public class ChannelController {
 		UserVO user = userQuery.current();
 		
 		List<UserVO> users = 
-				userQuery.listByCompanyIdWithExceptAndClassify(Long.parseLong(user.getGroupId()), null, UserClassify.COMPANY);
+				userQuery.listByCompanyIdWithExceptAndClassify(Long.parseLong(user.getGroupId()), TerminalType.QT_MEDIA_EDITOR.getName(), null, UserClassify.COMPANY);
 		
 		Map<String, List<UserVO>> map = new HashMap<String, List<UserVO>>();
 		for (UserVO userVO : users) {

@@ -35,7 +35,7 @@ public class BroadTerminalQuery {
 	public String getChannelBroadstatus(Long channelId) throws Exception {
 		String status = "";
 		
-		String versionSendNum = versionSendQuery.getBroadId(channelId);
+		String versionSendNum = versionSendQuery.getLastBroadId(channelId);
 		if (!versionSendNum.isEmpty()) {
 			List<String> ids = new ArrayList<String>();
 			ids.add(versionSendNum);
@@ -68,7 +68,7 @@ public class BroadTerminalQuery {
 		List<String> broadId = new ArrayList<String>();
 
 		for (ChannelPO item : channels) {
-			String versionCode = versionSendQuery.getBroadId(item.getId());
+			String versionCode = versionSendQuery.getLastBroadId(item.getId());
 			if (!versionCode.isEmpty()) {
 				broadId.add(versionCode);
 			}

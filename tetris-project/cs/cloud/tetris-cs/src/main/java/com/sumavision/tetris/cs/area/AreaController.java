@@ -56,7 +56,15 @@ public class AreaController {
 
 		List<AreaVO> areaList = JSON.parseArray(areaListStr, AreaVO.class);
 
-		return areaService.setCheckArea(channelId, areaList);
+		return areaService.setCheckArea(channelId, areaList, false);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/set/force")
+	public Object setAreaListForce(Long channelId, String areaListStr, HttpServletRequest request) throws Exception {
+		List<AreaVO> areaList = JSON.parseArray(areaListStr, AreaVO.class);
+		return areaService.setCheckArea(channelId, areaList, true);
 	}
 
 	/**

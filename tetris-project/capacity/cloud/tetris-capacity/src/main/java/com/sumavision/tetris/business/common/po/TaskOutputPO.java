@@ -19,6 +19,9 @@ public class TaskOutputPO extends AbstractBasePO{
 	
 	private Long inputId;
 	
+	/** 多源的时候用 */
+	private String inputList;
+	
 	private String task;
 	
 	private String output;
@@ -56,6 +59,14 @@ public class TaskOutputPO extends AbstractBasePO{
 
 	public void setInputId(Long inputId) {
 		this.inputId = inputId;
+	}
+
+	public String getInputList() {
+		return inputList;
+	}
+
+	public void setInputList(String inputList) {
+		this.inputList = inputList;
 	}
 
 	@Column(name = "TASK", columnDefinition = "longtext")

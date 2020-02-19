@@ -105,6 +105,8 @@ public class MediaVideoController {
             String keyWords,
             String remark,
 			Long folderId, 
+			Boolean mediaEdit,
+            String mediaEditTemplate,
 			HttpServletRequest request) throws Exception{
 		
 		MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class);
@@ -126,6 +128,9 @@ public class MediaVideoController {
 		}
 		
 		MediaVideoPO entity = mediaVideoService.addTask(user, name, tagList, null, remark, taskParam, folder);
+		entity.setMediaEdit(mediaEdit);
+		entity.setMediaEditTemplate(mediaEditTemplate);
+		mediaVideoDao.save(entity);
 		
 		return new MediaVideoVO().set(entity);
 		
@@ -277,7 +282,7 @@ public class MediaVideoController {
 		
 		//文件不是一个
 		if(!name.equals(task.getFileName()) 
-				|| lastModified!=task.getLastModified() 
+				|| lastModified!=task.getLastModified().longValue() 
 				|| size!=task.getSize() 
 				|| !type.equals(task.getMimetype())){
 			throw new MediaVideoCannotMatchException(uuid, name, lastModified, size, type, task.getFileName(), 
@@ -317,6 +322,10 @@ public class MediaVideoController {
 				mediaVideoService.startUploadProcess(task);
 			}else{
 				mediaVideoDao.save(task);
+			}
+			
+			if (task.getMediaEdit() != null && task.getMediaEdit()) {
+				mediaVideoService.startMediaEdit(task);
 			}
 		}
 		

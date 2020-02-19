@@ -48,9 +48,6 @@ public class ProgramController {
 	@RequestMapping(value = "/set")
 	public Object programSet(Long scheduleId, String programInfo,HttpServletRequest request) throws Exception {
 		
-//		ProgramVO program = JSONObject.parseObject(programInfo,ProgramVO.class);
-//		ProgramVO retrunProgram = programService.setProgram(program);
-		
 		TemplateVO templateVO = JSON.parseObject(programInfo, TemplateVO.class);
 		
 		return programService.setProgram(scheduleId, templateVO);

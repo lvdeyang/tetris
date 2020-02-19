@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
+import com.sumavision.tetris.mims.app.media.live.MediaPushLiveQuery;
+import com.sumavision.tetris.mims.app.media.live.MediaPushLiveVO;
 
 @Component
 public class CsResourceQuery {
@@ -16,6 +18,9 @@ public class CsResourceQuery {
 
 	@Autowired
 	MediaAVideoQuery mediaAVideoQuery;
+	
+	@Autowired
+	MediaPushLiveQuery mediaPushLiveQuery;
 
 	/**
 	 * 根据cs目录id获取媒资列表<br/>
@@ -89,5 +94,11 @@ public class CsResourceQuery {
 		List<MediaAVideoVO> mimsVideoList = mediaAVideoQuery.loadAll();
 		
 		return mimsVideoList;
+	}
+	
+	public List<MediaPushLiveVO> getMIMSLiveResources() throws Exception {
+		List<MediaPushLiveVO> mimsLiveList = mediaPushLiveQuery.loadAll();
+		
+		return mimsLiveList;
 	}
 }

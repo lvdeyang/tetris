@@ -112,6 +112,12 @@ define([
                 var self = this;
                 self.$emit('preview',scope);
             },
+            handleIfDown: function (scope) {
+                var self  = this;
+                var row = scope.row;
+                return (row.type != "PUSH_LIVE" && self.options.currentScreen.data.length != row.index + 1)
+                    || (self.options.currentScreen.data.length == row.index + 1 && self.options.currentScreen.data[self.options.currentScreen.data.length - 1].type != "PUSH_LIVE");
+            },
             programResourceUp: function (scope) {
                 var self = this;
                 var row = scope.row;
@@ -137,6 +143,10 @@ define([
                 for (var i = 0; i < length; i++) {
                     var item = self.options.currentScreen.data[i];
                     if (item.index == index + 1) {
+                        if (item.type == 'PUSH_LIVE') {
+                            this.$message.error('直播资源要求位于播放列表末尾');
+                            return;
+                        }
                         item.index -= 1;
                         break;
                     }
@@ -208,6 +218,12 @@ define([
                 });
                 self.loadingMenuResource();
             },
+            checkSelectable: function (row) {
+                return !row.disabled;
+            },
+            resourceType: function (row) {
+                return row.type == 'PUSH_LIVE' ? '直播' : "文件"
+            },
             loadingMenuResource: function () {
                 var self = this;
                 if (self.dialog.chooseResource.resources.data)
@@ -219,7 +235,12 @@ define([
                     if (status != 200) return;
                     if (data && data.length > 0) {
                         for (var i = 0; i < data.length; i++) {
-                            self.dialog.chooseResource.resources.data.push(data[i])
+                            if (data[i].type == 'PUSH_LIVE') {
+                                if (self.options.currentScreen.data.length > 0 && self.options.currentScreen.data[self.options.currentScreen.data.length - 1].type == 'PUSH_LIVE') data[i].disabled = true;
+                            } else {
+                                if (self.channelData.hasFile === false) data[i].disabled = true;
+                            }
+                            self.dialog.chooseResource.resources.data.push(data[i]);
                         }
                     }
                 }, null, ajax.NO_ERROR_CATCH_CODE)
@@ -242,13 +263,34 @@ define([
                 self.dialog.chooseResource.loading = true;
 
                 var chooseResources = self.dialog.chooseResource.resources.chooses;
+                var hasLive = false;
+                for (var i = 0; i < chooseResources.length; i++) {
+                    if (chooseResources[i].type == "PUSH_LIVE") {
+                        if (hasLive) {
+                            self.dialog.chooseResource.loading = false;
+                            this.$message({
+                                message: '直播资源不可多选！',
+                                type: 'warning'
+                            });
+                            return;
+                        } else {
+                            hasLive = true;
+                        }
+                    }
+                }
                 if (chooseResources && chooseResources.length > 0) {
+                    var pop = null;
+                    if (self.options.currentScreen.data.length > 0) {
+                        var last = self.options.currentScreen.data[self.options.currentScreen.data.length - 1];
+                        if (last.type == "PUSH_LIVE") pop = self.options.currentScreen.data.pop();
+                    }
                     for (var i = 0; i < chooseResources.length; i++) {
                         chooseResources[i].index = self.options.currentScreen.data.length + 1;
                         chooseResources[i].resourceId = chooseResources[i].id;
                         chooseResources[i].serialNum = self.options.currentScreen.no;
-                        self.options.currentScreen.data.push(chooseResources[i])
+                        self.options.currentScreen.data.push(chooseResources[i]);
                     }
+                    if (pop) last.index = self.options.currentScreen.data.push(pop);
                 }
                 self.dialog.chooseResource.loading = false;
                 self.handleChooseResourcesClose();

@@ -13,7 +13,7 @@ public class VersionSendQuery {
 	VersionSendDAO versionSendDao;
 
 	/**
-	 * 添加播发版本<br/>
+	 * 添加发布播发版本<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
@@ -24,7 +24,7 @@ public class VersionSendQuery {
 	 * @param filePath 播发tar包存储地址
 	 * @return List<ResourceSendPO> 地区列表
 	 */
-	public void addVersion(Long channelId, String version, String broadId, MediaCompressVO mediaCompress, String filePath) {
+	public void addVersion(Long channelId, String version, String broadId, MediaCompressVO mediaCompress, String filePath, VersionSendType type) {
 		VersionSendPO versionPO = new VersionSendPO();
 		versionPO.setChannelId(channelId);
 		versionPO.setVersion(version);
@@ -34,6 +34,34 @@ public class VersionSendQuery {
 			versionPO.setFileSize(mediaCompress.getSize());
 		}
 		versionPO.setFilePath(filePath);
+		versionPO.setFileType(type);
+
+		versionSendDao.save(versionPO);
+	}
+
+	/**
+	 * 添加同步数据播发版本<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param channelId 频道id
+	 * @param version 版本号
+	 * @param broadId 播发交互id
+	 * @param MediaCompressVO 播发tar包信息
+	 * @param filePath 播发tar包存储地址
+	 * @return List<ResourceSendPO> 地区列表
+	 */
+	public void addUpdateVersion(Long channelId, String version, String broadId, MediaCompressVO mediaCompress, String filePath) {
+		VersionSendPO versionPO = new VersionSendPO();
+		versionPO.setChannelId(channelId);
+		versionPO.setVersion(version);
+		versionPO.setBroadId(broadId);
+		if (mediaCompress != null) {
+			versionPO.setFileName(mediaCompress.getName());
+			versionPO.setFileSize(mediaCompress.getSize());
+		}
+		versionPO.setFilePath(filePath);
+		versionPO.setFileType(VersionSendType.Update);
 
 		versionSendDao.save(versionPO);
 	}
@@ -65,15 +93,42 @@ public class VersionSendQuery {
 	}
 	
 	/**
-	 * 根据频道id获取播发交互id<br/>
+	 * 根据频道id获取最后一个发布播发版本号<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param channelId 频道id
+	 * @return String 版本号
+	 */
+	public String getLastBroadVersion(Long channelId) {
+		List<VersionSendPO> versionList = versionSendDao.findByChannelId(channelId);
+		String versionCode = "";
+		if (versionList != null && versionList.size() > 0) {
+			for (VersionSendPO item : versionList) {
+				if (item.getFileType() == VersionSendType.Update) continue;
+				String itemVersionCode = item.getVersion().split("v")[1];
+				try {
+					if (versionCode.equals("") || Long.parseLong(versionCode) < Long.parseLong(itemVersionCode)) {
+						versionCode = itemVersionCode;
+					}
+				} catch (NumberFormatException e) {
+					break;
+				}
+			}
+		}
+		return versionCode.isEmpty() ? versionCode : "v" + versionCode;
+	}
+	
+	/**
+	 * 根据频道id获取发布播发交互id<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
 	 * @param channelId 频道id
 	 * @return String 播发交互id
 	 */
-	public String getBroadId(Long channelId) {
-		String lastVersion = getLastVersion(channelId);
+	public String getLastBroadId(Long channelId) {
+		String lastVersion = getLastBroadVersion(channelId);
 		return lastVersion.isEmpty() ? lastVersion :  channelId.toString() + lastVersion.split("v")[1];
 	}
 	
@@ -85,8 +140,8 @@ public class VersionSendQuery {
 	 * @param channelId 频道id
 	 * @return String 播发交互id
 	 */
-	public Long getChannelId(String lastVersionNum){
-		VersionSendPO versionSendPO = versionSendDao.findByBroadId(lastVersionNum);
+	public Long getChannelId(String versionNum){
+		VersionSendPO versionSendPO = versionSendDao.findByBroadId(versionNum);
 		return versionSendPO != null ? versionSendPO.getChannelId() : null;
 	}
 
@@ -116,8 +171,8 @@ public class VersionSendQuery {
 	 * @param channelId 频道id
 	 * @return VersionSendPO 版本信息
 	 */
-	public VersionSendPO getLastVersionSendPO(Long channelId){
-		String broadId = getBroadId(channelId);
+	public VersionSendPO getLastBroadVersionSendPO(Long channelId){
+		String broadId = getLastBroadId(channelId);
 		return broadId.isEmpty() ? null : versionSendDao.findByChannelIdAndBroadId(channelId, broadId);
 	}
 }

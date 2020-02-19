@@ -105,6 +105,12 @@ public class MediaVideoPO extends AbstractBasePO{
 	/** 加密文件地址 */
 	private String encryptionUrl;
 	
+	/** 是否转码 */
+	private Boolean mediaEdit;
+	
+	/** 转码模板 */
+	private String mediaEditTemplate;
+	
 	/** 附加字段 */
 	private String addition;
 
@@ -325,6 +331,24 @@ public class MediaVideoPO extends AbstractBasePO{
 
 	public void setEncryptionUrl(String encryptionUrl) {
 		this.encryptionUrl = encryptionUrl;
+	}
+	
+	@Column(name = "MEDIA_EDIT")
+	public Boolean getMediaEdit() {
+		return mediaEdit;
+	}
+
+	public void setMediaEdit(Boolean mediaEdit) {
+		this.mediaEdit = mediaEdit;
+	}
+
+	@Column(name = "MEDIA_EDIT_TEMPLATE")
+	public String getMediaEditTemplate() {
+		return mediaEditTemplate;
+	}
+
+	public void setMediaEditTemplate(String mediaEditTemplate) {
+		this.mediaEditTemplate = mediaEditTemplate;
 	}
 
 	@Column(name = "ADDITION")

@@ -2,6 +2,8 @@ package com.sumavision.tetris.cs.bak;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -26,6 +28,9 @@ public class VersionSendPO extends AbstractBasePO {
 	
 	/** 下发tar包地址 */
 	private String filePath;
+	
+	/** 下发tar包类型 */
+	private VersionSendType fileType;
 	
 	/** 播发版本号 */
 	private String version;
@@ -67,6 +72,16 @@ public class VersionSendPO extends AbstractBasePO {
 
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "FILE_TYPE")
+	public VersionSendType getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(VersionSendType fileType) {
+		this.fileType = fileType;
 	}
 
 	@Column(name = "VERSION")

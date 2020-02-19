@@ -1,8 +1,12 @@
 package com.sumavision.tetris.cs.program;
 
 import java.util.Comparator;
+import java.util.Date;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
+import com.sumavision.tetris.cs.menu.CsResourceVO;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
@@ -22,6 +26,9 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private Integer hotWeight;
 	private Integer downloadCount;
 	private String duration;
+	private String freq;
+	private String audioPid;
+	private String videoPid;
 
 	@Override
 	public ScreenVO set(ScreenPO entity) throws Exception {
@@ -40,9 +47,79 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setHotWeight(entity.getHotWeight())
 		.setDownloadCount(entity.getDownloadCount())
 		.setDuration(entity.getDuration())
+		.setFreq(entity.getFreq())
+		.setAudioPid(entity.getAudioPid())
+		.setVideoPid(entity.getVideoPid())
 		.setMimsUuid(entity.getMimsUuid())
 		.setResourceId(entity.getResourceId());
 		return this;
+	}
+	
+	public ScreenVO getFromAVideoVO(MediaAVideoVO media) throws Exception {
+		return this.setMimsUuid(media.getUuid())
+		.setName(media.getName())
+		.setPreviewUrl(media.getPreviewUrl())
+		.setEncryption(media.getEncryption() != null && media.getEncryption() ? "true" : "false")
+		.setEncryptionUrl(media.getEncryptionUrl())
+		.setType(media.getType())
+		.setMimetype(media.getMimetype())
+		.setHotWeight(media.getHotWeight())
+		.setDownloadCount(media.getDownloadCount())
+		.setDuration(media.getDuration());
+	}
+	
+	public ScreenVO getFromAudioVO(MediaAudioVO media) throws Exception {
+		return this.setMimsUuid(media.getUuid())
+				.setName(media.getName())
+				.setPreviewUrl(media.getPreviewUrl())
+				.setEncryption(media.getEncryption() != null && media.getEncryption() ? "true" : "false")
+				.setEncryptionUrl(media.getEncryptionUrl())
+				.setType(media.getType())
+				.setMimetype(media.getMimetype())
+				.setHotWeight(media.getHotWeight())
+				.setDownloadCount(media.getDownloadCount())
+				.setDuration(media.getDuration());
+	}
+	
+	public ScreenVO getFromCsResourceVO(CsResourceVO resourceVO) throws Exception {
+		return this.setResourceId(resourceVO.getId())
+				.setMimsUuid(resourceVO.getMimsUuid())
+				.setName(resourceVO.getName())
+				.setType(resourceVO.getType())
+				.setMimetype(resourceVO.getMimetype())
+				.setDuration(resourceVO.getDuration())
+				.setPreviewUrl(resourceVO.getPreviewUrl())
+				.setEncryption(resourceVO.getEncryption())
+				.setEncryptionUrl(resourceVO.getEncryptionUrl())
+				.setDownloadCount(resourceVO.getDownloadCount())
+				.setFreq(resourceVO.getFreq())
+				.setAudioPid(resourceVO.getAudioPid())
+				.setVideoPid(resourceVO.getVideoPid())
+				.setMimsUuid(resourceVO.getUuid())
+				.setUpdateTime(new Date());
+	}
+	
+	public static ScreenPO getPO(ScreenVO vo, Long programId) throws Exception {
+		ScreenPO screenPO = new ScreenPO();
+		if (vo == null || programId == null) return screenPO;
+		screenPO.setProgramId(programId);
+		screenPO.setMimsUuid(vo.getMimsUuid());
+		screenPO.setResourceId(vo.getResourceId());
+		screenPO.setScreenIndex(vo.getIndex());
+		screenPO.setSerialNum(vo.getSerialNum());
+		screenPO.setName(vo.getName());
+		screenPO.setType(vo.getType());
+		screenPO.setMimetype(vo.getMimetype());
+		screenPO.setPreviewUrl(vo.getPreviewUrl());
+		screenPO.setEncryptionUrl(vo.getEncryptionUrl());
+		screenPO.setHotWeight(vo.getHotWeight());
+		screenPO.setDownloadCount(vo.getDownloadCount());
+		screenPO.setDuration(vo.getDuration());
+		screenPO.setFreq(vo.getFreq());
+		screenPO.setAudioPid(vo.getAudioPid());
+		screenPO.setVideoPid(vo.getVideoPid());
+		screenPO.setUpdateTime(new Date());
+		return screenPO;
 	}
 
 	public Long getProgramId() {
@@ -172,6 +249,33 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 
 	public ScreenVO setDuration(String duration) {
 		this.duration = duration;
+		return this;
+	}
+
+	public String getFreq() {
+		return freq;
+	}
+
+	public ScreenVO setFreq(String freq) {
+		this.freq = freq;
+		return this;
+	}
+
+	public String getAudioPid() {
+		return audioPid;
+	}
+
+	public ScreenVO setAudioPid(String audioPid) {
+		this.audioPid = audioPid;
+		return this;
+	}
+
+	public String getVideoPid() {
+		return videoPid;
+	}
+
+	public ScreenVO setVideoPid(String videoPid) {
+		this.videoPid = videoPid;
 		return this;
 	}
 
