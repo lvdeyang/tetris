@@ -23,6 +23,8 @@ define([
 
     var MATERIAL_TYPE_TXT = 'txt';
 
+    var MATERIAL_TYPE_CSV = 'csv';
+
     var MATERIAL_TYPE_COMPRESS = 'compress';
 
     function Type(mimetype, suffix, type){
@@ -31,13 +33,15 @@ define([
         this.type = type;
     };
 
-    Type.prototype.equals = function(mimetype){
-        return this.mimetype === mimetype;
+    Type.prototype.equals = function(file){
+        var mimetype = file.type;
+        var name = file.name;
+        return this.mimetype === mimetype || (name&&name.endsWith(this.mimetype));
     };
 
-    var isRequiresType = function(mimetype, requires){
+    var isRequiresType = function(file, requires){
         for(var i=0; i<requires.length; i++){
-            if(requires[i].equals(mimetype)){
+            if(requires[i].equals(file)){
                 return true;
             }
         }
@@ -76,14 +80,14 @@ define([
                     self.files.splice(0, self.files.length);
                 }
             },
-            //空间选择文件
+            //控件选择文件
             fileSelected:function(e){
                 var self = this;
                 var $input = e.target;
                 var files = $input.files;
                 for(var i=0; i<files.length; i++){
                     var file = files[i];
-                    if(isRequiresType(files[i].type, self.requires)){
+                    if(isRequiresType(files[i], self.requires)){
                         var finded = false;
                         for(var j=0; j<self.files.length; j++){
                             var exist = self.files[j];
@@ -152,7 +156,7 @@ define([
                 var self = this;
                 var accept = '';
                 for(var i=0; i<self.requires.length; i++){
-                    if (self.requireType[0] === "video") return '';
+                    //if (self.requireType[0] === "video") return '';
                     accept += self.requires[i].mimetype;
                     if(i !== self.requires.length-1){
                         accept += ',';
@@ -229,13 +233,16 @@ define([
                         self.requires.push(new Type('audio/wav', 'wav', MATERIAL_TYPE_AUDIO));
                     }else if(self.requireType[i] === MATERIAL_TYPE_VIDEO){
                         self.requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
-                        self.requires.push(new Type('video/vnd.dlna.mpeg-tts', 'ts', MATERIAL_TYPE_VIDEO));
+                        //self.requires.push(new Type('video/vnd.dlna.mpeg-tts', 'ts', MATERIAL_TYPE_VIDEO));
+                        self.requires.push(new Type('.ts', 'ts', MATERIAL_TYPE_VIDEO));
                     }else if(self.requireType[i] === MATERIAL_TYPE_TXT){
                         self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
                     }else if(self.requireType[i] === MATERIAL_TYPE_COMPRESS){
                         self.requires.push(new Type('application/x-zip-compressed', 'zip', MATERIAL_TYPE_COMPRESS));
                         self.requires.push(new Type('application/zip', 'zip', MATERIAL_TYPE_COMPRESS));
                         self.requires.push(new Type('application/x-tar', 'tar', MATERIAL_TYPE_COMPRESS));
+                    }else if(self.requireType[i] === MATERIAL_TYPE_CSV){
+                        self.requires.push(new Type('.csv', 'csv', MATERIAL_TYPE_TXT));
                     }
                 }
             }else{
@@ -247,7 +254,8 @@ define([
                 self.requires.push(new Type('audio/x-wav', 'wav', MATERIAL_TYPE_AUDIO));
                 self.requires.push(new Type('audio/wav', 'wav', MATERIAL_TYPE_AUDIO));
                 self.requires.push(new Type('video/mp4', 'mp4', MATERIAL_TYPE_VIDEO));
-                self.requires.push(new Type('video/vnd.dlna.mpeg-tts', 'ts', MATERIAL_TYPE_VIDEO));
+                //self.requires.push(new Type('video/vnd.dlna.mpeg-tts', 'ts', MATERIAL_TYPE_VIDEO));
+                self.requires.push(new Type('.ts', 'ts', MATERIAL_TYPE_VIDEO));
                 self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
                 self.requires.push(new Type('application/x-zip-compressed', 'zip', MATERIAL_TYPE_COMPRESS));
                 self.requires.push(new Type('application/x-tar', 'tar', MATERIAL_TYPE_COMPRESS));

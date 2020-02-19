@@ -14,6 +14,16 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface SystemRoleDAO extends BaseDAO<SystemRolePO>{
 
 	/**
+	 * 根据id查询角色数据<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 上午9:59:01
+	 * @param Collection<Long> ids 角色id列表
+	 * @return List<SystemRolePO> 角色列表
+	 */
+	public List<SystemRolePO> findByIdIn(Collection<Long> ids);
+	
+	/**
 	 * 根据类型查询系统角色<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

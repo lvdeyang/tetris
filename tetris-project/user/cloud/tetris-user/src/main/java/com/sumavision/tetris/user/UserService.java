@@ -1,5 +1,6 @@
 package com.sumavision.tetris.user;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -25,10 +26,14 @@ import com.sumavision.tetris.organization.OrganizationPO;
 import com.sumavision.tetris.organization.OrganizationUserPermissionDAO;
 import com.sumavision.tetris.organization.OrganizationUserPermissionPO;
 import com.sumavision.tetris.organization.exception.CompanyNotExistException;
+import com.sumavision.tetris.system.role.SystemRoleDAO;
+import com.sumavision.tetris.system.role.SystemRolePO;
+import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
+import com.sumavision.tetris.user.event.UserImportEvent;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.user.exception.MailAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
@@ -52,6 +57,9 @@ public class UserService{
 
 	@Autowired
 	private UserDAO userDao;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	@Autowired
 	private UserSystemRolePermissionDAO userSystemRolePermissionDao;
@@ -85,6 +93,9 @@ public class UserService{
 	
 	@Autowired
 	private BusinessRoleService businessRoleService;
+	
+	@Autowired
+	private SystemRoleDAO systemRoleDao;
 	
 	/**
 	 * 添加一个用户<br/>
@@ -466,5 +477,103 @@ public class UserService{
 		userDao.save(user);
 		
 		return new UserVO().set(user);
+	}
+	
+	/**
+	 * 导入csv<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 上午10:44:06
+	 * @param String csv csv文件
+	 */
+	public void importCsv(String csv) throws Exception{
+		UserVO self = userQuery.current();
+		String[] lines = csv.split("\n");
+		Set<String> roleNames = new HashSet<String>();
+		List<UserPO> users = new ArrayList<UserPO>();
+		List<CompanyUserPermissionPO> companyUserPermissions = new ArrayList<CompanyUserPermissionPO>();
+		List<SystemRolePO> roles = new ArrayList<SystemRolePO>();
+		List<UserSystemRolePermissionPO> userSystemRolePermissions = new ArrayList<UserSystemRolePermissionPO>();
+		for(int i=1; i<lines.length; i++){
+			String line = lines[i];
+			String[] columns = line.split(",");
+			String[] roleNamesInColumn = columns[6].split("#");
+			for(String name:roleNamesInColumn){
+				if(!"".equals(name)){
+					roleNames.add(name);
+				}
+			}
+			if(!columns[0].equals(self.getUsername())){
+				UserPO user = new UserPO();
+				user.setUsername(columns[0]);
+				user.setNickname(columns[1]);
+				user.setPassword(sha256Encoder.encode("123456"));
+				user.setUserno(columns[4]);
+				user.setClassify(UserClassify.COMPANY);
+				user.setMobile(columns[7]);
+				user.setMail(columns[8]);
+				user.setAutoGeneration(false);
+				users.add(user);
+			}
+		}
+		
+		if(roleNames.size() > 0){
+			for(String roleName:roleNames){
+				SystemRolePO role = new SystemRolePO();
+				role.setAutoGeneration(false);
+				role.setCompanyId(Long.valueOf(self.getGroupId()));
+				role.setName(roleName);
+				role.setType(SystemRoleType.BUSINESS);
+				role.setUpdateTime(new Date());
+				roles.add(role);
+			}
+		}
+		
+		if(users.size() > 0){
+			userDao.save(users);
+			for(UserPO user:users){
+				CompanyUserPermissionPO permission = new CompanyUserPermissionPO();
+				permission.setUserId(user.getId().toString());
+				permission.setCompanyId(Long.valueOf(self.getGroupId()));
+				companyUserPermissions.add(permission);
+			}
+			companyUserPermissionDao.save(companyUserPermissions);
+		}
+		
+		if(roles.size() > 0){
+			systemRoleDao.save(roles);
+			for(SystemRolePO role:roles){
+				for(int i=1; i<lines.length; i++){
+					String line = lines[i];
+					String[] columns = line.split(",");
+					if(!columns[0].equals(self.getUsername()) && columns[6].indexOf(role.getName())>=0){
+						for(UserPO user:users){
+							if(user.getUsername().equals(columns[0])){
+								UserSystemRolePermissionPO permission = new UserSystemRolePermissionPO();
+								permission.setAutoGeneration(false);
+								permission.setRoleId(role.getId());
+								permission.setRoleType(SystemRoleType.BUSINESS);
+								permission.setUserId(user.getId());
+								permission.setUpdateTime(new Date());
+								userSystemRolePermissions.add(permission);
+								break;
+							}
+						}
+					}
+				}
+			}
+			if(userSystemRolePermissions.size() > 0){
+				userSystemRolePermissionDao.save(userSystemRolePermissions);
+			}
+		}
+		
+		//发射事件
+		if(users.size() > 0){
+			for(UserPO user:users){
+				UserImportEvent event = new UserImportEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), self.getGroupId(), self.getGroupName());
+				applicationEventPublisher.publishEvent(event);
+			}
+		}
+		
 	}
 }
