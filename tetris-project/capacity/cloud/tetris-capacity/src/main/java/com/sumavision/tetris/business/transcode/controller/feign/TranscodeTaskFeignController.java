@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
+import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -80,6 +81,70 @@ public class TranscodeTaskFeignController {
 		String response = transcodeTaskService.analysisInput(analysisInputVO);
 		System.out.println("刷源返回" + response);
 		return response;
+	}
+	
+	/**
+	 * 切换备份源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午8:38:48
+	 * @param String inputId 输入id
+	 * @param String index 备份源索引
+	 * @param String capacityIp 能力ip
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/change/backup")
+	public Object changeBackup(
+			String inputId,
+			String index,
+			String capacityIp,
+			HttpServletRequest request) throws Exception{
+		
+		transcodeTaskService.changeBackUp(inputId, index, capacityIp);
+		
+		return null;
+	}
+	
+	/**
+	 * 添加盖播<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午8:59:56
+	 * @param String input 盖播源
+	 * @param String capacityIp 能力ip
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/cover")
+	public Object changeBackup(
+			String input,
+			String capacityIp,
+			HttpServletRequest request) throws Exception{
+		
+		InputBO inputBO = JSONObject.parseObject(input, InputBO.class);
+		transcodeTaskService.addCover(inputBO, capacityIp);
+		
+		return null;
+	}
+	
+	/**
+	 * 删除盖播源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午9:01:06
+	 * @param String inputId 盖播源id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/cover")
+	public Object changeBackup(
+			String inputId,
+			HttpServletRequest request) throws Exception{
+		
+		transcodeTaskService.deleteCover(inputId);
+		
+		return null;
 	}
 	
 }

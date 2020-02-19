@@ -92,4 +92,40 @@ public class CapacityService {
 		JsonBodyResponseParser.parseObject(capacityFeign.setHeartbeatUrl(capacityIp, heartbeatUrl), null);
 	}
 	
+	/**
+	 * 切换备份源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午9:26:06
+	 * @param String inputId 备份源id
+	 * @param String index 索引
+	 * @param String capacityIp 能力ip
+	 */
+	public void changeBackup(String inputId, String index, String capacityIp) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.changeBackup(inputId, index, capacityIp), null);
+	}
+	
+	/**
+	 * 添加盖播<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午9:26:51
+	 * @param String input 盖播源参数（全量）
+	 * @param String capacityIp 能力ip
+	 */
+	public void addCover(String input, String capacityIp) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.addCover(input, capacityIp), null);
+	}
+	
+	/**
+	 * 删除盖播<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午9:27:29
+	 * @param String inputId 盖播源id
+	 */
+	public void deleteCover(String inputId) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.deleteCover(inputId), null);
+	}
+	
 }
