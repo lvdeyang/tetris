@@ -23,9 +23,11 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
+import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -56,6 +58,9 @@ public class MediaVideoQuery {
 	
 	@Autowired
 	private Path path;
+	
+	@Autowired
+	private ServerProps serverProps;
 	
 	/**
 	 * 加载文件夹下的视频媒资<br/>
@@ -420,6 +425,28 @@ public class MediaVideoQuery {
 	 * @return List<MediaVideoVO> 视频列表
 	 */
 	public List<MediaVideoVO> findByPreviewUrlIn(Collection<String> previewUrls) throws Exception{
+		ArrayList<String> searchPreivewList = new ArrayList<String>();
+		if (previewUrls == null || previewUrls.isEmpty()) return new ArrayList<MediaVideoVO>();
+		String localUrl = new StringBufferWrapper()
+				.append("http://")
+				.append(serverProps.getFtpIp())
+				.append(":")
+				.append(serverProps.getPort())
+				.append("/").toString();
+		String netUrl = new StringBufferWrapper()
+				.append("http://")
+				.append(serverProps.getIp())
+				.append(":")
+				.append(serverProps.getPort())
+				.append("/")
+				.toString();
+		for (String previewUrl : previewUrls) {
+			if (previewUrl.startsWith(localUrl)){
+				searchPreivewList.add(previewUrl.split(localUrl)[1]);
+			} else if (previewUrl.startsWith(netUrl)) {
+				searchPreivewList.add(previewUrl.split(netUrl)[1]);
+			}
+		}
 		List<MediaVideoPO> entities = mediaVideoDao.findByPreviewUrlIn(previewUrls);
 		return MediaVideoVO.getConverter(MediaVideoVO.class).convert(entities, MediaVideoVO.class);
 	}

@@ -88,6 +88,7 @@ public class Adapter {
 				break;
 			}
 		}
+		if (useTemplate == null && screenNum == 1) return oneScreen();
 		return useTemplate;
 	}
 	
@@ -111,6 +112,7 @@ public class Adapter {
 				returnObject.put("height", screen.getString("height"));
 				returnObject.put("top", screen.getString("top"));
 				returnObject.put("left", screen.getString("left"));
+				returnObject.put("no", serialNum);
 				return returnObject;
 			}
 		}

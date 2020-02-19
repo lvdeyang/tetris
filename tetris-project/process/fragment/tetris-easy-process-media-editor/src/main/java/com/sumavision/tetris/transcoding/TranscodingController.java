@@ -18,6 +18,8 @@ import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionQuer
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionService;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskRatePermissionVO;
 import com.sumavision.tetris.media.editor.task.MediaEditorTaskVO;
+import com.sumavision.tetris.mims.app.media.MediaFeign;
+import com.sumavision.tetris.mims.app.media.MediaQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.CachedHttpServletRequestWrapper;
 import com.sumavision.tetris.transcoding.addTask.AddTaskService;
@@ -162,8 +164,19 @@ public class TranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/test")
-	public Object test(String xml,HttpServletRequest request) throws Exception {
-		HttpRequestUtil.httpXmlPost(RequestUrlType.GET_TEMPLETE_NAME_LIST_URL.getUrl(),xml);
-		return null;
+	public Object test(String xml, Boolean ifToFirst, HttpServletRequest request) throws Exception {
+//		HttpRequestUtil.httpXmlPost(RequestUrlType.GET_TEMPLETE_NAME_LIST_URL.getUrl(),xml);
+//		return null;
+		JSONObject variables = new JSONObject();
+		variables.put("_pa58_firstFirst", 1);
+		variables.put("_pa58_firstSecond", 2);
+		variables.put("_pa59_secondFirst", 3);
+		variables.put("_pa59_secondSecond", 4);
+		variables.put("ifToFirst", ifToFirst);
+		
+		String processInstanceId = processService.startByKey("_lzp_test_process", variables.toJSONString(), null, null);
+		
+		return new HashMapWrapper<String, Object>().put("processId", processInstanceId)
+				.getMap();
 	}
 }

@@ -195,6 +195,20 @@
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.addVideo.keyWords"></el-input>
                     </el-form-item>
+                    <el-form-item label="是否转码" prop="delivery">
+                        <el-switch v-model="dialog.addVideo.mediaEdit" @change="handleMediaEditChange"></el-switch>
+                    </el-form-item>
+                    <el-form-item label="转码模板"  v-if="dialog.addVideo.mediaEdit">
+                        <el-select
+                                v-model="dialog.addVideo.mediaEditTemplate"
+                                placeholder="请选择转码模板">
+                            <el-option
+                                    v-for="item in dialog.addVideo.mediaEditTemplates"
+                                    :key="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                     <el-form-item>
                         <el-button size="small" type="primary" @click="handleUpload"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
                         <div v-if="dialog.addVideo.task">{{dialog.addVideo.task.name}}</div>

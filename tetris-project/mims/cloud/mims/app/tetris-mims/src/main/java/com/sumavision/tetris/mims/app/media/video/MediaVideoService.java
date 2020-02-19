@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -30,6 +31,8 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.easy.process.core.ProcessQuery;
 import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.easy.process.core.ProcessVO;
+import com.sumavision.tetris.easy.process.media.editor.MediaEditorService;
+import com.sumavision.tetris.easy.process.media.editor.TranscodeMediaVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -98,6 +101,9 @@ public class MediaVideoService {
 	
 	@Autowired
 	private ProcessService processService;
+	
+	@Autowired
+	private MediaEditorService mediaEditorService;
 	
 	/**
 	 * 视频媒资上传审核通过<br/>
@@ -844,5 +850,28 @@ public class MediaVideoService {
 			br.close();
 		}
 		return duration;
+	}
+	
+	/**
+	 * 添加文件转码任务<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月12日 下午2:29:02
+	 * @param MediaAudioVO media 源文件信息
+	 * @param String param 模板名称
+	 * @return 参数键值对
+	 */
+	public void startMediaEdit(MediaVideoPO media) throws Exception {
+		String template = media.getMediaEditTemplate();
+		if (!media.getMediaEdit() || template == null || template.isEmpty()) return;
+		TranscodeMediaVO transcodeMediaVO = new TranscodeMediaVO();
+		transcodeMediaVO.setUuid(media.getUuid());
+		transcodeMediaVO.setStartTime(0l);
+		transcodeMediaVO.setEndTime(media.getDuration());
+		String transcodeJob = JSONArray.toJSONString(new ArrayListWrapper<TranscodeMediaVO>().add(transcodeMediaVO).getList());
+		String name = media.getName();
+		Long folderId = media.getFolderId();
+		
+		mediaEditorService.start(transcodeJob, template, name, folderId, "");
 	}
 }

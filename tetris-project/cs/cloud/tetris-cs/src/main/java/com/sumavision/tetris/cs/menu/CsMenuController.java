@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cs.menu;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
+import com.sumavision.tetris.mims.app.media.live.MediaPushLiveVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -188,8 +191,9 @@ public class CsMenuController {
 	public Object getMIMSResource(Long id,HttpServletRequest request) throws Exception {
 
 		List<MediaAVideoVO> resources = resourceQuery.getMIMSResources(id);
+		List<MediaPushLiveVO> lives = resourceQuery.getMIMSLiveResources();
 
-		return resources;
+		return new ArrayListWrapper<Object>().addAll(resources).addAll(lives).getList();
 	}
 	
 	/**

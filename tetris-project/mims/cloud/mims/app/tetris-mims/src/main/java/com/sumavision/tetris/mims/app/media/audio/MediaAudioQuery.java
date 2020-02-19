@@ -712,7 +712,29 @@ public class MediaAudioQuery {
 	 * @return List<MediaAudioVO> 音频列表
 	 */
 	public List<MediaAudioVO> findByPreviewUrlIn(Collection<String> previewUrls) throws Exception{
-		List<MediaAudioPO> entities = mediaAudioDao.findByPreviewUrlIn(previewUrls);
+		ArrayList<String> searchPreivewList = new ArrayList<String>();
+		if (previewUrls == null || previewUrls.isEmpty()) return new ArrayList<MediaAudioVO>();
+		String localUrl = new StringBufferWrapper()
+				.append("http://")
+				.append(serverProps.getFtpIp())
+				.append(":")
+				.append(serverProps.getPort())
+				.append("/").toString();
+		String netUrl = new StringBufferWrapper()
+				.append("http://")
+				.append(serverProps.getIp())
+				.append(":")
+				.append(serverProps.getPort())
+				.append("/")
+				.toString();
+		for (String previewUrl : previewUrls) {
+			if (previewUrl.startsWith(localUrl)){
+				searchPreivewList.add(previewUrl.split(localUrl)[1]);
+			} else if (previewUrl.startsWith(netUrl)) {
+				searchPreivewList.add(previewUrl.split(netUrl)[1]);
+			}
+		}
+		List<MediaAudioPO> entities = mediaAudioDao.findByPreviewUrlIn(searchPreivewList);
 		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(entities, MediaAudioVO.class);
 	}
 }

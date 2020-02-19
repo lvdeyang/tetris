@@ -76,16 +76,10 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 	@Override
 	public boolean equals(Object obj) {
 		BroadAbilityBroadInfoVO infoVO = (BroadAbilityBroadInfoVO)obj;
-		return (
-				this.getPreviewUrlIp() != null
+		return  this.userId == infoVO.getUserId()
+				&& this.getPreviewUrlIp() != null
 				&& this.getPreviewUrlIp().equals(infoVO.getPreviewUrlIp())
 				&& this.getPreviewUrlPort() != null
-				&& this.getPreviewUrlPort().equals(infoVO.getPreviewUrlPort())
-				)
-				|| (
-					this.getUserId() != null && this.getUserId() == infoVO.getUserId()
-					&& this.getPreviewUrlPort() != null
-					&& this.getPreviewUrlPort().equals(infoVO.getPreviewUrlPort())
-					);
+				&& this.getPreviewUrlPort().equals(infoVO.getPreviewUrlPort());
 	}
 }

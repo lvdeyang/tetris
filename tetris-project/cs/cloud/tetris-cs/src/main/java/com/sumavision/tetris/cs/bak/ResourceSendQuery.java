@@ -1,7 +1,6 @@
 package com.sumavision.tetris.cs.bak;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +57,9 @@ public class ResourceSendQuery {
 				sourceSend.setParentId(item.getParentId());
 				sourceSend.setPreviewUrl(item.getPreviewUrl());
 				sourceSend.setTime(item.getDuration());
+				sourceSend.setFreq(item.getFreq());
+				sourceSend.setAudioPid(item.getAudioPid());
+				sourceSend.setVideoPid(item.getVideoPid());
 				saveResource.add(sourceSend);
 
 				if (previewResource != null && previewResource.size() > 0) {
