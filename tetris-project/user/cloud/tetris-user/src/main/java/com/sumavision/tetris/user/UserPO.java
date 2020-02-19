@@ -1,15 +1,12 @@
 package com.sumavision.tetris.user;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -210,5 +207,38 @@ public class UserPO extends AbstractBasePO{
 	public void setEquipType(UserEquipType equipType) {
 		this.equipType = equipType;
 	}*/
+	
+	/**
+	 * 生产csv表头<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 上午9:26:53
+	 * @return String csv表头
+	 */
+	public static String head(){
+		return "用户账号,用户昵称,密码,所属分组编码,用户sip号码,用户类型,用户角色,手机号,邮箱,描述";
+	}
+	
+	/**
+	 * 生成csv一行数据<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 上午9:27:24
+	 * @param String roles #号分割
+	 * @return String csv一行数据
+	 */
+	public String row(String roles){
+		return new StringBufferWrapper().append(this.getUsername()).append(",")
+									    .append(this.getNickname()).append(",")
+									    .append(",")
+									    .append(",")
+									    .append(this.getUserno()).append(",")
+									    .append(",")
+									    .append(roles).append(",")
+									    .append(this.getMobile()).append(",")
+									    .append(this.getMail()).append(",")
+									    .append(",")
+									    .toString();
+	}
 	
 }

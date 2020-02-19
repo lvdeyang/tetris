@@ -382,6 +382,42 @@ define([
 
         },
 
+        //文件下载
+        download:function(uri, data, callback, method){
+            method = method || 'POST';
+            var url = window.HOST + window.SCHEMA + uri;
+            var xhr = new XMLHttpRequest();
+            var _token = storage.getItem(ajax._conf.authname) || '';
+            var _sessionId = storage.getItem(ajax._conf.sessionIdName) || '';
+            xhr.open(method, url, true);
+            xhr.setRequestHeader('Authorization', _token);
+            xhr.setRequestHeader('tetris-001', _token);
+            xhr.setRequestHeader('tetris-002', _sessionId);
+            xhr.responseType = "blob";
+            xhr.onload = function () {
+                if(this.status === 200){
+                    var blob = this.response;
+                    if(typeof callback === 'function') callback(blob);
+                }else{
+                    console.error('http异常状态：'+this.status);
+                    console.error(url);
+                    console.log(arguments);
+                }
+                xhr = null;
+            };
+            xhr.onerror = function(){
+                console.error('请求失败：'+url);
+                console.log(arguments);
+                xhr = null;
+            };
+            xhr.ontimeout = function(){
+                console.error('请求超时：'+url);
+                console.log(arguments);
+                xhr = null;
+            };
+            xhr.send();
+        },
+
         //update
         update:function(uri, data, callback, contentType, catchCodeArr, $loading, dataType){
 
