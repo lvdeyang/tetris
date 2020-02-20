@@ -1003,7 +1003,6 @@ public class HttpInterfaceController {
 		// 更新bundle上当前登陆的设备账号标识ID
 		bundle.setCurrentLoginId(certify_id);
 		bundle.setOnlineStatus(ONLINE_STATUS.ONLINE);
-		bundleService.save(bundle);
 		
 		String bundleId = bundle.getBundleId();
 
@@ -1027,10 +1026,13 @@ public class HttpInterfaceController {
 		if(choseWorkNode != null){
 			bundleExtraInfoJson.put("access_ip", choseWorkNode.getIp());
 			bundleExtraInfoJson.put("access_port", choseWorkNode.getPort());
+			bundle.setAccessNodeUid(choseWorkNode.getNodeUid());
 		}else{
 			bundleExtraInfoJson.put("access_ip", "");
 			bundleExtraInfoJson.put("access_port", "");
 		}
+		
+		bundleService.save(bundle);
 		
 		respBody.setBundle_extra_info(bundleExtraInfoJson.toJSONString());
 		respBody.setUserId(bundle.getId());
