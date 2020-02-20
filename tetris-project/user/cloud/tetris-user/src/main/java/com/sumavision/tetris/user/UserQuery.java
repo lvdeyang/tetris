@@ -677,6 +677,26 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 根据昵称列表查询用户列表<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 下午4:31:04
+	 * @param List<String> nicknames 昵称列表
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> queryUsersByNicknameIn(List<String> nicknames) throws Exception{
+		
+		List<UserPO> users = userDao.findByNicknameIn(nicknames);
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			for(UserPO user:users){
+				view_users.add(new UserVO().set(user));
+			}
+		}
+		return view_users;
+	}
+	
+	/**
 	 * 根据用户名分页查询（同一公司下）-- 带例外<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>

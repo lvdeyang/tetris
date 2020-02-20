@@ -244,11 +244,23 @@ public class UserQuery {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月3日 上午11:15:03
-	 * @param Long roleId jueseid
+	 * @param Long roleId 角色id
 	 * @return List<UserVO>
 	 */
 	public List<UserVO> queryUsersByRole(Long roleId) throws Exception{
 		return JsonBodyResponseParser.parseArray(userFeign.queryUserByRole(roleId), UserVO.class);
+	}
+	
+	/**
+	 * 根据昵称列表查询用户列表<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 下午4:38:46
+	 * @param List<String> nicknames
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> queryUsersByNickNameIn(List<String> nicknames) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.queryUsersByNicknameIn(JSON.toJSONString(nicknames)), UserVO.class);
 	}
 	
 	/***************************************************
