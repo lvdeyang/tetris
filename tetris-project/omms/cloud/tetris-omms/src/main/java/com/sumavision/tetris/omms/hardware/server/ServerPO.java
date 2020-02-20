@@ -4,6 +4,8 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,6 +30,9 @@ public class ServerPO extends AbstractBasePO{
 	/** ip */
 	private String ip;
 	
+	/** 小工具端口 */
+	private String gadgetPort;
+	
 	/** 备注 */
 	private String remark;
 	
@@ -36,6 +41,9 @@ public class ServerPO extends AbstractBasePO{
 
 	/** 创建时间 */
 	private Date createTime;
+	
+	/** 服务器状态 */
+	private ServerStatus status;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -53,6 +61,15 @@ public class ServerPO extends AbstractBasePO{
 
 	public void setIp(String ip) {
 		this.ip = ip;
+	}
+
+	@Column(name = "GADGET_PORT")
+	public String getGadgetPort() {
+		return gadgetPort;
+	}
+
+	public void setGadgetPort(String gadgetPort) {
+		this.gadgetPort = gadgetPort;
 	}
 
 	@Column(name = "REMARK")
@@ -81,6 +98,16 @@ public class ServerPO extends AbstractBasePO{
 
 	public void setCreateTime(Date createTime) {
 		this.createTime = createTime;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "STATUS")
+	public ServerStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(ServerStatus status) {
+		this.status = status;
 	}
 	
 }

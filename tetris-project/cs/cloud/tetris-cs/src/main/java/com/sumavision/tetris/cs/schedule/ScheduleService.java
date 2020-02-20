@@ -192,6 +192,7 @@ public class ScheduleService {
 			screen.setDuration(item.getDuration());
 			screen.setEncryption(item.getEncryption());
 			screen.setEncryptionUrl(item.getEncryptionUrl());
+			screen.setResourceId(item.getResourceId());
 			screenVOs.add(screen);
 		}
 		ProgramVO program = new ProgramVO();

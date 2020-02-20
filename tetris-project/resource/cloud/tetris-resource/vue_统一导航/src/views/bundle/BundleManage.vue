@@ -192,7 +192,7 @@
 
 <script type="text/ecmascript-6">
     import { getAllUsers,getDeviceModels,getBundles,getBundleDetailInfo,deleteBundle,getBundleChannels,logoutBundle,clearBundle,setAccessLayer,syncLdap,syncEquipInfoFromLdap,
-            syncEquipInfToLdap, cleanUpEquipInfo} from '../../api/api';
+            syncEquipInfToLdap, cleanUpEquipInfo, exportBundle} from '../../api/api';
     // let requestIP = document.location.host.split(":")[0];
 
     import selectLayerNode from '../layernode/SelectLayerNode';
@@ -556,16 +556,40 @@
     ,
 
         exportBundle : function () {
-            // location.href = "http://" + requestIP + ":8887/suma-venus-resource/bundle/export"
 
-            var exportUrlTemp = basePath + "/bundle/export"
+          exportBundle (null).then((res)=>{
+            const blob =new Blob([res.data], {type:'application/octet-stream;charset=utf-8'});
 
-            if (exportUrlTemp.indexOf('__requestIP__') !== -1) {
-                var requestIP = document.location.host.split(':')[0]
-                exportUrlTemp = exportUrlTemp.replace('__requestIP__', requestIP)
-            }
+            const fileName ='folder.csv';
 
-            location.href = exportUrlTemp
+            const elink =document.createElement('a');
+
+            elink.download =fileName;
+
+            elink.style.display ='none';
+
+            elink.href =URL.createObjectURL(blob);
+
+            document.body.appendChild(elink);
+
+            elink.click();
+
+            URL.revokeObjectURL(elink.href);
+
+            document.body.removeChild(elink);
+
+          }).catch((error)=>{
+
+            this.$message({
+
+              message:  error,
+
+              type:'error'
+
+            });
+
+          })
+
         }
     ,
 

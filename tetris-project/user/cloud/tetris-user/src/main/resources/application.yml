@@ -83,6 +83,8 @@ eureka:
       defaultZone: http://127.0.0.1:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
+    # 指定此实例的ip
+    #ip-address: 192.165.56.85
     prefer-ip-address: true
     # 心跳检测检测与续约时间
     # 测试时将值设置设置小些，保证服务关闭后注册中心能及时踢出服务

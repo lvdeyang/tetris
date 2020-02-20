@@ -118,6 +118,8 @@ public class MediaAudioController {
             String remark,
 			Long folderId, 
 			boolean encryption,
+			Boolean mediaEdit,
+			String mediaEditTemplate,
 			HttpServletRequest request) throws Exception{
 		
 		MediaAudioTaskVO taskParam = JSON.parseObject(task, MediaAudioTaskVO.class);
@@ -144,6 +146,9 @@ public class MediaAudioController {
 		}
 		
 		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, keyWordList, remark, encryption, taskParam, folder);
+		entity.setMediaEdit(mediaEdit);
+		entity.setMediaEditTemplate(mediaEditTemplate);
+		mediaAudioDao.save(entity);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -172,6 +177,8 @@ public class MediaAudioController {
             String keyWords,
             String remark,
             boolean encryption,
+            Boolean mediaEdit,
+            String mediaEditTemplate,
 			Long folderId, 
 			HttpServletRequest request) throws Exception{
 		
@@ -197,6 +204,9 @@ public class MediaAudioController {
 		}
 		
 		MediaAudioPO entity = mediaAudioService.addTaskFromTxt(user, name, tagList, keyWordList, remark, txtId, encryption, folder);
+		entity.setMediaEdit(mediaEdit);
+		entity.setMediaEditTemplate(mediaEditTemplate);
+		mediaAudioDao.save(entity);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -396,6 +406,10 @@ public class MediaAudioController {
 				if(task.getEncryption()){
 					fileEncodeService.encodeAudioFile(task);
 				}
+			}
+			
+			if (task.getMediaEdit() != null && task.getMediaEdit()) {
+				mediaAudioService.startMediaEdit(task);
 			}
 		}
 		

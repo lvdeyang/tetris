@@ -18,6 +18,9 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 	private Integer downloadCount;
 	private String encryption;
 	private String encryptionUrl;
+	private String freq;
+	private String audioPid;
+	private String videoPid;
 	private Boolean checked = true;
 	
 	@Override
@@ -35,7 +38,10 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 		.setChannelId(entity.getChannelId())
 		.setEncryptionUrl(entity.getEncryptionUrl())
 		.setDownloadCount(entity.getDownloadCount())
-		.setPreviewUrl(entity.getPreviewUrl());
+		.setPreviewUrl(entity.getPreviewUrl())
+		.setFreq(entity.getFreq())
+		.setAudioPid(entity.getAudioPid())
+		.setVideoPid(entity.getVideoPid());
 		
 		return this;
 	}
@@ -145,6 +151,33 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 
 	public CsResourceVO setEncryptionUrl(String encryptionUrl) {
 		this.encryptionUrl = encryptionUrl;
+		return this;
+	}
+
+	public String getFreq() {
+		return freq;
+	}
+
+	public CsResourceVO setFreq(String freq) {
+		this.freq = freq;
+		return this;
+	}
+
+	public String getAudioPid() {
+		return audioPid;
+	}
+
+	public CsResourceVO setAudioPid(String audioPid) {
+		this.audioPid = audioPid;
+		return this;
+	}
+
+	public String getVideoPid() {
+		return videoPid;
+	}
+
+	public CsResourceVO setVideoPid(String videoPid) {
+		this.videoPid = videoPid;
 		return this;
 	}
 

@@ -15,7 +15,7 @@ $(function(){
             form:{
                 id:'',
                 name:'',
-                age:'',
+                age:0,
                 company:'',
                 department:'',
                 phone:'',
@@ -52,7 +52,8 @@ $(function(){
                             self.status = 1;
                             self.editForm = false;
                         }else{
-                            self.status = 2;
+                            //self.status = 2;
+                            self.status = 1;
                             self.editForm = false;
                         }
                     }
@@ -107,15 +108,20 @@ $(function(){
             },
             handleTimeForWork:function(){
                 var self = this;
+                if(!self.form.age) self.form.age = 0;
                 $.post(BASEPATH+'covid19/register/statistics/save', self.form, function(response){
                     if(response.status === 200){
                         var data = response.data;
                         localStorage.setItem(self.key, $.toJSON(data));
-                        self.status = 2;
+                        //self.status = 2;
+                        self.status = 1;
                         self.editForm = false;
                         for(var i in data){
                             self.form[i] = ''+ data[i];
                         }
+                        self.$alert('统计成功', '提示', {
+                            okLabel: '知道了'
+                        });
                     }else{
                         self.$toast.error(response.message);
                     }

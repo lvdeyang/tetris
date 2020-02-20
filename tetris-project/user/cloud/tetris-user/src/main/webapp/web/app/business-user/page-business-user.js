@@ -13,6 +13,7 @@ define([
     'mi-frame',
     'mi-sub-title',
     'mi-user-dialog',
+    'mi-upload-dialog',
     'css!' + window.APPPATH + 'business-user/page-business-user.css'
 ], function (tpl, config, ajax, $, context, commons, Vue) {
 
@@ -68,6 +69,10 @@ define([
                         newPassword: '',
                         repeat: '',
                         loading: false
+                    },
+                    import:{
+                        requireType:['csv'],
+                        multiple:false
                     }
                 }
             },
@@ -113,6 +118,37 @@ define([
                 },
                 handelDelete: function () {
                     var self = this;
+                },
+                handleExport:function(){
+                    var self = this;
+                    ajax.download('/user/handle/export', null, function(data){
+                        var $a = $('#page-business-user-export');
+                        $a[0].download = 'user.csv';
+                        $a[0].href=window.URL.createObjectURL(data);
+                        $a[0].click();
+                        self.$message({
+                            type:'success',
+                            message:'操作成功'
+                        });
+                    });
+                },
+                handleImport:function(){
+                    var self = this;
+                    self.$refs.miUploadDialog.open();
+                },
+                fileSelected:function(files, done){
+                    var self = this;
+                    var csv = files[0];
+                    var data = new FormData();
+                    data.append('csv', csv);
+                    ajax.upload('/user/handle/import', data, function(data){
+                        self.$message({
+                            type:'success',
+                            message:'操作成功'
+                        });
+                        done();
+                        self.load(1);
+                    });
                 },
                 handleRowEdit: function (scope) {
                     var self = this;

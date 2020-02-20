@@ -51,7 +51,8 @@ require.config({
 
         /* pages */
         'page-omms-monitor-service':window.APPPATH + 'omms/monitor/service/page-omms-monitor-service',
-        'page-omms-software-service-type':window.APPPATH + 'omms/software/service/type/page-omms-software-service-type'
+        'page-omms-software-service-type':window.APPPATH + 'omms/software/service/type/page-omms-software-service-type',
+        'page-omms-hardware-server':window.APPPATH + 'omms/hardware/server/page-omms-hardware-server'
 
     },
     shim:{

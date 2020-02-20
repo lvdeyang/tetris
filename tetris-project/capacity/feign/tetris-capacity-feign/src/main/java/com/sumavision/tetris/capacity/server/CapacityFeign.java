@@ -82,4 +82,42 @@ public interface CapacityFeign {
 	public JSONObject setHeartbeatUrl(
 			@RequestParam("capacityIp") String capacityIp,
 			@RequestParam("heartbeatUrl") String heartbeatUrl) throws Exception;
+	
+	/**
+	 * 切换备份源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午9:06:43
+	 * @param String inputId 备份源输入id
+	 * @param String index 索引
+	 * @param String capacityIp 能力ip
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/change/backup")
+	public JSONObject changeBackup(
+			@RequestParam("inputId") String inputId,
+			@RequestParam("index") String index,
+			@RequestParam("capacityIp") String capacityIp) throws Exception;
+	
+	/**
+	 * 添加盖播<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午9:14:14
+	 * @param String input input全量参数
+	 * @param String capacityIp 能力ip
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/add/cover")
+	public JSONObject addCover(
+			@RequestParam("input") String input,
+			@RequestParam("capacityIp") String capacityIp) throws Exception;
+	
+	/**
+	 * 删除盖播<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午9:16:07
+	 * @param String inputId 盖播输入id
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/delete/cover")
+	public JSONObject deleteCover(@RequestParam("inputId") String inputId) throws Exception;
 }

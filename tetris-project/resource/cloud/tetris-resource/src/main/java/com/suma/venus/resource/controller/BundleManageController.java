@@ -863,7 +863,7 @@ public class BundleManageController extends ControllerBase {
 		}
 	}
 
-	@RequestMapping(value = "export", method = RequestMethod.GET)
+	@RequestMapping(value = "export", method = RequestMethod.POST)
 	public ResponseEntity<byte[]> export(HttpServletResponse response) {
 		try {
 			String fileName = "bundle数据表";

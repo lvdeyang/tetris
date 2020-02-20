@@ -22,6 +22,12 @@ public class MediaAVideoVO {
 	
 	private String remarks;
 	
+	private String freq;
+	
+	private String audioPid;
+	
+	private String videoPid;
+	
 	private StoreType storeType;
 	
 	private String uploadTmpPath;
@@ -43,6 +49,8 @@ public class MediaAVideoVO {
 	private Integer progress;
 	
 	private String previewUrl;
+	
+	private Integer hotWeight;
 	
 	private Boolean encryption;
 	
@@ -121,6 +129,38 @@ public class MediaAVideoVO {
 		return remarks;
 	}
 
+	public MediaAVideoVO setRemarks(String remarks) {
+		this.remarks = remarks;
+		return this;
+	}
+
+	public String getFreq() {
+		return freq;
+	}
+
+	public MediaAVideoVO setFreq(String freq) {
+		this.freq = freq;
+		return this;
+	}
+
+	public String getAudioPid() {
+		return audioPid;
+	}
+
+	public MediaAVideoVO setAudioPid(String audioPid) {
+		this.audioPid = audioPid;
+		return this;
+	}
+
+	public String getVideoPid() {
+		return videoPid;
+	}
+
+	public MediaAVideoVO setVideoPid(String videoPid) {
+		this.videoPid = videoPid;
+		return this;
+	}
+
 	public StoreType getStoreType() {
 		return storeType;
 	}
@@ -136,11 +176,6 @@ public class MediaAVideoVO {
 
 	public MediaAVideoVO setUploadTmpPath(String uploadTmpPath) {
 		this.uploadTmpPath = uploadTmpPath;
-		return this;
-	}
-
-	public MediaAVideoVO setRemarks(String remarks) {
-		this.remarks = remarks;
 		return this;
 	}
 
@@ -222,6 +257,15 @@ public class MediaAVideoVO {
 
 	public MediaAVideoVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+		return this;
+	}
+
+	public Integer getHotWeight() {
+		return hotWeight;
+	}
+
+	public MediaAVideoVO setHotWeight(Integer hotWeight) {
+		this.hotWeight = hotWeight;
 		return this;
 	}
 

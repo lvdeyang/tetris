@@ -1,9 +1,12 @@
 package com.sumavision.tetris.cs.menu;
 
+import java.util.Date;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Entity
@@ -50,6 +53,15 @@ public class CsResourcePO extends AbstractBasePO {
 	
 	/** 媒资加密预览地址 */
 	private String encryptionUrl;
+	
+	/** 媒资频点 */
+	private String freq;
+	
+	/** 媒资音频pid */
+	private String audioPid;
+	
+	/** 视频pid */
+	private String videoPid;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -157,5 +169,52 @@ public class CsResourcePO extends AbstractBasePO {
 
 	public void setEncryptionUrl(String encryptionUrl) {
 		this.encryptionUrl = encryptionUrl;
+	}
+
+	@Column(name = "FREQ")
+	public String getFreq() {
+		return freq;
+	}
+
+	public void setFreq(String freq) {
+		this.freq = freq;
+	}
+
+	@Column(name = "AUDIO_PID")
+	public String getAudioPid() {
+		return audioPid;
+	}
+
+	public void setAudioPid(String audioPid) {
+		this.audioPid = audioPid;
+	}
+
+	@Column(name = "VIDEO_PID")
+	public String getVideoPid() {
+		return videoPid;
+	}
+
+	public void setVideoPid(String videoPid) {
+		this.videoPid = videoPid;
+	}
+	
+	public CsResourcePO getFromAVideoVO(MediaAVideoVO media) {
+		if (media != null) {
+			this.setMimsUuid(media.getUuid());
+			this.setName(media.getName());
+			this.setType(media.getType());
+			this.setMimetype(media.getMimetype());
+			this.setDuration(media.getDuration());
+			this.setPreviewUrl(media.getPreviewUrl());
+			this.setEncryption(media.getEncryption() != null && media.getEncryption() ? "true" : "false");
+			this.setEncryptionUrl(media.getEncryptionUrl());
+			this.setDownloadCount(media.getDownloadCount());
+			this.setFreq(media.getFreq());
+			this.setAudioPid(media.getAudioPid());
+			this.setVideoPid(media.getVideoPid());
+			this.setMimsUuid(media.getUuid());
+			this.setUpdateTime(new Date());
+		}
+		return this;
 	}
 }

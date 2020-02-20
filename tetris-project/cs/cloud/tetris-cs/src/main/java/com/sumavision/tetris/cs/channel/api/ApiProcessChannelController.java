@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -27,6 +29,8 @@ import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
 import com.sumavision.tetris.mims.app.media.MediaQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/api/process/cs/channel")
@@ -45,6 +49,9 @@ public class ApiProcessChannelController {
 	
 	@Autowired
 	private MediaQuery mediaQuery;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 流程节点(文件转流)<br/>
@@ -76,7 +83,7 @@ public class ApiProcessChannelController {
 						.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(ip).setPreviewUrlPort(port.toString()))
 						.getList();
 				
-				ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播推流", "", ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null, null, null, infoVOs);
+				ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播推流", "", null, null, ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null, null, null, infoVOs);
 				
 				if (channel != null) {
 					//保存流程信息和回调地址
@@ -130,6 +137,28 @@ public class ApiProcessChannelController {
 		if (remotePO != null) {
 			channelService.stopBroadcast(remotePO.getChannelId());
 		}
+		return null;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/generate/with/internal/template")
+	public Object generateWithInternalTemplate(
+			String column,
+			String name, 
+			String type,
+			String author,
+			String publishTime,
+			String thumbnail,
+			String remark,
+			String keywords,
+			String content,
+			String region,
+			HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		List<JSONObject> contents = JSONArray.parseArray(content, JSONObject.class);
+		List<String> regions = JSONArray.parseArray(region, String.class);
+		channelService.generateWithInternalTemplate(name, author, publishTime, remark, keywords, contents, regions, user);
 		return null;
 	}
 }

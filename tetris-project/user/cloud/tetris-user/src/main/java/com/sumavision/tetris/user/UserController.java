@@ -1,5 +1,8 @@
 package com.sumavision.tetris.user;
 
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,18 +11,28 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.file.FileUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.config.server.ServerProps;
 import com.sumavision.tetris.config.server.UserServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
+import com.sumavision.tetris.system.role.SystemRoleDAO;
+import com.sumavision.tetris.system.role.SystemRolePO;
+import com.sumavision.tetris.system.role.SystemRoleType;
+import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
+import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.user.exception.UserNotExistException;
 
 @Controller
@@ -30,10 +43,19 @@ public class UserController {
 	private UserQuery userQuery;
 	
 	@Autowired
+	private UserDAO userDao;
+	
+	@Autowired
 	private UserService userService;
 	
 	@Autowired
 	private UserServerPropsQuery userServerPropsQuery;
+	
+	@Autowired
+	private UserSystemRolePermissionDAO userSystemRolePermissionDao;
+	
+	@Autowired
+	private SystemRoleDAO systemRoleDao;
 	
 	/**
 	 * 查询枚举类型<br/>
@@ -363,4 +385,90 @@ public class UserController {
 		
 		response.sendRedirect(redirectUrl.toString());
 	}
+	
+	/**
+	 * 导出用户数据<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 上午8:41:20
+	 * @return blob 用户角色关联表 csv
+	 */
+	@RequestMapping(value = "/handle/export")
+	public ResponseEntity<byte[]> handleExport(HttpServletRequest request) throws Exception{
+		
+		UserVO self = userQuery.current();
+		
+		StringBufferWrapper csv = new StringBufferWrapper().append(UserPO.head()).append("\n");
+		
+		List<UserPO> users = userDao.findByCompanyId(Long.valueOf(self.getGroupId()));
+		if(users!=null && users.size()>0){
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserPO user:users){
+				if(user.getId().equals(self.getId())) continue;
+				userIds.add(user.getId());
+			}
+			List<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserIdInAndRoleType(userIds, SystemRoleType.BUSINESS);
+			List<SystemRolePO> roles = null;
+			List<Long> roleIds = new ArrayList<Long>();
+			if(permissions!=null && permissions.size()>0){
+				for(UserSystemRolePermissionPO permission:permissions){
+					roleIds.add(permission.getRoleId());
+				}
+				roles = systemRoleDao.findByIdIn(roleIds);
+			}
+			for(UserPO user:users){
+				if(user.getId().equals(self.getId())) continue;
+				StringBufferWrapper roleInfo = new StringBufferWrapper();
+				if(permissions!=null && permissions.size()>0){
+					for(UserSystemRolePermissionPO permission:permissions){
+						if(user.getId().equals(permission.getUserId())){
+							for(SystemRolePO role:roles){
+								if(permission.getRoleId().equals(role.getId())){
+									roleInfo.append(role.getName()).append("#");
+									break;
+								}
+							}
+						}
+					}
+				}
+				csv.append(user.row(roleInfo.toString().substring(0, roleInfo.toString().length()-1))).append("\n");
+			}
+		}
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Content-type", new MediaType("application", "octet-stream", Charset.forName("utf-8")).toString());
+        headers.add("Content-Disposition", "attchement;filename=user.csv");
+        byte[] csvBytes = csv.toString().getBytes();
+        byte[] utf8Bytes = new byte[csvBytes.length+3];
+        utf8Bytes[0] = (byte)0xEF;
+        utf8Bytes[1] = (byte)0xBB;
+        utf8Bytes[2] = (byte)0xBF;
+        for(int i=0; i<csvBytes.length; i++){
+        	utf8Bytes[i+3] = csvBytes[i];
+        }
+        return new ResponseEntity<byte[]>(utf8Bytes, headers, HttpStatus.OK);
+	}
+	
+	/**
+	 * 导入用户表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 上午8:42:16
+	 * @param formdata csv 用户角色关联表数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/handle/import")
+	public Object handleImport(HttpServletRequest request, HttpServletResponse response) throws Exception{
+		MultipartHttpServletRequestWrapper multipartRequest = new MultipartHttpServletRequestWrapper(request);
+		InputStream inputstream = multipartRequest.getInputStream("csv");
+		String csv = FileUtil.readAsString(inputstream);
+		userService.importCsv(csv);
+		return null;
+	}
+	
 }
+
+
+
+

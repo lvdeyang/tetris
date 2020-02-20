@@ -1,5 +1,6 @@
 package com.sumavision.tetris.business.common.dao;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Modifying;
@@ -23,9 +24,13 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	
 	public List<TaskInputPO> findByCount(Integer count);
 	
+	public List<TaskInputPO> findByIdIn(Collection<Long> ids);
+	
 	//乐观
 	@Modifying
 	@Query("update TaskInputPO input set input.version = ?2 + 1, input.count = ?3 where input.taskUuid = ?1 and input.version = ?2")
 	public int update(String taskUuid, Integer version, Integer count);
+	
+	public TaskInputPO findByTypeAndTaskUuid(BusinessType type, String taskUuid);
 	
 }

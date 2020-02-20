@@ -39,12 +39,6 @@ define([
                 groups: context.getProp('groups'),
                 loading: false,
                 loadingText: "",
-                screen: {
-                    one: "一分屏",
-                    four: "四分屏",
-                    six: "六分屏",
-                    nine: "九分屏"
-                },
                 channel: {
                     page: {
                         currentPage: 1,
@@ -54,6 +48,26 @@ define([
                     },
                     data: [],
                     multipleSelection: []
+                },
+                options: {
+                    level: [
+                        {
+                            value: '9',
+                            label: '一般'
+                        }, {
+                            value: '8',
+                            label: '较大'
+                        }, {
+                            value: '7',
+                            label: '重大'
+                        }, {
+                            value: '6',
+                            label: '很大'
+                        }, {
+                            value: '5',
+                            label: '特别重大'
+                        }
+                    ]
                 },
                 dialog: {
                     addProgram: {
@@ -72,7 +86,9 @@ define([
                         autoBroadShuffle: false,
                         autoBroadDuration: 1,
                         autoBroadStart: "",
-                        date: ""
+                        date: "",
+                        level: '',
+                        hasFile: true
                     },
                     editChannel: {
                         visible: false,
@@ -90,7 +106,9 @@ define([
                         autoBroad: false,
                         autoBroadShuffle: false,
                         autoBroadDuration: 1,
-                        autoBroadStart: ""
+                        autoBroadStart: "",
+                        level: '',
+                        hasFile: true
                     },
                     editMenu: {
                         visible: false,
@@ -282,7 +300,12 @@ define([
                         remark: "",
                         date: ""
                     }
-                }
+                },
+                broadWayStream: '轮播推流',
+                broadWayFile: '下载文件',
+                broadWayTerminal: '终端播发',
+                qtEquipType: 'QT_MEDIA_EDITOR',
+                pushEquipType: 'PUSH'
             },
             computed: {},
             watch: {},
@@ -341,9 +364,13 @@ define([
                     //    });
                     //}
                 },
+
+                // add channel dialog event
                 handleAddProgram: function(){
                     var self = this;
-                    self.dialog.addProgram.broadWay = "轮播推流";
+                    self.dialog.addProgram.broadWay = self.broadWayStream;
+                    self.dialog.addProgram.level = "一般";
+                    self.dialog.addProgram.hasFile = true;
                     var t = new Date();
                     self.dialog.addProgram.date = t.getFullYear()+"-"+(t.getMonth()+1)+"-"+t.getDate()+" "+t.getHours()+":"+t.getMinutes()+":"+t.getSeconds();
                     var output = {
@@ -359,6 +386,8 @@ define([
                     self.dialog.addProgram.name = "";
                     self.dialog.addProgram.date = "";
                     self.dialog.addProgram.broadWay = "";
+                    self.dialog.addProgram.level = '';
+                    self.dialog.addProgram.hasFile = true;
                     self.dialog.addProgram.outputQtUsers = [];
                     self.dialog.addProgram.outputPushUsers = [];
                     self.dialog.addProgram.outputUserPort = "";
@@ -372,6 +401,11 @@ define([
                     self.dialog.addProgram.autoBroadStart = "";
                     self.dialog.addProgram.visible = false;
                     self.dialog.addProgram.value = "";
+                },
+                //更换优先级监听
+                handleAddProgramLevelOptionsChange: function (data) {
+                    var self = this;
+                    self.dialog.addProgram.level = data;
                 },
                 //添加流输出数的监听
                 handleAddProgramOutputCount: function (currentValue, oldValue) {
@@ -396,7 +430,7 @@ define([
                 },
                 handleAddProgramQtUserSet: function () {
                     var self = this;
-                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.addProgram.outputQtUsers, "QT");
+                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.addProgram.outputQtUsers, self.qtEquipType);
                 },
                 handleAddProgramPushUserSet: function () {
                     var self = this;
@@ -421,7 +455,7 @@ define([
                         });
                         return;
                     }
-                    if (self.dialog.addProgram.broadWay == "轮播推流" && self.dialog.addProgram.outputQtUsers.length <= 0) {
+                    if (self.dialog.addProgram.broadWay == self.broadWayStream && self.dialog.addProgram.outputQtUsers.length <= 0) {
                         var noOut = true;
                         for (var i = 0; i < self.dialog.addProgram.output.length; i++){
                             if (self.dialog.addProgram.output[i].previewUrlIp.trim() != "" && self.dialog.addProgram.output[i].previewUrlPort.trim() != ""){
@@ -437,7 +471,7 @@ define([
                             return;
                         }
                     }
-                    if (self.dialog.addProgram.broadWay == "下载文件" && !self.dialog.addProgram.outputQtUsers.length && !self.dialog.addProgram.outputPushUsers.length){
+                    if (self.dialog.addProgram.broadWay == self.broadWayFile && !self.dialog.addProgram.outputQtUsers.length && !self.dialog.addProgram.outputPushUsers.length){
                         this.$message({
                             message: '请选择至少一个播发用户',
                             type: 'warning'
@@ -449,7 +483,7 @@ define([
                         name: self.dialog.addProgram.name,
                         date: self.dialog.addProgram.date,
                         broadWay: self.dialog.addProgram.broadWay,
-                        outputUsers: JSON.stringify(self.dialog.addProgram.broadWay == "轮播推流" ? self.dialog.addProgram.outputQtUsers : self.dialog.addProgram.outputQtUsers.concat(self.dialog.addProgram.outputPushUsers)),
+                        outputUsers: JSON.stringify(self.dialog.addProgram.broadWay == self.broadWayStream ? self.dialog.addProgram.outputQtUsers : self.dialog.addProgram.outputQtUsers.concat(self.dialog.addProgram.outputPushUsers)),
                         outputUserPort: self.dialog.addProgram.outputUserPort,
                         output: JSON.stringify(self.dialog.addProgram.output),
                         encryption: self.dialog.addProgram.encryption,
@@ -457,7 +491,9 @@ define([
                         autoBroadShuffle: self.dialog.addProgram.autoBroadShuffle,
                         autoBroadDuration: self.dialog.addProgram.autoBroadDuration,
                         autoBroadStart: self.dialog.addProgram.autoBroadStart,
-                        remark: self.dialog.addProgram.remark
+                        remark: self.dialog.addProgram.remark,
+                        level: self.dialog.addProgram.level,
+                        hasFile: self.dialog.addProgram.hasFile
                     };
                     ajax.post('/cs/channel/add', newData, function (data, status) {
                         self.dialog.addProgram.loading = false;
@@ -469,24 +505,32 @@ define([
                         self.handleAddProgramClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
+
+                // edit channel dialog event
                 editChannel: function (scope) {
                     var self = this;
                     var row = scope.row;
                     self.dialog.editChannel.data = row;
                     self.dialog.editChannel.name = row.name;
                     self.dialog.editChannel.broadWay = row.broadWay;
-                    if (row.broadWay == "下载文件" && row.outputUsers) {
-                        for (var i = 0; i < row.outputUsers.length; i++) {
-                            var item = row.outputUsers[i];
-                            switch(item.equipType) {
-                                case "QT":
-                                    self.dialog.editChannel.outputQtUsers.push(item);
-                                    break;
-                                case "PUSH":
-                                    self.dialog.editChannel.outputPushUsers.push(item);
-                                    break;
-                                default :
-                                    break;
+                    if (row.outputUsers) {
+                        if (row.broadWay == self.broadWayFile) {
+                            for (var i = 0; i < row.outputUsers.length; i++) {
+                                var item = row.outputUsers[i];
+                                switch(item.equipType) {
+                                    case self.qtEquipType:
+                                        self.dialog.editChannel.outputQtUsers.push(item);
+                                        break;
+                                    case self.pushEquipType:
+                                        self.dialog.editChannel.outputPushUsers.push(item);
+                                        break;
+                                    default :
+                                        break;
+                                }
+                            }
+                        } else {
+                            for (var i = 0; i < row.outputUsers.length; i++) {
+                                self.dialog.editChannel.outputQtUsers.push(row.outputUsers[i]);
                             }
                         }
                     }
@@ -494,6 +538,8 @@ define([
                     if (row.output) self.dialog.editChannel.outputCount = row.output.length;
                     self.dialog.editChannel.output = row.output;
                     self.dialog.editChannel.remark = row.remark;
+                    self.dialog.editChannel.level = row.level;
+                    self.dialog.editChannel.hasFile = (row.hasFile != null) ? row.hasFile : true;
                     self.dialog.editChannel.encryption = row.encryption;
                     self.dialog.editChannel.autoBroad = row.autoBroad;
                     self.dialog.editChannel.autoBroadShuffle = row.autoBroadShuffle;
@@ -527,21 +573,29 @@ define([
                     self.dialog.editChannel.outputCount = 1;
                     self.dialog.editChannel.output = [];
                     self.dialog.editChannel.remark = "";
+                    self.dialog.editChannel.level = '';
+                    self.dialog.editChannel.hasFile = true;
                     self.dialog.editChannel.encryption  = false;
                     self.dialog.editChannel.autoBroad = false;
                     self.dialog.editChannel.autoBroadShuffle = false;
                     self.dialog.editChannel.autoBroadDuration = 1;
                     self.dialog.editChannel.autoBroadStart = "";
                 },
+                handleEditChannelLevelOptionsChange: function (data) {
+                    var self = this;
+                    self.dialog.editChannel.level = data;
+                },
                 handleEditChannelQtUserSet: function () {
                     var self = this;
-                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.editChannel.outputQtUsers, "QT");
+                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.editChannel.outputQtUsers, self.qtEquipType);
                 },
                 handleEditChannelCommitSend: function (listener) {
                     var self = this;
                     self.dialog.editChannel.loading = true;
                     var newName = self.dialog.editChannel.name;
                     var newRemark = self.dialog.editChannel.remark;
+                    var level = self.dialog.editChannel.level;
+                    var hasFile = self.dialog.editChannel.hasFile;
                     var outputQtUsers = self.dialog.editChannel.outputQtUsers;
                     var outputPushUsers = self.dialog.editChannel.outputPushUsers;
                     var outputUserPort = self.dialog.editChannel.outputUserPort;
@@ -562,7 +616,9 @@ define([
                         autoBroadShuffle: autoBroadShuffle,
                         autoBroadDuration: autoBroadDuration,
                         autoBroadStart: autoBroadStart,
-                        remark: newRemark
+                        remark: newRemark,
+                        level: level,
+                        hasFile: hasFile
                     };
                     ajax.post('/cs/channel/edit', questData, function (data, status) {
                         self.dialog.editChannel.loading = false;
@@ -574,6 +630,8 @@ define([
                         });
                         self.dialog.editChannel.data.name = newName;
                         self.dialog.editChannel.data.remark = newRemark;
+                        self.dialog.editChannel.data.level = level;
+                        self.dialog.editChannel.data.hasFile = hasFile;
                         self.dialog.editChannel.data.outputUsers = outputQtUsers.concat(outputPushUsers);
                         self.dialog.editChannel.data.output = output;
                         self.dialog.editChannel.data.encryption = encryption;
@@ -594,7 +652,7 @@ define([
                         });
                         return;
                     }
-                    if (self.dialog.editChannel.broadWay == "轮播推流" && self.dialog.editChannel.outputQtUsers.length <= 0) {
+                    if (self.dialog.editChannel.broadWay == self.broadWayStream && self.dialog.editChannel.outputQtUsers.length <= 0) {
                         var noOut = true;
                         for (var i = 0; i < self.dialog.editChannel.output.length; i++){
                             if (self.dialog.editChannel.output[i].previewUrlIp.trim() != "" && self.dialog.editChannel.output[i].previewUrlPort.trim() != ""){
@@ -610,7 +668,7 @@ define([
                             return;
                         }
                     }
-                    if (self.dialog.editChannel.broadWay == "下载文件" && !self.dialog.editChannel.outputQtUsers.length && !self.dialog.editChannel.outputPushUsers.length){
+                    if (self.dialog.editChannel.broadWay == self.broadWayFile && !self.dialog.editChannel.outputQtUsers.length && !self.dialog.editChannel.outputPushUsers.length){
                         this.$message({
                             message: '请选择至少一个播发用户',
                             type: 'warning'
@@ -656,6 +714,40 @@ define([
                         self.handleEditChannelCommitSend(function () {});
                     }
                 },
+                updateMenuToTerminal: function (scope) {
+                    var self = this;
+                    var row = scope.row;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title: '危险操作',
+                        message: h('div', null, [
+                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class: 'el-message-box__message'}, [
+                                h('p', null, ['此操作将对频道下的所有地区终端做资源同步，是否继续?'])
+                            ])
+                        ]),
+                        type: 'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose: function (action, instance, done) {
+                            instance.confirmButtonLoading = true;
+                            if (action === 'confirm') {
+                                var questData = {
+                                    channelId: row.id
+                                };
+                                ajax.post('/cs/channel/update/to/terminal', questData, function (data, status) {
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
+                            } else {
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function () {
+                    });
+                },
                 rowDelete: function (scope) {
                     var self = this;
                     var row = scope.row;
@@ -697,9 +789,6 @@ define([
                         for (var i = 0; i < rows.length; i++) {
                             this.$refs.multipleChannelTable.toggleRowSelection(row);
                         }
-                        //rows.forEach(row => {
-                        //  this.$refs.multipleChannelTable.toggleRowSelection(row);
-                        //});
                     } else {
                         this.$refs.multipleChannelTable.clearSelection();
                     }
@@ -1226,18 +1315,62 @@ define([
                 },
                 handleManageBroadcastAreaCommit: function () {
                     var self = this;
+                    var h = self.$createElement;
                     self.dialog.manageBroadcastArea.loading = true;
                     var questData = {
                         channelId: self.dialog.manageBroadcastArea.data.id,
                         areaListStr: JSON.stringify(self.dialog.manageBroadcastArea.tree.current)
                     };
-                    ajax.post('/cs/area/set', questData, function (data, status) {
-                        self.dialog.manageBroadcastArea.loading = false;
-                        self.handleManageBroadcastAreaClose();
+                    ajax.post('/cs/area/set', questData, function (data, status, message) {
                         if (status == 200) {
+                            self.dialog.manageBroadcastArea.loading = false;
+                            self.handleManageBroadcastAreaClose();
                             self.$message({
                                 message: '保存成功',
                                 type: 'success'
+                            });
+                        } else if (status == 409) {
+                            self.$msgbox({
+                                title: '地区被占用',
+                                message: h('div', null, [
+                                    h('div', {class: 'el-message-box__status el-icon-warning'}, null),
+                                    h('div', {class: 'el-message-box__message'}, [
+                                        h('p', null, ['是否强制使用已被占用地区，确定则取消其他频道占用?'])
+                                    ])
+                                ]),
+                                type: 'wraning',
+                                showCancelButton: true,
+                                confirmButtonText: '确定',
+                                cancelButtonText: '取消',
+                                beforeClose: function (action, instance, done) {
+                                    instance.confirmButtonLoading = true;
+                                    if (action === 'confirm') {
+                                        var questData = {
+                                            channelId: self.dialog.manageBroadcastArea.data.id,
+                                            areaListStr: JSON.stringify(self.dialog.manageBroadcastArea.tree.current)
+                                        };
+                                        ajax.post('/cs/area/set/force', questData, function (data, status) {
+                                            instance.confirmButtonLoading = false;
+                                            done();
+                                            self.dialog.manageBroadcastArea.loading = false;
+                                            if (status == 200) {
+                                                self.handleManageBroadcastAreaClose();
+                                                self.$message({
+                                                    message: '保存成功',
+                                                    type: 'success'
+                                                });
+                                            }
+                                        }, null, ajax.NO_ERROR_CATCH_CODE);
+                                    } else {
+                                        instance.confirmButtonLoading = false;
+                                        done();
+                                    }
+                                }
+                            }).catch(function () {
+                            });
+                        } else if (status == 403) {
+                            this.$alert(message, '地区被占用', {
+                                confirmButtonText: '确定'
                             });
                         }
                     }, null, ajax.NO_ERROR_CATCH_CODE);
@@ -1310,7 +1443,7 @@ define([
                     var questData = {
                         channelId: row.id
                     };
-                    if (row.broadWay == "终端播发") {
+                    if (row.broadWay == self.broadWayTerminal) {
                         self.loadingText = "正在更新播发状态";
                         self.loading = true;
                         ajax.post('/cs/channel/broadcast/status', questData, function (data, status) {

@@ -855,6 +855,7 @@ public class MediaCompressService {
 	 */
 	public MediaCompressVO packageTar(String jsonString, List<FileCompressVO> mimsUuidList) throws Exception {
 		UserVO userVO = userQuery.current();
+		String separator = File.separator;
 		FolderPO folderPO = folderDao.findCompanyRootFolderByType(userVO.getGroupId(),
 				FolderType.COMPANY_COMPRESS.toString());
 
@@ -875,7 +876,8 @@ public class MediaCompressService {
 			String[] filePaths = item.getPath().split("/");
 			StringBufferWrapper filePathBuffer = new StringBufferWrapper().append(tarDirPath.toString());
 			for (int i = 1; i < filePaths.length; i++) {
-				filePathBuffer.append("/").append(filePaths[i]);
+//				filePathBuffer.append("/").append(filePaths[i]);
+				filePathBuffer.append(separator).append(filePaths[i]);
 			}
 			File fileDir = new File(filePathBuffer.toString());
 			if (!fileDir.exists()) {
@@ -884,20 +886,25 @@ public class MediaCompressService {
 			
 			String uploadPath = ""; 
 			MediaVideoPO mediaVideoPO = mediaVideoDAO.findByUuid(item.getUuid());
+			String mediaName = "";
 			if (mediaVideoPO != null) {
 				uploadPath = mediaVideoPO.getUploadTmpPath();
+				mediaName = mediaVideoPO.getFileName();
 			}else {
 				MediaAudioPO mediaAudioPO = mediaAudioDAO.findByUuid(item.getUuid());
 				if (mediaAudioPO != null) {
 					uploadPath = mediaAudioPO.getUploadTmpPath();
+					mediaName = mediaAudioPO.getFileName();
 				}
 			}
 			
 			if (!uploadPath.isEmpty()) {
-				String[] pathLists = uploadPath.split("/");
-				String mediaName = pathLists[pathLists.length-1];
+//				String[] pathLists = uploadPath.split("/");
+//				String[] pathLists = uploadPath.split(separator);
+//				String mediaName = pathLists[pathLists.length-1];
 				
-				String copyDest = new StringBufferWrapper().append(filePathBuffer.toString()).append("/").append(mediaName).toString();
+//				String copyDest = new StringBufferWrapper().append(filePathBuffer.toString()).append("/").append(mediaName).toString();
+				String copyDest = new StringBufferWrapper().append(filePathBuffer.toString()).append(separator).append(mediaName).toString();
 				
 				CopyFileUtil.copyFileUsingFileChannels(new File(uploadPath), new File(copyDest));
 			}

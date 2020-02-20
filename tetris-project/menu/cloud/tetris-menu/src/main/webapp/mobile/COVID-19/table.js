@@ -9,10 +9,12 @@ $(function(){
                         {title:'姓名', name:'name'},
                         {title:'日期', name:'updateTime'},
                         {title:'体温', name:'temperature'},
-                        {title:'年龄', name:'age'},
-                        {title:'单位', name:'company'},
-                        {title:'部门', name:'department'},
+                        {title:'单位部门', name:'company'},
+                        {title:'工作房间号', name:'department'},
                         {title:'电话', name:'phone'},
+                        {title:'进入时间', name:'timeForWork'}
+
+                        /*{title:'年龄', name:'age'},
                         {title:'户籍地址', name:'homeAddress'},
                         {title:'现居地址', name:'liveAddress'},
                         {title:'单位地址', name:'workAddress'},
@@ -21,8 +23,7 @@ $(function(){
                         {title:'2020年1月1后有无接触疑似确诊病人', name:'contactWithSuspectedOrConfirmedPatientsAfter20200101'},
                         {title:'自2020年1月1日起，在湖北省停留', name:'stayInHubeiSince20200101'},
                         {title:'近期有无咳嗽发烧症状', name:'coughOrFever'},
-                        {title:'上班时间', name:'timeForWork'},
-                        {title:'下班时间', name:'closingTime'}
+                        {title:'下班时间', name:'closingTime'}*/
                     ],
                     data:[],
                     page:{
@@ -65,9 +66,6 @@ $(function(){
             currentPageChange:function(currentPage){
                 var self = this;
                 self.load(currentPage);
-                /*if(self.table.page.currentPage != currentPage){
-                    self.load(currentPage);
-                }*/
             }
         },
         mounted:function(){

@@ -51,6 +51,7 @@ public class BroadAbilityBroadInfoService {
 			for (UserVO user : users) {
 				abilityBroadInfoVOs.add(new BroadAbilityBroadInfoVO()
 						.setUserId(user.getId())
+						.setPreviewUrlIp(user.getIp())
 						.setPreviewUrlPort(port != null && !port.isEmpty() ? port : "9999"));
 			}
 		}

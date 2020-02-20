@@ -27,4 +27,34 @@ public interface AreaDAO extends BaseDAO<AreaPO>{
 	 * @return AreaPO 地区信息
 	 */
 	public AreaPO findByChannelIdAndAreaId(Long channelId,String areaId);
+	
+	/**
+	 * 校验地区占用情况<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月13日 下午5:51:41
+	 * @param List<String> areaIds 地区id数组
+	 * @param Long channelId 频道id
+	 * @return
+	 */
+	@Query(value = "SELECT area.* FROM TETRIS_CS_AREA area "
+			+ "WHERE area.AREA_ID IN ?1 "
+			+ "AND area.CHANNEL_ID <> ?2", nativeQuery = true)
+	public List<AreaPO> findByAreaIdInWithExceptChannelId(List<String> areaIds, Long channelId);
+	
+	/**
+	 * 校验地区占用情况<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月13日 下午5:51:41
+	 * @param List<String> areaIds 地区id数组
+	 * @param Long channelId 频道id
+	 * @return
+	 */
+	@Query(value = "SELECT area.* FROM TETRIS_CS_AREA area "
+			+ "LEFT JOIN TETRIS_CS_TERMINAL_BROAD_INFO info ON area.CHANNEL_ID = info.CHANNEL_ID "
+			+ "WHERE area.AREA_ID IN ?1 "
+			+ "AND area.CHANNEL_ID <> ?2 "
+			+ "AND info.LEVEL = ?3", nativeQuery = true)
+	public List<AreaPO> findByAreaIdInWithExceptChannelId(List<String> areaIds, Long channelId, String level);
 }
