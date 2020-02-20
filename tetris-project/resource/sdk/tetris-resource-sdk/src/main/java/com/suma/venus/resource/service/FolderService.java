@@ -48,7 +48,7 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 			// rootFolder.setFolderType();
 			rootFolder.setBeBvcRoot(true);
 			rootFolder.setToLdap(true);
-			rootFolder.setFolderIndex(1);
+			rootFolder.setFolderIndex(0);
 			folderDao.save(rootFolder);
 
 			List<FolderPO> rootFolders = new ArrayList<>();
@@ -90,7 +90,7 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 			rootOnDemandFolder.setFolderType(FolderType.ON_DEMAND);
 			// rootOnDemandFolder.setBeBvcRoot(true);
 			rootOnDemandFolder.setToLdap(false);
-			rootOnDemandFolder.setFolderIndex(1);
+			rootOnDemandFolder.setFolderIndex(4);
 			rootFolders.add(rootOnDemandFolder);
 
 			folderDao.save(rootFolders);

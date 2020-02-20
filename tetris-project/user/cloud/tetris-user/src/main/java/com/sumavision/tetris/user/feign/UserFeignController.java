@@ -110,6 +110,24 @@ public class UserFeignController {
 	}
 	
 	/**
+	 * 根据用户昵称列表查询用户列表<br/>
+	 * <b>作者:</b>sm<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 下午4:33:33
+	 * @param String names
+	 * @return List<UserVO>
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/nickname/in")
+	public Object findByNickNameIn(
+			String nicknames,
+			HttpServletRequest request) throws Exception{
+		List<String> nickNames = JSON.parseArray(nicknames, String.class);
+		return userQuery.queryUsersByNicknameIn(nickNames);
+	}
+	
+	/**
 	 * 根据id和类型查询用户<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

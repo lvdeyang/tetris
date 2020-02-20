@@ -454,6 +454,14 @@ public class UpdateBatchBundlesUtil {
 						screenSchemePOList.add(busyScreen);
 					}
 				}
+				
+				LOGGER.info("unlockAndUpdateBatchBundles, logical operate time=" + (System.currentTimeMillis() - startTime));
+
+				lockChannelParamDao.deleteByBundleId(bundlePO.getBundleId());
+				lockScreenParamDao.deleteByBundleId(bundlePO.getBundleId());
+				lockBundleParamDao.deleteByBundleId(bundlePO.getBundleId());
+
+				LOGGER.info("unlockAndUpdateBatchBundles del all time=" + (System.currentTimeMillis() - startTime));
 
 				bundlePO.setLockStatus(LockStatus.IDLE);
 			}
@@ -470,14 +478,6 @@ public class UpdateBatchBundlesUtil {
 			successCnt++;
 
 		}
-
-		LOGGER.info("unlockAndUpdateBatchBundles, logical operate time=" + (System.currentTimeMillis() - startTime));
-
-		lockChannelParamDao.deleteBatchByBundleIds(bundleIdSet);
-		lockScreenParamDao.deleteBatchByBundleIds(bundleIdSet);
-		lockBundleParamDao.deleteBatchByBundleIds(bundleIdSet);
-
-		LOGGER.info("unlockAndUpdateBatchBundles del all time=" + (System.currentTimeMillis() - startTime));
 
 		channelSchemeDao.save(channelSchemePOList);
 		screenSchemeDao.save(screenSchemePOList);

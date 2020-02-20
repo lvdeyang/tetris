@@ -6,6 +6,7 @@
 
     <el-card style="float:left;margin-top:10px;width:45%;font-size: 18px; min-height: 800px;" body-style="padding:0px" >
       <div slot="header" class="clearfix">
+        <div class="clearfix-first" style="position: relative; width: 100%; height: 37px;">
         <el-button type="primary" size="small" @click="showAddFolderDialog" :disabled="disableAddFolderBtn" style="float: left;">添加目录</el-button>
         <el-button type="primary" size="small" @click="showModifyFolderDialog" :disabled="disableModifyFolderBtn" style="float: left;">修改</el-button>
         <!-- <el-button type="danger" size="small" @click="upShift" style="float: left;">测试上移</el-button> -->
@@ -29,7 +30,41 @@
             <el-dropdown-item  v-on:click.native="cleanUpLdap()">重置LDAP数据</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
+          </div>
 
+        <div class="clearfix-second" style="position: relative;">
+        <el-upload
+          class="upload-folder"
+          :action=uploadUrl
+          name="filePoster"
+          :headers="myHeaders"
+          :show-file-list="false"
+          accept=".csv"
+          :on-success="uploadSuccess"
+          :on-error="uploadError"
+          :on-progress="onprogress"
+          style="float: left;">
+          <el-button type="primary" size="small">导入分组</el-button>
+        </el-upload>
+
+        <el-button type="primary" size="small" @click="exportFolder" style="float: left; margin-left: 10px;">导出分组</el-button>
+
+        <el-upload
+          class="upload-user"
+          :action=uploadUserUrl
+          name="userFile"
+          :headers="myHeaders"
+          :show-file-list="false"
+          :on-success="uploadSuccess"
+          accept=".csv"
+          :on-error="uploadError"
+          :on-progress="onprogress"
+          style="float: left; margin-left: 10px;">
+          <el-button type="primary" size="small">导入用户</el-button>
+        </el-upload>
+
+        <el-button type="primary" size="small" @click="exportUser" style="float: left; margin-left: 10px;">导出用户</el-button>
+        </div>
       </div>
 
       <div class="custom-tree-container">
@@ -161,9 +196,11 @@
 <script type="text/ecmascript-6">
 	import { addFolder,modifyFolder,deleteFolder,setFolderOfBundles,resetFolderOfBundles,initFolderTree,getDeviceModels,
     queryBundlesWithoutFolder,queryUsersWithoutFolder,setFolderToUsers,resetFolderOfUsers,queryRootOptions,setRoot,syncFolderToLdap,
-    syncFolderFromLdap,cleanupFolderLdap,changeNodePosition,resetRootNode} from '../../api/api';
+    syncFolderFromLdap,cleanupFolderLdap,changeNodePosition,resetRootNode,exportFolder,exportUser} from '../../api/api';
 
-	export default {
+  let basePath = process.env.RESOURCE_ROOT
+
+  export default {
 		data() {
 			return {
               activeTabName : "FolderManage",
@@ -199,6 +236,11 @@
         setRootId : "",
         setRootOptions : [],
         modifyForm : {},
+        uploadUrl : basePath + "/folder/import",
+        uploadUserUrl : basePath + "/folder/user/import",
+        myHeaders : {
+          'tetris-001': sessionStorage.getItem('token')
+        },
         toLdapoptions : [
           {
             value : true,
@@ -774,8 +816,111 @@
           }
         });
 
+      },
+
+      uploadSuccess: function(res){
+        if(res.errMsg){
+          this.$message({
+            message: res.errMsg,
+            type: 'error'
+          });
+        }else{
+          if(res.successCnt != null){
+            this.$message({
+              message: "成功导入分组的数量：" + res.successCnt,
+              type: 'success'
+            });
+          }else{
+            this.$message({
+              message: "导入失败",
+              type: 'error'
+            });
+          }
+
+          this.initTree(true);
+        }
+      },
+      uploadError: function(err){
+        this.$message({
+          message: "上传文件错误: " + JSON.stringify(err),
+          type: 'error'
+        });
+      },
+      onprogress : function(){
+        //this.resourceTableLoading = true;
+      },
+      exportFolder: function () {
+
+        exportFolder (null).then((res)=>{
+          const blob =new Blob([res.data], {type:'application/octet-stream;charset=utf-8'});
+
+          const fileName ='Folder.csv';
+
+          const elink =document.createElement('a');
+
+          elink.download =fileName;
+
+          elink.style.display ='none';
+
+          elink.href =URL.createObjectURL(blob);
+
+          document.body.appendChild(elink);
+
+          elink.click();
+
+          URL.revokeObjectURL(elink.href);
+
+          document.body.removeChild(elink);
+
+        }).catch((error)=>{
+
+          this.$message({
+
+            message:  error,
+
+            type:'error'
+
+          });
+
+        })
+      },
+      exportUser: function () {
+
+        exportUser (null).then((res)=>{
+          const blob =new Blob([res.data], {type:'application/octet-stream;charset=utf-8'});
+
+          const fileName ='UserFolder.csv';
+
+          const elink =document.createElement('a');
+
+          elink.download =fileName;
+
+          elink.style.display ='none';
+
+          elink.href =URL.createObjectURL(blob);
+
+          document.body.appendChild(elink);
+
+          elink.click();
+
+          URL.revokeObjectURL(elink.href);
+
+          document.body.removeChild(elink);
+
+        }).catch((error)=>{
+
+          this.$message({
+
+            message:  error,
+
+            type:'error'
+
+          });
+
+        })
       }
 		},
+
 		mounted() {
           var self = this;
           self.$nextTick(function(){

@@ -90,6 +90,7 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.SerInfoPO;
@@ -1013,13 +1014,25 @@ public class HttpInterfaceController {
 		respBody.setBundle_id(bundleId);
 		/** bundle_extra_info */
 		List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleId(bundleId);
+		JSONObject bundleExtraInfoJson = new JSONObject();
 		if (!extraInfos.isEmpty()) {
-			JSONObject bundleExtraInfoJson = new JSONObject();
 			for (ExtraInfoPO extraInfoPO : extraInfos) {
 				bundleExtraInfoJson.put(extraInfoPO.getName(), extraInfoPO.getValue());
 			}
-			respBody.setBundle_extra_info(bundleExtraInfoJson.toJSONString());
 		}
+		
+		//自动选择tvos接入层
+		List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_TVOS);
+		WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
+		if(choseWorkNode != null){
+			bundleExtraInfoJson.put("access_ip", choseWorkNode.getIp());
+			bundleExtraInfoJson.put("access_port", choseWorkNode.getPort());
+		}else{
+			bundleExtraInfoJson.put("access_ip", "");
+			bundleExtraInfoJson.put("access_port", "");
+		}
+		
+		respBody.setBundle_extra_info(bundleExtraInfoJson.toJSONString());
 		respBody.setUserId(bundle.getId());
 		// respBody.setUser_extra_info(checkResult.getExtraInfo());
 		respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS);

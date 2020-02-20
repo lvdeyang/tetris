@@ -231,4 +231,7 @@ public interface UserFeign {
 	 */
 	@RequestMapping(value = "/user/feign/query/user/by/role")
 	public JSONObject queryUserByRole(@RequestParam("roleId") Long roleId);
+	
+	@RequestMapping(value = "/user/feign/find/by/nickname/in")
+	public JSONObject queryUsersByNicknameIn(@RequestParam("nicknames") String nicknames);
 }

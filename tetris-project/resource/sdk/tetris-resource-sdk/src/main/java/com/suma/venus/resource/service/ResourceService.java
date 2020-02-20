@@ -169,20 +169,7 @@ public class ResourceService {
 				return userresList;
 			}
 			Map<String, UserBO> allUserMap = new HashMap<String, UserBO>();
-			List<Long> userIds = new ArrayList<Long>();
 			for(UserBO user: allUsers){
-				userIds.add(user.getId());
-			}
-			List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(userIds);
-			for(UserBO user: allUsers){
-				for(FolderUserMap map: folderUserMaps){
-					if(user.getId().equals(map.getUserId())){
-						user.setFolderId(map.getFolderId());
-						user.setFolderIndex(map.getFolderIndex().intValue());
-						user.setFolderUuid(map.getFolderUuid());
-						break;
-					}
-				}
 				allUserMap.put(user.getUserNo(), user);
 			}
 

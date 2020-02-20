@@ -194,7 +194,7 @@ public class TranscodeTaskService {
 		String taskUuid = transcode.getTask_id();
 		String capacityIp = transcode.getDevice_ip();
 		
-		if(transcode.getInput_array().size() == 0){
+		if(transcode.getInput_array().size() == 1){
 			
 			InputBO inputBO = transcode.getInput_array().iterator().next();
 			List<TaskBO> taskBOs = transcode.getTask_array();
@@ -203,7 +203,7 @@ public class TranscodeTaskService {
 			String uniq = generateUniq(inputBO);
 			
 			save(taskUuid, uniq, capacityIp, inputBO, taskBOs, outputBOs, BusinessType.TRANSCODE);
-		}else {
+		}else if(transcode.getInput_array().size() > 1){
 			InputBO backUpInput = null;
 			List<CheckInputBO> checks = new ArrayList<CheckInputBO>(); 
 			for(InputBO input: transcode.getInput_array()){
