@@ -49,7 +49,8 @@ public class FolderPO extends CommonPO<FolderPO> {
 		TERMINAL, // 终端文件夹
 		MONITOR, // 监控文件夹
 		LIVE, // 直播文件夹
-		ON_DEMAND// 点播文件夹
+		ON_DEMAND, // 点播文件夹
+		USER // 用户文件夹
 	}
 
 	@Column

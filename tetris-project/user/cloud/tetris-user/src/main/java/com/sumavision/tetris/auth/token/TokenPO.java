@@ -74,6 +74,7 @@ public class TokenPO extends AbstractBasePO{
 		this.userId = userId;
 	}
 
+	@Enumerated(value = EnumType.STRING)
 	@Column(name = "TYPE")
 	public TerminalType getType() {
 		return type;

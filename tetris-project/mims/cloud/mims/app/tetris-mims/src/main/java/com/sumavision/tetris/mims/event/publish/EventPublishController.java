@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.business.role.event.BusinessRoleRemovedEvent;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.event.UserImportEvent;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 
 @Controller
@@ -43,6 +44,30 @@ public class EventPublishController {
 			String roleName,
 			HttpServletRequest request) throws Exception{
 		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, userId, nickname, companyId, companyName, roleId, roleName);
+		applicationEventPublisher.publishEvent(event);
+		return null;
+	}
+	
+	/**
+	 * 用户导入事件发布代理<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月25日 下午4:19:47
+	 * @param String userId 用户id
+	 * @param String nickname 昵称
+	 * @param String companyId 公司id
+	 * @param String companyName 公司名称
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/user/import")
+	public Object userImport(
+			String userId,
+			String nickname,
+			String companyId,
+			String companyName,
+			HttpServletRequest request) throws Exception{
+		UserImportEvent event = new UserImportEvent(applicationEventPublisher, userId, nickname, companyId, companyName);
 		applicationEventPublisher.publishEvent(event);
 		return null;
 	}

@@ -61,6 +61,20 @@ public interface UserFeign {
 	public JSONObject findByIdIn(@RequestParam("ids") String ids);
 	
 	/**
+	 * 根据id和类型查询用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月19日 下午3:30:27
+	 * @param JSONArray ids 用户id列表
+	 * @param String terminalType 查询类型
+	 * @return JSONObject 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/find/by/id/in/and/type")
+	public JSONObject findByIdInAndType(
+			@RequestParam("ids") String ids,
+			@RequestParam("terminalType") String terminalType);
+	
+	/**
 	 * 分页查询公司下的用户列表（带例外）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

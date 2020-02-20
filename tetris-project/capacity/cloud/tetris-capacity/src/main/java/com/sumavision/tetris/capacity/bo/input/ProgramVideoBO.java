@@ -28,6 +28,8 @@ public class ProgramVideoBO {
 	private String decode_mode;
 	
 	private Integer nv_card_idx;
+	
+	private String deinterlace_mode;
 
 	public Integer getPid() {
 		return pid;
@@ -98,6 +100,15 @@ public class ProgramVideoBO {
 
 	public ProgramVideoBO setNv_card_idx(Integer nv_card_idx) {
 		this.nv_card_idx = nv_card_idx;
+		return this;
+	}
+
+	public String getDeinterlace_mode() {
+		return deinterlace_mode;
+	}
+
+	public ProgramVideoBO setDeinterlace_mode(String deinterlace_mode) {
+		this.deinterlace_mode = deinterlace_mode;
 		return this;
 	}
 	

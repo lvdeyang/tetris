@@ -26,6 +26,10 @@ public enum MediaSettingsType {
 	PROCESS_EDIT_AUDIO_STREAM("音频流修改流程"),
 	PROCESS_DELETE_AUDIO_STREAM("音频流删除流程"),
 	
+	PROCESS_UPLOAD_PUSH_LIVE("push直播上传流程"),
+	PROCESS_EDIT_PUSH_LIVE("push直播修改流程"),
+	PROCESS_DELETE_PUSH_LIVE("push直播删除流程"),
+	
 	PROCESS_UPLOAD_TXT("文本上传流程"),
 	PROCESS_EDIT_TXT("文本修改流程"),
 	PROCESS_DELETE_TXT("文本删除流程"),

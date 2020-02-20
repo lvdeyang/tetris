@@ -68,6 +68,9 @@ define([
                         tags:[],
                         keyWords:'',
                         task:'',
+                        mediaEdit:false,
+                        mediaEditTemplate:'',
+                        mediaEditTemplates:[],
                         loading:false
                     },
                     editVideo:{
@@ -487,6 +490,8 @@ define([
                     self.dialog.addVideo.tags = [];
                     self.dialog.addVideo.keyWords = '';
                     self.dialog.addVideo.task = '';
+                    self.dialog.addVideo.mediaEdit = false;
+                    self.dialog.addVideo.mediaEditTemplate = '';
                     self.dialog.addVideo.visible = false;
                     self.dialog.addVideo.loading = false;
                 },
@@ -499,6 +504,24 @@ define([
                     self.dialog.editVideo.keyWords = '';
                     self.dialog.editVideo.visible = false;
                     self.dialog.editVideo.loading = false;
+                },
+                //开启转码按钮获取模板列表
+                handleMediaEditChange: function(ifOpen) {
+                    var self = this;
+                    if (ifOpen) {
+                        self.dialog.addVideo.mediaEditTemplates.splice(0, self.dialog.addVideo.mediaEditTemplates.length);
+                        ajax.post('/media/editor/feign/template/list', null , function (data, status) {
+                            if (status == 200) {
+                                if (data != null && data.length > 0) {
+                                    for (var i = 0; i < data.length; i++) {
+                                        self.dialog.addVideo.mediaEditTemplates.push(data[i]);
+                                    }
+                                }
+                            }
+                        })
+                    } else {
+                        self.dialog.addVideo.mediaEditTemplate = '';
+                    }
                 },
                 //添加视频媒资任务
                 addMediaVideoTask:function(){
@@ -523,7 +546,9 @@ define([
                         tags:(self.dialog.addVideo.tags.length > 0) ? self.dialog.addVideo.tags.join(",") : null,
                         keyWords:self.dialog.addVideo.keyWords,
                         remark:self.dialog.addVideo.remark,
-                        folderId:self.current.id
+                        folderId:self.current.id,
+                        mediaEdit: self.dialog.addVideo.mediaEdit,
+                        mediaEditTemplate: self.dialog.addVideo.mediaEditTemplate
                     }, function(data, status){
                         self.dialog.addVideo.loading = false;
                         if(status !== 200) return;
@@ -585,7 +610,7 @@ define([
                         name:file.name,
                         size:file.size,
                         mimetype:file.type,
-                        lastModified:file.lastModified,
+                        lastModified:file.lastModified || file.lastModifiedDate.getTime(),
                         file:file
                     };
                     self.dialog.addVideo.task = task;
@@ -627,7 +652,7 @@ define([
                                         return;
                                     }
                                     if(file.name!==data.name
-                                        || file.lastModified!==data.lastModified
+                                        || (file.lastModified||file.lastModifiedDate.getTime())!==data.lastModified
                                         || file.size!==data.size
                                         || file.type!==data.mimetype){
                                         self.$message.error('您选择的文件与当前任务的文件不同！');

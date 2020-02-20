@@ -54,6 +54,15 @@ public class ScreenPO extends AbstractBasePO {
 	/** 媒资时长 */
 	private String duration;
 	
+	/** 媒资频点 */
+	private String freq;
+	
+	/** 媒资音频pid */
+	private String audioPid;
+	
+	/** 媒资视频pid */
+	private String videoPid;
+	
 	@Column(name="PROGRAM_ID")
 	public Long getProgramId() {
 		return programId;
@@ -169,5 +178,32 @@ public class ScreenPO extends AbstractBasePO {
 
 	public void setDuration(String duration) {
 		this.duration = duration;
+	}
+
+	@Column(name = "FREQ")
+	public String getFreq() {
+		return freq;
+	}
+
+	public void setFreq(String freq) {
+		this.freq = freq;
+	}
+
+	@Column(name = "AUDIO_PID")
+	public String getAudioPid() {
+		return audioPid;
+	}
+
+	public void setAudioPid(String audioPid) {
+		this.audioPid = audioPid;
+	}
+
+	@Column(name = "VIDEO_PID")
+	public String getVideoPid() {
+		return videoPid;
+	}
+
+	public void setVideoPid(String videoPid) {
+		this.videoPid = videoPid;
 	}
 }

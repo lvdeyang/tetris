@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
@@ -127,6 +128,27 @@ public class UserFeignController {
 	}
 	
 	/**
+	 * 根据id和类型查询用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月19日 下午3:30:27
+	 * @param JSONArray ids 用户id列表
+	 * @param String terminalType 查询类型
+	 * @return JSONObject 用户列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/id/in/and/type")
+	public Object findByIdIn(
+			String ids,
+			String terminalType,
+			HttpServletRequest request) throws Exception{
+		List<Long> userIds = JSON.parseArray(ids, Long.class);
+		TerminalType type = TerminalType.fromName(terminalType);
+		return userQuery.findByIdInAndType(userIds, type);
+	}
+	
+	/**
 	 * 分页查询公司下的用户列表（带例外）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -206,7 +228,7 @@ public class UserFeignController {
 		
 		UserClassify userClassify = UserClassify.fromName(classify);
 		if(except == null){
-			return userQuery.listByCompanyIdAndClassify(companyId, userClassify);
+			return userQuery.listByCompanyIdAndClassify(companyId, terminalType, userClassify);
 		}else{
 			List<Long> exceptIds = JSON.parseArray(except, Long.class);
 			return userQuery.listByCompanyIdWithExceptAndClassify(companyId, terminalType, exceptIds, userClassify);

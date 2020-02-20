@@ -418,7 +418,7 @@ public class BundleService extends CommonService<BundlePO> {
 				bundlePO.setBundleNum(userNo + "_" + i);
 				bundlePO.setUserId(Long.valueOf(userId));
 				// 默认上线
-				bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
+				bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 
 				bundlePOs.add(bundlePO);
 				bundleIds.add(bundlePO.getBundleId());
@@ -428,22 +428,55 @@ public class BundleService extends CommonService<BundlePO> {
 				//channelSchemePOs.addAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
 			}
 			
-			//创建机顶盒设备 -- 先注掉
-			BundlePO bundlePO = new BundlePO();
-			bundlePO.setBundleName(username + "_机顶盒");
-			bundlePO.setUsername("机顶盒_" + userNo);
-			//bundlePO.setOnlinePassword(password);
-			bundlePO.setBundleId(BundlePO.createBundleId());
-			bundlePO.setDeviceModel("tvos");
-			bundlePO.setBundleType("VenusTerminal");
-			bundlePO.setBundleNum("机顶盒_" + userNo);
-			bundlePO.setUserId(Long.valueOf(userId));
-			// 默认上线
-			bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
+			//创建机顶盒设备 
+			BundlePO tvos = new BundlePO();
+			tvos.setBundleName(username + "_机顶盒");
+			tvos.setUsername("机顶盒_" + userNo);
+			//tvos.setOnlinePassword(password);
+			tvos.setBundleId(BundlePO.createBundleId());
+			tvos.setDeviceModel("tvos");
+			tvos.setBundleType("VenusTerminal");
+			tvos.setBundleNum("机顶盒_" + userNo);
+			tvos.setUserId(Long.valueOf(userId));
+			tvos.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 
-			bundlePOs.add(bundlePO);
-			bundleIds.add(bundlePO.getBundleId());
-			configDefaultAbility(bundlePO);
+			bundlePOs.add(tvos);
+			bundleIds.add(tvos.getBundleId());
+			configDefaultAbility(tvos);
+			
+			//创建pc终端
+			BundlePO pc = new BundlePO();
+			pc.setBundleName(username + "_pc");
+			pc.setUsername("pc_" + userNo);
+			//pc.setOnlinePassword(password);
+			pc.setBundleId(BundlePO.createBundleId());
+			pc.setDeviceModel("pc");
+			pc.setBundleType("VenusTerminal");
+			pc.setBundleNum("pc_" + userNo);
+			pc.setUserId(Long.valueOf(userId));
+			// 默认上线
+			pc.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+
+			bundlePOs.add(pc);
+			bundleIds.add(pc.getBundleId());
+			configDefaultAbility(pc);
+			
+			//创建zk终端
+			BundlePO zk = new BundlePO();
+			zk.setBundleName(username + "_zk");
+			zk.setUsername("zk_" + userNo);
+			//pc.setOnlinePassword(password);
+			zk.setBundleId(BundlePO.createBundleId());
+			zk.setDeviceModel("zk");
+			zk.setBundleType("VenusTerminal");
+			zk.setBundleNum("zk" + userNo);
+			zk.setUserId(Long.valueOf(userId));
+			// 默认上线
+			zk.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+
+			bundlePOs.add(zk);
+			bundleIds.add(zk.getBundleId());
+			configDefaultAbility(zk);
 
 			// 保存数据库
 			bundleDao.save(bundlePOs);

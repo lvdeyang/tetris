@@ -70,6 +70,9 @@ define([
                         keyWords:'',
                         way:'0',
                         encryption:false,
+                        mediaEdit:false,
+                        mediaEditTemplate:'',
+                        mediaEditTemplates:[],
                         txt:'',
                         txtTask:'',
                         task:'',
@@ -531,7 +534,9 @@ define([
                     self.dialog.addAudio.tags = [];
                     self.dialog.addAudio.keyWords = '';
                     self.dialog.addAudio.way = '0';
-                    self.dialog.addAudio.encode = false;
+                    self.dialog.addAudio.encryption = false;
+                    self.dialog.addAudio.mediaEdit = false;
+                    self.dialog.addAudio.mediaEditTemplate = '';
                     self.dialog.addAudio.txt = '';
                     self.dialog.addAudio.txtTask = '';
                     self.dialog.addAudio.task = '';
@@ -548,6 +553,24 @@ define([
                     self.dialog.editAudio.keyWords = '';
                     self.dialog.editAudio.visible = false;
                     self.dialog.editAudio.loading = false;
+                },
+                //开启转码按钮获取模板列表
+                handleMediaEditChange: function(ifOpen) {
+                    var self = this;
+                    if (ifOpen) {
+                        self.dialog.addAudio.mediaEditTemplates.splice(0, self.dialog.addAudio.mediaEditTemplates.length);
+                        ajax.post('/media/editor/feign/template/list', null , function (data, status) {
+                            if (status == 200) {
+                                if (data != null && data.length > 0) {
+                                    for (var i = 0; i < data.length; i++) {
+                                        self.dialog.addAudio.mediaEditTemplates.push(data[i]);
+                                    }
+                                }
+                            }
+                        })
+                    } else {
+                        self.dialog.addAudio.mediaEditTemplate = '';
+                    }
                 },
                 //添加视频媒资任务
                 addMediaAudioTask:function(){
@@ -579,7 +602,9 @@ define([
                             keyWords:self.dialog.addAudio.keyWords,
                             remark:self.dialog.addAudio.remark,
                             folderId:self.current.id,
-                            encryption: self.dialog.addAudio.encryption
+                            encryption: self.dialog.addAudio.encryption,
+                            mediaEdit: self.dialog.addAudio.mediaEdit,
+                            mediaEditTemplate: self.dialog.addAudio.mediaEditTemplate
                         }, function(data, status){
                             self.dialog.addAudio.loading = false;
                             if(status !== 200) return;
@@ -607,6 +632,8 @@ define([
                             remark:self.dialog.addAudio.remark,
                             folderId:self.current.id,
                             encryption:self.dialog.addAudio.encryption,
+                            mediaEdit:self.dialog.addAudio.mediaEdit,
+                            mediaEditTemplate: self.dialog.addAudio.mediaEditTemplate,
                             txtId:self.dialog.addAudio.txt.id
                         };
                         ajax.post('/media/audio/task/add/from/txt', questData, function(data, status){
@@ -668,7 +695,7 @@ define([
                         name:file.name,
                         size:file.size,
                         mimetype:file.type,
-                        lastModified:file.lastModified,
+                        lastModified:file.lastModified || file.lastModifiedDate.getTime(),
                         file:file
                     };
                     done();
@@ -685,7 +712,7 @@ define([
                         name:file.name,
                         size:file.size,
                         mimetype:file.type,
-                        lastModified:file.lastModified,
+                        lastModified:file.lastModified || file.lastModifiedDate.getTime(),
                         file:file
                     };
                     self.dialog.addAudio.task = task;
@@ -727,7 +754,7 @@ define([
                                         return;
                                     }
                                     if(file.name!==data.name
-                                        || file.lastModified!==data.lastModified
+                                        || (file.lastModified||file.lastModifiedDate.getTime())!==data.lastModified
                                         || file.size!==data.size
                                         || file.type!==data.mimetype){
                                         self.$message.error('您选择的文件与当前任务的文件不同！');

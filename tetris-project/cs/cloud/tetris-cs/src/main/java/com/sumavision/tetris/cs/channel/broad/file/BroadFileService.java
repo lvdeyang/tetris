@@ -178,7 +178,13 @@ public class BroadFileService {
 						JSONObject schedule = new JSONObject();
 						CsResourceVO resource = csResourceQuery.queryResourceById(item.getResourceId());
 						schedule.put("name", resource.getName());
-						schedule.put("previewUrl", resource.getPreviewUrl());
+						if (resource.getType().equals("PUSH_LIVE")) {
+							schedule.put("freq", resource.getFreq());
+							schedule.put("audioPid", resource.getAudioPid());
+							schedule.put("videoPid", resource.getVideoPid());
+						} else {
+							schedule.put("previewUrl", resource.getPreviewUrl());
+						}
 						schedule.put("index", item.getIndex());
 						scheduleList.add(schedule);
 					}
