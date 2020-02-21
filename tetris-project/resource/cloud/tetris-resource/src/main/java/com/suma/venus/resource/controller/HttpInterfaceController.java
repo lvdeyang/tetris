@@ -981,7 +981,7 @@ public class HttpInterfaceController {
 	}
 	
 	/** 获取用户下唯一机顶盒 */
-	@RequestMapping(method = RequestMethod.POST, value = "/access/getUserBundle", produces = {
+	@RequestMapping(method = RequestMethod.POST, value = "/tvos/access/getUserBundle", produces = {
 			"application/json;charset=UTF-8" })
 	@ResponseBody
 	public UserBundleCertifyResp getUserBundle(@RequestBody UserBundleCertifyRequest request) throws Exception{
@@ -1002,8 +1002,6 @@ public class HttpInterfaceController {
 		
 		// 更新bundle上当前登陆的设备账号标识ID
 		bundle.setCurrentLoginId(certify_id);
-		bundle.setOnlineStatus(ONLINE_STATUS.ONLINE);
-		bundleService.save(bundle);
 		
 		String bundleId = bundle.getBundleId();
 
@@ -1020,17 +1018,25 @@ public class HttpInterfaceController {
 				bundleExtraInfoJson.put(extraInfoPO.getName(), extraInfoPO.getValue());
 			}
 		}
-		
 		//自动选择tvos接入层
-		List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_TVOS);
-		WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
+		WorkNodePO choseWorkNode = null;
+		if(bundle.getAccessNodeUid() != null){
+			choseWorkNode = workNodeService.findByNodeUid(bundle.getAccessNodeUid());
+		}else{
+			List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_TVOS);
+			choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
+		}
+		
 		if(choseWorkNode != null){
 			bundleExtraInfoJson.put("access_ip", choseWorkNode.getIp());
 			bundleExtraInfoJson.put("access_port", choseWorkNode.getPort());
+			bundle.setAccessNodeUid(choseWorkNode.getNodeUid());
 		}else{
 			bundleExtraInfoJson.put("access_ip", "");
 			bundleExtraInfoJson.put("access_port", "");
 		}
+		
+		bundleService.save(bundle);
 		
 		respBody.setBundle_extra_info(bundleExtraInfoJson.toJSONString());
 		respBody.setUserId(bundle.getId());

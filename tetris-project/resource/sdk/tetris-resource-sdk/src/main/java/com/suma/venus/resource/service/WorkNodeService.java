@@ -68,7 +68,7 @@ public class WorkNodeService extends CommonService<WorkNodePO>{
 						number ++;
 					}
 				}
-				if(number > count){
+				if(number >= count){
 					chose = node;
 					count = number;
 				}
