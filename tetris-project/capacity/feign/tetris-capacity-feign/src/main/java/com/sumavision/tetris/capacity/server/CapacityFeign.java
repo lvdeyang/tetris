@@ -99,25 +99,25 @@ public interface CapacityFeign {
 			@RequestParam("capacityIp") String capacityIp) throws Exception;
 	
 	/**
-	 * 添加盖播<br/>
+	 * 转码任务添加盖播<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年2月18日 上午9:14:14
-	 * @param String input input全量参数
-	 * @param String capacityIp 能力ip
+	 * <b>日期：</b>2020年2月21日 上午11:18:54
+	 * @param String taskId 集群转码任务id
+	 * @param String input cover输入
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/add/cover")
 	public JSONObject addCover(
-			@RequestParam("input") String input,
-			@RequestParam("capacityIp") String capacityIp) throws Exception;
+			@RequestParam("taskId") String taskId,
+			@RequestParam("input") String input) throws Exception;
 	
 	/**
-	 * 删除盖播<br/>
-	 * <b>作者:</b>wjw<br/>
+	 * 转码任务删除盖播<br/>
+	 * <b>作者:</b>sm<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年2月18日 上午9:16:07
-	 * @param String inputId 盖播输入id
+	 * <b>日期：</b>2020年2月21日 上午11:20:06
+	 * @param String taskId 集群转码任务id
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/delete/cover")
-	public JSONObject deleteCover(@RequestParam("inputId") String inputId) throws Exception;
+	public JSONObject deleteCover(@RequestParam("taskId") String taskId) throws Exception;
 }
