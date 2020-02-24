@@ -94,7 +94,7 @@ public class BindResourceController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			List<UserBO> users = new ArrayList<UserBO>();
-			users = userQueryService.queryAllUserBaseInfo();
+			users = userQueryService.queryAllUserBaseInfo(null);
 			data.put("users", users);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());

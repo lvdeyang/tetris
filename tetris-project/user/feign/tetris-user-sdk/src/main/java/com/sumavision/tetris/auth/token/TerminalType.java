@@ -18,6 +18,7 @@ public enum TerminalType {
 	QT_MEDIA_EDITOR("qt快编软件", "/api/qt", 4*60*60),
 	QT_POLLING("qt轮询软件", "/api/polling", 4*60*60),
 	QT_CATALOGUE("qt编单软件", "/api/schedule", 4*60*60),
+	QT_ZK("qt指控软件", "/api/zk", 4*60*60),
 	API("api调用", "/api/server", 0);
 	
 	/** 终端类型名称 */
