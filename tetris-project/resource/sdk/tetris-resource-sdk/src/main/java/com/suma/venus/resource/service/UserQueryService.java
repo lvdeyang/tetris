@@ -19,6 +19,7 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
@@ -67,9 +68,9 @@ public class UserQueryService {
 	 * <b>日期：</b>2019年12月31日 下午2:06:15
 	 * @return List<UserBO> 
 	 */
-	public List<UserBO> queryAllUserBaseInfo() throws Exception{
+	public List<UserBO> queryAllUserBaseInfo(TerminalType terminalType) throws Exception{
 		
-		List<UserVO> userVOs = userQuery.queryAllUserBaseInfo();
+		List<UserVO> userVOs = userQuery.queryAllUserBaseInfo(terminalType == null? null:terminalType.getName());
 		List<UserBO> allUsers = transferUserVo2Bo(userVOs);
 		
 		List<Long> userIds = new ArrayList<Long>();
@@ -176,9 +177,9 @@ public class UserQueryService {
 	 * @param Long id 用户id
 	 * @return UserBO
 	 */
-	public UserBO queryUserByUserId(Long id) throws Exception{
+	public UserBO queryUserByUserId(Long id, TerminalType terminalType) throws Exception{
 		
-		UserVO user = userQuery.queryUserById(id);
+		UserVO user = userQuery.queryUserById(id, terminalType == null?null: terminalType.getName());
 		UserBO userBO = singleUserVo2Bo(user);
 		
 		FolderUserMap map = folderUserMapDao.findByUserId(user.getId());
@@ -199,9 +200,9 @@ public class UserQueryService {
 	 * @param List<Long> ids 用户id列表
 	 * @return List<UserBO>
 	 */
-	public List<UserBO> queryUsersByUserIds(List<Long> ids) throws Exception{
+	public List<UserBO> queryUsersByUserIds(List<Long> ids, TerminalType terminalType) throws Exception{
 		
-		List<UserVO> users = userQuery.findByIdIn(ids);
+		List<UserVO> users = userQuery.findByIdInAndType(ids, terminalType.getName());
 		
 		List<UserBO> allUsers = transferUserVo2Bo(users);
 		
@@ -363,7 +364,7 @@ public class UserQueryService {
 		userBO.setEmail(userVO.getMail());
 		userBO.setCreateTime(userVO.getUpdateTime());
 		userBO.setCreater("");
-		userBO.setLogined(false);
+		userBO.setLogined((userVO.getStatus() == null || userVO.getStatus() == "OFFLINE")? false: true);
 		userBO.setUserNo(userVO.getUserno());
 		
 		return userBO;

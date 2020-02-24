@@ -40,7 +40,7 @@ public class UserQueryController extends ControllerBase{
 		try {
 			List<UserBO> users = new ArrayList<UserBO>();
 //			Map<String, List<UserBO>> resultMap = userFeign.queryUsers();
-			users = userQueryService.queryAllUserBaseInfo();
+			users = userQueryService.queryAllUserBaseInfo(null);
 			data.put("users", users);
 		} catch (Exception e) {
 			LOGGER.error(e.toString());

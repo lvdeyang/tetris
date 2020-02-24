@@ -176,8 +176,8 @@ public class UserQuery {
 	 * <b>日期：</b>2019年12月24日 上午9:22:21
 	 * @return List<UserVO> 用户列表
 	 */
-	public Map<String, Object> queryAllUserBaseInfo(int currentPage, int pageSize) throws Exception{
-		return JsonBodyResponseParser.parseObject(userFeign.queryAllUserBaseInfo(currentPage, pageSize), Map.class);
+	public Map<String, Object> queryAllUserBaseInfo(String terminalType, int currentPage, int pageSize) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.queryAllUserBaseInfo(terminalType, currentPage, pageSize), Map.class);
 	}
 	
 	/**
@@ -187,8 +187,8 @@ public class UserQuery {
 	 * <b>日期：</b>2019年12月31日 下午2:01:49
 	 * @return List<UserVO>
 	 */
-	public List<UserVO> queryAllUserBaseInfo() throws Exception{
-		return JsonBodyResponseParser.parseArray(userFeign.queryAllUserBaseInfo(), UserVO.class);
+	public List<UserVO> queryAllUserBaseInfo(String terminalType) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.queryAllUserBaseInfo(terminalType), UserVO.class);
 	}
 	
 	/**
@@ -235,8 +235,8 @@ public class UserQuery {
 	 * @param Long id 用户id
 	 * @return UserVO 用户
 	 */
-	public UserVO queryUserById(Long id) throws Exception{
-		return JsonBodyResponseParser.parseObject(userFeign.queryUserById(id), UserVO.class);
+	public UserVO queryUserById(Long id, String terminalType) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.queryUserById(id, terminalType), UserVO.class);
 	}
 	
 	/**

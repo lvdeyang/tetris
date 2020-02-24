@@ -47,4 +47,18 @@ public class ApiTvosAuthController {
 		return token;
 	}
 	
+	/**
+	 * 用户注销登录<br/>
+	 * <b>作者:</b>Administrator<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月8日 上午10:37:07
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/do/logout")
+	public Object doLogout(HttpServletRequest request) throws Exception{
+		loginService.doLogout();
+		return null;
+	}
+	
 }
