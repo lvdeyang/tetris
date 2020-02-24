@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
@@ -274,11 +275,13 @@ public class UserFeignController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/query/all/user/baseInfo")
-	public Object queryAllUserBaseInfo(HttpServletRequest request) throws Exception{
+	public Object queryAllUserBaseInfo(
+			String terminalType,
+			HttpServletRequest request) throws Exception{
 		
 		UserVO userVO = userQuery.current();
 		
-		return userQuery.queryAllUserBaseInfo(userVO.getId());
+		return userQuery.queryAllUserBaseInfo(userVO.getId(), terminalType);
 	}
 	
 	/**
@@ -292,13 +295,14 @@ public class UserFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/query/all/user/baseInfo/by/page")
 	public Object queryAllUserBaseInfo(
+			String terminalType,
 			int currentPage,
 			int pageSize,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO userVO = userQuery.current();
 		
-		return userQuery.queryAllUserBaseInfo(userVO.getId(), currentPage, pageSize);
+		return userQuery.queryAllUserBaseInfo(userVO.getId(), terminalType, currentPage, pageSize);
 	}
 	
 	/**
@@ -375,14 +379,15 @@ public class UserFeignController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/query/user/by/id")
-	public Object queryUsersById(
+	@RequestMapping(value = "/query/user/by/id/and/type")
+	public Object queryUsersByIdAndTerminalType(
 			Long id,
+			String terminalType,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO userVO = userQuery.current();
 		
-		return new UserVO().set(userDAO.findOne(id));
+		return userQuery.queryUserByIdAndType(id, terminalType);
 	}
 	
 	/**

@@ -75,6 +75,7 @@ import com.suma.venus.resource.pojo.ScreenRectTemplatePO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.sumavision.tetris.auth.token.TerminalType;
 
 /**
  * 资源层统一资源查询Service
@@ -160,11 +161,11 @@ public class ResourceService {
 	private FolderUserMapDAO folderUserMapDao;
 
 	/** 通过userId查询具有权限的user */
-	public List<UserBO> queryUserresByUserId(Long userId) {
+	public List<UserBO> queryUserresByUserId(Long userId, TerminalType terminalType) {
 		List<UserBO> userresList = new ArrayList<UserBO>();
 		try {
 //			List<UserBO> allUsers = userFeign.queryUsers().get("users");
-			List<UserBO> allUsers = userQueryService.queryAllUserBaseInfo();
+			List<UserBO> allUsers = userQueryService.queryAllUserBaseInfo(terminalType);
 			if (null == allUsers || allUsers.isEmpty()) {
 				return userresList;
 			}
@@ -230,7 +231,7 @@ public class ResourceService {
 	public boolean hasPrivilegeOfUser(Long userId, Long dstUserId, BUSINESS_OPR_TYPE businessType) {
 		try {
 //			UserBO dstUserBO = userFeign.queryUserInfoById(dstUserId).get("user");
-			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId);
+			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId, null);
 			String code = null;// 权限码
 			switch (businessType) {
 			case DIANBO:// 点播
@@ -450,20 +451,20 @@ public class ResourceService {
 	 * @param Long userId 用户id
 	 * @return UserBO 用户
 	 */
-	public UserBO queryUserById(Long userId) {
+	public UserBO queryUserById(Long userId, TerminalType terminalType) {
 		try {
 //			Map<String, UserBO> resultMap = userFeign.queryUserInfoById(userId);
 //			if (resultMap == null || resultMap.size() <= 0 || resultMap.get("user") == null)
 //				return null;
 //			return resultMap.get("user");
 			
-			return userQueryService.queryUserByUserId(userId);
+			return userQueryService.queryUserByUserId(userId, terminalType);
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
-	public List<UserBO> queryUserListByIds(String ids) {
+	public List<UserBO> queryUserListByIds(String ids, TerminalType terminalType) {
 		if (StringUtils.isEmpty(ids)) {
 			return null;
 		}
@@ -478,7 +479,7 @@ public class ResourceService {
 
 //			Map<String, List<UserBO>> resultMap = userFeign.queryUserListByIds(ids);
 			
-			List<UserBO> userBOs = userQueryService.queryUsersByUserIds(idList);
+			List<UserBO> userBOs = userQueryService.queryUsersByUserIds(idList, terminalType);
 
 //			if (!CollectionUtils.isEmpty(resultMap) && !CollectionUtils.isEmpty(resultMap.get("users"))) {
 //				return resultMap.get("users");
