@@ -53,7 +53,16 @@ public interface WebsocketMessageFeign {
 	@RequestMapping(value = "/message/consume")
 	public JSONObject consume(@RequestParam("id") Long id);
 	
-	@RequestMapping(value = "/message/consumeAll")
-	public JSONObject consumeAll(@RequestParam("ids") Collection<Long> ids);
+	/**
+	 * 批量消费消息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月25日 下午2:46:01
+	 * @param ids String型
+	 * @return
+	 */
+	@RequestMapping(value = "/message/consume/all")
+	public JSONObject consumeAll(@RequestParam("ids") String ids);
 	
 }

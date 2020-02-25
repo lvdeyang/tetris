@@ -365,6 +365,21 @@ define([
             });
 
         },
+        
+        //向外部地址uri直接请求post。例如修改密码、websocket地址请求
+        editPsdPost:function(uri, data, callback, contentType, catchCodeArr, $loading, dataType, async){
+            return $.ajax({
+                type:'POST',
+                url:uri,
+                data:data,
+                success:callback,
+                $loading:$loading,
+                dataType:dataType,
+                contentType:contentType,
+                async:async,
+                'catch':ajax.doCatchCode(catchCodeArr)
+            });
+        },
 
         //处理上传
         upload:function(uri, formData, callback, catchCodeArr){
