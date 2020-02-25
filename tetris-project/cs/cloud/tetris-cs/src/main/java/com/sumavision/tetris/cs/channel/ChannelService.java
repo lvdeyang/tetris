@@ -356,6 +356,16 @@ public class ChannelService {
 	}
 	
 	/**
+	 * 重置终端补包地址<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 下午4:04:23
+	 */
+	public void resetZonePath() throws Exception {
+		broadTerminalService.resetZonePath();
+	}
+	
+	/**
 	 * 资源目录同步到终端<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

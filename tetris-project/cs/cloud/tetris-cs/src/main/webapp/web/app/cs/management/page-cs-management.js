@@ -62,7 +62,7 @@ define([
                             label: '重大'
                         }, {
                             value: '6',
-                            label: '很大'
+                            label: '很重大'
                         }, {
                             value: '5',
                             label: '特别重大'
@@ -363,6 +363,42 @@ define([
                     //    }).catch(function () {
                     //    });
                     //}
+                },
+                handleResetZoneUrl: function () {
+                    var self = this;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title: '危险操作',
+                        message: h('div', null, [
+                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class: 'el-message-box__message'}, [
+                                h('p', null, ['此操作将重置所有终端补包地址，是否继续?'])
+                            ])
+                        ]),
+                        type: 'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose: function (action, instance, done) {
+                            instance.confirmButtonLoading = true;
+                            if (action === 'confirm') {
+                                ajax.post('/cs/channel/reset/zone/url', null, function(data, status) {
+                                    if (status == 200) {
+                                        self.$message({
+                                            message: '重置成功',
+                                            type: 'success'
+                                        });
+                                    }
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                })
+                            } else {
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function () {
+                    });
                 },
 
                 // add channel dialog event
