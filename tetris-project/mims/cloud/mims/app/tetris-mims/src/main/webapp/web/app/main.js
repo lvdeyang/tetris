@@ -85,8 +85,11 @@ require.config({
         'page-backstage-production-audio-stream':window.APPPATH + 'backstage/production/audio-stream/page-backstage-production-audio-stream',
         'page-backstage-production-picture':window.APPPATH + 'backstage/production/picture/page-backstage-production-picture',
         'page-backstage-production-video':window.APPPATH + 'backstage/production/video/page-backstage-production-video',
-        'page-backstage-production-video-stream':window.APPPATH + 'backstage/production/video-stream/page-backstage-production-video-stream'
+        'page-backstage-production-video-stream':window.APPPATH + 'backstage/production/video-stream/page-backstage-production-video-stream',
 
+        /* operation-pages */
+        'page-operation-package':window.APPPATH + 'front/operation/package/page-operation-package',
+        'page-operation-package-media':window.APPPATH + 'front/operation/package-media/page-operation-package-media'
     },
     shim:{
         'vue':{

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.cs.area.AreaQuery;
@@ -99,6 +100,9 @@ public class BroadTerminalService {
 	private MimsServerPropsQuery mimsServerPropsQuery;
 	
 	@Autowired
+	private com.sumavision.tetris.cs.config.ServerProps csServerProps;
+	
+	@Autowired
 	private MediaCompressService mediaCompressService;
 	
 	@Autowired
@@ -173,7 +177,10 @@ public class BroadTerminalService {
 		
 		//初始化播发协议
 		JSONObject broadJsonObject = new JSONObject();
-		String broadIdString = channelId.toString() + newVersion.split("v")[1];
+//		String broadIdString = channelId.toString() + newVersion.split("v")[1];
+		String broadIdString = new StringBufferWrapper().append(channelId)
+				.append(DateUtil.format(new Date(), DateUtil.currentDateTimePattern))
+				.toString();
 		broadJsonObject.put("hasfile", hasFile ? 1 : 0);
 		broadJsonObject.put("level", BroadTerminalLevelType.fromName(broadInfoVO.getLevel()).getLevel());
 		broadJsonObject.put("id", broadIdString);
@@ -186,13 +193,17 @@ public class BroadTerminalService {
 		
 		MediaCompressVO mediaCompressVO = null;
 		String filePath = "";
+		String zoneStorePath = "";
+		String zoneDownloadPath = "";
 		if (hasFile) {
 			// 获取媒资增量
 			//List<CsResourceVO> addResourceList = resourceSendQuery.getAddResource(channelId, false);
 			//获取媒资全量或手选资源
 			List<CsResourceVO> addResourceList = new ArrayList<CsResourceVO>();
-			if (resourceIds == null || resourceIds.isEmpty()){
-				addResourceList = csResourceQuery.getResourcesFromChannelId(channelId);
+			if (resourceIds == null){
+				addResourceList = csResourceQuery.getResourcesFromChannelId(channelId);}
+			else if(resourceIds.isEmpty()){
+				
 			} else {
 				List<Long> resourceIdList = JSONArray.parseArray(resourceIds, Long.class);
 				addResourceList = csResourceQuery.queryResourceByIds(resourceIdList);
@@ -253,6 +264,10 @@ public class BroadTerminalService {
 			
 			broadJsonObject.put("filePath", filePath);
 			broadJsonObject.put("fileSize", mediaCompressVO.getSize());
+			
+//			Map<String, String> zonePath = versionSendQuery.getZonePath(channel);
+//			zoneStorePath = zonePath.get("zoneStorePath");
+//			zoneDownloadPath = zonePath.get("zoneDownloadUrl");
 		} else {
 			broadJsonObject.put("filePath", "");
 			broadJsonObject.put("fileSize", "");
@@ -276,7 +291,7 @@ public class BroadTerminalService {
 			areaSendQuery.saveArea(channelId);
 
 			// 保存播发版本
-			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath, hasFile ? VersionSendType.BROAD_FILE : VersionSendType.BROAD_LIVE);
+			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath, hasFile ? VersionSendType.BROAD_FILE : VersionSendType.BROAD_LIVE, zoneStorePath, zoneDownloadPath);
 
 			return getReturnJSON(true, "");
 		} else {
@@ -312,7 +327,7 @@ public class BroadTerminalService {
 		areaSendQuery.saveArea(channelId);
 
 		// 保存播发版本
-		versionSendQuery.addVersion(channelId, newVersion, channelId.toString() + newVersion.split("v")[1], null, null, VersionSendType.BROAD_FILE);
+		versionSendQuery.addVersion(channelId, newVersion, channelId.toString() + newVersion.split("v")[1], null, null, VersionSendType.BROAD_FILE, "", "s");
 	}
 	
 	/**
@@ -324,7 +339,7 @@ public class BroadTerminalService {
 	 */
 	public JSONObject restartBroadcast(Long channelId) throws Exception {
 		JSONObject broadJsonObject = new JSONObject();
-		VersionSendPO versionSendPO = versionSendQuery.getLastBroadVersionSendPO(channelId);
+		VersionSendPO versionSendPO = versionSendQuery.getLastBroadVersionPO(channelId);
 		if (versionSendPO == null) {
 			throw new ChannelTerminalRequestErrorException("重新播发", "当前频道没有被储存的版本信息");
 		}
@@ -439,6 +454,24 @@ public class BroadTerminalService {
 		} else {
 			throw new ChannelAlreadyStopException(channelQuery.findByChannelId(channelId).getName());
 		}
+	}
+	
+	/**
+	 * 重置终端补包地址<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 下午4:04:23
+	 */
+	public void resetZonePath() throws Exception {
+		JSONObject jsonParam = new JSONObject();
+		String ip = csServerProps.getIp();
+		String port = csServerProps.getPort();
+		jsonParam.put("ip", ip);
+		jsonParam.put("port", port);
+//		JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.RESET_ZONE_URL.getUrl(), jsonParam);
+//		if (response == null || !response.containsKey("result") || !response.getString("result").equals("1")) {
+//			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.RESET_ZONE_URL.getAction(), response.getString("message"));
+//		}
 	}
 	
 	private JSONObject getReturnJSON(Boolean ifSuccess, String message) {
