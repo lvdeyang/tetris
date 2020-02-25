@@ -15,6 +15,7 @@ import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.service.ResourceService;
+import com.sumavision.bvc.device.command.exception.UserHasNoAvailableEncoderException;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
@@ -109,6 +110,7 @@ public class MonitorLiveCallService {
 		
 		//被叫用户设备
 		EncoderDecoderUserMap localUserMap = encoderDecoderUserMapDao.findByUserId(localUser.getId());
+		if(localUserMap == null) throw new UserHasNoAvailableEncoderException(localUser.getName());
 		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getEncodeBundleId()).getList());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
@@ -274,6 +276,7 @@ public class MonitorLiveCallService {
 		
 		//被叫用户设备
 		EncoderDecoderUserMap localUserMap = encoderDecoderUserMapDao.findByUserId(localUser.getId());
+		if(localUserMap == null) throw new UserHasNoAvailableEncoderException(localUser.getName());
 		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getEncodeBundleId()).getList());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
@@ -407,6 +410,7 @@ public class MonitorLiveCallService {
 		
 		//被叫用户设备
 		EncoderDecoderUserMap calledUserMap = encoderDecoderUserMapDao.findByUserId(calledUser.getId());
+		if(calledUserMap == null) throw new UserHasNoAvailableEncoderException(calledUser.getName());
 		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(calledUserMap.getEncodeBundleId()).getList());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
@@ -517,6 +521,7 @@ public class MonitorLiveCallService {
 		
 		//主叫用户设备
 		EncoderDecoderUserMap localUserMap = encoderDecoderUserMapDao.findByUserId(localUser.getId());
+		if(localUserMap == null) throw new UserHasNoAvailableEncoderException(localUser.getName());
 		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getEncodeBundleId()).getList());
 		BundlePO callEncoderBundleEntity = callEncoderBundleEntities.get(0);
 		

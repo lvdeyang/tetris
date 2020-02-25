@@ -20,6 +20,7 @@ import com.sumavision.bvc.device.monitor.live.MonitorUserCallService;
 import com.sumavision.bvc.device.monitor.live.call.MonitorLiveCallDAO;
 import com.sumavision.bvc.device.monitor.live.call.MonitorLiveCallPO;
 import com.sumavision.bvc.device.monitor.live.call.MonitorLiveCallService;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -125,7 +126,7 @@ public class MonitorUserCallController {
 		
 		Long localUserId = userUtils.getUserIdFromSession(request);
 		
-		UserBO localUser = userUtils.queryUserById(localUserId);
+		UserBO localUser = userUtils.queryUserById(localUserId, TerminalType.PC_PLATFORM);
 		
 		UserBO xtUser = userUtils.queryUserByUserno(targetUser);
 		

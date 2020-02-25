@@ -33,6 +33,7 @@ import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserQuery;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -522,7 +523,7 @@ public class MonitorLiveController {
 			String type,
 			HttpServletRequest request) throws Exception{
 		
-		UserBO localUser = userUtils.queryUserById(localUserId);
+		UserBO localUser = userUtils.queryUserById(localUserId, TerminalType.PC_PLATFORM);
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
@@ -553,7 +554,7 @@ public class MonitorLiveController {
 			Long localUserId,
 			HttpServletRequest request) throws Exception{
 		
-		UserBO localUser = userUtils.queryUserById(localUserId);
+		UserBO localUser = userUtils.queryUserById(localUserId, TerminalType.PC_PLATFORM);
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
@@ -625,7 +626,7 @@ public class MonitorLiveController {
 			String type,
 			HttpServletRequest request) throws Exception{
 		
-		UserBO xtUser = userUtils.queryUserById(xtUserId);
+		UserBO xtUser = userUtils.queryUserById(xtUserId, TerminalType.PC_PLATFORM);
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
@@ -655,7 +656,7 @@ public class MonitorLiveController {
 			Long osdId,
 			Long xtUserId,
 			HttpServletRequest request) throws Exception{
-		UserBO xtUser = userUtils.queryUserById(xtUserId);
+		UserBO xtUser = userUtils.queryUserById(xtUserId, TerminalType.PC_PLATFORM);
 		UserVO user = userUtils.getUserFromSession(request);
 		List<MonitorLiveSplitConfigPO> configs = monitorLiveSplitConfigDAO.findByUserIdAndSerial(user.getId(), serial);
 		if(configs!=null && configs.size()>0){
@@ -721,7 +722,7 @@ public class MonitorLiveController {
 			String dstAudioBaseType,
 			HttpServletRequest request) throws Exception{
 		
-		UserBO xtUser = userUtils.queryUserById(xtUserId);
+		UserBO xtUser = userUtils.queryUserById(xtUserId, TerminalType.PC_PLATFORM);
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		

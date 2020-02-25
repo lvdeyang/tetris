@@ -47,6 +47,7 @@ import com.sumavision.bvc.system.dao.AVtplGearsDAO;
 import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
@@ -445,7 +446,7 @@ public class MonitorLiveUserService {
 		if(userId.longValue() == 1l){
 			//admin操作转换
 			userId = live.getUserId();
-			UserBO user = resourceService.queryUserById(userId);
+			UserBO user = resourceService.queryUserById(userId, TerminalType.QT_ZK);
 			userno = user.getUserNo();
 		}
 		if(!userId.equals(live.getUserId())){
@@ -477,7 +478,7 @@ public class MonitorLiveUserService {
 		if(userId.longValue() == 1l){
 			//admin操作转换
 			userId = live.getUserId();
-			UserBO user = resourceService.queryUserById(userId);
+			UserBO user = resourceService.queryUserById(userId, TerminalType.QT_ZK);
 			userno = user.getUserNo();
 		}
 		if(!userId.equals(live.getUserId())){

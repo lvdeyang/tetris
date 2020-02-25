@@ -71,6 +71,7 @@ import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -171,12 +172,12 @@ public class CommandBasicServiceImpl {
 			List<Long> userIdList
 			) throws Exception{
 		
-		UserBO creatorUserBo = resourceService.queryUserById(creatorUserId);
+		UserBO creatorUserBo = resourceService.queryUserById(creatorUserId, TerminalType.QT_ZK);
 		if(creatorUserBo == null){
 			throw new BaseException(StatusCode.FORBIDDEN, "当前用户已失效，请重新登录");
 		}
 		if(creatorUserBo.getFolderUuid() == null){
-			throw new UserHasNoFolderException(creatorUserBo.getName());
+			//throw new UserHasNoFolderException(creatorUserBo.getName());
 		}
 		
 		//确保成员中有创建者
@@ -239,7 +240,7 @@ public class CommandBasicServiceImpl {
 		//【注：解码器（播放器）在开启指挥时选择，如果选择不到，则该成员的转发状态为 ExecuteStatus.NO_AVAILABLE_PLAYER】
 		//用户管理层的批量接口，根据userIds查询List<UserBO>，由于缺少folderId，所以额外查询queryAllFolders，给UserBO中的folderId赋值
 		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
-		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr);
+		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
 		List<FolderPO> allFolders = resourceService.queryAllFolders();
 //		List<UserBO> allUsers = resourceService.queryUserresByUserId(creatorUserId);
 //		List<UserBO> commandUserBos = new ArrayList<UserBO>();
@@ -248,11 +249,16 @@ public class CommandBasicServiceImpl {
 //				commandUserBos.add(user);
 //			}
 //		}
-		
+		if(creatorUserBo.getFolderUuid() == null){
+			throw new UserHasNoFolderException(creatorUserBo.getName());
+		}
 		//从List<UserBO>取出bundleId列表，注意判空；给UserBO中的folderId赋值
 		List<String> bundleIds = new ArrayList<String>();
 		for(UserBO user : commandUserBos){
 			EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+			if(userMap == null){
+				throw new UserHasNoAvailableEncoderException(user.getName());
+			}
 			bundleIds.add(userMap.getEncodeBundleId());
 			for(FolderPO folder : allFolders){
 				if(folder.getUuid().equals(user.getFolderUuid())){
@@ -1166,7 +1172,7 @@ public class CommandBasicServiceImpl {
 			
 			//用户管理层的批量接口，根据userIds查询List<UserBO>，由于缺少folderId，所以额外查询queryAllFolders，给UserBO中的folderId赋值
 			String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
-			List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr);
+			List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
 			List<FolderPO> allFolders = resourceService.queryAllFolders();
 //			List<UserBO> allUsers = resourceService.queryUserresByUserId(group.getUserId());
 //			List<UserBO> commandUserBos = new ArrayList<UserBO>();
@@ -1186,6 +1192,9 @@ public class CommandBasicServiceImpl {
 			List<String> bundleIds = new ArrayList<String>();
 			for(UserBO user : commandUserBos){
 				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+				if(userMap == null){
+					throw new UserHasNoAvailableEncoderException(user.getName());
+				}
 				bundleIds.add(userMap.getEncodeBundleId());
 				for(FolderPO folder : allFolders){
 					if(folder.getUuid().equals(user.getFolderUuid())){
@@ -1235,6 +1244,7 @@ public class CommandBasicServiceImpl {
 //			BasicRolePO memberRole = basicRoleDao.findByName("指挥员");
 			for(UserBO user : commandUserBos){
 				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+				//if(userMap == null)//userMap上边已经判空，这里应该不需要
 				CommandGroupMemberPO memberPO = new CommandGroupMemberPO();
 				//关联指挥员角色
 //				memberPO.setRoleId(memberRole.getId());

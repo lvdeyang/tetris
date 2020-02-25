@@ -41,6 +41,7 @@ import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.enumeration.AvtplUsageType;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -533,8 +534,8 @@ public class CommandCommonServiceImpl {
 	public int compareLevelByUserId(Long userId1, Long userId2) {
 		
 		try {
-			UserBO user1 = resourceService.queryUserById(userId1);
-			UserBO user2 = resourceService.queryUserById(userId2);
+			UserBO user1 = resourceService.queryUserById(userId1, TerminalType.QT_ZK);
+			UserBO user2 = resourceService.queryUserById(userId2, TerminalType.QT_ZK);
 			
 			Set<Long> folderIds = new HashSetWrapper<Long>().add(user1.getFolderId()).add(user2.getFolderId()).getSet();
 			Map<Long, FolderPO> folderMap = resourceService.queryFoleders(folderIds);
@@ -589,8 +590,8 @@ public class CommandCommonServiceImpl {
 		public int compare(Long userId1, Long userId2) {
 			
 			try {
-				UserBO user1 = resourceServiceStatic.queryUserById(userId1);
-				UserBO user2 = resourceServiceStatic.queryUserById(userId2);
+				UserBO user1 = resourceServiceStatic.queryUserById(userId1, TerminalType.QT_ZK);
+				UserBO user2 = resourceServiceStatic.queryUserById(userId2, TerminalType.QT_ZK);
 				
 				Set<Long> folderIds = new HashSetWrapper<Long>().add(user1.getFolderId()).add(user2.getFolderId()).getSet();
 				Map<Long, FolderPO> folderMap = resourceServiceStatic.queryFoleders(folderIds);
