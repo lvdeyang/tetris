@@ -242,6 +242,21 @@ public class ChannelController {
 	}
 	
 	/**
+	 * 重置终端补包地址<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 下午4:04:23
+	 * @param request
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/reset/zone/url")
+	public Object setZoneUrl(HttpServletRequest request) throws Exception {
+		channelService.resetZonePath();
+		return null;
+	}
+	
+	/**
 	 * 播发跳转(能力播发)<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
