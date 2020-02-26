@@ -674,7 +674,7 @@ define([
                 for(var i=0; i<self.tree.institution.select.length; i++){
                     userIds.push(self.tree.institution.select[i].id);
                 }
-                ajax.post('/command/basic/save', {members: $.toJSON(userIds)}, function(data){
+                ajax.post('/command/basic/save', {members: $.toJSON(userIds),name:""}, function(data){
                     data.type = 'command';
                     data.select = [];
                     self.group.current = data;
@@ -967,9 +967,12 @@ define([
                     ajax.post('/command/basic/start', {
                         id:self.group.current.id
                     }, function(data){
+                        console.log(data)
                         self.group.current.status = 'start';
-                        if(data && data.length>0){
-                            self.qt.invoke('groupMembers', $.toJSON(data));
+                        var splits = data.splits;
+                        console.log(splits)
+                        if(splits && splits.length>0){
+                            self.qt.invoke('groupMembers', $.toJSON(splits));
                         }
                     });
                 }
@@ -1394,6 +1397,7 @@ define([
                     e = e.params;
                     self.enterCommand([e.businessId]);
                 });
+
                 //websocket 停止指挥
                 self.qt.on('commandStop', function(e){
                     e = e.params;

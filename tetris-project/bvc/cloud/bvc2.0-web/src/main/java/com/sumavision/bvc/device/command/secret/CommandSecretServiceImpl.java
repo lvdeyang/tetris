@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 
 * @ClassName: CommandSecretServiceImpl 
-* @Description: 专项指挥业务
+* @Description: 专项会议业务
 * @author zsy
 * @date 2019年10月24日 上午10:56:48 
 *
@@ -47,7 +47,7 @@ public class CommandSecretServiceImpl {
 	private CommandCommonUtil commandCommonUtil;
 	
 	/**
-	 * 开始专向指挥<br/>
+	 * 开始专向会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -67,7 +67,7 @@ public class CommandSecretServiceImpl {
 			int locationIndex) throws Exception{
 		
 		if(creatorUserId.equals(memberUserId)){
-			throw new BaseException(StatusCode.FORBIDDEN, "请选择其他成员进行专向指挥");
+			throw new BaseException(StatusCode.FORBIDDEN, "请选择其他成员进行专向会议");
 		}
 		
 		List<CommandGroupPO> secretGroups = commandGroupDao.findByType(GroupType.SECRET);
@@ -76,15 +76,15 @@ public class CommandSecretServiceImpl {
 				Set<CommandGroupMemberPO> members = secretGroup.getMembers();
 				for(CommandGroupMemberPO member : members){
 					if(member.getUserId().equals(creatorUserId)){
-						throw new BaseException(StatusCode.FORBIDDEN, "您已经在参加其他专向指挥");
+						throw new BaseException(StatusCode.FORBIDDEN, "您已经在参加其他专向会议");
 					}else if(member.getUserId().equals(memberUserId)){
-						throw new BaseException(StatusCode.FORBIDDEN, "对方已经在参加其他专向指挥");
+						throw new BaseException(StatusCode.FORBIDDEN, "对方已经在参加其他专向会议");
 					}
 				}
 			}
 		}
 		
-		log.info(creatorUsername + "发起专向指挥，成员用户userId：" + memberUserId);
+		log.info(creatorUsername + "发起专向会议，成员用户userId：" + memberUserId);
 		
 		List<Long> userIdArray = new ArrayListWrapper<Long>().add(memberUserId).getList();		
 		CommandGroupPO group = commandBasicServiceImpl.save(creatorUserId, creatorUserId, creatorUsername, name, GroupType.SECRET, userIdArray);
@@ -93,7 +93,7 @@ public class CommandSecretServiceImpl {
 	}
 	
 	/**
-	 * 停止专向指挥<br/>
+	 * 停止专向会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -105,7 +105,7 @@ public class CommandSecretServiceImpl {
 	public JSONObject stop(Long userId, Long groupId) throws Exception{
 		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
-		log.info("专向指挥停止：" + group.getName());
+		log.info("专向会议停止：" + group.getName());
 		
 		JSONArray splits = commandBasicServiceImpl.stop(userId, groupId, 0);
 		
@@ -122,7 +122,7 @@ public class CommandSecretServiceImpl {
 	}
 	
 	/**
-	 * 成员同意加入专向指挥<br/>
+	 * 成员同意加入专向会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -135,11 +135,11 @@ public class CommandSecretServiceImpl {
 				
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		if(group == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "专向指挥已停止");
+			throw new BaseException(StatusCode.FORBIDDEN, "专向会议已停止");
 		}
-		log.info("成员同意加入专向指挥：" + group.getName());
+		log.info("成员同意加入专向会议：" + group.getName());
 		
-		//停止其它业务观看专向指挥的2个成员
+		//停止其它业务观看专向会议的2个成员
 		List<Long> groupIds = new ArrayListWrapper<Long>().add(groupId).getList();
 		List<Long> srcUserIds = new ArrayList<Long>();
 		for(CommandGroupMemberPO member : group.getMembers()){
@@ -158,7 +158,7 @@ public class CommandSecretServiceImpl {
 	}
 	
 	/**
-	 * 成员拒绝加入专向指挥<br/>
+	 * 成员拒绝加入专向会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -171,9 +171,9 @@ public class CommandSecretServiceImpl {
 		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		if(group == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "专向指挥已停止");
+			throw new BaseException(StatusCode.FORBIDDEN, "专向会议已停止");
 		}
-		log.info("成员拒绝加入专向指挥，指挥：" + group.getName());
+		log.info("成员拒绝加入专向会议，会议：" + group.getName());
 		
 		commandBasicServiceImpl.stop(userId, groupId, 1);
 		
@@ -182,7 +182,7 @@ public class CommandSecretServiceImpl {
 	}
 	
 	/**
-	 * 判断一条转发是否因为专项指挥业务而暂停<br/>
+	 * 判断一条转发是否因为专项会议业务而暂停<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -198,11 +198,11 @@ public class CommandSecretServiceImpl {
 		CommandGroupMemberPO member = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
 		Long forwardSrcUserId = member.getUserId();
 		
-		//查找专向指挥group，非STOP的，且成员都CONNECT的，判断成员是否是forward的源（后续如果业务有变动，需要改成根据forward来查询判断）
+		//查找专向会议group，非STOP的，且成员都CONNECT的，判断成员是否是forward的源（后续如果业务有变动，需要改成根据forward来查询判断）
 //		Set<CommandGroupForwardPO> secretForwards = new HashSet<CommandGroupForwardPO>();
 		List<CommandGroupPO> secretGroups = commandGroupDao.findByType(GroupType.SECRET);
 		for(CommandGroupPO secretGroup : secretGroups){
-			//forward自己的指挥不需要判断
+			//forward自己的会议不需要判断
 			if(secretGroup.getId().equals(group.getId())){
 				continue;
 			}

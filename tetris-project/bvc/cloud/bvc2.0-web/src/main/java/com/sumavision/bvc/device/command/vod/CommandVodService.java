@@ -168,15 +168,15 @@ public class CommandVodService {
 		
 		//被点播--编码
 		List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(vodUser.getId())).getList());
-		if(encoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(user.getName());
+		if(encoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(vodUser.getName());
 		BundlePO encoderBundleEntity = encoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> encoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(encoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
-		if(encoderVideoChannels.size() == 0) throw new UserHasNoAvailableEncoderException(user.getName());
+		if(encoderVideoChannels.size() == 0) throw new UserHasNoAvailableEncoderException(vodUser.getName());
 		ChannelSchemeDTO encoderVideoChannel = encoderVideoChannels.get(0);
 		
 		List<ChannelSchemeDTO> encoderAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(encoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
-		if(encoderAudioChannels.size() == 0) throw new UserHasNoAvailableEncoderException(user.getName());
+		if(encoderAudioChannels.size() == 0) throw new UserHasNoAvailableEncoderException(vodUser.getName());
 		ChannelSchemeDTO encoderAudioChannel = encoderAudioChannels.get(0);		
 		
 		CommandVodPO userVod = new CommandVodPO(
@@ -363,7 +363,7 @@ public class CommandVodService {
 	 * @return
 	 * @throws Exception 如果已经存在“观看本地视频”的业务，则会抛错
 	 */
-	public CommandGroupUserPlayerPO seeOneselfStart(UserBO user, UserBO admin) throws Exception{
+	public CommandGroupUserPlayerPO seeOneselfUserStart(UserBO user, UserBO admin) throws Exception{
 		
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		CommandGroupUserPlayerPO selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
@@ -403,7 +403,7 @@ public class CommandVodService {
 		commandVodDao.save(userVod);
 		
 		decoderUserPlayer.setBusinessId(userVod.getId().toString());
-		decoderUserPlayer.setBusinessName("本地视频");
+		decoderUserPlayer.setBusinessName("本地视频预览");
 		commandGroupUserPlayerDao.save(decoderUserPlayer);
 		
 		//点播协议
@@ -414,6 +414,53 @@ public class CommandVodService {
 		executeBusiness.execute(logic, user.getName() + "用户观看自己");
 		
 		return decoderUserPlayer;
+	}
+
+	/**
+	 * 用户看自己的编码器<br/>
+	 * <p>与“点播用户”userStart()方法基本相同，区别是选用最后一个可用的播放器</p>
+	 * <p>VodType为USER_ONESELF，PlayerBusinessType为PLAY_USER_ONESELF，都是为了查询</p>
+	 * <p>会先校验该用户是否有播放器已经在观看本地视频，如果有则抛错</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月29日 上午9:10:26
+	 * @param user
+	 * @param admin
+	 * @return
+	 * @throws Exception 如果已经存在“观看本地视频”的业务，则会抛错
+	 */
+	public CommandGroupUserPlayerPO seeOneselfLocalStart(UserBO user) throws Exception{
+		
+		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+		CommandGroupUserPlayerPO selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
+		if(selfPlayer != null){
+			throw new BaseException(StatusCode.FORBIDDEN, "已经存在本地");
+		}
+		
+		//选最后一个播放器，选不到则抛错
+		selfPlayer = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_USER_ONESELF, -1);		
+		selfPlayer.setBusinessId("0");//需要写一个假的businessId
+		selfPlayer.setBusinessName("本地视频预览");
+		commandGroupUserPlayerDao.save(selfPlayer);
+		
+		return selfPlayer;
+	}
+	
+	public void seeOneselfLocalStop(UserBO user) throws Exception{
+		
+		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+		CommandGroupUserPlayerPO selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
+		if(selfPlayer == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "已经在观看本地视频");
+		}
+		
+		selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
+		if(selfPlayer == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有本地视频预览");
+		}
+		
+		selfPlayer.setFree();
+		commandGroupUserPlayerDao.save(selfPlayer);
 	}
 
 	/**

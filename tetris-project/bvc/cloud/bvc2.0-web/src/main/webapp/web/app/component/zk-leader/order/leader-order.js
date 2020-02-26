@@ -45,6 +45,7 @@ define([
             }
         },
         watch:{
+            //切换tab
             currentTab:function(){
                 var self = this;
                 if(self.currentTab == 0){
@@ -63,7 +64,7 @@ define([
                         self.refreshRecord();
                     }
                 }else if(self.currentTab == 3){
-                //    用户
+                    //用户
                     if(self.tree.user.data.length === 0){
                         self.refreshUser();
                     }
@@ -151,37 +152,41 @@ define([
                         self.qt.alert('消息提示', '您还没有选择资源文件');
                         return;
                     }
-                    //TODO:缺少播放的接口，传参数：屏幕序号，资源
-                    // ajax.post('/command/basic/forward/file', {
-                    //     id:self.group.id,
-                    //     src: $.toJSON(src),
-                    //     dst: $.toJSON(dst)
-                    // }, function(rows){
-                    //
-                    // });
+                    ajax.post('/command/vod/resource/file/start/player', {
+                        resourceFileId: self.tree.resource.select,
+                        serial:self.screenId
+                    }, function (data) {
+                        self.qt.linkedWebview('hidden',{id:'playVodFile', params:$.toJSON([data])});
+                        self.handleClose();
+                    });
                 }else if(self.currentTab == 1){
                     if(!self.tree.device.select.length){
                         self.qt.alert('消息提示', '您还没有选择设备资源');
                         return;
                     }
-                    ajax.post('/command/basic/forward/device', {
-                        id:self.group.id,
-                        src: $.toJSON(src),
-                        dst: $.toJSON(dst)
-                    }, function(rows){
-
+                    ajax.post('/command/vod/device/start/player', {
+                        deviceId: self.tree.device.select,
+                        serial:self.screenId
+                    }, function (data) {
+                        self.qt.linkedWebview('hidden',{id:'playVodDevice', params:$.toJSON([data])});
+                        self.handleClose();
                     });
                 }else if(self.currentTab == 2){
                     if(!self.tree.record.select.length){
                         self.qt.alert('消息提示', '您还没有选择录像资源');
                         return;
                     }
-                    ajax.post('/command/forward/record', {
-                        id:self.group.id,
-                        src: $.toJSON(src),
-                        dst: $.toJSON(dst)
-                    }, function(rows){
-
+                }else if(self.currentTab == 3){
+                    if(!self.tree.user.select.length){
+                        self.qt.alert('消息提示', '您还没有选择用户资源');
+                        return;
+                    }
+                    ajax.post('/command/vod/user/start/player', {
+                        userId: self.tree.user.select,
+                        serial:self.screenId
+                    }, function (data) {
+                        self.qt.linkedWebview('hidden',{id:'playVodUsers', params:$.toJSON([data])});
+                        self.handleClose();
                     });
                 }
             }

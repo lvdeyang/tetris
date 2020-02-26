@@ -27,7 +27,7 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.util.HttpServletRequestParser;
 
 /**
- * @ClassName: 权限角色
+ * @ClassName: 权限角色（原名BusinessRoleController，因为名称冲突所以加了个Bvc）
  * @author zy
  * @date 2018年7月25日 下午8:45:14 
  */

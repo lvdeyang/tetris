@@ -69,7 +69,7 @@ public class CommandSilenceServiceImpl {
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;	
 	
-	/** 指挥中的一个成员开启静默<br/>
+	/** 会议中的一个成员开启静默<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -135,7 +135,7 @@ public class CommandSilenceServiceImpl {
 			logic.merge(logicRecord);
 			
 			StringBufferWrapper description = new StringBufferWrapper()
-					.append(group.getName()).append(" 指挥，")
+					.append(group.getName()).append(" 会议，")
 					.append(operateMember.getUserName()).append(" 成员 ");
 			if(silenceToHigher) description.append("对上静默 ");
 			if(silenceToLower) description.append("对下静默 ");
@@ -146,7 +146,7 @@ public class CommandSilenceServiceImpl {
 	}	
 	
 	/**
-	 * 指挥中的一个成员停止静默<br/>
+	 * 会议中的一个成员停止静默<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -176,7 +176,7 @@ public class CommandSilenceServiceImpl {
 			commandBasicServiceImpl.startGroupForwards(group, true, true);
 			
 			StringBufferWrapper description = new StringBufferWrapper()
-					.append(group.getName()).append(" 指挥，")
+					.append(group.getName()).append(" 会议，")
 					.append(operateMember.getUserName()).append(" 成员 ");
 			if(stopSilenceToHigher) description.append("取消对上静默 ");
 			if(stopSilenceToLower) description.append("取消对下静默 ");

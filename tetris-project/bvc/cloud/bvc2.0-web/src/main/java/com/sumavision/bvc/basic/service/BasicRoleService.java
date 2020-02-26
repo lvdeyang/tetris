@@ -124,8 +124,8 @@ public class BasicRoleService {
 			_roles.add(role);
 			BasicRoleBO role1 = new BasicRoleBO();
 		}
-		if(null == basicRoleDao.findByName("指挥员")){
-			BasicRoleBO role = new BasicRoleBO("指挥员", "观众", false);
+		if(null == basicRoleDao.findByName("会议员")){
+			BasicRoleBO role = new BasicRoleBO("会议员", "观众", false);
 			_roles.add(role);
 		}
 		if(_roles.size() > 0){

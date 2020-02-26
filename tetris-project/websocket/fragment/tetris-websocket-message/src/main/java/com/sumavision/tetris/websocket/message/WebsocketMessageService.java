@@ -27,8 +27,10 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.core.SessionQueue;
@@ -352,6 +354,55 @@ public class WebsocketMessageService {
 			if(response != null) response.close();
 			if(httpclient != null) httpclient.close();
 		}
+	}
+	
+	/**
+	 * 广播会议消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月21日 下午7:00:52
+	 * @param Long commandId 会议id
+	 * @param Collection<Long> userIds 会议成员用户id列表
+	 * @param String message 消息内容
+	 * @param Long fromUserId 发起人id
+	 * @param String fromUsername fromUserName名称
+	 */
+	public void broadcastMeetingMessage(
+			Long commandId,
+			Collection<Long> userIds,
+			String message,
+			Long fromUserId,
+			String fromUsername) throws Exception{
+		
+		message = new StringBufferWrapper().append(fromUsername).append(" ").append(DateUtil.format(new Date(), DateUtil.dateTimePattern)).append("：").append(message).toString();
+		
+		message = JSON.toJSONString(new HashMapWrapper<String, Object>().put("businessType", "receiveInstantMessage")
+																	    .put("message", message)
+																	    .getMap());
+		//广播消息
+		WebsocketMessagePO messageEntity = new WebsocketMessagePO();
+		messageEntity.setUserId(commandId);
+		messageEntity.setUsername("会议广播");
+		messageEntity.setMessage(message);
+		messageEntity.setMessageType(WebsocketMessageType.INSTANT_MESSAGE);
+		messageEntity.setConsumed(true);
+		messageEntity.setUpdateTime(new Date());
+		messageEntity.setFromUserId(fromUserId);
+		messageEntity.setFromUsername(fromUsername);
+		websocketMessageDao.save(messageEntity);
+		
+		SessionQueue queue = SessionQueue.getInstance();
+		
+		if(userIds!=null && userIds.size()>0){
+			for(Long userId:userIds){
+				if(userId.equals(fromUserId)) continue;
+				Session session = queue.get(userId);
+				if(session != null){
+					session.getBasicRemote().sendText(message);
+				}
+			}
+		}
+		
 	}
 	
 }

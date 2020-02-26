@@ -92,4 +92,14 @@ public class WebsocketMessageService {
 		websocketMessageFeign.consumeAll(ids);
 	}
 	
+	public void broadcastMeetingMessage(
+			Long commandId,
+			Collection<Long> userIds,
+			String message,
+			Long fromUserId,
+			String fromUsername){
+		String userIdsStr = JSON.toJSONString(userIds);
+		websocketMessageFeign.broadcastMeetingMessage(commandId, userIdsStr, message, fromUserId, fromUsername);
+	}
+	
 }

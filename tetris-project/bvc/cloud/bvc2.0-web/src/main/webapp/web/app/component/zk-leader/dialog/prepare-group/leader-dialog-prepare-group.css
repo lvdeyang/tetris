@@ -1,0 +1,6 @@
+/* reset */
+html, body{overflow:hidden; min-width:0 !important; min-height:0 !important;}
+
+.leader-dialog-prepare-group .el-tabs__content{position:static;}
+.leader-dialog-prepare-group .el-input__inner{border-radius:0;}
+.leader-dialog-prepare-group .el-scrollbar__wrap{overflow-x:hidden;}

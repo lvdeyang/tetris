@@ -192,4 +192,17 @@ public class WebsocketMessageController {
 		return websocketMessageDao.countByUserIdAndMessageTypeAndConsumed(user.getId(), WebsocketMessageType.COMMAND, false);
 	}
 	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/instant/message")
+	public void broadcastMeetingMessage(
+			Long commandId,
+			String userIds,
+			String message,
+			Long fromUserId,
+			String fromUsername) throws Exception{
+		List<Long> parsedIds = JSON.parseArray(userIds, Long.class);
+		websocketMessageService.broadcastMeetingMessage(commandId, parsedIds, message, fromUserId, fromUsername);
+	}
+	
 }

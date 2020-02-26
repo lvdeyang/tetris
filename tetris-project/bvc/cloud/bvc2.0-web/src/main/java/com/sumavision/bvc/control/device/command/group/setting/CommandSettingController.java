@@ -7,8 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSONObject;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
+import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.setting.AutoManualMode;
 import com.sumavision.bvc.command.group.user.setting.CastMode;
 import com.sumavision.bvc.command.group.user.setting.CommandGroupUserSettingPO;
@@ -59,7 +59,13 @@ public class CommandSettingController {
 	public Object querySetting(HttpServletRequest request) throws Exception {
 		
 		UserVO user = userUtils.getUserFromSession(request);
-		CommandGroupUserSettingPO setting = commandGroupUserInfoDao.findByUserId(user.getId()).getSetting();
+		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+		CommandGroupUserSettingPO setting = null;
+		if(userInfo == null){
+			setting = new CommandGroupUserSettingPO();
+		}else{
+			setting = userInfo.getSetting();
+		}
 		return new CommandGroupUserSettingVO().set(setting);
 		
 	}

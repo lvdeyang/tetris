@@ -65,4 +65,13 @@ public interface WebsocketMessageFeign {
 	@RequestMapping(value = "/message/consume/all")
 	public JSONObject consumeAll(@RequestParam("ids") String ids);
 	
+
+	@RequestMapping(value = "/broadcast/instant/message")
+	public JSONObject broadcastMeetingMessage(
+			@RequestParam("commandId") Long commandId,
+			@RequestParam("userIds") String userIds,
+			@RequestParam("message") String message,
+			@RequestParam("fromUserId") Long fromUserId,
+			@RequestParam("fromUsername") String fromUsername);
+	
 }

@@ -12,7 +12,7 @@ public enum AvtplUsageType {
 
 	VOD("点播系统"),
 	WEB_PLAYER("播放器预览"),
-	COMMAND("指挥系统"),
+	COMMAND("会议系统."),
 	DEVICE_GROUP("设备组"),
 	STB("机顶盒"),
 	MOBILE("手机终端");

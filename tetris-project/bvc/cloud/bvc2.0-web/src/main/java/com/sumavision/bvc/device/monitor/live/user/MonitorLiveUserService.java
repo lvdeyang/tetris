@@ -446,7 +446,7 @@ public class MonitorLiveUserService {
 		if(userId.longValue() == 1l){
 			//admin操作转换
 			userId = live.getUserId();
-			UserBO user = resourceService.queryUserById(userId, TerminalType.QT_ZK);
+			UserBO user = resourceService.queryUserById(userId, TerminalType.PC_PLATFORM);
 			userno = user.getUserNo();
 		}
 		if(!userId.equals(live.getUserId())){
@@ -478,7 +478,7 @@ public class MonitorLiveUserService {
 		if(userId.longValue() == 1l){
 			//admin操作转换
 			userId = live.getUserId();
-			UserBO user = resourceService.queryUserById(userId, TerminalType.QT_ZK);
+			UserBO user = resourceService.queryUserById(userId, TerminalType.PC_PLATFORM);
 			userno = user.getUserNo();
 		}
 		if(!userId.equals(live.getUserId())){

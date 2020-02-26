@@ -99,6 +99,31 @@ define([
                     }, null, [403, 404, 408, 409, 500]);
                 });                
                 
+                //视频界面上的点播文件资源
+                self.qt.on('playVodFile', function (e) {
+                    self.qt.invoke('vodResourceFiles', e.params);
+                });
+                //视频界面上的点播设备资源
+                self.qt.on('playVodDevice', function (e) {
+                    self.qt.invoke('vodDevices', e.params);
+                });
+                //视频界面上的点播用户资源
+                self.qt.on('playVodUsers', function (e) {
+                    self.qt.invoke('vodUsers', e.params);
+                });
+                //视频界面上的呼叫
+                self.qt.on('playCall', function (e) {
+                    self.qt.invoke('callUsers', e.params);
+                });
+                //视频界面上的专项
+                self.qt.on('playSecret', function (e) {
+                    self.qt.invoke('secretStart', e.params);
+                });
+                //视频界面上的语音
+                self.qt.on('playVoice', function (e) {
+                    self.qt.invoke('voiceIntercoms', e.params);
+                });
+		
                 self.qt.get(['user'], function (variables) {
                     self.user = variables.user ? $.parseJSON(variables.user) : {};
                     self.gateIp = variables.user ? $.parseJSON(variables.user).gateIp : '';
@@ -257,6 +282,19 @@ define([
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'secretStop', params:e});
                             }
+                        //停止客户端的音/视频
+                        if (e.businessType === 'stopVideoSend') {
+                            self.qt.invoke('stopVideoSend', {});
+                            self.qt.warning('主席已将您的视频关闭');
+                        } else if (e.businessType === 'stopAudioSend') {
+                            self.qt.invoke('stopAudioSend', {});
+                            self.qt.warning('主席已将您的音频关闭');
+                        }
+
+                        //收到即时消息
+                        if(e.businessType === 'receiveInstantMessage'){
+                            self.qt.linkedWebview('historyMessage', {id: 'receiveInstantMessage', params: e});
+                        }
                         };
                         var onopen = function(){
                             console.log('已成功连接websocket...');

@@ -1,0 +1,5 @@
+/* reset */
+html, body{overflow:hidden; min-width:0 !important; min-height:0 !important;}
+
+.leader-dialog-add-group .el-tabs__content{position:static;}
+.leader-dialog-add-group .el-input__inner{border-radius:0;}
