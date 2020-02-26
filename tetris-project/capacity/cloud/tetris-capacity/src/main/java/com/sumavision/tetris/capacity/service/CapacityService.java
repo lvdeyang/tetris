@@ -232,12 +232,12 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月11日 下午1:46:11
 	 * @param DeleteInputsRequest input 不带msg_id的input
 	 */
-	public void deleteInputsAddMsgId(DeleteInputsRequest input) throws Exception{
+	public void deleteInputsAddMsgId(DeleteInputsRequest input, String capacityIp) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		input.setMsg_id(msg_id);
 		
-		deleteInputs(input);
+		deleteInputs(input, capacityIp);
 		
 	}
 	
@@ -248,10 +248,10 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月5日 上午9:51:20
 	 * @param DeleteInputsRequest input 删除输入请求
 	 */
-	private void deleteInputs(DeleteInputsRequest input) throws Exception{
+	private void deleteInputs(DeleteInputsRequest input, String capacityIp) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(capacityIp)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_INPUT)
@@ -610,12 +610,12 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月11日 下午2:53:36
 	 * @param DeleteTasksRequest task 不带msg_id的task
 	 */
-	public void deleteTasksAddMsgId(DeleteTasksRequest task) throws Exception{
+	public void deleteTasksAddMsgId(DeleteTasksRequest task, String capacityIp) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		task.setMsg_id(msg_id);
 		
-		deleteTasks(task);
+		deleteTasks(task, capacityIp);
 	}
 	
 	/**
@@ -625,10 +625,10 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月5日 下午3:56:56
 	 * @param DeleteTasksRequest task 需要删除的任务
 	 */
-	private void deleteTasks(DeleteTasksRequest task) throws Exception{
+	private void deleteTasks(DeleteTasksRequest task, String capacityIp) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(capacityIp)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)
@@ -984,14 +984,14 @@ public class CapacityService {
 	 * @param CreateOutputsRequest output 不带msg_id的 输出
 	 * @return CreateOutputsResponse
 	 */
-	public CreateOutputsResponse createOutputsAddMsgId(CreateOutputsRequest output) throws Exception{
+	public CreateOutputsResponse createOutputsAddMsgId(CreateOutputsRequest output, String capacityIp) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		output.setMsg_id(msg_id);
 		
 		System.out.println(JSONObject.toJSONString(output));
 		
-		return createOutputs(output);
+		return createOutputs(output, capacityIp);
 	}
 	
 	/**
@@ -1002,10 +1002,10 @@ public class CapacityService {
 	 * @param CreateOutputsRequest output 创建输出参数
 	 * @return CreateOutputsResponse 返回
 	 */
-	private CreateOutputsResponse createOutputs(CreateOutputsRequest output) throws Exception{
+	private CreateOutputsResponse createOutputs(CreateOutputsRequest output, String capacityIp) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(capacityIp)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_OUTPUT)
@@ -1028,12 +1028,12 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月12日 上午8:55:13
 	 * @param DeleteOutputsRequest output 不带msg_id的output
 	 */
-	public void deleteOutputsAddMsgId(DeleteOutputsRequest output) throws Exception{
+	public void deleteOutputsAddMsgId(DeleteOutputsRequest output, String capacityIp) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		output.setMsg_id(msg_id);
 		
-		deleteOutputs(output);
+		deleteOutputs(output, capacityIp);
 		
 	}
 	
@@ -1044,10 +1044,10 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月6日 上午11:50:09
 	 * @param DeleteOutputsRequest output 输出
 	 */
-	private void deleteOutputs(DeleteOutputsRequest output) throws Exception{
+	private void deleteOutputs(DeleteOutputsRequest output, String capacityIp) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(capacityIp)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_OUTPUT)
