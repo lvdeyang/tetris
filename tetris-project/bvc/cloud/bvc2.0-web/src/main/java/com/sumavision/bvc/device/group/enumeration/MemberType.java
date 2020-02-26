@@ -3,7 +3,7 @@ package com.sumavision.bvc.device.group.enumeration;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 /**
- * @ClassName: 成员类型
+ * @ClassName: 成员类型（暂时无用）
  * @Description: 设备/用户
  * @author zsy
  * @date 2018年10月9日

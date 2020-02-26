@@ -35,7 +35,7 @@ define([
                         rollingTime:'10',
                         rollingTimeUnlimited:false
                     },
-                    forcedRolling:false
+                    forcedRolling:true
                 },
                 tree:{
                     props:{
@@ -67,19 +67,19 @@ define([
                             total:0,
                             currentPage:0
                         },
-                        data:[
-
-                        ],
+                        data:[],
                         currentRow:''
                     }
                 }
             }
         },
         methods:{
+            //关闭弹窗事件
             handleWindowClose:function(){
                 var self = this;
                 self.qt.destroy();
             },
+            //移除标签
             handleTagRemove:function(user){
                 var self = this;
                 user.checked = false;
@@ -90,6 +90,7 @@ define([
                     }
                 }
             },
+            //复选框事件
             onUserCheckChange:function(data){
                 var self = this;
                 for(var i=0; i<self.tree.select.length; i++){
@@ -100,6 +101,7 @@ define([
                 }
                 self.tree.select.push(data);
             },
+            //发送按钮
             handleSendMessage:function(){
                 var self = this;
                 if(self.tree.select.length <= 0){
@@ -134,16 +136,19 @@ define([
                     self.qt.alert('title', '操作成功');
                 });
             },
+            //停止按钮
             handleMessageList:function(){
                 var self = this;
                 self.dialog.messageList.visible = true;
                 self.loadMessage(1);
             },
+            //通知列表
             handleMessageListClose:function(){
                 var self = this;
                 self.dialog.messageList.visible = false;
                 self.dialog.messageList.data.splice(0, self.dialog.messageList.data.length);
             },
+            //全部停止
             stopAllMessage:function(){
                 var self = this;
                 ajax.post('/command/message/stop/all', {
@@ -154,6 +159,7 @@ define([
                     }
                 });
             },
+            //删除通知
             deleteMessage:function(scope){
                 var self = this;
                 var row = scope.row;
@@ -167,6 +173,7 @@ define([
                     self.dialog.messageList.page.total -= 1;
                 });
             },
+            //停止通知
             stopMessage:function(scope){
                 var self = this;
                 var row = scope.row;
@@ -181,6 +188,7 @@ define([
                     }
                 });
             },
+            //再次通知
             messageAgain:function(scope){
                 var self = this;
                 var row = scope.row;
@@ -195,10 +203,12 @@ define([
                     }
                 });
             },
+            //更改当前选中的通知
             handleMessageCurrentChange:function(currentPage){
                 var self = this;
                 self.loadMessage(currentPage);
             },
+            //加载通知
             loadMessage:function(currentPage){
                 var self = this;
                 ajax.post('/command/message/query/message', {
@@ -218,10 +228,12 @@ define([
                     self.dialog.messageList.page.total = total;
                 });
             },
+            //多选框数据更新页后 保留所有数据
             styleTemplateRowKey:function(row){
                 var self = this;
                 return 'template_'+row.id;
             },
+            //报错模板按钮事件
             handleSaveStyleTemplates:function(){
                 var self = this;
                 if(!self.message.style.name){
@@ -261,17 +273,20 @@ define([
                     });
                 }
             },
+            //打开模板弹框
             handleStyleTemplates:function(){
                 var self = this;
                 self.dialog.styleTemplates.visible = true;
                 self.loadStyleTemplates(1);
             },
+            //关闭选择模板弹框
             handleStyleTemplatesClose:function(){
                 var self = this;
                 self.dialog.styleTemplates.visible = false;
                 self.dialog.styleTemplates.data.splice(0, self.dialog.styleTemplates.data.length);
                 self.dialog.styleTemplates.currentRow = '';
             },
+            //删除模板
             removeStyleTemplate:function(scope){
                 var self = this;
                 var row = scope.row;
@@ -288,14 +303,17 @@ define([
                     self.dialog.styleTemplates.page.total -= 1;
                 });
             },
+            //切换分页
             handleStyleTemplatesCurrentChange:function(currentPage){
                 var self = this;
                 self.loadStyleTemplates(currentPage);
             },
+            //更换样式
             handleCurrentStyleTemplateChange:function(currentRow, oldRow){
                 var self = this;
                 self.dialog.styleTemplates.currentRow = currentRow;
             },
+            //确定选择模板
             handleStyleTemplatesChange:function(){
                 var self = this;
                 var currentRow = self.dialog.styleTemplates.currentRow;

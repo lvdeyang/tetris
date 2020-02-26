@@ -1,6 +1,7 @@
-html,body{
+html, body {
     background-color: transparent;
 }
+
 #app {
     overflow: hidden;
 }
@@ -21,7 +22,7 @@ ul, li, div {
     top: 0;
     right: 0;
     width: 370px;
-    height: 730px;
+    height: 100%;;
     overflow: hidden;
 }
 
@@ -39,7 +40,8 @@ ul, li, div {
     position: absolute;
     right: 0;
     width: 324px;
-    height: 50px;
+    /*height: 50px;*/
+    display:none;
     border-radius: 12px 12px 0 0;
     background: #52cffb21;
     z-index: 1;
@@ -58,7 +60,7 @@ ul, li, div {
     color: #fff;
     text-align: center;
 }
-
+/*顶部标题具有高亮的样式*/
 .highLight {
     position: absolute;
     top: 0;
@@ -67,6 +69,7 @@ ul, li, div {
     height: 4px;
     border-radius: 3px;
     background-color: #00e9ff;
+    box-shadow: 0 2px 10px #51dff4;
     display: block;
 }
 
@@ -87,55 +90,41 @@ li.focusLight {
 
 /*给滚动条修改默认样式*/
 .el-tabs__nav-scroll::-webkit-scrollbar {
-    width: 4px;
+    width: 5px;
 }
 
-.el-tabs__nav-scroll::-webkit-scrollbar-thumb {
-    border-radius: 10px;
-    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.el-tabs__nav-scroll::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-    border-radius: 0;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-/*tab右侧自动加载的滚动条*/
+/*tab右侧自动加载的滚动条的整体容器，默认是灰色*/
 .el-tabs__nav-wrap::after {
     background-color: #204a6b;
 }
 
 /* 禁止横向滚动条 */
-.firstMenu .el-scrollbar__wrap,.secondMenu .el-scrollbar__wrap{
+.firstMenu .el-scrollbar__wrap,
+.commandTable .el-scrollbar__wrap {
     overflow-x: hidden;
-}
-
-.is-horizontal {
-    display: none;
 }
 
 .el-tabs--left .el-tabs__header.is-left {
     margin-right: 0;
 }
 
-.firstMenu{
+.firstMenu {
     position: absolute;
     top: 50px;
-    bottom: 0;
+    bottom: 50px;
     left: 0;
     width: 370px;
-}
-.el-tabs__content{
-    height: 100%;
-    background: #52cffb21;
-    border-radius: 0 0 12px 12px;
+    padding: 20px 0;
 }
 
-/*树的外层的容器 必须给高度，滚动条才起作用*/
-.scrollTab {
-    height: 500px;
+.el-tabs__content {
+    position: absolute;
+    top: 0;
+    left: 50px;
+    bottom: 50px;
+    background: #52cffb21;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
 }
 
 .el-tabs__item {
@@ -154,7 +143,7 @@ li.focusLight {
 }
 
 .is-left .is-active {
-    background-color: #f8a036;
+    background: linear-gradient(to bottom, #204a6b, #327ab1, #1c6fb1, #204a6b);
 }
 
 /* 树形组件开始 */
@@ -174,24 +163,58 @@ li.focusLight {
     color: #cfdae6;
     font-family: "Microsoft YaHei";
     font-size: 20px;
+    height: 30px;
     line-height: 30px;
-    background-color: #2d4e6899;
+    /*background-color: #2d4e6899;*/
 }
 
 .headFont {
+    display: inline-block;
     color: #cfdae6;
-    font-size: 20px;
+    font-size: 18px;
+    width: 148px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+/*录像回放的长度不一样*/
+.sheadFont{
+    display: inline-block;
+    color: #cfdae6;
+    font-size: 18px;
+    width: 235px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
+}
+/*指挥工作台的属性的用户名*/
+.headFonts{
+    display: inline-block;
+    color: #cfdae6;
+    font-size: 18px;
+    width: 115px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: top;
 }
 
 /*复选框的样式*/
 .el-checkbox__inner {
+    margin-left: -3px;
     border: 1px solid #7590A3;
     background-color: transparent;
+}
+/*名称和复选框之间的距离*/
+.el-checkbox__label{
+    margin-left: -3px;
 }
 
 .el-tree-node__content {
     padding-left: 0;
-    height: 60px;
+    height: 40px;
     border-bottom: 1px solid #0a1432;
     border-radius: 0 10px 0 0;
 }
@@ -220,16 +243,6 @@ li.focusLight {
     background-color: transparent;
 }
 
-/*悬浮按钮*/
-.folder {
-    position: absolute;
-    bottom: 22px;
-    left: 0;
-    z-index: 10;
-    width: 50px;
-    height: 20px;
-}
-
 /*折叠的按钮*/
 .el-radio-button__inner {
     padding: 12px 17px;
@@ -249,77 +262,6 @@ li.focusLight {
     color: #fff;
 }
 
-/*右侧底部按钮*/
-.ball {
-    position: absolute;
-    right: 120px;
-    bottom: 22px;
-    width: 100px;
-    height: 100px;
-    line-height: 140px;
-    text-align: center;
-    background: radial-gradient(circle at 100px 100px, #5cabff, #104f64);
-    border-radius: 50%;
-    overflow: hidden;
-    transition: 400ms cubic-bezier(.06, .55, .97, .78);
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-
-/* 呼吸灯样式 start */
-.animating {
-    animation: breathe 2500ms ease-in-out alternate infinite;
-}
-
-@-webkit-keyframes breathe {
-    0% {
-        opacity: .5;
-        box-shadow: 0 1px 2px rgba(255, 255, 255, 0.1);
-    }
-
-    100% {
-        opacity: 1;
-        box-shadow: 0 1px 30px rgba(59, 255, 255, 1);
-    }
-}
-
-.ball.activeBall {
-    position: absolute;
-    width: 360px;
-    height: 360px;
-    bottom: -177px;
-    left: 31px;
-    background: #173d5c59;
-    text-align: right;
-    clip-path: ellipse(54% 67% at 54% 53%);
-}
-
-.activeBall .circle_bottom {
-    width: 380px;
-    height: 120px;
-    background-color: transparent;
-}
-
-/*.closeIcon {*/
-    /*font-size: 70px;*/
-    /*color: #fff;*/
-/*}*/
-
-/* 控制点击后的图标和内容的显示 start */
-/*.ball.activeBall .closeIcon {*/
-    /*transform: rotate(45deg);*/
-    /*position: absolute;*/
-    /*right: 47px;*/
-    /*top: 44px;*/
-/*}*/
-
-/*.ball.activeBall .footer {*/
-    /*display: block;*/
-/*}*/
-
 /* 控制点击后的图标和内容的显示 end */
 
 /* 底部图标 */
@@ -328,13 +270,16 @@ li.focusLight {
     left: 50px;
     bottom: 0;
     width: 320px;
-    height: 180px;
+    z-index: 4;
+    min-height: 80px;
     background-color: #173d5c;
     border-radius: 0 0 12px 12px;
 }
 
 .customIcon {
-    position: absolute;
+    position: relative;
+    float: left;
+    margin: 10px;
     width: 60px;
     height: 60px;
     line-height: 72px;
@@ -345,45 +290,17 @@ li.focusLight {
 
 .customIcon.disable {
     background: gray;
-}
-
-.icon1 {
-    top: 20px;
-    left: 32px;
-}
-
-.icon2 {
-    top: 20px;
-    left: 130px;
-}
-
-.icon3 {
-    top: 20px;
-    right: 35px;
-}
-
-.icon4 {
-    top: 100px;
-    left: 32px;
-}
-
-.icon5 {
-    top: 100px;
-    left: 130px;
-}
-
-.icon6{
-    top: 100px;
-    right: 35px;
+    display: none;
 }
 
 .customIcon i {
-    font-size: 30px;
+    font-size: 36px;
     color: #fff;
 }
 
 .context-menu {
     position: fixed;
+    top:100px;
     right: 0;
     background-color: #163D5C;
     border-radius: 10px;
@@ -411,8 +328,9 @@ li.focusLight {
 }
 
 .context-menu .menu {
-    padding: 10px 15px;
-    border-bottom: 1px solid #000;
+    padding: 6px 10px;
+    border-bottom: 1px solid #464646;
+    cursor: pointer;
 }
 
 .context-menu .menu:not(.disable):hover {
@@ -428,20 +346,21 @@ li.focusLight {
 /*第二部分 指挥工作台*/
 .secondMenu {
     position: absolute;
-    top: 51px;
-    bottom: 0;
+    /*top: 51px;*/
+    top:0;
+    bottom: 50px;
     left: 46px;
-    padding: 18px 15px;
+    padding: 10px 15px;
     width: 290px;
     background-color: #52cffb21;
-    border-radius: 0 0 12px 12px;
+    /*border-radius: 0 0 12px 12px;*/
+    border-radius:12px;
 }
 
 .status {
+    display: inline-block;
     width: 97px;
     line-height: 30px;
-    background-color: #e3626438;
-    border: 1px solid #e36264;
     border-radius: 15px;
     color: #e36264;
     text-align: center;
@@ -454,20 +373,14 @@ li.focusLight {
 
 .status.start {
     color: #00ff14;
-    background-color: #3dff2538;
-    border-color: #3dff2538;
 }
 
 .status.pause {
     color: #ffc800;
-    background-color: #ffb22538;
-    border-color: #ffb22538;
 }
 
 .status.remind {
     color: #00fff3;
-    background-color: #05ffff38;
-    border-color: #62cbe3;
 }
 
 .status.stop {
@@ -482,51 +395,122 @@ li.focusLight {
     line-height: 40px;
     font-size: 18px;
     color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /*箭头的样式*/
 .el-select .el-input .el-select__caret {
-    margin-right: 12px;
-    font-size: 22px;
+    margin-right: 10px;
+    font-size: 30px;
     color: #00e8fe;
+    font-weight: bold;
 }
 
-/*下拉展开的面板*/
-.el-select-dropdown{
-    background-color:#204a6b;
+/*下拉列表展开的面板*/
+div.el-select-dropdown {
+    background-color: #204a6b;
     border: none;
+    max-width: 243px;
 }
-.el-select-group__title{
+
+.el-select-group__title {
     font-size: 18px;
     color: #fff;
 }
-.el-select-dropdown__item{
+
+/*加出下拉菜单的横向滚动条*/
+.el-select-dropdown__item {
+    width: 600px;
+    height: 40px;
     font-size: 18px;
+    color: #409EFF;
+    /*去掉省略号*/
+    text-overflow: inherit;
+}
+
+/*选中的样式的字体颜色*/
+.el-select-dropdown__item.selected {
     color: #00e9ff;
 }
-.el-select-dropdown__item.hover, .el-select-dropdown__item:hover{
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover {
     background-color: #204a6b;
 }
 
-.btnContainer{
-    position:absolute;
-    padding: 12px 10px;
-    width:300px;
-    height:216px;
-    bottom:0;
-    left:0;
-    background-color:#173d5c;
+.btnContainer {
+    position: absolute;
+    padding: 2px;
+    width: 313px;
+    height: 210px;
+    bottom: 0;
+    left: 0;
+    background-color: #173d5c;
     border-radius: 0 0 12px 12px;
+    z-index: 4;
 }
-.option-button{
+
+.option-button {
+    position: relative;
     float: left;
-    margin: 5px 7px;
+    margin: 5px 9px;
     width: 60px;
     height: 60px;
+    background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
+    border-radius: 12px;
 }
-.option-button img{
+.option-button.disable{
+    display: none;
+}
+
+.option-button img {
     display: block;
     width: 100%;
     height: 100%;
 }
 
+/*指挥工作台的树的横向滚动条*/
+.el-scrollbar__bar.is-horizontal{
+    display: none;
+}
+
+/*popover弹出框的样式*/
+.el-popover {
+    background: #3d475a;
+    border: 1px solid #076792;
+    color: #ffffff;
+}
+
+.el-dialog {
+    background: -webkit-linear-gradient(left top, #2a697a, #0D4C6B, #113E65);
+}
+
+#filter-user{
+    border:0;
+    color:#00e9ff;
+    border-radius:0;
+    background-color:rgba(0,0,0,0);
+}
+
+#filter-user+.el-input__suffix{
+    color:#00e9ff;
+    font-size:16px;
+}
+
+#filter-user:focus{
+    outline:0;
+}
+
+#filter-user::-webkit-input-placeholder{
+    color:#00e9ff;
+}
+#filter-user:-moz-placeholder{
+    color:#00e9ff;
+}
+#filter-user::-moz-placeholder{
+    color:#00e9ff;
+}
+#filter-user:-ms-input-placeholder{
+    color:#00e9ff;
+}

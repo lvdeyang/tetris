@@ -34,6 +34,7 @@ import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -110,7 +111,7 @@ public class MonitorDeviceController {
 		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
 		
 		//查询有权限的用户
-		List<UserBO> users = resourceService.queryUserresByUserId(userId);
+		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.PC_PLATFORM);
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user : users){
 			userIds.add(user.getId());
@@ -181,7 +182,7 @@ public class MonitorDeviceController {
 		}
 		
 		//查询有权限的用户
-		List<UserBO> userEntities = resourceService.queryUserresByUserId(userId);
+		List<UserBO> userEntities = resourceService.queryUserresByUserId(userId, TerminalType.PC_PLATFORM);
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user : userEntities){
 			userIds.add(user.getId());
@@ -456,7 +457,7 @@ public class MonitorDeviceController {
 		//只在编码中查询有权限的用户
 		List<UserBO> filteredUsers = new ArrayList<UserBO>();
 		if(type==0 || type==2){
-			List<UserBO> users = resourceService.queryUserresByUserId(userId);
+			List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.PC_PLATFORM);
 			List<Long> userIds = new ArrayList<Long>();
 			for(UserBO user : users){
 				userIds.add(user.getId());

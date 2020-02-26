@@ -1,6 +1,6 @@
 spring:
   application:
-    name: suma-bvc-business-zsy
+    name: tetris-bvc-business
   cloud:
 #    config:
 #      uri: http://localhost:8769
@@ -58,6 +58,9 @@ spring:
       suffix: .jsp
 server:
   port: 8094
+  jsp-servlet: 
+    init-parameters: 
+      development: true
 ribbon:
   ReadTimeout: 120000
   ConnectTimeout: 30000

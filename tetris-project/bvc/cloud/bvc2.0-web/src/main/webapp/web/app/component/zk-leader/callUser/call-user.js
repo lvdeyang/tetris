@@ -31,31 +31,45 @@ define([
             }
         },
         methods: {
+            //关闭弹框事件
             handleWindowClose: function () {
                 var self = this;
                 self.qt.destroy();
             },
+            //呼叫等的按钮共用事件
             callMemberCommit: function () {
                 var self = this;
                 if (!self.tree.select) {
                     self.qt.alert('提示信息', '您没有勾选任何用户');
                     return;
                 }
-                //TODO:接口需要。需要传给后台第几屏的参数
-                if (self.type === 'call') {
-                    console.log('call')
-                    console.log(self.tree.select)
-                } else if (self.type === 'orient') {
-                    console.log('orient')
-                } else if (self.type === 'voice') {
-                    console.log('voice')
+                if (self.type === 'call') { //呼叫
+                    ajax.post('/command/call/user/start/player', {
+                        userId: self.tree.select,
+                        serial:self.screenId
+                    }, function (data) {
+                        //动态弹窗，qt无法判断是哪个弹框，需要连到已有channel上，然后执行。解决播放器不实时更新，需要手动刷新的问题
+                        self.qt.linkedWebview('hidden',{id:'playCall', params:$.toJSON([data])});
+                        self.handleWindowClose();
+                    });
+                } else if (self.type === 'orient') { //专项
+                    ajax.post('/command/secret/start/player', {
+                        userId: self.tree.select,
+                        serial:self.screenId
+                    }, function (data) {
+                        self.qt.linkedWebview('hidden',{id:'playSecret', params:$.toJSON(data)});
+                        self.handleWindowClose();
+                    });
+                } else if (self.type === 'voice') { //语音
+                    ajax.post('/command/voice/intercom/start/player', {
+                        userId: self.tree.select,
+                        serial:self.screenId
+                    }, function (data) {
+                        self.qt.linkedWebview('hidden',{id:'playVoice', params:$.toJSON([data])});
+                        self.handleWindowClose();
+                    });
                 }
-                ajax.post('/command/call/user/start', {
-                    userId: self.screenId
-                }, function (data) {
-                    console.log(data)
-                    self.qt.invoke('callUsers', $.toJSON([data]));
-                });
+
             }
         },
         mounted: function () {

@@ -12,7 +12,7 @@ public enum TreeNodeType {
 	CHANNEL("通道"),
 	VIRTUAL("虚拟源"),
 	USER("用户"),
-	COMMAND("指挥");
+	COMMAND("会议.");
 	
 	private String name;
 	

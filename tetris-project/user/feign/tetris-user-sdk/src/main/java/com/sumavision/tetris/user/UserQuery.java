@@ -51,7 +51,7 @@ public class UserQuery {
 		
 		HttpSession session = null;
 		String sessionId = request.getHeader(HttpConstant.HEADER_SESSION_ID);
-		if(sessionId == null){
+		if(sessionId == null || sessionId.equals("")){
 			//临时session 5秒超时
 			session = HttpSessionContext.build(null, HttpConstant.TEMPORARY_SESSION_TIMEOUT);
 		}else{

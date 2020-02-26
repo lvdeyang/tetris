@@ -20,21 +20,27 @@ define([
                 qt:'',
                 groupId:'',
                 groupType:'',
+                page:'',//应该显示哪个页面
+                tag:'',
                 tree:{
                     props:{
                         children:'children',
                         label:'name'
                     },
                     data:[],
-                    select:''
-                }
+                    select:[]
+                },
+                //协同的人员数组
+                saveSelect:[]
             }
         },
         methods:{
+            //关闭弹窗事件
             handleWindowClose:function(){
                 var self = this;
                 self.qt.destroy();
             },
+            //添加提交事件
             handleAddMemberCommit:function(){
                 var self = this;
                 if(!self.tree.select){
@@ -42,13 +48,27 @@ define([
                     return;
                 }
                 if(self.groupType === 'command'){
-                    ajax.post('/command/cooperation/grant', {
-                        id:self.groupId,
-                        userIds: $.toJSON([self.tree.select])
-                    }, function(data){
-                        self.handleWindowClose();
-                        //self.qt.linkedWebview('business', $.toJSON({id:'cooperationAdd', cooperation:data}));
-                    });
+                    if(self.page =='add'){
+                        ajax.post('/command/cooperation/grant', {
+                            id:self.groupId,
+                            userIds: $.toJSON(self.tree.select)
+                        }, function(data){
+                            self.qt.success('邀请成功');
+                            self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
+                            self.handleWindowClose();
+                            self.saveSelect=self.tree.select;
+                        });
+                    }else if(self.page == 'cancel'){
+                        ajax.post('/command/cooperation/revoke/batch', {
+                            id:self.groupId,
+                            userIds: $.toJSON(self.tree.select)
+                        }, function(data){
+                            self.qt.success('撤销协同指挥成功');
+                            self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
+                            self.handleWindowClose();
+                            self.saveSelect=self.tree.select;
+                        });
+                    }
                 }
             }
         },
@@ -58,6 +78,8 @@ define([
                 var params = self.qt.getWindowParams();
                 self.groupId = params.id;
                 self.groupType = params.type;
+                self.page = params.page;
+                self.tag = params.tag;
 
                 //初始化ajax
                 ajax.init({
@@ -82,13 +104,25 @@ define([
 
                 if(self.groupType === 'command'){
                     self.tree.data.splice(0, self.tree.data.length);
-                    ajax.post('/command/basic/query/members', {id:self.groupId}, function(data){
-                        if(data.members && data.members.length>0){
-                            for(var i=0; i<data.members.length; i++){
-                                self.tree.data.push(data.members[i]);
+
+                    if(self.page === 'add'){
+                        ajax.post('/command/basic/query/members', {id:self.groupId}, function(data){
+                            if(data.members && data.members.length>0){
+                                for(var i=0; i<data.members.length; i++){
+                                        self.tree.data.push(data.members[i]);
+                                }
                             }
-                        }
-                    });
+                        })
+                    }
+                    else if(self.page == 'cancel'){
+                        ajax.post('/command/query/find/institution/tree/user/command/cooperation', {id:self.groupId}, function(data){
+                            if(data && data.length>0){
+                                for(var i=0; i<data.length; i++){
+                                    self.tree.data.push(data[i]);
+                                }
+                            }
+                        })
+                    }
                 }
             });
         }

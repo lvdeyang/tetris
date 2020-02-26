@@ -20,6 +20,7 @@ html, body {
 }
 
 .leftTime {
+    opacity:0;
     position: relative;
     float: left;
     width: 260px;
@@ -42,7 +43,7 @@ html, body {
 }
 
 .time {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: bold;
 }
 
@@ -58,11 +59,13 @@ html, body {
 }
 
 .center {
+    opacity:0;
     float: left;
     width: 500px;
     height: 90px;
     background: url("../../../../../images/zk-leader/header_center.png") no-repeat center;
     background-size: 100% 100%;
+    font-size: 30px;font-weight:bold
 }
 
 .right {
@@ -78,22 +81,35 @@ html, body {
     overflow: hidden;
 }
 
+.right p {
+    margin: 0;
+    height: 35px;
+    line-height: 35px;
+}
+
 .right .username {
-    font-size: 18px;
+    font-size: 24px;
     position: absolute;
-    left: 75px;
+    left: 30px;
     top: 0;
     height: 90px;
     line-height: 90px;
     white-space: nowrap;
+}
+
+.username.animate {
+    font-size: 18px;
+    left: 75px;
     animation: slidein 5s linear 0s infinite running; /* 5s决定跑马灯一次滚动的时长，自己调整 */
 }
 
 .setting {
-    margin: 0 15px;
-    font-size: 30px;
+    margin: 0 20px;
+    font-size: 28px;
+    cursor: pointer;
 }
 
+/*名字跑马灯动画*/
 @keyframes slidein {
     from {
         transform: translateX(30px); /* 盒子宽度 */
@@ -103,3 +119,58 @@ html, body {
     }
 }
 
+/*设置作战时间图标*/
+.setTimeIcon {
+    animation: ring 5s linear 0s infinite;
+}
+
+/* 震铃 */
+@-webkit-keyframes ring {
+    0% {
+        -webkit-transform: scale(1);
+    }
+    10%, 20% {
+        -webkit-transform: scale(0.9) rotate(-30deg);
+    }
+    30%, 50%, 70%, 90% {
+        -webkit-transform: scale(1.1) rotate(30deg);
+    }
+    40%, 60%, 80% {
+        -webkit-transform: scale(1.1) rotate(-30deg);
+    }
+    100% {
+        -webkit-transform: scale(1) rotate(0);
+    }
+}
+
+@media screen and (max-width: 1400px) {
+    .leftTime,.right {
+        width: 16%;
+    }
+
+    .center {
+        width: 26%;
+        font-size: 26px;
+    }
+}
+
+@media screen and (max-width: 1366px) {
+    .leftTime, .right {
+        width: 15%;
+    }
+
+    .center {
+        width: 29%;
+        font-size: 28px;
+    }
+}
+@media screen and (max-width: 1360px) {
+    .leftTime, .right {
+        width: 15%;
+    }
+
+    .center {
+        width: 22%;
+        font-size: 22px;
+    }
+}

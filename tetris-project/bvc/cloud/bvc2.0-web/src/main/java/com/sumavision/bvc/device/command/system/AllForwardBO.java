@@ -19,7 +19,7 @@ import lombok.Setter;
 /**
  * 
 * @ClassName: ForwardReturnBO 
-* @Description: 描述指挥系统中所有的业务转发，包括指挥、指挥转发、点播、通话
+* @Description: 描述会议系统中所有的业务转发，包括会议、会议转发、点播、通话
 * @author zsy
 * @date 2019年12月24日 下午1:14:15 
 *
@@ -114,7 +114,7 @@ public class AllForwardBO {
 		return this;
 	}
 	
-	/** 指挥中的转发，即观看 */
+	/** 会议中的转发，即观看 */
 	public AllForwardBO setByForward(CommandGroupForwardPO forward){
 		
 		CommandCommonUtil commandCommonUtil = SpringContext.getBean(CommandCommonUtil.class);
@@ -124,7 +124,7 @@ public class AllForwardBO {
 		
 		this.id = forward.getId().toString();
 		this.time = DateUtil.format(forward.getUpdateTime(), DateUtil.dateTimePattern);
-		this.businessType = "指挥";
+		this.businessType = "会议";
 		this.srcType = "用户";
 		this.srcInfo = srcMember==null?forward.getVideoBundleName():srcMember.getUserName();
 		this.srcBundleId = forward.getVideoBundleId();
