@@ -134,3 +134,9 @@ export const queryEncoders = params => { return axiosInstance.post(`${basePath}/
 export const queryDecoders = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/query/decoders`, qs.stringify(params)).then(res => res.data) }
 
 export const logout = params => { return axiosInstance.post(`${basePath}/do/logout`, qs.stringify(params)).then(res => res.data) }
+
+export const exportFolder = params => {return axiosInstance.post(`${basePath}/folder/export`, params,{responseType:'blob'}); };
+export const exportBundle = params => {return axiosInstance.post(`${basePath}/bundle/export`, params,{responseType:'blob'}); };
+export const exportUser = params => {return axiosInstance.post(`${basePath}/folder/user/export`, params,{responseType:'blob'}); };
+
+

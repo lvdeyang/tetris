@@ -3,6 +3,8 @@ package com.sumavision.bvc.device.command.message;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMessageDAO;
@@ -221,5 +224,30 @@ public class CommandMessageServiceImpl {
 			}
 		}
 		commandGroupMessageDao.deleteByIdIn(messageIds);
+	}
+
+	/**
+	 * 发送实时消息，给会议内的成员<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月21日 下午7:06:59
+	 * @param userId 发起人id
+	 * @param name 发起人名字
+	 * @param groupId 指挥id
+	 * @param message 消息
+	 * @throws Exception
+	 */
+	public void broadcastInstantMessage(Long userId, String name, Long groupId, String message) throws Exception{
+		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<Long> userIds = new ArrayList<Long>();
+		for(CommandGroupMemberPO member : members){
+			if(!member.getUserId().equals(userId)){
+				userIds.add(member.getUserId());
+			}
+		}
+		websocketMessageService.broadcastMeetingMessage(groupId, userIds, message, userId, name);
+		
 	}
 }

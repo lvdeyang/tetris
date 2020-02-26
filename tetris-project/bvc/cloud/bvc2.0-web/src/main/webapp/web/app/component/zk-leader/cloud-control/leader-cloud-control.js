@@ -19,6 +19,7 @@ define([
             return {
                 protocolSuccess: false,
                 speed: 8,
+                direct:0,
                 points: [],
                 serial: '',
                 dialog: {
@@ -41,10 +42,12 @@ define([
                 self.qt.on('mouseup', function (e) {
                     if (self.protocolSuccess) {
                         self.stop();
+                        self.direct=0;
                     }
                     self.qt.unbind('mouseup');
                 });
             },
+            //垂直事件
             vertical: function (direction) {
                 var self = this;
                 self.protocolSuccess = true;
@@ -56,6 +59,7 @@ define([
                     self.qtFunction();
                 });
             },
+            //水平事件
             horizontal: function (direction) {
                 var self = this;
                 self.protocolSuccess = true;
@@ -71,6 +75,11 @@ define([
             zoom: function (direction) {
                 var self = this;
                 self.protocolSuccess = true;
+                if(direction == 'OUT'){
+                    self.direct=1;
+                }else if(direction == 'IN'){
+                    self.direct=2;
+                }
                 ajax.post('/zk/cloud/control/zoom', {
                     direction: direction,
                     serial: self.serial,
@@ -83,6 +92,11 @@ define([
             focus: function (direction) {
                 var self = this;
                 self.protocolSuccess = true;
+                if(direction == 'NEAR'){
+                    self.direct=3;
+                }else if(direction == 'FAR'){
+                    self.direct=4;
+                }
                 ajax.post('/zk/cloud/control/focus', {
                     direction: direction,
                     serial: self.serial,
@@ -95,6 +109,11 @@ define([
             aperture: function (direction) {
                 var self = this;
                 self.protocolSuccess = true;
+                if(direction == 'MINUS'){
+                    self.direct=5;
+                }else if(direction == 'PLUS'){
+                    self.direct=6;
+                }
                 ajax.post('/zk/cloud/control/aperture', {
                     direction: direction,
                     serial: self.serial,
@@ -103,6 +122,7 @@ define([
                     self.qtFunction();
                 });
             },
+            //停止
             stop: function (fn) {
                 var self = this;
                 ajax.post('/zk/cloud/control/stop', {
@@ -112,6 +132,7 @@ define([
                     if (typeof fn === 'function') fn();
                 });
             },
+            //删除预置点
             handlePointRemove: function (point) {
                 var self = this;
                 var h = self.$createElement;
@@ -152,16 +173,19 @@ define([
                 }).catch(function () {
                 });
             },
+            //添加预置点的对话框显示
             handlePointAdd: function () {
                 var self = this;
                 self.dialog.addPoint.visible = true;
             },
+            //关闭预置点弹框事件
             handleAddPointClose: function () {
                 var self = this;
                 self.dialog.addPoint.visible = false;
                 self.dialog.addPoint.loading = false;
                 self.dialog.addPoint.name = '';
             },
+            //添加预置点的添加事件
             handleAddPointCommit: function () {
                 var self = this;
                 if (!self.dialog.addPoint.name) {
@@ -184,6 +208,7 @@ define([
                     self.handleAddPointClose();
                 }, null, [403, 404, 408, 409]);
             },
+            //设置预置点
             handlePointInvoke: function (point) {
                 var self = this;
                 var h = self.$createElement;
@@ -224,6 +249,7 @@ define([
                 }).catch(function () {
                 });
             },
+            //获取预置点数据
             checkPoints: function () {
                 var self = this;
                 ajax.post('/zk/cloud/control/load/points', {

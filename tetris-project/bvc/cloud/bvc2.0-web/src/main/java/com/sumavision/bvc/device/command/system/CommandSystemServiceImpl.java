@@ -213,6 +213,7 @@ public class CommandSystemServiceImpl {
 		JSONArray bundles = new JSONArray();
 		for(String layerId : layerIds){
 			WorkNodePO workNode = queryLayerByLayerId(workNodes, layerId);
+			if(workNode == null) continue;
 			String server = workNode.getIp() + ":8007";
 			JSONArray getBundles = obtainBundlesFromLayer(server);
 			

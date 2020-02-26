@@ -1,12 +1,14 @@
 package com.sumavision.bvc.control.device.command.group.query;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,14 +30,19 @@ import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.service.ResourceService;
+import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupForwardDemandDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
+import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
+import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
+import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
+import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
@@ -45,13 +52,17 @@ import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeType;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.basic.forward.ForwardReturnBO;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.command.time.CommandFightTimeServiceImpl;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.ChannelBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -62,6 +73,9 @@ public class CommandQueryController {
 
 	@Autowired
 	private UserUtils userUtils;
+	
+	@Autowired
+	private QueryUtil queryUtil;
 	
 	@Autowired
 	private ResourceQueryUtil resourceQueryUtil;
@@ -85,10 +99,16 @@ public class CommandQueryController {
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
 	
 	@Autowired
+	private CommandGroupRecordDAO commandGroupRecordDao;
+	
+	@Autowired
 	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private CommandFightTimeServiceImpl commandFightTimeServiceImpl;
 	
 	/**
 	 * 查询组织机构及用户<br/>
@@ -111,7 +131,7 @@ public class CommandQueryController {
 		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
 		
 		//查询有权限的用户
-		List<UserBO> users = resourceService.queryUserresByUserId(userId);
+		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user : users){
 			userIds.add(user.getId());
@@ -123,7 +143,7 @@ public class CommandQueryController {
 				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
 				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
 //				   (!"ldap".equals(user.getCreater()) && user.getEncoderId()!=null)){// && user.getDecoderId()!=null)){
-					(!"ldap".equals(user.getCreater()) && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
+					(!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
 					if(filterMode == 0
 							|| filterMode == 1 && user.isLogined()
 							|| filterMode == 2 && !user.isLogined()){
@@ -154,7 +174,166 @@ public class CommandQueryController {
 	}
 	
 	/**
-	 * 查询当前指挥外的所有用户<br/>
+	 * 查询会议中所有被授权协同会议的人<br/>
+	 * <p>包括接听和未接听的</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 下午6:17:05
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/institution/tree/user/command/cooperation")
+	public Object findInstitutionTreeUserCommandCooperation(String id, HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		List<UserBO> filteredUsers = new ArrayList<UserBO>();
+		List<FolderBO> folders = new ArrayList<FolderBO>();
+		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
+				
+//		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
+		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
+		Set<CommandGroupMemberPO> members = group.getMembers();
+		
+		//查询有权限的用户
+		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user : users){
+			userIds.add(user.getId());
+		}
+		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
+		
+		if(users!=null && users.size()>0){
+			for(UserBO user:users){
+				if(user.getId().equals(userId)) continue;
+				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
+				   (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){// && user.getDecoderId()!=null)){
+					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
+					if(member!=null
+							&& (member.getCooperateStatus().equals(MemberStatus.CONNECT) || member.getCooperateStatus().equals(MemberStatus.CONNECTING))){
+						filteredUsers.add(user);
+					}
+				}
+			}
+		}
+		
+		//查询所有非点播的文件夹
+		List<FolderPO> totalFolders = resourceService.queryAllFolders();
+		for(FolderPO folder:totalFolders){
+			if(!FolderType.ON_DEMAND.equals(folder.getFolderType())){
+				folders.add(new FolderBO().set(folder));
+			}
+		}
+		
+		//找所有的根
+		List<FolderBO> roots = findRoots(folders);
+		for(FolderBO root:roots){
+			TreeNodeVO _root = new TreeNodeVO().set(root)
+											   .setChildren(new ArrayList<TreeNodeVO>());
+			_roots.add(_root);
+			recursionFolder(_root, folders, null, null, filteredUsers);
+		}
+		
+		return _roots;
+	}
+
+	/**
+	 * 查询会议中所有被授权协同会议的人<br/>
+	 * <p>包括接听和未接听的</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 下午6:17:05
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/command/cooperation/list")
+	public Object findInstitutionTreeUserCommandCooperationList(String id, HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		List<UserBO> filteredUsers = new ArrayList<UserBO>();
+		List<FolderBO> folders = new ArrayList<FolderBO>();
+		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
+				
+//		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
+		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
+		Set<CommandGroupMemberPO> members = group.getMembers();
+		
+		JSONObject info = new JSONObject();
+		info.put("id", group.getId().toString());
+		info.put("name", group.getName());
+		info.put("status", group.getStatus().getCode());
+		info.put("commander", group.getUserId());
+		info.put("creator", group.getUserId());
+		List<CommandGroupRecordPO> runningRecords = commandGroupRecordDao.findByGroupIdAndRun(group.getId(), true);
+		if(runningRecords.size() > 0){
+			info.put("isRecord", true);
+		}else{
+			info.put("isRecord", false);
+		}
+		
+		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
+			     .setName("发言成员列表")
+			     .setType(TreeNodeType.FOLDER)
+			     .setKey()
+			     .setIcon(TreeNodeIcon.FOLDER.getName())
+			     .setChildren(new ArrayList<TreeNodeVO>());
+		
+		//查询用户
+//		List<UserBO> users = resourceService.queryUserresByUserId(userId);
+		List<Long> userIdList = new ArrayList<Long>();
+		for(CommandGroupMemberPO member : members){
+			userIdList.add(member.getUserId());
+		}
+		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
+		List<UserBO> users = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user : users){
+			userIds.add(user.getId());
+		}
+		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
+		
+		//先放入主席
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		UserBO chairmanUserBO = queryUtil.queryUserById(users, chairmanMember.getUserId());
+		chairmanUserBO.setName(chairmanUserBO.getName() + " [主席]");
+		EncoderDecoderUserMap chairmanUserMap = commonQueryUtil.queryUserMapById(userMaps, chairmanUserBO.getId());
+		TreeNodeVO chairmanUserNode = new TreeNodeVO().set(chairmanUserBO, chairmanUserMap);
+		commandRoot.getChildren().add(chairmanUserNode);
+				
+		if(users!=null && users.size()>0){
+			for(UserBO user:users){
+				if(user.getId().equals(chairmanUserBO.getId())) continue;
+				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
+				   (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){// && user.getDecoderId()!=null)){
+					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
+					if(member!=null
+							&& (member.getCooperateStatus().equals(MemberStatus.CONNECT) || member.getCooperateStatus().equals(MemberStatus.CONNECTING))){
+						filteredUsers.add(user);
+						TreeNodeVO userNode = new TreeNodeVO().set(user, userMap);
+						commandRoot.getChildren().add(userNode);
+					}
+				}
+			}
+		}		
+		_roots.add(commandRoot);
+		info.put("members", _roots);
+		
+		return info;
+	}
+
+	/**
+	 * 查询当前会议外的所有用户<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月14日
@@ -177,7 +356,7 @@ public class CommandQueryController {
 		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
 		
 		//查询有权限的用户
-		List<UserBO> users = resourceService.queryUserresByUserId(userId);
+		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user : users){
 			userIds.add(user.getId());
@@ -188,7 +367,7 @@ public class CommandQueryController {
 				if(user.getId().equals(userId)) continue;
 				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
 				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
-				   (!"ldap".equals(user.getCreater()) && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){// && user.getDecoderId()!=null)){
+				   (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){// && user.getDecoderId()!=null)){
 					if(!memberUserIds.contains(user.getId())){
 						filteredUsers.add(user);
 					}
@@ -441,11 +620,11 @@ public class CommandQueryController {
 	}
 	
 	/**
-	 * 查询用户所在的指挥列表<br/>
+	 * 查询用户所在的会议列表<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月15日 下午2:37:19
-	 * @return TreeNodeVO 指挥树节点
+	 * @return TreeNodeVO 会议树节点
 	 */
 	@JsonBody
 	@ResponseBody
@@ -456,9 +635,9 @@ public class CommandQueryController {
 		
 		List<CommandGroupPO> commands = commandGroupDao.findByMemberUserId(userId);
 		
-		//加入指挥组节点
+		//加入会议组节点
 		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
-											     .setName("指挥组列表")
+											     .setName("会议组列表")
 											     .setType(TreeNodeType.FOLDER)
 											     .setKey()
 											     .setIcon(TreeNodeIcon.FOLDER.getName())
@@ -478,8 +657,8 @@ public class CommandQueryController {
 	}
 	
 	/**
-	 * 查询用户已经进入的指挥<br/>
-	 * <p>用户CONNECT的指挥，以及用户作为主席的所有指挥</p>
+	 * 查询用户已经进入的会议<br/>
+	 * <p>用户CONNECT的会议，以及用户作为主席的所有会议</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月12日 上午10:21:58
@@ -512,7 +691,15 @@ public class CommandQueryController {
 			}else{
 				group.put("type", "meeting");
 			}
-			group.put("status", command.getStatus().getCode());
+			GroupStatus groupStatus = command.getStatus();
+			group.put("status", groupStatus.getCode());
+			//已经启动的会议，添加作战时间
+			if(!groupStatus.equals(GroupStatus.STOP)){
+				Date fightTime = commandFightTimeServiceImpl.calculateCurrentFightTime(command);
+				if(fightTime != null){
+					group.put("fightTime", DateUtil.format(fightTime, DateUtil.dateTimePattern));
+				}
+			}
 			groups.add(group);
 		}
 		
@@ -520,12 +707,12 @@ public class CommandQueryController {
 	}
 	
 	/**
-	 * 查询当前指挥内的所有转发点播<br/>
+	 * 查询当前会议内的所有转发点播<br/>
 	 * <p>包括设备、文件</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月15日 下午1:57:43
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -634,6 +821,42 @@ public class CommandQueryController {
 			}
 		}
 		return roots;
+	}
+	
+	/**
+	 * 获取folderId对应的目录及其下级目录<br/>
+	 * <p>方法写好了，没有测过。需求暂时不需要了</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 上午11:19:57
+	 * @param folders
+	 * @param folderId
+	 * @return
+	 */
+	@Deprecated
+	private List<FolderBO> queryThisAndLowerFolders(List<FolderBO> folders, Long folderId){
+		
+		List<FolderBO> filteredFolders = new ArrayList<FolderBO>();
+		FolderBO thisFolder = queryUtil.queryFolderById(folders, folderId);
+		
+		//先把这个目录加进去，下边不能再加
+		filteredFolders.add(thisFolder);
+		
+		//除了这个目录之外的，下级目录的parentPath
+		String parentPath = null;
+		String thisParentPath = thisFolder.getParentPath();
+		if(thisParentPath == null){
+			parentPath = "/" + thisFolder.getId().toString();
+		}else{
+			parentPath = thisParentPath + "/" + thisFolder.getId().toString();
+		}
+		for(FolderBO folder : folders){
+			if(folder.getParentPath()!=null && folder.getParentPath().startsWith(parentPath)){
+				filteredFolders.add(folder);
+			}
+		}
+		
+		return filteredFolders;
 	}
 	
 }

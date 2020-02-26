@@ -113,7 +113,7 @@
     },
     {
         "defaultType": "COMMAND1",
-        "name": "指挥模板1",
+        "name": "会议.模板1",
         "videoFormat": "h264",
         "videoFormat2": "h264",
         "audioFormat": "aac",

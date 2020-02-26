@@ -51,7 +51,7 @@ public class UserQuery {
 		
 		HttpSession session = null;
 		String sessionId = request.getHeader(HttpConstant.HEADER_SESSION_ID);
-		if(sessionId == null){
+		if(sessionId == null || sessionId.equals("")){
 			//临时session 5秒超时
 			session = HttpSessionContext.build(null, HttpConstant.TEMPORARY_SESSION_TIMEOUT);
 		}else{
@@ -176,8 +176,8 @@ public class UserQuery {
 	 * <b>日期：</b>2019年12月24日 上午9:22:21
 	 * @return List<UserVO> 用户列表
 	 */
-	public Map<String, Object> queryAllUserBaseInfo(int currentPage, int pageSize) throws Exception{
-		return JsonBodyResponseParser.parseObject(userFeign.queryAllUserBaseInfo(currentPage, pageSize), Map.class);
+	public Map<String, Object> queryAllUserBaseInfo(String terminalType, int currentPage, int pageSize) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.queryAllUserBaseInfo(terminalType, currentPage, pageSize), Map.class);
 	}
 	
 	/**
@@ -187,8 +187,8 @@ public class UserQuery {
 	 * <b>日期：</b>2019年12月31日 下午2:01:49
 	 * @return List<UserVO>
 	 */
-	public List<UserVO> queryAllUserBaseInfo() throws Exception{
-		return JsonBodyResponseParser.parseArray(userFeign.queryAllUserBaseInfo(), UserVO.class);
+	public List<UserVO> queryAllUserBaseInfo(String terminalType) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.queryAllUserBaseInfo(terminalType), UserVO.class);
 	}
 	
 	/**
@@ -235,8 +235,8 @@ public class UserQuery {
 	 * @param Long id 用户id
 	 * @return UserVO 用户
 	 */
-	public UserVO queryUserById(Long id) throws Exception{
-		return JsonBodyResponseParser.parseObject(userFeign.queryUserById(id), UserVO.class);
+	public UserVO queryUserById(Long id, String terminalType) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.queryUserById(id, terminalType), UserVO.class);
 	}
 	
 	/**
@@ -256,11 +256,23 @@ public class UserQuery {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月3日 上午11:15:03
-	 * @param Long roleId jueseid
+	 * @param Long roleId 角色id
 	 * @return List<UserVO>
 	 */
 	public List<UserVO> queryUsersByRole(Long roleId) throws Exception{
 		return JsonBodyResponseParser.parseArray(userFeign.queryUserByRole(roleId), UserVO.class);
+	}
+	
+	/**
+	 * 根据昵称列表查询用户列表<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 下午4:38:46
+	 * @param List<String> nicknames
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> queryUsersByNickNameIn(List<String> nicknames) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.queryUsersByNicknameIn(JSON.toJSONString(nicknames)), UserVO.class);
 	}
 	
 	/***************************************************

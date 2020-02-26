@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
@@ -107,6 +108,24 @@ public class UserFeignController {
 			HttpServletRequest request) throws Exception{
 		List<Long> userIds = JSON.parseArray(ids, Long.class);
 		return userQuery.findByIdIn(userIds);
+	}
+	
+	/**
+	 * 根据用户昵称列表查询用户列表<br/>
+	 * <b>作者:</b>sm<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 下午4:33:33
+	 * @param String names
+	 * @return List<UserVO>
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/nickname/in")
+	public Object findByNickNameIn(
+			String nicknames,
+			HttpServletRequest request) throws Exception{
+		List<String> nickNames = JSON.parseArray(nicknames, String.class);
+		return userQuery.queryUsersByNicknameIn(nickNames);
 	}
 	
 	/**
@@ -256,11 +275,13 @@ public class UserFeignController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/query/all/user/baseInfo")
-	public Object queryAllUserBaseInfo(HttpServletRequest request) throws Exception{
+	public Object queryAllUserBaseInfo(
+			String terminalType,
+			HttpServletRequest request) throws Exception{
 		
 		UserVO userVO = userQuery.current();
 		
-		return userQuery.queryAllUserBaseInfo(userVO.getId());
+		return userQuery.queryAllUserBaseInfo(userVO.getId(), terminalType);
 	}
 	
 	/**
@@ -274,13 +295,14 @@ public class UserFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/query/all/user/baseInfo/by/page")
 	public Object queryAllUserBaseInfo(
+			String terminalType,
 			int currentPage,
 			int pageSize,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO userVO = userQuery.current();
 		
-		return userQuery.queryAllUserBaseInfo(userVO.getId(), currentPage, pageSize);
+		return userQuery.queryAllUserBaseInfo(userVO.getId(), terminalType, currentPage, pageSize);
 	}
 	
 	/**
@@ -357,14 +379,15 @@ public class UserFeignController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/query/user/by/id")
-	public Object queryUsersById(
+	@RequestMapping(value = "/query/user/by/id/and/type")
+	public Object queryUsersByIdAndTerminalType(
 			Long id,
+			String terminalType,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO userVO = userQuery.current();
 		
-		return new UserVO().set(userDAO.findOne(id));
+		return userQuery.queryUserByIdAndType(id, terminalType);
 	}
 	
 	/**

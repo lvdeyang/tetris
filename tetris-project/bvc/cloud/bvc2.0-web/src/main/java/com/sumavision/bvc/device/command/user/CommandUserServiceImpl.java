@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.dao.UserLiveCallDAO;
@@ -26,6 +27,7 @@ import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayou
 import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
 import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
+import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.UserDoesNotLoginException;
 import com.sumavision.bvc.device.command.exception.UserHasNoAvailableEncoderException;
 import com.sumavision.bvc.device.command.exception.UserNotMatchBusinessException;
@@ -44,6 +46,7 @@ import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -56,7 +59,13 @@ import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 public class CommandUserServiceImpl {
 	
 	@Autowired 
+	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired 
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
+	
+	@Autowired 
+	private ResourceService resourceService;
 	
 	@Autowired
 	private ResourceQueryUtil resourceQueryUtil;
@@ -86,11 +95,21 @@ public class CommandUserServiceImpl {
 	 * 生成一个默认的用户信息，包含一个默认的显示屏幕方案<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>日期：</b>2019年9月26日
-	 * @param userBo
+	 * @param userId
+	 * @param userName 如果不输入，则会向用户管理查询
 	 * @param doPersistence 是否持久化（通常为true）
 	 * @return CommandGroupUserInfoPO 
 	 */
 	public CommandGroupUserInfoPO generateDefaultUserInfo(Long userId, String userName, boolean doPersistence) throws Exception{
+		
+		if(userName==null || userName.equals("")){
+			try{
+				UserBO userBo = resourceService.queryUserById(userId, TerminalType.QT_ZK);
+				userName = userBo.getName();
+			}catch(Exception e){
+				userName = "未获取";
+			}			
+		}
 		
 		CommandGroupUserInfoPO userInfo = new CommandGroupUserInfoPO();
 		userInfo.setUserId(userId);
@@ -115,6 +134,29 @@ public class CommandUserServiceImpl {
 		layoutScheme.setType(SchemeType.DEFAULT);
 		
 		userInfo.getLayoutSchemes().add(layoutScheme);
+		
+		if(doPersistence){
+			commandGroupUserInfoDao.save(userInfo);
+		}
+		
+		return userInfo;
+	}
+	
+
+	public CommandGroupUserInfoPO updateUserInfoPlayers(CommandGroupUserInfoPO userInfo, boolean doPersistence) throws Exception{
+		
+		//该用户已保存的播放器
+		List<CommandGroupUserPlayerPO> userPlayers = userInfo.getPlayers();
+		
+		//从资源层获取播放器
+		List<PlayerBundleBO> allPlayers = resourceQueryUtil.queryPlayerBundlesByUserId(userInfo.getUserId());
+		
+		for(PlayerBundleBO playerBO : allPlayers){
+			CommandGroupUserPlayerPO userPlayer = commandCommonUtil.queryPlayerByBundleId(userPlayers, playerBO.getBundleId());
+			if(userPlayer != null){
+				userPlayer.set(playerBO);
+			}
+		}
 		
 		if(doPersistence){
 			commandGroupUserInfoDao.save(userInfo);
@@ -400,7 +442,7 @@ public class CommandUserServiceImpl {
 		UserLiveCallPO call = userLiveCallDao.findOne(businessId);
 		
 		if(call == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "呼叫不存在！");
+			throw new BaseException(StatusCode.FORBIDDEN, "对方已挂断");
 		}
 		
 		if(!user.getId().equals(call.getCalledUserId())){
@@ -408,7 +450,12 @@ public class CommandUserServiceImpl {
 		}
 		
 		//消息消费
-		websocketMessageService.consume(call.getMessageId());
+		try{
+			websocketMessageService.consume(call.getMessageId());
+		}catch(Exception e){
+			e.printStackTrace();
+			System.out.println("消息消费异常，id：" + call.getMessageId());
+		}
 		
 		//参数模板
 		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();
@@ -442,7 +489,7 @@ public class CommandUserServiceImpl {
 		UserLiveCallPO call = userLiveCallDao.findOne(businessId);
 		
 		if(call == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "呼叫不存在！");
+			throw new BaseException(StatusCode.FORBIDDEN, "对方已挂断");
 		}
 		
 		if(!user.getId().equals(call.getCalledUserId())){
@@ -450,7 +497,12 @@ public class CommandUserServiceImpl {
 		}
 		
 		//呼叫方发送的消息消费
-		websocketMessageService.consume(call.getMessageId());
+		try{
+			websocketMessageService.consume(call.getMessageId());
+		}catch(Exception e){
+			e.printStackTrace();
+			System.out.println("消息消费异常，id：" + call.getMessageId());
+		}
 		
 		//被呼叫方
 		CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
@@ -581,7 +633,7 @@ public class CommandUserServiceImpl {
 		UserLiveCallPO call = userLiveCallDao.findOne(businessId);
 		
 		if(call == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "语音对讲不存在！");
+			throw new BaseException(StatusCode.FORBIDDEN, "对方已挂断");
 		}
 		
 		if(!user.getId().equals(call.getCalledUserId())){
@@ -589,7 +641,12 @@ public class CommandUserServiceImpl {
 		}
 		
 		//消息消费
-		websocketMessageService.consume(call.getMessageId());
+		try{
+			websocketMessageService.consume(call.getMessageId());
+		}catch(Exception e){
+			e.printStackTrace();
+			System.out.println("消息消费异常，id：" + call.getMessageId());
+		}
 		
 		//参数模板
 		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();
@@ -624,7 +681,7 @@ public class CommandUserServiceImpl {
 		UserLiveCallPO call = userLiveCallDao.findOne(businessId);
 		
 		if(call == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "语音对讲不存在！");
+			throw new BaseException(StatusCode.FORBIDDEN, "对方已挂断！");
 		}
 		
 		if(!user.getId().equals(call.getCalledUserId())){
@@ -632,7 +689,12 @@ public class CommandUserServiceImpl {
 		}
 		
 		//呼叫方发送的消息消费
-		websocketMessageService.consume(call.getMessageId());
+		try{
+			websocketMessageService.consume(call.getMessageId());
+		}catch(Exception e){
+			e.printStackTrace();
+			System.out.println("消息消费异常，id：" + call.getMessageId());
+		}
 		
 		//被呼叫方
 		CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
@@ -679,7 +741,7 @@ public class CommandUserServiceImpl {
 		UserLiveCallPO call = userLiveCallDao.findOne(businessId);
 		
 		if(call == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "语音对讲不存在！");
+			throw new BaseException(StatusCode.FORBIDDEN, "对方已挂断！");
 		}
 		
 		if(!user.getId().equals(call.getCalledUserId()) && !user.getId().equals(call.getCallUserId())){

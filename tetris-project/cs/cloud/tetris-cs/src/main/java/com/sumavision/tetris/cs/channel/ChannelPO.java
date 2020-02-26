@@ -10,6 +10,9 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 @Entity(name = "TETRIS_CS_CHANNEL")
 public class ChannelPO extends AbstractBasePO {
 	private static final long serialVersionUID = 1L;
+	
+	/** 唯一标识 */
+	public static final String VERSION_OF_ORIGIN = "0.0";
 
 	/** 频道名称 */
 	private String name;

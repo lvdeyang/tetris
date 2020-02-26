@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Service
@@ -76,8 +78,28 @@ public class WebsocketMessageService {
 		websocketMessageFeign.consume(id);
 	}
 	
-	public void consumeAll(Collection<Long> ids) throws Exception{
+	/**
+	 * 批量消费消息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月25日 下午2:48:08
+	 * @param idsList
+	 * @throws Exception
+	 */
+	public void consumeAll(Collection<Long> idsList) throws Exception{
+		String ids = JSON.toJSONString(idsList);
 		websocketMessageFeign.consumeAll(ids);
+	}
+	
+	public void broadcastMeetingMessage(
+			Long commandId,
+			Collection<Long> userIds,
+			String message,
+			Long fromUserId,
+			String fromUsername){
+		String userIdsStr = JSON.toJSONString(userIds);
+		websocketMessageFeign.broadcastMeetingMessage(commandId, userIdsStr, message, fromUserId, fromUsername);
 	}
 	
 }

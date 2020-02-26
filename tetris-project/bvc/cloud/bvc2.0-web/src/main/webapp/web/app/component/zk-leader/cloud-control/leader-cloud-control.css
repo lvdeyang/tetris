@@ -31,7 +31,7 @@
     margin-bottom: 10px;
 }
 
-button.define {
+button.define,button.default {
     background-color: #043554e3;
     border: 1px solid #043554e3;
     color: #00c9ff;
@@ -41,18 +41,26 @@ button.define {
     color: #409EFF;
     outline: 0;
 }
-
+/*鼠标松开后的样式*/
 .define:hover {
     color: #409EFF;
     border-color: #043554e3;
     background-color: #043554e3;
 }
-
+/*鼠标松开后的样式*/
 .define:focus {
+    color: #409EFF;
+    border-color: #043554e3;
+    background-color: #043554e3;
+}
+
+/*聚焦时的样式*/
+.default:focus{
     color: #409EFF;
     border-color: #031b2d;
     background-color: #031b2d;
 }
+
 
 .el-button--normal {
     color: #00c9ff;
@@ -118,6 +126,7 @@ button.define {
     background-color: transparent;
     border: 1px solid #00c9ff;
     color: #fff;
+    font-size: 18px;
 }
 .close{
     position: absolute;
@@ -126,3 +135,8 @@ button.define {
     width: 100%;
     text-align: center;
 }
+/*弹出的框*/
+.el-dialog{
+    background: -webkit-linear-gradient(left top, #2a697a,#0D4C6B,#113E65);
+}
+

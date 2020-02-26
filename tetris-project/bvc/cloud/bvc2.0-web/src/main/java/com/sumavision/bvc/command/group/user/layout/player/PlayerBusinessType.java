@@ -12,17 +12,17 @@ public enum PlayerBusinessType {
 	//考虑跟ConfigType.java合并
 	
 	NONE("未使用", "none"),
-	BASIC_COMMAND("普通指挥业务", "command"),//主席用commandMember，其他成员用command
-	CHAIRMAN_BASIC_COMMAND("主席的普通指挥业务", "commandMember"),//主席用commandMember，其他成员用command
-	COOPERATE_COMMAND("协同指挥业务", "cooperation"),
-	SECRET_COMMAND("专向指挥业务", "secret"),
-//	DEMAND_FORWARD("指挥转发点播", ""),//废弃
-	COMMAND_FORWARD_DEVICE("指挥转发设备", "commandForwardDevice"),
-	COMMAND_FORWARD_FILE("指挥转发文件", "commandForwardFile"),
-	PLAY_COMMAND_RECORD("播放指挥录像", "vodRecordFile"),
+	BASIC_COMMAND("普通会议业务", "command"),//主席用commandMember，其他成员用command
+	CHAIRMAN_BASIC_COMMAND("主席的普通会议业务", "commandMember"),//主席用commandMember，其他成员用command
+	COOPERATE_COMMAND("协同会议业务", "cooperation"),
+	SECRET_COMMAND("专向会议业务", "secret"),
+//	DEMAND_FORWARD("会议转发点播", ""),//废弃
+	COMMAND_FORWARD_DEVICE("会议转发设备", "commandForwardDevice"),
+	COMMAND_FORWARD_FILE("会议转发文件", "commandForwardFile"),
+	PLAY_COMMAND_RECORD("播放会议录像", "vodRecordFile"),
 	PLAY_FILE("点播文件", "vodResourceFile"),
 	PLAY_USER("点播用户", "vodUser"),
-	PLAY_USER_ONESELF("本地视频", "vodUser"),//看自己的编码器，给客户端的code也是vodUser，客户端按照普通点播来处理
+	PLAY_USER_ONESELF("本地视频", "localPreview"),//看自己的编码器，原来给客户端的code也是vodUser，客户端按照普通点播来处理；2月20日改用localPreview
 	PLAY_DEVICE("点播设备", "vodDevice"),
 	PLAY_RECORD("播放录像", ""),
 	USER_CALL("用户呼叫", "callUser"),

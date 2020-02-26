@@ -13,10 +13,13 @@ import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
+import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
@@ -43,6 +46,9 @@ public class UserQueryService {
 	@Autowired
 	private BundleDao bundleDao;
 	
+	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
 	/**
 	 * 当前用户<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -56,17 +62,36 @@ public class UserQueryService {
 	}
 
 	/**
-	 * 查询所有用户基本信息<br/>
+	 * 查询所有用户基本信息--带文件夹信息<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年12月31日 下午2:06:15
 	 * @return List<UserBO> 
 	 */
-	public List<UserBO> queryAllUserBaseInfo() throws Exception{
+	public List<UserBO> queryAllUserBaseInfo(TerminalType terminalType) throws Exception{
 		
-		List<UserVO> userVOs = userQuery.queryAllUserBaseInfo();
+		List<UserVO> userVOs = userQuery.queryAllUserBaseInfo(terminalType == null? null:terminalType.getName());
+		List<UserBO> allUsers = transferUserVo2Bo(userVOs);
 		
-		return transferUserVo2Bo(userVOs);
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user: allUsers){
+			userIds.add(user.getId());
+		}
+		
+		//给用户赋予文件夹信息
+		List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(userIds);
+		for(UserBO user: allUsers){
+			for(FolderUserMap map: folderUserMaps){
+				if(user.getId().equals(map.getUserId())){
+					user.setFolderId(map.getFolderId());
+					user.setFolderIndex(map.getFolderIndex().intValue());
+					user.setFolderUuid(map.getFolderUuid());
+					break;
+				}
+			}
+		}
+		
+		return allUsers;
 	}
 	
 	/**
@@ -114,6 +139,22 @@ public class UserQueryService {
 	}
 	
 	/**
+	 * 根据昵称列表查询用户列表<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 下午4:42:03
+	 * @param List<String> nicknames
+	 * @return List<UserBO>
+	 */
+	public List<UserBO> queryUsersByNicknameIn(List<String> nicknames) throws Exception{
+		
+		List<UserVO> users = userQuery.queryUsersByNickNameIn(nicknames);
+		
+		return transferUserVo2Bo(users);
+		
+	}
+	
+	/**
 	 * 根据用户号码查询用户<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -136,11 +177,19 @@ public class UserQueryService {
 	 * @param Long id 用户id
 	 * @return UserBO
 	 */
-	public UserBO queryUserByUserId(Long id) throws Exception{
+	public UserBO queryUserByUserId(Long id, TerminalType terminalType) throws Exception{
 		
-		UserVO user = userQuery.queryUserById(id);
+		UserVO user = userQuery.queryUserById(id, terminalType == null?null: terminalType.getName());
+		UserBO userBO = singleUserVo2Bo(user);
 		
-		return singleUserVo2Bo(user);
+		FolderUserMap map = folderUserMapDao.findByUserId(user.getId());
+		if(map != null){
+			userBO.setFolderId(map.getFolderId());
+			userBO.setFolderIndex(map.getFolderIndex().intValue());
+			userBO.setFolderUuid(map.getFolderUuid());
+		}
+		
+		return userBO;
 	}
 	
 	/**
@@ -151,11 +200,31 @@ public class UserQueryService {
 	 * @param List<Long> ids 用户id列表
 	 * @return List<UserBO>
 	 */
-	public List<UserBO> queryUsersByUserIds(List<Long> ids) throws Exception{
+	public List<UserBO> queryUsersByUserIds(List<Long> ids, TerminalType terminalType) throws Exception{
 		
-		List<UserVO> users = userQuery.findByIdIn(ids);
+		List<UserVO> users = userQuery.findByIdInAndType(ids, terminalType.getName());
 		
-		return transferUserVo2Bo(users);
+		List<UserBO> allUsers = transferUserVo2Bo(users);
+		
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user: allUsers){
+			userIds.add(user.getId());
+		}
+		
+		//给用户赋予文件夹信息
+		List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(userIds);
+		for(UserBO user: allUsers){
+			for(FolderUserMap map: folderUserMaps){
+				if(user.getId().equals(map.getUserId())){
+					user.setFolderId(map.getFolderId());
+					user.setFolderIndex(map.getFolderIndex().intValue());
+					user.setFolderUuid(map.getFolderUuid());
+					break;
+				}
+			}
+		}
+		
+		return allUsers;
 	}
 	
 	/**
@@ -295,7 +364,7 @@ public class UserQueryService {
 		userBO.setEmail(userVO.getMail());
 		userBO.setCreateTime(userVO.getUpdateTime());
 		userBO.setCreater("");
-		userBO.setLogined(false);
+		userBO.setLogined((userVO.getStatus() == null || userVO.getStatus() == "OFFLINE")? false: true);
 		userBO.setUserNo(userVO.getUserno());
 		
 		return userBO;

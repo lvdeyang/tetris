@@ -335,4 +335,7 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	
 	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.username LIKE ?2 AND user.id NOT IN ?3 \n#pageable\n", nativeQuery = true)
 	public Page<UserPO> findByCompanyIdAndLikeNameWithExcept(Long companyId, String userName, Collection<Long> except, Pageable page);
+
+	public List<UserPO> findByNicknameIn(Collection<String> nicknames);
+	
 }

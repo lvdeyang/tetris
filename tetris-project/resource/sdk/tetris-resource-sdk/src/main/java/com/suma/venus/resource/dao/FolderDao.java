@@ -26,7 +26,7 @@ public interface FolderDao extends CommonDao<FolderPO>{
 
 	public FolderPO findTopByUuid(String uuid);
 	
-	public List<FolderPO> findByUuidIn(List<String> uuids);
+	public List<FolderPO> findByUuidIn(Collection<String> uuids);
 	
 	public List<FolderPO> findByFolderType(FolderType folderType);
 	
@@ -34,6 +34,9 @@ public interface FolderDao extends CommonDao<FolderPO>{
 	
 	@Query("select f from FolderPO f where f.folderType=?1 and f.parentPath is null")
 	public FolderPO findRootFolderByType(FolderType folderType);
+	
+	@Query("select f from FolderPO f where f.folderType=?1 and f.parentId=?2")
+	public FolderPO findFolderByTypeAndParent(FolderType folderType, Long parentId);
 
 	@Query("select folder.id from FolderPO folder where folder.name=?1")
 	public Long findIdByName(String name);

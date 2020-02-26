@@ -26,6 +26,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 
 	public List<BundlePO> findByAccessNodeUid(String accessNodeUid);
 	
+	public int countByAccessNodeUid(String accessNodeUid);
+	
 	public List<BundlePO> findByAccessNodeUidIn(Collection<String> accessNodeUids);
 
 	public List<BundlePO> findByFolderId(Long folderId);
