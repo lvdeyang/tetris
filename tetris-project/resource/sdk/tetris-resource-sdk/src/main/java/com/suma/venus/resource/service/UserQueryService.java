@@ -70,7 +70,9 @@ public class UserQueryService {
 	 */
 	public List<UserBO> queryAllUserBaseInfo(TerminalType terminalType) throws Exception{
 		
-		List<UserVO> userVOs = userQuery.queryAllUserBaseInfo(terminalType == null? null:terminalType.getName());
+		String name = terminalType == null? null:terminalType.getName();
+		
+		List<UserVO> userVOs = userQuery.queryAllUserBaseInfo(name);
 		List<UserBO> allUsers = transferUserVo2Bo(userVOs);
 		
 		List<Long> userIds = new ArrayList<Long>();
@@ -179,7 +181,9 @@ public class UserQueryService {
 	 */
 	public UserBO queryUserByUserId(Long id, TerminalType terminalType) throws Exception{
 		
-		UserVO user = userQuery.queryUserById(id, terminalType == null?null: terminalType.getName());
+		String name = terminalType == null?null: terminalType.getName();
+		
+		UserVO user = userQuery.queryUserById(id, name);
 		UserBO userBO = singleUserVo2Bo(user);
 		
 		FolderUserMap map = folderUserMapDao.findByUserId(user.getId());
@@ -202,7 +206,9 @@ public class UserQueryService {
 	 */
 	public List<UserBO> queryUsersByUserIds(List<Long> ids, TerminalType terminalType) throws Exception{
 		
-		List<UserVO> users = userQuery.findByIdInAndType(ids, terminalType.getName());
+		String name = terminalType == null?null: terminalType.getName();
+		
+		List<UserVO> users = userQuery.findByIdInAndType(ids, name);
 		
 		List<UserBO> allUsers = transferUserVo2Bo(users);
 		
@@ -264,10 +270,12 @@ public class UserQueryService {
 		}
 		
 		//再查权限
-		List<PrivilegePO> privileges = privilegeDao.findByRoleIdIn(roleIds);
-		
-		for (PrivilegePO po : privileges) {
-			bo.getResourceCodes().add(po.getResourceIndentity());
+		if(roleIds.size() > 0){
+			List<PrivilegePO> privileges = privilegeDao.findByRoleIdIn(roleIds);
+			
+			for (PrivilegePO po : privileges) {
+				bo.getResourceCodes().add(po.getResourceIndentity());
+			}
 		}
 		
 		return bo;
@@ -292,16 +300,19 @@ public class UserQueryService {
 		}
 		
 		//再查权限
-		List<PrivilegePO> privileges = privilegeDao.findByRoleIdIn(roleIds);
-		
-		if(privileges == null || privileges.size() <= 0){
-			throw new BaseException(StatusCode.ERROR, "用户无权限");
-		}
-		
-		for (String resource : bo.getResourceCodes()) {
-			for (PrivilegePO po : privileges) {
-				if (resource.equalsIgnoreCase(po.getResourceIndentity())) {
-					return true;
+		if(roleIds.size() > 0){
+			
+			List<PrivilegePO> privileges = privilegeDao.findByRoleIdIn(roleIds);
+			
+			if(privileges == null || privileges.size() <= 0){
+				throw new BaseException(StatusCode.ERROR, "用户无权限");
+			}
+			
+			for (String resource : bo.getResourceCodes()) {
+				for (PrivilegePO po : privileges) {
+					if (resource.equalsIgnoreCase(po.getResourceIndentity())) {
+						return true;
+					}
 				}
 			}
 		}

@@ -106,43 +106,44 @@ public class TranscodeTaskFeignController {
 		return null;
 	}
 	
+
 	/**
-	 * 添加盖播<br/>
+	 * 添加转码任务盖播<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年2月18日 上午8:59:56
-	 * @param String input 盖播源
-	 * @param String capacityIp 能力ip
+	 * <b>日期：</b>2020年2月21日 上午11:11:27
+	 * @param String taskId 集群任务id
+	 * @param String input cover输入
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/cover")
-	public Object changeBackup(
+	public Object addCover(
+			String taskId,
 			String input,
-			String capacityIp,
 			HttpServletRequest request) throws Exception{
 		
 		InputBO inputBO = JSONObject.parseObject(input, InputBO.class);
-		transcodeTaskService.addCover(inputBO, capacityIp);
+		transcodeTaskService.addCover(taskId, inputBO);
 		
 		return null;
 	}
 	
 	/**
-	 * 删除盖播源<br/>
+	 * 删除转码任务盖播<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年2月18日 上午9:01:06
-	 * @param String inputId 盖播源id
+	 * <b>日期：</b>2020年2月21日 上午11:16:04
+	 * @param String taskId 集群任务id
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete/cover")
 	public Object changeBackup(
-			String inputId,
+			String taskId,
 			HttpServletRequest request) throws Exception{
 		
-		transcodeTaskService.deleteCover(inputId);
+		transcodeTaskService.deleteCover(taskId);
 		
 		return null;
 	}

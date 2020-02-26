@@ -3,31 +3,42 @@ package com.sumavision.tetris.business.director.bo;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 
 /**
- * 校验InputBO是否需要创建<br/>
+ * 校验输入参数<br/>
  * <b>作者:</b>wjw<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年2月14日 下午4:23:32
+ * <b>日期：</b>2020年2月17日 上午11:21:44
  */
 public class InputCheckBO {
-
-	private boolean isExsit;
 	
-	private InputBO input;
+	private boolean isExist;
+	
+	private InputBO inputBO;
+	
+	/** 持久化inputId */
+	private Long inputId;
 
-	public boolean isExsit() {
-		return isExsit;
+	public boolean isExist() {
+		return isExist;
 	}
 
-	public void setExsit(boolean isExsit) {
-		this.isExsit = isExsit;
+	public void setExist(boolean isExist) {
+		this.isExist = isExist;
 	}
 
-	public InputBO getInput() {
-		return input;
+	public InputBO getInputBO() {
+		return inputBO;
 	}
 
-	public void setInput(InputBO input) {
-		this.input = input;
+	public void setInputBO(InputBO inputBO) {
+		this.inputBO = inputBO;
+	}
+
+	public Long getInputId() {
+		return inputId;
+	}
+
+	public void setInputId(Long inputId) {
+		this.inputId = inputId;
 	}
 	
 }
