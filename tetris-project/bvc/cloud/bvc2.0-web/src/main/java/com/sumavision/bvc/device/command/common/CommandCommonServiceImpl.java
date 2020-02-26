@@ -31,6 +31,7 @@ import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl
 import com.sumavision.bvc.device.command.exception.HasNotUsefulPlayerException;
 import com.sumavision.bvc.device.command.exception.PlayerIsBeingUsedException;
 import com.sumavision.bvc.device.command.secret.CommandSecretServiceImpl;
+import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.enumeration.CodecParamType;
 import com.sumavision.bvc.device.group.service.util.MeetingUtil;
@@ -41,6 +42,7 @@ import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.enumeration.AvtplUsageType;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -70,6 +72,9 @@ public class CommandCommonServiceImpl {
 	
 	@Autowired
 	private CommandSilenceServiceImpl commandSilenceServiceImpl;
+	
+	@Autowired
+	private CommandUserServiceImpl commandUserServiceImpl;
 	
 	@Autowired
 	private AvtplService avtplService;
@@ -108,7 +113,7 @@ public class CommandCommonServiceImpl {
 			avTpls = avtplDao.findByUsageType(AvtplUsageType.COMMAND);
 			AvtplPO sys_avtpl = meetingUtil.generateAvtpl(CodecParamType.DEFAULT.getName(), "COMMAND1");
 			avTpls.add(sys_avtpl);
-//			throw new AvtplNotFoundException("缺少指挥系统参数模板！");
+//			throw new AvtplNotFoundException("缺少会议系统参数模板！");
 		}
 		targetAvtpl = avTpls.get(0);
 		//查询codec模板档位
@@ -119,7 +124,7 @@ public class CommandCommonServiceImpl {
 		}
 		
 		if(targetGear == null){
-			throw new AvtplNotFoundException("指挥系统参数模板没有创建档位！");
+			throw new AvtplNotFoundException("会议系统参数模板没有创建档位！");
 		}
 		
 		return new HashMapWrapper<String, Object>().put("avtpl", targetAvtpl)
@@ -174,6 +179,10 @@ public class CommandCommonServiceImpl {
 		synchronized (userId) {
 			
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+			if(null == userInfo){
+				//如果没有则建立默认
+				userInfo = commandUserServiceImpl.generateDefaultUserInfo(userId, null, true);
+			}
 
 			CommandGroupUserLayoutShemePO userUsingScheme = queryIsUsingScheme(userInfo);
 			
@@ -210,6 +219,10 @@ public class CommandCommonServiceImpl {
 		synchronized (userId) {
 			
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+			if(null == userInfo){
+				//如果没有则建立默认
+				userInfo = commandUserServiceImpl.generateDefaultUserInfo(userId, null, true);
+			}
 			CommandGroupUserLayoutShemePO userUsingScheme = queryIsUsingScheme(userInfo);			
 			List<CommandGroupUserPlayerPO> players = userUsingScheme.obtainPlayers();			
 			CommandGroupUserPlayerPO userPlayer = commandCommonUtil.queryPlayerByLocationIndex(players, locationIndex);
@@ -251,6 +264,10 @@ public class CommandCommonServiceImpl {
 		synchronized (userId) {
 			
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+			if(null == userInfo){
+				//如果没有则建立默认
+				userInfo = commandUserServiceImpl.generateDefaultUserInfo(userId, null, true);
+			}
 
 			CommandGroupUserLayoutShemePO userUsingScheme = queryIsUsingScheme(userInfo);
 			
@@ -489,7 +506,7 @@ public class CommandCommonServiceImpl {
 	
 	/**
 	 * 一条转发能否被执行（或从暂停中恢复）<br/>
-	 * <p>该转发没有因为指挥暂停、专向指挥、静默操作而停止时，可以被执行。需要另行判断转发的执行状态ExecuteStatus</p>
+	 * <p>该转发没有因为会议暂停、专向会议、静默操作而停止时，可以被执行。需要另行判断转发的执行状态ExecuteStatus</p>
 	 * <p>搭配 CommandCommonUtil 的 queryForwardsReadyToBeDone 方法一起使用</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -533,8 +550,8 @@ public class CommandCommonServiceImpl {
 	public int compareLevelByUserId(Long userId1, Long userId2) {
 		
 		try {
-			UserBO user1 = resourceService.queryUserById(userId1);
-			UserBO user2 = resourceService.queryUserById(userId2);
+			UserBO user1 = resourceService.queryUserById(userId1, TerminalType.QT_ZK);
+			UserBO user2 = resourceService.queryUserById(userId2, TerminalType.QT_ZK);
 			
 			Set<Long> folderIds = new HashSetWrapper<Long>().add(user1.getFolderId()).add(user2.getFolderId()).getSet();
 			Map<Long, FolderPO> folderMap = resourceService.queryFoleders(folderIds);
@@ -589,8 +606,8 @@ public class CommandCommonServiceImpl {
 		public int compare(Long userId1, Long userId2) {
 			
 			try {
-				UserBO user1 = resourceServiceStatic.queryUserById(userId1);
-				UserBO user2 = resourceServiceStatic.queryUserById(userId2);
+				UserBO user1 = resourceServiceStatic.queryUserById(userId1, TerminalType.QT_ZK);
+				UserBO user2 = resourceServiceStatic.queryUserById(userId2, TerminalType.QT_ZK);
 				
 				Set<Long> folderIds = new HashSetWrapper<Long>().add(user1.getFolderId()).add(user2.getFolderId()).getSet();
 				Map<Long, FolderPO> folderMap = resourceServiceStatic.queryFoleders(folderIds);

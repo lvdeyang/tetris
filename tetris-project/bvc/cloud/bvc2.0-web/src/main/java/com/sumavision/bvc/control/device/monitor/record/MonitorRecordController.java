@@ -26,6 +26,7 @@ import com.sumavision.bvc.device.monitor.record.MonitorRecordDAO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordService;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -297,7 +298,7 @@ public class MonitorRecordController {
 			throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 1);
 		}
 		
-		UserBO targetUser = userUtils.queryUserById(targetUserId);
+		UserBO targetUser = userUtils.queryUserById(targetUserId, TerminalType.PC_PLATFORM);
 		
 		MonitorRecordPO task = null;
 		if("ldap".equals(targetUser.getCreater())){

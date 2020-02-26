@@ -39,6 +39,7 @@ define([
             }
         },
         methods:{
+            //取消关闭事件
             handleDecodeBindClose:function(){
                 var self = this;
                 self.dialog.decodeBind.visible = false;
@@ -48,13 +49,14 @@ define([
                 self.dialog.decodeBind.table.data.splice(0, self.dialog.decodeBind.table.data.length);
                 self.qt.destroy();
             },
+            //绑定按钮提交事件
             handleDecodeBindCommit:function(){
                 var self = this;
                 if(!self.dialog.decodeBind.tree.currentBundle){
                     self.$message({
                         type:'success',
                         message:'您还没有选择设备！'
-                    })
+                    });
                     return;
                 }
                 var currentBundle = $.parseJSON(self.dialog.decodeBind.tree.currentBundle);
@@ -75,6 +77,7 @@ define([
                     self.dialog.decodeBind.tree.currentBundle = '';
                 }, null, [403, 404, 408, 409, 500]);
             },
+            //删除事件
             handleDecodeBindRemove:function(scope){
                 var self = this;
                 var row = scope.row;
@@ -91,6 +94,7 @@ define([
                     self.refreshDecodeBindTree();
                 });
             },
+            //获取树形结构的数据
             refreshDecodeBindTree:function(){
                 var self = this;
                 var serial = self.dialog.decodeBind.serial;
@@ -104,6 +108,7 @@ define([
                     }
                 });
             },
+            //获取绑定设备的数据
             refreshDecodeBindTable:function(){
                 var self = this;
                 var serial = self.dialog.decodeBind.serial;

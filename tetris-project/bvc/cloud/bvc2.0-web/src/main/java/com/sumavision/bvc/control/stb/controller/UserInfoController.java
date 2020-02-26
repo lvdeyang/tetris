@@ -20,6 +20,7 @@ import com.netflix.client.http.HttpRequest;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.sumavision.bvc.control.device.group.controller.DeviceGroupControlController;
+import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.dao.DeviceGroupDAO;
 import com.sumavision.bvc.device.group.dao.DeviceGroupMemberDAO;
@@ -37,7 +38,7 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
-@RequestMapping(value = "/userInfo")
+@RequestMapping(value = "/api/tvos/userInfo")
 public class UserInfoController {
 	
 	@Autowired
@@ -54,6 +55,9 @@ public class UserInfoController {
 	
 	@Autowired
 	private QueryUtil queryUtil;
+	
+	@Autowired
+	private UserUtils userUtils;
 	
 	@Autowired
 	private DeviceGroupControlController deviceGroupControllerController;
@@ -77,7 +81,8 @@ public class UserInfoController {
 			@RequestBody JSONObject acceptJson,
 			HttpServletRequest request) throws Exception {
 		
-		Long userId = Long.parseLong(acceptJson.getString("userId"));
+//		Long userId = Long.parseLong(acceptJson.getString("userId"));
+		Long userId = userUtils.getUserIdFromSession(request);
 		
 		System.out.println("************ acceptParam userId : " + userId + " ************");
 		
@@ -121,7 +126,7 @@ public class UserInfoController {
 		String serverTime = DateUtil.format(new Date(), DateUtil.dateTimePattern);
 		data.put("serverTime",serverTime);
 
-		return data;	
+		return data;
 	}
 	
 	
@@ -212,7 +217,8 @@ public class UserInfoController {
 			@RequestBody JSONObject acceptJson,
 			HttpServletRequest request) throws Exception {
 		
-        Long userId = Long.parseLong(acceptJson.getString("userId"));
+//        Long userId = Long.parseLong(acceptJson.getString("userId"));
+        Long userId = userUtils.getUserIdFromSession(request);
         Long folderId = Long.parseLong(acceptJson.getString("folderId"));
         String bundleId = acceptJson.getString("bundleId");
 

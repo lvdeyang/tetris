@@ -49,6 +49,7 @@ public class ApiThirdpartLoginFilter extends ZuulFilter{
 			
 			String zuulCertify = md5Encoder.encode(message);
 			if(!zuulCertify.equals(certify)){
+				System.out.println("certify的md5校验不通过");
 				ctx.setResponseStatusCode(403);
 				ctx.setSendZuulResponse(false);
 			}

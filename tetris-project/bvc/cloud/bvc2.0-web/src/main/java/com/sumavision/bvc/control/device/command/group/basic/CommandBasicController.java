@@ -31,16 +31,21 @@ import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
 import com.sumavision.bvc.control.device.group.vo.tree.TreeNodeVO;
+import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeIcon;
+import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeType;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.ForwardReturnBO;
 import com.sumavision.bvc.device.command.basic.remind.CommandRemindServiceImpl;
+import com.sumavision.bvc.device.command.basic.silence.CommandSilenceLocalServiceImpl;
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl;
+import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.ChannelBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -63,6 +68,9 @@ public class CommandBasicController {
 	private CommandRemindServiceImpl commandRemindServiceImpl;
 
 	@Autowired
+	private CommandSilenceLocalServiceImpl commandSilenceLocalServiceImpl;
+
+	@Autowired
 	private CommandGroupDAO commandGroupDao;
 
 	@Autowired
@@ -72,16 +80,21 @@ public class CommandBasicController {
 	private UserUtils userUtils;
 
 	@Autowired
+	private QueryUtil queryUtil;
+
+	@Autowired
+	private CommandCommonUtil commandCommonUtil;
+
+	@Autowired
 	private ResourceService resourceService;
 	
 	/**
-	 * 
-	 * 查询指挥的所有成员及状态<br/>
+	 * 查询会议的所有成员及状态<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月24日 上午11:20:15
-	 * @param id 指挥组id
+	 * @param id 会议组id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -113,10 +126,78 @@ public class CommandBasicController {
 		}
 				
 		return info;
+		
+//		return queryMembersList(id, request);
+	}
+	
+	/**
+	 * 查询会议的所有成员及状态，列表呈现，不再是树<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月21日 上午11:34:06
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/members/list")
+	public Object queryMembersList(
+			String id,
+			HttpServletRequest request) throws Exception{
+		
+		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
+		
+		JSONObject info = new JSONObject();
+		info.put("id", group.getId().toString());
+		info.put("name", group.getName());
+		info.put("status", group.getStatus().getCode());
+		info.put("commander", group.getUserId());
+		info.put("creator", group.getUserId());
+		List<CommandGroupRecordPO> runningRecords = commandGroupRecordDao.findByGroupIdAndRun(group.getId(), true);
+		if(runningRecords.size() > 0){
+			info.put("isRecord", true);
+		}else{
+			info.put("isRecord", false);
+		}
+		
+		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<UserBO> userBOs = commandCommonUtil.queryUsersByMembers(members);
+		
+		//成员列表节点
+		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
+											     .setName("成员列表")
+											     .setType(TreeNodeType.FOLDER)
+											     .setKey()
+											     .setIcon(TreeNodeIcon.FOLDER.getName())
+											     .setChildren(new ArrayList<TreeNodeVO>());
+		
+		List<FolderPO> totalFolders = resourceService.queryAllFolders();		
+		
+		//先放入主席
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		UserBO chairmanUserBO = queryUtil.queryUserById(userBOs, chairmanMember.getUserId());
+		FolderPO chairmanFolder = queryUtil.queryFolderPOById(totalFolders, chairmanMember.getFolderId());
+		TreeNodeVO chairmanMemberTree = new TreeNodeVO().setWithInfo(chairmanMember, chairmanUserBO, chairmanFolder);
+		commandRoot.getChildren().add(chairmanMemberTree);
+		for(CommandGroupMemberPO member : members){
+			if(member.isAdministrator()) continue;
+			UserBO userBO = queryUtil.queryUserById(userBOs, member.getUserId());
+			FolderPO folder = queryUtil.queryFolderPOById(totalFolders, chairmanMember.getFolderId());
+			TreeNodeVO commandTree = new TreeNodeVO().setWithInfo(member, userBO, folder);
+			commandRoot.getChildren().add(commandTree);
+		}
+		List<TreeNodeVO> rootList = new ArrayList<TreeNodeVO>();
+		rootList.add(commandRoot);
+		info.put("members", rootList);
+		
+		return info;		
 	}
 		
 	/**
-	 * 新建指挥<br/>
+	 * 新建会议<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>日期：</b>2019年9月26日
 	 * @param userIdList json格式的用户id列表
@@ -127,19 +208,22 @@ public class CommandBasicController {
 	@RequestMapping(value = "/save")
 	public Object save(
 			String members,
+			String name,
 			HttpServletRequest request) throws Exception{
-		//TODO:区分创建者和主席
+		//考虑区分创建者和主席
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		//生成一个name
 		Date date = new Date();
 		String createTime = DateUtil.format(date, DateUtil.dateTimePattern);
-		String name = new StringBuilder().append(user.getName())
+		//未输入则生成一个name
+		if(name==null || name.equals("")){
+			name = new StringBuilder().append(user.getName())
 				   .append(" ")
 				   .append(createTime)
 				   .append(" ")
-				   .append("指挥")
+				   .append("会议")
 				   .toString();
+		}
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
 		
@@ -158,7 +242,33 @@ public class CommandBasicController {
 	}
 	
 	/**
-	 * 删除指挥（批量）<br/>
+	 * 修改会议名称<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月16日 上午9:36:17
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/modify/name")
+	public Object modifyName(
+			String id,
+			String name,
+			HttpServletRequest request) throws Exception{
+
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		commandBasicServiceImpl.modifyName(userId, Long.parseLong(id), name);
+		
+		return null;
+	}
+	
+	/**
+	 * 删除会议（批量）<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>日期：</b>2019年9月26日
 	 * @param ids
@@ -186,7 +296,7 @@ public class CommandBasicController {
 	}
 		
 	/**
-	 * 进入指挥，获取指挥信息（批量）<br/>
+	 * 进入会议，获取会议信息（批量）<br/>
 	 * <p>非主席的成员会按照“接听”处理，主席不处理</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -238,7 +348,7 @@ public class CommandBasicController {
 	}
 	
 	
-	//查询某个指挥的所有成员及状态（方法名暂定）
+	//查询某个会议的所有成员及状态（方法名暂定）
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/query/tree/{groupId}", method = RequestMethod.GET)
@@ -249,17 +359,18 @@ public class CommandBasicController {
 	}
 	
 	
-	//查询当前指挥外的所有成员
+	//查询当前会议外的所有成员
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/query/members/except/group/{groupId}")
+	@Deprecated
 	public Object queryMembersExceptGroup(
 			HttpServletRequest request) throws Exception{
 		return null;
 	}
 	
 	/**
-	 * 开始指挥<br/>
+	 * 开始会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -276,12 +387,12 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
-		Object chairSplits = commandBasicServiceImpl.start(Long.parseLong(id), -1);
-		return chairSplits;
+		Object result = commandBasicServiceImpl.start(Long.parseLong(id), -1);
+		return result;
 	}
 	
 	/**
-	 * 停止指挥<br/>
+	 * 停止会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -328,7 +439,7 @@ public class CommandBasicController {
 	}	
 	
 	
-	//退出指挥
+	//退出会议
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/exit")
@@ -384,12 +495,12 @@ public class CommandBasicController {
 	
 	
 	/**
-	 * 指挥中的一个成员开启对上静默<br/>
+	 * 会议中的一个成员开启对上静默<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月6日 上午11:12:52
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -410,12 +521,12 @@ public class CommandBasicController {
 	
 	
 	/**
-	 * 指挥中的一个成员停止对上静默<br/>
+	 * 会议中的一个成员停止对上静默<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月6日 上午11:13:25
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -436,12 +547,12 @@ public class CommandBasicController {
 	
 	
 	/**
-	 * 指挥中的一个成员开启对下静默<br/>
+	 * 会议中的一个成员开启对下静默<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月6日 上午11:13:42
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -462,12 +573,12 @@ public class CommandBasicController {
 	
 	
 	/**
-	 * 指挥中的一个成员停止对下静默<br/>
+	 * 会议中的一个成员停止对下静默<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月6日 上午11:13:56
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -520,7 +631,7 @@ public class CommandBasicController {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年12月2日 下午1:50:42
-	 * @param businessId 指挥id-成员userId
+	 * @param businessId 会议id-成员userId
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -546,7 +657,7 @@ public class CommandBasicController {
 	}
 	
 	/**
-	 * 指挥转发设备<br/>
+	 * 会议转发设备<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -632,7 +743,7 @@ public class CommandBasicController {
 	}
 	
 	/**
-	 * 指挥转发文件<br/>
+	 * 会议转发文件<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -718,7 +829,7 @@ public class CommandBasicController {
 	}
 	
 	/**
-	 * 主席停止一个指挥中的多个转发<br/>
+	 * 主席停止一个会议中的多个转发<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -746,7 +857,7 @@ public class CommandBasicController {
 	
 	/**
 	 * 成员停止多个转发<br/>
-	 * <p>支持不同指挥中的转发</p>
+	 * <p>支持不同会议中的转发</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月15日 下午2:01:28
@@ -773,7 +884,7 @@ public class CommandBasicController {
 	}
 	
 	/**
-	 * 开启指挥提醒<br/>
+	 * 开启会议提醒<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -795,7 +906,7 @@ public class CommandBasicController {
 	}
 	
 	/**
-	 * 关闭指挥提醒<br/>
+	 * 关闭会议提醒<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -817,6 +928,60 @@ public class CommandBasicController {
 	}
 	
 	/**
+	 * 停止用户本地视频发送<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月20日 下午4:05:08
+	 * @param userIds
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@ResponseBody
+	@JsonBody
+	@RequestMapping(value = "/stop/user/video/send")
+	public Object stopUsersVideoSend(
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		UserBO user = userUtils.queryUserById(userId);
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
+		
+		commandSilenceLocalServiceImpl.operate(user, userIdArray, 1, 2);
+		
+		return null;
+	}
+	
+	/**
+	 * 停止用户本地音频发送<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月20日 下午4:05:40
+	 * @param userIds
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@ResponseBody
+	@JsonBody
+	@RequestMapping(value = "/stop/user/audio/send")
+	public Object stopUsersAudioSend(
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		UserBO user = userUtils.queryUserById(userId);
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
+		
+		commandSilenceLocalServiceImpl.operate(user, userIdArray, 2, 2);
+		
+		return null;
+	}
+	
+	/**
 	 * @Title: 设备组成员树<br/>
 	 * @param groupId 设备组id
 	 * @throws Exception 
@@ -834,18 +999,6 @@ public class CommandBasicController {
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		Set<CommandGroupMemberPO> members = group.getMembers();
 		
-//		//查询有权限的用户
-//		List<UserBO> users = resourceService.queryUserresByUserId(userId);
-//		if(users!=null && users.size()>0){
-//			for(UserBO user:users){
-//				if(user.getId().equals(userId)) continue;
-//				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
-//				   (!"ldap".equals(user.getCreater()) && user.getEncoderId()!=null)){// && user.getDecoderId()!=null)){
-//					filteredUsers.add(user);
-//				}
-//			}
-//		}
-		
 		//查询所有非点播的文件夹
 		List<FolderPO> totalFolders = resourceService.queryAllFolders();
 		for(FolderPO folder:totalFolders){
@@ -857,13 +1010,16 @@ public class CommandBasicController {
 		//过滤掉无用的文件夹
 		List<FolderBO> usefulFolders = filterUsefulFolders(folders, null, members);
 		
+		//得到所有的相关用户
+		List<UserBO> userBOs = commandCommonUtil.queryUsersByMembers(members);
+		
 		//找所有的根
 		List<FolderBO> roots = findRoots(usefulFolders);
 		for(FolderBO root:roots){
 			TreeNodeVO _root = new TreeNodeVO().set(root)
 											   .setChildren(new ArrayList<TreeNodeVO>());
 			_roots.add(_root);
-			recursionFolder(_root, usefulFolders, null, null, members);
+			recursionFolder(_root, usefulFolders, null, null, members, userBOs);
 		}
 		
 		return _roots;
@@ -930,13 +1086,17 @@ public class CommandBasicController {
 		return new ArrayList<FolderBO>(usefulFolders);
 	}
 	
-	/**递归组文件夹层级*/
-	public void recursionFolder(
+	/**递归组文件夹层级。
+	 * userBOs列表可以通过commandCommonUtil.queryUsersByMembers(members)获得，用来给members提供用户的在线状态*/
+	private void recursionFolder(
 			TreeNodeVO root, 
 			List<FolderBO> folders, 
 			List<BundleBO> bundles, 
 			List<ChannelBO> channels,
-			Set<CommandGroupMemberPO> users){
+			Set<CommandGroupMemberPO> members,
+			List<UserBO> userBOs){
+		
+		if(userBOs == null) userBOs = new ArrayList<UserBO>();
 		
 		//往里装文件夹
 		for(FolderBO folder:folders){
@@ -944,7 +1104,7 @@ public class CommandBasicController {
 				TreeNodeVO folderNode = new TreeNodeVO().set(folder)
 														.setChildren(new ArrayList<TreeNodeVO>());
 				root.getChildren().add(folderNode);
-				recursionFolder(folderNode, folders, bundles, channels, users);
+				recursionFolder(folderNode, folders, bundles, channels, members, userBOs);
 			}
 		}
 		
@@ -968,10 +1128,11 @@ public class CommandBasicController {
 		}
 		
 		//往里装用户
-		if(users!=null && users.size()>0){
-			for(CommandGroupMemberPO user:users){
-				if(user.getFolderId()!=null && root.getId().equals(user.getFolderId().toString())){
-					TreeNodeVO userNode = new TreeNodeVO().set(user);
+		if(members!=null && members.size()>0){
+			for(CommandGroupMemberPO member : members){
+				if(member.getFolderId()!=null && root.getId().equals(member.getFolderId().toString())){
+					UserBO userBO = queryUtil.queryUserById(userBOs, member.getUserId());
+					TreeNodeVO userNode = new TreeNodeVO().set(member, userBO);
 					root.getChildren().add(userNode);
 				}
 			}

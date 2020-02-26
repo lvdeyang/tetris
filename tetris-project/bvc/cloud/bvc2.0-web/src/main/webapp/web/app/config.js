@@ -13,7 +13,6 @@ define(function(){
 //            login:'http://10.10.40.106:8885/vue/#/',
             login:'https://192.165.56.140:8543/vue/#/',
             authname:'business_cache_key_5002',
-//            authname:'tetris-001',
             header_auth_token:'tetris-001',
             header_session_id:'tetris-002',
             //url:查询菜单

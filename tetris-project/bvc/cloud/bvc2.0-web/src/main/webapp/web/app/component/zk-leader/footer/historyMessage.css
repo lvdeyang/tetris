@@ -3,7 +3,7 @@ html,body{
 }
 .message {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     width: 100%;
     height: 90px;
@@ -13,9 +13,7 @@ html,body{
     padding-left: 15px;
     top:0;
     left: 0;
-    width: 230px;
-    height: 50px;
-    line-height: 50px;
+    width: 16%;
     text-align: center;
     color: #fff;
     font-size: 20px;
@@ -26,21 +24,20 @@ html,body{
     float: left;
     width: 26px;
     height: 22px;
-    margin: 14px 5px;
+    margin: 10px 9px;
 }
 
 .msgBg{
     position: absolute;
-    top:10px;
-    left: 290px;
+    top:5px;
+    left:20%;
     z-index: 1;
 }
 .msgContent {
     position: absolute;
-    left: 350px;
-    top: 15px;
-    padding-left: 150px;
-    width: 600px;
+    top: 0;
+    left: 29%;
+    right: 0;
     height: 70px;
     font-size: 16px;
     color: #00e9ff;
@@ -48,17 +45,28 @@ html,body{
     overflow: hidden;
 }
 
-ul, li {
+.msgContent p{
     margin: 0;
-    padding: 0;
-    list-style: none;
+    padding: 0 5px;
+    line-height: 23px;
+    word-break:break-all;
+    word-wrap:break-word ;
 }
 
-.msgContent li{
-    line-height: 23px;
+/*修改消息界面和 整体的默认的滚动条样式*/
+::-webkit-scrollbar{/*滚动条整体样式*/
+    width: 4px;     /*高宽分别对应横竖滚动条的尺寸*/
+    height: 4px;
 }
-.animating{
-    animation: wordsLoop 5s linear infinite normal;
+::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    background: rgba(0,0,0,0.2);
+}
+::-webkit-scrollbar-track {/*滚动条里面轨道*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    border-radius: 0;
+    background: rgba(0,0,0,0.1);
 }
 
 .note {
@@ -67,8 +75,19 @@ ul, li {
 
 .tagMessage {
     position: absolute;
-    top: 5px;
-    right: 10px;
+    top: 48px;
+    left:21%;
+    border: 1px solid #f8a036;
+    border-radius: 13px;
+    background-color: #f8a036;
+}
+.forward{
+    position: absolute;
+    top:5px;
+    right: 0;
+    border: 1px solid #f8a036;
+    border-radius: 13px;
+    background-color: #f8a036;
 }
 img{
     display: block;
@@ -78,14 +97,14 @@ img{
 
 .el-button{
     position: absolute;
-    padding: 18px;
+    padding: 18px 8px;
     top:5px;
     right: 0;
     background: #204a6b;
-    border-radius: 10px 0 0 10px;
+    border-radius: 0 10px 10px 0;
     border: 0;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 14px;
     color: #00e9ff;
 }
 .el-button:active,.el-button:hover,.el-button:focus {
@@ -94,19 +113,111 @@ img{
     outline: 0;
 }
 
-@keyframes wordsLoop {
-    0% {
-        transform: translateY(65px);
-        -webkit-transform: translateY(65px);
+.sendMsg{
+    position:absolute;
+    left:29%;
+    right: 0;
+    top:69px;
+    height:40px;
+    box-sizing:border-box;
+    background-color:#2d4e684a;
+    box-sizing: border-box;
+}
+
+.sendMsgContent{
+    width: 46%;
+    height: 34px;
+    float: left;
+    border: 0;
+    background-color: #41444645;
+    color: #f8a036;
+    font-size: 16px;
+    text-indent: 10px;
+}
+
+.sendMsgContent:focus{
+    outline:0;
+}
+
+.sendMsgContent::-webkit-input-placeholder{
+    color:#f8a036;
+    font-size:16px;
+}
+.sendMsgContent:-moz-placeholder,body{
+    color:#00e9ff;
+    font-size:16px;
+}
+.sendMsgContent::-moz-placeholder{
+    color:#00e9ff;
+    font-size:16px;
+}
+.sendMsgContent:-ms-input-placeholder{
+    color:#00e9ff;
+    font-size:16px;
+}
+
+.sendMsgBtn{
+    margin: 0;
+    display: inline-block;
+    width: 98px;
+    height: 24px;
+    line-height: 22px;
+    border-radius: 11px;
+    color: rgb(255, 255, 255);
+    text-align: center;
+    float: left;
+    cursor: pointer;
+    border: 0;
+    background-color: #f8a036;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+@media screen and (max-width:1366px){
+    .message{
+        width: 90%;
     }
-    50%{
-        transform: translateY(0);
-        -webkit-transform: translateY(0);
+    .msgContent, .sendMsg{
+        left: 34%;
     }
-    100% {
-        transform: translateY(-70px);
-        -webkit-transform: translateY(-70px);
+    .sendMsgContent{
+        width: 74%;
     }
 }
 
+@media screen and (max-width:1100px){
+    .message{
+        width: 90%;
+    }
+    .msgContent, .sendMsg{
+        left: 36%;
+    }
+    .sendMsgContent{
+        width: 74%;
+    }
+}
+
+@media screen and (max-width:800px){
+    .message{
+        width: 86%;
+    }
+    .msgContent, .sendMsg{
+        left: 44%;
+    }
+    .sendMsgContent{
+        width: 66%;
+    }
+}
+
+@media screen and (max-width:600px){
+    .message{
+        width:84%;
+    }
+    .msgContent, .sendMsg{
+        left: 48%;
+    }
+    .sendMsgContent{
+        width: 66%;
+    }
+}
 

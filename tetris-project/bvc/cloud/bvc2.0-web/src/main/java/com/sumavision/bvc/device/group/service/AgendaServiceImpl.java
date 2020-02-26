@@ -352,7 +352,7 @@ public class AgendaServiceImpl {
 					newPosition.setSrcs(new ArrayList<DeviceGroupConfigVideoSrcPO>());
 					for(int j=0; j<srcArr.size(); j++){
 						JSONObject srcObj = srcArr.getJSONObject(j);
-						JSONObject paramObj = srcObj.getJSONObject("param"); 
+						JSONObject paramObj = JSON.parseObject(srcObj.getString("param"));//srcObj.getJSONObject("param"); 
 						DeviceGroupConfigVideoSrcPO newSrc = new DeviceGroupConfigVideoSrcPO();
 						
 						if(paramObj.containsKey("roleId")){

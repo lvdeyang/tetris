@@ -25,6 +25,7 @@ import com.sumavision.bvc.command.group.dao.CommandGroupMessageStyleDAO;
 import com.sumavision.bvc.command.group.message.CommandGroupMessagePO;
 import com.sumavision.bvc.command.group.message.CommandGroupMessageStylePO;
 import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.message.CommandMessageServiceImpl;
 import com.sumavision.bvc.device.command.message.CommandMessageStyleServiceImpl;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -411,6 +412,32 @@ public class CommandMessageController {
 		return result;
 	}	
 	
+	/**
+	 * 发送实时消息，给会议内的成员<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月21日 下午7:09:55
+	 * @param id
+	 * @param message
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/instant/message")
+	public Object broadcastInstantMessage(
+			String id,
+		    String message,
+		    HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);		
+		commandMessageServiceImpl.broadcastInstantMessage(user.getId(), user.getName(), Long.parseLong(id), message);
+		return null;		
+		
+	}
+
 	//发送文件
 	public Object sendFile(HttpServletRequest request) throws Exception{
 		return null;

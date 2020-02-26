@@ -55,6 +55,9 @@ public class CommandGroupPO extends AbstractBasePO {
 	/** 最后一次停止时间 */
 	private Date endTime;
 	
+	/** 设置的作战时间 */
+	private Date fightTime;
+	
 	/** 组类型 */
 	private GroupType type;
 	
@@ -124,6 +127,15 @@ public class CommandGroupPO extends AbstractBasePO {
 
 	public void setEndTime(Date endTime) {
 		this.endTime = endTime;
+	}
+
+	@Column(name = "FIGHT_TIME")
+	public Date getFightTime() {
+		return fightTime;
+	}
+
+	public void setFightTime(Date fightTime) {
+		this.fightTime = fightTime;
 	}
 
 	@Column(name = "CREATE_TIME")

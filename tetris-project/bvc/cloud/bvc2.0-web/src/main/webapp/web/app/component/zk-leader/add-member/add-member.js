@@ -31,6 +31,7 @@ define([
             }
         },
         methods:{
+            //树形结构的复选框事件
             onUserCheckChange:function(data){
                 var self = this;
                 for(var i=0; i<self.tree.select.length; i++){
@@ -41,10 +42,12 @@ define([
                 }
                 self.tree.select.push(data);
             },
+            //关闭弹框事件
             handleWindowClose:function(){
                 var self = this;
                 self.qt.destroy();
             },
+            //提交按钮事件
             handleAddMemberCommit:function(){
                 var self = this;
                 if(self.tree.select.length <= 0){
@@ -60,7 +63,7 @@ define([
                         id:self.groupId,
                         members: $.toJSON(members)
                     }, function(data){
-                        self.qt.linkedWebview('business', $.toJSON({id:'commandMemberAdd', params:data}));
+                        self.qt.linkedWebview('rightBar', $.toJSON({id:'commandMemberAdd', params:data}));
                         self.handleWindowClose();
                     });
                 }

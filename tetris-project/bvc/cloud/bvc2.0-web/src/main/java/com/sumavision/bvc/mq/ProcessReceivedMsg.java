@@ -178,7 +178,7 @@ public class ProcessReceivedMsg {
     			groupUuid = getGroupUuidByBundleIdFromResource(bundleId);
     			if(groupUuid == null){
     	    		//TODO:未查到，可能已经释放
-    				bAccept = false;
+    				bAccept = true;
     				break;
     	    	}
     			groupPO = deviceGroupDao.findByUuid(groupUuid);
