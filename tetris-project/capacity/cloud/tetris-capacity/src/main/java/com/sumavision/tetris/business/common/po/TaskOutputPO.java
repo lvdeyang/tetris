@@ -30,6 +30,9 @@ public class TaskOutputPO extends AbstractBasePO{
 	
 	private BusinessType type;
 	
+	/** 盖播id */
+	private Long coverId;
+	
 	/** **************
 	 *    yjgb使用          *
 	 ** ************ */
@@ -134,6 +137,14 @@ public class TaskOutputPO extends AbstractBasePO{
 
 	public void setCapacityIp(String capacityIp) {
 		this.capacityIp = capacityIp;
+	}
+
+	public Long getCoverId() {
+		return coverId;
+	}
+
+	public void setCoverId(Long coverId) {
+		this.coverId = coverId;
 	}
 	
 }

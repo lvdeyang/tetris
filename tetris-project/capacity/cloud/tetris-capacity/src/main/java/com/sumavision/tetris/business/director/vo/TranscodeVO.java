@@ -1,5 +1,7 @@
 package com.sumavision.tetris.business.director.vo;
 
+import java.util.List;
+
 /**
  * 转码参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -7,14 +9,35 @@ package com.sumavision.tetris.business.director.vo;
  * <b>日期：</b>2020年2月17日 上午8:24:30
  */
 public class TranscodeVO {
+	
+	private TranscodeVideoVO video;
+	
+	private TranscodeAudioVO audio;
+	
+	private TranscodeSubtitleVO subtitile;
 
-	/** 帧率变换 */
-	private String fps;
-	
-	/** 分辨率 */
-	private String resolution;
-	
-	/** 文本osd */
-	private String content;
+	public TranscodeVideoVO getVideo() {
+		return video;
+	}
+
+	public void setVideo(TranscodeVideoVO video) {
+		this.video = video;
+	}
+
+	public TranscodeAudioVO getAudio() {
+		return audio;
+	}
+
+	public void setAudio(TranscodeAudioVO audio) {
+		this.audio = audio;
+	}
+
+	public TranscodeSubtitleVO getSubtitile() {
+		return subtitile;
+	}
+
+	public void setSubtitile(TranscodeSubtitleVO subtitile) {
+		this.subtitile = subtitile;
+	}
 	
 }
