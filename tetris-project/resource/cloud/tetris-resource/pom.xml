@@ -113,11 +113,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jta-narayana</artifactId>
-		</dependency>
-		
-		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
 		    <artifactId>tetris-menu-feign</artifactId>
 		    <version>0.0.1-SNAPSHOT</version>
