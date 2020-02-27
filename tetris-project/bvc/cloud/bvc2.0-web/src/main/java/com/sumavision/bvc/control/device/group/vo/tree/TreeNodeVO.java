@@ -12,6 +12,7 @@ import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
+import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeIcon;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeType;
 import com.sumavision.bvc.control.device.monitor.vod.VodResourceVO;
@@ -693,6 +694,12 @@ public class TreeNodeVO {
 			.setIcon(TreeNodeIcon.GROUP.getName())
 			.setKey(this.generateKey())
 			.setParam(JSON.toJSONString(new HashMapWrapper<String, String>().put("creator", command.getUserId().toString()).getMap()));
+		if(GroupStatus.STOP.equals(command.getStatus())){
+			this.setBundleStatus("bundle-offline");
+		}else{
+			this.setStyle("color:#0dcc19;");
+			this.setBundleStatus("bundle-online");
+		}
 		
 		return this;
 	}

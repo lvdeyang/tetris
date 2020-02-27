@@ -53,7 +53,7 @@ define([
             },
             ignore:function(command){
                 var self = this;
-                ajax.post('/message/consume/all', {
+                ajax.post('/command/message/consume/all', {
                     ids: $.toJSON([command.id])
                 }, function(data){
                     for(var i=0; i<self.commands.length; i++){
@@ -197,7 +197,7 @@ define([
 
                 self.qt.on('messagePanelShow', function(e){
                     self.commands.splice(0, self.commands.length);
-                    ajax.post('/message/find/unconsumed/commands', null, function(commands){
+                    ajax.post('/command/message/find/unconsumed/commands', null, function(commands){
                         if(commands && commands.length>0){
                             for(var i=0; i<commands.length; i++){
                                 commands[i].message = $.parseJSON(commands[i].message);

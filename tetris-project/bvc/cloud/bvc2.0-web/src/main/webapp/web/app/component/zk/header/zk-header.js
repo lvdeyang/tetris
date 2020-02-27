@@ -83,7 +83,7 @@ define([
                 });
             });
 
-            ajax.post('/message/count/by/unconsumed/commands', null, function(messageNum){
+            ajax.post('/command/message/count/by/unconsumed/commands', null, function(messageNum){
                 self.messageNum = messageNum;
             });
         }
