@@ -200,8 +200,8 @@ define([
                     self.gatePort = variables.user ? $.parseJSON(variables.user).gatePort : '';
                 });
 
-                self.refreshInstitution();
-                self.refreshCommand();
+                //self.refreshInstitution();
+                //self.refreshCommand();
 
                 self.qt.on('goHome', function(){
                     self.goHome();
