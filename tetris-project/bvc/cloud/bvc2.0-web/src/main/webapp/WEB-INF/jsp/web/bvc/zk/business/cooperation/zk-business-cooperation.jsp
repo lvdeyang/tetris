@@ -81,7 +81,7 @@
 
     <style type="text/css">
         /* reset */
-        *{font-family:'Microsoft YaHei'!important;}
+        *{font-family:'Microsoft YaHei';}
         html,
         body{width:100%; height:100%; margin:0; padding:0;}
         body{background-color:#F2F3F7; width:500px;}

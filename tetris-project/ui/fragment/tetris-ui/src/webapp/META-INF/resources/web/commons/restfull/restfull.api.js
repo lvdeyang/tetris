@@ -4,12 +4,11 @@
 define([
 
     'storage',
-    'router',
     'config',
     'jquery',
     'json'
 
-], function(storage, router, config, $){
+], function(storage, config, $){
 
     var baseError = '#/' + config.redirect.error;
 
