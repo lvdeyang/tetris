@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -25,6 +26,9 @@ public class WebsocketMessageController {
 	
 	@Autowired
 	private WebsocketMessageDAO websocketMessageDao;
+	
+	@Autowired
+	private WebsocketMessageQuery websocketMessageQuery;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -203,6 +207,34 @@ public class WebsocketMessageController {
 			String fromUsername) throws Exception{
 		List<Long> parsedIds = JSON.parseArray(userIds, Long.class);
 		websocketMessageService.broadcastMeetingMessage(commandId, parsedIds, message, fromUserId, fromUsername);
+	}
+	
+	/**
+	 * 查询历史及时消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 下午10:20:27
+	 * @param Long commandId 会议id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return long total 总数据量
+	 * @return List<WebsocketMessageVO> rows 消息列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/history/instant/message")
+	public Object queryHistoryInstantMessage(
+			Long commandId,
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request) throws Exception{
+		
+		long total = websocketMessageDao.countByUserIdAndMessageType(commandId, WebsocketMessageType.INSTANT_MESSAGE);
+		List<WebsocketMessageVO> rows = websocketMessageQuery.findByUserIdAndMessageTypeOrderByUpdateTimeDesc(commandId, WebsocketMessageType.INSTANT_MESSAGE, currentPage, pageSize);
+		
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", rows)
+												   .getMap();
 	}
 	
 }

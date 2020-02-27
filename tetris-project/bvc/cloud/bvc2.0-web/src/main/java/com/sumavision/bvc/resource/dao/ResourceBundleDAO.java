@@ -77,6 +77,20 @@ public class ResourceBundleDAO{
 	}
 	
 	/**
+	 * @Title: 根据UserId和deviceModel查询某用户的特定类型的设备<br/>
+	 * @param userId
+	 * @param deviceModel
+	 * @return List<BundlePO>
+	 */
+	public List<BundlePO> findByUserIdAndDeviceModel(Long userId, String deviceModel){
+		if(userId == null) return null;
+		//TODO：清空hibernate一级缓存，暂时先这样写
+		resourceEntityManager.clear();
+		List<BundlePO> bundles = gainResultList("from BundlePO where userId = ?1 and deviceModel = ?2", BundlePO.class, userId, deviceModel, null, null);
+		return bundles;
+	}
+
+	/**
 	 * 根据号码查询设备<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

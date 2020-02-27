@@ -5,6 +5,8 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -92,6 +94,27 @@ public class WebsocketMessageService {
 		websocketMessageFeign.consumeAll(ids);
 	}
 	
+	
+	public Object findUnconsumedInstantMessageByFromUserId(Long fromUserId){
+		return websocketMessageFeign.findUnconsumedInstantMessageByFromUserId(fromUserId);
+	}
+	
+	
+	public Object statisticsUnconsumedInstantMessageNumber(){
+		return websocketMessageFeign.statisticsUnconsumedInstantMessageNumber();
+	}
+	
+	
+	public Object findUnconsumedCommands(){
+		return websocketMessageFeign.findUnconsumedCommands();
+	}
+	
+	
+	public Object countByUnconsumedCommands(){
+		return websocketMessageFeign.countByUnconsumedCommands();
+	}
+	
+	
 	public void broadcastMeetingMessage(
 			Long commandId,
 			Collection<Long> userIds,
@@ -100,6 +123,13 @@ public class WebsocketMessageService {
 			String fromUsername){
 		String userIdsStr = JSON.toJSONString(userIds);
 		websocketMessageFeign.broadcastMeetingMessage(commandId, userIdsStr, message, fromUserId, fromUsername);
+	}
+	
+	public Object queryHistoryInstantMessage(
+			Long commandId,
+			int currentPage,
+			int pageSize){
+		return websocketMessageFeign.queryHistoryInstantMessage(commandId, currentPage, pageSize);
 	}
 	
 }
