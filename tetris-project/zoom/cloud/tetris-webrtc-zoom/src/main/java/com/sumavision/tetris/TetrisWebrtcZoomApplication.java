@@ -22,6 +22,7 @@ import org.springframework.context.annotation.ComponentScan;
 public class TetrisWebrtcZoomApplication extends SpringBootServletInitializer{
 
 	public static void main(String[] args) {
+		System.out.print("Mr");
 		SpringApplication.run(TetrisWebrtcZoomApplication.class, args);
 	}
 	
