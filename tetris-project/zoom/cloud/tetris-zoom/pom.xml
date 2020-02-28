@@ -12,13 +12,13 @@
     </parent>
     
     <groupId>com.sumavision.tetris</groupId>
-    <artifactId>tetris-webrtc-zoom</artifactId>
+    <artifactId>tetris-zoom</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     
     <packaging>war</packaging>
     
-    <name>tetris-webrtc-zoom</name>
-    <description>webrtc视频会议</description>
+    <name>tetris-zoom</name>
+    <description>视频会议</description>
   
     <properties>
 	    <webVersion>3.1</webVersion>
@@ -118,7 +118,7 @@
     </dependencyManagement>
     
     <build>
-    	<finalName>tetris-webrtc-zoom</finalName>
+    	<finalName>tetris-zoom</finalName>
 	    <plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

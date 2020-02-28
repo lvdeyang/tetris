@@ -19,15 +19,15 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableFeignClients("com.sumavision.tetris")
 @EnableEurekaClient
 @SpringBootApplication
-public class TetrisWebrtcZoomApplication extends SpringBootServletInitializer{
+public class TetrisZoomApplication extends SpringBootServletInitializer{
 
 	public static void main(String[] args) {
-		SpringApplication.run(TetrisWebrtcZoomApplication.class, args);
+		SpringApplication.run(TetrisZoomApplication.class, args);
 	}
 	
 	@Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-        return application.sources(TetrisWebrtcZoomApplication.class);
+        return application.sources(TetrisZoomApplication.class);
     }
 	
 }

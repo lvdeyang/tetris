@@ -6,15 +6,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.sumavision.tetris.config.server.UserServerPropsQuery;
-import com.sumavision.tetris.config.server.WebrtcZoomServerPropsQuery;
+import com.sumavision.tetris.config.server.ZoomServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping(value = "/user/server/props/feign")
-public class WebrtcZoomServerPropsFeignController {
+public class ZoomServerPropsFeignController {
 
 	@Autowired
-	private WebrtcZoomServerPropsQuery webrtcZommServerPropsQuery;
+	private ZoomServerPropsQuery webrtcZommServerPropsQuery;
 	
 	/**
 	 * 查询webrtc会议服务属性<br/>

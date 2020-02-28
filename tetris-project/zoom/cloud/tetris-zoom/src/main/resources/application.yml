@@ -8,7 +8,7 @@ spring:
     #这里保存全部历史记录
     #history-level: full
   application:
-    name: tetris-webrtc-zoom
+    name: tetris-zoom
   cloud:
 #    config:
 #      uri: http://192.165.56.71:8081
@@ -19,7 +19,7 @@ spring:
 #    active: pro
   datasource:
     base:
-      url: jdbc:mysql://localhost:3306/webrtc-zoom?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+      url: jdbc:mysql://localhost:3306/zoom?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
       username: root
       password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver
