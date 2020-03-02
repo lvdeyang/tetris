@@ -1,5 +1,8 @@
 package com.sumavision.tetris.cs.channel.api;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,8 +12,12 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.cs.bak.VersionSendPO;
+import com.sumavision.tetris.cs.bak.VersionSendQuery;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
@@ -19,6 +26,8 @@ import com.sumavision.tetris.cs.channel.ChannelType;
 import com.sumavision.tetris.cs.channel.ChannelVO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
+import com.sumavision.tetris.user.UserQuery;
 
 @Controller
 @RequestMapping(value = "/api/server/cs/channel")
@@ -31,6 +40,12 @@ public class ApiServerChannelController {
 	
 	@Autowired
 	private ChannelDAO channelDao;
+	
+	@Autowired
+	private VersionSendQuery VersionSendQuery;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 分页获取频道列表<br/>
@@ -91,7 +106,7 @@ public class ApiServerChannelController {
 				.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(previewUrlIp).setPreviewUrlPort(previewUrlPort))
 				.getList();
 
-		ChannelPO channel = channelService.add(name, date, broadWay, remark, ChannelType.REMOTE, encryption, false, null, null, null, null, null, infoVOs);
+		ChannelPO channel = channelService.add(name, date, broadWay, remark, null, null, ChannelType.REMOTE, encryption, false, null, null, null, null, null, infoVOs);
 
 		return new ChannelVO().set(channel);
 	}
@@ -120,7 +135,7 @@ public class ApiServerChannelController {
 				.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(previewUrlIp).setPreviewUrlPort(previewUrlPort))
 				.getList();
 		
-		ChannelPO channel = channelService.edit(id, name, remark, encryption, false, null, null, null, null, null, infoVOs);
+		ChannelPO channel = channelService.edit(id, name, remark, null, null, encryption, false, null, null, null, null, null, infoVOs);
 
 		return new ChannelVO().set(channel);
 	}
@@ -197,4 +212,49 @@ public class ApiServerChannelController {
 		return channelQuery.getBroadstatus(id);
 	}
 	
+	/**
+	 * 上传分片<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 下午3:43:12
+	 * @param secName taskid和section标记组成
+	 * @param block 分片数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/upload")
+	public Object upload(HttpServletRequest nativeRequest) throws Exception{
+		
+		MultipartHttpServletRequestWrapper request = new MultipartHttpServletRequestWrapper(nativeRequest);
+		
+		String secName = request.getString("secName");
+		String taskId = secName.split("_")[0];
+		VersionSendPO versionSendPO = VersionSendQuery.getFromBroadId(taskId);
+		if (versionSendPO == null) return null;
+		String filePath = new StringBufferWrapper()
+				.append(versionSendPO.getZoneStorePath())
+				.append(File.separator)
+				.append(secName)
+				.append(".bak")
+				.toString();
+		
+		//文件起始位置错误
+		File file = new File(filePath);
+		
+		//分块
+		InputStream block = null;
+		FileOutputStream out = null;
+		try{
+			if(!file.exists()) file.createNewFile();
+			block = request.getInputStream("block");
+			byte[] blockBytes = ByteUtil.inputStreamToBytes(block);
+			out = new FileOutputStream(file, true);
+			out.write(blockBytes);
+		}finally{
+			if(block != null) block.close();
+			if(out != null) out.close();
+		}
+		
+        return null;
+	}
 }

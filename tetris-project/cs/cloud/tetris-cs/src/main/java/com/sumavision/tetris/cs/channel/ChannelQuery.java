@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
@@ -20,6 +21,8 @@ import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoPO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoPO;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoQuery;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalQuery;
 import com.sumavision.tetris.cs.channel.exception.ChannelNotExistsException;
 import com.sumavision.tetris.user.UserQuery;
@@ -41,6 +44,9 @@ public class ChannelQuery {
 	
 	@Autowired
 	private BroadAbilityBroadInfoDAO broadAbilityBroadInfoDAO;
+	
+	@Autowired
+	private BroadTerminalBroadInfoQuery broadTerminalBroadInfoQuery;
 	
 	@Autowired
 	private Adapter adapter;
@@ -87,7 +93,7 @@ public class ChannelQuery {
 					String previewPort = broadAbilityBroadInfoPO.getPreviewUrlPort();
 					Long userId = broadAbilityBroadInfoPO.getUserId();
 					if (userId != null) {
-						outputUsers.add(userQuery.findByIdIn(new ArrayListWrapper<Long>().add(userId).getList()).get(0));
+						outputUsers.add(userQuery.findByIdIn(new ArrayListWrapper<Long>().add(userId).getList()).get(0).setEquipType(TerminalType.QT_MEDIA_EDITOR.toString()));
 						if (channelVO.getOutputUserPort() == null || channelVO.getOutputUserPort().isEmpty()) channelVO.setOutputUserPort(broadAbilityBroadInfoPO.getPreviewUrlPort());
 					} else {
 						if (previewIp != null && previewPort != null) {
@@ -105,6 +111,12 @@ public class ChannelQuery {
 					outputUsers.add(userQuery.findByIdIn(new ArrayListWrapper<Long>().add(broadFileBroadInfoVO.getUserId()).getList()).get(0).setEquipType(broadFileBroadInfoVO.getUserEquipType()));
 				}
 				channelVO.setOutputUsers(outputUsers);
+			} else {
+				BroadTerminalBroadInfoPO broadTerminalBroadInfoPO = broadTerminalBroadInfoQuery.findByChannelId(channelVO.getId());
+				if (broadTerminalBroadInfoPO != null) {
+					channelVO.setLevel(broadTerminalBroadInfoPO.getLevel());
+					channelVO.setHasFile(broadTerminalBroadInfoPO.getHasFile());
+				}
 			}
 		}
 		
@@ -156,6 +168,12 @@ public class ChannelQuery {
 	 */
 	public JSONArray getTemplate(Long channelId, Long scheduleId) throws Exception {
 		ChannelPO channel = findByChannelId(channelId);
+		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.TERMINAL_BROAD) {
+			BroadTerminalBroadInfoPO broadInfoPO = broadTerminalBroadInfoQuery.findByChannelId(channelId);
+			if (broadInfoPO != null && broadInfoPO.getHasFile() != null && !broadInfoPO.getHasFile()){
+				return adapter.getAllTemplate(BroadWay.ABILITY_BROAD);
+			}
+		}
 		return adapter.getAllTemplate(BroadWay.fromName(channel.getBroadWay()));
 	}
 

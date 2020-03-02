@@ -32,7 +32,7 @@ import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
 @EnableTransactionManagement
 @EnableJpaRepositories(entityManagerFactoryRef="baseEntityManagerFactory",//实体管理引用
 						transactionManagerRef="baseTransactionManager",//事务管理引用
-						basePackages ={"com.sumavision.bvc", "com.sumavision.tetris"})//扫描包
+						basePackages ={"com.sumavision.bvc", "com.sumavision.tetris", "com.suma.venus"})//扫描包
 public class BaseDataSourceConfig {
 	
 	@Autowired
@@ -58,7 +58,7 @@ public class BaseDataSourceConfig {
         return builder
                 .dataSource(baseDataSource)
                 .properties(getVendorProperties(baseDataSource))
-                .packages("com.sumavision.bvc", "com.sumavision.tetris") //设置应用DataSource的基础包名
+                .packages("com.sumavision.bvc", "com.sumavision.tetris", "com.suma.venus") //设置应用DataSource的基础包名
                 .persistenceUnit("basePersistenceUnit")
                 .build();
     }

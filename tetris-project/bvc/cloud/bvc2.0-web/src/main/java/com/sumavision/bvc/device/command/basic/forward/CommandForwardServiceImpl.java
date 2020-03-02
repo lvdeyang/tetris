@@ -21,6 +21,7 @@ import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupForwardDemandDAO;
+import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
@@ -55,7 +56,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 
 * @ClassName: CommandForwardServiceImpl 
-* @Description: 指挥转发业务
+* @Description: 会议转发业务
 * @author zsy
 * @date 2019年11月14日 上午09:56:48 
 *
@@ -70,6 +71,9 @@ public class CommandForwardServiceImpl {
 	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
+	
+	@Autowired
+	private CommandGroupUserPlayerDAO commandGroupUserPlayerDao;
 	
 	@Autowired
 	private CommandGroupForwardDemandDAO commandGroupForwardDemandDao;
@@ -102,7 +106,7 @@ public class CommandForwardServiceImpl {
 	private ResourceService resourceService;
 
 	/**
-	 * 指挥转发设备<br/>
+	 * 会议转发设备<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -247,7 +251,7 @@ public class CommandForwardServiceImpl {
 	}
 
 	/**
-	 * 指挥转发文件<br/>
+	 * 会议转发文件<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -433,8 +437,10 @@ public class CommandForwardServiceImpl {
 					demand.setExecuteStatus(ForwardDemandStatus.NO_AVAILABLE_PLAYER);
 				}
 			}
+			dstMember.getPlayers().addAll(players);
 			
 			commandGroupDao.save(group);
+			commandGroupUserPlayerDao.save(players);
 			
 			//生成logic下发协议
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
@@ -474,7 +480,7 @@ public class CommandForwardServiceImpl {
 	}
 
 	/**
-	 * 主席停止一个指挥中的多个转发<br/>
+	 * 主席停止一个会议中的多个转发<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -508,7 +514,7 @@ public class CommandForwardServiceImpl {
 
 	/**
 	 * 成员停止多个转发<br/>
-	 * <p>支持不同指挥中的转发</p>
+	 * <p>支持不同会议中的转发</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月15日 下午2:07:38
@@ -535,7 +541,7 @@ public class CommandForwardServiceImpl {
 	}	
 	
 	/**
-	 * 停止一个指挥中的多个转发点播<br/>
+	 * 停止一个会议中的多个转发点播<br/>
 	 * <p>可能涉及多个成员用户，所以返回map</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -604,7 +610,7 @@ public class CommandForwardServiceImpl {
 			LogicBO logic = commandBasicServiceImpl.closeBundle(null, stopDemands, allNeedClosePlayers, codec, group.getUserId());
 			LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(stopDemands, null, null, allNeedClosePlayers, codec, group.getUserId());
 			logic.merge(logicCastDevice);
-			executeBusiness.execute(logic, group.getName() + " 指挥停止多个转发");
+			executeBusiness.execute(logic, group.getName() + " 会议停止多个转发");
 			
 			return result;			
 		}

@@ -2,6 +2,8 @@ package com.sumavision.tetris.cs.bak;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -27,11 +29,20 @@ public class VersionSendPO extends AbstractBasePO {
 	/** 下发tar包地址 */
 	private String filePath;
 	
+	/** 下发tar包类型 */
+	private VersionSendType fileType;
+	
 	/** 播发版本号 */
 	private String version;
 	
 	/** 平台播发id */
 	private String broadId;
+	
+	/** 分片存放本地地址 */
+	private String zoneStorePath;
+	
+	/** 分片下载地址 */
+	private String zoneDownloadPath;
 
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -68,6 +79,16 @@ public class VersionSendPO extends AbstractBasePO {
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
 	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "FILE_TYPE")
+	public VersionSendType getFileType() {
+		return fileType;
+	}
+
+	public void setFileType(VersionSendType fileType) {
+		this.fileType = fileType;
+	}
 
 	@Column(name = "VERSION")
 	public String getVersion() {
@@ -85,5 +106,23 @@ public class VersionSendPO extends AbstractBasePO {
 
 	public void setBroadId(String broadId) {
 		this.broadId = broadId;
+	}
+
+	@Column(name = "ZOON_STORE_PATH")
+	public String getZoneStorePath() {
+		return zoneStorePath;
+	}
+
+	public void setZoneStorePath(String zoneStorePath) {
+		this.zoneStorePath = zoneStorePath;
+	}
+
+	@Column(name = "ZOON_DOWNLOAD_PATH")
+	public String getZoneDownloadPath() {
+		return zoneDownloadPath;
+	}
+
+	public void setZoneDownloadPath(String zoneDownloadPath) {
+		this.zoneDownloadPath = zoneDownloadPath;
 	}
 }

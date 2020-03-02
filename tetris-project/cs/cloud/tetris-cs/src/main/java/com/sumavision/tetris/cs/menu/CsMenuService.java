@@ -31,6 +31,10 @@ public class CsMenuService {
 	 * @return CsMenuVO cs媒资目录
 	 */
 	public CsMenuPO addRoot(Long channelId, String name) {
+		if (name.equals("yjgbPush")) {
+			CsMenuPO menu = menuDao.findByChannelIdAndParentIdAndName(channelId, -1l, name);
+			if (menu != null) return menu;
+		}
 		CsMenuPO menuPO = new CsMenuPO();
 		menuPO.setName(name);
 		menuPO.setUpdateTime(new Date());

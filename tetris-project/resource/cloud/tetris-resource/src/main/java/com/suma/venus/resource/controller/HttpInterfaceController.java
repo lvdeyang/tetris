@@ -90,6 +90,7 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.SerInfoPO;
@@ -976,6 +977,72 @@ public class HttpInterfaceController {
 			respBody.setError_message("系统错误");
 		}
 		LOGGER.info("Device Bundle Certify Response : " + JSONObject.toJSONString(resp));
+		return resp;
+	}
+	
+	/** 获取用户下唯一机顶盒 */
+	@RequestMapping(method = RequestMethod.POST, value = "/tvos/access/getUserBundle", produces = {
+			"application/json;charset=UTF-8" })
+	@ResponseBody
+	public UserBundleCertifyResp getUserBundle(@RequestBody UserBundleCertifyRequest request) throws Exception{
+		
+		UserBO userBO = userQueryService.current();
+		
+		String username = request.getUser_bundle_certify_request().getUsername();
+		String password = request.getUser_bundle_certify_request().getPassword();
+		String bundleModel = request.getUser_bundle_certify_request().getBundle_model();
+		String bundleType = request.getUser_bundle_certify_request().getBundle_type();
+		String certify_id = request.getUser_bundle_certify_request().getSerial_num();
+		UserBundleCertifyResp resp = new UserBundleCertifyResp();
+		BundleCertifyResponseBody respBody = new BundleCertifyResponseBody();
+		respBody.setUsername(username);
+		resp.setUser_bundle_certify_response(respBody);
+		
+		BundlePO bundle = bundleDao.findByUserIdAndDeviceModel(userBO.getId(), "tvos");
+		
+		// 更新bundle上当前登陆的设备账号标识ID
+		bundle.setCurrentLoginId(certify_id);
+		
+		String bundleId = bundle.getBundleId();
+
+		String ca_num = request.getUser_bundle_certify_request().getCa_num();
+		saveUserBundleExtraInfo(bundleId, "ca_num", ca_num);
+		saveUserBundleExtraInfo(bundleId, "serial_num", certify_id);
+
+		respBody.setBundle_id(bundleId);
+		/** bundle_extra_info */
+		List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleId(bundleId);
+		JSONObject bundleExtraInfoJson = new JSONObject();
+		if (!extraInfos.isEmpty()) {
+			for (ExtraInfoPO extraInfoPO : extraInfos) {
+				bundleExtraInfoJson.put(extraInfoPO.getName(), extraInfoPO.getValue());
+			}
+		}
+		//自动选择tvos接入层
+		WorkNodePO choseWorkNode = null;
+		if(bundle.getAccessNodeUid() != null){
+			choseWorkNode = workNodeService.findByNodeUid(bundle.getAccessNodeUid());
+		}else{
+			List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_TVOS);
+			choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
+		}
+		
+		if(choseWorkNode != null){
+			bundleExtraInfoJson.put("access_ip", choseWorkNode.getIp());
+			bundleExtraInfoJson.put("access_port", choseWorkNode.getPort());
+			bundle.setAccessNodeUid(choseWorkNode.getNodeUid());
+		}else{
+			bundleExtraInfoJson.put("access_ip", "");
+			bundleExtraInfoJson.put("access_port", "");
+		}
+		
+		bundleService.save(bundle);
+		
+		respBody.setBundle_extra_info(bundleExtraInfoJson.toJSONString());
+		respBody.setUserId(bundle.getId());
+		// respBody.setUser_extra_info(checkResult.getExtraInfo());
+		respBody.setResult(com.suma.venus.resource.base.bo.ResponseBody.SUCCESS);
+		
 		return resp;
 	}
 

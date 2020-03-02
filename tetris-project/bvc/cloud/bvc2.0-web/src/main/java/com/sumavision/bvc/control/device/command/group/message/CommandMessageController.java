@@ -25,11 +25,13 @@ import com.sumavision.bvc.command.group.dao.CommandGroupMessageStyleDAO;
 import com.sumavision.bvc.command.group.message.CommandGroupMessagePO;
 import com.sumavision.bvc.command.group.message.CommandGroupMessageStylePO;
 import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.message.CommandMessageServiceImpl;
 import com.sumavision.bvc.device.command.message.CommandMessageStyleServiceImpl;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
 @Controller
 @RequestMapping(value = "/command/message")
@@ -43,6 +45,9 @@ public class CommandMessageController {
 	
 	@Autowired
 	private CommandMessageStyleServiceImpl commandMessageStyleServiceImpl;
+	
+	@Autowired
+	private WebsocketMessageService websocketMessageService;
 	
 	@Autowired
 	private CommandGroupMessageDAO commandGroupMessageDao;
@@ -409,16 +414,109 @@ public class CommandMessageController {
 		result.put("rows", rows);
 		
 		return result;
-	}	
+	}
 	
+	/**
+	 * 根据发送用户查询离线消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月14日 下午3:08:25
+	 * @param Long fromUserId 发送用户id
+	 * @return List<WebsocketMessageVO> 消息列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/unconsumed/instant/message/by/from/user/id")
+	public Object findUnconsumedInstantMessageByFromUserId(
+			Long fromUserId,
+			HttpServletRequest request) throws Exception{
+		return websocketMessageService.findUnconsumedInstantMessageByFromUserId(fromUserId);
+	}
+	
+	/**
+	 * 分用户统计当前用户的离线消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月14日 下午4:05:47
+	 * @return List<StatisticsInstantMessageResultVO> 统计结果
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/statistics/unconsumed/instant/message/munber")
+	public Object statisticsUnconsumedInstantMessageNumber(HttpServletRequest request) throws Exception{
+		return websocketMessageService.statisticsUnconsumedInstantMessageNumber();
+	}
+	
+	/**
+	 * 查询当前用户未消费的命令消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月14日 下午1:41:56
+	 * @return List<WebsocketMessageVO> 命令列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/unconsumed/commands")
+	public Object findUnconsumedCommands(HttpServletRequest request) throws Exception{
+		return websocketMessageService.findUnconsumedCommands();
+	}
+	
+	/**
+	 * 查询当前用户未消费的命令数量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月14日 下午1:41:56
+	 * @return Long 命令数量
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/count/by/unconsumed/commands")
+	public Object countByUnconsumedCommands(HttpServletRequest request) throws Exception{
+		return websocketMessageService.countByUnconsumedCommands();
+	}
+	
+	/**
+	 * 发送实时消息，给会议内的成员<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月21日 下午7:09:55
+	 * @param id
+	 * @param message
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/instant/message")
+	public Object broadcastInstantMessage(
+			String id,
+		    String message,
+		    HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);		
+		commandMessageServiceImpl.broadcastInstantMessage(user.getId(), user.getName(), Long.parseLong(id), message);
+		return null;		
+		
+	}
+
 	//发送文件
+	@Deprecated
 	public Object sendFile(HttpServletRequest request) throws Exception{
 		return null;
 	}
 	
 	//查询当前用户与目标用户的历史消息
-	public Object queryHistoryMessage(HttpServletRequest request) throws Exception{
-		return null;
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/history/instant/message")
+	public Object queryHistoryInstantMessage(
+			Long commandId,
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request) throws Exception{
+		return websocketMessageService.queryHistoryInstantMessage(commandId, currentPage, pageSize);
 	}
 	
 }

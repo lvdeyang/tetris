@@ -1,15 +1,19 @@
 package com.sumavision.bvc.device.command.common;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
@@ -30,12 +34,16 @@ import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
 import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
 import com.sumavision.bvc.system.enumeration.GearsLevel;
+import com.sumavision.tetris.auth.token.TerminalType;
 
 @Service
 public class CommandCommonUtil {
 	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
+	
+	@Autowired
+	private ResourceService resourceService;
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
@@ -111,7 +119,14 @@ public class CommandCommonUtil {
 			if(forward.getExecuteStatus().equals(ExecuteStatus.UNDONE)
 					&& map.get(srcMemberId).getMemberStatus().equals(MemberStatus.CONNECT)
 					&& map.get(dstMemberId).getMemberStatus().equals(MemberStatus.CONNECT)){
-				needForwards.add(forward);
+				//如果是协同指挥转发
+				if(ForwardBusinessType.COOPERATE_COMMAND.equals(forward.getForwardBusinessType())){
+					if(map.get(srcMemberId).getCooperateStatus().equals(MemberStatus.CONNECT)){
+						needForwards.add(forward);
+					}
+				}else{
+					needForwards.add(forward);
+				}
 			}
 		}
 		return needForwards;
@@ -201,6 +216,25 @@ public class CommandCommonUtil {
 				if(dstMemberId==null || dstMemberId.equals(forward.getDstMemberId())){
 					return forward;
 				}
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 根据bundleId查找播放器<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月13日 下午2:58:41
+	 * @param players
+	 * @param bundleId
+	 * @return
+	 */
+	public CommandGroupUserPlayerPO queryPlayerByBundleId(Collection<CommandGroupUserPlayerPO> players, String bundleId) {
+		for(CommandGroupUserPlayerPO player : players){
+			if(player.getBundleId().equals(bundleId)){
+				return player;
 			}
 		}
 		return null;
@@ -460,6 +494,25 @@ public class CommandCommonUtil {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * 查询members列表对应的UserBO列表<br/>
+	 * <p>用户在线情况按照 QT_ZK 查询</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月14日 上午9:40:02
+	 * @param members
+	 * @return
+	 */
+	public List<UserBO> queryUsersByMembers(Collection<CommandGroupMemberPO> members){
+		List<Long> userIdList = new ArrayList<Long>();
+		for(CommandGroupMemberPO member : members){
+			userIdList.add(member.getUserId());
+		}
+		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
+		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
+		return commandUserBos;
 	}
 	
 }

@@ -302,6 +302,7 @@ public class RouterController {
 		return mv;
 	}
 	
+	
 	/**
 	 * 首长终端  指挥转发<br/>
 	 * <b>作者:</b>yxc<br/>
@@ -385,4 +386,75 @@ public class RouterController {
 		mv.addObject("token", token);
 		return mv;
 	}
+	
+	/**
+	 * 底部  转发关系<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月7日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/forward-relationship/forward-relation")
+	public ModelAndView zkLeaderForwardShip(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/forward-relationship/forward-relation");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 头部  设置作战时间<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月16日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/set/fightTime")
+	public ModelAndView zkLeaderFightTime(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/set-fightTime/fightTime");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 选择成员创建会议对话框<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月20日 上午11:12:50
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/dialog/create/group")
+	public ModelAndView zkLeaderDialogCreateGroup(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/dialog/create-group/create-group");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 选择会议加入会议对话框<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月20日 上午11:12:50
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/dialog/add/group")
+	public ModelAndView zkLeaderDialogAddGroup(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/dialog/add-group/add-group");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 选择成员安排会议对话框<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月20日 上午11:12:50
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/dialog/prepare/group")
+	public ModelAndView zkLeaderDialogPrepareGroup(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/dialog/prepare-group/prepare-group");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
 }

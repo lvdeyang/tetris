@@ -26,6 +26,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 
 	public List<BundlePO> findByAccessNodeUid(String accessNodeUid);
 	
+	public int countByAccessNodeUid(String accessNodeUid);
+	
 	public List<BundlePO> findByAccessNodeUidIn(Collection<String> accessNodeUids);
 
 	public List<BundlePO> findByFolderId(Long folderId);
@@ -37,6 +39,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public List<BundlePO> findByBundleTypeAndExtraBindId(String bundleType, String extraBindId);
 
 	public BundlePO findByUsername(String username);
+	
+	public BundlePO findByUserIdAndDeviceModel(Long userId, String deviceModel);
 
 	@Query("select bundle from BundlePO bundle where bundle.bundleId in ?1")
 	public List<BundlePO> findInBundleIds(List<String> bundleIds);

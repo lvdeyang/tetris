@@ -82,4 +82,82 @@ public interface CapacityFeign {
 	public JSONObject setHeartbeatUrl(
 			@RequestParam("capacityIp") String capacityIp,
 			@RequestParam("heartbeatUrl") String heartbeatUrl) throws Exception;
+	
+	/**
+	 * 切换备份源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午9:06:43
+	 * @param String inputId 备份源输入id
+	 * @param String index 索引
+	 * @param String capacityIp 能力ip
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/change/backup")
+	public JSONObject changeBackup(
+			@RequestParam("inputId") String inputId,
+			@RequestParam("index") String index,
+			@RequestParam("capacityIp") String capacityIp) throws Exception;
+	
+	/**
+	 * 转码任务添加盖播<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月21日 上午11:18:54
+	 * @param String taskId 集群转码任务id
+	 * @param String input cover输入
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/add/cover")
+	public JSONObject addCover(
+			@RequestParam("taskId") String taskId,
+			@RequestParam("input") String input) throws Exception;
+	
+	/**
+	 * 转码任务删除盖播<br/>
+	 * <b>作者:</b>sm<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月21日 上午11:20:06
+	 * @param String taskId 集群转码任务id
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/delete/cover")
+	public JSONObject deleteCover(@RequestParam("taskId") String taskId) throws Exception;
+	
+	/**
+	 * 添加导播任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月26日 上午11:33:50
+	 * @param String tasks 导播任务
+	 */
+	@RequestMapping(value = "/director/task/feign/add")
+	public JSONObject addDirector(@RequestParam("tasks") String tasks) throws Exception;
+	
+	/**
+	 * 删除导播任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月26日 上午11:33:50
+	 * @param String tasks 导播任务
+	 */
+	@RequestMapping(value = "/director/task/feign/delete")
+	public JSONObject deleteDirector(@RequestParam("tasks") String tasks) throws Exception;
+	
+	/**
+	 * 添加导播任务输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月26日 上午11:33:50
+	 * @param String outputs 导播输出
+	 */
+	@RequestMapping(value = "/director/task/feign/add/output")
+	public JSONObject addOutput(@RequestParam("outputs") String outputs) throws Exception;
+	
+	/**
+	 * 添加导播任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月26日 上午11:33:50
+	 * @param String outputs 导播输出
+	 */
+	@RequestMapping(value = "/director/task/feign/delete/output")
+	public JSONObject deleteOutput(@RequestParam("outputs") String outputs) throws Exception;
 }

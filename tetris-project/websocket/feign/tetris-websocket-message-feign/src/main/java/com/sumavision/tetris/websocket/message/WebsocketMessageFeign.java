@@ -2,6 +2,8 @@ package com.sumavision.tetris.websocket.message;
 
 import java.util.Collection;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,7 +55,44 @@ public interface WebsocketMessageFeign {
 	@RequestMapping(value = "/message/consume")
 	public JSONObject consume(@RequestParam("id") Long id);
 	
-	@RequestMapping(value = "/message/consumeAll")
-	public JSONObject consumeAll(@RequestParam("ids") Collection<Long> ids);
+	/**
+	 * 批量消费消息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月25日 下午2:46:01
+	 * @param ids String型
+	 * @return
+	 */
+	@RequestMapping(value = "/message/consume/all")
+	public JSONObject consumeAll(@RequestParam("ids") String ids);
+	
+	@RequestMapping(value = "/message/find/unconsumed/instant/message/by/from/user/id")
+	public JSONObject findUnconsumedInstantMessageByFromUserId(
+			@RequestParam("fromUserId") Long fromUserId);
+	
+	@RequestMapping(value = "/message/statistics/unconsumed/instant/message/munber")
+	public JSONObject statisticsUnconsumedInstantMessageNumber();
+	
+	@RequestMapping(value = "/message/find/unconsumed/commands")
+	public JSONObject findUnconsumedCommands();
+	
+	@RequestMapping(value = "/message/count/by/unconsumed/commands")
+	public JSONObject countByUnconsumedCommands();
+	
+
+	@RequestMapping(value = "/message/broadcast/instant/message")
+	public JSONObject broadcastMeetingMessage(
+			@RequestParam("commandId") Long commandId,
+			@RequestParam("userIds") String userIds,
+			@RequestParam("message") String message,
+			@RequestParam("fromUserId") Long fromUserId,
+			@RequestParam("fromUsername") String fromUsername);
+	
+	@RequestMapping(value = "/message/query/history/instant/message")
+	public JSONObject queryHistoryInstantMessage(
+			@RequestParam("commandId") Long commandId,
+			@RequestParam("commandId") int currentPage,
+			@RequestParam("commandId")int pageSize);
 	
 }

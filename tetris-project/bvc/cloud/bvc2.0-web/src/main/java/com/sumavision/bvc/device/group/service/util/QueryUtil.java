@@ -13,7 +13,10 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.FolderPO;
+import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.dao.DeviceGroupDAO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.enumeration.ConfigType;
@@ -1998,4 +2001,35 @@ public class QueryUtil {
 		
 		return _dsts;
 	}
+	
+	public UserBO queryUserById(Collection<UserBO> users, Long id){
+		if(users == null) return null;
+		for(UserBO user : users){
+			if(user.getId().equals(id)){
+				return user;
+			}
+		}
+		return null;
+	}
+	
+	public FolderBO queryFolderById(Collection<FolderBO> folders, Long id){
+		if(folders == null) return null;
+		for(FolderBO folder : folders){
+			if(folder.getId().equals(id)){
+				return folder;
+			}
+		}
+		return null;
+	}
+	
+	public FolderPO queryFolderPOById(Collection<FolderPO> folders, Long id){
+		if(folders == null) return null;
+		for(FolderPO folder : folders){
+			if(folder.getId().equals(id)){
+				return folder;
+			}
+		}
+		return null;
+	}
+	
 }

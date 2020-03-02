@@ -15,6 +15,10 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
 	private String remark;
 	
+	private String level;
+	
+	private Boolean hasFile;
+	
 	private String broadWay;
 	
 	private String broadcastStatus;
@@ -110,6 +114,24 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
 	public ChannelVO setRemark(String remark) {
 		this.remark = remark;
+		return this;
+	}
+
+	public String getLevel() {
+		return level;
+	}
+
+	public ChannelVO setLevel(String level) {
+		this.level = level;
+		return this;
+	}
+
+	public Boolean getHasFile() {
+		return hasFile;
+	}
+
+	public ChannelVO setHasFile(Boolean hasFile) {
+		this.hasFile = hasFile;
 		return this;
 	}
 

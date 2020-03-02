@@ -26,12 +26,12 @@ public class CommandCooperateController {
 	private UserUtils userUtils;
 
 	/**
-	 * 发起协同指挥<br/>
+	 * 发起协同会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月29日 上午11:04:50
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param members 协同成员
 	 * @param request
 	 * @return
@@ -53,12 +53,12 @@ public class CommandCooperateController {
 	}
 	
 	/**
-	 * 同意协同指挥<br/>
+	 * 同意协同会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月5日 上午9:29:44
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @return
 	 * @throws Exception 
 	 */
@@ -77,12 +77,12 @@ public class CommandCooperateController {
 	}
 	
 	/**
-	 * 拒绝协同指挥<br/>
+	 * 拒绝协同会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月5日 上午9:34:04
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -102,13 +102,13 @@ public class CommandCooperateController {
 	}
 	
 	/**
-	 * 撤销授权协同指挥<br/>
+	 * 撤销授权协同会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月5日 上午9:36:49
-	 * @param id 指挥id
-	 * @param businessId 指挥id-成员id
+	 * @param id 会议id
+	 * @param businessId 会议id-成员id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -123,9 +123,38 @@ public class CommandCooperateController {
 		
 		String userIdString = businessId.split("-")[1];
 		
-		commandCooperateServiceImpl.revoke(Long.parseLong(userIdString), Long.parseLong(id));
+		JSONArray result = commandCooperateServiceImpl.revoke(Long.parseLong(userIdString), Long.parseLong(id));
 		
-		return null;
+		//应该是一个空数组
+		return result;
+	}
+	
+	/**
+	 * 批量撤销授权协同会议<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 下午8:49:31
+	 * @param id
+	 * @param userIds
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/revoke/batch")
+	public Object revokeBatch(
+			String id,
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
+		
+		JSONArray result = commandCooperateServiceImpl.revokeBatch(userIdArray, Long.parseLong(id));
+		
+		//应该是一个空数组
+		return result;
 	}
 	
 }

@@ -14,7 +14,7 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 127.0.0.1
+      ipAddress: 192.165.56.71
 #  profiles:
 #    active: pro
   datasource:
@@ -66,6 +66,9 @@ server:
 #  context-path: /menu 
 #  address: 192.165.56.71
   port: 8083
+  jsp-servlet: 
+    init-parameters: 
+      development: true
 logging:
   pattern:
     console: "%d - %msg%n" 
@@ -80,9 +83,10 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://127.0.0.1:8081/eureka/
+      defaultZone: http://192.165.56.71:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
+    ip-address: 192.165.56.71
     prefer-ip-address: true
     # 心跳检测检测与续约时间
     # 测试时将值设置设置小些，保证服务关闭后注册中心能及时踢出服务

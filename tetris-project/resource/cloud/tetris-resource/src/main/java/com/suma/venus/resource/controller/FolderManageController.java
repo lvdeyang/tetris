@@ -1,17 +1,38 @@
 package com.suma.venus.resource.controller;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -19,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.alibaba.fastjson.JSONObject;
 import com.suma.application.ldap.department.dao.LdapDepartmentDao;
@@ -32,6 +54,7 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.FolderService;
@@ -41,7 +64,9 @@ import com.suma.venus.resource.vo.BundleVO;
 import com.suma.venus.resource.vo.FolderTreeVO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 
 /**
  * 分组管理controller
@@ -85,6 +110,9 @@ public class FolderManageController extends ControllerBase {
 	
 	@Autowired
 	private UserQueryService userQueryService;
+	
+	@Autowired
+	private Path path;
 
 	@RequestMapping(value = "add", method = RequestMethod.POST)
 	@ResponseBody
@@ -1213,4 +1241,530 @@ public class FolderManageController extends ControllerBase {
 		folderNodeVO.setNodeType("FOLDER");
 		return folderNodeVO;
 	}
+	
+	/**
+	 * 导入分组<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午10:42:01
+	 * @param uploadFile
+	 */
+	@RequestMapping(value = "/import", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> importFolders(@RequestParam("filePoster") MultipartFile uploadFile) {
+		Map<String, Object> data = makeAjaxData();
+		try {
+			//int successCnt = importExcel(uploadFile.getInputStream());
+			int successCnt = importcsv(uploadFile.getInputStream());
+			data.put("successCnt", successCnt);
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+			data.put(ERRMSG, "内部错误");
+		}
+
+		return data;
+	}
+	
+	/**
+	 * 导入用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 下午4:06:07
+	 */
+	@RequestMapping(value = "/user/import", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> importUserFolders(@RequestParam("userFile") MultipartFile uploadFile) {
+		Map<String, Object> data = makeAjaxData();
+		try {
+			//int successCnt = importExcel(uploadFile.getInputStream());
+			int successCnt = importUserCSV(uploadFile.getInputStream());
+			data.put("successCnt", successCnt);
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+			data.put(ERRMSG, "内部错误");
+		}
+
+		return data;
+	}
+	
+	private int importExcel(InputStream is) throws Exception {
+		int successCnt = 0;
+
+		Workbook workbook = WorkbookFactory.create(is);
+		Sheet sheet = workbook.getSheetAt(0);
+		int lastRowNum = sheet.getLastRowNum();
+
+		// 按行读取并处理数据,第一行标题栏忽略
+		for (int i = 1; i <= lastRowNum; i++) {
+			// TODO
+
+			try {
+				Row row = sheet.getRow(i);
+				
+				if (row.getCell(0) == null || row.getCell(1) == null
+						|| StringUtils.isEmpty(row.getCell(0).getStringCellValue())
+						|| StringUtils.isEmpty(row.getCell(1).getStringCellValue())) {
+					continue;
+				}
+				
+				String folderUuid = row.getCell(0).getStringCellValue();
+				String folderName = row.getCell(1).getStringCellValue();
+
+				String parentUuid = null;
+				String folderType = null;
+
+				if (row.getCell(2) != null) {
+					parentUuid = row.getCell(2).getStringCellValue();
+				}
+
+				if (row.getCell(3) != null) {
+					folderType = row.getCell(3).getStringCellValue();
+				}
+
+				if (StringUtils.isEmpty(folderUuid) || StringUtils.isEmpty(folderName)) {
+					continue;
+				}
+
+				FolderPO folderPO = folderDao.findTopByUuid(folderUuid);
+
+				if (folderPO == null) {
+					// TODO 怎么处理？
+					folderPO = new FolderPO();
+					folderPO.setUuid(folderUuid);
+
+				}
+
+				folderPO.setName(folderName);
+				
+				FolderPO parentFolder;
+				if (!StringUtils.isEmpty(parentUuid)) {
+					parentFolder = folderDao.findTopByUuid(parentUuid);
+				} else {
+					// 导入的根目录处理
+					switch (folderType) {
+					case "终端":
+						folderPO.setFolderType(FolderType.TERMINAL);
+						break;
+					case "监控":
+						folderPO.setFolderType(FolderType.MONITOR);
+						break;
+					case "直播":
+						folderPO.setFolderType(FolderType.LIVE);
+						break;
+					case "点播":
+						folderPO.setFolderType(FolderType.ON_DEMAND);
+						break;
+					case "用户":
+						folderPO.setFolderType(FolderType.USER);
+						break;
+					default:
+						folderPO.setFolderType(FolderType.TERMINAL);
+						break;
+					}
+
+					List<FolderPO> templistFolderPOs = folderDao.findBvcRootFolders();
+					
+					parentFolder = folderDao.findFolderByTypeAndParent(folderPO.getFolderType(), templistFolderPOs.get(0).getId());
+				}
+				
+				if(parentFolder == null) {
+					continue;
+				}
+				
+				folderPO.setParentId(parentFolder.getId());
+
+				if (null != parentFolder.getParentPath()) {
+					folderPO.setParentPath(parentFolder.getParentPath() + "/" + parentFolder.getId());
+				} else {
+					folderPO.setParentPath("/" + parentFolder.getId());
+				}
+				
+				folderPO.setFolderType(parentFolder.getFolderType());
+
+				int maxIndex = caculateMaxfolderIndex(parentFolder, folderPO);
+				handleNewParentFolderIndexChange(parentFolder, maxIndex + 1);
+				folderPO.setFolderIndex(maxIndex + 1);
+
+				folderService.save(folderPO);
+				successCnt++;
+
+			} catch (Exception e) {
+				LOGGER.error(e.toString());
+				continue;
+			}
+		}
+
+		return successCnt;
+	}
+	
+	@RequestMapping(value = "/export", method = RequestMethod.POST)
+	public ResponseEntity<byte[]> export(HttpServletResponse response) {
+		try {
+			String fileName = "分组数据表";
+			File file = createCSV();
+			// createCSV().write(os);
+			System.out.println(file.getAbsolutePath());
+
+			FileInputStream in = new FileInputStream(file);
+			byte[] body = new byte[in.available()];
+			in.read(body);
+			HttpHeaders headers = new HttpHeaders();
+			// headers.setContentType(MediaType.);
+			headers.setContentDispositionFormData("attachment", new String((fileName + ".csv").getBytes("UTF-8"), "iso-8859-1"));
+			
+			try {
+				in.close();
+				file.delete();
+
+			} catch (Exception e) {
+				LOGGER.info("FileInputStream close, delte temp file error");
+				e.printStackTrace();
+			}
+
+			return new ResponseEntity<byte[]>(body, headers, HttpStatus.CREATED);
+
+		} catch (Exception e) {
+			LOGGER.info("Fail to export csv of users:", e);
+		}
+
+		return null;
+	}
+	
+	/**
+	 * 导出用户关联文件夹csv<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 下午3:07:24
+	 */
+	@RequestMapping(value = "/user/export", method = RequestMethod.POST)
+	public ResponseEntity<byte[]> exportUser(HttpServletResponse response) {
+		try {
+			String fileName = "用户分组数据表";
+			File file = createUserCSV();
+			// createCSV().write(os);
+			System.out.println(file.getAbsolutePath());
+
+			FileInputStream in = new FileInputStream(file);
+			byte[] body = new byte[in.available()];
+			in.read(body);
+			HttpHeaders headers = new HttpHeaders();
+			// headers.setContentType(MediaType.);
+			headers.setContentDispositionFormData("attachment", new String((fileName + ".csv").getBytes("UTF-8"), "iso-8859-1"));
+			
+			try {
+				in.close();
+				file.delete();
+
+			} catch (Exception e) {
+				LOGGER.info("FileInputStream close, delte temp file error");
+				e.printStackTrace();
+			}
+
+			return new ResponseEntity<byte[]>(body, headers, HttpStatus.CREATED);
+
+		} catch (Exception e) {
+			LOGGER.info("Fail to export csv of users:", e);
+		}
+
+		return null;
+	}
+
+	private File createCSV() throws Exception {
+		
+		String webappPath = path.webappPath();
+		
+		String filePath = new StringBufferWrapper().append(webappPath)
+												   .append("exportFoldersCSVTemp_")
+												   .append(Calendar.getInstance().getTimeInMillis())
+												   .append(".csv")
+												   .toString();
+
+		File file = new File(filePath);
+		
+		LOGGER.info("file.getAbsolutePath()=" + file.getAbsolutePath());
+		// FileWriter fileWriter = new FileWriter(file,true);
+		// System.out.println(file.getAbsolutePath());
+
+		Appendable printWriter = new PrintWriter(file, "GBK");
+		CSVPrinter csvPrinter = CSVFormat.EXCEL.withHeader("分组编码", "分组名称", "父分组编码", "分组类型").print(printWriter);
+
+		List<FolderPO> rootFolders = folderService.findByParentPath(null);
+		if (rootFolders.isEmpty()) {
+			LOGGER.error("数据库错误：不存在根节点");
+		} else {
+			for (FolderPO rootFolderPO : rootFolders) {
+				createChildData(rootFolderPO, csvPrinter);
+			}
+
+		}
+
+		csvPrinter.flush();
+		// printWriter.flush();
+		// printWriter.close();
+		csvPrinter.close();
+
+		return file;
+
+	}
+	
+	private File createUserCSV() throws Exception {
+		
+		String webappPath = path.webappPath();
+		
+		String filePath = new StringBufferWrapper().append(webappPath)
+												   .append("exportFolderMapUserCSVTemp_")
+												   .append(Calendar.getInstance().getTimeInMillis())
+												   .append(".csv")
+												   .toString();
+
+		File file = new File(filePath);
+
+		Appendable printWriter = new PrintWriter(file, "GBK");
+		CSVPrinter csvPrinter = CSVFormat.EXCEL.withHeader("用户账号", "用户昵称", "密码", "所属分组编码").print(printWriter);
+
+		List<FolderUserMap> maps = folderUserMapDao.findAll();
+		for(FolderUserMap map: maps){
+			csvPrinter.printRecord("", map.getUserName(), "", map.getFolderUuid());
+		}
+
+		csvPrinter.flush();
+		csvPrinter.close();
+
+		return file;
+
+	}
+
+	// 递归方法
+	private void createChildData(FolderPO parentFolderPO, CSVPrinter csvPrinter) {
+		String parentUuid = "";
+
+		String typeStr = "";
+
+		if (parentFolderPO.getParentId() != null && parentFolderPO.getParentId() != -1l) {
+
+			FolderPO tempPo = folderDao.findOne(parentFolderPO.getParentId());
+			if (tempPo != null) {
+				parentUuid = tempPo.getUuid();
+			}
+		}
+
+		if (parentFolderPO.getFolderType() != null) {
+			switch (parentFolderPO.getFolderType().toString()) {
+	
+			case "TERMINAL":
+				typeStr = "终端";
+				break;
+			case "MONITOR":
+				typeStr = "监控";
+				break;
+			case "LIVE":
+				typeStr = "直播";
+				break;
+			case "ON_DEMAND":
+				typeStr = "点播";
+				break;
+			default:
+				break;
+			}
+		}
+
+		try {
+			csvPrinter.printRecord(parentFolderPO.getUuid(), parentFolderPO.getName(), parentUuid, typeStr);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		List<FolderPO> childFolderPOList = folderDao.findByParentId(parentFolderPO.getId());
+
+		if (!CollectionUtils.isEmpty(childFolderPOList)) {
+
+			for (FolderPO folderPO : childFolderPOList) {
+				// 递归
+				createChildData(folderPO, csvPrinter);
+			}
+
+		}
+
+	}
+	
+	private int importcsv(InputStream is) throws Exception {
+		int successCnt = 0;
+
+		CSVParser parser = CSVParser.parse(is, Charset.forName("gbk"), CSVFormat.DEFAULT
+				.withHeader("folderUuid", "folderName", "parentUuid", "folderType").withSkipHeaderRecord());
+		for (CSVRecord csvRecord : parser) {
+
+			if (StringUtils.isEmpty(csvRecord.get("folderUuid")) || StringUtils.isEmpty(csvRecord.get("folderName"))) {
+				continue;
+			}
+			try {
+
+				String folderUuid = csvRecord.get("folderUuid");
+				String folderName = csvRecord.get("folderName");
+				String parentUuid = csvRecord.get("folderUuid");
+				String folderType = csvRecord.get("folderType");
+
+				FolderPO folderPO = folderDao.findTopByUuid(folderUuid);
+
+				if (folderPO == null) {
+					folderPO = new FolderPO();
+					folderPO.setUuid(folderUuid);
+				}
+
+				folderPO.setName(folderName);
+
+				FolderPO parentFolder;
+
+				if (!StringUtils.isEmpty(parentUuid)) {
+					parentFolder = folderDao.findTopByUuid(parentUuid);
+				} else {
+					// 导入的根目录处理
+					switch (folderType) {
+					case "终端":
+						folderPO.setFolderType(FolderType.TERMINAL);
+						break;
+					case "监控":
+						folderPO.setFolderType(FolderType.MONITOR);
+						break;
+					case "直播":
+						folderPO.setFolderType(FolderType.LIVE);
+						break;
+					case "点播":
+						folderPO.setFolderType(FolderType.ON_DEMAND);
+						break;
+					default:
+						folderPO.setFolderType(FolderType.TERMINAL);
+						break;
+					}
+
+					List<FolderPO> templistFolderPOs = folderDao.findBvcRootFolders();
+					
+					if (CollectionUtils.isEmpty(templistFolderPOs)) {
+						continue;
+					}
+
+					parentFolder = folderDao.findFolderByTypeAndParent(folderPO.getFolderType(),
+							templistFolderPOs.get(0).getId());
+
+				}
+
+				if (parentFolder == null) {
+					continue;
+				}
+
+				folderPO.setParentId(parentFolder.getId());
+
+				if (null != parentFolder.getParentPath()) {
+					folderPO.setParentPath(parentFolder.getParentPath() + "/" + parentFolder.getId());
+				} else {
+					folderPO.setParentPath("/" + parentFolder.getId());
+				}
+
+				folderPO.setFolderType(parentFolder.getFolderType());
+
+				int maxIndex = caculateMaxfolderIndex(parentFolder, folderPO);
+				handleNewParentFolderIndexChange(parentFolder, maxIndex + 1);
+				folderPO.setFolderIndex(maxIndex + 1);
+
+				folderService.save(folderPO);
+				successCnt++;
+
+			} catch (Exception e) {
+				LOGGER.error(e.toString());
+				continue;
+			}
+		}
+
+		return successCnt;
+
+	}
+	
+	private int importUserCSV(InputStream is) throws Exception {
+		int successCnt = 0;
+
+		CSVParser parser = CSVParser.parse(is, Charset.forName("gbk"), CSVFormat.DEFAULT
+				.withHeader("userName", "nickName", "password", "folderUuid").withSkipHeaderRecord());
+		
+		List<JSONObject> allData = new ArrayList<JSONObject>();
+		List<String> allNames = new ArrayList<String>();
+		Set<String> allFolders = new HashSet<String>();
+		
+		for (CSVRecord csvRecord : parser) {
+
+			if (StringUtils.isEmpty(csvRecord.get("nickName")) || StringUtils.isEmpty(csvRecord.get("folderUuid"))) {
+				continue;
+			}
+
+			String nickName = csvRecord.get("nickName");
+			String folderUuid = csvRecord.get("folderUuid");
+			
+			JSONObject data = new JSONObject();
+			data.put("nickName", nickName);
+			data.put("folderUuid", folderUuid);
+			allData.add(data);
+			allNames.add(nickName);
+			allFolders.add(folderUuid);
+
+			successCnt++;
+		}
+		
+		List<FolderUserMap> maps = folderUserMapDao.findAll();
+		List<FolderPO> folders = folderDao.findByUuidIn(allFolders);
+		List<UserBO> users = userQueryService.queryUsersByNicknameIn(allNames);
+		
+		List<FolderUserMap> needSaveMaps = new ArrayList<FolderUserMap>();
+		for(JSONObject data: allData){
+			String nickName = data.getString("nickName");
+			String folderUuid = data.getString("folderUuid");
+			
+			FolderPO folderPO = null;
+			for(FolderPO folder: folders){
+				if(folder.getUuid().equals(folderUuid)){
+					folderPO = folder;
+					break;
+				}
+			}
+			
+			UserBO userBO = null;
+			for(UserBO user: users){
+				if(user.getName().equals(nickName)){
+					userBO = user;
+					break;
+				}
+			}
+			
+			if(folderPO != null && userBO != null){
+				
+				FolderUserMap folderUserMap = null;
+				for(FolderUserMap map: maps){
+					if(map.getUserName().equals(nickName)){
+						folderUserMap = map;
+						break;
+					}
+				}
+				
+				if(folderUserMap == null){
+					folderUserMap = new FolderUserMap();
+				}
+				
+				folderUserMap.setFolderId(folderPO.getId());
+				folderUserMap.setFolderIndex(folderPO.getFolderIndex().longValue());
+				folderUserMap.setFolderUuid(folderUuid);
+				folderUserMap.setUserId(userBO.getId());
+				folderUserMap.setUserName(nickName);
+				folderUserMap.setSyncStatus(0);
+				folderUserMap.setCreator(userBO.getCreater());
+				
+				needSaveMaps.add(folderUserMap);
+			}
+			
+		}
+		
+		folderUserMapDao.save(needSaveMaps);
+
+		return successCnt;
+
+	}
+	
 }

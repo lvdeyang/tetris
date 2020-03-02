@@ -992,8 +992,9 @@ define([
                         id:self.group.current.id
                     }, function(data){
                         self.group.current.status = 'start';
-                        if(data && data.length>0){
-                            self.qt.invoke('groupMembers', $.toJSON(data));
+                        var splits = data.splits;
+                        if(splits && splits.length>0){
+                            self.qt.invoke('groupMembers', $.toJSON(splits));
                         }
                     });
                 }

@@ -111,7 +111,7 @@ public class UserQuery {
 		
 		HttpSession session = null;
 		String sessionId = request.getHeader(HttpConstant.HEADER_SESSION_ID);
-		if(sessionId == null){
+		if(sessionId == null || sessionId.equals("")){
 			//临时session 5秒超时
 			session = HttpSessionContext.build(null, HttpConstant.TEMPORARY_SESSION_TIMEOUT);
 		}else{
@@ -333,6 +333,42 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 根据公司id和类型查询用户列表(带类型)<br/>
+	 * <b>作者:</b>ldy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月18日 上午10:00:12
+	 * @param Long companyId 公司id
+	 * @param UserClassify classify 用户类型
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> listByCompanyIdAndClassify(Long companyId, String terminalType, UserClassify classify) throws Exception{
+		List<UserPO> users = userDao.findByCompanyIdAndClassfy(companyId, classify.toString());
+		TerminalType type = null;
+		if (terminalType != null && !terminalType.isEmpty()) type = TerminalType.fromName(terminalType);
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserPO user:users){
+				userIds.add(user.getId());
+			}
+			List<TokenPO> tokenPOs = tokenDao.findByUserIdInAndType(userIds, type);
+			for(UserPO user:users){
+				UserVO userVO = new UserVO().set(user);
+				for(TokenPO tokenPO: tokenPOs){
+					if(tokenPO.getUserId().equals(user.getId())){
+						userVO.setStatus(tokenPO.getStatus().toString());
+						userVO.setIp(tokenPO.getIp());
+						break;
+					}
+				}
+				view_users.add(userVO);
+			}
+		}
+		
+		return view_users;
+	}
+	
+	/**
 	 * 分页查询公司下的用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -422,6 +458,7 @@ public class UserQuery {
 				for(TokenPO tokenPO: tokenPOs){
 					if(tokenPO.getUserId().equals(user.getId())){
 						userVO.setStatus(tokenPO.getStatus().toString());
+						userVO.setIp(tokenPO.getIp());
 						break;
 					}
 				}
@@ -524,6 +561,27 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 根据id和类型查询用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月19日 下午3:30:27
+	 * @param JSONArray ids 用户id列表
+	 * @param TerminalType terminalType 查询类型
+	 * @return JSONObject 用户列表
+	 */
+	public List<UserVO> findByIdInAndType(Collection<Long> ids, TerminalType terminalType) throws Exception{
+		List<UserPO> entities = userDao.findByIdIn(ids);
+		List<UserVO> returnVOs = new ArrayList<UserVO>();
+		for (UserPO userPO : entities) {
+			UserVO user = new UserVO().set(userPO);
+			TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
+			if (token != null) user.setIp(token.getIp()).setStatus(token.getStatus().toString());
+			returnVOs.add(user);
+		}
+		return returnVOs;
+	}
+	
+	/**
 	 * 分页查询所有用户（同一公司下）<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -533,11 +591,38 @@ public class UserQuery {
 	 * @param int pageSize
 	 * @return Map<String, Object>
 	 */
-	public Map<String, Object> queryAllUserBaseInfo(Long userId, int currentPage, int pageSize) throws Exception{
+	public Map<String, Object> queryAllUserBaseInfo(Long userId, String terminalType, int currentPage, int pageSize) throws Exception{
 		
 		CompanyPO companyPO = companyDao.findByUserId(userId);
+		TerminalType type = null;
+		if (terminalType != null && !terminalType.isEmpty()) type = TerminalType.fromName(terminalType);
 		if (companyPO != null) {
-			return listByCompanyId(companyPO.getId(), currentPage, pageSize);
+			Long companyId = companyPO.getId();
+			int total = userDao.countByCompanyId(companyId);
+			List<UserPO> users = findByCompanyId(companyId, currentPage, pageSize);
+			List<UserVO> view_users = new ArrayList<UserVO>();
+			if(users!=null && users.size()>0){
+				List<Long> userIds = new ArrayList<Long>();
+				for(UserPO user:users){
+					userIds.add(user.getId());
+				}
+				List<TokenPO> tokenPOs = tokenDao.findByUserIdInAndType(userIds, type);
+				for(UserPO user:users){
+					UserVO userVO = new UserVO().set(user);
+					for(TokenPO tokenPO: tokenPOs){
+						if(tokenPO.getUserId().equals(user.getId())){
+							userVO.setStatus(tokenPO.getStatus().toString());
+							userVO.setIp(tokenPO.getIp());
+							break;
+						}
+					}
+					view_users.add(userVO);
+				}
+			}
+			
+			return new HashMapWrapper<String, Object>().put("total", total)
+													   .put("rows", view_users)
+													   .getMap();
 		}else {
 			return null;
 		}
@@ -551,14 +636,29 @@ public class UserQuery {
 	 * @param Long userId 用户id
 	 * @return List<UserVO>
 	 */
-	public List<UserVO> queryAllUserBaseInfo(Long userId) throws Exception{
+	public List<UserVO> queryAllUserBaseInfo(Long userId, String terminalType) throws Exception{
 		CompanyPO companyPO = companyDao.findByUserId(userId);
+		TerminalType type = null;
+		if (terminalType != null && !terminalType.isEmpty()) type = TerminalType.fromName(terminalType);
 		if (companyPO != null) {
 			List<UserPO> users = userDao.findByCompanyId(companyPO.getId());
 			List<UserVO> view_users = new ArrayList<UserVO>();
 			if(users!=null && users.size()>0){
+				List<Long> userIds = new ArrayList<Long>();
 				for(UserPO user:users){
-					view_users.add(new UserVO().set(user));
+					userIds.add(user.getId());
+				}
+				List<TokenPO> tokenPOs = tokenDao.findByUserIdInAndType(userIds, type);
+				for(UserPO user:users){
+					UserVO userVO = new UserVO().set(user);
+					for(TokenPO tokenPO: tokenPOs){
+						if(tokenPO.getUserId().equals(user.getId())){
+							userVO.setStatus(tokenPO.getStatus().toString());
+							userVO.setIp(tokenPO.getIp());
+							break;
+						}
+					}
+					view_users.add(userVO);
 				}
 			}
 			return view_users;
@@ -657,6 +757,27 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 根据用户id和终端类型查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月24日 上午10:56:22
+	 * @param Long userId 用户id
+	 * @param String terminalType 终端类型
+	 * @return UserVO
+	 */
+	public UserVO queryUserByIdAndType(Long userId, String terminalType) throws Exception{
+		
+		UserVO userVO = new UserVO().set(userDao.findOne(userId));
+		TerminalType type = null;
+		if (terminalType != null && !terminalType.isEmpty()) type = TerminalType.fromName(terminalType);
+		TokenPO tokenPO = tokenDao.findByUserIdAndType(userId, type);
+		
+		if(tokenPO != null) userVO.setIp(tokenPO.getIp()).setStatus(tokenPO.getStatus().toString());
+		
+		return userVO;
+	}	
+	
+	/**
 	 * 根据角色id查询用户<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -667,6 +788,26 @@ public class UserQuery {
 	public List<UserVO> queryUsersByRole(Long roleId) throws Exception{
 		
 		List<UserPO> users = userDao.findByRoleId(roleId);
+		List<UserVO> view_users = new ArrayList<UserVO>();
+		if(users!=null && users.size()>0){
+			for(UserPO user:users){
+				view_users.add(new UserVO().set(user));
+			}
+		}
+		return view_users;
+	}
+	
+	/**
+	 * 根据昵称列表查询用户列表<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月19日 下午4:31:04
+	 * @param List<String> nicknames 昵称列表
+	 * @return List<UserVO> 用户列表
+	 */
+	public List<UserVO> queryUsersByNicknameIn(List<String> nicknames) throws Exception{
+		
+		List<UserPO> users = userDao.findByNicknameIn(nicknames);
 		List<UserVO> view_users = new ArrayList<UserVO>();
 		if(users!=null && users.size()>0){
 			for(UserPO user:users){

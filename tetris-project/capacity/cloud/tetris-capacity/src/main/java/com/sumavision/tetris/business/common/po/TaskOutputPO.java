@@ -19,6 +19,9 @@ public class TaskOutputPO extends AbstractBasePO{
 	
 	private Long inputId;
 	
+	/** 多源的时候用 */
+	private String inputList;
+	
 	private String task;
 	
 	private String output;
@@ -26,6 +29,9 @@ public class TaskOutputPO extends AbstractBasePO{
 	private String capacityIp;
 	
 	private BusinessType type;
+	
+	/** 盖播id */
+	private Long coverId;
 	
 	/** **************
 	 *    yjgb使用          *
@@ -56,6 +62,14 @@ public class TaskOutputPO extends AbstractBasePO{
 
 	public void setInputId(Long inputId) {
 		this.inputId = inputId;
+	}
+
+	public String getInputList() {
+		return inputList;
+	}
+
+	public void setInputList(String inputList) {
+		this.inputList = inputList;
 	}
 
 	@Column(name = "TASK", columnDefinition = "longtext")
@@ -123,6 +137,14 @@ public class TaskOutputPO extends AbstractBasePO{
 
 	public void setCapacityIp(String capacityIp) {
 		this.capacityIp = capacityIp;
+	}
+
+	public Long getCoverId() {
+		return coverId;
+	}
+
+	public void setCoverId(Long coverId) {
+		this.coverId = coverId;
 	}
 	
 }

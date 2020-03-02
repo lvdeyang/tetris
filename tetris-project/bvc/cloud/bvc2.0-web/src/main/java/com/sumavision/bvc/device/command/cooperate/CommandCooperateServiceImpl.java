@@ -18,10 +18,12 @@ import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
+import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
+import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
@@ -30,10 +32,12 @@ import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
+import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -47,7 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 
 * @ClassName: CommandCooperateServiceImpl 
-* @Description: 协同指挥业务
+* @Description: 协同会议业务
 * @author zsy
 * @date 2019年10月24日 上午10:56:48 
 *
@@ -68,6 +72,9 @@ public class CommandCooperateServiceImpl {
 
 	@Autowired
 	private CommandBasicServiceImpl commandBasicServiceImpl;
+
+	@Autowired
+	private CommandRecordServiceImpl commandRecordServiceImpl;
 
 	@Autowired
 	private CommandCastServiceImpl commandCastServiceImpl;
@@ -101,6 +108,7 @@ public class CommandCooperateServiceImpl {
 					
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		GroupType groupType = group.getType();
+		List<CommandGroupUserPlayerPO> needSavePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 		
 		if(group.getStatus().equals(GroupStatus.STOP)){
 			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
@@ -108,7 +116,7 @@ public class CommandCooperateServiceImpl {
 		
 		if(userIdArray.contains(group.getUserId())){
 			if(groupType.equals(GroupType.BASIC)){
-				throw new BaseException(StatusCode.FORBIDDEN, "不能选择主席进行协同指挥");
+				throw new BaseException(StatusCode.FORBIDDEN, "不能选择主席进行协同会议");
 			}else if(groupType.equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, "不能指定主席发言");
 			}
@@ -123,7 +131,7 @@ public class CommandCooperateServiceImpl {
 					cooperateMembers.add(member);
 				}else{
 					if(groupType.equals(GroupType.BASIC)){
-						throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经被授权协同指挥");
+						throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经被授权协同会议");
 					}else if(groupType.equals(GroupType.MEETING)){
 						throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经申请发言");
 					}
@@ -215,7 +223,7 @@ public class CommandCooperateServiceImpl {
 					
 					player.setBusinessId(group.getId().toString());//如果需要改成c2m_forward.getId()，那么需要先save获得id
 					if(groupType.equals(GroupType.BASIC)){
-						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + "协同指挥");
+						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + "协同会议");
 					}if(groupType.equals(GroupType.MEETING)){
 						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + "发言");
 					}
@@ -241,7 +249,9 @@ public class CommandCooperateServiceImpl {
 					c2m_forward.setExecuteStatus(ExecuteStatus.NO_AVAILABLE_PLAYER);
 				}				
 			}
-		}		
+			member.getPlayers().addAll(players);
+			needSavePlayers.addAll(players);
+		}
 
 		//给每个协同成员发送消息
 		for(CommandGroupMemberPO cooperateMember : cooperateMembers){
@@ -255,7 +265,7 @@ public class CommandCooperateServiceImpl {
 			//TODO: businessId中添加其他信息
 			message.put("businessId", group.getId().toString());
 			if(groupType.equals(GroupType.BASIC)){
-				message.put("businessInfo", "接受到 " + group.getName() + " 的主席：" + chairman.getUserName() + " 邀请进入协同指挥，是否进入？");
+				message.put("businessInfo", "接受到 " + group.getName() + " 的主席：" + chairman.getUserName() + " 邀请进入协同会议，是否进入？");
 			}else if(groupType.equals(GroupType.MEETING)){
 				message.put("businessInfo", "接受到 " + group.getName() + " 的主席：" + chairman.getUserName() + " 指定发言，是否同意？");
 			}
@@ -267,6 +277,7 @@ public class CommandCooperateServiceImpl {
 		group.getForwards().addAll(forwards);		
 		
 		commandGroupDao.save(group);
+		commandGroupUserPlayerDao.save(needSavePlayers);
 
 		}
 		
@@ -274,7 +285,7 @@ public class CommandCooperateServiceImpl {
 	}
 	
 	/**
-	 * 同意协同指挥<br/>
+	 * 同意协同会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -299,7 +310,7 @@ public class CommandCooperateServiceImpl {
 			return;
 		}else if(cooperateStatus.equals(MemberStatus.DISCONNECT)){
 			if(group.getType().equals(GroupType.BASIC)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "协同指挥已结束");
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "协同会议已结束");
 			}else if(group.getType().equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "发言已结束");
 			}
@@ -314,7 +325,7 @@ public class CommandCooperateServiceImpl {
 	}
 	
 	/**
-	 * 拒绝协同指挥<br/>
+	 * 拒绝协同会议<br/>
 	 * <p>线程不安全，调用处必须使用 command-group-{groupId} 加锁</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -332,7 +343,7 @@ public class CommandCooperateServiceImpl {
 		MemberStatus cooperateStatus = refuseMember.getCooperateStatus();
 		if(cooperateStatus.equals(MemberStatus.CONNECT)){
 			if(group.getType().equals(GroupType.BASIC)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "正在进行协同指挥");
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "正在进行协同会议");
 			}else if(group.getType().equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "正在发言");
 			}
@@ -349,21 +360,134 @@ public class CommandCooperateServiceImpl {
 	}
 	
 	/**
-	 * 撤销授权协同指挥<br/>
+		 * 撤销授权协同会议<br/>
+		 * <p>详细描述</p>
+		 * <b>作者:</b>zsy<br/>
+		 * <b>版本：</b>1.0<br/>
+		 * <b>日期：</b>2019年11月4日 下午1:26:41
+		 * @param userId
+		 * @param groupId
+		 * @return
+		 * @throws Exception
+		 */
+		public JSONArray revoke(Long userId, Long groupId) throws Exception{
+			
+			synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
+			
+				CommandGroupPO group = commandGroupDao.findOne(groupId);
+				List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
+				
+				if(GroupStatus.STOP.equals(group.getStatus())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经停止。id: " + group.getId());
+				}
+			
+				JSONArray groupInfos = new JSONArray();
+				Set<CommandGroupForwardPO> forwards = group.getForwards();
+				Set<CommandGroupMemberPO> members = group.getMembers();
+				CommandGroupMemberPO revokeMember = commandCommonUtil.queryMemberByUserId(members, userId);
+				CommandGroupMemberPO chairman = commandCommonUtil.queryChairmanMember(members);
+				List<Long> consumeIds = new ArrayList<Long>();
+				
+				if(revokeMember.getMessageCoId() != null){
+	//				websocketMessageService.consume(revokeMember.getMessageCoId());
+					consumeIds.add(revokeMember.getMessageCoId());
+					revokeMember.setMessageCoId(null);
+				}
+				
+				revokeMember.setCooperateStatus(MemberStatus.DISCONNECT);
+				List<Long> srcMemberIds = new ArrayListWrapper<Long>().add(revokeMember.getId()).getList();
+				Set<CommandGroupForwardPO> relativeForwards = commandCommonUtil.queryForwardsBySrcmemberIds(forwards, srcMemberIds, ForwardBusinessType.COOPERATE_COMMAND, null);
+				
+				//给正在观看的成员发送的消息
+				JSONObject message = new JSONObject();
+				message.put("businessType", "cooperationRevoke");
+				//TODO: businessId中添加其他信息
+				message.put("businessId", group.getId().toString());
+				message.put("splits", new JSONArray());
+				if(group.getType().equals(GroupType.BASIC)){
+					message.put("businessInfo", group.getName() + " 主席撤销授权 " + revokeMember.getUserName() + " 协同会议");
+				}else if(group.getType().equals(GroupType.MEETING)){
+					message.put("businessInfo", group.getName() + " 主席停止 " + revokeMember.getUserName() + " 发言");
+				}
+				
+				//给被撤销成员发消息 TODO:信息可能不足
+				messageCaches.add(new MessageSendCacheBO(revokeMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName()));
+	//			WebsocketMessageVO ws = websocketMessageService.send(revokeMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName());
+	//			consumeIds.add(ws.getId());
+				
+				//释放其他成员的播放器，删除转发PO
+				List<CommandGroupUserPlayerPO> needClosePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+				List<CommandGroupUserPlayerPO> needFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+				for(CommandGroupForwardPO forward : relativeForwards){
+					forward.setGroup(null);
+					//TODO:释放播放器没做好
+	//				if(forward.getExecuteStatus().equals(ExecuteStatus.DONE)){
+						CommandGroupMemberPO dstMember = commandCommonUtil.queryMemberById(members, forward.getDstMemberId());
+						JSONArray splits = new JSONArray();
+						message.put("splits", splits);
+						for(CommandGroupUserPlayerPO player : dstMember.getPlayers()){
+							if(player.getBundleId().equals(forward.getDstVideoBundleId())
+									&& player.getPlayerBusinessType().equals(PlayerBusinessType.COOPERATE_COMMAND)){
+								
+								//forward状态是DONE的，close播放器
+	//							if(forward.getExecuteStatus().equals(ExecuteStatus.DONE)){
+									needClosePlayers.add(player);
+	//							}
+								
+								player.setFree();
+								needFreePlayers.add(player);
+								dstMember.getPlayers().remove(player);
+								
+								//给正在观看的成员填入分屏信息，发消息
+								JSONObject split = new JSONObject();
+								split.put("serial", player.getLocationIndex());
+								splits.add(split);
+							}
+						}
+						messageCaches.add(new MessageSendCacheBO(dstMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName()));
+	//					WebsocketMessageVO ws2 = websocketMessageService.send(dstMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName());
+	//					consumeIds.add(ws2.getId());
+	//				}
+				}
+				forwards.removeAll(relativeForwards);
+				commandGroupDao.save(group);
+				commandGroupUserPlayerDao.save(needFreePlayers);
+				
+				//关闭播放器，考虑怎么给不需要挂断的编码器计数
+				CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
+				CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
+				LogicBO logic = commandBasicServiceImpl.closeBundle(null, null, needClosePlayers, codec, group.getUserId());
+				LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(null, null, null, needClosePlayers, codec, group.getUserId());
+				logic.merge(logicCastDevice);
+				executeBusiness.execute(logic, group.getName() + " 会议中撤销" + revokeMember.getUserName() + "的协同会议授权");
+				
+				for(MessageSendCacheBO cache : messageCaches){
+					WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+					consumeIds.add(ws.getId());
+				}
+				websocketMessageService.consumeAll(consumeIds);
+				
+				return groupInfos;		
+			}
+		}
+
+	/**
+	 * 批量撤销授权协同会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年11月4日 下午1:26:41
-	 * @param userId
+	 * <b>日期：</b>2020年2月18日 下午6:05:37
+	 * @param userIds
 	 * @param groupId
 	 * @return
 	 * @throws Exception
 	 */
-	public JSONArray revoke(Long userId, Long groupId) throws Exception{
+	public JSONArray revokeBatch(List<Long> userIds, Long groupId) throws Exception{
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 		
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
 			
 			if(GroupStatus.STOP.equals(group.getStatus())){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经停止。id: " + group.getId());
@@ -372,83 +496,96 @@ public class CommandCooperateServiceImpl {
 			JSONArray groupInfos = new JSONArray();
 			Set<CommandGroupForwardPO> forwards = group.getForwards();
 			Set<CommandGroupMemberPO> members = group.getMembers();
-			CommandGroupMemberPO revokeMember = commandCommonUtil.queryMemberByUserId(members, userId);
-			CommandGroupMemberPO chairman = commandCommonUtil.queryChairmanMember(members);
+			List<CommandGroupMemberPO> revokeMembers = commandCommonUtil.queryMembersByUserIds(members, userIds);
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			List<Long> consumeIds = new ArrayList<Long>();
+			List<Long> revokeMemberIds = new ArrayList<Long>();
 			
-			if(revokeMember.getMessageCoId() != null){
-//				websocketMessageService.consume(revokeMember.getMessageCoId());
-				consumeIds.add(revokeMember.getMessageCoId());
-				revokeMember.setMessageCoId(null);
+			StringBufferWrapper revokeMembersNames = new StringBufferWrapper();			
+			for(CommandGroupMemberPO revokeMember : revokeMembers){
+				if(revokeMember.getMessageCoId() != null){
+					consumeIds.add(revokeMember.getMessageCoId());
+					revokeMember.setMessageCoId(null);
+				}
+				revokeMemberIds.add(revokeMember.getId());
+				revokeMember.setCooperateStatus(MemberStatus.DISCONNECT);//TODO:是否需要先判断一下
+				revokeMembersNames.append(revokeMember.getUserName()).append("，");
 			}
+			revokeMembersNames.append("被主席撤销协同会议");	
 			
-			revokeMember.setCooperateStatus(MemberStatus.DISCONNECT);
-			List<Long> srcMemberIds = new ArrayListWrapper<Long>().add(revokeMember.getId()).getList();
-			Set<CommandGroupForwardPO> relativeForwards = commandCommonUtil.queryForwardsBySrcmemberIds(forwards, srcMemberIds, ForwardBusinessType.COOPERATE_COMMAND, null);
+			//以这些成员为源的协同转发
+			Set<CommandGroupForwardPO> relativeForwards = commandCommonUtil.queryForwardsBySrcmemberIds(forwards, revokeMemberIds, ForwardBusinessType.COOPERATE_COMMAND, null);
+			List<CommandGroupForwardPO> allNeedDelForwards = new ArrayList<CommandGroupForwardPO>();
 			
-			//给正在观看的成员发送的消息
-			JSONObject message = new JSONObject();
-			message.put("businessType", "cooperationRevoke");
-			//TODO: businessId中添加其他信息
-			message.put("businessId", group.getId().toString());
-			if(group.getType().equals(GroupType.BASIC)){
-				message.put("businessInfo", group.getName() + " 主席撤销授权 " + revokeMember.getUserName() + " 协同指挥");
-			}else if(group.getType().equals(GroupType.MEETING)){
-				message.put("businessInfo", group.getName() + " 主席停止 " + revokeMember.getUserName() + " 发言");
-			}
-			
-			//给被撤销成员发消息 TODO:信息可能不足
-			WebsocketMessageVO ws = websocketMessageService.send(revokeMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName());
-			consumeIds.add(ws.getId());
-			
-			//释放其他成员的播放器，删除转发PO
-			List<CommandGroupUserPlayerPO> needClosePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+			//释放这些退出或删除成员的播放器，同时如果是删人就给被删的成员发消息
 			List<CommandGroupUserPlayerPO> needFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
-			for(CommandGroupForwardPO forward : relativeForwards){
-				forward.setGroup(null);
-				//TODO:释放播放器没做好
-//				if(forward.getExecuteStatus().equals(ExecuteStatus.DONE)){
-					CommandGroupMemberPO dstMember = commandCommonUtil.queryMemberById(members, forward.getDstMemberId());
-					JSONArray splits = new JSONArray();
-					message.put("splits", splits);
-					for(CommandGroupUserPlayerPO player : dstMember.getPlayers()){
-						if(player.getBundleId().equals(forward.getDstVideoBundleId())
-								&& player.getPlayerBusinessType().equals(PlayerBusinessType.COOPERATE_COMMAND)){
-							
-							//forward状态是DONE的，close播放器
-//							if(forward.getExecuteStatus().equals(ExecuteStatus.DONE)){
-								needClosePlayers.add(player);
-//							}
-							
-							player.setFree();
-							needFreePlayers.add(player);
-							dstMember.getPlayers().remove(player);
-							
-							//给正在观看的成员填入分屏信息，发消息
-							JSONObject split = new JSONObject();
-							split.put("serial", player.getLocationIndex());
-							splits.add(split);
+			
+			//除主席外，处理所有成员，包括被撤销的
+			for(CommandGroupMemberPO member : members){
+				if(member.isAdministrator()){// || revokeMemberIds.contains(member.getId())){
+					continue;
+				}
+				List<CommandGroupUserPlayerPO> thisMemberFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+				JSONArray splits = new JSONArray();
+				for(CommandGroupForwardPO forward : relativeForwards){
+					if(member.getId().equals(forward.getDstMemberId())){
+						//目的是该成员的，找播放器
+						for(CommandGroupUserPlayerPO player : member.getPlayers()){
+							//播放器对应转发目的，且 这是一条协同转发，且 该转发的源是一个被撤销协同的成员
+							if(player.getBundleId().equals(forward.getDstVideoBundleId())
+									//&& forward.getForwardBusinessType().equals(ForwardBusinessType.COOPERATE_COMMAND)//这个条件上头查询已经有了
+									&& revokeMemberIds.contains(forward.getSrcMemberId())){
+								player.setFree();
+								needFreePlayers.add(player);
+								thisMemberFreePlayers.add(player);
+								allNeedDelForwards.add(forward);
+								
+								JSONObject split = new JSONObject();
+								split.put("serial", player.getLocationIndex());
+								splits.add(split);
+							}
 						}
 					}
-					WebsocketMessageVO ws2 = websocketMessageService.send(dstMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName());
-					consumeIds.add(ws2.getId());
-//				}
+				}
+				member.getPlayers().removeAll(thisMemberFreePlayers);
+				log.info(member.getUserName() + " 释放了播放器个数：" + thisMemberFreePlayers.size());
+				
+				JSONObject message = new JSONObject();
+				message.put("businessType", "cooperationRevoke");
+				message.put("businessId", group.getId().toString());
+				message.put("businessInfo", revokeMembersNames.toString());
+				message.put("splits", splits);
+				messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairmanMember.getUserId(), chairmanMember.getUserName()));
 			}
-			forwards.removeAll(relativeForwards);
+			
+			forwards.removeAll(allNeedDelForwards);
+			log.info(revokeMembersNames.toString() + "，删除转发个数：" + allNeedDelForwards.size());
+			
 			commandGroupDao.save(group);
 			commandGroupUserPlayerDao.save(needFreePlayers);
-			websocketMessageService.consumeAll(consumeIds);
 			
-			//关闭播放器，考虑怎么给不需要挂断的编码器计数
+			//发协议（删转发协议不用发，通过挂断播放器来删）			
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-			LogicBO logic = commandBasicServiceImpl.closeBundle(null, null, needClosePlayers, codec, group.getUserId());
-			LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(null, null, null, needClosePlayers, codec, group.getUserId());
+			LogicBO logic = commandBasicServiceImpl.closeBundle(null, null, needFreePlayers, codec, group.getUserId());
+			LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(null, null, null, needFreePlayers, codec, group.getUserId());
 			logic.merge(logicCastDevice);
-			executeBusiness.execute(logic, group.getName() + " 指挥中撤销" + revokeMember.getUserName() + "的协同指挥授权");
 			
-			return groupInfos;
-		
+			//录制更新
+			LogicBO logicRecord = commandRecordServiceImpl.update(group.getUserId(), group, 1, false);
+			logic.merge(logicRecord);
+			
+			ExecuteBusinessReturnBO returnBO = executeBusiness.execute(logic, revokeMembersNames.toString());
+			commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());			
+
+			//发消息
+			for(MessageSendCacheBO cache : messageCaches){
+				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);			
+			
+			return groupInfos;		
 		}
 	}
 	
@@ -539,7 +676,7 @@ public class CommandCooperateServiceImpl {
 									message.put("businessType", "cooperationAgree");
 									message.put("businessId", group.getId().toString());
 									if(groupType.equals(GroupType.BASIC)){
-										message.put("businessInfo", group.getName() + " 主席授权 " + acceptMember.getUserName() + " 协同指挥");
+										message.put("businessInfo", group.getName() + " 主席授权 " + acceptMember.getUserName() + " 协同会议");
 									}else if(groupType.equals(GroupType.MEETING)){
 										message.put("businessInfo", group.getName() + " 成员 " + acceptMember.getUserName() + " 发言");
 									}
@@ -553,7 +690,7 @@ public class CommandCooperateServiceImpl {
 									split.put("businessType", "cooperation");
 									split.put("businessId", group.getId() + "-" + acceptMember.getUserId());
 									if(groupType.equals(GroupType.BASIC)){
-										split.put("businessInfo", group.getName() + "-" + acceptMember.getUserName() + "协同指挥");
+										split.put("businessInfo", group.getName() + "-" + acceptMember.getUserName() + "协同会议");
 									}else if(groupType.equals(GroupType.MEETING)){
 										split.put("businessInfo", group.getName() + "-" + acceptMember.getUserName() + "发言");
 									}
@@ -590,7 +727,7 @@ public class CommandCooperateServiceImpl {
 //								JSONObject message = new JSONObject();
 //								message.put("businessType", "cooperationAgree");
 //								message.put("businessId", group.getId().toString());
-//								message.put("businessInfo", group.getName() + " 指挥主席授权 " + acceptMember.getUserName() + " 协同指挥");
+//								message.put("businessInfo", group.getName() + " 会议主席授权 " + acceptMember.getUserName() + " 协同会议");
 //								message.put("splits", new JSONArray());
 //								//用于返回的分屏信息
 //								JSONObject split = new JSONObject();
@@ -599,7 +736,7 @@ public class CommandCooperateServiceImpl {
 //								split.put("bundleNo", player.getCode());
 //								split.put("businessType", "cooperation");
 //								split.put("businessId", group.getId() + "-" + acceptMember.getId());
-//								split.put("businessInfo", group.getName() + " 指挥-" + acceptMember.getUserName() + "协同指挥");
+//								split.put("businessInfo", group.getName() + " 会议-" + acceptMember.getUserName() + "协同会议");
 //								split.put("status", "start");
 //								message.getJSONArray("splits").add(split);
 //								
@@ -641,7 +778,7 @@ public class CommandCooperateServiceImpl {
 				//TODO: businessId中添加其他信息
 				message.put("businessId", group.getId().toString());
 				if(groupType.equals(GroupType.BASIC)){
-					message.put("businessInfo", refuseMember.getUserName() + " 拒绝与您协同指挥");
+					message.put("businessInfo", refuseMember.getUserName() + " 拒绝与您协同会议");
 				}else if(groupType.equals(GroupType.MEETING)){
 					message.put("businessInfo", refuseMember.getUserName() + " 拒绝发言");
 				}
@@ -661,7 +798,7 @@ public class CommandCooperateServiceImpl {
 			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, allNeedForwards, null, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);		
 			
-			executeBusiness.execute(logic, group.getName() + " 协同指挥成员接听和拒绝");
+			executeBusiness.execute(logic, group.getName() + " 协同会议成员接听和拒绝");
 			
 			//发消息
 			for(MessageSendCacheBO cache : messageCaches){

@@ -21,6 +21,8 @@ public class TaskInputPO extends AbstractBasePO{
 	
 	private String taskUuid;
 	
+	private String capacityIp;
+	
 	private String input;
 	
 	/** 保证源的唯一性，yjgb: ip@port; 直播: url; 收录: url */
@@ -80,6 +82,14 @@ public class TaskInputPO extends AbstractBasePO{
 
 	public void setType(BusinessType type) {
 		this.type = type;
+	}
+
+	public String getCapacityIp() {
+		return capacityIp;
+	}
+
+	public void setCapacityIp(String capacityIp) {
+		this.capacityIp = capacityIp;
 	}
 	
 }

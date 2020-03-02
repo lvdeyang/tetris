@@ -55,6 +55,7 @@ require.config({
         'page-media-picture':window.APPPATH + 'front/media/picture/page-media-picture',
         'page-media-video':window.APPPATH + 'front/media/video/page-media-video',
         'page-media-video-stream':window.APPPATH + 'front/media/video-stream/page-media-video-stream',
+        'page-media-push-live':window.APPPATH + 'front/media/push-live/page-media-push-live',
         'page-media-compress':window.APPPATH + 'front/media/compress/page-media-compress',
         'page-media-settings':window.APPPATH + 'front/media/settings/page-media-settings',
         'page-media-tag':window.APPPATH + 'front/media/tag/page-media-tag',
@@ -84,8 +85,11 @@ require.config({
         'page-backstage-production-audio-stream':window.APPPATH + 'backstage/production/audio-stream/page-backstage-production-audio-stream',
         'page-backstage-production-picture':window.APPPATH + 'backstage/production/picture/page-backstage-production-picture',
         'page-backstage-production-video':window.APPPATH + 'backstage/production/video/page-backstage-production-video',
-        'page-backstage-production-video-stream':window.APPPATH + 'backstage/production/video-stream/page-backstage-production-video-stream'
+        'page-backstage-production-video-stream':window.APPPATH + 'backstage/production/video-stream/page-backstage-production-video-stream',
 
+        /* operation-pages */
+        'page-operation-package':window.APPPATH + 'front/operation/package/page-operation-package',
+        'page-operation-package-media':window.APPPATH + 'front/operation/package-media/page-operation-package-media'
     },
     shim:{
         'vue':{

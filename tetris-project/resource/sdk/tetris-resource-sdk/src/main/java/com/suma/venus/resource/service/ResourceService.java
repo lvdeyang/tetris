@@ -50,6 +50,7 @@ import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
@@ -66,6 +67,7 @@ import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
+import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.LockBundleParamPO;
 import com.suma.venus.resource.pojo.LockChannelParamPO;
 import com.suma.venus.resource.pojo.LockScreenParamPO;
@@ -73,6 +75,7 @@ import com.suma.venus.resource.pojo.ScreenRectTemplatePO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.sumavision.tetris.auth.token.TerminalType;
 
 /**
  * 资源层统一资源查询Service
@@ -154,25 +157,21 @@ public class ResourceService {
 	@Autowired
 	private UserQueryService userQueryService;
 	
+	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
 
 	/** 通过userId查询具有权限的user */
-	public List<UserBO> queryUserresByUserId(Long userId) {
+	public List<UserBO> queryUserresByUserId(Long userId, TerminalType terminalType) {
 		List<UserBO> userresList = new ArrayList<UserBO>();
 		try {
 //			List<UserBO> allUsers = userFeign.queryUsers().get("users");
-			List<UserBO> allUsers = userQueryService.queryAllUserBaseInfo();
+			List<UserBO> allUsers = userQueryService.queryAllUserBaseInfo(terminalType);
 			if (null == allUsers || allUsers.isEmpty()) {
 				return userresList;
 			}
 			Map<String, UserBO> allUserMap = new HashMap<String, UserBO>();
-			for (UserBO userBO : allUsers) {
-				if (null != userBO.getFolderUuid()) {
-					FolderPO folder = folderDao.findTopByUuid(userBO.getFolderUuid());
-					if (null != folder) {
-						userBO.setFolderId(folder.getId());
-					}
-				}
-				allUserMap.put(userBO.getUserNo(), userBO);
+			for(UserBO user: allUsers){
+				allUserMap.put(user.getUserNo(), user);
 			}
 
 			Set<String> userNoSet = new HashSet<String>();
@@ -232,7 +231,7 @@ public class ResourceService {
 	public boolean hasPrivilegeOfUser(Long userId, Long dstUserId, BUSINESS_OPR_TYPE businessType) {
 		try {
 //			UserBO dstUserBO = userFeign.queryUserInfoById(dstUserId).get("user");
-			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId);
+			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId, null);
 			String code = null;// 权限码
 			switch (businessType) {
 			case DIANBO:// 点播
@@ -452,20 +451,20 @@ public class ResourceService {
 	 * @param Long userId 用户id
 	 * @return UserBO 用户
 	 */
-	public UserBO queryUserById(Long userId) {
+	public UserBO queryUserById(Long userId, TerminalType terminalType) {
 		try {
 //			Map<String, UserBO> resultMap = userFeign.queryUserInfoById(userId);
 //			if (resultMap == null || resultMap.size() <= 0 || resultMap.get("user") == null)
 //				return null;
 //			return resultMap.get("user");
 			
-			return userQueryService.queryUserByUserId(userId);
+			return userQueryService.queryUserByUserId(userId, terminalType);
 		} catch (Exception e) {
 			return null;
 		}
 	}
 
-	public List<UserBO> queryUserListByIds(String ids) {
+	public List<UserBO> queryUserListByIds(String ids, TerminalType terminalType) {
 		if (StringUtils.isEmpty(ids)) {
 			return null;
 		}
@@ -480,7 +479,7 @@ public class ResourceService {
 
 //			Map<String, List<UserBO>> resultMap = userFeign.queryUserListByIds(ids);
 			
-			List<UserBO> userBOs = userQueryService.queryUsersByUserIds(idList);
+			List<UserBO> userBOs = userQueryService.queryUsersByUserIds(idList, terminalType);
 
 //			if (!CollectionUtils.isEmpty(resultMap) && !CollectionUtils.isEmpty(resultMap.get("users"))) {
 //				return resultMap.get("users");

@@ -310,7 +310,7 @@ public class ResourceQueryUtil {
 	/** 根据userId查询播放器资源bundle **/
 	public List<PlayerBundleBO> queryPlayerBundlesByUserId(Long userId) {
 		List<PlayerBundleBO> playerBundles = new ArrayList<>();
-		List<BundlePO> playerBundlePOs = bundleDao.findByUserId(userId);
+		List<BundlePO> playerBundlePOs = bundleDao.findByUserIdAndDeviceModel(userId, "player");
 		if (playerBundlePOs == null) {
 			return playerBundles;
 		}
@@ -342,7 +342,7 @@ public class ResourceQueryUtil {
 	public PlayerBundleBO querySpecifiedPlayerBundle(Long userId) {
 //		List<BundlePO> bundles = bundleDao.findByUserId(userId);
 //		List<BundlePO> playerBundlePOs = bundleService.queryPlayerBundlesByUserId(userId);
-		List<BundlePO> playerBundlePOs = bundleDao.findByUserId(userId);
+		List<BundlePO> playerBundlePOs = bundleDao.findByUserIdAndDeviceModel(userId, "player");
 		if (playerBundlePOs == null) {
 			return null;
 		}

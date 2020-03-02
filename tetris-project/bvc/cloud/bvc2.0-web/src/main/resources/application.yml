@@ -1,12 +1,12 @@
 spring:
   application:
-    name: suma-bvc-business-zsy
+    name: tetris-bvc-business
   cloud:
 #    config:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.77
+      ipAddress: 192.165.56.71
   profiles:
     active: pro
   datasource:
@@ -58,13 +58,16 @@ spring:
       suffix: .jsp
 server:
   port: 8094
+  jsp-servlet: 
+    init-parameters: 
+      development: true
 ribbon:
   ReadTimeout: 120000
   ConnectTimeout: 30000
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.77:8081/eureka/
+      defaultZone: http://192.165.56.71:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true

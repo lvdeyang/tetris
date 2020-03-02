@@ -93,6 +93,7 @@ define([
             }
         },
         methods:{
+            //加载第当前页的数据
             load:function(currentPage){
                 var self = this;
                 ajax.post('/command/query/command/forward', {
@@ -111,14 +112,17 @@ define([
                     self.table.currentPage = currentPage;
                 });
             },
+            //关闭弹窗
             handleClose:function(){
                 var self = this;
                 self.qt.destroy();
             },
+            //当前页改变
             currentChange:function(currentPage){
                 var self = this;
                 self.load(currentPage);
             },
+            //文件资源树形结构的复选框事件
             onVodResourceCheckChange:function(data){
                 var self = this;
                 for(var i=0; i<self.tree.resource.select.length; i++){
@@ -129,6 +133,7 @@ define([
                 }
                 self.tree.resource.select.push(data);
             },
+            //文件资源的全选事件
             onVodResourceUnCheckAll:function(){
                 var self = this;
                 for(var i=0; i<self.tree.resource.select.length; i++){
@@ -136,6 +141,7 @@ define([
                 }
                 self.tree.resource.select.splice(0, self.tree.resource.select.length);
             },
+            //成员列表的复选框事件
             onUserCheckChange:function(data){
                 var self = this;
                 for(var i=0; i<self.tree.members.select.length; i++){
@@ -146,6 +152,7 @@ define([
                 }
                 self.tree.members.select.push(data);
             },
+            //成员列表的全选事件
             onUserUnCheckAll:function(){
                 var self = this;
                 for(var i=0; i<self.tree.members.select.length; i++){
@@ -153,6 +160,7 @@ define([
                 }
                 self.tree.members.select.splice(0, self.tree.members.select.length);
             },
+            //设备资源的复选框事件
             onBundleCheckChange:function(data){
                 var self = this;
                 for(var i=0; i<self.tree.device.select.length; i++){
@@ -163,6 +171,7 @@ define([
                 }
                 self.tree.device.select.push(data);
             },
+            //设备资源的全选事件
             onBundleUnCheckAll:function(){
                 var self = this;
                 for(var i=0; i<self.tree.device.select.length; i++){
@@ -181,6 +190,7 @@ define([
                     self.tree.record.select.push(data);
                 }
             },
+            //录制回放的全选事件
             onRecordUnCheckAll:function(){
                 var self = this;
                 for(var i=0; i<self.tree.record.select.length; i++){
@@ -188,6 +198,7 @@ define([
                 }
                 self.tree.record.select.splice(0, self.tree.record.select.length);
             },
+            //获取设备数据
             refreshDevice:function(){
                 var self = this;
                 self.tree.device.data.splice(0, self.tree.device.data.length);
@@ -199,6 +210,7 @@ define([
                     }
                 });
             },
+            //获取文件数据
             refreshFile:function(){
                 var self = this;
                 self.tree.resource.data.splice(0, self.tree.resource.data.length);
@@ -210,6 +222,7 @@ define([
                     }
                 });
             },
+            //获取录制文件数据
             refreshRecord:function(){
                 var self=this;
                 ajax.post('/command/record/query',null,function (data) {
@@ -239,6 +252,7 @@ define([
                     }
                 })
             },
+            //转发操作
             handleRowRemove:function(scope){
                 var self = this;
                 var row = scope.row;
@@ -255,6 +269,7 @@ define([
                     self.table.total -= 1;
                 });
             },
+            //全部停止转发
             handleForwardStopAll:function(){
                 var self = this;
                 ajax.post('/command/forward/stop/all', {id:self.group.id}, function(){
@@ -262,6 +277,7 @@ define([
                     self.table.total = 0;
                 });
             },
+            //转发按钮的事件
             handleForward:function(){
                 var self = this;
                 if(self.tree.members.select.length <= 0){

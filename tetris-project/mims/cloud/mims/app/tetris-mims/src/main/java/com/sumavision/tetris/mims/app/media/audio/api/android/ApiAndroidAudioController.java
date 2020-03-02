@@ -90,6 +90,9 @@ public class ApiAndroidAudioController {
 			List<FolderBreadCrumbVO> breadCrumbList = folderQuery.convertFolderBreadCrumbToList(breadCrumb);
 			medias.put("breadCrumb", breadCrumbList);
 		}
+		if(medias.get("rows") == null){
+			medias.put("rows", new ArrayList<MediaAudioVO>());
+		}
 		return medias;
 	}
 	

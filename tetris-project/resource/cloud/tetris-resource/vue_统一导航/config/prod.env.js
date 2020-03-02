@@ -1,7 +1,7 @@
 'use strict'
 
 // 重要
-const useLocalRouteConst = false
+const useLocalRouteConst = true
 
 module.exports = {
   NODE_ENV: '"production"',

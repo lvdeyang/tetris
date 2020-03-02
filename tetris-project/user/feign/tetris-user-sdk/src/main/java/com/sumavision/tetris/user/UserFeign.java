@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
 
 /**
@@ -59,6 +60,20 @@ public interface UserFeign {
 	 */
 	@RequestMapping(value = "/user/feign/find/by/id/in")
 	public JSONObject findByIdIn(@RequestParam("ids") String ids);
+	
+	/**
+	 * 根据id和类型查询用户<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月19日 下午3:30:27
+	 * @param JSONArray ids 用户id列表
+	 * @param String terminalType 查询类型
+	 * @return JSONObject 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/find/by/id/in/and/type")
+	public JSONObject findByIdInAndType(
+			@RequestParam("ids") String ids,
+			@RequestParam("terminalType") String terminalType);
 	
 	/**
 	 * 分页查询公司下的用户列表（带例外）<br/>
@@ -135,6 +150,7 @@ public interface UserFeign {
 	 */
 	@RequestMapping(value = "/user/feign/query/all/user/baseInfo/by/page")
 	public JSONObject queryAllUserBaseInfo(
+			@RequestParam("terminalType") String terminalType,
 			@RequestParam("currentPage") int currentPage,
 			@RequestParam("pageSize") int pageSize);
 	
@@ -146,7 +162,7 @@ public interface UserFeign {
 	 * @return List<UserVO> 用户列表
 	 */
 	@RequestMapping(value = "/user/feign/query/all/user/baseInfo")
-	public JSONObject queryAllUserBaseInfo();
+	public JSONObject queryAllUserBaseInfo(@RequestParam("terminalType") String terminalType);
 	
 	/**
 	 * 根据用户名模糊查询分页<br/>
@@ -193,8 +209,10 @@ public interface UserFeign {
 	 * @param Long id 用户名
 	 * @return UserVO 用户
 	 */
-	@RequestMapping(value = "/user/feign/query/user/by/id")
-	public JSONObject queryUserById(@RequestParam("id") Long id);
+	@RequestMapping(value = "/user/feign/query/user/by/id/and/type")
+	public JSONObject queryUserById(
+			@RequestParam("id") Long id,
+			@RequestParam("terminalType") String terminalType);
 	
 	/**
 	 * 根据用户号码查询用户<br/>
@@ -217,4 +235,7 @@ public interface UserFeign {
 	 */
 	@RequestMapping(value = "/user/feign/query/user/by/role")
 	public JSONObject queryUserByRole(@RequestParam("roleId") Long roleId);
+	
+	@RequestMapping(value = "/user/feign/find/by/nickname/in")
+	public JSONObject queryUsersByNicknameIn(@RequestParam("nicknames") String nicknames);
 }

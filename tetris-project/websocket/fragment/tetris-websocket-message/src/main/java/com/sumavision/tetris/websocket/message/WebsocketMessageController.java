@@ -1,6 +1,7 @@
 package com.sumavision.tetris.websocket.message;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -23,6 +26,9 @@ public class WebsocketMessageController {
 	
 	@Autowired
 	private WebsocketMessageDAO websocketMessageDao;
+	
+	@Autowired
+	private WebsocketMessageQuery websocketMessageQuery;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -62,8 +68,29 @@ public class WebsocketMessageController {
 	 * <b>日期：</b>2019年10月17日 下午4:04:43
 	 * @param Long id 消息id
 	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/resend")
 	public Object resend(Long id, HttpServletRequest request) throws Exception{
 		websocketMessageService.resend(id);
+		return null;
+	}
+	
+	/**
+	 * 批量消费临时消息,消费后不会再向前端推消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月21日 下午4:16:56
+	 * @param JSONArray ids 消息id列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/consume/all")
+	public Object consumeAll(
+			String ids, 
+			HttpServletRequest request) throws Exception{
+		List<Long> parsedIds = JSON.parseArray(ids, Long.class);
+		websocketMessageService.consumeAll(parsedIds);
 		return null;
 	}
 	
@@ -167,6 +194,47 @@ public class WebsocketMessageController {
 	public Object countByUnconsumedCommands(HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		return websocketMessageDao.countByUserIdAndMessageTypeAndConsumed(user.getId(), WebsocketMessageType.COMMAND, false);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/instant/message")
+	public void broadcastMeetingMessage(
+			Long commandId,
+			String userIds,
+			String message,
+			Long fromUserId,
+			String fromUsername) throws Exception{
+		List<Long> parsedIds = JSON.parseArray(userIds, Long.class);
+		websocketMessageService.broadcastMeetingMessage(commandId, parsedIds, message, fromUserId, fromUsername);
+	}
+	
+	/**
+	 * 查询历史及时消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 下午10:20:27
+	 * @param Long commandId 会议id
+	 * @param int currentPage 当前页码
+	 * @param int pageSize 每页数据量
+	 * @return long total 总数据量
+	 * @return List<WebsocketMessageVO> rows 消息列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/history/instant/message")
+	public Object queryHistoryInstantMessage(
+			Long commandId,
+			int currentPage,
+			int pageSize,
+			HttpServletRequest request) throws Exception{
+		
+		long total = websocketMessageDao.countByUserIdAndMessageType(commandId, WebsocketMessageType.INSTANT_MESSAGE);
+		List<WebsocketMessageVO> rows = websocketMessageQuery.findByUserIdAndMessageTypeOrderByUpdateTimeDesc(commandId, WebsocketMessageType.INSTANT_MESSAGE, currentPage, pageSize);
+		
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", rows)
+												   .getMap();
 	}
 	
 }

@@ -175,7 +175,10 @@ define([
                     var self = this;
                     self.dialog.editColumn.visible = true;
                     self.dialog.editColumn.key = columnKey;
-                    self.dialog.editColumn.column = column;
+                    self.dialog.editColumn.column = {
+                        name:column.name,
+                        value:typeof column.path === 'undefined'?column.value:column.path
+                    };
                 },
                 handleEditColumnClose:function(){
                     var self = this;
@@ -185,11 +188,19 @@ define([
                 },
                 handleEditColumnCommit:function(){
                     var self = this;
-                    ajax.post('/service/type/save/column', {
+                    var param = {
                         id:self.tree.current.id,
                         columnKey:self.dialog.editColumn.key,
                         columnValue:self.dialog.editColumn.column.value
-                    }, function(data){
+                    };
+                    if(self.dialog.editColumn.key === 'installScript'){
+                        param.columnKey = 'installScriptPath';
+                    }else if(self.dialog.editColumn.key === 'startupScript'){
+                        param.columnKey = 'startupScriptPath';
+                    }else if(self.dialog.editColumn.key === 'shutdownScript'){
+                        param.columnKey = 'shutdownScriptPath';
+                    }
+                    ajax.post('/service/type/save/column', param, function(data){
                         var column = self.columns[self.dialog.editColumn.key];
                         if(column.path===''|| column.path){
                             column.path = self.dialog.editColumn.column.value;
@@ -197,6 +208,11 @@ define([
                             column.value = self.dialog.editColumn.column.value;
                         }
                         self.handleEditColumnClose();
+                        self.tree.current.params[param.columnKey] = param.columnValue;
+                        self.$message({
+                            type:'success',
+                            message:'保存成功'
+                        });
                     });
                 }
             },
@@ -287,9 +303,19 @@ define([
                             if($codeScope.hasClass(editor.name)){
                                 var value = editor.editor.getValue();
                                 self.columns[editor.name].value = value;
-                                console.log(self.columns[editor.name].value);
-                                $codeScope.toggleClass('edit');
-                                editor.editor.setReadOnly(true);
+                                ajax.post('/service/type/save/column', {
+                                    id:self.tree.current.id,
+                                    columnKey:editor.name,
+                                    columnValue:value
+                                }, function(data){
+                                    self.tree.current.params[editor.name] = self.columns[editor.name].value;
+                                    $codeScope.toggleClass('edit');
+                                    editor.editor.setReadOnly(true);
+                                    self.$message({
+                                        type:'success',
+                                        message:'保存成功'
+                                    });
+                                });
                                 break;
                             }
                         }

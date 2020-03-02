@@ -107,7 +107,6 @@ define([
                     }
                 });*/
                 ajax.post('/monitor/device/load/callable/users', null, function(data){
-//                ajax.post('/command/basic/save', {userIdList:"[2259]"}, function(data){
                     if(data && data.length>0){
                         for(var i=0; i<data.length; i++){
                             self.tree.data.push(data[i]);
@@ -225,7 +224,6 @@ define([
             }
         },
         created:function(){
-        	//return;
             var self = this;
             ajax.post('/monitor/device/find/user/binding/player', null, function(data){
                 self.$embed = $('<embed width="100%" height="100%" style="z-index:0" type="application/media-suma-lightlive"/>');

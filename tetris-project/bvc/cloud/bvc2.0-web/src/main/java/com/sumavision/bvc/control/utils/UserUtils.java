@@ -12,6 +12,7 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.service.UserQueryService;
 import com.sumavision.bvc.control.welcome.UserVO;
+import com.sumavision.tetris.auth.token.TerminalType;
 
 /**
  * 用户相关操作<br/>
@@ -90,6 +91,7 @@ public class UserUtils {
 	
 	/**
 	 * 根据用户id查询用户<br/>
+	 * <p>用户的在线状态按照 QT_ZK 查找</p>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月3日 下午2:41:44
@@ -97,12 +99,27 @@ public class UserUtils {
 	 * @return UserBO 用户
 	 */
 	public UserBO queryUserById(Long userId) throws Exception{
-		try{
-//			Map<String, UserBO> resultMap = userQueryService.queryUserInfoById(userId);
-//			if(resultMap==null || resultMap.size()<=0 || resultMap.get("user")==null) return null;
-//			return resultMap.get("user");
-			
-			return userQueryService.queryUserByUserId(userId);
+		try{			
+			return userQueryService.queryUserByUserId(userId, TerminalType.QT_ZK);
+		}catch(Exception e){
+			return null;
+		}
+	}
+	
+	/**
+	 * 根据用户id查询用户<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月24日 下午4:51:36
+	 * @param userId
+	 * @param terminalType
+	 * @return
+	 * @throws Exception
+	 */
+	public UserBO queryUserById(Long userId, TerminalType terminalType) throws Exception{
+		try{			
+			return userQueryService.queryUserByUserId(userId, terminalType);
 		}catch(Exception e){
 			return null;
 		}

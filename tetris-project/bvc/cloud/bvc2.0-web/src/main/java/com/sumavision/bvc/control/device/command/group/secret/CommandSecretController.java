@@ -29,12 +29,12 @@ public class CommandSecretController {
 	CommandSecretServiceImpl commandSecretServiceImpl;
 	
 	/**
-	 * 发起专向指挥<br/>
+	 * 发起专向会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月24日 下午4:22:01
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param userId 目标用户id
 	 * @param request
 	 * @return
@@ -51,7 +51,7 @@ public class CommandSecretController {
 		
 		String name = new StringBuilder()
 				.append(user.getName())
-				.append("发起的专向指挥")
+				.append("发起的专向会议")
 				.toString();
 		
 		Object chairSplits = commandSecretServiceImpl.start(user.getId(), user.getName(), name, Long.parseLong(userId), -1);
@@ -60,7 +60,7 @@ public class CommandSecretController {
 	}
 	
 	/**
-	 * 指定播放器，发起专向指挥<br/>
+	 * 指定播放器，发起专向会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -83,7 +83,7 @@ public class CommandSecretController {
 		
 		String name = new StringBuilder()
 				.append(user.getName())
-				.append("发起的专向指挥")
+				.append("发起的专向会议")
 				.toString();
 		
 		Object chairSplits = commandSecretServiceImpl.start(user.getId(), user.getName(), name, Long.parseLong(userId), serial);
@@ -92,12 +92,12 @@ public class CommandSecretController {
 	}
 	
 	/**
-	 * 停止专向指挥<br/>
+	 * 停止专向会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月7日 下午3:15:50
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -117,12 +117,12 @@ public class CommandSecretController {
 	}
 	
 	/**
-	 * 成员同意加入专向指挥<br/>
+	 * 成员同意加入专向会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月7日 下午3:16:22
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -142,12 +142,12 @@ public class CommandSecretController {
 	}
 	
 	/**
-	 * 成员拒绝加入专向指挥<br/>
+	 * 成员拒绝加入专向会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月7日 下午3:16:48
-	 * @param id 指挥id
+	 * @param id 会议id
 	 * @param request
 	 * @return
 	 * @throws Exception

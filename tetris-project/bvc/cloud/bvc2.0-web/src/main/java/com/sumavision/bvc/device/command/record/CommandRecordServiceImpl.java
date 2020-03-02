@@ -52,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 
 * @ClassName: CommandRecordServiceImpl 
-* @Description: 指挥录制业务
+* @Description: 会议录制业务
 * @author zsy
 * @date 2019年11月18日 上午10:56:48 
 *
@@ -87,7 +87,7 @@ public class CommandRecordServiceImpl {
 	private ExecuteBusinessProxy executeBusiness;	
 	
 	/**
-	 * 指挥开始录制<br/>
+	 * 会议开始录制<br/>
 	 * <p>所有录制都不呼叫编码器，停止的时候也不挂断编码器</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -262,7 +262,7 @@ public class CommandRecordServiceImpl {
 				CommandGroupRecordFragmentPO fragment;
 				fragment = commandCommonUtil.queryFragmentBySrcMemberId(record, forward.getSrcMemberId());
 				if(fragment == null){
-					//在某个用户被从指挥删除之后，又加入到指挥，那么其memberId会改变，使用info即用户名查询
+					//在某个用户被从会议删除之后，又加入到会议，那么其memberId会改变，使用info即用户名查询
 					CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
 					if(srcMember != null){
 						fragment = commandCommonUtil.queryFragmentByInfo(record, srcMember.getUserName());
@@ -356,7 +356,7 @@ public class CommandRecordServiceImpl {
 	}
 
 	/**
-	 * 指挥停止录制<br/>
+	 * 会议停止录制<br/>
 	 * <p>所有录制都不呼叫编码器，停止的时候也不挂断编码器</p>
 	 * <p>该方法不会修改group，只读取groupName，因此不需要处理group的同步</p>
 	 * <b>作者:</b>zsy<br/>
@@ -431,8 +431,8 @@ public class CommandRecordServiceImpl {
 	}
 	
 	/**
-	 * 开始播放指挥录像<br/>
-	 * <p>完整的一段指挥录像，包含多个片段</p>
+	 * 开始播放会议录像<br/>
+	 * <p>完整的一段会议录像，包含多个片段</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月26日 上午10:20:14
@@ -452,7 +452,7 @@ public class CommandRecordServiceImpl {
 				CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount);
 				//recordId-fragmentId@@UUID 该规则不需要记录
 				player.setBusinessId(record.getId().toString() + "-" + fragment.getId().toString() + "@@" + UUID.randomUUID().toString().replaceAll("-", ""));
-				//录像：xxx指挥，xx成员，开始时间
+				//录像：xxx会议，xx成员，开始时间
 				player.setBusinessName("录像：" + fragment.getInfo() + " " + DateUtil.format(fragment.getStartTime(), DateUtil.dateTimePattern));
 				player.setPlayerBusinessType(PlayerBusinessType.PLAY_COMMAND_RECORD);
 				

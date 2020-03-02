@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
+import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -80,6 +81,71 @@ public class TranscodeTaskFeignController {
 		String response = transcodeTaskService.analysisInput(analysisInputVO);
 		System.out.println("刷源返回" + response);
 		return response;
+	}
+	
+	/**
+	 * 切换备份源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月18日 上午8:38:48
+	 * @param String inputId 输入id
+	 * @param String index 备份源索引
+	 * @param String capacityIp 能力ip
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/change/backup")
+	public Object changeBackup(
+			String inputId,
+			String index,
+			String capacityIp,
+			HttpServletRequest request) throws Exception{
+		
+		transcodeTaskService.changeBackUp(inputId, index, capacityIp);
+		
+		return null;
+	}
+	
+
+	/**
+	 * 添加转码任务盖播<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月21日 上午11:11:27
+	 * @param String taskId 集群任务id
+	 * @param String input cover输入
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/cover")
+	public Object addCover(
+			String taskId,
+			String input,
+			HttpServletRequest request) throws Exception{
+		
+		InputBO inputBO = JSONObject.parseObject(input, InputBO.class);
+		transcodeTaskService.addCover(taskId, inputBO);
+		
+		return null;
+	}
+	
+	/**
+	 * 删除转码任务盖播<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月21日 上午11:16:04
+	 * @param String taskId 集群任务id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/cover")
+	public Object changeBackup(
+			String taskId,
+			HttpServletRequest request) throws Exception{
+		
+		transcodeTaskService.deleteCover(taskId);
+		
+		return null;
 	}
 	
 }

@@ -1297,6 +1297,9 @@ public class FolderService {
 		//音频流
 		createCompanyFolder(companyId, companyName, FolderType.COMPANY_AUDIO_STREAM, root.getId(), parentPath, Long.parseLong(roleId), roleName);
 		
+		//push直播
+		createCompanyFolder(companyId, companyName, FolderType.COMPANY_PUSH_LIVE, root.getId(), parentPath, Long.parseLong(roleId), roleName);
+		
 		//文本
 		createCompanyFolder(companyId, companyName, FolderType.COMPANY_TXT, root.getId(), parentPath, Long.parseLong(roleId), roleName);
 	

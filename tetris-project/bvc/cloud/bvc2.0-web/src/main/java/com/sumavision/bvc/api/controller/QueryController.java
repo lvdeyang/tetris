@@ -31,13 +31,13 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @ClassName: API的查询接口
+ * @ClassName: API的查询接口。目前只有机顶盒使用
  * @author zsy
  * @date 2018年12月8日 下午2:27:00
  */
 @Slf4j
 @Controller
-@RequestMapping(value = "/api/query")
+@RequestMapping(value = "/api/tvos/api/query")
 public class QueryController {	
 	
 	@Autowired

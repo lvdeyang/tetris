@@ -63,7 +63,6 @@
     <meta name="msapplication-tap-highlight" content="no">
 
     <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/ui/element-ui/element-ui-2.4.3.min.css"/>
-
     <!-- icons -->
     <link rel="stylesheet" type="text/css" href="<%=basePath %>web/lib/icon/Font-Awesome-3.2.1/css/font-awesome.css"/>
 
@@ -79,10 +78,9 @@
 
     <style type="text/css">
     /* reset */
-    *{font-family:'Microsoft YaHei'!important;}
+    *{font-family:'Microsoft YaHei';}
     html,
     body{width:100%; height:100%; margin:0; padding:0;}
-    body{background-color:#F2F3F7; min-width:940px;}
     aside,main{height:100%!important;}
     .page-wrapper{width:100%; height:100%; padding:0; border:0; position:relative;}
     .page-body{position:absolute; top:92px; left:0; right:0; bottom:0; padding:15px 0 15px 15px;}

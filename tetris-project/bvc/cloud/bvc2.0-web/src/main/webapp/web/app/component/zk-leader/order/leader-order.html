@@ -52,31 +52,31 @@
                     </div>
                 </div>
             </el-tab-pane>
-            <el-tab-pane label="录像回放" name="2">
-                <div style="position:absolute; left:32px; top:45px; right:0; bottom:0;">
-                    <div style="width:100%; height:100%; position:relative;">
-                        <el-scrollbar style="height:100%;">
-                            <el-tree
-                                    :data="tree.record.data"
-                                    node-key="id"
-                                    :props="tree.props">
-                                            <span slot-scope="{node,data}">
-                                                <el-radio v-if="data.type==='RECORD_PLAYBACK'"
-                                                          v-model="tree.record.select" :label="data.id">
-                                                    <span class="icon-file-alt"
-                                                          style="font-size:15px; position:relative; top:1px;"></span>
-                                                    <span style="position:relative; top:1px;font-size: 18px">{{data.groupName}}</span>
-                                                </el-radio>
-                                                <span v-else>
-                                                    <span class="icon-folder-close"></span>
-                                                    <span>{{data.groupName}}</span>
-                                                </span>
-                                            </span>
-                            </el-tree>
-                        </el-scrollbar>
-                    </div>
-                </div>
-            </el-tab-pane>
+            <!--<el-tab-pane label="录像回放" name="2">-->
+                <!--<div style="position:absolute; left:32px; top:45px; right:0; bottom:0;">-->
+                    <!--<div style="width:100%; height:100%; position:relative;">-->
+                        <!--<el-scrollbar style="height:100%;">-->
+                            <!--<el-tree-->
+                                    <!--:data="tree.record.data"-->
+                                    <!--node-key="id"-->
+                                    <!--:props="tree.props">-->
+                                            <!--<span slot-scope="{node,data}">-->
+                                                <!--<el-radio v-if="data.type==='RECORD_PLAYBACK'"-->
+                                                          <!--v-model="tree.record.select" :label="data.id">-->
+                                                    <!--<span class="icon-file-alt"-->
+                                                          <!--style="font-size:15px; position:relative; top:1px;"></span>-->
+                                                    <!--<span style="position:relative; top:1px;font-size: 18px">{{data.groupName}}</span>-->
+                                                <!--</el-radio>-->
+                                                <!--<span v-else>-->
+                                                    <!--<span class="icon-folder-close"></span>-->
+                                                    <!--<span>{{data.groupName}}</span>-->
+                                                <!--</span>-->
+                                            <!--</span>-->
+                            <!--</el-tree>-->
+                        <!--</el-scrollbar>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</el-tab-pane>-->
             <el-tab-pane label="组织机构" name="3">
                 <div style="position:absolute; left:32px; top:45px; right:0; bottom:0;">
                     <div style="width:100%; height:100%; position:relative;">
@@ -89,8 +89,8 @@
                                                 <el-radio v-if="data.type==='USER'"
                                                           v-model="tree.user.select" :label="data.id">
                                                     <span class="icon-file-alt"
-                                                          style="position:relative; top:1px;font-size: 16px"></span>
-                                                    <span style="position:relative; top:1px;font-size: 16px">{{data.name}}</span>
+                                                          :style="data.style+'position:relative; top:1px;font-size: 16px'"></span>
+                                                    <span :style="data.style+'position:relative; top:1px;font-size: 16px'">{{data.name}}</span>
                                                 </el-radio>
                                                 <span v-else>
                                                     <span class="icon-folder-close"></span>

@@ -113,11 +113,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-jta-narayana</artifactId>
-		</dependency>
-		
-		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
 		    <artifactId>tetris-menu-feign</artifactId>
 		    <version>0.0.1-SNAPSHOT</version>
@@ -168,6 +163,30 @@
 	      <artifactId>spring-ldap-core</artifactId>
 	      <version>2.0.4.RELEASE</version>
 	 	</dependency>
+	 	
+        <dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-common</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-mvc</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-orm</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+	 	
+	 	<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-csv</artifactId>
+			<version>1.8</version>
+		</dependency>
 		
     </dependencies>
     

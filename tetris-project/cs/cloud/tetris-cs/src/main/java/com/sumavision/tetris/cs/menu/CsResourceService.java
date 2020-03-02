@@ -54,17 +54,7 @@ public class CsResourceService {
 				}
 			}
 			if (alive) continue;
-			CsResourcePO newresource = new CsResourcePO();
-			newresource.setMimsUuid(aVideoVO.getUuid());
-			newresource.setName(aVideoVO.getName());
-			newresource.setType(aVideoVO.getType());
-			newresource.setMimetype(aVideoVO.getMimetype());
-			newresource.setDuration(aVideoVO.getDuration());
-			newresource.setPreviewUrl(aVideoVO.getPreviewUrl());
-			newresource.setEncryption(aVideoVO.getEncryption() != null && aVideoVO.getEncryption() ? "true" : "false");
-			newresource.setEncryptionUrl(aVideoVO.getEncryptionUrl());
-			newresource.setDownloadCount(aVideoVO.getDownloadCount());
-			newresource.setMimsUuid(aVideoVO.getUuid());
+			CsResourcePO newresource = new CsResourcePO().getFromAVideoVO(aVideoVO);
 			newresource.setChannelId(channelId);
 			newresource.setParentId(parentId);
 			newresource.setParentPath(parentMenu.getParentPath() + "/" + parentMenu.getName());

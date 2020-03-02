@@ -17,7 +17,6 @@ import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
-import com.sumavision.tetris.business.common.service.LockService;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramAudioBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramBO;
@@ -457,29 +456,18 @@ public class StreamPassbyService {
 	 */
 	public OutputBO stream2OutputBO(String outputId, String videoTaskId, String audioTaskId, String encodeVideoId, String encodeAudioId, String name, String storageUrl) throws Exception{
 	
-		OutputHlsBO hls = new OutputHlsBO().setPrimary_m3u8(name)
-										   .setVideo_array(new ArrayList<OutputVideoBO>())
-										   .setAudio_array(new ArrayList<OutputAudioBO>())
-										   .setMedia_group(new ArrayList<OutputMediaGroupBO>())
-										   .setStorage(new ArrayList<OutputStorageBO>());
-		
-		OutputVideoBO video = new OutputVideoBO().setTask_id(videoTaskId)
-				                                 .setEncode_id(encodeVideoId);
-		
-		OutputAudioBO audio = new OutputAudioBO().setTask_id(audioTaskId)
-												 .setEncode_id(encodeAudioId);
-		
-		OutputIndexBO index = new OutputIndexBO().setIndex(0);
-		
-		OutputMediaGroupBO media = new OutputMediaGroupBO().setVideo(0)
-														   .setAudio(new ArrayListWrapper<OutputIndexBO>().add(index).getList());
-		
 		OutputStorageBO storage = new OutputStorageBO().setUrl(storageUrl);
 		
-		hls.getAudio_array().add(audio);
-		hls.getVideo_array().add(video);
-		hls.getMedia_group().add(media);
-		hls.getStorage().add(storage);
+		OutputAudioBO audio = new OutputAudioBO().setTask_id(audioTaskId)
+				 								 .setEncode_id(encodeAudioId);
+		
+		OutputMediaGroupBO media = new OutputMediaGroupBO().setVideo_task_id(videoTaskId)
+				   										   .setVideo_encode_id(encodeVideoId)
+				   										   .setAudio_array(new ArrayListWrapper<OutputAudioBO>().add(audio).getList());
+
+		OutputHlsBO hls = new OutputHlsBO().setPlaylist_name(name)
+											.setMedia_group_array(new ArrayListWrapper<OutputMediaGroupBO>().add(media).getList())
+											.setStorage(storage);
 	
 		OutputBO output = new OutputBO().setId(outputId)
 										.setHls(hls);

@@ -93,6 +93,9 @@ public class CommandUserInfoController {
 		if(null == userInfo){
 			//如果没有则建立默认
 			userInfo = commandUserServiceImpl.generateDefaultUserInfo(user.getId(), user.getName(), true);
+		}else{
+			//如果有，则更新播放器信息
+			commandUserServiceImpl.updateUserInfoPlayers(userInfo, true);
 		}
 
 		//查找自己看自己，如果没有，则添加一个
@@ -101,11 +104,11 @@ public class CommandUserInfoController {
 			selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
 			if(selfPlayer == null){
 				UserBO userBO = userUtils.queryUserById(user.getId());
-				UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-				commandVodService.seeOneselfStart(userBO, admin);
+//				UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+				commandVodService.seeOneselfLocalStart(userBO);
 			}
 		}catch(Exception e){
-			log.info(user.getName() + " 用户添加自己看自己失败");
+			log.info(user.getName() + " 用户添加本地视频预览失败");
 			e.printStackTrace();
 		}
 		

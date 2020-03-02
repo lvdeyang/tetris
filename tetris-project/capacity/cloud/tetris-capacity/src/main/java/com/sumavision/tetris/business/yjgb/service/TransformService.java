@@ -468,10 +468,10 @@ public class TransformService {
 		CreateOutputsRequest outputsRequest = new CreateOutputsRequest();
 		outputsRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 		//创建输出
-		CreateOutputsResponse outputResponse = capacityService.createOutputsAddMsgId(outputsRequest);
+		CreateOutputsResponse outputResponse = capacityService.createOutputsAddMsgId(outputsRequest, capacityProps.getIp());
 		
 		//创建输出返回处理 -- 回滚
-		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null);
+		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, capacityProps.getIp());
 		
 		outputs.addAll(outputBOs);
 		
@@ -521,7 +521,7 @@ public class TransformService {
 				delete.getOutput_array().add(idRequest);
 			}
 
-			capacityService.deleteOutputsAddMsgId(delete);
+			capacityService.deleteOutputsAddMsgId(delete, capacityProps.getIp());
 			
 			taskPO.setOutput(JSON.toJSONString(outputs));
 			taskOutputDao.save(taskPO);

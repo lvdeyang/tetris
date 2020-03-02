@@ -4,12 +4,11 @@
 define([
 
     'storage',
-    'router',
     'config',
     'jquery',
     'json'
 
-], function(storage, router, config, $){
+], function(storage, config, $){
 
     var baseError = '#/' + config.redirect.error;
 
@@ -365,6 +364,21 @@ define([
             });
 
         },
+        
+        //向外部地址uri直接请求post。例如修改密码、websocket地址请求
+        editPsdPost:function(uri, data, callback, contentType, catchCodeArr, $loading, dataType, async){
+            return $.ajax({
+                type:'POST',
+                url:uri,
+                data:data,
+                success:callback,
+                $loading:$loading,
+                dataType:dataType,
+                contentType:contentType,
+                async:async,
+                'catch':ajax.doCatchCode(catchCodeArr)
+            });
+        },
 
         //处理上传
         upload:function(uri, formData, callback, catchCodeArr){
@@ -380,6 +394,42 @@ define([
                 'catch':ajax.doCatchCode(catchCodeArr)
             });
 
+        },
+
+        //文件下载
+        download:function(uri, data, callback, method){
+            method = method || 'POST';
+            var url = window.HOST + window.SCHEMA + uri;
+            var xhr = new XMLHttpRequest();
+            var _token = storage.getItem(ajax._conf.authname) || '';
+            var _sessionId = storage.getItem(ajax._conf.sessionIdName) || '';
+            xhr.open(method, url, true);
+            xhr.setRequestHeader('Authorization', _token);
+            xhr.setRequestHeader('tetris-001', _token);
+            xhr.setRequestHeader('tetris-002', _sessionId);
+            xhr.responseType = "blob";
+            xhr.onload = function () {
+                if(this.status === 200){
+                    var blob = this.response;
+                    if(typeof callback === 'function') callback(blob);
+                }else{
+                    console.error('http异常状态：'+this.status);
+                    console.error(url);
+                    console.log(arguments);
+                }
+                xhr = null;
+            };
+            xhr.onerror = function(){
+                console.error('请求失败：'+url);
+                console.log(arguments);
+                xhr = null;
+            };
+            xhr.ontimeout = function(){
+                console.error('请求超时：'+url);
+                console.log(arguments);
+                xhr = null;
+            };
+            xhr.send();
         },
 
         //update

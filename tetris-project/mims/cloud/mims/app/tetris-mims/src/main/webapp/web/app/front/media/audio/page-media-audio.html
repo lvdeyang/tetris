@@ -212,6 +212,20 @@
                     <el-form-item label="是否加密" prop="delivery">
                         <el-switch v-model="dialog.addAudio.encryption"></el-switch>
                     </el-form-item>
+                    <el-form-item label="是否转码" prop="delivery">
+                        <el-switch v-model="dialog.addAudio.mediaEdit" @change="handleMediaEditChange"></el-switch>
+                    </el-form-item>
+                    <el-form-item label="转码模板"  v-if="dialog.addAudio.mediaEdit">
+                        <el-select
+                                v-model="dialog.addAudio.mediaEditTemplate"
+                                placeholder="请选择转码模板">
+                            <el-option
+                                    v-for="item in dialog.addAudio.mediaEditTemplates"
+                                    :key="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
                     <el-form-item v-show="dialog.addAudio.way==0">
                         <el-button size="small" type="primary" @click="handleUpload"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
                         <div v-if="dialog.addAudio.task">{{dialog.addAudio.task.name}}</div>
