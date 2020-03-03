@@ -348,7 +348,9 @@ public class BundleManageController extends ControllerBase {
 //			}
 //		}
 
-		bundleHeartBeatService.removeBundleStatus(bundle.getDeviceIp());
+		if(bundle.getDeviceIp() != null){
+			bundleHeartBeatService.removeBundleStatus(bundle.getDeviceIp());
+		}
 
 		bundleService.delete(bundle);
 
@@ -372,6 +374,7 @@ public class BundleManageController extends ControllerBase {
 		// 通过消息队列通知接入层
 //			interfaceFromResource.delBundleRequest(bundle);
 
+		//为了删除ldap上面的设备
 		if (!SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {
 			// 从ldap删除
 			try {
