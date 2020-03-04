@@ -252,11 +252,31 @@ require([
         }
     });
 
+    //生成path，用于active
+    function generatePath(menus){
+        if(menus && menus.length>0){
+            for(var i=0; i<menus.length; i++){
+                var menu = menus[i];
+                menu.path = menu.title;
+                if(menu.link){
+                    if(menu.link.indexOf("#/") != -1){
+                        menu.path = menu.link.split("#")[1].split("?")[0];
+                    }
+                }
+                if(menu.sub && menu.sub.length>0){
+                    generatePath(menu.sub);
+                }
+            }
+        }
+    }
+
     ajax.get('/prepare/app', null, function(data){
     	var user = data.user;
     	var menus = data.menus;
+        context.setProp('token', window.TOKEN);
     	menuUtil.parseUrlTemplate(menus);
         commons.data = menus;
+        generatePath(commons.data);
     	
         //初始化全局vue实例
         app = new Vue({

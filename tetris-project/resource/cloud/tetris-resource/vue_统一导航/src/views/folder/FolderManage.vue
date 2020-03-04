@@ -231,7 +231,10 @@
         userTableLoading : false,
         dialogAddForderFormVisible : false,
         dialogmodifyForderFormVisible : false,
-        folderForm : {},
+        folderForm : {
+          name: "",
+          toLdap: false
+        },
         dialogsetRootVisible : false,
         setRootId : "",
         setRootOptions : [],
@@ -432,8 +435,6 @@
 
       showAddFolderDialog : function(){
         this.dialogAddForderFormVisible = true;
-        this.folderForm = {};
-        this.folderForm.toLdap = false;
       },
       addFolder : function(){
         if(!this.folderForm.name.length){

@@ -531,6 +531,37 @@ public class TransformService {
 	}
 	
 	/**
+	 * 删除转码任务的全部输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 下午5:45:09
+	 * @param String id 任务id
+	 */
+	public void deleteAllOutput(String id) throws Exception{
+		
+		TaskOutputPO taskPO = taskOutputDao.findByTaskUuidAndType(id, BusinessType.YJGB);
+		
+		if(taskPO == null){
+			throw new BaseException(StatusCode.ERROR, "任务不存在在！");
+		}
+		
+		List<OutputBO> outputs = JSONObject.parseArray(taskPO.getOutput(), OutputBO.class);
+
+		DeleteOutputsRequest delete = new DeleteOutputsRequest().setOutput_array(new ArrayList<IdRequest>());
+		for(OutputBO outputBO: outputs){
+			IdRequest idRequest = new IdRequest().setId(outputBO.getId());
+			delete.getOutput_array().add(idRequest);
+		}
+
+		capacityService.deleteOutputsAddMsgId(delete, capacityProps.getIp());
+		
+		taskPO.setOutput(null);
+		taskOutputDao.save(taskPO);
+			
+		
+	}
+	
+	/**
 	 * 录制回调<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
