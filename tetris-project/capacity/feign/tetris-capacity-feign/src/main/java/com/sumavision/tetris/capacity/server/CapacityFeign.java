@@ -160,4 +160,40 @@ public interface CapacityFeign {
 	 */
 	@RequestMapping(value = "/director/task/feign/delete/output")
 	public JSONObject deleteOutput(@RequestParam("outputs") String outputs) throws Exception;
+	
+	/**
+	 * 添加应急广播任务输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月4日 上午8:34:36
+	 * @param String id 任务标识
+	 * @param String outputParam 输出
+	 */
+	@RequestMapping(value = "/capacity/transform/feign/add/output")
+	public JSONObject addTransformOutput(
+			@RequestParam("id") String id,
+			@RequestParam("outputParam") String outputParam) throws Exception;
+	
+	/**
+	 * 删除应急广播任务输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月4日 上午8:35:44
+	 * @param String id 任务标识
+	 * @param String outputParam 输出
+	 */
+	@RequestMapping(value = "/capacity/transform/feign/delete/output")
+	public JSONObject deleteTransformOutput(
+			@RequestParam("id") String id,
+			@RequestParam("outputParam") String outputParam) throws Exception;
+	
+	/**
+	 * 删除应急广播任务全部输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月4日 上午8:37:00
+	 * @param String id 任务标识
+	 */
+	@RequestMapping(value = "/capacity/transform/feign/delete/all")
+	public JSONObject deleteTransformAllOutput(@RequestParam("id") String id) throws Exception;
 }

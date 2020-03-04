@@ -11,13 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
-import com.suma.venus.resource.base.bo.ResultBO;
-import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
@@ -25,11 +21,12 @@ import com.suma.venus.resource.dao.ScreenRectTemplateDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
-import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
-import com.sumavision.tetris.commons.util.encoder.MessageEncoder;
+import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Md5Encoder;
 
@@ -70,6 +67,9 @@ public class BundleService extends CommonService<BundlePO> {
 	
 	@Autowired
 	private Md5Encoder md5Encoder;
+	
+	@Autowired
+	private WorkNodeService workNodeService;
 	
 	/**
 	 * 检验设备密码<br/>
@@ -405,6 +405,11 @@ public class BundleService extends CommonService<BundlePO> {
 			List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
 			List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
 			List<String> bundleIds = new ArrayList<String>();
+			
+			//自动选择player接入层
+			List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_JV210);
+			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
+				
 			// 创建17个播放器资源
 			for (int i = 1; i <= 17; i++) {
 				BundlePO bundlePO = new BundlePO();
@@ -417,6 +422,11 @@ public class BundleService extends CommonService<BundlePO> {
 				bundlePO.setBundleAlias("播放器");
 				bundlePO.setBundleNum(userNo + "_" + i);
 				bundlePO.setUserId(Long.valueOf(userId));
+				
+				if(choseWorkNode != null){
+					bundlePO.setAccessNodeUid(choseWorkNode.getNodeUid());
+				}
+				
 				// 默认上线
 				bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 
