@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
@@ -36,14 +37,18 @@ import com.suma.venus.alarmoprlog.orm.dao.ISubscribeAlarmDAO;
 import com.suma.venus.alarmoprlog.orm.entity.AlarmInfoPO;
 import com.suma.venus.alarmoprlog.orm.entity.AlarmPO;
 import com.suma.venus.alarmoprlog.orm.entity.RawAlarmPO;
+import com.suma.venus.alarmoprlog.orm.entity.SubscribeAlarmPO;
 import com.suma.venus.alarmoprlog.orm.entity.AlarmInfoPO.EBlockStatus;
 import com.suma.venus.alarmoprlog.orm.entity.AlarmPO.EAlarmStatus;
 import com.suma.venus.alarmoprlog.service.alarm.AlarmService;
+import com.suma.venus.alarmoprlog.service.alarm.HandleReceiveAlarmThread;
 import com.suma.venus.alarmoprlog.service.alarm.notify.AlarmNotifyThreadPool;
 import com.suma.venus.alarmoprlog.service.alarm.notify.HttpAlarmNotifyThread;
 import com.suma.venus.alarmoprlog.service.alarm.vo.AlarmVO;
 import com.suma.venus.alarmoprlog.service.alarm.vo.QueryAlarmVO;
 import com.sumavision.tetris.alarm.bo.AlarmParamBO;
+import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping("/alarm")
@@ -81,90 +86,11 @@ public class AlarmController {
 	@RequestMapping(value = "/tiggerAlarm", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> httpTriggerAlarm(@RequestBody AlarmParamBO alarmParamBO) {
-
-		// TODO ajax请求遇到跨域问题 未解决,现在为post表单方式
+		// ajax请求遇到跨域问题 未解决,现在为post表单方式
 		Map<String, Object> data = new HashMap<String, Object>();
-		
-		LOGGER.warn("alarmParamBO="+ JSONObject.toJSONString(alarmParamBO));
-		
-		// 获得alarmInfo
-		String alarmCode = alarmParamBO.getAlarmCode();
-		AlarmInfoPO alarmInfoPO = alarmInfoDAO.findByAlarmCode(alarmCode);
-
-		if (alarmInfoPO == null) {
-			LOGGER.warn("Cannot query any alarmInfo by alarmCode[{}]", alarmCode);
-			data.put("errMsg", "do not support this alarm type");
-			return data;
-		}
-
-		List<AlarmPO> alarmPOs = alarmService.queryAlarmPOforNewMsg(alarmParamBO, EAlarmStatus.UNTREATED);
-
-		// 组装rawAlarm
-		RawAlarmPO rawAlarmPO = new RawAlarmPO();
-		rawAlarmPO.setAlarmInfo(alarmInfoPO);
-		rawAlarmPO.setSourceServiceIP(alarmParamBO.getSourceServiceIP());
-		rawAlarmPO.setSourceService(alarmParamBO.getSourceService());
-		rawAlarmPO.setAlarmDevice(alarmParamBO.getAlarmDevice());
-		rawAlarmPO.setAlarmObj(alarmParamBO.getAlarmObj());
-		rawAlarmPO.setAlarmParams(formateParams(alarmParamBO.getParams()));
-		rawAlarmPO.setCreateTime(alarmParamBO.getCreateTime());
-
-		rawAlarmDAO.save(rawAlarmPO);
-
-		LOGGER.info("----------rawAlarmPO saved");
-
-		Long rawAlarmId = rawAlarmPO.getId();
-
-		if (rawAlarmId == null || rawAlarmId == -1L) {
-			LOGGER.error("fail to create rawAlarm");
-			data.put("errMsg", "");
-			return data;
-		}
-
-		RawAlarmPO rawAlarmPO2 = rawAlarmPO;
-
-		AlarmPO alarmPO = null;
-
-		if (alarmPOs == null || alarmPOs.isEmpty()) {
-
-			alarmPO = new AlarmPO();
-			alarmPO.setLastAlarm(rawAlarmPO2);
-			alarmPO.setFirstCreateTime(rawAlarmPO2.getCreateTime());
-			alarmPO.setAlarmStatus(EAlarmStatus.UNTREATED);
-			alarmPO.setAlarmCount(1);
-
-			alarmDAO.save(alarmPO);
-
-			Long alarmId = alarmPO.getId();
-			// 过滤，创建或者修改实时告警Alarm
-			if (alarmId == null || alarmId == -1L) {
-				LOGGER.error("fail to create alarm");
-				data.put("errMsg", "");
-				return data;
-			}
-
-		} else {
-
-			alarmPO = alarmPOs.get(0);
-
-			alarmPO.setAlarmCount(alarmPO.getAlarmCount() + 1);
-			alarmPO.setLastAlarm(rawAlarmPO2);
-
-			alarmDAO.save(alarmPO);
-
-		}
-
-		Long alarmPOId = alarmPO.getId();
-		rawAlarmPO2.setAlarmPOId(alarmPOId);
-		rawAlarmDAO.save(rawAlarmPO2);
-
-		HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO, subscribeAlarmDAO, alarmDAO,
-				loadBalanced, restTemplate);
-		// 放入线程池待执行
-		AlarmNotifyThreadPool.getThreadPool().execute(httpAlarmNotifyThread);
-
-		LOGGER.info("----------handleTrigger finish");
-		data.put("errMsg", "");
+		alarmParamBO.setType("alarm");
+		LOGGER.info("receive alarmParamBO=" + JSONObject.toJSONString(alarmParamBO) + ", add to queue");
+		HandleReceiveAlarmThread.push(alarmParamBO);
 		return data;
 	}
 
@@ -174,37 +100,11 @@ public class AlarmController {
 
 		// TODO ajax请求遇到跨域问题 未解决,现在为post表单方式
 		Map<String, Object> data = new HashMap<String, Object>();
-
-		LOGGER.info("----------handleRecovery start, alarmCode==" + alarmParamBO.getAlarmCode() + ", service=="
+		LOGGER.info("----------receive recover alarm, alarmCode==" + alarmParamBO.getAlarmCode() + ", service=="
 				+ alarmParamBO.getSourceService() + ", sourceServiceIP==" + alarmParamBO.getSourceServiceIP()
 				+ ", alarmObj==" + alarmParamBO.getAlarmObj() + ", creatTime==" + alarmParamBO.getCreateTime());
-
-		List<AlarmPO> alarmPOs = alarmService.queryAlarmPOforNewMsg(alarmParamBO, EAlarmStatus.UNTREATED);
-
-		if (CollectionUtils.isEmpty(alarmPOs)) {
-			// TODO 要不要考虑异步的情况
-			data.put("errMsg", "");
-			return data;
-		}
-
-		AlarmPO alarmPO = alarmPOs.get(0);
-		alarmPO.setRecoverTime(alarmParamBO.getCreateTime());
-		alarmPO.setAlarmStatus(EAlarmStatus.AUTO_RECOVER);
-
-		alarmDAO.save(alarmPO);
-
-		// AlarmNotifyHandleThread alarmNotifyHandleThread = new
-		// AlarmNotifyHandleThread(alarmPO, subscribeAlarmDAO,
-		// alarmDAO, messageService);
-
-		// 放入线程池待执行
-		// AlarmNotifyThreadPool.getThreadPool().execute(alarmNotifyHandleThread);
-
-		HttpAlarmNotifyThread httpAlarmNotifyThread = new HttpAlarmNotifyThread(alarmPO, subscribeAlarmDAO, alarmDAO,
-				loadBalanced, restTemplate);
-		// 放入线程池待执行
-		AlarmNotifyThreadPool.getThreadPool().execute(httpAlarmNotifyThread);
-
+		alarmParamBO.setType("recover");
+		HandleReceiveAlarmThread.push(alarmParamBO);
 		LOGGER.info("----------handleRecovery finish");
 		return data;
 	}
@@ -351,7 +251,7 @@ public class AlarmController {
 	}
 
 	/**
-	 * 页面操作屏蔽告警
+	 * 页面操作取消屏蔽告警
 	 * 
 	 * @return
 	 */
@@ -405,12 +305,12 @@ public class AlarmController {
 			// rawAlarmPO一同删除
 			Long alarmPOId = alarmOptional.get().getId();
 
-			alarmDAO.deleteById(alarmPOId);
-
 			List<RawAlarmPO> rawAlarmPOs = rawAlarmDAO.findByAlarmPOId(alarmPOId);
 
+			alarmDAO.delete(alarmPOId);
+
 			// TODO
-			// rawAlarmDAO.deleteInBatch(rawAlarmPOs);
+			rawAlarmDAO.deleteInBatch(rawAlarmPOs);
 
 			data.put("errMsg", "");
 
@@ -419,6 +319,40 @@ public class AlarmController {
 			data.put("errMsg", "内部错误");
 		}
 		return data;
+	}
+
+	/**
+	 * 对外接口，查询服务订阅的所有告警code，关联的未解决告警 主要用作服务重启之后的查询等特殊情况
+	 * 
+	 * @return
+	 */
+	@JsonBody
+	@RequestMapping(value = "/querySubUntreatedAlarms", method = RequestMethod.POST)
+	@ResponseBody
+	public Object querySubUntreatedAlarms(@RequestParam(value = "serviceName") String serviceName) {
+		List<SubscribeAlarmPO> subscribeAlarmPOs = subscribeAlarmDAO.findBySubServiceName(serviceName);
+
+		if (CollectionUtils.isEmpty(subscribeAlarmPOs)) {
+			return null;
+		}
+
+		List<String> alarmCodeList = subscribeAlarmPOs.stream().map(s -> s.getAlarmInfo().getAlarmCode())
+				.collect(Collectors.toList());
+
+		List<AlarmPO> untreatedAlarmPOs = alarmService.queryAlarmPOByAlarmCodesAndStatus(alarmCodeList,
+				EAlarmStatus.UNTREATED);
+
+		if (CollectionUtils.isEmpty(untreatedAlarmPOs)) {
+			return null;
+		}
+
+		List<AlarmNotifyBO> alarmNotifyBOs = new ArrayList<>();
+
+		for (AlarmPO po : untreatedAlarmPOs) {
+			alarmNotifyBOs.add(transFromPO(po));
+		}
+
+		return alarmNotifyBOs;
 	}
 
 	public String formateParams(Map<String, String> params) {
@@ -436,4 +370,23 @@ public class AlarmController {
 
 		return sb.toString();
 	}
+
+	private AlarmNotifyBO transFromPO(AlarmPO alarmPO) {
+
+		if (alarmPO != null && alarmPO.getLastAlarm() != null) {
+			AlarmNotifyBO alarmNotifyBO = new AlarmNotifyBO();
+			alarmNotifyBO.setAlarmCode(alarmPO.getLastAlarm().getAlarmInfo().getAlarmCode());
+			alarmNotifyBO.setAlarmTime(alarmPO.getLastAlarm().getCreateTime());
+			alarmNotifyBO.setAlarmStatus(alarmPO.getAlarmStatus().toString());
+			alarmNotifyBO.setSourceServiceIP(alarmPO.getLastAlarm().getSourceServiceIP());
+			alarmNotifyBO.setSourceService(alarmPO.getLastAlarm().getSourceService());
+			alarmNotifyBO.setAlarmDevice(alarmPO.getLastAlarm().getAlarmDevice());
+			alarmNotifyBO.setAlarmObj(alarmPO.getLastAlarm().getAlarmObj());
+			alarmNotifyBO.setAlarmId(alarmPO.getId());
+			alarmNotifyBO.setParams(AlarmNotifyBO.formatParams(alarmPO.getLastAlarm().getAlarmParams()));
+			return alarmNotifyBO;
+		}
+		return null;
+	}
+
 }

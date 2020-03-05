@@ -1,5 +1,6 @@
 package com.sumavision.signal.bvc.resource.dao;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -42,6 +43,25 @@ public class ResourceBundleDAO{
 		resourceEntityManager.clear();
 		List<BundlePO> bundles = gainResultList("from BundlePO where id in ?1", BundlePO.class, ids, null, null, null);
 		return bundles;
+	}
+	
+	/**
+	 * @Title: 根据bundleId查询<br/> 
+	 * @param bundleIds
+	 * @return BundlePO
+	 */
+	public BundlePO findByBundleId(String bundleId){
+		List<String> ids = new ArrayList<String>();
+		ids.add(bundleId);
+		//TODO：清空hibernate一级缓存，暂时先这样写
+		resourceEntityManager.clear();
+		List<BundlePO> bundles = gainResultList("from BundlePO where bundleId in ?1", BundlePO.class, ids, null, null, null);
+		
+		if(bundles == null || bundles.size() <= 0){
+			return null;
+		}else{
+			return bundles.get(0);
+		}
 	}
 	
 	/**

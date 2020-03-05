@@ -14,6 +14,7 @@ import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.ScreenRectTemplatePO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.service.UserQueryService;
+import com.sumavision.signal.bvc.network.bo.NetBundleBO;
 import com.sumavision.signal.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.signal.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.signal.bvc.resource.dao.ResourceFolderDAO;
@@ -268,6 +269,25 @@ public class ResourceQueryUtil {
 		
 		return null;
 		
+	}
+	
+	/**
+	 * 根据bundleId查询网络信息设备<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 下午4:44:52
+	 * @param String bundleId 设备id
+	 * @return NetBundleBO
+	 */
+	public NetBundleBO queryBundleByBundleId(String bundleId) throws Exception{
+		
+		BundlePO bundle = bundleDao.findByBundleId(bundleId);
+		if(bundle == null){
+			return null;
+		}else{
+			return new NetBundleBO().toBo(bundle);
+		}
+
 	}
 	
 }

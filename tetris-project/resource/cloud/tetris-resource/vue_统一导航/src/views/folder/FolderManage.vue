@@ -59,6 +59,7 @@
           accept=".csv"
           :on-error="uploadError"
           :on-progress="onprogress"
+          :on-change="handleChange"
           style="float: left; margin-left: 10px;">
           <el-button type="primary" size="small">导入用户</el-button>
         </el-upload>
@@ -198,7 +199,11 @@
     queryBundlesWithoutFolder,queryUsersWithoutFolder,setFolderToUsers,resetFolderOfUsers,queryRootOptions,setRoot,syncFolderToLdap,
     syncFolderFromLdap,cleanupFolderLdap,changeNodePosition,resetRootNode,exportFolder,exportUser} from '../../api/api';
 
-  let basePath = process.env.RESOURCE_ROOT
+  let requestIP = document.location.host.split(":")[0];
+
+  //let basePath = process.env.RESOURCE_ROOT;
+
+  let basePath = "http://" + requestIP + ":8093";
 
   export default {
 		data() {
@@ -275,6 +280,19 @@
       //     }
       //   });
       // },
+
+      handleChange(file, fileList){
+        var _this = this;
+        if (file.raw) {
+          let reader = new FileReader()
+          reader.onload = function (e) {
+            _this.contentHtml = e.target.result;
+          };
+          reader.readAsText(file.raw,'utf-8');
+
+        }
+        console.log(file, fileList);
+      },
       initTree : function(keepExpand){
         initFolderTree().then(res => {
           if (res.errMsg) {

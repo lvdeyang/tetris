@@ -25,6 +25,14 @@ public class CapacityProps {
 	
 	@Value("$(appSecret)")
 	private String appSecret;
+	
+	/** 为了测试加的 */
+	@Value("$(netId)")
+	private String netId;
+
+	/** 为了测试加的 */
+	@Value("$(netIp)")
+	private String netIp;
 
 	public String getSrtIp() {
 		return srtIp;
@@ -48,6 +56,14 @@ public class CapacityProps {
 
 	public String getAppSecret() {
 		return appSecret;
+	}
+
+	public String getNetId() {
+		return netId;
+	}
+
+	public String getNetIp() {
+		return netIp;
 	} 
 	
 }

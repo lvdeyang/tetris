@@ -438,6 +438,23 @@ public class BundleService extends CommonService<BundlePO> {
 				//channelSchemePOs.addAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
 			}
 			
+			//创建本地编码器encoder
+			BundlePO encoder = new BundlePO();
+			encoder.setBundleName(username + "_encoder");
+			encoder.setUsername("encoder_" + userNo);
+			//encoder.setOnlinePassword(password);
+			encoder.setBundleId(BundlePO.createBundleId());
+			encoder.setDeviceModel("encoder");
+			encoder.setBundleType("VenusTerminal");
+			encoder.setBundleNum(userNo + "_encoder");
+			encoder.setUserId(Long.valueOf(userId));
+			// 默认上线
+			encoder.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+			
+			bundlePOs.add(encoder);
+			bundleIds.add(encoder.getBundleId());
+			configDefaultAbility(encoder);
+			
 			//创建机顶盒设备 
 			BundlePO tvos = new BundlePO();
 			tvos.setBundleName(username + "_机顶盒");
@@ -446,7 +463,7 @@ public class BundleService extends CommonService<BundlePO> {
 			tvos.setBundleId(BundlePO.createBundleId());
 			tvos.setDeviceModel("tvos");
 			tvos.setBundleType("VenusTerminal");
-			tvos.setBundleNum("机顶盒_" + userNo);
+			tvos.setBundleNum(userNo + "_tvos");
 			tvos.setUserId(Long.valueOf(userId));
 			tvos.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 
@@ -462,7 +479,7 @@ public class BundleService extends CommonService<BundlePO> {
 			pc.setBundleId(BundlePO.createBundleId());
 			pc.setDeviceModel("pc");
 			pc.setBundleType("VenusTerminal");
-			pc.setBundleNum("pc_" + userNo);
+			pc.setBundleNum(userNo + "_pc");
 			pc.setUserId(Long.valueOf(userId));
 			// 默认上线
 			pc.setOnlineStatus(ONLINE_STATUS.OFFLINE);
@@ -479,7 +496,7 @@ public class BundleService extends CommonService<BundlePO> {
 			zk.setBundleId(BundlePO.createBundleId());
 			zk.setDeviceModel("zk");
 			zk.setBundleType("VenusTerminal");
-			zk.setBundleNum("zk" + userNo);
+			zk.setBundleNum(userNo + "_zk");
 			zk.setUserId(Long.valueOf(userId));
 			// 默认上线
 			zk.setOnlineStatus(ONLINE_STATUS.OFFLINE);

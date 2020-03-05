@@ -21,6 +21,8 @@ public interface ISubscribeAlarmDAO
 
 	public List<SubscribeAlarmPO> findByAlarmInfo_AlarmCode(String alarmCode);
 
+	public List<SubscribeAlarmPO> findBySubServiceName(String subServiceName);
+
 	@Query("select u from SubscribeAlarmPO u left join u.alarmInfo p where concat(u.subServiceName, p.alarmCode, p.alarmName, p.alarmLevel, ifnull(u.subsObj,'')) like %:keyword%")
 	public Page<SubscribeAlarmPO> findByKeywordContaining(Pageable pageable, @Param("keyword") String keyword);
 

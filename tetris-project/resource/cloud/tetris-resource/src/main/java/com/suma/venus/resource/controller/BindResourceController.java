@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,7 +27,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.application.ldap.contants.LdapContants;
 import com.suma.venus.resource.base.bo.BundlePrivilegeBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
-import com.suma.venus.resource.base.bo.ResultBO;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UnbindResouceBO;
 import com.suma.venus.resource.base.bo.UnbindRolePrivilegeBO;
@@ -34,6 +34,7 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.base.bo.UserresPrivilegeBO;
 import com.suma.venus.resource.bo.PrivilegeStatusBO;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.feign.UserQueryFeign;
@@ -42,6 +43,7 @@ import com.suma.venus.resource.lianwang.auth.AuthXmlUtil;
 import com.suma.venus.resource.lianwang.auth.DevAuthXml;
 import com.suma.venus.resource.lianwang.auth.UserAuthXml;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
@@ -80,6 +82,9 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private RolePrivilegeMapDAO rolePrivilegeMapDao;
+	
+	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
 
 	// 联网中心消息服务注册ID
 	@Value("${connectCenterLayerID}")
@@ -106,7 +111,13 @@ public class BindResourceController extends ControllerBase {
 
 	@RequestMapping(value = "/queryBundlesOfRole", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> queryBundles(Long roleId, String bindType, String deviceModel, String keyword, int pageNum, int countPerPage) {
+	public Map<String, Object> queryBundles(Long roleId, String bindType, String deviceModel, String keyword, String showAutoCreate, Long folderId, int pageNum, int countPerPage) {
+		boolean showAutoCreateBoolean = false;
+
+		if (!StringUtils.isEmpty(showAutoCreate) && showAutoCreate.equals("true")) {
+			showAutoCreateBoolean = true;
+		}
+		
 		try {
 			if (BIND_TYPE_UNBINDED.equals(bindType)) {// 只查未绑定的资源
 				List<BundlePrivilegeBO> bundlePrivileges = getUnbindedBundles(queryUnbindedBundleIds(roleId, deviceModel, keyword));
@@ -115,7 +126,7 @@ public class BindResourceController extends ControllerBase {
 				List<BundlePrivilegeBO> bundlePrivileges = getBindedBundles(roleId, deviceModel, keyword);
 				return bundlePageResponse(pageNum, countPerPage, bundlePrivileges);
 			} else {// 绑定和未绑定都查
-				List<BundlePrivilegeBO> bundlePrivileges = getBundles(roleId, deviceModel, keyword);
+				List<BundlePrivilegeBO> bundlePrivileges = getBundles(roleId, deviceModel, keyword, folderId);
 				return bundlePageResponse(pageNum, countPerPage, bundlePrivileges);
 			}
 		} catch (Exception e) {
@@ -128,9 +139,9 @@ public class BindResourceController extends ControllerBase {
 
 	@RequestMapping(value = "/queryUsersOfRole", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> queryUsersOfRole(Long roleId, String keyword, int pageNum, int countPerPage) {
+	public Map<String, Object> queryUsersOfRole(Long roleId, String keyword, Long folderId, int pageNum, int countPerPage) {
 		try {
-			return userPageResponse(pageNum, countPerPage, getUsers(roleId, keyword));
+			return userPageResponse(pageNum, countPerPage, getUsers(roleId, keyword, folderId));
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			Map<String, Object> data = makeAjaxData();
@@ -257,9 +268,9 @@ public class BindResourceController extends ControllerBase {
 	}
 
 	/** 查询所有资源，并标记其中有权限的资源 */
-	private List<BundlePrivilegeBO> getBundles(Long roleId, String deviceModel, String keyword) throws Exception{
+	private List<BundlePrivilegeBO> getBundles(Long roleId, String deviceModel, String keyword, Long folderId) throws Exception{
 		List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
-		Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, null);
+		Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, folderId);
 		if (bundleIds.isEmpty()) {
 			return bundlePrivileges;
 		}
@@ -307,9 +318,30 @@ public class BindResourceController extends ControllerBase {
 	}
 	
 	/** 查询所有用户，并标记其中有权限的用户 */
-	private List<UserresPrivilegeBO> getUsers(Long roleId, String keyword) throws Exception{
+	private List<UserresPrivilegeBO> getUsers(Long roleId, String keyword, Long folderId) throws Exception{
 		List<UserresPrivilegeBO> userresPrivilegeBOs = new ArrayList<>();
-		List<UserBO> allUsers = userQueryService.queryUserLikeUserName(keyword);
+		List<UserBO> userBOs = userQueryService.queryUserLikeUserName(keyword);
+		
+		List<UserBO> allUsers = new ArrayList<UserBO>();
+		
+		if(StringUtils.isEmpty(folderId)){
+			allUsers = userBOs;
+		}else{
+			List<Long> userIds = new ArrayList<Long>();
+			for(UserBO user: userBOs){
+				userIds.add(user.getId());
+			}
+			List<FolderUserMap> maps = folderUserMapDao.findByFolderIdAndUserIdIn(folderId, userIds);
+			for(UserBO user: userBOs){
+				for(FolderUserMap map: maps){
+					if(user.getId().equals(map.getUserId())){
+						allUsers.add(user);
+						break;
+					}
+				}
+			}
+		}
+		
 //		Map<String, List<UserBO>> resultMap = userFeign.queryUsersByNameLike(keyword)/* userFeign.queryUsers() */;
 //		if (null != resultMap && null != resultMap.get("users")) {
 //			allUsers = resultMap.get("users");

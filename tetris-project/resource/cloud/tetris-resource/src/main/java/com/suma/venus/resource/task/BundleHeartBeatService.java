@@ -28,7 +28,7 @@ public class BundleHeartBeatService {
 	// 检测设备心跳动作的频率
 	@Value("${checkBundleHeartBeatFreq}")
 	private long freqTime;
-	
+
 	@Value("${checkBundleHeartBeatTimeout}")
 	private long timeout;
 
