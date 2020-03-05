@@ -90,7 +90,7 @@ public class CommandCooperateServiceImpl {
 	
 	/**
 	 * 
-	 * 发起协同指挥<br/>
+	 * 发起协同会议<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -278,6 +278,13 @@ public class CommandCooperateServiceImpl {
 		
 		commandGroupDao.save(group);
 		commandGroupUserPlayerDao.save(needSavePlayers);
+		
+		//自动接听测试代码
+//		List<CommandGroupMemberPO> acceptMembers = new ArrayList<CommandGroupMemberPO>();
+//		for(CommandGroupMemberPO cooperateMember : cooperateMembers){
+//			acceptMembers.add(cooperateMember);
+//		}
+//		membersResponse(group, acceptMembers, null);
 
 		}
 		

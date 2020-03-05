@@ -134,32 +134,31 @@ public class CommandCommonServiceImpl {
 	
 	/**
 	 * 根据业务用户占用播放器--用户操作加锁<br/>
-	 * <b>TODO：负载均衡满足不了，得用redis<br/>
+	 * <b>负载均衡满足不了，得用redis<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月16日 下午8:30:42
-	 * @param Long userId 用户id
-	 * @param PlayerBusinessType businessType 业务类型
+	 * @param userId 用户id
+	 * @param businessType 业务类型
 	 * @return CommandGroupUserPlayerPO 播放器
 	 */
 	public CommandGroupUserPlayerPO userChoseUsefulPlayer(Long userId, PlayerBusinessType businessType) throws Exception{
-		
-		return userChoseUsefulPlayer(userId, businessType, 0);
-//		synchronized (userId) {
-//			
-//			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
-//
-//			CommandGroupUserLayoutShemePO userUsingScheme = queryIsUsingScheme(userInfo);
-//			
-//			CommandGroupUserPlayerPO userPlayer = queryUsefulPlayer(userUsingScheme);
-//			
-//			userPlayer.setPlayerBusinessType(businessType);
-//			
-//			commandGroupUserPlayerDao.save(userPlayer);
-//			
-//			return userPlayer;
-//		}
-		
+		return userChoseUsefulPlayer(userId, businessType, 0, false);
+	}
+	
+	/**
+	 * 根据业务用户占用播放器--用户操作加锁<br/>
+	 * <b>负载均衡满足不了，得用redis<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月16日 下午8:30:42
+	 * @param userId 用户id
+	 * @param businessType 业务类型
+	 * @param dontException 找不到可用播放器时，true则返回null，false则抛错。因为事物嵌套中的抛错，即使try-catch，也会在最终无法提交JPA，所以尽量使用true然后判空
+	 * @return CommandGroupUserPlayerPO 播放器
+	 */
+	public CommandGroupUserPlayerPO userChoseUsefulPlayer(Long userId, PlayerBusinessType businessType, boolean dontException) throws Exception{		
+		return userChoseUsefulPlayer(userId, businessType, 0, dontException);
 	}
 	
 	/**
@@ -171,10 +170,11 @@ public class CommandCommonServiceImpl {
 	 * @param userId
 	 * @param businessType
 	 * @param mode 0选取第一个可用播放器，-1选取最后一个可用播放器
+	 * @param dontException 找不到可用播放器时，true则返回null，false则抛错。因为事物嵌套中的抛错，即使try-catch，也会在最终无法提交JPA，所以尽量使用true然后判空
 	 * @return
 	 * @throws Exception
 	 */
-	public CommandGroupUserPlayerPO userChoseUsefulPlayer(Long userId, PlayerBusinessType businessType, int mode) throws Exception{
+	public CommandGroupUserPlayerPO userChoseUsefulPlayer(Long userId, PlayerBusinessType businessType, int mode, boolean dontException) throws Exception{
 		
 		synchronized (userId) {
 			
@@ -188,14 +188,15 @@ public class CommandCommonServiceImpl {
 			
 			CommandGroupUserPlayerPO userPlayer = null;
 			if(mode == 0){
-				userPlayer = queryUsefulPlayer(userUsingScheme);
+				userPlayer = queryUsefulPlayer(userUsingScheme, dontException);
 			}else if(mode == -1){
-				userPlayer = queryLastUsefulPlayer(userUsingScheme);
+				userPlayer = queryLastUsefulPlayer(userUsingScheme, dontException);
 			}
 			
-			userPlayer.setPlayerBusinessType(businessType);
-			
-			commandGroupUserPlayerDao.save(userPlayer);
+			if(userPlayer != null){
+				userPlayer.setPlayerBusinessType(businessType);
+				commandGroupUserPlayerDao.save(userPlayer);
+			}			
 			
 			return userPlayer;
 		}
@@ -245,7 +246,7 @@ public class CommandCommonServiceImpl {
 	
 	/**
 	 * 根据业务用户占用多个播放器--用户操作加锁<br/>
-	 * <b>TODO：负载均衡满足不了，得用redis<br/>
+	 * <b>负载均衡满足不了，得用redis<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月22日
@@ -312,9 +313,10 @@ public class CommandCommonServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月16日 下午7:03:25
 	 * @param CommandGroupUserLayoutShemePO scheme 布局方案
+	 * @param boolean dontException 找不到可用播放器时，true则返回null，false则抛错
 	 * @return CommandGroupUserPlayerPO 播放器，如果查询不到则会抛错
 	 */
-	private CommandGroupUserPlayerPO queryUsefulPlayer(CommandGroupUserLayoutShemePO scheme) throws Exception{
+	private CommandGroupUserPlayerPO queryUsefulPlayer(CommandGroupUserLayoutShemePO scheme, boolean dontException) throws Exception{
 		List<CommandGroupUserPlayerPO> players = scheme.obtainPlayers();
 		Collections.sort(players, new CommandGroupUserPlayerPO.PlayerComparatorFromIndex());
 		for(CommandGroupUserPlayerPO player: players){
@@ -322,7 +324,11 @@ public class CommandCommonServiceImpl {
 				return player;
 			}
 		}
-		throw new HasNotUsefulPlayerException();
+		if(dontException){
+			return null;
+		}else{
+			throw new HasNotUsefulPlayerException();
+		}
 	}
 	
 	/**
@@ -333,9 +339,10 @@ public class CommandCommonServiceImpl {
 	 * <b>日期：</b>2019年11月29日 上午9:19:17
 	 * @param scheme
 	 * @return CommandGroupUserPlayerPO 播放器信息，如果查询不到则会抛错
+	 * @param boolean dontException 找不到可用播放器时，true则返回null，false则抛错
 	 * @throws Exception
 	 */
-	private CommandGroupUserPlayerPO queryLastUsefulPlayer(CommandGroupUserLayoutShemePO scheme) throws Exception{
+	private CommandGroupUserPlayerPO queryLastUsefulPlayer(CommandGroupUserLayoutShemePO scheme, boolean dontException) throws Exception{
 		List<CommandGroupUserPlayerPO> players = scheme.obtainPlayers();
 		Collections.sort(players, new CommandGroupUserPlayerPO.PlayerComparatorFromIndex());
 		for(int i=players.size()-1 ; i>=0; i--){
@@ -344,7 +351,11 @@ public class CommandCommonServiceImpl {
 				return player;
 			}
 		}
-		throw new HasNotUsefulPlayerException();
+		if(dontException){
+			return null;
+		}else{
+			throw new HasNotUsefulPlayerException();
+		}
 	}
 	/**
 	 * 查询布局方案中可用的多个播放器--线程不安全<br/>

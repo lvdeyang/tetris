@@ -388,7 +388,7 @@ public class CommandVodService {
 		ChannelSchemeDTO encoderAudioChannel = encoderAudioChannels.get(0);
 		
 		//选最后一个播放器，选不到则抛错
-		CommandGroupUserPlayerPO decoderUserPlayer = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_USER_ONESELF, -1);
+		CommandGroupUserPlayerPO decoderUserPlayer = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_USER_ONESELF, -1, false);
 		
 		CommandVodPO userVod = new CommandVodPO(
 				VodType.USER_ONESELF, user.getId(), user.getName(), 
@@ -438,7 +438,7 @@ public class CommandVodService {
 		}
 		
 		//选最后一个播放器，选不到则抛错
-		selfPlayer = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_USER_ONESELF, -1);		
+		selfPlayer = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_USER_ONESELF, -1, false);		
 		selfPlayer.setBusinessId("0");//需要写一个假的businessId
 		selfPlayer.setBusinessName("本地视频预览");
 		commandGroupUserPlayerDao.save(selfPlayer);
