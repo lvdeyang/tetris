@@ -99,6 +99,22 @@ public class UserQuery {
 	}*/
 	
 	/**
+	 * 根据游客id查询游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午5:11:59
+	 * @param String userId 游客id
+	 * @return UserVO 游客
+	 */
+	public UserVO findTourist(String userId) throws Exception{
+		UserPO user = userDao.findByUuid(userId);
+		if(user.getUsername()==null || "".equals(user.getUsername())){
+			return new UserVO().set(user);
+		}
+		return null;
+	}
+	
+	/**
 	 * 获取当前登录用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

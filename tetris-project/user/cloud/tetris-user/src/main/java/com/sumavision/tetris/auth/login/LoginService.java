@@ -24,6 +24,7 @@ import com.sumavision.tetris.user.UserStatus;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
+import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 import com.sumavision.tetris.user.exception.UsernameNotExistException;
 
 @Service
@@ -89,6 +90,8 @@ public class LoginService {
 			String ip,
 			TerminalType terminalType,
 			String verifyCode) throws Exception{
+		
+		if(username==null || "".equals(username)) throw new UsernameCannotBeNullException();
 		
 		UserPO user = userDao.findByUsername(username);
 		if(user == null) throw new UsernameNotExistException(username);

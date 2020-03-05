@@ -81,10 +81,10 @@
 		  	<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
-		<!-- websocket消息模块 -->
+		<!-- websocket-feign消息模块 -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
-			<artifactId>tetris-websocket-message</artifactId>
+			<artifactId>tetris-websocket-message-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		

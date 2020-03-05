@@ -1,9 +1,5 @@
 package com.sumavision.tetris.websocket.message;
 
-import java.util.Collection;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +16,24 @@ import com.sumavision.tetris.config.feign.FeignConfiguration;
 @FeignClient(name = "tetris-user", configuration = FeignConfiguration.class)
 public interface WebsocketMessageFeign {
 
+	/**
+	 * 只推送消息无数据持久化<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 上午8:56:13
+	 * @param String targetId 目标id
+	 * @param String businessId 业务id
+	 * @param String content 业务内容
+	 * @param String fromId 消息发布者id
+	 * @param String fromName 消息发布者名称
+	 */
+	public JSONObject push(
+			@RequestParam("targetId") String targetId,
+			@RequestParam("businessId") String businessId,
+			@RequestParam("content") String content,
+			@RequestParam("fromId") String fromId,
+			@RequestParam("fromName") String fromName);
+	
 	/**
 	 * 发送消息<br/>
 	 * <b>作者:</b>lvdeyang<br/>

@@ -21,7 +21,7 @@ public class SessionQueue {
 		return instance;
 	}
 	
-	private final ConcurrentHashMap<Long, Session> queue = new ConcurrentHashMap<Long, Session>();
+	private final ConcurrentHashMap<String, Session> queue = new ConcurrentHashMap<String, Session>();
 	
 	/**
 	 * 注册websocket session<br/>
@@ -32,6 +32,18 @@ public class SessionQueue {
 	 * @param Session session websocket session
 	 */
 	public void put(Long userId, Session session){
+		this.queue.put(userId.toString(), session);
+	}
+	
+	/**
+	 * 注册websocket session<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月10日 下午4:34:21
+	 * @param String userId 用户id
+	 * @param Session session websocket session
+	 */
+	public void put(String userId, Session session){
 		this.queue.put(userId, session);
 	}
 	
@@ -44,6 +56,18 @@ public class SessionQueue {
 	 * @return Session websocket session
 	 */
 	public Session get(Long userId){
+		return this.queue.get(userId.toString());
+	}
+	
+	/**
+	 * 获取用户session<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月10日 下午4:35:28
+	 * @param String userId 
+	 * @return Session websocket session
+	 */
+	public Session get(String userId){
 		return this.queue.get(userId);
 	}
 	
@@ -56,6 +80,19 @@ public class SessionQueue {
 	 * @return Session websocket session
 	 */
 	public Session remove(Long userId){
+		return this.queue.remove(userId.toString());
+	}
+	
+	/**
+	 * 移除session<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月10日 下午4:38:41
+	 * @param String userId 用户id
+	 * @return Session websocket session
+	 */
+	public Session remove(String userId){
 		return this.queue.remove(userId);
 	}
+	
 }

@@ -12,10 +12,10 @@ public interface SessionMetadataDAO extends BaseDAO<SessionMetadataPO>{
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年9月10日 下午4:45:03
-	 * @param Long userId 用户id
+	 * @param String userId 用户id
 	 * @return SessionMetadataPO websocket session 元数据
 	 */
-	public SessionMetadataPO findByUserId(Long userId);
+	public SessionMetadataPO findByUserId(String userId);
 	
 	/**
 	 * 根据sessionId查询webscocket session元数据<br/>

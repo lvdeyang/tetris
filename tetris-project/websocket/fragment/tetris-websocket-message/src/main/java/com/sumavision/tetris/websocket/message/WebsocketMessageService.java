@@ -27,10 +27,12 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.core.SessionQueue;
@@ -79,6 +81,75 @@ public class WebsocketMessageService {
 	} 
 	
 	/**
+	 * 只推送消息无数据持久化<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 上午8:56:13
+	 * @param String targetId 目标id
+	 * @param String businessId 业务id
+	 * @param JSONObject content 业务内容
+	 * @param String fromId 消息发布者id
+	 * @param String fromName 消息发布者名称
+	 */
+	public void push(
+			String targetId,
+			String businessId,
+			JSONObject content,
+			String fromId,
+			String fromName) throws Exception{
+		
+		SessionQueue queue = SessionQueue.getInstance();
+		Session session = queue.get(targetId);
+		if(session != null){
+			JSONObject message = new JSONObject();
+			message.put("targetId", targetId);
+			message.put("businessId", businessId);
+			message.put("content", content);
+			message.put("fromId", fromId);
+			message.put("fromName", fromName);
+			session.getBasicRemote().sendText(message.toJSONString());
+		}else{
+			SessionMetadataPO metadata = sessionMetadataDao.findByUserId(targetId);
+			if(metadata != null){
+				//防止死循环
+				if(!(metadata.getServerIp().equals(applicationConfig.getIp()) && 
+						metadata.getServerPort().equals(applicationConfig.getPort()))){
+					StringBuffer url = new StringBuffer();
+					url.append("http://").append(metadata.getServerIp()).append(":").append(metadata.getServerPort()).append("/message/push");
+					CloseableHttpClient httpclient = null;
+					CloseableHttpResponse response = null;
+					BufferedReader bReader = null;
+					try{
+						httpclient = HttpClients.createDefault();
+						HttpPost httpPost = new HttpPost(url.toString());
+						httpPost.setHeader(HttpConstant.HEADER_FEIGN_CLIENT, HttpConstant.HEADER_FEIGN_CLIENT_KEY);
+						List<NameValuePair> keyValues = new ArrayList<NameValuePair>();  
+						keyValues.add(new BasicNameValuePair("targetId", targetId));
+						keyValues.add(new BasicNameValuePair("businessId", businessId));	
+						keyValues.add(new BasicNameValuePair("content", content.toJSONString()));
+						keyValues.add(new BasicNameValuePair("fromId", fromId));
+						keyValues.add(new BasicNameValuePair("fromName", fromName));
+						httpPost.setEntity(new UrlEncodedFormEntity(keyValues, "UTF-8")); 
+					    response = httpclient.execute(httpPost);
+					    if(response.getStatusLine().getStatusCode() != 200){
+				        	throw new WebsocketMessageLoadBalacePostSendFailException(metadata.getServerIp(), metadata.getServerPort(), fromName, targetId, content.toJSONString());
+					    }
+					}finally{
+						if(bReader != null) bReader.close();
+						if(response != null) response.close();
+						if(httpclient != null) httpclient.close();
+					}
+				}else{
+					System.out.println(new StringBufferWrapper().append(targetId).append("获取到websocket元数据，但未获取到session！").toString());
+				}
+			}else{
+				System.out.println(new StringBufferWrapper().append(targetId).append("未注册websocket链接！").toString());
+			}
+		}
+		
+	}
+	
+	/**
 	 * 发送websocket消息<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -96,7 +167,7 @@ public class WebsocketMessageService {
 			Long fromUserId,
 			String fromUsername) throws Exception{
 		
-		SessionMetadataPO metadata = sessionMetadataDao.findByUserId(userId);
+		SessionMetadataPO metadata = sessionMetadataDao.findByUserId(userId.toString());
 		List<UserVO> users = userQuery.findByIdIn(new ArrayListWrapper<Long>().add(userId).getList());
 		if(users==null || users.size()<=0) throw new TargetUserNotFoundException();
 		UserVO user = users.get(0);
@@ -167,7 +238,7 @@ public class WebsocketMessageService {
 			String ip, 
 			String port) throws Exception{
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
-		String token = request.getHeader("Authorization");
+		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);
 		StringBuffer url = new StringBuffer();
 		url.append("http://").append(ip).append(":").append(port).append("/message/send");
 		CloseableHttpClient httpclient = null;
@@ -176,7 +247,7 @@ public class WebsocketMessageService {
 		try{
 			httpclient = HttpClients.createDefault();
 			HttpPost httpPost = new HttpPost(url.toString());
-			httpPost.setHeader("Authorization", token);
+			httpPost.setHeader(HttpConstant.HEADER_AUTH_TOKEN, token);
 			List<NameValuePair> keyValues = new ArrayList<NameValuePair>();  
 			keyValues.add(new BasicNameValuePair("userId", userId.toString()));
 			keyValues.add(new BasicNameValuePair("message", message));	
@@ -215,7 +286,7 @@ public class WebsocketMessageService {
 	 */
 	public void resend(Long id) throws Exception{
 		WebsocketMessagePO message = websocketMessageDao.findOne(id);
-		SessionMetadataPO metadata = sessionMetadataDao.findByUserId(message.getUserId());
+		SessionMetadataPO metadata = sessionMetadataDao.findByUserId(message.getUserId().toString());
 		if(metadata == null) return;
 		if(metadata.getServerIp().equals(applicationConfig.getIp()) && 
 				metadata.getServerPort().equals(applicationConfig.getPort())){
@@ -245,7 +316,7 @@ public class WebsocketMessageService {
 			String ip,
 			String port) throws Exception{
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
-		String token = request.getHeader("Authorization");
+		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);
 		StringBuffer url = new StringBuffer();
 		url.append("http://").append(ip).append(":").append(port).append("/message/resend");
 		CloseableHttpClient httpclient = null;
@@ -254,7 +325,7 @@ public class WebsocketMessageService {
 		try{
 			httpclient = HttpClients.createDefault();
 			HttpPost httpPost = new HttpPost(url.toString());
-			httpPost.setHeader("Authorization", token);
+			httpPost.setHeader(HttpConstant.HEADER_AUTH_TOKEN, token);
 			List<NameValuePair> keyValues = new ArrayList<NameValuePair>();  
 			keyValues.add(new BasicNameValuePair("id", id.toString()));
 			httpPost.setEntity(new UrlEncodedFormEntity(keyValues, "UTF-8")); 
@@ -295,7 +366,7 @@ public class WebsocketMessageService {
 	 */
 	public void consume(Long id) throws Exception{
 		WebsocketMessagePO entity = websocketMessageDao.findOne(id);
-		SessionMetadataPO metadata = sessionMetadataDao.findByUserId(entity.getUserId());
+		SessionMetadataPO metadata = sessionMetadataDao.findByUserId(entity.getUserId().toString());
 		if(metadata == null){
 			entity.setConsumed(true);
 			websocketMessageDao.save(entity);
@@ -332,7 +403,7 @@ public class WebsocketMessageService {
 	 */
 	private void postConsume(Long id, String ip, String port) throws Exception{
 		HttpServletRequest request = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getRequest();
-		String token = request.getHeader("Authorization");
+		String token = request.getHeader(HttpConstant.HEADER_AUTH_TOKEN);
 		StringBuffer url = new StringBuffer();
 		url.append("http://").append(ip).append(":").append(port).append("/message/consume");
 		CloseableHttpClient httpclient = null;
@@ -341,7 +412,7 @@ public class WebsocketMessageService {
 		try{
 			httpclient = HttpClients.createDefault();
 			HttpPost httpPost = new HttpPost(url.toString());
-			httpPost.setHeader("Authorization", token);
+			httpPost.setHeader(HttpConstant.HEADER_AUTH_TOKEN, token);
 			List<NameValuePair> keyValues = new ArrayList<NameValuePair>();  
 			keyValues.add(new BasicNameValuePair("id", id.toString()));
 			httpPost.setEntity(new UrlEncodedFormEntity(keyValues, "UTF-8")); 

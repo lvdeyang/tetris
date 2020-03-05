@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.auth.token.TerminalType;
-import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserClassify;
@@ -428,5 +427,79 @@ public class UserFeignController {
 		UserVO userVO = userQuery.current();
 		
 		return userQuery.queryUsersByRole(roleId);
+	}
+	
+	/**
+	 * 添加游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午4:46:11
+	 * @param String userId 游客id
+	 * @param String nickname 游客昵称
+	 * @return UserVO 用户
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/tourist")
+	public Object addTourist(
+			String userId,
+			String nickname,
+			HttpServletRequest request) throws Exception{
+		
+		return userService.addTourist(userId, nickname);
+	}
+	
+	/**
+	 * 删除游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午4:48:34
+	 * @param String userId 游客id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove/tourist")
+	public Object removeTourist(
+			String userId, 
+			HttpServletRequest request) throws Exception{
+		
+		userService.removeTourist(userId);
+		return null;
+	}
+	
+	/**
+	 * 批量删除游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 下午1:56:02
+	 * @param JSONString userIds 游客id列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove/tourist/batch")
+	public Object removeTouristBatch(
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		userService.removeTouristBatch(JSON.parseArray(userIds, String.class));
+		return null;
+	}
+	
+	/**
+	 * 根据游客id查询游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午5:14:21
+	 * @param String userId 游客id
+	 * @return UserVO 游客
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/tourist")
+	public Object findTourist(
+			String userId,
+			HttpServletRequest request) throws Exception{
+		
+		return userQuery.findTourist(userId);
 	}
 }
