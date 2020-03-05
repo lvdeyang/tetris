@@ -1,7 +1,6 @@
 package com.sumavision.tetris.websocket.message;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -32,6 +31,32 @@ public class WebsocketMessageController {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	/**
+	 * 只推送消息无数据持久化<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 上午9:29:29
+	 * @param String targetId 目标id
+	 * @param String businessId 业务id
+	 * @param String content 业务内容
+	 * @param String fromId 消息发布者id
+	 * @param String fromName 消息发布者名称
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/push")
+	public Object push(
+			String targetId,
+			String businessId,
+			String content,
+			String fromId,
+			String fromName,
+			HttpServletRequest request) throws Exception{
+		
+		websocketMessageService.push(targetId, businessId, JSON.parseObject(content), fromId, fromName);
+		return null;
+	} 
 	
 	/**
 	 * 发送消息<br/>

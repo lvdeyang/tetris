@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
 
 /**
@@ -238,4 +237,48 @@ public interface UserFeign {
 	
 	@RequestMapping(value = "/user/feign/find/by/nickname/in")
 	public JSONObject queryUsersByNicknameIn(@RequestParam("nicknames") String nicknames);
+	
+	/**
+	 * 添加游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午4:51:54
+	 * @param String userId 游客id
+	 * @param String nickname 游客昵称
+	 * @return UserVO 游客
+	 */
+	@RequestMapping(value = "/user/feign/add/tourist")
+	public JSONObject addTourist(@RequestParam("userId") String userId, @RequestParam("nickname") String nickname);
+	
+	/**
+	 * 删除游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午4:53:29
+	 * @param String userId 游客id
+	 */
+	@RequestMapping(value = "/user/feign/remove/tourist")
+	public JSONObject removeTourist(@RequestParam("userId") String userId);
+	
+	/**
+	 * 批量删除游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 下午1:57:38
+	 * @param JSONString userIds 游客id列表
+	 */
+	@RequestMapping(value = "/user/feign/remove/tourist/batch")
+	public JSONObject removeTouristBatch(@RequestParam("userIds") String userIds);
+	
+	/**
+	 * 根据游客id查询游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午5:16:36
+	 * @param String userId 游客id
+	 * @return UserVO 游客
+	 */
+	@RequestMapping(value = "/user/feign/find/tourist")
+	public JSONObject findTourist(@RequestParam("userId") String userId);
+	
 }

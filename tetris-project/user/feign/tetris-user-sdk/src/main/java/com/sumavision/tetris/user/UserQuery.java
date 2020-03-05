@@ -275,6 +275,18 @@ public class UserQuery {
 		return JsonBodyResponseParser.parseArray(userFeign.queryUsersByNicknameIn(JSON.toJSONString(nicknames)), UserVO.class);
 	}
 	
+	/**
+	 * 根据游客id查询游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午5:18:32
+	 * @param String userId 游客id
+	 * @return UserVO 游客
+	 */
+	public UserVO findTourist(String userId) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.findTourist(userId), UserVO.class);
+	}
+	
 	/***************************************************
 	 ***************************************************
 	 ***************************************************/

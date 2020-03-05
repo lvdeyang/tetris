@@ -419,19 +419,21 @@ public class UserController {
 			for(UserPO user:users){
 				if(user.getId().equals(self.getId())) continue;
 				StringBufferWrapper roleInfo = new StringBufferWrapper();
+				boolean hasRoleInfo = false;
 				if(permissions!=null && permissions.size()>0){
 					for(UserSystemRolePermissionPO permission:permissions){
 						if(user.getId().equals(permission.getUserId())){
 							for(SystemRolePO role:roles){
 								if(permission.getRoleId().equals(role.getId())){
 									roleInfo.append(role.getName()).append("#");
+									hasRoleInfo = true;
 									break;
 								}
 							}
 						}
 					}
 				}
-				csv.append(user.row(roleInfo.toString().substring(0, roleInfo.toString().length()-1))).append("\n");
+				csv.append(user.row(hasRoleInfo?roleInfo.toString().substring(0, roleInfo.toString().length()-1):"")).append("\n");
 			}
 		}
 		

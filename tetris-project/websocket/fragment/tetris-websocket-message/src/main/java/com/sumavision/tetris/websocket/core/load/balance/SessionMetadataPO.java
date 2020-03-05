@@ -13,7 +13,7 @@ public class SessionMetadataPO extends AbstractBasePO{
 	private static final long serialVersionUID = 1L;
 
 	/** 用户id */
-	private Long userId;
+	private String userId;
 	
 	/** 用户名称 */
 	private String username;
@@ -28,11 +28,11 @@ public class SessionMetadataPO extends AbstractBasePO{
 	private String sessionId;
 	
 	@Column(name = "USER_ID")
-	public Long getUserId() {
+	public String getUserId() {
 		return userId;
 	}
 	
-	public void setUserId(Long userId) {
+	public void setUserId(String userId) {
 		this.userId = userId;
 	}
 	

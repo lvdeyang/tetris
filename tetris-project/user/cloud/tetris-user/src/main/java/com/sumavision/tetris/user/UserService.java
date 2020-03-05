@@ -1,6 +1,7 @@
 package com.sumavision.tetris.user;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -96,6 +97,54 @@ public class UserService{
 	
 	@Autowired
 	private SystemRoleDAO systemRoleDao;
+	
+	/**
+	 * 添加一个游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午4:40:58
+	 * @param String userId 游客id
+	 * @param String nickname 游客昵称
+	 * @return UserVO 用户
+	 */
+	public UserVO addTourist(String userId, String nickname) throws Exception{
+		UserPO tourist = new UserPO();
+		tourist.setUuid(userId);
+		tourist.setNickname(nickname);
+		tourist.setUpdateTime(new Date());
+		userDao.save(tourist);
+		return new UserVO().set(tourist);
+	}
+	
+	/**
+	 * 清除游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午4:44:32
+	 * @param String userId 游客id
+	 */
+	public void removeTourist(String userId) throws Exception{
+		UserPO user = userDao.findByUuid(userId);
+		if(user != null){
+			userDao.delete(user);
+		}
+	}
+	
+	/**
+	 * 批量清除游客<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 下午1:51:43
+	 * @param Collection<String> userIds 游客id列表
+	 */
+	public void removeTouristBatch(Collection<String> userIds) throws Exception{
+		if(userIds!=null && userIds.size()>0){
+			List<UserPO> users = userDao.findByUuidIn(userIds);
+			if(users!=null && users.size()>0){
+				userDao.deleteInBatch(users);
+			}
+		}
+	}
 	
 	/**
 	 * 添加一个用户<br/>

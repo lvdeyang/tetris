@@ -5,11 +5,9 @@ import java.util.Collection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Service
@@ -18,6 +16,26 @@ public class WebsocketMessageService {
 
 	@Autowired
 	private WebsocketMessageFeign websocketMessageFeign;
+	
+	/**
+	 * 只推送消息无数据持久化<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 上午8:56:13
+	 * @param String targetId 目标id
+	 * @param String businessId 业务id
+	 * @param JSONObject content 业务内容
+	 * @param String fromId 消息发布者id
+	 * @param String fromName 消息发布者名称
+	 */
+	public void push(
+			String targetId,
+			String businessId,
+			JSONObject content,
+			String fromId,
+			String fromName) throws Exception{
+		websocketMessageFeign.push(targetId, businessId, content.toJSONString(), fromId, fromName);
+	}
 	
 	/**
 	 * 发送websocket消息<br/>

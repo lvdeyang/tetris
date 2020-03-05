@@ -8,6 +8,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+import org.dom4j.util.UserDataAttribute;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.context.SpringContext;
@@ -15,14 +16,15 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.core.config.ApplicationConfig;
+import com.sumavision.tetris.websocket.core.exception.IllegalTouristException;
 import com.sumavision.tetris.websocket.core.load.balance.SessionMetadataService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
 @Component
-@ServerEndpoint("/server/websocket/{token}")
-public class ServerWebsocket {
+@ServerEndpoint("/tourist/server/websocket/{userId}")
+public class TouristServerWebsocket {
 
-	private ApplicationConfig applicationConfig;
+private ApplicationConfig applicationConfig;
 	
 	private SessionMetadataService sessionMetadataService;
 	
@@ -38,13 +40,17 @@ public class ServerWebsocket {
     }
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("token") String token) throws Exception{
+    public void onOpen(Session session, @PathParam("userId") String userId) throws Exception{
     	initBean();
-    	UserVO user = userQuery.findByToken(token);
-    	user.setUuid(user.getId().toString());
-		sessionMetadataService.add(user, session);
-		//messageService.offlineMessage(user.getId());
-		System.out.println(new StringBufferWrapper().append("用户：").append(user.getNickname()).append("连上来啦...").toString());
+    	UserVO tourist = userQuery.findTourist(userId);
+    	if(tourist == null){
+    		session.close();
+    		throw new IllegalTouristException();
+    	}else{
+    		sessionMetadataService.add(tourist, session);
+    		System.out.println(new StringBufferWrapper().append("游客：").append(tourist.getUuid()).append("连上来啦...").toString());
+    	}
+		
     }
 
     @OnClose
@@ -73,5 +79,5 @@ public class ServerWebsocket {
 		if(messageService == null) messageService = SpringContext.getBean(WebsocketMessageService.class);
 		if(eventPublisher == null) eventPublisher = SpringContext.getBean(EventPublisher.class);
 	}
-    
+	
 }

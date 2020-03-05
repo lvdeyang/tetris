@@ -1,4 +1,4 @@
-package com.sumavision.tetris.websocket.core.load.balance;
+package com.sumavision.tetris.websocket.core.load.balance.api.zoom.qt;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -8,14 +8,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.websocket.core.load.balance.WebsocketServerQuery;
 
 @Controller
-@RequestMapping(value = "/websocket/server")
-public class WebsocketServerController {
+@RequestMapping(value = "/api/zoom/qt/websocket/server")
+public class ApiZoomQtWebsocketServerController {
 
 	@Autowired
 	private WebsocketServerQuery websocketServerQuery;
 	
+	/**
+	 * 获取登录用户websocket连接地址<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午4:20:19
+	 * @return String 登录用户websocket连接地址
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/addr")
@@ -23,6 +31,13 @@ public class WebsocketServerController {
 		return websocketServerQuery.addr();
 	}
 	
+	/**
+	 * 获取游客websocket连接地址<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月2日 下午4:21:11
+	 * @return String 游客websocket连接地址
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/tourist/addr")

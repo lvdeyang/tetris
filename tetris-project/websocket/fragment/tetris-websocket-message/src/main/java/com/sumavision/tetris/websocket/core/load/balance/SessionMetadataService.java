@@ -34,11 +34,11 @@ public class SessionMetadataService {
 			Session session) throws Exception{
 		try{
 			SessionMetadataPO metadata = null;
-			metadata = sessionMetadataDao.findByUserId(user.getId());
+			metadata = sessionMetadataDao.findByUserId(user.getId().toString());
 			if(metadata == null){
 				metadata = new SessionMetadataPO();
 			}
-			metadata.setUserId(user.getId());
+			metadata.setUserId(user.getUuid());
 			metadata.setServerIp(applicationConfig.getIp());
 			metadata.setServerPort(applicationConfig.getPort());
 			metadata.setUsername(user.getNickname());
@@ -59,7 +59,7 @@ public class SessionMetadataService {
 	 * <b>日期：</b>2019年9月10日 下午4:52:46
 	 * @param Session session websocket session
 	 */
-	public Long remove(Session session) throws Exception{
+	public String remove(Session session) throws Exception{
 		SessionMetadataPO metadata = sessionMetadataDao.findBySessionId(session.getId());
 		if(metadata != null){
 			sessionMetadataDao.delete(metadata);
