@@ -17,6 +17,7 @@ import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMessageDAO;
+import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.enumeration.MessageStatus;
 import com.sumavision.bvc.command.group.message.CommandGroupMessagePO;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -243,7 +244,7 @@ public class CommandMessageServiceImpl {
 		Set<CommandGroupMemberPO> members = group.getMembers();
 		List<Long> userIds = new ArrayList<Long>();
 		for(CommandGroupMemberPO member : members){
-			if(!member.getUserId().equals(userId)){
+			if(member.getMemberStatus().equals(MemberStatus.CONNECT) && !member.getUserId().equals(userId)){
 				userIds.add(member.getUserId());
 			}
 		}

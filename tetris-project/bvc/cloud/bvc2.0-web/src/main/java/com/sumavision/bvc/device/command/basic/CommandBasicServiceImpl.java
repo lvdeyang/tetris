@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
@@ -22,7 +21,6 @@ import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.basic.dao.BasicRoleDAO;
-import com.sumavision.bvc.basic.po.BasicRolePO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
@@ -42,7 +40,6 @@ import com.sumavision.bvc.command.group.enumeration.MediaType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
@@ -64,9 +61,7 @@ import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
 import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.ForwardDelBO;
 import com.sumavision.bvc.device.group.bo.ForwardSetBO;
-import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
-import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
@@ -654,16 +649,14 @@ public class CommandBasicServiceImpl {
 		
 		//处理其它成员
 		for(CommandGroupMemberPO member : members){
+			
 			if(member.isAdministrator()){
 				continue;
-			}
+			}	
 			
 			//查找播放器
-			CommandGroupUserPlayerPO player = null;
-			try {
-				player = commandCommonServiceImpl.userChoseUsefulPlayer(member.getUserId(), PlayerBusinessType.BASIC_COMMAND);
-			} catch (Exception e) {
-				e.printStackTrace();//没有可用的播放器
+			CommandGroupUserPlayerPO player = commandCommonServiceImpl.userChoseUsefulPlayer(member.getUserId(), PlayerBusinessType.BASIC_COMMAND, true);
+			if(player == null){
 				log.info(new StringBufferWrapper().append("会议成员 ").append(member.getUserName()).
 						append(" id: ").append(member.getId()).append(" 没有可用的播放器").toString());
 			}
@@ -1670,15 +1663,19 @@ public class CommandBasicServiceImpl {
 			if(member.isAdministrator()){
 				continue;
 			}
+
+			if(member.getPlayers() == null){
+				member.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
+				member.getPlayers().clear();
+			}
 			
 			//查找看主席的播放器
-			CommandGroupUserPlayerPO player4c = null;
-			try {
-				player4c = commandCommonServiceImpl.userChoseUsefulPlayer(member.getUserId(), PlayerBusinessType.BASIC_COMMAND);
+			CommandGroupUserPlayerPO player4c = commandCommonServiceImpl.userChoseUsefulPlayer(member.getUserId(), PlayerBusinessType.BASIC_COMMAND, true);
+			if(player4c != null){
 				log.info(new StringBufferWrapper().append("新进入会议成员 ").append(member.getUserName()).
 						append(" id: ").append(member.getId()).append(" 观看主席的播放器serial为 ").append(player4c.getLocationIndex()).toString());
-			} catch (Exception e) {
-				e.printStackTrace();//没有可用的播放器
+			}else{
+				//没有可用的播放器
 				log.info(new StringBufferWrapper().append("新进入会议成员 ").append(member.getUserName()).
 						append(" id: ").append(member.getId()).append(" 没有可用的播放器").toString());
 			}
@@ -1698,10 +1695,6 @@ public class CommandBasicServiceImpl {
 						//给转发设置目的
 						forward.setDstPlayer(player4c);
 						
-						if(member.getPlayers() == null){
-							member.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
-							member.getPlayers().clear();
-						}
 						member.getPlayers().add(player4c);
 						player4c.setMember(member);
 					}else{
@@ -1710,7 +1703,7 @@ public class CommandBasicServiceImpl {
 				}
 			}
 
-			//给每个新成员查找[1+协同数]个播放器，建立转发
+			//给每个新成员查找[协同数]个播放器，建立转发
 			List<CommandGroupUserPlayerPO> players = commandCommonServiceImpl.userChoseUsefulPlayers(member.getUserId(), PlayerBusinessType.COOPERATE_COMMAND, cooperateMembers.size(), false);
 			int usefulPlayersCount2 = players.size();
 			log.info(new StringBufferWrapper().append("（不含主席的）协同成员数为 ").append(cooperateMembers.size())

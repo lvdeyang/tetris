@@ -34,8 +34,8 @@ public class MonitorRecordSchedulingListener implements ServletContextListener{
 						LOG.error("排期录制线程被打断！", e);
 					}
 					try{
-						//recordService.doScheduling();
-						LOG.info("排期录制被暂时关闭！");
+						recordService.doScheduling();
+//						LOG.info("排期录制被暂时关闭！");
 					}catch(Exception e){
 						LOG.error("排期录制执行异常！", e);
 					}
