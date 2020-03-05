@@ -1,28 +1,37 @@
 package com.suma.venus.resource.task;
 
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 
 @Component
+
 public class BundleHeartBeatMonitorThread implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BundleHeartBeatMonitorThread.class);
 
 	// 设备的超时时间
-	private final long timeout = 15 * 1000;
+	private long timeout;
 
 	private BundleHeartBeatService bundleHeartBeatService;
 
-	public BundleHeartBeatMonitorThread(BundleHeartBeatService bundleHeartBeatService) {
+	private AlarmFeignClientService alarmFeignClientService;
+
+	public BundleHeartBeatMonitorThread(BundleHeartBeatService bundleHeartBeatService,
+			AlarmFeignClientService alarmFeignClientService, long timeout) {
 
 		this.bundleHeartBeatService = bundleHeartBeatService;
+		this.alarmFeignClientService = alarmFeignClientService;
+		this.timeout = timeout;
 	}
 
 	@Override
@@ -41,8 +50,18 @@ public class BundleHeartBeatMonitorThread implements Runnable {
 		while (it.hasNext()) {
 			Map.Entry<String, Long> e = it.next();
 			if ((System.currentTimeMillis() - bunldeStatusMap.get(e.getKey())) > timeout) {
+
+				try {
+					alarmFeignClientService.triggerAlarm("11011000", e.getKey(), e.getKey(), null, false,
+							Calendar.getInstance().getTime());
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
 				bundleHeartBeatService.removeBundleStatus(e.getKey());
-				//TODO 发出告警
+				// TODO 发出告警
+
 			}
 		}
 	}

@@ -1,3 +1,28 @@
+<<<<<<< HEAD
+[
+    {
+        "path": "/Home", 
+        "component": "Home", 
+        "children": [
+            {
+                "path": "/AlarmInfo", 
+                "component": "alarmoprlog/alarmBaseInfoList"
+            },
+            {
+                "path": "/Alarm", 
+                "component": "alarmoprlog/alarmList"
+            },
+            {
+                "path": "/Oprlog", 
+                "component": "alarmoprlog/oprlogList"
+            },
+            {
+                "path": "/Subscribe", 
+                "component": "alarmoprlog/subscribeList"
+            }
+        ]
+    }
+=======
 [
     {
         "path": "/Home", 
@@ -17,4 +42,5 @@
             }
         ]
     }
+>>>>>>> 63c7f8bd7a99af1df4351846716c8a97d533e4d1
 ]

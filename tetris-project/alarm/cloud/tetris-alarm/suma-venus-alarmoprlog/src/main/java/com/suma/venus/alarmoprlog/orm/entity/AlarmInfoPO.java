@@ -34,7 +34,7 @@ public class AlarmInfoPO extends CommonPO<AlarmInfoPO> {
 	private static final long serialVersionUID = -6623991486186362273L;
 
 	/**
-	 * 告警编码，由8位数字组成
+	 * 告警编码，由8位数字+字母组成
 	 */
 	@Column(name = "alarmcode", nullable = false, unique = true)
 	private String alarmCode;

@@ -1,0 +1,54 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: tetris-record
+
+  datasource:
+    #base:
+      url: jdbc:mysql://10.10.40.116:3306/record?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+      username: sumadb
+      password: Sumavision@300079
+      driver-class-name: com.mysql.jdbc.Driver
+      driverClassName: com.mysql.jdbc.Driver
+      initial-size : 10
+      min-idle : 20
+      max-active : 100
+      validation-query : SELECT 1
+      test-while-idle : true
+      test-on-borrow : true
+      time-between-eviction-runs-millis : 600000
+      min-evictable-idle-time-millis : 3600000
+    
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    database: MYSQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  thymeleaf:
+    cache: false
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://10.10.40.115:8884/eureka/
+  instance:
+    instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
+    prefer-ip-address: true
+
+feign: 
+  hystrix: 
+   enabled: true    
+hystrix:
+  command:
+    default:
+      execution:
+        timeout:
+          enabled: false
+        isolation:
+          thread: 
+            timeoutInMilliseconds: 5000
+          strategy: SEMAPHORE

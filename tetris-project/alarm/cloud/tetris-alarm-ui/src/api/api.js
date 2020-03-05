@@ -74,5 +74,9 @@ export const editAlarmBaseInfo = params => { return axiosInstance.post(`${basePa
 export const delAlarmBaseInfo = params => { return axiosInstance.post(`${basePath}/alarmInfo/del`, qs.stringify(params)).then(res => res.data) }
 export const checkAlarmCode = params => { return axiosInstance.post(`${basePath}/alarmInfo/checkCode`, qs.stringify(params)).then(res => res.data) }
 
+// 告警订阅
+export const querySubscribeListPage = params => { return axiosInstance.post(`${basePath}/subscribe/queryByKeyword`, qs.stringify(params)).then(res => res.data) }
+export const delSubscribe = params => { return axiosInstance.post(`${basePath}/subscribe/del`, qs.stringify(params)).then(res => res.data) }
+
 // 操作日志
 export const queryOprlogListPage = params => { return axiosInstance.post(`${basePath}/oprlog/queryPage`, qs.stringify(params)).then(res => res.data) }

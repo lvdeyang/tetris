@@ -12,7 +12,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -128,6 +127,35 @@ public class SubscribeController {
 		subscribeAlarmDAO.delete(subscribeAlarmPOs.get(0));
 
 		LOGGER.info("----------unSubscribe finish");
+		data.put("errMsg", "");
+		return data;
+
+	}
+
+	@RequestMapping(value = "/del", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> del(@RequestParam(value = "id", required = true) Long id) {
+
+		// TODO ajax请求遇到跨域问题 未解决,现在为post表单方式
+		Map<String, Object> data = new HashMap<String, Object>();
+
+		try {
+			SubscribeAlarmPO subscribeAlarmPO = subscribeAlarmDAO.findOne(id);
+			if (subscribeAlarmPO == null) {
+				data.put("errMsg", "参数错误");
+				return data;
+			}
+			
+			subscribeAlarmDAO.delete(subscribeAlarmPO);
+
+		} catch (Exception e) {
+			data.put("errMsg", "内部错误");
+			return data;
+		}
+
+	
+
+		LOGGER.info("----------delsubscribe finish");
 		data.put("errMsg", "");
 		return data;
 
