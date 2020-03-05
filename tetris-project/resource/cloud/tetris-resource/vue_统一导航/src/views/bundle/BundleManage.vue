@@ -125,8 +125,8 @@
 
         <!--工具条-->
         <el-col :span="24" class="toolbar">
-            <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :current-page="pageNum"
-                           :page-size="countPerPage" :total="total" style="float:right;">
+          <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20" ></el-input>
+          <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :total="total" style="float:right;">
             </el-pagination>
         </el-col>
 
@@ -210,7 +210,8 @@
                 deviceModel: '',
                 keyword: '',
                 userId: '',
-                sourceType: ''
+                sourceType: '',
+                countPerPage:''
             },
             users: [],
             resourceTableLoading: false,
@@ -222,7 +223,7 @@
             channelSchemes: [],
             total: 0,
             pageNum: 1,
-            countPerPage: 10,
+            countPerPage: 20,
             currentRow: {},
             bundleId: "",
             newAccessNodeUid: "",
@@ -306,6 +307,11 @@
     ,
         //获取资源列表
         getResources : function (pageNum) {
+
+            this.countPerPage = 20
+            if (/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)) {
+              this.countPerPage = parseInt(this.filters.countPerPage)
+            }
             let param = {
                 deviceModel: this.filters.deviceModel,
                 keyword: this.filters.keyword,

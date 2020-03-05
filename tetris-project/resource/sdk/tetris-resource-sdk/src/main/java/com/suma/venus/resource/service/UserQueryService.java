@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
@@ -22,6 +23,7 @@ import com.suma.venus.resource.pojo.PrivilegePO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.user.UserQuery;
@@ -58,7 +60,12 @@ public class UserQueryService {
 	 */
 	public UserBO current() throws Exception{
 		UserVO user = userQuery.current();
-		return singleUserVo2Bo(user);
+		
+		BundlePO encoder = bundleDao.findByUserIdAndDeviceModel(user.getId(), "encoder");
+		
+		EncoderDecoderUserMap map = encoderDecoderUserMapDao.findByUserId(user.getId());
+		
+		return singleUserVo2Bo(user, encoder, map);
 	}
 
 	/**
@@ -137,7 +144,11 @@ public class UserQueryService {
 		
 		UserVO user = userQuery.queryUserByName(userName);
 		
-		return singleUserVo2Bo(user);
+		BundlePO encoder = bundleDao.findByUserIdAndDeviceModel(user.getId(), "encoder");
+		
+		EncoderDecoderUserMap map = encoderDecoderUserMapDao.findByUserId(user.getId());
+		
+		return singleUserVo2Bo(user, encoder, map);
 	}
 	
 	/**
@@ -168,7 +179,11 @@ public class UserQueryService {
 		
 		UserVO user = userQuery.queryUserByNo(userNo);
 		
-		return singleUserVo2Bo(user);
+		BundlePO encoder = bundleDao.findByUserIdAndDeviceModel(user.getId(), "encoder");
+		
+		EncoderDecoderUserMap map = encoderDecoderUserMapDao.findByUserId(user.getId());
+		
+		return singleUserVo2Bo(user, encoder, map);
 	}
 	
 	/**
@@ -184,7 +199,9 @@ public class UserQueryService {
 		String name = terminalType == null?null: terminalType.getName();
 		
 		UserVO user = userQuery.queryUserById(id, name);
-		UserBO userBO = singleUserVo2Bo(user);
+		BundlePO encoder = bundleDao.findByUserIdAndDeviceModel(user.getId(), "encoder");
+		EncoderDecoderUserMap encodeMap = encoderDecoderUserMapDao.findByUserId(user.getId());
+		UserBO userBO = singleUserVo2Bo(user, encoder, encodeMap);
 		
 		FolderUserMap map = folderUserMapDao.findByUserId(user.getId());
 		if(map != null){
@@ -364,7 +381,23 @@ public class UserQueryService {
 	 * @param UserVO userVO 用户vo
 	 * @return UserBO
 	 */
-	public UserBO singleUserVo2Bo(UserVO userVO) throws Exception{
+	public UserBO singleUserVo2Bo(UserVO userVO, BundlePO encoder, EncoderDecoderUserMap map) throws Exception{
+		
+		EncoderBO local_encoder = null;
+		if(encoder != null){
+			local_encoder = new EncoderBO();
+			local_encoder.setEncoderId(encoder.getBundleId());
+			local_encoder.setEncoderName(encoder.getBundleName());
+			local_encoder.setEncoderType(EncoderBO.ENCODER_TYPE.fromName(encoder.getDeviceModel()));
+		}
+		
+		EncoderBO Jv210_encoder = null;
+		if(map != null && map.getEncodeBundleId() != null){
+			Jv210_encoder = new EncoderBO();
+			Jv210_encoder.setEncoderId(map.getEncodeBundleId());
+			Jv210_encoder.setEncoderName(map.getEncodeBundleName());
+			Jv210_encoder.setEncoderType(EncoderBO.ENCODER_TYPE.fromName(map.getEncodeDeviceModel()));
+		}
 		
 		UserBO userBO = new UserBO();
 		userBO.setUser(userVO);
@@ -377,6 +410,8 @@ public class UserQueryService {
 		userBO.setCreater("");
 		userBO.setLogined((userVO.getStatus() == null || userVO.getStatus() == "OFFLINE")? false: true);
 		userBO.setUserNo(userVO.getUserno());
+		userBO.setLocal_encoder(local_encoder);
+		userBO.setExternal_encoder(Jv210_encoder);
 		
 		return userBO;
 	}
@@ -390,10 +425,29 @@ public class UserQueryService {
 	 * @return List<UserBO> 
 	 */
 	public List<UserBO> transferUserVo2Bo(List<UserVO> userVOs) throws Exception{
+		
+		List<Long> userIds = new ArrayList<Long>();
+		List<BundlePO> encoders = bundleDao.findByUserIdInAndDeviceModel(userIds, "encoder");
+		List<EncoderDecoderUserMap> maps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
+		
 		List<UserBO> userBOs = new ArrayList<UserBO>();
 		if(userVOs != null && userVOs.size() > 0){
 			for(UserVO userVO: userVOs){
-				userBOs.add(singleUserVo2Bo(userVO));
+				BundlePO _encode = null;
+				EncoderDecoderUserMap _map = null;
+				for(BundlePO encoder: encoders){
+					if(encoder.getUserId().equals(userVO.getId())){
+						_encode = encoder;
+						break;
+					}
+				}
+				for(EncoderDecoderUserMap map: maps){
+					if(map.getUserId().equals(userVO.getId())){
+						_map = map;
+						break;
+					}
+				}
+				userBOs.add(singleUserVo2Bo(userVO, _encode, _map));
 			}
 		}
 		

@@ -102,9 +102,11 @@ public class UserBindBundleController {
 			Long encodeId,
 			String encodeBundleId,
 			String encodeBundleName,
+			String encodeDeviceModel,
 			Long decodeId,
 			String decodeBundleId,
 			String decodeBundleName,
+			String decodeDeviceModel,
 			HttpServletRequest request) throws Exception{
 		
 		EncoderDecoderUserMap map = encoderDecoderUserMapDao.findByUserId(userId);
@@ -116,9 +118,11 @@ public class UserBindBundleController {
 		map.setDecodeBundleId(decodeBundleId);
 		map.setDecodeBundleName(decodeBundleName);
 		map.setDecodeId(decodeId);
+		map.setDecodeDeviceModel(decodeDeviceModel);
 		map.setEncodeBundleId(encodeBundleId);
 		map.setEncodeId(encodeId);
 		map.setEncodeBundleName(encodeBundleName);
+		map.setEncodeDeviceModel(encodeDeviceModel);
 		
 		encoderDecoderUserMapDao.save(map);
 		
@@ -149,6 +153,7 @@ public class UserBindBundleController {
 				bind.setEncodeId(map.getEncodeId())
 					.setEncodeBundleId(map.getEncodeBundleId())
 			    	.setEncodeBundleName(map.getEncodeBundleName())
+			    	.setEncodeDeviceModel(map.getEncodeDeviceModel())
 			    	.setEncodeIp(encoder.getDeviceIp())
 			    	.setEncodeUserName(encoder.getUsername());
 			}
@@ -157,6 +162,7 @@ public class UserBindBundleController {
 			    bind.setDecodeId(map.getDecodeId())
 			    	.setDecodeBundleId(map.getDecodeBundleId())
 			    	.setDecodeBundleName(map.getDecodeBundleName())
+			    	.setDecodeDeviceModel(map.getDecodeDeviceModel())
 			    	.setDecodeIp(decoder.getDeviceIp())
 			    	.setDecodeUserName(decoder.getUsername());
 			}

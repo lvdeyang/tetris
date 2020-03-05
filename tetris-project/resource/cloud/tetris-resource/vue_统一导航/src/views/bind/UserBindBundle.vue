@@ -247,11 +247,13 @@ export default{
                 encodeId:'',
                 encodeBundleId:'',
                 encodeBundleName:'',
+                encodeDeviceModel:'',
                 encodeUsername:'',
                 encodeIp:'',
                 decodeId:'',
                 decodeBundleId:'',
                 decodeBundleName:'',
+                decodeDeviceModel:'',
                 decodeUsername:'',
                 decodeIp:''
             },
@@ -365,16 +367,19 @@ export default{
                             self.form.encodeId = data.encodeId;
                             self.form.encodeBundleId = data.encodeBundleId;
                             self.form.encodeBundleName = data.encodeBundleName;
+                            self.form.encodeDeviceModel = data.encodeDeviceModel;
                             self.form.encodeUsername = data.encodeUsername;
                             self.form.encodeIp = data.encodeIp;
                             self.form.decodeId = data.decodeId;
                             self.form.decodeBundleId = data.decodeBundleId;
                             self.form.decodeBundleName = data.decodeBundleName;
+                            self.form.decodeDeviceModel = data.decodeDeviceModel;
                             self.form.decodeUsername = data.decodeUsername;
                             self.form.decodeIp = data.decodeIp;
                             self.table.data.push({
                                 bundleId:data.encodeBundleId,
                                 bundleName:data.encodeBundleName,
+                                deviceModel:data.encodeDeviceModel,
                                 username:data.encodeUserName,
                                 ip:data.encodeIp,
                                 type:'编码器'
@@ -382,6 +387,7 @@ export default{
                             self.table.data.push({
                                 bundleId:data.decodeBundleId,
                                 bundleName:data.decodeBundleName,
+                                deviceModel:data.decodeDeviceModel,
                                 username:data.decodeUserName,
                                 ip:data.decodeIp,
                                 type:'解码器'
@@ -390,11 +396,13 @@ export default{
                             self.form.encodeId = '',
                             self.form.encodeBundleId = '',
                             self.form.encodeBundleName = '',
+                            self.form.encodeDeviceModel = '',
                             self.form.encodeUsername = '';
                             self.form.encodeIp = '';
                             self.form.decodeId = '',
                             self.form.decodeBundleId = '';
                             self.form.decodeBundleName = '';
+                            self.form.decodeDeviceModel = '';
                             self.form.decodeUsername = '';
                             self.form.decodeIp = '';
                         }
@@ -418,9 +426,11 @@ export default{
                 encodeId:self.form.encodeId,
                 encodeBundleId:self.form.encodeBundleId,
                 encodeBundleName:self.form.encodeBundleName,
+                encodeDeviceModel:self.form.encodeDeviceModel,
                 decodeId:self.form.decodeId,
                 decodeBundleId:self.form.decodeBundleId,
-                decodeBundleName:self.form.decodeBundleName
+                decodeBundleName:self.form.decodeBundleName,
+                decodeDeviceModel:self.form.decodeDeviceModel
             }).then(response=>{
                 if(response.status !== 200){
                     self.$message({
@@ -432,6 +442,7 @@ export default{
                     self.table.data.push({
                         bundleId:self.form.encodeBundleId,
                         bundleName:self.form.encodeBundleName,
+                        deviceModel:self.form.encodeDeviceModel,
                         username:self.form.encodeUsername,
                         ip:self.form.encodeIp,
                         type:'编码器'
@@ -439,6 +450,7 @@ export default{
                     self.table.data.push({
                         bundleId:self.form.decodeBundleId,
                         bundleName:self.form.decodeBundleName,
+                        deviceModel:self.form.decodeDeviceModel,
                         username:self.form.decodeUsername,
                         ip:self.form.decodeIp,
                         type:'解码器'
@@ -510,6 +522,7 @@ export default{
             self.form.encodeId = self.dialog.selectEncoder.table.current.id;
             self.form.encodeBundleId = self.dialog.selectEncoder.table.current.bundleId;
             self.form.encodeBundleName = self.dialog.selectEncoder.table.current.bundleName;
+            self.form.encodeDeviceModel = self.dialog.selectEncoder.table.current.deviceModel;
             self.form.encodeUsername = self.dialog.selectEncoder.table.current.username;
             self.form.encodeIp = self.dialog.selectEncoder.table.current.ip;
             self.handleSelectEncoderClose();
@@ -584,6 +597,7 @@ export default{
             self.form.decodeId = self.dialog.selectDecoder.table.current.id;
             self.form.decodeBundleId = self.dialog.selectDecoder.table.current.bundleId;
             self.form.decodeBundleName = self.dialog.selectDecoder.table.current.bundleName;
+            self.form.decodeDeviceModel = self.dialog.selectDecoder.table.current.deviceModel;
             self.form.decodeUsername = self.dialog.selectDecoder.table.current.username;
             self.form.decodeIp = self.dialog.selectDecoder.table.current.ip;
             self.handleSelectDecoderClose();

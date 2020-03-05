@@ -1,5 +1,7 @@
 package com.suma.venus.resource.base.bo;
 
+import java.util.List;
+
 import com.sumavision.tetris.user.UserVO;
 
 public class UserBO {
@@ -37,6 +39,10 @@ public class UserBO {
 	private String folderUuid;
 
 	private Integer folderIndex;
+	
+	private EncoderBO local_encoder;
+	
+	private EncoderBO external_encoder;
 	
 	public UserVO getUser() {
 		return user;
@@ -166,4 +172,20 @@ public class UserBO {
 		this.folderIndex = folderIndex;
 	}
 
+	public EncoderBO getLocal_encoder() {
+		return local_encoder;
+	}
+
+	public void setLocal_encoder(EncoderBO local_encoder) {
+		this.local_encoder = local_encoder;
+	}
+
+	public EncoderBO getExternal_encoder() {
+		return external_encoder;
+	}
+
+	public void setExternal_encoder(EncoderBO external_encoder) {
+		this.external_encoder = external_encoder;
+	}
+	
 }

@@ -27,6 +27,7 @@ import com.suma.venus.message.bo.VenusMessageHead.MsgType;
 import com.suma.venus.message.mq.ResponseBO;
 import com.suma.venus.message.util.RegisterStatus;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.signal.bvc.common.enumeration.NodeType;
 import com.sumavision.signal.bvc.config.CapacityProps;
 import com.sumavision.signal.bvc.entity.dao.CapacityPermissionPortDAO;
 import com.sumavision.signal.bvc.entity.dao.InternetAccessDAO;
@@ -59,6 +60,7 @@ import com.sumavision.signal.bvc.mq.bo.PlayerBO;
 import com.sumavision.signal.bvc.mq.bo.RectBO;
 import com.sumavision.signal.bvc.mq.bo.ScreenBO;
 import com.sumavision.signal.bvc.mq.bo.SourceBO;
+import com.sumavision.signal.bvc.network.service.NetworkService;
 import com.sumavision.signal.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.signal.bvc.service.MQSendService;
 import com.sumavision.signal.bvc.service.MqExecutorService;
@@ -128,6 +130,9 @@ public class ProcessReceivedMsg {
 	
 	@Autowired
 	private CapacityPermissionPortDAO capacityPermissionPortDao;
+	
+	@Autowired
+	private NetworkService networkService;
     
     /*
      * 根据接口协议的数据类型解析msg中的方法名，根据相应方法名注入上层解析接口进行处理
@@ -177,6 +182,8 @@ public class ProcessReceivedMsg {
     	String bundleType = bundle.getBundle_type();
     	String deviceModel = bundle.getDevice_model();
     	
+    	String layerId = responseBo.getMessage().getMessage_header().getDestination_id();
+    	
     	if(deviceModel != null){
     		if(deviceModel.equals("5G")){
         		processOpenBundle5GMsg(bundle);
@@ -186,7 +193,7 @@ public class ProcessReceivedMsg {
     	}else{
     		switch (bundleType) {
 			case "VenusTerminal":
-				processOpenBundleVenusTerminalMsg(bundle);
+				processOpenBundleVenusTerminalMsg(bundle, layerId);
 				break;
 			case "VenusVirtual":
 				processOpenBundleVenusVirtualMsg(bundle);
@@ -796,24 +803,29 @@ public class ProcessReceivedMsg {
     
     /**处理open_bundle信息的VenusTerminal类型信息
      * @throws Exception */
-    private void processOpenBundleVenusTerminalMsg(BundleBO bundle) throws Exception{
+    private void processOpenBundleVenusTerminalMsg(BundleBO bundle, String layerId) throws Exception{
     	
     	String bundleId = bundle.getBundle_id();
     	
-    	TerminalBindRepeaterPO bind = terminalBindRepeaterDao.findByBundleId(bundleId);
-    	
-    	if(bind == null) throw new Exception(bundle.getBundle_id() + "该终端未绑定转发器！");
-    	
-    	if(bind.getDeviceModel().equals("jv210")){
+    	if(layerId.equals(NodeType.NETWORK.getId())){
     		
-    		processOpenBundleJv210Msg(bundle, bind);
+    	}else{
     		
-    	}else if(bind.getDeviceModel().equals("jv220")){
-    		
-    		processOpenBundleJv220Msg(bundle, bind);
-    		
+        	TerminalBindRepeaterPO bind = terminalBindRepeaterDao.findByBundleId(bundleId);
+        	
+        	if(bind == null) throw new Exception(bundle.getBundle_id() + "该终端未绑定转发器！");
+        	
+        	if(bind.getDeviceModel().equals("jv210")){
+        		
+        		processOpenBundleJv210Msg(bundle, bind);
+        		
+        	}else if(bind.getDeviceModel().equals("jv220")){
+        		
+        		processOpenBundleJv220Msg(bundle, bind);
+        		
+        	}
+        	
     	}
-    	
     }
     
     /**处理open_bundle信息的jv220类型信息

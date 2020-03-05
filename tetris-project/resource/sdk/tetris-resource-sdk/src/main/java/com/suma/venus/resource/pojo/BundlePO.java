@@ -101,7 +101,7 @@ public class BundlePO extends CommonPO<BundlePO> {
 	
 	/** 设备所属用户id */
 	private Long userId;
-
+	
 	public static String createBundleId() {
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}

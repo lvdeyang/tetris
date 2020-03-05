@@ -60,7 +60,7 @@ public class LockService {
 		}
 		input1.setCount(ii);
 		try{
-			System.out.println("-------"+ii+"======"+taskInputDao.save(input1).getCount());
+			//System.out.println("-------"+ii+"======"+taskInputDao.save(input1).getCount());
 			Thread.sleep(2000);
 		}catch(ObjectOptimisticLockingFailureException e){
 			System.out.println("---失败----"+ii);

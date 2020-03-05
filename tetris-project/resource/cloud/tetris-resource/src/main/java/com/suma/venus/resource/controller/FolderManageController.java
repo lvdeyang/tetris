@@ -359,6 +359,23 @@ public class FolderManageController extends ControllerBase {
 
 		return data;
 	}
+	
+	@RequestMapping(value = "/queryTreeChildrenByParentId", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> queryTreeChildrenByParentId(@RequestParam(value = "parentId", required = false) Long parentId) {
+		Map<String, Object> data = makeAjaxData();
+		try {
+
+			data.put("tree", createChildrenTreeNodes(parentId, true, 1));
+		} catch (
+
+		Exception e) {
+			LOGGER.error("Fail to init folder tree", e);
+			data.put(ERRMSG, "内部错误");
+		}
+
+		return data;
+	}
 
 	@RequestMapping(value = "/initTree", method = RequestMethod.POST)
 	@ResponseBody
@@ -375,6 +392,32 @@ public class FolderManageController extends ControllerBase {
 			for (FolderPO rootFolderPO : rootFolders) {
 				FolderTreeVO rootTreeVO = createFolderNodeFromFolderPO(rootFolderPO);
 				rootTreeVO.setChildren(createChildrenTreeNodes(rootFolderPO.getId()));
+				tree.add(rootTreeVO);
+			}
+			data.put("tree", tree);
+		} catch (Exception e) {
+			LOGGER.error("Fail to init folder tree", e);
+			data.put(ERRMSG, "内部错误");
+		}
+
+		return data;
+	}
+	
+	@RequestMapping(value = "/initTreeWithOutMember", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> initAllTreeWithOutMember() {
+		Map<String, Object> data = makeAjaxData();
+		try {
+			List<FolderPO> rootFolders = folderService.findByParentPath(null);
+			if (rootFolders.isEmpty()) {
+				data.put(ERRMSG, "数据库错误：不存在根节点");
+				return data;
+			}
+//			FolderPO rootFolderPO = rootFolders.get(0);
+			List<FolderTreeVO> tree = new LinkedList<FolderTreeVO>();
+			for (FolderPO rootFolderPO : rootFolders) {
+				FolderTreeVO rootTreeVO = createFolderNodeFromFolderPO(rootFolderPO);
+				rootTreeVO.setChildren(createChildrenTreeNodes(rootFolderPO.getId(), false, null));
 				tree.add(rootTreeVO);
 			}
 			data.put("tree", tree);
@@ -1176,6 +1219,57 @@ public class FolderManageController extends ControllerBase {
 		}
 		return children;
 	}
+	
+	private List<FolderTreeVO> createChildrenTreeNodes(Long parentId, boolean withMembers, Integer level) {
+		List<FolderTreeVO> children = new LinkedList<FolderTreeVO>();
+		try {
+
+			if ((level != null && level <= 0) || parentId == null) {
+				return children;
+			}
+
+			// 添加子分组节点(递归)
+			// TODO
+			List<FolderPO> childrenPO = folderService.findByParentId(parentId);
+			for (FolderPO childFolder : childrenPO) {
+				FolderTreeVO folderNodeVO = createFolderNodeFromFolderPO(childFolder);
+				if (level == null || level > 0) {
+					if (level != null) {
+						level--;
+					}
+					folderNodeVO.setChildren(createChildrenTreeNodes(childFolder.getId(), withMembers, level));
+				}
+				children.add(folderNodeVO);
+			}
+
+			Collections.sort(children, Comparator.comparing(FolderTreeVO::getFolderIndex));
+
+			// 添加子bundle节点
+			if (withMembers) {
+				List<BundlePO> bundles = bundleService.findByFolderId(parentId);
+				for (BundlePO bundle : bundles) {
+					children.add(createBundleNode(parentId, bundle));
+				}
+			}
+
+			// 添加子用户节点
+			if (withMembers) {
+				try {
+					FolderPO folderPO = folderDao.findOne(parentId);
+					Map<String, List<UserBO>> usersMap = userFeign.queryUsersByFolderUuid(folderPO.getUuid());
+					for (UserBO userBO : usersMap.get("users")) {
+						children.add(createUserNode(parentId, userBO));
+					}
+				} catch (Exception e) {
+					LOGGER.error("", e);
+				}
+			}
+
+		} catch (Exception e) {
+			LOGGER.error("Fail to creat folder tree children", e);
+		}
+		return children;
+	}
 
 	private FolderTreeVO createBundleNode(Long parentId, BundlePO bundle) {
 		FolderTreeVO bundleNodeVO = new FolderTreeVO();
@@ -1485,7 +1579,7 @@ public class FolderManageController extends ControllerBase {
 		// FileWriter fileWriter = new FileWriter(file,true);
 		// System.out.println(file.getAbsolutePath());
 
-		Appendable printWriter = new PrintWriter(file, "GBK");
+		Appendable printWriter = new PrintWriter(file, "utf-8");
 		CSVPrinter csvPrinter = CSVFormat.EXCEL.withHeader("分组编码", "分组名称", "父分组编码", "分组类型").print(printWriter);
 
 		List<FolderPO> rootFolders = folderService.findByParentPath(null);
@@ -1519,7 +1613,7 @@ public class FolderManageController extends ControllerBase {
 
 		File file = new File(filePath);
 
-		Appendable printWriter = new PrintWriter(file, "GBK");
+		Appendable printWriter = new PrintWriter(file, "utf-8");
 		CSVPrinter csvPrinter = CSVFormat.EXCEL.withHeader("用户账号", "用户昵称", "密码", "所属分组编码").print(printWriter);
 
 		List<FolderUserMap> maps = folderUserMapDao.findAll();
@@ -1591,7 +1685,7 @@ public class FolderManageController extends ControllerBase {
 	private int importcsv(InputStream is) throws Exception {
 		int successCnt = 0;
 
-		CSVParser parser = CSVParser.parse(is, Charset.forName("gbk"), CSVFormat.DEFAULT
+		CSVParser parser = CSVParser.parse(is, Charset.forName("utf-8"), CSVFormat.DEFAULT
 				.withHeader("folderUuid", "folderName", "parentUuid", "folderType").withSkipHeaderRecord());
 		for (CSVRecord csvRecord : parser) {
 
@@ -1602,7 +1696,7 @@ public class FolderManageController extends ControllerBase {
 
 				String folderUuid = csvRecord.get("folderUuid");
 				String folderName = csvRecord.get("folderName");
-				String parentUuid = csvRecord.get("folderUuid");
+				String parentUuid = csvRecord.get("parentUuid");
 				String folderType = csvRecord.get("folderType");
 
 				FolderPO folderPO = folderDao.findTopByUuid(folderUuid);
@@ -1615,11 +1709,9 @@ public class FolderManageController extends ControllerBase {
 				folderPO.setName(folderName);
 
 				FolderPO parentFolder;
-
+				
 				if (!StringUtils.isEmpty(parentUuid)) {
-					parentFolder = folderDao.findTopByUuid(parentUuid);
-				} else {
-					// 导入的根目录处理
+					
 					switch (folderType) {
 					case "终端":
 						folderPO.setFolderType(FolderType.TERMINAL);
@@ -1637,31 +1729,62 @@ public class FolderManageController extends ControllerBase {
 						folderPO.setFolderType(FolderType.TERMINAL);
 						break;
 					}
-
-					List<FolderPO> templistFolderPOs = folderDao.findBvcRootFolders();
 					
-					if (CollectionUtils.isEmpty(templistFolderPOs)) {
-						continue;
+					parentFolder = folderDao.findTopByUuid(parentUuid);
+					
+					folderPO.setParentId(parentFolder.getId());
+
+					if (null != parentFolder.getParentPath()) {
+						folderPO.setParentPath(parentFolder.getParentPath() + "/" + parentFolder.getId());
+					} else {
+						folderPO.setParentPath("/" + parentFolder.getId());
 					}
-
-					parentFolder = folderDao.findFolderByTypeAndParent(folderPO.getFolderType(),
-							templistFolderPOs.get(0).getId());
-
-				}
-
-				if (parentFolder == null) {
-					continue;
-				}
-
-				folderPO.setParentId(parentFolder.getId());
-
-				if (null != parentFolder.getParentPath()) {
-					folderPO.setParentPath(parentFolder.getParentPath() + "/" + parentFolder.getId());
+					
+					if (parentFolder.getFolderType() != null) {
+						folderPO.setFolderType(parentFolder.getFolderType());
+					}
+					
 				} else {
-					folderPO.setParentPath("/" + parentFolder.getId());
-				}
+					
+					// 导入的根目录处理
+					switch (folderType) {
+					case "终端":
+						folderPO.setFolderType(FolderType.TERMINAL);
+						break;
+					case "监控":
+						folderPO.setFolderType(FolderType.MONITOR);
+						break;
+					case "直播":
+						folderPO.setFolderType(FolderType.LIVE);
+						break;
+					case "点播":
+						folderPO.setFolderType(FolderType.ON_DEMAND);
+						break;
+					default:
+						folderPO.setFolderType(null);
+						break;
+					}
+					
+					folderPO.setParentId(-1l);
+					folderPO.setParentPath(null);
+					
+					parentFolder = new FolderPO();
+					parentFolder.setId(-1l);
 
-				folderPO.setFolderType(parentFolder.getFolderType());
+//					List<FolderPO> templistFolderPOs = folderDao.findBvcRootFolders();
+//					
+//					if (CollectionUtils.isEmpty(templistFolderPOs)) {
+//						continue;
+//					}
+//
+//					parentFolder = folderDao.findFolderByTypeAndParent(folderPO.getFolderType(),
+//							templistFolderPOs.get(0).getId());
+//					
+//					if (parentFolder == null) {
+//						parentFolder = templistFolderPOs.get(0);
+//					}
+
+				}
 
 				int maxIndex = caculateMaxfolderIndex(parentFolder, folderPO);
 				handleNewParentFolderIndexChange(parentFolder, maxIndex + 1);
@@ -1683,7 +1806,7 @@ public class FolderManageController extends ControllerBase {
 	private int importUserCSV(InputStream is) throws Exception {
 		int successCnt = 0;
 
-		CSVParser parser = CSVParser.parse(is, Charset.forName("gbk"), CSVFormat.DEFAULT
+		CSVParser parser = CSVParser.parse(is, Charset.forName("utf-8"), CSVFormat.DEFAULT
 				.withHeader("userName", "nickName", "password", "folderUuid").withSkipHeaderRecord());
 		
 		List<JSONObject> allData = new ArrayList<JSONObject>();

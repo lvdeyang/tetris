@@ -85,6 +85,8 @@ export const queryFolderTree = params => {return axiosInstance.post(`${basePath}
 export const addFolder = params => { return axiosInstance.post(`${basePath}/folder/add`, qs.stringify(params)).then(res => res.data) }
 export const deleteFolder = params => { return axiosInstance.post(`${basePath}/folder/delete`, qs.stringify(params)).then(res => res.data) }
 export const initFolderTree = params => { return axiosInstance.post(`${basePath}/folder/initTree`, qs.stringify(params)).then(res => res.data) }
+export const queryTreeChildren = params => { return axiosInstance.post(`${basePath}/folder/queryTreeChildrenByParentId`, qs.stringify(params)).then(res => res.data) }
+export const initFolderTreeWithOutMember = params => { return axiosInstance.post(`${basePath}/folder/initTreeWithOutMember`, qs.stringify(params)).then(res => res.data) }
 export const modifyFolder = params => { return axiosInstance.post(`${basePath}/folder/modify`, qs.stringify(params)).then(res => res.data) }
 export const setFolderOfBundles = params => { return axiosInstance.post(`${basePath}/folder/setFolderOfBundles`, qs.stringify(params)).then(res => res.data) }
 export const resetFolderOfBundles = params => { return axiosInstance.post(`${basePath}/folder/resetFolderOfBundles`, qs.stringify(params)).then(res => res.data) }

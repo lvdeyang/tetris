@@ -28,6 +28,9 @@ public class EncoderDecoderUserMap extends CommonPO<EncoderDecoderUserMap> {
 	/** 编码器名 */
 	private String encodeBundleName;
 	
+	/** 编码器类型 */
+	private String encodeDeviceModel;
+	
 	/** 解码器id--对应BundlePO的id */
 	private Long decodeId;
 	
@@ -36,6 +39,9 @@ public class EncoderDecoderUserMap extends CommonPO<EncoderDecoderUserMap> {
 	
 	/** 解码器名 */
 	private String decodeBundleName;
+	
+	/** 解码器类型 */
+	private String decodeDeviceModel;
 
 	public Long getUserId() {
 		return userId;
@@ -99,6 +105,22 @@ public class EncoderDecoderUserMap extends CommonPO<EncoderDecoderUserMap> {
 
 	public void setDecodeBundleName(String decodeBundleName) {
 		this.decodeBundleName = decodeBundleName;
+	}
+
+	public String getEncodeDeviceModel() {
+		return encodeDeviceModel;
+	}
+
+	public void setEncodeDeviceModel(String encodeDeviceModel) {
+		this.encodeDeviceModel = encodeDeviceModel;
+	}
+
+	public String getDecodeDeviceModel() {
+		return decodeDeviceModel;
+	}
+
+	public void setDecodeDeviceModel(String decodeDeviceModel) {
+		this.decodeDeviceModel = decodeDeviceModel;
 	}
 	
 }

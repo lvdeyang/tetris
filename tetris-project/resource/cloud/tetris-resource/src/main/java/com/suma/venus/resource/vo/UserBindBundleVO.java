@@ -16,6 +16,8 @@ public class UserBindBundleVO {
 	/** 编码器名 */
 	private String encodeBundleName;
 	
+	private String encodeDeviceModel;
+	
 	private String encodeIp;
 	
 	private String encodeUserName;
@@ -27,6 +29,8 @@ public class UserBindBundleVO {
 	
 	/** 解码器名 */
 	private String decodeBundleName;
+	
+	private String decodeDeviceModel;
 	
 	private String decodeIp;
 	
@@ -137,6 +141,24 @@ public class UserBindBundleVO {
 
 	public UserBindBundleVO setDecodeId(Long decodeId) {
 		this.decodeId = decodeId;
+		return this;
+	}
+
+	public String getEncodeDeviceModel() {
+		return encodeDeviceModel;
+	}
+
+	public UserBindBundleVO setEncodeDeviceModel(String encodeDeviceModel) {
+		this.encodeDeviceModel = encodeDeviceModel;
+		return this;
+	}
+
+	public String getDecodeDeviceModel() {
+		return decodeDeviceModel;
+	}
+
+	public UserBindBundleVO setDecodeDeviceModel(String decodeDeviceModel) {
+		this.decodeDeviceModel = decodeDeviceModel;
 		return this;
 	}
 	
