@@ -13,8 +13,6 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 
-@Component
-
 public class BundleHeartBeatMonitorThread implements Runnable {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(BundleHeartBeatMonitorThread.class);
