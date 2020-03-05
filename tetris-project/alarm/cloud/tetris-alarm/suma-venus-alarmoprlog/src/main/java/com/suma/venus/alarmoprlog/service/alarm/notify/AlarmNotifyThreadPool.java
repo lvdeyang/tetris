@@ -19,7 +19,7 @@ public class AlarmNotifyThreadPool {
 
 	public static ThreadPoolExecutor getThreadPool() {
 		if (threadPoolExecutor == null) {
-			threadPoolExecutor = new ThreadPoolExecutor(20, 256, 10L, TimeUnit.SECONDS,
+			threadPoolExecutor = new ThreadPoolExecutor(10, 256, 10L, TimeUnit.SECONDS,
 					new LinkedBlockingDeque<Runnable>(256), new ThreadPoolExecutor.DiscardOldestPolicy());
 
 			threadPoolExecutor.allowCoreThreadTimeOut(true);

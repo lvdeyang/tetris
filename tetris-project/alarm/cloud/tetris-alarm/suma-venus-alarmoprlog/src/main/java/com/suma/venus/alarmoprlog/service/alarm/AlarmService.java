@@ -6,9 +6,11 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -182,6 +184,34 @@ public class AlarmService {
 				Predicate[] pre = new Predicate[predicateList.size()];
 				return query.where(predicateList.toArray(pre)).getRestriction();
 
+			}
+		});
+
+		return alarmPOs;
+
+	}
+
+	public List<AlarmPO> queryAlarmPOByAlarmCodesAndStatus(List<String> alarmCodeList, EAlarmStatus status) {
+
+		List<AlarmPO> alarmPOs = alarmDAO.findAll(new Specification<AlarmPO>() {
+
+			@Override
+			public Predicate toPredicate(Root<AlarmPO> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+
+				List<Predicate> predicateList = new ArrayList<>();
+
+				predicateList.add(cb.equal(root.get("alarmStatus").as(EAlarmStatus.class), status));
+
+				In<String> in = cb.in(root.get("lastAlarm").get("alarmInfo").get("alarmCode").as(String.class));
+
+				for (String alarmCode : alarmCodeList) {
+					in.value(alarmCode);
+				}
+
+				predicateList.add(cb.and(cb.and(in)));
+
+				Predicate[] pre = new Predicate[predicateList.size()];
+				return query.where(predicateList.toArray(pre)).getRestriction();
 			}
 		});
 

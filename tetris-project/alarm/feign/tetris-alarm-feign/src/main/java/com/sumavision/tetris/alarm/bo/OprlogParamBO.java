@@ -13,9 +13,9 @@ public class OprlogParamBO {
 
 	private String oprName;
 
-	private String ip;
-	
-	@JSONField(format="yyyy-MM-dd HH:mm:ss")
+	private String sourceServiceIP;
+
+	@JSONField(format = "yyyy-MM-dd HH:mm:ss")
 	private Date oprTime = Calendar.getInstance().getTime();
 
 	private String oprDetail;
@@ -44,12 +44,12 @@ public class OprlogParamBO {
 		this.oprName = oprName;
 	}
 
-	public String getIp() {
-		return ip;
+	public String getSourceServiceIP() {
+		return sourceServiceIP;
 	}
 
-	public void setIp(String ip) {
-		this.ip = ip;
+	public void setSourceServiceIP(String sourceServiceIP) {
+		this.sourceServiceIP = sourceServiceIP;
 	}
 
 	public Date getOprTime() {

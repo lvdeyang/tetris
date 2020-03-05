@@ -1,7 +1,7 @@
 package com.sumavision.tetris.alarm.clientservice.http;
 
-import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -12,8 +12,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sumavision.tetris.alarm.bo.AlarmParamBO;
-import com.sumavision.tetris.alarm.bo.http.OprlogParamBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO;
+import com.sumavision.tetris.alarm.bo.http.AlarmNotifyBO;
 import com.sumavision.tetris.alarm.bo.http.SubscribeParamBO;
+import com.sumavision.tetris.mvc.ext.response.json.aop.JsonBodyWrapper;
+import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Component
 public class AlarmFeignClientService {
@@ -219,7 +222,14 @@ public class AlarmFeignClientService {
 
 		alarmFeign.sendOprlog(oprlogParamBO);
 
-		// TODO
+	}
+
+	public List<AlarmNotifyBO> querySubUntreatedAlarm(String serviceName) throws Exception {
+		if (StringUtils.isEmpty(serviceName)) {
+			throw new IllegalArgumentException("service name Should not be NULL!");
+		}
+
+		return JsonBodyResponseParser.parseArray(alarmFeign.querySubUntreatedAlarms(serviceName), AlarmNotifyBO.class);
 
 	}
 

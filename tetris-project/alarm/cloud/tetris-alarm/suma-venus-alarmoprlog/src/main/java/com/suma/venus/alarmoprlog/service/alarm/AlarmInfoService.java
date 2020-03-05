@@ -42,7 +42,7 @@ public class AlarmInfoService {
 
 		Sheet sheet = workbook.getSheetAt(0);
 		int lastRowNum = sheet.getLastRowNum();
-		//Row titleRow = sheet.getRow(0);
+		// Row titleRow = sheet.getRow(0);
 
 		for (int i = 1; i <= lastRowNum; i++) {
 
@@ -58,24 +58,36 @@ public class AlarmInfoService {
 					continue;
 				}
 
-				alarmInfoPO = new AlarmInfoPO();
+				if (alarmInfoDAO.findByAlarmCode(row.getCell(0).getStringCellValue()) != null) {
+					// TODO
+					alarmInfoPO = alarmInfoDAO.findByAlarmCode(row.getCell(0).getStringCellValue());
+				} else {
+					alarmInfoPO = new AlarmInfoPO();
 
-				alarmInfoPO.setAlarmCode(row.getCell(0).getStringCellValue());
+					// 0列 告警编码
+					alarmInfoPO.setAlarmCode(row.getCell(0).getStringCellValue());
+				}
 
+				// 1列 告警名称
 				alarmInfoPO.setAlarmName(row.getCell(1).getStringCellValue());
-				alarmInfoPO.setAlarmBrief(row.getCell(2).getStringCellValue());
+
+				// 2列 告警描述
+				if (row.getCell(2) != null && row.getCell(2).getStringCellValue() != null) {
+					alarmInfoPO.setAlarmBrief(row.getCell(2).getStringCellValue());
+				}
+
+				// 3列 告警级别
 				alarmInfoPO.setAlarmLevel(transferAlarmLevel(row.getCell(3).getStringCellValue()));
-				alarmInfoPO.setAlarmSolution(row.getCell(4).getStringCellValue());
+
+				// 4列 告警解决方案
+				// 2列 告警描述
+				if (row.getCell(4) != null && row.getCell(4).getStringCellValue() != null) {
+					alarmInfoPO.setAlarmSolution(row.getCell(4).getStringCellValue());
+				}
 
 			} catch (Exception e) {
 				// TODO: handle exception
 				errorNum++;
-				continue;
-			}
-
-			if (alarmInfoDAO.findByAlarmCode(alarmInfoPO.getAlarmCode()) != null) {
-				// TODO
-				sameNum++;
 				continue;
 			}
 
