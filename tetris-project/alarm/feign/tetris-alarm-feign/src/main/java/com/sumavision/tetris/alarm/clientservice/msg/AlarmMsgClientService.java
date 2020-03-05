@@ -146,7 +146,8 @@ public class AlarmMsgClientService {
 	 * @param recoveryTime 恢复时间 可空
 	 * 
 	 */
-	public void recoverAlarm(String alarmCode, String alarmDevice,String alarmObj, Map<String, String> params, Date recoveryTime) {
+	public void recoverAlarm(String alarmCode, String alarmDevice, String alarmObj, Map<String, String> params,
+			Date recoveryTime) {
 
 		if (Strings.isNullOrEmpty(alarmCode) || Strings.isNullOrEmpty(alarmObj)) {
 			throw new IllegalArgumentException("Alarm Code or SourceObj Should not be NULL!");
@@ -271,7 +272,7 @@ public class AlarmMsgClientService {
 			oprlogParamBO.setSourceService(serviceName);
 			oprlogParamBO.setOprName(oprName);
 			oprlogParamBO.setOprDetail(detail);
-			oprlogParamBO.setIp(sourceIP);
+			oprlogParamBO.setSourceServiceIP(sourceIP);
 
 			if (oprTime != null) {
 				oprlogParamBO.setOprTime(oprTime);

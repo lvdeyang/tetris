@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 [
     {
         "path": "/Home", 
@@ -22,25 +21,4 @@
             }
         ]
     }
-=======
-[
-    {
-        "path": "/Home", 
-        "component": "Home", 
-        "children": [
-            {
-                "path": "/AlarmInfo", 
-                "component": "alarmoprlog/alarmBaseInfoList"
-            },
-            {
-                "path": "/Alarm", 
-                "component": "alarmoprlog/alarmList"
-            },
-            {
-                "path": "/Oprlog", 
-                "component": "alarmoprlog/oprlogList"
-            }
-        ]
-    }
->>>>>>> 63c7f8bd7a99af1df4351846716c8a97d533e4d1
 ]

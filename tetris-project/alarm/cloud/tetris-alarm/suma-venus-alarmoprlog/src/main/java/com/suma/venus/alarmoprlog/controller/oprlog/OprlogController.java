@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,10 +22,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.alarmoprlog.orm.dao.IOprlogDAO;
 import com.suma.venus.alarmoprlog.orm.entity.OprlogPO;
+import com.suma.venus.alarmoprlog.service.oprlog.HandleReceiveOprlogThread;
 import com.suma.venus.alarmoprlog.service.oprlog.OprlogService;
 import com.suma.venus.alarmoprlog.service.oprlog.vo.OprlogVO;
 import com.suma.venus.alarmoprlog.service.oprlog.vo.QueryOprlogVO;
-import com.sumavision.tetris.alarm.bo.http.OprlogParamBO;
+import com.sumavision.tetris.alarm.bo.OprlogParamBO;
 
 @Controller
 @RequestMapping("/oprlog")
@@ -37,28 +37,17 @@ public class OprlogController {
 	@Autowired
 	private OprlogService oprlogService;
 
-	@Autowired
-	private IOprlogDAO oprlogDAO;
-
 	@RequestMapping(value = "/triggerOprlog", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> triggerOprlog(@RequestBody OprlogParamBO oprlogParamBO) {
 
-		// TODO ajax请求遇到跨域问题 未解决,现在为post表单方式
+		// ajax请求遇到跨域问题 未解决,现在为post表单方式
 		Map<String, Object> data = new HashMap<String, Object>();
-
-		OprlogPO oprlogPO = new OprlogPO();
-
-		BeanUtils.copyProperties(oprlogParamBO, oprlogPO);
-
-		oprlogDAO.save(oprlogPO);
-
+		HandleReceiveOprlogThread.push(oprlogParamBO);
 		data.put("errMsg", "");
-
 		return data;
 
 	}
-
 
 	@RequestMapping(value = "/queryPage", method = RequestMethod.POST)
 	@ResponseBody

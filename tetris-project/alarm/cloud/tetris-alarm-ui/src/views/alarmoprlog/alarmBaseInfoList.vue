@@ -33,12 +33,12 @@
     </el-form>
 
 		<!--列表-->
-		<el-table :data="alarmInfoVOs" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 100%;">
+		<el-table stripe :data="alarmInfoVOs" highlight-current-row v-loading="listLoading" @selection-change="selsChange" style="width: 100%;">
 		  <el-table-column prop="id" v-if="false" width="60"></el-table-column>
 			<el-table-column prop="alarmCode" label="编码" width="100" sortable></el-table-column>
-			<el-table-column prop="alarmName" label="名称" width="180"></el-table-column>
+			<el-table-column prop="alarmName" label="名称" width="250"></el-table-column>
 			<el-table-column prop="alarmLevel" label="级别"  :formatter="alarmLevelFormat" width="180" sortable></el-table-column>
-      <el-table-column prop="alarmName" label="简介" width="250"></el-table-column>
+      <el-table-column prop="alarmBrief" label="简介" width="250"></el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-button size="small" @click="handleShowEdit(scope.$index, scope.row)">编辑</el-button>
@@ -50,7 +50,7 @@
     <!--表底工具条-->
     <el-col :span="24" class="toolbar">
         <!--<el-button type="danger" @click="batchRemove" :disabled="this.sels.length===0">批量删除</el-button>-->
-        <el-pagination layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="20" :total="total" style="float:right;">
+        <el-pagination layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="10" :total="total" style="float:right;">
         </el-pagination>
     </el-col>
 
@@ -221,7 +221,7 @@ export default {
       let para = {
         keyword: this.filters.keyword,
         pageIndex: this.page - 1,
-        pageSize: 20
+        pageSize: 10
       }
 
       this.listLoading = true

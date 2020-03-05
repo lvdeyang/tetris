@@ -106,6 +106,7 @@ public class HttpAlarmNotifyThread implements Runnable {
 				if ((alarmPO.getAlarmCount() > 1 && alarmNotifyExp(alarmPO)) || alarmPO.getAlarmCount() == 1) {
 					// 已超时旧告警或者新告警通知
 					for (SubscribeAlarmPO subscribeAlarmPO : subscribeAlarmPOs) {
+						// TODO 如果收不到 怎么办
 						startNotify(alarmPO, subscribeAlarmPO);
 					}
 				} else {
@@ -135,7 +136,7 @@ public class HttpAlarmNotifyThread implements Runnable {
 				"----------pushWebSoketMsg start, alarmCode==" + alarmPO.getLastAlarm().getAlarmInfo().getAlarmCode());
 
 		// 页面通知 暂时只处理新告警
-		if (alarmPO.getAlarmCount() == 1) {
+		if (alarmPO.getAlarmCount() == 1 && alarmPO.getAlarmStatus().equals(EAlarmStatus.UNTREATED)) {
 			try {
 				WebSocketServer.sendInfo("new", "alarm");
 			} catch (IOException e) {
@@ -201,7 +202,6 @@ public class HttpAlarmNotifyThread implements Runnable {
 	 * 
 	 */
 	private boolean startNotify(AlarmPO alarmPO, SubscribeAlarmPO subscribeAlarmPO) {
-
 		alarmPO.setLastNotifyTime(new Date());
 		alarmDAO.save(alarmPO);
 
@@ -239,7 +239,7 @@ public class HttpAlarmNotifyThread implements Runnable {
 			alarmNotifyBO.setAlarmDevice(alarmPO.getLastAlarm().getAlarmDevice());
 			alarmNotifyBO.setAlarmObj(alarmPO.getLastAlarm().getAlarmObj());
 			alarmNotifyBO.setAlarmId(alarmPO.getId());
-			alarmNotifyBO.setParams(formatParams(alarmPO.getLastAlarm().getAlarmParams()));
+			alarmNotifyBO.setParams(AlarmNotifyBO.formatParams(alarmPO.getLastAlarm().getAlarmParams()));
 			return alarmNotifyBO;
 		}
 
@@ -252,34 +252,6 @@ public class HttpAlarmNotifyThread implements Runnable {
 
 	public void setAlarmService(IAlarmDAO alarmDAO) {
 		this.alarmDAO = alarmDAO;
-	}
-
-	private Map<String, String> formatParams(String params) {
-
-		if (StringUtils.isEmpty(params)) {
-			return null;
-		}
-
-		Map<String, String> paramsMap = new HashMap<>();
-
-		String[] strArr = params.split(";");
-
-		for (int i = 0; i < strArr.length; i++) {
-			if (StringUtils.isEmpty(strArr[i])) {
-				continue;
-			}
-
-			try {
-				String[] kvArr = strArr[i].split("=");
-				paramsMap.put(kvArr[0], kvArr[1]);
-			} catch (Exception e) {
-				// TODO: handle exception
-			}
-
-		}
-
-		return paramsMap;
-
 	}
 
 }
