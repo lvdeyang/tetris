@@ -3,8 +3,10 @@ package com.sumavision.tetris.user;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +35,7 @@ import com.sumavision.tetris.system.role.SystemRolePO;
 import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
+import com.sumavision.tetris.user.event.UserImportEventPublisher;
 import com.sumavision.tetris.user.exception.UserNotExistException;
 
 @Controller
@@ -56,6 +59,9 @@ public class UserController {
 	
 	@Autowired
 	private SystemRoleDAO systemRoleDao;
+	
+	@Autowired
+	private UserImportInfoDAO userImportInfoDao;
 	
 	/**
 	 * 查询枚举类型<br/>
@@ -467,6 +473,38 @@ public class UserController {
 		String csv = FileUtil.readAsString(inputstream);
 		userService.importCsv(csv);
 		return null;
+	}
+	
+	/**
+	 * 查询用户导入状态<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月9日 下午2:40:38
+	 * @return boolean status 是否正在导入
+	 * @return long totalUsers 导入总用户数
+	 * @return long currentUser 当前导入用户
+	 * @return int importTimes 导入次数
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/import/status")
+	public Object queryImportStatus(HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		UserImportEventPublisher publisher = userService.getUserImportEventPublisher(user.getGroupId());
+		UserImportInfoPO userImportInfo = userImportInfoDao.findByCompanyId(user.getGroupId());
+		Map<String, Object> status = new HashMap<String, Object>();
+		if(publisher == null){
+			status.put("status", false);
+			status.put("totalUsers", 0);
+			status.put("currentUser", 0);
+			status.put("importTimes", userImportInfo.getTimes());
+		}else{
+			status.put("status", true);
+			status.put("totalUsers", publisher.getTotalUsers());
+			status.put("currentUser", publisher.getCurrentNum());
+			status.put("importTimes", userImportInfo.getTimes());
+		}
+		return status;
 	}
 	
 }

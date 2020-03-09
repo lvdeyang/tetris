@@ -34,6 +34,12 @@ define([
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 activeId: window.BASEPATH + 'index#/page-business-user',
+                import:{
+                    status:false,
+                    totalUsers:0,
+                    currentUser:0,
+                    importTimes:0
+                },
                 table: {
                     rows: [],
                     pageSize: 50,
@@ -273,12 +279,25 @@ define([
                 handleCurrentChange:function(currentPage){
                     var self = this;
                     self.load(currentPage);
+                },
+                importStatus:function(){
+                    var self = this;
+                    ajax.post('/user/query/import/status', null, function(data){
+                        self.import.status = data.status;
+                        self.import.totalUsers = data.totalUsers;
+                        self.import.currentUser = data.currentUser;
+                        self.import.importTimes = data.importTimes;
+                    });
                 }
             },
             created: function () {
                 var self = this;
                 self.load(1);
                 self.loadCompany();
+                self.importStatus();
+                setInterval(function(){
+                    self.importStatus();
+                }, 5000);
             }
         });
     };
