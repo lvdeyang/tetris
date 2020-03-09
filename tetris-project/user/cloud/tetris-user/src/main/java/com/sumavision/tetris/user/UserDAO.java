@@ -323,6 +323,18 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	public UserPO findByCompanyIdAndUserno(Long companyId, String userno);
 	
 	/**
+	 * 根据用户号码查询用户--同一公司下<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年1月2日 下午7:00:50
+	 * @param Long companyId 公司id
+	 * @param Collection<String> userno 用户号码列表
+	 * @return List<UserPO> 用户信息列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 AND user.userno IN ?2", nativeQuery = true)
+	public List<UserPO> findByCompanyIdAndUsernoIn(Long companyId, Collection<String> usernos);
+	
+	/**
 	 * 根据角色id查询用户<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>

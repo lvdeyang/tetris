@@ -30,8 +30,8 @@ public class UserImportListener implements ApplicationListener<UserImportEvent> 
 	@Override
 	public void onApplicationEvent(UserImportEvent event) {
 		try{
-			//注册个人网盘
-			folderService.createPersonalDisk(event.getUserId(), event.getNickname());
+			//注册个人网盘--这个地方先不实现了
+			
 		}catch(Exception e){
 			e.printStackTrace();
 		}

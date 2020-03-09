@@ -21,16 +21,9 @@ public interface UserImportFeign {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年1月25日 下午4:31:31
-	 * @param String userId 用户id
-	 * @param String userName 用户昵称
-	 * @param String companyId 公司id
-	 * @param String companyName 公司名称
+	 * @param String users 导入的用户列表
 	 */
 	@RequestMapping(value = "/event/publish/user/import")
-	public JSONObject userImport(
-			@RequestParam("userId") String userId,
-			@RequestParam("nickname") String nickname,
-			@RequestParam("companyId") String companyId,
-			@RequestParam("companyName") String companyName) throws Exception;
+	public JSONObject userImport(@RequestParam("users") String users) throws Exception;
 	
 }

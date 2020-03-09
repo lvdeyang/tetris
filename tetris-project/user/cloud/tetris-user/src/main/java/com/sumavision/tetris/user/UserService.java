@@ -5,7 +5,9 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -34,8 +36,9 @@ import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
-import com.sumavision.tetris.user.event.UserImportEvent;
+import com.sumavision.tetris.user.event.UserImportEventPublisher;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
+import com.sumavision.tetris.user.exception.DuplicateUserNumberImportedException;
 import com.sumavision.tetris.user.exception.MailAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileNotExistException;
@@ -45,6 +48,8 @@ import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
 import com.sumavision.tetris.user.exception.UserNotExistException;
 import com.sumavision.tetris.user.exception.UsernameAlreadyExistException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
+import com.sumavision.tetris.user.exception.UsernoAlreadyExistInSystemException;
+import com.sumavision.tetris.user.exception.UsernoCannotBeNullException;
 
 /**
  * 用户操作（主增删改）<br/>
@@ -97,6 +102,9 @@ public class UserService{
 	
 	@Autowired
 	private SystemRoleDAO systemRoleDao;
+	
+	@Autowired
+	private UserImportInfoService userImportInfoService;
 	
 	/**
 	 * 添加一个游客<br/>
@@ -528,6 +536,13 @@ public class UserService{
 		return new UserVO().set(user);
 	}
 	
+	/** 用户导入事件发布管理 */
+	private ConcurrentHashMap<String, UserImportEventPublisher> publishers;
+	
+	public UserImportEventPublisher getUserImportEventPublisher(String companyId){
+		return this.publishers.get(companyId);
+	}
+	
 	/**
 	 * 导入csv<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -579,6 +594,25 @@ public class UserService{
 		}
 		
 		if(users.size() > 0){
+			//校验
+			Set<String> usernos = new HashSet<String>();
+			for(UserPO user:users){
+				if(user.getUserno() == null) throw new UsernoCannotBeNullException(user.getNickname());
+				for(String userno:usernos){
+					if(userno.equals(user.getUserno())){
+						throw new DuplicateUserNumberImportedException(userno);
+					}
+				}
+				usernos.add(user.getUserno());
+			}
+			List<UserPO> duplicateUsers = userDao.findByCompanyIdAndUsernoIn(Long.valueOf(self.getGroupId()), usernos);
+			if(duplicateUsers!=null && duplicateUsers.size()>0){
+				Set<String> duplicateUsernos = new HashSet<String>();
+				for(UserPO user:duplicateUsers){
+					duplicateUsernos.add(user.getUserno());
+				}
+				throw new UsernoAlreadyExistInSystemException(duplicateUsernos);
+			}
 			userDao.save(users);
 			for(UserPO user:users){
 				CompanyUserPermissionPO permission = new CompanyUserPermissionPO();
@@ -618,11 +652,14 @@ public class UserService{
 		
 		//发射事件
 		if(users.size() > 0){
-			for(UserPO user:users){
-				UserImportEvent event = new UserImportEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), self.getGroupId(), self.getGroupName());
-				applicationEventPublisher.publishEvent(event);
-			}
+			UserImportEventPublisher userImportEventPublisher = new UserImportEventPublisher(applicationEventPublisher, users, self.getGroupId(), self.getGroupName(), publishers);
+			this.publishers.put(self.getGroupId(), userImportEventPublisher);
+			userImportEventPublisher.publish();
 		}
 		
+		//更新导入次数
+		userImportInfoService.addTimes(self.getGroupId());
+		
 	}
+	
 }

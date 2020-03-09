@@ -58,7 +58,7 @@ public class ZoomMessageService {
 		
 		ZoomPO zoom = zoomDao.findOne(myMember.getZoomId());
 		if(zoom == null){
-			throw new ZoomNotFoundException();
+			throw new ZoomNotFoundException(myMember.getZoomId());
 		}
 		
 		ZoomMessagePO messageEntity = new ZoomMessagePO();
@@ -109,7 +109,7 @@ public class ZoomMessageService {
 		
 		ZoomPO zoom = zoomDao.findOne(myMember.getZoomId());
 		if(zoom == null){
-			throw new ZoomNotFoundException();
+			throw new ZoomNotFoundException(myMember.getZoomId());
 		}
 		
 		List<ZoomMessagePO> messageEntities = new ArrayList<ZoomMessagePO>();
@@ -169,7 +169,7 @@ public class ZoomMessageService {
 		
 		ZoomPO zoom = zoomDao.findOne(myMember.getZoomId());
 		if(zoom == null){
-			throw new ZoomNotFoundException();
+			throw new ZoomNotFoundException(myMember.getZoomId());
 		}
 		
 		List<ZoomMemberPO> others = zoomMemberDao.findByZoomIdAndIdNot(zoom.getId(), myMember.getId());

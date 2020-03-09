@@ -1,5 +1,7 @@
 package com.sumavision.tetris.mims.event.publish;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,8 +10,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.business.role.event.BusinessRoleRemovedEvent;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.user.event.UserImportEvent;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 
@@ -62,12 +66,9 @@ public class EventPublishController {
 	@ResponseBody
 	@RequestMapping(value = "/user/import")
 	public Object userImport(
-			String userId,
-			String nickname,
-			String companyId,
-			String companyName,
+			String users,
 			HttpServletRequest request) throws Exception{
-		UserImportEvent event = new UserImportEvent(applicationEventPublisher, userId, nickname, companyId, companyName);
+		UserImportEvent event = new UserImportEvent(applicationEventPublisher, JSON.parseArray(users, UserVO.class));
 		applicationEventPublisher.publishEvent(event);
 		return null;
 	}
