@@ -1,5 +1,7 @@
 package com.sumavision.tetris.user.exception;
 
+import java.util.Collection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -19,6 +21,10 @@ public class UsernameAlreadyExistException extends BaseException{
 		LOG.error(new StringBufferWrapper().append("用户名已经存在！")
 										   .append(username)
 										   .toString());
+	}
+	
+	public UsernameAlreadyExistException(Collection<String> usernames) {
+		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("用户名在系统中已存在！").append(usernames.toString().replace("[", "").replace("]", "")).toString());
 	}
 
 }

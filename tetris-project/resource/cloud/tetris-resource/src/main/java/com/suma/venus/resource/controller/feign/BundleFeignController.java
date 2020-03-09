@@ -4,6 +4,8 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.vo.BundleFeignVO;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping("/feign/bundle")
@@ -28,6 +32,35 @@ public class BundleFeignController {
 
 	@Autowired
 	private BundleService bundleService;
+	
+	@Autowired
+	private BundleDao bundleDao;
+	
+	/**
+	 * 查询经纬度范围内的ipc设备<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月6日 下午2:21:21
+	 * @param Long longitude 经度°
+	 * @param Long latitude 纬度°
+	 * @param Long raidus 半径范m
+	 * @return List<BundlePO>
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/visible/bundle")
+	public Object queryVisibleBundle(
+			Long longitude,
+			Long latitude,
+			Long raidus,
+			HttpServletRequest request) throws Exception{
+		
+		List<BundlePO> bundles = bundleDao.findByRaidus(longitude, latitude, raidus, "ipc");
+		
+		List<YjgbVO> vos = new YjgbVO().getConverter(YjgbVO.class).convert(bundles, YjgbVO.class);
+		
+		return vos;
+	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/queryTranscodeDevice", produces = {
 			"application/json;charset=UTF-8" })

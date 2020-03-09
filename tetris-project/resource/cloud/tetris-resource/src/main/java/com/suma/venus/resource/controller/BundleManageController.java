@@ -1003,5 +1003,28 @@ public class BundleManageController extends ControllerBase {
 		return JSONObject.parseObject(resultEntity.getBody());
 
 	}
+	
+	/**
+	 * 同步用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月6日 上午10:46:51
+	 */
+	@RequestMapping(value = "/syncUser", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> syncUser() {
+		Map<String, Object> data = makeAjaxData();
+		try {
+			
+			bundleService.syncUser();
+			
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+			e.printStackTrace();
+			data.put(ERRMSG, "内部错误");
+		}
+
+		return data;
+	}
 
 }

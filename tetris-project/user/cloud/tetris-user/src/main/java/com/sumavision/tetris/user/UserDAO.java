@@ -350,4 +350,14 @@ public interface UserDAO extends BaseDAO<UserPO>{
 
 	public List<UserPO> findByNicknameIn(Collection<String> nicknames);
 	
+	/**
+	 * 根据用户名查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月9日 下午6:52:50
+	 * @param Collection<String> usernames 用户名列表
+	 * @return List<UserPO> 用户列表
+	 */
+	public List<UserPO> findByUsernameIn(Collection<String> usernames);
+	
 }

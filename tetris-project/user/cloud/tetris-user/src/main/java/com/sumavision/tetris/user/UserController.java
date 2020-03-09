@@ -497,12 +497,12 @@ public class UserController {
 			status.put("status", false);
 			status.put("totalUsers", 0);
 			status.put("currentUser", 0);
-			status.put("importTimes", userImportInfo.getTimes());
+			status.put("importTimes", userImportInfo==null?0:userImportInfo.getTimes());
 		}else{
 			status.put("status", true);
 			status.put("totalUsers", publisher.getTotalUsers());
 			status.put("currentUser", publisher.getCurrentNum());
-			status.put("importTimes", userImportInfo.getTimes());
+			status.put("importTimes", userImportInfo==null?0:userImportInfo.getTimes());
 		}
 		return status;
 	}

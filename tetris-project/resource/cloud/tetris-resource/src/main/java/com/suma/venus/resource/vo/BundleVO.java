@@ -39,6 +39,15 @@ public class BundleVO {
 	
 	private SOURCE_TYPE sourceType;
 	
+	/** 坐标-经度 */
+	private Long longitude;
+
+	/** 坐标-纬度 */
+	private Long latitude;
+	
+	/** 流地址 */
+	private String streamUrl;
+	
 	public BundlePO toPO(){
 		BundlePO po = new BundlePO();
 		po.setBundleId(this.getBundleId());
@@ -54,6 +63,9 @@ public class BundleVO {
 		}
 		po.setAccessNodeUid(this.getAccessNodeUid());
 		po.setFolderId(this.getBundleFolderId() == null?null: Long.valueOf(this.getBundleFolderId()));
+		po.setLongitude(this.getLongitude());
+		po.setLatitude(this.getLatitude());
+		po.setStreamUrl(this.getStreamUrl());
 		return po;
 	}
 	
@@ -73,6 +85,9 @@ public class BundleVO {
 		vo.setDeviceAddr(new DeviceAddrVO(po.getDeviceIp(),po.getDevicePort()));
 		vo.setSourceType(po.getSourceType());
 		vo.setBundleFolderId(po.getFolderId() == null? null: po.getFolderId().toString());
+		vo.setLongitude(po.getLongitude());
+		vo.setLatitude(po.getLatitude());
+		vo.setStreamUrl(po.getStreamUrl());
 		return vo;
 	}
 	
@@ -216,6 +231,30 @@ public class BundleVO {
 
 	public void setBundleFolderId(String bundleFolderId) {
 		this.bundleFolderId = bundleFolderId;
+	}
+
+	public Long getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Long longitude) {
+		this.longitude = longitude;
+	}
+
+	public Long getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Long latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getStreamUrl() {
+		return streamUrl;
+	}
+
+	public void setStreamUrl(String streamUrl) {
+		this.streamUrl = streamUrl;
 	}
 	
 }

@@ -144,5 +144,21 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	@Query(value = "SELECT DISTINCT bundle.* FROM bundlepo bundle LEFT JOIN channel_schemepo channel ON bundle.bundle_id = channel.bundle_id WHERE bundle.bundle_name LIKE ?1 AND bundle.bundle_id LIKE ?2 AND bundle.user_name LIKE ?3 AND bundle.device_ip LIKE ?4 And bundle.device_model = ?5 AND channel.channel_name = ?6 \n#pageable\n", countQuery = "SELECT DISTINCT COUNT(bundle.id) FROM BUNDLEPO bundle WHERE bundle.bundle_name LIKE ?1 AND bundle.bundle_id LIKE ?2 AND bundle.user_name LIKE ?3 AND bundle.device_ip LIKE ?4 And bundle.device_model = ?5 AND channel.channel_name = ?6", nativeQuery = true)
 	public Page<BundlePO> findBySearch(String bundleName, String bundleId, String bundleNo, String ip,
 			String deviceModel, String channelName, Pageable page);
+	
+	public List<BundlePO> findByUserIdNotIn(Collection<Long> ids);
+	
+	/**
+	 *查询经纬度范围内的对应类型设备<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月6日 下午2:15:03
+	 * @param Long longitude 经度
+	 * @param Long latitude 纬度
+	 * @param Long raidus 半径范围(米)
+	 * @param String deviceModel 设备类型
+	 * @return List<BundlePO>
+	 */
+	@Query(value = "SELECT * FROM bundlepo where device_model = ?4 AND (6371000.393 * acos (cos ( radians(?2) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?1) ) + sin ( radians(?2) ) * sin( radians( latitude ) )) ) <= ?3", nativeQuery = true)
+	public List<BundlePO> findByRaidus(Long longitude, Long latitude, Long raidus, String deviceModel);
 
 }

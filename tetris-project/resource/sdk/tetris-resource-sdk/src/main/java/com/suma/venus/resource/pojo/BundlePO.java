@@ -67,6 +67,16 @@ public class BundlePO extends CommonPO<BundlePO> {
 	private Integer operateIndex = 0;
 
 	private Integer operateCount = 0;
+	
+	/************************* 以下几个字段只对ipc设备有效 ********************************/
+	/** 坐标-经度 */
+	private Long longitude;
+
+	/** 坐标-纬度 */
+	private Long latitude;
+	
+	/** 流地址 */
+	private String streamUrl;
 
 	/************************* 以下几个字段只对合屏混音设备有效 ********************************/
 	/** 音频解码路数最大值 */
@@ -420,6 +430,30 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public Long getLongitude() {
+		return longitude;
+	}
+
+	public void setLongitude(Long longitude) {
+		this.longitude = longitude;
+	}
+
+	public Long getLatitude() {
+		return latitude;
+	}
+
+	public void setLatitude(Long latitude) {
+		this.latitude = latitude;
+	}
+
+	public String getStreamUrl() {
+		return streamUrl;
+	}
+
+	public void setStreamUrl(String streamUrl) {
+		this.streamUrl = streamUrl;
 	}
 
 	@Override

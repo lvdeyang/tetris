@@ -66,11 +66,13 @@ public class UserImportEvent extends ApplicationEvent{
 			Object source,
 			String userId, 
 			String nickname, 
+			String userno,
 			String companyId, 
 			String companyName) {
 		super(source);
 		this.userId = userId;
 		this.nickname = nickname;
+		this.userno = userno;
 		this.companyId = companyId;
 		this.companyName = companyName;
 	}

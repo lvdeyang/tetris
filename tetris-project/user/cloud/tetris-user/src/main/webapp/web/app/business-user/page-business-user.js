@@ -19,6 +19,8 @@ define([
 
     var pageId = 'page-business-user';
 
+    var vueInstance = null;
+
     var init = function () {
 
         //设置标题
@@ -27,18 +29,19 @@ define([
         var $page = document.getElementById(pageId);
         $page.innerHTML = tpl;
 
-        new Vue({
+        vueInstance = new Vue({
             el: '#' + pageId + '-wrapper',
             data: {
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
                 activeId: window.BASEPATH + 'index#/page-business-user',
-                import:{
+                importInfo:{
                     status:false,
                     totalUsers:0,
                     currentUser:0,
-                    importTimes:0
+                    importTimes:0,
+                    interval:''
                 },
                 table: {
                     rows: [],
@@ -153,7 +156,8 @@ define([
                             message:'操作成功'
                         });
                         done();
-                        self.load(1);
+                        //self.load(1);
+                        self.loopImportStatus();
                     });
                 },
                 handleRowEdit: function (scope) {
@@ -283,11 +287,26 @@ define([
                 importStatus:function(){
                     var self = this;
                     ajax.post('/user/query/import/status', null, function(data){
-                        self.import.status = data.status;
-                        self.import.totalUsers = data.totalUsers;
-                        self.import.currentUser = data.currentUser;
-                        self.import.importTimes = data.importTimes;
+                        self.importInfo.status = data.status;
+                        self.importInfo.totalUsers = data.totalUsers;
+                        self.importInfo.currentUser = data.currentUser;
+                        self.importInfo.importTimes = data.importTimes;
+                        if(data.status && !self.importInfo.interval){
+                            self.loopImportStatus();
+                        }
+                        if(!data.status && self.importInfo.interval){
+                            clearInterval(self.importInfo.interval);
+                            self.load(1);
+                            console.log('清除interval');
+                        }
                     });
+                },
+                loopImportStatus:function(){
+                    var self = this;
+                    self.importStatus();
+                    self.importInfo.interval = setInterval(function(){
+                        self.importStatus();
+                    }, 5000);
                 }
             },
             created: function () {
@@ -295,15 +314,12 @@ define([
                 self.load(1);
                 self.loadCompany();
                 self.importStatus();
-                setInterval(function(){
-                    self.importStatus();
-                }, 5000);
             }
         });
     };
 
     var destroy = function () {
-
+        if(vueInstance.importInfo.interval) clearInterval(vueInstance.importInfo.interval);
     };
 
     var groupList = {

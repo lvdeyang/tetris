@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.event.UserImportEvent;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 
 @Controller
@@ -36,6 +37,19 @@ public class EventPublishController {
 			String userno,
 			HttpServletRequest request) throws Exception{
 		UserRegisteredEvent event = new UserRegisteredEvent(applicationEventPublisher, userId, nickname, userno);
+		applicationEventPublisher.publishEvent(event);
+		return null;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/user/import")
+	public Object userImport(
+			String userId,
+			String nickname,
+			String userno,
+			HttpServletRequest request) throws Exception{
+		UserImportEvent event = new UserImportEvent(applicationEventPublisher, userId, nickname, userno, null, null);
 		applicationEventPublisher.publishEvent(event);
 		return null;
 	}

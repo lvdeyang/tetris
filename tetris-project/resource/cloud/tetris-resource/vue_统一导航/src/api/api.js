@@ -141,4 +141,7 @@ export const exportFolder = params => {return axiosInstance.post(`${basePath}/fo
 export const exportBundle = params => {return axiosInstance.post(`${basePath}/bundle/export`, params,{responseType:'blob'}); };
 export const exportUser = params => {return axiosInstance.post(`${basePath}/folder/user/export`, params,{responseType:'blob'}); };
 
+export const syncUser = params => { return axiosInstance.post(`${basePath}/bundle/syncUser`, qs.stringify(params)).then(res => res.data) }
+
+
 

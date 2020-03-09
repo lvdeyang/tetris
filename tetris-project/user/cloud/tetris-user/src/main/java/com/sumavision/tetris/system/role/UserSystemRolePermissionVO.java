@@ -17,6 +17,8 @@ public class UserSystemRolePermissionVO {
 	
 	private Long userId;
 	
+	private String username;
+	
 	private String nickname;
 	
 	private boolean autoGeneration;
@@ -75,6 +77,15 @@ public class UserSystemRolePermissionVO {
 		return this;
 	}
 
+	public String getUsername() {
+		return username;
+	}
+
+	public UserSystemRolePermissionVO setUsername(String username) {
+		this.username = username;
+		return this;
+	}
+
 	public String getNickname() {
 		return nickname;
 	}
@@ -111,6 +122,7 @@ public class UserSystemRolePermissionVO {
 			.setAutoGeneration(permission.isAutoGeneration())
 			.setRoleId(permission.getRoleId())
 			.setUserId(user.getId())
+			.setUsername(user.getUsername())
 			.setNickname(user.getNickname());
 		return this;
 	}
