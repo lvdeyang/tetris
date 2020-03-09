@@ -114,6 +114,19 @@ public class EurekaFeign {
 		private ApplicationYml applicationYml;
 		
 		/**
+		 * eureka监控首页<br/>
+		 * <b>作者:</b>lvdeyang<br/>
+		 * <b>版本：</b>1.0<br/>
+		 * <b>日期：</b>2020年3月6日 下午3:39:41
+		 * @return html页面
+		 */
+		public String homePage() throws Exception{
+			return doGet(applicationYml.getBaseUrl(), 
+					null, 
+					"获取eureka首页失败");
+		}
+		
+		/**
 		 * 根据appId查询app实例列表<br/>
 		 * <b>作者:</b>lvdeyang<br/>
 		 * <b>版本：</b>1.0<br/>

@@ -1,0 +1,17 @@
+<mi-frame id="page-home-wrapper" :menus="menus" :user="user" :groups="groups">
+    <template slot="title">微服务监控</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a @click="refresh" style="cursor:pointer;">刷新</a></el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <div v-loading="loading" style="width:100%; height:100%; position:relative;">
+            <el-scrollbar style="height:100%;">
+                <div id="eureka-page-wrapper"></div>
+            </el-scrollbar>
+        </div>
+
+    </template>
+</mi-frame>
