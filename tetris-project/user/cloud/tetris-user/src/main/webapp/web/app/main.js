@@ -46,6 +46,7 @@ require.config({
         'mi-tag-dialog':window.APPPATH + 'component/dialog/mims/tag/mims-tag',
 
         /* pages */
+        'page-home':window.APPPATH + 'home/page-home',
         'page-user':window.APPPATH + 'user/page-user',
         'page-bind-system-role':window.APPPATH + 'bind-system-role/page-bind-system-role',
         'page-system-role':window.APPPATH + 'system-role/page-system-role',

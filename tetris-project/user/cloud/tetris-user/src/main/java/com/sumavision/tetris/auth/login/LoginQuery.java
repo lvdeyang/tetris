@@ -40,7 +40,9 @@ public class LoginQuery {
 		TokenPO tokenEntity = tokenDao.findByToken(token);
 		UserPO user = userDao.findOne(tokenEntity.getUserId());
 		String redirectUrl = null;
-		if(UserClassify.INTERNAL.equals(user.getClassify())){
+		ServerProps props = userServerPropsQuery.queryProps();
+		redirectUrl = new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-home").toString();
+		/*if(UserClassify.INTERNAL.equals(user.getClassify())){
 			ServerProps props = userServerPropsQuery.queryProps();
 			redirectUrl = new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-user").toString();
 		}else if(UserClassify.COMPANY.equals(user.getClassify())){
@@ -51,7 +53,7 @@ public class LoginQuery {
 		}else if(UserClassify.NORMAL.equals(user.getClassify())){
 			com.sumavision.tetris.mims.config.server.ServerProps props = mimsServerPropsQuery.queryProps();
 			redirectUrl = new StringBufferWrapper().append("http://").append(props.getFtpIp()).append(":").append(props.getPort()).append("/index/media/picture/").append(token).toString();
-		}
+		}*/
 		
 		return redirectUrl;
 	}

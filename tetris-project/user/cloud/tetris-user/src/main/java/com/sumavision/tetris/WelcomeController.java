@@ -15,6 +15,7 @@ import com.sumavision.tetris.menu.MenuQuery;
 import com.sumavision.tetris.menu.MenuVO;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.spring.eureka.application.EurekaFeign.MemoryQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -27,6 +28,9 @@ public class WelcomeController {
 	
 	@Autowired
 	private MenuQuery menuQuery;
+	
+	@Autowired
+	private MemoryQuery memoryQuery;
 	
 	/**
 	 * 需要登录后访问<br/>
@@ -77,6 +81,20 @@ public class WelcomeController {
 		appInfo.put("menus", menus);
 		
 		return appInfo;
+	}
+	
+	/**
+	 * 获取首页内容<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月6日 下午3:50:30
+	 * @return html html页面
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/home/page")
+	public Object homePage() throws Exception{
+		return memoryQuery.homePage();
 	}
 	
 }
