@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
@@ -401,6 +402,7 @@ public class BundleService extends CommonService<BundlePO> {
 	 * @param String userNo 用户号码
 	 */
 	public void createUserBundle(String userId, String username, String userNo) throws Exception{
+		
 		try {
 			List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
 			List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
@@ -508,9 +510,38 @@ public class BundleService extends CommonService<BundlePO> {
 			// 保存数据库
 			bundleDao.save(bundlePOs);
 			channelSchemeDao.save(channelSchemePOs);
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * 同步用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月6日 上午10:14:33
+	 */
+	public void syncUser() throws Exception{
+		
+		List<UserBO> users = userQueryService.queryAllUserBaseInfo(null);
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user: users){
+			userIds.add(user.getId());
+		}
+		
+		List<BundlePO> needRemoveBundles = bundleDao.findByUserIdNotIn(userIds);
+		List<String> bundleIds = new ArrayList<String>();
+		for(BundlePO bundle: needRemoveBundles){
+			bundleIds.add(bundle.getBundleId());
+		}
+		
+		List<ChannelSchemePO> needRemoveChannels = channelSchemeDao.findByBundleIdIn(bundleIds);
+		List<ScreenSchemePO> needRemoveScreens = screenSchemeDao.findByBundleIdIn(bundleIds);
+		
+		bundleDao.delete(needRemoveBundles);
+		channelSchemeDao.delete(needRemoveChannels);
+		screenSchemeDao.delete(needRemoveScreens);
+		
 	}
 }

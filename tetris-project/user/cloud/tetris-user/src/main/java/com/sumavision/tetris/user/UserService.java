@@ -39,6 +39,7 @@ import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
 import com.sumavision.tetris.user.event.UserImportEventPublisher;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.user.exception.DuplicateUserNumberImportedException;
+import com.sumavision.tetris.user.exception.DuplicateUsernameImportedException;
 import com.sumavision.tetris.user.exception.MailAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileAlreadyExistException;
 import com.sumavision.tetris.user.exception.MobileNotExistException;
@@ -537,7 +538,7 @@ public class UserService{
 	}
 	
 	/** 用户导入事件发布管理 */
-	private ConcurrentHashMap<String, UserImportEventPublisher> publishers;
+	private ConcurrentHashMap<String, UserImportEventPublisher> publishers = new ConcurrentHashMap<String, UserImportEventPublisher>();
 	
 	public UserImportEventPublisher getUserImportEventPublisher(String companyId){
 		return this.publishers.get(companyId);
@@ -596,14 +597,22 @@ public class UserService{
 		if(users.size() > 0){
 			//校验
 			Set<String> usernos = new HashSet<String>();
+			Set<String> usernames = new HashSet<String>();
 			for(UserPO user:users){
 				if(user.getUserno() == null) throw new UsernoCannotBeNullException(user.getNickname());
+				if(user.getUsername() == null) throw new UsernameCannotBeNullException();
 				for(String userno:usernos){
 					if(userno.equals(user.getUserno())){
 						throw new DuplicateUserNumberImportedException(userno);
 					}
 				}
+				for(String username:usernames){
+					if(username.equals(user.getUsername())){
+						throw new DuplicateUsernameImportedException(username);
+					}
+				}
 				usernos.add(user.getUserno());
+				usernames.add(user.getUsername());
 			}
 			List<UserPO> duplicateUsers = userDao.findByCompanyIdAndUsernoIn(Long.valueOf(self.getGroupId()), usernos);
 			if(duplicateUsers!=null && duplicateUsers.size()>0){
@@ -612,6 +621,14 @@ public class UserService{
 					duplicateUsernos.add(user.getUserno());
 				}
 				throw new UsernoAlreadyExistInSystemException(duplicateUsernos);
+			}
+			List<UserPO> existUsers = userDao.findByUsernameIn(usernames);
+			if(existUsers!=null && existUsers.size()>0){
+				Set<String> duplicateUsernames = new HashSet<String>();
+				for(UserPO user:existUsers){
+					duplicateUsernames.add(user.getUsername());
+				}
+				throw new UsernameAlreadyExistException(duplicateUsernames);
 			}
 			userDao.save(users);
 			for(UserPO user:users){

@@ -1,9 +1,13 @@
 package com.sumavision.tetris.user;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
+@Entity
+@Table(name = "TETRIS_USER_IMPORT_INFO")
 public class UserImportInfoPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;

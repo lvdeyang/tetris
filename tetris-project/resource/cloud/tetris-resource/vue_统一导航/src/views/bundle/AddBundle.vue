@@ -64,6 +64,18 @@
         <el-input v-model="bundleForm.deviceAddr.devicePort" style="width: 200px;"></el-input>
       </el-form-item>
 
+      <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc'" label="坐标经度(°)" prop="longitude">
+        <el-input v-model="bundleForm.longitude" style="width: 200px;"></el-input>
+      </el-form-item>
+
+      <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc'" label="坐标纬度(°)" prop="latitude">
+        <el-input v-model="bundleForm.latitude" style="width: 200px;"></el-input>
+      </el-form-item>
+
+      <el-form-item size="small" v-show="bundleForm.deviceModel=='ipc'" label="流地址" prop="streamUrl">
+        <el-input v-model="bundleForm.streamUrl" style="width: 200px;"></el-input>
+      </el-form-item>
+
 
       <el-button style="margin-top:10px; margin-left: 30px" type="info" size="small" @click="addExtraInfo">新增扩展字段</el-button>
 
@@ -211,7 +223,11 @@
             deviceIp : "",
             devicePort : 5060
           },
-          coderType : "DEFAULT"
+          coderType : "DEFAULT",
+          longitude : '',
+          latitude : '',
+          streamUrl : '',
+          streamUrl:''
           // accessNodeUid : ""
         },
         rules : {

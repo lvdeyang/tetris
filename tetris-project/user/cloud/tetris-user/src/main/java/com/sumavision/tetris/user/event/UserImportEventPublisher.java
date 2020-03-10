@@ -47,14 +47,14 @@ public class UserImportEventPublisher implements Runnable{
 	public void run() {
 		for(UserPO user:users){
 			this.currentNum += 1;
-			UserImportEvent event = new UserImportEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), this.companyId, this.companyName);
+			UserImportEvent event = new UserImportEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), user.getUserno(), this.companyId, this.companyName);
 			applicationEventPublisher.publishEvent(event);
 		}
 		this.cache.remove(this.companyId);
 	}
 	
 	public void publish(){
-		new Thread(this).run();
+		new Thread(this).start();
 	}
 	
 	public Long getTotalUsers(){

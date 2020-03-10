@@ -13,11 +13,11 @@
             <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus sp_title"></span>&nbsp;添加用户</el-button>
             <el-button type="warning" size="small" @click="handelDelete"><span class="icon-trash sp_title"></span>&nbsp;删除用户</el-button>
 
-            <el-button v-if="import.status" size="small" disabled><span class="feather-icon-download-cloud" style="position:relative; right:1px;"></span>&nbsp;导出数据</el-button>
+            <el-button v-if="importInfo.status" size="small" disabled><span class="feather-icon-download-cloud" style="position:relative; right:1px;"></span>&nbsp;导出数据</el-button>
             <el-button v-else size="small" @click="handleExport"><span class="feather-icon-download-cloud" style="position:relative; right:1px;"></span>&nbsp;导出数据</el-button>
 
-            <el-button v-if="import.status" size="small" disabled><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;正在处理第{{import.currentUser}}条数据，总共{{import.totalUsers}}</el-button>
-            <el-button v-else size="small" @click="handleImport"><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;导入数据(已导入{{import.importTimes}}次)</el-button>
+            <el-button v-if="importInfo.status" size="small" disabled><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;正在处理第{{importInfo.currentUser}}条数据，总共{{importInfo.totalUsers}}</el-button>
+            <el-button v-else size="small" @click="handleImport"><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;导入数据(已导入{{importInfo.importTimes}}次)</el-button>
 
             <div class="div_user_list">
                 <el-scrollbar style="height:100%;">
@@ -32,6 +32,10 @@
                         <el-table-column
                                 label="昵称"
                                 prop="nickname">
+                        </el-table-column>
+                        <el-table-column
+                                label="账号"
+                                prop="username">
                         </el-table-column>
                         <el-table-column
                                 label="号码"

@@ -58,6 +58,9 @@
             <el-button type="danger" size="small" @click="handleMultiDelete" style="float: left; margin-left: 10px;">
                 批量删除
             </el-button>
+            <el-button type="danger" size="small" @click="syncUser" style="float: left; margin-left: 10px;">
+              同步用户
+            </el-button>
 
 
             <!--
@@ -192,7 +195,7 @@
 
 <script type="text/ecmascript-6">
     import { getAllUsers,getDeviceModels,getBundles,getBundleDetailInfo,deleteBundle,getBundleChannels,logoutBundle,clearBundle,setAccessLayer,syncLdap,syncEquipInfoFromLdap,
-            syncEquipInfToLdap, cleanUpEquipInfo, exportBundle} from '../../api/api';
+            syncEquipInfToLdap, cleanUpEquipInfo, exportBundle, syncUser} from '../../api/api';
     // let requestIP = document.location.host.split(":")[0];
 
     import selectLayerNode from '../layernode/SelectLayerNode';
@@ -681,6 +684,41 @@
             });
 
         }
+    ,
+
+      syncUser : function () {
+
+        this.$confirm('是否确认同步用户资源?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.resourceTableLoading = true
+
+          syncUser(null).then(res => {
+            this.resourceTableLoading = false;
+            if (res.errMsg) {
+              this.$message({
+                message: res.errMsg,
+                type: 'error'
+              });
+            } else {
+              this.$message({
+                message: "同步成功",
+                type: 'success'
+              });
+              this.getResources(1);
+              // window.location.reload();
+            }
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消同步'
+          });
+        });
+
+      }
     ,
 
         handleSelectionChange : function (val) {
