@@ -136,14 +136,13 @@ public class CommandQueryController {
 		for(UserBO user : users){
 			userIds.add(user.getId());
 		}
-		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
-				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
-				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
-//				   (!"ldap".equals(user.getCreater()) && user.getEncoderId()!=null)){// && user.getDecoderId()!=null)){
-					(!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
+				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
+//					(!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
 					if(filterMode == 0
 							|| filterMode == 1 && user.isLogined()
 							|| filterMode == 2 && !user.isLogined()){
@@ -205,14 +204,13 @@ public class CommandQueryController {
 		for(UserBO user : users){
 			userIds.add(user.getId());
 		}
-		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 		
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
-				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
-				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
-				   (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){// && user.getDecoderId()!=null)){
+				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
 					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
 					if(member!=null
 							&& (member.getCooperateStatus().equals(MemberStatus.CONNECT) || member.getCooperateStatus().equals(MemberStatus.CONNECTING))){
@@ -300,27 +298,25 @@ public class CommandQueryController {
 		for(UserBO user : users){
 			userIds.add(user.getId());
 		}
-		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 		
 		//先放入主席
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		UserBO chairmanUserBO = queryUtil.queryUserById(users, chairmanMember.getUserId());
 		chairmanUserBO.setName(chairmanUserBO.getName() + " [主席]");
-		EncoderDecoderUserMap chairmanUserMap = commonQueryUtil.queryUserMapById(userMaps, chairmanUserBO.getId());
-		TreeNodeVO chairmanUserNode = new TreeNodeVO().set(chairmanUserBO, chairmanUserMap);
+		TreeNodeVO chairmanUserNode = new TreeNodeVO().set(chairmanUserBO, null);//查询列表不需要给出decoderId
 		commandRoot.getChildren().add(chairmanUserNode);
 				
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
 				if(user.getId().equals(chairmanUserBO.getId())) continue;
-				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
-				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
-				   (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){// && user.getDecoderId()!=null)){
+				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+						   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
 					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
 					if(member!=null
 							&& (member.getCooperateStatus().equals(MemberStatus.CONNECT) || member.getCooperateStatus().equals(MemberStatus.CONNECTING))){
 						filteredUsers.add(user);
-						TreeNodeVO userNode = new TreeNodeVO().set(user, userMap);
+						TreeNodeVO userNode = new TreeNodeVO().set(user, null);//查询列表不需要给出decoderId
 						commandRoot.getChildren().add(userNode);
 					}
 				}
@@ -361,13 +357,13 @@ public class CommandQueryController {
 		for(UserBO user : users){
 			userIds.add(user.getId());
 		}
-		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
+//		List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
-				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
-				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
-				   (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){// && user.getDecoderId()!=null)){
+				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				   (!"ldap".equals(user.getCreater()) && encoderId!=null) && !encoderId.equals("")){// && user.getDecoderId()!=null)){
 					if(!memberUserIds.contains(user.getId())){
 						filteredUsers.add(user);
 					}

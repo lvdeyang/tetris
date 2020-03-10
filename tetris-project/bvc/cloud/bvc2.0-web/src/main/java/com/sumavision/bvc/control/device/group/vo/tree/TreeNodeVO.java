@@ -26,6 +26,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAuthorizationMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupBusinessRolePO;
 import com.sumavision.bvc.device.group.po.DeviceGroupConfigVideoPO;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.system.enumeration.BusinessRoleSpecial;
 import com.sumavision.bvc.system.po.AuthorizationMemberPO;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -39,6 +40,9 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 *
  */
 public class TreeNodeVO {
+	
+	@Autowired
+	private CommonQueryUtil commonQueryUtil;
 	
 	@Autowired
 	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
@@ -296,7 +300,7 @@ public class TreeNodeVO {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月16日 下午5:19:33
 	 * @param user 用户数据
-	 * @param userMap 编解码器信息，有判空
+	 * @param userMap 解码器信息，有判空
 	 * @return TreeNodeVO 树节点
 	 */
 	public TreeNodeVO set(UserBO user, EncoderDecoderUserMap userMap){
@@ -306,7 +310,7 @@ public class TreeNodeVO {
 																			.put("username", user.getName())
 																			.put("userno", user.getUserNo())
 																			.put("creater", user.getCreater())
-																			.put("encoderId", userMap==null?null:userMap.getEncodeBundleId())
+																			.put("encoderId", commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user))
 																			.put("decoderId", userMap==null?null:userMap.getDecodeBundleId())
 																		    .getMap()))
 			.setType(TreeNodeType.USER)

@@ -40,6 +40,7 @@ import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
@@ -66,6 +67,9 @@ public class CommandUserServiceImpl {
 	
 	@Autowired 
 	private ResourceService resourceService;
+	
+	@Autowired
+	private CommonQueryUtil commonQueryUtil;
 	
 	@Autowired
 	private ResourceQueryUtil resourceQueryUtil;
@@ -244,7 +248,7 @@ public class CommandUserServiceImpl {
 		
 		//被呼叫
 		//编码
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(calledUser.getId())).getList());
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(calledUser)).getList());
 		if(calledEncoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(calledUser.getName());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
@@ -258,7 +262,7 @@ public class CommandUserServiceImpl {
 		
 		//呼叫方
 		//编码
-		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(callUser.getId())).getList());
+		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(callUser)).getList());
 		if(callEncoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(callUser.getName());
 		BundlePO callEncoderBundleEntity = callEncoderBundleEntities.get(0);
 		
@@ -370,7 +374,7 @@ public class CommandUserServiceImpl {
 		
 		//被呼叫
 		//编码
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(calledUser.getId())).getList());
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(calledUser)).getList());
 		if(calledEncoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(calledUser.getName());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
@@ -380,7 +384,7 @@ public class CommandUserServiceImpl {
 		
 		//呼叫方
 		//编码
-		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(resourceQueryUtil.queryEncodeBundleIdByUserId(callUser.getId())).getList());
+		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(callUser)).getList());
 		if(callEncoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(callUser.getName());
 		BundlePO callEncoderBundleEntity = callEncoderBundleEntities.get(0);
 				

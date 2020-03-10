@@ -28,6 +28,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.AvtplNotFoundException;
 import com.sumavision.bvc.device.monitor.exception.UserHasNoPermissionToRemoveLiveDeviceException;
@@ -99,6 +100,9 @@ public class MonitorLiveService {
 	@Autowired
 	private ResourceQueryUtil resourceQueryUtil;
 	
+	@Autowired
+	private CommonQueryUtil commonQueryUtil;
+	
 	/**
 	 * 点播本地用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -142,7 +146,7 @@ public class MonitorLiveService {
 			Long userId) throws Exception{
 		
 		if(localUser == null) throw new UserCannotBeFoundException();
-		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(localUser.getId());
+		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(localUser);
 		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		
 		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(encoderId).getList());
@@ -209,7 +213,8 @@ public class MonitorLiveService {
 			String userno) throws Exception{
 		
 		if(xtUser == null) throw new UserCannotBeFoundException();
-		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(xtUser.getId());
+//		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(xtUser.getId());
+		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(xtUser);
 		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		
 		AvtplPO targetAvtpl = null;
@@ -341,7 +346,8 @@ public class MonitorLiveService {
 			String userno) throws Exception{
 		
 		if(xtUser == null) throw new UserCannotBeFoundException();
-		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(xtUser.getId());
+//		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(xtUser.getId());
+		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(xtUser);
 		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		
 		AvtplPO targetAvtpl = null;
