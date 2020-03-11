@@ -18,4 +18,6 @@ public interface FolderUserMapDAO extends CommonDao<FolderUserMap>{
 	
 	public List<FolderUserMap> findByFolderIdAndUserIdIn(Long folderId, Collection<Long> userIds);
 	
+	public List<FolderUserMap> findByFolderIdInAndUserIdIn(Collection<Long> folderIds, Collection<Long> userIds);
+	
 }
