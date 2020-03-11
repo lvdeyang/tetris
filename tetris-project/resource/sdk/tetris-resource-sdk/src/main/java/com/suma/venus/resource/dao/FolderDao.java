@@ -55,4 +55,6 @@ public interface FolderDao extends CommonDao<FolderPO>{
 	//查询bvc内部的默认根节点
 	@Query("select f from FolderPO f where f.sourceType='SYSTEM' and f.beBvcRoot=true")
 	public List<FolderPO> findBvcRootFolders();
+	
+	public List<FolderPO> findByParentPathLike(String path);
 }

@@ -94,13 +94,11 @@
     <el-card style="float:left;margin-left:50px;margin-top:10px;width:50%;min-height: 800px;" body-style="padding:0px">
 
       <div slot="header" class="clearfix">
-        <!--
-        <el-select v-model="filters.deviceModel" size="small" placeholder="选择设备类型" style="float: left;margin-left: 30px;width:200px;">
+        <el-select v-model="filters.deviceModel" size="small" placeholder="选择设备类型" style="float: left;margin-left: 30px;width:100px;">
           <el-option v-for="item in deviceModelOptions" :key="item.value" :label="item.label" :value="item.value">
           </el-option>
         </el-select>
-        -->
-        <el-input v-model="filters.keyword" size="small" style="float: left;margin-left: 30px;width:200px;" placeholder="关键字" ></el-input>
+        <el-input v-model="filters.keyword" size="small" style="float: left;margin-left: 30px;width:150px;" placeholder="关键字" ></el-input>
         <el-button type="info" @click="getBundles" size="small" style="float: left;margin-left: 30px;">查询设备</el-button>
         <el-button type="info" @click="getUsers" size="small" style="float: left;margin-left: 30px;">查询用户</el-button>
         <el-button type="primary" @click="setFolder" size="small" :disabled="disableSetFolderBtn" style="float: right;margin-right: 50px;">加入分组</el-button>
@@ -111,8 +109,8 @@
         <el-table-column width="50" type="selection"></el-table-column>
         <el-table-column prop="bundleName" label="名称" width="200" sortable>
         </el-table-column>
-        <!--<el-table-column prop="deviceModel" label="资源类型" width="150" sortable>-->
-        <!--</el-table-column>-->
+        <el-table-column prop="deviceModel" label="资源类型" width="150" sortable>
+        </el-table-column>
         <el-table-column prop="username" label="账号" width="200"  sortable>
         </el-table-column>
         <el-table-column prop="bundleId" label="资源ID" width="300"  sortable>
@@ -215,7 +213,7 @@
         userTableShow : false,
         deviceModelOptions : [],
         filters: {
-          deviceModel : '',
+          deviceModel : 'jv210',
           keyword: ''
         },
         multipleSelection : [],
@@ -263,23 +261,23 @@
 		},
 		methods: {
       //获取资源类型
-      // getDeviceModels : function(){
-      //   getDeviceModels().then(res => {
-      //     if(!res.errMsg && res.deviceModels){
-      //       this.deviceModelOptions.push({
-      //         value : "",
-      //         label : "全部类型"
-      //       });
-      //       for(let deviceModel of res.deviceModels){
-      //         let deviceModelOption = {
-      //           value : deviceModel,
-      //           label : deviceModel
-      //         };
-      //         this.deviceModelOptions.push(deviceModelOption);
-      //       }
-      //     }
-      //   });
-      // },
+       getDeviceModels : function(){
+         getDeviceModels().then(res => {
+           if(!res.errMsg && res.deviceModels){
+             this.deviceModelOptions.push({
+               value : "",
+               label : "全部类型"
+             });
+             for(let deviceModel of res.deviceModels){
+               let deviceModelOption = {
+                 value : deviceModel,
+                 label : deviceModel
+               };
+               this.deviceModelOptions.push(deviceModelOption);
+             }
+           }
+         });
+       },
 
       handleChange(file, fileList){
         var _this = this;
@@ -643,7 +641,8 @@
                 type: 'error'
               });
             } else {
-              this.initTree(true);
+              //this.initTree(true);
+              this.currentSelectNode.children = this.currentSelectNode.children.concat(res.userNodes);
               this.getUsers();
             }
           });
@@ -946,7 +945,7 @@
             self.$parent.$parent.$parent.$parent.$parent.setActive('/FolderManage');
           });
 		  this.initTree();
-		  // this.getDeviceModels();
+      this.getDeviceModels();
 		  this.getBundles();
 		}
 	}
