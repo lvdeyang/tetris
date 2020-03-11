@@ -92,21 +92,27 @@ public class PcWebLoginFilter implements Filter{
 				chain.doFilter(request, response);
 				return;
 			} catch (Exception e) {
-				LOG.error("----------------------------");
-				LOG.error(requestUri);
-				e.printStackTrace();
-				if(e instanceof BaseException){
-					BaseException bex = (BaseException)e;
-					jsonResult.put("status", bex.getCode().getCode());
-					jsonResult.put("message", bex.getMessage());
-				}else{
-					jsonResult.put("status", StatusCode.ERROR.getCode());
-					jsonResult.put("message", "服务器端异常");
+				try{
+					tokenQuery.checkToken(token, TerminalType.QT_ZK);
+					chain.doFilter(request, response);
+					return;
+				}catch(Exception e1) {
+					LOG.error("----------------------------");
+					LOG.error(requestUri);
+					e.printStackTrace();
+					if(e instanceof BaseException){
+						BaseException bex = (BaseException)e1;
+						jsonResult.put("status", bex.getCode().getCode());
+						jsonResult.put("message", bex.getMessage());
+					}else{
+						jsonResult.put("status", StatusCode.ERROR.getCode());
+						jsonResult.put("message", "服务器端异常");
+					}
+					response.setContentType("application/json; charset=UTF-8");
+					PrintWriter writer = response.getWriter();
+					writer.write(jsonResult.toJSONString());
+					writer.close();
 				}
-				response.setContentType("application/json; charset=UTF-8");
-				PrintWriter writer = response.getWriter();
-				writer.write(jsonResult.toJSONString());
-				writer.close();
 			}
 		}
 		
@@ -151,6 +157,9 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/tetris-capacity/*")
 												   .add("/demo/*")
 												   .add("/server/websocket/*")
+												   .add("/portal/login")
+												   .add("/covid19/register/statistics/*")
+												   .add("/router/*")
 												   .getList();
 	}
 	

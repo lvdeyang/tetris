@@ -13,6 +13,8 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.suma.venus.resource.base.bo.EncoderBO;
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.sumavision.bvc.common.group.dao.CommonGroupDAO;
@@ -1980,6 +1982,36 @@ public class CommonQueryUtil {
 		for(EncoderDecoderUserMap userMap : userMaps){
 			if(userMap.getUserId().equals(userId)){
 				return userMap;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 从UserBO得到绑定编码器的bundleId<br/>
+	 * <p>如果绑定的外部编码器（如210设备）bundleId有效则返回；</p>
+	 * <p>其次如果自动生成的本地编码器（通常给摄像头用）bundleId有效则返回；</p>
+	 * <p>都没有则返回null</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月9日 上午9:13:25
+	 * @param user
+	 * @return
+	 */
+	public String queryExternalOrLocalEncoderIdFromUserBO(UserBO user){
+		if(user == null) return null;
+		EncoderBO external_encoder = user.getExternal_encoder();
+		if(external_encoder != null){
+			String external_encoderId = external_encoder.getEncoderId();
+			if(external_encoderId != null && !external_encoderId.equals("")){
+				return external_encoderId;
+			}
+		}
+		EncoderBO local_encoder = user.getLocal_encoder();
+		if(local_encoder != null){
+			String local_encoderId = local_encoder.getEncoderId();
+			if(local_encoderId != null && !local_encoderId.equals("")){
+				return local_encoderId;
 			}
 		}
 		return null;

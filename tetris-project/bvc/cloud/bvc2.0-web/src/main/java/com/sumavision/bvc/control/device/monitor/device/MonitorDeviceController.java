@@ -120,9 +120,10 @@ public class MonitorDeviceController {
 		if(users!=null && users.size()>0){
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
+				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
 				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
-				   (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null && userMap.getDecodeBundleId()!=null)){
+				   (!"ldap".equals(user.getCreater()) && userMap!=null && encoderId!=null && userMap.getDecodeBundleId()!=null)){
 					filteredUsers.add(user);
 				}
 			}
@@ -462,11 +463,12 @@ public class MonitorDeviceController {
 			for(UserBO user : users){
 				userIds.add(user.getId());
 			}
-			List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
+//			List<EncoderDecoderUserMap> userMaps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 			if(users!=null && users.size()>0){
 				for(UserBO user:users){
-					EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
-					if("ldap".equals(user.getCreater()) || (!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null)){
+//					EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+					String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+					if("ldap".equals(user.getCreater()) || (!"ldap".equals(user.getCreater()) && encoderId!=null)){
 						filteredUsers.add(user);
 					}
 				}

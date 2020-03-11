@@ -26,7 +26,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
-import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.UserHasNoPermissionToRemoveLiveUserException;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.device.monitor.live.LiveType;
@@ -92,7 +92,7 @@ public class MonitorLiveUserService {
 	private MonitorLiveCommons commons;
 	
 	@Autowired
-	private ResourceQueryUtil resourceQueryUtil;
+	private CommonQueryUtil commonQueryUtil;
 	
 	@Autowired
 	private ResourceService resourceService;
@@ -120,7 +120,8 @@ public class MonitorLiveUserService {
 			String userno) throws Exception{
 		
 		if(user == null) throw new UserCannotBeFoundException();
-		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
+//		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
+		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		authorize(user.getId(), userId);
 		
@@ -230,7 +231,8 @@ public class MonitorLiveUserService {
 			String userno) throws Exception{
 		
 		if(user == null) throw new UserCannotBeFoundException();
-		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
+//		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
+		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
 		authorize(user.getId(), userId);
 		

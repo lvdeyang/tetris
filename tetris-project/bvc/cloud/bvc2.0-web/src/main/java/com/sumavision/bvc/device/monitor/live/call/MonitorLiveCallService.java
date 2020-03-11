@@ -28,6 +28,7 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.UserHasNoPermissionToRemoveLiveCallException;
 import com.sumavision.bvc.device.monitor.live.LiveType;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
@@ -71,6 +72,9 @@ public class MonitorLiveCallService {
 	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
 	
 	@Autowired
+	private CommonQueryUtil commonQueryUtil;
+	
+	@Autowired
 	private MonitorLiveCommons commons;
 	
 	@Autowired
@@ -111,7 +115,8 @@ public class MonitorLiveCallService {
 		//被叫用户设备
 		EncoderDecoderUserMap localUserMap = encoderDecoderUserMapDao.findByUserId(localUser.getId());
 		if(localUserMap == null) throw new UserHasNoAvailableEncoderException(localUser.getName());
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getEncodeBundleId()).getList());
+		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(localUser);
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(encoderId).getList());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> calledEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -277,7 +282,8 @@ public class MonitorLiveCallService {
 		//被叫用户设备
 		EncoderDecoderUserMap localUserMap = encoderDecoderUserMapDao.findByUserId(localUser.getId());
 		if(localUserMap == null) throw new UserHasNoAvailableEncoderException(localUser.getName());
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getEncodeBundleId()).getList());
+		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(localUser);
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(encoderId).getList());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> calledEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -411,7 +417,8 @@ public class MonitorLiveCallService {
 		//被叫用户设备
 		EncoderDecoderUserMap calledUserMap = encoderDecoderUserMapDao.findByUserId(calledUser.getId());
 		if(calledUserMap == null) throw new UserHasNoAvailableEncoderException(calledUser.getName());
-		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(calledUserMap.getEncodeBundleId()).getList());
+		String calledUserEncoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(calledUser);
+		List<BundlePO> calledEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(calledUserEncoderId).getList());
 		BundlePO calledEncoderBundleEntity = calledEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> calledEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(calledEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -431,7 +438,8 @@ public class MonitorLiveCallService {
 		
 		//主叫用户设备
 		EncoderDecoderUserMap callUserMap = encoderDecoderUserMapDao.findByUserId(callUser.getId());
-		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(callUserMap.getEncodeBundleId()).getList());
+		String callUserEncoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(callUser);
+		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(callUserEncoderId).getList());
 		BundlePO callEncoderBundleEntity = callEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> callEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(callEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
@@ -522,7 +530,8 @@ public class MonitorLiveCallService {
 		//主叫用户设备
 		EncoderDecoderUserMap localUserMap = encoderDecoderUserMapDao.findByUserId(localUser.getId());
 		if(localUserMap == null) throw new UserHasNoAvailableEncoderException(localUser.getName());
-		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserMap.getEncodeBundleId()).getList());
+		String localUserEncoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(localUser);
+		List<BundlePO> callEncoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(localUserEncoderId).getList());
 		BundlePO callEncoderBundleEntity = callEncoderBundleEntities.get(0);
 		
 		List<ChannelSchemeDTO> callEncoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(callEncoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);

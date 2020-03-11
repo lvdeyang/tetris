@@ -293,7 +293,8 @@ public class ResourceQueryUtil {
 		return bundleBos;
 	}
 	
-	public String queryEncodeBundleIdByUserId(Long userId){
+	@Deprecated
+	public String queryEncodeBundleIdByUserId_Deprecated(Long userId){
 		if(userId == null) return null;
 		EncoderDecoderUserMap userMap = encoderDecoderUserMapDao.findByUserId(userId);
 		if(userMap == null) return null;
