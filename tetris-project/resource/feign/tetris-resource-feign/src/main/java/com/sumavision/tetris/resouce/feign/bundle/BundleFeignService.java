@@ -12,7 +12,7 @@ import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class BundleService {
+public class BundleFeignService {
 
 	@Autowired
 	private BundleFeign bundleFeign;
