@@ -423,7 +423,7 @@ public class BundleService extends CommonService<BundlePO> {
 				BundlePO bundlePO = new BundlePO();
 				bundlePO.setBundleName(username + "_" + i);
 				bundlePO.setUsername(userNo + "_" + i);
-				//bundlePO.setOnlinePassword(password);
+				bundlePO.setOnlinePassword(userNo);
 				bundlePO.setBundleId(BundlePO.createBundleId());
 				bundlePO.setDeviceModel("player");
 				bundlePO.setBundleType("VenusTerminal");
