@@ -224,7 +224,7 @@ public class AlarmFeignClientService {
 
 	}
 
-	public List<AlarmNotifyBO> querySubUntreatedAlarm(String serviceName) throws Exception {
+	public List<AlarmNotifyBO> querySubUntreatedAlarm() throws Exception {
 		if (StringUtils.isEmpty(serviceName)) {
 			throw new IllegalArgumentException("service name Should not be NULL!");
 		}
