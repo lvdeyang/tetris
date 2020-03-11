@@ -25,12 +25,14 @@
 
                 -->
         <span style="float: left;font-size: 14px; height: 34px;line-height: 34px;">选择分组：</span>
-        <el-select v-model="folderTreeSelected.label" size="medium" placeholder="选择分组"  style="float: left; width: 200px" clearable @clear="clearHandle" ref="selectTree">
-          <el-option class="tree-select" :value="folderTreeSelected.value" :label="folderTreeSelected.label" style="width: 200px;height: auto;overflow: auto;">
+        <el-select v-model="folderTreeSelected.label" size="medium" placeholder="选择分组"  style="float: left; width: 200px" filterable :filter-method="dataFilter" clearable @clear="clearHandle" ref="selectTree">
+          <el-option class="tree-select" :value="folderTreeSelected.value" :label="folderTreeSelected.label" style="width: 200px;height: auto;overflow: hidden;">
             <el-tree
+              ref="tree"
               :data="treeData"
               :props="defaultProps"
               :default-expand-all="defaultExpandAll"
+              :filter-node-method="filterNode"
               :expand-on-click-node="expandOnClickNode"
               @node-click="handleNodeClick"
               ></el-tree>
@@ -128,7 +130,7 @@
         children:'children',
         label:'name'
       },
-      defaultExpandAll: true,
+      defaultExpandAll: false,
       expandOnClickNode: false,
       activeTabName: 'BindResource',
       deviceModelOptions:[],
@@ -180,6 +182,13 @@
     }
   },
   methods: {
+    dataFilter:function(value){
+       this.$refs.tree.filter(value);
+    },
+    filterNode:function(value, data) {
+        if (!value) return true;
+        return data.name.indexOf(value) !== -1;
+    },
     initTree: function(keepExpand) {
       initFolderTreeWithOutMember().then(res => {
         if (res.errMsg) {
@@ -208,7 +217,8 @@
 
   clearHandle:function(){
       this.folderTreeSelected.value = "",
-      this.folderTreeSelected.label = ""
+      this.folderTreeSelected.label = "",
+      this.$refs.tree.filter("");
   },
 
   handleTabClick (tab, event){

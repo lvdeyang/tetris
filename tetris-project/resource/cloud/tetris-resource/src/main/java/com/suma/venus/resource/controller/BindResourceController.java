@@ -34,6 +34,7 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.base.bo.UserresPrivilegeBO;
 import com.suma.venus.resource.bo.PrivilegeStatusBO;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
@@ -43,6 +44,7 @@ import com.suma.venus.resource.lianwang.auth.AuthXmlUtil;
 import com.suma.venus.resource.lianwang.auth.DevAuthXml;
 import com.suma.venus.resource.lianwang.auth.UserAuthXml;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
@@ -52,6 +54,7 @@ import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.VirtualResourceService;
 import com.suma.venus.resource.util.XMLBeanUtils;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 @Controller
 @RequestMapping("/resource")
@@ -85,6 +88,9 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private FolderDao folderDao;
 
 	// 联网中心消息服务注册ID
 	@Value("${connectCenterLayerID}")
@@ -270,7 +276,9 @@ public class BindResourceController extends ControllerBase {
 	/** 查询所有资源，并标记其中有权限的资源 */
 	private List<BundlePrivilegeBO> getBundles(Long roleId, String deviceModel, String keyword, Long folderId) throws Exception{
 		List<BundlePrivilegeBO> bundlePrivileges = new ArrayList<BundlePrivilegeBO>();
-		Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, folderId);
+		//Set<String> bundleIds = bundleService.queryBundleIdSetByMultiParams(deviceModel, null, keyword, folderId);
+		//获取文件夹下的设备改为获取全部包含子文件夹
+		Set<String> bundleIds = bundleService.queryBundleSetByMultiParams(deviceModel, null, keyword, folderId);
 		if (bundleIds.isEmpty()) {
 			return bundlePrivileges;
 		}
@@ -331,7 +339,26 @@ public class BindResourceController extends ControllerBase {
 			for(UserBO user: userBOs){
 				userIds.add(user.getId());
 			}
-			List<FolderUserMap> maps = folderUserMapDao.findByFolderIdAndUserIdIn(folderId, userIds);
+			
+			List<FolderPO> parentFolders = folderDao.findByParentId(folderId);
+			List<FolderPO> folders = folderDao.findByParentPathLike(new StringBufferWrapper().append("%")
+																						 .append("/")
+																						 .append(folderId)
+																						 .append("/")
+																						 .append("%")
+																						 .toString());
+			
+			List<Long> folderIds = new ArrayList<Long>();
+			folderIds.add(folderId);
+			for(FolderPO folder: parentFolders){
+				folderIds.add(folder.getId());
+			}
+			for(FolderPO folder: folders){
+				folderIds.add(folder.getId());		
+			}
+			
+			List<FolderUserMap> maps = folderUserMapDao.findByFolderIdInAndUserIdIn(folderIds, userIds);
+			//List<FolderUserMap> maps = folderUserMapDao.findByFolderIdAndUserIdIn(folderId, userIds);
 			for(UserBO user: userBOs){
 				for(FolderUserMap map: maps){
 					if(user.getId().equals(map.getUserId())){

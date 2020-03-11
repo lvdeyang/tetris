@@ -268,6 +268,8 @@ public class FolderManageController extends ControllerBase {
 	public Map<String, Object> setFolderToUsers(@RequestParam("folderId") Long folderId, @RequestParam("users") String userIds) {
 		Map<String, Object> data = makeAjaxData();
 		try {
+			
+			List<FolderTreeVO> userNodes = new LinkedList<FolderTreeVO>();
 			FolderPO folderPO = folderDao.findOne(folderId);
 			
 			List<UserBO> users = JSONObject.parseArray(userIds, UserBO.class);
@@ -283,7 +285,11 @@ public class FolderManageController extends ControllerBase {
 
 //			userFeign.setFolderToUsers(folderPO.getUuid(), usernames, maxIndex);
 			folderService.setFolderToUsers(folderPO, users, Long.valueOf(maxIndex));
+			for(UserBO user: users){
+				userNodes.add(createUserNode(folderId, user));
+			}
 
+			data.put("userNodes", userNodes);
 		} catch (Exception e) {
 			LOGGER.error("Fail to set folder : ", e);
 			data.put(ERRMSG, "内部错误");
@@ -1707,6 +1713,7 @@ public class FolderManageController extends ControllerBase {
 				}
 
 				folderPO.setName(folderName);
+				folderPO.setToLdap(true);
 
 				FolderPO parentFolder;
 				
