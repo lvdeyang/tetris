@@ -18,6 +18,7 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
+import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.ScreenRectTemplateDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
@@ -25,11 +26,13 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
+import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Md5Encoder;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 @Service
 public class BundleService extends CommonService<BundlePO> {
@@ -71,6 +74,9 @@ public class BundleService extends CommonService<BundlePO> {
 	
 	@Autowired
 	private WorkNodeService workNodeService;
+	
+	@Autowired
+	private FolderDao folderDao;
 	
 	/**
 	 * 检验设备密码<br/>
@@ -443,13 +449,18 @@ public class BundleService extends CommonService<BundlePO> {
 			//创建本地编码器encoder
 			BundlePO encoder = new BundlePO();
 			encoder.setBundleName(username + "_encoder");
-			encoder.setUsername("encoder_" + userNo);
+			encoder.setUsername(userNo + "_encoder");
 			//encoder.setOnlinePassword(password);
 			encoder.setBundleId(BundlePO.createBundleId());
 			encoder.setDeviceModel("encoder");
 			encoder.setBundleType("VenusTerminal");
 			encoder.setBundleNum(userNo + "_encoder");
 			encoder.setUserId(Long.valueOf(userId));
+			
+			if(choseWorkNode != null){
+				encoder.setAccessNodeUid(choseWorkNode.getNodeUid());
+			}
+			
 			// 默认上线
 			encoder.setOnlineStatus(ONLINE_STATUS.OFFLINE);
 			
@@ -460,7 +471,7 @@ public class BundleService extends CommonService<BundlePO> {
 			//创建机顶盒设备 
 			BundlePO tvos = new BundlePO();
 			tvos.setBundleName(username + "_机顶盒");
-			tvos.setUsername("机顶盒_" + userNo);
+			tvos.setUsername(userNo + "_tvos");
 			//tvos.setOnlinePassword(password);
 			tvos.setBundleId(BundlePO.createBundleId());
 			tvos.setDeviceModel("tvos");
@@ -476,7 +487,7 @@ public class BundleService extends CommonService<BundlePO> {
 			//创建pc终端
 			BundlePO pc = new BundlePO();
 			pc.setBundleName(username + "_pc");
-			pc.setUsername("pc_" + userNo);
+			pc.setUsername(userNo + "_pc");
 			//pc.setOnlinePassword(password);
 			pc.setBundleId(BundlePO.createBundleId());
 			pc.setDeviceModel("pc");
@@ -493,7 +504,7 @@ public class BundleService extends CommonService<BundlePO> {
 			//创建zk终端
 			BundlePO zk = new BundlePO();
 			zk.setBundleName(username + "_zk");
-			zk.setUsername("zk_" + userNo);
+			zk.setUsername(userNo + "_zk");
 			//pc.setOnlinePassword(password);
 			zk.setBundleId(BundlePO.createBundleId());
 			zk.setDeviceModel("zk");
@@ -543,5 +554,28 @@ public class BundleService extends CommonService<BundlePO> {
 		channelSchemeDao.delete(needRemoveChannels);
 		screenSchemeDao.delete(needRemoveScreens);
 		
+	}
+	
+	public Set<String> queryBundleSetByMultiParams(String deviceModel, String sourceType, String keyword, Long folderId) {
+		
+		List<BundlePO> bundlePOList = new ArrayList<BundlePO>();
+		
+		bundlePOList.addAll(bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderId, false)));
+		
+		List<FolderPO> parentFolders = folderDao.findByParentId(folderId);
+		List<FolderPO> folders = folderDao.findByParentPathLike(new StringBufferWrapper().append("%")
+																					 .append("/")
+																					 .append(folderId)
+																					 .append("/")
+																					 .append("%")
+																					 .toString());
+		for(FolderPO folderPO: parentFolders){
+			bundlePOList.addAll(bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderPO.getId(), false)));
+		}
+		for(FolderPO folderPO: folders){
+			bundlePOList.addAll(bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, folderPO.getId(), false)));
+		}
+		
+		return bundlePOList.stream().map(b -> b.getBundleId()).collect(Collectors.toSet());
 	}
 }
