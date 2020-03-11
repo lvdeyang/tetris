@@ -55,7 +55,10 @@ public class BundleFeignController {
 			Long raidus,
 			HttpServletRequest request) throws Exception{
 		
-		List<BundlePO> bundles = bundleDao.findByRaidus(longitude, latitude, raidus, "ipc");
+		List<String> deviceModels = new ArrayList<String>();
+		deviceModels.add("ipc");
+		deviceModels.add("speaker");
+		List<BundlePO> bundles = bundleDao.findByRaidus(longitude, latitude, raidus, deviceModels);
 		
 		List<YjgbVO> vos = new YjgbVO().getConverter(YjgbVO.class).convert(bundles, YjgbVO.class);
 		

@@ -15,6 +15,8 @@ public class BundleVO {
 	private String DeviceModel;
 	
 	private String streamUrl;
+	
+	private String identify;
 
 	public String getBundleId() {
 		return bundleId;
@@ -46,6 +48,14 @@ public class BundleVO {
 
 	public void setStreamUrl(String streamUrl) {
 		this.streamUrl = streamUrl;
+	}
+
+	public String getIdentify() {
+		return identify;
+	}
+
+	public void setIdentify(String identify) {
+		this.identify = identify;
 	}
 	
 }

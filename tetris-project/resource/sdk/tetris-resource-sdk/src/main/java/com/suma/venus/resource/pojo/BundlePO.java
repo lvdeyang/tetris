@@ -77,6 +77,10 @@ public class BundlePO extends CommonPO<BundlePO> {
 	
 	/** 流地址 */
 	private String streamUrl;
+	
+	/************************* 以下几个字段只对大喇叭设备有效 ********************************/
+	/** speaker标识 */
+	private String identify;
 
 	/************************* 以下几个字段只对合屏混音设备有效 ********************************/
 	/** 音频解码路数最大值 */
@@ -454,6 +458,14 @@ public class BundlePO extends CommonPO<BundlePO> {
 
 	public void setStreamUrl(String streamUrl) {
 		this.streamUrl = streamUrl;
+	}
+
+	public String getIdentify() {
+		return identify;
+	}
+
+	public void setIdentify(String identify) {
+		this.identify = identify;
 	}
 
 	@Override
