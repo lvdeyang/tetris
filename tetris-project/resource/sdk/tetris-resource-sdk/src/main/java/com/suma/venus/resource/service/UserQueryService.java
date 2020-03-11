@@ -427,6 +427,9 @@ public class UserQueryService {
 	public List<UserBO> transferUserVo2Bo(List<UserVO> userVOs) throws Exception{
 		
 		List<Long> userIds = new ArrayList<Long>();
+		for(UserVO userVO : userVOs){
+			userIds.add(userVO.getId());
+		}
 		List<BundlePO> encoders = bundleDao.findByUserIdInAndDeviceModel(userIds, "encoder");
 		List<EncoderDecoderUserMap> maps = encoderDecoderUserMapDao.findByUserIdIn(userIds);
 		

@@ -27,6 +27,7 @@ public interface WebsocketMessageFeign {
 	 * @param String fromId 消息发布者id
 	 * @param String fromName 消息发布者名称
 	 */
+	@RequestMapping(value = "/push")
 	public JSONObject push(
 			@RequestParam("targetId") String targetId,
 			@RequestParam("businessId") String businessId,
@@ -106,7 +107,7 @@ public interface WebsocketMessageFeign {
 	@RequestMapping(value = "/message/query/history/instant/message")
 	public JSONObject queryHistoryInstantMessage(
 			@RequestParam("commandId") Long commandId,
-			@RequestParam("commandId") int currentPage,
-			@RequestParam("commandId")int pageSize);
+			@RequestParam("currentPage") int currentPage,
+			@RequestParam("pageSize")int pageSize);
 	
 }
