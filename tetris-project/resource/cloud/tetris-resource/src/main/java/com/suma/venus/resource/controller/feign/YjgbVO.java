@@ -12,6 +12,8 @@ public class YjgbVO extends AbstractBaseVO<YjgbVO, BundlePO>{
 	private String DeviceModel;
 	
 	private String streamUrl;
+	
+	private String identify;
 
 	public String getBundleId() {
 		return bundleId;
@@ -45,6 +47,14 @@ public class YjgbVO extends AbstractBaseVO<YjgbVO, BundlePO>{
 		DeviceModel = deviceModel;
 	}
 
+	public String getIdentify() {
+		return identify;
+	}
+
+	public void setIdentify(String identify) {
+		this.identify = identify;
+	}
+
 	@Override
 	public YjgbVO set(BundlePO entity) throws Exception {
 		this.setId(entity.getId());
@@ -52,6 +62,7 @@ public class YjgbVO extends AbstractBaseVO<YjgbVO, BundlePO>{
 		this.setBundleName(entity.getBundleName());
 		this.setStreamUrl(entity.getStreamUrl());
 		this.setDeviceModel(entity.getDeviceModel());
+		this.setIdentify(entity.getIdentify());
 		return this;
 	}
 	
