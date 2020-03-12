@@ -84,23 +84,3 @@ public class ServerWebsocket {
 	}
     
 }
-
-class A<T>{
-	private String uuid;
-	
-	public T set(String uuid){
-		this.uuid = uuid;
-		return (T)this;
-	}
-}
-
-class AA extends A<AA>{
-	public static void main(String[] args){
-		AA aa = new AA();
-		Class aaClass = aa.getClass();
-		Method[] ms = aaClass.getMethods();
-		for(Method m:ms){
-			System.out.println(m.getName());
-		}
-	}
-}
