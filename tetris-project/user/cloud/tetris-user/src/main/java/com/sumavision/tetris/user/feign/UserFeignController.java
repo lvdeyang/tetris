@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -501,5 +502,42 @@ public class UserFeignController {
 			HttpServletRequest request) throws Exception{
 		
 		return userQuery.findTourist(userId);
+	}
+	
+	/**
+	 * 根据用户号码查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:43:03
+	 * @param String userno 用户号码
+	 * @return UserVO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/userno")
+	public Object findByUserno(
+			String userno,
+			HttpServletRequest request) throws Exception{
+		
+		return userQuery.findByUserno(userno);
+	}
+	
+	/**
+	 * 根据用户号码批量查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:43:03
+	 * @param String usernos 用户号码
+	 * @return List<UserVO>
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/userno/in")
+	public Object findByUsernoIn(
+			String usernos,
+			HttpServletRequest request) throws Exception{
+		
+		List<String> usernoList = JSONArray.parseArray(usernos, String.class);
+		return userQuery.findByUsernoIn(usernoList);
 	}
 }
