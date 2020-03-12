@@ -1,5 +1,8 @@
 package com.sumavision.tetris.websocket.core;
 
+import java.lang.reflect.Method;
+import java.util.Date;
+
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -41,7 +44,11 @@ public class ServerWebsocket {
     public void onOpen(Session session, @PathParam("token") String token) throws Exception{
     	initBean();
     	UserVO user = userQuery.findByToken(token);
-    	user.setUuid(user.getId().toString());
+    	//这个地方很奇怪，反射能调到，直接调不到
+    	Class userClass = user.getClass();
+    	Method method = userClass.getMethod("setUuid", String.class);
+    	method.invoke(user, user.getId().toString());
+    	//user.setUuid(user.getId().toString());
 		sessionMetadataService.add(user, session);
 		//messageService.offlineMessage(user.getId());
 		System.out.println(new StringBufferWrapper().append("用户：").append(user.getNickname()).append("连上来啦...").toString());
@@ -51,7 +58,9 @@ public class ServerWebsocket {
     public void onClose(Session session) throws Exception{
     	initBean();
 		String userId = sessionMetadataService.remove(session);
-    	eventPublisher.publishWebsocketSessionClosedEvent(Long.valueOf(userId));
+		try{
+			eventPublisher.publishWebsocketSessionClosedEvent(Long.valueOf(userId));
+		}catch(Exception e){}
     }
 	
     @OnError
@@ -74,4 +83,24 @@ public class ServerWebsocket {
 		if(eventPublisher == null) eventPublisher = SpringContext.getBean(EventPublisher.class);
 	}
     
+}
+
+class A<T>{
+	private String uuid;
+	
+	public T set(String uuid){
+		this.uuid = uuid;
+		return (T)this;
+	}
+}
+
+class AA extends A<AA>{
+	public static void main(String[] args){
+		AA aa = new AA();
+		Class aaClass = aa.getClass();
+		Method[] ms = aaClass.getMethods();
+		for(Method m:ms){
+			System.out.println(m.getName());
+		}
+	}
 }
