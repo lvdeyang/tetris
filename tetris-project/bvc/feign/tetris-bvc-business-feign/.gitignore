@@ -1,0 +1,10 @@
+/target/
+/bin/
+/.apt_generated/
+/.settings/
+.classpath
+.factorypath
+.project
+/.idea/
+/src/main/webapp/.idea/
+lombok-1.16.10.jar
