@@ -187,7 +187,7 @@ public class ZoomService {
 		for(ZoomMemberPO m:members){
 			if(m.getId().equals(member.getId())) continue;
 			if(!m.getJoin()) continue;
-			websocketMessageService.push(m.getUserId(), "zoomJoin", JSON.parseObject(JSON.toJSONString(new ZoomMemberVO().set(m))), tourist?self.getUuid():self.getId().toString(), rename);
+			websocketMessageService.push(m.getUserId(), "zoomJoin", JSON.parseObject(JSON.toJSONString(new ZoomMemberVO().set(member))), tourist?self.getUuid():self.getId().toString(), rename);
 		}
 		
 		ZoomMemberVO me = new ZoomMemberVO().set(member);
@@ -324,7 +324,7 @@ public class ZoomService {
 			JSONObject content = new JSONObject();
 			content.put("code", zoom.getCode());
 			content.put("name", zoom.getName());
-			websocketMessageService.push(m.getUserId(), "zoomStart", content, chairman.getUserId(), chairman.getRename());
+			websocketMessageService.push(m.getUserId(), "zoomStop", content, chairman.getUserId(), chairman.getRename());
 		}
 		
 		//处理游客

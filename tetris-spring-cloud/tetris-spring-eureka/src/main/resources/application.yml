@@ -3,7 +3,7 @@ server:
 
 eureka:
   instance:
-    hostname: 192.165.56.84
+    hostname: 192.165.56.71
   # 关闭自我保护机制，保证不可用服务及时踢出
   server:
     enableSelfPreservation: false
@@ -36,7 +36,7 @@ spring:
     database: MYSQL
     show-sql: false
     hibernate:
-      ddl-auto: update      
+      ddl-auto: update          
 feign: 
   hystrix: 
    enabled: true    
