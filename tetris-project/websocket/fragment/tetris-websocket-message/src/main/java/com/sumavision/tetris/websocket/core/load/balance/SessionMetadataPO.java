@@ -3,11 +3,12 @@ package com.sumavision.tetris.websocket.core.load.balance;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Entity
-@Table(name = "TETRIS_WEBSOCKET_SESSION_METADATA")
+@Table(name = "TETRIS_WEBSOCKET_SESSION_METADATA", uniqueConstraints = {@UniqueConstraint(columnNames="USER_ID")})
 public class SessionMetadataPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;

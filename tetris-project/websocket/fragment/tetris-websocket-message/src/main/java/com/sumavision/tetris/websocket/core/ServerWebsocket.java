@@ -58,9 +58,7 @@ public class ServerWebsocket {
     public void onClose(Session session) throws Exception{
     	initBean();
 		String userId = sessionMetadataService.remove(session);
-		try{
-			eventPublisher.publishWebsocketSessionClosedEvent(Long.valueOf(userId));
-		}catch(Exception e){}
+		eventPublisher.publishWebsocketSessionClosedEvent(Long.valueOf(userId));
     }
 	
     @OnError
