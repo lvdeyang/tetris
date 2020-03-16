@@ -6,13 +6,13 @@ function QtEvent(id, fn){
 function QtContext(id, onChannelReady){
     var self = this;
     try{
-        new QWebChannel(qt.webChannelTransport, function(channel){
+        if(window.content){
             self.id = id;
             self.onChannelReady = onChannelReady;
-            self.channel = channel;
+            self.channel = {objects:{content:window.content}};
             self.events = [];
             self.channel.objects.content.slotSetId(self.id);
-            self.channel.objects.content.signalFromQt.connect(function(e){
+            var myFn = function(e){
                 e = $.parseJSON(e);
                 var targetEventId = e.id;
                 for(var i=0; i<self.events.length; i++){
@@ -20,11 +20,34 @@ function QtContext(id, onChannelReady){
                         self.events[i].fn(e);
                     }
                 }
-            });
+            };
+            self.channel.objects.content.signalFromQt.connect(myFn);
             if(typeof self.onChannelReady === 'function'){
-                self.onChannelReady();
+                setTimeout(function(){
+                    self.onChannelReady();
+                }, 200);
             }
-        });
+        }else{
+            new QWebChannel(qt.webChannelTransport, function(channel){
+                self.id = id;
+                self.onChannelReady = onChannelReady;
+                self.channel = channel;
+                self.events = [];
+                self.channel.objects.content.slotSetId(self.id);
+                self.channel.objects.content.signalFromQt.connect(function(e){
+                    e = $.parseJSON(e);
+                    var targetEventId = e.id;
+                    for(var i=0; i<self.events.length; i++){
+                        if(self.events[i].id.split('.')[0]==targetEventId && typeof self.events[i].fn==='function'){
+                            self.events[i].fn(e);
+                        }
+                    }
+                });
+                if(typeof self.onChannelReady === 'function'){
+                    self.onChannelReady();
+                }
+            });
+        }
     }catch(e){
         console.log('当前不是qt环境');
     }
@@ -131,9 +154,14 @@ QtContext.prototype.getWindowParams = function(){
 
 QtContext.prototype.get = function(keyArray, fn){
     if(typeof fn !== 'function') return;
-    this.channel.objects.content.slotGetGlobalVar($.toJSON(keyArray), function(values){
+    if(window.content){
+        var values = this.channel.objects.content.slotGetGlobalVar($.toJSON(keyArray));
         fn($.parseJSON(values));
-    });
+    }else{
+        this.channel.objects.content.slotGetGlobalVar($.toJSON(keyArray), function(values){
+            fn($.parseJSON(values));
+        });
+    }
 };
 
 QtContext.prototype.set = function(key, value){
