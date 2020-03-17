@@ -7,7 +7,7 @@ public class StartBundleDispatchBO {
 
 	private String taskId = "";
 
-	private Long userId;
+	private String userId = "";
 	
 	private String bundleId = "";
 	
@@ -24,11 +24,11 @@ public class StartBundleDispatchBO {
 		return this;
 	}
 
-	public Long getUserId() {
+	public String getUserId() {
 		return userId;
 	}
 
-	public StartBundleDispatchBO setUserId(Long userId) {
+	public StartBundleDispatchBO setUserId(String userId) {
 		this.userId = userId;
 		return this;
 	}
