@@ -19,7 +19,7 @@ public class DispatchBO {
 	
 	private List<StopTaskDispatchBO> stopTaskDispatch = new ArrayList<StopTaskDispatchBO>();
 	
-	private List<StartUserDispatchBO> stopUserDispatch = new ArrayList<StartUserDispatchBO>();
+	private List<StopUserDispatchBO> stopUserDispatch = new ArrayList<StopUserDispatchBO>();
 
 	public List<StartBundleDispatchBO> getStartBundleDispatch() {
 		return startBundleDispatch;
@@ -57,11 +57,11 @@ public class DispatchBO {
 		return this;
 	}
 
-	public List<StartUserDispatchBO> getStopUserDispatch() {
+	public List<StopUserDispatchBO> getStopUserDispatch() {
 		return stopUserDispatch;
 	}
 
-	public DispatchBO setStopUserDispatch(List<StartUserDispatchBO> stopUserDispatch) {
+	public DispatchBO setStopUserDispatch(List<StopUserDispatchBO> stopUserDispatch) {
 		this.stopUserDispatch = stopUserDispatch;
 		return this;
 	}
