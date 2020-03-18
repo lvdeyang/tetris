@@ -70,10 +70,10 @@ public class BundlePO extends CommonPO<BundlePO> {
 	
 	/************************* 以下几个字段只对ipc设备有效 ********************************/
 	/** 坐标-经度 */
-	private Long longitude;
+	private String longitude;
 
 	/** 坐标-纬度 */
-	private Long latitude;
+	private String latitude;
 	
 	/** 流地址 */
 	private String streamUrl;
@@ -436,19 +436,19 @@ public class BundlePO extends CommonPO<BundlePO> {
 		this.userId = userId;
 	}
 
-	public Long getLongitude() {
+	public String getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(Long longitude) {
+	public void setLongitude(String longitude) {
 		this.longitude = longitude;
 	}
 
-	public Long getLatitude() {
+	public String getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(Long latitude) {
+	public void setLatitude(String latitude) {
 		this.latitude = latitude;
 	}
 

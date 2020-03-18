@@ -40,10 +40,10 @@ public class BundleVO {
 	private SOURCE_TYPE sourceType;
 	
 	/** 坐标-经度 */
-	private Long longitude;
+	private String longitude;
 
 	/** 坐标-纬度 */
-	private Long latitude;
+	private String latitude;
 	
 	/** 流地址 */
 	private String streamUrl;
@@ -238,19 +238,19 @@ public class BundleVO {
 		this.bundleFolderId = bundleFolderId;
 	}
 
-	public Long getLongitude() {
+	public String getLongitude() {
 		return longitude;
 	}
 
-	public void setLongitude(Long longitude) {
+	public void setLongitude(String longitude) {
 		this.longitude = longitude;
 	}
 
-	public Long getLatitude() {
+	public String getLatitude() {
 		return latitude;
 	}
 
-	public void setLatitude(Long latitude) {
+	public void setLatitude(String latitude) {
 		this.latitude = latitude;
 	}
 

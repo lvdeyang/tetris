@@ -6,6 +6,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 /**
  * 接入层节点pojo
@@ -57,6 +59,12 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
 	/**录制资源下载端口**/
 	private Integer downloadPort;
 	
+	/** webrtcHttp端口 */
+	private Integer webrtcHttpPort;
+	
+	/** webrtc websocket端口 */
+	private Integer webrtcWebsocketPort;
+	
 	public enum NodeType {
 //		ACCESS_JV210("JV210接入"),
 //		ACCESS_CDN("CDN接入"),
@@ -73,7 +81,8 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
 		ACCESS_NETWORK("联网服务设备"),
 		ACCESS_DISPLAYCTRL("显控汇接网关"),
 		ACCESS_S100("流转发器接入"),
-		ACCESS_VODPROXY("点播代理服务设备");
+		ACCESS_VODPROXY("点播代理服务设备"),
+		ACCESS_WEBRTC("webrtc接入");
 		
         private String name;
         
@@ -86,35 +95,13 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
         }
         
         public static NodeType fromString(String s) throws Exception{
-            if("ACCESS_JV210".equals(s)){
-                return ACCESS_JV210;
-            }else if("ACCESS_JV230".equals(s)){
-                return ACCESS_JV230;
-            }else if("ACCESS_TVOS".equals(s)){
-                return ACCESS_TVOS;
-            }else if("ACCESS_MIXER".equals(s)){
-                return ACCESS_MIXER;
-            }else if("ACCESS_CDN".equals(s)){
-                return ACCESS_CDN;
-            }else if("ACCESS_IPC".equals(s)){
-                return ACCESS_IPC;
-            }else if("ACCESS_MOBILE".equals(s)){
-            	return ACCESS_MOBILE;
-            }else if("ACCESS_VOD".equals(s)){
-            	return ACCESS_VOD;
-            }else if("ACCESS_STREAMMEDIA".equals(s)){
-            	return ACCESS_STREAMMEDIA;
-            }else if("ACCESS_NETWORK".equals(s)){
-            	return ACCESS_NETWORK;
-            }else if("ACCESS_DISPLAYCTL".equals(s)){
-            	return ACCESS_DISPLAYCTRL;
-            }else if("ACCESS_S100".equals(s)){
-            	return ACCESS_S100;
-            }else if("ACCESS_VODPROXY".equals(s)){
-            	return ACCESS_VODPROXY;
-            }else {
-                throw new Exception("错误的类型："+s);
+            NodeType[] values = NodeType.values();
+            for(NodeType value: values){
+            	if(s.equals(value.getName())){
+            		return value;
+            	}
             }
+            throw new ErrorTypeException("name", s);
         }
     }
 	
@@ -217,5 +204,23 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
 
 	public void setMonitorUrl(String monitorUrl) {
 		this.monitorUrl = monitorUrl;
+	}
+
+	@Column
+	public Integer getWebrtcHttpPort() {
+		return webrtcHttpPort;
+	}
+
+	public void setWebrtcHttpPort(Integer webrtcHttpPort) {
+		this.webrtcHttpPort = webrtcHttpPort;
+	}
+
+	@Column
+	public Integer getWebrtcWebsocketPort() {
+		return webrtcWebsocketPort;
+	}
+
+	public void setWebrtcWebsocketPort(Integer webrtcWebsocketPort) {
+		this.webrtcWebsocketPort = webrtcWebsocketPort;
 	}
 }

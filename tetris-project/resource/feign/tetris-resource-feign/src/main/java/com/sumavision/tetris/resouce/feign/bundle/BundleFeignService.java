@@ -40,7 +40,7 @@ public class BundleFeignService {
 	 * @param Long latitude 纬度
 	 * @param Long raidus 半径范围
 	 */
-	public List<BundleVO> queryVisibleBundle(Long longitude, Long latitude, Long raidus) throws Exception{
+	public List<BundleVO> queryVisibleBundle(String longitude, String latitude, Long raidus) throws Exception{
 		return JsonBodyResponseParser.parseArray(bundleFeign.queryVisibleBundle(longitude, latitude, raidus), BundleVO.class);
 	}
 

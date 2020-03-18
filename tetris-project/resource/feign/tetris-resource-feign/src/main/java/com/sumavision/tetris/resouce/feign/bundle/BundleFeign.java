@@ -41,8 +41,8 @@ public interface BundleFeign {
 	 */
 	@RequestMapping(value = "/feign/bundle/query/visible/bundle", method = RequestMethod.POST)
 	public JSONObject queryVisibleBundle(
-			@RequestParam(value = "longitude") Long longitude,
-			@RequestParam(value = "latitude") Long latitude,
+			@RequestParam(value = "longitude") String longitude,
+			@RequestParam(value = "latitude") String latitude,
 			@RequestParam(value = "raidus") Long raidus) throws Exception;
 
 }

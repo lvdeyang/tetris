@@ -50,8 +50,8 @@ public class BundleFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/query/visible/bundle")
 	public Object queryVisibleBundle(
-			Long longitude,
-			Long latitude,
+			String longitude,
+			String latitude,
 			Long raidus,
 			HttpServletRequest request) throws Exception{
 		
