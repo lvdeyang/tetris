@@ -21,12 +21,11 @@ public class UserService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午4:40:58
-	 * @param String userId 游客id
 	 * @param String nickname 游客昵称
 	 * @return UserVO 用户
 	 */
-	public UserVO addTourist(String userId, String nickname) throws Exception{
-		return JsonBodyResponseParser.parseObject(userFeign.addTourist(userId, nickname), UserVO.class);
+	public UserVO addTourist(String nickname) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.addTourist(nickname), UserVO.class);
 	}
 	
 	/**
@@ -34,9 +33,9 @@ public class UserService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午4:44:32
-	 * @param String userId 游客id
+	 * @param Long userId 游客id
 	 */
-	public void removeTourist(String userId) throws Exception{
+	public void removeTourist(Long userId) throws Exception{
 		userFeign.removeTourist(userId);
 	}
 	
@@ -45,9 +44,9 @@ public class UserService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月3日 下午1:59:06
-	 * @param Collection<String> userIds 游客id列表
+	 * @param Collection<Long> userIds 游客id列表
 	 */
-	public void removeTouristBatch(Collection<String> userIds) throws Exception{
+	public void removeTouristBatch(Collection<Long> userIds) throws Exception{
 		userFeign.removeTouristBatch(JSON.toJSONString(userIds));
 	}
 	

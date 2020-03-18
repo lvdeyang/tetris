@@ -22,9 +22,6 @@ public class ApiG01WebAuthController {
 	@Autowired
 	private LoginService loginService;
 	
-	@Autowired
-	
-	
 	/**
 	 * 用户名密码登录<br/>
 	 * <b>作者:</b>lvdeyang<br/>

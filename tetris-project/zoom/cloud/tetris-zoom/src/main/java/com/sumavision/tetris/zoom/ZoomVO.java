@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
+import com.sumavision.tetris.zoom.webrtc.WebRtcRoomInfoVO;
+import com.sumavision.tetris.zoom.webrtc.WebRtcVO;
 
 public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 
@@ -16,6 +18,9 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 	
 	/** 会议状态 */
 	private String status;
+	
+	/** 保密等级 */
+	private String secretLevel;
 
 	/** 会议模式 */
 	private String mode;
@@ -25,6 +30,9 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 	
 	/** 创建者用户昵称 */
 	private String creatorUserNickname;
+	
+	/** webrtc信息 */
+	private WebRtcVO webRtc;
 	
 	/** 自己 */
 	private ZoomMemberVO me;
@@ -68,6 +76,15 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 		return this;
 	}
 
+	public String getSecretLevel() {
+		return secretLevel;
+	}
+
+	public ZoomVO setSecretLevel(String secretLevel) {
+		this.secretLevel = secretLevel;
+		return this;
+	}
+
 	public String getMode() {
 		return mode;
 	}
@@ -92,6 +109,20 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 
 	public ZoomVO setCreatorUserNickname(String creatorUserNickname) {
 		this.creatorUserNickname = creatorUserNickname;
+		return this;
+	}
+	
+	public WebRtcVO getWebRtc() {
+		return webRtc;
+	}
+
+	public ZoomVO setWebRtc(WebRtcVO webRtc) {
+		this.webRtc = webRtc;
+		return this;
+	}
+	
+	public ZoomVO setWebRtc(WebRtcRoomInfoVO webRtcRoomInfo) {
+		this.webRtc = webRtcRoomInfo.transform();
 		return this;
 	}
 

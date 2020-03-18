@@ -8,8 +8,6 @@ import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
-import io.reactivex.netty.channel.StringTransformer;
-
 /**
  * 会议表<br/>
  * <b>作者:</b>lvdeyang<br/>
@@ -28,9 +26,15 @@ public class ZoomPO extends AbstractBasePO{
 	/** 会议号码 */
 	private String code;
 	
+	/** 会议呼入密码 */
+	private String password;
+	
 	/** 会议状态 */
 	private ZoomStatus status;
 
+	/** 保密等级 */
+	private ZoomSecretLevel secretLevel;
+	
 	/** 会议模式 */
 	private ZoomMode mode;
 	
@@ -61,6 +65,15 @@ public class ZoomPO extends AbstractBasePO{
 		this.code = code;
 	}
 
+	@Column(name = "PASSWORD")
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "STATUS")
 	public ZoomStatus getStatus() {
@@ -69,6 +82,16 @@ public class ZoomPO extends AbstractBasePO{
 
 	public void setStatus(ZoomStatus status) {
 		this.status = status;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "SECRET_LEVEL")
+	public ZoomSecretLevel getSecretLevel() {
+		return secretLevel;
+	}
+
+	public void setSecretLevel(ZoomSecretLevel secretLevel) {
+		this.secretLevel = secretLevel;
 	}
 
 	@Enumerated(value = EnumType.STRING)
