@@ -280,11 +280,11 @@ public class UserQuery {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午5:18:32
-	 * @param String userId 游客id
+	 * @param String userUuid 游客uuid
 	 * @return UserVO 游客
 	 */
-	public UserVO findTourist(String userId) throws Exception{
-		return JsonBodyResponseParser.parseObject(userFeign.findTourist(userId), UserVO.class);
+	public UserVO findTourist(String userUuid) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.findTourist(userUuid), UserVO.class);
 	}
 	
 	/**
