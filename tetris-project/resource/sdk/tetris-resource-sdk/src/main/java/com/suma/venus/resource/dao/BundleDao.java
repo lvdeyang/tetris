@@ -159,7 +159,7 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	 * @return List<BundlePO>
 	 */
 	@Query(value = "SELECT * FROM bundlepo where device_model in ?4 AND (6371000.393 * acos (cos ( radians(?2) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?1) ) + sin ( radians(?2) ) * sin( radians( latitude ) )) ) <= ?3", nativeQuery = true)
-	public List<BundlePO> findByRaidus(Long longitude, Long latitude, Long raidus, Collection<String> deviceModel);
+	public List<BundlePO> findByRaidus(String longitude, String latitude, Long raidus, Collection<String> deviceModel);
 
 	public List<BundlePO> findByDeviceModelAndUserIdIn(String type, Collection<Long> userIds);
 }
