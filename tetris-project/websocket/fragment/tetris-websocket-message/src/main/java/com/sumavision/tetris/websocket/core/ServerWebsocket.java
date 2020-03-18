@@ -1,8 +1,5 @@
 package com.sumavision.tetris.websocket.core;
 
-import java.lang.reflect.Method;
-import java.util.Date;
-
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -18,6 +15,7 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.core.config.ApplicationConfig;
+import com.sumavision.tetris.websocket.core.exception.IllegalTokenException;
 import com.sumavision.tetris.websocket.core.load.balance.SessionMetadataService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
@@ -44,10 +42,14 @@ public class ServerWebsocket {
     public void onOpen(Session session, @PathParam("token") String token) throws Exception{
     	initBean();
     	UserVO user = userQuery.findByToken(token);
+    	if(user == null){
+    		session.close();
+    		throw new IllegalTokenException(token);
+    	}
     	//这个地方很奇怪，反射能调到，直接调不到
-    	Class userClass = user.getClass();
-    	Method method = userClass.getMethod("setUuid", String.class);
-    	method.invoke(user, user.getId().toString());
+    	//Class userClass = user.getClass();
+    	//Method method = userClass.getMethod("setUuid", String.class);
+    	//method.invoke(user, user.getId().toString());
     	//user.setUuid(user.getId().toString());
 		sessionMetadataService.add(user, session);
 		//messageService.offlineMessage(user.getId());

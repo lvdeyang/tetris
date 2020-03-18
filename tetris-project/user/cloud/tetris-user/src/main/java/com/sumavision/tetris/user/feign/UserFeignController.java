@@ -489,17 +489,17 @@ public class UserFeignController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午5:14:21
-	 * @param String userId 游客id
+	 * @param String userUuId 游客uuid
 	 * @return UserVO 游客
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/find/tourist")
 	public Object findTourist(
-			String userId,
+			String userUuId,
 			HttpServletRequest request) throws Exception{
 		
-		return userQuery.findTourist(userId);
+		return userQuery.findTourist(userUuId);
 	}
 	
 	/**

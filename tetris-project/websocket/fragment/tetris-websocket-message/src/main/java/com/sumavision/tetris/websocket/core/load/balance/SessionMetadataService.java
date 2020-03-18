@@ -38,7 +38,7 @@ public class SessionMetadataService {
 			if(metadata == null){
 				metadata = new SessionMetadataPO();
 			}
-			metadata.setUserId(user.getUuid());
+			metadata.setUserId(user.getId().toString());
 			metadata.setServerIp(applicationConfig.getIp());
 			metadata.setServerPort(applicationConfig.getPort());
 			metadata.setUsername(user.getNickname());

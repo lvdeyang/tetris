@@ -64,7 +64,8 @@ public class ZoomService {
 			ZoomMode mode,
 			String rename,
 			Boolean myAudio,
-			Boolean myVideo) throws Exception{
+			Boolean myVideo,
+			ZoomMemberType type) throws Exception{
 		
 		UserVO self = userQuery.current();
 		
@@ -106,6 +107,7 @@ public class ZoomService {
 		chairman.setTheirAudio(true);
 		chairman.setTheirVideo(true);
 		chairman.setUpdateTime(new Date());
+		chairman.setType(type);
 		zoomMemberDao.save(chairman);
 		
 		ZoomMemberVO me = new ZoomMemberVO().set(chairman);

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.zoom.ZoomMemberType;
 import com.sumavision.tetris.zoom.ZoomMode;
 import com.sumavision.tetris.zoom.ZoomService;
 
@@ -41,7 +42,7 @@ public class ApiZoomAndroidController {
 			Boolean myVideo,
 			HttpServletRequest request) throws Exception{
 		
-		return zoomService.create(name, ZoomMode.valueOf(mode), rename, myAudio, myVideo);
+		return zoomService.create(name, ZoomMode.valueOf(mode), rename, myAudio, myVideo, ZoomMemberType.TERMINl);
 	}
 	
 	/**
