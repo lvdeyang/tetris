@@ -8,7 +8,6 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
-import org.dom4j.util.UserDataAttribute;
 import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.context.SpringContext;
@@ -21,7 +20,7 @@ import com.sumavision.tetris.websocket.core.load.balance.SessionMetadataService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
 @Component
-@ServerEndpoint("/tourist/server/websocket/{userId}")
+@ServerEndpoint("/tourist/server/websocket/{userUuid}")
 public class TouristServerWebsocket {
 
 private ApplicationConfig applicationConfig;
@@ -40,9 +39,9 @@ private ApplicationConfig applicationConfig;
     }
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("userId") String userId) throws Exception{
+    public void onOpen(Session session, @PathParam("userUuid") String userUuid) throws Exception{
     	initBean();
-    	UserVO tourist = userQuery.findTourist(userId);
+    	UserVO tourist = userQuery.findTourist(userUuid);
     	if(tourist == null){
     		session.close();
     		throw new IllegalTouristException();
