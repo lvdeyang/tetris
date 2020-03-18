@@ -10,6 +10,8 @@ public class StartBundleDispatchBO {
 	/** 通常为false；为true时，调度服务只进行记录而不实际调度 */
 	private boolean recordOnly = false;
 
+	private String meetingCode = "";
+
 	private String userId = "";
 	
 	private String bundleId = "";
@@ -33,6 +35,15 @@ public class StartBundleDispatchBO {
 
 	public StartBundleDispatchBO setRecordOnly(boolean recordOnly) {
 		this.recordOnly = recordOnly;
+		return this;
+	}
+
+	public String getMeetingCode() {
+		return meetingCode;
+	}
+
+	public StartBundleDispatchBO setMeetingCode(String meetingCode) {
+		this.meetingCode = meetingCode;
 		return this;
 	}
 

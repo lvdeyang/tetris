@@ -6,9 +6,14 @@ import java.util.List;
 public class StartUserDispatchBO {
 
 	private String taskId = "";
+
+	/** 仅在更新某个用户调度时使用 */
+	private Long dispatchId = null;
 	
 	/** 通常为false；为true时，调度服务只进行记录而不实际调度 */
 	private boolean recordOnly = false;
+
+	private String meetingCode = "";
 
 	private String userId = "";
 	
@@ -20,6 +25,15 @@ public class StartUserDispatchBO {
 
 	public StartUserDispatchBO setTaskId(String taskId) {
 		this.taskId = taskId;
+		return this;
+	}
+
+	public Long getDispatchId() {
+		return dispatchId;
+	}
+
+	public StartUserDispatchBO setDispatchId(Long dispatchId) {
+		this.dispatchId = dispatchId;
 		return this;
 	}
 
@@ -38,6 +52,15 @@ public class StartUserDispatchBO {
 
 	public StartUserDispatchBO setUserId(String userId) {
 		this.userId = userId;
+		return this;
+	}
+
+	public String getMeetingCode() {
+		return meetingCode;
+	}
+
+	public StartUserDispatchBO setMeetingCode(String meetingCode) {
+		this.meetingCode = meetingCode;
 		return this;
 	}
 
