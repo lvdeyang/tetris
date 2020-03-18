@@ -8,6 +8,9 @@ public class ZoomMemberVO extends AbstractBaseVO<ZoomMemberVO, ZoomMemberPO>{
 	/** 用户id */
 	private String userId;
 	
+	/** 用户号码 */
+	private String userno;
+	
 	/** 用户昵称 */
 	private String userNickname;
 	
@@ -47,14 +50,23 @@ public class ZoomMemberVO extends AbstractBaseVO<ZoomMemberVO, ZoomMemberPO>{
 	/** 设备id */
 	private String bundleId;
 	
+	/** 接入层id */
+	private String layerId;
+	
 	/** 视频通道id */
 	private String videoChannelId;
 	
 	/** 音频通道id */
 	private String audioChannelId;
 	
-	/** 屏幕通道id */
-	private String screenChannelId;
+	/** 屏幕视频通道id */
+	private String screenVideoChannelId;
+	
+	/** 屏幕音频通道id */
+	private String screenAudioChannelId;
+	
+	/** 会议成员终端类型 */
+	private String type;
 	
 	public String getUserId() {
 		return userId;
@@ -62,6 +74,15 @@ public class ZoomMemberVO extends AbstractBaseVO<ZoomMemberVO, ZoomMemberPO>{
 
 	public ZoomMemberVO setUserId(String userId) {
 		this.userId = userId;
+		return this;
+	}
+	
+	public String getUserno() {
+		return userno;
+	}
+
+	public ZoomMemberVO setUserno(String userno) {
+		this.userno = userno;
 		return this;
 	}
 
@@ -182,6 +203,15 @@ public class ZoomMemberVO extends AbstractBaseVO<ZoomMemberVO, ZoomMemberPO>{
 		return this;
 	}
 
+	public String getLayerId() {
+		return layerId;
+	}
+
+	public ZoomMemberVO setLayerId(String layerId) {
+		this.layerId = layerId;
+		return this;
+	}
+
 	public String getVideoChannelId() {
 		return videoChannelId;
 	}
@@ -200,12 +230,30 @@ public class ZoomMemberVO extends AbstractBaseVO<ZoomMemberVO, ZoomMemberPO>{
 		return this;
 	}
 
-	public String getScreenChannelId() {
-		return screenChannelId;
+	public String getScreenVideoChannelId() {
+		return screenVideoChannelId;
 	}
 
-	public ZoomMemberVO setScreenChannelId(String screenChannelId) {
-		this.screenChannelId = screenChannelId;
+	public ZoomMemberVO setScreenVideoChannelId(String screenVideoChannelId) {
+		this.screenVideoChannelId = screenVideoChannelId;
+		return this;
+	}
+
+	public String getScreenAudioChannelId() {
+		return screenAudioChannelId;
+	}
+
+	public ZoomMemberVO setScreenAudioChannelId(String screenAudioChannelId) {
+		this.screenAudioChannelId = screenAudioChannelId;
+		return this;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public ZoomMemberVO setType(String type) {
+		this.type = type;
 		return this;
 	}
 

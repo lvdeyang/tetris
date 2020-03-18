@@ -435,7 +435,6 @@ public class UserFeignController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午4:46:11
-	 * @param String userId 游客id
 	 * @param String nickname 游客昵称
 	 * @return UserVO 用户
 	 */
@@ -443,11 +442,10 @@ public class UserFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/add/tourist")
 	public Object addTourist(
-			String userId,
 			String nickname,
 			HttpServletRequest request) throws Exception{
 		
-		return userService.addTourist(userId, nickname);
+		return userService.addTourist(nickname);
 	}
 	
 	/**
@@ -455,13 +453,13 @@ public class UserFeignController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午4:48:34
-	 * @param String userId 游客id
+	 * @param Long userId 游客id
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/remove/tourist")
 	public Object removeTourist(
-			String userId, 
+			Long userId, 
 			HttpServletRequest request) throws Exception{
 		
 		userService.removeTourist(userId);
@@ -482,7 +480,7 @@ public class UserFeignController {
 			String userIds,
 			HttpServletRequest request) throws Exception{
 		
-		userService.removeTouristBatch(JSON.parseArray(userIds, String.class));
+		userService.removeTouristBatch(JSON.parseArray(userIds, Long.class));
 		return null;
 	}
 	
