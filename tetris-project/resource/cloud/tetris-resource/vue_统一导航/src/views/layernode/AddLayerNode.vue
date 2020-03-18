@@ -41,6 +41,14 @@
         <el-input v-model="nodeForm.netUrl" style="width: 200px;" placeholder="网管页面地址，可不填"></el-input>
       </el-form-item>
 
+      <el-form-item v-show="nodeForm.type=='ACCESS_WEBRTC'" label="webrtc http端口" prop="webrtcHttpPort">
+        <el-input v-model="nodeForm.webrtcHttpPort" style="width: 200px;"></el-input>
+      </el-form-item>
+
+      <el-form-item v-show="nodeForm.type=='ACCESS_WEBRTC'" label="webrtc websocket端口" prop="webrtcWebsocketPort">
+        <el-input v-model="nodeForm.webrtcWebsocketPort" style="width: 200px;"></el-input>
+      </el-form-item>
+
       <!--<el-form-item label="访问地址" prop="url">-->
         <!--<el-input v-model="nodeForm.url" style="width: 200px;"></el-input>-->
       <!--</el-form-item>-->
@@ -144,6 +152,10 @@
           {
             label : "点播代理服务设备",
             value : "ACCESS_VODPROXY"
+          },
+          {
+            label : "webrtc接入",
+            value : "ACCESS_WEBRTC"
           }
         ],
         nodeForm : {
@@ -154,7 +166,9 @@
           port : null,
           downloadPort : null,
           monitorUrl:'',
-          netUrl:''
+          netUrl:'',
+          webrtcHttpPort:8088,
+          webrtcWebsocketPort:8188
         },
         rules : {
           type: [

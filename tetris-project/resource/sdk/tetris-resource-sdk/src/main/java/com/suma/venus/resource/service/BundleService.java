@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.bo.mq.ResourceBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
@@ -528,6 +529,80 @@ public class BundleService extends CommonService<BundlePO> {
 	}
 	
 	/**
+	 * 创建游客设备--播放器和pc<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月18日 上午9:11:37
+	 * @param String userId 用户id
+	 * @param String username 用户名
+	 * @param String userNo 用户号码
+	 */
+	public void createTouristBundle(String userId, String username, String userNo) throws Exception{
+		
+		try {
+			List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
+			List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
+			List<String> bundleIds = new ArrayList<String>();
+			
+			//自动选择player接入层
+			List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_JV210);
+			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
+				
+			// 创建17个播放器资源
+			for (int i = 1; i <= 17; i++) {
+				BundlePO bundlePO = new BundlePO();
+				bundlePO.setBundleName(username + "_" + i);
+				bundlePO.setUsername(userNo + "_" + i);
+				bundlePO.setOnlinePassword(userNo);
+				bundlePO.setBundleId(BundlePO.createBundleId());
+				bundlePO.setDeviceModel("player");
+				bundlePO.setBundleType("VenusTerminal");
+				bundlePO.setBundleAlias("播放器");
+				bundlePO.setBundleNum(userNo + "_" + i);
+				bundlePO.setUserId(Long.valueOf(userId));
+				
+				if(choseWorkNode != null){
+					bundlePO.setAccessNodeUid(choseWorkNode.getNodeUid());
+				}
+				
+				// 默认上线
+				bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+
+				bundlePOs.add(bundlePO);
+				bundleIds.add(bundlePO.getBundleId());
+
+				configDefaultAbility(bundlePO);
+				// 配置两路解码通道(音频解码和视频解码各一路)
+				//channelSchemePOs.addAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
+			}
+			
+			//创建pc终端
+			BundlePO pc = new BundlePO();
+			pc.setBundleName(username + "_pc");
+			pc.setUsername(userNo + "_pc");
+			//pc.setOnlinePassword(password);
+			pc.setBundleId(BundlePO.createBundleId());
+			pc.setDeviceModel("pc");
+			pc.setBundleType("VenusTerminal");
+			pc.setBundleNum(userNo + "_pc");
+			pc.setUserId(Long.valueOf(userId));
+			// 默认上线
+			pc.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+
+			bundlePOs.add(pc);
+			bundleIds.add(pc.getBundleId());
+			configDefaultAbility(pc);
+
+			// 保存数据库
+			bundleDao.save(bundlePOs);
+			channelSchemeDao.save(channelSchemePOs);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
 	 * 同步用户<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -577,5 +652,50 @@ public class BundleService extends CommonService<BundlePO> {
 		}
 		
 		return bundlePOList.stream().map(b -> b.getBundleId()).collect(Collectors.toSet());
+	}
+	
+	/**
+	 * 查询用户下对应资源类型的资源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月17日 下午5:00:27
+	 * @param List<Long> userIds userIds 用户列表
+	 * @param String type 资源类型
+	 * @return List<ResourceBO> 资源信息
+	 */
+	public List<ResourceBO> queryResource(List<Long> userIds, String type) throws Exception{
+		
+		List<BundlePO> bundles = bundleDao.findByDeviceModelAndUserIdIn(type, userIds);
+		List<String> bundleIds = new ArrayList<String>();
+		for(BundlePO bundle: bundles){
+			bundleIds.add(bundle.getBundleId());
+		}
+		List<ChannelSchemePO> channels = channelSchemeDao.findByBundleIdIn(bundleIds);
+		
+		List<ResourceBO> resources = new ArrayList<ResourceBO>();
+		for(BundlePO bundle: bundles){
+			ResourceBO resourceBO = new ResourceBO();
+			resourceBO.setUserId(bundle.getUserId().toString());
+			resourceBO.setBundleId(bundle.getBundleId());
+			resourceBO.setLayerId(bundle.getAccessNodeUid());
+			resourceBO.setType(bundle.getDeviceModel());
+			for(ChannelSchemePO channel: channels){
+				if(channel.getBundleId().equals(bundle.getBundleId()) && channel.getChannelId().equals("VenusVideoIn_1")){
+					resourceBO.setVideoChannelId(channel.getChannelId());
+				}
+				if(channel.getBundleId().equals(bundle.getBundleId()) && channel.getChannelId().equals("VenusAudioIn_1")){
+					resourceBO.setAudioChannelId(channel.getChannelId());
+				}
+				if(channel.getBundleId().equals(bundle.getBundleId()) && channel.getChannelId().equals("VenusVideoIn_2")){
+					resourceBO.setScreenVideoChannelId(channel.getChannelId());
+				}
+				if(channel.getBundleId().equals(bundle.getBundleId()) && channel.getChannelId().equals("VenusAudioIn_2")){
+					resourceBO.setScreenAudioChannelId(channel.getChannelId());
+				}
+			}
+			resources.add(resourceBO);
+		}
+		
+		return resources;
 	}
 }

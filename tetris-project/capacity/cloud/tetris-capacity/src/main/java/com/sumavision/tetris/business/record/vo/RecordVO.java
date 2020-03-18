@@ -7,6 +7,8 @@ package com.sumavision.tetris.business.record.vo;
  * <b>日期：</b>2019年12月2日 上午11:36:22
  */
 public class RecordVO {
+	
+	private String deviceIp;
 
 	/** udp/rtp/http/hls/rtsp/rtmp */
 	private String type;
@@ -14,6 +16,15 @@ public class RecordVO {
 	private SourceParamVO sourceParam;
 	
 	private OutputParamVO outputParam;
+
+	public String getDeviceIp() {
+		return deviceIp;
+	}
+
+	public RecordVO setDeviceIp(String deviceIp) {
+		this.deviceIp = deviceIp;
+		return this;
+	}
 
 	public String getType() {
 		return type;

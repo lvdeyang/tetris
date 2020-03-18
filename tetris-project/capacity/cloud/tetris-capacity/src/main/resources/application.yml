@@ -14,7 +14,7 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.85
+      ipAddress: 10.10.40.207
 #  profiles:
 #    active: pro
   datasource:
@@ -95,13 +95,15 @@ ribbon:
       clients: tetris-menu
   ReadTimeout: 120000
   ConnectTimeout: 30000
+  MaxAutoRetries: 0
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.85:8081/eureka/
+      defaultZone: http://10.10.40.207:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
+    ip-address: 10.10.40.207
     # 心跳检测检测与续约时间
     # 测试时将值设置设置小些，保证服务关闭后注册中心能及时踢出服务
     #lease-renewal-interval-in-seconds: 1

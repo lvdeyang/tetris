@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 public class ResourceService {
@@ -32,7 +34,7 @@ public class ResourceService {
 	 * @return List<WorkNodeVO> 节点信息
 	 */
 	public List<WorkNodeVO> queryWebRtc() throws Exception{
-		return null;
+		return JsonBodyResponseParser.parseArray(resourceFeign.queryWebRtc(), WorkNodeVO.class);
 	}
 	
 	/**
@@ -45,7 +47,7 @@ public class ResourceService {
 	 * @return List<ResourceVO> 资源信息
 	 */
 	public List<ResourceVO> queryResource(List<Long> userIds, String type) throws Exception{
-		return null;
+		return JsonBodyResponseParser.parseArray(resourceFeign.queryResource(JSON.toJSONString(userIds), type), ResourceVO.class);
 	}
 	
 }
