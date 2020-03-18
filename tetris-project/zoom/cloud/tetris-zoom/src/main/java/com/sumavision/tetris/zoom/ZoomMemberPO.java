@@ -2,6 +2,8 @@ package com.sumavision.tetris.zoom;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -20,6 +22,9 @@ public class ZoomMemberPO extends AbstractBasePO{
 
 	/** 用户id */
 	private String userId;
+	
+	/** 用户号码 */
+	private String userno;
 	
 	/** 用户昵称 */
 	private String userNickname;
@@ -56,6 +61,9 @@ public class ZoomMemberPO extends AbstractBasePO{
 	
 	/** 是否共享屏幕 */
 	private Boolean shareScreen;
+	
+	/** 记录成员终端类型 */
+	private ZoomMemberType type;
 
 	@Column(name = "USER_ID")
 	public String getUserId() {
@@ -64,6 +72,15 @@ public class ZoomMemberPO extends AbstractBasePO{
 
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+	
+	@Column(name = "USERNO")
+	public String getUserno() {
+		return userno;
+	}
+
+	public void setUserno(String userno) {
+		this.userno = userno;
 	}
 
 	@Column(name = "USER_NICKNAME")
@@ -172,6 +189,16 @@ public class ZoomMemberPO extends AbstractBasePO{
 
 	public void setShareScreen(Boolean shareScreen) {
 		this.shareScreen = shareScreen;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "TYPE")
+	public ZoomMemberType getType() {
+		return type;
+	}
+
+	public void setType(ZoomMemberType type) {
+		this.type = type;
 	}
 	
 }
