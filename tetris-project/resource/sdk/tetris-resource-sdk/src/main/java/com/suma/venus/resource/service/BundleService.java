@@ -451,7 +451,7 @@ public class BundleService extends CommonService<BundlePO> {
 			BundlePO encoder = new BundlePO();
 			encoder.setBundleName(username + "_encoder");
 			encoder.setUsername(userNo + "_encoder");
-			//encoder.setOnlinePassword(password);
+			encoder.setOnlinePassword(userNo + "_encoder");
 			encoder.setBundleId(BundlePO.createBundleId());
 			encoder.setDeviceModel("encoder");
 			encoder.setBundleType("VenusTerminal");

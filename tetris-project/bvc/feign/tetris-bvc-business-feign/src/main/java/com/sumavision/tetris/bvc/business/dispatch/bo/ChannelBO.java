@@ -13,9 +13,10 @@ public class ChannelBO {
 
 	private SourceParamBO source_param;
 	
+	/** AUTO/PARAM/COMMAND1等 */
 	private String codecParamType = "AUTO";
 	
-	/** 编解码参数 */
+	/** 编解码参数，近当codecParamType为PARAM时使用此字段 */
 	private CodecParamBO codec_param = new CodecParamBO();
 
 	public String getChannelId() {

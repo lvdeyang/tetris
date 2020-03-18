@@ -2,9 +2,9 @@ package com.sumavision.tetris.bvc.business.dispatch.bo;
 
 public class VideoParamBO {
 
-	private String resolution = "";
+	private String resolution = "1920x1080";
 	
-	private String codec = "";
+	private String codec = "h264";
 	
 	private String bit_depth = "8bit";
 	
