@@ -3,7 +3,6 @@ package com.sumavision.tetris.zoom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,6 +72,8 @@ public class ZoomService {
 		zoom.setName(name);
 		zoom.setMode(mode);
 		zoom.setStatus(ZoomStatus.START);
+		//TODO 默认创建公开会议
+		zoom.setSecretLevel(ZoomSecretLevel.PUBLIC);
 		zoom.setCreatorUserId(self.getId());
 		zoom.setCreatorUserNickname(self.getNickname());
 		zoom.setCreatorUserRename(rename);
@@ -93,6 +94,7 @@ public class ZoomService {
 		ZoomMemberPO chairman = new ZoomMemberPO();
 		chairman.setUserId(self.getId().toString());
 		chairman.setUserNickname(self.getNickname());
+		chairman.setUserno(self.getUserno());
 		chairman.setRename(rename);
 		chairman.setTourist(false);
 		chairman.setZoomId(zoom.getId());
@@ -144,14 +146,15 @@ public class ZoomService {
 			self = userQuery.current();
 			tourist = false;
 		}catch(Exception e){
-			self = userService.addTourist(UUID.randomUUID().toString(), rename);
+			self = userService.addTourist(rename);
 		}
 		
-		ZoomMemberPO member = zoomMemberDao.findByZoomIdAndUserId(zoom.getId(), tourist?self.getUuid():self.getId().toString());
+		ZoomMemberPO member = zoomMemberDao.findByZoomIdAndUserId(zoom.getId(), self.getId().toString());
 		if(member == null){
 			member = new ZoomMemberPO();
-			member.setUserId(tourist?self.getUuid():self.getId().toString());
+			member.setUserId(self.getId().toString());
 			member.setUserNickname(self.getNickname());
+			member.setUserno(self.getUserno());
 			member.setRename(rename);
 			member.setTourist(tourist);
 			member.setZoomId(zoom.getId());
@@ -225,7 +228,7 @@ public class ZoomService {
 			self = userQuery.current();
 			tourist = false;
 		}catch(Exception e){
-			self = userService.addTourist(UUID.randomUUID().toString(), rename);
+			self = userService.addTourist(rename);
 		}
 		
 		ZoomPO zoom = zoomDao.findByCode(code);
@@ -238,7 +241,7 @@ public class ZoomService {
 		ZoomMemberPO selfMember = null;
 		if(tourist){
 			selfMember = new ZoomMemberPO();
-			selfMember.setUserId(self.getUuid());
+			selfMember.setUserId(self.getId().toString());
 			selfMember.setUserNickname(self.getNickname());
 			selfMember.setRename(rename);
 			selfMember.setTourist(tourist);
@@ -329,9 +332,9 @@ public class ZoomService {
 		
 		//处理游客
 		if(tourists.size() > 0){
-			List<String> touristIds = new ArrayList<String>();
+			List<Long> touristIds = new ArrayList<Long>();
 			for(ZoomMemberPO tourist:tourists){
-				touristIds.add(tourist.getUserId());
+				touristIds.add(Long.valueOf(tourist.getUserId()));
 			}
 			userService.removeTouristBatch(touristIds);
 			zoomMemberDao.deleteInBatch(tourists);
@@ -377,7 +380,7 @@ public class ZoomService {
 		}
 		
 		if(selfMember.getTourist()){
-			userService.removeTourist(selfMember.getUserId());
+			userService.removeTourist(Long.valueOf(selfMember.getUserId()));
 			zoomMemberDao.delete(selfMember);
 		}else{
 			selfMember.setChairman(false);
@@ -599,7 +602,7 @@ public class ZoomService {
 		}
 		
 		if(targetMember.getTourist()){
-			userService.removeTourist(targetMember.getUserId());
+			userService.removeTourist(Long.valueOf(targetMember.getUserId()));
 			zoomMemberDao.delete(targetMember);
 		}else{
 			targetMember.setChairman(false);

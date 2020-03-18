@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sumavision.tetris.business.role.BusinessRoleService;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.organization.CompanyDAO;
 import com.sumavision.tetris.organization.CompanyPO;
 import com.sumavision.tetris.organization.CompanyService;
@@ -36,8 +36,12 @@ import com.sumavision.tetris.system.role.SystemRoleVO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionDAO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
+import com.sumavision.tetris.user.event.TouristCreateEvent;
+import com.sumavision.tetris.user.event.TouristDeleteBatchEvent;
+import com.sumavision.tetris.user.event.TouristDeleteEvent;
 import com.sumavision.tetris.user.event.UserImportEventPublisher;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
+import com.sumavision.tetris.user.exception.DeletedUserIsNotATouristException;
 import com.sumavision.tetris.user.exception.DuplicateUserNumberImportedException;
 import com.sumavision.tetris.user.exception.DuplicateUsernameImportedException;
 import com.sumavision.tetris.user.exception.MailAlreadyExistException;
@@ -116,12 +120,16 @@ public class UserService{
 	 * @param String nickname 游客昵称
 	 * @return UserVO 用户
 	 */
-	public UserVO addTourist(String userId, String nickname) throws Exception{
+	public UserVO addTourist(String nickname) throws Exception{
 		UserPO tourist = new UserPO();
-		tourist.setUuid(userId);
 		tourist.setNickname(nickname);
+		tourist.setUserno(new StringBufferWrapper().append("t").append(tourist.getId()).toString());
+		tourist.setClassify(UserClassify.TOURIST);
 		tourist.setUpdateTime(new Date());
 		userDao.save(tourist);
+		//发布游客创建事件
+		TouristCreateEvent event = new TouristCreateEvent(applicationEventPublisher, tourist.getId().toString(), tourist.getNickname(), tourist.getUserno());
+		applicationEventPublisher.publishEvent(event);
 		return new UserVO().set(tourist);
 	}
 	
@@ -130,13 +138,17 @@ public class UserService{
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午4:44:32
-	 * @param String userId 游客id
+	 * @param Long userId 游客id
 	 */
-	public void removeTourist(String userId) throws Exception{
-		UserPO user = userDao.findByUuid(userId);
-		if(user != null){
-			userDao.delete(user);
+	public void removeTourist(Long userId) throws Exception{
+		UserPO tourist = userDao.findOne(userId);
+		if(tourist == null) return;
+		if(!UserClassify.TOURIST.equals(tourist.getClassify())){
+			throw new DeletedUserIsNotATouristException(userId);
 		}
+		TouristDeleteEvent event = new TouristDeleteEvent(applicationEventPublisher, tourist.getId().toString(), tourist.getNickname(), tourist.getUserno());
+		applicationEventPublisher.publishEvent(event);
+		userDao.delete(tourist);
 	}
 	
 	/**
@@ -144,12 +156,14 @@ public class UserService{
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月3日 下午1:51:43
-	 * @param Collection<String> userIds 游客id列表
+	 * @param Collection<Long> userIds 游客id列表
 	 */
-	public void removeTouristBatch(Collection<String> userIds) throws Exception{
+	public void removeTouristBatch(Collection<Long> userIds) throws Exception{
 		if(userIds!=null && userIds.size()>0){
-			List<UserPO> users = userDao.findByUuidIn(userIds);
+			List<UserPO> users = userDao.findAll(userIds);
 			if(users!=null && users.size()>0){
+				TouristDeleteBatchEvent event = new TouristDeleteBatchEvent(applicationEventPublisher, userIds);
+				applicationEventPublisher.publishEvent(event);
 				userDao.deleteInBatch(users);
 			}
 		}

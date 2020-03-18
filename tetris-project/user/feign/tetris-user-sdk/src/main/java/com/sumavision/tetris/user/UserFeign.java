@@ -243,12 +243,11 @@ public interface UserFeign {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午4:51:54
-	 * @param String userId 游客id
 	 * @param String nickname 游客昵称
 	 * @return UserVO 游客
 	 */
 	@RequestMapping(value = "/user/feign/add/tourist")
-	public JSONObject addTourist(@RequestParam("userId") String userId, @RequestParam("nickname") String nickname);
+	public JSONObject addTourist(@RequestParam("nickname") String nickname);
 	
 	/**
 	 * 删除游客<br/>
@@ -258,7 +257,7 @@ public interface UserFeign {
 	 * @param String userId 游客id
 	 */
 	@RequestMapping(value = "/user/feign/remove/tourist")
-	public JSONObject removeTourist(@RequestParam("userId") String userId);
+	public JSONObject removeTourist(@RequestParam("userId") Long userId);
 	
 	/**
 	 * 批量删除游客<br/>
