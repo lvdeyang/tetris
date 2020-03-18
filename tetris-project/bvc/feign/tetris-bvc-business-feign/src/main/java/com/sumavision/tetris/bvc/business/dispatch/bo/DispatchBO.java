@@ -19,6 +19,8 @@ public class DispatchBO {
 	
 	private List<StopTaskDispatchBO> stopTaskDispatch = new ArrayList<StopTaskDispatchBO>();
 	
+	private List<StopTaskDispatchByUserIdAndSourceBO> stopTaskDispatchByUserIdAndSource = new ArrayList<StopTaskDispatchByUserIdAndSourceBO>();
+	
 	private List<StopUserDispatchBO> stopUserDispatch = new ArrayList<StopUserDispatchBO>();
 
 	public List<StartBundleDispatchBO> getStartBundleDispatch() {
@@ -54,6 +56,15 @@ public class DispatchBO {
 
 	public DispatchBO setStopTaskDispatch(List<StopTaskDispatchBO> stopTaskDispatch) {
 		this.stopTaskDispatch = stopTaskDispatch;
+		return this;
+	}
+
+	public List<StopTaskDispatchByUserIdAndSourceBO> getStopTaskDispatchByUserIdAndSource() {
+		return stopTaskDispatchByUserIdAndSource;
+	}
+
+	public DispatchBO setStopTaskDispatchByUserIdAndSource(List<StopTaskDispatchByUserIdAndSourceBO> stopTaskDispatchByUserIdAndSource) {
+		this.stopTaskDispatchByUserIdAndSource = stopTaskDispatchByUserIdAndSource;
 		return this;
 	}
 
