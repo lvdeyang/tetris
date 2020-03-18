@@ -19,7 +19,8 @@ public enum TerminalType {
 	QT_POLLING("qt轮询软件", "/api/polling", 4*60*60),
 	QT_CATALOGUE("qt编单软件", "/api/schedule", 4*60*60),
 	QT_ZK("qt指控软件", "/api/zk", 4*60*60),
-	API("api调用", "/api/server", 0);
+	API("api调用", "/api/server", 0),
+	G01_WEB("g01web端", "/api/g01/web", 4*60*60);
 	
 	/** 终端类型名称 */
 	private String name;

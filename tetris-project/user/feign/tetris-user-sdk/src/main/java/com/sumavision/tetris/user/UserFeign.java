@@ -281,4 +281,26 @@ public interface UserFeign {
 	@RequestMapping(value = "/user/feign/find/tourist")
 	public JSONObject findTourist(@RequestParam("userId") String userId);
 	
+	/**
+	 * 根据用户号码查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:46:51
+	 * @param String userno 用户号码
+	 * @return UserVO
+	 */
+	@RequestMapping(value = "/user/feign/find/by/userno")
+	public JSONObject findByUserno(@RequestParam("userno") String userno);
+	
+	/**
+	 * 根据用户号码批量查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:46:51
+	 * @param String usernos 用户号码
+	 * @return List<UserVO>
+	 */
+	@RequestMapping(value = "/user/feign/find/by/userno/in")
+	public JSONObject findByUsernoIn(@RequestParam("usernos") String usernos);
+	
 }

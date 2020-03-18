@@ -24,4 +24,28 @@ public class ResourceService {
 		return JsonBodyResponseParser.parseArray(resourceFeign.queryUsersByUserId(userId, terminalType), UserBO.class);
 	}
 	
+	/**
+	 * 获取webrtc接入信息<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月17日 下午3:38:36
+	 * @return List<WorkNodeVO> 节点信息
+	 */
+	public List<WorkNodeVO> queryWebRtc() throws Exception{
+		return null;
+	}
+	
+	/**
+	 * 查询用户资源（根据类型）<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月17日 下午3:41:48
+	 * @param List<Long> userIds 用户id
+	 * @param String type 设备类型
+	 * @return List<ResourceVO> 资源信息
+	 */
+	public List<ResourceVO> queryResource(List<Long> userIds, String type) throws Exception{
+		return null;
+	}
+	
 }

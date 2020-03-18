@@ -887,6 +887,32 @@ public class UserQuery {
 												   .getMap();
 	}
 	
+	/**
+	 * 根据用户号码查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:34:50
+	 * @param String userno 用户号码
+	 * @return UserVO
+	 */
+	public UserVO findByUserno(String userno) throws Exception{
+		return new UserVO().set(userDao.findByUserno(userno));
+	}
+	
+	/**
+	 * 根据用户号码批量查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:34:50
+	 * @param List<String> usernos 用户号码
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> findByUsernoIn(List<String> usernos) throws Exception{
+		List<UserPO> users = userDao.findByUsernoIn(usernos);
+		List<UserVO> userVOs = UserVO.getConverter(UserVO.class).convert(users, UserVO.class);
+		return userVOs;
+	}
+	
 	/**************************************************************************
 	 **************************************************************************
 	 **************************************************************************/

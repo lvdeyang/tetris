@@ -99,6 +99,27 @@
 			<artifactId>spring-cloud-starter-feign</artifactId>
 		</dependency>
 
+		<!-- ssh2 -->
+		<dependency>
+		    <groupId>com.jcraft</groupId>
+		    <artifactId>jsch</artifactId>
+		    <version>0.1.55</version>
+		</dependency>
+		
+		<!-- 模板引擎 -->
+		<dependency>
+		    <groupId>com.quhaodian.discover</groupId>
+		    <artifactId>discover-freemaker</artifactId>
+		    <version>1.8.2</version>
+		</dependency>
+		
+		<!-- ftp -->
+		<dependency>
+		    <groupId>commons-net</groupId>
+		    <artifactId>commons-net</artifactId>
+		    <version>3.6</version>
+		</dependency>
+
 	</dependencies>
 	
 	<dependencyManagement>

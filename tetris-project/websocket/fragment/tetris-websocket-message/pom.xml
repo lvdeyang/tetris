@@ -55,21 +55,23 @@
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-user-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
+			<scope>test</scope>
 		</dependency>
 		
-		<!-- menu-feign -->
+		<!-- menu-feign 
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-menu-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		</dependency>-->
 		
-		<!-- mims-feign -->
+		<!-- mims-feign 
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-mims-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		</dependency>-->
+		
 		
 		<!-- p2p-feign -->
 		<dependency>
