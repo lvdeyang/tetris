@@ -6,6 +6,9 @@ import java.util.List;
 public class StartBundleDispatchBO {
 
 	private String taskId = "";
+	
+	/** 通常为false；为true时，调度服务只进行记录而不实际调度 */
+	private boolean recordOnly = false;
 
 	private String userId = "";
 	
@@ -21,6 +24,15 @@ public class StartBundleDispatchBO {
 
 	public StartBundleDispatchBO setTaskId(String taskId) {
 		this.taskId = taskId;
+		return this;
+	}
+
+	public boolean isRecordOnly() {
+		return recordOnly;
+	}
+
+	public StartBundleDispatchBO setRecordOnly(boolean recordOnly) {
+		this.recordOnly = recordOnly;
 		return this;
 	}
 

@@ -2,7 +2,7 @@ package com.sumavision.tetris.bvc.business.dispatch.bo;
 
 public class AudioParamBO {
 
-	private String codec = "";
+	private String codec = "aac";
 
 	private String bitrate = "64000";
 	
