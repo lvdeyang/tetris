@@ -3,6 +3,8 @@ package com.sumavision.tetris.agent.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.ws.Dispatch;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +21,11 @@ import com.sumavision.tetris.agent.vo.ResourceVO;
 import com.sumavision.tetris.agent.vo.ResponseResourceVO;
 import com.sumavision.tetris.agent.vo.StopVO;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
+import com.sumavision.tetris.bvc.business.dispatch.bo.ChannelBO;
+import com.sumavision.tetris.bvc.business.dispatch.bo.DispatchBO;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
+import com.sumavision.tetris.bvc.business.dispatch.bo.SourceParamBO;
+import com.sumavision.tetris.bvc.business.dispatch.bo.StartUserDispatchBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.resouce.feign.resource.ResourceService;
@@ -57,7 +63,7 @@ public class TerminalAgentService {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月11日 下午2:58:23
-	 * @return AgentResponse
+	 * @return AgentResponse 协议信息
 	 */
 	public ResponseResourceVO queryResources() throws Exception{
 			
@@ -96,7 +102,7 @@ public class TerminalAgentService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月12日 下午3:26:26
 	 * @param String calledNo 被呼叫用户号码
-	 * @return PassByVO
+	 * @return PassByVO 协议信息
 	 */
 	public PassByVO callUser(String calledNo) throws Exception{
 		
@@ -120,7 +126,7 @@ public class TerminalAgentService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月12日 下午3:50:34
 	 * @param String code 会议号码
-	 * @return PassByVO
+	 * @return PassByVO 协议信息
 	 */
 	public PassByVO callMeeting(String code) throws Exception{
 		
@@ -134,19 +140,6 @@ public class TerminalAgentService {
 			  .setLocal_user_no(callUser.getUserno());
 		
 		return passBy;
-	}
-	
-	/**
-	 * 发送passby协议<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年3月12日 下午4:22:19
-	 * @param PassByVO passBy passby协议
-	 */
-	public void sendPassBy(PassByVO passBy) throws Exception{
-		
-		//调用消息服务的feign接口
-		
 	}
 	
 	/**
@@ -165,7 +158,7 @@ public class TerminalAgentService {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月13日 上午9:15:38
-	 * @param String userno
+	 * @param String userno 用户号码
 	 */
 	public void bye(String userno) throws Exception{
 		
@@ -183,7 +176,7 @@ public class TerminalAgentService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月13日 上午9:30:34
 	 * @param String userno 用户号码
-	 * @return List<PassByVO>
+	 * @return List<PassByVO> 协议信息
 	 */
 	public List<PassByVO> resume(String userno) throws Exception{
 		
@@ -209,7 +202,7 @@ public class TerminalAgentService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月12日 下午3:21:08
 	 * @param ZoomVO zoom zoom会议信息
-	 * @return PassByVO
+	 * @return PassByVO 协议信息
 	 */
 	public PassByVO zoomVo2PassByVO(ZoomVO zoom) throws Exception{
 		
@@ -266,52 +259,92 @@ public class TerminalAgentService {
 		return passBy;
 	}
 	
-	
+	/**
+	 * 消息发送<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月16日 上午10:26:10
+	 * @param String code 会议号码
+	 * @param JSONObject jsonObject 消息体
+	 * @param List<ZoomMemberVO> targets 接收消息方
+	 * @param String businessId 业务id
+	 */
 	public void push(String code, JSONObject jsonObject, List<ZoomMemberVO> targets, String businessId) throws Exception{
 		
-		ZoomMemberVO changeMember = jsonObject.parseObject(JSON.toJSONString(jsonObject), ZoomMemberVO.class);
-				
+			
+		List<PassByBO> passBys = new ArrayList<PassByBO>();
+		List<DispatchBO> dispatches = new ArrayList<DispatchBO>();
 		
 		String operate = "";
 		
 		if(businessId.equals("zoomJoin") || businessId.equals("zoomInvitation")){
+			
 			operate = "business_call_220_join";
+			ZoomMemberVO changeMember = JSONObject.parseObject(JSON.toJSONString(jsonObject), ZoomMemberVO.class);
+			passBys = generateCallMessage(code, changeMember, targets, operate, true, true);	
+			
+		}else if(businessId.equals("zoomStart")){
+			
+			//调用zoomJoin
+			
 		}
-//		else if(businessId.equals("zoomStart")){
-//			operate = "business_call_220_start";
-//		}
 		else if(businessId.equals("zoomStop")){
+			
 			operate = "business_stop_220";
+			passBys = stopAllUsers(code, targets);
+			
 		}else if(businessId.equals("zoomExit") || businessId.equals("zoomKickOut")){
+			
+			ZoomMemberVO changeMember = JSONObject.parseObject(JSON.toJSONString(jsonObject), ZoomMemberVO.class);
 			operate = "business_stop_220_channel";
+			passBys = stopUser(code, changeMember, targets);
+			
 		}else if(businessId.equals("zoomOpenShareScreen")){
+			
+			ZoomMemberVO changeMember = JSONObject.parseObject(JSON.toJSONString(jsonObject), ZoomMemberVO.class);
 			operate = "business_call_220_join";
+			passBys = generateCallMessage(code, changeMember, targets, operate, true, false);
+			
 		}else if(businessId.equals("zoomCloseShareScreen")){
 			operate = "business_call_220_stop";
 		}
 		
-		List<PassByBO> passBys = new ArrayList<PassByBO>();
-		if(businessId.equals("zoomJoin") || businessId.equals("zoomInvitation")){
-			passBys = generateCallMessage(code, changeMember, targets, operate, true, true);
-		}
+		//调用流调
 		
-		//
-		
-		if(businessId.equals("zoomOpenShareScreen")){
-			passBys = generateCallMessage(code, changeMember, targets, operate, true, false);
-		}
-		
-		if(businessId.equals("zoomStop")){
-			passBys = stopAllUsers(code, targets);
-		}
-		
-		if(businessId.equals("zoomExit") || businessId.equals("zoomKickOut")){
-			passBys = stopUser(code, changeMember, targets);
-		}
 		
 		//调用消息服务
 		tetrisDispatchService.dispatch(passBys);
+	}
+	
+	/**
+	 * 停止一个屏幕共享<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月16日 上午10:08:30
+	 * @param String code 会议号码
+	 * @param ZoomMemberVO changeMember 停止屏幕共享的成员
+	 * @param List<ZoomMemberVO> targets 消息目标
+	 * @return List<PassByBO> 协议信息
+	 */
+	public List<PassByBO> stopScreenRemote(
+			String code, 
+			ZoomMemberVO changeMember, 
+			List<ZoomMemberVO> targets) throws Exception{
 		
+		List<PassByBO> passBys = new ArrayList<PassByBO>();	
+		
+		for(ZoomMemberVO target: targets){
+			
+			if(changeMember.getShareScreen()){
+				StopVO remoteScreenStop = stopScreenRemote(changeMember, target, code);
+				PassByBO remoteScreenPassBy = new PassByBO().setLayer_id("layerId")
+												      		.setBundle_id(target.getBundleId())
+												      		.setPass_by_content(JSON.toJSONString(remoteScreenStop));
+				passBys.add(remoteScreenPassBy);
+			}
+		}
+		
+		return passBys;
 	}
 	
 	/**
@@ -319,10 +352,9 @@ public class TerminalAgentService {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月13日 下午3:24:51
-	 * @param code
-	 * @param members
-	 * @return
-	 * @throws Exception
+	 * @param String code 会议号码
+	 * @param List<ZoomMemberVO> members 会议成员
+	 * @return List<PassByBO> 协议信息
 	 */
 	public List<PassByBO> stopAllUsers(
 			String code, 
@@ -350,10 +382,10 @@ public class TerminalAgentService {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月13日 下午3:14:21
-	 * @param String code
-	 * @param ZoomMemberVO changeMember
-	 * @param List<ZoomMemberVO> targets
-	 * @return List<PassByBO>
+	 * @param String code 会议号码
+	 * @param ZoomMemberVO changeMember 停止的成员
+	 * @param List<ZoomMemberVO> targets 通知目标成员
+	 * @return List<PassByBO> 协议信息
 	 */
 	public List<PassByBO> stopUser(
 			String code, 
@@ -375,14 +407,14 @@ public class TerminalAgentService {
 			if(changeMember.getMyVideo() || changeMember.getMyAudio()){
 				StopVO remoteStop = stopRemote(changeMember, target, code);
 				PassByBO remotePassBy = new PassByBO().setLayer_id("layerId")
-												      .setBundle_id(changeMember.getBundleId())
+												      .setBundle_id(target.getBundleId())
 												      .setPass_by_content(JSON.toJSONString(remoteStop));
 				passBys.add(remotePassBy);
 			}
 			if(changeMember.getShareScreen()){
 				StopVO remoteScreenStop = stopScreenRemote(changeMember, target, code);
 				PassByBO remoteScreenPassBy = new PassByBO().setLayer_id("layerId")
-												      		.setBundle_id(changeMember.getBundleId())
+												      		.setBundle_id(target.getBundleId())
 												      		.setPass_by_content(JSON.toJSONString(remoteScreenStop));
 				passBys.add(remoteScreenPassBy);
 			}
@@ -402,7 +434,7 @@ public class TerminalAgentService {
 	 * @param String operate 消息标识
 	 * @param boolean shareScreen 是否下发屏幕共享
 	 * @param boolean videoAudio 是否下发音视频
-	 * @return List<PassByBO>
+	 * @return List<PassByBO> 协议信息
 	 */
 	public List<PassByBO> generateCallMessage(
 			String code, 
@@ -474,7 +506,7 @@ public class TerminalAgentService {
 	 * <b>日期：</b>2020年3月12日 下午2:21:45
 	 * @param ZoomMemberVO member zoom成员信息
 	 * @param int priority 优先级
-	 * @return RemoteVO
+	 * @return RemoteVO 协议信息
 	 */
 	public RemoteVO setRemote(ZoomMemberVO member, int priority) throws Exception{
 		
@@ -514,7 +546,7 @@ public class TerminalAgentService {
 	 * <b>日期：</b>2020年3月12日 下午2:51:29
 	 * @param ZoomMemberVO member zoom成员信息
 	 * @param int priority 优先级
-	 * @return RemoteVO
+	 * @return RemoteVO 协议信息
 	 */
 	public RemoteVO setScreenRemote(ZoomMemberVO member, int priority, String status) throws Exception{
 		
@@ -543,7 +575,7 @@ public class TerminalAgentService {
 	 * <b>日期：</b>2020年3月13日 下午2:35:12
 	 * @param ZoomMemberVO member 成员信息
 	 * @param String code 会议号码
-	 * @return StopVO
+	 * @return StopVO 协议信息
 	 */
 	public StopVO stopLocal(ZoomMemberVO member, String code) throws Exception{
 		
@@ -554,6 +586,16 @@ public class TerminalAgentService {
 		return local;
 	}
 	
+	/**
+	 * 停止看远端<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月16日 上午10:19:00
+	 * @param ZoomMemberVO member 远端成员信息
+	 * @param ZoomMemberVO target 接收消息成员信息
+	 * @param String code 会议号码
+	 * @return StopVO 协议信息
+	 */
 	public StopVO stopRemote(ZoomMemberVO member, ZoomMemberVO target, String code) throws Exception{
 		
 		StopVO remote = new StopVO().setOperate("business_stop_220_channel")
@@ -564,6 +606,16 @@ public class TerminalAgentService {
 		return remote;
 	}
 	
+	/**
+	 * 停止看屏幕共享<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月16日 上午10:20:57
+	 * @param ZoomMemberVO member 屏幕共享成员信息
+	 * @param ZoomMemberVO target 接收消息成员信息
+	 * @param String code 会议号码
+	 * @return StopVO 协议信息
+	 */
 	public StopVO stopScreenRemote(ZoomMemberVO member, ZoomMemberVO target, String code) throws Exception{
 		
 		StopVO screenRemote = new StopVO().setOperate("business_stop_220_channel")
@@ -572,6 +624,64 @@ public class TerminalAgentService {
 				   				    	  .setLocal_user_identify(target.getId().toString())
 				   				    	  .setRemote_channel_no(new StringBufferWrapper().append(member.getId()).append("-screen").toString());
 		return screenRemote;
+	}
+	
+	/**
+	 * 生成开始调度协议<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月18日 上午9:59:34
+	 * @param ZoomMemberVO changeMember 入会的成员
+	 * @param List<ZoomMemberVO> targets 目的成员列表
+	 * @return DispatchBO 调度协议
+	 */
+	public DispatchBO generateStartUserDispatch(
+			ZoomMemberVO changeMember, 
+			List<ZoomMemberVO> targets) throws Exception{
+		
+		DispatchBO dispatch = new DispatchBO();
+		List<StartUserDispatchBO> userDispatches = new ArrayList<StartUserDispatchBO>();
+		List<ChannelBO> channels = new ArrayList<ChannelBO>();
+		
+		if(changeMember.getMyVideo()){
+			SourceParamBO sourceParam = new SourceParamBO().setLayerId("")
+														   .setBundleId(changeMember.getBundleId())
+														   .setChannelId(changeMember.getVideoChannelId());
+			ChannelBO channel = new ChannelBO().setSource_param(sourceParam);
+			channels.add(channel);
+		}
+		
+		if(changeMember.getMyAudio()){
+			SourceParamBO sourceParam = new SourceParamBO().setLayerId("")
+														   .setBundleId(changeMember.getBundleId())
+														   .setChannelId(changeMember.getAudioChannelId());
+			ChannelBO channel = new ChannelBO().setSource_param(sourceParam);
+			channels.add(channel);
+		}
+		
+		if(changeMember.getShareScreen()){
+			SourceParamBO videoSourceParam = new SourceParamBO().setLayerId("")
+														   .setBundleId(changeMember.getBundleId())
+														   .setChannelId("");
+			ChannelBO videoChannel = new ChannelBO().setSource_param(videoSourceParam);
+			channels.add(videoChannel);
+			
+			SourceParamBO audioSourceParam = new SourceParamBO().setLayerId("")
+															    .setBundleId(changeMember.getBundleId())
+															    .setChannelId("");
+			ChannelBO audioChannel = new ChannelBO().setSource_param(audioSourceParam);
+			channels.add(audioChannel);
+		}
+		
+		for(ZoomMemberVO member: targets){
+			StartUserDispatchBO userDispatch = new StartUserDispatchBO().setUserId(member.getUserId())
+																		.setChannels(new ArrayListWrapper<ChannelBO>().addAll(channels).getList());
+			userDispatches.add(userDispatch);
+		}
+		
+		dispatch.setStartUserDispatch(new ArrayListWrapper<StartUserDispatchBO>().addAll(userDispatches).getList());
+		
+		return dispatch;
 	}
 	
 }

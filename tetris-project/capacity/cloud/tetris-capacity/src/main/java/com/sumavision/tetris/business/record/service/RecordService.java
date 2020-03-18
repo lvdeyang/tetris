@@ -6,11 +6,14 @@ import java.util.List;
 import java.util.UUID;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.druid.support.logging.Log;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
@@ -46,6 +49,8 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 @Transactional(rollbackFor = Exception.class)
 public class RecordService {
 	
+	private static final Logger LOG = LoggerFactory.getLogger(RecordService.class);
+	
 	@Autowired
 	private TaskInputDAO taskInputDao;
 	
@@ -71,6 +76,8 @@ public class RecordService {
 	 */
 	public String createRecord(RecordVO record) throws Exception{
 		
+		LOG.info("收录：" + JSONObject.toJSONString(record));
+		
 		String uuid = UUID.randomUUID().toString().replaceAll("-", "");
 		
 		String url = record.getSourceParam().getUrl();
@@ -89,9 +96,14 @@ public class RecordService {
 	 */
 	public void deleteRecord(String id) throws Exception{
 		
+		System.out.println("删除收录:" + id);
+		
 		TaskOutputPO output = delete(id);
 		
-		taskOutputDao.delete(output);
+		if(output != null){
+			taskOutputDao.delete(output);
+		}
+
 	}
 	
 	/**
@@ -143,6 +155,7 @@ public class RecordService {
 				output.setTask(JSON.toJSONString(taskBOs));
 				output.setTaskUuid(taskUuid);
 				output.setType(businessType);
+				output.setCapacityIp(record.getDeviceIp());
 				output.setUpdateTime(new Date());
 				
 				taskOutputDao.save(output);
@@ -151,7 +164,7 @@ public class RecordService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, record.getDeviceIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -164,7 +177,7 @@ public class RecordService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest, record.getDeviceIp(), capacityProps.getPort());
 				throw e;
 				
 			} catch (Exception e) {
@@ -209,6 +222,7 @@ public class RecordService {
 				output.setTask(JSON.toJSONString(taskBOs));
 				output.setTaskUuid(taskUuid);
 				output.setType(businessType);
+				output.setCapacityIp(record.getDeviceIp());
 				output.setUpdateTime(new Date());
 				
 				taskOutputDao.save(output);
@@ -222,7 +236,7 @@ public class RecordService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, record.getDeviceIp(), capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -235,7 +249,7 @@ public class RecordService {
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest, record.getDeviceIp(), capacityProps.getPort());
 				throw e;
 				
 			} catch (Exception e) {
@@ -291,7 +305,7 @@ public class RecordService {
 						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().add(outputBO).getList());
 					}
 				
-					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+					capacityService.deleteAllAddMsgId(allRequest, output.getCapacityIp(), capacityProps.getPort());
 					
 					output.setOutput(null);
 					output.setTask(null);
@@ -339,9 +353,9 @@ public class RecordService {
 				throw new BaseException(StatusCode.FORBIDDEN, "源地址不是udp！");
 			}
 			
-			String sourceIp = sourceUrl.split("@")[1].split(":")[0];
+			String sourceIp = sourceUrl.split("udp://")[1].split(":")[0];
 			
-			int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
+			int sourcePort = Integer.valueOf(sourceUrl.split("udp://")[1].split(":")[1]).intValue();
 			
 			CommonTsBO udp_ts = new CommonTsBO().setSource_ip(sourceIp)
 												.setSource_port(sourcePort);
