@@ -4,6 +4,8 @@ public class WebRtcVO {
 
 	private String ip;
 	
+	private String layerId;
+	
 	private String httpPort;
 	
 	private String websocketPort;
@@ -14,6 +16,15 @@ public class WebRtcVO {
 
 	public WebRtcVO setIp(String ip) {
 		this.ip = ip;
+		return this;
+	}
+
+	public String getLayerId() {
+		return layerId;
+	}
+
+	public WebRtcVO setLayerId(String layerId) {
+		this.layerId = layerId;
 		return this;
 	}
 
