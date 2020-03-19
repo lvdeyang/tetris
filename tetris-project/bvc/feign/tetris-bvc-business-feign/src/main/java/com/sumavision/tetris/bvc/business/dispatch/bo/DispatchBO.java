@@ -11,16 +11,25 @@ import java.util.List;
  */
 public class DispatchBO {
 	
+	//设备开始调度、更新调度
 	private List<StartBundleDispatchBO> startBundleDispatch = new ArrayList<StartBundleDispatchBO>();
 	
+	//用户开始调度、更新调度
 	private List<StartUserDispatchBO> startUserDispatch = new ArrayList<StartUserDispatchBO>();
 	
+	//停止设备调度
 	private List<StopBundleDispatchBO> stopBundleDispatch = new ArrayList<StopBundleDispatchBO>();
 	
+	//按任务id停止调度。可以停止设备调度和用户调度
 	private List<StopTaskDispatchBO> stopTaskDispatch = new ArrayList<StopTaskDispatchBO>();
 	
-	private List<StopTaskDispatchByUserIdAndSourceBO> stopTaskDispatchByUserIdAndSource = new ArrayList<StopTaskDispatchByUserIdAndSourceBO>();
+	//以userId和meetingCode和停止调度。可以停止设备调度和用户调度。一次停止该用户在该会议下的全部调度
+	private List<StopTaskDispatchByUserIdAndMeetingCodeBO> stopTaskDispatchByUserIdAndMeetingCode = new ArrayList<StopTaskDispatchByUserIdAndMeetingCodeBO>();
 	
+	//以userId和meetingCode和源 停止 用户调度。仅用于停止“用户调度”任务，否则返回错误。要求任务只有1个通道才能停止。一次只停止一个任务
+	private List<StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO> stopTaskDispatchByUserIdAndMeetingCodeAndSource = new ArrayList<StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO>();
+	
+	//停止若干个用户的所有调度。可以停止设备调度和用户调度
 	private List<StopUserDispatchBO> stopUserDispatch = new ArrayList<StopUserDispatchBO>();
 
 	public List<StartBundleDispatchBO> getStartBundleDispatch() {
@@ -59,12 +68,21 @@ public class DispatchBO {
 		return this;
 	}
 
-	public List<StopTaskDispatchByUserIdAndSourceBO> getStopTaskDispatchByUserIdAndSource() {
-		return stopTaskDispatchByUserIdAndSource;
+	public List<StopTaskDispatchByUserIdAndMeetingCodeBO> getStopTaskDispatchByUserIdAndMeetingCode() {
+		return stopTaskDispatchByUserIdAndMeetingCode;
 	}
 
-	public DispatchBO setStopTaskDispatchByUserIdAndSource(List<StopTaskDispatchByUserIdAndSourceBO> stopTaskDispatchByUserIdAndSource) {
-		this.stopTaskDispatchByUserIdAndSource = stopTaskDispatchByUserIdAndSource;
+	public DispatchBO setStopTaskDispatchByUserIdAndMeetingCode(List<StopTaskDispatchByUserIdAndMeetingCodeBO> stopTaskDispatchByUserIdAndMeetingCode) {
+		this.stopTaskDispatchByUserIdAndMeetingCode = stopTaskDispatchByUserIdAndMeetingCode;
+		return this;
+	}
+
+	public List<StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO> getStopTaskDispatchByUserIdAndMeetingCodeAndSource() {
+		return stopTaskDispatchByUserIdAndMeetingCodeAndSource;
+	}
+
+	public DispatchBO setStopTaskDispatchByUserIdAndMeetingCodeAndSource(List<StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO> stopTaskDispatchByUserIdAndMeetingCodeAndSource) {
+		this.stopTaskDispatchByUserIdAndMeetingCodeAndSource = stopTaskDispatchByUserIdAndMeetingCodeAndSource;
 		return this;
 	}
 

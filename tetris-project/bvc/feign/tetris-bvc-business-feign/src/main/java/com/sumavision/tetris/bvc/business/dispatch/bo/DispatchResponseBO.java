@@ -1,59 +1,24 @@
 package com.sumavision.tetris.bvc.business.dispatch.bo;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 调度返回结果
+ * @author zsy
+ *
+ */
 public class DispatchResponseBO {
 
-	private String taskId = "";
+	/** 开始、更新调度需要返回dispatchId；有错误的调度需要返回错误信息；其它情况可能不给返回 */
+	private List<DispatchResponseBodyBO> dispatchResponse = new ArrayList<DispatchResponseBodyBO>();
 
-	private String result = "success";//fail
-	
-	private int code = 200;
-	
-	private Long dispatchId;
-	
-	private String errMsg;
-	
-	public String getTaskId() {
-		return taskId;
+	public List<DispatchResponseBodyBO> getDispatchResponse() {
+		return dispatchResponse;
 	}
 
-	public DispatchResponseBO setTaskId(String taskId) {
-		this.taskId = taskId;
-		return this;
-	}
-
-	public String getResult() {
-		return result;
-	}
-
-	public DispatchResponseBO setResult(String result) {
-		this.result = result;
-		return this;
-	}
-
-	public int getCode() {
-		return code;
-	}
-
-	public DispatchResponseBO setCode(int code) {
-		this.code = code;
-		return this;
-	}
-
-	public Long getDispatchId() {
-		return dispatchId;
-	}
-
-	public DispatchResponseBO setDispatchId(Long dispatchId) {
-		this.dispatchId = dispatchId;
-		return this;
-	}
-
-	public String getErrMsg() {
-		return errMsg;
-	}
-
-	public DispatchResponseBO setErrMsg(String errMsg) {
-		this.errMsg = errMsg;
+	public DispatchResponseBO setDispatchResponse(List<DispatchResponseBodyBO> dispatchResponse) {
+		this.dispatchResponse = dispatchResponse;
 		return this;
 	}
 
