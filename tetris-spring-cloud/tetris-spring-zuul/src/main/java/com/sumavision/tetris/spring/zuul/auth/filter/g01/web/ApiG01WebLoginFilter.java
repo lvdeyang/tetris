@@ -15,6 +15,7 @@ import com.sumavision.tetris.mvc.ext.request.RequestUserAgentAnalyzer;
 public class ApiG01WebLoginFilter extends ZuulFilter{
 
 	private String[] ignores = new String[]{
+		"/api/g01/web/resource/*",
 		"/api/g01/web/auth/do/username/password/login"
 	};
 	

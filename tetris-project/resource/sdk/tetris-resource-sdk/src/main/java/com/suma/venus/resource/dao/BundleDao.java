@@ -162,4 +162,10 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public List<BundlePO> findByRaidus(String longitude, String latitude, Long raidus, Collection<String> deviceModel);
 
 	public List<BundlePO> findByDeviceModelAndUserIdIn(String type, Collection<Long> userIds);
+	
+	public void deleteByUserId(Long userId);
+	
+	public void deleteByUserIdIn(Collection<Long> userIds);
+	
+	public BundlePO findByDeviceModelAndUsername(String deviceModel, String username);
 }

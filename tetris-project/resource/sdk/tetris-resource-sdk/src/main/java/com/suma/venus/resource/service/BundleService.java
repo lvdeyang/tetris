@@ -1,6 +1,7 @@
 package com.suma.venus.resource.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -518,6 +519,23 @@ public class BundleService extends CommonService<BundlePO> {
 			bundlePOs.add(zk);
 			bundleIds.add(zk.getBundleId());
 			configDefaultAbility(zk);
+			
+			//创建jv220终端
+			BundlePO jv220 = new BundlePO();
+			jv220.setBundleName(username + "_jv220");
+			jv220.setUsername(userNo + "_jv220");
+			//jv220.setOnlinePassword(password);
+			jv220.setBundleId(BundlePO.createBundleId());
+			jv220.setDeviceModel("jv220");
+			jv220.setBundleType("VenusTerminal");
+			jv220.setBundleNum(userNo + "_jv220");
+			jv220.setUserId(Long.valueOf(userId));
+			// 默认上线
+			jv220.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+
+			bundlePOs.add(jv220);
+			bundleIds.add(jv220.getBundleId());
+			configDefaultAbility(jv220);
 
 			// 保存数据库
 			bundleDao.save(bundlePOs);
@@ -592,6 +610,23 @@ public class BundleService extends CommonService<BundlePO> {
 			bundlePOs.add(pc);
 			bundleIds.add(pc.getBundleId());
 			configDefaultAbility(pc);
+			
+			//创建jv220终端
+			BundlePO jv220 = new BundlePO();
+			jv220.setBundleName(username + "_jv220");
+			jv220.setUsername(userNo + "_jv220");
+			//jv220.setOnlinePassword(password);
+			jv220.setBundleId(BundlePO.createBundleId());
+			jv220.setDeviceModel("jv220");
+			jv220.setBundleType("VenusTerminal");
+			jv220.setBundleNum(userNo + "_jv220");
+			jv220.setUserId(Long.valueOf(userId));
+			// 默认上线
+			jv220.setOnlineStatus(ONLINE_STATUS.OFFLINE);
+
+			bundlePOs.add(jv220);
+			bundleIds.add(jv220.getBundleId());
+			configDefaultAbility(jv220);
 
 			// 保存数据库
 			bundleDao.save(bundlePOs);
@@ -697,5 +732,27 @@ public class BundleService extends CommonService<BundlePO> {
 		}
 		
 		return resources;
+	}
+	
+	/**
+	 * 删除用户创建的设备<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月18日 下午3:20:33
+	 * @param Long userId 用户id
+	 */
+	public void deleteByUserId(Long userId) throws Exception{
+		bundleDao.deleteByUserId(userId);
+	}
+	
+	/**
+	 * 批量删除用户创建的设备<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月18日 下午3:20:33
+	 * @param List<Long> userIds 用户id数组
+	 */
+	public void deleteByUserIdIn(Collection<Long> userIds) throws Exception{
+		bundleDao.deleteByUserIdIn(userIds);
 	}
 }
