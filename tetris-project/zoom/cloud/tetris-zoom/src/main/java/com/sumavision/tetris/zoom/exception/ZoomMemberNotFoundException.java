@@ -12,5 +12,10 @@ public class ZoomMemberNotFoundException extends BaseException{
 		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("会议成员不存在！id：").append(zoomMemberId).toString());
 		
 	}
+	
+	public ZoomMemberNotFoundException(String zoomMemberIds) {
+		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("会议成员不存在！id：").append(zoomMemberIds).toString());
+		
+	}
 
 }

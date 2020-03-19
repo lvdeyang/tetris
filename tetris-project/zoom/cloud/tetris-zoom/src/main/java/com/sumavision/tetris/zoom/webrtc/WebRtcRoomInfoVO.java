@@ -102,7 +102,7 @@ public class WebRtcRoomInfoVO extends AbstractBaseVO<WebRtcRoomInfoVO, WebRtcRoo
 	}
 
 	@Override
-	public WebRtcRoomInfoVO set(WebRtcRoomInfoPO entity) throws Exception {
+	public WebRtcRoomInfoVO set(WebRtcRoomInfoPO entity){
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
@@ -126,6 +126,7 @@ public class WebRtcRoomInfoVO extends AbstractBaseVO<WebRtcRoomInfoVO, WebRtcRoo
 	 */
 	public WebRtcVO transform(){
 		return new WebRtcVO().setIp(this.getIp())
+							 .setLayerId(this.getWebRtcLayerId())
 							 .setHttpPort(this.getWebRtcHttpPort())
 							 .setWebsocketPort(this.getWebRtcWebSocketPort());
 	}

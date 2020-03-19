@@ -22,6 +22,9 @@ public class Jv220UserAllocationPO extends AbstractBasePO{
 	/** 用户id */
 	private Long userId;
 	
+	/** 用户号码 */
+	private String userno;
+	
 	/** 用户昵称 */
 	private String nickname;
 
@@ -32,6 +35,15 @@ public class Jv220UserAllocationPO extends AbstractBasePO{
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	@Column(name = "USERNO")
+	public String getUserno() {
+		return userno;
+	}
+
+	public void setUserno(String userno) {
+		this.userno = userno;
 	}
 
 	@Column(name = "NICKNAME")

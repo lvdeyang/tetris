@@ -262,6 +262,7 @@ public class ZoomMemberVO extends AbstractBaseVO<ZoomMemberVO, ZoomMemberPO>{
 		this.setId(entity.getId())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 			.setUserId(entity.getUserId())
+			.setUserno(entity.getUserno())
 			.setUserNickname(entity.getUserNickname())
 			.setRename(entity.getRename())
 			.setTourist(entity.getTourist())
@@ -272,7 +273,8 @@ public class ZoomMemberVO extends AbstractBaseVO<ZoomMemberVO, ZoomMemberPO>{
 			.setMyAudio(entity.getMyAudio())
 			.setMyVideo(entity.getMyVideo())
 			.setTheirAudio(entity.getTheirAudio())
-			.setTheirVideo(entity.getTheirVideo());
+			.setTheirVideo(entity.getTheirVideo())
+			.setType(entity.getType().toString());
 		return this;
 	}
 

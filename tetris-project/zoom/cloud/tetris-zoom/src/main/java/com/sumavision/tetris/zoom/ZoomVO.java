@@ -190,6 +190,7 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 			.setName(entity.getName())
 			.setCode(entity.getCode())
 			.setStatus(entity.getStatus().toString())
+			.setSecretLevel(entity.getSecretLevel().toString())
 			.setMode(entity.getMode().toString())
 			.setCreatorUserId(entity.getCreatorUserId())
 			.setCreatorUserNickname(entity.getCreatorUserNickname());
