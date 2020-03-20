@@ -71,6 +71,101 @@ public class ZoomService {
 	private Jv220UserAllocationQuery jv220UserAllocationQuery;
 	
 	/**
+	 * 邀人建会<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月20日 上午8:41:52
+	 * @param String name 会议名称
+	 * @param ZoomMode mode 会议模式
+	 * @param String rename 主席入会名称
+	 * @param Boolean myAudio 是否开启音频
+	 * @param Boolean myVideo 是否开启视频
+	 * @param ZoomSecretLevel secretLevel 秘密等级
+	 * @param ZoomMemberType type 成员类型
+	 * @param Collection<String> usernos 被邀成员用户号码列表
+	 * @return ZoomVO 会议信息
+	 */
+	public ZoomVO create(
+			String name,
+			ZoomMode mode,
+			String rename,
+			Boolean myAudio,
+			Boolean myVideo,
+			ZoomSecretLevel secretLevel,
+			ZoomMemberType type,
+			Collection<String> usernos) throws Exception{
+		
+		UserVO self = userQuery.current();
+		
+		ZoomPO zoom = new ZoomPO();
+		zoom.setName(name);
+		zoom.setMode(mode);
+		zoom.setStatus(ZoomStatus.START);
+		zoom.setSecretLevel(secretLevel);
+		zoom.setCreatorUserId(self.getId());
+		zoom.setCreatorUserNickname(self.getNickname());
+		zoom.setCreatorUserRename(rename);
+		zoom.setUpdateTime(new Date());
+		zoomDao.save(zoom);
+		zoom.setCode();
+		zoomDao.save(zoom);
+		
+		WebRtcVO webRtc = webRtcRoomInfoService.createRoom(zoom.getId(), zoom.getCode());
+		
+		ZoomMemberPO chairman = new ZoomMemberPO();
+		chairman.setUserId(self.getId().toString());
+		chairman.setUserNickname(self.getNickname());
+		chairman.setUserno(self.getUserno());
+		chairman.setRename(rename);
+		chairman.setTourist(false);
+		chairman.setZoomId(zoom.getId());
+		chairman.setChairman(true);
+		chairman.setSpokesman(false);
+		chairman.setJoin(true);
+		chairman.setMyAudio(myAudio);
+		chairman.setMyVideo(myVideo);
+		chairman.setTheirAudio(true);
+		chairman.setTheirVideo(true);
+		chairman.setUpdateTime(new Date());
+		chairman.setType(type);
+		zoomMemberDao.save(chairman);
+		
+		//发送通知
+		List<UserVO> users = userQuery.findByUsernoIn(usernos);
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserVO user:users){
+			userIds.add(user.getId());
+		}
+		List<Long> jv220UserIds = jv220UserAllocationQuery.filterJv220(userIds);
+		JSONObject content = new JSONObject();
+		content.put("code", zoom.getCode());
+		content.put("name", zoom.getName());
+		String businessId = "zoomInvitation";
+		List<ZoomMemberVO> jv220s = new ArrayList<ZoomMemberVO>();
+		for(UserVO user:users){
+			if(jv220UserIds.contains(user.getId())){
+				jv220s.add(new ZoomMemberVO().setUserId(user.getId().toString())
+											 .setUserno(user.getUserno())
+											 .setUserNickname(user.getNickname()));
+			}else{
+				websocketMessageService.push(user.getId().toString(), businessId, content, chairman.getUserId(), chairman.getRename());
+			}
+		}
+		if(jv220s.size() > 0){
+			terminalAgentService.push(zoom.getCode(), content, jv220s, businessId);
+		}
+		
+		ZoomMemberVO me = new ZoomMemberVO().set(chairman);
+		
+		return zoomQuery.queryBundleInfo(new ZoomVO().set(zoom)
+					    .setWebRtc(webRtc)
+					    .setMe(me)
+					    .setChairman(me)
+					    .setTotalMembers(1l)
+					    .addMember(me));
+	}
+	
+	/**
 	 * 创建会议<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -105,20 +200,7 @@ public class ZoomService {
 		zoom.setCreatorUserRename(rename);
 		zoom.setUpdateTime(new Date());
 		zoomDao.save(zoom);
-		
-		/*会议号码小于8位往前边补0
-		String id = zoom.getId().toString();
-		StringBufferWrapper code = new StringBufferWrapper();
-		if(id.length() < 8){
-			for(int i=0; i<(11-id.length()); i++){
-				code.append(0);
-			}
-		}
-		code.append(id);
-		zoom.setCode(code.toString());*/
-		
-		//号码取z+zoomId的方式
-		zoom.setCode(new StringBufferWrapper().append("z").append(zoom.getId()).toString());
+		zoom.setCode();
 		zoomDao.save(zoom);
 		
 		WebRtcVO webRtc = webRtcRoomInfoService.createRoom(zoom.getId(), zoom.getCode());
@@ -234,6 +316,7 @@ public class ZoomService {
 			ZoomMemberVO m1 = new ZoomMemberVO().set(m);
 			if(m.getChairman()) zoomInfo.setChairman(m1);
 			zoomInfo.addMember(m1);
+			if(m.getJoin() && m.getSpokesman()) zoomInfo.addSpokesman(m1);
 		}
 		zoomInfo = zoomQuery.queryBundleInfo(zoomInfo);
 		

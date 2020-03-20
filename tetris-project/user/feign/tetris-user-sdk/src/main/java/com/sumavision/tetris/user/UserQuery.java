@@ -311,6 +311,18 @@ public class UserQuery {
 		return JsonBodyResponseParser.parseArray(userFeign.findByUsernoIn(usernos), UserVO.class);
 	}
 	
+	/**
+	 * 根据用户号码批量查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:58:14
+	 * @param Collection<String> userno 用户号码列表
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> findByUsernoIn(Collection<String> usernos) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.findByUsernoIn(JSON.toJSONString(usernos)), UserVO.class);
+	}
+	
 	/***************************************************
 	 ***************************************************
 	 ***************************************************/
