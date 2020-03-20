@@ -18,7 +18,7 @@ public interface MenuDAO extends BaseDAO<MenuPO>{
 	 * @param Collection<String> roleIds 用户角色列表
 	 * @return List<MenuPO> 菜单
 	 */
-	@Query(value = "select m.id, m.uuid, m.update_time, m.title, m.link, m.icon, m.style, m.is_group, m.parent_id, m.menu_id_path, m.serial, m.auto_generation from TETRIS_MENU m left join TETRIS_SYSTEM_ROLE_MENU_PERMISSION mp on m.id=mp.menu_id where m.is_group=0 and mp.role_id in ?1 order by m.serial asc", nativeQuery = true)
+	@Query(value = "select distinct m.id, m.uuid, m.update_time, m.title, m.link, m.icon, m.style, m.is_group, m.parent_id, m.menu_id_path, m.serial, m.auto_generation from TETRIS_MENU m left join TETRIS_SYSTEM_ROLE_MENU_PERMISSION mp on m.id=mp.menu_id where m.is_group=0 and mp.role_id in ?1 order by m.serial asc", nativeQuery = true)
 	public List<MenuPO> findByRoleIdIn(Collection<String> roleIds);
 	
 	/**
