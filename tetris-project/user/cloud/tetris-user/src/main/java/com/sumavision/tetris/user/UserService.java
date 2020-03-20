@@ -655,7 +655,27 @@ public class UserService{
 		}
 		
 		if(roles.size() > 0){
-			systemRoleDao.save(roles);
+			//角色判重
+			List<SystemRolePO> existRoles = systemRoleDao.findByCompanyIdAndNameIn(Long.valueOf(self.getGroupId()), roleNames);
+			if(existRoles!=null && existRoles.size()>0){
+				List<SystemRolePO> notExistRoles = new ArrayList<SystemRolePO>();
+				for(SystemRolePO role:roles){
+					boolean exist = false;
+					for(SystemRolePO existRole:existRoles){
+						if(role.getName().equals(existRole.getName())){
+							exist = true;
+							break;
+						}
+					}
+					if(!exist) notExistRoles.add(role);
+				}
+				systemRoleDao.save(notExistRoles);
+				roles = new ArrayList<SystemRolePO>();
+				roles.addAll(existRoles);
+				roles.addAll(notExistRoles);
+			}else{
+				systemRoleDao.save(roles);
+			}
 			for(SystemRolePO role:roles){
 				for(int i=1; i<lines.length; i++){
 					String line = lines[i];
