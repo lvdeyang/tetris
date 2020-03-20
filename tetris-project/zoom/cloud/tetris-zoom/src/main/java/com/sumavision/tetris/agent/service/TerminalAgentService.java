@@ -3,8 +3,6 @@ package com.sumavision.tetris.agent.service;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.ws.Dispatch;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +18,14 @@ import com.sumavision.tetris.agent.vo.RemoteVO;
 import com.sumavision.tetris.agent.vo.ResourceVO;
 import com.sumavision.tetris.agent.vo.ResponseResourceVO;
 import com.sumavision.tetris.agent.vo.StopVO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
 import com.sumavision.tetris.bvc.business.dispatch.bo.ChannelBO;
 import com.sumavision.tetris.bvc.business.dispatch.bo.DispatchBO;
 import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
 import com.sumavision.tetris.bvc.business.dispatch.bo.SourceParamBO;
 import com.sumavision.tetris.bvc.business.dispatch.bo.StartUserDispatchBO;
+import com.sumavision.tetris.bvc.business.dispatch.bo.StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.resouce.feign.resource.ResourceService;
@@ -34,6 +34,7 @@ import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.zoom.ZoomDAO;
 import com.sumavision.tetris.zoom.ZoomMemberPO;
+import com.sumavision.tetris.zoom.ZoomMemberType;
 import com.sumavision.tetris.zoom.ZoomMemberVO;
 import com.sumavision.tetris.zoom.ZoomPO;
 import com.sumavision.tetris.zoom.ZoomService;
@@ -133,7 +134,7 @@ public class TerminalAgentService {
 		UserVO callUser = userQuery.current();
 		
 		//调用加入会议接口
-		ZoomVO zoom = zoomService.join(code, callUser.getNickname(), true, true);
+		ZoomVO zoom = zoomService.join(code, callUser.getNickname(), true, true, ZoomMemberType.JV220);
 		
 		PassByVO passBy = zoomVo2PassByVO(zoom);
 		passBy.setOperate("call_meeting")
@@ -210,51 +211,56 @@ public class TerminalAgentService {
 		
 		//自己编码
 		ZoomMemberVO me = zoom.getMe();
-		LocalPublishVO local = setLocal(me);
 		
-		//远端解码
-		List<RemoteVO> remotes = new ArrayList<RemoteVO>();
-		//主席
-		int priority = 1;
-		ZoomMemberVO chairman = zoom.getChairman();
-		if(chairman.getShareScreen()){
-			RemoteVO chairmanScreenRemote = setScreenRemote(chairman, priority, "open");
-			remotes.add(chairmanScreenRemote);
-			priority++;
-		}
-		RemoteVO chairmanRemote = setRemote(chairman, priority);
-		remotes.add(chairmanRemote);
-		priority++;
-		
-		//发言人
-		List<ZoomMemberVO> spokesmans = zoom.getSpokesmem();
-		for(ZoomMemberVO spokesman: spokesmans){
-			if(spokesman.getShareScreen()){
-				RemoteVO spokesmanScreenRemote = setScreenRemote(chairman, priority, "open");
-				remotes.add(spokesmanScreenRemote);
+		if(me.getJoin()){
+			
+			LocalPublishVO local = setLocal(me);
+			
+			//远端解码
+			List<RemoteVO> remotes = new ArrayList<RemoteVO>();
+			//主席
+			int priority = 1;
+			ZoomMemberVO chairman = zoom.getChairman();
+			if(chairman.getShareScreen()){
+				RemoteVO chairmanScreenRemote = setScreenRemote(chairman, priority, "open");
+				remotes.add(chairmanScreenRemote);
 				priority++;
 			}
-			RemoteVO spokesmanRemote = setRemote(spokesman, priority);
-			remotes.add(spokesmanRemote);
+			RemoteVO chairmanRemote = setRemote(chairman, priority);
+			remotes.add(chairmanRemote);
 			priority++;
+			
+			//发言人
+			List<ZoomMemberVO> spokesmans = zoom.getSpokesmem();
+			for(ZoomMemberVO spokesman: spokesmans){
+				if(spokesman.getShareScreen()){
+					RemoteVO spokesmanScreenRemote = setScreenRemote(chairman, priority, "open");
+					remotes.add(spokesmanScreenRemote);
+					priority++;
+				}
+				RemoteVO spokesmanRemote = setRemote(spokesman, priority);
+				remotes.add(spokesmanRemote);
+				priority++;
+			}
+			
+			//成员列表（包含主席和发言人） -- 不流调
+//			List<ZoomMemberVO> members = zoom.getMembers();
+//			for(ZoomMemberVO member: members){
+//				RemoteVO memberRemote = setRemote(member, priority);
+//				remotes.add(memberRemote);
+//				priority++;
+//			}
+			
+			//共享屏幕--不解析
+			
+			PassByParamVO param = new PassByParamVO().setLocal_publish(local)
+												     .setRemote(new ArrayListWrapper<RemoteVO>().addAll(remotes).getList());
+			
+			passBy.setRemote_meeting_no(zoom.getCode())
+				  .setLocal_user_identify(me.getId().toString())
+			      .setParam(param);
+			
 		}
-		
-		//成员列表（包含主席和发言人） -- 不流调
-//		List<ZoomMemberVO> members = zoom.getMembers();
-//		for(ZoomMemberVO member: members){
-//			RemoteVO memberRemote = setRemote(member, priority);
-//			remotes.add(memberRemote);
-//			priority++;
-//		}
-		
-		//共享屏幕--不解析
-		
-		PassByParamVO param = new PassByParamVO().setLocal_publish(local)
-											     .setRemote(new ArrayListWrapper<RemoteVO>().addAll(remotes).getList());
-		
-		passBy.setRemote_meeting_no(zoom.getCode())
-			  .setLocal_user_identify(me.getId().toString())
-		      .setParam(param);
 		
 		return passBy;
 	}
@@ -271,24 +277,34 @@ public class TerminalAgentService {
 	 */
 	public void push(String code, JSONObject jsonObject, List<ZoomMemberVO> targets, String businessId) throws Exception{
 		
-			
 		List<PassByBO> passBys = new ArrayList<PassByBO>();
-		List<DispatchBO> dispatches = new ArrayList<DispatchBO>();
+		DispatchBO dispatch = new DispatchBO();
 		
 		String operate = "";
 		
-		if(businessId.equals("zoomJoin") || businessId.equals("zoomInvitation")){
+		if(businessId.equals("zoomJoin")){
 			
 			operate = "business_call_220_join";
 			ZoomMemberVO changeMember = JSONObject.parseObject(JSON.toJSONString(jsonObject), ZoomMemberVO.class);
-			passBys = generateCallMessage(code, changeMember, targets, operate, true, true);	
+			passBys = generateCallMessage(code, changeMember, targets, operate, true, true);
+			dispatch = generateStartUserDispatch(code, changeMember, targets);
 			
-		}else if(businessId.equals("zoomStart")){
+		}else if(businessId.equals("zoomStart") || businessId.equals("zoomInvitation")){
 			
-			//调用zoomJoin
+			for(ZoomMemberVO target: targets){
+				//调用zoomJoin
+				ZoomVO zoomVO = zoomService.join(code, target.getRename(), target.getMyAudio(), target.getMyVideo(), ZoomMemberType.JV220);
 			
-		}
-		else if(businessId.equals("zoomStop")){
+				PassByVO passBy = zoomVo2PassByVO(zoomVO);
+				passBy.setOperate("business_call_220_start")
+					  .setLocal_user_no(target.getUserno());
+				PassByBO passByBO = new PassByBO().setLayer_id(target.getLayerId())
+												  .setBundle_id(target.getBundleId())
+												  .setPass_by_content(JSON.toJSONString(passBy));
+				passBys.add(passByBO);
+			}
+			
+		}else if(businessId.equals("zoomStop")){
 			
 			operate = "business_stop_220";
 			passBys = stopAllUsers(code, targets);
@@ -298,6 +314,7 @@ public class TerminalAgentService {
 			ZoomMemberVO changeMember = JSONObject.parseObject(JSON.toJSONString(jsonObject), ZoomMemberVO.class);
 			operate = "business_stop_220_channel";
 			passBys = stopUser(code, changeMember, targets);
+			dispatch = generateStopUserDispatch(code, changeMember, targets);
 			
 		}else if(businessId.equals("zoomOpenShareScreen")){
 			
@@ -306,11 +323,19 @@ public class TerminalAgentService {
 			passBys = generateCallMessage(code, changeMember, targets, operate, true, false);
 			
 		}else if(businessId.equals("zoomCloseShareScreen")){
+			
+			ZoomMemberVO changeMember = JSONObject.parseObject(JSON.toJSONString(jsonObject), ZoomMemberVO.class);
 			operate = "business_call_220_stop";
+			passBys = stopScreenRemote(code, changeMember, targets);
+			
+		}else if(businessId.equals("zoomChangeChairman")){
+			
+			
+			
 		}
 		
 		//调用流调
-		
+		tetrisDispatchService.dispatch(dispatch);
 		
 		//调用消息服务
 		tetrisDispatchService.dispatch(passBys);
@@ -337,7 +362,7 @@ public class TerminalAgentService {
 			
 			if(changeMember.getShareScreen()){
 				StopVO remoteScreenStop = stopScreenRemote(changeMember, target, code);
-				PassByBO remoteScreenPassBy = new PassByBO().setLayer_id("layerId")
+				PassByBO remoteScreenPassBy = new PassByBO().setLayer_id(target.getLayerId())
 												      		.setBundle_id(target.getBundleId())
 												      		.setPass_by_content(JSON.toJSONString(remoteScreenStop));
 				passBys.add(remoteScreenPassBy);
@@ -366,7 +391,7 @@ public class TerminalAgentService {
 			
 			StopVO localStop = stopLocal(member, code);
 			
-			PassByBO localPassBy = new PassByBO().setLayer_id("layerId")
+			PassByBO localPassBy = new PassByBO().setLayer_id(member.getLayerId())
 											     .setBundle_id(member.getBundleId())
 											     .setPass_by_content(JSON.toJSONString(localStop));
 			
@@ -396,7 +421,7 @@ public class TerminalAgentService {
 		
 		StopVO localStop = stopLocal(changeMember, code);
 		
-		PassByBO localPassBy = new PassByBO().setLayer_id("layerId")
+		PassByBO localPassBy = new PassByBO().setLayer_id(changeMember.getLayerId())
 										     .setBundle_id(changeMember.getBundleId())
 										     .setPass_by_content(JSON.toJSONString(localStop));
 		
@@ -406,14 +431,14 @@ public class TerminalAgentService {
 			
 			if(changeMember.getMyVideo() || changeMember.getMyAudio()){
 				StopVO remoteStop = stopRemote(changeMember, target, code);
-				PassByBO remotePassBy = new PassByBO().setLayer_id("layerId")
+				PassByBO remotePassBy = new PassByBO().setLayer_id(changeMember.getLayerId())
 												      .setBundle_id(target.getBundleId())
 												      .setPass_by_content(JSON.toJSONString(remoteStop));
 				passBys.add(remotePassBy);
 			}
 			if(changeMember.getShareScreen()){
 				StopVO remoteScreenStop = stopScreenRemote(changeMember, target, code);
-				PassByBO remoteScreenPassBy = new PassByBO().setLayer_id("layerId")
+				PassByBO remoteScreenPassBy = new PassByBO().setLayer_id(changeMember.getLayerId())
 												      		.setBundle_id(target.getBundleId())
 												      		.setPass_by_content(JSON.toJSONString(remoteScreenStop));
 				passBys.add(remoteScreenPassBy);
@@ -465,14 +490,13 @@ public class TerminalAgentService {
 		for(ZoomMemberVO target: targets){
 			LocalPublishVO local = setLocal(target);
 			PassByVO passByVO = new PassByVO().setOperate(operate)
-											  //target的userno
-											  .setLocal_user_no("")
+											  .setLocal_user_no(target.getUserno())
 											  .setLocal_user_identify(target.getId().toString())
 											  .setRemote_meeting_no(code)
 											  .setParam(new PassByParamVO().setLocal_publish(local)
 													  					   .setRemote(new ArrayListWrapper<RemoteVO>().addAll(remotes).getList()));
 			
-			PassByBO passByBO = new PassByBO().setLayer_id("layerId")
+			PassByBO passByBO = new PassByBO().setLayer_id(target.getLayerId())
 											  .setBundle_id(target.getBundleId())
 											  .setPass_by_content(JSON.toJSONString(passByVO));
 			
@@ -514,8 +538,7 @@ public class TerminalAgentService {
 										.setPriority(priority);
 
 		RemotePullVO video = new RemotePullVO().setBundle_id(member.getBundleId())
-											   //TODO:需要layerId
-											   .setLayer_id("")
+											   .setLayer_id(member.getLayerId())
 										   	   .setChannel_id(member.getVideoChannelId());	
 		if(!member.getMyVideo()){
 			video.setStatus("stop");
@@ -524,8 +547,7 @@ public class TerminalAgentService {
 		}
 		
 		RemotePullVO audio = new RemotePullVO().setBundle_id(member.getBundleId())			
-											   //TODO:需要layerId
-								               .setLayer_id("")
+								               .setLayer_id(member.getLayerId())
 								               .setChannel_id(member.getAudioChannelId());
 		if(!member.getMyAudio()){
 			audio.setStatus("close");
@@ -553,17 +575,13 @@ public class TerminalAgentService {
 		RemoteVO remote = new RemoteVO().setLocal_channel_no(new StringBufferWrapper().append(member.getId()).append("-screen").toString())
 										.setPriority(priority)
 										.setRemote_video_pull(new RemotePullVO().setStatus(status)
-																				//TODO:需要layerId	
-																				.setLayer_id("")
+																				.setLayer_id(member.getLayerId())
 																				.setBundle_id(member.getBundleId())
-																				//TODO:需要屏幕共享videoChannelId
-																				.setChannel_id(""))
+																				.setChannel_id(member.getScreenVideoChannelId()))
 										.setRemote_audio_pull(new RemotePullVO().setStatus(status)
-																				//TODO:需要layerId
-												                                .setLayer_id("")
+												                                .setLayer_id(member.getLayerId())
 												                                .setBundle_id(member.getBundleId())
-												                                //TODO:需要屏幕共享audioChannelId
-												                                .setChannel_id(""));
+												                                .setChannel_id(member.getScreenAudioChannelId()));
 
 		return remote;
 	}
@@ -580,7 +598,7 @@ public class TerminalAgentService {
 	public StopVO stopLocal(ZoomMemberVO member, String code) throws Exception{
 		
 		StopVO local = new StopVO().setOperate("business_stop_220")
-				   				   .setLocal_user_no("")
+				   				   .setLocal_user_no(member.getUserno())
 				   				   .setRemote_meeting_no(code)
 				   				   .setLocal_user_identify(member.getId().toString());
 		return local;
@@ -599,7 +617,7 @@ public class TerminalAgentService {
 	public StopVO stopRemote(ZoomMemberVO member, ZoomMemberVO target, String code) throws Exception{
 		
 		StopVO remote = new StopVO().setOperate("business_stop_220_channel")
-				   				    .setLocal_user_no("")
+				   				    .setLocal_user_no(target.getUserno())
 				   				    .setRemote_meeting_no(code)
 				   				    .setLocal_user_identify(target.getId().toString())
 				   				    .setRemote_channel_no(member.getId().toString());
@@ -619,7 +637,7 @@ public class TerminalAgentService {
 	public StopVO stopScreenRemote(ZoomMemberVO member, ZoomMemberVO target, String code) throws Exception{
 		
 		StopVO screenRemote = new StopVO().setOperate("business_stop_220_channel")
-				   				    	  .setLocal_user_no("")
+				   				    	  .setLocal_user_no(target.getUserno())
 				   				    	  .setRemote_meeting_no(code)
 				   				    	  .setLocal_user_identify(target.getId().toString())
 				   				    	  .setRemote_channel_no(new StringBufferWrapper().append(member.getId()).append("-screen").toString());
@@ -627,61 +645,168 @@ public class TerminalAgentService {
 	}
 	
 	/**
-	 * 生成开始调度协议<br/>
+	 * 生成开始转发调度协议<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月18日 上午9:59:34
+	 * @param String code 会议号码
 	 * @param ZoomMemberVO changeMember 入会的成员
 	 * @param List<ZoomMemberVO> targets 目的成员列表
 	 * @return DispatchBO 调度协议
 	 */
 	public DispatchBO generateStartUserDispatch(
+			String code,
 			ZoomMemberVO changeMember, 
 			List<ZoomMemberVO> targets) throws Exception{
 		
 		DispatchBO dispatch = new DispatchBO();
 		List<StartUserDispatchBO> userDispatches = new ArrayList<StartUserDispatchBO>();
-		List<ChannelBO> channels = new ArrayList<ChannelBO>();
-		
-		if(changeMember.getMyVideo()){
-			SourceParamBO sourceParam = new SourceParamBO().setLayerId("")
-														   .setBundleId(changeMember.getBundleId())
-														   .setChannelId(changeMember.getVideoChannelId());
-			ChannelBO channel = new ChannelBO().setSource_param(sourceParam);
-			channels.add(channel);
-		}
-		
-		if(changeMember.getMyAudio()){
-			SourceParamBO sourceParam = new SourceParamBO().setLayerId("")
-														   .setBundleId(changeMember.getBundleId())
-														   .setChannelId(changeMember.getAudioChannelId());
-			ChannelBO channel = new ChannelBO().setSource_param(sourceParam);
-			channels.add(channel);
-		}
-		
-		if(changeMember.getShareScreen()){
-			SourceParamBO videoSourceParam = new SourceParamBO().setLayerId("")
-														   .setBundleId(changeMember.getBundleId())
-														   .setChannelId("");
-			ChannelBO videoChannel = new ChannelBO().setSource_param(videoSourceParam);
-			channels.add(videoChannel);
-			
-			SourceParamBO audioSourceParam = new SourceParamBO().setLayerId("")
-															    .setBundleId(changeMember.getBundleId())
-															    .setChannelId("");
-			ChannelBO audioChannel = new ChannelBO().setSource_param(audioSourceParam);
-			channels.add(audioChannel);
-		}
 		
 		for(ZoomMemberVO member: targets){
-			StartUserDispatchBO userDispatch = new StartUserDispatchBO().setUserId(member.getUserId())
-																		.setChannels(new ArrayListWrapper<ChannelBO>().addAll(channels).getList());
-			userDispatches.add(userDispatch);
+			userDispatches.addAll(generateUserDispatch(code, changeMember, member));
 		}
 		
 		dispatch.setStartUserDispatch(new ArrayListWrapper<StartUserDispatchBO>().addAll(userDispatches).getList());
 		
 		return dispatch;
+	}
+	
+	/**
+	 * 生成停止转发调度协议<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月19日 上午11:29:00
+	 * @param String code 会议号码
+	 * @param ZoomMemberVO changeMember 停止的成员
+	 * @param List<ZoomMemberVO> targets 所有目的
+	 * @return DispatchBO 调度协议
+	 */
+	public DispatchBO generateStopUserDispatch(
+			String code,
+			ZoomMemberVO changeMember, 
+			List<ZoomMemberVO> targets) throws Exception{
+		
+		DispatchBO dispatch = new DispatchBO();
+		List<StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO> userDispatches = new ArrayList<StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO>();
+
+		for(ZoomMemberVO target: targets){
+			StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO stopVideo = new StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO().setUserId(target.getUserId())
+																									 .setSourceBundleId(changeMember.getBundleId())
+																									 .setSourceChannelId(changeMember.getVideoChannelId());
+			
+			userDispatches.add(stopVideo);
+			
+			StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO stopAudio = new StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO().setUserId(target.getUserId())
+																									 .setSourceBundleId(changeMember.getBundleId())
+																									 .setSourceChannelId(changeMember.getAudioChannelId());
+			
+			userDispatches.add(stopAudio);
+
+			StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO stopScreenVideo = new StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO().setUserId(target.getUserId())
+																							    	 .setSourceBundleId(changeMember.getBundleId())
+																									 .setSourceChannelId(changeMember.getScreenVideoChannelId());
+			
+			userDispatches.add(stopScreenVideo);
+
+			StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO stopScreenAudio = new StopTaskDispatchByUserIdAndMeetingCodeAndSourceBO().setUserId(target.getUserId())
+																									 	   .setSourceBundleId(changeMember.getBundleId())
+																										   .setSourceChannelId(changeMember.getScreenAudioChannelId());
+			
+			userDispatches.add(stopScreenAudio);
+		}
+		
+		dispatch.getStopTaskDispatchByUserIdAndMeetingCodeAndSource().addAll(userDispatches);
+		
+		return dispatch;
+	}
+	
+	/**
+	 * 根据ZoomVO生成开始调度协议<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月20日 上午11:38:16
+	 * @param ZoomVO zoom 成员会议信息
+	 * @return List<StartUserDispatchBO> 开始调度协议
+	 */
+	public List<StartUserDispatchBO> generateUserDispatch(ZoomVO zoom) throws Exception{
+		
+		List<StartUserDispatchBO> userDispatches = new ArrayList<StartUserDispatchBO>();
+		
+		ZoomMemberVO me = zoom.getMe();
+		
+		ZoomMemberVO chairman = zoom.getChairman();
+		
+		userDispatches.addAll(generateUserDispatch(zoom.getCode(), chairman, me));
+		
+		List<ZoomMemberVO> spokes = zoom.getSpokesmem();
+		for(ZoomMemberVO spoke: spokes){
+			userDispatches.addAll(generateUserDispatch(zoom.getCode(), spoke, me));
+		}
+		
+		return userDispatches;
+		
+	}
+	
+	/**
+	 * 生成用户调度协议--根据源和目的<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月20日 上午11:27:20
+	 * @param String code 会议号码
+	 * @param ZoomMemberVO source 源
+	 * @param ZoomMemberVO dst 目的
+	 * @return List<StartUserDispatchBO> 调度协议
+	 */
+	public List<StartUserDispatchBO> generateUserDispatch(
+			String code,
+			ZoomMemberVO source,
+			ZoomMemberVO dst) throws Exception{
+		
+		List<StartUserDispatchBO> userDispatches = new ArrayList<StartUserDispatchBO>();
+		
+		if(source.getMyVideo()){
+			SourceParamBO sourceParam = new SourceParamBO().setLayerId(source.getLayerId())
+														   .setBundleId(source.getBundleId())
+														   .setChannelId(source.getVideoChannelId());
+			ChannelBO channel = new ChannelBO().setSource_param(sourceParam);
+			StartUserDispatchBO userDispatch = new StartUserDispatchBO().setUserId(dst.getUserId())
+																		.setMeetingCode(code)
+																		.setChannels(new ArrayListWrapper<ChannelBO>().add(channel).getList());
+			userDispatches.add(userDispatch);
+		}
+		
+		if(source.getMyAudio()){
+			SourceParamBO sourceParam = new SourceParamBO().setLayerId(source.getLayerId())
+														   .setBundleId(source.getBundleId())
+														   .setChannelId(source.getAudioChannelId());
+			ChannelBO channel = new ChannelBO().setSource_param(sourceParam);
+			StartUserDispatchBO userDispatch = new StartUserDispatchBO().setUserId(dst.getUserId())
+																		.setMeetingCode(code)
+																		.setChannels(new ArrayListWrapper<ChannelBO>().add(channel).getList());
+			userDispatches.add(userDispatch);
+		}
+		
+		if(source.getShareScreen()){
+			SourceParamBO videoSourceParam = new SourceParamBO().setLayerId(source.getLayerId())
+															    .setBundleId(source.getBundleId())
+															    .setChannelId(source.getScreenVideoChannelId());
+			ChannelBO videoChannel = new ChannelBO().setSource_param(videoSourceParam);
+			StartUserDispatchBO videoUserDispatch = new StartUserDispatchBO().setUserId(dst.getUserId())
+																			 .setMeetingCode(code)
+																			 .setChannels(new ArrayListWrapper<ChannelBO>().add(videoChannel).getList());
+			userDispatches.add(videoUserDispatch);
+			
+			SourceParamBO audioSourceParam = new SourceParamBO().setLayerId(source.getLayerId())
+															    .setBundleId(source.getBundleId())
+															    .setChannelId(source.getScreenAudioChannelId());
+			ChannelBO audioChannel = new ChannelBO().setSource_param(audioSourceParam);
+			StartUserDispatchBO audioUserDispatch = new StartUserDispatchBO().setUserId(dst.getUserId())
+																			 .setMeetingCode(code)
+																			 .setChannels(new ArrayListWrapper<ChannelBO>().add(audioChannel).getList());
+			userDispatches.add(audioUserDispatch);
+		}
+		
+		return userDispatches;
 	}
 	
 }
