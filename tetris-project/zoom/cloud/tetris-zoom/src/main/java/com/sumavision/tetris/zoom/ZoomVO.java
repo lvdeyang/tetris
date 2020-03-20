@@ -41,7 +41,7 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 	private ZoomMemberVO chairman;
 	
 	/** 发言人列表 */
-	private List<ZoomMemberVO> spokesmem;
+	private List<ZoomMemberVO> spokesmen;
 	
 	/** 成员总数 */
 	private Long totalMembers;
@@ -144,12 +144,12 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 		return this;
 	}
 
-	public List<ZoomMemberVO> getSpokesmem() {
-		return spokesmem;
+	public List<ZoomMemberVO> getSpokesmen() {
+		return spokesmen;
 	}
 
-	public ZoomVO setSpokesmem(List<ZoomMemberVO> spokesmem) {
-		this.spokesmem = spokesmem;
+	public ZoomVO setSpokesmen(List<ZoomMemberVO> spokesmen) {
+		this.spokesmen = spokesmen;
 		return this;
 	}
 	
@@ -162,9 +162,9 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 		return this;
 	}
 
-	public ZoomVO addSpokesman(ZoomMemberVO spokesmem) {
-		if(this.getSpokesmem() == null) this.setSpokesmem(new ArrayList<ZoomMemberVO>());
-		this.getSpokesmem().add(spokesmem);
+	public ZoomVO addSpokesman(ZoomMemberVO spokesmen) {
+		if(this.getSpokesmen() == null) this.setSpokesmen(new ArrayList<ZoomMemberVO>());
+		this.getSpokesmen().add(spokesmen);
 		return this;
 	}
 

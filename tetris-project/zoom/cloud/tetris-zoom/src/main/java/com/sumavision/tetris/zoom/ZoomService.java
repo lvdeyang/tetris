@@ -316,6 +316,7 @@ public class ZoomService {
 			ZoomMemberVO m1 = new ZoomMemberVO().set(m);
 			if(m.getChairman()) zoomInfo.setChairman(m1);
 			zoomInfo.addMember(m1);
+			if(m.getJoin() && m.getSpokesman()) zoomInfo.addSpokesman(m1);
 		}
 		zoomInfo = zoomQuery.queryBundleInfo(zoomInfo);
 		
