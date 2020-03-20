@@ -6,6 +6,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -63,6 +64,22 @@ public class ZoomPO extends AbstractBasePO{
 
 	public void setCode(String code) {
 		this.code = code;
+	}
+	
+	public void setCode(){
+		/*方式一：会议号码小于8位往前边补0
+		String id = this.getId().toString();
+		StringBufferWrapper code = new StringBufferWrapper();
+		if(id.length() < 8){
+			for(int i=0; i<(11-id.length()); i++){
+				code.append(0);
+			}
+		}
+		code.append(id);
+		this.code = code.toString();*/
+		
+		//方式二：号码取z+zoomId的方式
+		if(this.getId() != null) this.code = new StringBufferWrapper().append("z").append(this.getId()).toString();
 	}
 
 	@Column(name = "PASSWORD")
