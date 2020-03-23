@@ -176,9 +176,9 @@
                 <img v-else :src="baseUrl+'images/zk/business/disable/enterCommand.png'" />
             </div>
             <div :class="'option-button '+(buttons.addCommand?'':'disable')" title="添加指挥" @click="addCommand">
-                <img v-if="buttons.addCommand" :src="baseUrl+'images/zk/business/able/addCommand.png'" />
-                <img v-else :src="baseUrl+'images/zk/business/disable/addCommand.png'" />
-            </div>
+            <img v-if="buttons.addCommand" :src="baseUrl+'images/zk/business/able/addCommand.png'" />
+            <img v-else :src="baseUrl+'images/zk/business/disable/addCommand.png'" />
+        </div>
             <div :class="'option-button '+(buttons.removeCommand?'':'disable')" title="删除指挥" @click="removeCommand">
                 <img v-if="buttons.removeCommand" :src="baseUrl+'images/zk/business/able/removeCommand.png'" />
                 <img v-else :src="baseUrl+'images/zk/business/disable/removeCommand.png'" />

@@ -644,7 +644,6 @@ define([
         ajax.post('/command/basic/enter', {
           ids: $.toJSON(commandIds)
         }, function (data) {
-          console.log(99999)
           if (data && data.length > 0) {
             var playerSettings = [];
             for (var i = 0; i < data.length; i++) {
@@ -1016,7 +1015,6 @@ define([
             });
             //去掉根目录那层
             self.group.tree = tree;
-            console.log(tree);
             self.group.current = data;
             if (self.user.id == data.creator) {
               self.buttons.addMember = true;
@@ -1677,8 +1675,8 @@ define([
         });
         // self.refreshCommand();
         self.refreshCommandButtonAction();
-        // self.refreshCurrentGroupMembers();
-
+        self.refreshCurrentGroupMembers();
+      
         //动态获取firsetMenu和footer的高度
         window.onresize = function () {
           self.firstMenuHeight = window.getComputedStyle(self.$refs.firstMenu).height;
@@ -1787,11 +1785,11 @@ define([
           console.log('走这吗？')
           var group = $.parseJSON(e.params)[0];
           group.type = 'command';
+          console.log(group)
           self.currentGroupChange(group);
           self.group.entered.push(group);
           self.qt.set('currentGroupId', group.id);
         });
-
 
         self.qt.on('yanxiaochao', function (e) {
           console.log('还是走这？')

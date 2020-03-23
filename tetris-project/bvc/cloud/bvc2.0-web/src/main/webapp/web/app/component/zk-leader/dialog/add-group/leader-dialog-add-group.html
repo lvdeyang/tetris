@@ -1,5 +1,5 @@
-<div class="leader-dialog-add-group" style="width:100%; height:100%; position:relative; background-color:#fff;">
-     <el-input placeholder="筛选会议" v-model="filterText" suffix-icon="icon-filter" style="position:absolute; top:2px; right:2px; z-index:2; width:300px; border:0;"></el-input>
+<div class="leader-dialog-add-group" style="width:100%; height:100%; position:relative; background-color:#206ec366;">
+     <el-input placeholder="筛选会议" v-model="filterText"style="position:absolute; top:2px; right:2px; z-index:2; width:300px; border:0;"></el-input>
      <div style="position:absolute; left:1px; top:1px; right:1px; bottom:50px;">
           <div style="width:100%; height:100%; position:relative;">
                <el-tabs v-model="currentTab" type="card">
@@ -13,6 +13,10 @@
                                <el-table-column
                                        prop="name"
                                        label="名称">
+                               </el-table-column>
+                               <el-table-column
+                                       label="主席">
+                                   <template slot-scope="scope">{{JSON.parse(scope.row.param).creatorName}}</template>
                                </el-table-column>
                                <el-table-column
                                        label="状态">
@@ -51,7 +55,7 @@
                                            <el-button type="text" @click="enterCommand(scope, 'start')" style="padding:0; font-size:20px;"><span class="icon-signin"></span></el-button>
                                        </el-tooltip>
                                        <el-tooltip class="item" effect="dark" content="删除会议" placement="bottom">
-                                           <el-button type="text" @click="removeCommand(scope)" style="padding:0; font-size:20px; margin-left:30px;"><span class="icon-trash"></span></el-button>
+                                           <el-button type="text" @click="removeCommand(scope)" style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c"><span class="icon-trash"></span></el-button>
                                        </el-tooltip>
                                    </template>
                                </el-table-column>
@@ -62,6 +66,6 @@
           </div>
      </div>
      <div style="height:50px; position:absolute; left:0; bottom:0; width:100%; text-align:right; padding-top:9px; padding-right:10px; box-sizing:border-box;">
-          <el-button size="small" @click="cancel" type="danger">取消</el-button>
+          <el-button size="small" @click="cancel" type="warning">取消</el-button>
      </div>
 </div>
