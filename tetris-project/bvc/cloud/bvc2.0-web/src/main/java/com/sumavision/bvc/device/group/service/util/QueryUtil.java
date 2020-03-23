@@ -51,6 +51,7 @@ import com.sumavision.bvc.device.jv230.dao.CombineJv230DAO;
 import com.sumavision.bvc.device.jv230.po.CombineJv230PO;
 import com.sumavision.bvc.device.jv230.po.Jv230ChannelPO;
 import com.sumavision.bvc.device.jv230.po.Jv230PO;
+import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.enumeration.BusinessRoleSpecial;
 import com.sumavision.bvc.system.enumeration.GearsLevel;
 import com.sumavision.bvc.system.po.ChannelNamePO;
@@ -2031,5 +2032,40 @@ public class QueryUtil {
 		}
 		return null;
 	}
+	
+	public List<ChannelSchemeDTO> queryChannelDTOsByBundleId(Collection<ChannelSchemeDTO> channelDTOs, String bundleId){
+		if(channelDTOs==null || bundleId==null) return null;
+		List<ChannelSchemeDTO> channels = new ArrayList<ChannelSchemeDTO>();
+		for(ChannelSchemeDTO channelDTO : channelDTOs){
+			if(bundleId.equals(channelDTO.getBundleId())){
+				channels.add(channelDTO);
+			}
+		}
+		return channels;
+	}
+	
+	public ChannelSchemeDTO queryChannelDTOsByBundleIdAndChannelId(Collection<ChannelSchemeDTO> channelDTOs, String bundleId, String channelId){
+		if(channelDTOs==null || bundleId==null || channelId==null) return null;
+		for(ChannelSchemeDTO channelDTO : channelDTOs){
+			if(bundleId.equals(channelDTO.getBundleId()) && channelId.equals(channelDTO.getChannelId())){
+				return channelDTO;
+			}
+		}
+		return null;
+	}
+	
+//	public List<ChannelSchemeDTO> queryChannelDTOsByBundle(Collection<ChannelSchemeDTO> channelDTOs, BundlePO bundle){
+//		if(channelDTOs==null || bundle==null) return null;
+//		if(bundle.getc)
+//		
+//		
+//		List<ChannelSchemeDTO> channels = new ArrayList<ChannelSchemeDTO>();
+//		for(ChannelSchemeDTO channelDTO : channelDTOs){
+//			if(bundleId.equals(channelDTO.getBundleId()) && channelId.equals(channelDTO.getChannelId())){
+//				channels.add(channelDTO);
+//			}
+//		}
+//		return channels;
+//	}
 	
 }

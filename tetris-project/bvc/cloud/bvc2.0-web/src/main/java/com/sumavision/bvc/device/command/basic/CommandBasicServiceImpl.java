@@ -2454,7 +2454,8 @@ public class CommandBasicServiceImpl {
 			CodecParamBO codec,
 			Long userId){
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		LogicBO logic = new LogicBO().setUserId(admin.getId().toString())
 		 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
@@ -2610,7 +2611,8 @@ public class CommandBasicServiceImpl {
 			CodecParamBO codec,
 			Long userId){
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		LogicBO logic = new LogicBO().setUserId(admin.getId().toString())
 		 		 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>());

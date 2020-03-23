@@ -27,7 +27,7 @@ public interface WebsocketMessageFeign {
 	 * @param String fromId 消息发布者id
 	 * @param String fromName 消息发布者名称
 	 */
-	@RequestMapping(value = "/push")
+	@RequestMapping(value = "/message/push")
 	public JSONObject push(
 			@RequestParam("targetId") String targetId,
 			@RequestParam("businessId") String businessId,
