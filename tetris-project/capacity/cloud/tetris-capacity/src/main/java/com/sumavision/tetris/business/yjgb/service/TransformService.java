@@ -569,7 +569,7 @@ public class TransformService {
 	 * @param String id 标识
 	 * @param mimsId 媒资id
 	 */
-	public void recordCallback(String id, String mimsId) throws Exception{
+	public void recordCallback(String id, String mimsId, String previewUrl) throws Exception{
 		
 		TaskOutputPO task = taskOutputDao.findByTaskUuidAndType(id, BusinessType.YJGB);
 		
@@ -583,6 +583,8 @@ public class TransformService {
 													  .append(mimsId)
 													  .append("&mediaType=")
 													  .append(task.getMediaType())
+													  .append("&previewUrl=")
+													  .append(previewUrl)
 													  .toString();	
 				
 				System.out.println("回调打印:" + url);
