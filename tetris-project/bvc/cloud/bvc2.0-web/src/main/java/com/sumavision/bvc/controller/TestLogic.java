@@ -33,6 +33,7 @@ import com.sumavision.bvc.control.system.vo.AvtplGearsVO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.command.emergent.broadcast.CommandEmergentBroadcastServiceImpl;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.group.dao.DeviceGroupAuthorizationDAO;
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskDAO;
@@ -49,6 +50,8 @@ import com.sumavision.bvc.system.enumeration.GearsLevel;
 import com.sumavision.bvc.system.enumeration.Resolution;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
+import com.sumavision.tetris.bvc.business.dispatch.bo.DispatchBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -116,12 +119,37 @@ public class TestLogic {
 	@Autowired
 	private AvtplService avtplService;
 	
+	@Autowired
+	private CommandEmergentBroadcastServiceImpl commandEmergentBroadcastServiceImpl;
+	
+	@Autowired
+	private TetrisDispatchService tetrisDispatchService;
+	
+	@ResponseBody
+	@JsonBody
+	@RequestMapping(value = "/dispatch", method = RequestMethod.GET)
+	public Object dispatch(HttpServletRequest request) throws Exception{
+		JSONObject recordJson = readJsonFromFile("dispatch");
+//		DispatchBO dispatchBO = JSONObject.parseObject(recordJson, DispatchBO.class);
+		DispatchBO dispatchBO = JSONObject.toJavaObject(recordJson, DispatchBO.class);
+		tetrisDispatchService.dispatch(dispatchBO);
+		return null;
+	}
+	
+	@ResponseBody
+	@JsonBody
+	@RequestMapping(value = "/broadcast", method = RequestMethod.GET)
+	public Object broadcast(HttpServletRequest request) throws Exception{
+		commandEmergentBroadcastServiceImpl.queryAndNotifyDevices("129.817461", "44.4266", 1500L, "test");
+		return null;
+	}
+	
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/authorizedPlaylist", method = RequestMethod.GET)
 	public Object authorizedPlaylist(HttpServletRequest request) throws Exception{
 		
-		avtplService.generateDefaultAvtpls();
+		//avtplService.generateDefaultAvtpls();
 		
 		//根据userId查找record
 		Long userId = 1091L;

@@ -27,7 +27,6 @@ import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAuthorizationMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupBusinessRolePO;
 import com.sumavision.bvc.device.group.po.DeviceGroupConfigVideoPO;
-import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.system.enumeration.BusinessRoleSpecial;
 import com.sumavision.bvc.system.po.AuthorizationMemberPO;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;

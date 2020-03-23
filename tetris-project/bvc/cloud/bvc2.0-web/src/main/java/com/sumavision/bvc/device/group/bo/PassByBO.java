@@ -2,8 +2,10 @@ package com.sumavision.bvc.device.group.bo;
 
 import java.util.Collection;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupPO;
+import com.sumavision.tetris.bvc.business.dispatch.po.TetrisDispatchPO;
 
 /**
  * @ClassName: 透传协议 
@@ -157,6 +159,16 @@ public class PassByBO {
 		this.setBundle_id(member.getBundleId())
 			.setLayer_id(member.getLayerId())
 			.setType("administrator_update_request")
+			.setPass_by_content(passByContent);
+		
+		return this;
+	}
+	
+	public PassByBO setMeetingInfo(TetrisDispatchPO dispatch){
+		
+		JSONObject passByContent = new JSONObject();
+		passByContent.put("meetingCode", dispatch.getMeetingCode());
+		this.setType("meeting_info")
 			.setPass_by_content(passByContent);
 		
 		return this;

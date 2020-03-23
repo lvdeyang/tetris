@@ -30,6 +30,7 @@ public class CommandEmergentBroadcastController {
 	 * @param bundleIds
 	 * @param eventLevel 事件级别 0一般，1较大，2，重大，3特别重大
 	 * @param eventType 事件类型，参考《国家应急平台体系信息资源分类与编码规范》，默认使用11000（自然灾害）
+	 * @param unifiedId 消息预警唯一标识
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -41,16 +42,18 @@ public class CommandEmergentBroadcastController {
 			String bundleIds,
 			int eventLevel,
 			String eventType,
+			String unifiedId,
 			HttpServletRequest request) throws Exception{
 		
 		List<String> bundleIdsList = JSONArray.parseArray(bundleIds, String.class);
 		
-		CommandBroadcastSpeakPO speak = commandEmergentBroadcastServiceImpl.speakStart(bundleIdsList, eventLevel, eventType);
+		CommandBroadcastSpeakPO speak = commandEmergentBroadcastServiceImpl.speakStart(bundleIdsList, eventLevel, eventType, unifiedId);
 		
 		//TODO:测试一下列表中有没有新增的喊话任务
 		JSONObject list = commandEmergentBroadcastServiceImpl.queryAllSpeakList();
 		JSONObject result = new JSONObject();
 		result.put("id", speak.getId().toString());
+		result.put("targetUdp", speak.getTargetUdp());
 		list.put("result", result);
 		
 		return list;

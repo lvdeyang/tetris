@@ -73,8 +73,9 @@ define([
                     param = !param?null:typeof param==='object'?param:$.parseJSON(param);
                     try{
                         webviewLinked = $.parseJSON(webviewLinked);
-                    }catch(e){}
-                    ajax.post(url, param, function(data, status, message){
+                    } catch (e) {
+                    }
+                    ajax.post(url, param, function (data, status, message) {
                         //处理qt回调
                         var response = {
                             status:status,

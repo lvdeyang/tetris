@@ -71,10 +71,11 @@ public class CommandEmergentBroadcastServiceImpl {
 	 * @param bundleIds
 	 * @param eventLevel
 	 * @param eventType
+	 * @param unifiedId
 	 * @return
 	 * @throws Exception
 	 */
-	public CommandBroadcastSpeakPO speakStart(List<String> bundleIds, int eventLevel, String eventType) throws Exception{
+	public CommandBroadcastSpeakPO speakStart(List<String> bundleIds, int eventLevel, String eventType, String unifiedId) throws Exception{
 		
 		//从bundleId列表查询所有的bundlePO
 		List<BundlePO> bundles = resourceBundleDao.findByBundleIds(bundleIds);
@@ -83,15 +84,24 @@ public class CommandEmergentBroadcastServiceImpl {
 		if(bundles.size() == 0){
 			throw new BaseException(StatusCode.FORBIDDEN, "请选择扬声器");
 		}
+		log.info("选择扬声器个数：" + bundleIds.size());
 		
-		//TODO:把bundleIds转换成23位的标识符
+		//从bundle提取23位的标识符
 		List<String> bundleIdentifications = new ArrayList<String>();
 		for(BundlePO bundle : bundles){
-//			bundleIdentifications.add(bundle.getIdentification());
+			bundleIdentifications.add(bundle.getIdentify());
 		}
 		String terminalEbrids = StringUtils.join(bundleIdentifications.toArray(), ",");
+//		String terminalEbrids = "";//StringUtils.join(bundleIdentifications.toArray(), ",");
+//		for(int i=0; i<bundles.size(); i++){
+//			terminalEbrids += bundles.get(i).getIdentify();
+//			if(i < bundles.size()-1){
+//				terminalEbrids += ",";
+//			}
+//		}
 		
 		JSONObject params = new JSONObject();
+		params.put("unifiedId", unifiedId);
 		params.put("eventLevel", eventLevel);
 		params.put("eventType", eventType);
 		params.put("fromBVC", true);
@@ -105,7 +115,8 @@ public class CommandEmergentBroadcastServiceImpl {
 		
 		String r = null;
 		try {
-			r = HttpClient.post(url, params.toJSONString());//请求头数据格式可能不对
+//			r = HttpClient.post(url, params.toJSONString(), Locale.ENGLISH);//请求头数据格式可能不对
+			r = HttpClient.encodepost(url, params);//请求头数据格式可能不对
 		} catch (Exception e) {
 			e.printStackTrace();
 			log.error("开始喊话请求失败");
@@ -115,9 +126,28 @@ public class CommandEmergentBroadcastServiceImpl {
 		
 		if(r.contains("@$$@请求失败")){
 			throw new BaseException(StatusCode.FORBIDDEN, "喊话失败，" + r.split("@$$@")[0]);
-		}		
+		}
 		
 		CommandBroadcastSpeakPO speak = new CommandBroadcastSpeakPO();
+		
+		try {
+			JSONObject result = JSON.parseObject(r);
+			String errMsg = result.getString("errMsg");
+			if(errMsg != null){
+				throw new BaseException(StatusCode.FORBIDDEN, "喊话失败：" + errMsg);
+			}
+			String targetUdp = result.getString("targetUdp");
+			Long appMessageId = result.getLong("appMessageId");
+			speak.setTargetUdp(targetUdp);
+			speak.setAppMessageId(appMessageId);
+		} catch (BaseException e) {
+			throw e;
+		} catch (Exception e) {
+			e.printStackTrace();
+			log.warn("开始返回解析失败");
+			throw new BaseException(StatusCode.FORBIDDEN, "喊话数据解析失败");
+		}
+		
 		speak.setCreatetime(new Date());
 		speak.setSpeakers(new ArrayList<CommandBroadcastSpeakerPO>());
 		for(BundlePO bundle : bundles){
@@ -158,14 +188,15 @@ public class CommandEmergentBroadcastServiceImpl {
 			
 			JSONObject params = new JSONObject();
 			params.put("fromBVC", true);
-			params.put("messageId", speak.getId());
+			params.put("messageId", speak.getAppMessageId());
 			
 			String url = "http://" + smartexpressIssueUrl + "/smartexpress-issue-ui/speakerByDS/stopCallAjax";			
 			
-			log.info("开始喊话：" + url + " 参数：" + params.toJSONString());
+			log.info("停止喊话：" + url + " 参数：" + params.toJSONString());
 			String r = null;
 			try {
-				r = HttpClient.post(url, params.toJSONString());//请求头数据格式可能不对
+//				r = HttpClient.post(url, params.toJSONString());//请求头数据格式可能不对
+				r = HttpClient.encodepost(url, params);//请求头数据格式可能不对
 			} catch (Exception e) {
 				e.printStackTrace();
 				log.error("停止喊话请求失败");
@@ -203,6 +234,7 @@ public class CommandEmergentBroadcastServiceImpl {
 				bundles.add(bundleJSON);
 			}
 			speakJSON.put("id", speak.getId().toString());
+			speakJSON.put("targetUdp", speak.getTargetUdp());
 			speakJSON.put("bundles", bundles);
 			broadcastList.add(speakJSON);
 		}
@@ -220,35 +252,36 @@ public class CommandEmergentBroadcastServiceImpl {
 	 * <b>日期：</b>2020年3月10日 上午11:23:17
 	 * @throws Exception 
 	 */
-	public List<BundleVO> queryAndNotifyDevices(Long longitude, Long latitude, Long raidus) throws Exception{
+	public List<BundleVO> queryAndNotifyDevices(String longitude, String latitude, Long raidus, String unifiedId) throws Exception{
+		
+		log.info("精度 " + longitude + " 纬度 " + latitude + " 范围（米） " + raidus);
 
 		//向资源查询
 		List<BundleVO> bundleVOs = bundleFeignService.queryVisibleBundle(longitude, latitude, raidus);
 		
-		//生成消息
-		JSONObject message = new JSONObject();
-//		JSONArray bundles = new JSONArray();
-//		for(){
-//			JSONObject bundle = new JSONObject();
-//			bundle.put("id", "");
-//			
-//			bundles.add(bundle);
-//		}
-		message.put("businessType", "emergentBroadcastRelativeDevices");
-		message.put("businessInfo", "应急广播推送设备");
-		message.put("bundles", bundleVOs);
+		if(bundleVOs.size() > 0){
 		
-		//websocket给所有用户推送
-		List<Long> consumeIds = new ArrayList<Long>();
-		List<UserVO> userVOs = userQuery.queryAllUserBaseInfo("qt指控软件");
-		for(UserVO userVO : userVOs){
-			WebsocketMessageVO ws = websocketMessageService.send(userVO.getId(), JSON.toJSONString(message), WebsocketMessageType.COMMAND);
-			consumeIds.add(ws.getId());
+			//生成消息
+			JSONObject message = new JSONObject();
+			message.put("businessType", "emergentBroadcastRelativeDevices");
+			message.put("businessInfo", "应急广播推送设备");
+			message.put("unifiedId", unifiedId);
+			message.put("bundles", bundleVOs);
+			
+			//websocket给所有用户推送
+			List<Long> consumeIds = new ArrayList<Long>();
+			List<UserVO> userVOs = userQuery.queryAllUserBaseInfo("qt指控软件");
+			for(UserVO userVO : userVOs){
+				WebsocketMessageVO ws = websocketMessageService.send(userVO.getId(), JSON.toJSONString(message), WebsocketMessageType.COMMAND);
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
+			
+			//打印
+			log.info("给" + userVOs.size() + "个用户推送应急广播设备：" + message);
+		}else{
+			log.info("未查询到任何设备，不推送");
 		}
-		websocketMessageService.consumeAll(consumeIds);
-		
-		//打印
-		log.info("给" + userVOs.size() + "个用户推送应急广播设备：" + message);
 		
 		return bundleVOs;
 	}

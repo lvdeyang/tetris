@@ -1,6 +1,8 @@
 package com.sumavision.bvc.device.group.bo;
 
+import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberChannelPO;
+import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 
 /**
  * @ClassName: ConnectBO 
@@ -155,6 +157,32 @@ public class ConnectBO {
 		    .setChannelId(channel.getChannelId())
 		    .setChannel_status("Open")
 		    .setCodec_param(codec);
+		return this;
+	}
+	
+	/**
+	 * 生成通道占用打开协议 <br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月16日 下午2:47:56
+	 * @param channel
+	 * @param forwardSrc 描述源信息，如果为null则表示无源，不需要设置源
+	 * @param bundle 提供接入层id
+	 * @param codec
+	 * @return
+	 */
+	public ConnectBO set(ChannelSchemeDTO channel, ForwardSetSrcBO forwardSrc, BundlePO bundle, CodecParamBO codec){
+		this.setLock_type("write")
+		    .setLayerId(bundle.getAccessNodeUid())
+		    .setBase_type(channel.getBaseType())
+		    .setBundleId(channel.getBundleId())
+		    .setChannelId(channel.getChannelId())
+		    .setChannel_status("Open")
+		    .setCodec_param(codec);
+		if(forwardSrc != null){
+			this.setSource_param(forwardSrc);
+		}
 		return this;
 	}
 	

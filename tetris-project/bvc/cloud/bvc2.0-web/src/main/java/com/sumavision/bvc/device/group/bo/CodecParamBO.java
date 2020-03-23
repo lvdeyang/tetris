@@ -6,6 +6,10 @@ import com.sumavision.bvc.common.group.po.CommonAvtplGearsPO;
 import com.sumavision.bvc.common.group.po.CommonAvtplPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
+import com.sumavision.bvc.system.po.AvtplGearsPO;
+import com.sumavision.bvc.system.po.AvtplPO;
+import com.sumavision.tetris.bvc.business.dispatch.po.DispatchAudioParamPO;
+import com.sumavision.tetris.bvc.business.dispatch.po.DispatchVideoParamPO;
 
 public class CodecParamBO {
 
@@ -46,6 +50,15 @@ public class CodecParamBO {
 				   						      .setFps(gear.getFps()==null?"25.0":gear.getFps()));
 		return this;
 	}
+	public CodecParamBO set(AvtplPO avtpl, AvtplGearsPO gear){
+		this.setAudio_param(new AudioParamBO().setCodec(avtpl.getAudioFormat().getName())
+												.setBitrate(gear.getAudioBitRate()))
+		    .setVideo_param(new VideoParamBO().setCodec(avtpl.getVideoFormat().getName())
+				   						      .setResolution(gear.getVideoResolution().getName())
+				   						      .setBitrate(gear.getVideoBitRate())
+				   						      .setFps(gear.getFps()==null?"25.0":gear.getFps()));
+		return this;
+	}
 	public CodecParamBO set(CommandGroupAvtplPO avtpl, CommandGroupAvtplGearsPO gear){
 		this.setAudio_param(new AudioParamBO().setCodec(avtpl.getAudioFormat().getName()))
 		    .setVideo_param(new VideoParamBO().setCodec(avtpl.getVideoFormat().getName())
@@ -65,6 +78,12 @@ public class CodecParamBO {
 		    .setVideo_param(new VideoParamBO().setCodec(avtpl.getVideoFormat().getName())
 				   						      .setResolution(gear.getVideoResolution().getName())
 				   						      .setBitrate(gear.getVideoBitRate()));
+		return this;
+	}
+	
+	public CodecParamBO set(DispatchVideoParamPO videoParam, DispatchAudioParamPO auidoParam){
+		this.setAudio_param(new AudioParamBO().set(auidoParam))
+			.setVideo_param(new VideoParamBO().set(videoParam));
 		return this;
 	}
 	

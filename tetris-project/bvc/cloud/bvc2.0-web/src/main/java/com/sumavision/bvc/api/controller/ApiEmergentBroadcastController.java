@@ -34,6 +34,7 @@ public class ApiEmergentBroadcastController {
 	 * @param longitude
 	 * @param latitude
 	 * @param raidus
+	 * @param unifiedId 消息预警唯一标识
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -45,10 +46,11 @@ public class ApiEmergentBroadcastController {
 			String longitude,
 			String latitude,
 			String raidus,
+			String unifiedId,
 			HttpServletRequest request) throws Exception{
 		
 		//查询设备列表，同时业务也会将设备列表推送给终端
-		List<BundleVO> bundleVOs = commandEmergentBroadcastServiceImpl.queryAndNotifyDevices(Long.parseLong(longitude), Long.parseLong(latitude), Long.parseLong(raidus));
+		List<BundleVO> bundleVOs = commandEmergentBroadcastServiceImpl.queryAndNotifyDevices(longitude, latitude, Long.parseLong(raidus), unifiedId);
 		
 		return bundleVOs;
 	}

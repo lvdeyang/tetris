@@ -183,7 +183,8 @@ public class MonitorApi92Controller {
 		List<ChannelSchemeDTO> dstAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(dstBundleEntity.getBundleId()).getList(), ResourceChannelDAO.DECODE_AUDIO);
 		ChannelSchemeDTO dstAudioChannel = dstAudioChannels.get(0);
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(username);
+//		UserBO admin = resourceService.queryUserInfoByUsername(username);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		monitorLiveService.add(
 				null,
@@ -240,7 +241,8 @@ public class MonitorApi92Controller {
 		List<ChannelSchemeDTO> dstAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(dstBundleEntity.getBundleId()).getList(), ResourceChannelDAO.DECODE_AUDIO);
 		ChannelSchemeDTO dstAudioChannel = dstAudioChannels.get(0);
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(username);
+//		UserBO admin = resourceService.queryUserInfoByUsername(username);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		MonitorLivePO task = monitorLiveQuery.findBySrcAndDst(
 				srcBundleEntity.getBundleId(), srcVideoChannel.getChannelId(), srcBundleEntity.getBundleId(), srcAudioChannel.getChannelId(), 
@@ -286,7 +288,8 @@ public class MonitorApi92Controller {
 		List<ChannelSchemeDTO> dstAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(dstBundleEntity.getBundleId()).getList(), ResourceChannelDAO.DECODE_AUDIO);
 		ChannelSchemeDTO dstAudioChannel = dstAudioChannels.get(0);
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(username);
+//		UserBO admin = resourceService.queryUserInfoByUsername(username);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		//MonitorRecordPO file = monitorRecordDao.findByPreviewUrl(srcFile);
 		if(srcFile.startsWith(RecordFileVO.RECORD)){
@@ -341,7 +344,8 @@ public class MonitorApi92Controller {
 		List<ChannelSchemeDTO> dstAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(dstBundleEntity.getBundleId()).getList(), ResourceChannelDAO.DECODE_AUDIO);
 		ChannelSchemeDTO dstAudioChannel = dstAudioChannels.get(0);
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(username);
+//		UserBO admin = resourceService.queryUserInfoByUsername(username);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		//查询文件
 		//MonitorRecordPO file = monitorRecordDao.findByPreviewUrl(srcFile);
@@ -423,7 +427,8 @@ public class MonitorApi92Controller {
 		int beginIndex = params.getIntValue("beginIndex");
 		int pageSize = params.getIntValue("pageSize");
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(username);
+//		UserBO admin = resourceService.queryUserInfoByUsername(username);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		List<MonitorRecordPO> entities = monitorRecordDao.findByVideoBundleId(bundleId);
 		
@@ -483,7 +488,8 @@ public class MonitorApi92Controller {
 		int beginIndex = params.getIntValue("beginIndex");
 		int pageSize = params.getIntValue("pageSize");
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(username);
+//		UserBO admin = resourceService.queryUserInfoByUsername(username);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		List<RecordFileVO> rows = new ArrayList<RecordFileVO>();
 		
@@ -566,7 +572,8 @@ public class MonitorApi92Controller {
 		Date parsedStartTime = startTime==null?null:DateUtil.parse(startTime, DateUtil.dateTimePattern);
 		Date parsedEndTime = endTime==null?null:DateUtil.parse(endTime, DateUtil.dateTimePattern);
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(username);
+//		UserBO admin = resourceService.queryUserInfoByUsername(username);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		List<RecordFileVO> rows = new ArrayList<RecordFileVO>();
 		
@@ -667,7 +674,8 @@ public class MonitorApi92Controller {
 		String ldap_user = params.getString("ldap_user");
 		String local_user = params.getString("local_user");
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(username);
+//		UserBO admin = resourceService.queryUserInfoByUsername(username);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		int action = 0;
 		UserBO user = resourceService.queryUserInfoByUsername(local_user);
@@ -749,7 +757,8 @@ public class MonitorApi92Controller {
 		String cmd = params.getString("cmd");
 		JSONArray sides = params.getJSONArray("sides");
 
-		UserBO admin = resourceService.queryUserInfoByUsername(username);
+//		UserBO admin = resourceService.queryUserInfoByUsername(username);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		if(cmd.equals("stop")){
 			monitorUserCallService.stopUserTwoSideCall(srcUser, dstUser, uuid, type, admin.getId());

@@ -804,8 +804,8 @@ public class MonitorRecordService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年7月1日 上午10:16:19
 	 * @param MonitorRecordPO task 录制任务
-	 * @param LogicBO logic 协议
-	 * @param LogicBO log 打印日志
+	 * @param DispatchBO logic 协议
+	 * @param DispatchBO log 打印日志
 	 */
 	private void sendProtocol(
 			MonitorRecordPO task,

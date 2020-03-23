@@ -40,6 +40,12 @@ public class CommandBroadcastSpeakPO extends AbstractBasePO {
 	/** 喊话名称，可能无用 */
 	private String name;
 	
+	/** 喊话服务返回的id，用于bvc监听应急喊话是否停止 */
+	private Long appMessageId;
+	
+	/** 喊话推送的ts流目标地址（ip:port）*/
+	private String targetUdp;
+	
 	/** 创建时间 */
 	private Date createtime;
 	
@@ -53,6 +59,24 @@ public class CommandBroadcastSpeakPO extends AbstractBasePO {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Column(name = "APP_MESSAGE_ID")
+	public Long getAppMessageId() {
+		return appMessageId;
+	}
+
+	public void setAppMessageId(Long appMessageId) {
+		this.appMessageId = appMessageId;
+	}
+
+	@Column(name = "TARGET_UDP")
+	public String getTargetUdp() {
+		return targetUdp;
+	}
+
+	public void setTargetUdp(String targetUdp) {
+		this.targetUdp = targetUdp;
 	}
 
 	@Column(name = "CREATE_TIME")

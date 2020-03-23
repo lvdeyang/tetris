@@ -1,5 +1,7 @@
 package com.sumavision.bvc.device.group.bo;
 
+import com.sumavision.tetris.bvc.business.dispatch.po.DispatchVideoParamPO;
+
 public class VideoParamBO {
 
 	private String resolution = "";
@@ -80,6 +82,17 @@ public class VideoParamBO {
 
 	public VideoParamBO setProfile(String profile) {
 		this.profile = profile;
+		return this;
+	}
+	
+	public VideoParamBO set(DispatchVideoParamPO videoParam){
+		this.bit_depth = videoParam.getBit_depth();
+		this.bitrate = videoParam.getBitrate();
+		this.chroma_subsampling = videoParam.getChroma_subsampling();
+		this.codec = videoParam.getCodec();
+		this.fps = videoParam.getFps();
+		this.profile = videoParam.getProfile();
+		this.resolution = videoParam.getResolution();
 		return this;
 	}
 	

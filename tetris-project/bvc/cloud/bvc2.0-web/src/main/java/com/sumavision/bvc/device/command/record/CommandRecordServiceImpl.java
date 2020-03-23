@@ -113,7 +113,8 @@ public class CommandRecordServiceImpl {
 			String logStr = group.getName() + " 开始录制，操作人userId：" + userId;
 			log.info(logStr);
 			
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			String adminUserId = admin.getId().toString();
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);						
@@ -230,7 +231,8 @@ public class CommandRecordServiceImpl {
 		String logStr = group.getName() + " 更新录制，操作人userId：" + userId;
 		log.info(logStr);
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		String adminUserId = admin.getId().toString();
 		Set<CommandGroupMemberPO> members = group.getMembers();
 		Set<CommandGroupForwardPO> forwards = group.getForwards();
@@ -396,7 +398,8 @@ public class CommandRecordServiceImpl {
 			return logic;
 		}
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		String adminUserId = admin.getId().toString();
 		for(CommandGroupRecordPO record : records){
 			record.setRun(false);

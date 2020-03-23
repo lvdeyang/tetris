@@ -1,5 +1,6 @@
 package com.sumavision.bvc.device.group.bo;
 
+import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupPO;
 
@@ -137,6 +138,25 @@ public class DisconnectBundleBO {
 		
 		PassByBO passBy = new PassByBO().setHangUp(group, member);
 		this.setPass_by_str(passBy);
+		
+		return this;
+	}
+	
+	/**
+	 * 设备挂断协议<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月16日 下午3:44:48
+	 * @param bundle
+	 * @param codec
+	 * @return
+	 */
+	public DisconnectBundleBO setDisconnectBundle(BundlePO bundle, CodecParamBO codec){
+		this.setLayerId(bundle.getAccessNodeUid())
+			.setBundleId(bundle.getBundleId())
+			.setBundle_type(bundle.getBundleType())
+			.setCodec_param(codec);
 		
 		return this;
 	}

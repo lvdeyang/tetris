@@ -306,7 +306,6 @@ define([
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
                     self.qt.warning(businessInfo);
-                    // self.pushMessage(businessInfo);
                     self.qt.invoke('callUserStop', $.toJSON({serial: serial}));
                 });
                 //websocket 停止呼叫
@@ -315,7 +314,6 @@ define([
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
                     self.qt.warning(businessInfo);
-                    // self.pushMessage(businessInfo);
                     self.qt.invoke('callUserStop', $.toJSON({serial: serial}));
                 });
 
@@ -392,7 +390,6 @@ define([
                 self.qt.on('cooperationRefuse', function (e) {
                     var e = e.params;
                     self.qt.warning(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
                 });
                 //撤销协同指挥授权
                 self.qt.on('cooperationRevoke', function (e) {
@@ -418,6 +415,7 @@ define([
                         self.qt.linkedWebview('rightBar', {id: 'linkEnterCommand', params: e.businessId});
                     });
                 });
+
                 self.qt.on('enterCommand', function (e) {
                     e = e.params;
                     //需要用到rightbar里的方法，所以连接过去，在那个页面调用
@@ -428,35 +426,35 @@ define([
                 self.qt.on('commandStop', function (e) {
                     self.qt.linkedWebview('rightBar', {id: 'usercommandStop', params: e});
                     e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
-                    self.qt.warning(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
+                    self.qt.info(e.businessInfo);
                     self.qt.invoke('commandExit', $.toJSON(e.splits));
                 });
 
                 self.qt.on('commandMemberOnline', function (e) {
-                    e = e.params;
-                    self.qt.info(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
-                    if (e.splits && e.splits.length > 0) {
-                        self.qt.invoke('groupMembers', $.toJSON(e.splits));
-                    }
+                  e = e.params;
+                  self.qt.info(e.businessInfo);
+                  if (e.splits && e.splits.length > 0) {
+                      self.qt.invoke('groupMembers', $.toJSON(e.splits));
+                  }
+                  setTimeout(function(){
+                    self.qt.linkedWebview('rightBar', {id:'yanxiaochao', params:e});
+                  }, 2000);
                 });
 
                 self.qt.on('commandMemberOffline', function (e) {
                     e = e.params;
                     self.qt.info(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
-                    //self.callBoard.unshift(e.businessInfo);
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('commandExit', e.splits);
                     }
+                    setTimeout(function(){
+                      self.qt.linkedWebview('rightBar', {id:'yanxiaochao', params:e});
+                    }, 2000);
                 });
 
                 self.qt.on('commandPause', function (e) {
                     e = e.params;
                     self.qt.info(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
                 });
 
                 self.qt.on('commandPauseRecover', function (e) {
@@ -464,41 +462,15 @@ define([
                     self.qt.invoke('commandPauseRecover', e.splits);
                 });
 
+                // 监听强退成员时
                 self.qt.on('commandMemberDelete', function (e) {
+                  self.qt.linkedWebview('rightBar',{id:'reduceMembers',params:e});
                     e = e.params;
-                    self.qt.info(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
-                    var memberIds = e.memberIds;
-                    var beDeleted = false;
-                    if (memberIds && memberIds.length > 0) {
-                        for (var i = 0; i < memberIds.length; i++) {
-                            if (memberIds[i] == self.user.id) {
-                                beDeleted = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (beDeleted) {
-                        for (var i = 0; i < self.group.entered.length; i++) {
-                            if (self.group.entered[i].id == e.businessId) {
-                                self.group.entered.splice(i, 1);
-                                break;
-                            }
-                        }
-                        if (self.group.currentId == e.businessId) {
-                            if (self.group.entered.length > 0) {
-                                self.group.currentId = self.group.entered[0].id;
-                                self.group.current = self.group.entered[0];
-                                self.currentGroupChange(self.group.currentId);
-                            } else {
-                                self.group.currentId = '';
-                                self.group.current = '';
-                            }
-                        }
-                    }
-                    if (e.splits && e.splits.length > 0) {
-                        self.qt.invoke('commandMemberDelete', e.splits);
-                    }
+                    self.qt.info(e.businessInfo);   
+                });
+
+                self.qt.on('commandMemberDeleteProxy', function (e) {
+                  self.qt.invoke('commandMemberDelete', e.params);    
                 });
 
                 self.qt.on('commandForwardDevice', function (e) {
@@ -582,7 +554,6 @@ define([
                 self.qt.on('commandForwardStop', function (e) {
                     e = e.params;
                     self.qt.info(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('commandForwardStop', $.toJSON(e.splits));
                     }
@@ -630,7 +601,6 @@ define([
                 self.qt.on('commandMessageStop', function (e) {
                     e = e.params;
                     self.qt.info(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
                     self.qt.invoke('commandMessageStop', $.toJSON({businessId: e.businessId}));
                 });
 
@@ -658,14 +628,12 @@ define([
                 self.qt.on('secretRefuse', function (e) {
                     e = e.params;
                     self.qt.alert('业务提示', e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial: e.serial}]));
                 });
 
                 self.qt.on('secretStop', function (e) {
                     e = e.params;
                     self.qt.alert('业务提示', e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial: e.serial}]));
                 });
 
@@ -673,7 +641,6 @@ define([
                 self.qt.on('receiveInstantMessage', function (e) {
                     e = e.params;
                     self.pushMessage(e.message);
-                    //self.callBoard.unshift(e.message);
                 });
 
                 /***************
