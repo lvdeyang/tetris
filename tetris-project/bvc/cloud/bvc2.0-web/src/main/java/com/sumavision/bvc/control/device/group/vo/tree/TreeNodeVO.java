@@ -724,7 +724,8 @@ public class TreeNodeVO {
 			.setType(TreeNodeType.COMMAND)
 			.setIcon(TreeNodeIcon.GROUP.getName())
 			.setKey(this.generateKey())
-			.setParam(JSON.toJSONString(new HashMapWrapper<String, String>().put("creator", command.getUserId().toString()).getMap()));
+			.setParam(JSON.toJSONString(new HashMapWrapper<String, String>().put("creator", command.getUserId().toString())
+																			.put("creatorName", command.getUserName()).getMap()));
 		if(GroupStatus.STOP.equals(command.getStatus())){
 			this.setBundleStatus("bundle-offline");
 		}else{

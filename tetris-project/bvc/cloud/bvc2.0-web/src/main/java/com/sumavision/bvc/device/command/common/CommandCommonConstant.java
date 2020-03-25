@@ -1,5 +1,7 @@
 package com.sumavision.bvc.device.command.common;
 
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  * 指挥公用常量<br/>
  * <b>作者:</b>wjw<br/>
@@ -7,6 +9,12 @@ package com.sumavision.bvc.device.command.common;
  * <b>日期：</b>2019年10月20日 下午12:10:35
  */
 public class CommandCommonConstant {
+	
+	/**
+	 * 用来设置
+	 */
+	@Value("${commandString}")
+	public static String COMMAND_STRING;
 	
 	/** 管理员用户名 */
 	public static final String USER_NAME= "系统管理员";

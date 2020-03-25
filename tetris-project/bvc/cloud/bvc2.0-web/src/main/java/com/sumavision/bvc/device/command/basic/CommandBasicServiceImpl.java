@@ -191,9 +191,26 @@ public class CommandBasicServiceImpl {
 		}
 		
 		//会议组重名校验
-		CommandGroupPO existGroup = commandGroupDao.findByName(name);
-		if(existGroup!=null){
-			throw new CommandGroupNameAlreadyExistedException(name);
+		List<CommandGroupPO> existGroups = commandGroupDao.findByName(name);
+		if(existGroups!=null && existGroups.size()>0){
+			List<CommandGroupPO> likeGroups = commandGroupDao.findByNameLike(name + "-%");
+			String recommendedName0 = name + "-";
+			String recommendedName = null;
+			boolean ok = false;
+			for(int i=2; ; i++){
+				ok = true;
+				recommendedName = recommendedName0 + i;
+				for(CommandGroupPO likeGroup : likeGroups){
+					if(recommendedName.equals(likeGroup.getName())){
+						ok = false;
+						break;
+					}
+				}
+				if(ok){
+					break;
+				}
+			}
+			throw new CommandGroupNameAlreadyExistedException(name, recommendedName);
 		}
 		
 		CommandGroupPO group = new CommandGroupPO();
@@ -470,8 +487,8 @@ public class CommandBasicServiceImpl {
 			throw new BaseException(StatusCode.FORBIDDEN, "请输入名称");
 		}
 		
-		CommandGroupPO existGroup = commandGroupDao.findByName(name);
-		if(existGroup!=null){
+		List<CommandGroupPO> existGroups = commandGroupDao.findByName(name);
+		if(existGroups!=null && existGroups.size()>0){
 			throw new CommandGroupNameAlreadyExistedException(name);
 		}
 		
@@ -727,6 +744,10 @@ public class CommandBasicServiceImpl {
 	 */
 	public JSONArray stop(Long userId, Long groupId, int stopMode) throws Exception{
 		
+		if(groupId==null || groupId.equals("")){
+			throw new BaseException(StatusCode.FORBIDDEN, "停会操作，会议id有误");
+		}
+		
 		//通常返回主席的屏幕；在专向会议中，由对方成员停止或拒绝，返回对方成员的屏幕
 		JSONArray returnSplits = new JSONArray();
 		JSONArray chairSplits = new JSONArray();
@@ -735,6 +756,11 @@ public class CommandBasicServiceImpl {
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 					
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		if(group == null){
+//			throw new BaseException(StatusCode.FORBIDDEN, "会议不存在，id: " + groupId);
+			log.info("进行停止操作的会议不存在，id：" + groupId);
+			return new JSONArray();
+		}
 		if(group.getStatus().equals(GroupStatus.REMIND)){
 			if(group.getType().equals(GroupType.BASIC)){
 				throw new BaseException(StatusCode.FORBIDDEN, "请先关闭会议提醒");
@@ -816,16 +842,18 @@ public class CommandBasicServiceImpl {
 			//普通会议给其它成员发通知
 			if(!member.isAdministrator() && group.getType().equals(GroupType.BASIC)
 					|| !member.isAdministrator() && group.getType().equals(GroupType.MEETING)){
-				JSONObject message = new JSONObject();
-				message.put("businessType", "commandStop");
-				message.put("fromUserId", chairman.getUserId());
-				message.put("fromUserName", chairman.getUserName());
-				message.put("businessId", group.getId().toString());
-				message.put("businessInfo", group.getName() + " 停止了");
-				message.put("splits", splits);
-				
-				//发送消息
-				messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName()));
+				if(member.getMemberStatus().equals(MemberStatus.CONNECT)){
+					JSONObject message = new JSONObject();
+					message.put("businessType", "commandStop");
+					message.put("fromUserId", chairman.getUserId());
+					message.put("fromUserName", chairman.getUserName());
+					message.put("businessId", group.getId().toString());
+					message.put("businessInfo", group.getName() + " 停止了");
+					message.put("splits", splits);
+					
+					//发送消息
+					messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName()));
+				}
 			}
 			
 			//专向会议的通知
@@ -1750,9 +1778,19 @@ public class CommandBasicServiceImpl {
 	 */
 	public Object removeMembers(Long groupId, List<Long> userIdList, int mode) throws Exception{
 		
+		if(groupId==null || groupId.equals("")){
+			throw new BaseException(StatusCode.FORBIDDEN, "退出操作，会议id有误");
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			
+			if(group == null){
+//				throw new BaseException(StatusCode.FORBIDDEN, "会议不存在，id: " + groupId);
+				log.info("进行退出/删人操作的会议不存在，id：" + groupId);
+				return new JSONArray();
+			}
 			
 			//会议停止状态下不能“退出”
 			if(mode == 0){

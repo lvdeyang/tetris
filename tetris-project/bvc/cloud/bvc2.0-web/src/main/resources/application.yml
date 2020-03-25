@@ -85,3 +85,11 @@ connectCenterLayerID: suma-venus-access-lianwang
 emergent:
   #应急广播，喊话系统的IP端口
   smartexpressIssueUrl: 10.10.40.251:8480
+  
+#指挥相关配置
+command:
+  #指挥/会议文字切换
+  commandString: 指挥
+  #创建本地预览的模式，0关闭，1使用摄像头，2使用绑定的编码器
+  localPreviewMode: 1
+  
