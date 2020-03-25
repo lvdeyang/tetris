@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
+import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
@@ -27,11 +29,12 @@ import com.sumavision.bvc.control.device.monitor.device.WebSipPlayerVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
-import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
+import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -60,6 +63,9 @@ public class CommandUserInfoController {
 	
 	@Autowired
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
+	
+	@Autowired
+	private ResourceBundleDAO resourceBundleDao;
 	
 	@Autowired
 	private CommandUserServiceImpl commandUserServiceImpl;
@@ -158,9 +164,24 @@ public class CommandUserInfoController {
 				  .setPort(port);
 		}
 		
+		//获取本地编码器（通常是摄像头）
+		WebSipPlayerVO encoderBundleVO = null;
+		try{
+			UserBO userBo = resourceService.queryUserById(user.getId(), TerminalType.QT_ZK);
+			EncoderBO localEncoder = userBo.getLocal_encoder();
+			String bundleId = localEncoder.getEncoderId();
+			List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(bundleId).getList());
+			BundlePO encoderBundlePO = encoderBundleEntities.get(0);
+			PlayerBundleBO encoderBundleBO = resourceQueryUtil.generateByBundlePO(encoderBundlePO);
+			encoderBundleVO = new WebSipPlayerVO().set(encoderBundleBO);
+			encoderBundleVO.setIp(clientIp).setPort(port);
+		}catch(Exception e){			
+		}
+		
 		return new HashMapWrapper<String, Object>()
 				.put("user", user)
 				.put("players", players)
+				.put("localEncoder", encoderBundleVO)
 				.getMap();
 	}
 	
