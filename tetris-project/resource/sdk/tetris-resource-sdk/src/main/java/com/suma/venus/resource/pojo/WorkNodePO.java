@@ -97,7 +97,7 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
         public static NodeType fromString(String s) throws Exception{
             NodeType[] values = NodeType.values();
             for(NodeType value: values){
-            	if(s.equals(value)){
+            	if(s.equals(value.toString())){
             		return value;
             	}
             }
