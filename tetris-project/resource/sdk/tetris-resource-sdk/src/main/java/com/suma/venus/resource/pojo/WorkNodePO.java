@@ -97,11 +97,11 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
         public static NodeType fromString(String s) throws Exception{
             NodeType[] values = NodeType.values();
             for(NodeType value: values){
-            	if(s.equals(value.getName())){
+            	if(s.equals(value)){
             		return value;
             	}
             }
-            throw new ErrorTypeException("name", s);
+            throw new ErrorTypeException("value", s);
         }
     }
 	
