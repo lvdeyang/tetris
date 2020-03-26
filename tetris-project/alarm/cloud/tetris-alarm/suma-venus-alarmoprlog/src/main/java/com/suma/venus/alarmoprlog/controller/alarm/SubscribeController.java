@@ -64,38 +64,36 @@ public class SubscribeController {
 				.findByAlarmInfo_AlarmCodeAndSubServiceNameAndMsgCallbackId(subscribeParamBO.getAlarmCode(),
 						subscribeParamBO.getSourceService(), null);
 
+		SubscribeAlarmPO subscribeAlarmPO;
+
 		if (subscribeAlarmPOs == null || subscribeAlarmPOs.isEmpty()) {
 
-			SubscribeAlarmPO subscribeAlarmPO = new SubscribeAlarmPO();
+			subscribeAlarmPO = new SubscribeAlarmPO();
 			subscribeAlarmPO.setAlarmInfo(alarmInfoPO);
-			subscribeAlarmPO.setMsgCallbackId(null);
 			subscribeAlarmPO.setSubServiceName(subscribeParamBO.getSourceService());
-			subscribeAlarmPO.setSubsIP(subscribeParamBO.getSubscribeIP());
-			subscribeAlarmPO.setSubsTime(subscribeParamBO.getSubscribeTime());
-			subscribeAlarmPO.setCallbackUrl(subscribeParamBO.getCallbackUrl());
-			if (StringUtils.isEmpty(subscribeParamBO.getAlarmNotifyMethod())) {
-				// TODO 默认为普通HTTP方式发送
-				subscribeAlarmPO.setAlarmNotifyMethod(EAlarmNotifyMethod.HTTP);
-			} else {
-				subscribeAlarmPO
-						.setAlarmNotifyMethod(EAlarmNotifyMethod.valueOf(subscribeParamBO.getAlarmNotifyMethod()));
-			}
-
-			if (StringUtils.isEmpty(subscribeParamBO.getAlarmNotifyPattern())) {
-				subscribeAlarmPO.setAlarmNotifyPattern(EAlarmNotifyPattern.NOTIFY_NORMAL);
-			} else {
-				subscribeAlarmPO
-						.setAlarmNotifyPattern(EAlarmNotifyPattern.valueOf(subscribeParamBO.getAlarmNotifyPattern()));
-			}
-
-			subscribeAlarmDAO.save(subscribeAlarmPO);
-
 		} else {
-
-			SubscribeAlarmPO subscribeAlarmPO2 = subscribeAlarmPOs.get(0);
-			subscribeAlarmPO2.setSubsTime(subscribeParamBO.getSubscribeTime());
-			subscribeAlarmDAO.save(subscribeAlarmPO2);
+			subscribeAlarmPO = subscribeAlarmPOs.get(0);
 		}
+
+		subscribeAlarmPO.setMsgCallbackId(null);
+		subscribeAlarmPO.setSubsTime(subscribeParamBO.getSubscribeTime());
+		subscribeAlarmPO.setCallbackUrl(subscribeParamBO.getCallbackUrl());
+
+		if (StringUtils.isEmpty(subscribeParamBO.getAlarmNotifyMethod())) {
+			// TODO 默认为普通HTTP方式发送
+			subscribeAlarmPO.setAlarmNotifyMethod(EAlarmNotifyMethod.HTTP);
+		} else {
+			subscribeAlarmPO.setAlarmNotifyMethod(EAlarmNotifyMethod.valueOf(subscribeParamBO.getAlarmNotifyMethod()));
+		}
+
+		if (StringUtils.isEmpty(subscribeParamBO.getAlarmNotifyPattern())) {
+			subscribeAlarmPO.setAlarmNotifyPattern(EAlarmNotifyPattern.NOTIFY_NORMAL);
+		} else {
+			subscribeAlarmPO
+					.setAlarmNotifyPattern(EAlarmNotifyPattern.valueOf(subscribeParamBO.getAlarmNotifyPattern()));
+		}
+
+		subscribeAlarmDAO.save(subscribeAlarmPO);
 
 		data.put("errMsg", "");
 		return data;
@@ -145,15 +143,13 @@ public class SubscribeController {
 				data.put("errMsg", "参数错误");
 				return data;
 			}
-			
+
 			subscribeAlarmDAO.delete(subscribeAlarmPO);
 
 		} catch (Exception e) {
 			data.put("errMsg", "内部错误");
 			return data;
 		}
-
-	
 
 		LOGGER.info("----------delsubscribe finish");
 		data.put("errMsg", "");

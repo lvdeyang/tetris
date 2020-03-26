@@ -3,6 +3,10 @@ package com.sumavision.tetris.record.file;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -14,15 +18,23 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * @author chenmo
  *
  */
+@Entity
+@Table(name = "recordFile")
 public class RecordFilePO extends AbstractBasePO {
 
 	private static final long serialVersionUID = 1L;
 
 	// 所属录制子任务Id
-	private Long recordTaskItemId;
+	@Column(name = "recordStrategyItemId")
+	private Long recordStrategyItemId;
 
 	// 所属录制任务Id，不必要，但是方便查询
-	private Long recordTaskId;
+	@Column(name = "recordStrategyId")
+	private Long recordStrategyId;
+
+	// 所属录制任务Id，不必要，但是方便查询
+	@Column(name = "storageId")
+	private Long storageId;
 
 	// 分段开始时间
 	@Column(name = "startTime")
@@ -32,27 +44,45 @@ public class RecordFilePO extends AbstractBasePO {
 	@Column(name = "stopTime")
 	private Date stopTime;
 
-	// 分段文件路径（hls默认是）
+	@Column(name = "filePath")
 	private String filePath;
 
+	@Column(name = "vodPath")
+	private String vodPath;
+
 	// 录制状态,0,未录制，1：正在录制，2，录制完成，3：录制失败，4：暂停
+	@Enumerated(EnumType.STRING)
 	@Column(name = "status")
-	private Integer status;
+	private ERecordFileStatus status;
 
-	public Long getRecordTaskItemId() {
-		return recordTaskItemId;
+	public enum ERecordFileStatus {
+		RECORD_WAIT("未录制"), RECORD_RUN("正在录制"), RECORD_SUC("录制完成");
+
+		private String name;
+
+		private ERecordFileStatus(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
 	}
 
-	public void setRecordTaskItemId(Long recordTaskItemId) {
-		this.recordTaskItemId = recordTaskItemId;
+	public Long getRecordStrategyItemId() {
+		return recordStrategyItemId;
 	}
 
-	public Long getRecordTaskId() {
-		return recordTaskId;
+	public void setRecordStrategyItemId(Long recordStrategyItemId) {
+		this.recordStrategyItemId = recordStrategyItemId;
 	}
 
-	public void setRecordTaskId(Long recordTaskId) {
-		this.recordTaskId = recordTaskId;
+	public Long getRecordStrategyId() {
+		return recordStrategyId;
+	}
+
+	public void setRecordStrategyId(Long recordStrategyId) {
+		this.recordStrategyId = recordStrategyId;
 	}
 
 	public Date getStartTime() {
@@ -71,11 +101,11 @@ public class RecordFilePO extends AbstractBasePO {
 		this.stopTime = stopTime;
 	}
 
-	public Integer getStatus() {
+	public ERecordFileStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(Integer status) {
+	public void setStatus(ERecordFileStatus status) {
 		this.status = status;
 	}
 
@@ -85,6 +115,22 @@ public class RecordFilePO extends AbstractBasePO {
 
 	public void setFilePath(String filePath) {
 		this.filePath = filePath;
+	}
+
+	public String getVodPath() {
+		return vodPath;
+	}
+
+	public void setVodPath(String vodPath) {
+		this.vodPath = vodPath;
+	}
+
+	public Long getStorageId() {
+		return storageId;
+	}
+
+	public void setStorageId(Long storageId) {
+		this.storageId = storageId;
 	}
 
 }

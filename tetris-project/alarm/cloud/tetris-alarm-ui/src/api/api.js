@@ -80,3 +80,4 @@ export const delSubscribe = params => { return axiosInstance.post(`${basePath}/s
 
 // 操作日志
 export const queryOprlogListPage = params => { return axiosInstance.post(`${basePath}/oprlog/queryPage`, qs.stringify(params)).then(res => res.data) }
+export const delOprlog = params => { return axiosInstance.post(`${basePath}/oprlog/del`, qs.stringify(params)).then(res => res.data) }
