@@ -10,18 +10,16 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.sumavision.bvc.command.group.enumeration.EditStatus;
+import com.sumavision.bvc.command.group.enumeration.GroupSpeakType;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
-import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.system.enumeration.GearsLevel;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -61,11 +59,14 @@ public class CommandGroupPO extends AbstractBasePO {
 	/** 组类型 */
 	private GroupType type;
 	
+	/** 组类型 */
+	private GroupSpeakType speakType = GroupSpeakType.CHAIRMAN;
+	
 	/** 组状态 */
-	private GroupStatus status;
+	private GroupStatus status = GroupStatus.STOP;
 	
 	/** 编辑类型：正常（预设），临时，已删除 */
-	private EditStatus editStatus;
+	private EditStatus editStatus = EditStatus.NORMAL;
 	
 	/** 参数方案 */
 	private CommandGroupAvtplPO avtpl;
@@ -155,6 +156,16 @@ public class CommandGroupPO extends AbstractBasePO {
 
 	public void setType(GroupType type) {
 		this.type = type;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "SPEAK_TYPE")
+	public GroupSpeakType getSpeakType() {
+		return speakType;
+	}
+
+	public void setSpeakType(GroupSpeakType speakType) {
+		this.speakType = speakType;
 	}
 
 	@Enumerated(value = EnumType.STRING)

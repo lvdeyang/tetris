@@ -27,6 +27,7 @@ import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupForwardDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
+import com.sumavision.bvc.command.group.enumeration.EditStatus;
 import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
@@ -216,6 +217,7 @@ public class CommandBasicServiceImpl {
 		CommandGroupPO group = new CommandGroupPO();
 		group.setName(name);
 		group.setType(type);
+		group.setEditStatus(EditStatus.NORMAL);
 		
 		group.setUserId(creatorUserId);
 		group.setUserName(creatorUsername);
