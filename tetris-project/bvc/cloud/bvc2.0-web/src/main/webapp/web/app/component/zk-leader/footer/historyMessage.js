@@ -5,7 +5,6 @@ define([
     'vue',
     'config',
     'element-ui',
-    'date',
     'css!' + window.APPPATH + 'component/zk-leader/footer/historyMessage.css'
 ], function (tpl, ajax, $, Vue, config) {
 
@@ -52,21 +51,12 @@ define([
             //发送消息
             sendInstantMessage: function () {
                 var self = this;
-
-                self.qt.get(['currentGroupId'], function (variables) {
-                    var currentGroupId = variables.currentGroupId;
-                    if(!currentGroupId){
-                        self.qt.error('未获取到当前会议id!');
-                    }else{
-                        ajax.post('/command/message/broadcast/instant/message', {
-                            id:currentGroupId,
-                            message: self.instantMessage
-                        }, function () {
-                            self.pushMessage('我 '+new Date().format('yyyy-MM-dd hh:mm:ss')+'：' + self.instantMessage);
-                            self.instantMessage = '';
-                            self.qt.success('发送成功!');
-                        });
-                    }
+                ajax.post('/message/broadcast/instant/message', {
+                    message: self.instantMessage
+                }, function () {
+                    self.pushMessage('我：' + self.instantMessage);
+                    self.instantMessage = '';
+                    self.qt.success('发送成功!');
                 });
             },
             //组合按键发送消息
@@ -83,22 +73,9 @@ define([
                 self.qt.invoke('hideService');
             },
             //历史消息弹框
-            showMessagePanel:function(){
-                var self = this;
-                self.qt.invoke('hideService');
-            },
-            //历史消息弹框
             showMessagePanel: function () {
                 var self = this;
-                self.qt.get(['currentGroupId'], function (variables) {
-                    var currentGroupId = variables.currentGroupId;
-                    if(!currentGroupId){
-                        self.qt.error('未获取到当前会议id!');
-                    }else {
-                        self.qt.window('/router/zk/leader/footer/pop', {currentGroupId: currentGroupId}, {width:'100%', height:'100%'});
-                    }
-                });
-
+                self.qt.window('/router/zk/leader/footer/pop', null, {width: '100%', height: '100%'});
             },
             //分屏事件
             layoutChange: function (index) {
@@ -260,7 +237,7 @@ define([
                     });
                 });
 
-                //专项会议
+                //专项指挥
                 self.qt.on('vipWindow', function (e) {
                     self.qt.window('/router/zk/leader/callUser', {serial: e.serial, type: 'orient'}, {
                         width: 900,
@@ -306,6 +283,7 @@ define([
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
                     self.qt.warning(businessInfo);
+                    // self.pushMessage(businessInfo);
                     self.qt.invoke('callUserStop', $.toJSON({serial: serial}));
                 });
                 //websocket 停止呼叫
@@ -314,6 +292,7 @@ define([
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
                     self.qt.warning(businessInfo);
+                    // self.pushMessage(businessInfo);
                     self.qt.invoke('callUserStop', $.toJSON({serial: serial}));
                 });
 
@@ -344,7 +323,6 @@ define([
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
                     self.qt.warning(businessInfo);
-                    // self.pushMessage(businessInfo);
                     self.qt.invoke('voiceIntercomStop', $.toJSON({serial: serial}));
                 });
                 //websocket 停止语音对讲
@@ -353,26 +331,21 @@ define([
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
                     self.qt.warning(businessInfo);
-                    // self.pushMessage(businessInfo);
                     self.qt.invoke('voiceIntercomStop', $.toJSON({serial: serial}));
                 });
 
-                //授权协同会议
+                //授权协同指挥
                 self.qt.on('cooperationGrant', function (e) {
                     var e = e.params;
                     if (self.settings.responseMode === 'auto') {
                         setTimeout(function () {
-                            ajax.post('/command/cooperation/agree', {id: e.businessId}, function(){
-                                self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
-                            });
+                            ajax.post('/command/cooperation/agree', {id: e.businessId}, null);
                         }, 200);
                     } else {
                         self.qt.confirm('业务提示', e.businessInfo, '拒绝', '同意', function () {
                             ajax.post('/command/cooperation/refuse', {id: e.businessId}, null);
                         }, function () {
-                            ajax.post('/command/cooperation/agree', {id: e.businessId}, function(){
-                                self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
-                            });
+                            ajax.post('/command/cooperation/agree', {id: e.businessId}, null);
                         });
                     }
                 });
@@ -380,26 +353,23 @@ define([
                 self.qt.on('cooperationAgree', function (e) {
                     var e = e.params;
                     self.qt.info(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
-                    if (e.splits && e.splits.length > 0) {
+                        if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('cooperationGrant', e.splits);
                     }
-                    self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
                 });
                 //拒绝协同指挥
                 self.qt.on('cooperationRefuse', function (e) {
                     var e = e.params;
                     self.qt.warning(e.businessInfo);
+                    // self.pushMessage(e.businessInfo);
                 });
                 //撤销协同指挥授权
                 self.qt.on('cooperationRevoke', function (e) {
                     var e = e.params;
                     self.qt.warning(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('cooperationRevoke', e.splits);
                     }
-                    self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
                 });
 
                 //websocket 开始指挥
@@ -410,12 +380,10 @@ define([
                         ajax.post('/command/basic/refuse', {id: e.businessId}, function () {
                         });
                     }, function () {
-                        //同意进入指挥
-                        //需要用到rightbar里的方法，所以连接过去，在那个页面调用
+                        //同意进入指挥.需要用到rightbar里的方法，所以连接过去，在那个页面调用
                         self.qt.linkedWebview('rightBar', {id: 'linkEnterCommand', params: e.businessId});
                     });
                 });
-
                 self.qt.on('enterCommand', function (e) {
                     e = e.params;
                     //需要用到rightbar里的方法，所以连接过去，在那个页面调用
@@ -426,19 +394,16 @@ define([
                 self.qt.on('commandStop', function (e) {
                     self.qt.linkedWebview('rightBar', {id: 'usercommandStop', params: e});
                     e = e.params;
-                    self.qt.info(e.businessInfo);
+                    self.qt.warning(e.businessInfo);
                     self.qt.invoke('commandExit', $.toJSON(e.splits));
                 });
 
                 self.qt.on('commandMemberOnline', function (e) {
-                  e = e.params;
-                  self.qt.info(e.businessInfo);
-                  if (e.splits && e.splits.length > 0) {
-                      self.qt.invoke('groupMembers', $.toJSON(e.splits));
-                  }
-                  setTimeout(function(){
-                    self.qt.linkedWebview('rightBar', {id:'yanxiaochao', params:e});
-                  }, 2000);
+                    e = e.params;
+                    self.qt.info(e.businessInfo);
+                    if (e.splits && e.splits.length > 0) {
+                        self.qt.invoke('groupMembers', $.toJSON(e.splits));
+                    }
                 });
 
                 self.qt.on('commandMemberOffline', function (e) {
@@ -447,9 +412,6 @@ define([
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('commandExit', e.splits);
                     }
-                    setTimeout(function(){
-                      self.qt.linkedWebview('rightBar', {id:'yanxiaochao', params:e});
-                    }, 2000);
                 });
 
                 self.qt.on('commandPause', function (e) {
@@ -462,15 +424,40 @@ define([
                     self.qt.invoke('commandPauseRecover', e.splits);
                 });
 
-                // 监听强退成员时
                 self.qt.on('commandMemberDelete', function (e) {
-                  self.qt.linkedWebview('rightBar',{id:'reduceMembers',params:e});
                     e = e.params;
-                    self.qt.info(e.businessInfo);   
-                });
-
-                self.qt.on('commandMemberDeleteProxy', function (e) {
-                  self.qt.invoke('commandMemberDelete', e.params);    
+                    self.qt.info(e.businessInfo);
+                    var memberIds = e.memberIds;
+                    var beDeleted = false;
+                    if (memberIds && memberIds.length > 0) {
+                        for (var i = 0; i < memberIds.length; i++) {
+                            if (memberIds[i] == self.user.id) {
+                                beDeleted = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (beDeleted) {
+                        for (var i = 0; i < self.group.entered.length; i++) {
+                            if (self.group.entered[i].id == e.businessId) {
+                                self.group.entered.splice(i, 1);
+                                break;
+                            }
+                        }
+                        if (self.group.currentId == e.businessId) {
+                            if (self.group.entered.length > 0) {
+                                self.group.currentId = self.group.entered[0].id;
+                                self.group.current = self.group.entered[0];
+                                self.currentGroupChange(self.group.currentId);
+                            } else {
+                                self.group.currentId = '';
+                                self.group.current = '';
+                            }
+                        }
+                    }
+                    if (e.splits && e.splits.length > 0) {
+                        self.qt.invoke('commandMemberDelete', e.splits);
+                    }
                 });
 
                 self.qt.on('commandForwardDevice', function (e) {

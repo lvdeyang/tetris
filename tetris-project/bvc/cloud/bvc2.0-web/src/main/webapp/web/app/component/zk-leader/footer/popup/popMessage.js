@@ -22,8 +22,7 @@ define([
                     currentPage:0,
                     pageSize:30,
                     total:0
-                },
-                currentGroupId:''
+                }
             }
         },
         watch:{
@@ -40,8 +39,7 @@ define([
             load:function(currentPage){
                 var self = this;
                 self.historyInstantMsg.splice(0, self.historyInstantMsg.length);
-                ajax.post('/command/message/query/history/instant/message', {
-                    commandId:self.currentGroupId,
+                ajax.post('/message/query/history/instant/message', {
                     currentPage:currentPage,
                     pageSize:self.page.pageSize
                 }, function(data){
@@ -64,7 +62,7 @@ define([
             //忽略
             ignore: function (e, index,item) {
                 var self = this;
-                ajax.post('/command/message/consume/all', {
+                ajax.post('/message/consume/all', {
                     ids: $.toJSON([item.id])
                 }, function(){
                     $(e.target).parents(".btns").parents(".msg").addClass('animating');
@@ -246,9 +244,6 @@ define([
             var self = this;
             self.qt = new QtContext('popMessage', function () {
 
-                var params = self.qt.getWindowParams();
-                self.currentGroupId = params.currentGroupId;
-
                 // 初始化ajax
                 ajax.init({
                     login: config.ajax.login,
@@ -272,7 +267,7 @@ define([
                 });
 
                 self.msgData.splice(0, self.msgData.length);
-                ajax.post('/command/message/find/unconsumed/commands', null, function (commands) {
+                ajax.post('/message/find/unconsumed/commands', null, function (commands) {
                     console.log(commands)
                     if (commands && commands.length > 0) {
                         for (var i = 0; i < commands.length; i++) {

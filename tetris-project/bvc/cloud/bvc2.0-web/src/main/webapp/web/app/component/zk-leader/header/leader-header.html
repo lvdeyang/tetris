@@ -12,7 +12,7 @@
         </div>
         <div class="leftTime">
             <p>
-                <span style="font-size: 14px;margin-right: 10px">会议</span>
+                <span style="font-size: 14px;margin-right: 10px">指挥</span>
                 <span class="date">{{date}}</span>
             </p>
             <p>
@@ -29,7 +29,7 @@
             <!--<span class="el-icon-time setTimeIcon" style="position: absolute;right: 22px;bottom: 23px;font-size: 24px;cursor: pointer;color: #cafffa" @click="openSetTime"></span>-->
         </div>
         <div class="center">
-            <span>网络化作战会议系统</span>
+            <span>网络化作战指挥系统</span>
         </div>
         <div class="right">
             <span class="icon-user" style="font-size: 30px;position: absolute;left: 40px;top:28px;"></span>
@@ -40,14 +40,14 @@
         </div>
         <div class="right">
             <p style="font-size: 14px;line-height: 54px;margin-left: -10px">
-                <span style="margin: 0 8px">首页</span>
-                <span style="margin: 0 30px">设置</span>
+                <span style="margin: 0 8px">设置</span>
+                <span style="margin: 0 30px">管理</span>
                 <span style="margin: 0">退出</span>
             </p>
             <p>
-                <span class="setting icon-home" title="首页" @click="goHome"></span>
-                <span class="setting icon-cog" @click="showSettings" style="margin-right: 10px" title="系统设置"></span>
-                <span class="setting icon-off" title="退出" @click="exitCommand"></span>
+                <span class="setting icon-cog" @click="showSettings" title="系统设置"></span>
+                <span class="setting icon-th-large" title="系统管理" style="margin-right: 10px"></span>
+                <span class="setting icon-off" title="退出" @click="closeExit"></span>
             </p>
         </div>
     </div>

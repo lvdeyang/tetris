@@ -1,0 +1,69 @@
+.fight {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background: #000 url("../../../../../images/zk-leader/popMsg.png") no-repeat center;
+    background-size: 100% 100%;
+}
+
+.title {
+    position: absolute;
+    top: 37px;
+    left: 435px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+}
+
+.defaultForm {
+   position: absolute;
+    top:85px;
+    left: 75px;
+    right: 75px;
+    bottom: 80px;
+}
+
+.el-form-item__label{
+    font-size: 16px;
+    color: #cccfd6;
+    line-height: 40px;
+}
+
+.el-input__inner{
+    background-color: transparent;
+    color: #b8cfff;
+    font-size: 18px;
+}
+/*更改日期和时间的面板背景的样式*/
+.el-picker-panel,.el-time-panel {
+    color: #e5eeff;
+    background: #0f0b40;
+}
+.el-date-table th,.el-time-spinner__item{
+    color: #a5c3ff;
+}
+.el-picker-panel__icon-btn,.el-date-picker__header-label,.el-time-spinner__item.active:not(.disabled){
+    color: #fff;
+}
+
+/*取消按钮的字体颜色*/
+.el-time-panel__btn{
+    color: #eaeaea;
+}
+/*前面的图标*/
+.el-input__prefix, .el-input__suffix{
+    color: #fddbdb;
+}
+
+/*下拉选项*/
+.el-select-dropdown{
+    background-color: transparent;
+}
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover{
+    background-color: #142640;
+}
+.el-select-dropdown__item{
+    color: #b9d0ff;
+}

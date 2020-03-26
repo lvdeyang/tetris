@@ -12,8 +12,8 @@
                     <el-time-picker id="time" placeholder="选择时间" v-model="form.time" style="width: 100%;"></el-time-picker>
                 </el-col>
             </el-form-item>
-            <el-form-item label="作战会议">
-                <el-select v-model="fightCommand" placeholder="请选择会议" style="width: 400px">
+            <el-form-item label="作战指挥">
+                <el-select v-model="fightCommand" placeholder="请选择指挥" style="width: 400px">
                     <el-option v-for="item in command" :key="item.id" :label="item.name" :value="item.id"></el-option>
                 </el-select>
             </el-form-item>

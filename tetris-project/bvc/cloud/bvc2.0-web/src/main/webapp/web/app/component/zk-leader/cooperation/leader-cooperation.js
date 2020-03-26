@@ -21,6 +21,7 @@ define([
                 groupId:'',
                 groupType:'',
                 page:'',//应该显示哪个页面
+                pageName:'', //多个页面公用，区分
                 tag:'',
                 tree:{
                     props:{
@@ -54,7 +55,6 @@ define([
                             userIds: $.toJSON(self.tree.select)
                         }, function(data){
                             self.qt.success('邀请成功');
-                            self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
                             self.handleWindowClose();
                             self.saveSelect=self.tree.select;
                         });
@@ -63,8 +63,7 @@ define([
                             id:self.groupId,
                             userIds: $.toJSON(self.tree.select)
                         }, function(data){
-                            self.qt.success('撤销协同指挥成功');
-                            self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
+                            self.qt.success('撤销协同成功');
                             self.handleWindowClose();
                             self.saveSelect=self.tree.select;
                         });
@@ -79,6 +78,7 @@ define([
                 self.groupId = params.id;
                 self.groupType = params.type;
                 self.page = params.page;
+                self.pageName=params.name;
                 self.tag = params.tag;
 
                 //初始化ajax

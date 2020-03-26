@@ -40,8 +40,8 @@ html,body{
     right: 0;
     height: 70px;
     font-size: 16px;
-    color: #eaeaec;
-    background:#13a9d691 url(../../../../../images/zk-leader/msgContent.png) no-repeat center;
+    color: #00e9ff;
+    background: url("../../../../../images/zk-leader/msgContent.png") no-repeat center;
     overflow: hidden;
 }
 
