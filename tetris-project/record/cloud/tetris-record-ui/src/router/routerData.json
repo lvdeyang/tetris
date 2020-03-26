@@ -1,0 +1,28 @@
+[
+    {
+        "path": "/Home", 
+        "component": "Home", 
+        "children": [
+            {
+                "path": "/AlarmInfo", 
+                "component": "alarmoprlog/alarmBaseInfoList"
+            },
+            {
+                "path": "/RecordStrategy", 
+                "component": "record/recordStrategy"
+            },
+            {
+                "path": "/RecordDevice", 
+                "component": "record/recordDevice"
+            },
+            {
+                "path": "/RecordFile", 
+                "component": "record/recordFile"
+            },
+            {
+                "path": "/RecordStorage", 
+                "component": "record/recordStorage"
+            }
+        ]
+    }
+]
