@@ -4,10 +4,6 @@
         "component": "Home", 
         "children": [
             {
-                "path": "/AlarmInfo", 
-                "component": "alarmoprlog/alarmBaseInfoList"
-            },
-            {
                 "path": "/RecordStrategy", 
                 "component": "record/recordStrategy"
             },
