@@ -6,6 +6,7 @@
     <groupId>com.sumvision.tetris</groupId>
     <artifactId>tetris-record</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>war</packaging>
 
     <name>tetris-record</name>
     <description>融合媒体平台-收录</description>
@@ -96,6 +97,22 @@
 			<artifactId>tetris-mims-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<!-- capacity-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-capacity-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- resource-feign -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-resource-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		
 		
 		<!-- eureka依赖 -->
 		<dependency>

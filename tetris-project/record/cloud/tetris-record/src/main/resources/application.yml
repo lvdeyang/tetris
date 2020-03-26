@@ -1,44 +1,55 @@
 server:
-  port: 8091
+  port: 8098
 
 spring:
   application:
     name: tetris-record
+  cloud:
+    inetutils:
+      preferred-networks: 10.10.40.27
 
   datasource:
-    #base:
-      url: jdbc:mysql://10.10.40.116:3306/record?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
-      username: sumadb
-      password: Sumavision@300079
+      url: jdbc:mysql://10.10.40.207:3306/record?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+      username: root
+      password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver
       driverClassName: com.mysql.jdbc.Driver
-      initial-size : 10
-      min-idle : 20
-      max-active : 100
-      validation-query : SELECT 1
-      test-while-idle : true
-      test-on-borrow : true
-      time-between-eviction-runs-millis : 600000
-      min-evictable-idle-time-millis : 3600000
+      druid:
+        initial-size: 10
+        min-idle: 20
+        max-active: 100
+        validation-query : SELECT 1
+        test-while-idle : true
+        time-between-eviction-runs-millis : 600000
+        min-evictable-idle-time-millis : 3600000
     
   jpa:
-    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
-    database: MYSQL
+    database: mysql
     show-sql: true
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     hibernate:
       ddl-auto: update
-
-  thymeleaf:
-    cache: false
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
 eureka:
+  instance:
+    lease-expiration-duration-in-seconds: 10
+    lease-renewal-interval-in-seconds: 3
+    preferIpAddress: true
+    ipAddress: 10.10.40.27
+    instance-id: ${eureka.instance.ipAddress}:${spring.application.name}:${server.port}
   client:
     serviceUrl:
-      defaultZone: http://10.10.40.115:8884/eureka/
-  instance:
-    instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
-    prefer-ip-address: true
-
+      defaultZone:  http://10.10.40.207:8081/eureka/
+ribbon:
+  eager-load:
+      enabled: true
+      clients: tetris-user
+  ReadTimeout: 120000
+  ConnectTimeout: 30000
+  MaxAutoRetries: 0
+  MaxAutoRetriesNextServer: 3
 feign: 
   hystrix: 
    enabled: true    
@@ -52,3 +63,11 @@ hystrix:
           thread: 
             timeoutInMilliseconds: 5000
           strategy: SEMAPHORE
+localRecordBasePath: /home/record/
+ftpBasePath: ftp://suma:suma123@10.10.40.116/
+httpBasePath: http://10.10.40.207:8099/record/
+storageSize: 80
+cleanSpaceThreshold: 60
+cleanTimeThreshold: 30
+
+
