@@ -620,14 +620,29 @@ public class CommandQueryController {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月15日 下午2:37:19
+	 * @param type 查询类型，command或group，如果null则认为command
 	 * @return TreeNodeVO 会议树节点
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/list")
-	public Object list(HttpServletRequest request) throws Exception{
+	public Object list(
+			String type,
+			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
+		
+		if(type == null) type = "command";
+		GroupType needType = null;
+		switch (type){
+		case "meeting":
+			needType = GroupType.MEETING;
+			break;
+		case "command":
+		default:
+			needType = GroupType.BASIC;
+			break;
+		}
 		
 		List<CommandGroupPO> commands = commandGroupDao.findByMemberUserId(userId);
 		
@@ -640,8 +655,8 @@ public class CommandQueryController {
 											     .setChildren(new ArrayList<TreeNodeVO>());
 		
 		for(CommandGroupPO command: commands){
-			GroupType type = command.getType();
-			if(!type.equals(GroupType.BASIC)){
+			GroupType groupType = command.getType();
+			if(!needType.equals(groupType)){
 				continue;
 			}
 			TreeNodeVO commandTree = new TreeNodeVO().set(command);
@@ -658,6 +673,7 @@ public class CommandQueryController {
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月12日 上午10:21:58
+	 * @param type 查询类型，command或group，如果null则认为command
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -665,24 +681,38 @@ public class CommandQueryController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/entered")
-	public Object findEnterdCommandGroup(HttpServletRequest request) throws Exception{
+	public Object findEnterdCommandGroup(
+			String type,
+			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		JSONArray groups = new JSONArray();
 		
+		if(type == null) type = "command";
+		GroupType needType = null;
+		switch (type){
+		case "meeting":
+			needType = GroupType.MEETING;
+			break;
+		case "command":
+		default:
+			needType = GroupType.BASIC;
+			break;
+		}
+		
 		List <CommandGroupPO> commands = commandGroupDao.findEnteredGroupByMemberUserId(userId);
 		
 		for(CommandGroupPO command : commands){
-			GroupType type = command.getType();
-			if(!type.equals(GroupType.BASIC)){
+			GroupType groupType = command.getType();
+			if(!needType.equals(groupType)){
 				continue;
 			}
 			JSONObject group = new JSONObject();
 			group.put("id", command.getId().toString());
 			group.put("name", command.getName());
 			group.put("creator", command.getUserId().toString());
-			if(type.equals(GroupType.BASIC)){// || type.equals(GroupType.COOPERATE) || type.equals(GroupType.SECRET)){
+			if(groupType.equals(GroupType.BASIC)){// || type.equals(GroupType.COOPERATE) || type.equals(GroupType.SECRET)){
 				group.put("type", "command");
 			}else{
 				group.put("type", "meeting");

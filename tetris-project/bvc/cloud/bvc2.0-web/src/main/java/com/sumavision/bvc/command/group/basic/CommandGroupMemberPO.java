@@ -15,6 +15,7 @@ import javax.persistence.Table;
 
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
+import com.sumavision.bvc.device.group.enumeration.MemberType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -37,6 +38,9 @@ public class CommandGroupMemberPO extends AbstractBasePO {
 
 	/** 用户号码 */
 	private String userNum;
+	
+	/** 成员类型 */
+	private MemberType memberType = MemberType.USER;
 	
 	/** 所属文件夹id*/
 	private Long folderId;
@@ -151,6 +155,16 @@ public class CommandGroupMemberPO extends AbstractBasePO {
 
 	public void setUserNum(String userNum) {
 		this.userNum = userNum;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "MEMBER_TYPE")
+	public MemberType getMemberType() {
+		return memberType;
+	}
+
+	public void setMemberType(MemberType memberType) {
+		this.memberType = memberType;
 	}
 
 	@Column(name = "FOLDER_ID")

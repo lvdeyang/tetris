@@ -19,6 +19,7 @@ import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
+import com.sumavision.bvc.command.group.enumeration.GroupSpeakType;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
@@ -54,7 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Transactional(rollbackFor = Exception.class)
 @Service
-public class CommandMeetingServiceImpl {
+public class CommandMeetingSpeakServiceImpl {
 	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
@@ -79,6 +80,190 @@ public class CommandMeetingServiceImpl {
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
+
+	/**
+	 * 指定发言<br/>
+	 * <p>指定后立刻开始，不需要同意</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 上午11:33:21
+	 * @param userId 操作人
+	 * @param groupId
+	 * @param userIdArray
+	 * @throws Exception
+	 */
+	public void speakAppoint(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
+		
+		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
+			
+			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			
+			if(group.getStatus().equals(GroupStatus.STOP)){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+			}
+			
+			if(group.getUserId().equals(userId)){
+				throw new BaseException(StatusCode.FORBIDDEN, "主席不需要申请发言");
+			}
+			
+			//协同成员，校验是否已经被授权协同
+			Set<CommandGroupMemberPO> members = group.getMembers();
+			Set<CommandGroupMemberPO> cooperateMembers = new HashSet<CommandGroupMemberPO>();
+			for(CommandGroupMemberPO member : members){
+				
+			}
+			
+			
+			
+			group.setSpeakType(GroupSpeakType.DISCUSS);
+			
+		}
+	}
+	
+	/**
+	 * 申请发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午12:02:08
+	 * @param userId 申请人
+	 * @param groupId
+	 * @throws Exception
+	 */
+	public void speakApply(Long userId, Long groupId) throws Exception{
+
+		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
+			
+			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			
+			if(group.getStatus().equals(GroupStatus.STOP)){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+			}
+			
+			if(group.getUserId().equals(userId)){
+				throw new BaseException(StatusCode.FORBIDDEN, "主席不需要申请发言");
+			}
+			
+			//协同成员，校验是否已经被授权协同
+			Set<CommandGroupMemberPO> members = group.getMembers();
+			CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, userId);
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+			
+			
+			
+			
+			
+			
+			
+			Set<CommandGroupMemberPO> cooperateMembers = new HashSet<CommandGroupMemberPO>();
+			
+			
+			
+			group.setSpeakType(GroupSpeakType.DISCUSS);
+			
+		}
+	}
+	
+	/**
+	 * 主席同意成员的申请发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 上午11:34:35
+	 * @param userId 操作人
+	 * @param groupId
+	 * @param userIdArray 被拒绝的用户
+	 * @throws Exception
+	 */
+	public void speakApplyAgree(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
+		
+	}
+	
+
+	/**
+	 * 主席拒绝成员的申请发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 上午11:37:12
+	 * @param userId 操作人
+	 * @param groupId
+	 * @param userIdArray 被同意的用户
+	 * @throws Exception
+	 */
+	public void speakApplyDisagree(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
+		
+	}
+	
+	/**
+	 * 成员停止发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 上午11:38:33
+	 * @param userId
+	 * @param groupId
+	 * @throws Exception
+	 */
+	public void speakStopByMember(Long userId, Long groupId) throws Exception{
+		
+	}
+	
+	/**
+	 * 主席停止多个成员发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 上午11:41:10
+	 * @param userId
+	 * @param groupId
+	 * @param userIdArray
+	 * @throws Exception
+	 */
+	public void speakStopByChairman(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
+		
+	}
+	
+	/**
+	 * 开始讨论<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 上午11:44:23
+	 * @param userId 操作人
+	 * @param groupId
+	 * @throws Exception
+	 */
+	public void discussStart(Long userId, Long groupId) throws Exception{
+		
+		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
+			
+			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			group.setSpeakType(GroupSpeakType.DISCUSS);
+			
+		}
+	}
+	
+	/**
+	 * 停止讨论<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 上午11:44:46
+	 * @param userId 操作人
+	 * @param groupId
+	 * @throws Exception
+	 */
+	public void discussStop(Long userId, Long groupId) throws Exception{
+		
+		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
+			
+			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			group.setSpeakType(GroupSpeakType.CHAIRMAN);
+			
+		}
+	}
+	
 	
 	/**
 	 * 
