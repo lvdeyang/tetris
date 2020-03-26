@@ -40,7 +40,7 @@ public class ExecuteBusiness {
 	private ResourceService resourceService;
 	
 	//点播系统模式下，使用Admin锁定资源
-	public static final String username = "应急广播管理员用户";
+	public static final String username = "系统管理员";
 	public static Long adminUserId = null;
 	
 	//以下配置会从logic.properties读取，不要在这里改
@@ -66,8 +66,9 @@ public class ExecuteBusiness {
 //			jsonFromBusiness.put("userId", adminUserId);
 //		}
 		if(null == adminUserId){
-			UserBO admin = resourceService.queryUserInfoByUsername(username);
-			adminUserId = admin.getId();
+//			UserBO admin = resourceService.queryUserInfoByUsername(username);
+//			adminUserId = admin.getId();
+			adminUserId = -1L;
 		}
 		
 		//处理OMC对接

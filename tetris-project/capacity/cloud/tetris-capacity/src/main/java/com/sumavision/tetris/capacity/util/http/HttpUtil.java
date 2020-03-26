@@ -49,7 +49,7 @@ public class HttpUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
         JSONObject jsonResult = null;
         HttpPost method = new HttpPost(url);
-        method.setConfig(RequestConfig.custom().setConnectTimeout(5000)
+        method.setConfig(RequestConfig.custom().setConnectTimeout(3000)
         		                               .setConnectionRequestTimeout(1000)
         		                               .setSocketTimeout(5000)
         		                               .build());

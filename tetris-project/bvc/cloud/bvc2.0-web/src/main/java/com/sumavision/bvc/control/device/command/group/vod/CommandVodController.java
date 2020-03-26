@@ -191,7 +191,8 @@ public class CommandVodController {
 			UserBO user = userUtils.queryUserById(id);
 			UserBO vodUser = userUtils.queryUserById(userId);
 		
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandVodService.userStart(user, vodUser, admin, -1);
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
@@ -225,7 +226,8 @@ public class CommandVodController {
 			UserBO user = userUtils.queryUserById(id);
 			UserBO vodUser = userUtils.queryUserById(userId);
 		
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandVodService.userStart(user, vodUser, admin, serial);
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
@@ -259,7 +261,8 @@ public class CommandVodController {
 			
 			List<Long> userIdList = JSON.parseArray(userIds, Long.class);
 			List<BusinessPlayerVO> playerVOs = new ArrayList<BusinessPlayerVO>();
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			for(Long userId : userIdList){
 				UserBO vodUser = userUtils.queryUserById(userId);
@@ -296,7 +299,8 @@ public class CommandVodController {
 			Long id = userUtils.getUserIdFromSession(request);
 			UserBO user = userUtils.queryUserById(id);
 			
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandVodService.userStop(user, businessId, admin);
 			
@@ -324,7 +328,8 @@ public class CommandVodController {
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
 		
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandVodService.deviceStart(user, deviceId, admin, -1);
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
@@ -358,7 +363,8 @@ public class CommandVodController {
 		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
 			UserBO user = userUtils.queryUserById(id);
 		
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandVodService.deviceStart(user, deviceId, admin, serial);
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
@@ -392,7 +398,8 @@ public class CommandVodController {
 			
 			List<String> deviceIdList = JSON.parseArray(deviceIds, String.class);
 			List<BusinessPlayerVO> playerVOs = new ArrayList<BusinessPlayerVO>();
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			for(String deviceId : deviceIdList){
 				try{
@@ -429,7 +436,8 @@ public class CommandVodController {
 			Long id = userUtils.getUserIdFromSession(request);
 			UserBO user = userUtils.queryUserById(id);
 			
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandVodService.deviceStop(user, businessId, admin);
 			

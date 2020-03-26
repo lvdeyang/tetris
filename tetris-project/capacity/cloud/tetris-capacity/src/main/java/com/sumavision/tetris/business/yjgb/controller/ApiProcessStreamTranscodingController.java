@@ -115,10 +115,10 @@ public class ApiProcessStreamTranscodingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/record/callback")
-	public Object recordCallback(String messageId, String mimsId, HttpServletRequest request) throws Exception{
+	public Object recordCallback(String messageId, String mimsId, String previewUrl, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		transformService.recordCallback(messageId, mimsId);
+		transformService.recordCallback(messageId, mimsId, previewUrl);
 		
 		return null;
 	}

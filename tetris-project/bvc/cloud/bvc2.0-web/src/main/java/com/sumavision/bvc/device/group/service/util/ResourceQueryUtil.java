@@ -293,7 +293,8 @@ public class ResourceQueryUtil {
 		return bundleBos;
 	}
 	
-	public String queryEncodeBundleIdByUserId(Long userId){
+	@Deprecated
+	public String queryEncodeBundleIdByUserId_Deprecated(Long userId){
 		if(userId == null) return null;
 		EncoderDecoderUserMap userMap = encoderDecoderUserMapDao.findByUserId(userId);
 		if(userMap == null) return null;
@@ -319,20 +320,20 @@ public class ResourceQueryUtil {
 			if (bundlePO.getUsername().endsWith("_17")) {
 				continue;
 			}
-			PlayerBundleBO playerBundle = new PlayerBundleBO();
-			playerBundle.setBundleId(bundlePO.getBundleId());
-			playerBundle.setBundleNum(bundlePO.getBundleNum());
-			playerBundle.setBundleName(bundlePO.getBundleName());
-			playerBundle.setUsername(bundlePO.getUsername());
-			playerBundle.setPassword(bundlePO.getOnlinePassword());
-			playerBundle.setBundleType(bundlePO.getBundleType());
-			playerBundle.setChannelIds(channelSchemeDao.findChannelIdsByBundleId(bundlePO.getBundleId()));
-			playerBundle.setAccessLayerId(bundlePO.getAccessNodeUid());
-			WorkNodePO accessLayer = workNodeDao.findByNodeUid(bundlePO.getAccessNodeUid());
-			if (null != accessLayer) {
-				playerBundle.setAccessLayerIp(accessLayer.getIp());
-				playerBundle.setAccessLayerPort(accessLayer.getPort());
-			}
+			PlayerBundleBO playerBundle = generateByBundlePO(bundlePO);//new PlayerBundleBO();
+//			playerBundle.setBundleId(bundlePO.getBundleId());
+//			playerBundle.setBundleNum(bundlePO.getBundleNum());
+//			playerBundle.setBundleName(bundlePO.getBundleName());
+//			playerBundle.setUsername(bundlePO.getUsername());
+//			playerBundle.setPassword(bundlePO.getOnlinePassword());
+//			playerBundle.setBundleType(bundlePO.getBundleType());
+//			playerBundle.setChannelIds(channelSchemeDao.findChannelIdsByBundleId(bundlePO.getBundleId()));
+//			playerBundle.setAccessLayerId(bundlePO.getAccessNodeUid());
+//			WorkNodePO accessLayer = workNodeDao.findByNodeUid(bundlePO.getAccessNodeUid());
+//			if (null != accessLayer) {
+//				playerBundle.setAccessLayerIp(accessLayer.getIp());
+//				playerBundle.setAccessLayerPort(accessLayer.getPort());
+//			}
 			playerBundles.add(playerBundle);
 		}
 		return playerBundles;
@@ -349,24 +350,42 @@ public class ResourceQueryUtil {
 		for (BundlePO bundlePO : playerBundlePOs) {
 			// 过滤出第17个播放器
 			if (bundlePO.getUsername().endsWith("_17")) {
-				PlayerBundleBO playerBundle = new PlayerBundleBO();
-				playerBundle.setBundleId(bundlePO.getBundleId());
-				playerBundle.setBundleNum(bundlePO.getBundleNum());
-				playerBundle.setBundleName(bundlePO.getBundleName());
-				playerBundle.setUsername(bundlePO.getUsername());
-				playerBundle.setPassword(bundlePO.getOnlinePassword());
-				playerBundle.setBundleType(bundlePO.getBundleType());
-				playerBundle.setChannelIds(channelSchemeDao.findChannelIdsByBundleId(bundlePO.getBundleId()));
-				playerBundle.setAccessLayerId(bundlePO.getAccessNodeUid());
-				WorkNodePO accessLayer = workNodeDao.findByNodeUid(bundlePO.getAccessNodeUid());
-				if (null != accessLayer) {
-					playerBundle.setAccessLayerIp(accessLayer.getIp());
-					playerBundle.setAccessLayerPort(accessLayer.getPort());
-				}
+				PlayerBundleBO playerBundle = generateByBundlePO(bundlePO);
+//				playerBundle.setBundleId(bundlePO.getBundleId());
+//				playerBundle.setBundleNum(bundlePO.getBundleNum());
+//				playerBundle.setBundleName(bundlePO.getBundleName());
+//				playerBundle.setUsername(bundlePO.getUsername());
+//				playerBundle.setPassword(bundlePO.getOnlinePassword());
+//				playerBundle.setBundleType(bundlePO.getBundleType());
+//				playerBundle.setChannelIds(channelSchemeDao.findChannelIdsByBundleId(bundlePO.getBundleId()));
+//				playerBundle.setAccessLayerId(bundlePO.getAccessNodeUid());
+//				WorkNodePO accessLayer = workNodeDao.findByNodeUid(bundlePO.getAccessNodeUid());
+//				if (null != accessLayer) {
+//					playerBundle.setAccessLayerIp(accessLayer.getIp());
+//					playerBundle.setAccessLayerPort(accessLayer.getPort());
+//				}
 				return playerBundle;
 			}
 		}
 		return null;
+	}
+	
+	public PlayerBundleBO generateByBundlePO(BundlePO bundlePO) {
+		PlayerBundleBO playerBundle = new PlayerBundleBO();
+		playerBundle.setBundleId(bundlePO.getBundleId());
+		playerBundle.setBundleNum(bundlePO.getBundleNum());
+		playerBundle.setBundleName(bundlePO.getBundleName());
+		playerBundle.setUsername(bundlePO.getUsername());
+		playerBundle.setPassword(bundlePO.getOnlinePassword());
+		playerBundle.setBundleType(bundlePO.getBundleType());
+		playerBundle.setChannelIds(channelSchemeDao.findChannelIdsByBundleId(bundlePO.getBundleId()));
+		playerBundle.setAccessLayerId(bundlePO.getAccessNodeUid());
+		WorkNodePO accessLayer = workNodeDao.findByNodeUid(bundlePO.getAccessNodeUid());
+		if (null != accessLayer) {
+			playerBundle.setAccessLayerIp(accessLayer.getIp());
+			playerBundle.setAccessLayerPort(accessLayer.getPort());
+		}
+		return playerBundle;
 	}
 	
 }

@@ -170,8 +170,19 @@ public interface SystemRoleDAO extends BaseDAO<SystemRolePO>{
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月2日 上午11:02:40
 	 * @param Long companyId 公司id
-	 * @return List<SystemRolePO>
+	 * @return List<SystemRolePO> 角色列表
 	 */
 	public List<SystemRolePO> findByCompanyId(Long companyId);
+	
+	/**
+	 * 根据名称查询公司下的角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月20日 下午1:54:32
+	 * @param Long companyId 公司id
+	 * @param Collection<String> names 角色名称列表
+	 * @return List<SystemRolePO> 角色列表
+	 */
+	public List<SystemRolePO> findByCompanyIdAndNameIn(Long companyId, Collection<String> names);
 	
 }

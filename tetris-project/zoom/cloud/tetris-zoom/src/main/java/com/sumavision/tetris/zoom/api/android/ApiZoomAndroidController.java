@@ -1,5 +1,8 @@
 package com.sumavision.tetris.zoom.api.android;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,8 +10,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.zoom.ZoomMemberDAO;
+import com.sumavision.tetris.zoom.ZoomMemberType;
 import com.sumavision.tetris.zoom.ZoomMode;
+import com.sumavision.tetris.zoom.ZoomSecretLevel;
 import com.sumavision.tetris.zoom.ZoomService;
 
 @Controller
@@ -17,6 +25,9 @@ public class ApiZoomAndroidController {
 
 	@Autowired
 	private ZoomService zoomService;
+	
+	@Autowired
+	private ZoomMemberDAO zoomMemberDao;
 	
 	/**
 	 * 创建会议<br/>
@@ -41,7 +52,7 @@ public class ApiZoomAndroidController {
 			Boolean myVideo,
 			HttpServletRequest request) throws Exception{
 		
-		return zoomService.create(name, ZoomMode.valueOf(mode), rename, myAudio, myVideo);
+		return zoomService.create(name, ZoomMode.valueOf(mode), rename, myAudio, myVideo, ZoomSecretLevel.PUBLIC, ZoomMemberType.TERMINl);
 	}
 	
 	/**
@@ -65,7 +76,7 @@ public class ApiZoomAndroidController {
 			Boolean myVideo,
 			HttpServletRequest request) throws Exception{
 		
-		return zoomService.join(code, rename, myAudio, myVideo);
+		return zoomService.join(code, rename, myAudio, myVideo, ZoomMemberType.TERMINl);
 	}
 	
 	/**
@@ -89,7 +100,7 @@ public class ApiZoomAndroidController {
 			Boolean myVideo,
 			HttpServletRequest request) throws Exception{
 		
-		return zoomService.start(code, rename, myAudio, myVideo);
+		return zoomService.start(code, rename, myAudio, myVideo, ZoomMemberType.TERMINl);
 	}
 	
 	/**
@@ -122,7 +133,16 @@ public class ApiZoomAndroidController {
 			Long zoomMemberId,
 			HttpServletRequest request) throws Exception{
 		
-		zoomService.exit(zoomMemberId);
+		Map<String, Object> result = zoomService.exit(zoomMemberId);
+		if(result != null){
+			List<Long> memberIds = zoomMemberDao.findIdByZoomIdAndIdNotIn(Long.valueOf(result.get("zoomId").toString()), new ArrayListWrapper<Long>().add(zoomMemberId).getList(), true);
+			if(memberIds==null || memberIds.size()<=0){
+				zoomService.stop(result.get("zoomCode").toString());
+			}else{
+				zoomService.changeChairman(memberIds.get(0));
+				zoomService.exit(zoomMemberId);
+			}
+		}
 		return null;
 	}
 	
@@ -149,17 +169,17 @@ public class ApiZoomAndroidController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月4日 上午10:44:58
-	 * @param Long targetZoomMemberId 目标发言人成员id
-	 * @return ZoomMemberVO 发言人成员信息
+	 * @param JSONString targetZoomMemberIds 目标发言人成员id列表
+	 * @return List<ZoomMemberVO> 发言人成员信息列表
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/spokesman")
 	public Object addSpokesman(
-			Long targetZoomMemberId,
+			String targetZoomMemberIds,
 			HttpServletRequest request) throws Exception{
 		
-		return zoomService.addSpokesman(targetZoomMemberId);
+		return zoomService.addSpokesman(JSON.parseArray(targetZoomMemberIds, Long.class));
 	}
 	
 	/**
@@ -167,17 +187,17 @@ public class ApiZoomAndroidController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月4日 上午10:54:16
-	 * @param Long targetZoomMemberId 目标发言人成员id
-	 * @return ZoomMemberVO 发言人
+	 * @param JSONString targetZoomMemberIds 目标发言人成员id列表
+	 * @return List<ZoomMemberVO> 发言人列表
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/remove/spokesman")
 	public Object removeSpokesman(
-			Long targetZoomMemberId,
+			String targetZoomMemberIds,
 			HttpServletRequest request) throws Exception{
 		
-		return zoomService.removeSpokesman(targetZoomMemberId);
+		return zoomService.removeSpokesman(JSON.parseArray(targetZoomMemberIds, Long.class));
 	}
 	
 	/**
@@ -186,17 +206,17 @@ public class ApiZoomAndroidController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月4日 上午11:23:01
 	 * @param String code 会议号码
-	 * @param Long userId 目标用户id
+	 * @param JSONString userIds 目标用户id列表
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/invitation")
 	public Object invitation(
 			String code, 
-			Long userId,
+			String userIds,
 			HttpServletRequest request) throws Exception{
 		
-		zoomService.invitation(code, userId);
+		zoomService.invitation(code, JSON.parseArray(userIds, Long.class));
 		return null;
 	}
 	
@@ -205,17 +225,17 @@ public class ApiZoomAndroidController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月4日 上午11:35:12
-	 * @param Long targetZoomMemberId 目标会议成员
-	 * @return ZoomMemberVO 被踢出的会议成员
+	 * @param JSONString targetZoomMemberIds 目标会议成员id列表
+	 * @return List<ZoomMemberVO> 被踢出的会议成员列表
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/kick/out")
 	public Object kickOut(
-			Long targetZoomMemberId,
+			String targetZoomMemberIds,
 			HttpServletRequest request) throws Exception{
 		
-		return zoomService.kickOut(targetZoomMemberId);
+		return zoomService.kickOut(JSON.parseArray(targetZoomMemberIds, Long.class));
 	}
 	
 	/**

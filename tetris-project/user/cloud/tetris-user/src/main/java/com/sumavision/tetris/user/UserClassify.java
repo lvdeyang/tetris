@@ -20,7 +20,8 @@ public enum UserClassify {
 	TERMINAL("终端用户", false),
 	INTERNAL("系统内置用户", false),
 	COMPANY("企业用户", true),
-	NORMAL("普通用户", true);
+	NORMAL("普通用户", true),
+	TOURIST("游客", false);
 	
 	private String name;
 	

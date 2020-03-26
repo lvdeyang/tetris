@@ -114,8 +114,9 @@ public class LogicBO {
 		return mustLockAllBundle;
 	}
 
-	public void setMustLockAllBundle(boolean mustLockAllBundle) {
+	public LogicBO setMustLockAllBundle(boolean mustLockAllBundle) {
 		this.mustLockAllBundle = mustLockAllBundle;
+		return this;
 	}
 
 	public List<ConnectBO> getConnect() {

@@ -11,5 +11,9 @@ public class UserNotFoundException extends BaseException{
 	public UserNotFoundException(Long userId) {
 		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("用户不存在！id：").append(userId).toString());
 	}
+	
+	public UserNotFoundException(String userIds) {
+		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("用户不存在！ids：").append(userIds).toString());
+	}
 
 }

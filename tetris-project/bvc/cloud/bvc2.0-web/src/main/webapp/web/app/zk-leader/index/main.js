@@ -52,7 +52,7 @@ require([
     'rightBar'
 ], function (storage, Vue, config) {
     var app = null;
-
+    window.showTab = 1; // 1 显示 x  2  显示  y
 //    缓存token
     storage.setItem(config.ajax.authname, window.TOKEN);
 

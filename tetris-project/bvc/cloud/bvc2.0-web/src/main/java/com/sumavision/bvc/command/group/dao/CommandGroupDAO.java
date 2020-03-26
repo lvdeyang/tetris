@@ -13,8 +13,12 @@ import com.sumavision.tetris.orm.dao.MetBaseDAO;
 @RepositoryDefinition(domainClass = CommandGroupPO.class, idClass = long.class)
 public interface CommandGroupDAO extends MetBaseDAO<CommandGroupPO>{
 
-	public CommandGroupPO findByName(String name);
-	
+	public List<CommandGroupPO> findByName(String name);
+
+	public List<CommandGroupPO> findByNameLike(String name);
+
+	public List<CommandGroupPO> findByNameAndUserId(String name, Long userId);
+		
 	public List<CommandGroupPO> findByType(GroupType type);
 	
 	public List<CommandGroupPO> findByStatus(GroupStatus status);

@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alibaba.fastjson.JSON;
+import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
@@ -296,7 +297,7 @@ public class TreeNodeVO {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年1月16日 下午5:19:33
 	 * @param user 用户数据
-	 * @param userMap 编解码器信息，有判空
+	 * @param userMap 解码器信息，有判空
 	 * @return TreeNodeVO 树节点
 	 */
 	public TreeNodeVO set(UserBO user, EncoderDecoderUserMap userMap){
@@ -306,7 +307,7 @@ public class TreeNodeVO {
 																			.put("username", user.getName())
 																			.put("userno", user.getUserNo())
 																			.put("creater", user.getCreater())
-																			.put("encoderId", userMap==null?null:userMap.getEncodeBundleId())
+																			.put("encoderId", queryExternalOrLocalEncoderIdFromUserBO(user))
 																			.put("decoderId", userMap==null?null:userMap.getDecodeBundleId())
 																		    .getMap()))
 			.setType(TreeNodeType.USER)
@@ -324,11 +325,41 @@ public class TreeNodeVO {
 	}
 	
 	/**
+	 * 从UserBO得到绑定编码器的bundleId<br/>
+	 * <p>如果绑定的外部编码器（如210设备）bundleId有效则返回；</p>
+	 * <p>其次如果自动生成的本地编码器（通常给摄像头用）bundleId有效则返回；</p>
+	 * <p>都没有则返回null</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月9日 上午9:13:25
+	 * @param user
+	 * @return
+	 */
+	private String queryExternalOrLocalEncoderIdFromUserBO(UserBO user){
+		if(user == null) return null;
+		EncoderBO external_encoder = user.getExternal_encoder();
+		if(external_encoder != null){
+			String external_encoderId = external_encoder.getEncoderId();
+			if(external_encoderId != null && !external_encoderId.equals("")){
+				return external_encoderId;
+			}
+		}
+		EncoderBO local_encoder = user.getLocal_encoder();
+		if(local_encoder != null){
+			String local_encoderId = local_encoder.getEncoderId();
+			if(local_encoderId != null && !local_encoderId.equals("")){
+				return local_encoderId;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * 创建指挥成员节点<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月23日 上午10:45:34
-	 * @param CommandGroupMemberPO member 指挥成员
+	 * @param CommandBroadcastSpeakerPO member 指挥成员
 	 * @param UserBO userBO 成员对应的用户，用于获得在线状态；null则按照离线处理
 	 * @return TreeNodeVO 树节点
 	 */
@@ -683,7 +714,7 @@ public class TreeNodeVO {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月15日 下午2:33:09
-	 * @param CommandGroupPO command 指挥
+	 * @param CommandBroadcastSpeakPO command 指挥
 	 * @return TreeNodeVO 树节点
 	 */
 	public TreeNodeVO set(CommandGroupPO command){
@@ -693,7 +724,8 @@ public class TreeNodeVO {
 			.setType(TreeNodeType.COMMAND)
 			.setIcon(TreeNodeIcon.GROUP.getName())
 			.setKey(this.generateKey())
-			.setParam(JSON.toJSONString(new HashMapWrapper<String, String>().put("creator", command.getUserId().toString()).getMap()));
+			.setParam(JSON.toJSONString(new HashMapWrapper<String, String>().put("creator", command.getUserId().toString())
+																			.put("creatorName", command.getUserName()).getMap()));
 		if(GroupStatus.STOP.equals(command.getStatus())){
 			this.setBundleStatus("bundle-offline");
 		}else{

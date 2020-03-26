@@ -245,7 +245,8 @@ public class CommandCastServiceImpl {
 		player.getCastDevices().addAll(addDevices);
 		commandGroupUserPlayerDao.save(player);
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		LogicBO logic = new LogicBO().setUserId(admin.getId().toString())
 		 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
@@ -418,7 +419,8 @@ public class CommandCastServiceImpl {
 			Long userId,
 			List<CommandGroupUserPlayerCastDevicePO> restrictCastDevices){
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		LogicBO logic = new LogicBO().setUserId(admin.getId().toString())
 		 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
@@ -597,7 +599,8 @@ public class CommandCastServiceImpl {
 			Long userId,
 			List<CommandGroupUserPlayerCastDevicePO> restrictCastDevices){
 		
-		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		LogicBO logic = new LogicBO().setUserId(admin.getId().toString())
 		 		 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())

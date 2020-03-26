@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.common.group.po.CommonBusinessRolePO;
 import com.sumavision.bvc.common.group.po.CommonMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupBusinessRolePO;
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberChannelPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupMemberPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupPO;
+import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.bvc.business.dispatch.po.TetrisDispatchPO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 /**
@@ -358,6 +361,42 @@ public class ConnectBundleBO {
 		for(DeviceGroupMemberChannelPO channel: channels){
 			ConnectBO connect = new ConnectBO().set(channel, codec);
 			this.getChannels().add(connect);
+		}
+			
+		return this;
+	}
+		
+	/**
+	 * 给dispatch生成呼叫协议<br/>
+	 * <p>passby携带了meetingCode给webrtc使用</p>
+	 * <p>List参数描述通道，必须数量一样，且按顺序对应</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月20日 下午2:51:42
+	 * @param dispatch
+	 * @param bundle
+	 * @param forwardSrcs 通道的源，对于无源的：如果所有都无源，该参数可以使用null；对于部分无源，必须在List中使用null占位
+	 * @param channels 通道
+	 * @param codecs 音视频参数
+	 * @return
+	 */
+	public ConnectBundleBO set(TetrisDispatchPO dispatch, BundlePO bundle, List<ForwardSetSrcBO> forwardSrcs, List<ChannelSchemeDTO> channels, List<CodecParamBO> codecs){
+		this.setLock_type("write")
+			.setLayerId(bundle.getAccessNodeUid())
+			.setBundleId(bundle.getBundleId())
+			.setBundle_type(bundle.getBundleType())
+			.setPass_by_str(new PassByBO().setMeetingInfo(dispatch));
+		
+		int i = 0;
+		for(ChannelSchemeDTO channel: channels){
+			CodecParamBO codec = codecs.get(i);
+			ForwardSetSrcBO forwardSrc = null;
+			if(forwardSrcs != null){
+				forwardSrc = forwardSrcs.get(i);
+			}
+			ConnectBO connect = new ConnectBO().set(channel, forwardSrc, bundle, codec);
+			this.getChannels().add(connect);
+			i++;
 		}
 			
 		return this;

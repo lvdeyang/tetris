@@ -1,5 +1,7 @@
 package com.sumavision.bvc.device.group.bo;
 
+import com.sumavision.tetris.bvc.business.dispatch.po.DispatchAudioParamPO;
+
 public class AudioParamBO {
 
 	private String codec = "";
@@ -67,5 +69,15 @@ public class AudioParamBO {
 	public AudioParamBO setGain(int gain) {
 		this.gain = gain;
 		return this;
-	}	
+	}
+	
+	public AudioParamBO set(DispatchAudioParamPO auidoParam){
+		this.bit_width = auidoParam.getBit_width();
+		this.bitrate = auidoParam.getBitrate();
+		this.channel_cnt = auidoParam.getChannel_cnt();
+		this.codec = auidoParam.getCodec();
+		this.gain = auidoParam.getGain();
+		this.sample_rate = auidoParam.getSample_rate();
+		return this;
+	}
 }

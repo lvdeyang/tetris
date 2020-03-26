@@ -1,4 +1,84 @@
 /* reset */
-html, body{overflow:hidden; min-width:0 !important; min-height:0 !important;}
-.leader-dialog-create-group .el-input__inner{border-radius:0;}
-.leader-dialog-create-group .el-scrollbar__wrap{overflow-x:hidden;}
+html,
+body {
+  overflow: hidden;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  background-color: #000;
+}
+
+.leader-dialog-create-group .el-input__inner {
+  border-radius: 0;
+}
+
+.leader-dialog-create-group .el-scrollbar__wrap {
+  overflow-x: hidden;
+}
+
+.table {
+  float: left;
+  width: 47%;
+  border: 1px solid #c4c6cc;
+  border-radius: 5px;
+}
+
+.haveChoosed {
+  margin-left: 20px;
+  float: left;
+  width: 47%;
+  border: 1px solid #c4c6cc;
+  border-radius: 5px;
+}
+
+.checkbox {
+  margin-bottom: 5px;
+  padding: 10px;
+}
+
+.tip {
+  word-break: break-all;
+  color: #d4b085;
+  font-size: 14px;
+}
+
+/* 更改分页的样式 */
+.el-pagination {
+  white-space: normal;
+}
+
+.el-pagination__total,
+.el-pagination__jump {
+  color: #e4ebf9;
+}
+
+/* 更改默认按钮的样式 */
+.el-button--primary {
+  background-color: #206ec3;
+  border-color: #206ec3;
+}
+
+/* 更改table表格的样式 */
+.el-table,
+.el-table__expanded-cell {
+  background-color: #2d716d87;
+  color: #c2f9ff;
+}
+
+.el-table thead {
+  color: #00e4fd;
+}
+
+.el-table th,
+.el-table tr {
+  background-color: #3c628836;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover>td {
+  background-color: #34675d;
+}
+
+/* 更改输入框背景色 */
+.el-input__inner {
+  background-color: #29423c3d;
+  color: #fff;
+}

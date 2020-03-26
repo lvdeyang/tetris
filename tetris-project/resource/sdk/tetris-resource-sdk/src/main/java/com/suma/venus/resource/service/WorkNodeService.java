@@ -77,4 +77,18 @@ public class WorkNodeService extends CommonService<WorkNodePO>{
 		
 		return chose;
 	}
+	
+	/**
+	 * 根据节点类型查询节点<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月17日 下午3:06:45
+	 * @param NodeType type 节点类型
+	 * @return List<WorkNodePO> 节点数组
+	 */
+	public List<WorkNodePO> queryLayerNode(NodeType type) throws Exception{
+		
+		return workNodeDao.findByType(type);
+		
+	}
 }

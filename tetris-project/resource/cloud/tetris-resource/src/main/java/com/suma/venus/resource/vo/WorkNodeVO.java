@@ -14,6 +14,7 @@ public class WorkNodeVO{
 
 	private String ip;
 	
+	/** 接入端口 */
 	private Integer port;
 	
 	private String type;
@@ -30,6 +31,12 @@ public class WorkNodeVO{
 	
 	/**录制资源下载端口**/
 	private Integer downloadPort;
+	
+	/** webrtcHttp端口 */
+	private Integer webrtcHttpPort;
+	
+	/** webrtc websocket端口 */
+	private Integer webrtcWebsocketPort;
 
 	public static WorkNodeVO fromPO(WorkNodePO po){
 	    WorkNodeVO vo = new WorkNodeVO();
@@ -134,6 +141,22 @@ public class WorkNodeVO{
 
 	public void setMonitorUrl(String monitorUrl) {
 		this.monitorUrl = monitorUrl;
+	}
+
+	public Integer getWebrtcHttpPort() {
+		return webrtcHttpPort;
+	}
+
+	public void setWebrtcHttpPort(Integer webrtcHttpPort) {
+		this.webrtcHttpPort = webrtcHttpPort;
+	}
+
+	public Integer getWebrtcWebsocketPort() {
+		return webrtcWebsocketPort;
+	}
+
+	public void setWebrtcWebsocketPort(Integer webrtcWebsocketPort) {
+		this.webrtcWebsocketPort = webrtcWebsocketPort;
 	}
 	
 }

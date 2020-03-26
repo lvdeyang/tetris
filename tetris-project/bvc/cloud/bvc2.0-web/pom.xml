@@ -55,11 +55,11 @@
 			<version>1.3.0.RELEASE</version>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
-		</dependency>
+		</dependency> -->
 
 		<!-- <dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -104,6 +104,19 @@
 		<dependency>
 			<groupId>com.suma.venus</groupId>
 			<artifactId>tetris-resource-sdk</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-resource-feign</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
+		<!-- 业务的feign，提供调度的BO -->
+		<dependency>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-bvc-business-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 

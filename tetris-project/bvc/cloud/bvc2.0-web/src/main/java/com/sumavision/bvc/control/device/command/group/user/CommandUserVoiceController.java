@@ -162,7 +162,8 @@ public class CommandUserVoiceController {
 			Long callUserId = userUtils.getUserIdFromSession(request);
 			UserBO callUser = userUtils.queryUserById(callUserId);
 			
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandUserServiceImpl.acceptVoice(callUser, businessId, admin);
 			
@@ -214,7 +215,8 @@ public class CommandUserVoiceController {
 			Long userId = userUtils.getUserIdFromSession(request);
 			UserBO user = userUtils.queryUserById(userId);
 			
-			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandUserServiceImpl.stopVoice(user, businessId, admin);
 			

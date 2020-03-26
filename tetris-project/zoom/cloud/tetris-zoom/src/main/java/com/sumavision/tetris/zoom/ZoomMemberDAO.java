@@ -3,6 +3,7 @@ package com.sumavision.tetris.zoom;
 import java.util.Collection;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
@@ -19,6 +20,19 @@ public interface ZoomMemberDAO extends BaseDAO<ZoomMemberPO>{
 	 * @return List<ZoomMemberPO> 会议成员列表
 	 */
 	public List<ZoomMemberPO> findByZoomId(Long zoomId);
+	
+	/**
+	 * 查询会议成员id带例外<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月19日 下午3:16:20
+	 * @param Long zoomId 会议室id
+	 * @param Collection<Long> exceptId 例外成员id
+	 * @param boolean join 是否入会
+	 * @return List<Long> 会议成员id列表
+	 */
+	@Query(value = "select member.id from com.sumavision.tetris.zoom.ZoomMemberPO member where member.zoomId=?1 and member.id not in and join=?3")
+	public List<Long> findIdByZoomIdAndIdNotIn(Long zoomId, Collection<Long> exceptId, boolean join);
 	
 	/**
 	 * 查询会议中的成员<br/>
@@ -63,5 +77,15 @@ public interface ZoomMemberDAO extends BaseDAO<ZoomMemberPO>{
 	 * @return ZoomMemberPO 主席成员
 	 */
 	public ZoomMemberPO findByZoomIdAndChairman(Long zoomId, Boolean chairman);
+	
+	/**
+	 * 查询用户参加的会<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月18日 下午4:12:00
+	 * @param String userno 用户号码
+	 * @return List<ZoomMemberPO> 会议成员
+	 */
+	public List<ZoomMemberPO> findByUserno(String userno);
 	
 }

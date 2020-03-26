@@ -1,5 +1,7 @@
 package com.suma.venus.resource.event.publish;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +10,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.event.TouristCreateEvent;
+import com.sumavision.tetris.user.event.TouristDeleteBatchEvent;
+import com.sumavision.tetris.user.event.TouristDeleteEvent;
 import com.sumavision.tetris.user.event.UserImportEvent;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 
@@ -41,6 +47,15 @@ public class EventPublishController {
 		return null;
 	}
 	
+	/**
+	 * 用户导入事件发布代理<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月18日 下午2:26:05
+	 * @param String userId 用户id
+	 * @param String nickname 昵称
+	 * @param String userno 用户号码
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/user/import")
@@ -50,6 +65,65 @@ public class EventPublishController {
 			String userno,
 			HttpServletRequest request) throws Exception{
 		UserImportEvent event = new UserImportEvent(applicationEventPublisher, userId, nickname, userno, null, null);
+		applicationEventPublisher.publishEvent(event);
+		return null;
+	}
+	
+	/**
+	 * 游客创建事件发布代理<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月18日 下午2:27:39
+	 * @param String userId 用户id
+	 * @param String nickname 昵称
+	 * @param String userno 用户号码
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/tourist/create")
+	public Object touristCreate(
+			String userId,
+			String nickname,
+			String userno,
+			HttpServletRequest request) throws Exception{
+		TouristCreateEvent event = new TouristCreateEvent(applicationEventPublisher, userId, nickname, userno);
+		applicationEventPublisher.publishEvent(event);
+		return null;
+	}
+	
+	/**
+	 * 游客删除事件发布代理<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月18日 下午2:30:41
+	 * @param String userId 游客id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/tourist/delete")
+	public Object touristDelete(
+			String userId,
+			HttpServletRequest request) throws Exception{
+		TouristDeleteEvent event = new TouristDeleteEvent(applicationEventPublisher, userId, null, null);
+		applicationEventPublisher.publishEvent(event);
+		return null;
+	}
+	
+	/**
+	 * 游客批量删除事件发布代理<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月18日 下午2:31:44
+	 * @param String userIds 批量用户id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/tourist/delete/batch")
+	public Object touristDeleteBatch(
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		List<Long> userIdList = JSONArray.parseArray(userIds, Long.class);
+		TouristDeleteBatchEvent event = new TouristDeleteBatchEvent(applicationEventPublisher, userIdList);
 		applicationEventPublisher.publishEvent(event);
 		return null;
 	}

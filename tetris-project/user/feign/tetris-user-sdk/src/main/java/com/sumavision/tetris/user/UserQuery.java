@@ -280,11 +280,47 @@ public class UserQuery {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午5:18:32
-	 * @param String userId 游客id
+	 * @param String userUuid 游客uuid
 	 * @return UserVO 游客
 	 */
-	public UserVO findTourist(String userId) throws Exception{
-		return JsonBodyResponseParser.parseObject(userFeign.findTourist(userId), UserVO.class);
+	public UserVO findTourist(String userUuid) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.findTourist(userUuid), UserVO.class);
+	}
+	
+	/**
+	 * 根据用户号码查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:58:14
+	 * @param String userno 用户号码
+	 * @return UserVO
+	 */
+	public UserVO findByUserno(String userno) throws Exception{
+		return JsonBodyResponseParser.parseObject(userFeign.findByUserno(userno), UserVO.class);
+	}
+	
+	/**
+	 * 根据用户号码批量查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:58:14
+	 * @param String userno 用户号码
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> findByUsernoIn(String usernos) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.findByUsernoIn(usernos), UserVO.class);
+	}
+	
+	/**
+	 * 根据用户号码批量查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:58:14
+	 * @param Collection<String> userno 用户号码列表
+	 * @return List<UserVO>
+	 */
+	public List<UserVO> findByUsernoIn(Collection<String> usernos) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.findByUsernoIn(JSON.toJSONString(usernos)), UserVO.class);
 	}
 	
 	/***************************************************

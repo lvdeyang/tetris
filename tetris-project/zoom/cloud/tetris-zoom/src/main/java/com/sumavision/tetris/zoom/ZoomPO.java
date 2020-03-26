@@ -6,9 +6,8 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
-
-import io.reactivex.netty.channel.StringTransformer;
 
 /**
  * 会议表<br/>
@@ -28,9 +27,15 @@ public class ZoomPO extends AbstractBasePO{
 	/** 会议号码 */
 	private String code;
 	
+	/** 会议呼入密码 */
+	private String password;
+	
 	/** 会议状态 */
 	private ZoomStatus status;
 
+	/** 保密等级 */
+	private ZoomSecretLevel secretLevel;
+	
 	/** 会议模式 */
 	private ZoomMode mode;
 	
@@ -60,6 +65,31 @@ public class ZoomPO extends AbstractBasePO{
 	public void setCode(String code) {
 		this.code = code;
 	}
+	
+	public void setCode(){
+		/*方式一：会议号码小于8位往前边补0
+		String id = this.getId().toString();
+		StringBufferWrapper code = new StringBufferWrapper();
+		if(id.length() < 8){
+			for(int i=0; i<(11-id.length()); i++){
+				code.append(0);
+			}
+		}
+		code.append(id);
+		this.code = code.toString();*/
+		
+		//方式二：号码取z+zoomId的方式
+		if(this.getId() != null) this.code = new StringBufferWrapper().append("z").append(this.getId()).toString();
+	}
+
+	@Column(name = "PASSWORD")
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
 
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "STATUS")
@@ -69,6 +99,16 @@ public class ZoomPO extends AbstractBasePO{
 
 	public void setStatus(ZoomStatus status) {
 		this.status = status;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "SECRET_LEVEL")
+	public ZoomSecretLevel getSecretLevel() {
+		return secretLevel;
+	}
+
+	public void setSecretLevel(ZoomSecretLevel secretLevel) {
+		this.secretLevel = secretLevel;
 	}
 
 	@Enumerated(value = EnumType.STRING)

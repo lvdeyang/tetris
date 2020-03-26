@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -434,7 +435,6 @@ public class UserFeignController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午4:46:11
-	 * @param String userId 游客id
 	 * @param String nickname 游客昵称
 	 * @return UserVO 用户
 	 */
@@ -442,11 +442,10 @@ public class UserFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/add/tourist")
 	public Object addTourist(
-			String userId,
 			String nickname,
 			HttpServletRequest request) throws Exception{
 		
-		return userService.addTourist(userId, nickname);
+		return userService.addTourist(nickname);
 	}
 	
 	/**
@@ -454,13 +453,13 @@ public class UserFeignController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午4:48:34
-	 * @param String userId 游客id
+	 * @param Long userId 游客id
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/remove/tourist")
 	public Object removeTourist(
-			String userId, 
+			Long userId, 
 			HttpServletRequest request) throws Exception{
 		
 		userService.removeTourist(userId);
@@ -481,7 +480,7 @@ public class UserFeignController {
 			String userIds,
 			HttpServletRequest request) throws Exception{
 		
-		userService.removeTouristBatch(JSON.parseArray(userIds, String.class));
+		userService.removeTouristBatch(JSON.parseArray(userIds, Long.class));
 		return null;
 	}
 	
@@ -490,16 +489,53 @@ public class UserFeignController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月2日 下午5:14:21
-	 * @param String userId 游客id
+	 * @param String userUuId 游客uuid
 	 * @return UserVO 游客
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/find/tourist")
 	public Object findTourist(
-			String userId,
+			String userUuId,
 			HttpServletRequest request) throws Exception{
 		
-		return userQuery.findTourist(userId);
+		return userQuery.findTourist(userUuId);
+	}
+	
+	/**
+	 * 根据用户号码查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:43:03
+	 * @param String userno 用户号码
+	 * @return UserVO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/userno")
+	public Object findByUserno(
+			String userno,
+			HttpServletRequest request) throws Exception{
+		
+		return userQuery.findByUserno(userno);
+	}
+	
+	/**
+	 * 根据用户号码批量查询用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月12日 上午10:43:03
+	 * @param String usernos 用户号码
+	 * @return List<UserVO>
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/userno/in")
+	public Object findByUsernoIn(
+			String usernos,
+			HttpServletRequest request) throws Exception{
+		
+		List<String> usernoList = JSONArray.parseArray(usernos, String.class);
+		return userQuery.findByUsernoIn(usernoList);
 	}
 }

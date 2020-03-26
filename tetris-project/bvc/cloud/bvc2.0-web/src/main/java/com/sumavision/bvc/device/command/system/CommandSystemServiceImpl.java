@@ -16,8 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupForwardDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupForwardDemandDAO;
 import com.sumavision.bvc.command.group.dao.CommandVodDAO;
@@ -30,10 +32,14 @@ import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.command.group.user.UserLiveCallPO;
 import com.sumavision.bvc.command.group.vod.CommandVodPO;
 import com.sumavision.bvc.communication.http.HttpClient;
+import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceLayerDAO;
+import com.sumavision.tetris.auth.token.TerminalType;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -68,6 +74,12 @@ public class CommandSystemServiceImpl {
 	private ResourceQueryUtil resourceQueryUtil;
 	
 	@Autowired
+	private CommonQueryUtil commonQueryUtil;
+	
+	@Autowired
+	private ResourceService resourceService;
+	
+	@Autowired
 	ResourceLayerDAO conn_layer;
 	
 	@Autowired
@@ -87,6 +99,16 @@ public class CommandSystemServiceImpl {
 		
 		//查询有权限的设备
 		List<BundlePO> queryBundles = resourceQueryUtil.queryUseableBundles(userId);
+		
+		//
+		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
+		List<String> encoderIds = new ArrayList<String>();
+		for(UserBO user : users){
+			String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+			if(encoderId != null) encoderIds.add(encoderId);
+		}
+		List<BundlePO> userBundles = resourceBundleDao.findByBundleIds(encoderIds);
+		if(userBundles != null) queryBundles.addAll(userBundles);
 		
 		List<AllForwardBO> allForwards = new ArrayList<AllForwardBO>();
 		

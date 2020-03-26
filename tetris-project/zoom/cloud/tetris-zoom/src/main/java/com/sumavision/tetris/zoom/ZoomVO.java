@@ -5,6 +5,8 @@ import java.util.List;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
+import com.sumavision.tetris.zoom.webrtc.WebRtcRoomInfoVO;
+import com.sumavision.tetris.zoom.webrtc.WebRtcVO;
 
 public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 
@@ -16,6 +18,9 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 	
 	/** 会议状态 */
 	private String status;
+	
+	/** 保密等级 */
+	private String secretLevel;
 
 	/** 会议模式 */
 	private String mode;
@@ -26,6 +31,9 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 	/** 创建者用户昵称 */
 	private String creatorUserNickname;
 	
+	/** webrtc信息 */
+	private WebRtcVO webRtc;
+	
 	/** 自己 */
 	private ZoomMemberVO me;
 	
@@ -33,7 +41,7 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 	private ZoomMemberVO chairman;
 	
 	/** 发言人列表 */
-	private List<ZoomMemberVO> spokesmem;
+	private List<ZoomMemberVO> spokesmen;
 	
 	/** 成员总数 */
 	private Long totalMembers;
@@ -68,6 +76,15 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 		return this;
 	}
 
+	public String getSecretLevel() {
+		return secretLevel;
+	}
+
+	public ZoomVO setSecretLevel(String secretLevel) {
+		this.secretLevel = secretLevel;
+		return this;
+	}
+
 	public String getMode() {
 		return mode;
 	}
@@ -94,6 +111,20 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 		this.creatorUserNickname = creatorUserNickname;
 		return this;
 	}
+	
+	public WebRtcVO getWebRtc() {
+		return webRtc;
+	}
+
+	public ZoomVO setWebRtc(WebRtcVO webRtc) {
+		this.webRtc = webRtc;
+		return this;
+	}
+	
+	public ZoomVO setWebRtc(WebRtcRoomInfoVO webRtcRoomInfo) {
+		this.webRtc = webRtcRoomInfo.transform();
+		return this;
+	}
 
 	public ZoomMemberVO getMe() {
 		return me;
@@ -113,12 +144,12 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 		return this;
 	}
 
-	public List<ZoomMemberVO> getSpokesmem() {
-		return spokesmem;
+	public List<ZoomMemberVO> getSpokesmen() {
+		return spokesmen;
 	}
 
-	public ZoomVO setSpokesmem(List<ZoomMemberVO> spokesmem) {
-		this.spokesmem = spokesmem;
+	public ZoomVO setSpokesmen(List<ZoomMemberVO> spokesmen) {
+		this.spokesmen = spokesmen;
 		return this;
 	}
 	
@@ -131,9 +162,9 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 		return this;
 	}
 
-	public ZoomVO addSpokesman(ZoomMemberVO spokesmem) {
-		if(this.getSpokesmem() == null) this.setSpokesmem(new ArrayList<ZoomMemberVO>());
-		this.getSpokesmem().add(spokesmem);
+	public ZoomVO addSpokesman(ZoomMemberVO spokesmen) {
+		if(this.getSpokesmen() == null) this.setSpokesmen(new ArrayList<ZoomMemberVO>());
+		this.getSpokesmen().add(spokesmen);
 		return this;
 	}
 
@@ -159,6 +190,7 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 			.setName(entity.getName())
 			.setCode(entity.getCode())
 			.setStatus(entity.getStatus().toString())
+			.setSecretLevel(entity.getSecretLevel().toString())
 			.setMode(entity.getMode().toString())
 			.setCreatorUserId(entity.getCreatorUserId())
 			.setCreatorUserNickname(entity.getCreatorUserNickname());

@@ -42,6 +42,7 @@ import com.sumavision.bvc.device.command.basic.remind.CommandRemindServiceImpl;
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceLocalServiceImpl;
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
 import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.ChannelBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
@@ -227,7 +228,20 @@ public class CommandBasicController {
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
 		
-		CommandGroupPO group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, GroupType.BASIC, userIdArray);
+		CommandGroupPO group = null;
+		try{
+			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, GroupType.BASIC, userIdArray);
+		}catch(CommandGroupNameAlreadyExistedException e){
+			//重名
+			JSONObject info = new JSONObject();
+			info.put("status", "error");
+			JSONObject errorInfo = new JSONObject();
+			errorInfo.put("type", "");
+			errorInfo.put("msg", "名称已被使用");
+			errorInfo.put("recommendedName", e.getRecommendedName());
+			info.put("errorInfo", errorInfo);
+			return info;
+		}
 		
 		JSONObject info = new JSONObject();
 		info.put("id", group.getId().toString());
