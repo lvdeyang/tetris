@@ -13,6 +13,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenDAO;
+import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.business.role.BusinessRoleService;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -55,6 +58,8 @@ import com.sumavision.tetris.user.exception.UsernameAlreadyExistException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 import com.sumavision.tetris.user.exception.UsernoAlreadyExistInSystemException;
 import com.sumavision.tetris.user.exception.UsernoCannotBeNullException;
+
+import antlr.Token;
 
 /**
  * 用户操作（主增删改）<br/>
@@ -110,6 +115,9 @@ public class UserService{
 	
 	@Autowired
 	private UserImportInfoService userImportInfoService;
+	
+	@Autowired
+	private TokenDAO tokenDao;
 	
 	/**
 	 * 添加一个游客<br/>
@@ -711,6 +719,66 @@ public class UserService{
 		//更新导入次数
 		userImportInfoService.addTimes(self.getGroupId());
 		
+	}
+	
+	/**
+	 * 终端用户离线<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月25日 下午5:55:38
+	 * @param Long userId 用户id
+	 * @param TerminalType type 终端类型
+	 */
+	public void userOffline(Long userId, TerminalType type) throws Exception{
+		
+		TokenPO token = tokenDao.findByUserIdAndType(userId, type);
+		token.setStatus(UserStatus.OFFLINE);
+		tokenDao.save(token);
+		
+	}
+	
+	/**
+	 * 添加ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午3:48:05
+	 * @param List<UserVO> userVOs 用户信息
+	 * @return List<UserPO> 用户信息
+	 */
+	public List<UserPO> addLdapUser(List<UserVO> userVOs) throws Exception{
+		List<String> userUuids = new ArrayList<String>();
+		for(UserVO userVO: userVOs){
+			userUuids.add(userVO.getUuid());
+		}
+		
+		List<UserPO> users = userDao.findByUuidIn(userUuids);
+		
+		List<UserPO> userPOs = new ArrayList<UserPO>();
+		for(UserVO userVO: userVOs){
+			UserPO userPO = null;
+			for(UserPO user: users){
+				if(user.getUuid().equals(userVO.getUuid())){
+					userPO = user;
+					break;
+				}
+			}
+			
+			if(userPO == null){
+				userPO = new UserPO();
+			}
+			
+			userPO.setUuid(userVO.getUuid());
+			userPO.setClassify(UserClassify.LDAP);
+			userPO.setUsername(userVO.getUsername());
+			userPO.setNickname(userVO.getNickname());
+			userPO.setUserno(userVO.getUserno());
+			
+			userPOs.add(userPO);
+		}
+		
+		userDao.save(userPOs);
+		
+		return userPOs;
 	}
 	
 }

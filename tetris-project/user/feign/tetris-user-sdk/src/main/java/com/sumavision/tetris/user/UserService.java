@@ -1,12 +1,14 @@
 package com.sumavision.tetris.user;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Service
@@ -48,6 +50,28 @@ public class UserService {
 	 */
 	public void removeTouristBatch(Collection<Long> userIds) throws Exception{
 		userFeign.removeTouristBatch(JSON.toJSONString(userIds));
+	}
+	
+	/**
+	 * 添加ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午4:04:50
+	 * @param List<UserVO> users ldap用户信息
+	 * @return List<UserVO> 持久化过后的用户信息
+	 */
+	public List<UserVO> addLdapUser(List<UserVO> users) throws Exception{
+		return JsonBodyResponseParser.parseArray(userFeign.addLdapUser(JSON.toJSONString(users)), UserVO.class);
+	}
+	
+	/**
+	 * 删除ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午5:25:23
+	 */
+	public void deleteLdapUser() throws Exception{
+		userFeign.deleteLdapUsers();
 	}
 	
 }

@@ -241,6 +241,25 @@ public class CommandCommonUtil {
 	}
 	
 	/**
+	 * 根据号码code查找播放器<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 下午1:08:54
+	 * @param players
+	 * @param code
+	 * @return
+	 */
+	public CommandGroupUserPlayerPO queryPlayerByCode(Collection<CommandGroupUserPlayerPO> players, String code) {
+		for(CommandGroupUserPlayerPO player : players){
+			if(player.getCode().equals(code)){
+				return player;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * 根据位置索引查找播放器<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>

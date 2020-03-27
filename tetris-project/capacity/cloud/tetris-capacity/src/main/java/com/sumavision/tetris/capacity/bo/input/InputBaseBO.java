@@ -44,7 +44,7 @@ public class InputBaseBO <V extends InputBaseBO>{
 	
 	private BackUpEsAndRawBO back_up_raw;
 	
-	private SourceUrlBO file;
+	private InputFileBO file;
 	
 	private CoverBO cover;
 	
@@ -202,11 +202,11 @@ public class InputBaseBO <V extends InputBaseBO>{
 		return (V)this;
 	}
 
-	public SourceUrlBO getFile() {
+	public InputFileBO getFile() {
 		return file;
 	}
 
-	public V setFile(SourceUrlBO file) {
+	public V setFile(InputFileBO file) {
 		this.file = file;
 		return (V)this;
 	}

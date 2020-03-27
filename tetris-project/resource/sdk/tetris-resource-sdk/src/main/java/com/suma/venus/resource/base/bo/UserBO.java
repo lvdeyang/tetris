@@ -12,7 +12,7 @@ public class UserBO {
 
 	private String name;
 
-	private boolean isAdmin;
+	private boolean isAdmin = false;
 
 	private int level;
 

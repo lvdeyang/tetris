@@ -85,6 +85,22 @@ public class LdapUserDao extends LdapBaseDao {
 			}
 		});
 	}
+	
+	// 根据服务类型批量查询
+	@SuppressWarnings("unchecked")
+	public List<LdapUserPo> getUserByFactInfo(String factInfo) {
+		AndFilter filter = new AndFilter();
+		filter.and(new EqualsFilter("objectclass", "userInfo"));
+		filter.and(new EqualsFilter("userFactInfo", factInfo));
+		return ldapTemplate.search(getBaseDN("ou", "userInfo"), filter.encode(), new ContextMapper() {
+			@Override
+			public Object mapFromContext(Object ctx) {
+				DirContextAdapter context = (DirContextAdapter) ctx;
+				LdapUserPo ldapUserPo = getLdapUserPO(context);
+				return ldapUserPo;
+			}
+		});
+	}
 
 	// 删除一个账户 返回删除的user
 	public LdapUserPo remove(LdapUserPo user) {
@@ -95,6 +111,13 @@ public class LdapUserDao extends LdapBaseDao {
 			user = oldUserList.get(0);
 			ldapTemplate.unbind(user.getDn());
 			return user;
+		}
+	}
+	
+	//批量删除
+	public void removeAll(List<LdapUserPo> users){
+		for(LdapUserPo user: users){
+			ldapTemplate.unbind(user.getDn());
 		}
 	}
 

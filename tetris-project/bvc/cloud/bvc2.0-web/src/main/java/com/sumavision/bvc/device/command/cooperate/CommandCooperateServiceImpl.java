@@ -234,7 +234,7 @@ public class CommandCooperateServiceImpl {
 					split.put("serial", player.getLocationIndex());
 					split.put("bundleId", player.getBundleId());
 					split.put("bundleNo", player.getCode());
-					split.put("businessType", "command");
+					split.put("businessType", "command");//TODO:存疑，cooperation，player.getPlayerBusinessType().getCode()
 					split.put("businessId", group.getId().toString());
 					split.put("businessInfo", player.getBusinessName());
 					split.put("status", "start");
@@ -592,7 +592,7 @@ public class CommandCooperateServiceImpl {
 			}
 			websocketMessageService.consumeAll(consumeIds);			
 			
-			return groupInfos;		
+			return groupInfos;
 		}
 	}
 	

@@ -17,6 +17,8 @@ public class UserVO{
 	
 	private String updateTime;
 	
+	private String username;
+	
 	/** 用户名 */
 	private String nickname;
 	
@@ -341,6 +343,15 @@ public class UserVO{
 
 	public void setTags(List<String> tags) {
 		this.tags = tags;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public UserVO setUsername(String username) {
+		this.username = username;
+		return this;
 	}
 	
 }

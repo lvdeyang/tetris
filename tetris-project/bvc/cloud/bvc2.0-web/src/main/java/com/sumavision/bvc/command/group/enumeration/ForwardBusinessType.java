@@ -10,7 +10,7 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum ForwardBusinessType {
 	
 	BASIC_COMMAND("普通会议业务"),//包括专向会议的转发，因为专项会议复用了普通会议
-	COOPERATE_COMMAND("协同会议业务"),
+	COOPERATE_COMMAND("协同会议业务"),//包括发言业务。后续考虑协同成员看其他人
 	DEMAND_FORWARD("会议转发点播"),
 	PLAYER_CAST_DEVICE("播放器上屏");
 	

@@ -20,8 +20,8 @@
         <el-button type="primary" size="small" @click="cleanUpLdap"  style="float: left;">重置LDAP数据</el-button>
         -->
         <el-dropdown style="float: left;margin-left: 10px;">
-          <el-button type="primary" size="small">
-              LDAP操作<i class="el-icon-arrow-down el-icon--right"></i>
+          <el-button type="primary" size="small" :loading="ldapLoading">
+              分组及设备LDAP操作<i class="el-icon-arrow-down el-icon--right"></i>
           </el-button>
 
           <el-dropdown-menu slot="dropdown">
@@ -257,6 +257,7 @@
             label : "否"
           }
         ],
+        ldapLoading: false
 			}
 		},
 		methods: {
@@ -364,9 +365,11 @@
           type: 'warning'
         }).then(() => {
           this.resourceTableLoading = true;
+          this.ldapLoading = true;
           let param = {};
           syncFolderToLdap(param).then(res => {
             this.resourceTableLoading = false;
+            this.ldapLoading = false;
             if(res.errMsg){
               this.$message({
                 message: res.errMsg,
@@ -394,9 +397,11 @@
           type: 'warning'
         }).then(() => {
           this.resourceTableLoading = true;
+          this.ldapLoading = true;
           let param = {};
           syncFolderFromLdap(param).then(res => {
             this.resourceTableLoading = false;
+            this.ldapLoading = false;
             if(res.errMsg){
               this.$message({
                 message: res.errMsg,
@@ -424,9 +429,11 @@
           type: 'warning'
         }).then(() => {
           this.resourceTableLoading = true;
+          this.ldapLoading = true;
           let param = {};
           cleanupFolderLdap(param).then(res => {
             this.resourceTableLoading = false;
+            this.ldapLoading = false;
             if(res.errMsg){
               this.$message({
                 message: res.errMsg,

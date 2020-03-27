@@ -156,7 +156,7 @@ public class CommandUserServiceImpl {
 		List<PlayerBundleBO> allPlayers = resourceQueryUtil.queryPlayerBundlesByUserId(userInfo.getUserId());
 		
 		for(PlayerBundleBO playerBO : allPlayers){
-			CommandGroupUserPlayerPO userPlayer = commandCommonUtil.queryPlayerByBundleId(userPlayers, playerBO.getBundleId());
+			CommandGroupUserPlayerPO userPlayer = commandCommonUtil.queryPlayerByCode(userPlayers, playerBO.getBundleNum());
 			if(userPlayer != null){
 				userPlayer.set(playerBO);
 			}
