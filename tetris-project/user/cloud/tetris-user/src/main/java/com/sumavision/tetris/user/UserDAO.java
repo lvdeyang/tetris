@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
@@ -379,5 +380,26 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @return List<UserPO>
 	 */
 	public List<UserPO> findByUsernoIn(Collection<String> usernos);
+	
+	/**
+	 * 根据用户ids和用户类型删除用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午2:13:55
+	 * @param Collection<Long> userIds 用户id列表
+	 * @param UserClassify classify 用户类型
+	 */
+	@Transactional
+	public void deleteByIdInAndClassify(Collection<Long> userIds, UserClassify classify);
+	
+	/**
+	 * 删除用户类型所有用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午5:22:14
+	 * @param UserClassify classify 用户类型
+	 */
+	@Transactional
+	public void deleteByClassify(UserClassify classify);
 	
 }

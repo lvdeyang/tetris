@@ -302,4 +302,35 @@ public interface UserFeign {
 	@RequestMapping(value = "/user/feign/find/by/userno/in")
 	public JSONObject findByUsernoIn(@RequestParam("usernos") String usernos);
 	
+	/**
+	 * 删除ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午2:19:18
+	 * @param String userIds 用户ids
+	 */
+	@RequestMapping(value = "/user/feign/delete/ldap/user/by/ids")
+	public JSONObject deleteLdapUser(@RequestParam("userIds") String userIds);
+	
+	/**
+	 * 删除ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午2:19:18
+	 */
+	@RequestMapping(value = "/user/feign/delete/ldap/user")
+	public JSONObject deleteLdapUsers();
+	
+	
+	/**
+	 * 添加ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午3:58:37
+	 * @param String users ldap用户信息
+	 * @return List<UserVO> 持久化过的用户信息
+	 */
+	@RequestMapping(value = "/user/feign/add/ldap/user")
+	public JSONObject addLdapUser(@RequestParam("users") String users);
+	
 }

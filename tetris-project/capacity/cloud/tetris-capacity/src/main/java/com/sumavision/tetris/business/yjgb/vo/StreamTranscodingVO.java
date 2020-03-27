@@ -1,5 +1,7 @@
 package com.sumavision.tetris.business.yjgb.vo;
 
+import java.util.List;
+
 public class StreamTranscodingVO {
 	/** 是否转码 */
 	private boolean isTranscoding;
@@ -7,6 +9,8 @@ public class StreamTranscodingVO {
 	private boolean needRecordOutput;
 	/** 转码源地址 */
 	private String assetUrl;
+	/** 文件 */
+	private List<FileVO> files;
 	/** 媒体类型 */
 	private String mediaType;
 	/** 节目号 */
@@ -40,6 +44,14 @@ public class StreamTranscodingVO {
 
 	public void setAssetUrl(String assetUrl) {
 		this.assetUrl = assetUrl;
+	}
+
+	public List<FileVO> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<FileVO> files) {
+		this.files = files;
 	}
 
 	public Integer getBePCM() {

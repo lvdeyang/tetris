@@ -19,6 +19,8 @@ public class FolderUserMap extends CommonPO<FolderUserMap>{
 	
 	private Long userId;
 	
+	private String userUuid;
+	
 	private String userName;
 	
 	/** 索引顺序编号 */ 
@@ -51,6 +53,14 @@ public class FolderUserMap extends CommonPO<FolderUserMap>{
 
 	public void setUserId(Long userId) {
 		this.userId = userId;
+	}
+
+	public String getUserUuid() {
+		return userUuid;
+	}
+
+	public void setUserUuid(String userUuid) {
+		this.userUuid = userUuid;
 	}
 
 	public String getUserName() {

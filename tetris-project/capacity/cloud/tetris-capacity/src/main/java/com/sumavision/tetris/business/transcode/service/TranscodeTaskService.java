@@ -146,7 +146,7 @@ public class TranscodeTaskService {
 									 .toString();
 		}
 		if(inputBO.getFile() != null){
-			uniq = inputBO.getFile().getUrl();
+			uniq = uuid;
 		}
 		if(inputBO.getUdp_pcm() != null){
 			uniq = new StringBuffer().append(inputBO.getUdp_pcm().getSource_ip())
@@ -672,7 +672,7 @@ public class TranscodeTaskService {
 									 .toString();
 		}
 		if(inputBO.getFile() != null){
-			uniq = inputBO.getFile().getUrl();
+			uniq = inputBO.getId();
 		}
 		if(inputBO.getUdp_pcm() != null){
 			uniq = new StringBuffer().append(inputBO.getUdp_pcm().getSource_ip())

@@ -151,6 +151,7 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 				map.setFolderUuid(folder.getUuid());
 				map.setFolderIndex(maxIndex);
 				map.setUserId(user.getId());
+				map.setUserUuid(user.getUser().getUuid());
 				map.setUserName(user.getName());
 				map.setCreator(user.getCreater());
 				map.setSyncStatus(0);

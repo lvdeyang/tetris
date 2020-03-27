@@ -323,6 +323,17 @@ public class UserQuery {
 		return JsonBodyResponseParser.parseArray(userFeign.findByUsernoIn(JSON.toJSONString(usernos)), UserVO.class);
 	}
 	
+	/**
+	 * 删除ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午2:25:24
+	 * @param Collection<Long> userIds 用户ids
+	 */
+	public void deleteLdapUser(Collection<Long> userIds) throws Exception{
+		userFeign.deleteLdapUser(JSON.toJSONString(userIds));
+	}
+	
 	/***************************************************
 	 ***************************************************
 	 ***************************************************/
