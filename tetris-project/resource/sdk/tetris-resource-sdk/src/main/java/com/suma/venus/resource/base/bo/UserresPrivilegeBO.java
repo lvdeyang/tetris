@@ -16,6 +16,9 @@ public class UserresPrivilegeBO {
 	
 	//呼叫权限
 	private boolean hasHJPrivilege = false;
+	
+	//指挥权限
+	private boolean hasZKPrivilege = false;
 
 	public Long getId() {
 		return id;
@@ -63,6 +66,14 @@ public class UserresPrivilegeBO {
 
 	public void setHasHJPrivilege(boolean hasHJPrivilege) {
 		this.hasHJPrivilege = hasHJPrivilege;
+	}
+
+	public boolean isHasZKPrivilege() {
+		return hasZKPrivilege;
+	}
+
+	public void setHasZKPrivilege(boolean hasZKPrivilege) {
+		this.hasZKPrivilege = hasZKPrivilege;
 	}
 	
 }

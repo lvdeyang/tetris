@@ -385,6 +385,7 @@ public class BindResourceController extends ControllerBase {
 				boolean hasReadPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-r");
 				boolean hasWritePrivilege = privilegeCodes.contains(userBO.getUserNo() + "-w");
 				boolean hasHJPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-hj");
+				boolean hasZKPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-zk");
 				UserresPrivilegeBO userresPrivilege = getUserresPrivilegeFromUserBO(userBO);
 				if (hasReadPrivilege) {
 					userresPrivilege.setHasReadPrivilege(true);
@@ -394,6 +395,9 @@ public class BindResourceController extends ControllerBase {
 				}
 				if (hasHJPrivilege) {
 					userresPrivilege.setHasHJPrivilege(true);
+				}
+				if (hasZKPrivilege){
+					userresPrivilege.setHasZKPrivilege(true);
 				}
 				userresPrivilegeBOs.add(userresPrivilege);
 			}
@@ -671,17 +675,19 @@ public class BindResourceController extends ControllerBase {
 	@ResponseBody
 	public Map<String, Object> submitUserresPrivilege(@RequestParam(value = "roleId") Long roleId, @RequestParam(value = "prevReadChecks") String prevReadChecks,
 			@RequestParam(value = "prevWriteChecks") String prevWriteChecks, @RequestParam(value = "prevHJChecks") String prevHJChecks,
-			@RequestParam(value = "readChecks") String readChecks, @RequestParam(value = "writeChecks") String writeChecks, @RequestParam(value = "hjChecks") String hjChecks,
-			Principal principal) {
+			@RequestParam(value = "prevZKChecks") String prevZKChecks, @RequestParam(value = "readChecks") String readChecks, @RequestParam(value = "writeChecks") String writeChecks, 
+			@RequestParam(value = "hjChecks") String hjChecks, @RequestParam(value = "zkChecks") String zkChecks, Principal principal) {
 		Map<String, Object> data = makeAjaxData();
 
 		try {
 			List<String> preReadCheckList = new ArrayList<String>();
 			List<String> prevWriteCheckList = new ArrayList<String>();
 			List<String> prevHJCheckeList = new ArrayList<String>();
+			List<String> prevZKCheckeList = new ArrayList<String>();
 			List<String> readCheckList = new ArrayList<String>();
 			List<String> writeCheckList = new ArrayList<String>();
 			List<String> hjCheckList = new ArrayList<String>();
+			List<String> zkCheckList = new ArrayList<String>();
 			if (null != prevReadChecks && !prevReadChecks.isEmpty()) {
 				preReadCheckList = Arrays.asList(prevReadChecks.split(","));
 			}
@@ -690,6 +696,9 @@ public class BindResourceController extends ControllerBase {
 			}
 			if (null != prevHJChecks && !prevHJChecks.isEmpty()) {
 				prevHJCheckeList = Arrays.asList(prevHJChecks.split(","));
+			}
+			if (null != prevZKChecks && !prevZKChecks.isEmpty()) {
+				prevZKCheckeList = Arrays.asList(prevZKChecks.split(","));
 			}
 			if (null != readChecks && !readChecks.isEmpty()) {
 				readCheckList = Arrays.asList(readChecks.split(","));
@@ -700,10 +709,14 @@ public class BindResourceController extends ControllerBase {
 			if (null != hjChecks && !hjChecks.isEmpty()) {
 				hjCheckList = Arrays.asList(hjChecks.split(","));
 			}
+			if (null != zkChecks && !zkChecks.isEmpty()) {
+				zkCheckList = Arrays.asList(zkChecks.split(","));
+			}
 
 			List<String> toBindReadCheckList = getToBindPrivileges(preReadCheckList, readCheckList);
 			List<String> toBindWriteCheckList = getToBindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toBindHJCheckList = getToBindPrivileges(prevHJCheckeList, hjCheckList);
+			List<String> toBindZKCheckList = getToBindPrivileges(prevZKCheckeList, zkCheckList);
 			List<String> toBindChecks = new ArrayList<String>();
 			for (String readCheck : toBindReadCheckList) {
 				toBindChecks.add(readCheck + "-r");
@@ -714,6 +727,9 @@ public class BindResourceController extends ControllerBase {
 			for (String hjCheck : toBindHJCheckList) {
 				toBindChecks.add(hjCheck + "-hj");
 			}
+			for (String zkCheck : toBindZKCheckList) {
+				toBindChecks.add(zkCheck + "-zk");
+			}
 			if (!bindResourceCodes(roleId, toBindChecks)) {
 				data.put(ERRMSG, "绑定失败");
 				return data;
@@ -722,6 +738,7 @@ public class BindResourceController extends ControllerBase {
 			List<String> toUnbindReadCheckList = getToUnbindPrivileges(preReadCheckList, readCheckList);
 			List<String> toUnbindWriteCheList = getToUnbindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toUnbindHJCheckList = getToUnbindPrivileges(prevHJCheckeList, hjCheckList);
+			List<String> toUnbindZKCheckList = getToUnbindPrivileges(prevZKCheckeList, zkCheckList);
 			List<String> toUnbindChecks = new ArrayList<String>();
 			for (String readCheck : toUnbindReadCheckList) {
 				toUnbindChecks.add(readCheck + "-r");
@@ -731,6 +748,9 @@ public class BindResourceController extends ControllerBase {
 			}
 			for (String hjCheck : toUnbindHJCheckList) {
 				toUnbindChecks.add(hjCheck + "-hj");
+			}
+			for (String zkCheck : toUnbindZKCheckList) {
+				toUnbindChecks.add(zkCheck + "-zk");
 			}
 			if (!unbindResourceCodes(roleId, toUnbindChecks)) {
 				data.put(ERRMSG, "解绑失败");
