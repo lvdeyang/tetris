@@ -15,6 +15,8 @@ public enum PlayerBusinessType {
 	BASIC_COMMAND("普通会议业务", "command"),//主席用commandMember，其他成员用command
 	CHAIRMAN_BASIC_COMMAND("主席的普通会议业务", "commandMember"),//主席用commandMember，其他成员用command
 	COOPERATE_COMMAND("协同会议业务", "cooperation"),
+//	COOPERATE_MEMBER_COMMAND("协同成员的业务", "cooperationMember"),//协同指挥成员观看其它成员的是时候使用，目前没有
+	SPEAK_MEETING("会议发言业务", "speak"),
 	SECRET_COMMAND("专向会议业务", "secret"),
 //	DEMAND_FORWARD("会议转发点播", ""),//废弃
 	COMMAND_FORWARD_DEVICE("会议转发设备", "commandForwardDevice"),
