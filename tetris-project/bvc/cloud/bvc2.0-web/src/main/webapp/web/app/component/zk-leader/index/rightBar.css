@@ -59,6 +59,7 @@ ul, li, div {
     color: #fff;
     text-align: center;
 }
+
 /*顶部标题具有高亮的样式*/
 .highLight {
     position: absolute;
@@ -179,8 +180,9 @@ li.focusLight {
     text-overflow: ellipsis;
     vertical-align: top;
 }
+
 /*录像回放的长度不一样*/
-.sheadFont{
+.sheadFont {
     display: inline-block;
     color: #cfdae6;
     font-size: 18px;
@@ -190,8 +192,9 @@ li.focusLight {
     text-overflow: ellipsis;
     vertical-align: top;
 }
+
 /*指挥工作台的属性的用户名*/
-.headFonts{
+.headFonts {
     display: inline-block;
     color: #cfdae6;
     font-size: 18px;
@@ -208,8 +211,9 @@ li.focusLight {
     border: 1px solid #7590A3;
     background-color: transparent;
 }
+
 /*名称和复选框之间的距离*/
-.el-checkbox__label{
+.el-checkbox__label {
     margin-left: -3px;
 }
 
@@ -301,7 +305,7 @@ li.focusLight {
 
 .context-menu {
     position: fixed;
-    top:100px;
+    top: 100px;
     right: 0;
     background-color: #163D5C;
     border-radius: 10px;
@@ -448,7 +452,8 @@ div.el-select-dropdown {
     border-radius: 0 0 12px 12px;
     z-index: 4;
 }
-.thirdMenu .btnContainer{
+
+.thirdMenu .btnContainer {
     height: 70px;
 }
 
@@ -461,7 +466,8 @@ div.el-select-dropdown {
     background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
     border-radius: 12px;
 }
-.option-button.disable{
+
+.option-button.disable {
     display: none;
 }
 
@@ -472,7 +478,7 @@ div.el-select-dropdown {
 }
 
 /*指挥工作台的树的横向滚动条*/
-.el-scrollbar__bar.is-horizontal{
+.el-scrollbar__bar.is-horizontal {
     display: none;
 }
 
@@ -488,7 +494,7 @@ div.el-select-dropdown {
 }
 
 /*第三部分菜单*/
-.thirdMenu{
+.thirdMenu {
     position: absolute;
     top: 50px;
     bottom: 50px;
@@ -496,25 +502,30 @@ div.el-select-dropdown {
     width: 325px;
     background-color: #1e52778c;
 }
-.thirdMenu .el-input__inner{
+
+.thirdMenu .el-input__inner {
     background-color: #5b6265b8;
     border: none;
 }
-.meetList{
+
+.meetList {
     position: absolute;
     margin-top: 5px;
     bottom: 75px;
     top: 50px;
 }
-.meetList .title{
+
+.meetList .title {
     color: #c0a16b;
     font-size: 18px;
     font-weight: bold;
 }
-.meetList ul{
+
+.meetList ul {
     min-height: 100px;
 }
-.meetList li{
+
+.meetList li {
     margin: 2px 0;
     padding: 0 5px;
     height: 30px;
@@ -523,7 +534,8 @@ div.el-select-dropdown {
     background-color: #052f54;
     font-size: 14px;
 }
-.meetList .content{
+
+.meetList .content {
     display: inline-block;
     width: 130px;
     white-space: nowrap;
@@ -533,14 +545,25 @@ div.el-select-dropdown {
     vertical-align: middle;
 }
 
-.attendance{
+.attendance {
     position: absolute;
     top: 51px;
-    left:45px;
+    left: 45px;
     bottom: 50px;
     width: 317px;
     background: #00000030;
 }
+
+/*悬浮发言按钮*/
+.suspend {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    width: 60px;
+    height: 64px;
+    background-color: #b1b1b1;
+}
+
 
 
 

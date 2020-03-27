@@ -292,7 +292,6 @@ define([
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
                     self.qt.warning(businessInfo);
-                    // self.pushMessage(businessInfo);
                     self.qt.invoke('callUserStop', $.toJSON({serial: serial}));
                 });
 
@@ -361,7 +360,6 @@ define([
                 self.qt.on('cooperationRefuse', function (e) {
                     var e = e.params;
                     self.qt.warning(e.businessInfo);
-                    // self.pushMessage(e.businessInfo);
                 });
                 //撤销协同指挥授权
                 self.qt.on('cooperationRevoke', function (e) {
@@ -392,9 +390,9 @@ define([
 
                 //websocket 停止指挥  成员监听到停止指挥，先会到右侧菜单处理一些事情
                 self.qt.on('commandStop', function (e) {
-                    self.qt.linkedWebview('rightBar', {id: 'usercommandStop', params: e});
                     e = e.params;
                     self.qt.warning(e.businessInfo);
+                    self.qt.linkedWebview('rightBar', {id: 'usercommandStop', params: e});
                     self.qt.invoke('commandExit', $.toJSON(e.splits));
                 });
 

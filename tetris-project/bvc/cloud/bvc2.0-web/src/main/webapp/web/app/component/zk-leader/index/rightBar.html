@@ -415,20 +415,42 @@
                               <span :class="scope.data.type==='USER'?'handDown el-icon-tickets':''"
                                     style="font-size: 20px;margin: 5px;color: #00ceff"
                                     @click="handleContextMenuShow($event, scope.data,null,'观看')"></span>
-                              <span v-if="scope.data.type==='USER'">
+                                <!--代表是主席页，有复选框-->
+                                <span v-if="buttons.addMember">
+                                     <el-checkbox v-if="scope.data.type==='USER'" v-model="scope.data.checked"
+                                                  @change="onCommandUserCheckChange(scope.data)">
                                     <span :class="scope.data.icon" :style="scope.data.style+' position:relative; top:1px;'"></span>
-                                <span class="headFonts">{{scope.data.name}}</span>
-                                <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
-                                  <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
-                                </el-popover>
-                              </span>
-                              <span v-else>
+                                    <span class="headFonts">{{scope.data.name}}</span>
+                                    <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
+                                      <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                    </el-popover>
+                                 </el-checkbox>
+                                      <span v-else>
                                 <span :class="scope.data.icon" :style="scope.data.style"></span>
                                 <span class="sheadFont">{{scope.data.name}}</span>
                                 <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
                                   <span class="icon-double-angle-down" style="font-size: 14px;color: #00ceff"
                                         slot="reference"></span>
                                 </el-popover>
+                              </span>
+                                </span>
+                                <!--代表是成员页，没有复选框-->
+                              <span v-else>
+                                  <span v-if="scope.data.type==='USER'">
+                                        <span :class="scope.data.icon" :style="scope.data.style+' position:relative; top:1px;'"></span>
+                                       <span class="headFonts">{{scope.data.name}}</span>
+                                        <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
+                                          <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                        </el-popover>
+                                  </span>
+                                  <span v-else>
+                                <span :class="scope.data.icon" :style="scope.data.style"></span>
+                                <span class="sheadFont">{{scope.data.name}}</span>
+                                <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
+                                  <span class="icon-double-angle-down" style="font-size: 14px;color: #00ceff"
+                                        slot="reference"></span>
+                                </el-popover>
+                              </span>
                               </span>
                             </span>
                         </el-tree>
@@ -515,6 +537,12 @@
                     <img v-else :src="baseUrl+'images/zk-leader/disable/exitCommand.png'"/>
                 </div>
             </div>
+            <!--悬浮按钮-->
+            <!--<div class="suspend" title="发言" @mousedown="itemMousemove">-->
+               <!--<div class="speakPic">-->
+                   <!--<img :src="baseUrl+'images/zk-leader/speak.png'" alt="">-->
+               <!--</div>-->
+            <!--</div>-->
         </div>
 
     </div>

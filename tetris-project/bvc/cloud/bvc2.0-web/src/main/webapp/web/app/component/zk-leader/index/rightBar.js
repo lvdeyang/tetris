@@ -164,6 +164,8 @@ define([
                 this.switchStatus2 = false;
                 this.switchStatus3 = false;
                 this.people=false;
+                //进会后在切回来，group.current没变，还是会议的值，所以在从刷一次
+                this.currentGroupChange(this.group.currentId)
             },
             toggleMenu2: function () {
                 var self = this;
@@ -175,6 +177,7 @@ define([
                 this.switchStatus2 = true;
                 this.switchStatus3 = false;
                 this.people=false;
+                self.refreshCommand();
                 //切换时要重新获取高度
                 this.$nextTick(function () {
                     //在下次 DOM 更新循环结束之后执行这个回调。在修改数据之后立即使用这个方法，获取更新后的DOM.
@@ -193,7 +196,7 @@ define([
                 this.switchStatus2 = false;
                 this.switchStatus3 = true;
                 this.people=false;
-                this.refreshCommand();
+                this.refreshCommand("meeting");
             },
 
             //-----第一个树形菜单的复选框的勾选事件 start -----
@@ -394,8 +397,8 @@ define([
                 self.buttons.addCommand = false;
                 self.buttons.removeCommand = false;
             },
-            //获取指挥列表的数据以及刷新对应按钮
-            refreshCommand: function () {
+            //获取指挥列表的数据以及刷新对应按钮，type取值为meeting/command，如果为空则相当于command
+            refreshCommand: function (type) {
                 var self = this;
                 self.command.data.splice(0, self.command.data.length);
                 //先清空
@@ -403,7 +406,7 @@ define([
                 self.myCommand.filterData = [];
                 self.joinCommand.totalData = [];
                 self.joinCommand.filterData = [];
-                ajax.post('/command/query/list', null, function (data) {
+                ajax.post('/command/query/list', {type:type}, function (data) {
                     if (data && data.length > 0) {
                         var commands = data[0].children;
                         var joinCommand = {
@@ -969,6 +972,7 @@ define([
                 ajax.post('/command/basic/remove', {ids: $.toJSON(ids)}, function (data) {
                     self.command.select.splice(0, self.command.select.length);
                     self.refreshCommand();
+
                     for (var i = 0; i < ids.length; i++) {
                         for (var j = 0; j < self.group.entered.length; j++) {
                             if (ids[i] == self.group.entered[j].id) {
@@ -1332,6 +1336,7 @@ define([
             },
             //退出指挥
             exitCommand: function (name) {
+                console.log(8988767)
                 var self = this;
                 if (name === '会议') {
                     self.switchStatus1 = false;
@@ -1362,7 +1367,11 @@ define([
                             self.group.current.status = 'stop';
                         }
                         self.qt.invoke('commandExit', $.toJSON(data));
-                        self.refreshCommand();
+                        if(name === '会议'){
+                            self.refreshCommand("meeting");
+                        }else{
+                            self.refreshCommand();
+                        }
                     });
                 } else {
                     ajax.post('/command/basic/exit', {
@@ -1506,17 +1515,21 @@ define([
                 var self = this;
                 ajax.post('/command/basic/enter', {ids: $.toJSON([id])}, function (data) {
                     self.meetName = data[0].name;
+                    self.switchStatus1 = false;
+                    self.switchStatus2 = false;
+                    self.switchStatus3 = false;
+                    self.people = true;
+
+                    //进入自己建的会议
                     if (action === 'start') {
                         ajax.post('/command/basic/start', {
                             id: id
                         }, function () {
-                            self.switchStatus1 = false;
-                            self.switchStatus2 = false;
-                            self.switchStatus3 = false;
-                            self.people = true;
                             self.qt.linkedWebview('rightBar', {id: 'currentGroupChange', params: $.toJSON(data)});
                         });
-                    } else {
+                    }
+                    else {
+                        //进入他人会议
                         self.qt.linkedWebview('rightBar', {id: 'currentGroupChange', params: $.toJSON(data)});
                     }
                 });
@@ -1537,7 +1550,37 @@ define([
                     height: 900
                 });
             },
+            //悬浮按钮鼠标滑过事件
+            itemMouseover: function() {
+                // $(".speakPic").css("display", "block");
+                $('.suspend').addClass('sweep');
+            },
 
+            itemMouseout: function() {
+                // $(".speakPic").css("display", "none");
+                $('.suspend').removeClass('sweep');
+            },
+            itemMousemove: function(e) {
+                var self = this;
+                console.log(e.target)
+                var odiv = e.target;        //获取目标元素
+
+                //算出鼠标相对元素的位置
+                var disX = e.clientX - odiv.offsetLeft;
+                var disY = e.clientY - odiv.offsetTop;
+                document.onmousemove = function(e){       //鼠标按下并移动的事件
+                    //用鼠标的位置减去鼠标相对元素的位置，得到元素的位置
+                    var left = e.clientX - disX;
+                    var top = e.clientY - disY;
+                    //移动当前元素
+                    odiv.style.left = left + 'px';
+                    odiv.style.top = top + 'px';
+                };
+                document.onmouseup = function(e){
+                    document.onmousemove = null;
+                    document.onmouseup = null;
+                };
+            },
         },
         computed: {
             groupCurrent: function () {
@@ -1714,7 +1757,7 @@ define([
                     self.switchStatus2 = false;
                     self.switchStatus3 = true;
                     self.people = false;
-                    self.refreshCommand();
+                    self.refreshCommand("meeting");
                 });
 
                 //监听到添加成员，刷新树
@@ -1738,6 +1781,10 @@ define([
                     self.switchStatus2 = false;
                     self.switchStatus3 = false;
                     self.people = true;
+                    $('.triggerLi1').removeClass('focusLight');
+                    $('.triggerLi2').removeClass('focusLight');
+                    $('.triggerLi3').addClass('focusLight');
+                    $('.highLight').css('left', '225px');
                     //加参数是为了区分进会时 ，不影响指挥的代码
                     self.enterCommand([e.params], 'meet');
                 });
@@ -1746,11 +1793,7 @@ define([
                 self.qt.on('currentGroupChange', function (e) {
                     var group = $.parseJSON(e.params)[0];
                     group.type = 'command';
-                    self.switchStatus1 = false;
-                    self.switchStatus2 = false;
-                    self.switchStatus3 = false;
                     self.currentGroupChange(group);
-                    self.people = true;
                     self.qt.set('currentGroupId', group.id);
                 });
 
@@ -1773,6 +1816,7 @@ define([
                             self.group.currentId = '';
                         }
                     }
+                    // self.refreshCommand("meeting");
                 })
             });
         }
