@@ -48,7 +48,7 @@ define([
                     return;
                 }
                 if(!this.fightCommand){
-                    this.qt.alert('提示信息', '请选择作战会议');
+                    this.qt.alert('提示信息', '请选择作战指挥');
                     return;
                 }
                 var date=this.timeFormat(this.form.date).split(' ')[0];
@@ -97,7 +97,7 @@ define([
                     }
                 });
 
-                //    获取会议列表
+                //    获取指挥列表
                 ajax.post('/command/query/list', null, function (data) {
                     console.log(data)
                     if (data && data.length > 0) {

@@ -20,6 +20,7 @@ define([
                 currentTab:'0',
                 qt:'',
                 group:'',
+                page:'',  //打开的是会议还是指挥
                 tree:{
                     props:{
                         children:'children',
@@ -353,6 +354,7 @@ define([
             self.qt = new QtContext('leaderForward', function(){
                 var params = self.qt.getWindowParams();
                 var id = params.id;
+                self.page=params.name;
 
                 //初始化ajax
                 ajax.init({

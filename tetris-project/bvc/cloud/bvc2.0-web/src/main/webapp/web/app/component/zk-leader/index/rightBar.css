@@ -40,8 +40,7 @@ ul, li, div {
     position: absolute;
     right: 0;
     width: 324px;
-    /*height: 50px;*/
-    display:none;
+    height: 50px;
     border-radius: 12px 12px 0 0;
     background: #52cffb21;
     z-index: 1;
@@ -49,8 +48,8 @@ ul, li, div {
 
 .switch li {
     display: inline-block;
-    width: 49%;
-    font-size: 20px;
+    width: 32%;
+    font-size: 18px;
     font-weight: bold;
     height: 50px;
     line-height: 50px;
@@ -60,12 +59,13 @@ ul, li, div {
     color: #fff;
     text-align: center;
 }
+
 /*顶部标题具有高亮的样式*/
 .highLight {
     position: absolute;
     top: 0;
     left: 16px;
-    width: 120px;
+    width: 90px;
     height: 4px;
     border-radius: 3px;
     background-color: #00e9ff;
@@ -99,7 +99,8 @@ li.focusLight {
 }
 
 /* 禁止横向滚动条 */
-.firstMenu .el-scrollbar__wrap,
+.secondMenu .el-scrollbar__wrap,
+.thirdMenu .el-scrollbar__wrap,
 .commandTable .el-scrollbar__wrap {
     overflow-x: hidden;
 }
@@ -112,9 +113,10 @@ li.focusLight {
     position: absolute;
     top: 50px;
     bottom: 50px;
-    left: 0;
-    width: 370px;
+    left: 45px;
+    width: 324px;
     padding: 20px 0;
+    background-color: #1e52778c;
 }
 
 .el-tabs__content {
@@ -165,7 +167,7 @@ li.focusLight {
     font-size: 20px;
     height: 30px;
     line-height: 30px;
-    /*background-color: #2d4e6899;*/
+    background-color: #2d4e6899;
 }
 
 .headFont {
@@ -178,19 +180,21 @@ li.focusLight {
     text-overflow: ellipsis;
     vertical-align: top;
 }
+
 /*录像回放的长度不一样*/
-.sheadFont{
+.sheadFont {
     display: inline-block;
     color: #cfdae6;
     font-size: 18px;
-    width: 185px;
+    width: 235px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
     vertical-align: top;
 }
+
 /*指挥工作台的属性的用户名*/
-.headFonts{
+.headFonts {
     display: inline-block;
     color: #cfdae6;
     font-size: 18px;
@@ -207,8 +211,9 @@ li.focusLight {
     border: 1px solid #7590A3;
     background-color: transparent;
 }
+
 /*名称和复选框之间的距离*/
-.el-checkbox__label{
+.el-checkbox__label {
     margin-left: -3px;
 }
 
@@ -300,7 +305,7 @@ li.focusLight {
 
 .context-menu {
     position: fixed;
-    top:100px;
+    top: 100px;
     right: 0;
     background-color: #163D5C;
     border-radius: 10px;
@@ -346,15 +351,12 @@ li.focusLight {
 /*第二部分 指挥工作台*/
 .secondMenu {
     position: absolute;
-    /*top: 51px;*/
-    top:0;
+    top: 51px;
     bottom: 50px;
-    left: 46px;
-    padding: 10px 15px;
-    width: 290px;
+    left: 0;
+    width: 370px;
     background-color: #52cffb21;
-    /*border-radius: 0 0 12px 12px;*/
-    border-radius:12px;
+    border-radius: 0 0 12px 12px;
 }
 
 .status {
@@ -443,12 +445,16 @@ div.el-select-dropdown {
     position: absolute;
     padding: 2px;
     width: 313px;
-    height: 210px;
+    /*height: 210px;*/
     bottom: 0;
     left: 0;
     background-color: #173d5c;
     border-radius: 0 0 12px 12px;
     z-index: 4;
+}
+
+.thirdMenu .btnContainer {
+    height: 70px;
 }
 
 .option-button {
@@ -460,7 +466,8 @@ div.el-select-dropdown {
     background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
     border-radius: 12px;
 }
-.option-button.disable{
+
+.option-button.disable {
     display: none;
 }
 
@@ -471,7 +478,7 @@ div.el-select-dropdown {
 }
 
 /*指挥工作台的树的横向滚动条*/
-.el-scrollbar__bar.is-horizontal{
+.el-scrollbar__bar.is-horizontal {
     display: none;
 }
 
@@ -486,31 +493,78 @@ div.el-select-dropdown {
     background: -webkit-linear-gradient(left top, #2a697a, #0D4C6B, #113E65);
 }
 
-#filter-user{
-    border:0;
-    color:#00e9ff;
-    border-radius:0;
-    background-color:rgba(0,0,0,0);
+/*第三部分菜单*/
+.thirdMenu {
+    position: absolute;
+    top: 50px;
+    bottom: 50px;
+    left: 45px;
+    width: 325px;
+    background-color: #1e52778c;
 }
 
-#filter-user+.el-input__suffix{
-    color:#00e9ff;
-    font-size:16px;
+.thirdMenu .el-input__inner {
+    background-color: #5b6265b8;
+    border: none;
 }
 
-#filter-user:focus{
-    outline:0;
+.meetList {
+    position: absolute;
+    margin-top: 5px;
+    bottom: 75px;
+    top: 50px;
 }
 
-#filter-user::-webkit-input-placeholder{
-    color:#00e9ff;
+.meetList .title {
+    color: #c0a16b;
+    font-size: 18px;
+    font-weight: bold;
 }
-#filter-user:-moz-placeholder{
-    color:#00e9ff;
+
+.meetList ul {
+    min-height: 100px;
 }
-#filter-user::-moz-placeholder{
-    color:#00e9ff;
+
+.meetList li {
+    margin: 2px 0;
+    padding: 0 5px;
+    height: 30px;
+    line-height: 30px;
+    color: #fff;
+    background-color: #052f54;
+    font-size: 14px;
 }
-#filter-user:-ms-input-placeholder{
-    color:#00e9ff;
+
+.meetList .content {
+    display: inline-block;
+    width: 130px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    word-break: break-all;
+    vertical-align: middle;
 }
+
+.attendance {
+    position: absolute;
+    top: 51px;
+    left: 45px;
+    bottom: 50px;
+    width: 317px;
+    background: #00000030;
+}
+
+/*悬浮发言按钮*/
+.suspend {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    width: 60px;
+    height: 64px;
+    background-color: #b1b1b1;
+}
+
+
+
+
+

@@ -21,7 +21,7 @@
         </div>
     </div>
     <div class="title" v-if="type === 'call'">呼叫用户</div>
-    <div class="title" v-else-if="type === 'orient'">专项会议</div>
+    <div class="title" v-else-if="type === 'orient'">专项指挥</div>
     <div class="title" v-else="type === 'voice'">语音通话</div>
     <div style="position:absolute; left:0; bottom:10px; height:50px; right:0; padding:4px 10px 14px 10px; text-align:center;">
         <el-button size="medium" @click="handleWindowClose">取消/关闭</el-button>
