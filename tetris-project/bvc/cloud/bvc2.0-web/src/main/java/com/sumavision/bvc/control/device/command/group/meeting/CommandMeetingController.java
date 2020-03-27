@@ -20,6 +20,7 @@ import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.cooperate.CommandCooperateServiceImpl;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
+import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -29,6 +30,9 @@ public class CommandMeetingController {
 	
 	@Autowired
 	private CommandBasicServiceImpl commandBasicServiceImpl;
+	
+	@Autowired
+	private CommandMeetingSpeakServiceImpl commandMeetingSpeakServiceImpl;
 	
 	@Autowired
 	private CommandCooperateServiceImpl commandCooperateServiceImpl;
@@ -96,106 +100,215 @@ public class CommandMeetingController {
 				
 		return info;
 	}
-
+	
 	/**
-	 * 发起协同指挥<br/>
+	 * 指定发言<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年10月29日 上午11:04:50
-	 * @param id 指挥id
-	 * @param members 协同成员
+	 * <b>日期：</b>2020年3月27日 上午8:38:45
+	 * @param id
+	 * @param userIds
 	 * @param request
 	 * @return
 	 * @throws Exception
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/grant")
-	public Object start(
+	@RequestMapping(value = "/speak/appoint")
+	public Object speakAppoint(
 			String id,
 			String userIds,
 			HttpServletRequest request) throws Exception{
 		
+		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandCooperateServiceImpl.start(Long.parseLong(id), userIdArray);
+		commandMeetingSpeakServiceImpl.speakAppoint(user.getId(), Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
 	
 	/**
-	 * 同意协同指挥<br/>
+	 * 申请发言<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年11月5日 上午9:29:44
-	 * @param id 指挥id
-	 * @return
-	 * @throws Exception 
-	 */
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/agree")
-	public Object agree(
-			String id,
-			HttpServletRequest request) throws Exception{
-		
-		Long userId = userUtils.getUserIdFromSession(request);
-		
-		commandCooperateServiceImpl.agree(userId, Long.parseLong(id));
-		
-		return null;
-	}
-	
-	/**
-	 * 拒绝协同指挥<br/>
-	 * <p>详细描述</p>
-	 * <b>作者:</b>zsy<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年11月5日 上午9:34:04
-	 * @param id 指挥id
+	 * <b>日期：</b>2020年3月27日 上午8:40:00
+	 * @param id
 	 * @param request
 	 * @return
 	 * @throws Exception
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/refuse")
-	public Object refuse(
+	@RequestMapping(value = "/speak/apply")
+	public Object speakApplyAgree(
 			String id,
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandCooperateServiceImpl.refuse(userId, Long.parseLong(id));
+		commandMeetingSpeakServiceImpl.speakApply(userId, Long.parseLong(id));
 		
 		return null;
 	}
 	
 	/**
-	 * 撤销授权协同指挥<br/>
+	 * 主席同意成员的申请发言<br/>
 	 * <p>详细描述</p>
-	 * <b>作者:</b>Administrator<br/>
+	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年11月5日 上午9:36:49
-	 * @param id 指挥id
-	 * @param businessId 指挥id-成员id
+	 * <b>日期：</b>2020年3月27日 上午8:42:58
+	 * @param id
+	 * @param userIds
 	 * @param request
 	 * @return
 	 * @throws Exception
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/revoke")
-	public Object revoke(
+	@RequestMapping(value = "/speak/apply/agree")
+	public Object speakApplyAgree(
 			String id,
-			String businessId,
+			String userIds,
 			HttpServletRequest request) throws Exception{
 		
-		String userIdString = businessId.split("-")[1];
+		UserVO user = userUtils.getUserFromSession(request);
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandCooperateServiceImpl.revoke(Long.parseLong(userIdString), Long.parseLong(id));
+		commandMeetingSpeakServiceImpl.speakApplyAgree(user.getId(), Long.parseLong(id), userIdArray);
+		
+		return null;
+	}
+	
+	/**
+	 * 主席拒绝成员的申请发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 上午8:43:10
+	 * @param id
+	 * @param userIds
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/speak/apply/disagree")
+	public Object speakApplyDisagree(
+			String id,
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
+		
+		commandMeetingSpeakServiceImpl.speakApplyDisagree(user.getId(), Long.parseLong(id), userIdArray);
+		
+		return null;
+	}
+	
+	/**
+	 * 成员停止发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 上午8:45:40
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/speak/stop/by/member")
+	public Object speakStopByMember(
+			String id,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		commandMeetingSpeakServiceImpl.speakStopByMember(userId, Long.parseLong(id));
+		
+		return null;
+	}
+	
+	/**
+	 * 主席停止多个成员发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 上午8:49:36
+	 * @param id
+	 * @param userIds
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/speak/stop/by/chairman")
+	public Object speakStopByChairman(
+			String id,
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
+		
+		commandMeetingSpeakServiceImpl.speakStopByChairman(user.getId(), Long.parseLong(id), userIdArray);
+		
+		return null;
+	}
+	
+	/**
+	 * 开始讨论（全员互看）<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 上午8:52:11
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/discuss/start")
+	public Object discussStart(
+			String id,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		commandMeetingSpeakServiceImpl.discussStart(userId, Long.parseLong(id));
+		
+		return null;
+	}
+	
+	/**
+	 * 停止讨论<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 上午8:52:38
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/discuss/stop")
+	public Object discussStop(
+			String id,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		commandMeetingSpeakServiceImpl.discussStop(userId, Long.parseLong(id));
 		
 		return null;
 	}

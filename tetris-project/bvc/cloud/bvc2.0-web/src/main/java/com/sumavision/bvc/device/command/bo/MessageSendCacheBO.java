@@ -28,6 +28,16 @@ public class MessageSendCacheBO {
 	public MessageSendCacheBO(
 			Long userId,
 			String message,
+			WebsocketMessageType type){
+		this.userId = userId;
+		this.message = message;
+		this.type = type;
+	}
+	
+	/** 后边的两个参数已经弃用 */
+	public MessageSendCacheBO(
+			Long userId,
+			String message,
 			WebsocketMessageType type,
 			Long fromUserId,
 			String fromUsername){
