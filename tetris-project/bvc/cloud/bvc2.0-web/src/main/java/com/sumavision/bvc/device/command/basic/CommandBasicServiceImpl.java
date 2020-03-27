@@ -821,11 +821,6 @@ public class CommandBasicServiceImpl {
 				member.setMessageCoId(null);
 			}
 			
-			member.setMemberStatus(MemberStatus.DISCONNECT);
-			member.setCooperateStatus(MemberStatus.DISCONNECT);
-			member.setSilenceToHigher(false);
-			member.setSilenceToLower(false);
-			
 			//释放播放器，同时统计屏幕序号用于返回split
 			JSONArray splits = new JSONArray();
 			List<CommandGroupUserPlayerPO> players = member.getPlayers();
@@ -841,7 +836,7 @@ public class CommandBasicServiceImpl {
 				returnSplits = splits;
 			}
 			
-			//普通会议给其它成员发通知
+			//普通会议给其它 会议中的 成员发通知
 			if(!member.isAdministrator() && group.getType().equals(GroupType.BASIC)
 					|| !member.isAdministrator() && group.getType().equals(GroupType.MEETING)){
 				if(member.getMemberStatus().equals(MemberStatus.CONNECT)){
@@ -909,6 +904,10 @@ public class CommandBasicServiceImpl {
 				//发送消息
 				messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName()));
 			}
+			member.setMemberStatus(MemberStatus.DISCONNECT);
+			member.setCooperateStatus(MemberStatus.DISCONNECT);
+			member.setSilenceToHigher(false);
+			member.setSilenceToLower(false);
 		}
 		
 		//删除协同会议的forwardPO
