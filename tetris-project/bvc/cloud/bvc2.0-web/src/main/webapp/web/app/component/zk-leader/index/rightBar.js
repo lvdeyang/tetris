@@ -71,7 +71,13 @@ define([
                     //指挥状态
                     isPause: false,
                     //退出指挥
-                    exitCommand: true
+                    exitCommand: true,
+                    //发言
+                    speak:true, //按钮是否显示
+                    isSpeaking:false, //控制显示哪个按钮,是否正在发言
+                    //控制指定发言，全员讨论按钮是否显示
+                    meetBtn:true,
+                    discussion:false, //false:没在讨论，应该显示讨论按钮，true：正在讨论，应该显示停止讨论按钮
                 },
                 props: {
                     children: 'children',
@@ -150,7 +156,8 @@ define([
                     totalData: [],
                     filterData: []
                 },
-                meetName: ''
+                meetName: '',
+
             }
         },
         methods: {
@@ -770,7 +777,7 @@ define([
                             }
                         }
                     });
-                } else if (self.currentTab == 2) {
+                } else if (self.currentTab == 3) {
                     self.device.data.splice(0, self.device.data.length);
                     ajax.post('/command/query/find/institution/tree/bundle/2/false/1', null, function (data) {
                         if (data && data.length > 0) {
@@ -793,7 +800,7 @@ define([
                             }
                         }
                     });
-                } else if (self.currentTab == 2) {
+                } else if (self.currentTab == 3) {
                     self.device.data.splice(0, self.device.data.length);
                     ajax.post('/command/query/find/institution/tree/bundle/2/false/2', null, function (data) {
                         if (data && data.length > 0) {
@@ -836,22 +843,7 @@ define([
                         self.cancelChoose();
                         self.qt.invoke('vodUsers', $.toJSON(data));
                     });
-                }
-                // else if (self.currentTab == 2) {
-                //     //点播设备
-                //     if (self.device.select.length <= 0) {
-                //         self.qt.alert('消息提示', '您还没有选中设备');
-                //         return;
-                //     }
-                //     var deviceIds = [];
-                //     for (var i = 0; i < self.device.select.length; i++) {
-                //         deviceIds.push(self.device.select[i].id);
-                //     }
-                //     ajax.post('/command/vod/device/start/batch', {deviceIds: $.toJSON(deviceIds)}, function (data) {
-                //         self.qt.invoke('vodDevices', $.toJSON(data));
-                //     });
-                // }
-                else if (self.currentTab == 2) {
+                } else if (self.currentTab == 2) {
                     //点播文件
                     if (self.file.select.length <= 0) {
                         self.qt.alert('消息提示', '您还没有选中文件');
@@ -864,18 +856,20 @@ define([
                     ajax.post('/command/vod/resource/file/start/batch', {resourceFileIds: $.toJSON(resourceFileIds)}, function (data) {
                         self.qt.invoke('vodResourceFiles', $.toJSON(data));
                     });
+                }  else if (self.currentTab == 3) {
+                    //点播设备
+                    if (self.device.select.length <= 0) {
+                        self.qt.alert('消息提示', '您还没有选中设备');
+                        return;
+                    }
+                    var deviceIds = [];
+                    for (var i = 0; i < self.device.select.length; i++) {
+                        deviceIds.push(self.device.select[i].id);
+                    }
+                    ajax.post('/command/vod/device/start/batch', {deviceIds: $.toJSON(deviceIds)}, function (data) {
+                        self.qt.invoke('vodDevices', $.toJSON(data));
+                    });
                 }
-                // else if (self.currentTab == 4) {
-                //     //点播录像
-                //     if (self.record.select.length <= 0) {
-                //         self.qt.alert('消息提示', '您还没有选中文件');
-                //         return;
-                //     }
-                //     var recordIds = [];
-                //     for (var i = 0; i < self.record.select.length; i++) {
-                //         recordIds.push(self.record.select[i].id);
-                //     }
-                // }
             },
             // 一键语音通话
             voiceIntercomBatch: function () {
@@ -1336,7 +1330,6 @@ define([
             },
             //退出指挥
             exitCommand: function (name) {
-                console.log(8988767)
                 var self = this;
                 if (name === '会议') {
                     self.switchStatus1 = false;
@@ -1550,30 +1543,20 @@ define([
                     height: 900
                 });
             },
-            //悬浮按钮鼠标滑过事件
-            itemMouseover: function() {
-                // $(".speakPic").css("display", "block");
-                $('.suspend').addClass('sweep');
-            },
-
-            itemMouseout: function() {
-                // $(".speakPic").css("display", "none");
-                $('.suspend').removeClass('sweep');
-            },
+            //悬浮按钮鼠标移动事件
             itemMousemove: function(e) {
-                var self = this;
-                console.log(e.target)
                 var odiv = e.target;        //获取目标元素
 
                 //算出鼠标相对元素的位置
-                var disX = e.clientX - odiv.offsetLeft;
                 var disY = e.clientY - odiv.offsetTop;
                 document.onmousemove = function(e){       //鼠标按下并移动的事件
                     //用鼠标的位置减去鼠标相对元素的位置，得到元素的位置
-                    var left = e.clientX - disX;
                     var top = e.clientY - disY;
+                    //防止拖拽超过范围
+                    if(top<=113 || top>700){
+                        return;
+                    }
                     //移动当前元素
-                    odiv.style.left = left + 'px';
                     odiv.style.top = top + 'px';
                 };
                 document.onmouseup = function(e){
@@ -1581,6 +1564,79 @@ define([
                     document.onmouseup = null;
                 };
             },
+            //申请发言
+            applySpeak:function () {
+                var self=this;
+                if(!self.buttons.isSpeaking){
+                    ajax.post('/command/meeting/speak/apply',{id:self.group.current.id},function (data) {
+                        self.qt.success('操作成功');
+                        self.buttons.isSpeaking=true;
+                    })
+                }
+            },
+            //成员自己停止发言
+            stopSpeak:function () {
+                var self=this;
+                if(self.buttons.isSpeaking){
+                    ajax.post('/command/meeting/speak/stop/by/member',{id:self.group.current.id},function (data) {
+                        self.qt.success('操作成功');
+                        self.buttons.isSpeaking=false;
+                    })
+                }
+            },
+            //指定发言
+            assignSpeak:function () {
+                var self = this;
+                var ids=[];
+                if(!self.group.current.select.length){
+                    self.qt.alert('提示信息', '您没有勾选任何用户');
+                    return;
+                }
+                self.group.current.select.forEach(function (value) {
+                    ids.push(value.id);
+                });
+                ajax.post('/command/meeting/speak/appoint', {
+                    id:self.group.current.id,
+                    userIds: $.toJSON(ids)
+                }, function(data){
+                    self.qt.success('操作成功');
+                });
+
+            },
+            //主席停止指定发言
+            stopAssignSpeak:function () {
+                var self = this;
+                var ids=[];
+                if(!self.group.current.select.length){
+                    self.qt.alert('提示信息', '您没有勾选任何用户');
+                    return;
+                }
+                self.group.current.select.forEach(function (value) {
+                    ids.push(value.id);
+                });
+                ajax.post('/command/meeting/speak/stop/by/chairman', {
+                    id:self.group.current.id,
+                    userIds: $.toJSON(ids)
+                }, function(data){
+                    self.qt.success('操作成功');
+                });
+            },
+            //全员讨论
+            allDiscuss:function () {
+                var self=this;
+                if(!self.buttons.discussion){ //讨论
+                    ajax.post('/command/meeting/discuss/start',{id:self.group.current.id},function (data) {
+                        self.qt.success('操作成功');
+                        self.buttons.discussion=true;
+                    })
+                }else{ //停止讨论
+                    ajax.post('/command/meeting/discuss/stop',{id:self.group.current.id},function (data) {
+                        self.qt.success('操作成功');
+                        self.buttons.discussion=false;
+                    })
+                }
+            }
+            
         },
         computed: {
             groupCurrent: function () {
@@ -1607,6 +1663,12 @@ define([
                         self.refreshFile();
                     }
                     self.refreshFileButtonAction();
+                }else if(self.currentTab == 3){
+                    self.refreshDevice();
+                    self.refreshDeviceButtonAction();
+                }else if(self.currentTab == 4){
+                    self.refreshRecord();
+                    self.refreshRecordButtonAction();
                 }
                 this.$nextTick(function () {
                     //在下次 DOM 更新循环结束之后执行这个回调。在修改数据之后立即使用这个方法，获取更新后的DOM.
@@ -1644,6 +1706,8 @@ define([
                         self.buttons.isPause = false;
                     }
                     self.buttons.exitCommand = true;
+                    self.buttons.speak=false;
+                    self.buttons.meetBtn=true;
                 } else {
                     self.group.isChairman = false;
                     self.buttons.addMember = false;
@@ -1660,6 +1724,8 @@ define([
                     self.buttons.commandRestart = false;
                     self.buttons.isPause = false;
                     self.buttons.exitCommand = true;
+                    self.buttons.speak=true;
+                    self.buttons.meetBtn=false;
                 }
             },
             // 监听浏览器窗口宽度变化，这个值就会变化,

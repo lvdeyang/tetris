@@ -348,7 +348,7 @@ define([
                         });
                     }
                 });
-                //同意授权指挥
+                //成员同意授权指挥
                 self.qt.on('cooperationAgree', function (e) {
                     var e = e.params;
                     self.qt.info(e.businessInfo);
@@ -356,13 +356,41 @@ define([
                         self.qt.invoke('cooperationGrant', e.splits);
                     }
                 });
-                //拒绝协同指挥
+                //成员拒绝协同指挥
                 self.qt.on('cooperationRefuse', function (e) {
                     var e = e.params;
                     self.qt.warning(e.businessInfo);
                 });
                 //撤销协同指挥授权
                 self.qt.on('cooperationRevoke', function (e) {
+                    var e = e.params;
+                    self.qt.warning(e.businessInfo);
+                    if (e.splits && e.splits.length > 0) {
+                        self.qt.invoke('cooperationRevoke', e.splits);
+                    }
+                });
+
+                //主席同意申请人发言
+                self.qt.on('speakApply', function (e) {
+                    var e = e.params;
+                    var ids=e.businessId.split('-'); //返回的格式是:会议id-成员id
+                    self.qt.confirm('业务提示', e.businessInfo, '拒绝', '同意', function () {
+                        ajax.post('/command/meeting/speak/apply/disagree', {id: ids[0],userIds:$.toJSON([ids[1]])}, null);
+                    }, function () {
+                        ajax.post('/command/meeting/speak/apply/agree', {id: ids[0],userIds:$.toJSON([ids[1]])}, null);
+                    });
+                });
+                //通知观看发言和讨论
+                self.qt.on('speakStart', function (e) {
+                    var e = e.params;
+                    self.qt.info(e.businessInfo);
+                    if (e.splits && e.splits.length > 0) {
+                        //TODO:qt仿照协同的这个方法改下
+                        self.qt.invoke('cooperationGrant', e.splits);
+                    }
+                });
+                //通知停止发言/停止讨论
+                self.qt.on('speakStop', function (e) {
                     var e = e.params;
                     self.qt.warning(e.businessInfo);
                     if (e.splits && e.splits.length > 0) {
