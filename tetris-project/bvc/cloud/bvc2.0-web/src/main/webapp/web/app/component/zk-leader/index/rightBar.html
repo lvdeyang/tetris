@@ -95,7 +95,8 @@
                     </div>
                     <div :class="'option-button '+(buttons.commandForward?'':'disable')" title="指挥转发"
                          @click="commandForward('指挥')">
-                        <img v-if="buttons.commandForward" :src="baseUrl+'images/zk-leader/able/zhihui/commandForward.png'"/>
+                        <img v-if="buttons.commandForward"
+                             :src="baseUrl+'images/zk-leader/able/zhihui/commandForward.png'"/>
                     </div>
                     <div :class="'option-button '+(buttons.silenceUp?'':'disable')"
                          :title="buttons.silenceUp && buttons.silenceUpStart?'关闭对上静默':'开启对上静默'" @click="silenceUp">
@@ -116,9 +117,11 @@
                         <img v-if="buttons.sendMessage" :src="baseUrl+'images/zk-leader/able/sendMessage.png'"/>
                     </div>
                     <div :class="'option-button '+(buttons.commandRecord?'':'disable')"
-                    :title="buttons.isRecord?'关闭会议录制':'开启会议录制'" @click="commandRecord">
-                    <img v-if="buttons.commandRecord && !buttons.isRecord" :src="baseUrl+'images/zk-leader/able/zhihui/commandRecord.png'"/>
-                    <img v-if="buttons.commandRecord && buttons.isRecord" :src="baseUrl+'images/zk-leader/able/zhihui/commandRecordPause.png'">
+                         :title="buttons.isRecord?'关闭会议录制':'开启会议录制'" @click="commandRecord">
+                        <img v-if="buttons.commandRecord && !buttons.isRecord"
+                             :src="baseUrl+'images/zk-leader/able/zhihui/commandRecord.png'"/>
+                        <img v-if="buttons.commandRecord && buttons.isRecord"
+                             :src="baseUrl+'images/zk-leader/able/zhihui/commandRecordPause.png'">
                     </div>
                     <div :class="'option-button '+(buttons.commandReminder?'':'disable')"
                          :title="buttons.isRemind?'关闭指挥提醒':'开启指挥提醒'" @click="commandRemind">
@@ -131,12 +134,14 @@
                     </div>
                     <div :class="'option-button '+(buttons.commandRestart?'':'disable')"
                          :title="!buttons.isPause?'开始指挥':'恢复指挥'" @click="startCommand">
-                        <img v-if="buttons.commandRestart" :src="baseUrl+'images/zk-leader/able/zhihui/commandRestart.png'"/>
+                        <img v-if="buttons.commandRestart"
+                             :src="baseUrl+'images/zk-leader/able/zhihui/commandRestart.png'"/>
                         <img v-else :src="baseUrl+'images/zk-leader/disable/commandRestart.png'"/>
                     </div>
                     <div :class="'option-button '+(buttons.commandPause?'':'disable')" title="暂停指挥"
                          @click="pauseCommand">
-                        <img v-if="buttons.commandPause" :src="baseUrl+'images/zk-leader/able/zhihui/commandPause.png'"/>
+                        <img v-if="buttons.commandPause"
+                             :src="baseUrl+'images/zk-leader/able/zhihui/commandPause.png'"/>
                         <img v-else :src="baseUrl+'images/zk-leader/disable/commandPause.png'"/>
                     </div>
                     <div :class="'option-button '+(buttons.exitCommand?'':'disable')" title="退出指挥" @click="exitCommand">
@@ -259,6 +264,117 @@
                         </el-scrollbar>
                     </div>
                 </el-tab-pane>
+                <!--设备资源-->
+                <el-tab-pane class="tabPage">
+                <span slot="label" class="myTitle">
+                <img class="fontPic" src="../../../../../images/zk-leader/equipment.png" alt="">
+                </span>
+                <div class="scrollTab">
+                <el-scrollbar style="height:100%">
+                <el-tree :data="device.data" node-key="id" :props="props">
+                <span class="headline" slot-scope="{node,data}">
+                <span :class="data.type==='BUNDLE'?'handDown el-icon-tickets':''"
+                style="font-size: 20px;margin: 5px;color: #00ceff"
+                @click="handleContextMenuShow($event, data)"></span>
+                <el-checkbox v-if="data.type==='BUNDLE'" @change="onDviceCheckChange(data)">
+                <span :class="data.icon"
+                :style="data.style+' position:relative; top:1px;'"></span>
+                <span class="headFont">{{data.name}}</span>
+                <el-popover
+                placement="top"
+                width="200"
+                trigger="click"
+                :content="data.name">
+                <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                </el-popover>
+                </el-checkbox>
+                <span v-else>
+                <span :class="data.icon" :style="data.style"></span>
+                <span class="sheadFont">{{data.name}}</span>
+                </span>
+                </span>
+                </el-tree>
+                </el-scrollbar>
+                </div>
+                </el-tab-pane>
+                <!--录像回放-->
+                <el-tab-pane class="tabPage">
+                <span slot="label" class="myTitle">
+                <img class="fontPic" src="../../../../../images/zk-leader/record.png" alt="">
+                </span>
+                <div class="scrollTab">
+                    <!--<span style="color: #fff">jjjjj</span>-->
+                <el-scrollbar style="height:100%">
+                <el-tree :data="record.data" node-key="id"
+                :check-strictly=true
+                :props="props"
+                :expand-on-click-node="false">
+                <span class="headline" slot-scope="{node,data}">
+                <span :class="data.type==='RECORD_PLAYBACK'?'handDown el-icon-tickets':''"
+                style="font-size: 20px;margin: 5px;color: #00ceff"
+                @click="handleContextMenuShow($event, data)"></span>
+                <el-checkbox v-if="data.type==='RECORD_PLAYBACK'" @change="onRecordCheckChange(data)">
+                <span class="icon-file-alt"
+                style="font-size:15px; position:relative; top:1px;"></span>
+                <span class="headFont">{{data.groupName}}</span>
+                <el-popover
+                placement="top"
+                width="200"
+                trigger="click"
+                :content="data.groupName">
+                <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                </el-popover>
+                </el-checkbox>
+                <span v-else>
+                <span class="icon-folder-close"></span>
+                <span class="sheadFont">{{data.groupName}}</span>
+                <el-popover
+                placement="top"
+                width="200"
+                trigger="click"
+                :content="data.groupName">
+                <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                </el-popover>
+                </span>
+                </span>
+                </el-tree>
+                    <!--<p style="color: #fff">wwww</p>-->
+                    <!--<el-tree :data="record.data" node-key="id"-->
+                             <!--:check-strictly=true-->
+                             <!--:props="props"-->
+                             <!--:expand-on-click-node="false">-->
+                <!--<span class="headline" slot-scope="{node,data}">-->
+                <!--<span :class="data.type==='RECORD_PLAYBACK'?'handDown el-icon-tickets':''"-->
+                      <!--style="font-size: 20px;margin: 5px;color: #00ceff"-->
+                      <!--@click="handleContextMenuShow($event, data)"></span>-->
+                <!--<el-checkbox v-if="data.type==='RECORD_PLAYBACK'" @change="onRecordCheckChange(data)">-->
+                <!--<span class="icon-file-alt"-->
+                      <!--style="font-size:15px; position:relative; top:1px;"></span>-->
+                <!--<span class="headFont">{{data.groupName}}</span>-->
+                <!--<el-popover-->
+                        <!--placement="top"-->
+                        <!--width="200"-->
+                        <!--trigger="click"-->
+                        <!--:content="data.groupName">-->
+                <!--<span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>-->
+                <!--</el-popover>-->
+                <!--</el-checkbox>-->
+                <!--<span v-else>-->
+                <!--<span class="icon-folder-close"></span>-->
+                <!--<span class="sheadFont">{{data.groupName}}</span>-->
+                <!--<el-popover-->
+                        <!--placement="top"-->
+                        <!--width="200"-->
+                        <!--trigger="click"-->
+                        <!--:content="data.groupName">-->
+                <!--<span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>-->
+                <!--</el-popover>-->
+                <!--</span>-->
+                <!--</span>-->
+                    <!--</el-tree>-->
+                </el-scrollbar>
+                </div>
+                </el-tab-pane>
             </el-tabs>
 
             <!-- 底部的按钮图标 -->
@@ -321,6 +437,14 @@
                     <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
                 </div>
                 <div class="customIcon" v-else="currentTab==2" @click="refreshFile">
+                    <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
+                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
+                </div>
+                <div class="customIcon" v-else="currentTab==3" @click="refreshDevice">
+                    <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
+                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
+                </div>
+                <div class="customIcon" v-else="currentTab==4" @click="refreshRecord">
                     <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
                     <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
                 </div>
@@ -404,7 +528,9 @@
 
         <!--会议列表的人员显示-->
         <div class="attendance" v-if="people">
-            <div style="text-align: center;background-color: #166094;height: 30px;line-height: 30px;font-weight:bold;color: #cfe8ff;">会议名称：{{meetName}}</div>
+            <div style="text-align: center;background-color: #166094;height: 30px;line-height: 30px;font-weight:bold;color: #cfe8ff;">
+                会议名称：{{meetName}}
+            </div>
             <div class="commandTable"
                  style="position:absolute; left:15px; top:30px; width:290px;height: 310px; bottom:50px;overflow: hidden">
                 <div style="width:100%; height:100%; position:relative;" v-loading="group.loading">
@@ -419,10 +545,12 @@
                                 <span v-if="buttons.addMember">
                                      <el-checkbox v-if="scope.data.type==='USER'" v-model="scope.data.checked"
                                                   @change="onCommandUserCheckChange(scope.data)">
-                                    <span :class="scope.data.icon" :style="scope.data.style+' position:relative; top:1px;'"></span>
+                                    <span :class="scope.data.icon"
+                                          :style="scope.data.style+' position:relative; top:1px;'"></span>
                                     <span class="headFonts">{{scope.data.name}}</span>
                                     <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
-                                      <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                      <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff"
+                                            slot="reference"></span>
                                     </el-popover>
                                  </el-checkbox>
                                       <span v-else>
@@ -437,10 +565,13 @@
                                 <!--代表是成员页，没有复选框-->
                               <span v-else>
                                   <span v-if="scope.data.type==='USER'">
-                                        <span :class="scope.data.icon" :style="scope.data.style+' position:relative; top:1px;'"></span>
+                                        <span :class="scope.data.icon"
+                                              :style="scope.data.style+' position:relative; top:1px;'"></span>
                                        <span class="headFonts">{{scope.data.name}}</span>
-                                        <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
-                                          <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                        <el-popover placement="top" width="200" trigger="click"
+                                                    :content="scope.data.name">
+                                          <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff"
+                                                slot="reference"></span>
                                         </el-popover>
                                   </span>
                                   <span v-else>
@@ -456,7 +587,7 @@
                         </el-tree>
                     </el-scrollbar>
                 </div>
-            </div >
+            </div>
 
             <!--底部按钮 -->
             <div class="btnContainer">
@@ -469,18 +600,29 @@
                     <img v-if="buttons.removeMember" :src="baseUrl+'images/zk-leader/able/removeMember.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/removeMember.png'"/>
                 </div>
-                <div :class="'option-button '+(buttons.cooperativeCommand?'':'disable')" title="会议协同"
-                     @click="cooperativeCommand('会议')">
-                    <img v-if="buttons.cooperativeCommand"
-                         :src="baseUrl+'images/zk-leader/able/huiyi/cooperativeCommand.png'"/>
-                    <img v-else :src="baseUrl+'images/zk-leader/disable/cooperativeCommand.png'"/>
+                <div :class="'option-button '+(buttons.meetBtn?'':'disable')" title="指定发言" @click="assignSpeak">
+                    <img v-if="buttons.meetBtn" :src="baseUrl+'images/zk-leader/appointSpeak.png'"/>
                 </div>
-                <div :class="'option-button '+(buttons.cancelCooperative?'':'disable')" title="取消协同"
-                     @click="cancelCooperativeCommand('会议')">
-                    <i class=" icon-globe"
-                       style="position: absolute;top:6px;left: 13px;font-size: 36px;color: #fff"></i>
-                    <span style="position: absolute;bottom: 1px;color: #fff;font-size: 10px;left: 10px">取消协同</span>
+                <div :class="'option-button '+(buttons.meetBtn?'':'disable')" title="停止指定发言" @click="stopAssignSpeak">
+                    <img v-if="buttons.meetBtn" :src="baseUrl+'images/zk-leader/stopSpeak.png'"/>
                 </div>
+                <div :class="'option-button '+(buttons.meetBtn?'':'disable')" title="全员讨论" @click="allDiscuss">
+                    <img v-if="!buttons.discussion" :src="baseUrl+'images/zk-leader/discuss.png'"/>
+                    <img v-else :src="baseUrl+'images/zk-leader/stopDiscuss.png'"/>
+                </div>
+
+                <!--<div :class="'option-button '+(buttons.cooperativeCommand?'':'disable')" title="会议协同"-->
+                     <!--@click="cooperativeCommand('会议')">-->
+                    <!--<img v-if="buttons.cooperativeCommand"-->
+                         <!--:src="baseUrl+'images/zk-leader/able/huiyi/cooperativeCommand.png'"/>-->
+                    <!--<img v-else :src="baseUrl+'images/zk-leader/disable/cooperativeCommand.png'"/>-->
+                <!--</div>-->
+                <!--<div :class="'option-button '+(buttons.cancelCooperative?'':'disable')" title="取消协同"-->
+                     <!--@click="cancelCooperativeCommand('会议')">-->
+                    <!--<i class=" icon-globe"-->
+                       <!--style="position: absolute;top:6px;left: 13px;font-size: 36px;color: #fff"></i>-->
+                    <!--<span style="position: absolute;bottom: 1px;color: #fff;font-size: 10px;left: 10px">取消协同</span>-->
+                <!--</div>-->
                 <div :class="'option-button '+(buttons.commandForward?'':'disable')" title="会议转发"
                      @click="commandForward('会议')">
                     <img v-if="buttons.commandForward" :src="baseUrl+'images/zk-leader/able/huiyi/commandForward.png'"/>
@@ -511,8 +653,10 @@
                 </div>
                 <div :class="'option-button '+(buttons.commandRecord?'':'disable')"
                      :title="buttons.isRecord?'关闭会议录制':'开启会议录制'" @click="commandRecord">
-                    <img v-if="buttons.commandRecord && !buttons.isRecord" :src="baseUrl+'images/zk-leader/able/huiyi/commandRecord.png'"/>
-                    <img v-if="buttons.commandRecord && buttons.isRecord" :src="baseUrl+'images/zk-leader/able/huiyi/commandRecordPause.png'">
+                    <img v-if="buttons.commandRecord && !buttons.isRecord"
+                         :src="baseUrl+'images/zk-leader/able/huiyi/commandRecord.png'"/>
+                    <img v-if="buttons.commandRecord && buttons.isRecord"
+                         :src="baseUrl+'images/zk-leader/able/huiyi/commandRecordPause.png'">
                 </div>
                 <div :class="'option-button '+(buttons.commandReminder?'':'disable')"
                      :title="buttons.isRemind?'关闭会议提醒':'开启会议提醒'" @click="commandRemind">
@@ -528,21 +672,24 @@
                     <img v-if="buttons.commandRestart" :src="baseUrl+'images/zk-leader/able/huiyi/commandRestart.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/commandRestart.png'"/>
                 </div>
+                <div :class="'option-button '+(buttons.isSpeaking?'':'disable')" title="停止发言" @click="stopSpeak">
+                    <img v-if="buttons.isSpeaking" :src="baseUrl+'images/zk-leader/hangUp.png'"/>
+                </div>
                 <div :class="'option-button '+(buttons.commandPause?'':'disable')" title="暂停会议" @click="pauseCommand">
                     <img v-if="buttons.commandPause" :src="baseUrl+'images/zk-leader/able/huiyi/commandPause.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/commandPause.png'"/>
                 </div>
-                <div :class="'option-button '+(buttons.exitCommand?'':'disable')" title="退出会议" @click="exitCommand('会议')">
+                <div :class="'option-button '+(buttons.exitCommand?'':'disable')" title="退出会议"
+                     @click="exitCommand('会议')">
                     <img v-if="buttons.exitCommand" :src="baseUrl+'images/zk-leader/able/huiyi/exitCommand.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/exitCommand.png'"/>
                 </div>
             </div>
             <!--悬浮按钮-->
-            <!--<div class="suspend" title="发言" @mousedown="itemMousemove">-->
-               <!--<div class="speakPic">-->
-                   <!--<img :src="baseUrl+'images/zk-leader/speak.png'" alt="">-->
-               <!--</div>-->
-            <!--</div>-->
+          <div v-if="buttons.speak">
+              <!--<img class="suspend" v-if="buttons.isSpeaking" :src="baseUrl+'images/zk-leader/speaking.png'" title="正在发言" @mousedown="itemMousemove">-->
+              <img class="suspend" :src="baseUrl+'images/zk-leader/speak.png'" title="申请发言" @mousedown="itemMousemove" @click="applySpeak">
+          </div>
         </div>
 
     </div>

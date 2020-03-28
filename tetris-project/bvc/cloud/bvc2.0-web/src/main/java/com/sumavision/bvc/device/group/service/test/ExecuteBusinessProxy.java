@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.meeting.logic.ExecuteBusiness;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
@@ -36,7 +37,7 @@ public class ExecuteBusinessProxy {
 			LogicBO protocal, 
 			String message) throws Exception{
 		
-		String jsonProtocal = JSON.toJSONString(protocal);
+		String jsonProtocal = JSON.toJSONString(protocal, SerializerFeature.DisableCircularReferenceDetect);
 		LOG.info(message);
 		LOG.info(jsonProtocal);
 		//System.out.println(message);
