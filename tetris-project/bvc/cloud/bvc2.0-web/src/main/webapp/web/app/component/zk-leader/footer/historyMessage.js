@@ -5,6 +5,7 @@ define([
     'vue',
     'config',
     'element-ui',
+    'date',
     'css!' + window.APPPATH + 'component/zk-leader/footer/historyMessage.css'
 ], function (tpl, ajax, $, Vue, config) {
 
@@ -51,12 +52,20 @@ define([
             //发送消息
             sendInstantMessage: function () {
                 var self = this;
-                ajax.post('/message/broadcast/instant/message', {
-                    message: self.instantMessage
-                }, function () {
-                    self.pushMessage('我：' + self.instantMessage);
-                    self.instantMessage = '';
-                    self.qt.success('发送成功!');
+                self.qt.get(['currentGroupId'], function (variables) {
+                    var currentGroupId = variables.currentGroupId;
+                    if(!currentGroupId){
+                        self.qt.error('未获取到当前会议id!');
+                    }else{
+                        ajax.post('/command/message/broadcast/instant/message', {
+                            id:currentGroupId,
+                            message: self.instantMessage
+                        }, function () {
+                            self.pushMessage('我 '+new Date().format('yyyy-MM-dd hh:mm:ss')+'：' + self.instantMessage);
+                            self.instantMessage = '';
+                            self.qt.success('发送成功!');
+                        });
+                    }
                 });
             },
             //组合按键发送消息
@@ -73,9 +82,27 @@ define([
                 self.qt.invoke('hideService');
             },
             //历史消息弹框
+            showMessagePanel:function(){
+                var self = this;
+                self.qt.invoke('hideService');
+            },
+            //历史消息弹框
             showMessagePanel: function () {
                 var self = this;
-                self.qt.window('/router/zk/leader/footer/pop', null, {width: '100%', height: '100%'});
+                self.qt.get(['currentGroupId'], function (variables) {
+                    var currentGroupId = variables.currentGroupId;
+                    if(!currentGroupId){
+                        self.qt.error('未获取到当前会议id!');
+                    }else {
+                        self.qt.window('/router/zk/leader/footer/pop', {currentGroupId: currentGroupId}, {width:'100%', height:'100%'});
+                    }
+                });
+
+            },
+            //录制任务管理
+            recManage:function () {
+                var self = this;
+                self.qt.window('/router/zk/leader/rec', null, {width: '100%', height: '100%'});
             },
             //分屏事件
             layoutChange: function (index) {
@@ -283,7 +310,6 @@ define([
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
                     self.qt.warning(businessInfo);
-                    // self.pushMessage(businessInfo);
                     self.qt.invoke('callUserStop', $.toJSON({serial: serial}));
                 });
                 //websocket 停止呼叫
@@ -355,6 +381,7 @@ define([
                         if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('cooperationGrant', e.splits);
                     }
+                    self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
                 });
                 //成员拒绝协同指挥
                 self.qt.on('cooperationRefuse', function (e) {
@@ -368,6 +395,7 @@ define([
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('cooperationRevoke', e.splits);
                     }
+                    self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
                 });
 
                 //主席同意申请人发言
@@ -385,8 +413,7 @@ define([
                     var e = e.params;
                     self.qt.info(e.businessInfo);
                     if (e.splits && e.splits.length > 0) {
-                        //TODO:qt仿照协同的这个方法改下
-                        self.qt.invoke('cooperationGrant', e.splits);
+                        self.qt.invoke('speakStart', e.splits);
                     }
                 });
                 //通知停止发言/停止讨论
@@ -394,7 +421,7 @@ define([
                     var e = e.params;
                     self.qt.warning(e.businessInfo);
                     if (e.splits && e.splits.length > 0) {
-                        self.qt.invoke('cooperationRevoke', e.splits);
+                        self.qt.invoke('speakStop', e.splits);
                     }
                 });
 
@@ -425,11 +452,14 @@ define([
                 });
 
                 self.qt.on('commandMemberOnline', function (e) {
-                    e = e.params;
-                    self.qt.info(e.businessInfo);
-                    if (e.splits && e.splits.length > 0) {
-                        self.qt.invoke('groupMembers', $.toJSON(e.splits));
-                    }
+                  e = e.params;
+                  self.qt.info(e.businessInfo);
+                  if (e.splits && e.splits.length > 0) {
+                      self.qt.invoke('groupMembers', $.toJSON(e.splits));
+                  }
+                  setTimeout(function(){
+                    self.qt.linkedWebview('rightBar', {id:'yanxiaochao', params:e});
+                  }, 2000);
                 });
 
                 self.qt.on('commandMemberOffline', function (e) {
@@ -438,6 +468,9 @@ define([
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('commandExit', e.splits);
                     }
+                    setTimeout(function(){
+                      self.qt.linkedWebview('rightBar', {id:'yanxiaochao', params:e});
+                    }, 2000);
                 });
 
                 self.qt.on('commandPause', function (e) {
@@ -450,40 +483,15 @@ define([
                     self.qt.invoke('commandPauseRecover', e.splits);
                 });
 
+                // 监听强退成员时
                 self.qt.on('commandMemberDelete', function (e) {
+                  self.qt.linkedWebview('rightBar',{id:'reduceMembers',params:e});
                     e = e.params;
-                    self.qt.info(e.businessInfo);
-                    var memberIds = e.memberIds;
-                    var beDeleted = false;
-                    if (memberIds && memberIds.length > 0) {
-                        for (var i = 0; i < memberIds.length; i++) {
-                            if (memberIds[i] == self.user.id) {
-                                beDeleted = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (beDeleted) {
-                        for (var i = 0; i < self.group.entered.length; i++) {
-                            if (self.group.entered[i].id == e.businessId) {
-                                self.group.entered.splice(i, 1);
-                                break;
-                            }
-                        }
-                        if (self.group.currentId == e.businessId) {
-                            if (self.group.entered.length > 0) {
-                                self.group.currentId = self.group.entered[0].id;
-                                self.group.current = self.group.entered[0];
-                                self.currentGroupChange(self.group.currentId);
-                            } else {
-                                self.group.currentId = '';
-                                self.group.current = '';
-                            }
-                        }
-                    }
-                    if (e.splits && e.splits.length > 0) {
-                        self.qt.invoke('commandMemberDelete', e.splits);
-                    }
+                    self.qt.info(e.businessInfo);   
+                });
+
+                self.qt.on('commandMemberDeleteProxy', function (e) {
+                  self.qt.invoke('commandMemberDelete', e.params);    
                 });
 
                 self.qt.on('commandForwardDevice', function (e) {

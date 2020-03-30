@@ -402,6 +402,20 @@ public class RouterController {
 	}
 	
 	/**
+	 * 底部  录制任务管理<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月28日 上午17:21:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/rec")
+	public ModelAndView zkLeaderRec(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/recManage/recManage");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 头部  设置作战时间<br/>
 	 * <b>作者:</b>yxc<br/>
 	 * <b>版本：</b>1.0<br/>
