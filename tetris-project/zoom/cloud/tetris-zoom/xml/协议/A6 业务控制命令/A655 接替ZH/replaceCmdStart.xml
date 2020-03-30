@@ -1,0 +1,9 @@
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>replacestart</operation>
+	<seq>3fa306388e4d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<op>00000000001</op>
+	<targid>00000000002</targid>
+</notify>

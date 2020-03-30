@@ -1,0 +1,38 @@
+<control>
+	<commandname>group</commandname>
+	<operation>create</operation>
+	<seq>1882caf88e2411e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<!-- 组ID，组ID不允许重复，应唯一 -->
+	<gid>123</gid>
+	<!-- 主题，创建和更新组时携带，销毁组时不携带 -->
+	<subject>XX项目第三次研讨会</subject>
+	<!-- 组信息，创建和更新组时携带，销毁组时不携带 -->
+	<bizinfo>
+		<!-- 组业务类型，cnf表示会议组，cmd表示ZH组-->
+		<biztype>cnf</biztype>
+		<!-- 组名称 -->
+		<bizname>研发一组</bizname>
+		<!-- 创建者ID -->
+		<creatorid>00000000001</creatorid>
+		<!-- 最上级成员ID -->
+		<topid>00000000001</topid>
+		<!-- 成员列表 -->
+		<mlist>
+			<!-- 主席没有pid标签，其他都有-->
+			<minfo>
+				<mid>00000000001</mid>
+				<mname>li</mname>
+				<mtype>usr</mtype>
+			</minfo>
+			<minfo>
+				<mid>00000000002</mid>
+				<mname>张三</mname>
+				<!-- 成员类型，en表示编码设备，ende表示编解码设备,usr表示用户 -->
+				<mtype>usr</mtype>
+				<!-- 上级成员ID；会议组成员的上级成员ID为主席；ZH组成员的上级成员为其直接上级；主席 和最高级ZH员无上级不应显示此标签   -->
+				<pid>00000000001</pid>
+			</minfo>
+		</mlist>
+	</bizinfo>
+</control> 

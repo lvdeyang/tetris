@@ -31,7 +31,7 @@ public interface ZoomMemberDAO extends BaseDAO<ZoomMemberPO>{
 	 * @param boolean join 是否入会
 	 * @return List<Long> 会议成员id列表
 	 */
-	@Query(value = "select member.id from com.sumavision.tetris.zoom.ZoomMemberPO member where member.zoomId=?1 and member.id not in and join=?3")
+	@Query(value = "select m.id from com.sumavision.tetris.zoom.ZoomMemberPO m where m.zoomId=?1 and m.id not in ?2 and m.join=?3")
 	public List<Long> findIdByZoomIdAndIdNotIn(Long zoomId, Collection<Long> exceptId, boolean join);
 	
 	/**

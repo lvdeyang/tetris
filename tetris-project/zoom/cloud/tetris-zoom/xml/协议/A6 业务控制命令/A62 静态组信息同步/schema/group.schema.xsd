@@ -1,0 +1,83 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+			elementFormDefault="qualified"      
+			attributeFormDefault="unqualified">
+
+	<!-- 静态组管理操作，包括创建组、更新组、销毁组-->
+	<xsd:simpleType name="operationType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="create"/>
+			<xsd:enumeration value="update"/>
+			<xsd:enumeration value="destroy"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 组业务类型，cnf表示会议组，cmd表示ZH组-->
+	<xsd:simpleType   name="bizType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="cnf"/>
+			<xsd:enumeration  value="cmd"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 成员类型，en表示编码设备，ende表示编解码设备,usr表示用户-->
+	<xsd:simpleType name="mType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="en"/>
+			<xsd:enumeration   value="ende"/>
+			<xsd:enumeration value="usr"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!--成员信息-->
+	<xsd:complexType name="mitemType">
+		<xsd:sequence>
+			<xsd:element name="mid" type="userIDType"/>
+			<xsd:element  name="mname"  type="xsd:string"/>
+			<!-- 成员类型 -->
+			<xsd:element name="mtype" type="mType"/>
+			<!-- 上级成员ID；会议组成员的上级成员ID为主席；ZH组成员的上级成员为其直接上级；主席 和最高级ZH员无上级不应显示此标签   -->
+			<xsd:element name="pid" type="userIDType" minOccurs="0" maxOccurs="1"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 成员列表，应包含当前组所有成员 -->
+	<xsd:complexType   name="mlistType">
+		<xsd:sequence>
+		<xsd:element name="minfo" type="mitemType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 组信息 -->
+	<xsd:complexType name="bizinfoType">
+		<xsd:sequence>
+			<!-- 组业务类型 -->
+			<xsd:element name="biztype" type="bizType"/>
+			<!-- 组名称 -->
+			<xsd:element name="bizname" type="xsd:string"/>
+			<!-- 创建者ID -->
+			<xsd:element name="creatorid" type="userIDType"/>
+			<!-- 最上级成员ID -->
+			<xsd:element  name="topid"  type="userIDType"/>
+			<!-- 成员列表 -->
+			<xsd:element name="mlist" type="mlistType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element  name="control">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="commandname" type="xsd:string"  fixed="group"/>
+				<xsd:element name="operation" type="operationType"/>
+				<xsd:element name="seq" type="uuidType"/>
+				<xsd:element name="ts" type="xsd:unsignedLong"/>
+				<!-- 组ID，组ID不允许重复，应唯一 -->
+				<xsd:element name="gid" type="xsd:string"/>
+				<!-- 主题，创建和更新组时携带，销毁组时不携带 -->
+				<xsd:element name="subject" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+				<!-- 组信息，创建和更新组时携带，销毁组时不携带 -->
+				<xsd:element name="bizinfo" type="bizinfoType" maxOccurs="1"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

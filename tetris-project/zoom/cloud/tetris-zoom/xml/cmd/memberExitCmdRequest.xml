@@ -1,0 +1,12 @@
+<!-- 退出指挥请求 -->
+<request>
+	<commandname>bizcmd</commandname>
+	<operation>mquitreq</operation>
+	<seq>3fa306388e4d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<!--  退出成员ID -->
+	<op>00000000002</op>
+	<!-- 可处理成员退出请求的成员ID -->
+	<mid>00000000001</mid>
+</request>

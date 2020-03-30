@@ -48,12 +48,12 @@ public class ApiZoomAndroidSourceGroupController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/create/favorites")
+	@RequestMapping(value = "/create/favorites/group")
 	public Object createFavorites(
 			String name,
 			HttpServletRequest request) throws Exception{
 		
-		return sourceGroupService.createFavorites(name);
+		return sourceGroupService.createFavoritesGroup(name);
 	}
 	
 	
@@ -67,12 +67,12 @@ public class ApiZoomAndroidSourceGroupController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/remove/favorites")
+	@RequestMapping(value = "/remove/favorites/group")
 	public Object removeFavorites(
 			Long id, 
 			HttpServletRequest request) throws Exception{
 		
-		sourceGroupService.removeFavorites(id);
+		sourceGroupService.removeFavoritesGroup(id);
 		return null;
 	}
 	

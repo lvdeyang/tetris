@@ -54,7 +54,7 @@ public class SourceGroupService {
 	 * @param String name 分组名称
 	 * @return SourceGroupVO 分组
 	 */
-	public SourceGroupVO createFavorites(String name) throws Exception{
+	public SourceGroupVO createFavoritesGroup(String name) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
@@ -75,7 +75,7 @@ public class SourceGroupService {
 	 * <b>日期：</b>2020年3月5日 上午11:01:41
 	 * @param Long id 收藏夹组id
 	 */
-	public void removeFavorites(Long id) throws Exception{
+	public void removeFavoritesGroup(Long id) throws Exception{
 		SourceGroupPO sourceGroup = sourceGroupDao.findOne(id);
 		if(sourceGroup == null) return;
 		List<FavoritesPO> favorites = favoritesDao.findBySourceGroupId(sourceGroup.getId());

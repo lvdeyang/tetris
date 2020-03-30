@@ -1,0 +1,14 @@
+<response>
+	<commandname>pointindexoperation</commandname>
+	<operation>response</operation>
+	<seq>e27738e08e1911e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<devname>member1</devname>
+	<devid>00000000003</devid>
+	<pointindexlist>
+		<pointindexitem>
+			<pointindexname>领导1</pointindexname>
+			<pointindexvalue>128</pointindexvalue>
+		</pointindexitem>
+	</pointindexlist>
+</response>

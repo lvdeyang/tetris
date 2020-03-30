@@ -1,0 +1,142 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+			elementFormDefault="qualified"      
+			attributeFormDefault="unqualified">
+			
+	<!-- 命令名称类型，bizcnf表示会议组业务命令，bizcmd表示ZH组业务命令 -->
+	<xsd:simpleType name="commandnameType">
+		<xsd:restriction base="xsd:string">
+		<xsd:enumeration value="bizcnf"/>
+		<xsd:enumeration value="bizcmd"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 组业务操作类型，包括启动、暂停、恢复、结束、成员加入通知、
+		 成员退出通知、成员退出请 求、成员退出响应、成员状态更新、
+		 全量信息同步、媒体转发授权/取消、媒体转发通知/取消、开启/停 止讨论模式、
+		 发言通知、取消发言、申请发言请求、申请发言响应、开始/结束专向ZH、
+		 开始/结束协 同ZH、开始/结束越级ZH、开始/结束授权ZH、开始/结束接替ZH-->
+	<xsd:simpleType name="operationType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="start"/>
+			<xsd:enumeration value="pause"/>
+			<xsd:enumeration value="resume"/>
+			<xsd:enumeration value="stop"/>
+			<xsd:enumeration value="maddinc"/>
+			<xsd:enumeration value="mquit"/>
+			<xsd:enumeration value="mquitreq"/>
+			<xsd:enumeration value="mquitres"/>
+			<xsd:enumeration value="mstatus"/>
+			<xsd:enumeration value="maddfull"/>
+			<xsd:enumeration value="fauthon"/>
+			<xsd:enumeration value="fauthoff"/>
+			<xsd:enumeration value="pullmediastart"/>
+			<xsd:enumeration value="pullmediastop"/>
+			<xsd:enumeration value="discstart"/>
+			<xsd:enumeration value="discstop"/>
+			<xsd:enumeration value="spkset"/>
+			<xsd:enumeration value="spkcal"/>
+			<xsd:enumeration value="spkreq"/>
+			<xsd:enumeration value="spkres"/>
+			<xsd:enumeration value="secretstart"/>
+			<xsd:enumeration value="secretstop"/>
+			<xsd:enumeration value="corpstart"/>
+			<xsd:enumeration value="corpstop"/>
+			<xsd:enumeration value="crossstart"/>
+			<xsd:enumeration value="crossstop"/>
+			<xsd:enumeration value="authstart"/>
+			<xsd:enumeration value="authstop"/>
+			<xsd:enumeration value="replacestart"/>
+			<xsd:enumeration value="replacestop"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 组业务类型，cnf表示会议组，cmd表示ZH组-->
+	<xsd:simpleType name="bizType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="cnf"/>
+			<xsd:enumeration value="cmd"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	
+	<!-- 业务的组类型，temp表示临时组，preset表示静态组-->
+	<xsd:simpleType  name="groupType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration   value="temp"/>
+			<xsd:enumeration value="preset"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 成员类型，en表示编码设备，ende表示编解码设备，usr表示用户-->
+	<xsd:simpleType name="mType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="en"/>
+			<xsd:enumeration   value="ende"/>
+			<xsd:enumeration value="usr"/>
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!--成员信息-->
+	<xsd:complexType name="mitemType">
+		<xsd:sequence>
+			<xsd:element name="mid" type="userIDType"/>
+			<xsd:element name="mname" type="xsd:string"/>
+			<!-- 成员类型 -->
+			<xsd:element name="mtype" type="mType"/>
+			<!-- 上级成员ID -->
+			<xsd:element name="pid" type="userIDType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 成员列表-->
+	<xsd:complexType name="mlistType">
+		<xsd:sequence>
+			<xsd:element name="minfo" type="mitemType" minOccurs="0" maxOccurs="unbounded"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 组信息 -->
+	<xsd:complexType name="bizinfoType">
+		<xsd:sequence>
+			<!-- 组业务类型 -->
+			<xsd:element name="biztype" type="bizType"/>
+			<!-- 组名称 -->
+			<xsd:element name="bizname" type="xsd:string"/>
+			<!-- 创建者ID -->
+			<xsd:element name="creatorid" type="userIDType"/>
+			<!-- 最上级成员ID -->
+			<xsd:element  name="topid"  type="userIDType"/>
+			<!-- 成员列表 -->
+			<xsd:element name="mlist" type="mlistType"/>
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element  name="notify">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- commandname命令名称-->
+				<xsd:element name="commandname" type="commandnameType"/>
+				<!-- 操作名称，启动分组业务取值为start -->
+				<xsd:element name="operation" type="operationType"/>
+				<!-- seq命令序号-->
+				<xsd:element name="seq" type="uuidType"/>
+				<xsd:element name="ts" type="xsd:unsignedLong"/>
+				<!-- 业务组ID，若业务组属于静态组（业务组类型取值为preset，静态组操作见组信息同步）， 
+					   业务组ID等于静态组ID；若业务组为临时业务组（业务组类型取值为temp），组ID需动态生成且不能与 静态组ID重复 -->
+				<xsd:element name="gid" type="xsd:string"/>
+				<!-- 本操作发起成员ID-->
+				<xsd:element name="op" type="userIDType"/>
+				<!-- 业务组类型，temp表示临时业务，preset表示基于静态组的业务-->
+				<xsd:element name="grouptype" type="groupType"/>
+				<!-- 业务主题 -->
+				<xsd:element name="subject" type="xsd:string"/>
+				<!-- 业务开始时间，格式为YYYY-MM-DD HH:mm:SS -->
+				<xsd:element name="stime" type="xsd:string"/>
+				<!-- bizinfo为业务信息 -->
+				<!-- 若业务组属于静态组，bizinfo信息可以不携带-->
+				<xsd:element name="bizinfo" type="bizinfoType" minOccurs="0" maxOccurs="1"/>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

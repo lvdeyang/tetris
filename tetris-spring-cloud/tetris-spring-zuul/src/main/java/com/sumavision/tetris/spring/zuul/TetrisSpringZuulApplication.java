@@ -31,6 +31,8 @@ import com.sumavision.tetris.spring.zuul.auth.filter.server.ApiServerLoginFilter
 import com.sumavision.tetris.spring.zuul.auth.filter.terminal.ApiTerminalLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.thirdpart.ApiThirdpartLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.tvos.ApiTvosLoginFilter;
+import com.sumavision.tetris.spring.zuul.auth.filter.zoom.ApiZoomAndroidLoginFilter;
+import com.sumavision.tetris.spring.zuul.auth.filter.zoom.ApiZoomQtLoginFilter;
 
 @ComponentScan(basePackages = {"com.sumavision.tetris"})
 //这个地方不能扫描user-feign中的filter
@@ -125,6 +127,17 @@ public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
 	@Bean
 	public ServletDetectionFilter servletDetectionFilter(){
 		return new MultipartFilter();
+	}
+	
+	
+	@Bean
+	public ApiZoomAndroidLoginFilter apiZoomAndroidLoginFilter(){
+		return new ApiZoomAndroidLoginFilter();
+	}
+	
+	@Bean
+	public ApiZoomQtLoginFilter apiZoomQtLoginFilter(){
+		return new ApiZoomQtLoginFilter();
 	}
 	
 	@Bean

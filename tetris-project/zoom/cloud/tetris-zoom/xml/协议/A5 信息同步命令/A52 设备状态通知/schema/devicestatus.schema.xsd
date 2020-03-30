@@ -1,0 +1,39 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<!-- 设备状态，0-不在线，1-在线,2-会话中有媒体连接（仅编解码设备使用状态2） -->
+	<xsd:simpleType name="status_type">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="0" />
+			<xsd:enumeration value="1" />
+			<xsd:enumeration value="2" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 设备类型（包括编解码设备和服务设备），2表示编码设备，3表示解码设备，6表示媒体处理 服务单元，11表示编解码一体设备 -->
+	<!-- 信令控制服务单元和应用服务单元的状态在应用服务单元中已知，无需采用当前命令额外通 知 -->
+	<xsd:simpleType name="devType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="2" />
+			<xsd:enumeration value="3" />
+			<xsd:enumeration value="6" />
+			<xsd:enumeration value="11" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:element name="notify">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="commandname" type="xsd:string" />
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<xsd:element name="devid" type="deviceIDType" minOccurs="1" />
+				<xsd:element name="devtype" type="devType" minOccurs="1" />
+				<xsd:element name="status" type="status_type" minOccurs="0" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

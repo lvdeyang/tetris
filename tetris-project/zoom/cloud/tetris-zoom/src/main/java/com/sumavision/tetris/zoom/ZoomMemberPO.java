@@ -92,7 +92,7 @@ public class ZoomMemberPO extends AbstractBasePO{
 		this.userNickname = userNickname;
 	}
 
-	@Column(name = "RENAME")
+	@Column(name = "RE_NAME")
 	public String getRename() {
 		return rename;
 	}
@@ -137,7 +137,7 @@ public class ZoomMemberPO extends AbstractBasePO{
 		this.spokesman = spokesman;
 	}
 
-	@Column(name = "JOIN")
+	@Column(name = "JO_IN")
 	public Boolean getJoin() {
 		return join;
 	}

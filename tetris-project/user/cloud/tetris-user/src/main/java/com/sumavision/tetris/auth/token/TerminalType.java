@@ -17,9 +17,12 @@ public enum TerminalType {
 	ANDROID_TVOS("安卓机顶盒", "/api/tvos", 4*60*60),
 	QT_MEDIA_EDITOR("qt快编软件", "/api/qt", 4*60*60),
 	QT_POLLING("qt轮询软件", "/api/polling", 4*60*60),
-	QT_CATALOGUE("qt编单软件", "/api/scheduel", 4*60*60),
+	QT_CATALOGUE("qt编单软件", "/api/schedule", 4*60*60),
 	QT_ZK("qt指控软件", "/api/zk", 4*60*60),
-	API("api调用", "/api/server", 0);
+	API("api调用", "/api/server", 0),
+	G01_WEB("g01web端", "/api/g01/web", 4*60*60),
+	ZOOM_ANDROID("安卓会议端", "/api/zoom/android", 4*60*60),
+	ZOOM_QT("qt会议端", "/api/zoom/qt", 4*60*60);
 	
 	/** 终端类型名称 */
 	private String name;

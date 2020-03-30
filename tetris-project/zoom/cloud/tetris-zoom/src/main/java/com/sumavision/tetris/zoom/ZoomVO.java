@@ -26,7 +26,7 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 	private String mode;
 	
 	/** 创建者用户id */
-	private Long creatorUserId;
+	private String creatorUserId;
 	
 	/** 创建者用户昵称 */
 	private String creatorUserNickname;
@@ -94,11 +94,11 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 		return this;
 	}
 
-	public Long getCreatorUserId() {
+	public String getCreatorUserId() {
 		return creatorUserId;
 	}
 
-	public ZoomVO setCreatorUserId(Long creatorUserId) {
+	public ZoomVO setCreatorUserId(String creatorUserId) {
 		this.creatorUserId = creatorUserId;
 		return this;
 	}
@@ -192,7 +192,7 @@ public class ZoomVO extends AbstractBaseVO<ZoomVO, ZoomPO>{
 			.setStatus(entity.getStatus().toString())
 			.setSecretLevel(entity.getSecretLevel().toString())
 			.setMode(entity.getMode().toString())
-			.setCreatorUserId(entity.getCreatorUserId())
+			.setCreatorUserId(entity.getCreatorUserId().toString())
 			.setCreatorUserNickname(entity.getCreatorUserNickname());
 		return this;
 	}

@@ -76,7 +76,8 @@ public class AccessSecurityFilter implements Filter{
 				!requestUri.startsWith("/tetris-p2p") &&
 				!requestUri.startsWith("/tetris-resource") &&
 				!requestUri.startsWith("/tetris-capacity") &&
-				!requestUri.startsWith("/tetris-bvc-business")){
+				!requestUri.startsWith("/tetris-bvc-business") &&
+				!requestUri.startsWith("/tetris-zoom")){
 			
 			LOG.error("----------------------------");
 			LOG.error(requestUri);

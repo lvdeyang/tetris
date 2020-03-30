@@ -1,0 +1,66 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	        elementFormDefault="qualified" 
+	        attributeFormDefault="unqualified">
+	        
+	<xsd:include schemaLocation="common.xsd" />
+	
+	<!-- 媒体推送操作，start表示开始、stop表示停止 -->
+	<xsd:simpleType name="operation_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="start" />
+			<xsd:enumeration value="stop" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="audio_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="g.711" />
+			<xsd:enumeration value="aac-lc" />
+			<xsd:enumeration value="g.729a" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="video_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="h.264" />
+			<xsd:enumeration value="h.265" />
+			<xsd:enumeration value="javs" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="ring_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="online" />
+			<xsd:enumeration value="offline" />
+			<xsd:enumeration value="ringing" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:complexType name="src_type">
+		<xsd:sequence>
+			<!-- userid可以为用户ID或设备ID -->
+			<xsd:element name="userid" type="userIDType" minOccurs="1" />
+			<xsd:element name="postfix" type="xsd:string" minOccurs="0" />
+			<xsd:element name="ring" type="ring_type" />
+			<!-- 若包含url值，表示点播用户或设备的媒体文件；若不包含url值，表示直接点播用户或设备 -->
+			<xsd:element name="url" type="xsd:string" minOccurs="0" />
+			<xsd:element name="video" type="video_type" default="h.264" minOccurs="0" />
+			<xsd:element name="audio" type="audio_type" default="g.711" minOccurs="0" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="control">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="commandname" type="xsd:string" />
+				<xsd:element name="operation" type="operation_type" />
+				<xsd:element name="seq" type="xsd:string" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<xsd:element name="src" type="src_type" />
+				<xsd:element name="dst" type="src_type" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

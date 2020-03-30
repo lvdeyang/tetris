@@ -50,7 +50,7 @@ public class ContactsPO extends AbstractBasePO{
 		this.contactsUserNickname = contactsUserNickname;
 	}
 
-	@Column(name = "RENAME")
+	@Column(name = "RE_NAME")
 	public String getRename() {
 		return rename;
 	}

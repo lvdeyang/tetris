@@ -1,0 +1,87 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<xsd:simpleType name="Integer0_15">
+		<xsd:restriction base="xsd:integer">
+			<xsd:maxInclusive value="15" />
+			<xsd:minInclusive value="0" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="Integer0_7">
+		<xsd:restriction base="xsd:integer">
+			<xsd:maxInclusive value="7" />
+			<xsd:minInclusive value="0" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="Integer1_9">
+		<xsd:restriction base="xsd:integer">
+			<xsd:maxInclusive value="9" />
+			<xsd:minInclusive value="1" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="Integer0_99">
+		<xsd:restriction base="xsd:integer">
+			<xsd:maxInclusive value="99" />
+			<xsd:minInclusive value="0" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="FontName_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="宋体" />
+			<xsd:enumeration value="黑体" />
+			<xsd:enumeration value="楷体" />
+			<xsd:enumeration value="仿宋" />
+			<xsd:enumeration value="微软雅黑" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:simpleType name="Color_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:length value="11" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 字幕内容，字幕最大长度为32个全角字符 -->
+	<xsd:simpleType name="Text_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:maxLength value="32" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:element name="control">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="commandname" type="xsd:string" />
+				<xsd:element name="seq" type="seqType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<xsd:element name="devname" type="devnameType" />
+				<!-- 设备编码id类型 -->
+				<xsd:element name="devid" type="deviceIDType" />
+				<!-- OSD行号（可选，取值0-7），缺省为0 -->
+				<xsd:element name="index" type="Integer0_7" />
+				<!-- 是否显示，0-不显示 1-显示（可选），缺省为1 -->
+				<xsd:element name="show" type="xsd:boolean" />
+				<!-- OSD居左占比（与屏幕宽度的相对占比，取值0-99，0表示最靠左）（可选），缺省为20 -->
+				<xsd:element name="left" type="Integer0_99" />
+				<!-- OSD居上占比（与屏幕高度的相对占比，取值0-99，0表示最靠上）（可选），当行号为0时缺 省为20，当行号为1时缺省为30，当行号为2时缺省为40，当行号为3时缺省为50，当行号为4时缺省为60， 
+					当行号为5时缺省为70，当行号为6时缺省为80，当行号为7时缺省为90 -->
+				<xsd:element name="top" type="Integer0_99" />
+				<!-- OSD字体名称（可选），缺省为"宋体" -->
+				<xsd:element name="fontname" type="FontName_type" />
+				<!-- OSD字体大小（可选，1-9表示字体大小相对值，代表字体大小支持9档调节，缺省为5，字体 大小相对值应根据解码设备实际单位完成映射 -->
+				<xsd:element name="fontsize" type="Integer1_9" />
+				<!-- OSD字体颜色，字符格式（R,G,B）（R=0-255,G=0-255,B=0-255）（可选），缺省为"255-255- 255" -->
+				<xsd:element name="color" type="Color_type" default="255-255-255" />
+				<!-- OSD字体内容（必选），UTF-8编码，空表示清空字幕 -->
+				<xsd:element name="text" type="Text_type" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

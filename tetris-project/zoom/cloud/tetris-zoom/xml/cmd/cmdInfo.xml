@@ -1,0 +1,75 @@
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>maddfull</operation>
+	<seq></seq>
+	<ts></ts>
+	<gid></gid>
+	<op></op>
+	<grouptype>preset</grouptype>
+	<subject></subject>
+	<stime></stime>
+	<bizinfo>
+		<biztype>cmd</biztype>
+		<bizname></bizname>
+		<creatorid></creatorid>
+		<topid></topid>
+		<mlist>
+			<minfo>
+				<mid></mid>
+				<mname></mname>
+				<!-- 成员类型，en表示编码设备，ende表示编解码设备,usr表示用户 -->
+				<mtype></mtype>
+				<!-- 成员状态，1表示正在业务、2表示暂时离开、3表示已退出 -->
+				<mstatus></mstatus>
+				<pid></pid>
+			</minfo>
+		</mlist>
+	</bizinfo>
+	
+	<cmdstatus>
+		<!-- ZH状态，0表示正常业务、1表示暂停业务 -->
+		<status></status>
+		<!-- 授权ZH状态项，与接替ZH状态项互斥 -->
+		<authitem>
+			<op></op>
+			<accepauthid></accepauthid>
+			<cmdedid></cmdedid>
+		</authitem>
+		<!-- 接替ZH状态项，与授权ZH状态项互斥 -->
+		<replaceitem>
+			<op></op>
+			<targid></targid>
+		</replaceitem>
+		<!-- 专向ZH列表 -->
+		<secretlist>
+			<secretitem>
+				<upid></upid>
+				<downid></downid>
+			</secretitem>
+			<secretitem>
+				<upid></upid>
+				<downid></downid>
+			</secretitem>
+		</secretlist>
+		<!-- 协同ZH列表 -->
+		<croplist>
+			<cropitem>
+				<mid></mid>
+			</cropitem>
+			<cropitem>
+				<mid></mid>
+			</cropitem>
+		</croplist>
+		<!-- 越级ZH列表 -->
+		<croslist>
+			<crossitem>
+				<upid></upid>
+				<downid></downid>
+			</crossitem>
+			<crossitem>
+				<upid></upid>
+				<downid></downid>
+			</crossitem>
+		</croslist>
+	</cmdstatus>
+</notify>

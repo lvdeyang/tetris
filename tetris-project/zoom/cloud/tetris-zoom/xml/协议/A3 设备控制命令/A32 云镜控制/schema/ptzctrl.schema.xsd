@@ -1,0 +1,158 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<!-- 镜头变倍 -->
+	<xsd:simpleType name="zoomctrl_type">
+		<xsd:restriction base="xsd:string">
+			<!-- 镜头放大 -->
+			<xsd:enumeration value="in" />
+			<!-- 镜头缩小 -->
+			<xsd:enumeration value="out" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 聚焦 -->
+	<xsd:simpleType name="focusctrl_type">
+		<xsd:restriction base="xsd:string">
+			<!-- 近 -->
+			<xsd:enumeration value="near" />
+			<!-- 远 -->
+			<xsd:enumeration value="far" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 光圈 -->
+	<xsd:simpleType name="aperturectrl_type">
+		<xsd:restriction base="xsd:string">
+			<!-- 放大 -->
+			<xsd:enumeration value="+" />
+			<!-- 缩小 -->
+			<xsd:enumeration value="-" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 云台垂直方向运动 -->
+	<xsd:simpleType name="tilt_direction_type">
+		<xsd:restriction base="xsd:string">
+			<!-- 上 -->
+			<xsd:enumeration value="u" />
+			<!-- 下 -->
+			<xsd:enumeration value="d" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 云台水平方向运动 -->
+	<xsd:simpleType name="pan_direction_type">
+		<xsd:restriction base="xsd:string">
+			<!-- 左 -->
+			<xsd:enumeration value="l" />
+			<!-- 右 -->
+			<xsd:enumeration value="r" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 取值范围0-255的整数，可用于控制云台运动速度相对值、聚焦速度、光圈速度 -->
+	<!-- 相对速度最大值255，若设备实际可控速度为[a,b]，设置速度值为x时，则设备实际速度值为 a+(b-a)/255*x -->
+	<xsd:simpleType name="Integer0_255">
+		<xsd:restriction base="xsd:integer">
+			<xsd:maxInclusive value="255" />
+			<xsd:minInclusive value="0" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 取值范围0-127的整数，可用于控制镜头变倍速度相对值 -->
+	<!-- 相对速度最大值127，若设备实际可控速度为[a,b]，设置速度值为x时，则设备实际速度值为 a+(b-a)/127*x -->
+	<xsd:simpleType name="Integer0_127">
+		<xsd:restriction base="xsd:integer">
+			<xsd:maxInclusive value="127" />
+			<xsd:minInclusive value="0" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 操作类型 -->
+	<xsd:simpleType name="operation_type">
+		<xsd:restriction base="xsd:string">
+			<!-- 开始 -->
+			<xsd:enumeration value="start" />
+			<!-- 停止 -->
+			<xsd:enumeration value="stop" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 云台垂直运动控制（包括方向和速度相对值） -->
+	<xsd:complexType name="tilt_servo_type">
+		<xsd:sequence>
+			<xsd:element name="direction" type="tilt_direction_type"
+				minOccurs="1" />
+			<xsd:element name="speed" type="Integer0_255" minOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 云台水平运动控制（包括方向和速度） -->
+	<xsd:complexType name="pan_servo_type">
+		<xsd:sequence>
+			<xsd:element name="direction" type="pan_direction_type"
+				minOccurs="1" />
+			<xsd:element name="speed" type="Integer0_255" minOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 镜头变倍控制（放大或缩小及速度相对值） -->
+	<xsd:complexType name="zoom_type">
+		<xsd:sequence>
+			<xsd:element name="zoomctrl" type="zoomctrl_type"
+				minOccurs="1" />
+			<xsd:element name="speed" type="Integer0_127" minOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!--聚焦控制（远或近及速度） -->
+	<xsd:complexType name="focus_type">
+		<xsd:sequence>
+			<xsd:element name="focusctrl" type="focusctrl_type"
+				minOccurs="1" />
+			<xsd:element name="speed" type="Integer0_255" minOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!--光圈控制（放大或缩小及速度） -->
+	<xsd:complexType name="aperture_type">
+		<xsd:sequence>
+			<xsd:element name="aperturectrl" type="aperturectrl_type"
+				minOccurs="1" />
+			<xsd:element name="speed" type="Integer0_255" minOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 设备控制 -->
+	<xsd:element name="control">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- 命令名称（必选） -->
+				<xsd:element name="commandname" type="xsd:string" />
+				<!-- 操作类型（必选） -->
+				<xsd:element name="operation" type="operation_type" />
+				<!-- 操作序列号值（必选） -->
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<!-- 设备名称（必选） -->
+				<xsd:element name="devname" type="devnameType" />
+				<!-- 设备ID（必选） -->
+				<xsd:element name="devid" type="deviceIDType" />
+				<!-- 云台垂直运动控制（可选） -->
+				<xsd:element name="tiltservo" type="tilt_servo_type" minOccurs="0" maxOccurs="1" />
+				<!-- 云台水平运动控制（可选） -->
+				<xsd:element name="panservo" type="pan_servo_type" minOccurs="0" maxOccurs="1" />
+				<!-- 镜头变倍控制（可选） -->
+				<xsd:element name="zoom" type="zoom_type" minOccurs="0" maxOccurs="1" />
+				<!-- 聚焦远近控制（可选） -->
+				<xsd:element name="focus" type="focus_type" minOccurs="0" maxOccurs="1" />
+				<!-- 光圈放大缩小控制（可选） -->
+				<xsd:element name="aperture" type="aperture_type" minOccurs="0" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

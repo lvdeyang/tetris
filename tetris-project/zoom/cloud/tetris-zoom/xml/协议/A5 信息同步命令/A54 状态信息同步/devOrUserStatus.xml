@@ -1,0 +1,30 @@
+<notify>
+	<commandname>syncinfo</commandname>
+	<seq>8cd41a008e4311e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<userlist>
+		<useritem>
+			<!-- 用户ID -->
+			<userid>00000000001</userid>
+			<!-- 状态（1--在线、0--不在线） -->
+			<status>1</status>
+			<!-- 登录服务节点ID -->
+			<visitednodeid>9e4dee468e4311e8b445060400ef5315</visitednodeid>
+			<!-- 绑定的设备 ID，用户可以不存在绑定的设备ID -->
+			<binddevid>10000000001</binddevid>
+		</useritem>
+	</userlist>
+	<devlist>
+		<devitem>
+			<!-- 设备ID -->
+			<devid>10000000001</devid>
+			<!-- 设备状态（1--在线、0--不在线） -->
+			<status>1</status>
+			<!-- 设备类型（包括编解码设备和服务设备），2表示编码设备，3表示解码设备，
+			4表示应用服务 单元，6表示媒体处理服务单元，11表示编解码一体设备 -->
+			<devtype>2</devtype>
+			<!-- 登录服务节点ID -->
+			<visitednodeid>9e4dee468e4311e8b445060400ef5315</visitednodeid>
+		</devitem>
+	</devlist>
+</notify>
