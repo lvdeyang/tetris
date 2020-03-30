@@ -44,7 +44,6 @@ import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
 import com.sumavision.bvc.device.command.bo.SplitBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
-import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
@@ -556,6 +555,7 @@ public class CommandBasicServiceImpl {
 			result.put("splits", chairSplits);
 			return result;
 		}
+		String commandString = commandCommonUtil.generateCommandString(group.getType());
 		group.setStatus(GroupStatus.START);
 		Date startTime = new Date();
 		group.setStartTime(startTime);
@@ -607,7 +607,7 @@ public class CommandBasicServiceImpl {
 								player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
 							}else if(group.getType().equals(GroupType.SECRET)){
 								player.setBusinessId(group.getId().toString());
-								player.setBusinessName("正在与" + secretMember.getUserName() + "专向指挥");
+								player.setBusinessName("正在与" + secretMember.getUserName() + "专向" + commandString);
 								player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
 							}else if(group.getType().equals(GroupType.MEETING)){
 								player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
@@ -661,7 +661,7 @@ public class CommandBasicServiceImpl {
 			//查找播放器
 			CommandGroupUserPlayerPO player = commandCommonServiceImpl.userChoseUsefulPlayer(member.getUserId(), PlayerBusinessType.BASIC_COMMAND, true);
 			if(player == null){
-				log.info(new StringBufferWrapper().append("会议成员 ").append(member.getUserName()).
+				log.info(new StringBufferWrapper().append(commandString + "成员 ").append(member.getUserName()).
 						append(" id: ").append(member.getId()).append(" 没有可用的播放器").toString());
 			}
 			
@@ -677,7 +677,7 @@ public class CommandBasicServiceImpl {
 							player.setBusinessName(group.getName() + "：" + chairman.getUserName());
 							player.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
 						}else if(group.getType().equals(GroupType.SECRET)){
-							player.setBusinessName("正在与" + chairman.getUserName() + "专向会议");
+							player.setBusinessName("正在与" + chairman.getUserName() + "专向" + commandString);
 							player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
 						}else if(group.getType().equals(GroupType.MEETING)){
 							player.setBusinessName(group.getName());
@@ -706,7 +706,7 @@ public class CommandBasicServiceImpl {
 				message.put("businessInfo", "接受到 " + group.getName() + " 邀请，主席：" + chairman.getUserName() + "，是否进入？");
 			}else if(group.getType().equals(GroupType.SECRET)){
 				message.put("businessType", "secretStart");
-				message.put("businessInfo", chairman.getUserName() + " 邀请你专向会议");
+				message.put("businessInfo", chairman.getUserName() + " 邀请你专向" + commandString);
 			}
 			
 			//发送消息。后续考虑使用CommandGroupPO.startTime作为唯一标识
@@ -763,11 +763,12 @@ public class CommandBasicServiceImpl {
 			log.info("进行停止操作的会议不存在，id：" + groupId);
 			return new JSONArray();
 		}
+		String commandString = commandCommonUtil.generateCommandString(group.getType());
 		if(group.getStatus().equals(GroupStatus.REMIND)){
 			if(group.getType().equals(GroupType.BASIC)){
-				throw new BaseException(StatusCode.FORBIDDEN, "请先关闭会议提醒");
+				throw new BaseException(StatusCode.FORBIDDEN, "请先关闭" + commandString + "提醒");
 			}else if(group.getType().equals(GroupType.MEETING)){
-				throw new BaseException(StatusCode.FORBIDDEN, "请先关闭会议提醒");
+				throw new BaseException(StatusCode.FORBIDDEN, "请先关闭" + commandString + "提醒");
 			}
 		}
 		
@@ -865,7 +866,7 @@ public class CommandBasicServiceImpl {
 						message.put("fromUserId", secretMember.getUserId());
 						message.put("fromUserName", secretMember.getUserName());
 //						message.put("businessId", group.getId().toString());
-						message.put("businessInfo", secretMember.getUserName() + " 拒绝与你专向会议");
+						message.put("businessInfo", secretMember.getUserName() + " 拒绝与你专向" + commandString);
 						if(splits.size() > 0){
 							message.put("serial", splits.getJSONObject(0).getInteger("serial"));
 						}
@@ -878,7 +879,7 @@ public class CommandBasicServiceImpl {
 						message.put("fromUserId", secretMember.getUserId());
 						message.put("fromUserName", secretMember.getUserName());
 //						message.put("businessId", group.getId().toString());
-						message.put("businessInfo", secretMember.getUserName() + " 停止了专向会议");
+						message.put("businessInfo", secretMember.getUserName() + " 停止了专向" + commandString);
 						if(splits.size() > 0){
 							message.put("serial", splits.getJSONObject(0).getInteger("serial"));
 						}
@@ -893,7 +894,7 @@ public class CommandBasicServiceImpl {
 						message.put("fromUserId", chairman.getUserId());
 						message.put("fromUserName", chairman.getUserName());
 //						message.put("businessId", group.getId().toString());
-						message.put("businessInfo", chairman.getUserName() + " 停止了专向会议");
+						message.put("businessInfo", chairman.getUserName() + " 停止了专向" + commandString);
 						if(splits.size() > 0){
 							message.put("serial", splits.getJSONObject(0).getInteger("serial"));
 						}
@@ -1093,14 +1094,16 @@ public class CommandBasicServiceImpl {
 			return;
 		}
 		
+		String commandString = commandCommonUtil.generateCommandString(group.getType());
+		
 		List<CommandGroupMemberPO> refuseMembers = new ArrayList<CommandGroupMemberPO>();
 		for(CommandGroupMemberPO member : group.getMembers()){
 			if(member.getUserId().equals(userId)){
 				if(member.getMemberStatus().equals(MemberStatus.CONNECT)){
 					if(group.getType().equals(GroupType.BASIC)){
-						throw new BaseException(StatusCode.FORBIDDEN, "已进入该会议，可使用“退出会议”功能，id: " + group.getId());
+						throw new BaseException(StatusCode.FORBIDDEN, "已进入该" + commandString + "会议，可使用“退出" + commandString + "会议”功能，id: " + group.getId());
 					}else if(group.getType().equals(GroupType.MEETING)){
-						throw new BaseException(StatusCode.FORBIDDEN, "已进入该会议，可使用“退出会议”功能，id: " + group.getId());
+						throw new BaseException(StatusCode.FORBIDDEN, "已进入该" + commandString + "会议，可使用“退出" + commandString + "会议”功能，id: " + group.getId());
 					}
 				}
 				refuseMembers.add(member);
@@ -1120,11 +1123,12 @@ public class CommandBasicServiceImpl {
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
 			}
+			String commandString = commandCommonUtil.generateCommandString(group.getType());
 			if(group.getStatus().equals(GroupStatus.REMIND)){
 				if(group.getType().equals(GroupType.BASIC)){
-					throw new BaseException(StatusCode.FORBIDDEN, "请先关闭会议提醒");
+					throw new BaseException(StatusCode.FORBIDDEN, "请先关闭" + commandString + "提醒");
 				}else if(group.getType().equals(GroupType.MEETING)){
-					throw new BaseException(StatusCode.FORBIDDEN, "请先关闭会议提醒");
+					throw new BaseException(StatusCode.FORBIDDEN, "请先关闭" + commandString + "提醒");
 				}
 			}
 			group.setStatus(GroupStatus.PAUSE);
@@ -1181,7 +1185,7 @@ public class CommandBasicServiceImpl {
 			LogicBO logicRecord = commandRecordServiceImpl.update(group.getUserId(), group, 1, false);
 			logic.merge(logicRecord);
 			
-			ExecuteBusinessReturnBO returnBO = executeBusiness.execute(logic, group.getName() + " 会议暂停");
+			ExecuteBusinessReturnBO returnBO = executeBusiness.execute(logic, group.getName() + " " + commandString + "暂停");
 			commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());
 			
 			return chairSplits;
@@ -1605,7 +1609,9 @@ public class CommandBasicServiceImpl {
 		JSONArray chairSplits = new JSONArray();
 		
 		Set<CommandGroupMemberPO> members = group.getMembers();
-		Set<CommandGroupForwardPO> forwards = group.getForwards();		
+		Set<CommandGroupForwardPO> forwards = group.getForwards();
+//		String commandString = commandCommonUtil.generateCommandString(group.getType());
+		String cooperateString = commandCommonUtil.generateCooperateString(group.getType());
 		
 		List<Long> newMemberIds = new ArrayList<Long>();
 		for(CommandGroupMemberPO newMember : newMembers){
@@ -1731,7 +1737,7 @@ public class CommandBasicServiceImpl {
 						CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount2);
 						
 						player.setBusinessId(group.getId().toString());//如果需要改成c2m_forward.getId()，那么需要先save获得id
-						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + "协同会议");
+						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + cooperateString);
 						player.setPlayerBusinessType(PlayerBusinessType.COOPERATE_COMMAND);
 						
 						//用于返回的分屏信息
