@@ -1,0 +1,224 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<!-- 命令名称类型，bizcnf表示会议组业务命令，bizcmd表示ZH组业务命令 -->
+	<xsd:simpleType name="commandnameType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="bizcnf" />
+			<xsd:enumeration value="bizcmd" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 组业务类型，cnf表示会议组，cmd表示ZH组 -->
+	<xsd:simpleType name="bizType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="cnf" />
+			<xsd:enumeration value="cmd" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 业务的组类型，temp表示临时组，preset表示静态组 -->
+	<xsd:simpleType name="groupType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="temp" />
+			<xsd:enumeration value="preset" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 成员类型，en表示编码设备，ende表示编解码设备,usr表示用户 -->
+	<xsd:simpleType name="mType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="en" />
+			<xsd:enumeration value="ende" />
+			<xsd:enumeration value="usr" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 成员状态，1表示正在业务、2表示暂时离开、3表示已退出 -->
+	<xsd:simpleType name="statusType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="1" />
+			<xsd:enumeration value="2" />
+			<xsd:enumeration value="3" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!-- 会议业务模式状态，0表示主席模式、1表示讨论模式 -->
+	<xsd:simpleType name="cnfstatuscodeType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="0" />
+			<xsd:enumeration value="1" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 业务状态，0表示正常业务、1表示暂停 -->
+	<xsd:simpleType name="statuscodeType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="0" />
+			<xsd:enumeration value="1" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!--成员信息 -->
+	<xsd:complexType name="mitemType">
+		<xsd:sequence>
+			<xsd:element name="mid" type="userIDType" />
+			<xsd:element name="mname" type="xsd:string" />
+			<!-- 成员类型 -->
+			<xsd:element name="mtype" type="mType" />
+			<!-- 成员状态 -->
+			<xsd:element name="mstatus" type="statusType" />
+			<!-- 上级成员ID -->
+			<xsd:element name="pid" type="userIDType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 成员列表 -->
+	<xsd:complexType name="mlistType">
+		<xsd:sequence>
+			<xsd:element name="minfo" type="mitemType" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 组信息 -->
+	<xsd:complexType name="bizinfoType">
+		<xsd:sequence>
+			<!-- 组类型 -->
+			<xsd:element name="biztype" type="biztype" />
+			<!-- 组名称 -->
+			<xsd:element name="bizname" type="xsd:string" />
+			<!-- 创建者ID -->
+			<xsd:element name="creatorid" type="userIDType" />
+			<!-- 最上级成员ID -->
+			<xsd:element name="topid" type="userIDType" />
+			<!-- 成员列表，应包含所有成员（包括新成员）信息，若是ZH业务，成员关系应是授权或接替 后的新ZH上下级关系 -->
+			<xsd:element name="mlist" type="mlistType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 会议业务状态信息 -->
+	<xsd:complexType name="cnfstatusType">
+		<xsd:sequence>
+			<!-- 会议模式，0表示主席模式、1表示讨论模式 -->
+			<xsd:element name="mode" type="cnfstatuscodeType" />
+			<!-- 会议状态，0表示正常业务、1表示暂停 -->
+			<xsd:element name="status" type="statuscodeType" />
+			<!-- 若有成员正在发言，携带正在发言者ID -->
+			<xsd:element name="spkid" type="userIDType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 授权ZH状态信息 -->
+	<xsd:complexType name="authitemType">
+		<xsd:sequence>
+			<xsd:element name="op" type="userIDType" />
+			<xsd:element name="accepauthid" type="userIDType" />
+			<xsd:element name="cmdedid" type="userIDType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 接替ZH状态信息 -->
+	<xsd:complexType name="replaceitemType">
+		<xsd:sequence>
+			<xsd:element name="op" type="userIDType" />
+			<xsd:element name="targid" type="userIDType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 专向ZH列表 -->
+	<xsd:complexType name="secretlistType">
+		<xsd:sequence>
+			<xsd:element name="secretitem" type="secretitemType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="secretitemType">
+		<xsd:sequence>
+			<xsd:element name="upid" type="userIDType" />
+			<xsd:element name="downid" type="userIDType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 协同ZH列表 -->
+	<xsd:complexType name="croplistType">
+		<xsd:sequence>
+			<xsd:element name="cropitem" type="cropitemType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="cropitemType">
+		<xsd:sequence>
+			<xsd:element name="mid" type="userIDType" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 越级ZH列表 -->
+	<xsd:complexType name="crosslistType">
+		<xsd:sequence>
+			<xsd:element name="crossitem" type="crossitemType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:complexType name="crossitemType">
+		<xsd:sequence>
+			<xsd:element name="upid" type="userIDType" />
+			<xsd:element name="downid" type="userIDType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- ZH业务状态信息 -->
+	<xsd:complexType name="cmdstatusType">
+		<xsd:sequence>
+			<!-- ZH状态，0表示正常业务、1表示暂停业务 -->
+			<xsd:element name="status" type="statuscodeType" />
+			<!-- 授权ZH状态项，与接替ZH状态项互斥 -->
+			<xsd:element name="authitem" type="authitemType" />
+			<!-- 接替ZH状态项，与授权ZH状态项互斥 -->
+			<xsd:element name="replaceitem" type="replaceitemType" />
+			<!-- 专向ZH列表 -->
+			<xsd:element name="secretlist" type="secretlistType" />
+			<!-- 协同ZH列表 -->
+			<xsd:element name="croplist" type="croplistType" />
+			<!-- 越级ZH列表 -->
+			<xsd:element name="croslist" type="crosslistType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="notify">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- commandname命令名称 -->
+				<xsd:element name="commandname" type="commandnameType" />
+				<!-- 操作名称，类型定义见A.6.3.1启动分组业务，全量信息同步取值为maddfull -->
+				<xsd:element name="operation" type="operationType" />
+				<!-- seq命令序号 -->
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<!-- 业务组ID -->
+				<xsd:element name="gid" type="xsd:string" />
+				<!-- 本操作发起成员ID -->
+				<xsd:element name="op" type="userIDType" />
+				<!-- 业务组类型，temp表示临时业务，preset表示基于静态组的业务 -->
+				<xsd:element name="grouptype" type="groupType" />
+				<!--业务主题 -->
+				<xsd:element name="subject" type="xsd:string" />
+				<!--业务开始时间，格式为YYYY-MM-DD HH:mm:SS -->
+				<xsd:element name="stime" type="xsd:string" />
+				<!-- bizinfo为业务信息 -->
+				<!-- 应携带bizinfo信息，应包含所有成员（包括新成员）信息，若是ZH业务，成员关系应是授 权或接替后的新ZH上下级关系 -->
+				<xsd:element name="bizinfo" type="bizinfoType" minOccurs="1" maxOccurs="1" />
+				<!-- 若是会议业务，应携带会议状态信息 -->
+				<xsd:element name="cnfstatus" type="cnfstatusType" minOccurs="0" maxOccurs="1" />
+				<!-- 若是ZH业务，应携带ZH状态信息 -->
+				<xsd:element name="cmdstatus" type="cmdstatusType" minOccurs="0" maxOccurs="1" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

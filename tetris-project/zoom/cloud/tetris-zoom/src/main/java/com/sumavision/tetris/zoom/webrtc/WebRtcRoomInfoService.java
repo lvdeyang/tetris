@@ -101,10 +101,10 @@ public class WebRtcRoomInfoService {
 											  .append("/action/create_room")
 											  .toString();
 		
-		JSONObject response = doPost(url, new HashMapWrapper<String, Object>().put("roomId", zoomCode).getMap(), new StringBufferWrapper().append("webrtc会议室创建失败，roomId：").append(zoomCode).toString());
+		/*JSONObject response = doPost(url, new HashMapWrapper<String, Object>().put("roomId", zoomCode).getMap(), new StringBufferWrapper().append("webrtc会议室创建失败，roomId：").append(zoomCode).toString());
 		if("failed".equals(response.getString("ret"))){
 			throw new WebrtcResponseErrorException(url, new StringBufferWrapper().append("webrtc会议室创建失败，roomId重复，roomId：").append(zoomCode).toString());
-		}
+		}*/
 		
 		return new WebRtcRoomInfoVO().set(webRtcRoomInfo).transform();
 	}
@@ -119,7 +119,7 @@ public class WebRtcRoomInfoService {
 	public void destroyRoom(Long zoomId) throws Exception{
 		List<WebRtcRoomInfoPO> webRtcRoomInfos = webRtcRoomInfoDao.findByZoomId(zoomId);
 		if(webRtcRoomInfos==null || webRtcRoomInfos.size()<=0) return;
-		for(WebRtcRoomInfoPO webRtcRoomInfo:webRtcRoomInfos){
+		/*for(WebRtcRoomInfoPO webRtcRoomInfo:webRtcRoomInfos){
 			String url = new StringBufferWrapper().append("http://")
 												  .append(webRtcRoomInfo.getIp())
 												  .append(":")
@@ -128,7 +128,7 @@ public class WebRtcRoomInfoService {
 												  .toString();
 			
 			doPost(url, new HashMapWrapper<String, Object>().put("roomId", webRtcRoomInfo.getRoomId()).getMap(), new StringBufferWrapper().append("webrtc会议销毁建失败，roomId：").append(webRtcRoomInfo.getRoomId()).toString());
-		}
+		}*/
 		
 		webRtcRoomInfoDao.deleteInBatch(webRtcRoomInfos);
 	}

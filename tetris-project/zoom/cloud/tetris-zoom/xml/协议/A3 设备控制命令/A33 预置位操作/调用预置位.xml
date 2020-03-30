@@ -1,0 +1,9 @@
+<control>
+	<commandname>pointindexoperation</commandname>
+	<operation>invoke</operation>
+	<seq>c8591d048e1711e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<devname>member1</devname>
+	<devid>00000000003</devid>
+	<pointindexvalue>128</pointindexvalue>
+</control>

@@ -1,0 +1,12 @@
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>corpstart</operation>
+	<seq>3fa306388e4d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<op>00000000001</op>
+	<mlist>
+		<mid>00000000002</mid>
+		<mid>00000000003</mid>
+	</mlist>
+</notify>

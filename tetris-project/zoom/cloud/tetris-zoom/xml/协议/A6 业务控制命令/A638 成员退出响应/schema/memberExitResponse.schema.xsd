@@ -1,0 +1,43 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<!-- 命令名称类型，bizcnf表示会议组业务命令，bizcmd表示ZH组业务命令 -->
+	<xsd:simpleType name="commandnameType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="bizcnf" />
+			<xsd:enumeration value="bizcmd" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 响应，0表示不同意、1表示同意 -->
+	<xsd:simpleType name="codeType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="0" />
+			<xsd:enumeration value="1" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:element name="response">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- commandname命令名称 -->
+				<xsd:element name="commandname" type="commandnameType" />
+				<!-- 操作名称，类型定义见A.6.3.1启动分组业务，成员退出响应取值为mquitres -->
+				<xsd:element name="operation" type="operationType" />
+				<!-- seq命令序号 -->
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<!-- 业务组ID -->
+				<xsd:element name="gid" type="xsd:string" />
+				<!-- 本操作发起成员ID -->
+				<xsd:element name="op" type="userIDType" />
+				<!-- 本操作相关成员ID -->
+				<xsd:element name="mid" type="userIDType" />
+				<xsd:element name="code" type="codeType" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

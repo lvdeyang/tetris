@@ -79,7 +79,8 @@ public class ZoomPO extends AbstractBasePO{
 		this.code = code.toString();*/
 		
 		//方式二：号码取z+zoomId的方式
-		if(this.getId() != null) this.code = new StringBufferWrapper().append("z").append(this.getId()).toString();
+		this.code = "5678";
+		//if(this.getId() != null) this.code = new StringBufferWrapper().append("z").append(this.getId()).toString();
 	}
 
 	@Column(name = "PASSWORD")

@@ -72,10 +72,6 @@ public class MessageEncoder {
 	@SuppressWarnings("restriction")
 	public static class AES{
 		
-		private BASE64Decoder decoder = new BASE64Decoder();
-		
-		private BASE64Encoder encoder = new BASE64Encoder();
-		
 		/**
 		 * 编码<br/>
 		 * <b>作者:</b>lvdeyang<br/>
@@ -98,7 +94,8 @@ public class MessageEncoder {
             cipher.init(Cipher.ENCRYPT_MODE, key);
             byte [] byte_encode = message.getBytes("utf-8");
             byte [] byte_AES = cipher.doFinal(byte_encode);
-            String AES_encode = new String(this.encoder.encode(byte_AES));
+            BASE64Encoder encoder = new BASE64Encoder();
+            String AES_encode = new String(encoder.encode(byte_AES));
             return AES_encode;     
 		}
 		
@@ -122,7 +119,8 @@ public class MessageEncoder {
             SecretKey key = new SecretKeySpec(raw, "AES");
             Cipher cipher = Cipher.getInstance("AES");
             cipher.init(Cipher.DECRYPT_MODE, key);
-            byte [] byte_content = this.decoder.decodeBuffer(message);
+            BASE64Decoder decoder = new BASE64Decoder();
+            byte [] byte_content = decoder.decodeBuffer(message);
             byte [] byte_decode = cipher.doFinal(byte_content);
             String AES_decode = new String(byte_decode,"utf-8");
             return AES_decode;      
@@ -140,10 +138,6 @@ public class MessageEncoder {
 	@SuppressWarnings("restriction")
 	public static class Base64{
 		
-		private BASE64Decoder decoder = new BASE64Decoder();
-		
-		private BASE64Encoder encoder = new BASE64Encoder();
-		
 		/**
 		 * 编码<br/>
 		 * <b>作者:</b>lvdeyang<br/>
@@ -153,7 +147,8 @@ public class MessageEncoder {
 		 * @return String base64编码后内容
 		 */
 		public String encode(String message){
-			return this.encoder.encode(message.getBytes());
+			BASE64Encoder encoder = new BASE64Encoder();
+			return encoder.encode(message.getBytes());
 		}
 		
 		/**
@@ -165,7 +160,8 @@ public class MessageEncoder {
 		 * @return String base64解码后内容
 		 */
 		public String decode(String message) throws Exception{
-			return new String(this.decoder.decodeBuffer(message));
+			BASE64Decoder decoder = new BASE64Decoder();
+			return new String(decoder.decodeBuffer(message));
 		}
 	}
 	

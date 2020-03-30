@@ -1,0 +1,79 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<!-- 状态，0表示不在线，1表示在线 -->
+	<xsd:simpleType name="statusType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="0" />
+			<xsd:enumeration value="1" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 设备类型（包括编解码设备和服务设备），2表示编码设备，3表示解码设备，
+	4表示应用服务 单元，6表示媒体处理服务单元，11表示编解码一体设备 -->
+	<xsd:simpleType name="devType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="2" />
+			<xsd:enumeration value="3" />
+			<xsd:enumeration value="4" />
+			<xsd:enumeration value="6" />
+			<xsd:enumeration value="11" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 用户信息类型，包含用户ID、状态（1--在线、0--不在线）、登录服务节点ID、绑定的设备 ID，用户可以不存在绑定的设备ID -->
+	<xsd:complexType name="useritemType">
+		<xsd:sequence>
+			<xsd:element name="userid" type="userIDType" />
+			<xsd:element name="status" type="statusType" />
+			<xsd:element name="visitednodeid" type="uuidType" />
+			<xsd:element name="binddevid" type="deviceIDType"
+				minOccurs="0" maxOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 设备信息类型，包含设备ID、设备状态（1--在线、0--不在线）、设备类型（包括编解码设 备和服务设备）、登录服务节点ID -->
+	<xsd:complexType name="devitemType">
+		<xsd:sequence>
+			<xsd:element name="devid" type="deviceIDType" />
+			<xsd:element name="status" type="statusType" />
+			<xsd:element name="devtype" type="devType" />
+			<xsd:element name="visitednodeid" type="uuidType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 用户表类型，包括若干个用户信息 -->
+	<xsd:complexType name="userlistType">
+		<xsd:sequence>
+			<xsd:element name="useritem" type="useritemType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 设备表类型，包括若干个设备信息 -->
+	<xsd:complexType name="devlistType">
+		<xsd:sequence>
+			<xsd:element name="devitem" type="devitemType" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="notify">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- commandname命令名称 -->
+				<xsd:element name="commandname" type="xsd:string" fixed="syncinfo" />
+				<!-- seq命令序号 -->
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<!--userlist为用户列表，包括若干用户的状态信息 -->
+				<xsd:element name="userlist" type="userlistType" />
+				<!--devicelist为设备列表，包括若干设备的状态信息 -->
+				<xsd:element name="devlist" type="devlistType" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

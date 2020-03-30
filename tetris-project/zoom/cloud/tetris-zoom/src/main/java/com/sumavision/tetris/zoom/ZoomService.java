@@ -264,10 +264,13 @@ public class ZoomService {
 		boolean tourist = true;
 		try{
 			self = userQuery.current();
-			tourist = false;
+			if(self != null){
+				tourist = false;
+			}
 		}catch(Exception e){
 			self = userService.addTourist(rename);
 		}
+		if(self == null) self = userService.addTourist(rename);
 		
 		ZoomMemberPO member = zoomMemberDao.findByZoomIdAndUserId(zoom.getId(), self.getId().toString());
 		if(member == null){

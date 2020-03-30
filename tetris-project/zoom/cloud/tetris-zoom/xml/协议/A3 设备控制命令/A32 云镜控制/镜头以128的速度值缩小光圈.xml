@@ -1,0 +1,13 @@
+<control>
+	<commandname>ptzctrl</commandname>
+	<operation>start</operation>
+	<seq>66edf2e88e1611e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<devname>member1</devname>
+	<devid>00000000003</devid>
+	<aperture>
+		<!-- +放大  -缩小-->
+		<aperturectrl>-</aperturectrl>
+		<speed>128</speed>
+	</aperture>
+</control>

@@ -65,7 +65,7 @@ spring:
 server:
 #  context-path: /menu 
 #  address: 192.165.56.71
-  port: 8086
+  port: 8080
 logging:
   pattern:
     console: "%d - %msg%n" 

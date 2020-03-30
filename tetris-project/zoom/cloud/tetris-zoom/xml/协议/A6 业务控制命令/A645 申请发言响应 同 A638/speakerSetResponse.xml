@@ -1,0 +1,12 @@
+<response>
+	<commandname>bizcnf</commandname>
+	<operation>spkres</operation>
+	<seq>3fa306388e4d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<!-- 申请发言请求处理的成员ID -->
+	<op>00000000001</op>
+	<!-- 申请发言成员ID -->
+	<mid>00000000002</mid>
+	<code>1</code>
+</response>

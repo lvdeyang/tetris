@@ -1,0 +1,35 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<xsd:include schemaLocation="common.xsd" />
+	
+	<!-- 呼叫操作，start表示开始、stop表示停止 -->
+	<xsd:simpleType name="operation_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="start" />
+			<xsd:enumeration value="stop" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:complexType name="src_type">
+		<xsd:sequence>
+			<xsd:element name="userid" type="userIDType" minOccurs="1" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="control">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="commandname" type="xsd:string" />
+				<xsd:element name="operation" type="operation_type" />
+				<xsd:element name="seq" type="xsd:string" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<xsd:element name="src" type="src_type" />
+				<xsd:element name="dst" type="src_type" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

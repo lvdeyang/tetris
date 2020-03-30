@@ -1,0 +1,20 @@
+<!-- 开始会议媒体转发 -->
+<notify>
+	<commandname>bizcnf</commandname>
+	<operation>pullmediastart</operation>
+	<seq>3fa306388e4d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<!-- 本操作发起成员ID-->
+	<op>00000000001</op>
+	<!-- 本操作相关成员ID，媒体接收成员ID列表-->
+	<mlist>
+		<mid>00000000002</mid>
+		<mid>00000000003</mid>
+	</mlist>
+	<!-- 媒体源（用户或设备编号）列表-->
+	<medialist>
+		<mediasrcid>00000000004</mediasrcid>
+		<mediasrcid>00000000005</mediasrcid>
+	</medialist>
+</notify>
