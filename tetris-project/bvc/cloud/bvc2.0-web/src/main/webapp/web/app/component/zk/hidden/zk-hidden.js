@@ -134,7 +134,6 @@ define([
                     ajax.editPsdPost('http://' + self.gateIp + ':' + self.gatePort + '/tetris-user/api/zk/websocket/server/addr',
                             null,
                             function (addr, status) {
-                        console.log(addr);
                         var onmessage = function(e){
                             var e = $.parseJSON(e.data);
                             //呼叫用户消息
@@ -230,6 +229,24 @@ define([
                                 self.qt.linkedWebview('business', {id:'cooperationRevoke', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'cooperationRevoke', params:e});
+                            }
+
+                            //主席指定发言，通知发言人
+                            if(e.businessType === 'speakAppoint'){
+                                self.qt.info(e.businessInfo)
+                            }else if(e.businessType === 'speakApply'){ //通知主席有人申请发言
+                                //监听呼叫消息，消息状态要在底部滚动
+                                self.qt.linkedWebview('historyMessage', {id:'speakApply', params:e});
+                            }else if(e.businessType === 'speakApplyAgree'){ //通知申请人被同意
+                                self.qt.info(e.businessInfo);
+                            //    TODO: 连接到人员页面，把按钮状态改下
+                            //     self.linkedWebview('rightBar',{id:'speaking',params:e})
+                            }else if(e.businessType === 'speakApplyDisagree'){ //通知申请人被拒绝
+                                self.qt.info(e.businessInfo);
+                            }else if(e.businessType === 'speakStop'){ //通知全员停止发言/停止讨论
+                                self.qt.linkedWebview('historyMessage', {id:'speakStop', params:e});
+                            }else if(e.businessType === 'speakStart'){ //通知观看发言/开始讨论
+                                self.qt.linkedWebview('historyMessage', {id:'speakStart', params:e});
                             }
 
                             //指挥转发

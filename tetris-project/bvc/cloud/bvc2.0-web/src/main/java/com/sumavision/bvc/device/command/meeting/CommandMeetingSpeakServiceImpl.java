@@ -118,6 +118,9 @@ public class CommandMeetingSpeakServiceImpl {
 			if(userIdArray.contains(group.getUserId())){
 				throw new BaseException(StatusCode.FORBIDDEN, "不能指定主席发言");
 			}
+			
+			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
+			List<Long> consumeIds = new ArrayList<Long>();
 						
 			//发言人，校验是否已经在发言
 			Set<CommandGroupMemberPO> members = group.getMembers();
@@ -138,14 +141,26 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 			
 			//校验协同成员是否入会
+			JSONObject message = new JSONObject();
+			message.put("businessType", "speakAppoint");
+			message.put("businessInfo", group.getName() + "主席指定发言，您已开始发言");
+			message.put("businessId", group.getId());
 			for(CommandGroupMemberPO speakMember : speakMembers){
 				if(!speakMember.getMemberStatus().equals(MemberStatus.CONNECT)){
 					throw new BaseException(StatusCode.FORBIDDEN, speakMember.getUserName() + " 还未进入");
 				}
+				messageCaches.add(new MessageSendCacheBO(speakMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
 			}
 			
 			//这里有持久化
 			speakStart(group, speakMembers, 0);
+			
+			//发消息
+			for(MessageSendCacheBO cache : messageCaches){
+				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
 		}
 	}
 	
@@ -185,7 +200,8 @@ public class CommandMeetingSpeakServiceImpl {
 			
 			JSONObject message = new JSONObject();
 			message.put("businessType", "speakApply");
-			message.put("businessInfo", member.getUserName() + "申请发言");			
+			message.put("businessInfo", member.getUserName() + "申请发言");
+			message.put("businessId", group.getId().toString() + "-" + member.getUserId());
 			
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			WebsocketMessageVO ws = websocketMessageService.send(chairmanMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
@@ -201,7 +217,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月26日 上午11:34:35
-	 * @param userId 操作人
+	 * @param userId 操作人（应该是主席）
 	 * @param groupId
 	 * @param userIdArray 被拒绝的用户
 	 * @throws Exception
@@ -222,11 +238,18 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 			
 			//这个判断正常情况没有用
-			if(group.getUserId().equals(userId)){
+			if(userIdArray.contains(group.getUserId())){
 				throw new BaseException(StatusCode.FORBIDDEN, "主席不需要发言");
 			}
-						
+			
+			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
+			List<Long> consumeIds = new ArrayList<Long>();
+			
 			//发言人，校验是否已经在发言
+			JSONObject message = new JSONObject();
+			message.put("businessType", "speakApplyAgree");
+			message.put("businessInfo", group.getName() + "主席同意发言，您已开始发言");
+			message.put("businessId", group.getId());
 			Set<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
@@ -234,6 +257,7 @@ public class CommandMeetingSpeakServiceImpl {
 					if(member.getCooperateStatus().equals(MemberStatus.DISCONNECT)){
 						member.setCooperateStatus(MemberStatus.CONNECT);
 						speakMembers.add(member);
+						messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
 					}else{
 //						if(groupType.equals(GroupType.BASIC)){
 //							throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经被授权协同会议");
@@ -252,6 +276,13 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 			
 			speakStart(group, speakMembers, 0);
+			
+			//发消息
+			for(MessageSendCacheBO cache : messageCaches){
+				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
 		}
 	}
 	
@@ -262,7 +293,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月26日 上午11:37:12
-	 * @param userId 操作人
+	 * @param userId 操作人（应该是主席）
 	 * @param groupId
 	 * @param userIdArray 被同意的用户
 	 * @throws Exception
@@ -727,7 +758,7 @@ public class CommandMeetingSpeakServiceImpl {
 			log.info(member.getUserName() + " 释放了播放器个数：" + thisMemberFreePlayers.size());
 			
 			JSONObject message = new JSONObject();
-			message.put("businessType", "cooperationRevoke");
+			message.put("businessType", "speakStop");
 			message.put("businessId", group.getId().toString());
 			message.put("businessInfo", businessInfo);
 			message.put("splits", splits);
