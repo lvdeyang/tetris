@@ -2,7 +2,6 @@ package com.sumavision.bvc.control.device.command.group.basic;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +19,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.FolderPO;
-import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
@@ -44,9 +42,6 @@ import com.sumavision.bvc.device.command.basic.silence.CommandSilenceLocalServic
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
-import com.sumavision.bvc.device.group.bo.BundleBO;
-import com.sumavision.bvc.device.group.bo.ChannelBO;
-import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -222,11 +217,12 @@ public class CommandBasicController {
 		String createTime = DateUtil.format(date, DateUtil.dateTimePattern);
 		//未输入则生成一个name
 		if(name==null || name.equals("")){
+			String commandString = commandCommonUtil.generateCommandString(GroupType.BASIC);
 			name = new StringBuilder().append(user.getName())
 				   .append(" ")
 				   .append(createTime)
 				   .append(" ")
-				   .append("会议")
+				   .append(commandString)
 				   .toString();
 		}
 		

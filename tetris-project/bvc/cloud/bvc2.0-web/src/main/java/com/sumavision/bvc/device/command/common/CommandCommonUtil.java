@@ -23,6 +23,7 @@ import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
+import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
@@ -33,11 +34,15 @@ import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlaye
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
 import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
+import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.system.enumeration.GearsLevel;
 import com.sumavision.tetris.auth.token.TerminalType;
 
 @Service
 public class CommandCommonUtil {
+	
+	@Autowired
+	private ServerProps serverProps;
 	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
@@ -532,6 +537,48 @@ public class CommandCommonUtil {
 		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
 		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
 		return commandUserBos;
+	}
+	
+	/**
+	 *生成“指挥”/“会议”字符串<br/>
+	 * <p>对于指挥</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 下午6:17:34
+	 * @param type
+	 * @return
+	 */
+	public String generateCommandString(GroupType type){
+		if(GroupType.MEETING.equals(type)){
+			return "会议";
+		}else{
+			//普通指挥和专向指挥
+			return serverProps.getCommandString();
+		}
+	}
+	
+	/**
+	 *生成“协同指挥”/“协同会议”/“发言”字符串<br/>
+	 * <p>考虑是用“协同”还是用“协同指挥”</p>
+	 * <p>当页面主动请求后台时，会按照指挥/会议区分协同/发言，不会混用接口；但是成员入会时，cooperate的成员就需要通过这里解析为“协同”/“发言”</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 下午6:17:34
+	 * @param type
+	 * @return
+	 */
+	public String generateCooperateString(GroupType type){
+		if(GroupType.MEETING.equals(type)){
+			return "发言";
+		}else{
+			//普通指挥和专向指挥
+//			if(serverProps.getCommandString().equals("指挥")){
+//				return "协同指挥";
+//			}else{
+//				return "协同会议";
+//			}
+			return "协同" + serverProps.getCommandString();
+		}
 	}
 	
 }

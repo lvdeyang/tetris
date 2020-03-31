@@ -108,6 +108,10 @@ public class CommandCooperateServiceImpl {
 					
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		GroupType groupType = group.getType();
+		String commandString = commandCommonUtil.generateCommandString(groupType);
+		if(groupType.equals(GroupType.MEETING)){
+			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "会议中不能进行协同");
+		}
 		List<CommandGroupUserPlayerPO> needSavePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 		
 		if(group.getStatus().equals(GroupStatus.STOP)){
@@ -116,9 +120,9 @@ public class CommandCooperateServiceImpl {
 		
 		if(userIdArray.contains(group.getUserId())){
 			if(groupType.equals(GroupType.BASIC)){
-				throw new BaseException(StatusCode.FORBIDDEN, "不能选择主席进行协同会议");
+				throw new BaseException(StatusCode.FORBIDDEN, "不能选择主席进行协同" + commandString);
 			}else if(groupType.equals(GroupType.MEETING)){
-				throw new BaseException(StatusCode.FORBIDDEN, "不能指定主席发言");
+				throw new BaseException(StatusCode.FORBIDDEN, "不能指定主席发言");//无用
 			}
 		}
 		
@@ -131,7 +135,7 @@ public class CommandCooperateServiceImpl {
 					cooperateMembers.add(member);
 				}else{
 					if(groupType.equals(GroupType.BASIC)){
-						throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经被授权协同会议");
+						throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经被授权协同" + commandString);
 					}else if(groupType.equals(GroupType.MEETING)){
 						throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经申请发言");
 					}
@@ -223,9 +227,9 @@ public class CommandCooperateServiceImpl {
 					
 					player.setBusinessId(group.getId().toString());//如果需要改成c2m_forward.getId()，那么需要先save获得id
 					if(groupType.equals(GroupType.BASIC)){
-						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + "协同会议");
+						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + "协同" + commandString);
 					}if(groupType.equals(GroupType.MEETING)){
-						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + "发言");
+						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + "发言");//无用
 					}
 					player.setPlayerBusinessType(PlayerBusinessType.COOPERATE_COMMAND);
 					
@@ -265,9 +269,9 @@ public class CommandCooperateServiceImpl {
 			//TODO: businessId中添加其他信息
 			message.put("businessId", group.getId().toString());
 			if(groupType.equals(GroupType.BASIC)){
-				message.put("businessInfo", "接受到 " + group.getName() + " 的主席：" + chairman.getUserName() + " 邀请进入协同会议，是否进入？");
+				message.put("businessInfo", "接受到 " + group.getName() + " 的主席：" + chairman.getUserName() + " 邀请进入协同" + commandString + "，是否进入？");
 			}else if(groupType.equals(GroupType.MEETING)){
-				message.put("businessInfo", "接受到 " + group.getName() + " 的主席：" + chairman.getUserName() + " 指定发言，是否同意？");
+				message.put("businessInfo", "接受到 " + group.getName() + " 的主席：" + chairman.getUserName() + " 指定发言，是否同意？");//无用
 			}
 			
 			WebsocketMessageVO ws = websocketMessageService.send(cooperateMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName());
@@ -311,15 +315,19 @@ public class CommandCooperateServiceImpl {
 			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经停止。id: " + group.getId());
 		}
 		
+		if(group.getType().equals(GroupType.MEETING)){
+			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "会议中不能进行协同");
+		}
+		
 		CommandGroupMemberPO acceptMember = commandCommonUtil.queryMemberByUserId(group.getMembers(), userId);
 		MemberStatus cooperateStatus = acceptMember.getCooperateStatus();
 		if(cooperateStatus.equals(MemberStatus.CONNECT)){
 			return;
 		}else if(cooperateStatus.equals(MemberStatus.DISCONNECT)){
 			if(group.getType().equals(GroupType.BASIC)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "协同会议已结束");
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "协同已结束");
 			}else if(group.getType().equals(GroupType.MEETING)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "发言已结束");
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "发言已结束");//无用
 			}
 			
 		}
@@ -345,14 +353,17 @@ public class CommandCooperateServiceImpl {
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 		
-		CommandGroupPO group = commandGroupDao.findOne(groupId);		
+		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		if(group.getType().equals(GroupType.MEETING)){
+			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "会议中不能进行协同");
+		}
 		CommandGroupMemberPO refuseMember = commandCommonUtil.queryMemberByUserId(group.getMembers(), userId);
 		MemberStatus cooperateStatus = refuseMember.getCooperateStatus();
 		if(cooperateStatus.equals(MemberStatus.CONNECT)){
 			if(group.getType().equals(GroupType.BASIC)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "正在进行协同会议");
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "正在进行协同");
 			}else if(group.getType().equals(GroupType.MEETING)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "正在发言");
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "正在发言");//无用
 			}
 			
 		}else if(cooperateStatus.equals(MemberStatus.DISCONNECT)){
@@ -387,7 +398,11 @@ public class CommandCooperateServiceImpl {
 				if(GroupStatus.STOP.equals(group.getStatus())){
 					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经停止。id: " + group.getId());
 				}
+				if(group.getType().equals(GroupType.MEETING)){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "会议中不能进行协同");
+				}
 			
+				String commandString = commandCommonUtil.generateCommandString(group.getType());
 				JSONArray groupInfos = new JSONArray();
 				Set<CommandGroupForwardPO> forwards = group.getForwards();
 				Set<CommandGroupMemberPO> members = group.getMembers();
@@ -412,9 +427,9 @@ public class CommandCooperateServiceImpl {
 				message.put("businessId", group.getId().toString());
 				message.put("splits", new JSONArray());
 				if(group.getType().equals(GroupType.BASIC)){
-					message.put("businessInfo", group.getName() + " 主席撤销授权 " + revokeMember.getUserName() + " 协同会议");
+					message.put("businessInfo", group.getName() + " 主席撤销授权 " + revokeMember.getUserName() + " 协同" + commandString);
 				}else if(group.getType().equals(GroupType.MEETING)){
-					message.put("businessInfo", group.getName() + " 主席停止 " + revokeMember.getUserName() + " 发言");
+					message.put("businessInfo", group.getName() + " 主席停止 " + revokeMember.getUserName() + " 发言");//无用
 				}
 				
 				//给被撤销成员发消息 TODO:信息可能不足
@@ -499,7 +514,11 @@ public class CommandCooperateServiceImpl {
 			if(GroupStatus.STOP.equals(group.getStatus())){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经停止。id: " + group.getId());
 			}
+			if(group.getType().equals(GroupType.MEETING)){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "会议中不能进行协同");
+			}
 		
+			String commandString = commandCommonUtil.generateCommandString(group.getType());
 			JSONArray groupInfos = new JSONArray();
 			Set<CommandGroupForwardPO> forwards = group.getForwards();
 			Set<CommandGroupMemberPO> members = group.getMembers();
@@ -518,7 +537,7 @@ public class CommandCooperateServiceImpl {
 				revokeMember.setCooperateStatus(MemberStatus.DISCONNECT);//TODO:是否需要先判断一下
 				revokeMembersNames.append(revokeMember.getUserName()).append("，");
 			}
-			revokeMembersNames.append("被主席撤销协同会议");	
+			revokeMembersNames.append("被主席撤销协同" + commandString);	
 			
 			//以这些成员为源的协同转发
 			Set<CommandGroupForwardPO> relativeForwards = commandCommonUtil.queryForwardsBySrcmemberIds(forwards, revokeMemberIds, ForwardBusinessType.COOPERATE_COMMAND, null);
@@ -611,6 +630,7 @@ public class CommandCooperateServiceImpl {
 	private void membersResponse(CommandGroupPO group, List<CommandGroupMemberPO> acceptMembers, List<CommandGroupMemberPO> refuseMembers) throws Exception{
 
 			GroupType groupType = group.getType();
+			String commandString = commandCommonUtil.generateCommandString(groupType);
 			if(null == acceptMembers) acceptMembers = new ArrayList<CommandGroupMemberPO>();
 			if(null == refuseMembers) refuseMembers = new ArrayList<CommandGroupMemberPO>();
 			Set<CommandGroupMemberPO> members = group.getMembers();
@@ -683,9 +703,9 @@ public class CommandCooperateServiceImpl {
 									message.put("businessType", "cooperationAgree");
 									message.put("businessId", group.getId().toString());
 									if(groupType.equals(GroupType.BASIC)){
-										message.put("businessInfo", group.getName() + " 主席授权 " + acceptMember.getUserName() + " 协同会议");
+										message.put("businessInfo", group.getName() + " 主席授权 " + acceptMember.getUserName() + " 协同" + commandString);
 									}else if(groupType.equals(GroupType.MEETING)){
-										message.put("businessInfo", group.getName() + " 成员 " + acceptMember.getUserName() + " 发言");
+										message.put("businessInfo", group.getName() + " 成员 " + acceptMember.getUserName() + " 发言");//无用
 									}
 									
 									message.put("splits", new JSONArray());
@@ -697,7 +717,7 @@ public class CommandCooperateServiceImpl {
 									split.put("businessType", "cooperation");
 									split.put("businessId", group.getId() + "-" + acceptMember.getUserId());
 									if(groupType.equals(GroupType.BASIC)){
-										split.put("businessInfo", group.getName() + "-" + acceptMember.getUserName() + "协同会议");
+										split.put("businessInfo", group.getName() + "-" + acceptMember.getUserName() + "协同" + commandString);
 									}else if(groupType.equals(GroupType.MEETING)){
 										split.put("businessInfo", group.getName() + "-" + acceptMember.getUserName() + "发言");
 									}
@@ -785,9 +805,9 @@ public class CommandCooperateServiceImpl {
 				//TODO: businessId中添加其他信息
 				message.put("businessId", group.getId().toString());
 				if(groupType.equals(GroupType.BASIC)){
-					message.put("businessInfo", refuseMember.getUserName() + " 拒绝与您协同会议");
+					message.put("businessInfo", refuseMember.getUserName() + " 拒绝与您协同" + commandString);
 				}else if(groupType.equals(GroupType.MEETING)){
-					message.put("businessInfo", refuseMember.getUserName() + " 拒绝发言");
+					message.put("businessInfo", refuseMember.getUserName() + " 拒绝发言");//无用
 				}
 				
 //				WebsocketMessageVO ws = websocketMessageService.send(chairman.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, refuseMember.getUserId(), refuseMember.getUserName());

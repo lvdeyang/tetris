@@ -7,6 +7,7 @@ import java.util.Properties;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -23,12 +24,14 @@ import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlaye
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
+import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserLayoutShemeVO;
 import com.sumavision.bvc.control.device.monitor.device.MonitorDeviceController;
 import com.sumavision.bvc.control.device.monitor.device.WebSipPlayerVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
+import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
@@ -51,6 +54,9 @@ import net.sf.json.JSONObject;
 @Controller
 @RequestMapping(value = "/command/user/info")
 public class CommandUserInfoController {
+	
+	@Autowired
+	private ServerProps serverProps;
 	
 	@Autowired
 	private UserUtils userUtils;
@@ -111,8 +117,17 @@ public class CommandUserInfoController {
 			if(selfPlayer == null){
 				UserBO userBO = userUtils.queryUserById(user.getId());
 //				UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-				commandVodService.seeOneselfLocalStart(userBO);
+
+				if(serverProps.getLocalPreviewMode() == 1){
+					commandVodService.seeOneselfLocalStart(userBO);
+				}else if(serverProps.getLocalPreviewMode() == 2){
+					UserBO admin = new UserBO();
+					admin.setId(-1L);
+					commandVodService.seeOneselfUserStart(userBO, admin);
+				}
 			}
+			log.info("serverProps.LOCAL_PREVIEW_MODE: " + serverProps.getLocalPreviewMode());
+			log.info("serverProps.COMMAND_STRING: " + serverProps.getCommandString());
 		}catch(Exception e){
 			log.info(user.getName() + " 用户添加本地视频预览失败");
 			e.printStackTrace();

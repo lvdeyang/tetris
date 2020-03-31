@@ -46,6 +46,7 @@ import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
+import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.control.device.group.vo.tree.TreeNodeVO;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeIcon;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeType;
@@ -70,6 +71,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @Controller
 @RequestMapping(value = "/command/query")
 public class CommandQueryController {
+
+	@Autowired
+	private ServerProps serverProps;
 
 	@Autowired
 	private UserUtils userUtils;
@@ -648,7 +652,7 @@ public class CommandQueryController {
 		
 		//加入会议组节点
 		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
-											     .setName("会议组列表")
+											     .setName(serverProps.getCommandString() + "组列表")
 											     .setType(TreeNodeType.FOLDER)
 											     .setKey()
 											     .setIcon(TreeNodeIcon.FOLDER.getName())

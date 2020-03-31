@@ -66,8 +66,10 @@ public class CommandSecretServiceImpl {
 			Long memberUserId,
 			int locationIndex) throws Exception{
 		
+		String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
+		
 		if(creatorUserId.equals(memberUserId)){
-			throw new BaseException(StatusCode.FORBIDDEN, "请选择其他成员进行专向会议");
+			throw new BaseException(StatusCode.FORBIDDEN, "请选择其他成员进行专向" + commandString);
 		}
 		
 		List<CommandGroupPO> secretGroups = commandGroupDao.findByType(GroupType.SECRET);
@@ -76,9 +78,9 @@ public class CommandSecretServiceImpl {
 				Set<CommandGroupMemberPO> members = secretGroup.getMembers();
 				for(CommandGroupMemberPO member : members){
 					if(member.getUserId().equals(creatorUserId)){
-						throw new BaseException(StatusCode.FORBIDDEN, "您已经在参加其他专向会议");
+						throw new BaseException(StatusCode.FORBIDDEN, "您已经在参加其他专向" + commandString);
 					}else if(member.getUserId().equals(memberUserId)){
-						throw new BaseException(StatusCode.FORBIDDEN, "对方已经在参加其他专向会议");
+						throw new BaseException(StatusCode.FORBIDDEN, "对方已经在参加其他专向" + commandString);
 					}
 				}
 			}
@@ -135,7 +137,8 @@ public class CommandSecretServiceImpl {
 				
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		if(group == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "专向会议已停止");
+			String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
+			throw new BaseException(StatusCode.FORBIDDEN, "专向" + commandString + "已停止");
 		}
 		log.info("成员同意加入专向会议：" + group.getName());
 		
@@ -171,6 +174,7 @@ public class CommandSecretServiceImpl {
 		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		if(group == null){
+			String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
 			throw new BaseException(StatusCode.FORBIDDEN, "专向会议已停止");
 		}
 		log.info("成员拒绝加入专向会议，会议：" + group.getName());

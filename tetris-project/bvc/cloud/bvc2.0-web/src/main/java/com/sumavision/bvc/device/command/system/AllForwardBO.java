@@ -124,7 +124,7 @@ public class AllForwardBO {
 		
 		this.id = forward.getId().toString();
 		this.time = DateUtil.format(forward.getUpdateTime(), DateUtil.dateTimePattern);
-		this.businessType = "会议";
+		this.businessType = "多人业务";
 		this.srcType = "用户";
 		this.srcInfo = srcMember==null?forward.getVideoBundleName():srcMember.getUserName();
 		this.srcBundleId = forward.getVideoBundleId();

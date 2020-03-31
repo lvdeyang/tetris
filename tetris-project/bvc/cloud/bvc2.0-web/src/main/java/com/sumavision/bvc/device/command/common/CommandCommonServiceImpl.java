@@ -113,7 +113,7 @@ public class CommandCommonServiceImpl {
 			avTpls = avtplDao.findByUsageType(AvtplUsageType.COMMAND);
 			AvtplPO sys_avtpl = meetingUtil.generateAvtpl(CodecParamType.DEFAULT.getName(), "COMMAND1");
 			avTpls.add(sys_avtpl);
-//			throw new AvtplNotFoundException("缺少会议系统参数模板！");
+//			throw new AvtplNotFoundException("缺少会议.系统参数模板！");
 		}
 		targetAvtpl = avTpls.get(0);
 		//查询codec模板档位
@@ -124,7 +124,7 @@ public class CommandCommonServiceImpl {
 		}
 		
 		if(targetGear == null){
-			throw new AvtplNotFoundException("会议系统参数模板没有创建档位！");
+			throw new AvtplNotFoundException("会议.系统参数模板没有创建档位！");
 		}
 		
 		return new HashMapWrapper<String, Object>().put("avtpl", targetAvtpl)
