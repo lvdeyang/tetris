@@ -1,0 +1,22 @@
+<notify>
+	<commandname>bizcnf</commandname>
+	<operation>pullmediastart</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<mlist>
+		<#if mediaForwardMlist??>
+			<#list mediaForwardMlist as mid>
+				<mid>${mid}</mid>
+			</#list>
+		</#if>
+	</mlist>
+	<medialist>
+		<#if medialist??>
+			<#list medialist as mediasrcid>
+				<mediasrcid>${mediasrcid}</mediasrcid>
+			</#list>
+		</#if>
+	</medialist>
+</notify>

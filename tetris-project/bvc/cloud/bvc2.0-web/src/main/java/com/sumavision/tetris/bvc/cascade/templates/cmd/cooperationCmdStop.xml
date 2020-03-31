@@ -1,0 +1,15 @@
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>corpstop</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<mlist>
+		<#if croplist??>
+			<#list croplist as m>
+				<mid>${m.mid}</mid>
+			</#list>
+		</#if>
+	</mlist>
+</notify>

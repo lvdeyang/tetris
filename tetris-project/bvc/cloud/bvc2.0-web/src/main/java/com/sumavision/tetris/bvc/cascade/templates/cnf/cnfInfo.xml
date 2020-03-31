@@ -1,0 +1,38 @@
+<notify>
+	<commandname>bizcnf</commandname>
+	<operation>maddfull</operation>
+	<seq></seq>
+	<ts></ts>
+	<gid></gid>
+	<op></op>
+	<grouptype>preset</grouptype>
+	<subject></subject>
+	<stime></stime>
+	
+	<bizinfo>
+		<biztype>cnf</biztype>
+		<bizname></bizname>
+		<creatorid></creatorid>
+		<topid></topid>
+		<mlist>
+			<minfo>
+				<mid></mid>
+				<mname></mname>
+				<!-- 成员类型，en表示编码设备，ende表示编解码设备,usr表示用户 -->
+				<mtype></mtype>
+				<!-- 成员状态，1表示正在业务、2表示暂时离开、3表示已退出 -->
+				<mstatus></mstatus>
+				<pid></pid>
+			</minfo>
+		</mlist>
+	</bizinfo>
+	
+	<cnfstatus>
+		<!-- 会议模式，0表示主席模式、1表示讨论模式 -->
+		<mode></mode>
+		<!-- 会议状态，0表示正常业务、1表示暂停 -->
+		<status></status>
+		<!-- 若有成员正在发言，携带正在发言者ID -->
+		<spkid></spkid>
+	</cnfstatus>
+</notify>
