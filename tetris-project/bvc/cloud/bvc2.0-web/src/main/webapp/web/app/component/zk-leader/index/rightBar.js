@@ -129,15 +129,13 @@ define([
                     current: '',
                     isChairman: '',
                     entered: [],
-                    remindIds: [],
-                    loading: false
+                    remindIds: []
                 },
                 //给指挥起名字
                 dialog: {
                     resetName: {
                         visible: false,
-                        name: '',
-                        loading: false
+                        name: ''
                     }
                 },
                 //窗口高度
@@ -1011,10 +1009,7 @@ define([
                     }
                 }
                 if (currentGroup.type === 'command') {
-                    self.group.loading = true;
-                    console.log(currentGroup.id)
                     ajax.post('/command/basic/query/members', {id: currentGroup.id}, function (data, status) {
-                        self.group.loading = false;
                         if (status !== 200) return;
                         data.type = 'command';
                         data.select = [];
@@ -1025,7 +1020,6 @@ define([
                         //去掉根目录那层
                         self.group.tree = tree;
                         self.group.current = data;
-                        console.log(self.group.current)
                         if (self.user.id == data.creator) {
                             self.buttons.addMember = true;
                             self.buttons.removeMember = true;
@@ -1419,7 +1413,6 @@ define([
             resetNameClose: function () {
                 var self = this;
                 self.dialog.resetName.visible = false;
-                self.dialog.resetName.loading = false;
                 self.dialog.resetName.name = '';
                 self.cancelChoose();
             },
@@ -1860,6 +1853,7 @@ define([
                     self.currentGroupChange(group);
                     self.qt.set('currentGroupId', group.id);
                 });
+              
                 //从安排会议页面来，到这个页面时在刷新下数据
                 self.qt.on('refreshData', function (e) {
                     self.switchStatus1 = false;
@@ -1875,6 +1869,7 @@ define([
                     self.currentGroupChange(self.group.current.id);
                     self.qt.invoke('groupMembers', e);
                 });
+                
                 // 监听退成员时
                 self.qt.on('reduceMembers', function (e) {
                     e = e.params.params;
@@ -1921,6 +1916,11 @@ define([
 
                 //成员同意 进入指挥
                 self.qt.on('linkEnterCommand', function (e) {
+                    //加参数是为了区分进会时 ，不影响指挥的代码
+                    self.enterCommand([e.params]);
+                });
+                //成员同意进入会议
+                self.qt.on('linkEnterMeeting', function (e) {
                     self.switchStatus1 = false;
                     self.switchStatus2 = false;
                     self.switchStatus3 = false;
@@ -1941,7 +1941,7 @@ define([
                     self.qt.set('currentGroupId', group.id);
                 });
 
-                // //websocket 停止指挥  成员监听到主席停止指挥，关闭成员播放器
+                //websocket 停止指挥  成员监听到主席停止指挥，关闭成员播放器
                 self.qt.on('usercommandStop', function (e) {
                     e = e.params;
                     for (var i = 0; i < self.group.entered.length; i++) {
@@ -1960,7 +1960,7 @@ define([
                             self.group.currentId = '';
                         }
                     }
-                    // self.refreshCommand("meeting");
+                    self.refreshCommand("meeting");
                 });
 
                 //右上角叉的关闭按钮
@@ -1968,10 +1968,9 @@ define([
                     self.exitCurrentCommandAndCloseWindow();
                 });
 
-                self.qt.on('yanxiaochao', function (e) {
-                    console.log('还是走这？')
-                    console.log(e)
-                    self.currentGroupChange(self.group.current);
+                //监听到成员退出
+                self.qt.on('memberOffline', function (e) {
+                    self.currentGroupChange(e.params);
                 });
 
                 // 授权协同会议

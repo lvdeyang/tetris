@@ -1785,7 +1785,6 @@ define([
           console.log('走这吗？')
           var group = $.parseJSON(e.params)[0];
           group.type = 'command';
-          console.log(group)
           self.currentGroupChange(group);
           self.group.entered.push(group);
           self.qt.set('currentGroupId', group.id);
