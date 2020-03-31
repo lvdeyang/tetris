@@ -47,13 +47,12 @@ define([
         tableData: [], //表格的数据
         checkBoxData: [],
         selectDelete: [], //多选删除
-        searchText: '', //右侧搜索框
+        searchText: '' //右侧搜索框
       }
     },
     watch: {
       //监听左侧table页面变化，保持勾选的状态
       pageData: function () {
-        console.log('sdsjfj')
         var self = this;
         this.$nextTick(function () {
           self.checkBoxData.forEach(function (item) {
@@ -279,7 +278,6 @@ define([
       handleSelect: function (selectArr, val) {
         var self = this;
         var idx = self.checkBoxData.indexOf(val);
-        console.log(idx)
         if (idx > -1) {
           self.checkBoxData.splice(idx, 1);
         } else {
@@ -317,7 +315,7 @@ define([
           if (self.checkBoxData.indexOf(item) === -1) {
             self.checkBoxData.push(item)
           }
-        })
+        });
         self.pageData.forEach(function (item) {
           //让页面上全是勾选状态
           self.$refs.multipleTable.toggleRowSelection(item, true);
@@ -332,7 +330,7 @@ define([
             if (val.id === item.id) {
               self.checkBoxData.splice(index, 1);
             }
-          })
+          });
           self.$refs.multipleTable.toggleRowSelection(item, false);
         })
       },

@@ -156,8 +156,8 @@ define([
                     totalData: [],
                     filterData: []
                 },
-                meetName: '',
-
+                meetName: '', //会议名称
+                recordSelect:'1',//下拉选项
             }
         },
         methods: {
@@ -476,14 +476,15 @@ define([
                 self.contextMenu.top = '';
             },
             handleContextMenuShow: function (e, data, type, name) {
+                console.log(data)
+                console.log(data.param)
                 if ($(e.target).hasClass('handDown')) {
                     if (data.type === 'FOLDER') return;
                     var self = this;
                     self.contextMenu.visible = true;
                     self.contextMenu.scope = type;
                     self.contextMenu.currentNode = data;
-                    // self.contextMenu.top = e.clientY + 'px';
-
+               
                     //在指挥里把点播改成观看
                     self.contextMenu.diff = name;
                     //增加修改指挥名称功能
@@ -492,8 +493,10 @@ define([
                     self.dialog.resetName.commandId = data.id;
 
                     //区分下是不是当前用户建的指挥,目的是只有主席才能改名字
-                    var param = JSON.parse(data.param);
-                    self.contextMenu.currentNode.creator = param.creator;
+                    if(data.param){
+                        var param = JSON.parse(data.param);
+                        self.contextMenu.currentNode.creator = param.creator;
+                    }
 
                     if (data.type === 'USER') {
                         self.contextMenu.call = true;
@@ -502,6 +505,7 @@ define([
                         self.contextMenu.dedicatedCommand = true;
                         self.contextMenu.enterCommand = false;
                         self.contextMenu.removeRecord = false;
+                        self.contextMenu.recordRecord = true;
                     } else if (data.type === 'BUNDLE') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = true;
@@ -509,6 +513,7 @@ define([
                         self.contextMenu.dedicatedCommand = false;
                         self.contextMenu.enterCommand = false;
                         self.contextMenu.removeRecord = false;
+                        self.contextMenu.recordRecord = true;
                     } else if (data.type === 'VOD_RESOURCE') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = true;
@@ -516,6 +521,7 @@ define([
                         self.contextMenu.dedicatedCommand = false;
                         self.contextMenu.enterCommand = false;
                         self.contextMenu.removeRecord = false;
+                        self.contextMenu.recordRecord = false;
                     } else if (data.type === 'COMMAND') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = false;
@@ -529,6 +535,7 @@ define([
                         self.contextMenu.intercom = false;
                         self.contextMenu.dedicatedCommand = false;
                         self.contextMenu.enterCommand = false;
+                        self.contextMenu.recordRecord = false;
                         if (self.contextMenu.currentNode.level == 2) {
                             self.contextMenu.removeRecord = true;
                         } else {
@@ -1131,8 +1138,7 @@ define([
                         id: self.group.current.id,
                         members: $.toJSON(members)
                     }, function (data) {
-                        if (status !== 200) return;
-                        self.refreshCurrentGroupMembers();
+                        self.currentGroupChange(self.group.current.id);
                         if (data && data.length > 0) {
                             self.qt.invoke('commandMemberDelete', data);
                         }
@@ -1619,6 +1625,10 @@ define([
                     userIds: $.toJSON(ids)
                 }, function(data){
                     self.qt.success('操作成功');
+                    self.group.current.select.forEach(function (value) {
+                        value.checked = false;
+                    });
+                    self.group.current.select = [];
                 });
             },
             //全员讨论
@@ -1635,8 +1645,34 @@ define([
                         self.buttons.discussion=false;
                     })
                 }
-            }
-            
+            },
+            //退出会议并关闭窗体---暂时好像没用到
+            exitCurrentCommandAndCloseWindow: function () {
+                var self = this;
+                if (!self.group.current) {
+                    self.qt.linkedWebview('header', {
+                        id: 'closeWindow'
+                    });
+                } else {
+                    if (self.user.id == self.group.current.creator) {
+                        ajax.post('/command/basic/stop', {
+                            id: self.group.current.id
+                        }, function (data) {
+                            self.qt.linkedWebview('header', {
+                                id: 'closeWindow'
+                            });
+                        });
+                    } else {
+                        ajax.post('/command/basic/exit', {
+                            id: self.group.current.id
+                        }, function (data) {
+                            self.qt.linkedWebview('header', {
+                                id: 'closeWindow'
+                            });
+                        });
+                    }
+                }
+            },
         },
         computed: {
             groupCurrent: function () {
@@ -1829,8 +1865,43 @@ define([
                 //监听到添加成员，刷新树
                 self.qt.on('commandMemberAdd', function (e) {
                     e = e.params;
-                    self.refreshCurrentGroupMembers();
+                    self.currentGroupChange(self.group.current.id);
                     self.qt.invoke('groupMembers', e);
+                });
+                // 监听退成员时
+                self.qt.on('reduceMembers', function (e) {
+                    e = e.params.params;
+                    var memberIds = e.memberIds;
+                    var beDeleted = false;
+                    if (memberIds && memberIds.length > 0) {
+                        for (var i = 0; i < memberIds.length; i++) {
+                            if (memberIds[i] == self.user.id) {
+                                beDeleted = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (beDeleted) {
+                        for (var i = 0; i < self.group.entered.length; i++) {
+                            if (self.group.entered[i].id == e.businessId) {
+                                self.group.entered.splice(i, 1);
+                                break;
+                            }
+                        }
+                        if (self.group.currentId == e.businessId) {
+                            if (self.group.entered.length > 0) {
+                                self.group.currentId = self.group.entered[0].id;
+                                self.group.current = self.group.entered[0];
+                                self.currentGroupChange(self.group.currentId);
+                            } else {
+                                self.group.currentId = '';
+                                self.group.current = '';
+                            }
+                        }
+                    }
+                    if (e.splits && e.splits.length > 0) {
+                        self.qt.invoke('commandMemberDelete', e.splits);
+                    }
                 });
 
                 self.qt.on('responseModeChange', function (e) {
@@ -1883,7 +1954,23 @@ define([
                         }
                     }
                     // self.refreshCommand("meeting");
-                })
+                });
+
+                //右上角叉的关闭按钮
+                self.qt.on('exitCurrentCommandAndCloseWindow', function () {
+                    self.exitCurrentCommandAndCloseWindow();
+                });
+
+                self.qt.on('yanxiaochao', function (e) {
+                    console.log('还是走这？')
+                    console.log(e)
+                    self.currentGroupChange(self.group.current);
+                });
+
+                // 授权协同会议
+                self.qt.on('refreshCurrentGroupMembers', function (e) {
+                    self.currentGroupChange(self.group.current);
+                });
             });
         }
     });

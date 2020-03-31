@@ -8,9 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
+import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.secret.CommandSecretServiceImpl;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -20,6 +22,9 @@ public class CommandSecretController {
 
 	@Autowired
 	private UserUtils userUtils;
+
+	@Autowired
+	private CommandCommonUtil commandCommonUtil;
 	
 	@Autowired
 	CommandBasicServiceImpl commandBasicServiceImpl;
@@ -49,9 +54,10 @@ public class CommandSecretController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
+		String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
 		String name = new StringBuilder()
 				.append(user.getName())
-				.append("发起的专向会议")
+				.append("发起的专向" + commandString)
 				.toString();
 		
 		Object chairSplits = commandSecretServiceImpl.start(user.getId(), user.getName(), name, Long.parseLong(userId), -1);
@@ -81,9 +87,10 @@ public class CommandSecretController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
+		String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
 		String name = new StringBuilder()
 				.append(user.getName())
-				.append("发起的专向会议")
+				.append("发起的专向" + commandString)
 				.toString();
 		
 		Object chairSplits = commandSecretServiceImpl.start(user.getId(), user.getName(), name, Long.parseLong(userId), serial);

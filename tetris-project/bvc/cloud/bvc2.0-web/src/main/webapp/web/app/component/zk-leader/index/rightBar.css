@@ -58,6 +58,7 @@ ul, li, div {
     background: #204a6b;
     color: #fff;
     text-align: center;
+    cursor: pointer;
 }
 
 /*顶部标题具有高亮的样式*/
@@ -142,6 +143,10 @@ li.focusLight {
     display: block;
     width: 100%;
     height: 100%;
+}
+/*禁止图片拖拽*/
+img {
+    -webkit-user-drag: none;
 }
 
 .is-left .is-active {
@@ -390,8 +395,8 @@ li.focusLight {
 }
 
 /*下拉框样式修改*/
-.el-input--small .el-input__inner {
-    background-color: #204a6b9e;
+.el-input__inner {
+    background-color: #1e67a09e;
     border: none;
     height: 40px;
     line-height: 40px;
@@ -405,7 +410,7 @@ li.focusLight {
 /*箭头的样式*/
 .el-select .el-input .el-select__caret {
     margin-right: 10px;
-    font-size: 30px;
+    font-size: 28px;
     color: #00e8fe;
     font-weight: bold;
 }
@@ -558,9 +563,17 @@ div.el-select-dropdown {
     position: fixed;
     top: 50%;
     right: 0;
-    /*width: 60px;*/
-    /*height: 64px;*/
-    /*background-color: #b1b1b1;*/
+}
+
+.recordTitle{
+    margin: 0;
+    height: 30px;
+    line-height: 30px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #34a7ff;
+    background-color: #0808088c;
+    text-align: center;
 }
 
 

@@ -13,12 +13,34 @@ public class CommandCommonConstant {
 	/**
 	 * 用来设置
 	 */
-	@Value("${commandString}")
-	public static String COMMAND_STRING;
+	@Value("${command.commandString}")
+	public String commandString;
+	
+	/**
+	 * 创建本地预览的模式，0关闭，1使用摄像头，2使用绑定的编码器
+	 */
+	@Value("${command.localPreviewMode}")
+	public int localPreviewMode;
 	
 	/** 管理员用户名 */
 	public static final String USER_NAME= "系统管理员";
 	
+	public String getCommandString() {
+		return commandString;
+	}
+
+	public void setCommandString(String commandString) {
+		this.commandString = commandString;
+	}
+
+	public int getLocalPreviewMode() {
+		return localPreviewMode;
+	}
+
+	public void setLocalPreviewMode(int localPreviewMode) {
+		this.localPreviewMode = localPreviewMode;
+	}
+
 	/** 呼叫消息 */
 	public static final String MESSAGE_CALL = "callUser";
 	

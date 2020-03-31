@@ -1,11 +1,11 @@
 define([
-    'text!' + window.APPPATH + 'component/zk-leader/dialog/add-group/leader-dialog-add-group.html',
+    'text!' + window.APPPATH + 'component/zk-leader/dialog/add-group/rec.html',
     'restfull',
     'jquery',
     'vue',
     'config',
     'element-ui',
-    'css!' + window.APPPATH + 'component/zk-leader/dialog/add-group/leader-dialog-add-group.css'
+    'css!' + window.APPPATH + 'component/zk-leader/dialog/add-group/rec.css'
 ], function (tpl, ajax, $, Vue, config) {
 
     //组件名称

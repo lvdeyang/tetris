@@ -39,6 +39,12 @@ define([
                 var self = this;
                 self.qt.window('/router/zk/leader/settings', null, {width: 980, height: 600});
             },
+            // exitCommand:function(){
+            //     var self = this;
+            //     self.qt.confirm('提示', '确定关闭软件？', '是', function(){
+            //         self.qt.linkedWebview('rightBar', {id:'exitCurrentCommandAndCloseWindow'});
+            //     });
+            // },
             //退出
             closeExit: function () {
                 var self = this;
@@ -102,6 +108,10 @@ define([
                         alert('header' + msg);
                     });
                 });
+
+                // self.qt.on('closeWindow', function(){
+                //     self.closeExit();
+                // });
 
                 // TODO: 获取作战时间 linkwebview
                 // var d = new Date(2019, 11, 31, 23, 59, 45);//2015-1-1 1:1:1

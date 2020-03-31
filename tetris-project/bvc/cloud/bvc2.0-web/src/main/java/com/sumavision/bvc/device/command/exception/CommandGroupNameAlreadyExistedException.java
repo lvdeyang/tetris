@@ -12,16 +12,16 @@ public class CommandGroupNameAlreadyExistedException extends BaseException {
 	private String recommendedName;
 	
 	public CommandGroupNameAlreadyExistedException(String groupName){
-		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("会议：")
+		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("名称 ")
 															 .append(groupName)
-															 .append("已经存在，请修改名称")
+															 .append(" 已被使用，请修改")
 															 .toString());
 	}
 	
 	public CommandGroupNameAlreadyExistedException(String groupName, String recommendedName){
-		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("会议：")
+		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("名称 ")
 															 .append(groupName)
-															 .append("已经存在，请修改名称")
+															 .append(" 已被使用，请修改")
 															 .toString());
 		this.setRecommendedName(recommendedName);
 	}
