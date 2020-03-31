@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.bvc.api.controller.EmergentBundleVO;
 import com.sumavision.bvc.command.emergent.broadcast.CommandBroadcastSpeakPO;
 import com.sumavision.bvc.command.emergent.broadcast.CommandBroadcastSpeakerPO;
 import com.sumavision.bvc.command.group.dao.CommandBroadcastSpeakDAO;
@@ -20,8 +22,8 @@ import com.sumavision.bvc.communication.http.HttpClient;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
-import com.sumavision.tetris.resouce.feign.bundle.BundleVO;
+//import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
+//import com.sumavision.tetris.resouce.feign.bundle.BundleVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -54,10 +56,13 @@ public class CommandEmergentBroadcastServiceImpl {
 	private ResourceBundleDAO resourceBundleDao;
 	
 	@Autowired
-	private UserQuery userQuery;
+	private BundleDao bundleDao;
 	
 	@Autowired
-	private BundleFeignService bundleFeignService;
+	private UserQuery userQuery;
+	
+//	@Autowired
+//	private BundleFeignService bundleFeignService;
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
@@ -252,12 +257,24 @@ public class CommandEmergentBroadcastServiceImpl {
 	 * <b>日期：</b>2020年3月10日 上午11:23:17
 	 * @throws Exception 
 	 */
-	public List<BundleVO> queryAndNotifyDevices(String longitude, String latitude, Long raidus, String unifiedId) throws Exception{
+	public List<EmergentBundleVO> queryAndNotifyDevices(String longitude, String latitude, Long raidus, String unifiedId) throws Exception{
 		
 		log.info("精度 " + longitude + " 纬度 " + latitude + " 范围（米） " + raidus);
 
 		//向资源查询
-		List<BundleVO> bundleVOs = bundleFeignService.queryVisibleBundle(longitude, latitude, raidus);
+		List<String> deviceModels = new ArrayList<String>();
+		deviceModels.add("ipc");
+		deviceModels.add("speaker");
+		List<BundlePO> bundlePOs = bundleDao.findByRaidus(longitude, latitude, raidus, deviceModels);
+		
+		List<EmergentBundleVO> bundleVOs = new ArrayList<EmergentBundleVO>();		
+		if(bundlePOs != null){
+			for(BundlePO bundlePO : bundlePOs){
+				bundleVOs.add(new EmergentBundleVO().set(bundlePO));
+			}
+		}
+
+//		List<BundleVO> bundleVOs = bundleFeignService.queryVisibleBundle(longitude, latitude, raidus);
 		
 		if(bundleVOs.size() > 0){
 		
@@ -270,7 +287,13 @@ public class CommandEmergentBroadcastServiceImpl {
 			
 			//websocket给所有用户推送
 			List<Long> consumeIds = new ArrayList<Long>();
-			List<UserVO> userVOs = userQuery.queryAllUserBaseInfo("qt指控软件");
+			List<UserVO> userVOs = null;
+			try{
+				userQuery.queryAllUserBaseInfo("qt指控软件");
+			}catch(Exception e){
+				userVOs = new ArrayList<UserVO>();
+				log.info("查询用户失败，可能是没有权限");
+			}
 			for(UserVO userVO : userVOs){
 				WebsocketMessageVO ws = websocketMessageService.send(userVO.getId(), JSON.toJSONString(message), WebsocketMessageType.COMMAND);
 				consumeIds.add(ws.getId());

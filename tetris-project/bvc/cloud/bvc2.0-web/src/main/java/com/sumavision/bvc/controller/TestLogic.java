@@ -140,7 +140,7 @@ public class TestLogic {
 	@JsonBody
 	@RequestMapping(value = "/broadcast", method = RequestMethod.GET)
 	public Object broadcast(HttpServletRequest request) throws Exception{
-		commandEmergentBroadcastServiceImpl.queryAndNotifyDevices("129.817461", "44.4266", 1500L, "test");
+//		commandEmergentBroadcastServiceImpl.queryAndNotifyDevices("129.817461", "44.4266", 1500L, "test");
 		return null;
 	}
 	

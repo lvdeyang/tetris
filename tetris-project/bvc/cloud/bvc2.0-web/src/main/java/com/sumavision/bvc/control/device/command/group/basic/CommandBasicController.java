@@ -25,6 +25,7 @@ import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
@@ -225,12 +226,13 @@ public class CommandBasicController {
 				   .append(commandString)
 				   .toString();
 		}
+		String subject = name;
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
 		
 		CommandGroupPO group = null;
 		try{
-			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, GroupType.BASIC, userIdArray);
+			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, subject, GroupType.BASIC, OriginType.INNER, userIdArray);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();

@@ -107,11 +107,11 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-resource-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		</dependency> -->
 		
 		<!-- 业务的feign，提供调度的BO -->
 		<dependency>

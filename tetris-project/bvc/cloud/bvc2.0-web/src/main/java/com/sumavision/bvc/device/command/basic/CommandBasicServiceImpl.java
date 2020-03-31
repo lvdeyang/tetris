@@ -37,6 +37,7 @@ import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MediaType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
@@ -167,7 +168,9 @@ public class CommandBasicServiceImpl {
 			Long chairmanUserId,
 			String creatorUsername,
 			String name,
+			String subject,
 			GroupType type,
+			OriginType originType,
 			List<Long> userIdList
 			) throws Exception{
 		
@@ -215,7 +218,9 @@ public class CommandBasicServiceImpl {
 		
 		CommandGroupPO group = new CommandGroupPO();
 		group.setName(name);
+		group.setSubject(subject);
 		group.setType(type);
+		group.setOriginType(originType);
 		group.setEditStatus(EditStatus.NORMAL);
 		
 		group.setUserId(creatorUserId);
@@ -702,7 +707,13 @@ public class CommandBasicServiceImpl {
 			message.put("fromUserName", chairman.getUserName());
 			message.put("businessId", group.getId().toString());
 			if(group.getType().equals(GroupType.BASIC) || group.getType().equals(GroupType.MEETING)){
-				message.put("businessType", "commandStart");
+				String businessType = null;
+				if(GroupType.MEETING.equals(group.getType())){
+					businessType = "meetingStart";
+				}else{
+					businessType = "commandStart";
+				}
+				message.put("businessType", businessType);
 				message.put("businessInfo", "接受到 " + group.getName() + " 邀请，主席：" + chairman.getUserName() + "，是否进入？");
 			}else if(group.getType().equals(GroupType.SECRET)){
 				message.put("businessType", "secretStart");
@@ -1577,8 +1588,14 @@ public class CommandBasicServiceImpl {
 			
 			//发消息给新成员
 			for(CommandGroupMemberPO member : newMembers){
+				String businessType = null;
+				if(GroupType.MEETING.equals(group.getType())){
+					businessType = "meetingStart";
+				}else{
+					businessType = "commandStart";
+				}
 				JSONObject message = new JSONObject();
-				message.put("businessType", "commandStart");
+				message.put("businessType", businessType);
 				message.put("fromUserId", chairmanMember.getUserId());
 				message.put("fromUserName", chairmanMember.getUserName());
 				message.put("businessId", group.getId().toString());

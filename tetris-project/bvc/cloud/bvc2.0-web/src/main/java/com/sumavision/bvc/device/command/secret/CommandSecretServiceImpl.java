@@ -16,6 +16,7 @@ import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
@@ -89,7 +90,7 @@ public class CommandSecretServiceImpl {
 		log.info(creatorUsername + "发起专向会议，成员用户userId：" + memberUserId);
 		
 		List<Long> userIdArray = new ArrayListWrapper<Long>().add(memberUserId).getList();		
-		CommandGroupPO group = commandBasicServiceImpl.save(creatorUserId, creatorUserId, creatorUsername, name, GroupType.SECRET, userIdArray);
+		CommandGroupPO group = commandBasicServiceImpl.save(creatorUserId, creatorUserId, creatorUsername, name, name, GroupType.SECRET, OriginType.INNER, userIdArray);
 		Object chairSplits = commandBasicServiceImpl.start(group.getId(), locationIndex);
 		return chairSplits;
 	}
