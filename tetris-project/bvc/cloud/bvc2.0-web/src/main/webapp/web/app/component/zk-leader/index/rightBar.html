@@ -40,7 +40,7 @@
 
                 <!--树形菜单-->
                 <div class="commandTable"
-                     style="position:absolute; left:15px; top:90px; width:290px;height: 400px; bottom:50px;overflow: hidden">
+                     style="position:absolute; left:15px; top:90px; width:290px;height: 450px; bottom:50px;overflow: hidden">
                     <div style="width:100%; height:100%; position:relative;">
                         <el-scrollbar style="height:100%;">
                             <el-tree
@@ -504,9 +504,9 @@
                 会议名称：{{meetName}}
             </div>
             <div class="commandTable"
-                 style="position:absolute; left:15px; top:30px; width:290px;height: 310px; bottom:50px;overflow: hidden">
-                <div style="width:100%; height:100%; position:relative;" v-loading="group.loading">
-                    <el-scrollbar style="height:90%;">
+                 style="position:absolute; left:15px; top:30px; width:290px;height: 450px; bottom:50px;overflow: hidden">
+                <div style="width:100%; height:100%; position:relative;">
+                    <el-scrollbar style="height:100%;">
                         <el-tree ref="commandUserTree" :filter-node-method="filterCommandUserNode" :data="group.tree"
                                  node-key="id" :props="props">
                             <span class="headline" slot-scope="scope">
@@ -518,14 +518,14 @@
                                      <el-checkbox v-if="scope.data.type==='USER'" v-model="scope.data.checked"
                                                   @change="onCommandUserCheckChange(scope.data)">
                                     <span :class="scope.data.icon"
-                                          :style="scope.data.style+' position:relative; top:1px;'"></span>
+                                          :style="scope.data.bundleStatus == 'bundle-online'?'color:#0dcc19;':'color:#676767;'+' position:relative; top:1px;'"></span>
                                     <span class="headFonts">{{scope.data.name}}</span>
                                     <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
                                       <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
                                             slot="reference"></span>
                                     </el-popover>
                                  </el-checkbox>
-                                      <span v-else>
+                                <span v-else>
                                 <span :class="scope.data.icon" :style="scope.data.style"></span>
                                 <span class="sheadFont">{{scope.data.name}}</span>
                                 <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
@@ -704,8 +704,7 @@
         <el-input v-model="dialog.resetName.name" placeholder="起个名吧" style="width:100%;"></el-input>
         <span slot="footer" class="dialog-footer">
             <el-button size="medium" @click="resetNameClose">取消</el-button>
-            <el-button size="medium" type="primary" @click="resetNameCommit"
-                       :loading="dialog.resetName.loading">确定</el-button>
+            <el-button size="medium" type="primary" @click="resetNameCommit">确定</el-button>
         </span>
     </el-dialog>
 </div>

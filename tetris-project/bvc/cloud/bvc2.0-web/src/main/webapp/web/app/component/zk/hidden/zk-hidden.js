@@ -136,6 +136,7 @@ define([
                             function (addr, status) {
                         var onmessage = function(e){
                             var e = $.parseJSON(e.data);
+                            console.log(e)
                             //呼叫用户消息
                             if(e.businessType === 'callUser'){
                                 self.qt.linkedWebview('business', {id:'callUserMessage', params:e});
@@ -210,6 +211,12 @@ define([
                                 self.qt.linkedWebview('business', {id:'commandMemberDelete', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'commandMemberDelete', params:e});
+                            }
+
+                            //会议
+                            if(e.businessType === 'meetingStart'){
+                                //监听呼叫消息，消息状态要在底部滚动
+                                self.qt.linkedWebview('historyMessage', {id:'meetingStart', params:e});
                             }
 
                             //协同指挥

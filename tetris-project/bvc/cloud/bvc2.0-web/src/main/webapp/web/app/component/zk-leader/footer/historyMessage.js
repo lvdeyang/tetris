@@ -437,6 +437,20 @@ define([
                         self.qt.linkedWebview('rightBar', {id: 'linkEnterCommand', params: e.businessId});
                     });
                 });
+
+                //websocket 开始会议
+                self.qt.on('meetingStart', function (e) {
+                    e = e.params;
+                    self.qt.confirm('业务提示', e.businessInfo, '拒绝', '同意', function () {
+                        //拒绝进入指挥
+                        ajax.post('/command/basic/refuse', {id: e.businessId}, function () {
+                        });
+                    }, function () {
+                        //同意进入指挥.需要用到rightbar里的方法，所以连接过去，在那个页面调用
+                        self.qt.linkedWebview('rightBar', {id: 'linkEnterMeeting', params: e.businessId});
+                    });
+                });
+
                 self.qt.on('enterCommand', function (e) {
                     e = e.params;
                     //需要用到rightbar里的方法，所以连接过去，在那个页面调用
@@ -469,7 +483,7 @@ define([
                         self.qt.invoke('commandExit', e.splits);
                     }
                     setTimeout(function(){
-                      self.qt.linkedWebview('rightBar', {id:'yanxiaochao', params:e});
+                      self.qt.linkedWebview('rightBar', {id:'memberOffline', params:e});
                     }, 2000);
                 });
 
