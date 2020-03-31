@@ -3,12 +3,12 @@
     <el-tab-pane label="安排会议" name="prepareCommand">
       <div style="position:absolute; left:100px; top:0; right:4px; bottom:0;">
         <div style="width:100%; height:100%; position:relative;">
-          <div style="height:50x;line-height: 50px; width:100%; box-sizing:border-box;">
-            <el-input style="width:40%; float:left;margin: 0 5px" v-model="commandName" placeholder="请输入会议名称">
+          <div style="height:50px;line-height: 50px; width:100%; box-sizing:border-box;">
+            <el-input style="width:45%; float:left;margin: 0 5px" v-model="commandName" placeholder="请输入会议名称">
             </el-input>
-            <el-input style="width:40%; float:left;margin: 0 5px" v-model="filterUser" placeholder="筛选用户">
+            <el-input style="width:45%; float:left;margin: 0 5px" v-model="filterUser" placeholder="筛选用户">
             </el-input>
-            <el-button type="primary" size="medium" @click="changeSearch">搜索</el-button>
+            <el-button style="position: absolute;top:10px;right: 125px;z-index: 1" type="primary" size="mini" @click="changeSearch">搜索</el-button>
           </div>
           <div style="position:absolute; left:1px; top:50px; right:1px; bottom:50px;background:linear-gradient(rgb(40, 60, 105), rgb(51, 114, 119), rgb(15, 58, 102));">
             <div style="width:100%; height:100%; overflow:auto;">

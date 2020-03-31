@@ -327,7 +327,9 @@ define([
             //左侧一键全选按钮
             selectAll: function () {
                 var self = this;
-                self.tableData.forEach(function (item) {
+                //之前是直接用tableData的数据
+                var tempData=self.searchData.length?self.searchData:self.tableData;
+                tempData.forEach(function (item) {
                     if (self.checkBoxData.indexOf(item) === -1) {
                         self.checkBoxData.push(item)
                     }
@@ -341,7 +343,9 @@ define([
             //左侧一键取消全选按钮
             unsetAll: function () {
                 var self = this;
-                self.pageData.forEach(function (item) {
+                var tempData=self.searchData.length?self.searchData:self.tableData;
+                // self.pageData.forEach(function (item) { //之前用的
+                tempData.forEach(function (item) {
                     self.checkBoxData.forEach(function (val, index) {
                         if (val.id === item.id) {
                             self.checkBoxData.splice(index, 1);

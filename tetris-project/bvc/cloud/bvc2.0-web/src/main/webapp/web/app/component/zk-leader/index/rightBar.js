@@ -1012,6 +1012,7 @@ define([
                 }
                 if (currentGroup.type === 'command') {
                     self.group.loading = true;
+                    console.log(currentGroup.id)
                     ajax.post('/command/basic/query/members', {id: currentGroup.id}, function (data, status) {
                         self.group.loading = false;
                         if (status !== 200) return;
@@ -1024,6 +1025,7 @@ define([
                         //去掉根目录那层
                         self.group.tree = tree;
                         self.group.current = data;
+                        console.log(self.group.current)
                         if (self.user.id == data.creator) {
                             self.buttons.addMember = true;
                             self.buttons.removeMember = true;
@@ -1848,10 +1850,15 @@ define([
 
                 //从新建会议页面来，到这个页面时改变
                 self.qt.on('showData', function (e) {
+                    var group = $.parseJSON(e.params)[0];
                     self.switchStatus1 = false;
                     self.switchStatus2 = false;
                     self.switchStatus3 = false;
                     self.people = true;
+                    self.meetName=group.name;
+                    group.type = 'command';
+                    self.currentGroupChange(group);
+                    self.qt.set('currentGroupId', group.id);
                 });
                 //从安排会议页面来，到这个页面时在刷新下数据
                 self.qt.on('refreshData', function (e) {
