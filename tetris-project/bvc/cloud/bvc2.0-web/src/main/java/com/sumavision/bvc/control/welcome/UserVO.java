@@ -19,6 +19,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserBO>{
 	
 	private String createTime;
 	
+	@Deprecated
 	private String creator;
 	
 	public String getName() {
@@ -84,7 +85,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserBO>{
 		return this;
 	}
 
-	public String getCreator() {
+	public String getCreator_Deprecated() {
 		return creator;
 	}
 

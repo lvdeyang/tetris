@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.bvc.device.command.emergent.broadcast.CommandEmergentBroadcastServiceImpl;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
-import com.sumavision.tetris.resouce.feign.bundle.BundleVO;
 
 /**
  * @ClassName: 对应急广播系统提供的接口
@@ -50,7 +49,7 @@ public class ApiEmergentBroadcastController {
 			HttpServletRequest request) throws Exception{
 		
 		//查询设备列表，同时业务也会将设备列表推送给终端
-		List<BundleVO> bundleVOs = commandEmergentBroadcastServiceImpl.queryAndNotifyDevices(longitude, latitude, Long.parseLong(raidus), unifiedId);
+		List<EmergentBundleVO> bundleVOs = commandEmergentBroadcastServiceImpl.queryAndNotifyDevices(longitude, latitude, Long.parseLong(raidus), unifiedId);
 		
 		return bundleVOs;
 	}

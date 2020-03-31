@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.control.utils.TreeUtils;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
@@ -76,7 +77,7 @@ public class CommandMeetingController {
 		
 		CommandGroupPO group = null;
 		try{
-			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, GroupType.MEETING, userIdArray);
+			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, name, GroupType.MEETING, OriginType.INNER, userIdArray);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();
