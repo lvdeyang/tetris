@@ -1,0 +1,18 @@
+<notify>
+	<commandname>bizcnf</commandname>
+	<operation>maddinc</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<mlist>
+		<#if mAddList??>
+			<#list mAddList as m>
+				<mid>${m.mid}</mid>
+				<mname>${m.mname}</mname>
+				<mtype>${m.mtype}</mtype>
+				<pid>${m.pid}</pid>
+			</#list>
+		</#if>
+	</mlist>
+</notify>

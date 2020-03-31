@@ -1,0 +1,11 @@
+<!-- 成员主动退出指挥 -->
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>mquit</operation>
+	<quittype>r</quittype>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<mid>${mid}</mid>
+</notify>
