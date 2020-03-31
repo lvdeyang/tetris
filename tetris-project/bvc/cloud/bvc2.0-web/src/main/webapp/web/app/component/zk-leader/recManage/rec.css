@@ -1,0 +1,66 @@
+/* reset */
+html,
+body {
+  overflow: hidden;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  background: #000
+}
+
+.leader-dialog-add-group .el-tabs__content {
+  position: static;
+}
+.search{
+  height: 35px;
+  line-height: 35px;
+}
+.el-range-editor .el-range-input {
+  background-color: #0000001c;
+}
+
+.leader-dialog-add-group .el-input__inner {
+  border-radius: 0;
+}
+
+/* 更改table表格的样式 */
+.el-table,
+.el-table__expanded-cell {
+  background-color: #2d716d87;
+  color: #c2f9ff;
+}
+
+.el-table thead {
+  color: #00e4fd;
+}
+
+.el-table th,
+.el-table tr {
+  background-color: #3c628836;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover>td {
+  background-color: #34675d;
+}
+
+
+/* 更改输入框背景色 */
+.el-input__inner {
+  background-color: #00000073;
+  color: #fff;
+}
+
+/* 左侧tab */
+.el-tabs__item {
+  color: #a9e3ff;
+  font-size: 16px;
+}
+
+.el-tabs__item.is-active {
+  color: #00ffad;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.el-date-editor .el-range-separator,.el-date-editor .el-range-input{
+  color: #dadada;
+}

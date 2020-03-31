@@ -12,10 +12,12 @@
         <!--第一部分的菜单-->
         <div class="firstMenu" v-show="switchStatus1">
             <div>
-                <div style="display: inline-block;font-size: 20px;color: #d6c9c9">当前指挥状态：</div>
-                <!--状态-->
-                <div :class="'status ' + group.current.status">
-                    <span>{{group.current.status==='start'?'开始':(group.current.status==='pause'?'暂停':(group.current.status==='remind'?'提醒':'停止'))}}</span>
+                <div v-if="group.current">
+                    <div style="display: inline-block;font-size: 20px;color: #d6c9c9">当前指挥状态：</div>
+                    <!--状态-->
+                    <div :class="'status ' + group.current.status">
+                        <span>{{group.current.status==='start'?'开始':(group.current.status==='pause'?'暂停':(group.current.status==='remind'?'提醒':'停止'))}}</span>
+                    </div>
                 </div>
 
                 <!--下拉选项-->
@@ -38,9 +40,9 @@
 
                 <!--树形菜单-->
                 <div class="commandTable"
-                     style="position:absolute; left:15px; top:90px; width:290px;height: 310px; bottom:50px;overflow: hidden">
-                    <div style="width:100%; height:100%; position:relative;" v-loading="group.loading">
-                        <el-scrollbar style="height:90%;">
+                     style="position:absolute; left:15px; top:90px; width:290px;height: 400px; bottom:50px;overflow: hidden">
+                    <div style="width:100%; height:100%; position:relative;">
+                        <el-scrollbar style="height:100%;">
                             <el-tree
                                     :data="group.tree"
                                     node-key="id"
@@ -58,7 +60,7 @@
                                                  width="200"
                                                  trigger="click"
                                                  :content="data.name">
-                                              <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff"
+                                              <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
                                                     slot="reference"></span>
                                         </el-popover>
                                     </el-checkbox>
@@ -76,11 +78,11 @@
                 <div class="btnContainer" v-if="group.current && group.current.type==='command'">
                     <div :class="'option-button '+(buttons.addMember?'':'disable')" title="添加成员"
                          @click="addCommandMember">
-                        <img v-if="buttons.addMember" :src="baseUrl+'images/zk-leader/able/addMember.png'"/>
+                        <img v-if="buttons.addMember" :src="baseUrl+'images/zk-leader/able/addMember.png'" draggable="false"/>
                     </div>
                     <div :class="'option-button '+(buttons.removeMember?'':'disable')" title="强退成员"
                          @click="removeCommandMember">
-                        <img v-if="buttons.removeMember" :src="baseUrl+'images/zk-leader/able/removeMember.png'"/>
+                        <img v-if="buttons.removeMember" :src="baseUrl+'images/zk-leader/able/removeMember.png'" draggable="false"/>
                     </div>
                     <div :class="'option-button '+(buttons.cooperativeCommand?'':'disable')" title="协同指挥"
                          @click="cooperativeCommand('指挥')">
@@ -163,7 +165,7 @@
                 <!--指挥列表-->
                 <el-tab-pane class="tabPage">
                     <span slot="label" class="myTitle">
-                      <img class="fontPic" src="../../../../../images/zk-leader/command.png" alt="">
+                      <img class="fontPic" src="../../../../../images/zk-leader/command.png" draggable="false">
                     </span>
                     <!--/*树的外层的容器 必须给高度，滚动条才起作用*/-->
                     <div class="scrollTab" :style="contentStyleObj">
@@ -180,7 +182,7 @@
                                               width="200"
                                               trigger="click"
                                               :content="data.name">
-                                              <span class="el-icon-arrow-down"
+                                              <span class="el-icon-caret-bottom"
                                                     style="margin-left:45px;font-size: 14px;color: #00ceff"
                                                     slot="reference"></span>
                                         </el-popover>
@@ -197,7 +199,7 @@
                 <!--组织结构-->
                 <el-tab-pane class="tabPage">
                     <span slot="label" class="myTitle">
-                      <img class="fontPic" src="../../../../../images/zk-leader/organization.png" alt="">
+                      <img class="fontPic" src="../../../../../images/zk-leader/organization.png" draggable="false">
                     </span>
                     <div class="scrollTab">
                         <el-scrollbar style="height:100%">
@@ -217,7 +219,7 @@
                                                  width="200"
                                                  trigger="click"
                                                  :content="data.name">
-                                              <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff"
+                                              <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
                                                     slot="reference"></span>
                                         </el-popover>
                                     </el-checkbox>
@@ -233,7 +235,7 @@
                 <!--文件资源-->
                 <el-tab-pane class="tabPage">
                     <span slot="label" class="myTitle">
-                      <img class="fontPic" src="../../../../../images/zk-leader/fileResource.png" alt="">
+                      <img class="fontPic" src="../../../../../images/zk-leader/fileResource.png" draggable="false">
                     </span>
                     <div class="scrollTab">
                         <el-scrollbar style="height:100%">
@@ -251,7 +253,7 @@
                                             width="200"
                                             trigger="click"
                                             :content="data.name">
-                                              <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff"
+                                              <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
                                                     slot="reference"></span>
                                         </el-popover>
                                     </el-checkbox>
@@ -267,25 +269,25 @@
                 <!--设备资源-->
                 <el-tab-pane class="tabPage">
                 <span slot="label" class="myTitle">
-                <img class="fontPic" src="../../../../../images/zk-leader/equipment.png" alt="">
+                <img class="fontPic" src="../../../../../images/zk-leader/equipment.png" draggable="false">
                 </span>
-                <div class="scrollTab">
-                <el-scrollbar style="height:100%">
-                <el-tree :data="device.data" node-key="id" :props="props">
+                    <div class="scrollTab">
+                        <el-scrollbar style="height:100%">
+                            <el-tree :data="device.data" node-key="id" :props="props">
                 <span class="headline" slot-scope="{node,data}">
                 <span :class="data.type==='BUNDLE'?'handDown el-icon-tickets':''"
-                style="font-size: 20px;margin: 5px;color: #00ceff"
-                @click="handleContextMenuShow($event, data)"></span>
+                      style="font-size: 20px;margin: 5px;color: #00ceff"
+                      @click="handleContextMenuShow($event, data)"></span>
                 <el-checkbox v-if="data.type==='BUNDLE'" @change="onDviceCheckChange(data)">
                 <span :class="data.icon"
-                :style="data.style+' position:relative; top:1px;'"></span>
+                      :style="data.style+' position:relative; top:1px;'"></span>
                 <span class="headFont">{{data.name}}</span>
                 <el-popover
-                placement="top"
-                width="200"
-                trigger="click"
-                :content="data.name">
-                <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                        placement="top"
+                        width="200"
+                        trigger="click"
+                        :content="data.name">
+                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
                 </el-popover>
                 </el-checkbox>
                 <span v-else>
@@ -293,87 +295,57 @@
                 <span class="sheadFont">{{data.name}}</span>
                 </span>
                 </span>
-                </el-tree>
-                </el-scrollbar>
-                </div>
+                            </el-tree>
+                        </el-scrollbar>
+                    </div>
                 </el-tab-pane>
                 <!--录像回放-->
                 <el-tab-pane class="tabPage">
                 <span slot="label" class="myTitle">
-                <img class="fontPic" src="../../../../../images/zk-leader/record.png" alt="">
+                <img class="fontPic" src="../../../../../images/zk-leader/record.png" draggable="false">
                 </span>
                 <div class="scrollTab">
-                    <!--<span style="color: #fff">jjjjj</span>-->
+                    <el-select v-model="recordSelect" placeholder="请选择" style="width: 320px">
+                        <el-option value="1" label="指挥录制"></el-option>
+                        <el-option value="2" label="设备录制"></el-option>
+                        <el-option value="3" label="用户录制"></el-option>
+                    </el-select>
                 <el-scrollbar style="height:100%">
                 <el-tree :data="record.data" node-key="id"
-                :check-strictly=true
-                :props="props"
-                :expand-on-click-node="false">
+                                     :check-strictly=true
+                                     :props="props"
+                                     :expand-on-click-node="false">
                 <span class="headline" slot-scope="{node,data}">
                 <span :class="data.type==='RECORD_PLAYBACK'?'handDown el-icon-tickets':''"
-                style="font-size: 20px;margin: 5px;color: #00ceff"
-                @click="handleContextMenuShow($event, data)"></span>
+                      style="font-size: 20px;margin: 5px;color: #00ceff"
+                      @click="handleContextMenuShow($event, data)"></span>
                 <el-checkbox v-if="data.type==='RECORD_PLAYBACK'" @change="onRecordCheckChange(data)">
                 <span class="icon-file-alt"
-                style="font-size:15px; position:relative; top:1px;"></span>
+                      style="font-size:15px; position:relative; top:1px;"></span>
                 <span class="headFont">{{data.groupName}}</span>
                 <el-popover
-                placement="top"
-                width="200"
-                trigger="click"
-                :content="data.groupName">
-                <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                        placement="top"
+                        width="200"
+                        trigger="click"
+                        :content="data.groupName">
+                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
                 </el-popover>
                 </el-checkbox>
                 <span v-else>
                 <span class="icon-folder-close"></span>
                 <span class="sheadFont">{{data.groupName}}</span>
                 <el-popover
-                placement="top"
-                width="200"
-                trigger="click"
-                :content="data.groupName">
-                <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                        placement="top"
+                        width="200"
+                        trigger="click"
+                        :content="data.groupName">
+                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
                 </el-popover>
                 </span>
                 </span>
                 </el-tree>
-                    <!--<p style="color: #fff">wwww</p>-->
-                    <!--<el-tree :data="record.data" node-key="id"-->
-                             <!--:check-strictly=true-->
-                             <!--:props="props"-->
-                             <!--:expand-on-click-node="false">-->
-                <!--<span class="headline" slot-scope="{node,data}">-->
-                <!--<span :class="data.type==='RECORD_PLAYBACK'?'handDown el-icon-tickets':''"-->
-                      <!--style="font-size: 20px;margin: 5px;color: #00ceff"-->
-                      <!--@click="handleContextMenuShow($event, data)"></span>-->
-                <!--<el-checkbox v-if="data.type==='RECORD_PLAYBACK'" @change="onRecordCheckChange(data)">-->
-                <!--<span class="icon-file-alt"-->
-                      <!--style="font-size:15px; position:relative; top:1px;"></span>-->
-                <!--<span class="headFont">{{data.groupName}}</span>-->
-                <!--<el-popover-->
-                        <!--placement="top"-->
-                        <!--width="200"-->
-                        <!--trigger="click"-->
-                        <!--:content="data.groupName">-->
-                <!--<span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>-->
-                <!--</el-popover>-->
-                <!--</el-checkbox>-->
-                <!--<span v-else>-->
-                <!--<span class="icon-folder-close"></span>-->
-                <!--<span class="sheadFont">{{data.groupName}}</span>-->
-                <!--<el-popover-->
-                        <!--placement="top"-->
-                        <!--width="200"-->
-                        <!--trigger="click"-->
-                        <!--:content="data.groupName">-->
-                <!--<span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff" slot="reference"></span>-->
-                <!--</el-popover>-->
-                <!--</span>-->
-                <!--</span>-->
-                    <!--</el-tree>-->
                 </el-scrollbar>
-                </div>
+                    </div>
                 </el-tab-pane>
             </el-tabs>
 
@@ -476,7 +448,7 @@
                                     width="200"
                                     trigger="click"
                                     :content="item.name">
-                                <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff"
+                                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
                                       slot="reference"></span>
                             </el-popover>
                         </li>
@@ -508,7 +480,7 @@
                                     width="200"
                                     trigger="click"
                                     :content="item.name">
-                                <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff"
+                                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
                                       slot="reference"></span>
                             </el-popover>
                         </li>
@@ -549,7 +521,7 @@
                                           :style="scope.data.style+' position:relative; top:1px;'"></span>
                                     <span class="headFonts">{{scope.data.name}}</span>
                                     <el-popover placement="top" width="200" trigger="click" :content="scope.data.name">
-                                      <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff"
+                                      <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
                                             slot="reference"></span>
                                     </el-popover>
                                  </el-checkbox>
@@ -570,7 +542,7 @@
                                        <span class="headFonts">{{scope.data.name}}</span>
                                         <el-popover placement="top" width="200" trigger="click"
                                                     :content="scope.data.name">
-                                          <span class="el-icon-arrow-down" style="font-size: 14px;color: #00ceff"
+                                          <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
                                                 slot="reference"></span>
                                         </el-popover>
                                   </span>
@@ -610,19 +582,6 @@
                     <img v-if="!buttons.discussion" :src="baseUrl+'images/zk-leader/discuss.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/stopDiscuss.png'"/>
                 </div>
-
-                <!--<div :class="'option-button '+(buttons.cooperativeCommand?'':'disable')" title="会议协同"-->
-                     <!--@click="cooperativeCommand('会议')">-->
-                    <!--<img v-if="buttons.cooperativeCommand"-->
-                         <!--:src="baseUrl+'images/zk-leader/able/huiyi/cooperativeCommand.png'"/>-->
-                    <!--<img v-else :src="baseUrl+'images/zk-leader/disable/cooperativeCommand.png'"/>-->
-                <!--</div>-->
-                <!--<div :class="'option-button '+(buttons.cancelCooperative?'':'disable')" title="取消协同"-->
-                     <!--@click="cancelCooperativeCommand('会议')">-->
-                    <!--<i class=" icon-globe"-->
-                       <!--style="position: absolute;top:6px;left: 13px;font-size: 36px;color: #fff"></i>-->
-                    <!--<span style="position: absolute;bottom: 1px;color: #fff;font-size: 10px;left: 10px">取消协同</span>-->
-                <!--</div>-->
                 <div :class="'option-button '+(buttons.commandForward?'':'disable')" title="会议转发"
                      @click="commandForward('会议')">
                     <img v-if="buttons.commandForward" :src="baseUrl+'images/zk-leader/able/huiyi/commandForward.png'"/>
@@ -686,10 +645,10 @@
                 </div>
             </div>
             <!--悬浮按钮-->
-          <div v-if="buttons.speak">
-              <!--<img class="suspend" v-if="buttons.isSpeaking" :src="baseUrl+'images/zk-leader/speaking.png'" title="正在发言" @mousedown="itemMousemove">-->
-              <img class="suspend" :src="baseUrl+'images/zk-leader/speak.png'" title="申请发言" @mousedown="itemMousemove" @click="applySpeak">
-          </div>
+            <div v-if="buttons.speak">
+                <img class="suspend" :src="baseUrl+'images/zk-leader/speak.png'" title="申请发言" @mousedown="itemMousemove"
+                     @click="applySpeak">
+            </div>
         </div>
 
     </div>
@@ -717,6 +676,10 @@
             <div :class="'menu ' + (contextMenu.vod?'':'disable')" v-else @click="vod">
                 <i class="menuIcon icon-facetime-video"></i>
                 <span>点播</span>
+            </div>
+            <div :class="'menu ' + (contextMenu.recordRecord?'':'disable')">
+                <i class="menuIcon icon-camera-retro"></i>
+                <span>录制</span>
             </div>
             <div :class="'menu ' + (contextMenu.dedicatedCommand?'':'disable')" @click="secretCommand">
                 <i class="menuIcon  icon-user-md"></i>
