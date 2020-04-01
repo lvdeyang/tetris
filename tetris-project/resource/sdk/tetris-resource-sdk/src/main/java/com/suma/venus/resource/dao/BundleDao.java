@@ -168,4 +168,7 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public void deleteByUserIdIn(Collection<Long> userIds);
 	
 	public BundlePO findByDeviceModelAndUsername(String deviceModel, String username);
+	
+	@Query(value = "select bundleId from com.suma.venus.resource.pojo.BundlePO where bundleNum in ?1")
+	public List<String> findBundleIdByBundleNumIn(Collection<String> bundleNums);
 }

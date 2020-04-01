@@ -12,7 +12,7 @@ public class RequestResouceTypeAnalyzer {
 		".eot", ".svg", ".ttf", ".woff", ".jsp", ".gif",
 		".mp4", ".mp3", ".m3u8", ".ts", ".bpmn", ".xml",
 		".tar", ".rar", ".txt", ".wav", ".apk", ".json",
-		".lnk"
+		".lnk", ".map"
 	};
 	
 	/**
