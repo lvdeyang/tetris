@@ -39,4 +39,7 @@ public interface CommandGroupDAO extends MetBaseDAO<CommandGroupPO>{
 	@Query(value="SELECT * FROM bvc_command_group _group INNER JOIN bvc_command_group_member member ON member.group_id=_group.id WHERE (member.user_id=?1 and (member.member_status='CONNECT' or member.is_administrator=true))", nativeQuery=true)
 	public List<CommandGroupPO> findEnteredGroupByMemberUserId(Long userId);
 	
+	@Query(value = "select id from com.sumavision.bvc.command.group.basic.CommandGroupPO where uuid=?1")
+	public Long findIdByUuid(String uuid);
+	
 }
