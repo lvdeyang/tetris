@@ -696,6 +696,13 @@
         </div>
     </div>
 
+    <!--参与多个指挥,每个指挥都有提醒-->
+    <template>
+        <audio v-for="remindId in group.remindIds" style="display:none;" autoplay="autoplay" loop="loop">
+            <source src="/web/app/zk/business/command_remind_music.mp3" type="audio/mpeg" />
+        </audio>
+    </template>
+
     <!--给指挥起名字-->
     <el-dialog
             title="设置指挥名称"

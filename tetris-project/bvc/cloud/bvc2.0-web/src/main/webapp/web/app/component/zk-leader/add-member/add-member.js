@@ -133,11 +133,50 @@ define([
       //搜索功能，先前台处理，需要后台写接口
       changeSearch: function () {
         var text = this.filterText.trim();
-        var self = this;
-        this.searchData = [];
-        this.level2.forEach(function (l) {
-          self.searchFolder(l, text);
-        });
+          var selected1=this.selected1.trim();
+          var selected2=this.selected2.trim();
+          var selected3=this.selected3.trim();
+          var selected4=this.selected4.trim();
+          var selected5=this.selected5.trim();
+          var self = this;
+          this.searchData = [];
+          var tempData=[];
+          if(!selected1 && !selected2 && !selected3 && !selected4 && !selected5){
+              tempData=this.level2;
+          }else if(selected1 && !selected2 && !selected3 && !selected4 && !selected5){
+              this.options2.forEach(function (value,index) {
+                  if(value.id  === selected1 || value.name === selected1){
+                      tempData.push(self.options2[index]);
+                  }
+              });
+          }else if(selected1 && selected2 && !selected3 && !selected4 && !selected5){
+              this.options3.forEach(function (value,index) {
+                  if(value.id  === selected2 || value.name === selected2){
+                      tempData.push(self.options3[index]);
+                  }
+              });
+          }else if(selected1 && selected2 && selected3 && !selected4 && !selected5){
+              this.options4.forEach(function (value,index) {
+                  if(value.id  === selected3 || value.name === selected3){
+                      tempData.push(self.options4[index]);
+                  }
+              });
+          }else if(selected1 && selected2 && selected3 && selected4 && !selected5){
+              this.options5.forEach(function (value,index) {
+                  if(value.id  === selected4 || value.name === selected4){
+                      tempData.push(self.options5[index]);
+                  }
+              });
+          }else if(selected1 && selected2 && selected3 && selected4 && selected5){
+              this.options6.forEach(function (value,index) {
+                  if(value.id  === selected5 || value.name === selected5){
+                      tempData.push(self.options6[index]);
+                  }
+              });
+          }
+          tempData.forEach(function (l) {
+              self.searchFolder(l, text);
+          });
       },
 
       //绑定事件，给二级菜单赋值
@@ -160,7 +199,13 @@ define([
                 if (value2.type == 'FOLDER') {
                   self.options3.push(value2);
                 } else {
-                  self.tableData.push(value2);
+                    if(self.filterText.trim()) {
+                        if(value2.name.indexOf(self.filterText.trim())>-1){
+                            self.tableData.push(value2);
+                        }
+                    }else{
+                        self.tableData.push(value2);
+                    }
                 }
               })
             } else {
@@ -190,7 +235,13 @@ define([
                 if (value2.type == 'FOLDER') {
                   self.options4.push(value2);
                 } else {
-                  self.tableData.push(value2);
+                    if(self.filterText.trim()) {
+                        if(value2.name.indexOf(self.filterText.trim())>-1){
+                            self.tableData.push(value2);
+                        }
+                    }else{
+                        self.tableData.push(value2);
+                    }
                 }
               })
             } else {
@@ -218,7 +269,13 @@ define([
                 if (value2.type == 'FOLDER') {
                   self.options5.push(value2);
                 } else {
-                  self.tableData.push(value2);
+                    if(self.filterText.trim()) {
+                        if(value2.name.indexOf(self.filterText.trim())>-1){
+                            self.tableData.push(value2);
+                        }
+                    }else{
+                        self.tableData.push(value2);
+                    }
                 }
               })
             } else {
@@ -242,7 +299,13 @@ define([
                 if (value2.type == 'FOLDER') {
                   self.options6.push(value2);
                 } else {
-                  self.tableData.push(value2);
+                    if(self.filterText.trim()) {
+                        if(value2.name.indexOf(self.filterText.trim())>-1){
+                            self.tableData.push(value2);
+                        }
+                    }else{
+                        self.tableData.push(value2);
+                    }
                 }
               })
             } else {
@@ -259,7 +322,13 @@ define([
         self.searchData = [];
         this.options6.forEach(function (value) {
           if (self.selected5 == value.id) {
-            self.tableData = value.children;
+              if(self.filterText.trim()) {
+                  if(value.name.indexOf(self.filterText.trim())>-1){
+                      self.tableData.push(value);
+                  }
+              }else{
+                  self.tableData = value.children;
+              }
           }
         })
       },

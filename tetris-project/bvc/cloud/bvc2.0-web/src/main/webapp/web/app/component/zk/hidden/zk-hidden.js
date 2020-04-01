@@ -275,11 +275,11 @@ define([
                             if(e.businessType === 'commandRemind'){
                                 self.qt.linkedWebview('business', {id:'commandRemind', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
-                                self.qt.linkedWebview('historyMessage', {id:'commandRemind', params:e});
+                                self.qt.linkedWebview('rightBar', {id:'commandRemind', params:e});
                             }else if(e.businessType === 'commandRemindStop'){
                                 self.qt.linkedWebview('business', {id:'commandRemindStop', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
-                                self.qt.linkedWebview('historyMessage', {id:'commandRemindStop', params:e});
+                                self.qt.linkedWebview('rightBar', {id:'commandRemindStop', params:e});
                             }
 
                             //指挥消息

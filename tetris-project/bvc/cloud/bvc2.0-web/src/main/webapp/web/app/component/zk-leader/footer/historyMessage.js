@@ -81,11 +81,7 @@ define([
                 var self = this;
                 self.qt.invoke('hideService');
             },
-            //历史消息弹框
-            showMessagePanel:function(){
-                var self = this;
-                self.qt.invoke('hideService');
-            },
+
             //历史消息弹框
             showMessagePanel: function () {
                 var self = this;
@@ -97,7 +93,6 @@ define([
                         self.qt.window('/router/zk/leader/footer/pop', {currentGroupId: currentGroupId}, {width:'100%', height:'100%'});
                     }
                 });
-
             },
             //录制任务管理
             recManage:function () {
@@ -508,6 +503,7 @@ define([
                   self.qt.invoke('commandMemberDelete', e.params);    
                 });
 
+                //指挥转发设备消息
                 self.qt.on('commandForwardDevice', function (e) {
                     e = e.params;
                     var forwards = e.forwards;
@@ -592,39 +588,6 @@ define([
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('commandForwardStop', $.toJSON(e.splits));
                     }
-                });
-
-                //指挥提醒
-                self.qt.on('commandRemind', function (e) {
-                    e = e.params;
-                    var finded = false;
-                    for (var i = 0; i < self.group.remindIds.length; i++) {
-                        if (self.group.remindIds[i] == e.businessId) {
-                            finded = true;
-                            break;
-                        }
-                    }
-                    if (!finded) {
-                        self.group.remindIds.push(e.businessId);
-                    }
-                    if (self.group.current.id == e.businessId) {
-                        self.group.current.status = 'remind';
-                    }
-                    self.qt.invoke('commandRemind', $.toJSON(e));
-                });
-
-                self.qt.on('commandRemindStop', function (e) {
-                    e = e.params;
-                    for (var i = 0; i < self.group.remindIds.length; i++) {
-                        if (self.group.remindIds[i] == e.businessId) {
-                            self.group.remindIds.splice(i, 1);
-                            break;
-                        }
-                    }
-                    if (self.group.current.id == e.businessId) {
-                        self.group.current.status = e.status;
-                    }
-                    self.qt.invoke('commandRemindStop', $.toJSON(e));
                 });
 
                 //发动通知消息
