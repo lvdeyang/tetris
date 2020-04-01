@@ -22,7 +22,8 @@ define([
                     currentPage:0,
                     pageSize:30,
                     total:0
-                }
+                },
+                currentGroupId:''
             }
         },
         watch:{
@@ -39,10 +40,12 @@ define([
             load:function(currentPage){
                 var self = this;
                 self.historyInstantMsg.splice(0, self.historyInstantMsg.length);
-                ajax.post('/message/query/history/instant/message', {
+                ajax.post('/command/message/query/history/instant/message', {
+                    commandId:self.currentGroupId,
                     currentPage:currentPage,
                     pageSize:self.page.pageSize
                 }, function(data){
+                    var data=data.data;
                     var total = data.total;
                     var rows = data.rows;
                     if(rows && rows.length>0){
@@ -62,7 +65,7 @@ define([
             //忽略
             ignore: function (e, index,item) {
                 var self = this;
-                ajax.post('/message/consume/all', {
+                ajax.post('/command/message/consume/all', {
                     ids: $.toJSON([item.id])
                 }, function(){
                     $(e.target).parents(".btns").parents(".msg").addClass('animating');
@@ -243,6 +246,9 @@ define([
         mounted: function () {
             var self = this;
             self.qt = new QtContext('popMessage', function () {
+                var params = self.qt.getWindowParams();
+                console.log(params)
+                self.currentGroupId = params.currentGroupId;
 
                 // 初始化ajax
                 ajax.init({
@@ -267,8 +273,7 @@ define([
                 });
 
                 self.msgData.splice(0, self.msgData.length);
-                ajax.post('/message/find/unconsumed/commands', null, function (commands) {
-                    console.log(commands)
+                ajax.post('/command/message/find/unconsumed/commands', null, function (commands) {
                     if (commands && commands.length > 0) {
                         for (var i = 0; i < commands.length; i++) {
                             commands[i].message = $.parseJSON(commands[i].message);

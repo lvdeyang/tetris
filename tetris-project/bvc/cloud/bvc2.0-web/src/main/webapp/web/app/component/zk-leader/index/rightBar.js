@@ -289,7 +289,6 @@ define([
             },
             //-----第一个树形菜单的复选框的勾选事件 end -----
 
-
             //获取组织结构的数据以及刷新对应按钮
             refreshInstitution: function () {
                 var self = this;
@@ -1252,12 +1251,14 @@ define([
                     ajax.post('/command/basic/remind/stop', {id: self.group.current.id}, function (data) {
                         self.qt.alert('提示消息', '操作成功');
                         self.buttons.isRemind = false;
+                        console.log(self.group.remindIds)
                         for (var i = 0; i < self.group.remindIds.length; i++) {
                             if (self.group.remindIds[i] == self.group.current.id) {
                                 self.group.remindIds.splice(i, 1);
                                 break;
                             }
                         }
+                        console.log(self.group.remindIds)
                         if (data.businessId == self.group.current.id) {
                             self.group.current.status = data.status;
                         }
@@ -1268,6 +1269,7 @@ define([
                         self.qt.alert('提示消息', '操作成功');
                         self.buttons.isRemind = true;
                         var finded = false;
+                        console.log(self.group.remindIds)
                         for (var i = 0; i < self.group.remindIds.length; i++) {
                             if (self.group.remindIds[i] == self.group.current.id) {
                                 finded = true;
@@ -1280,6 +1282,7 @@ define([
                         if (data.businessId == self.group.current.id) {
                             self.group.current.status = data.status;
                         }
+                        console.log(self.group.remindIds)
                         self.qt.invoke('commandRemind', $.toJSON(data));
                     });
                 }
@@ -1308,6 +1311,7 @@ define([
                         self.group.current.status = 'start';
                         var splits = data.splits;
                         if (splits && splits.length > 0) {
+                            // 主席web通知qt进入指挥
                             self.qt.invoke('groupMembers', $.toJSON(splits));
                         }
                     });
@@ -1391,14 +1395,6 @@ define([
                         }
                     });
                 }
-            },
-            //刷新设置
-            refreshSettings: function () {
-                var self = this;
-                ajax.post('/settings/query/all', null, function (data) {
-                    self.settings.responseMode = data.responseMode;
-                    self.settings.sendAnswerMode = data.sendAnswerMode;
-                });
             },
             //按钮操作完后 取消组织结构的勾选
             cancelChoose: function () {
@@ -1516,10 +1512,15 @@ define([
 
                     //进入自己建的会议
                     if (action === 'start') {
+                        self.group.current.id=id;
                         ajax.post('/command/basic/start', {
                             id: id
-                        }, function () {
-                            self.qt.linkedWebview('rightBar', {id: 'currentGroupChange', params: $.toJSON(data)});
+                        }, function (data) {
+                            var splits = data.splits;
+                            if (splits && splits.length > 0) {
+                                // 主席web通知qt进入指挥
+                                self.qt.invoke('groupMembers', $.toJSON(splits));
+                            }
                         });
                     }
                     else {
@@ -1976,6 +1977,41 @@ define([
                 // 授权协同会议
                 self.qt.on('refreshCurrentGroupMembers', function (e) {
                     self.currentGroupChange(self.group.current);
+                });
+
+                //成员收到指挥提醒，播放音乐
+                self.qt.on('commandRemind', function (e) {
+                    e = e.params;
+                    var finded = false;
+                    for (var i = 0; i < self.group.remindIds.length; i++) {
+                        if (self.group.remindIds[i] == e.businessId) {
+                            finded = true;
+                            break;
+                        }
+                    }
+                    if (!finded) {
+                        self.group.remindIds.push(e.businessId);
+                    }
+                    if (self.group.current.id == e.businessId) {
+                        self.group.current.status = 'remind';
+                    }
+                    self.qt.info(e.businessInfo);
+                    self.qt.invoke('commandRemind', $.toJSON(e));
+                });
+                //成员收到指挥提醒停止，停止播放音乐
+                self.qt.on('commandRemindStop', function (e) {
+                    e = e.params;
+                    for (var i = 0; i < self.group.remindIds.length; i++) {
+                        if (self.group.remindIds[i] == e.businessId) {
+                            self.group.remindIds.splice(i, 1);
+                            break;
+                        }
+                    }
+                    if (self.group.current.id == e.businessId) {
+                        self.group.current.status = e.status;
+                    }
+                    self.qt.info(e.businessInfo);
+                    self.qt.invoke('commandRemindStop', $.toJSON(e));
                 });
             });
         }
