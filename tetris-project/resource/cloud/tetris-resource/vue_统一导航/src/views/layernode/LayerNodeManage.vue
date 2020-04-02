@@ -127,7 +127,7 @@
             label : "流转发器接入",
             value : "ACCESS_S100"
           },
-          // 暂时都用 JV210设备 
+          // 暂时都用 JV210设备
           {
             label : "点播代理服务设备",
             value : "ACCESS_VODPROXY"
@@ -149,7 +149,8 @@
           ACCESS_NETWORK : "联网服务设备",
           ACCESS_DISPLAYCTRL : "显控汇接网关",
           ACCESS_S100 : "流转发器接入",
-          ACCESS_VODPROXY : "点播代理服务设备"
+          ACCESS_VODPROXY : "点播代理服务设备",
+          ACCESS_WEBRTC: "webrtc接入"
         },
         filters: {
           type : '',

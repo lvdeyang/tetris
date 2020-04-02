@@ -933,7 +933,7 @@ public class TranscodeTaskService {
 						
 					}
 					
-					capacityService.modifyTaskSourceAddMsgId(task.getId(), source);
+					capacityService.modifyTaskSourceAddMsgId(task.getId(), capacityIp, source);
 				}
 				
 				output.setTask(JSON.toJSONString(tasks));
@@ -994,7 +994,7 @@ public class TranscodeTaskService {
 						
 					}
 					
-					capacityService.modifyTaskSourceAddMsgId(task.getId(), source);
+					capacityService.modifyTaskSourceAddMsgId(task.getId(), output.getCapacityIp(), source);
 					
 				}
 				

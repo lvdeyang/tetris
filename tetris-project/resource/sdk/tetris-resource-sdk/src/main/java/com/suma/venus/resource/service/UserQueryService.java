@@ -388,6 +388,7 @@ public class UserQueryService {
 			local_encoder = new EncoderBO();
 			local_encoder.setEncoderId(encoder.getBundleId());
 			local_encoder.setEncoderName(encoder.getBundleName());
+			local_encoder.setEncoderNo(encoder.getUsername());
 			local_encoder.setEncoderType(EncoderBO.ENCODER_TYPE.fromName(encoder.getDeviceModel()));
 		}
 		

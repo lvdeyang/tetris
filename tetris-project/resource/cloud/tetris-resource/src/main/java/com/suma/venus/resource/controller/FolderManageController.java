@@ -166,11 +166,13 @@ public class FolderManageController extends ControllerBase {
 				data.put(ERRMSG, "根节点不能删除");
 				return data;
 			}
-
+			
 			// 调整同级数据的index
-			int oldIndex = folder.getFolderIndex();
-			FolderPO parentFolder = folderDao.findOne(folder.getParentId());
-			handleOldParentFolderIndexChange(parentFolder, oldIndex);
+			if(folder.getFolderIndex() != null){
+				int oldIndex = folder.getFolderIndex();
+				FolderPO parentFolder = folderDao.findOne(folder.getParentId());
+				handleOldParentFolderIndexChange(parentFolder, oldIndex);
+			}
 
 			folderService.delete(folder);
 

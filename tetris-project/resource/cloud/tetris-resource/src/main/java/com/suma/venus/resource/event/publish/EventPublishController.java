@@ -17,6 +17,7 @@ import com.sumavision.tetris.user.event.TouristDeleteBatchEvent;
 import com.sumavision.tetris.user.event.TouristDeleteEvent;
 import com.sumavision.tetris.user.event.UserImportEvent;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
+import com.sumavision.tetris.user.event.WebsocketSessionClosedEvent;
 
 @Controller
 @RequestMapping(value = "/event/publish")
@@ -125,6 +126,44 @@ public class EventPublishController {
 		List<Long> userIdList = JSONArray.parseArray(userIds, Long.class);
 		TouristDeleteBatchEvent event = new TouristDeleteBatchEvent(applicationEventPublisher, userIdList);
 		applicationEventPublisher.publishEvent(event);
+		return null;
+	}
+	
+	/**
+	 * 用户离线事件代理<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月31日 下午3:28:31
+	 * @param Long userId 用户id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/user/offline")
+	public Object userOffline(
+			Long userId,
+			HttpServletRequest request) throws Exception{
+		
+		WebsocketSessionClosedEvent event = new WebsocketSessionClosedEvent(applicationEventPublisher, userId);
+		applicationEventPublisher.publishEvent(event);
+		
+		return null;
+	}
+	
+	/**
+	 * 用户上线事件代理<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月31日 下午3:28:31
+	 * @param Long userId 用户id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/user/online")
+	public Object userOnline(
+			Long userId,
+			HttpServletRequest request) throws Exception{
+		
+		
 		return null;
 	}
 	
