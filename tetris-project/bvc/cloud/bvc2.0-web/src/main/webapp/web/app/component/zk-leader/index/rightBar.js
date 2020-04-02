@@ -1513,6 +1513,7 @@ define([
                     //进入自己建的会议
                     if (action === 'start') {
                         self.group.current.id=id;
+                        self.qt.set('currentGroupId', id);
                         ajax.post('/command/basic/start', {
                             id: id
                         }, function (data) {
