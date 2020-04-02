@@ -1,5 +1,6 @@
 package com.suma.venus.resource.dao;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;
@@ -21,4 +22,6 @@ public interface SerNodeDao extends CommonDao<SerNodePO> {
 	public List<SerNodePO> findBySourceType(SOURCE_TYPE sourceType);
 	
 	public List<SerNodePO> findByNodeFather(String nodeFather);
+	
+	public List<SerNodePO> findByNodeUuidIn(Collection<String> nodeUuids);
 }

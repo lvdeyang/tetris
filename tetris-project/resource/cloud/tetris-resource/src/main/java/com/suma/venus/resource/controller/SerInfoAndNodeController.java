@@ -1,5 +1,6 @@
 package com.suma.venus.resource.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +111,48 @@ public class SerInfoAndNodeController extends ControllerBase {
 			// 修改为查出所有 临时版本
 			// List<SerNodePO> pos = serNodeDao.findAll();
 			
+			SerNodePO local = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+			String fatherNodes = local.getNodeFather();
+			String relationNodes = local.getNodeRelations();
+			List<SerNodePO> needRemovePos = new ArrayList<SerNodePO>();
+			
+			for(SerNodePO po: pos){
+				String father = po.getNodeFather();
+				if(father != null && !father.equals("NULL")){
+					String[] fathers = father.split(",");
+					for(String str: fathers){
+						if(str.equals(local.getNodeUuid())){
+							needRemovePos.add(po);
+							break;
+						}
+					}
+				}
+			}
+			
+			if(fatherNodes != null && !fatherNodes.equals("NULL")){
+				String[] nodes = fatherNodes.split(",");
+				for(String node: nodes){
+					for(SerNodePO po: pos){
+						if(po.getNodeUuid().equals(node)){
+							needRemovePos.add(po);
+							break;
+						}
+					}
+				}
+			}
+			if(relationNodes != null && !relationNodes.equals("NULL")){
+				String[] nodes = relationNodes.split(",");
+				for(String node: nodes){
+					for(SerNodePO po: pos){
+						if(po.getNodeUuid().equals(node)){
+							needRemovePos.add(po);
+							break;
+						}
+					}
+				}
+			}
+			
+			pos.removeAll(needRemovePos);
 			
 			List<SerNodeVO> vos = SerNodeVO.transFromPOs(pos);
 
@@ -249,6 +292,7 @@ public class SerInfoAndNodeController extends ControllerBase {
 
 			serNodePOTemp.setNodeName(serNodeVO.getNodeName());
 			serNodePOTemp.setNodeFather(serNodeVO.getNodeFather());
+			serNodePOTemp.setNodeRelations(serNodeVO.getNodeRelations());
 			serNodePOTemp.setSyncStatus(SYNC_STATUS.ASYNC);
 			serNodeDao.save(serNodePOTemp);
 
@@ -259,7 +303,6 @@ public class SerInfoAndNodeController extends ControllerBase {
 		}
 
 		return data;
-
 	}
 
 	@RequestMapping("/delSerInfo")

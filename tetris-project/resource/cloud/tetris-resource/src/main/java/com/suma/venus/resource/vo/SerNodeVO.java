@@ -46,11 +46,11 @@ public class SerNodeVO {
 
 	public static List<SerNodeVO> transFromPOs(Collection<SerNodePO> pos) {
 
+		List<SerNodeVO> vos = new LinkedList<>();
 		if (CollectionUtils.isEmpty(pos)) {
-			return null;
+			return vos;
 		}
 
-		List<SerNodeVO> vos = new LinkedList<>();
 		for (SerNodePO po : pos) {
 			vos.add(transFromPO(po));
 		}

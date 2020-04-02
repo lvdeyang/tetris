@@ -107,7 +107,7 @@ public class UserQuery {
 	 * @return UserVO 游客
 	 */
 	public UserVO findTourist(String userUuId) throws Exception{
-		UserPO user = userDao.findByUuid(userUuId);
+		UserPO user = userDao.findOne(Long.valueOf(userUuId));
 		if(user.getUsername()==null || "".equals(user.getUsername())){
 			return new UserVO().set(user);
 		}
@@ -193,6 +193,7 @@ public class UserQuery {
 			.setIcon(userEntity.getIcon())
 			.setToken(tokenEntity.getToken())
 			.setId(userEntity.getId())
+			.setUserno(userEntity.getUserno())
 			.setIp(tokenEntity.getIp());
 		if(userEntity.getTags() != null && !userEntity.getTags().isEmpty()) user.setTags(Arrays.asList(userEntity.getTags().split(UserPO.SEPARATOR_TAG))); else user.setTags(new ArrayList<String>());
 		

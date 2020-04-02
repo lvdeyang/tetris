@@ -844,12 +844,12 @@ public class CapacityService {
 	 * @param PutTaskSourceRequest source 不带msg_id的source
 	 * @return TaskBaseResponse
 	 */
-	public TaskBaseResponse modifyTaskSourceAddMsgId(String taskId, PutTaskSourceRequest source) throws Exception{
+	public TaskBaseResponse modifyTaskSourceAddMsgId(String taskId, String capacityIp, PutTaskSourceRequest source) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		source.setMsg_id(msg_id);
 		
-		return modifyTaskSource(taskId, source);
+		return modifyTaskSource(taskId, capacityIp, source);
 		
 	}
 	
@@ -862,10 +862,10 @@ public class CapacityService {
 	 * @param PutTaskSourceRequest source 修改任务源参数
 	 * @return TaskResponse 返回
 	 */
-	private TaskBaseResponse modifyTaskSource(String taskId, PutTaskSourceRequest source) throws Exception{
+	private TaskBaseResponse modifyTaskSource(String taskId, String capacityIp, PutTaskSourceRequest source) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(capacityIp)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)

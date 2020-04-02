@@ -3,20 +3,11 @@ package com.suma.venus.resource.util;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-
-import com.suma.application.ldap.contants.LdapContants;
-import com.suma.venus.resource.lianwang.status.DeviceStatusXML;
-import com.suma.venus.resource.lianwang.status.NotifyRouteLinkXml;
-import com.suma.venus.resource.lianwang.status.NotifyUserDeviceXML;
-import com.suma.venus.resource.lianwang.status.UserStatusXML;
 
 public class XMLBeanUtils {
 	

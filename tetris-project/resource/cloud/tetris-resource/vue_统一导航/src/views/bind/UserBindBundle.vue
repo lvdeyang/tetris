@@ -185,7 +185,6 @@
                                         ref="selectDecoderTable"
                                         :data="dialog.selectDecoder.table.data"
                                         height="100%"
-                                        row-key="selectDecoderTableRowKey"
                                         style="width:100%"
                                         highlight-current-row
                                         @current-change="selectDecoderCurrentChange">

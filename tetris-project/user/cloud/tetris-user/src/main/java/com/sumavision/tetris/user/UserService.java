@@ -130,6 +130,7 @@ public class UserService{
 	 */
 	public UserVO addTourist(String nickname) throws Exception{
 		UserPO tourist = new UserPO();
+		userDao.save(tourist);
 		tourist.setNickname(nickname);
 		tourist.setUserno(new StringBufferWrapper().append("t").append(tourist.getId()).toString());
 		tourist.setClassify(UserClassify.TOURIST);
@@ -732,9 +733,10 @@ public class UserService{
 	public void userOffline(Long userId, TerminalType type) throws Exception{
 		
 		TokenPO token = tokenDao.findByUserIdAndType(userId, type);
-		token.setStatus(UserStatus.OFFLINE);
-		tokenDao.save(token);
-		
+		if(token != null){
+			token.setStatus(UserStatus.OFFLINE);
+			tokenDao.save(token);
+		}
 	}
 	
 	/**

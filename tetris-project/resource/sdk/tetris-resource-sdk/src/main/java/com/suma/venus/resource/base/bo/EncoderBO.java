@@ -8,6 +8,9 @@ public class EncoderBO {
 	
 	private String encoderName;
 	
+	/** 联网用 */
+	private String encoderNo;
+	
 	private ENCODER_TYPE encoderType;
 	
 	public enum ENCODER_TYPE{
@@ -58,6 +61,14 @@ public class EncoderBO {
 
 	public void setEncoderType(ENCODER_TYPE encoderType) {
 		this.encoderType = encoderType;
+	}
+
+	public String getEncoderNo() {
+		return encoderNo;
+	}
+
+	public void setEncoderNo(String encoderNo) {
+		this.encoderNo = encoderNo;
 	}
 	
 }

@@ -14,7 +14,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @ComponentScan(basePackages={"com.suma.venus", "com.sumavision.tetris"})
-@ServletComponentScan(basePackages={"com.suma.venus.resource.listener", "com.sumavision.tetris"})
+@ServletComponentScan(basePackages={"com.suma.venus.resource.listener", "com.suma.venus", "com.sumavision.tetris"})
 @EnableFeignClients(basePackages={"com.suma.venus", "com.sumavision.tetris"})
 @EnableEurekaClient
 @EnableScheduling
