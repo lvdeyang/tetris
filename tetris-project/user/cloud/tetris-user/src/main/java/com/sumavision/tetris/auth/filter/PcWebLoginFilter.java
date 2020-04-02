@@ -158,6 +158,7 @@ public class PcWebLoginFilter implements Filter{
 												   .add("/tetris-capacity/*")
 												   .add("/tetris-zoom/*")
 												   .add("/demo/*")
+												   .add("/tourist/server/websocket/*")
 												   .add("/server/websocket/*")
 												   .add("/portal/login")
 												   .add("/covid19/register/statistics/*")

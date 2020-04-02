@@ -613,14 +613,14 @@ public class ZoomService {
 		
 		WebRtcVO webRtc = webRtcRoomInfoQuery.findZoomWebRtc(zoom.getId());
 		
-		newChairmanEntity.setChairman(true);
-		zoomMemberDao.save(newChairmanEntity);
-		ZoomMemberVO newChairman = new ZoomMemberVO().set(newChairmanEntity);
-		
 		ZoomMemberPO oldchairmanEntity = zoomMemberDao.findByZoomIdAndChairman(zoom.getId(), true);
 		oldchairmanEntity.setChairman(false);
 		zoomMemberDao.save(oldchairmanEntity);
 		ZoomMemberVO oldChairman = new ZoomMemberVO().set(oldchairmanEntity);
+		
+		newChairmanEntity.setChairman(true);
+		zoomMemberDao.save(newChairmanEntity);
+		ZoomMemberVO newChairman = new ZoomMemberVO().set(newChairmanEntity);
 		
 		//通知成员
 		List<Long> exceptIds = new ArrayListWrapper<Long>().add(newChairmanEntity.getId()).add(oldchairmanEntity.getId()).getList();

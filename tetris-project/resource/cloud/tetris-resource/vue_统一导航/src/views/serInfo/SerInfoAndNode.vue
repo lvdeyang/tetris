@@ -12,7 +12,7 @@
                 <el-form-item prop="keyword" label="关键字" :span="6">
                     <el-input v-model="filters.keyword"></el-input>
                 </el-form-item>
-                <el-form-item :span="3"> 
+                <el-form-item :span="3">
                     <el-button type="primary" v-on:click="queryList()">查询</el-button>
                 </el-form-item>
                 <el-form-item :span="3">
@@ -32,7 +32,7 @@
                 <el-button type="primary" >
                     LDAP操作<i class="el-icon-arrow-down el-icon--right"></i>
                 </el-button>
-        
+
                 <el-dropdown-menu slot="dropdown">
                     <el-dropdown-item  v-on:click.native="handleSyncToLdap()">上传到LDAP</el-dropdown-item>
                     <el-dropdown-item  v-on:click.native="handleSyncFromLdap()">从LDAP下载</el-dropdown-item>
@@ -189,9 +189,9 @@
     </el-table>
 
     <!--SerNode编辑、新增界面-->
-    <el-dialog title="服务节点信息编辑" :visible.sync="serNodeEditFormVisible" :close-on-click-modal="false">
+    <el-dialog title="服务节点信息编辑" :visible.sync="serNodeEditFormVisible" :close-on-click-modal="false" :before-close="beforeClose">
       <el-form :model="serNodeEditForm" label-width="160px" ref="serNodeEditForm" :rules="serNodeEditFormRules" >
-        
+
         <el-form-item label="序号" prop="id" v-if="false">
 			<el-input v-model="serNodeEditForm.id" auto-complete="off"></el-input>
 	    </el-form-item>
@@ -203,41 +203,96 @@
           <el-input v-model="serNodeEditForm.nodeName" auto-complete="off"></el-input>
         </el-form-item>
 
-        <el-form-item label="上级服务节点" prop="nodeFather">
-          <template>
-            <el-select v-model="serNodeEditForm.nodeFather" placeholder="请选择">
-              <el-option
-                v-for="item in fatherNodeOptions"
-                :key="item.nodeUuid"
-                :label="item.nodeName"
-                :value="item.nodeUuid"
-              ></el-option>
-            </el-select>
-          </template>
+        <el-form-item label="上级服务节点" prop="nodeFather" v-if="serNodeEditBtnVisible">
+          <el-tag
+            v-for="tag in fatherTag"
+            :key="tag.nodeUuid"
+            closable
+            @close="handleFatherClose(tag)">
+            {{tag.nodeName}}
+          </el-tag>
+
+          <el-button
+            icon="el-icon-plus"
+            class="button-new-tag-father"
+            size="small"
+            @click="addFatherNode">
+          </el-button>
         </el-form-item>
 
-        <!--
-                <el-form-item label="关联服务节点ID" prop="nodeRelations">
-                    <el-input v-model="serNodeEditForm.nodeRelations"  auto-complete="off"></el-input>
-                </el-form-item>
-                
-                <el-form-item label="厂商信息" prop="nodeFactInfo">
-                    <el-input type="textarea" v-model="serInfoEditForm.nodeFactInfo" auto-complete="off"></el-input>
-                </el-form-item>
-        -->
+        <el-form-item label="关联服务节点" prop="nodeRelations" v-if="serNodeEditBtnVisible">
+            <el-tag
+              v-for="tag in relationTag"
+              :key="tag.nodeUuid"
+              closable
+              @close="handleClose(tag)">
+              {{tag.nodeName}}
+            </el-tag>
+
+            <el-button
+              icon="el-icon-plus"
+              class="button-new-tag-relation"
+              size="small"
+              @click="addRelationNode">
+            </el-button>
+        </el-form-item>
+
+        <!--<el-form-item label="厂商信息" prop="nodeFactInfo">
+            <el-input type="textarea" v-model="serInfoEditForm.nodeFactInfo" auto-complete="off"></el-input>
+        </el-form-item>-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="handleEditSerNode()" v-if="serNodeEditBtnVisible">修改</el-button>
         <el-button size="small" @click="handleAddSerNode()" v-if="serNodeAddBtnVisible">新增</el-button>
-        <el-button size="small" @click.native="serNodeEditFormVisible = false">关闭</el-button>
+        <el-button size="small" @click="handleEditSerNodeClose()">关闭</el-button>
       </div>
+    </el-dialog>
+
+    <el-dialog
+        title="选择节点"
+        :visible.sync="dialog.node.visible"
+        width="800px"
+        :before-close="handleDialogClose">
+
+        <div style="height:450px; position:relative;">
+          <div style="position:absolute; left:-20px; top:-20px; right:-20px; bottom:-20px;">
+            <div style="width:100%; height:100%; position:relative;">
+              <div style="width:100%; position:absolute; left:0; top:0px; right:0; bottom:0; padding:0 10px; box-sizing:border-box;">
+                <el-table
+                  ref="selectNodeTable"
+                  :data="dialog.node.table.data"
+                  height="100%"
+                  style="width:100%"
+                  @selection-change="handleSelectionChange">
+                  <el-table-column
+                    type="selection"
+                    width="55">
+                  </el-table-column>
+                  <el-table-column
+                    prop="nodeName"
+                    width="300"
+                    label="节点名称">
+                  </el-table-column>
+                  <el-table-column
+                    prop="nodeUuid"
+                    label="节点Uuid">
+                  </el-table-column>
+                </el-table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="small" @click="handleDialogClose">取消</el-button>
+            <el-button size="small" type="primary" @click="handleDialogCommit">确定</el-button>
+        </span>
+
     </el-dialog>
   </section>
 </template>
 
 <script type="text/ecmascript-6">
-
-
 
 import {
     querySerInfo,
@@ -268,7 +323,7 @@ export default {
             page: 1,
             listLoading: false,
             sels: [], //列表选中列
-            
+
             serInfoEditFormVisible: false, //编辑界面是否显示
             serInfoEditBtnVisible:false,   //弹出框中编辑按钮是否显示
             serInfoAddBtnVisible: false,  //弹出框中新建按钮新否显示
@@ -308,8 +363,8 @@ export default {
                 id: 0,
                 nodeUuid:"",
                 nodeName:"",
-                nodeFather:"",
-                nodeRelations: 0,
+                nodeFather:'',
+                nodeRelations: '',
                 nodeFactInfo: ""
             },
 
@@ -340,7 +395,22 @@ export default {
                 //TODO
             },
 
-            fatherNodeOptions: [] //服务上级节点选择项
+            fatherNodeOptions: [], //服务上级节点选择项
+            relationNodeOptions: [], //服务关联节点选择项
+
+            fatherTag:[],
+            relationTag:[],
+
+            dialog:{
+              node:{
+                type:'',
+                table:{
+                  data:[]
+                },
+                visible: false,
+                selection:[]
+              }
+            }
 
         };
 
@@ -366,11 +436,11 @@ export default {
         },
 
         serTypeFormat: function(row, column) {
-           
-            var dateString = row[column.property];  
-             
-            if (dateString == undefined) {  
-                return ""; 
+
+            var dateString = row[column.property];
+
+            if (dateString == undefined) {
+                return "";
             }
 
             switch (dateString) {
@@ -384,11 +454,11 @@ export default {
         },
 
         syncStatusFormat: function(row, column) {
-           
-            var dateString = row[column.property];  
-             
-            if (dateString == undefined) {  
-                return ""; 
+
+            var dateString = row[column.property];
+
+            if (dateString == undefined) {
+                return "";
             }
 
             switch (dateString) {
@@ -399,11 +469,11 @@ export default {
         },
 
         sourceTypeFormat: function (row, column) {
-           
-            var dateString = row[column.property];  
-             
-            if (dateString == undefined) {  
-                return ""; 
+
+            var dateString = row[column.property];
+
+            if (dateString == undefined) {
+                return "";
             }
 
             switch (dateString) {
@@ -417,9 +487,9 @@ export default {
             let para = {
                 // TODO
             };
-            
+
             this.listLoading = true;
-            
+
             if (this.activeTab === 'serInfoTab') {
                 querySerInfo(para).then(res => {
                     if(null !== res.errMsg && res.errMsg !== "") {
@@ -432,7 +502,7 @@ export default {
                         this.serInfoVOs = res.serInfoVOs;
                     }
 
-                    this.listLoading = false; 
+                    this.listLoading = false;
                 });
             } else if (this.activeTab === 'serNodeTab') {
                 querySerNode(para).then(res => {
@@ -446,12 +516,12 @@ export default {
                         this.serNodeVOs = res.serNodeVOs;
                     }
 
-                    this.listLoading = false; 
+                    this.listLoading = false;
                 });
             }
         },
 
-        
+
         // 显示添加SerInfo对话框
         handleShowAddDialog: function() {
             console.log("add");
@@ -468,12 +538,12 @@ export default {
                         console.log(queryFatherNodeOptions, error);
                     } else {
                         this.fatherNodeOptions = res.serNodeVOs;
+                        this.relationNodeOptions = res.serNodeVOs;
                         console.log("queryFatherNodeOptions, success", JSON.stringify(res.serNodeVOs));
 
-                       
                     }
                 });
-                
+
                 this.resetForm("serNodeEditForm");
                 this.serNodeAddBtnVisible = true;
                 this.serNodeEditFormVisible = true;
@@ -502,17 +572,46 @@ export default {
                         this.fatherNodeOptions = res.serNodeVOs;
                         //console.log("queryFatherNodeOptions, success", JSON.stringify(res.serNodeVOs));
 
-                       
+
                     }
                 });
-                
+
+                var nodes = this.serNodeVOs;
+
+                if(row.nodeFather != "NULL"){
+                    var father = row.nodeFather.split(",");
+
+                    for(var i=0;i<father.length;i++){
+                      for(var j=0; j<nodes.length; j++){
+                        if(nodes[j].nodeUuid === father[i]){
+                          this.fatherTag.push(nodes[j]);
+                          console.log(this.fatherTag);
+                          break;
+                        }
+                      }
+                    }
+                }
+
+                if(row.nodeRelations != "NULL"){
+                  var relations = row.nodeRelations.split(",");
+                  console.log(relations);
+                  for(var i=0;i<relations.length;i++){
+                    for(var j=0; j<nodes.length; j++){
+                      if(nodes[j].nodeUuid === relations[i]){
+                        this.relationTag.push(nodes[j]);
+                        break;
+                      }
+                    }
+                  }
+                }
+
                 this.resetForm("serNodeEditForm");
                 this.serNodeAddBtnVisible = false;
                 this.serNodeEditBtnVisible = false;
                 this.serNodeEditFormVisible = true;
                 this.serNodeEditBtnVisible = true;
                 this.serNodeEditForm = Object.assign({}, row);
-        
+
             }
         },
 
@@ -522,9 +621,9 @@ export default {
                     this.$confirm("确认新增服务设备信息吗？", "提示", {}).then(() => {
                         this.editLoading = true;
                         //NProgress.start();
-                        
+
                         let para = {
-                         
+
                             serNo: this.serInfoEditForm.serNo,
                             serName: this.serInfoEditForm.serName,
                             serAddr: this.serInfoEditForm.serAddr,
@@ -568,7 +667,7 @@ export default {
                     this.$confirm("确认修改服务设备信息吗？", "提示", {}).then(() => {
                         this.editLoading = true;
                         //NProgress.start();
-                        
+
                         let para = {
                             id: this.serInfoEditForm.id,
                             serUuid: this.serInfoEditForm.serUuid,
@@ -616,7 +715,7 @@ export default {
                     this.$confirm("确认新增服务节点信息吗？", "提示", {}).then(() => {
                         this.editLoading = true;
                         //NProgress.start();
-                        
+
                         let para = {
                             //id: this.editForm.id,
                             // nodeUuid: this.serNodeEditForm.nodeUuid,
@@ -658,13 +757,24 @@ export default {
                     this.$confirm("确认修改服务节点信息吗？", "提示", {}).then(() => {
                         this.editLoading = true;
                         //NProgress.start();
-                        
+
+                        var nodeFatherArray = [];
+                        var nodeRelationArray = [];
+
+                        for(var i=0; i<this.fatherTag.length;i++){
+                          nodeFatherArray.push(this.fatherTag[i].nodeUuid);
+                        }
+
+                        for(var i=0; i<this.relationTag.length;i++){
+                          nodeRelationArray.push(this.relationTag[i].nodeUuid);
+                        }
+
                         let para = {
                             //id: this.editForm.id,
                             nodeUuid: this.serNodeEditForm.nodeUuid,
                             nodeName: this.serNodeEditForm.nodeName,
-                            nodeFather: this.serNodeEditForm.nodeFather,
-                            // nodeRelations: this.serNodeEditForm.nodeRelations,
+                            nodeFather: nodeFatherArray.join(','),
+                            nodeRelations: nodeRelationArray.join(','),
                             // nodeFactInfo: this.serNodeEditForm.nodeFactInfo,
                         };
 
@@ -687,11 +797,25 @@ export default {
                             }
                         });
                         this.editLoading = false;
+
+                        this.fatherTag = [];
+                        this.relationTag = [];
                     });
                 }
 	        });
         },
 
+        handleEditSerNodeClose: function(){
+           this.serNodeEditFormVisible = false;
+           this.fatherTag = [];
+           this.relationTag = [];
+        },
+
+        beforeClose: function(done) {
+           this.fatherTag = [];
+           this.relationTag = [];
+           done();
+        },
 
         handleDelSerInfo: function(index, row) {
             // alert(JSON.stringify(row));
@@ -714,10 +838,10 @@ export default {
                 });
             });
         },
-        
+
 
         handleDelSerNode: function(index, row) {
-            
+
             this.$confirm("删除此服务节点信息，确认？", "提示", {}).then(() => {
                 let para = {
                     nodeUuid: row.nodeUuid
@@ -737,7 +861,6 @@ export default {
             });
         },
 
-
         ////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////////////////////////////////////////////
 
@@ -745,7 +868,7 @@ export default {
             this.$confirm("确认将本地未同步信息同步到LDAP服务器么？", "提示", {}).then(() => {
                 this.editLoading = true;
                 //NProgress.start();
-                        
+
                 let para = {};
 
                 if(this.activeTab === 'serInfoTab'){
@@ -788,12 +911,11 @@ export default {
             });
         },
 
-
         handleSyncFromLdap: function(){
             this.$confirm("确认将从LDAP服务器同步下载信息么？", "提示", {}).then(() => {
                 this.editLoading = true;
                 //NProgress.start();
-                        
+
                 let para = {};
 
                 if(this.activeTab === 'serInfoTab'){
@@ -841,7 +963,7 @@ export default {
             this.$confirm("确认清空上传到LDAP何从LDAP下载的所有信息么？", "提示", {}).then(() => {
                 this.editLoading = true;
                 //NProgress.start();
-                        
+
                 let para = {};
 
                 if(this.activeTab === 'serInfoTab'){
@@ -881,9 +1003,90 @@ export default {
                 }
 
                 this.editLoading = false;
-            });            
-        }
+            });
+        },
 
+        handleClose: function(tag) {
+          var self = this;
+          var table = self.fatherNodeOptions;
+          var selection = self.dialog.node.selection;
+          table.push(tag);
+          for(var i=self.relationTag.length-1;i>=0;i--){
+            if(self.relationTag[i].nodeUuid === tag.nodeUuid){
+              self.relationTag.splice(i,1);
+              break;
+            }
+          }
+
+        },
+
+        handleFatherClose: function(tag) {
+          var self = this;
+          var table = self.fatherNodeOptions;
+          var selection = self.dialog.node.selection;
+          table.push(tag);
+          for(var i=self.fatherTag.length-1;i>=0;i--){
+            if(self.fatherTag[i].nodeUuid === tag.nodeUuid){
+              self.fatherTag.splice(i,1);
+              break;
+            }
+          }
+
+        },
+
+        handleDialogCommit: function(){
+          var self = this;
+
+          var table = self.dialog.node.table.data;
+          for(var i=0; i<self.dialog.node.selection.length; i++){
+            for(var j=table.length-1; j>=0; j--){
+              if(table[j].nodeUuid === self.dialog.node.selection[i].nodeUuid){
+                table.splice(j,1);
+                break;
+              }
+            }
+          }
+
+          if(self.dialog.node.type === "relation"){
+              for(var i=0; i<self.dialog.node.selection.length; i++){
+                self.relationTag.push(self.dialog.node.selection[i]);
+              }
+          }
+
+          if(self.dialog.node.type === "father"){
+            for(var i=0; i<self.dialog.node.selection.length; i++){
+              self.fatherTag.push(self.dialog.node.selection[i]);
+            }
+          }
+
+
+          self.dialog.node.visible = false;
+        },
+
+        handleSelectionChange: function(val){
+          var self = this;
+          self.dialog.node.selection = val;
+        },
+
+        handleDialogClose: function(){
+          var self = this;
+          self.$refs.selectNodeTable.clearSelection();
+          self.dialog.node.visible = false;
+        },
+
+        addRelationNode: function(){
+          var self = this;
+          self.dialog.node.type = "relation";
+          self.dialog.node.table.data = self.fatherNodeOptions;
+          self.dialog.node.visible = true;
+        },
+
+        addFatherNode: function(){
+          var self = this;
+          self.dialog.node.type = "father";
+          self.dialog.node.table.data = self.fatherNodeOptions;
+          self.dialog.node.visible = true;
+        }
     },
 
     mounted() {

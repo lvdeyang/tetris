@@ -16,4 +16,12 @@ public interface ResourceUserRegisteredFeign {
 			@RequestParam("nickname") String nickname,
 			@RequestParam("userno") String userno) throws Exception;
 	
+	@RequestMapping(value = "/event/publish/user/offline")
+	public JSONObject userOffline(
+			@RequestParam("userId") Long userId) throws Exception;
+	
+	@RequestMapping(value = "/event/publish/user/online")
+	public JSONObject userOnline(
+			@RequestParam("userId") Long userId) throws Exception;
+	
 }

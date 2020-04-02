@@ -1,10 +1,6 @@
 package com.suma.venus.resource.lianwang.status;
 
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import com.suma.application.ldap.contants.LdapContants;
-import com.suma.venus.resource.base.bo.UserBO;
 
 public class UserStatusXML {
 

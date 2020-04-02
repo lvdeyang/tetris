@@ -181,6 +181,8 @@ public class DepartSyncLdapUtils {
 					map.setUserId(addUser.getId());
 					map.setUserUuid(addUser.getUuid());
 					map.setUserName(addUser.getUsername());
+					map.setUserNode(addUser.getGroupName());
+					map.setUserNo(addUser.getUserno());
 					
 					needAddMaps.add(map);
 				}

@@ -60,6 +60,7 @@ import com.sumavision.tetris.capacity.bo.task.ResampleBO;
 import com.sumavision.tetris.capacity.bo.task.ScaleBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
+import com.sumavision.tetris.capacity.bo.task.X264BO;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
@@ -632,7 +633,8 @@ public class TransformService {
 			file.setFile_array(new ArrayList<InputFileObjectBO>());
 			for(FileVO fileVO: streamTranscodingVO.getFiles()){
 				InputFileObjectBO fileObject = new InputFileObjectBO().setUrl(fileVO.getUrl())
-																	  .setLoop_count(fileVO.getCount());
+																	  .setLoop_count(fileVO.getCount())
+																	  .setStart_ms(fileVO.getSeek() == null?0: fileVO.getSeek().intValue());
 				
 				file.getFile_array().add(fileObject);
 			}
@@ -766,6 +768,12 @@ public class TransformService {
 		
 		List<TaskBO> tasks = new ArrayList<TaskBO>();
 		
+		CodecParamVO codecParam = streamTranscodingVO.getTaskVO().getCodecParam();
+		Long maxBitrate = null;
+		if(codecParam.getVbitrate() != null && codecParam.getAbitrate() != null){
+			maxBitrate = (long) ((codecParam.getVbitrate() + codecParam.getAbitrate()) * 1.5);
+		}
+		
 		/*******
 		 * 音频  *
 		 *******/
@@ -785,8 +793,6 @@ public class TransformService {
 				                       .setType("audio")
 				                       .setRaw_source(audioSource)
 				                       .setEncode_array(new ArrayList<EncodeBO>());
-		
-		CodecParamVO codecParam = streamTranscodingVO.getTaskVO().getCodecParam();
 		
 		EncodeBO audioEncode = new EncodeBO().setEncode_id(encodeAudioId)
 											 .setProcess_array(new ArrayList<PreProcessingBO>());
@@ -873,7 +879,8 @@ public class TransformService {
 			if(codecParam.getVcodec().equals("0")){
 				
 				Mpeg2BO mpeg2 = new Mpeg2BO().setBitrate(codecParam.getVbitrate() == null? 1500000: codecParam.getVbitrate().intValue())
-											 .setRatio(codecParam.getVratio() == null? "16:9": codecParam.getVratio())
+											 .setMax_bitrate(maxBitrate == null? 1500000: maxBitrate.intValue())
+		              						 .setRatio(codecParam.getVratio() == null? "16:9": codecParam.getVratio())
 											 .setWidth(width)
 											 .setHeight(height);
 				videoEncode.setMpeg2(mpeg2);
@@ -882,9 +889,11 @@ public class TransformService {
 			}else if(codecParam.getVcodec().equals("1")){
 				
 				H264BO h264 = new H264BO().setBitrate(codecParam.getVbitrate() == null? 1500000: codecParam.getVbitrate().intValue())
+										  .setMax_bitrate(maxBitrate == null? 1500000: maxBitrate.intValue())
 										  .setRatio(codecParam.getVratio() == null? "16:9": codecParam.getVratio())
 										  .setWidth(width)
-										  .setHeight(height);
+										  .setHeight(height)
+										  .setX264(new X264BO());
 				videoEncode.setH264(h264);
 				
 			}
@@ -916,6 +925,12 @@ public class TransformService {
 		List<OutputBO> outputs = new ArrayList<OutputBO>();
 		
 		TaskVO task = streamTranscodingVO.getTaskVO();
+		
+		CodecParamVO codecParam = streamTranscodingVO.getTaskVO().getCodecParam();
+		Long outputBitrate = null;
+		if(codecParam.getVbitrate() != null && codecParam.getAbitrate() != null){
+			outputBitrate = (long) ((codecParam.getVbitrate() + codecParam.getAbitrate()) * 1.5);
+		}
 		
 		List<OutParamVO> outputParams = task.getOutParam();
 		
@@ -966,6 +981,7 @@ public class TransformService {
 																	.setIp(outputIp)
 																	.setPort(outputPort)
 																	.setLocal_ip(outParam.getLocalIp() == null?capacityProps.getIp(): outParam.getLocalIp())
+																	.setBitrate(outputBitrate == null?8000000: outputBitrate.intValue())
 																	.setProgram_array(new ArrayList<OutputProgramBO>());
 					
 					OutputProgramBO program = new OutputProgramBO().setProgram_number(outParam.getProgNum() == null?301: outParam.getProgNum())
