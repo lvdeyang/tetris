@@ -1,0 +1,12 @@
+<notify>
+	<commandname>syncroutelink</commandname>
+	<seq>8cd41a008e4311e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<matsize>4</matsize>
+	<mattype>raw</mattype>
+	<matcontent>11,11</matcontent>
+	<nlist>
+		<nid>15558693f2345f03bccf64ad29b2890d</nid>
+		<nid>bbf7b4a0533659cba4190f59352dd050</nid>
+	</nlist>
+</notify>

@@ -27,4 +27,6 @@ public interface FolderUserMapDAO extends CommonDao<FolderUserMap>{
 	@Query(value = "select m.* from folder_user_map m where m.creator = 'ldap'", nativeQuery = true)
 	public List<FolderUserMap> findFromLdapMap();
 	
+	public List<FolderUserMap> findByUserNoIn(Collection<String> userNos);
+	
 }

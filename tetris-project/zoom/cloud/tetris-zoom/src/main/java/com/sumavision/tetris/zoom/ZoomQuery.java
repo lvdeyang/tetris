@@ -85,6 +85,46 @@ public class ZoomQuery {
 	 */
 	public ZoomVO queryBundleInfo(ZoomVO zoom) throws Exception{
 		queryBundleInfo(zoom.getMembers(), zoom.getWebRtc());
+		//补充me和chairman
+		for(ZoomMemberVO member: zoom.getMembers()){
+			if(zoom.getMe() != null){
+				if(zoom.getMe().getUserId().equals(member.getUserId())){
+					zoom.getMe().setBundleId(member.getBundleId())
+			                    .setLayerId(member.getLayerId())
+			                    .setVideoChannelId(member.getVideoChannelId())
+			                    .setAudioChannelId(member.getAudioChannelId())
+			                    .setScreenVideoChannelId(member.getScreenVideoChannelId())
+			                    .setScreenAudioChannelId(member.getScreenAudioChannelId());
+				}
+			}
+			
+			if(zoom.getChairman() != null){
+				if(zoom.getChairman().getUserId().equals(member.getUserId())){
+					zoom.getChairman().setBundleId(member.getBundleId())
+				                      .setLayerId(member.getLayerId())
+				                      .setVideoChannelId(member.getVideoChannelId())
+				                      .setAudioChannelId(member.getAudioChannelId())
+				                      .setScreenVideoChannelId(member.getScreenVideoChannelId())
+				                      .setScreenAudioChannelId(member.getScreenAudioChannelId());
+				}
+			}
+			
+			if(zoom.getSpokesmen() != null){
+				for(ZoomMemberVO spoke: zoom.getSpokesmen()){
+					if(spoke.getUserId().equals(member.getUserId())){
+						spoke.setBundleId(member.getBundleId())
+		                     .setLayerId(member.getLayerId())
+		                     .setVideoChannelId(member.getVideoChannelId())
+		                     .setAudioChannelId(member.getAudioChannelId())
+		                     .setScreenVideoChannelId(member.getScreenVideoChannelId())
+		                     .setScreenAudioChannelId(member.getScreenAudioChannelId());
+						break;
+					}
+				}
+			}
+
+		}
+
 		return zoom;
 	}
 	

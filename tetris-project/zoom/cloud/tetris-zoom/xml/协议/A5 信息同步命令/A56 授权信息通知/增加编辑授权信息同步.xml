@@ -1,0 +1,21 @@
+<control>
+	<commandname>authnotify</commandname>
+	<operation>add</operation>
+	<seq>1fec5ca28e4011e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<authnodeid>2bfcc9328e4011e8b445060400ef5315</authnodeid>
+	<authuserid>00000000003</authuserid>
+	<userid>00000000001</userid>
+	<userlist>
+		<useritem>
+			<userid>00000000002</userid>
+			<auth>1111111100000000</auth>
+		</useritem>
+	</userlist>
+	<devlist>
+		<devitem>
+			<devid>12000000001</devid>
+			<auth>1111110000000000</auth>
+		</devitem>
+	</devlist>
+</control>

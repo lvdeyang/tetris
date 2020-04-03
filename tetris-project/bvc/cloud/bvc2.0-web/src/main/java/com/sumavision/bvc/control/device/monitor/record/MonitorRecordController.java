@@ -16,22 +16,29 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.suma.venus.resource.base.bo.AccessNodeBO;
+import com.suma.venus.resource.base.bo.BundleInfo;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants;
+import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ResourceService;
+import com.sumavision.bvc.control.device.monitor.device.ChannelVO;
 import com.sumavision.bvc.control.device.monitor.exception.UserHasNoPermissionForBusinessException;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
+import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordDAO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordService;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
+import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
 
 @Controller
 @RequestMapping(value = "/monitor/record")
@@ -44,10 +51,19 @@ public class MonitorRecordController {
 	private UserUtils userUtils;
 	
 	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
 	private MonitorRecordService monitorRecordService;
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private BundleService bundleService;
+	
+	@Autowired
+	private ResourceQueryUtil resourceQueryUtil;
 	
 	@RequestMapping(value = "/index")
 	public ModelAndView index(String token){
@@ -104,6 +120,8 @@ public class MonitorRecordController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月17日 下午7:35:49
 	 * @param String mode 录制模式
+	 * @param String fileName 文件名称
+	 * @param String deviceType 如果为user device为用户id
 	 * @param String device 设备id
 	 * @param String startTime 开始录制时间下限
 	 * @param String endTime 开始录制时间上限
@@ -117,12 +135,21 @@ public class MonitorRecordController {
 	@RequestMapping(value = "/load")
 	public Object load(
 			String mode,
+			String fileName,
+			String deviceType,
 			String device,
 			String startTime,
 			String endTime,
 			int currentPage,
 			int pageSize,
 			HttpServletRequest request) throws Exception{
+		
+		String fileNameReg = null;
+		if(fileName != null){
+			fileNameReg = new StringBufferWrapper().append("%").append(fileName).append("%").toString();
+		}
+		
+		com.sumavision.tetris.user.UserVO user = userQuery.current();
 		
 		//获取userId
 		Long userId = userUtils.getUserIdFromSession(request);
@@ -141,19 +168,36 @@ public class MonitorRecordController {
 		List<MonitorRecordPO> entities = null;
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		
-		if(userId.longValue() == 1l){
-			Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-												mode, device, parsedStartTime, parsedEndTime, 
-												null, MonitorRecordStatus.STOP.toString(), page);
-			total = pagedEntities.getTotalElements();
-			entities = pagedEntities.getContent();
+		if("user".equals(deviceType)){
+			if(userId.longValue()==1l || user.getIsGroupCreator()){
+				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+													mode, null, parsedStartTime, parsedEndTime, 
+													null, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+				total = pagedEntities.getTotalElements();
+				entities = pagedEntities.getContent();
+			}else{
+				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+													mode, null, parsedStartTime, parsedEndTime, 
+													userId, MonitorRecordStatus.STOP.toString(), Long.valueOf(device), fileNameReg, page);
+				total = pagedEntities.getTotalElements();
+				entities = pagedEntities.getContent();
+			}
 		}else{
-			Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
-												mode, device, parsedStartTime, parsedEndTime, 
-												userId, MonitorRecordStatus.STOP.toString(), page);
-			total = pagedEntities.getTotalElements();
-			entities = pagedEntities.getContent();
+			if(userId.longValue()==1l || user.getIsGroupCreator()){
+				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+													mode, device, parsedStartTime, parsedEndTime, 
+													null, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+				total = pagedEntities.getTotalElements();
+				entities = pagedEntities.getContent();
+			}else{
+				Page<MonitorRecordPO> pagedEntities = monitorRecordDao.findByConditions(
+													mode, device, parsedStartTime, parsedEndTime, 
+													userId, MonitorRecordStatus.STOP.toString(), null, fileNameReg, page);
+				total = pagedEntities.getTotalElements();
+				entities = pagedEntities.getContent();
+			}
 		}
+		
 		
 		List<MonitorRecordTaskVO> rows = MonitorRecordTaskVO.getConverter(MonitorRecordTaskVO.class).convert(entities, MonitorRecordTaskVO.class);
 		return new HashMapWrapper<String, Object>().put("total", total)
@@ -171,6 +215,7 @@ public class MonitorRecordController {
 	 * @param String fileName 文件名
 	 * @param String startTime 开始录制时间
 	 * @param String endTime 结束录制时间
+	 * @param String bundleId 传channel信息时有这个字段，代表录制设备（当前设备只有一个音频编码和一个视频编码）
 	 * @param String videoBundleId 视频设备id
 	 * @param String videoBundleName 视频设备名称
 	 * @param String videoBundleType 视频设备类型
@@ -195,6 +240,7 @@ public class MonitorRecordController {
 			String fileName, 
 			String startTime, 
 			String endTime,
+			String bundleId,
 			String videoBundleId,
 			String videoBundleName,
 			String videoBundleType,
@@ -222,6 +268,37 @@ public class MonitorRecordController {
 			if(!result){
 				throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 0);
 			}
+		}
+		
+		//兼容不选通道直接录制设备
+		if(bundleId != null){
+			BundlePO bundle = bundleService.findByBundleId(bundleId);
+			List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundleId).getList(), 0);
+			ChannelVO encodeVideo = null;
+			ChannelVO encodeAudio = null;
+			if(queryChannels!=null && queryChannels.size()>0){
+				for(ChannelSchemeDTO channel:queryChannels){
+					if("VenusVideoIn".equals(channel.getBaseType())){
+						encodeVideo = new ChannelVO().set(channel);
+					}else if("VenusAudioIn".equals(channel.getBaseType())){
+						encodeAudio = new ChannelVO().set(channel);
+					}
+				}
+			}
+			videoBundleId = bundle.getBundleId();
+			videoBundleName = bundle.getBundleName();
+			videoBundleType = bundle.getBundleType();
+			videoLayerId = bundle.getAccessNodeUid();
+			videoChannelId = encodeVideo.getChannelId();
+			videoBaseType = encodeVideo.getBaseType();
+			videoChannelName = encodeVideo.getName();
+			audioBundleId = bundle.getBundleId();
+			audioBundleName = bundle.getBundleName();
+			audioBundleType = bundle.getBundleType();
+			audioLayerId = bundle.getAccessNodeUid();
+			audioChannelId = encodeAudio.getChannelId();
+			audioBaseType = encodeAudio.getBaseType();
+			audioChannelName = encodeAudio.getName();
 		}
 		
 		MonitorRecordPO task = monitorRecordService.addLocalDevice(

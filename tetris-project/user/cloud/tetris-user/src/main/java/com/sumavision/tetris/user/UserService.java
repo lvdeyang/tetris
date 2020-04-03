@@ -59,8 +59,6 @@ import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 import com.sumavision.tetris.user.exception.UsernoAlreadyExistInSystemException;
 import com.sumavision.tetris.user.exception.UsernoCannotBeNullException;
 
-import antlr.Token;
-
 /**
  * 用户操作（主增删改）<br/>
  * <b>作者:</b>lvdeyang<br/>
@@ -130,6 +128,7 @@ public class UserService{
 	 */
 	public UserVO addTourist(String nickname) throws Exception{
 		UserPO tourist = new UserPO();
+		userDao.save(tourist);
 		tourist.setNickname(nickname);
 		tourist.setUserno(new StringBufferWrapper().append("t").append(tourist.getId()).toString());
 		tourist.setClassify(UserClassify.TOURIST);
@@ -711,7 +710,7 @@ public class UserService{
 		
 		//发射事件
 		if(users.size() > 0){
-			UserImportEventPublisher userImportEventPublisher = new UserImportEventPublisher(applicationEventPublisher, users, self.getGroupId(), self.getGroupName(), publishers);
+			UserImportEventPublisher userImportEventPublisher = new UserImportEventPublisher(applicationEventPublisher, users, userSystemRolePermissions, self.getGroupId(), self.getGroupName(), publishers);
 			this.publishers.put(self.getGroupId(), userImportEventPublisher);
 			userImportEventPublisher.publish();
 		}
@@ -732,9 +731,10 @@ public class UserService{
 	public void userOffline(Long userId, TerminalType type) throws Exception{
 		
 		TokenPO token = tokenDao.findByUserIdAndType(userId, type);
-		token.setStatus(UserStatus.OFFLINE);
-		tokenDao.save(token);
-		
+		if(token != null){
+			token.setStatus(UserStatus.OFFLINE);
+			tokenDao.save(token);
+		}
 	}
 	
 	/**

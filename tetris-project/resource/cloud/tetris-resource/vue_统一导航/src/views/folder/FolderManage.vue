@@ -21,7 +21,7 @@
         -->
         <el-dropdown style="float: left;margin-left: 10px;">
           <el-button type="primary" size="small" :loading="ldapLoading">
-              分组及设备LDAP操作<i class="el-icon-arrow-down el-icon--right"></i>
+              用户及分组LDAP操作<i class="el-icon-arrow-down el-icon--right"></i>
           </el-button>
 
           <el-dropdown-menu slot="dropdown">
@@ -68,7 +68,7 @@
         </div>
       </div>
 
-      <div class="custom-tree-container">
+      <div class="custom-tree-container" v-loading="treeLoading">
         <div>
 
             <el-tree ref="tree"
@@ -247,6 +247,7 @@
         myHeaders : {
           'tetris-001': sessionStorage.getItem('token')
         },
+        treeLoading: false,
         toLdapoptions : [
           {
             value : true,
@@ -293,12 +294,14 @@
         console.log(file, fileList);
       },
       initTree : function(keepExpand){
+        this.treeLoading = true;
         initFolderTree().then(res => {
           if (res.errMsg) {
             this.$message({
               message: res.errMsg,
               type: 'error'
             });
+            this.treeLoading = false;
           } else {
             this.tree = res.tree;
             // console.log(JSON.stringify(res.tree));
@@ -310,6 +313,7 @@
             }
 
             this.defaultExpandKeys = this.expandNodeKeysArr;
+            this.treeLoading = false;
           }
         });
       },
@@ -530,6 +534,7 @@
       },
       deleteFolder : function(){
         if(this.currentSelectNode.beFolder){
+          this.treeLoading = true;
           //删除分组folder
           let param = {
             id : this.currentSelectNode.id
@@ -541,6 +546,7 @@
                 message: res.errMsg,
                 type: 'error'
               });
+              this.treeLoading = false;
             } else {
                 this.initTree(true);
             }
@@ -548,6 +554,7 @@
         } else {
           //删除分组设备
           if(this.currentSelectNode.bundleId){
+            this.treeLoading = true;
             let param = {
               bundleIds : this.currentSelectNode.bundleId
             };
@@ -557,12 +564,14 @@
                   message: res.errMsg,
                   type: 'error'
                 });
+                this.treeLoading = false;
               } else {
                  this.initTree(true);
                 this.getBundles();
               }
             });
           }else if(this.currentSelectNode.id){
+            this.treeLoading = true;
             let param = {
               userIds : this.currentSelectNode.id
             };
@@ -572,6 +581,7 @@
                   message: res.errMsg,
                   type: 'error'
                 });
+                this.treeLoading = false;
               } else {
                 this.initTree(true);
                 this.getUsers();

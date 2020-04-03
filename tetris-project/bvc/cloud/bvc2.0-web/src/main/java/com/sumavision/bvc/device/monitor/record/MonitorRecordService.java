@@ -50,6 +50,8 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 /**
  * 录制增删改业务<br/>
@@ -87,6 +89,9 @@ public class MonitorRecordService {
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 录制本地设备<br/>
@@ -536,10 +541,13 @@ public class MonitorRecordService {
 	 * @param Long userId 操作业务用户id
 	 */
 	public void stop(Long id, Long userId) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
 		MonitorRecordPO task = monitorRecordDao.findOne(id);
 		if(task == null) return;
 		
-		if(userId.longValue() == 1){
+		if(userId.longValue()==1 && user.getIsGroupCreator()){
 			userId = task.getUserId();
 		}
 		

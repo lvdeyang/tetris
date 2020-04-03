@@ -53,7 +53,8 @@ public class LdapUserInfoUtil {
 		user.setUserno(ldapUser.getUserNo());
 		user.setNickname(ldapUser.getUserName());
 		user.setUsername(ldapUser.getUserAccount());
-		//userNode有什么用？
+		//userNode用来绑定节点--这里取巧放在GroupName里面
+		user.setGroupName(ldapUser.getUserNode());
 		
 		return user;
 	}
