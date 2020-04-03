@@ -58,6 +58,9 @@ public class UserVO{
 	/** 用户隶属组织id */
 	private String groupId;
 	
+	/** 是否是组织创建者 */
+	private Boolean isGroupCreator;
+	
 	/** 用户隶属组织名称 */
 	private String groupName;
 	
@@ -235,6 +238,15 @@ public class UserVO{
 
 	public UserVO setGroupId(String groupId) {
 		this.groupId = groupId;
+		return this;
+	}
+
+	public Boolean getIsGroupCreator() {
+		return isGroupCreator;
+	}
+
+	public UserVO setIsGroupCreator(Boolean isGroupCreator) {
+		this.isGroupCreator = isGroupCreator;
 		return this;
 	}
 

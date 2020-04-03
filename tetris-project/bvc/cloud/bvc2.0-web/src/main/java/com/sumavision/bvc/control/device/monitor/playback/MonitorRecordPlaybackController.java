@@ -141,7 +141,7 @@ public class MonitorRecordPlaybackController {
 	 * @param int currentPage 当前页码
 	 * @param int pageSize 每页数据量
 	 * @return long total 总数据量
-	 * @return List<MonitorRecordVO> rows 录制文件列表
+	 * @return List<RecordFileVO> rows 录制文件列表
 	 */
 	@JsonBody
 	@ResponseBody

@@ -22,6 +22,8 @@ public class UserImportEvent extends ApplicationEvent{
 	
 	private String roleId;
 	
+	private List<String> roleIds;
+	
 	private String roleName;
 	
 	private String userno;
@@ -53,6 +55,10 @@ public class UserImportEvent extends ApplicationEvent{
 	public String getRoleId() {
 		return roleId;
 	}
+	
+	public List<String> getRoleIds() {
+		return roleIds;
+	}
 
 	public String getRoleName() {
 		return roleName;
@@ -68,13 +74,15 @@ public class UserImportEvent extends ApplicationEvent{
 			String nickname,
 			String userno,
 			String companyId, 
-			String companyName) {
+			String companyName,
+			List<String> roleIds) {
 		super(source);
 		this.userId = userId;
 		this.nickname = nickname;
 		this.userno = userno;
 		this.companyId = companyId;
 		this.companyName = companyName;
+		this.roleIds = roleIds;
 	}
 	
 	public UserImportEvent(
