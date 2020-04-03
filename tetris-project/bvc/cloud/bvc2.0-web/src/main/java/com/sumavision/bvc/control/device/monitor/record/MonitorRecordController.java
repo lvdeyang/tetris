@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.suma.venus.resource.base.bo.AccessNodeBO;
-import com.suma.venus.resource.base.bo.BundleInfo;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -352,7 +351,7 @@ public class MonitorRecordController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月4日 下午1:32:25
-	 * @param Long userId 录制的用户id
+	 * @param Long targetUserId 录制的用户id
 	 * @param String mode 录制模式
 	 * @param String fileName 录制文件名
 	 * @param String startTime 排期录制开始时间
