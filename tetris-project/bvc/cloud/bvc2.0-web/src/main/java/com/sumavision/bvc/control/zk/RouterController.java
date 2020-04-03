@@ -430,6 +430,34 @@ public class RouterController {
 	}
 	
 	/**
+	 * 添加录制任务<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月2日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/addRecord")
+	public ModelAndView zkLeaderaddRecord(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/addRecord/add-record");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 点播录制文件<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月2日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/record/file")
+	public ModelAndView zkLeaderRecord(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/recordFile/record-file");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 选择成员创建会议对话框<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

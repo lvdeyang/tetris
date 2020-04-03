@@ -17,6 +17,7 @@ body {
 
 .table {
   float: left;
+  margin-left: 30px;
   width: 47%;
   border: 1px solid #c4c6cc;
   border-radius: 5px;

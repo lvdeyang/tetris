@@ -1,0 +1,14 @@
+.addRecord{
+    padding: 50px;
+    background: linear-gradient(to bottom, #204a6b, #327ab1, #1c6fb1, #204a6b);
+}
+
+.el-input__inner{
+    margin: 10px 0;
+    background-color: #15000075;
+    color: #e2e3e4;
+}
+.el-date-editor .el-range-input{
+    background-color: #000;
+    color: #eff4ff;
+}

@@ -11,81 +11,83 @@
             <el-button type="primary" size="medium" @click="changeSearch">搜索</el-button>
           </div>
           <div style="position:absolute; left:1px; top:50px; right:1px; bottom:50px;background:linear-gradient(rgb(40, 60, 105), rgb(51, 114, 119), rgb(15, 58, 102));">
-            <div style="width:100%; height:100%; overflow:auto;">
-              <div class="checkbox">
-                <el-select v-model="selected1" filterable @blur="searchBlur($event,1)" @change='func2()'>
-                  <el-option v-for="option in options2" :value="option.id" :label="option.name" :key="option.id">
-                    {{ option.name }}
-                  </el-option>
-                </el-select>
-                <el-select v-model="selected2" filterable @blur="searchBlur($event,2)" @change='func3()'>
-                  <el-option v-for="option in options3" :value="option.id" :label="option.name" :key="option.id">
-                    {{ option.name }}
-                  </el-option>
-                </el-select>
-                <el-select v-model="selected3" filterable @blur="searchBlur($event,3)" @change='func4()'>
-                  <el-option v-for="option in options4" :value="option.id" :label="option.name" :key="option.id">
-                    {{ option.name }}
-                  </el-option>
-                </el-select>
-                <el-select v-model="selected4" filterable @blur="searchBlur($event,4)" @change='func5()'>
-                  <el-option v-for="option in options5" :value="option.id" :label="option.name" :key="option.id">
-                    {{ option.name }}
-                  </el-option>
-                </el-select>
-                <el-select v-model="selected5" filterable @blur="searchBlur($event,5)" @change='func6()'>
-                  <el-option v-for="option in options6" :value="option.id" :label="option.name" :key="option.id">
-                    {{ option.name }}
-                  </el-option>
-                </el-select>
-                <el-button @click="reset" size="small" type="primary">清空选项</el-button>
-              </div>
+            <div style="width:100%; height:100%; overflow:hidden;">
+             <el-scrollbar style="height: 100%">
+               <div class="checkbox">
+                 <el-select v-model="selected1" filterable @blur="searchBlur($event,1)" @change='func2()'>
+                   <el-option v-for="option in options2" :value="option.id" :label="option.name" :key="option.id">
+                     {{ option.name }}
+                   </el-option>
+                 </el-select>
+                 <el-select v-model="selected2" filterable @blur="searchBlur($event,2)" @change='func3()'>
+                   <el-option v-for="option in options3" :value="option.id" :label="option.name" :key="option.id">
+                     {{ option.name }}
+                   </el-option>
+                 </el-select>
+                 <el-select v-model="selected3" filterable @blur="searchBlur($event,3)" @change='func4()'>
+                   <el-option v-for="option in options4" :value="option.id" :label="option.name" :key="option.id">
+                     {{ option.name }}
+                   </el-option>
+                 </el-select>
+                 <el-select v-model="selected4" filterable @blur="searchBlur($event,4)" @change='func5()'>
+                   <el-option v-for="option in options5" :value="option.id" :label="option.name" :key="option.id">
+                     {{ option.name }}
+                   </el-option>
+                 </el-select>
+                 <el-select v-model="selected5" filterable @blur="searchBlur($event,5)" @change='func6()'>
+                   <el-option v-for="option in options6" :value="option.id" :label="option.name" :key="option.id">
+                     {{ option.name }}
+                   </el-option>
+                 </el-select>
+                 <el-button @click="reset" size="small" type="primary">清空选项</el-button>
+               </div>
 
-              <div class="table">
-                <el-button type="primary" size="medium" @click="selectAll">选择全部</el-button>
-                <el-button type="primary" size="medium" @click="unsetAll">取消选择</el-button>
-                <el-table ref="multipleTable" :data="pageData" tooltip-effect="dark" style="width: 100%" border
-                  @select="handleSelect" @select-all="selectCurrentPage">
-                  <el-table-column type="selection" width="55">
-                  </el-table-column>
-                  <el-table-column label="ID" width="120">
-                    <template slot-scope="scope">{{ scope.row.id }}</template>
-                  </el-table-column>
-                  <el-table-column prop="name" label="用户名">
-                  </el-table-column>
-                </el-table>
+               <div class="table">
+                 <el-button type="primary" size="medium" @click="selectAll">选择全部</el-button>
+                 <el-button type="primary" size="medium" @click="unsetAll">取消选择</el-button>
+                 <el-table ref="multipleTable" :data="pageData" tooltip-effect="dark" style="width: 100%" border
+                           @select="handleSelect" @select-all="selectCurrentPage">
+                   <el-table-column type="selection" width="55">
+                   </el-table-column>
+                   <el-table-column label="ID" width="120">
+                     <template slot-scope="scope">{{ scope.row.id }}</template>
+                   </el-table-column>
+                   <el-table-column prop="name" label="用户名">
+                   </el-table-column>
+                 </el-table>
 
-                <el-pagination background @current-change="handleCurrentChange" :current-page="leftCurrentPage"
-                  :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
-                  :total=searchTableData.length>
-                </el-pagination>
-              </div>
+                 <el-pagination background @current-change="handleCurrentChange" :current-page="leftCurrentPage"
+                                :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
+                                :total=searchTableData.length>
+                 </el-pagination>
+               </div>
 
-              <div class="haveChoosed">
-                <div>
-                  <el-button type="primary" size="medium" @click="unsetSomeAll">取消选择</el-button>
-                  <el-input style="width:70%;" v-model="searchText" placeholder="搜索用户"></el-input>
-                </div>
-                <div class="selectedTag">
-                  <el-table ref="selectTable" :data="selectedPage" :row-key="getRowKey" tooltip-effect="dark"
-                    style="width: 100%" border @selection-change="deleteChange">
-                    <el-table-column type="selection" :reserve-selection="true" width="55">
-                    </el-table-column>
-                    <el-table-column prop="name" label="用户名">
-                    </el-table-column>
-                    <el-table-column label="操作" width="110">
-                      <template slot-scope="scope">
-                        <span class="el-icon-delete" style="color:#ffbb1c;font-weight: 600;" @click="deleteSelected(scope.row)">删除</span>
-                      </template>
-                    </el-table-column>
-                  </el-table>
+               <div class="haveChoosed">
+                 <div>
+                   <el-button type="primary" size="medium" @click="unsetSomeAll">取消选择</el-button>
+                   <el-input style="width:70%;" v-model="searchText" placeholder="搜索用户"></el-input>
+                 </div>
+                 <div class="selectedTag">
+                   <el-table ref="selectTable" :data="selectedPage" :row-key="getRowKey" tooltip-effect="dark"
+                             style="width: 100%" border @selection-change="deleteChange">
+                     <el-table-column type="selection" :reserve-selection="true" width="55">
+                     </el-table-column>
+                     <el-table-column prop="name" label="用户名">
+                     </el-table-column>
+                     <el-table-column label="操作" width="110">
+                       <template slot-scope="scope">
+                         <span class="el-icon-delete" style="color:#ffbb1c;font-weight: 600;" @click="deleteSelected(scope.row)">删除</span>
+                       </template>
+                     </el-table-column>
+                   </el-table>
 
-                  <el-pagination background @current-change="selectCurrentChange" :current-page="rightCurrentPage"
-                    :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
-                    :total="searchSelectedData.length">
-                  </el-pagination>
-                </div>
-              </div>
+                   <el-pagination background @current-change="selectCurrentChange" :current-page="rightCurrentPage"
+                                  :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
+                                  :total="searchSelectedData.length">
+                   </el-pagination>
+                 </div>
+               </div>
+             </el-scrollbar>
             </div>
           </div>
           <div
