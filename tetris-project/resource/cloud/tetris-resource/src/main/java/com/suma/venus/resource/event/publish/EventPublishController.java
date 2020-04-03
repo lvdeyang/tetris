@@ -64,8 +64,11 @@ public class EventPublishController {
 			String userId,
 			String nickname,
 			String userno,
+			String roleIds,
 			HttpServletRequest request) throws Exception{
-		UserImportEvent event = new UserImportEvent(applicationEventPublisher, userId, nickname, userno, null, null);
+		
+		List<String> _roleIds = JSONArray.parseArray(roleIds, String.class);
+		UserImportEvent event = new UserImportEvent(applicationEventPublisher, userId, nickname, userno, null, null, _roleIds);
 		applicationEventPublisher.publishEvent(event);
 		return null;
 	}

@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
+import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.RoleBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
@@ -16,10 +18,13 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
+import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -41,6 +46,9 @@ public class UserQueryService {
 	
 	@Autowired
 	private PrivilegeDAO privilegeDao;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDao;
 	
 	@Autowired
 	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
@@ -480,6 +488,94 @@ public class UserQueryService {
 		}
 		
 		return roleBOs;
+	}
+	
+	/**
+	 * 导入用户权限绑定<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月3日 上午10:24:07
+	 * @param String userno 用户号码
+	 * @param List<String> roleIds 角色ids
+	 */
+	public void importUserPrivilage(String userno, List<String> roleIds) throws Exception{
+		
+		List<String> toBindChecks = new ArrayList<String>();
+		toBindChecks.add(userno + "-r");
+		toBindChecks.add(userno + "-w");
+		toBindChecks.add(userno + "-hj");
+		toBindChecks.add(userno + "-zk");
+		
+		for(String roleId: roleIds){
+			RoleAndResourceIdBO bo = new RoleAndResourceIdBO();
+			bo.setRoleId(Long.valueOf(roleId));
+			bo.setResourceCodes(new ArrayListWrapper<String>().addAll(toBindChecks).getList());
+			
+			bindRolePrivilege(bo);
+		}
+
+	}
+	
+	/**
+	 * 角色绑定权限<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月26日 下午2:00:49
+	 * @param RoleAndResourceIdBO param
+	 * @return boolean
+	 */
+	public boolean bindRolePrivilege(RoleAndResourceIdBO param) throws Exception{
+		
+		if (null == param.getRoleId() || param.getRoleId() == 0l) {
+			return false;
+		}
+
+		if (null == param.getResourceCodes() || param.getResourceCodes().isEmpty()) {
+			return false;
+		}
+
+		//TODO: feign中加
+//		RolePO role = roleService.findById(param.getRoleId());
+//		if (null == role) {
+//			return false;
+//		}
+		List<String> resources = new ArrayList<String>();
+		for (String resource : param.getResourceCodes()) {
+			resources.add(resource);
+		}
+		
+		List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resources);
+		
+		// 先保存权限
+		List<RolePrivilegeMap> maps = new ArrayList<RolePrivilegeMap>();
+		for (String resource : param.getResourceCodes()) {
+			PrivilegePO privilege = null;
+			for(PrivilegePO _privilege: privileges){
+				if(_privilege.getResourceIndentity().equals(resource)){
+					privilege = _privilege;
+					break;
+				}
+			}
+			if (null == privilege) {
+				PrivilegePO p = new PrivilegePO();
+				p.setbEdit(false);
+				p.setName("roleId-" + param.getRoleId() + "-privilege-" + resource);
+				p.setpCode("customcode");
+				p.setPrivilegeType(EPrivilegeType.CUSTOM);
+				p.setResourceIndentity(resource);
+				privilegeDao.save(p);
+				privilege = p;
+				// 进行绑定
+			}
+			RolePrivilegeMap mapR = new RolePrivilegeMap();
+			mapR.setPrivilegeId(privilege.getId());
+			mapR.setRoleId(param.getRoleId());
+			maps.add(mapR);
+		}
+		
+		rolePrivilegeMapDao.save(maps);
+		
+		return true;
 	}
 	
 }

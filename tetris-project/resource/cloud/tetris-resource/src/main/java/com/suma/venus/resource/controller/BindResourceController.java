@@ -892,7 +892,7 @@ public class BindResourceController extends ControllerBase {
 			bo.setRoleId(roleId);
 			bo.setResourceCodes(toBindChecks);
 			
-			return bindRolePrivilege(bo);
+			return userQueryService.bindRolePrivilege(bo);
 //			ResultBO result = userFeign.bindRolePrivilege(bo);
 //			if (null == result || !result.isResult()) {
 //				return false;
@@ -901,70 +901,6 @@ public class BindResourceController extends ControllerBase {
 		return true;
 	}
 	
-	/**
-	 * 角色绑定权限<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年12月26日 下午2:00:49
-	 * @param RoleAndResourceIdBO param
-	 * @return boolean
-	 */
-	private boolean bindRolePrivilege(RoleAndResourceIdBO param) throws Exception{
-		
-		LOGGER.info("=================/bindRolePrivilege===========BindRolePrivilegeBO is " + ((null == param) ? "null" : JSONObject.toJSON(param).toString()));
-
-		if (null == param.getRoleId() || param.getRoleId() == 0l) {
-			return false;
-		}
-
-		if (null == param.getResourceCodes() || param.getResourceCodes().isEmpty()) {
-			return false;
-		}
-
-		//TODO: feign中加
-//		RolePO role = roleService.findById(param.getRoleId());
-//		if (null == role) {
-//			return false;
-//		}
-		List<String> resources = new ArrayList<String>();
-		for (String resource : param.getResourceCodes()) {
-			resources.add(resource);
-		}
-		
-		List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resources);
-		
-		// 先保存权限
-		List<RolePrivilegeMap> maps = new ArrayList<RolePrivilegeMap>();
-		for (String resource : param.getResourceCodes()) {
-			PrivilegePO privilege = null;
-			for(PrivilegePO _privilege: privileges){
-				if(_privilege.getResourceIndentity().equals(resource)){
-					privilege = _privilege;
-					break;
-				}
-			}
-			if (null == privilege) {
-				PrivilegePO p = new PrivilegePO();
-				p.setbEdit(false);
-				p.setName("roleId-" + param.getRoleId() + "-privilege-" + resource);
-				p.setpCode("customcode");
-				p.setPrivilegeType(EPrivilegeType.CUSTOM);
-				p.setResourceIndentity(resource);
-				privilegeDao.save(p);
-				privilege = p;
-				// 进行绑定
-			}
-			RolePrivilegeMap mapR = new RolePrivilegeMap();
-			mapR.setPrivilegeId(privilege.getId());
-			mapR.setRoleId(param.getRoleId());
-			maps.add(mapR);
-		}
-		
-		rolePrivilegeMapDao.save(maps);
-		
-		return true;
-	}
-
 	private boolean unbindResourceCodes(Long roleId, List<String> toUnbindCheckList) throws Exception{
 		if (!toUnbindCheckList.isEmpty()) {
 			UnbindRolePrivilegeBO bo = new UnbindRolePrivilegeBO();
