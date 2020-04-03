@@ -582,7 +582,7 @@ public class UserService{
 		List<UserSystemRolePermissionPO> userSystemRolePermissions = new ArrayList<UserSystemRolePermissionPO>();
 		for(int i=1; i<lines.length; i++){
 			String line = lines[i];
-			String[] columns = line.split(",");
+			String[] columns = line.split(",",-1);
 			String[] roleNamesInColumn = columns[6].split("#");
 			for(String name:roleNamesInColumn){
 				if(!"".equals(name)){

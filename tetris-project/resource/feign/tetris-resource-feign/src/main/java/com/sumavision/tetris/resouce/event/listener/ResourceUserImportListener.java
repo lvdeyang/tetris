@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.resouce.event.ResourceUserImportFeign;
 import com.sumavision.tetris.user.event.UserImportEvent;
 
@@ -24,7 +25,7 @@ public class ResourceUserImportListener implements ApplicationListener<UserImpor
 	@Override
 	public void onApplicationEvent(UserImportEvent event) {
 		try {
-			userImportFeign.userImport(event.getUserId(), event.getNickname(), event.getUserno());
+			userImportFeign.userImport(event.getUserId(), event.getNickname(), event.getUserno(), JSON.toJSONString(event.getRoleIds()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
