@@ -63,7 +63,7 @@ public class CommandCommonUtil {
 	 * @return Set<CommandGroupForwardPO> needForwards 符合条件的转发列表
 	 */
 	public Set<CommandGroupForwardPO> queryForwardsByMemberIds(
-			Set<CommandGroupForwardPO> forwards, List<Long> memberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
+			Collection<CommandGroupForwardPO> forwards, Collection<Long> memberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
 		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
 		for(CommandGroupForwardPO forward : forwards){
 			if(type==null || type.equals(forward.getForwardBusinessType())){
@@ -92,7 +92,7 @@ public class CommandCommonUtil {
 	 * @return
 	 */
 	public Set<CommandGroupForwardPO> queryForwardsBySrcmemberIds(
-			Set<CommandGroupForwardPO> forwards, List<Long> srcMemberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
+			Collection<CommandGroupForwardPO> forwards, Collection<Long> srcMemberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
 		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
 		for(CommandGroupForwardPO forward : forwards){
 			if(type==null || type.equals(forward.getForwardBusinessType())){
@@ -114,7 +114,7 @@ public class CommandCommonUtil {
 	 * @throws Exception 
 	 * @return Set<CommandGroupForwardPO> needForwards 具备执行条件的转发列表
 	 */
-	private Set<CommandGroupForwardPO> queryForwardsReadyToBeDone(Set<CommandGroupMemberPO> members, Set<CommandGroupForwardPO> forwards) {
+	private Set<CommandGroupForwardPO> queryForwardsReadyToBeDone(Collection<CommandGroupMemberPO> members, Collection<CommandGroupForwardPO> forwards) {
 		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
 		Map<Long, CommandGroupMemberPO> map = membersSetToMap(members);
 		for(CommandGroupForwardPO forward : forwards){
@@ -149,7 +149,7 @@ public class CommandCommonUtil {
 	 * @param forwards 转发列表
 	 * @return
 	 */
-	public Set<CommandGroupForwardPO> queryForwardsReadyAndCanBeDone(Set<CommandGroupMemberPO> members, Set<CommandGroupForwardPO> forwards) {
+	public Set<CommandGroupForwardPO> queryForwardsReadyAndCanBeDone(Collection<CommandGroupMemberPO> members, Collection<CommandGroupForwardPO> forwards) {
 		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
 		Set<CommandGroupForwardPO> readyForwards = queryForwardsReadyToBeDone(members, forwards);
 		for(CommandGroupForwardPO forward : readyForwards){
@@ -161,7 +161,7 @@ public class CommandCommonUtil {
 	}
 	
 	//把Set<CommandGroupMemberPO>以id为key转为map，供queryForwardsNeedToBeDone调用
-	private Map<Long, CommandGroupMemberPO> membersSetToMap (Set<CommandGroupMemberPO> members) {
+	private Map<Long, CommandGroupMemberPO> membersSetToMap (Collection<CommandGroupMemberPO> members) {
 		Map<Long, CommandGroupMemberPO> map = new HashMap<Long, CommandGroupMemberPO>();
 		if (members == null) {
 			return map;
@@ -179,7 +179,7 @@ public class CommandCommonUtil {
 	 * @throws Exception 
 	 * @return CommandGroupForwardPO forward 转发
 	 */
-	public CommandGroupForwardPO queryForwardByDstVideoBundleId(Set<CommandGroupForwardPO> forwards, String dstVideoBundleId) {
+	public CommandGroupForwardPO queryForwardByDstVideoBundleId(Collection<CommandGroupForwardPO> forwards, String dstVideoBundleId) {
 		for(CommandGroupForwardPO forward : forwards){
 			if(dstVideoBundleId.equals(forward.getDstVideoBundleId())){
 				return forward;
@@ -195,7 +195,7 @@ public class CommandCommonUtil {
 	 * @throws Exception 
 	 * @return CommandGroupForwardPO forward 转发
 	 */
-	public CommandGroupForwardPO queryForwardByDstAudioBundleId(Set<CommandGroupForwardPO> forwards, String dstAudioBundleId) {
+	public CommandGroupForwardPO queryForwardByDstAudioBundleId(Collection<CommandGroupForwardPO> forwards, String dstAudioBundleId) {
 		for(CommandGroupForwardPO forward : forwards){
 			if(dstAudioBundleId.equals(forward.getDstAudioBundleId())){
 				return forward;
@@ -215,7 +215,7 @@ public class CommandCommonUtil {
 	 * @param dstMemberId 如果为空，则忽略该参数
 	 * @return
 	 */
-	public CommandGroupForwardPO queryForwardBySrcAndDstMemberId(Set<CommandGroupForwardPO> forwards, Long srcMemberId, Long dstMemberId) {
+	public CommandGroupForwardPO queryForwardBySrcAndDstMemberId(Collection<CommandGroupForwardPO> forwards, Long srcMemberId, Long dstMemberId) {
 		for(CommandGroupForwardPO forward : forwards){
 			if(srcMemberId==null || srcMemberId.equals(forward.getSrcMemberId())){
 				if(dstMemberId==null || dstMemberId.equals(forward.getDstMemberId())){
@@ -418,7 +418,7 @@ public class CommandCommonUtil {
 	 * @param id
 	 * @return
 	 */
-	public CommandGroupMemberPO queryMemberById(Set<CommandGroupMemberPO> members, Long id){
+	public CommandGroupMemberPO queryMemberById(Collection<CommandGroupMemberPO> members, Long id){
 		for(CommandGroupMemberPO member : members){
 			if(id.equals(member.getId())){
 				return member;
@@ -437,7 +437,7 @@ public class CommandCommonUtil {
 	 * @param userId
 	 * @return
 	 */
-	public CommandGroupMemberPO queryMemberByUserId(Set<CommandGroupMemberPO> members, Long userId){
+	public CommandGroupMemberPO queryMemberByUserId(Collection<CommandGroupMemberPO> members, Long userId){
 		for(CommandGroupMemberPO member : members){
 			if(userId.equals(member.getUserId())){
 				return member;
@@ -456,7 +456,7 @@ public class CommandCommonUtil {
 	 * @param userIds
 	 * @return
 	 */
-	public List<CommandGroupMemberPO> queryMembersByUserIds(Set<CommandGroupMemberPO> members, List<Long> userIds){
+	public List<CommandGroupMemberPO> queryMembersByUserIds(Collection<CommandGroupMemberPO> members, List<Long> userIds){
 		List<CommandGroupMemberPO> target = new ArrayList<CommandGroupMemberPO>();
 		for(CommandGroupMemberPO member : members){
 			if(userIds.contains(member.getUserId())){
@@ -484,7 +484,7 @@ public class CommandCommonUtil {
 		}
 		return null;
 	}
-	public CommandGroupMemberPO queryChairmanMember(Set<CommandGroupMemberPO> members){
+	public CommandGroupMemberPO queryChairmanMember(Collection<CommandGroupMemberPO> members){
 		for(CommandGroupMemberPO member : members){
 			if(member.isAdministrator()){
 				return member;
