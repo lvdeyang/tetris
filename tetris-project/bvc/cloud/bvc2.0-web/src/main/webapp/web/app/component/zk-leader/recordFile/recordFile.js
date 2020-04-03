@@ -107,27 +107,9 @@ define([
                     currentPage: self.currentPage,
                     pageSize: 10
                 }, function (data) {
-                    // if(data.rows && data.rows.length>0){
-                    data.rows = [{
-                        id: 1,
-                        fileName: "文件名",
-                        previewUrl: "预览地址",
-                        startTime: "开始时间",
-                        endTime: "结束时间",
-                        removeable: "当前用户是否可以删除",
-                        playable: "当前文件是否可播放--主要根据是否有接入层id来判断"
-                    },
-                        {
-                            id: 2,
-                            fileName: "文件名",
-                            previewUrl: "预览地址",
-                            startTime: "开始时间",
-                            endTime: "结束时间",
-                            removeable: "当前用户是否可以删除",
-                            playable: "当前文件是否可播放--主要根据是否有接入层id来判断"
-                        }]
+                    if(data.rows && data.rows.length>0){
                     self.files = data.rows;
-                    // }
+                    }
                 })
             },
             //日期筛选

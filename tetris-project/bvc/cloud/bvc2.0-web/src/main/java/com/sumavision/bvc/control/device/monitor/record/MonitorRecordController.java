@@ -144,8 +144,10 @@ public class MonitorRecordController {
 			int pageSize,
 			HttpServletRequest request) throws Exception{
 		
+		if("".equals(device)) device = null;
+		
 		String fileNameReg = null;
-		if(fileName != null){
+		if(fileName!=null && !"".equals(fileName)){
 			fileNameReg = new StringBufferWrapper().append("%").append(fileName).append("%").toString();
 		}
 		

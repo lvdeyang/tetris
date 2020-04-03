@@ -1585,7 +1585,7 @@ define([
                 var self = this;
                 if (!self.buttons.isSpeaking) {
                     ajax.post('/command/meeting/speak/apply', {id: self.group.current.id}, function (data) {
-                        self.qt.success('操作成功');
+                        self.qt.success('已向主席发出申请');
                         self.buttons.isSpeaking = true;
                     })
                 }
@@ -1595,7 +1595,7 @@ define([
                 var self = this;
                 if (self.buttons.isSpeaking) {
                     ajax.post('/command/meeting/speak/stop/by/member', {id: self.group.current.id}, function (data) {
-                        self.qt.success('操作成功');
+                        self.qt.success('您停止了自己的发言');
                         self.buttons.isSpeaking = false;
                     })
                 }

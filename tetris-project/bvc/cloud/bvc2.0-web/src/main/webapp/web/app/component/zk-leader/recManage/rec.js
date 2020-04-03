@@ -65,13 +65,6 @@ define([
                     console.log(data)
                 })
             },
-            //删除任务
-            // removeTask:function (id) {
-            //     console.log(id)
-            //     ajax.post('/monitor/record/remove/file/'+id,null,function (data) {
-            //         console.log(data)
-            //     })
-            // },
             //获取数据
             refreshRecord: function (text1, text2, text3, text4, text5) {
                 var self = this;
@@ -86,98 +79,6 @@ define([
                     pageSize: '10'
                 }, function (data) {
                     console.log(data)
-                    data.rows = [
-                        {
-                            id: 1,
-                            fileName: '王小虎1',
-                            type: 'ss',
-                            videoSource: 'sss',
-                            audioSource: 'xxx',
-                            startTime: '2020-02-23 19:23:43',
-                            endTime: '2020-02-23 19:23:43',
-                            mode: '手动录制',
-                        }, {
-                            id: 2,
-                            fileName: '王小虎2',
-                            type: 'ss',
-                            videoSource: 'sss',
-                            audioSource: 'xxx',
-                            startTime: '2020-02-23 19:23:43',
-                            endTime: '2020-02-23 19:23:43',
-                            mode: '手动录制',
-                        }, {
-                            id: 3,
-                            fileName: '王小虎3',
-                            type: 'ss',
-                            videoSource: 'sss',
-                            audioSource: 'xxx',
-                            startTime: '2020-02-23 19:23:43',
-                            endTime: '2020-02-23 19:23:43',
-                            mode: '手动录制',
-                        }, {
-                            id: 4,
-                            fileName: '王小虎4',
-                            type: 'ss',
-                            videoSource: 'sss',
-                            audioSource: 'xxx',
-                            startTime: '2020-02-23 19:23:43',
-                            endTime: '2020-02-23 19:23:43',
-                            mode: '手动录制',
-                        },
-                        {
-                            id:5,
-                            fileName: '王小虎5',
-                            type: 'ss',
-                            videoSource: 'sss',
-                            audioSource: 'xxx',
-                            startTime: '2020-02-23 19:23:43',
-                            endTime: '2020-02-23 19:23:43',
-                            mode: '手动录制',
-                        },
-                        {
-                            id:6,
-                            fileName: '王小虎6',
-                            type: 'ss',
-                            videoSource: 'sss',
-                            audioSource: 'xxx',
-                            startTime: '2020-02-23 19:23:43',
-                            endTime: '2020-02-23 19:23:43',
-                            mode: '手动录制',
-                        },
-                        {
-                            id:7,
-                            fileName: '王小虎7',
-                            type: 'ss',
-                            videoSource: 'sss',
-                            audioSource: 'xxx',
-                            startTime: '2020-02-23 19:23:43',
-                            endTime: '2020-02-23 19:23:43',
-                            mode: '手动录制',
-                        },
-                        {
-                            id:8,
-                            fileName: '王小虎8',
-                            type: 'ss',
-                            videoSource: 'sss',
-                            audioSource: 'xxx',
-                            startTime: '2020-02-23 19:23:43',
-                            endTime: '2020-02-23 19:23:43',
-                            mode: '手动录制',
-                        },
-                        {
-                            id: "9",
-                            fileName: "文件名称",
-                            videoSource: "视频源",
-                            audioSource: "音频源",
-                            startTime: "任务开始时间",
-                            endTime: "任务结束时间",
-                            mode: "任务模式(名称)",
-                            type: "录制模式，标识录制用户还是录制设备（名称）",
-                            recordUserId: "录制用户id",
-                            recordUsername: "录制用户名",
-                            recordUserno: "录制用户号码"
-                        }
-                    ];
                     if (data.rows && data.rows.length > 0) {
                         var commands = data.rows;
                         for (var i = 0; i < commands.length; i++) {
@@ -194,8 +95,8 @@ define([
             },
             //格式化时间
             format: function (str) {
-                str=str.toString();
                 if (str) {
+                    str=str.toString();
                     var str = str.replace(/ GMT.+$/, '');// Or str = str.substring(0, 24)
                     var d = new Date(str);
                     var a = [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];

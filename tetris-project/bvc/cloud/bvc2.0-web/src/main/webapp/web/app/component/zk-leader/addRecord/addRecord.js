@@ -31,7 +31,7 @@ define([
                 var self=this;
                 if(self.category === 'USER'){
                     ajax.post('/monitor/record/add/record/user/task',{
-                        userId:self.recordId,
+                        targetUserId:self.recordId,
                         mode:self.recordMode,
                         fileName:self.inputName,
                         startTime:self.format(this.date[0]),
