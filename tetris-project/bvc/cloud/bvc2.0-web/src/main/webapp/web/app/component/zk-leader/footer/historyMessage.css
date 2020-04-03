@@ -90,6 +90,7 @@ html,body{
     border-radius: 13px;
     background-color: #f8a036;
     color: #fff;
+    cursor: default;
 }
 .forward{
     position: absolute;

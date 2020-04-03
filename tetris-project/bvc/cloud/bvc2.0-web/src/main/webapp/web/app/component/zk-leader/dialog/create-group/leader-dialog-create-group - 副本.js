@@ -131,39 +131,50 @@ define([
                     })
                 }
             },
-            filterLevel: function() {
+            //搜索功能，先前台处理，需要后台写接口
+            changeSearch: function () {
+                var text = this.filterText.trim();
                 var selected1 = this.selected1.trim();
                 var selected2 = this.selected2.trim();
                 var selected3 = this.selected3.trim();
                 var selected4 = this.selected4.trim();
                 var selected5 = this.selected5.trim();
-                var levels = [selected1, selected2, selected3, selected4, selected5];
-                levels = levels.filter(function(l) {
-                    return l;
-                });
-                // 比如只选择了前几级 ['根目录', '人员目录', '硬件公司']
-                console.log(levels)
-
-                //previousValue （上一次调用回调返回的值，或者是提供的初始值（initialValue））currentValue （数组中当前被处理的元素）
-                var filterData = levels.reduce(function(preFilterData, currentLevel) {
-                    var currentLevelData = [];
-                    preFilterData.forEach(function(item) {
-                        if (item.type === 'FOLDER' && item.name === currentLevel && item.children) {
-                            currentLevelData = currentLevelData.concat(item.children)
-                        }
-                    });
-                    return currentLevelData;
-                }, this.level2);
-
-                return filterData;
-            },
-            //搜索功能，先前台处理，需要后台写接口
-            changeSearch: function () {
-                var text = this.filterText.trim();
                 var self = this;
                 this.searchData = [];
-                var tempData = this.filterLevel();
-                console.log(tempData)
+                var tempData = [];
+                if (!selected1 && !selected2 && !selected3 && !selected4 && !selected5) {
+                    tempData = this.level2;
+                } else if (selected1 && !selected2 && !selected3 && !selected4 && !selected5) {
+                    this.options2.forEach(function (value, index) {
+                        if (value.id === selected1 || value.name === selected1) {
+                            tempData.push(self.options2[index]);
+                        }
+                    });
+                } else if (selected1 && selected2 && !selected3 && !selected4 && !selected5) {
+                    this.options3.forEach(function (value, index) {
+                        if (value.id === selected2 || value.name === selected2) {
+                            tempData.push(self.options3[index]);
+                        }
+                    });
+                } else if (selected1 && selected2 && selected3 && !selected4 && !selected5) {
+                    this.options4.forEach(function (value, index) {
+                        if (value.id === selected3 || value.name === selected3) {
+                            tempData.push(self.options4[index]);
+                        }
+                    });
+                } else if (selected1 && selected2 && selected3 && selected4 && !selected5) {
+                    this.options5.forEach(function (value, index) {
+                        if (value.id === selected4 || value.name === selected4) {
+                            tempData.push(self.options5[index]);
+                        }
+                    });
+                } else if (selected1 && selected2 && selected3 && selected4 && selected5) {
+                    this.options6.forEach(function (value, index) {
+                        if (value.id === selected5 || value.name === selected5) {
+                            tempData.push(self.options6[index]);
+                        }
+                    });
+                }
                 tempData.forEach(function (l) {
                     self.searchFolder(l, text);
                 });
@@ -203,6 +214,7 @@ define([
                         }
                     }
                 });
+                console.log(self.options3)
             },
 
             //绑定事件，给三级菜单赋值
@@ -454,6 +466,8 @@ define([
                             self.level2 = self.level2.concat(data[i].children);
                         }
                         self.options2 = self.level2;
+                        console.log(self.level2)
+                        console.log(self.options2)
                     }
                 });
             },

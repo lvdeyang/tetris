@@ -17,224 +17,201 @@ define([
         data: function () {
             return {
                 baseUrl: window.BASEPATH,
-                currentTab:'deviceData', //对应tab的name
-                filterText:'',
-                recordMode:'', //录制模式
-                date:'', //查询日期
-                deviceCurrentPage:1,
-                userCurrentPage:1,
-                userData:{
-                    totalData:[],
-                    filterData:[
-
-                    ]
-                },
-                deviceData:{
-                    totalData:[
-                        {
-                            fileName: '王小虎',
-                            deviceName:'001设备',
-                            videoSource:'sss',
-                            audioSource:'xxx',
-                            startDate:'2020-02-23 19:23:43',
-                            endDate:'2020-02-23 19:23:43',
-                            recMode:'手动录制',
-                            status:'正在录制'
-                        },  {
-                            fileName: '王小虎1',
-                            deviceName:'001设备',
-                            videoSource:'sss',
-                            audioSource:'xxx',
-                            startDate:'2020-02-23 19:23:43',
-                            endDate:'2020-02-23 19:23:43',
-                            recMode:'手动录制',
-                            status:'正在录制'
-                        },  {
-                            fileName: '王小虎2',
-                            deviceName:'001设备',
-                            videoSource:'sss',
-                            audioSource:'xxx',
-                            startDate:'2020-02-23 19:23:43',
-                            endDate:'2020-02-23 19:23:43',
-                            recMode:'手动录制',
-                            status:'正在录制'
-                        },  {
-                            fileName: '王小虎3',
-                            deviceName:'001设备',
-                            videoSource:'sss',
-                            audioSource:'xxx',
-                            startDate:'2020-02-23 19:23:43',
-                            endDate:'2020-02-23 19:23:43',
-                            recMode:'手动录制',
-                            status:'正在录制'
-                        },
-                        {
-                            fileName: '王小虎3',
-                            deviceName:'001设备',
-                            videoSource:'sss',
-                            audioSource:'xxx',
-                            startDate:'2020-02-23 19:23:43',
-                            endDate:'2020-02-23 19:23:43',
-                            recMode:'手动录制',
-                            status:'正在录制'
-                        },
-                        {
-                            fileName: '王小虎3',
-                            deviceName:'001设备',
-                            videoSource:'sss',
-                            audioSource:'xxx',
-                            startDate:'2020-02-23 19:23:43',
-                            endDate:'2020-02-23 19:23:43',
-                            recMode:'手动录制',
-                            status:'正在录制'
-                        },
-                        {
-                            fileName: '王小虎3',
-                            deviceName:'001设备',
-                            videoSource:'sss',
-                            audioSource:'xxx',
-                            startDate:'2020-02-23 19:23:43',
-                            endDate:'2020-02-23 19:23:43',
-                            recMode:'手动录制',
-                            status:'正在录制'
-                        },
-                        {
-                            fileName: '李发',
-                            deviceName:'001设备',
-                            videoSource:'sss',
-                            audioSource:'xxx',
-                            startDate:'2020-02-23 19:23:43',
-                            endDate:'2020-02-23 19:23:43',
-                            recMode:'手动录制',
-                            status:'正在录制'
-                        }
-                    ],
-                    filterData:[]
+                filterText: '',
+                recordMode: 'MANUAL', //录制模式  MANUAL(手动)|SCHEDULING(排期)
+                date: '', //查询日期
+                deviceCurrentPage: 1,
+                deviceData: {
+                    totalData: [],
+                    filterData: []
                 }
             }
         },
-        watch:{
-            currentTab:function(){
-                var self = this;
-                if(self.currentTab === 'userData'){
-                    // self.filterUserCommand();
-
-                }else if(self.currentTab === 'deviceData'){
-                    // self.filterDeviceCommand();
-                    self.deviceData.filterData=self.deviceData.totalData.slice(0,self.deviceData.totalData.length)
-                }
-            }
-        },
-        computed:{
+        computed: {
             //设备的分页
             pageData: function () {
-                return this.deviceData.filterData.slice((this.deviceCurrentPage - 1) * 2, this.deviceCurrentPage * 2);
+                return this.deviceData.totalData.slice((this.deviceCurrentPage - 1) * 10, this.deviceCurrentPage * 10);
             }
         },
         methods: {
-            search:function () {
-                var self = this;
-                if(self.currentTab === 'userData'){
-                    self.filterUserCommand();
-                }else if(self.currentTab === 'deviceData'){
-                    self.filterDeviceCommand();
-                }
-            },
             //当前页改变
-            deviceCurrentChange:function (val) {
-                this.deviceCurrentPage=val;
+            deviceCurrentChange: function (val) {
+                this.deviceCurrentPage = val;
             },
-            userCurrentChange:function (val) {
-                this.userCurrentPage=val;
-            },
-
             //过滤设备数据
-            filterUserCommand:function(){
-                var self = this;
-                self.userData.filterData.splice(0, self.userData.filterData.length);
-                for(var i=0; i<self.userData.totalData.length; i++){
-                    if(self.userData.totalData[i].name.indexOf(self.filterText)>=0){
-                        self.userData.filterData.push(self.userData.totalData[i]);
-                    }
-                }
+            // filterDeviceCommand:function(){
+            //     var self = this;
+            //     self.deviceData.filterData.splice(0, self.deviceData.filterData.length);
+            //     for(var i=0; i<self.deviceData.totalData.length; i++){
+            //         if(self.deviceData.totalData[i].fileName.indexOf(self.filterText)>=0){
+            //             self.deviceData.filterData.push(self.deviceData.totalData[i]);
+            //         }
+            //     }
+            // },
+            search: function () {
+                var mode = this.recordMode;
+                var name = this.filterText;
+                var date = this.date;
+                var startDate = this.format(date[0]);
+                var endDate = this.format(date[1]);
+                var page = this.deviceCurrentPage;
+                this.deviceData.totalData.splice(0, this.deviceData.totalData.length);
+                this.refreshRecord(mode, name, startDate, endDate, page);
             },
-            filterDeviceCommand:function(){
-                var self = this;
-                self.deviceData.filterData.splice(0, self.deviceData.filterData.length);
-                for(var i=0; i<self.deviceData.totalData.length; i++){
-                    if(self.deviceData.totalData[i].fileName.indexOf(self.filterText)>=0){
-                        self.deviceData.filterData.push(self.deviceData.totalData[i]);
-                    }
-                }
+            //停止任务
+            stopTask: function (id) {
+                console.log(id)
+                ajax.post('/monitor/record/stop/' + id, null, function (data) {
+                    console.log(data)
+                })
             },
-            refreshCommand:function(){
+            //删除任务
+            // removeTask:function (id) {
+            //     console.log(id)
+            //     ajax.post('/monitor/record/remove/file/'+id,null,function (data) {
+            //         console.log(data)
+            //     })
+            // },
+            //获取数据
+            refreshRecord: function (text1, text2, text3, text4, text5) {
                 var self = this;
-                ajax.post('/command/record/query', null, function(data){
-                    if(data && data.length>0){
-                        var commands = data[0].children;
-                        if(commands && commands.length>0){
-                            for(var i=0; i<commands.length; i++){
-                                var creator = $.parseJSON(commands[i].param).creator;
-                                if(creator == self.user.id){
-                                    //我的会议
-                                    self.userData.totalData.push(commands[i]);
-                                    self.userData.filterData.push(commands[i]);
-                                }else{
-                                    //我加入的会议
-                                    self.deviceData.totalData.push(commands[i]);
-                                    self.deviceData.filterData.push(commands[i]);
-                                }
-                            }
+                ajax.post('/monitor/record/load', {
+                    mode: text1,
+                    fileName: text2,
+                    deviceType: '',
+                    device: '',
+                    startTime: text3,
+                    endTime: text4,
+                    currentPage: text5,
+                    pageSize: '10'
+                }, function (data) {
+                    console.log(data)
+                    data.rows = [
+                        {
+                            id: 1,
+                            fileName: '王小虎1',
+                            type: 'ss',
+                            videoSource: 'sss',
+                            audioSource: 'xxx',
+                            startTime: '2020-02-23 19:23:43',
+                            endTime: '2020-02-23 19:23:43',
+                            mode: '手动录制',
+                        }, {
+                            id: 2,
+                            fileName: '王小虎2',
+                            type: 'ss',
+                            videoSource: 'sss',
+                            audioSource: 'xxx',
+                            startTime: '2020-02-23 19:23:43',
+                            endTime: '2020-02-23 19:23:43',
+                            mode: '手动录制',
+                        }, {
+                            id: 3,
+                            fileName: '王小虎3',
+                            type: 'ss',
+                            videoSource: 'sss',
+                            audioSource: 'xxx',
+                            startTime: '2020-02-23 19:23:43',
+                            endTime: '2020-02-23 19:23:43',
+                            mode: '手动录制',
+                        }, {
+                            id: 4,
+                            fileName: '王小虎4',
+                            type: 'ss',
+                            videoSource: 'sss',
+                            audioSource: 'xxx',
+                            startTime: '2020-02-23 19:23:43',
+                            endTime: '2020-02-23 19:23:43',
+                            mode: '手动录制',
+                        },
+                        {
+                            id:5,
+                            fileName: '王小虎5',
+                            type: 'ss',
+                            videoSource: 'sss',
+                            audioSource: 'xxx',
+                            startTime: '2020-02-23 19:23:43',
+                            endTime: '2020-02-23 19:23:43',
+                            mode: '手动录制',
+                        },
+                        {
+                            id:6,
+                            fileName: '王小虎6',
+                            type: 'ss',
+                            videoSource: 'sss',
+                            audioSource: 'xxx',
+                            startTime: '2020-02-23 19:23:43',
+                            endTime: '2020-02-23 19:23:43',
+                            mode: '手动录制',
+                        },
+                        {
+                            id:7,
+                            fileName: '王小虎7',
+                            type: 'ss',
+                            videoSource: 'sss',
+                            audioSource: 'xxx',
+                            startTime: '2020-02-23 19:23:43',
+                            endTime: '2020-02-23 19:23:43',
+                            mode: '手动录制',
+                        },
+                        {
+                            id:8,
+                            fileName: '王小虎8',
+                            type: 'ss',
+                            videoSource: 'sss',
+                            audioSource: 'xxx',
+                            startTime: '2020-02-23 19:23:43',
+                            endTime: '2020-02-23 19:23:43',
+                            mode: '手动录制',
+                        },
+                        {
+                            id: "9",
+                            fileName: "文件名称",
+                            videoSource: "视频源",
+                            audioSource: "音频源",
+                            startTime: "任务开始时间",
+                            endTime: "任务结束时间",
+                            mode: "任务模式(名称)",
+                            type: "录制模式，标识录制用户还是录制设备（名称）",
+                            recordUserId: "录制用户id",
+                            recordUsername: "录制用户名",
+                            recordUserno: "录制用户号码"
+                        }
+                    ];
+                    if (data.rows && data.rows.length > 0) {
+                        var commands = data.rows;
+                        for (var i = 0; i < commands.length; i++) {
+                            self.deviceData.totalData.push(commands[i]);
+                            console.log(self.deviceData.totalData.length)
+                            // self.deviceData.filterData.push(commands[i]);
                         }
                     }
                 });
             },
-            enterCommand:function(scope, action){
+            cancel: function () {
                 var self = this;
-                var row = scope.row;
-                ajax.post('/command/basic/enter', {ids: $.toJSON([row.id])}, function(data){
-                    if(action === 'start'){
-                        ajax.post('/command/basic/start', {
-                            id:row.id
-                        }, function(){
-                            self.qt.linkedWebview('rightBar', {id:'currentGroupChange', params: $.toJSON(data)});
-                            setTimeout(function(){
-                                self.goHome();
-                            }, 1000);
-                        });
-                    }else{
-                        self.qt.linkedWebview('rightBar', {id:'currentGroupChange', params: $.toJSON(data)});
-                        setTimeout(function(){
-                            self.goHome();
-                        }, 1000);
-                    }
-                });
-            },
-            removeCommand:function(scope){
-                var self = this;
-                var row = scope.row;
-                ajax.post('/command/basic/remove', {ids: $.toJSON([row.id])}, function(data){
-                    for(var i=0; i<self.userData.totalData.length; i++){
-                        if(self.userData.totalData[i].id === row.id){
-                            self.userData.totalData.splice(i, 1);
-                        }
-                    }
-                    for(var i=0; i<self.userData.filterData.length; i++){
-                        if(self.userData.filterData[i].id === row.id){
-                            self.userData.filterData.splice(i, 1);
-                        }
-                    }
-                });
-            },
-            cancel:function(){
-                var self = this;
-                self.qt.invoke('slotOpenStartUpPage');
                 self.qt.destroy();
+            },
+            //格式化时间
+            format: function (str) {
+                str=str.toString();
+                if (str) {
+                    var str = str.replace(/ GMT.+$/, '');// Or str = str.substring(0, 24)
+                    var d = new Date(str);
+                    var a = [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];
+                    for (var i = 0, len = a.length; i < len; i++) {
+                        if (a[i] < 10) {
+                            a[i] = '0' + a[i];
+                        }
+                    }
+                    str = a[0] + '-' + a[1] + '-' + a[2] + ' ' + a[3] + ':' + a[4] + ':' + a[5];
+                    return str;
+                }
             }
         },
         mounted: function () {
             var self = this;
-            self.qt = new QtContext('leaderDialogAddGroup', function () {
+            self.qt = new QtContext('rec', function () {
                 //初始化ajax
                 ajax.init({
                     login: config.ajax.login,
@@ -265,9 +242,9 @@ define([
 
                 });
 
-                // self.refreshCommand();
+                self.refreshRecord(self.recordMode, self.filterText, self.format(self.date[0]), self.format(self.date[1]), self.deviceCurrentPage);
 
-                self.qt.on('close', function(){
+                self.qt.on('close', function () {
                     self.qt.destroy();
                 });
             });

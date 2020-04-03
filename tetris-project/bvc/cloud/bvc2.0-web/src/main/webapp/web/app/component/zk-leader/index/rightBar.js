@@ -73,11 +73,11 @@ define([
                     //退出指挥
                     exitCommand: true,
                     //发言
-                    speak:true, //按钮是否显示
-                    isSpeaking:false, //控制显示哪个按钮,是否正在发言
+                    speak: true, //按钮是否显示
+                    isSpeaking: false, //控制显示哪个按钮,是否正在发言
                     //控制指定发言，全员讨论按钮是否显示
-                    meetBtn:true,
-                    discussion:false, //false:没在讨论，应该显示讨论按钮，true：正在讨论，应该显示停止讨论按钮
+                    meetBtn: true,
+                    discussion: false, //false:没在讨论，应该显示讨论按钮，true：正在讨论，应该显示停止讨论按钮
                 },
                 props: {
                     children: 'children',
@@ -155,7 +155,6 @@ define([
                     filterData: []
                 },
                 meetName: '', //会议名称
-                recordSelect:'1',//下拉选项
             }
         },
         methods: {
@@ -168,7 +167,7 @@ define([
                 this.switchStatus1 = true;
                 this.switchStatus2 = false;
                 this.switchStatus3 = false;
-                this.people=false;
+                this.people = false;
                 //进会后在切回来，group.current没变，还是会议的值，所以在从刷一次
                 this.currentGroupChange(this.group.currentId)
             },
@@ -181,7 +180,7 @@ define([
                 this.switchStatus1 = false;
                 this.switchStatus2 = true;
                 this.switchStatus3 = false;
-                this.people=false;
+                this.people = false;
                 self.refreshCommand();
                 //切换时要重新获取高度
                 this.$nextTick(function () {
@@ -200,7 +199,7 @@ define([
                 this.switchStatus1 = false;
                 this.switchStatus2 = false;
                 this.switchStatus3 = true;
-                this.people=false;
+                this.people = false;
                 this.refreshCommand("meeting");
             },
 
@@ -410,7 +409,7 @@ define([
                 self.myCommand.filterData = [];
                 self.joinCommand.totalData = [];
                 self.joinCommand.filterData = [];
-                ajax.post('/command/query/list', {type:type}, function (data) {
+                ajax.post('/command/query/list', {type: type}, function (data) {
                     if (data && data.length > 0) {
                         var commands = data[0].children;
                         var joinCommand = {
@@ -473,15 +472,13 @@ define([
                 self.contextMenu.top = '';
             },
             handleContextMenuShow: function (e, data, type, name) {
-                console.log(data)
-                console.log(data.param)
                 if ($(e.target).hasClass('handDown')) {
                     if (data.type === 'FOLDER') return;
                     var self = this;
                     self.contextMenu.visible = true;
                     self.contextMenu.scope = type;
                     self.contextMenu.currentNode = data;
-               
+
                     //在指挥里把点播改成观看
                     self.contextMenu.diff = name;
                     //增加修改指挥名称功能
@@ -490,7 +487,7 @@ define([
                     self.dialog.resetName.commandId = data.id;
 
                     //区分下是不是当前用户建的指挥,目的是只有主席才能改名字
-                    if(data.param){
+                    if (data.param) {
                         var param = JSON.parse(data.param);
                         self.contextMenu.currentNode.creator = param.creator;
                     }
@@ -668,6 +665,18 @@ define([
                     });
                 });
             },
+            //录制
+            recordTask:function () {
+                var self = this;
+                var realType=JSON.parse(self.contextMenu.currentNode.param).realType;
+                if (!self.contextMenu.recordRecord) {
+                    return;
+                }
+                //在树上设备节点有个param字段  里面有realType  这个字段如果是XT 就调用“添加录制xt设备任务”  如果是BVC就调“添加录制本地设备任务"
+                self.qt.window('/router/zk/leader/addRecord',{paramId:self.contextMenu.currentNode.id,paramType:self.contextMenu.currentNode.type,realType:realType},{width:700,height:500});
+                self.contextMenu.visible = false;
+            },
+
             //------弹出的菜单上的点击事件 end -----
 
 
@@ -860,7 +869,7 @@ define([
                     ajax.post('/command/vod/resource/file/start/batch', {resourceFileIds: $.toJSON(resourceFileIds)}, function (data) {
                         self.qt.invoke('vodResourceFiles', $.toJSON(data));
                     });
-                }  else if (self.currentTab == 3) {
+                } else if (self.currentTab == 3) {
                     //点播设备
                     if (self.device.select.length <= 0) {
                         self.qt.alert('消息提示', '您还没有选中设备');
@@ -989,6 +998,10 @@ define([
                         self.currentGroupChange(self.group.currentId);
                     }
                 });
+            },
+            //点播录制文件
+            playRecordFile:function () {
+                this.qt.window('/router/zk/leader/record/file',null,{width:1000,height:700})
             },
             //----------第一个树形菜单底部的按钮图标 end----------
 
@@ -1366,9 +1379,9 @@ define([
                             self.group.current.status = 'stop';
                         }
                         self.qt.invoke('commandExit', $.toJSON(data));
-                        if(name === '会议'){
+                        if (name === '会议') {
                             self.refreshCommand("meeting");
-                        }else{
+                        } else {
                             self.refreshCommand();
                         }
                     });
@@ -1512,7 +1525,7 @@ define([
 
                     //进入自己建的会议
                     if (action === 'start') {
-                        self.group.current.id=id;
+                        self.group.current.id = id;
                         self.qt.set('currentGroupId', id);
                         ajax.post('/command/basic/start', {
                             id: id
@@ -1535,7 +1548,7 @@ define([
                 var self = this;
                 self.qt.window('/router/zk/leader/dialog/create/group', {}, {
                     width: 1366,
-                    height: 900
+                    height: 700
                 });
             },
             //安排会议
@@ -1543,55 +1556,55 @@ define([
                 var self = this;
                 self.qt.window('/router/zk/leader/dialog/prepare/group', {}, {
                     width: 1366,
-                    height: 900
+                    height: 700
                 });
             },
             //悬浮按钮鼠标移动事件
-            itemMousemove: function(e) {
+            itemMousemove: function (e) {
                 var odiv = e.target;        //获取目标元素
 
                 //算出鼠标相对元素的位置
                 var disY = e.clientY - odiv.offsetTop;
-                document.onmousemove = function(e){       //鼠标按下并移动的事件
+                document.onmousemove = function (e) {       //鼠标按下并移动的事件
                     //用鼠标的位置减去鼠标相对元素的位置，得到元素的位置
                     var top = e.clientY - disY;
                     //防止拖拽超过范围
-                    if(top<=113 || top>700){
+                    if (top <= 113 || top > 700) {
                         return;
                     }
                     //移动当前元素
                     odiv.style.top = top + 'px';
                 };
-                document.onmouseup = function(e){
+                document.onmouseup = function (e) {
                     document.onmousemove = null;
                     document.onmouseup = null;
                 };
             },
             //申请发言
-            applySpeak:function () {
-                var self=this;
-                if(!self.buttons.isSpeaking){
-                    ajax.post('/command/meeting/speak/apply',{id:self.group.current.id},function (data) {
+            applySpeak: function () {
+                var self = this;
+                if (!self.buttons.isSpeaking) {
+                    ajax.post('/command/meeting/speak/apply', {id: self.group.current.id}, function (data) {
                         self.qt.success('操作成功');
-                        self.buttons.isSpeaking=true;
+                        self.buttons.isSpeaking = true;
                     })
                 }
             },
             //成员自己停止发言
-            stopSpeak:function () {
-                var self=this;
-                if(self.buttons.isSpeaking){
-                    ajax.post('/command/meeting/speak/stop/by/member',{id:self.group.current.id},function (data) {
+            stopSpeak: function () {
+                var self = this;
+                if (self.buttons.isSpeaking) {
+                    ajax.post('/command/meeting/speak/stop/by/member', {id: self.group.current.id}, function (data) {
                         self.qt.success('操作成功');
-                        self.buttons.isSpeaking=false;
+                        self.buttons.isSpeaking = false;
                     })
                 }
             },
             //指定发言
-            assignSpeak:function () {
+            assignSpeak: function () {
                 var self = this;
-                var ids=[];
-                if(!self.group.current.select.length){
+                var ids = [];
+                if (!self.group.current.select.length) {
                     self.qt.alert('提示信息', '您没有勾选任何用户');
                     return;
                 }
@@ -1599,18 +1612,18 @@ define([
                     ids.push(value.id);
                 });
                 ajax.post('/command/meeting/speak/appoint', {
-                    id:self.group.current.id,
+                    id: self.group.current.id,
                     userIds: $.toJSON(ids)
-                }, function(data){
+                }, function (data) {
                     self.qt.success('操作成功');
                 });
 
             },
             //主席停止指定发言
-            stopAssignSpeak:function () {
+            stopAssignSpeak: function () {
                 var self = this;
-                var ids=[];
-                if(!self.group.current.select.length){
+                var ids = [];
+                if (!self.group.current.select.length) {
                     self.qt.alert('提示信息', '您没有勾选任何用户');
                     return;
                 }
@@ -1618,9 +1631,9 @@ define([
                     ids.push(value.id);
                 });
                 ajax.post('/command/meeting/speak/stop/by/chairman', {
-                    id:self.group.current.id,
+                    id: self.group.current.id,
                     userIds: $.toJSON(ids)
-                }, function(data){
+                }, function (data) {
                     self.qt.success('操作成功');
                     self.group.current.select.forEach(function (value) {
                         value.checked = false;
@@ -1629,17 +1642,17 @@ define([
                 });
             },
             //全员讨论
-            allDiscuss:function () {
-                var self=this;
-                if(!self.buttons.discussion){ //讨论
-                    ajax.post('/command/meeting/discuss/start',{id:self.group.current.id},function (data) {
+            allDiscuss: function () {
+                var self = this;
+                if (!self.buttons.discussion) { //讨论
+                    ajax.post('/command/meeting/discuss/start', {id: self.group.current.id}, function (data) {
                         self.qt.success('操作成功');
-                        self.buttons.discussion=true;
+                        self.buttons.discussion = true;
                     })
-                }else{ //停止讨论
-                    ajax.post('/command/meeting/discuss/stop',{id:self.group.current.id},function (data) {
+                } else { //停止讨论
+                    ajax.post('/command/meeting/discuss/stop', {id: self.group.current.id}, function (data) {
                         self.qt.success('操作成功');
-                        self.buttons.discussion=false;
+                        self.buttons.discussion = false;
                     })
                 }
             },
@@ -1696,10 +1709,10 @@ define([
                         self.refreshFile();
                     }
                     self.refreshFileButtonAction();
-                }else if(self.currentTab == 3){
+                } else if (self.currentTab == 3) {
                     self.refreshDevice();
                     self.refreshDeviceButtonAction();
-                }else if(self.currentTab == 4){
+                } else if (self.currentTab == 4) {
                     self.refreshRecord();
                     self.refreshRecordButtonAction();
                 }
@@ -1739,8 +1752,8 @@ define([
                         self.buttons.isPause = false;
                     }
                     self.buttons.exitCommand = true;
-                    self.buttons.speak=false;
-                    self.buttons.meetBtn=true;
+                    self.buttons.speak = false;
+                    self.buttons.meetBtn = true;
                 } else {
                     self.group.isChairman = false;
                     self.buttons.addMember = false;
@@ -1757,8 +1770,8 @@ define([
                     self.buttons.commandRestart = false;
                     self.buttons.isPause = false;
                     self.buttons.exitCommand = true;
-                    self.buttons.speak=true;
-                    self.buttons.meetBtn=false;
+                    self.buttons.speak = true;
+                    self.buttons.meetBtn = false;
                 }
             },
             // 监听浏览器窗口宽度变化，这个值就会变化,
@@ -1773,7 +1786,7 @@ define([
                 var joinFilterData = [];
 
                 if (self.myCommand.totalData && self.myCommand.totalData.length) {
-                    myFilterData = self.myCommand.totalData.filter(function(item) {
+                    myFilterData = self.myCommand.totalData.filter(function (item) {
                         if (item && item.name) {
                             return item.name.indexOf(val) > -1;
                         }
@@ -1782,7 +1795,7 @@ define([
                 }
 
                 if (self.joinCommand.totalData && self.joinCommand.totalData.length) {
-                    joinFilterData = self.joinCommand.totalData.filter(function(item) {
+                    joinFilterData = self.joinCommand.totalData.filter(function (item) {
                         if (item && item.name) {
                             return item.name.indexOf(val) > -1;
                         }
@@ -1850,12 +1863,12 @@ define([
                     self.switchStatus2 = false;
                     self.switchStatus3 = false;
                     self.people = true;
-                    self.meetName=group.name;
+                    self.meetName = group.name;
                     group.type = 'command';
                     self.currentGroupChange(group);
                     self.qt.set('currentGroupId', group.id);
                 });
-              
+
                 //从安排会议页面来，到这个页面时在刷新下数据
                 self.qt.on('refreshData', function (e) {
                     self.switchStatus1 = false;
@@ -1871,7 +1884,7 @@ define([
                     self.currentGroupChange(self.group.current.id);
                     self.qt.invoke('groupMembers', e);
                 });
-                
+
                 // 监听退成员时
                 self.qt.on('reduceMembers', function (e) {
                     e = e.params.params;
