@@ -59,8 +59,6 @@ import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 import com.sumavision.tetris.user.exception.UsernoAlreadyExistInSystemException;
 import com.sumavision.tetris.user.exception.UsernoCannotBeNullException;
 
-import antlr.Token;
-
 /**
  * 用户操作（主增删改）<br/>
  * <b>作者:</b>lvdeyang<br/>
@@ -712,7 +710,7 @@ public class UserService{
 		
 		//发射事件
 		if(users.size() > 0){
-			UserImportEventPublisher userImportEventPublisher = new UserImportEventPublisher(applicationEventPublisher, users, self.getGroupId(), self.getGroupName(), publishers);
+			UserImportEventPublisher userImportEventPublisher = new UserImportEventPublisher(applicationEventPublisher, users, userSystemRolePermissions, self.getGroupId(), self.getGroupName(), publishers);
 			this.publishers.put(self.getGroupId(), userImportEventPublisher);
 			userImportEventPublisher.publish();
 		}

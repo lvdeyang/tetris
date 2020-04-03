@@ -12,6 +12,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.device.monitor.live.call.MonitorLiveCallService;
@@ -56,6 +57,9 @@ public class ApiThirdpartBvcCascadeController {
 	
 	@Autowired
 	private MonitorLiveCommons monitorLiveCommons;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 	
 	/**
 	 * 查询服务节点<br/>
@@ -153,6 +157,78 @@ public class ApiThirdpartBvcCascadeController {
 		protocolParser.parse(src_user, content);
 		return new HashMapWrapper<String, String>().put("seq", seq)
 												   .put("cmd", cmd)
+												   .getMap();
+	}
+	
+	/**
+	 * 联网向业务发送上线请求<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月2日 下午6:18:27
+	 * @param seq String 命令标识号
+	 * @param cmd trigger_cmd
+	 * @param app_num 上线的节点的应用号码
+	 * @param status online，offline
+	 * @return 
+	 * {
+	 *	   status:200,
+	 *	   message:"",
+	 *	   data:{
+	 *	       seq:String(命令标识号),
+	 *	 	   cmd:String(常量字符串, trigger_cmd)
+	 * 	   }
+	 * }
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/report/node/online")
+	public Object reportNodeOnline(HttpServletRequest request) throws Exception{
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String seq = requestWrapper.getString("seq");
+		String cmd = requestWrapper.getString("cmd");
+		String app_num = requestWrapper.getString("app_num");
+		String status = requestWrapper.getString("status");
+		
+		return new HashMapWrapper<String, String>().put("seq", seq)
+												   .put("cmd", cmd)
+												   .getMap();
+	}
+	
+	/**
+	 * 联网向业务发送请求同步数据命令<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月2日 下午6:24:42
+	 * @param seq String 命令标识号
+	 * @param cmd trigger_cmd
+	 * @param app_num 上线的节点的应用号码
+	 * @return
+	 * {
+	 *	   status:200,
+	 *	   message:"",
+	 *	   data:{
+	 *	       seq:String(命令标识号),
+	 *	 	   cmd:String(常量字符串, trigger_cmd),
+	 *         app_num:String(需要同步信息节点的应用号码),
+	 *	       sync_info:String(同步信息的xml),
+	 *	       sync_route_info:String(同步路由信息的xml)
+	 * 	   }
+	 * }
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/request/sync/info")
+	public Object requestSyncInfo(HttpServletRequest request) throws Exception{
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String seq = requestWrapper.getString("seq");
+		String cmd = requestWrapper.getString("cmd");
+		String app_num = requestWrapper.getString("app_num");
+		
+		return new HashMapWrapper<String, String>().put("seq", seq)
+												   .put("cmd", cmd)
+												   .put("app_num", app_num)
+												   .put("sync_info", "")
+												   .put("sync_route_info", "")
 												   .getMap();
 	}
 	
