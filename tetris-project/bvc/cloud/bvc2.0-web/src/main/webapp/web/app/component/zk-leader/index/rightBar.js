@@ -1003,6 +1003,14 @@ define([
             playRecordFile:function () {
                 this.qt.window('/router/zk/leader/record/file',null,{width:1000,height:700})
             },
+            //外部文件管理
+            openOutFile:function () {
+                this.qt.window('/router/zk/leader/out/file',null,{width:1000,height:700})
+            },
+            //文件导入
+            fileImport:function () {
+                this.qt.window('/router/zk/leader/file/import',null,{width:1000,height:700})
+            },
             //----------第一个树形菜单底部的按钮图标 end----------
 
 

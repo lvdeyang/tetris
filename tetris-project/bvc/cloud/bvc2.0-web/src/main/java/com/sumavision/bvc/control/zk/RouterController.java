@@ -458,6 +458,34 @@ public class RouterController {
 	}
 	
 	/**
+	 * 外部文件管理<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月3日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/out/file")
+	public ModelAndView zkLeaderOutFile(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/outFile/outFile");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 外部文件导入<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月3日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/file/import")
+	public ModelAndView zkLeaderFileImport(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/fileImport/file-import");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 选择成员创建会议对话框<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

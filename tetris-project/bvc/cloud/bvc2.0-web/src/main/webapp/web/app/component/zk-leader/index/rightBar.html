@@ -78,11 +78,13 @@
                 <div class="btnContainer" v-if="group.currentId && group.current.type==='command'">
                     <div :class="'option-button '+(buttons.addMember?'':'disable')" title="添加成员"
                          @click="addCommandMember">
-                        <img v-if="buttons.addMember" :src="baseUrl+'images/zk-leader/able/addMember.png'" draggable="false"/>
+                        <img v-if="buttons.addMember" :src="baseUrl+'images/zk-leader/able/addMember.png'"
+                             draggable="false"/>
                     </div>
                     <div :class="'option-button '+(buttons.removeMember?'':'disable')" title="强退成员"
                          @click="removeCommandMember">
-                        <img v-if="buttons.removeMember" :src="baseUrl+'images/zk-leader/able/removeMember.png'" draggable="false"/>
+                        <img v-if="buttons.removeMember" :src="baseUrl+'images/zk-leader/able/removeMember.png'"
+                             draggable="false"/>
                     </div>
                     <div :class="'option-button '+(buttons.cooperativeCommand?'':'disable')" title="协同指挥"
                          @click="cooperativeCommand('指挥')">
@@ -304,9 +306,9 @@
                 <span slot="label" class="myTitle">
                 <img class="fontPic" src="../../../../../images/zk-leader/record.png" draggable="false">
                 </span>
-                <div class="scrollTab">
-                <el-scrollbar style="height:100%">
-                <el-tree :data="record.data" node-key="id"
+                    <div class="scrollTab">
+                        <el-scrollbar style="height:100%">
+                            <el-tree :data="record.data" node-key="id"
                                      :check-strictly=true
                                      :props="props"
                                      :expand-on-click-node="false">
@@ -338,8 +340,8 @@
                 </el-popover>
                 </span>
                 </span>
-                </el-tree>
-                </el-scrollbar>
+                            </el-tree>
+                        </el-scrollbar>
                     </div>
                 </el-tab-pane>
             </el-tabs>
@@ -408,10 +410,24 @@
                     <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
                     <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
                 </div>
-                <div class="customIcon" v-else="currentTab==2" @click="refreshFile">
-                    <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
-                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
+
+                <div v-else="currentTab==2">
+                    <div class="customIcon" @click="openOutFile">
+                        <span style="position: absolute;top: 15px;font-size: 9px;color: #fff;left: 3px;">外部文件管理</span>
+                        <el-button type="text" size="small" icon="el-icon-printer"></el-button>
+                    </div>
+
+                    <div class="customIcon" @click="fileImport">
+                        <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 9px;">文件导入</span>
+                        <el-button type="text" size="small" icon="el-icon-upload"></el-button>
+                    </div>
+
+                    <div class="customIcon" @click="refreshFile">
+                        <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
+                        <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
+                    </div>
                 </div>
+
                 <div class="customIcon" v-else="currentTab==3" @click="refreshDevice">
                     <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
                     <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
@@ -699,7 +715,7 @@
     <!--参与多个指挥,每个指挥都有提醒-->
     <template>
         <audio v-for="remindId in group.remindIds" style="display:none;" autoplay="autoplay" loop="loop">
-            <source src="/web/app/zk/business/command_remind_music.mp3" type="audio/mpeg" />
+            <source src="/web/app/zk/business/command_remind_music.mp3" type="audio/mpeg"/>
         </audio>
     </template>
 

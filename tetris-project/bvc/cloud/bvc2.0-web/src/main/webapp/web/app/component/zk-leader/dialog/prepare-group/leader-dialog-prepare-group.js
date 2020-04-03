@@ -132,6 +132,20 @@ define([
                     }
                 }
             },
+            //只搜一级目录
+            getSearchUserData: function(l, text) {
+                if (!l.children) return;
+                var self = this;
+                l.children.forEach(function (value) {
+                    if (value.type === 'USER') {
+                        if (value.name.indexOf(text) > -1) {
+                            if (self.searchData.indexOf(value) === -1) {
+                                self.searchData.push(value);
+                            }
+                        }
+                    }
+                })
+            },
             deepPush: function (l) {
                 var self = this;
                 if (l.children && l.children.length) {
@@ -155,6 +169,7 @@ define([
                 var self = this;
                 this.searchData = [];
                 var tempData=[];
+                var isCheck = true; //表示选了下拉的，false就是没有选下拉
                 if(!selected1 && !selected2 && !selected3 && !selected4 && !selected5){
                     tempData=this.level2;
                 }else if(selected1 && !selected2 && !selected3 && !selected4 && !selected5){
@@ -189,7 +204,11 @@ define([
                     });
                 }
                 tempData.forEach(function (l) {
-                    self.searchFolder(l, text);
+                    if (isCheck)
+                        self.getSearchUserData(l, text);
+                    else{
+                        self.searchFolder(l, text);
+                    }
                 });
             },
             //绑定事件，给二级菜单赋值
@@ -466,6 +485,12 @@ define([
                 this.selected4 = '';
                 this.selected5 = '';
                 this.tableData = [];
+                //避免点击清空后 下拉菜单里还有选项
+                this.options2=[];
+                this.options3=[];
+                this.options4=[];
+                this.options5=[];
+                this.options6=[];
             },
 
             filterMyCommand: function () {
