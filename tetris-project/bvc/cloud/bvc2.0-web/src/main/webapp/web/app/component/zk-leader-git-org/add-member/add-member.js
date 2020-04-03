@@ -53,7 +53,6 @@ define([
     watch: {
       //监听左侧table页面变化，保持勾选的状态
       pageData: function () {
-        console.log('sdsjfj')
         var self = this;
         this.$nextTick(function () {
           self.checkBoxData.forEach(function (item) {

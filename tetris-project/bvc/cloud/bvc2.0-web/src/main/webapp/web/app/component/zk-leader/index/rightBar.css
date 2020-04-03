@@ -298,7 +298,8 @@ img {
     background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
 }
 
-.customIcon.disable {
+/*禁用的按钮都不显示*/
+.disable {
     background: gray;
     display: none;
 }
@@ -574,6 +575,12 @@ div.el-select-dropdown {
     color: #34a7ff;
     background-color: #0808088c;
     text-align: center;
+}
+
+.searchCondition{
+    margin-top: 10px;
+    height: 200px;
+    border: 1px solid red;
 }
 
 

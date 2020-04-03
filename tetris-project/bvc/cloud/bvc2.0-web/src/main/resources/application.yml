@@ -6,7 +6,7 @@ spring:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.77
+      ipAddress: 192.165.56.53
   profiles:
     active: pro
   datasource:
