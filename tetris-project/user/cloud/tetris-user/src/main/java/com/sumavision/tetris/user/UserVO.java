@@ -63,6 +63,9 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/** 用户隶属组织id */
 	private String groupId;
 	
+	/** 是否是组织创建者 */
+	private Boolean isGroupCreator;
+	
 	/** 用户隶属组织名称 */
 	private String groupName;
 	
@@ -225,6 +228,15 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		return this;
 	}
 
+	public Boolean getIsGroupCreator() {
+		return isGroupCreator;
+	}
+
+	public UserVO setIsGroupCreator(Boolean isGroupCreator) {
+		this.isGroupCreator = isGroupCreator;
+		return this;
+	}
+
 	public String getGroupName() {
 		return groupName;
 	}
@@ -356,6 +368,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	public UserVO setCompanyInfo(CompanyPO entity){
 		if(entity != null){
 			this.setGroupId(entity.getId().toString())
+				.setIsGroupCreator(entity.getUserId().equals(this.getId().toString())?true:false)
 				.setGroupName(entity.getName())
 				.setGroupHomeLink(entity.getHomeLink()==null?"":entity.getHomeLink())
 				.setLogo(entity.getLogo())
