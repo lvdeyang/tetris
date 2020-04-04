@@ -616,7 +616,6 @@ public class CommandCooperateServiceImpl {
 		}
 	}
 	
-	/** 暂未启用！ */
 	/**
 	 * 给[入会成员]选择观看协同的播放器<br/>
 	 * <p>详细描述</p>

@@ -372,6 +372,27 @@ public class CommandCommonUtil {
 	}
 	
 	/**
+	 * 根据源号码和目的号码查询转发调度<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月4日 下午2:00:49
+	 * @param demands
+	 * @param srcCodes
+	 * @param dstCodes
+	 * @return
+	 */
+	public CommandGroupForwardDemandPO queryForwardDemandByBySrcAndDstCode(
+			List<CommandGroupForwardDemandPO> demands, String srcCode, String dstCode) {
+		for(CommandGroupForwardDemandPO demand : demands){
+			if(srcCode.equals(demand.getSrcCode()) && dstCode.equals(demand.getDstCode())){
+				return demand;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * @Title: 根据dstVideoBundleId查找转发点播<br/>
 	 * @param List<CommandGroupForwardDemandPO> forwards 转发点播列表
 	 * @param String dstVideoBundleId
