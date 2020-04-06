@@ -93,7 +93,7 @@ public class MonitorExternalStaticResourceFolderService{
 		if(!folder.getCreateUserId().equals(createUserId.toString())){
 			throw new UserHasNoPermissionForExternalFolderException();
 		}
-		
+		if(folderPath==null || "".equals(folderPath)) folderPath = "/";
 		if(!folderPath.startsWith("/")) folderPath = new StringBufferWrapper().append("/").append(folderPath).toString();
 		folder.setName(name);
 		folder.setIp(ip);
