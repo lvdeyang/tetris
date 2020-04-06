@@ -12,7 +12,7 @@ public enum MemberStatus {
 	
 	CONNECT("已连通"),
 	DISCONNECT("未连通"),
-	CONNECTING("连通中");
+	CONNECTING("连通中");//会议MEETING的发言业务没有此状态
 
 	private String name;
 	

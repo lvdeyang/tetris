@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -176,6 +177,8 @@ public class CommandForwardServiceImpl {
 							ForwardDstType.USER,
 							dstMember.getId(),
 							dstMember.getUserName(),
+							dstMember.getUserNum(),
+							bundle.getBundleNum(),
 							bundle.getBundleId(),
 							bundle.getBundleName(),
 							bundle.getBundleType(),
@@ -309,6 +312,7 @@ public class CommandForwardServiceImpl {
 							ForwardDstType.USER,
 							dstMember.getId(),
 							dstMember.getUserName(),
+							dstMember.getUserNum(),
 							resourceId,
 							resourceName,
 							previewUrl,
@@ -478,6 +482,39 @@ public class CommandForwardServiceImpl {
 			
 		}
 	}
+	
+	/**
+	 * 按标准协议，根据源号码和目的号码，停止转发调度<br/>
+	 * <p>相同[源-目的]的多个任务，应该调用2次来停止，1次的话会有问题</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月4日 下午2:20:12
+	 * @param userId
+	 * @param groupUuid
+	 * @param srcCodes
+	 * @param dstCodes
+	 * @throws Exception
+	 */
+	public void stopBySrcAndDstCodes(Long userId, String groupUuid, List<String> srcCodes, List<String> dstCodes) throws Exception{
+		
+		CommandGroupPO group1 = commandGroupDao.findByUuid(groupUuid);
+		
+		synchronized (new StringBuffer().append(lockPrefix).append(group1.getId()).toString().intern()) {
+			
+			CommandGroupPO group = commandGroupDao.findByUuid(groupUuid);
+			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
+			List<CommandGroupForwardDemandPO> stopDdemands = new ArrayList<CommandGroupForwardDemandPO>();
+			for(String srcCode : srcCodes){
+				for(String dstCode : dstCodes){
+					CommandGroupForwardDemandPO demand = commandCommonUtil.queryForwardDemandByBySrcAndDstCode(demands, srcCode, dstCode);
+					if(demand != null){
+						stopDdemands.add(demand);
+					}
+				}
+			}
+			stopDemands(group, demands);
+		}
+	}
 
 	/**
 	 * 主席停止一个会议中的多个转发<br/>
@@ -491,25 +528,31 @@ public class CommandForwardServiceImpl {
 	 */
 	public void stopByChairman(Long groupId, List<Long> demandIds) throws Exception{
 		
-		//<userId, [{serial:屏幕序号}]>
-		HashMap<Long, JSONArray> result = stopDemands(groupId, demandIds);
-				
-		//发消息
-		CommandGroupPO group = commandGroupDao.findOne(groupId);
-		List<Long> consumeIds = new ArrayList<Long>();
-		for(Map.Entry<Long, JSONArray> entry: result.entrySet()){
-			System.out.println("Key: "+ entry.getKey()+ " Value: "+entry.getValue());
-			Long userId = entry.getKey();
-			JSONArray splits = entry.getValue();
-			JSONObject message = new JSONObject();
-			message.put("businessType", "commandForwardStop");
-			message.put("businessId", group.getId().toString());
-			message.put("businessInfo", group.getName() + " 停止了转发");
-			message.put("splits", splits);
-			WebsocketMessageVO ws = websocketMessageService.send(userId, message.toJSONString(), WebsocketMessageType.COMMAND, group.getUserId(), group.getUserName());
-			consumeIds.add(ws.getId());
+		synchronized (new StringBuffer().append(lockPrefix).append(groupId).toString().intern()) {
+		
+			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			List<CommandGroupForwardDemandPO> stopDemands = commandCommonUtil.queryForwardDemandsByIds(group.getForwardDemands(), demandIds);
+			
+			//<userId, [{serial:屏幕序号}]>
+			HashMap<Long, JSONArray> result = stopDemands(group, stopDemands);
+					
+			//发消息
+			List<Long> consumeIds = new ArrayList<Long>();
+			for(Map.Entry<Long, JSONArray> entry: result.entrySet()){
+				System.out.println("Key: "+ entry.getKey()+ " Value: "+entry.getValue());
+				Long userId = entry.getKey();
+				JSONArray splits = entry.getValue();
+				JSONObject message = new JSONObject();
+				message.put("businessType", "commandForwardStop");
+				message.put("businessId", group.getId().toString());
+				message.put("businessInfo", group.getName() + " 停止了转发");
+				message.put("splits", splits);
+				WebsocketMessageVO ws = websocketMessageService.send(userId, message.toJSONString(), WebsocketMessageType.COMMAND, group.getUserId(), group.getUserName());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
+			
 		}
-		websocketMessageService.consumeAll(consumeIds);
 	}
 
 	/**
@@ -529,11 +572,18 @@ public class CommandForwardServiceImpl {
 		List<Long> groupIds = commandGroupDao.findAllIdsByDemandIds(demandIds);
 		
 		for(Long groupId : groupIds){
-			//这里把demandIds全部传入，因为有groupId限制，所以demandIds传多了也没事
-			HashMap<Long, JSONArray> result = stopDemands(groupId, demandIds);
-			JSONArray splist1 = result.get(userId);
-			if(splist1 != null){
-				splits.addAll(splist1);
+			
+			synchronized (new StringBuffer().append(lockPrefix).append(groupId).toString().intern()) {
+				
+				//这里把demandIds全部传入，因为有groupId限制，所以demandIds传多了也没事
+				CommandGroupPO group = commandGroupDao.findOne(groupId);
+				List<CommandGroupForwardDemandPO> stopDemands = commandCommonUtil.queryForwardDemandsByIds(group.getForwardDemands(), demandIds);
+				HashMap<Long, JSONArray> result = stopDemands(group, stopDemands);
+				JSONArray splist1 = result.get(userId);
+				if(splist1 != null){
+					splits.addAll(splist1);
+				}
+				
 			}
 		}
 		
@@ -551,11 +601,11 @@ public class CommandForwardServiceImpl {
 	 * @return HashMap<Long, JSONArray> 格式为：<userId, [{serial:屏幕序号}]>
 	 * @throws Exception
 	 */
-	private HashMap<Long, JSONArray> stopDemands(Long groupId, List<Long> demandIds) throws Exception{
+	private HashMap<Long, JSONArray> stopDemands(CommandGroupPO group, List<CommandGroupForwardDemandPO> stopDemands) throws Exception{
 		
-		synchronized (new StringBuffer().append(lockPrefix).append(groupId).toString().intern()) {
+//		synchronized (new StringBuffer().append(lockPrefix).append(groupId).toString().intern()) {
 			
-			CommandGroupPO group = commandGroupDao.findOne(groupId);
+//			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
 			}
@@ -569,7 +619,7 @@ public class CommandForwardServiceImpl {
 			chairmanMember.getUserId();
 			group.getAvtpl();
 			
-			List<CommandGroupForwardDemandPO> stopDemands = commandCommonUtil.queryForwardDemandsByIds(demands, demandIds);
+//			List<CommandGroupForwardDemandPO> stopDemands = commandCommonUtil.queryForwardDemandsByIds(demands, demandIds);
 			List<CommandGroupUserPlayerPO> allNeedClosePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 			for(CommandGroupForwardDemandPO demand : stopDemands){
 				Long dstMemberId = demand.getDstMemberId();
@@ -613,6 +663,6 @@ public class CommandForwardServiceImpl {
 			executeBusiness.execute(logic, group.getName() + " 会议停止多个转发");
 			
 			return result;			
-		}
+//		}
 	}
 }

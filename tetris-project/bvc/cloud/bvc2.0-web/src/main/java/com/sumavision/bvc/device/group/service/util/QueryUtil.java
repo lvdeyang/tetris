@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.FolderUserMap;
 import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.dao.DeviceGroupDAO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
@@ -2053,19 +2055,28 @@ public class QueryUtil {
 		}
 		return null;
 	}
+
+	public FolderUserMap queryUserMapById(Collection<FolderUserMap> folderUserMaps, Long userId){
+		if(folderUserMaps == null) return null;
+		for(FolderUserMap folderUserMap : folderUserMaps){
+			if(folderUserMap.getUserId().equals(userId)){
+				return folderUserMap;
+			}
+		}
+		return null;
+	}
 	
-//	public List<ChannelSchemeDTO> queryChannelDTOsByBundle(Collection<ChannelSchemeDTO> channelDTOs, BundlePO bundle){
-//		if(channelDTOs==null || bundle==null) return null;
-//		if(bundle.getc)
-//		
-//		
-//		List<ChannelSchemeDTO> channels = new ArrayList<ChannelSchemeDTO>();
-//		for(ChannelSchemeDTO channelDTO : channelDTOs){
-//			if(bundleId.equals(channelDTO.getBundleId()) && channelId.equals(channelDTO.getChannelId())){
-//				channels.add(channelDTO);
-//			}
-//		}
-//		return channels;
-//	}
+	public boolean isLdapUser(UserBO user, Collection<FolderUserMap> folderUserMaps){
+		FolderUserMap folderUserMap = queryUserMapById(folderUserMaps, user.getId());
+		boolean result = isLdapUser(user, folderUserMap);
+		return result;
+	}
+	
+	public boolean isLdapUser(UserBO user, FolderUserMap folderUserMap){
+		if(folderUserMap!=null && "ldap".equals(folderUserMap.getCreator())){
+			return true;
+		}
+		return false;
+	}
 	
 }
