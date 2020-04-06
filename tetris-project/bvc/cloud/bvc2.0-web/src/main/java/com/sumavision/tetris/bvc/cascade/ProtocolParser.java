@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.w3c.dom.Node;
 
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.OriginType;
@@ -47,6 +48,9 @@ public class ProtocolParser {
 	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 	
 	/**
 	 * 解析根节点节点名称<br/>
@@ -147,6 +151,8 @@ public class ProtocolParser {
 			speakerSetRequest(reader, rootNodeName, srcNo);
 		}else if("bizcnf".equals(commandname) && "spkres".equals(operation)){
 			speakerSetResponse(reader, rootNodeName, srcNo);
+		}else if("syncinfo".equals(commandname) || "syncroutelink".equals(commandname)){
+			resourceRemoteService.notifyXml(commandname, xml);
 		}
 	}
 	
