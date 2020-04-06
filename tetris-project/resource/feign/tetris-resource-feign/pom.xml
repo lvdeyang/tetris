@@ -39,6 +39,13 @@
 		   <artifactId>tetris-user-feign</artifactId>
 		   <version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<!-- websocket-message-feign -->
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-websocket-message-feign</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
 
 	</dependencies>
   

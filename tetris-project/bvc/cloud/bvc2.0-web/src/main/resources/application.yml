@@ -1,12 +1,12 @@
 spring:
   application:
-    name: tetris-bvc-business-zsy
+    name: tetris-bvc-business-ldy
   cloud:
 #    config:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.77
+      ipAddress: 192.165.56.71
   profiles:
     active: pro
   datasource:

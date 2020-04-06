@@ -26,6 +26,9 @@ public class NetworkOutputPO extends AbstractBasePO{
 	/** 设备ip */
 	private String bundleIp;
 	
+	/** 调度网络ip */
+	private String netIp;
+	
 	/** 调度port */
 	private Long port;
 	
@@ -57,6 +60,14 @@ public class NetworkOutputPO extends AbstractBasePO{
 
 	public void setBundleIp(String bundleIp) {
 		this.bundleIp = bundleIp;
+	}
+
+	public String getNetIp() {
+		return netIp;
+	}
+
+	public void setNetIp(String netIp) {
+		this.netIp = netIp;
 	}
 
 	public Long getPort() {

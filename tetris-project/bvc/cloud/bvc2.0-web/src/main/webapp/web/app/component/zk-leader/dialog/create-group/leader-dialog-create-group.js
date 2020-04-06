@@ -131,50 +131,46 @@ define([
                     })
                 }
             },
-            //搜索功能，先前台处理，需要后台写接口
-            changeSearch: function () {
-                var text = this.filterText.trim();
+            filterLevel: function() {
                 var selected1 = this.selected1.trim();
                 var selected2 = this.selected2.trim();
                 var selected3 = this.selected3.trim();
                 var selected4 = this.selected4.trim();
                 var selected5 = this.selected5.trim();
+                var levels = [selected1, selected2, selected3, selected4, selected5];
+                levels = levels.filter(function(l) {
+                    return l;
+                });
+                // 比如只选择了前几级
+                // ['根目录', '人员目录', '硬件公司']
+                console.log(levels)
+    
+                var filterData = levels.reduce(function(preFilterData, currentLevel) {
+                    var currentLevelData = [];
+                    preFilterData.forEach(function(item) {
+                        if (
+                            item.type === 'FOLDER' 
+                            && (item.name === currentLevel || item.id === currentLevel)
+                            && item.children
+                        ) {
+                            currentLevelData = currentLevelData.concat(item.children)
+                        }
+                    });
+                    return currentLevelData;
+                }, this.level2);
+
+                return filterData;
+            },
+            //搜索功能，先前台处理，需要后台写接口
+            changeSearch: function () {
+                this.startFilterData();
+            },
+
+            startFilterData: function() {
+                var text = this.filterText.trim();
                 var self = this;
                 this.searchData = [];
-                var tempData = [];
-                if (!selected1 && !selected2 && !selected3 && !selected4 && !selected5) {
-                    tempData = this.level2;
-                } else if (selected1 && !selected2 && !selected3 && !selected4 && !selected5) {
-                    this.options2.forEach(function (value, index) {
-                        if (value.id === selected1 || value.name === selected1) {
-                            tempData.push(self.options2[index]);
-                        }
-                    });
-                } else if (selected1 && selected2 && !selected3 && !selected4 && !selected5) {
-                    this.options3.forEach(function (value, index) {
-                        if (value.id === selected2 || value.name === selected2) {
-                            tempData.push(self.options3[index]);
-                        }
-                    });
-                } else if (selected1 && selected2 && selected3 && !selected4 && !selected5) {
-                    this.options4.forEach(function (value, index) {
-                        if (value.id === selected3 || value.name === selected3) {
-                            tempData.push(self.options4[index]);
-                        }
-                    });
-                } else if (selected1 && selected2 && selected3 && selected4 && !selected5) {
-                    this.options5.forEach(function (value, index) {
-                        if (value.id === selected4 || value.name === selected4) {
-                            tempData.push(self.options5[index]);
-                        }
-                    });
-                } else if (selected1 && selected2 && selected3 && selected4 && selected5) {
-                    this.options6.forEach(function (value, index) {
-                        if (value.id === selected5 || value.name === selected5) {
-                            tempData.push(self.options6[index]);
-                        }
-                    });
-                }
+                var tempData = this.filterLevel();
                 tempData.forEach(function (l) {
                     self.searchFolder(l, text);
                 });
@@ -183,8 +179,6 @@ define([
             //绑定事件，给二级菜单赋值
             func2: function () {
                 var self = this;
-                self.tableData = []; //先清空
-                self.searchData = [];
                 self.selected2 = '';
                 self.selected3 = '';
                 self.selected4 = '';
@@ -193,34 +187,11 @@ define([
                 self.options4 = []; //4级菜单
                 self.options5 = []; //5级菜单
                 self.options6 = []; //6级菜单
-                this.level2.forEach(function (value) {
-                    if (self.selected1 == value.id) {
-                        if (value.children && value.children.length > 0) {
-                            value.children.forEach(function (value2) {
-                                if (value2.type == 'FOLDER') {
-                                    self.options3.push(value2);
-                                } else {
-                                    if (self.filterText.trim()) {
-                                        if (value2.name.indexOf(self.filterText.trim()) > -1) {
-                                            self.tableData.push(value2);
-                                        }
-                                    } else {
-                                        self.tableData.push(value2);
-                                    }
-                                }
-                            })
-                        } else {
-                            self.tableData = [];
-                        }
-                    }
-                });
             },
 
             //绑定事件，给三级菜单赋值
             func3: function () {
                 var self = this;
-                self.tableData = []; //先清空
-                self.searchData = [];
 
                 self.selected3 = '';
                 self.selected4 = '';
@@ -229,109 +200,29 @@ define([
                 self.options4 = []; //4级菜单
                 self.options5 = []; //5级菜单
                 self.options6 = []; //6级菜单`
-                this.options3.forEach(function (value) {
-                    if (self.selected2 == value.id) {
-                        if (value.children && value.children.length > 0) {
-                            value.children.forEach(function (value2) {
-                                if (value2.type == 'FOLDER') {
-                                    self.options4.push(value2);
-                                } else {
-                                    if (self.filterText.trim()) {
-                                        if (value2.name.indexOf(self.filterText.trim()) > -1) {
-                                            self.tableData.push(value2);
-                                        }
-                                    } else {
-                                        self.tableData.push(value2);
-                                    }
-                                }
-                            })
-                        } else {
-                            self.tableData = [];
-                        }
-                    }
-                })
             },
 
             //绑定事件，给四级菜单赋值
             func4: function () {
                 var self = this;
-                self.tableData = []; //先清空
-                self.searchData = [];
 
                 self.selected4 = '';
                 self.selected5 = '';
 
                 self.options5 = []; //5级菜单
                 self.options6 = []; //6级菜单
-                this.options4.forEach(function (value) {
-                    if (self.selected3 == value.id) {
-                        if (value.children && value.children.length > 0) {
-                            value.children.forEach(function (value2) {
-                                if (value2.type == 'FOLDER') {
-                                    self.options5.push(value2);
-                                } else {
-                                    if (self.filterText.trim()) {
-                                        if (value2.name.indexOf(self.filterText.trim()) > -1) {
-                                            self.tableData.push(value2);
-                                        }
-                                    } else {
-                                        self.tableData.push(value2);
-                                    }
-                                }
-                            })
-                        } else {
-                            self.tableData = [];
-                        }
-                    }
-                })
             },
 
             //绑定事件，给五级菜单赋值
             func5: function () {
                 var self = this;
-                self.tableData = []; //先清空
-                self.searchData = [];
                 self.selected5 = '';
                 self.options6 = []; //6级菜单
-                this.options5.forEach(function (value) {
-                    if (self.selected4 == value.id) {
-                        if (value.children && value.children.length > 0) {
-                            value.children.forEach(function (value2) {
-                                if (value2.type == 'FOLDER') {
-                                    self.options6.push(value2);
-                                } else {
-                                    if (self.filterText.trim()) {
-                                        if (value2.name.indexOf(self.filterText.trim()) > -1) {
-                                            self.tableData.push(value2);
-                                        }
-                                    } else {
-                                        self.tableData.push(value2);
-                                    }
-                                }
-                            })
-                        } else {
-                            self.tableData = [];
-                        }
-                    }
-                })
             },
 
             //绑定事件，给六级菜单赋值
             func6: function () {
                 var self = this;
-                self.tableData = []; //先清空
-                self.searchData = [];
-                this.options6.forEach(function (value) {
-                    if (self.selected5 == value.id) {
-                        if (self.filterText.trim()) {
-                            if (value.name.indexOf(self.filterText.trim()) > -1) {
-                                self.tableData.push(value);
-                            }
-                        } else {
-                            self.tableData = value.children;
-                        }
-                    }
-                })
             },
 
             //左侧table的当前页改变
@@ -444,6 +335,7 @@ define([
                 } else if (num === 5) {
                     this.selected5 = e.target.value;
                 }
+                this.startFilterData();
             },
 
             //清空按钮

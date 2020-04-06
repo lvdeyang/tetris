@@ -17,7 +17,8 @@ import com.sumavision.tetris.user.event.TouristDeleteBatchEvent;
 import com.sumavision.tetris.user.event.TouristDeleteEvent;
 import com.sumavision.tetris.user.event.UserImportEvent;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
-import com.sumavision.tetris.user.event.WebsocketSessionClosedEvent;
+import com.sumavision.tetris.websocket.core.event.WebsocketSessionClosedEvent;
+import com.sumavision.tetris.websocket.core.event.WebsocketSessionOpenEvent;
 
 @Controller
 @RequestMapping(value = "/event/publish")
@@ -166,6 +167,8 @@ public class EventPublishController {
 			Long userId,
 			HttpServletRequest request) throws Exception{
 		
+		WebsocketSessionOpenEvent event = new WebsocketSessionOpenEvent(applicationEventPublisher, userId);
+		applicationEventPublisher.publishEvent(event);
 		
 		return null;
 	}

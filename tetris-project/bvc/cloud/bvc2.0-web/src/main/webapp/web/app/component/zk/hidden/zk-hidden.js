@@ -329,7 +329,9 @@ define([
                             setTimeout(createWebsocket, 5*1000);
                         };
                         var createWebsocket = function(){
-                            var webSocket = new WebSocket(addr + window.TOKEN);
+                        	//把IP替换为虚拟IP
+                        	var virtualAddr = addr.replace(/[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/,self.gateIp);
+                            var webSocket = new WebSocket(virtualAddr + window.TOKEN);
                             webSocket.onopen = onopen;
                             webSocket.onmessage = onmessage;
                             webSocket.onerror = onerror;

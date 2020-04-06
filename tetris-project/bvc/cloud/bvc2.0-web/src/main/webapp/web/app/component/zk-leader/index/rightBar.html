@@ -12,7 +12,7 @@
         <!--第一部分的菜单-->
         <div class="firstMenu" v-show="switchStatus1">
             <div>
-                <div v-if="group.current">
+                <div v-if="group.currentId">
                     <div style="display: inline-block;font-size: 20px;color: #d6c9c9">当前指挥状态：</div>
                     <!--状态-->
                     <div :class="'status ' + group.current.status">
@@ -39,7 +39,7 @@
                 </div>
 
                 <!--树形菜单-->
-                <div class="commandTable"
+                <div v-if="group.currentId" class="commandTable"
                      style="position:absolute; left:15px; top:90px; width:290px;height: 450px; bottom:50px;overflow: hidden">
                     <div style="width:100%; height:100%; position:relative;">
                         <el-scrollbar style="height:100%;">
@@ -75,7 +75,7 @@
                 </div>
 
                 <!--底部按钮-->
-                <div class="btnContainer" v-if="group.current && group.current.type==='command'">
+                <div class="btnContainer" v-if="group.currentId && group.current.type==='command'">
                     <div :class="'option-button '+(buttons.addMember?'':'disable')" title="添加成员"
                          @click="addCommandMember">
                         <img v-if="buttons.addMember" :src="baseUrl+'images/zk-leader/able/addMember.png'" draggable="false"/>
@@ -305,11 +305,6 @@
                 <img class="fontPic" src="../../../../../images/zk-leader/record.png" draggable="false">
                 </span>
                 <div class="scrollTab">
-                    <el-select v-model="recordSelect" placeholder="请选择" style="width: 320px">
-                        <el-option value="1" label="指挥录制"></el-option>
-                        <el-option value="2" label="设备录制"></el-option>
-                        <el-option value="3" label="用户录制"></el-option>
-                    </el-select>
                 <el-scrollbar style="height:100%">
                 <el-tree :data="record.data" node-key="id"
                                      :check-strictly=true
@@ -398,6 +393,11 @@
                     <span style="position: absolute;top: 15px;font-size: 8px;color: #fff;left: 7px;">修改指挥名称</span>
                     <el-button type="text" class="button-refresh" icon=" icon-edit" size="small"
                                style="position: absolute;left: 14px"></el-button>
+                </div>
+
+                <div class="customIcon" v-if="currentTab==4" @click="playRecordFile">
+                    <span style="position: absolute;top: 15px;font-size: 9px;color: #fff;left: 3px;">查看录制文件</span>
+                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-printer"></el-button>
                 </div>
 
                 <div class="customIcon" v-if="currentTab==0" @click="refreshCommand">
@@ -677,7 +677,7 @@
                 <i class="menuIcon icon-facetime-video"></i>
                 <span>点播</span>
             </div>
-            <div :class="'menu ' + (contextMenu.recordRecord?'':'disable')">
+            <div :class="'menu ' + (contextMenu.recordRecord?'':'disable')" @click="recordTask">
                 <i class="menuIcon icon-camera-retro"></i>
                 <span>录制</span>
             </div>
