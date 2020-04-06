@@ -111,7 +111,7 @@ public class CommandMeetingSpeakServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
 			}
 			
-			if(groupType.equals(GroupType.MEETING)){
+			if(!groupType.equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行发言");
 			}
 			
@@ -184,7 +184,7 @@ public class CommandMeetingSpeakServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
 			}
 			
-			if(group.getType().equals(GroupType.MEETING)){
+			if(!group.getType().equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行发言");
 			}
 			
@@ -233,7 +233,7 @@ public class CommandMeetingSpeakServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
 			}
 			
-			if(group.getType().equals(GroupType.MEETING)){
+			if(!group.getType().equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行发言");
 			}
 			
@@ -307,7 +307,7 @@ public class CommandMeetingSpeakServiceImpl {
 			if(group.getStatus().equals(GroupStatus.STOP) || userIds.size()==0){
 				return;
 			}
-			if(group.getType().equals(GroupType.MEETING)){
+			if(!group.getType().equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行发言");
 			}
 			
@@ -353,7 +353,7 @@ public class CommandMeetingSpeakServiceImpl {
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				return;
 			}
-			if(group.getType().equals(GroupType.MEETING)){
+			if(!group.getType().equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行发言");
 			}
 						
@@ -394,7 +394,7 @@ public class CommandMeetingSpeakServiceImpl {
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				return;
 			}
-			if(groupType.equals(GroupType.MEETING)){
+			if(!groupType.equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行发言");
 			}
 			
@@ -447,7 +447,7 @@ public class CommandMeetingSpeakServiceImpl {
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
 			}
-			if(groupType.equals(GroupType.MEETING)){
+			if(!groupType.equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行讨论");
 			}
 						
@@ -488,7 +488,7 @@ public class CommandMeetingSpeakServiceImpl {
 //				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
 				return;
 			}
-			if(groupType.equals(GroupType.MEETING)){
+			if(!groupType.equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行讨论");
 			}
 						

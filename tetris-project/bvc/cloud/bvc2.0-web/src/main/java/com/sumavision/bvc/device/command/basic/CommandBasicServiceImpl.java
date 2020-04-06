@@ -1,6 +1,7 @@
 package com.sumavision.bvc.device.command.basic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -15,8 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.basic.dao.BasicRoleDAO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
@@ -64,6 +67,7 @@ import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
@@ -115,6 +119,9 @@ public class CommandBasicServiceImpl {
 	private ResourceChannelDAO resourceChannelDao;
 	
 	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
 	private ResourceService resourceService;
 	
 	@Autowired
@@ -137,6 +144,9 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
+	
+	@Autowired
+	private QueryUtil queryUtil;
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
@@ -265,6 +275,9 @@ public class CommandBasicServiceImpl {
 //				commandUserBos.add(user);
 //			}
 //		}
+		
+		List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(userIdList);
+		
 		if(creatorUserBo.getFolderUuid() == null){
 			throw new UserHasNoFolderException(creatorUserBo.getName());
 		}
@@ -288,6 +301,12 @@ public class CommandBasicServiceImpl {
 		//通过视频编码通道来校验编码器是否可用
 		if(videoEncode1Channels.size() < commandUserBos.size()){
 			for(UserBO user : commandUserBos){
+				
+				//外部系统用户则跳过
+				if(queryUtil.isLdapUser(user, folderUserMaps)){
+					continue;
+				}
+				
 				boolean hasChannel = false;
 				for(ChannelSchemeDTO channel : videoEncode1Channels){
 					String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
@@ -329,7 +348,14 @@ public class CommandBasicServiceImpl {
 			memberPO.setUserId(user.getId());
 			memberPO.setUserName(user.getName());
 			memberPO.setUserNum(user.getUserNo());
-			memberPO.setFolderId(user.getFolderId());
+			memberPO.setFolderId(user.getFolderId());			
+			memberPO.setGroup(group);
+			members.add(memberPO);
+			
+			if(queryUtil.isLdapUser(user, folderUserMaps)){
+				memberPO.setOriginType(OriginType.OUTER);
+				continue;
+			}
 			
 //			//遍历bundle
 			String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
@@ -359,9 +385,6 @@ public class CommandBasicServiceImpl {
 					break;
 				}
 			}
-			
-			memberPO.setGroup(group);
-			members.add(memberPO);
 		}
 		
 		//保存以获得member的id
@@ -577,130 +600,131 @@ public class CommandBasicServiceImpl {
 		}
 		
 		//处理主席
-		CommandGroupMemberPO chairman = null;
-		for(CommandGroupMemberPO member : members){
-			if(member.isAdministrator()){
-				chairman = member;
-				chairman.setMemberStatus(MemberStatus.CONNECT);
-				//查找播放器
-				List<CommandGroupUserPlayerPO> players = new ArrayList<CommandGroupUserPlayerPO>();
-				if(locationIndex == -1){
-					players = commandCommonServiceImpl.userChoseUsefulPlayers(member.getUserId(), PlayerBusinessType.BASIC_COMMAND, members.size()-1, false);
-				}else{
-					//只根据locationIndex选择一个播放器
-					CommandGroupUserPlayerPO player = commandCommonServiceImpl.userChosePlayerByLocationIndex(member.getUserId(), PlayerBusinessType.PLAY_DEVICE, locationIndex);
-					players.add(player);
-				}
-				int usefulPlayersCount = players.size();
-				if(group.getType().equals(GroupType.SECRET) && usefulPlayersCount < 1){
-					throw new HasNotUsefulPlayerException();
-				}
-				log.info(new StringBufferWrapper()
-						.append(group.getName()).append(" 指挥开始，")
-						.append("成员总数（除主席）为 ").append(members.size()-1)
-						.append(" 主席可用的播放器数为 ").append(usefulPlayersCount).toString());
-				
-				//处理所有给主席的转发
-				for(CommandGroupForwardPO forward : forwards){
-					if(chairman.getId().equals(forward.getDstMemberId())){
-						if(usefulPlayersCount > 0){
-							CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount);
-							CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
-							if(group.getType().equals(GroupType.BASIC)){
-								player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
-								player.setBusinessName(group.getName() + "：" + srcMember.getUserName());//添加成员名称
-								player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
-							}else if(group.getType().equals(GroupType.SECRET)){
-								player.setBusinessId(group.getId().toString());
-								player.setBusinessName("正在与" + secretMember.getUserName() + "专向" + commandString);
-								player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
-							}else if(group.getType().equals(GroupType.MEETING)){
-								player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
-								player.setBusinessName(group.getName() + "：" + srcMember.getUserName());//添加成员名称
-								player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
-							}
-							
-							//用于返回的分屏信息
-							JSONObject split = new JSONObject();
-							split.put("serial", player.getLocationIndex());
-							split.put("bundleId", player.getBundleId());
-							split.put("bundleNo", player.getCode());
-							split.put("businessId", player.getBusinessId());
-							split.put("status", "start");
-							if(group.getType().equals(GroupType.BASIC) || group.getType().equals(GroupType.MEETING)){
-								split.put("businessType", PlayerBusinessType.CHAIRMAN_BASIC_COMMAND.getCode());
-								split.put("businessInfo", player.getBusinessName());
-							}else if(group.getType().equals(GroupType.SECRET)){
-								split.put("businessType", PlayerBusinessType.SECRET_COMMAND.getCode());
-								split.put("businessInfo", player.getBusinessName());
-							}
-							Date fightTime = commandFightTimeServiceImpl.calculateCurrentFightTime(group);
-							if(fightTime != null){
-								split.put("fightTime", DateUtil.format(fightTime, DateUtil.dateTimePattern));
-							}
-							chairSplits.add(split);
-							
-							//给转发设置目的
-							forward.setDstPlayer(player);
-							player.setMember(chairman);
-							usefulPlayersCount--;
-						}else{
-							forward.setExecuteStatus(ExecuteStatus.NO_AVAILABLE_PLAYER);
-						}
-					}
-				}
-				if(chairman.getPlayers() == null) chairman.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
-				chairman.getPlayers().clear();
-				chairman.getPlayers().addAll(players);
-				break;
-			}
-		}
+		CommandGroupMemberPO chairman = commandCommonUtil.queryChairmanMember(members);
+		//TODO:先不选播放器
+//		for(CommandGroupMemberPO member : members){
+//			if(member.isAdministrator()){
+//				chairman = member;
+//				chairman.setMemberStatus(MemberStatus.CONNECT);
+//				//查找播放器
+//				List<CommandGroupUserPlayerPO> players = new ArrayList<CommandGroupUserPlayerPO>();
+//				if(locationIndex == -1){
+//					players = commandCommonServiceImpl.userChoseUsefulPlayers(member.getUserId(), PlayerBusinessType.BASIC_COMMAND, members.size()-1, false);
+//				}else{
+//					//只根据locationIndex选择一个播放器
+//					CommandGroupUserPlayerPO player = commandCommonServiceImpl.userChosePlayerByLocationIndex(member.getUserId(), PlayerBusinessType.PLAY_DEVICE, locationIndex);
+//					players.add(player);
+//				}
+//				int usefulPlayersCount = players.size();
+//				if(group.getType().equals(GroupType.SECRET) && usefulPlayersCount < 1){
+//					throw new HasNotUsefulPlayerException();
+//				}
+//				log.info(new StringBufferWrapper()
+//						.append(group.getName()).append(" 指挥开始，")
+//						.append("成员总数（除主席）为 ").append(members.size()-1)
+//						.append(" 主席可用的播放器数为 ").append(usefulPlayersCount).toString());
+//				
+//				//处理所有给主席的转发
+//				for(CommandGroupForwardPO forward : forwards){
+//					if(chairman.getId().equals(forward.getDstMemberId())){
+//						if(usefulPlayersCount > 0){
+//							CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount);
+//							CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
+//							if(group.getType().equals(GroupType.BASIC)){
+//								player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
+//								player.setBusinessName(group.getName() + "：" + srcMember.getUserName());//添加成员名称
+//								player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
+//							}else if(group.getType().equals(GroupType.SECRET)){
+//								player.setBusinessId(group.getId().toString());
+//								player.setBusinessName("正在与" + secretMember.getUserName() + "专向" + commandString);
+//								player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
+//							}else if(group.getType().equals(GroupType.MEETING)){
+//								player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
+//								player.setBusinessName(group.getName() + "：" + srcMember.getUserName());//添加成员名称
+//								player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
+//							}
+//							
+//							//用于返回的分屏信息
+//							JSONObject split = new JSONObject();
+//							split.put("serial", player.getLocationIndex());
+//							split.put("bundleId", player.getBundleId());
+//							split.put("bundleNo", player.getCode());
+//							split.put("businessId", player.getBusinessId());
+//							split.put("status", "start");
+//							if(group.getType().equals(GroupType.BASIC) || group.getType().equals(GroupType.MEETING)){
+//								split.put("businessType", PlayerBusinessType.CHAIRMAN_BASIC_COMMAND.getCode());
+//								split.put("businessInfo", player.getBusinessName());
+//							}else if(group.getType().equals(GroupType.SECRET)){
+//								split.put("businessType", PlayerBusinessType.SECRET_COMMAND.getCode());
+//								split.put("businessInfo", player.getBusinessName());
+//							}
+//							Date fightTime = commandFightTimeServiceImpl.calculateCurrentFightTime(group);
+//							if(fightTime != null){
+//								split.put("fightTime", DateUtil.format(fightTime, DateUtil.dateTimePattern));
+//							}
+//							chairSplits.add(split);
+//							
+//							//给转发设置目的
+//							forward.setDstPlayer(player);
+//							player.setMember(chairman);
+//							usefulPlayersCount--;
+//						}else{
+//							forward.setExecuteStatus(ExecuteStatus.NO_AVAILABLE_PLAYER);
+//						}
+//					}
+//				}
+//				if(chairman.getPlayers() == null) chairman.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
+//				chairman.getPlayers().clear();
+//				chairman.getPlayers().addAll(players);
+//				break;
+//			}
+//		}
 		
 		//处理其它成员
 		for(CommandGroupMemberPO member : members){
 			
 			if(member.isAdministrator()){
 				continue;
-			}	
-			
-			//查找播放器
-			CommandGroupUserPlayerPO player = commandCommonServiceImpl.userChoseUsefulPlayer(member.getUserId(), PlayerBusinessType.BASIC_COMMAND, true);
-			if(player == null){
-				log.info(new StringBufferWrapper().append(commandString + "成员 ").append(member.getUserName()).
-						append(" id: ").append(member.getId()).append(" 没有可用的播放器").toString());
 			}
 			
 			member.setMemberStatus(MemberStatus.CONNECTING);
 			
-			//处理给该成员的转发
-			for(CommandGroupForwardPO forward : forwards){
-				if(member.getId().equals(forward.getDstMemberId())){
-					if(null != player){
-						
-						player.setBusinessId(group.getId().toString());
-						if(group.getType().equals(GroupType.BASIC)){
-							player.setBusinessName(group.getName() + "：" + chairman.getUserName());
-							player.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
-						}else if(group.getType().equals(GroupType.SECRET)){
-							player.setBusinessName("正在与" + chairman.getUserName() + "专向" + commandString);
-							player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
-						}else if(group.getType().equals(GroupType.MEETING)){
-							player.setBusinessName(group.getName());
-							player.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
-						}
-						
-						//给转发设置目的
-						forward.setDstPlayer(player);
-						
-						if(member.getPlayers() == null) member.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
-						member.getPlayers().clear();
-						member.getPlayers().add(player);
-						player.setMember(member);
-					}else{
-						forward.setExecuteStatus(ExecuteStatus.NO_AVAILABLE_PLAYER);
-					}
-				}
-			}
+//			//查找播放器
+//			CommandGroupUserPlayerPO player = commandCommonServiceImpl.userChoseUsefulPlayer(member.getUserId(), PlayerBusinessType.BASIC_COMMAND, true);
+//			if(player == null){
+//				log.info(new StringBufferWrapper().append(commandString + "成员 ").append(member.getUserName()).
+//						append(" id: ").append(member.getId()).append(" 没有可用的播放器").toString());
+//			}
+//			
+//			//处理给该成员的转发
+//			for(CommandGroupForwardPO forward : forwards){
+//				if(member.getId().equals(forward.getDstMemberId())){
+//					if(null != player){
+//						
+//						player.setBusinessId(group.getId().toString());
+//						if(group.getType().equals(GroupType.BASIC)){
+//							player.setBusinessName(group.getName() + "：" + chairman.getUserName());
+//							player.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
+//						}else if(group.getType().equals(GroupType.SECRET)){
+//							player.setBusinessName("正在与" + chairman.getUserName() + "专向" + commandString);
+//							player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
+//						}else if(group.getType().equals(GroupType.MEETING)){
+//							player.setBusinessName(group.getName());
+//							player.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
+//						}
+//						
+//						//给转发设置目的
+//						forward.setDstPlayer(player);
+//						
+//						if(member.getPlayers() == null) member.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
+//						member.getPlayers().clear();
+//						member.getPlayers().add(player);
+//						player.setMember(member);
+//					}else{
+//						forward.setExecuteStatus(ExecuteStatus.NO_AVAILABLE_PLAYER);
+//					}
+//				}
+//			}
 			
 			JSONObject message = new JSONObject();
 			message.put("fromUserId", chairman.getUserId());
@@ -1027,7 +1051,7 @@ public class CommandBasicServiceImpl {
 				acceptMembers.add(thisMember);
 				//如果该成员状态为DISCONNECT，说明是已经拒绝了会议，现在重新进入，需要重选播放器
 				if(thisMember.getMemberStatus().equals(MemberStatus.DISCONNECT)){
-					chosePlayersForMembers(group, acceptMembers);
+//					chosePlayersForMembers(group, acceptMembers);//TODO:放进membersResponse
 					membersResponse(group, acceptMembers, null);
 				}else if(thisMember.getMemberStatus().equals(MemberStatus.CONNECT)){
 					//break;
@@ -1584,7 +1608,7 @@ public class CommandBasicServiceImpl {
 				return chairSplits;
 			}
 			
-			chairSplits = chosePlayersForMembers(group, newMembers);
+//			chairSplits = chosePlayersForMembers(group, newMembers);//TODO:去掉
 			
 			//发消息给新成员
 			for(CommandGroupMemberPO member : newMembers){
@@ -1617,25 +1641,47 @@ public class CommandBasicServiceImpl {
 			
 			return chairSplits;			
 		}
-	}
+	}	
 	
+	/**
+	 * 给新进入的成员和主席选播放器<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月2日 下午6:14:46
+	 * @param group
+	 * @param newMembers 新进入的成员，必须是group.getMembers()的一部分
+	 * @return chairSplits 主席新增的播放器。考虑优化成List<BusinessPlayerVO>
+	 * @throws Exception
+	 */
 	private JSONArray chosePlayersForMembers(CommandGroupPO group, List<CommandGroupMemberPO> newMembers) throws Exception{
 		//此时forwrad已经建立完毕
 		//【注意】此处不呼叫主席的播放器，待成员接听后通过forward呼叫，测试是否可行
 		
 		JSONArray chairSplits = new JSONArray();
 		
+		if(newMembers==null || newMembers.size()==0){
+			return chairSplits;
+		}
+		
 		Set<CommandGroupMemberPO> members = group.getMembers();
 		Set<CommandGroupForwardPO> forwards = group.getForwards();
 //		String commandString = commandCommonUtil.generateCommandString(group.getType());
 		String cooperateString = commandCommonUtil.generateCooperateString(group.getType());
 		
+		//新成员中是否含有主席。
+		boolean newMembersContainsChairman = false;
+		
 		List<Long> newMemberIds = new ArrayList<Long>();
 		for(CommandGroupMemberPO newMember : newMembers){
 			newMemberIds.add(newMember.getId());
+			if(newMember.isAdministrator()){
+				newMembersContainsChairman = true;
+			}
 		}
 		
-		Set<CommandGroupForwardPO> newForwards = commandCommonUtil.queryForwardsByMemberIds(forwards, newMemberIds, null, null);
+		//以新进入成员为源的转发
+		Set<CommandGroupForwardPO> newForwards = commandCommonUtil.queryForwardsBySrcmemberIds(forwards, newMemberIds, null, null);
 		
 		Set<CommandGroupMemberPO> cooperateMembers = new HashSet<CommandGroupMemberPO>();
 		for(CommandGroupMemberPO member : members){
@@ -1646,12 +1692,14 @@ public class CommandBasicServiceImpl {
 		
 		
 		//处理主席
+		int chairmanNeedPlayer = newMembers.size();
+		if(newMembersContainsChairman) chairmanNeedPlayer--;
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(group.getMembers());
-		List<CommandGroupUserPlayerPO> cPlayers = commandCommonServiceImpl.userChoseUsefulPlayers(chairmanMember.getUserId(), PlayerBusinessType.BASIC_COMMAND, newMembers.size(), false);
+		List<CommandGroupUserPlayerPO> cPlayers = commandCommonServiceImpl.userChoseUsefulPlayers(chairmanMember.getUserId(), PlayerBusinessType.BASIC_COMMAND, chairmanNeedPlayer, false);
 		int usefulPlayersCount = cPlayers.size();
 		log.info(new StringBufferWrapper()
-				.append(group.getName()).append(" 会议添加成员，")
-				.append("新进入成员总数为 ").append(newMembers.size())
+				.append(group.getName())
+				.append(" 新进入成员总数（不含主席）为 ").append(chairmanNeedPlayer)
 				.append(" 主席可用新的播放器数为 ").append(usefulPlayersCount).toString());
 		
 		//处理所有【新的】给主席的转发
@@ -1802,6 +1850,8 @@ public class CommandBasicServiceImpl {
 	 */
 	public Object removeMembers(Long groupId, List<Long> userIdList, int mode) throws Exception{
 		
+		//TODO:重复退出还有问题，会再次挂断编码器
+		
 		if(groupId==null || groupId.equals("")){
 			throw new BaseException(StatusCode.FORBIDDEN, "退出操作，会议id有误");
 		}
@@ -1868,7 +1918,14 @@ public class CommandBasicServiceImpl {
 			
 			//释放这些退出或删除成员的播放器，同时如果是删人就给被删的成员发消息
 			List<CommandGroupUserPlayerPO> needFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+			List<CommandGroupMemberPO> needCloseRemoveMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO removeMember : removeMembers){
+				
+				//只有进入的成员，才需要挂断编码器
+				if(MemberStatus.CONNECT.equals(removeMember.getMemberStatus())){
+					needCloseRemoveMembers.add(removeMember);
+				}
+				
 				JSONArray splits = new JSONArray();
 				List<CommandGroupUserPlayerPO> thisMemberFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 				for(CommandGroupUserPlayerPO player : removeMember.getPlayers()){
@@ -1958,17 +2015,24 @@ public class CommandBasicServiceImpl {
 			
 			if(mode == 0){
 				//退出
+				List<CommandGroupForwardPO> needRemoveCooForwards = new ArrayList<CommandGroupForwardPO>();
 				for(CommandGroupMemberPO removeMember : removeMembers){
 					removeMember.setMemberStatus(MemberStatus.DISCONNECT);
 					removeMember.setCooperateStatus(MemberStatus.DISCONNECT);
 					removeMember.setSilenceToHigher(false);
 					removeMember.setSilenceToLower(false);
 				}
-				//所有的forward都保留（目前只有普通和协同2种）
+				//所有的forward都保留（目前有普通和协同2种，协同的需要删除）
 				for(CommandGroupForwardPO forward : needDelForwards){
-					forward.clearDst();
-					forward.setExecuteStatus(ExecuteStatus.UNDONE);
+					if(ForwardBusinessType.COOPERATE_COMMAND.equals(forward.getForwardBusinessType())
+							&& removeMemberIds.contains(forward.getSrcMemberId())){
+						needRemoveCooForwards.add(forward);
+					}else{
+						forward.clearDst();
+						forward.setExecuteStatus(ExecuteStatus.UNDONE);
+					}
 				}
+				forwards.removeAll(needRemoveCooForwards);
 			}else if(mode == 1){
 				//删人
 				members.removeAll(removeMembers);
@@ -1981,7 +2045,7 @@ public class CommandBasicServiceImpl {
 			if(!group.getStatus().equals(GroupStatus.STOP)){
 				CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 				CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-				LogicBO logic = closeBundle(removeMembers, needDelDemandsForEncoder, needFreePlayers, codec, group.getUserId());
+				LogicBO logic = closeBundle(needCloseRemoveMembers, needDelDemandsForEncoder, needFreePlayers, codec, group.getUserId());
 				LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(needDelDemandsForEncoder, null, null, needFreePlayers, codec, group.getUserId());
 				logic.merge(logicCastDevice);
 				StringBufferWrapper description = new StringBufferWrapper().append(group.getName());
@@ -2014,7 +2078,7 @@ public class CommandBasicServiceImpl {
 	
 	/**
 	 * 批量处理成员的“接听”和“拒绝”<br/>
-	 * <p>线程不安全，调用处必须使用 command-group-{groupId} 加锁</p>
+	 * <p>注意不能选择自己看自己的播放器，例如主席看主席</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月24日 上午11:13:43
@@ -2031,6 +2095,9 @@ public class CommandBasicServiceImpl {
 		List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
 		
 		//考虑如果停会之后执行，有没有问题
+		
+		//给新进入成员和主席选播放器
+		chosePlayersForMembers(group, acceptMembers);//TODO:放进来
 		
 		//消息消费
 		try {
@@ -2066,7 +2133,7 @@ public class CommandBasicServiceImpl {
 			acceptMemberIds.add(acceptMember.getId());
 			allPlayers.addAll(acceptMember.getPlayers());
 			
-			//成员上线消息：不给主席发送
+			//成员上线消息（主席进入时不发送）
 			if(!acceptMember.isAdministrator()){
 				JSONObject message = new JSONObject();
 				message.put("businessType", "commandMemberOnline");
