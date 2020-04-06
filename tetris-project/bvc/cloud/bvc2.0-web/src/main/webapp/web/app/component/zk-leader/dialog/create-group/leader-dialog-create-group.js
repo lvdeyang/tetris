@@ -234,7 +234,6 @@ define([
                         }
                     }
                 });
-                console.log(self.options3)
             },
 
             //绑定事件，给三级菜单赋值
@@ -492,8 +491,6 @@ define([
                             self.level2 = self.level2.concat(data[i].children);
                         }
                         self.options2 = self.level2;
-                        console.log(self.level2)
-                        console.log(self.options2)
                     }
                 });
             },

@@ -411,7 +411,7 @@
                     <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
                 </div>
 
-                <div v-else="currentTab==2">
+                <div v-else-if="currentTab==2">
                     <div class="customIcon" @click="openOutFile">
                         <span style="position: absolute;top: 15px;font-size: 9px;color: #fff;left: 3px;">外部文件管理</span>
                         <el-button type="text" size="small" icon="el-icon-printer"></el-button>

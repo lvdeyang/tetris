@@ -51,7 +51,7 @@ define([
             handleAddMemberCommit:function(){
                 var self = this;
                 if(self.tree.select.length <= 0){
-                    self.qt.alert('提示信息', '您没有勾选任何用户');
+                    self.qt.warning('提示信息', '您没有勾选任何用户');
                     return;
                 }
                 var members = [];

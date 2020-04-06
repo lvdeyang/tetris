@@ -828,7 +828,7 @@ define([
             callUserBatch: function () {
                 var self = this;
                 if (self.institution.select.length <= 0) {
-                    self.qt.alert('消息提示', '您还没有选中用户');
+                    self.qt.warning('消息提示', '您还没有选中用户');
                     return;
                 }
                 var userIds = [];
@@ -845,7 +845,7 @@ define([
                 if (self.currentTab == 1) {
                     //点播用户
                     if (self.institution.select.length <= 0) {
-                        self.qt.alert('消息提示', '您还没有选中用户');
+                        self.qt.warning('消息提示', '您还没有选中用户');
                         return;
                     }
                     var userIds = [];
@@ -859,7 +859,7 @@ define([
                 } else if (self.currentTab == 2) {
                     //点播文件
                     if (self.file.select.length <= 0) {
-                        self.qt.alert('消息提示', '您还没有选中文件');
+                        self.qt.warning('消息提示', '您还没有选中文件');
                         return;
                     }
                     var resourceFileIds = [];
@@ -872,7 +872,7 @@ define([
                 } else if (self.currentTab == 3) {
                     //点播设备
                     if (self.device.select.length <= 0) {
-                        self.qt.alert('消息提示', '您还没有选中设备');
+                        self.qt.warning('消息提示', '您还没有选中设备');
                         return;
                     }
                     var deviceIds = [];
@@ -888,7 +888,7 @@ define([
             voiceIntercomBatch: function () {
                 var self = this;
                 if (self.institution.select.length <= 0) {
-                    self.qt.alert('消息提示', '您还没有选中用户');
+                    self.qt.warning('消息提示', '您还没有选中用户');
                     return;
                 }
                 var userIds = [];
@@ -920,7 +920,7 @@ define([
                 var self = this;
                 if (!self.buttons.enterCommand) return;
                 if (self.command.select.length <= 0) {
-                    self.qt.alert('消息提示', '您还没有选择任何指挥组');
+                    self.qt.warning('消息提示', '您还没有选择任何指挥组');
                 }
 
                 var ids = [];
@@ -969,7 +969,7 @@ define([
                 var self = this;
                 if (!self.buttons.removeCommand) return;
                 if (self.command.select.length <= 0) {
-                    self.qt.alert('信息提示', '您没有选择任何指挥组');
+                    self.qt.warning('信息提示', '您没有选择任何指挥组');
                     return;
                 }
                 var ids = [];
@@ -1001,7 +1001,7 @@ define([
             },
             //点播录制文件
             playRecordFile:function () {
-                this.qt.window('/router/zk/leader/record/file',null,{width:1000,height:700})
+                this.qt.window('/router/zk/leader/record/file',null,{width:1366,height:700})
             },
             //外部文件管理
             openOutFile:function () {
@@ -1142,7 +1142,7 @@ define([
                 var self = this;
                 if (!self.buttons.removeMember) return;
                 if (self.group.current.select.length <= 0) {
-                    self.qt.alert('提示信息', '您未选择任何成员');
+                    self.qt.warning('提示信息', '您未选择任何成员');
                     return;
                 }
                 self.qt.confirm('提示信息', '当前强退' + self.group.current.select.length + '个成员', '取消', '确定', null, function () {
@@ -1215,12 +1215,12 @@ define([
                 if (!self.buttons.silenceUpStart) {
                     ajax.post('/command/basic/silence/up/start', {id: self.group.current.id}, function () {
                         self.buttons.silenceUpStart = true;
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                     });
                 } else {
                     ajax.post('/command/basic/silence/up/stop', {id: self.group.current.id}, function () {
                         self.buttons.silenceUpStart = false;
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                     });
                 }
             },
@@ -1231,12 +1231,12 @@ define([
                 if (!self.buttons.silenceDownStart) {
                     ajax.post('/command/basic/silence/down/start', {id: self.group.current.id}, function () {
                         self.buttons.silenceDownStart = true;
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                     });
                 } else {
                     ajax.post('/command/basic/silence/down/stop', {id: self.group.current.id}, function () {
                         self.buttons.silenceDownStart = false;
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                     });
                 }
             },
@@ -1255,12 +1255,12 @@ define([
                 if (self.buttons.isRecord) {
                     ajax.post('/command/record/stop', {id: self.group.current.id}, function (data) {
                         self.buttons.isRecord = false;
-                        self.qt.alert('业务提示', '操作成功');
+                        self.qt.warning('业务提示', '操作成功');
                     });
                 } else {
                     ajax.post('/command/record/start', {id: self.group.current.id}, function (data) {
                         self.buttons.isRecord = true;
-                        self.qt.alert('业务提示', '操作成功');
+                        self.qt.warning('业务提示', '操作成功');
                     });
                 }
             },
@@ -1270,16 +1270,14 @@ define([
                 if (!self.buttons.commandReminder) return;
                 if (self.buttons.isRemind) {
                     ajax.post('/command/basic/remind/stop', {id: self.group.current.id}, function (data) {
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                         self.buttons.isRemind = false;
-                        console.log(self.group.remindIds)
                         for (var i = 0; i < self.group.remindIds.length; i++) {
                             if (self.group.remindIds[i] == self.group.current.id) {
                                 self.group.remindIds.splice(i, 1);
                                 break;
                             }
                         }
-                        console.log(self.group.remindIds)
                         if (data.businessId == self.group.current.id) {
                             self.group.current.status = data.status;
                         }
@@ -1287,10 +1285,9 @@ define([
                     });
                 } else {
                     ajax.post('/command/basic/remind', {id: self.group.current.id}, function (data) {
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                         self.buttons.isRemind = true;
                         var finded = false;
-                        console.log(self.group.remindIds)
                         for (var i = 0; i < self.group.remindIds.length; i++) {
                             if (self.group.remindIds[i] == self.group.current.id) {
                                 finded = true;
@@ -1303,7 +1300,6 @@ define([
                         if (data.businessId == self.group.current.id) {
                             self.group.current.status = data.status;
                         }
-                        console.log(self.group.remindIds)
                         self.qt.invoke('commandRemind', $.toJSON(data));
                     });
                 }
@@ -1441,10 +1437,10 @@ define([
                 //修改时，把原有值赋过去
                 if (type === 'edit') {
                     if (self.command.select.length <= 0) {
-                        self.qt.alert('信息提示', '请先选择要修改的项');
+                        self.qt.warning('信息提示', '请先选择要修改的项');
                         return;
                     } else if (self.command.select.length > 1) {
-                        self.qt.alert('信息提示', '只能选择一项进行修改名称');
+                        self.qt.warning('信息提示', '只能选择一项进行修改名称');
                         return;
                     }
                     //报错要修改的那项的名字
@@ -1613,7 +1609,7 @@ define([
                 var self = this;
                 var ids = [];
                 if (!self.group.current.select.length) {
-                    self.qt.alert('提示信息', '您没有勾选任何用户');
+                    self.qt.warning('提示信息', '您没有勾选任何用户');
                     return;
                 }
                 self.group.current.select.forEach(function (value) {
@@ -1632,7 +1628,7 @@ define([
                 var self = this;
                 var ids = [];
                 if (!self.group.current.select.length) {
-                    self.qt.alert('提示信息', '您没有勾选任何用户');
+                    self.qt.warning('提示信息', '您没有勾选任何用户');
                     return;
                 }
                 self.group.current.select.forEach(function (value) {

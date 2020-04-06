@@ -40,7 +40,7 @@ define([
             callMemberCommit: function () {
                 var self = this;
                 if (!self.tree.select) {
-                    self.qt.alert('提示信息', '您没有勾选任何用户');
+                    self.qt.warning('提示信息', '您没有勾选任何用户');
                     return;
                 }
                 if (self.type === 'call') { //呼叫
@@ -49,7 +49,6 @@ define([
                         serial:self.screenId
                     }, function (data) {
                         //动态弹窗，qt无法判断是哪个弹框，需要连到已有channel上，然后执行。解决播放器不实时更新，需要手动刷新的问题
-                        self.qt.linkedWebview('hidden',{id:'playCall', params:$.toJSON([data])});
                         self.handleWindowClose();
                     });
                 } else if (self.type === 'orient') { //专项
