@@ -88,4 +88,14 @@ public enum ChannelType {
 		}
 		throw new ErrorTypeException("type", type);
 	}
+	
+	public static final ChannelType fromPort(Long port) throws Exception{
+		ChannelType[] values = ChannelType.values();
+		for(ChannelType value: values){
+			if(value.getPort().equals(port)){
+				return value;
+			}
+		}
+		throw new ErrorTypeException("port", port);
+	}
 }

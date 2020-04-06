@@ -178,11 +178,13 @@ public class SerInfoAndNodeController extends ControllerBase {
 		}
 
 		try {
+			SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+			
 			SerInfoPO serInfoPO = new SerInfoPO();
 			BeanUtils.copyProperties(serInfoVO, serInfoPO);
 
 			serInfoPO.setSerUuid(BundlePO.createBundleId());
-			serInfoPO.setSerFactInfo(LdapContants.DEFAULT_FACT_UUID);
+			serInfoPO.setSerFactInfo(self.getNodeFactInfo());
 			serInfoPO.setSourceType(SOURCE_TYPE.SYSTEM);
 			serInfoPO.setSyncStatus(SYNC_STATUS.ASYNC);
 
@@ -238,22 +240,18 @@ public class SerInfoAndNodeController extends ControllerBase {
 
 		try {
 			
-			SerNodePO serNodePOTemp = serNodeDao.findTopByNodeUuid(LdapContants.DEFAULT_NODE_UUID);
-
-			if (serNodePOTemp != null) {
+			List<SerNodePO> serNodes = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
+			
+			if (serNodes != null && serNodes.size() > 0) {
 				data.put(ERRMSG, "不能再新增");
 				return data;
 			}
 
 			SerNodePO serNodePO = new SerNodePO();
 			BeanUtils.copyProperties(serNodeVO, serNodePO);
-			serNodePO.setNodeUuid(LdapContants.DEFAULT_NODE_UUID);
+//			serNodePO.setNodeUuid(LdapContants.DEFAULT_NODE_UUID);
 			
-			// 临时代码
-			// serNodePO.setNodeUuid(UUID.randomUUID().toString().replaceAll("-", ""));
-			
-			serNodePO.setNodeFactInfo(LdapContants.DEFAULT_FACT_UUID);
-			
+			serNodePO.setNodeUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 			
 			serNodePO.setNodeRelations("NULL");
 			serNodePO.setSourceType(SOURCE_TYPE.SYSTEM);
@@ -293,6 +291,7 @@ public class SerInfoAndNodeController extends ControllerBase {
 			serNodePOTemp.setNodeName(serNodeVO.getNodeName());
 			serNodePOTemp.setNodeFather(serNodeVO.getNodeFather());
 			serNodePOTemp.setNodeRelations(serNodeVO.getNodeRelations());
+			serNodePOTemp.setNodeFactInfo(serNodeVO.getNodeFactInfo());
 			serNodePOTemp.setSyncStatus(SYNC_STATUS.ASYNC);
 			serNodeDao.save(serNodePOTemp);
 

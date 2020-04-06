@@ -6,6 +6,7 @@ import com.suma.application.ldap.contants.LdapContants;
 import com.suma.application.ldap.user.po.LdapUserPo;
 import com.suma.application.ldap.util.Base64Util;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.sumavision.tetris.user.UserVO;
 
 @Component
@@ -19,7 +20,7 @@ public class LdapUserInfoUtil {
 	 * @param UserBO user 用户信息
 	 * @return LdapUserPo ldap用户信息
 	 */
-	public LdapUserPo pojoToLdap(UserBO user){
+	public LdapUserPo pojoToLdap(UserBO user, SerNodePO self){
 		
 		LdapUserPo ldapUser = new LdapUserPo();
 		ldapUser.setUserUuid(user.getUser().getUuid());
@@ -31,9 +32,8 @@ public class LdapUserInfoUtil {
 		ldapUser.setUserLevel(0);
 		ldapUser.setUserType(user.isAdmin() ? 2 : 1);
 		ldapUser.setUserOrg(user.getFolderUuid());
-		//TODO：这里的node写死的
-		ldapUser.setUserNode(LdapContants.DEFAULT_NODE_UUID);
-		ldapUser.setUserFactInfo(LdapContants.DEFAULT_FACT_UUID);
+		ldapUser.setUserNode(self.getNodeUuid());
+		ldapUser.setUserFactInfo(self.getNodeFactInfo());
 
 		return ldapUser;
 	}

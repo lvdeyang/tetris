@@ -1,41 +1,35 @@
 package com.sumavision.signal.bvc.http;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.Map.Entry;
 
-import org.apache.http.Consts;
-import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.params.HttpClientParams;
-import org.apache.http.entity.ContentType;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 //import org.apache.http.entity.mime.MultipartEntityBuilder;
 //import org.apache.http.entity.mime.content.FileBody;
 //import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
 
@@ -43,10 +37,10 @@ import org.apache.http.util.EntityUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 
 
 public class HttpClient {
-		
 	
 	/****************
 	 *  http POST方法
@@ -495,5 +489,105 @@ public class HttpClient {
 //        }  
 //        return result;
 //	}
+	
+	/****************
+	 *  http PUT方法
+	 ****************/
+	
+	//put
+	public static String put(String url, String params) throws Exception{
+		return put(url, params, Locale.ENGLISH);
+	}
+	
+	//put
+	public static String put(String url, String params, Locale locale) throws Exception{
+		return put(url, params, locale, null);
+	}
+	
+	public static String put(String url, String params, Locale locale, RequestConfig config) throws Exception{
+		CloseableHttpClient httpclient = null;
+		CloseableHttpResponse response = null;
+		BufferedReader bReader = null;
+		StringBuilder sBuilder = null;
+		try{
+			httpclient = HttpClients.createDefault();
+			HttpPut httpPut = new HttpPut(url);
+			if(config!=null) httpPut.setConfig(config);
+			httpPut.setHeader("Content-Type", "application/json");
+			httpPut.setHeader("Accept-Charset", "utf-8");
+			httpPut.setHeader("Accept-Language", locale.toLanguageTag());
+		         
+			httpPut.setEntity(new StringEntity(params, "utf-8"));
+		    response = httpclient.execute(httpPut);
+		    if(response.getStatusLine().getStatusCode() == 200){
+		    	HttpEntity entity = response.getEntity();
+		 	    InputStream in = entity.getContent();
+		 	    sBuilder = new StringBuilder();
+		 	    String line = "";
+		 	    bReader = new BufferedReader(new InputStreamReader(in, "utf-8"));
+		 	    while ((line=bReader.readLine()) != null) {
+		 	    	sBuilder.append(line);
+		 		}
+		 	    EntityUtils.consume(entity);
+		    }else{
+		    	return response.getStatusLine().getStatusCode()+"@$$@请求失败";
+		    }
+		}finally{
+			if(bReader != null) bReader.close();
+			if(response != null) response.close();
+			if(httpclient != null) httpclient.close();
+		}
+		return sBuilder==null?null:sBuilder.toString();
+	}
+	
+	/******************
+	 *  http DELETE方法
+	 *****************/
+	
+	//delete
+	public static String delete(String url, String params) throws Exception{
+		return delete(url, params, Locale.ENGLISH);
+	}
+	
+	//delete
+	public static String delete(String url, String params, Locale locale) throws Exception{
+		return delete(url, params, locale, null);
+	}
+	
+	public static String delete(String url, String params, Locale locale, RequestConfig config) throws Exception{
+		CloseableHttpClient httpclient = null;
+		CloseableHttpResponse response = null;
+		BufferedReader bReader = null;
+		StringBuilder sBuilder = null;
+		try{
+			httpclient = HttpClients.createDefault();
+			HttpDeleteWithBody httpDelete = new HttpDeleteWithBody(url);
+			if(config!=null) httpDelete.setConfig(config);
+			httpDelete.setHeader("Content-Type", "application/json");
+			httpDelete.setHeader("Accept-Charset", "utf-8");
+			httpDelete.setHeader("Accept-Language", locale.toLanguageTag());
+		       
+			httpDelete.setEntity(new StringEntity(params, "utf-8"));
+		    response = httpclient.execute(httpDelete);
+		    if(response.getStatusLine().getStatusCode() == 200){
+		    	HttpEntity entity = response.getEntity();
+		 	    InputStream in = entity.getContent();
+		 	    sBuilder = new StringBuilder();
+		 	    String line = "";
+		 	    bReader = new BufferedReader(new InputStreamReader(in, "utf-8"));
+		 	    while ((line=bReader.readLine()) != null) {
+		 	    	sBuilder.append(line);
+		 		}
+		 	    EntityUtils.consume(entity);
+		    }else{
+		    	return response.getStatusLine().getStatusCode()+"@$$@请求失败";
+		    }
+		}finally{
+			if(bReader != null) bReader.close();
+			if(response != null) response.close();
+			if(httpclient != null) httpclient.close();
+		}
+		return sBuilder==null?null:sBuilder.toString();
+	}
 	
 }

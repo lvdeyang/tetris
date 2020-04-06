@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.resouce.event.ResourceUserRegisteredFeign;
-import com.sumavision.tetris.user.event.WebsocketSessionClosedEvent;
+import com.sumavision.tetris.websocket.core.event.WebsocketSessionClosedEvent;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -18,7 +18,7 @@ public class ResourceUserOfflineListener implements ApplicationListener<Websocke
 	@Override
 	public void onApplicationEvent(WebsocketSessionClosedEvent event) {
 		try {
-			resourceUserRegisteredFeign.userOffline(event.getUserId());
+			resourceUserRegisteredFeign.userOnline(event.getUserId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

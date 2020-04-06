@@ -19,12 +19,14 @@ import com.suma.application.ldap.user.po.LdapUserPo;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
+import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.ldap.LdapDepartInfoUtil;
 import com.suma.venus.resource.ldap.LdapUserInfoUtil;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.service.UserQueryService;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.user.UserQuery;
@@ -62,6 +64,9 @@ public class DepartSyncLdapUtils {
 	
 	@Autowired
 	private UserService userFeignService;
+	
+	@Autowired
+	private SerNodeDao serNodeDao;
 
 	public int handleSyncFromLdap() {
 		List<LdapDepartmentPo> ldapDeparts = ldapDepartmentDao.queryAllDepartment();
@@ -105,6 +110,8 @@ public class DepartSyncLdapUtils {
 		List<FolderUserMap> existMaps = folderUserMapDao.findFromLdapMap();
 		List<FolderUserMap> needRemoveMaps = new ArrayList<FolderUserMap>();
 		
+		SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+		
 		if (!CollectionUtils.isEmpty(ldapUsers)) {
 			for(FolderUserMap map: existMaps){
 				boolean needDelete = true;
@@ -120,7 +127,7 @@ public class DepartSyncLdapUtils {
 			}
 			
 			for(LdapUserPo ldapUser: ldapUsers){
-				if(!ldapUser.getUserFactInfo().equals(LdapContants.DEFAULT_FACT_UUID)){
+				if(!ldapUser.getUserFactInfo().equals(self.getNodeFactInfo())){
 					boolean needAdd = true;
 					for(FolderUserMap map: existMaps){
 						if(map.getUserUuid().equals(ldapUser.getUserUuid())){
@@ -199,12 +206,13 @@ public class DepartSyncLdapUtils {
 		for (FolderPO folderPO : folderPOs) {
 			try {
 				List<LdapDepartmentPo> ldapDepartmentPos = ldapDepartmentDao.getDepartByUuid(folderPO.getUuid());
+				SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 				if (!CollectionUtils.isEmpty(ldapDepartmentPos)) {
-					LdapDepartmentPo ldapDepart = ldapDepartInfoUtil.pojoToLdap(folderPO);
+					LdapDepartmentPo ldapDepart = ldapDepartInfoUtil.pojoToLdap(folderPO, self);
 					ldapDepartmentDao.update(ldapDepart);
 				} else {
 					// 新建
-					LdapDepartmentPo ldapDepart = ldapDepartInfoUtil.pojoToLdap(folderPO);
+					LdapDepartmentPo ldapDepart = ldapDepartInfoUtil.pojoToLdap(folderPO, self);
 					ldapDepartmentDao.save(ldapDepart);
 				}
 
@@ -236,15 +244,16 @@ public class DepartSyncLdapUtils {
 		}
 		
 		List<UserBO> users = userService.queryUsersByUserIds(userIds, TerminalType.PC_PORTAL);
+		SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 		for(UserBO user: users){
 			List<LdapUserPo> ldapUserPoList = ldapUserDao.getUserByUuid(user.getUser().getUuid());
 			
 			if (!CollectionUtils.isEmpty(ldapUserPoList)) {
 				// TODO
-				LdapUserPo ldapUser = ldapUserInfoUtil.pojoToLdap(user);
+				LdapUserPo ldapUser = ldapUserInfoUtil.pojoToLdap(user, self);
 				ldapUserDao.update(ldapUser);
 			} else {
-				LdapUserPo ldapUser = ldapUserInfoUtil.pojoToLdap(user);
+				LdapUserPo ldapUser = ldapUserInfoUtil.pojoToLdap(user, self);
 				ldapUserDao.save(ldapUser);
 			}
 		}
@@ -288,8 +297,10 @@ public class DepartSyncLdapUtils {
 	 */
 	public void handleFolderUserCleanUpLdap() throws Exception{
 		
+		SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+		
 		//删除本地上传的ldap数据
-		List<LdapUserPo> ldapUsers = ldapUserDao.getUserByFactInfo(LdapContants.DEFAULT_FACT_UUID);
+		List<LdapUserPo> ldapUsers = ldapUserDao.getUserByFactInfo(self.getNodeFactInfo());
 		ldapUserDao.removeAll(ldapUsers);
 		
 		//删除本地下载的ldap数据

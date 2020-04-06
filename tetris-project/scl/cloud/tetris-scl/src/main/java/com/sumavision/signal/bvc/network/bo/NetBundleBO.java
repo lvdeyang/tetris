@@ -15,7 +15,7 @@ public class NetBundleBO {
 	
 	/** 设备ip */
 	private String bundleIp;
-	
+
 	/** 网络id */
 	private String netId;
 	

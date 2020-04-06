@@ -17,8 +17,10 @@ import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
+import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.ldap.LdapEquipInfoUtil;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.service.BundleService;
@@ -55,6 +57,9 @@ public class EquipSyncLdapUtils {
 
 	@Autowired
 	private LockBundleParamDao lockBundleParamDao;
+	
+	@Autowired
+	private SerNodeDao serNodeDao;
 
 	public int handleSyncFromLdap() {
 		List<LdapEquipPo> ldapEquips = ldapEquipDao.queryAllEquips();
@@ -140,19 +145,20 @@ public class EquipSyncLdapUtils {
 
 		}
 
+		SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 		List<BundlePO> successBundles = new ArrayList<BundlePO>();
 		for (BundlePO bundleToLdap : bundlesToLdap) {
 			try {
 				List<LdapEquipPo> oldLdapEquips = ldapEquipDao.getEquipByIUuid(bundleToLdap.getBundleId());
 				if (!CollectionUtils.isEmpty(oldLdapEquips)) {
-					LdapEquipPo ldapEquip = ldapEquipInfoUtil.pojoToLdap(bundleToLdap);
+					LdapEquipPo ldapEquip = ldapEquipInfoUtil.pojoToLdap(bundleToLdap, self);
 					if (null == ldapEquip) {
 						continue;
 					}
 					ldapEquipDao.update(ldapEquip);
 				} else {
 					// 新建
-					LdapEquipPo ldapEquip = ldapEquipInfoUtil.pojoToLdap(bundleToLdap);
+					LdapEquipPo ldapEquip = ldapEquipInfoUtil.pojoToLdap(bundleToLdap, self);
 					if (null == ldapEquip) {
 						continue;
 					}

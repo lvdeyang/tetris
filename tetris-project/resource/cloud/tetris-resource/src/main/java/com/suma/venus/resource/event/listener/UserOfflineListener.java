@@ -14,9 +14,10 @@ import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.lianwang.status.StatusXMLUtil;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.sumavision.tetris.auth.token.TerminalType;
-import com.sumavision.tetris.user.event.WebsocketSessionClosedEvent;
+import com.sumavision.tetris.websocket.core.event.WebsocketSessionClosedEvent;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -34,6 +35,9 @@ public class UserOfflineListener implements ApplicationListener<WebsocketSession
 	@Autowired
 	private FolderDao folderDao;
 	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
+	
 	@Override
 	public void onApplicationEvent(WebsocketSessionClosedEvent event) {
 		try {
@@ -41,12 +45,14 @@ public class UserOfflineListener implements ApplicationListener<WebsocketSession
 			if(map != null && map.getFolderId() != null){
 				FolderPO folder = folderDao.findOne(map.getFolderId());
 				
+				//本系统下的用户不在map里面存状态
 				if(folder != null && folder.getToLdap()){
+					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					UserBO userBO = userQueryService.queryUserByUserId(event.getUserId(), TerminalType.QT_ZK);
 					userBO.setLogined(false);
 					List<UserBO> localUserBOs = new ArrayList<UserBO>();
 					localUserBOs.add(userBO);
-					statusXMLUtil.sendResourcesXmlMessage(null, null, localUserBOs, "suma-venus-access-lianwang", 1500);
+					statusXMLUtil.sendResourcesXmlMessage(null, null, localUserBOs, connectCenterLayerID, 1500);
 				}
 			}
 		} catch (Exception e) {

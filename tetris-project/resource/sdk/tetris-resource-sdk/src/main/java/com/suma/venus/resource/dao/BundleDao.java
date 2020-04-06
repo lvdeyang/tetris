@@ -40,6 +40,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 
 	public BundlePO findByUsername(String username);
 	
+	public List<BundlePO> findByUsernameIn(Collection<String> usernames);
+	
 	public BundlePO findByUserIdAndDeviceModel(Long userId, String deviceModel);
 	
 	public List<BundlePO> findByUserIdInAndDeviceModel(Collection<Long> userIds, String deviceModel);

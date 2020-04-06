@@ -3,6 +3,7 @@ package com.sumavision.signal.bvc.network.po;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import com.sumavision.signal.bvc.entity.enumeration.SrcType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -23,8 +24,8 @@ public class NetworkInputPO extends AbstractBasePO{
 	/** 设备channelId */
 	private String channelId;
 	
-	/** 设备ip */
-	private String bundleIp;
+	/** 调度网络ip */
+	private String netIp;
 	
 	/** 调度port */
 	private Long port;
@@ -34,6 +35,9 @@ public class NetworkInputPO extends AbstractBasePO{
 	
 	/** 调度会话id */
 	private Long sid;
+	
+	/** 输入类型 */
+	private SrcType type;
 
 	public String getBundleId() {
 		return bundleId;
@@ -51,12 +55,12 @@ public class NetworkInputPO extends AbstractBasePO{
 		this.channelId = channelId;
 	}
 
-	public String getBundleIp() {
-		return bundleIp;
+	public String getNetIp() {
+		return netIp;
 	}
 
-	public void setBundleIp(String bundleIp) {
-		this.bundleIp = bundleIp;
+	public void setNetIp(String netIp) {
+		this.netIp = netIp;
 	}
 
 	public Long getPort() {

@@ -25,6 +25,44 @@ public class SerInfoPO extends CommonPO<SerInfoPO>{
 
 	private SYNC_STATUS syncStatus = SYNC_STATUS.ASYNC;
 	private SOURCE_TYPE sourceType = SOURCE_TYPE.SYSTEM;
+	
+	/**
+	 * 节点设备类型<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月3日 下午5:53:19
+	 */
+	public enum SerInfoType{
+		BUSINESS("业务控制单元", 1),
+		ENCODER("编码设备", 2),
+		DECODER("解码设备", 3),
+		APPLICATION("应用服务单元", 4),
+		SIGNAL("信令控制单元", 5),
+		MEDIA("媒体处理服务单元", 6),
+		STORAGE("媒体存储服务单元", 7),
+		SIGNAL_ZUUL("信令网关服务单元", 8),
+		MEDIA_ZUUL("媒体网关服务单元", 9),
+		DIRECTOR("导播控制服务单元", 10),
+		ENCODER_DECODER("编解码一体设备", 11);
+		
+		private String name;
+		
+		private Integer num;
+		
+		private SerInfoType(String name, Integer num){
+			this.name = name;
+			this.num = num;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public Integer getNum() {
+			return num;
+		}
+		
+	}
 
 	@Column
 	public String getSerUuid() {

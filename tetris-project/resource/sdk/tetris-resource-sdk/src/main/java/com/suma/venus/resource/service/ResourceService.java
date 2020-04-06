@@ -182,7 +182,7 @@ public class ResourceService {
 					// 绑定的用户资源的resouceCode格式:userNo-r(录制)/userNo-w(点播)/userNo-hj(呼叫)
 					if (code.endsWith("-r") || code.endsWith("-w")) {
 						userNoSet.add(code.substring(0, code.length() - 2));
-					} else if (code.endsWith("-hj")) {
+					} else if (code.endsWith("-hj") || code.endsWith("-zk")) {
 						userNoSet.add(code.substring(0, code.length() - 3));
 					} else {
 						userNoSet.add(code);

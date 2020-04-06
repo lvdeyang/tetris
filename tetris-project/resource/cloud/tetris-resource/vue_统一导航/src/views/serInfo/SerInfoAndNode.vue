@@ -146,11 +146,9 @@
             <el-form-item label="服务节点归属" prop="serNode">
                 <el-input v-model="serInfoEditForm.serNode" auto-complete="off"></el-input>
             </el-form-item>
-            <!--
-                    <el-form-item label="厂商信息" prop="serFactInfo">
-                        <el-input type="textarea" v-model="serInfoEditForm.serFactInfo" auto-complete="off"></el-input>
-                    </el-form-item>
-            -->
+            <el-form-item label="厂商信息" prop="serFactInfo">
+                <el-input type="textarea" v-model="serInfoEditForm.serFactInfo" auto-complete="off"></el-input>
+            </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="handleEditSerInfo()" v-if="serInfoEditBtnVisible" >修改</el-button>
@@ -165,10 +163,11 @@
     <!-- SerNode列表 -->
     <el-table :data="serNodeVOs" highlight-current-row v-loading="listLoading" v-if="activeTab==='serNodeTab'" @selection-change="selsChange" style="width: 100%;">
         <el-table-column prop="id" v-if="false" width="60"></el-table-column>
-        <el-table-column prop="nodeName" label="节点名称" width="200"></el-table-column>
+        <el-table-column prop="nodeName" label="节点名称" width="160"></el-table-column>
         <el-table-column prop="nodeUuid" label="节点UUID" width="280"></el-table-column>
         <el-table-column prop="nodeFather" label="上级服务节点ID" width="280" sortable></el-table-column>
         <el-table-column prop="nodeRelations" label="关联服务节点ID" width="160" sortable></el-table-column>
+        <el-table-column prop="nodeFactInfo" label="厂商名称" width="160"></el-table-column>
         <el-table-column prop="sourceType" label="来源" :formatter="sourceTypeFormat" width="100"></el-table-column>
         <el-table-column prop="syncStatus" label="同步状态" :formatter="syncStatusFormat" width="100"></el-table-column>
 
@@ -237,9 +236,9 @@
             </el-button>
         </el-form-item>
 
-        <!--<el-form-item label="厂商信息" prop="nodeFactInfo">
-            <el-input type="textarea" v-model="serInfoEditForm.nodeFactInfo" auto-complete="off"></el-input>
-        </el-form-item>-->
+        <el-form-item label="厂商信息" prop="nodeFactInfo">
+            <el-input type="textarea" v-model="serNodeEditForm.nodeFactInfo" auto-complete="off"></el-input>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="handleEditSerNode()" v-if="serNodeEditBtnVisible">修改</el-button>
@@ -632,7 +631,7 @@ export default {
                             serType: this.serInfoEditForm.serType,
                             serPro: this.serInfoEditForm.serPro,
                             serNode: this.serInfoEditForm.serNode,
-                            // serFactInfo: this.serInfoEditForm.serFactInfo,
+                            serFactInfo: this.serInfoEditForm.serFactInfo,
                         };
 
                         console.log(JSON.stringify(para));
@@ -679,7 +678,7 @@ export default {
                             serType: this.serInfoEditForm.serType,
                             serPro: this.serInfoEditForm.serPro,
                             serNode: this.serInfoEditForm.serNode,
-                            // serFactInfo: this.serInfoEditForm.serFactInfo,
+                            serFactInfo: this.serInfoEditForm.serFactInfo,
                         };
 
                         console.log(JSON.stringify(para));
@@ -775,7 +774,7 @@ export default {
                             nodeName: this.serNodeEditForm.nodeName,
                             nodeFather: nodeFatherArray.join(','),
                             nodeRelations: nodeRelationArray.join(','),
-                            // nodeFactInfo: this.serNodeEditForm.nodeFactInfo,
+                            nodeFactInfo: this.serNodeEditForm.nodeFactInfo
                         };
 
                         modifySerNode(para).then(res => {
