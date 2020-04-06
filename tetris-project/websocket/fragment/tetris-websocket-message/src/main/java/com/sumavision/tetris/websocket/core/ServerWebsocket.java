@@ -54,6 +54,7 @@ public class ServerWebsocket {
 		sessionMetadataService.add(user, session);
 		//messageService.offlineMessage(user.getId());
 		System.out.println(new StringBufferWrapper().append("用户：").append(user.getNickname()).append("连上来啦...").toString());
+		eventPublisher.publishWebsocketSessionOpenEvent(user.getId());
     }
 
     @OnClose
