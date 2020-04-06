@@ -9,9 +9,11 @@ import com.suma.application.ldap.contants.LdapContants;
 import com.suma.application.ldap.equip.po.LdapEquipPo;
 import com.suma.application.ldap.util.Base64Util;
 import com.suma.venus.resource.dao.FolderDao;
+import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
@@ -71,7 +73,8 @@ public class LdapEquipInfoUtil {
 		return bundle;
 	}
 	
-	public LdapEquipPo pojoToLdap(BundlePO bundle){
+	public LdapEquipPo pojoToLdap(BundlePO bundle, SerNodePO self){
+		
 		LdapEquipPo ldapEquip = new LdapEquipPo();
 		ldapEquip.setEquipUuid(bundle.getBundleId());
 		ldapEquip.setEquipNo(bundle.getUsername());
@@ -91,8 +94,8 @@ public class LdapEquipInfoUtil {
 		}
 		ldapEquip.setEquipOrg(folder.getUuid());
 		
-		ldapEquip.setEquipNode(null==bundle.getEquipNode() ? LdapContants.DEFAULT_NODE_UUID : bundle.getEquipNode());
-		ldapEquip.setEquipFactInfo(LdapContants.DEFAULT_FACT_UUID);
+		ldapEquip.setEquipNode(null==bundle.getEquipNode() ? self.getNodeUuid(): bundle.getEquipNode());
+		ldapEquip.setEquipFactInfo(self.getNodeFactInfo());
 		
 		//获取bundle的编码器类型
 		Integer codecType = channelSchemeService.getCoderDeviceType(bundle.getBundleId());

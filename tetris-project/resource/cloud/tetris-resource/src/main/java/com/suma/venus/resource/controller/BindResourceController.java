@@ -38,6 +38,7 @@ import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
+import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.lianwang.auth.AuthNotifyXml;
@@ -51,8 +52,10 @@ import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.UserQueryService;
@@ -101,6 +104,9 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private SerNodeDao serNodeDao;
 
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -637,6 +643,7 @@ public class BindResourceController extends ControllerBase {
 					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, new ArrayList<String>(), readCheckList,
 							writeCheckList, new ArrayList<String>());
 					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
+					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					for (UserBO userBO : userBOs) {
 						if ("ldap".equals(userBO.getCreater())) {
 							for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
@@ -645,7 +652,7 @@ public class BindResourceController extends ControllerBase {
 									continue;
 								}
 								AuthNotifyXml authNotifyXml = new AuthNotifyXml();
-								authNotifyXml.setAuthnodeid(LdapContants.DEFAULT_NODE_UUID);
+								authNotifyXml.setAuthnodeid(self.getNodeUuid());
 								authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
 								authNotifyXml.setUserid(userBO.getUserNo());
 								authNotifyXml.setOperation(entry.getValue().getDevOprType());
@@ -773,11 +780,12 @@ public class BindResourceController extends ControllerBase {
 					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, readCheckList, writeCheckList,
 							hjCheckList);
 					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
+					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					for (UserBO userBO : userBOs) {
 						if ("ldap".equals(userBO.getCreater())) {
 							for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
 								AuthNotifyXml authNotifyXml = new AuthNotifyXml();
-								authNotifyXml.setAuthnodeid(LdapContants.DEFAULT_NODE_UUID);
+								authNotifyXml.setAuthnodeid(self.getNodeUuid());
 								authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
 								authNotifyXml.setUserid(userBO.getUserNo());
 								authNotifyXml.setOperation(entry.getValue().getUserOprType());
