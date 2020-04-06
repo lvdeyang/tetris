@@ -14,6 +14,6 @@ public interface LdapContants {
 	public static final String EQUIP_ENCODE = "2";
 	public static final String EQUIP_DECODE = "3";
 	
-    public final static String DEFAULT_NODE_UUID = "f9ec9048025840e4a427ab8dc8475652";
-    public final static String DEFAULT_FACT_UUID = "SUMA";
+    /*public final static String DEFAULT_NODE_UUID = "f9ec9048025840e4a427ab8dc8475652";
+    public final static String DEFAULT_FACT_UUID = "SUMA";*/
 }

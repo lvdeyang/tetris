@@ -1,16 +1,94 @@
 package com.suma.venus.resource.service.router;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
+/**
+ * 路由相关Service<br/>
+ * <b>作者:</b>wjw<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年4月6日 上午10:00:57
+ */
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class RouterService {
+	
+	/**
+	 * 起点到终点的最优路径<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月6日 上午9:59:27
+	 * @param List<SerNodePO> nodes 所有节点信息
+	 * @param SerNodePO start 起点信息
+	 * @param SerNodePO end 终点信息
+	 * @return String 路径（uuid,uuid,uuid）
+	 */
+	public String queryReasonableRouter(
+			List<SerNodePO> nodes, 
+			SerNodePO start, 
+			SerNodePO end) throws Exception{
+		
+		List<RouterNodeBO> nodeBOs = new ArrayList<RouterNodeBO>();
+		for(SerNodePO node: nodes){
+			nodeBOs.add(generateRouterNodeBO(node, nodes));
+		}
+		
+		RouterNodeBO startBO = generateRouterNodeBO(start, nodes);
+		RouterNodeBO endBO = generateRouterNodeBO(end, nodes); 
+		
+		return queryReasonableRouter(nodeBOs, startBO, endBO);
+	}
+	
+	/**
+	 * nodePO生成nodeBO<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月6日 上午9:41:41
+	 * @param SerNodePO node 节点数据
+	 * @param List<SerNodePO> all 所有节点信息
+	 * @return RouterNodeBO 节点路由信息
+	 */
+	public RouterNodeBO generateRouterNodeBO(SerNodePO node, List<SerNodePO> all) throws Exception{
+		
+		RouterNodeBO nodeBO = new RouterNodeBO();
+		nodeBO.setNodeId(node.getNodeUuid());
+		nodeBO.setRelations(new ArrayList<String>());
+		
+		//父节点
+		if(node.getNodeFather() != null && !node.getNodeFather().equals("NULL")){
+			String[] fatherNodes = node.getNodeFather().split(",");
+			nodeBO.getRelations().addAll(Arrays.asList(fatherNodes));
+		}
+		
+		//关联节点
+		if(node.getNodeRelations() != null && !node.getNodeRelations().equals("NULL")){
+			String[] relationNodes = node.getNodeRelations().split(",");
+			nodeBO.getRelations().addAll(Arrays.asList(relationNodes));
+		}
+		
+		//子节点
+		for(SerNodePO nodePO: all){
+			String nodeFather = nodePO.getNodeFather();
+			if(nodeFather != null && !nodeFather.equals("NULL")){
+				String[] fatherNodes = nodePO.getNodeFather().split(",");
+				List<String> _fathers = Arrays.asList(fatherNodes);
+				if(_fathers.contains(node.getNodeUuid())){
+					nodeBO.getRelations().add(nodePO.getNodeUuid());
+				}
+			}
+		}
+		
+		return nodeBO;
+		
+	}
 	
 	/**
 	 * 起点到终点的最优路径<br/>
@@ -22,13 +100,16 @@ public class RouterService {
 	 * @param RouterNodeBO end 终点
 	 * @return String 路径信息
 	 */
-	public static String queryReasonableRouter(
+	public String queryReasonableRouter(
 			List<RouterNodeBO> nodes, 
 			RouterNodeBO start, 
 			RouterNodeBO end) throws Exception{
 		
 		if(start.getNodeId().equals(end.getNodeId())){
-			return start.getNodeId();
+			return new StringBufferWrapper().append(start.getNodeId())
+											.append(",")
+											.append(end.getNodeId())
+											.toString();
 		}
 		
 		if(start.getRelations().contains(end.getNodeId())){
@@ -48,10 +129,7 @@ public class RouterService {
 		
 		RouterNodeBO nodeBO = queryReasonableRouter(nodes, _nodes, end);
 		
-		return new StringBufferWrapper().append(nodeBO.getRouter())
-										.append(",")
-										.append(end.getNodeId())
-										.toString();
+		return nodeBO.getRouter();
 		
 	}
 
@@ -65,14 +143,22 @@ public class RouterService {
 	 * @param RouterNodeBO end 终点
 	 * @return RouterNodeBO 节点路径信息，放在router里面
 	 */
-	public static RouterNodeBO queryReasonableRouter(
+	public RouterNodeBO queryReasonableRouter(
 			List<RouterNodeBO> nodes, 
 			List<RouterNodeBO> starts, 
 			RouterNodeBO end) throws Exception{
 		
+		if(starts == null || starts.size() <= 0){
+			return new RouterNodeBO().setRouter(null);
+		}
+		
 		for(RouterNodeBO start: starts){
 			
 			if(start.getRelations().contains(end.getNodeId())){
+				start.setRouter(new StringBufferWrapper().append(start.getRouter())
+									                     .append(",")
+									                     .append(end.getNodeId())
+									                     .toString());
 				return start;
 			}
 			
@@ -103,7 +189,7 @@ public class RouterService {
 	 * @param RouterNodeBO _node 某节点
 	 * @return List<RouterNodeBO> 某节点所有关联节点
 	 */
-	public static List<RouterNodeBO> queryNodes(List<RouterNodeBO> nodes, RouterNodeBO _node) throws Exception{
+	public List<RouterNodeBO> queryNodes(List<RouterNodeBO> nodes, RouterNodeBO _node) throws Exception{
 		
 		List<RouterNodeBO> nodeList = new ArrayList<RouterNodeBO>();
 		for(RouterNodeBO node: nodes){
@@ -123,24 +209,20 @@ public class RouterService {
 		node1.setNodeId("1");
 	    node1.setRelations(new ArrayList<String>());
 	    node1.getRelations().add("2");
-	    node1.getRelations().add("3");
 	    
 	    RouterNodeBO node2 = new RouterNodeBO();
 	    node2.setNodeId("2");
 	    node2.setRelations(new ArrayList<String>());
 	    node2.getRelations().add("1");
-	    node2.getRelations().add("4");
 	    
 	    RouterNodeBO node3 = new RouterNodeBO();
 	    node3.setNodeId("3");
 	    node3.setRelations(new ArrayList<String>());
-	    node3.getRelations().add("1");
 	    node3.getRelations().add("5");
 	    
 	    RouterNodeBO node4 = new RouterNodeBO();
 	    node4.setNodeId("4");
 	    node4.setRelations(new ArrayList<String>());
-	    node4.getRelations().add("2");
 	    node4.getRelations().add("5");
 	    
 	    RouterNodeBO node5 = new RouterNodeBO();
@@ -154,8 +236,9 @@ public class RouterService {
 	    all.add(node2);
 	    all.add(node3);
 	    all.add(node4);
+	    all.add(node5);
 	    
-	    System.out.println(RouterService.queryReasonableRouter(all, node4, node3));
+	    //System.out.println(RouterService.queryReasonableRouter(all, node4, node4));
 		
 	}
 	

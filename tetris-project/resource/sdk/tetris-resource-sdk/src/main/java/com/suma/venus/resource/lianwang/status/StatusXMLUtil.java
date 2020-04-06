@@ -12,8 +12,10 @@ import com.suma.venus.message.service.MessageService;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.LdapContants;
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.SerInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.service.ChannelSchemeService;
@@ -38,14 +40,18 @@ public class StatusXMLUtil {
 	@Autowired
 	private TetrisDispatchService tetrisDispatchService;
 	
+	@Autowired
+	private SerNodeDao serNodeDao;
+	
 	private volatile boolean fullSending = false;
 	
 	//从userBO提取信息得到userStatusXml
-	public UserStatusXML fromUserBO(UserBO userBO){
+	public UserStatusXML fromUserBO(UserBO userBO, SerNodePO node){
+		
 		UserStatusXML userStatusXML = new UserStatusXML();
 		userStatusXML.setUserid(userBO.getUserNo());
 		userStatusXML.setStatus(userBO.isLogined()?1:0);
-		userStatusXML.setVisitednodeid(LdapContants.DEFAULT_NODE_UUID);
+		userStatusXML.setVisitednodeid(node.getNodeUuid());
 		//按绑定的编码器
 		/*if(null != userBO.getEncoderId()){
 			BundlePO bundle = bundleDao.findByBundleId(userBO.getEncoderId());
@@ -71,25 +77,25 @@ public class StatusXMLUtil {
 	}
 	
 	//从bundlePO提取信息得到DeviceStatusXML
-	public DeviceStatusXML fromBundlePO(BundlePO bundlePO){
+	public DeviceStatusXML fromBundlePO(BundlePO bundlePO, SerNodePO node){
 		DeviceStatusXML deviceStatusXML = new DeviceStatusXML();
 		//devID为11位格式，对应的我们bundle的用户账号
 		deviceStatusXML.setDevid(bundlePO.getUsername());
 		deviceStatusXML.setDevtype(channelSchemeService.getCoderDeviceType(bundlePO.getBundleId()));
 		deviceStatusXML.setStatus(ONLINE_STATUS.ONLINE==bundlePO.getOnlineStatus()?1:0);
-		deviceStatusXML.setVisitednodeid(LdapContants.DEFAULT_NODE_UUID);
+		deviceStatusXML.setVisitednodeid(node.getNodeUuid());
 		
 		return deviceStatusXML;
 	}
 	
-	public DeviceStatusXML fromSerInfo(SerInfoPO serInfoPO){
+	public DeviceStatusXML fromSerInfo(SerInfoPO serInfoPO, SerNodePO node){
 		DeviceStatusXML deviceStatusXML = new DeviceStatusXML();
 		//devID为11位格式，对应的我们bundle的用户账号
 		deviceStatusXML.setDevid(serInfoPO.getSerNo());
 		deviceStatusXML.setDevtype(serInfoPO.getSerType());
 		//默认上线
 		deviceStatusXML.setStatus(1);
-		deviceStatusXML.setVisitednodeid(LdapContants.DEFAULT_NODE_UUID);
+		deviceStatusXML.setVisitednodeid(node.getNodeUuid());
 		return deviceStatusXML;
 	}
 	
@@ -189,22 +195,25 @@ public class StatusXMLUtil {
 	
 	//根据设备和用户信息构造NotifyUserDeviceXML
 	public NotifyUserDeviceXML createResourcesXml(List<SerInfoPO> serInfoPOs,List<BundlePO> localDevs, List<UserBO> localUserBOs) {
+		
+		SerNodePO serNode = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+		
 		NotifyUserDeviceXML resourcesXml = new NotifyUserDeviceXML();
 		if(null != serInfoPOs){
 			for(SerInfoPO serInfoPO : serInfoPOs){
-				resourcesXml.getDevlist().add(fromSerInfo(serInfoPO));
+				resourcesXml.getDevlist().add(fromSerInfo(serInfoPO, serNode));
 			}
 		}
 		
 		if(null != localDevs){
 			for(BundlePO localDev : localDevs){
-				resourcesXml.getDevlist().add(fromBundlePO(localDev));
+				resourcesXml.getDevlist().add(fromBundlePO(localDev, serNode));
 			}
 		}
 
 		if(null != localUserBOs){
 			for(UserBO localUser : localUserBOs){
-				resourcesXml.getUserlist().add(fromUserBO(localUser));
+				resourcesXml.getUserlist().add(fromUserBO(localUser, serNode));
 			}
 		}
 		

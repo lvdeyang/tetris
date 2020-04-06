@@ -14,14 +14,16 @@ import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.lianwang.status.StatusXMLUtil;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.sumavision.tetris.auth.token.TerminalType;
-import com.sumavision.tetris.websocket.core.event.WebsocketSessionClosedEvent;
+import com.sumavision.tetris.websocket.core.event.WebsocketSessionOpenEvent;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class UserOfflineListener implements ApplicationListener<WebsocketSessionClosedEvent>{
+public class UserOnlineListener implements ApplicationListener<WebsocketSessionOpenEvent>{
 
 	@Autowired
 	private UserQueryService userQueryService;
@@ -39,7 +41,7 @@ public class UserOfflineListener implements ApplicationListener<WebsocketSession
 	private ResourceRemoteService resourceRemoteService;
 	
 	@Override
-	public void onApplicationEvent(WebsocketSessionClosedEvent event) {
+	public void onApplicationEvent(WebsocketSessionOpenEvent event) {
 		try {
 			FolderUserMap map = folderUserMapDao.findByUserId(event.getUserId());
 			if(map != null && map.getFolderId() != null){
@@ -49,7 +51,7 @@ public class UserOfflineListener implements ApplicationListener<WebsocketSession
 				if(folder != null && folder.getToLdap()){
 					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					UserBO userBO = userQueryService.queryUserByUserId(event.getUserId(), TerminalType.QT_ZK);
-					userBO.setLogined(false);
+					userBO.setLogined(true);
 					List<UserBO> localUserBOs = new ArrayList<UserBO>();
 					localUserBOs.add(userBO);
 					statusXMLUtil.sendResourcesXmlMessage(null, null, localUserBOs, connectCenterLayerID, 1500);

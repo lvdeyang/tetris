@@ -8,9 +8,13 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.JsonArray;
 import com.sumavision.signal.bvc.http.HttpClient;
 import com.sumavision.signal.bvc.network.bo.CreateInputResponseBO;
 import com.sumavision.signal.bvc.network.bo.CreateOutputResponseBO;
+import com.sumavision.signal.bvc.network.bo.CutSwitchResponseBO;
+import com.sumavision.signal.bvc.network.bo.SwitchRequestBO;
+import com.sumavision.signal.bvc.network.bo.SwitchResponseBO;
 
 @Service
 public class NetworkHttpService {
@@ -74,5 +78,61 @@ public class NetworkHttpService {
 		return createOutputResponse;
 	}
 	
+	/**
+	 * 切换数据流<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月23日 上午10:19:53
+	 * @param String netIp 网络ip
+	 * @param List<SwitchRequestBO> requests 切换数据流请求
+	 * @return List<SwitchResponseBO> 返回
+	 */
+	public List<SwitchResponseBO> switchData(String netIp, List<SwitchRequestBO> requests) throws Exception{
+		
+		String response = HttpClient.put("http://" + netIp + ":8100" + "/nm/Switch/Sid", JSON.toJSONString(requests));
+		
+		List<SwitchResponseBO> switchResponse = JSONArray.parseArray(response, SwitchResponseBO.class);
+		
+		return switchResponse;
+	}
+	
+	/**
+	 * 销毁网络资源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月23日 上午10:38:52
+	 * @param String netIp 网络ip
+	 * @param List<Integer> sids 会话id数组
+	 */
+	public void destory(String netIp, List<Integer> sids) throws Exception{
+		
+		HttpClient.delete("http://" + netIp + ":8100" + "/nm/DestroyResource", JSON.toJSONString(sids));
+		
+	}
+	
+	/**
+	 * 断开切换<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月24日 下午3:29:27
+	 * @param String netIp 网络ip
+	 * @param List<Long> sids 输出sid列表
+	 * @return List<CutSwitchResponseBO> 断开切换返回
+	 */
+	public List<CutSwitchResponseBO> cutSwitch(String netIp, List<Long> sids) throws Exception{
+		
+		List<JSONObject> requests = new ArrayList<JSONObject>();
+		for(Long sid: sids){
+			JSONObject request = new JSONObject();
+			request.put("sid_out", sid);
+			requests.add(request);
+		}
+		
+		String response = HttpClient.put("http://" + netIp + ":8100" + "/nm/BreakSwitch/Sid", JSON.toJSONString(requests));
+		
+		List<CutSwitchResponseBO> cutSwitchResponse = JSONArray.parseArray(response, CutSwitchResponseBO.class);
+		
+		return cutSwitchResponse;
+	}
 	
 }

@@ -115,6 +115,13 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- ldap -->
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-ldap</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- eureka依赖 -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

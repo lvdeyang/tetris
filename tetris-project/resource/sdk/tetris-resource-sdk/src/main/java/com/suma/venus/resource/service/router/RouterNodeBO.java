@@ -38,8 +38,9 @@ public class RouterNodeBO {
 		return router;
 	}
 
-	public void setRouter(String router) {
+	public RouterNodeBO setRouter(String router) {
 		this.router = router;
+		return this;
 	}
 	
 }

@@ -6,19 +6,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.resouce.event.ResourceUserRegisteredFeign;
-import com.sumavision.tetris.websocket.core.event.WebsocketSessionClosedEvent;
+import com.sumavision.tetris.websocket.core.event.WebsocketSessionOpenEvent;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
-public class ResourceUserOfflineListener implements ApplicationListener<WebsocketSessionClosedEvent>{
+public class ResourceUserOnlineListener implements ApplicationListener<WebsocketSessionOpenEvent>{
 
 	@Autowired
 	private ResourceUserRegisteredFeign resourceUserRegisteredFeign;
 	
 	@Override
-	public void onApplicationEvent(WebsocketSessionClosedEvent event) {
+	public void onApplicationEvent(WebsocketSessionOpenEvent event) {
 		try {
-			resourceUserRegisteredFeign.userOnline(event.getUserId());
+			resourceUserRegisteredFeign.userOffline(event.getUserId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

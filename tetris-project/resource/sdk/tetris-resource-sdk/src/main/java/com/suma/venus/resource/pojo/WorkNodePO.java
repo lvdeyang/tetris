@@ -82,7 +82,8 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
 		ACCESS_DISPLAYCTRL("显控汇接网关"),
 		ACCESS_S100("流转发器接入"),
 		ACCESS_VODPROXY("点播代理服务设备"),
-		ACCESS_WEBRTC("webrtc接入");
+		ACCESS_WEBRTC("webrtc接入"),
+		ACCESS_LIANWANG("联网接入");
 		
         private String name;
         
