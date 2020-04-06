@@ -46,6 +46,12 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 	/** 目的，设备组成员id。-1表示不是成员 */
 	private Long dstMemberId = -1L;
 	
+	/** 目的号码 */
+	private String dstCode;
+	
+	/** 源号码 */
+	private String srcCode;
+	
 //	/** 源，设备组成员id。-1表示不是成员 */
 //	private Long srcMemberId = -1L;
 
@@ -600,6 +606,24 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 		this.dstMemberId = dstMemberId;
 	}
 	
+	@Column(name = "DST_CODE")
+	public String getDstCode() {
+		return dstCode;
+	}
+
+	public void setDstCode(String dstCode) {
+		this.dstCode = dstCode;
+	}
+
+	@Column(name = "SRC_CODE")
+	public String getSrcCode() {
+		return srcCode;
+	}
+
+	public void setSrcCode(String srcCode) {
+		this.srcCode = srcCode;
+	}
+
 	public CommandGroupForwardDemandPO() {}
 	
 	//建立设备转发使用
@@ -609,6 +633,8 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 			ForwardDstType forwardDstType,
 			Long dstMemberId,
 			String dstUserName,//Long srcMemberId,
+			String dstCode,
+			String srcCode,
 			String videoBundleId,
 			String videoBundleName,
 			String videoBundleType,
@@ -645,6 +671,8 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 		this.executeStatus = executeStatus;
 		this.forwardDstType = forwardDstType;
 		this.dstMemberId = dstMemberId;
+		this.dstCode = dstCode;
+		this.srcCode = srcCode;
 //		this.srcMemberId = srcMemberId;
 		
 		this.setUpdateTime(new Date());
@@ -701,6 +729,7 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 			ForwardDstType forwardDstType,
 			Long dstMemberId,
 			String dstUserName,
+			String dstCode,
 			String resourceId,
 			String resourceName,
 			String playUrl,
@@ -717,6 +746,7 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 		this.forwardDstType = forwardDstType;
 		this.dstMemberId = dstMemberId;
 		this.dstUserName = dstUserName;
+		this.dstCode = dstCode;
 //		this.srcMemberId = srcMemberId;
 		
 		this.setUpdateTime(new Date());
