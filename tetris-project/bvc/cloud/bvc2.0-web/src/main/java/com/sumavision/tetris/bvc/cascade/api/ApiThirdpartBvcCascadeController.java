@@ -66,6 +66,8 @@ public class ApiThirdpartBvcCascadeController {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月30日 下午5:53:38
+	 * @param seq String(uuid)
+	 * @param cmd query_node_info
 	 * @param layer_id 自己的接入id
 	 * @return 
 	 * {
@@ -97,7 +99,11 @@ public class ApiThirdpartBvcCascadeController {
 	@ResponseBody
 	@RequestMapping(value = "/query/node/info")
 	public Object queryNodeInfo(HttpServletRequest request) throws Exception{
-		
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String layer_id = requestWrapper.getString("layer_id");
+		String seq = requestWrapper.getString("seq");
+		String cmd = requestWrapper.getString("cmd");
+		resourceRemoteService.queryNodeInfo(layer_id, seq, cmd);
 		return null;
 	}
 	
@@ -107,6 +113,7 @@ public class ApiThirdpartBvcCascadeController {
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月30日 下午6:01:16
+	 * @param cmd:String(常量字符串, query_next_node),
 	 * @param seq:String(命令标识号),
 	 * @param no:String(待查询的号码),
 	 * @param type:String(all, device, user, app)
@@ -121,8 +128,12 @@ public class ApiThirdpartBvcCascadeController {
 	@ResponseBody
 	@RequestMapping(value = "/query/next/node")
 	public Object queryNextNode(HttpServletRequest request) throws Exception{
-		
-		return null;
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String no = requestWrapper.getString("no");
+		String seq = requestWrapper.getString("seq");
+		String cmd = requestWrapper.getString("cmd");
+		String type = requestWrapper.getString("type");
+		return resourceRemoteService.queryNextRouterNode(seq, cmd, no, type);
 	}
 	
 	
@@ -188,7 +199,7 @@ public class ApiThirdpartBvcCascadeController {
 		String cmd = requestWrapper.getString("cmd");
 		String app_num = requestWrapper.getString("app_num");
 		String status = requestWrapper.getString("status");
-		
+		resourceRemoteService.updateRouter(app_num, status);
 		return new HashMapWrapper<String, String>().put("seq", seq)
 												   .put("cmd", cmd)
 												   .getMap();
@@ -223,13 +234,7 @@ public class ApiThirdpartBvcCascadeController {
 		String seq = requestWrapper.getString("seq");
 		String cmd = requestWrapper.getString("cmd");
 		String app_num = requestWrapper.getString("app_num");
-		
-		return new HashMapWrapper<String, String>().put("seq", seq)
-												   .put("cmd", cmd)
-												   .put("app_num", app_num)
-												   .put("sync_info", "")
-												   .put("sync_route_info", "")
-												   .getMap();
+		return resourceRemoteService.querySyncInfo(seq, cmd, app_num);
 	}
 	
 	/**
