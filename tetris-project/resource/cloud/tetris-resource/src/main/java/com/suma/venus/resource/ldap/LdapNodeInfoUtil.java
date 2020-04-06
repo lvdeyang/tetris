@@ -21,12 +21,13 @@ public class LdapNodeInfoUtil implements InitializingBean{
 	
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		List<SerNodePO> serNodePOs = serNodeDao.findAll();
+		//手动创建
+		/*List<SerNodePO> serNodePOs = serNodeDao.findAll();
 		if(serNodePOs.isEmpty()){
 			SerNodePO serNodePO = new SerNodePO(LdapContants.DEFAULT_NODE_UUID, "SUMA服务节点",
 					"NULL", "NULL", LdapContants.DEFAULT_FACT_UUID);
 			serNodeDao.save(serNodePO);
-		}
+		}*/
 		
 	}
 

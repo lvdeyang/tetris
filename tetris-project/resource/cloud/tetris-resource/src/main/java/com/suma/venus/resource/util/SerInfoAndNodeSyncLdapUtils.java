@@ -93,13 +93,13 @@ public class SerInfoAndNodeSyncLdapUtils {
 				try {
 
 					List<LdapSerInfoPo> ldapSerInfoPoList = ldapSerInfoDao.getSerInfoByUuid(serInfoPO.getSerUuid());
-
+					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					if (!CollectionUtils.isEmpty(ldapSerInfoPoList)) {
 						LdapSerInfoPo ldapSerInfo = ldapSerInfoUtil.pojoModifyToLdap(serInfoPO,
 								ldapSerInfoPoList.get(0));
 						ldapSerInfoDao.update(ldapSerInfo);
 					} else {
-						LdapSerInfoPo ldapSerInfo = ldapSerInfoUtil.pojoToLdap(serInfoPO);
+						LdapSerInfoPo ldapSerInfo = ldapSerInfoUtil.pojoToLdap(serInfoPO, self);
 						ldapSerInfoDao.save(ldapSerInfo);
 					}
 

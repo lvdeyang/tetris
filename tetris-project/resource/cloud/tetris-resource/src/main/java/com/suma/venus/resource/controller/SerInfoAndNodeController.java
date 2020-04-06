@@ -178,11 +178,13 @@ public class SerInfoAndNodeController extends ControllerBase {
 		}
 
 		try {
+			SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+			
 			SerInfoPO serInfoPO = new SerInfoPO();
 			BeanUtils.copyProperties(serInfoVO, serInfoPO);
 
 			serInfoPO.setSerUuid(BundlePO.createBundleId());
-			serInfoPO.setSerFactInfo(LdapContants.DEFAULT_FACT_UUID);
+			serInfoPO.setSerFactInfo(self.getNodeFactInfo());
 			serInfoPO.setSourceType(SOURCE_TYPE.SYSTEM);
 			serInfoPO.setSyncStatus(SYNC_STATUS.ASYNC);
 
