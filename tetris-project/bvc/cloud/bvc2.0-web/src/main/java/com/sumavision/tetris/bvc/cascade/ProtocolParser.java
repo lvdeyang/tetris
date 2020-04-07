@@ -151,7 +151,7 @@ public class ProtocolParser {
 			speakerSetRequest(reader, rootNodeName, srcNo);
 		}else if("bizcnf".equals(commandname) && "spkres".equals(operation)){
 			speakerSetResponse(reader, rootNodeName, srcNo);
-		}else if("syncinfo".equals(commandname) || "syncroutelink".equals(commandname)){
+		}else if("syncinfo".equals(commandname) || "syncroutelink".equals(commandname) || "authnotify".equals(commandname)){
 			resourceRemoteService.notifyXml(commandname, xml);
 		}
 	}

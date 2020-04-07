@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.business.role.BusinessRoleQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/business/role/feign")
@@ -17,6 +19,9 @@ public class BusinessRoleFeignController {
 
 	@Autowired
 	private BusinessRoleQuery businessRoleQuery;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 根据id查询角色<br/>
@@ -94,6 +99,21 @@ public class BusinessRoleFeignController {
 	@RequestMapping(value = "/find/company/admin/role")
 	public Object findCompanyAdminRole(HttpServletRequest request) throws Exception{
 		return businessRoleQuery.findCompanyAdminRole();
+	}
+	
+	/**
+	 * 查询用户私有角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 上午10:58:27
+	 * @return SystemRoleVO 私有角色
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/private/role")
+	public Object findPrivateRole(HttpServletRequest request) throws Exception{
+		UserVO user = userQuery.current();
+		return businessRoleQuery.findPrivateRole(user.getId());
 	}
 	
 }
