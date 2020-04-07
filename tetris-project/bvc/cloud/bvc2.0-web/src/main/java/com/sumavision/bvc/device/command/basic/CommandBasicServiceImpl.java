@@ -1850,7 +1850,7 @@ public class CommandBasicServiceImpl {
 	 */
 	public Object removeMembers(Long groupId, List<Long> userIdList, int mode) throws Exception{
 		
-		//TODO:重复退出还有问题，会再次挂断编码器
+		//“重复退出会再次挂断编码器”已改好
 		
 		if(groupId==null || groupId.equals("")){
 			throw new BaseException(StatusCode.FORBIDDEN, "退出操作，会议id有误");
@@ -1872,6 +1872,11 @@ public class CommandBasicServiceImpl {
 //					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，不需退出，id: " + group.getId());
 					return new JSONArray();
 				}
+			}
+			
+			//防止专向指挥中调用此方法
+			if(group.getType().equals(GroupType.SECRET)){
+				throw new BaseException(StatusCode.FORBIDDEN, "正在专项，不能退出，只能“停止”");
 			}
 			
 			JSONArray chairSplits = new JSONArray();

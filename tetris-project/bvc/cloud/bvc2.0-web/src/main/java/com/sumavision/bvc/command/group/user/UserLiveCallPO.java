@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sumavision.bvc.command.group.enumeration.CallStatus;
+import com.sumavision.bvc.command.group.enumeration.CallType;
 import com.sumavision.bvc.command.group.enumeration.UserCallType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -21,6 +22,8 @@ public class UserLiveCallPO extends AbstractBasePO{
 	
 	/** 呼叫消息id */
 	private Long messageId;
+	
+	private CallType callType = CallType.LOCAL_LOCAL;
 	
 	private UserCallType type;
 	
@@ -172,6 +175,16 @@ public class UserLiveCallPO extends AbstractBasePO{
 
 	public void setMessageId(Long messageId) {
 		this.messageId = messageId;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "CALL_TYPE")
+	public CallType getCallType() {
+		return callType;
+	}
+
+	public void setCallType(CallType callType) {
+		this.callType = callType;
 	}
 
 	@Enumerated(value = EnumType.STRING)

@@ -25,6 +25,7 @@ import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.control.device.monitor.exception.UserHasNoPermissionForBusinessException;
 import com.sumavision.bvc.control.device.monitor.playback.RecordFileVO;
 import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.device.monitor.live.MonitorLivePO;
@@ -141,6 +142,9 @@ public class MonitorApi92Controller {
 	
 	@Autowired
 	private MonitorPointService monitorPointService;
+	
+	@Autowired
+	private CommandUserServiceImpl commandUserServiceImpl;
 	
 	/**
 	 * 看编码器<br/>
@@ -858,6 +862,15 @@ public class MonitorApi92Controller {
 				}else{
 					//停止点播设备
 					monitorLiveDeviceService.stop(uuid, srcUser.getId(), srcUser.getUserNo());
+				}
+			}else if("accept".equals(operate)){
+				if(dstUser != null){
+					if("call".equals(type)){
+						//xt用户同意接听呼叫
+						commandUserServiceImpl.acceptCallByUuid(srcUser, uuid);
+					}else if("paly-call".equals(type)){
+						//TODO: xt用户同意点播转呼叫
+					}
 				}
 			}
 		}catch(Exception e){
