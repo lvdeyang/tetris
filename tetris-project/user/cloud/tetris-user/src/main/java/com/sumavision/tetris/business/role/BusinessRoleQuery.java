@@ -195,4 +195,30 @@ public class BusinessRoleQuery {
 		return null;
 	}
 	
+	/**
+	 * 根据用户id列表查询私有角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午1:47:44
+	 * @param Collection<Long> userIds 用户id列表
+	 * @return List<SystemRoleVO> 私有角色列表
+	 */
+	public List<SystemRoleVO> findPrivateRoleByUserIds(Collection<Long> userIds) throws Exception{
+		if(userIds!=null && userIds.size()>0){
+			List<String> names = new ArrayList<String>();
+			for(Long userId:userIds){
+				names.add(SystemRolePO.generatePrivateRoleName(userId));
+			}
+			List<SystemRolePO> entities = systemRoleDao.findByNameIn(names);
+			List<SystemRoleVO> privateRoles = new ArrayList<SystemRoleVO>();
+			if(entities!=null && entities.size()>0){
+				for(SystemRolePO entity:entities){
+					privateRoles.add(new SystemRoleVO().set(entity));
+				}
+			}
+			return privateRoles;
+		}
+		return null;
+	}
+	
 }
