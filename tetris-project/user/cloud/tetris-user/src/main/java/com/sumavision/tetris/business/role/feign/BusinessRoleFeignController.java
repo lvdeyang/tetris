@@ -116,4 +116,21 @@ public class BusinessRoleFeignController {
 		return businessRoleQuery.findPrivateRole(user.getId());
 	}
 	
+	/**
+	 * 根据用户id列表查询私有角色列表<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午1:50:22
+	 * @param JSONArray userIds 用户id列表
+	 * @return List<SystemRoleVO> 角色列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/private/role/by/user/ids")
+	public Object findPrivateRoleByUserIds(
+			String userIds, 
+			HttpServletRequest request) throws Exception{
+		return businessRoleQuery.findPrivateRoleByUserIds(JSON.parseArray(userIds, Long.class));
+	}
+	
 }

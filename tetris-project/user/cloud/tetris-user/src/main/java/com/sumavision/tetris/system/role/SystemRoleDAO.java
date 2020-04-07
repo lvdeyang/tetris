@@ -199,4 +199,14 @@ public interface SystemRoleDAO extends BaseDAO<SystemRolePO>{
 	 * @return List<SystemRolePO> 角色列表
 	 */
 	public List<SystemRolePO> findByName(String name);
+	
+	/**
+	 * 根据名称批量查询角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午1:39:58
+	 * @param Collection<String> names 角色名称列表
+	 * @return List<SystemRolePO> 角色列表
+	 */
+	public List<SystemRolePO> findByNameIn(Collection<String> names);
 }
