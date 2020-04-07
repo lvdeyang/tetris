@@ -11,7 +11,8 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum SystemRoleType {
 	
 	SYSTEM("系统角色"),
-	BUSINESS("业务角色");
+	BUSINESS("业务角色"),
+	PRIVATE("用户私有角色");
 	
 	private String name;
 	

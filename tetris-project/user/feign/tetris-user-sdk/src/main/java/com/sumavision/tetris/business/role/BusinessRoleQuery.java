@@ -3,6 +3,7 @@ package com.sumavision.tetris.business.role;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -76,6 +77,18 @@ public class BusinessRoleQuery {
 	 */
 	public SystemRoleVO findCompanyAdminRole() throws Exception{
 		return JsonBodyResponseParser.parseObject(businessRoleFeign.findCompanyAdminRole(), SystemRoleVO.class);
+	}
+	
+	/**
+	 * 查询用户私有角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 上午10:54:41
+	 * @param Long userId 用户id
+	 * @return SystemRoleVO 私有角色
+	 */
+	public SystemRoleVO findPrivateRole(Long userId) throws Exception{
+		return JsonBodyResponseParser.parseObject(businessRoleFeign.findPrivateRole(), SystemRoleVO.class);
 	}
 	
 }

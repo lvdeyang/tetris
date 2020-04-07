@@ -62,4 +62,13 @@ public interface BusinessRoleFeign {
 	@RequestMapping(value = "/business/role/feign/find/company/admin/role")
 	public JSONObject findCompanyAdminRole() throws Exception;
 	
+	/**
+	 * 查询用户私有角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 上午11:00:48
+	 * @return SystemRoleVO 私有角色
+	 */
+	@RequestMapping(value = "/business/role/feign/find/private/role")
+	public JSONObject findPrivateRole() throws Exception;
 }

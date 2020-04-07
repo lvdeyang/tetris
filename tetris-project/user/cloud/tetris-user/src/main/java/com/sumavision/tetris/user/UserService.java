@@ -377,6 +377,23 @@ public class UserService{
 		user.setUpdateTime(new Date());
 		userDao.save(user);
 		
+		//创建私有角色
+		SystemRolePO privateRole = new SystemRolePO();
+		privateRole.setAutoGeneration(true);
+		privateRole.setName(SystemRolePO.generatePrivateRoleName(user.getId()));
+		privateRole.setType(SystemRoleType.PRIVATE);
+		privateRole.setUpdateTime(new Date());
+		systemRoleDao.save(privateRole);
+		
+		//用户关联角色
+		UserSystemRolePermissionPO permission = new UserSystemRolePermissionPO();
+		permission.setAutoGeneration(true);
+		permission.setRoleId(privateRole.getId());
+		permission.setRoleType(SystemRoleType.PRIVATE);
+		permission.setUserId(user.getId());
+		permission.setUpdateTime(new Date());
+		userSystemRolePermissionDao.save(permission);
+		
 		return user;
 	}
 	
@@ -454,7 +471,22 @@ public class UserService{
 		
 		List<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserId(id);
 		
-		userSystemRolePermissionDao.deleteInBatch(permissions);
+		if(permissions!=null && permissions.size()>0){
+			//清除用户权限
+			userSystemRolePermissionDao.deleteInBatch(permissions);
+			//清除私有角色
+			UserSystemRolePermissionPO privatePermission = null;
+			for(UserSystemRolePermissionPO permission:permissions){
+				if(SystemRoleType.PRIVATE.equals(permission.getRoleType())){
+					privatePermission = permission;
+					break;
+				}
+			}
+			SystemRolePO privateRole = systemRoleDao.findOne(privatePermission.getRoleId());
+			if(privateRole != null){
+				systemRoleDao.delete(privateRole);
+			}
+		}
 		
 	}
 	
@@ -652,13 +684,42 @@ public class UserService{
 				throw new UsernameAlreadyExistException(duplicateUsernames);
 			}
 			userDao.save(users);
+			List<SystemRolePO> privateRoles = new ArrayList<SystemRolePO>();
 			for(UserPO user:users){
 				CompanyUserPermissionPO permission = new CompanyUserPermissionPO();
 				permission.setUserId(user.getId().toString());
 				permission.setCompanyId(Long.valueOf(self.getGroupId()));
 				companyUserPermissions.add(permission);
+				
+				//创建私有角色
+				SystemRolePO privateRole = new SystemRolePO();
+				privateRole.setAutoGeneration(true);
+				privateRole.setName(SystemRolePO.generatePrivateRoleName(user.getId()));
+				privateRole.setType(SystemRoleType.PRIVATE);
+				privateRole.setUpdateTime(new Date());
+				privateRoles.add(privateRole);
 			}
 			companyUserPermissionDao.save(companyUserPermissions);
+			systemRoleDao.save(privateRoles);
+			
+			//私有角色授权
+			List<UserSystemRolePermissionPO> privatePermissions = new ArrayList<UserSystemRolePermissionPO>();
+			for(UserPO user:users){
+				String privateRoleName = new StringBufferWrapper().append("private_u_").append(user.getId()).toString();
+				for(SystemRolePO privateRole:privateRoles){
+					if(privateRoleName.equals(privateRole.getName())){
+						UserSystemRolePermissionPO privatePermission = new UserSystemRolePermissionPO();
+						privatePermission.setAutoGeneration(true);
+						privatePermission.setRoleId(privateRole.getId());
+						privatePermission.setRoleType(SystemRoleType.PRIVATE);
+						privatePermission.setUserId(user.getId());
+						privatePermission.setUpdateTime(new Date());
+						privatePermissions.add(privatePermission);
+						break;
+					}
+				}
+			}
+			userSystemRolePermissionDao.save(privatePermissions);
 		}
 		
 		if(roles.size() > 0){
