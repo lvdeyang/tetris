@@ -482,9 +482,11 @@ public class UserService{
 					break;
 				}
 			}
-			SystemRolePO privateRole = systemRoleDao.findOne(privatePermission.getRoleId());
-			if(privateRole != null){
-				systemRoleDao.delete(privateRole);
+			if(privatePermission != null){
+				SystemRolePO privateRole = systemRoleDao.findOne(privatePermission.getRoleId());
+				if(privateRole != null){
+					systemRoleDao.delete(privateRole);
+				}
 			}
 		}
 		
@@ -684,8 +686,19 @@ public class UserService{
 				throw new UsernameAlreadyExistException(duplicateUsernames);
 			}
 			userDao.save(users);
+			List<UserSystemRolePermissionPO> systemRolePermissions = new ArrayList<UserSystemRolePermissionPO>();
 			List<SystemRolePO> privateRoles = new ArrayList<SystemRolePO>();
 			for(UserPO user:users){
+				//绑定系统角色
+				UserSystemRolePermissionPO systemRolePermission = new UserSystemRolePermissionPO();
+				systemRolePermission.setRoleId(3l);
+				systemRolePermission.setAutoGeneration(false);
+				systemRolePermission.setRoleType(SystemRoleType.SYSTEM);
+				systemRolePermission.setUserId(user.getId());
+				systemRolePermission.setUpdateTime(new Date());
+				systemRolePermissions.add(systemRolePermission);
+				
+				//绑定导入角色
 				CompanyUserPermissionPO permission = new CompanyUserPermissionPO();
 				permission.setUserId(user.getId().toString());
 				permission.setCompanyId(Long.valueOf(self.getGroupId()));
@@ -699,6 +712,7 @@ public class UserService{
 				privateRole.setUpdateTime(new Date());
 				privateRoles.add(privateRole);
 			}
+			userSystemRolePermissionDao.save(systemRolePermissions);
 			companyUserPermissionDao.save(companyUserPermissions);
 			systemRoleDao.save(privateRoles);
 			
