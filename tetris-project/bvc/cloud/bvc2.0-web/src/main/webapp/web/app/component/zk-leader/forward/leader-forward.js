@@ -282,7 +282,7 @@ define([
             handleForward:function(){
                 var self = this;
                 if(self.tree.members.select.length <= 0){
-                    self.qt.alert('消息提示', '您还没有选择转发对象');
+                    self.qt.warning('消息提示', '您还没有选择转发对象');
                     return;
                 }
                 var dst = [];
@@ -291,7 +291,7 @@ define([
                 }
                 if(self.currentTab == 0){
                     if(self.tree.resource.select.length <= 0){
-                        self.qt.alert('消息提示', '您还没有选择资源文件');
+                        self.qt.warning('消息提示', '您还没有选择资源文件');
                         return;
                     }
                     var src = [];
@@ -310,7 +310,7 @@ define([
                     });
                 }else if(self.currentTab == 1){
                     if(self.tree.device.select.length <= 0){
-                        self.qt.alert('消息提示', '您还没有选择设备资源');
+                        self.qt.warning('消息提示', '您还没有选择设备资源');
                         return;
                     }
                     var src = [];
@@ -329,7 +329,7 @@ define([
                     });
                 }else if(self.currentTab == 2){
                     if(self.tree.record.select.length <= 0){
-                        self.qt.alert('消息提示', '您还没有选择录像资源');
+                        self.qt.warning('消息提示', '您还没有选择录像资源');
                         return;
                     }
                     var src = [];

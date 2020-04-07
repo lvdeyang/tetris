@@ -149,7 +149,7 @@ define([
                 var self = this;
                 if(self.currentTab == 0){
                     if(!self.tree.resource.select.length){
-                        self.qt.alert('消息提示', '您还没有选择资源文件');
+                        self.qt.warning('消息提示', '您还没有选择资源文件');
                         return;
                     }
                     ajax.post('/command/vod/resource/file/start/player', {
@@ -161,7 +161,7 @@ define([
                     });
                 }else if(self.currentTab == 1){
                     if(!self.tree.device.select.length){
-                        self.qt.alert('消息提示', '您还没有选择设备资源');
+                        self.qt.warning('消息提示', '您还没有选择设备资源');
                         return;
                     }
                     ajax.post('/command/vod/device/start/player', {
@@ -173,12 +173,12 @@ define([
                     });
                 }else if(self.currentTab == 2){
                     if(!self.tree.record.select.length){
-                        self.qt.alert('消息提示', '您还没有选择录像资源');
+                        self.qt.warning('消息提示', '您还没有选择录像资源');
                         return;
                     }
                 }else if(self.currentTab == 3){
                     if(!self.tree.user.select.length){
-                        self.qt.alert('消息提示', '您还没有选择用户资源');
+                        self.qt.warning('消息提示', '您还没有选择用户资源');
                         return;
                     }
                     ajax.post('/command/vod/user/start/player', {

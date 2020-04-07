@@ -248,7 +248,6 @@ define([
             self.qt = new QtContext('popMessage', function () {
                 var params = self.qt.getWindowParams();
                 self.currentGroupId = params.currentGroupId;
-                console.log(self.currentGroupId)
 
                 // 初始化ajax
                 ajax.init({

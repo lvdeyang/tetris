@@ -32,7 +32,7 @@ define([
                 var self = this;
                 ajax.post('/heart/beat', null, function(data, status, message){
                     if(status !== 200){
-                        //self.qt.alert('请求失败', message);
+                        //self.qt.warning('请求失败', message);
                     }
                 }, null, [404, 403, 408, 409, 500]);
             }
@@ -123,6 +123,11 @@ define([
                 //视频界面上的语音
                 self.qt.on('playVoice', function (e) {
                     self.qt.invoke('voiceIntercoms', e.params);
+                });
+
+                //播放录像文件
+                self.qt.on('playRecordFile', function (e) {
+                    self.qt.invoke('vodRecordFileStart', e.params);
                 });
 		
                 self.qt.get(['user'], function (variables) {

@@ -788,7 +788,7 @@ define([
       callUserBatch: function () {
         var self = this;
         if (self.institution.select.length <= 0) {
-          self.qt.alert('消息提示', '您还没有选中用户');
+          self.qt.warning('消息提示', '您还没有选中用户');
           return;
         }
         var userIds = [];
@@ -807,7 +807,7 @@ define([
         if (self.currentTab == 1) {
           //点播用户
           if (self.institution.select.length <= 0) {
-            self.qt.alert('消息提示', '您还没有选中用户');
+            self.qt.warning('消息提示', '您还没有选中用户');
             return;
           }
           var userIds = [];
@@ -824,7 +824,7 @@ define([
         // else if (self.currentTab == 2) {
         //     //点播设备
         //     if (self.device.select.length <= 0) {
-        //         self.qt.alert('消息提示', '您还没有选中设备');
+        //         self.qt.warning('消息提示', '您还没有选中设备');
         //         return;
         //     }
         //     var deviceIds = [];
@@ -838,7 +838,7 @@ define([
         else if (self.currentTab == 2) {
           //点播文件
           if (self.file.select.length <= 0) {
-            self.qt.alert('消息提示', '您还没有选中文件');
+            self.qt.warning('消息提示', '您还没有选中文件');
             return;
           }
           var resourceFileIds = [];
@@ -854,7 +854,7 @@ define([
         // else if (self.currentTab == 4) {
         //     //点播录像
         //     if (self.record.select.length <= 0) {
-        //         self.qt.alert('消息提示', '您还没有选中文件');
+        //         self.qt.warning('消息提示', '您还没有选中文件');
         //         return;
         //     }
         //     var recordIds = [];
@@ -867,7 +867,7 @@ define([
       voiceIntercomBatch: function () {
         var self = this;
         if (self.institution.select.length <= 0) {
-          self.qt.alert('消息提示', '您还没有选中用户');
+          self.qt.warning('消息提示', '您还没有选中用户');
           return;
         }
         var userIds = [];
@@ -901,7 +901,7 @@ define([
         var self = this;
         if (!self.buttons.enterCommand) return;
         if (self.command.select.length <= 0) {
-          self.qt.alert('消息提示', '您还没有选择任何会议组');
+          self.qt.warning('消息提示', '您还没有选择任何会议组');
         }
 
         var ids = [];
@@ -952,7 +952,7 @@ define([
         var self = this;
         if (!self.buttons.removeCommand) return;
         if (self.command.select.length <= 0) {
-          self.qt.alert('信息提示', '您没有选择任何会议组');
+          self.qt.warning('信息提示', '您没有选择任何会议组');
           return;
         }
         var ids = [];
@@ -1124,7 +1124,7 @@ define([
         var self = this;
         if (!self.buttons.removeMember) return;
         if (self.group.current.select.length <= 0) {
-          self.qt.alert('提示信息', '您未选择任何成员');
+          self.qt.warning('提示信息', '您未选择任何成员');
           return;
         }
         self.qt.confirm('提示信息', '当前强退' + self.group.current.select.length + '个成员', '取消', '确定', null, function () {
@@ -1198,14 +1198,14 @@ define([
             id: self.group.current.id
           }, function () {
             self.buttons.silenceUpStart = false;
-            self.qt.alert('提示消息', '操作成功');
+            self.qt.warning('提示消息', '操作成功');
           });
         } else {
           ajax.post('/command/basic/silence/up/stop', {
             id: self.group.current.id
           }, function () {
             self.buttons.silenceUpStart = true;
-            self.qt.alert('提示消息', '操作成功');
+            self.qt.warning('提示消息', '操作成功');
           });
         }
       },
@@ -1218,14 +1218,14 @@ define([
             id: self.group.current.id
           }, function () {
             self.buttons.silenceDownStart = false;
-            self.qt.alert('提示消息', '操作成功');
+            self.qt.warning('提示消息', '操作成功');
           });
         } else {
           ajax.post('/command/basic/silence/down/stop', {
             id: self.group.current.id
           }, function () {
             self.buttons.silenceDownStart = true;
-            self.qt.alert('提示消息', '操作成功');
+            self.qt.warning('提示消息', '操作成功');
           });
         }
       },
@@ -1264,14 +1264,14 @@ define([
             id: self.group.current.id
           }, function (data) {
             self.buttons.isRecord = false;
-            self.qt.alert('业务提示', '操作成功');
+            self.qt.warning('业务提示', '操作成功');
           });
         } else {
           ajax.post('/command/record/start', {
             id: self.group.current.id
           }, function (data) {
             self.buttons.isRecord = true;
-            self.qt.alert('业务提示', '操作成功');
+            self.qt.warning('业务提示', '操作成功');
           });
         }
       },
@@ -1283,7 +1283,7 @@ define([
           ajax.post('/command/basic/remind/stop', {
             id: self.group.current.id
           }, function (data) {
-            self.qt.alert('提示消息', '操作成功');
+            self.qt.warning('提示消息', '操作成功');
             self.buttons.isRemind = false;
             for (var i = 0; i < self.group.remindIds.length; i++) {
               if (self.group.remindIds[i] == self.group.current.id) {
@@ -1300,7 +1300,7 @@ define([
           ajax.post('/command/basic/remind', {
             id: self.group.current.id
           }, function (data) {
-            self.qt.alert('提示消息', '操作成功');
+            self.qt.warning('提示消息', '操作成功');
             self.buttons.isRemind = true;
             var finded = false;
             for (var i = 0; i < self.group.remindIds.length; i++) {
@@ -1489,10 +1489,10 @@ define([
         //修改时，把原有值赋过去
         if (type === 'edit') {
           if (self.command.select.length <= 0) {
-            self.qt.alert('信息提示', '请先选择要修改的项');
+            self.qt.warning('信息提示', '请先选择要修改的项');
             return;
           } else if (self.command.select.length > 1) {
-            self.qt.alert('信息提示', '只能选择一项进行修改名称');
+            self.qt.warning('信息提示', '只能选择一项进行修改名称');
             return;
           }
           //报错要修改的那项的名字

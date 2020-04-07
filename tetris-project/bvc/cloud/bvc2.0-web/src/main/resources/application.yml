@@ -1,12 +1,12 @@
 spring:
   application:
-    name: tetris-bvc-business-ldy
+    name: tetris-bvc-business-yxc
   cloud:
 #    config:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.71
+      ipAddress: 192.165.56.53
   profiles:
     active: pro
   datasource:
@@ -45,7 +45,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     database: MYSQL
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: update
   thymeleaf:

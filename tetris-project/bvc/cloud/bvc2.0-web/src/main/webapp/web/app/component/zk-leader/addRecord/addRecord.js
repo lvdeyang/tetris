@@ -92,7 +92,6 @@ define([
             var self = this;
             self.qt = new QtContext('addRecord', function () {
                 var params = self.qt.getWindowParams();
-                console.log(params)
                 self.recordId = params.paramId;
                 self.category=params.paramType;
                 self.trueType=params.realType;

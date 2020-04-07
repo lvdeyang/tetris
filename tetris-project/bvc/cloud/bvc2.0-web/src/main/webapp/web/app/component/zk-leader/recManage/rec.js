@@ -30,7 +30,7 @@ define([
         computed: {
             //设备的分页
             pageData: function () {
-                return this.deviceData.totalData.slice((this.deviceCurrentPage - 1) * 10, this.deviceCurrentPage * 10);
+                return this.deviceData.totalData.slice((this.deviceCurrentPage - 1) * 3, this.deviceCurrentPage * 3);
             }
         },
         methods: {
@@ -60,9 +60,9 @@ define([
             },
             //停止任务
             stopTask: function (id) {
-                console.log(id)
-                ajax.post('/monitor/record/stop/' + id, null, function (data) {
-                    console.log(data)
+                var self = this;
+                ajax.post('/monitor/record/stop/' + id, null, function () {
+                        self.qt.success('成功停止此条数据的录制');
                 })
             },
             //获取数据
@@ -78,13 +78,10 @@ define([
                     currentPage: text5,
                     pageSize: '10'
                 }, function (data) {
-                    console.log(data)
                     if (data.rows && data.rows.length > 0) {
                         var commands = data.rows;
                         for (var i = 0; i < commands.length; i++) {
                             self.deviceData.totalData.push(commands[i]);
-                            console.log(self.deviceData.totalData.length)
-                            // self.deviceData.filterData.push(commands[i]);
                         }
                     }
                 });
@@ -96,7 +93,7 @@ define([
             //格式化时间
             format: function (str) {
                 if (str) {
-                    str=str.toString();
+                    str = str.toString();
                     var str = str.replace(/ GMT.+$/, '');// Or str = str.substring(0, 24)
                     var d = new Date(str);
                     var a = [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];

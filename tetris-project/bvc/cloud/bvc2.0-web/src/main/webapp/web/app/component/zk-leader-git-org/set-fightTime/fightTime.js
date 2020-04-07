@@ -44,11 +44,11 @@ define([
             //确定按钮提交事件
             submit: function () {
                 if(this.date ==='' || this.time ===''){
-                    this.qt.alert('提示信息', '请设置作战时间');
+                    this.qt.warning('提示信息', '请设置作战时间');
                     return;
                 }
                 if(!this.fightCommand){
-                    this.qt.alert('提示信息', '请选择作战会议');
+                    this.qt.warning('提示信息', '请选择作战会议');
                     return;
                 }
                 var date=this.timeFormat(this.form.date).split(' ')[0];

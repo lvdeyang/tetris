@@ -25,43 +25,7 @@ define([
                 },
                 //设备/用户树
                 record: {
-                    data: [
-                        {
-                            label: '一级 1',
-                            children: [{
-                                label: '二级 1-1',
-                                children: [{
-                                    label: '三级 1-1-1'
-                                }]
-                            }]
-                        }, {
-                            label: '一级 2',
-                            children: [{
-                                label: '二级 2-1',
-                                children: [{
-                                    label: '三级 2-1-1'
-                                }]
-                            }, {
-                                label: '二级 2-2',
-                                children: [{
-                                    label: '三级 2-2-1'
-                                }]
-                            }]
-                        }, {
-                            label: '一级 3',
-                            children: [{
-                                label: '二级 3-1',
-                                children: [{
-                                    label: '三级 3-1-1'
-                                }]
-                            }, {
-                                label: '二级 3-2',
-                                children: [{
-                                    label: '三级 3-2-1'
-                                }]
-                            }]
-                        }
-                    ],
+                    data: [],
                     select: ''
                 },
                 //录制文件树
@@ -70,7 +34,12 @@ define([
                 startTime: '',
                 endTime: '',
                 date: '',
-                fileSelect:'' //选择的文件
+                fileSelect: '' //选择的文件
+            }
+        },
+        computed: {
+            pageData: function () {
+                return this.files.slice((this.currentPage - 1) * 10, this.currentPage * 10);
             }
         },
         methods: {
@@ -92,42 +61,53 @@ define([
             //确定选择 左侧
             confirm: function () {
                 var self = this;
-                console.log(self.record.select)
                 var data = self.record.select;
                 var id = data.type == 'BUNDLE' ? data.id : null;
+                var bundleRealType = data.type == 'BUNDLE' && data.param.realType == 'XT' ? data.param.realType : null;
+                var startTime=self.date?self.format(self.date[0]):null;
+                var endTime=self.date?self.format(self.date[1]):null;
                 if (!self.record.select) {
                     self.qt.warning('请先选择左侧列表中设备或用户');
                     return;
                 }
-                ajax.post('/monitor/record/playback/find/by/condition', {
+                var param = {
                     type: data.type,
-                    bundleRealType: data.param.realType,//type为BUNDLE时，如果BUNDLE为XT设备传XT
+                    bundleRealType: bundleRealType,//type为BUNDLE时，如果BUNDLE为XT设备传XT
                     bundleId: id, //设备id,type为BUNDLE时设置此字段
-                    recordUserId: '', // 录制的用户id,type为USER时设置此字段
+                    recordUserId: data.type == 'USER' ? data.id : null, // 录制的用户id,type为USER时设置此字段
                     currentPage: self.currentPage,
                     pageSize: 10
-                }, function (data) {
-                    if(data.rows && data.rows.length>0){
-                    self.files = data.rows;
-                    }
+                };
+                if(startTime) param.timeLowerLimit = startTime;
+                if(endTime) param.timeUpperLimit = endTime;
+                ajax.post('/monitor/record/playback/find/by/condition', param, function (data) {
+                        self.files = data.rows;
                 })
             },
             //日期筛选
             filtrate: function () {
-                var self = this;
-                var date = self.date;
+                this.confirm();
             },
             //删除文件
             deleteFile: function (id) {
+                var self = this;
                 ajax.post('/monitor/record/remove/file/' + id, null, function (data) {
-                    console.log(data)
+                    self.qt.success('删除成功');
+                    self.confirm();
                 })
             },
             //提交
-            confirmSubmit:function () {
-                //TODO:调播放
-                console.log(this.fileSelect)
+            confirmSubmit: function () {
+                var self=this;
                 //播放地址： this.fileSelect.previewUrl
+                ajax.post('/command/vod/record/file/start',{
+                    businessType:'vodRecordFile',
+                    businessInfo:'点播'+this.fileSelect. fileName+'文件',
+                    url:this.fileSelect.previewUrl
+                },function (data) {
+                    self.qt.linkedWebview('hidden',{id:'playRecordFile', params:$.toJSON([data])});
+                    self.close();
+                })
             },
             //格式化日期
             format: function (str) {

@@ -105,11 +105,11 @@ define([
             handleSendMessage:function(){
                 var self = this;
                 if(self.tree.select.length <= 0){
-                    self.qt.alert('消息提示', '您还没有选择发送对象');
+                    self.qt.error('消息提示', '您还没有选择发送对象');
                     return;
                 }
                 if(!self.message.content){
-                    self.qt.alert('消息提示', '您还没有输入通知内容');
+                    self.qt.warning('消息提示', '您还没有输入通知内容');
                     return;
                 }
                 var members = [];
@@ -133,7 +133,7 @@ define([
                     }),
                     members:$.toJSON(members)
                 }, function(){
-                    self.qt.alert('title', '操作成功');
+                    self.qt.warning('title', '操作成功');
                 });
             },
             //停止按钮
@@ -237,7 +237,7 @@ define([
             handleSaveStyleTemplates:function(){
                 var self = this;
                 if(!self.message.style.name){
-                    self.qt.alert('消息提示', '请给模板起个名吧');
+                    self.qt.warning('消息提示', '请给模板起个名吧');
                     return;
                 }
                 if(self.message.style.id){
@@ -254,7 +254,7 @@ define([
                         rollingTime:self.message.style.rollingTime,
                         rollingTimeUnlimited: self.message.style.rollingTimeUnlimited
                     }, function(){
-                        self.qt.alert('消息提示', '修改成功');
+                        self.qt.warning('消息提示', '修改成功');
                     });
                 }else{
                     ajax.post('/command/message/style/templates/add', {
@@ -269,7 +269,7 @@ define([
                         rollingTime:self.message.style.rollingTime,
                         rollingTimeUnlimited: self.message.style.rollingTimeUnlimited
                     }, function(){
-                        self.qt.alert('消息提示', '添加成功');
+                        self.qt.warning('消息提示', '添加成功');
                     });
                 }
             },
