@@ -248,17 +248,19 @@ define([
                                 self.qt.info(e.businessInfo)
                             }else if(e.businessType === 'speakApply'){ //通知主席有人申请发言
                                 //监听呼叫消息，消息状态要在底部滚动
-                                self.qt.linkedWebview('historyMessage', {id:'speakApply', params:e});
+                                self.qt.linkedWebview('rightBar', {id:'agreeSpeakApply', params:e});
+
                             }else if(e.businessType === 'speakApplyAgree'){ //通知申请人被同意
-                                self.qt.info(e.businessInfo);
-                            //    TODO: 连接到人员页面，把按钮状态改下
-                            //     self.linkedWebview('rightBar',{id:'speaking',params:e})
+                                self.qt.linkedWebview('rightBar', {id:'speakApplyAgree', params:e});
+
                             }else if(e.businessType === 'speakApplyDisagree'){ //通知申请人被拒绝
-                                self.qt.info(e.businessInfo);
+                                self.qt.linkedWebview('rightBar', {id:'speakApplyDisagree', params:e});
+
                             }else if(e.businessType === 'speakStop'){ //通知全员停止发言/停止讨论
-                                self.qt.linkedWebview('historyMessage', {id:'speakStop', params:e});
+                                self.qt.linkedWebview('rightBar', {id:'speakStop', params:e});
+
                             }else if(e.businessType === 'speakStart'){ //通知观看发言/开始讨论
-                                self.qt.linkedWebview('historyMessage', {id:'speakStart', params:e});
+                                self.qt.linkedWebview('rightBar', {id:'speakStart', params:e});
                             }
 
                             //指挥转发
