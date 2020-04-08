@@ -143,12 +143,12 @@
                     </el-select>
                 </template>
             </el-form-item>
-            <el-form-item label="服务节点归属" prop="serNode">
+            <!--<el-form-item label="服务节点归属" prop="serNode">
                 <el-input v-model="serInfoEditForm.serNode" auto-complete="off"></el-input>
             </el-form-item>
             <el-form-item label="厂商信息" prop="serFactInfo">
                 <el-input type="textarea" v-model="serInfoEditForm.serFactInfo" auto-complete="off"></el-input>
-            </el-form-item>
+            </el-form-item>-->
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button size="small" @click="handleEditSerInfo()" v-if="serInfoEditBtnVisible" >修改</el-button>
@@ -358,7 +358,7 @@ export default {
                 }
             ],
 
-            serInfoEditForm: {
+            serNodeEditForm: {
                 id: 0,
                 nodeUuid:"",
                 nodeName:"",
@@ -379,15 +379,13 @@ export default {
             serNodeEditBtnVisible:false,   //弹出框中编辑按钮是否显示
             serNodeAddBtnVisible: false,  //弹出框中新建按钮新否显示
 
-            serNodeEditForm: {
+            serInfoEditForm: {
                 id: 0,
                 serUuid:"",
                 serName:"",
                 serAddr:"",
-                serPort: 0,
-                serPwd: "",
-                serNode: "",
-                serFactInfo: ""
+                serPort: 5060,
+                serPwd: ""
             },
 
             serNodeEditFormRules: {
@@ -630,8 +628,8 @@ export default {
                             serPwd: this.serInfoEditForm.serPwd,
                             serType: this.serInfoEditForm.serType,
                             serPro: this.serInfoEditForm.serPro,
-                            serNode: this.serInfoEditForm.serNode,
-                            serFactInfo: this.serInfoEditForm.serFactInfo,
+//                            serNode: this.serInfoEditForm.serNode,
+//                            serFactInfo: this.serInfoEditForm.serFactInfo,
                         };
 
                         console.log(JSON.stringify(para));
@@ -677,8 +675,8 @@ export default {
                             serPwd: this.serInfoEditForm.serPwd,
                             serType: this.serInfoEditForm.serType,
                             serPro: this.serInfoEditForm.serPro,
-                            serNode: this.serInfoEditForm.serNode,
-                            serFactInfo: this.serInfoEditForm.serFactInfo,
+                            /*serNode: this.serInfoEditForm.serNode,
+                            serFactInfo: this.serInfoEditForm.serFactInfo,*/
                         };
 
                         console.log(JSON.stringify(para));
