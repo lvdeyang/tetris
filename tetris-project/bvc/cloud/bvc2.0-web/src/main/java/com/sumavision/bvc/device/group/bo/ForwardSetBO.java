@@ -6,6 +6,7 @@ import java.util.List;
 import com.sumavision.bvc.command.group.enumeration.MediaType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
+import com.sumavision.bvc.command.group.user.UserLiveCallPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.vod.CommandVodPO;
 import com.sumavision.bvc.common.group.po.CommonChannelForwardPO;
@@ -383,6 +384,89 @@ public class ForwardSetBO {
 		
 		return this;
 	}
+	
+	/** 用于生成发起呼叫人的上屏转发 */
+	public ForwardSetBO setBySrcCallAndDstCastDevice(UserLiveCallPO call, CommandGroupUserPlayerCastDevicePO castDevice, CodecParamBO codec, MediaType mediaType){
+		ForwardSetSrcBO src = new ForwardSetSrcBO();
+		ForwardSetDstBO dst = new ForwardSetDstBO();
+		if(MediaType.VIDEO.equals(mediaType)){
+			//视频转发，以被呼叫人做源
+			src.setType("channel")
+			   .setLayerId(call.getCalledEncoderLayerId())
+			   .setBundleId(call.getCalledEncoderBundleId())
+			   .setChannelId(call.getCalledEncoderVideoChannelId());
+			dst.setBase_type("VenusVideoOut")
+			   .setLayerId(castDevice.getDstLayerId())
+			   .setBundleId(castDevice.getDstBundleId())
+			   .setChannelId(castDevice.getDstVideoChannelId())
+			   .setBundle_type(castDevice.getDstVenusBundleType())
+			   .setCodec_param(codec);
+		}else if(MediaType.AUDIO.equals(mediaType)){
+			//音频转发，以被呼叫人做源
+			src.setType("channel")
+			   .setLayerId(call.getCalledEncoderLayerId())
+			   .setBundleId(call.getCalledEncoderBundleId())
+			   .setChannelId(call.getCalledEncoderAudioChannelId());
+			dst.setBase_type("VenusAudioOut")
+			   .setLayerId(castDevice.getDstLayerId())
+			   .setBundleId(castDevice.getDstBundleId())
+			   .setChannelId(castDevice.getDstAudioChannelId())
+			   .setBundle_type(castDevice.getDstVenusBundleType())
+			   .setCodec_param(codec);
+		}
+		
+		//空源src要发null
+		if(src.getChannelId() != null){
+			this.setSrc(src);
+		}else{
+			this.setSrc(null);
+		} 
+		this.setDst(dst);
+		
+		return this;
+	}
+	
+	/** 用于生成被呼叫人的上屏转发 */
+	public ForwardSetBO setBySrcCalledAndDstCastDevice(UserLiveCallPO call, CommandGroupUserPlayerCastDevicePO castDevice, CodecParamBO codec, MediaType mediaType){
+		ForwardSetSrcBO src = new ForwardSetSrcBO();
+		ForwardSetDstBO dst = new ForwardSetDstBO();
+		if(MediaType.VIDEO.equals(mediaType)){
+			//视频转发，以呼叫人做源
+			src.setType("channel")
+			   .setLayerId(call.getCallEncoderLayerId())
+			   .setBundleId(call.getCallEncoderBundleId())
+			   .setChannelId(call.getCallEncoderVideoChannelId());
+			dst.setBase_type("VenusVideoOut")
+			   .setLayerId(castDevice.getDstLayerId())
+			   .setBundleId(castDevice.getDstBundleId())
+			   .setChannelId(castDevice.getDstVideoChannelId())
+			   .setBundle_type(castDevice.getDstVenusBundleType())
+			   .setCodec_param(codec);
+		}else if(MediaType.AUDIO.equals(mediaType)){
+			//音频转发，以呼叫人做源
+			src.setType("channel")
+			   .setLayerId(call.getCallEncoderLayerId())
+			   .setBundleId(call.getCallEncoderBundleId())
+			   .setChannelId(call.getCallEncoderAudioChannelId());
+			dst.setBase_type("VenusAudioOut")
+			   .setLayerId(castDevice.getDstLayerId())
+			   .setBundleId(castDevice.getDstBundleId())
+			   .setChannelId(castDevice.getDstAudioChannelId())
+			   .setBundle_type(castDevice.getDstVenusBundleType())
+			   .setCodec_param(codec);
+		}
+		
+		//空源src要发null
+		if(src.getChannelId() != null){
+			this.setSrc(src);
+		}else{
+			this.setSrc(null);
+		} 
+		this.setDst(dst);
+		
+		return this;
+	}
+	
 	public ForwardSetBO set(CommonChannelForwardPO forward, CodecParamBO codec){
 		ForwardSetSrcBO src = new ForwardSetSrcBO();
 		ForwardSetDstBO dst = new ForwardSetDstBO();

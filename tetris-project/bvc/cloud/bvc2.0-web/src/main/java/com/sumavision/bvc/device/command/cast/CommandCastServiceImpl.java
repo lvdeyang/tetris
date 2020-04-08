@@ -19,6 +19,7 @@ import com.sumavision.bvc.command.group.dao.CommandGroupForwardDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupForwardDemandDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.dao.CommandVodDAO;
+import com.sumavision.bvc.command.group.enumeration.CallType;
 import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
@@ -401,7 +402,7 @@ public class CommandCastServiceImpl {
 			Set<CommandGroupForwardPO> forwards,
 			Set<CommandGroupForwardPO> delForwards,
 			List<CommandVodPO> vods,
-			List<UserLiveCallPO> calls,//后续处理
+			List<UserLiveCallPO> calls,//已完成，待测
 			CodecParamBO codec,
 			Long userId){
 		return openBundleCastDeviceWithRestrict(demandsForForwardAndVod, forwards, delForwards, vods, calls, codec, userId, null);
@@ -414,7 +415,7 @@ public class CommandCastServiceImpl {
 			Set<CommandGroupForwardPO> forwards,
 			Set<CommandGroupForwardPO> delForwards,
 			List<CommandVodPO> vods,
-			List<UserLiveCallPO> calls,//后续处理			
+			List<UserLiveCallPO> calls,//已完成，待测
 			CodecParamBO codec,
 			Long userId,
 			List<CommandGroupUserPlayerCastDevicePO> restrictCastDevices){
@@ -453,6 +454,61 @@ public class CommandCastServiceImpl {
 							logic.getForwardSet().add(forwardAudio);
 //						}else if(vod.getVodType().equals(VodType.FILE)){//点播文件目前没有PO，后续完善
 						}
+					}
+				}
+			}
+		}
+		
+		//呼叫
+		if(null == calls) calls = new ArrayList<UserLiveCallPO>();
+		for(UserLiveCallPO call : calls){
+			
+			//呼叫方
+			List<CommandGroupUserPlayerCastDevicePO> castDevices = null;
+			if(restrictCastDevices == null){
+				if(call.getCalledEncoderBundleId() != null){
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCalledEncoderBundleId());
+					if(player != null){
+						castDevices = player.getCastDevices();
+					}
+				}
+			}else{
+				castDevices = restrictCastDevices;
+			}
+			if(castDevices != null){
+				for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
+					if(call.getCallType()==null
+							|| call.getCallType().equals(CallType.LOCAL_LOCAL)){//TODO:这里要拓展几种类型
+						
+						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
+						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
+						logic.getForwardSet().add(forwardVideo);
+						logic.getForwardSet().add(forwardAudio);
+					}
+				}
+			}
+			
+			//被呼叫方
+			List<CommandGroupUserPlayerCastDevicePO> castCalledDevices = null;
+			if(restrictCastDevices == null){
+				if(call.getCallEncoderBundleId() != null){
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCallEncoderBundleId());
+					if(player != null){
+						castCalledDevices = player.getCastDevices();
+					}
+				}
+			}else{
+				castCalledDevices = restrictCastDevices;
+			}
+			if(castCalledDevices != null){
+				for(CommandGroupUserPlayerCastDevicePO castDevice : castCalledDevices){
+					if(call.getCallType()==null
+							|| call.getCallType().equals(CallType.LOCAL_LOCAL)){//TODO:这里要拓展几种类型
+						
+						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCalledAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
+						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCalledAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
+						logic.getForwardSet().add(forwardVideo);
+						logic.getForwardSet().add(forwardAudio);
 					}
 				}
 			}

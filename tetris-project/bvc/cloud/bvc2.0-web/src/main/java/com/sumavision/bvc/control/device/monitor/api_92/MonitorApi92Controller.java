@@ -822,7 +822,8 @@ public class MonitorApi92Controller {
 						monitorLiveUserService.startXtSeeLocal(uuid, dstUser, srcUser.getId(), srcUser.getName(), srcUser.getUserNo());
 					}else if("call".equals(type)){
 						//开始xt用户呼叫本地用户
-						monitorLiveCallService.startXtCallLocal(uuid, dstUser, srcUser);
+//						monitorLiveCallService.startXtCallLocal(uuid, dstUser, srcUser);
+						commandUserServiceImpl.userCallUser_Cascade(srcUser, dstUser, -1, uuid);
 					}else if("paly-call".equals(type)){
 						//开始xt点播本地用户转xt呼叫本地用户
 						monitorLiveCallService.transXtCallLocal(uuid, dstUser, srcUser);
@@ -855,7 +856,8 @@ public class MonitorApi92Controller {
 						monitorLiveUserService.stop(uuid, srcUser.getId(), srcUser.getUserNo());
 					}else if("call".equals(type)){
 						//停止xt用户呼叫本地用户
-						monitorLiveCallService.stop(uuid, srcUser.getId());
+//						monitorLiveCallService.stop(uuid, srcUser.getId());
+						commandUserServiceImpl.stopCallByUuid(srcUser, uuid);
 					}else if("paly-call".equals(type)){
 						//停止xt点播本地用户转xt呼叫本地用户
 					}

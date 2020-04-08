@@ -14,6 +14,7 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
@@ -33,6 +34,9 @@ import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
 import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
+import com.sumavision.bvc.device.group.bo.PassByBO;
+import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
+import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
@@ -47,6 +51,7 @@ import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -87,6 +92,9 @@ public class CommandVodService {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
@@ -189,11 +197,11 @@ public class CommandVodService {
 		ChannelSchemeDTO encoderAudioChannel = encoderAudioChannels.get(0);		
 		
 		CommandVodPO userVod = new CommandVodPO(
-				VodType.USER, vodUser.getId(), vodUser.getName(), 
+				VodType.USER, vodUser.getId(), vodUser.getUserNo(), vodUser.getName(), 
 				encoderBundleEntity.getBundleId(), encoderBundleEntity.getBundleName(), encoderBundleEntity.getBundleType(),
 				encoderBundleEntity.getAccessNodeUid(), encoderVideoChannel.getChannelId(), encoderVideoChannel.getBaseType(), 
 				encoderAudioChannel.getChannelId(), encoderAudioChannel.getBaseType(), 
-				user.getId(), user.getName(), decoderUserPlayer.getBundleId(), 
+				user.getId(), user.getUserNo(), user.getName(), decoderUserPlayer.getBundleId(), 
 				decoderUserPlayer.getBundleName(), decoderUserPlayer.getBundleType(), decoderUserPlayer.getLayerId(),
 				decoderUserPlayer.getVideoChannelId(), decoderUserPlayer.getVideoBaseType(), decoderUserPlayer.getAudioChannelId(),
 				decoderUserPlayer.getAudioBaseType());
@@ -225,7 +233,7 @@ public class CommandVodService {
 	 * @param locationIndex 指定播放器序号，序号从0起始；-1为自动选择
 	 * @return CommandGroupUserPlayerPO 播放器
 	 */
-	public CommandGroupUserPlayerPO userStart_test(UserBO user, UserBO vodUser, UserBO admin, int locationIndex) throws Exception{
+	public CommandGroupUserPlayerPO userStart_Cascade(UserBO user, UserBO vodUser, UserBO admin, int locationIndex) throws Exception{
 		
 		FolderUserMap vodUserfolderUserMap = folderUserMapDao.findByUserId(vodUser.getId());
 		boolean bVodUserLdap = queryUtil.isLdapUser(user, vodUserfolderUserMap);
@@ -244,53 +252,59 @@ public class CommandVodService {
 			decoderUserPlayer = commandCommonServiceImpl.userChosePlayerByLocationIndex(user.getId(), PlayerBusinessType.PLAY_USER, locationIndex);
 		}
 		
-//		//被点播--编码
-//		if(!bVodUserLdap){
-//			List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(vodUser)).getList());
-//			if(encoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(vodUser.getName());
-//			BundlePO encoderBundleEntity = encoderBundleEntities.get(0);
-//			
-//			List<ChannelSchemeDTO> encoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(encoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
-//			if(encoderVideoChannels.size() == 0) throw new UserHasNoAvailableEncoderException(vodUser.getName());
-//			ChannelSchemeDTO encoderVideoChannel = encoderVideoChannels.get(0);
-//			
-//			List<ChannelSchemeDTO> encoderAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(encoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
-//			if(encoderAudioChannels.size() == 0) throw new UserHasNoAvailableEncoderException(vodUser.getName());
-//			ChannelSchemeDTO encoderAudioChannel = encoderAudioChannels.get(0);		
-//			
-//			CommandVodPO userVod = new CommandVodPO(
-//					VodType.USER, vodUser.getId(), vodUser.getName(), 
-//					encoderBundleEntity.getBundleId(), encoderBundleEntity.getBundleName(), encoderBundleEntity.getBundleType(),
-//					encoderBundleEntity.getAccessNodeUid(), encoderVideoChannel.getChannelId(), encoderVideoChannel.getBaseType(), 
-//					encoderAudioChannel.getChannelId(), encoderAudioChannel.getBaseType(), 
-//					user.getId(), user.getName(), decoderUserPlayer.getBundleId(), 
-//					decoderUserPlayer.getBundleName(), decoderUserPlayer.getBundleType(), decoderUserPlayer.getLayerId(),
-//					decoderUserPlayer.getVideoChannelId(), decoderUserPlayer.getVideoBaseType(), decoderUserPlayer.getAudioChannelId(),
-//					decoderUserPlayer.getAudioBaseType());
-//		}else{
-//			CommandVodPO userVod = new CommandVodPO(
-//					VodType.USER, vodUser.getId(), vodUser.getName(), 
-//					encoderBundleEntity.getBundleId(), encoderBundleEntity.getBundleName(), encoderBundleEntity.getBundleType(),
-//					encoderBundleEntity.getAccessNodeUid(), encoderVideoChannel.getChannelId(), encoderVideoChannel.getBaseType(), 
-//					encoderAudioChannel.getChannelId(), encoderAudioChannel.getBaseType(), 
-//					user.getId(), user.getName(), decoderUserPlayer.getBundleId(), 
-//					decoderUserPlayer.getBundleName(), decoderUserPlayer.getBundleType(), decoderUserPlayer.getLayerId(),
-//					decoderUserPlayer.getVideoChannelId(), decoderUserPlayer.getVideoBaseType(), decoderUserPlayer.getAudioChannelId(),
-//					decoderUserPlayer.getAudioBaseType());
-//		}
-//		
-//		commandGroupUserPlayerDao.save(decoderUserPlayer);
-//		commandVodDao.save(userVod);
-//		
-//		decoderUserPlayer.setBusinessId(userVod.getId().toString());
-//		decoderUserPlayer.setBusinessName("正在点播" + vodUser.getName() + "用户");
-//		
-//		//点播协议
-//		LogicBO logic = connectBundle(userVod, codec, admin.getId());
-//		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
-//		logic.merge(logicCast);
-//		
-//		executeBusiness.execute(logic, user.getName() + "点播" + vodUser.getName() + "用户：");
+		CommandVodPO userVod = new CommandVodPO();
+		
+		//被点播--编码
+		if(!bVodUserLdap){
+			List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(vodUser)).getList());
+			if(encoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(vodUser.getName());
+			BundlePO encoderBundleEntity = encoderBundleEntities.get(0);
+			
+			List<ChannelSchemeDTO> encoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(encoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
+			if(encoderVideoChannels.size() == 0) throw new UserHasNoAvailableEncoderException(vodUser.getName());
+			ChannelSchemeDTO encoderVideoChannel = encoderVideoChannels.get(0);
+			
+			List<ChannelSchemeDTO> encoderAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(encoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
+			if(encoderAudioChannels.size() == 0) throw new UserHasNoAvailableEncoderException(vodUser.getName());
+			ChannelSchemeDTO encoderAudioChannel = encoderAudioChannels.get(0);		
+			
+			userVod = new CommandVodPO(
+					VodType.USER, vodUser.getId(), vodUser.getUserNo(), vodUser.getName(), 
+					encoderBundleEntity.getBundleId(), encoderBundleEntity.getBundleName(), encoderBundleEntity.getBundleType(),
+					encoderBundleEntity.getAccessNodeUid(), encoderVideoChannel.getChannelId(), encoderVideoChannel.getBaseType(), 
+					encoderAudioChannel.getChannelId(), encoderAudioChannel.getBaseType(), 
+					user.getId(), user.getUserNo(), user.getName(), decoderUserPlayer.getBundleId(), 
+					decoderUserPlayer.getBundleName(), decoderUserPlayer.getBundleType(), decoderUserPlayer.getLayerId(),
+					decoderUserPlayer.getVideoChannelId(), decoderUserPlayer.getVideoBaseType(), decoderUserPlayer.getAudioChannelId(),
+					decoderUserPlayer.getAudioBaseType());
+		}else{
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
+			String bundleId = UUID.randomUUID().toString().replace("-", "");
+			String videoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+			String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+			userVod = new CommandVodPO(
+					VodType.LOCAL_SEE_OUTER_USER, vodUser.getId(), vodUser.getUserNo(), vodUser.getName(), 
+					bundleId, vodUser.getName()+"用户源", "outer_no_bundle_type",
+					localLayerId, videoChannelId, "outer_no_base_type", 
+					audioChannelId, "outer_no_base_type", 
+					user.getId(), user.getUserNo(), user.getName(), decoderUserPlayer.getBundleId(), 
+					decoderUserPlayer.getBundleName(), decoderUserPlayer.getBundleType(), decoderUserPlayer.getLayerId(),
+					decoderUserPlayer.getVideoChannelId(), decoderUserPlayer.getVideoBaseType(), decoderUserPlayer.getAudioChannelId(),
+					decoderUserPlayer.getAudioBaseType());
+		}
+		
+		commandGroupUserPlayerDao.save(decoderUserPlayer);
+		commandVodDao.save(userVod);
+		
+		decoderUserPlayer.setBusinessId(userVod.getId().toString());
+		decoderUserPlayer.setBusinessName("正在点播" + vodUser.getName() + "用户");
+		
+		//点播协议
+		LogicBO logic = connectBundle(userVod, codec, admin.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
+		logic.merge(logicCast);
+		
+		executeBusiness.execute(logic, user.getName() + "点播" + vodUser.getName() + "用户：");
 		
 		return decoderUserPlayer;
 	}
@@ -377,11 +391,11 @@ public class CommandVodService {
 		ChannelSchemeDTO encoderAudioChannel = encoderAudioChannels.get(0);
 				
 		CommandVodPO userVod = new CommandVodPO(
-				VodType.DEVICE, null, null, 
+				VodType.DEVICE, null, encoderBundleEntity.getBundleNum(), null, 
 				encoderBundleEntity.getBundleId(), encoderBundleEntity.getBundleName(), encoderBundleEntity.getBundleType(),
 				encoderBundleEntity.getAccessNodeUid(), encoderVideoChannel.getChannelId(), encoderVideoChannel.getBaseType(), 
 				encoderAudioChannel.getChannelId(), encoderAudioChannel.getBaseType(), 
-				user.getId(), user.getName(), decoderUserPlayer.getBundleId(), 
+				user.getId(), user.getUserNo(), user.getName(), decoderUserPlayer.getBundleId(), 
 				decoderUserPlayer.getBundleName(), decoderUserPlayer.getBundleType(), decoderUserPlayer.getLayerId(),
 				decoderUserPlayer.getVideoChannelId(), decoderUserPlayer.getVideoBaseType(), decoderUserPlayer.getAudioChannelId(),
 				decoderUserPlayer.getAudioBaseType());
@@ -481,11 +495,11 @@ public class CommandVodService {
 		CommandGroupUserPlayerPO decoderUserPlayer = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_USER_ONESELF, -1, false);
 		
 		CommandVodPO userVod = new CommandVodPO(
-				VodType.USER_ONESELF, user.getId(), user.getName(), 
+				VodType.USER_ONESELF, user.getId(), user.getUserNo(), user.getName(), 
 				encoderBundleEntity.getBundleId(), encoderBundleEntity.getBundleName(), encoderBundleEntity.getBundleType(),
 				encoderBundleEntity.getAccessNodeUid(), encoderVideoChannel.getChannelId(), encoderVideoChannel.getBaseType(), 
 				encoderAudioChannel.getChannelId(), encoderAudioChannel.getBaseType(), 
-				user.getId(), user.getName(), decoderUserPlayer.getBundleId(), 
+				user.getId(), user.getUserNo(), user.getName(), decoderUserPlayer.getBundleId(), 
 				decoderUserPlayer.getBundleName(), decoderUserPlayer.getBundleType(), decoderUserPlayer.getLayerId(),
 				decoderUserPlayer.getVideoChannelId(), decoderUserPlayer.getVideoBaseType(), decoderUserPlayer.getAudioChannelId(),
 				decoderUserPlayer.getAudioBaseType());
@@ -596,30 +610,75 @@ public class CommandVodService {
 	private LogicBO connectBundle(
 			CommandVodPO vod,
 			CodecParamBO codec,
-			Long userId) throws Exception{
+			Long userId) throws Exception{		
 		
+		VodType vodType = vod.getVodType();
+				
 		//呼叫设备
 		LogicBO logic = new LogicBO().setUserId(userId.toString())
-				 			 		 .setConnectBundle(new ArrayList<ConnectBundleBO>());
+				 			 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
+				 			 		 .setPass_by(new ArrayList<PassByBO>());
 		
-		//呼叫编码
-		ConnectBundleBO connectEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-														            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-																    .setLock_type("write")
-																    .setBundleId(vod.getSourceBundleId())
-																    .setLayerId(vod.getSourceLayerId())
-																    .setBundle_type(vod.getSourceBundleType());
-		ConnectBO connectEncoderVideoChannel = new ConnectBO().setChannelId(vod.getSourceVideoChannelId())
-														      .setChannel_status("Open")
-														      .setBase_type(vod.getSourceVideoBaseType())
-														      .setCodec_param(codec);
-		ConnectBO connectEncoderAudioChannel = new ConnectBO().setChannelId(vod.getSourceAudioChannelId())
-														      .setChannel_status("Open")
-														      .setBase_type(vod.getSourceAudioBaseType())
-														      .setCodec_param(codec);
-		
-		connectEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectEncoderVideoChannel).add(connectEncoderAudioChannel).getList());
-		logic.getConnectBundle().add(connectEncoderBundle);
+		if(vodType==null || vodType.equals(VodType.USER) || vodType.equals(VodType.DEVICE)){			
+			//呼叫编码
+			ConnectBundleBO connectEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+															            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+																	    .setLock_type("write")
+																	    .setBundleId(vod.getSourceBundleId())
+																	    .setLayerId(vod.getSourceLayerId())
+																	    .setBundle_type(vod.getSourceBundleType());
+			ConnectBO connectEncoderVideoChannel = new ConnectBO().setChannelId(vod.getSourceVideoChannelId())
+															      .setChannel_status("Open")
+															      .setBase_type(vod.getSourceVideoBaseType())
+															      .setCodec_param(codec);
+			ConnectBO connectEncoderAudioChannel = new ConnectBO().setChannelId(vod.getSourceAudioChannelId())
+															      .setChannel_status("Open")
+															      .setBase_type(vod.getSourceAudioBaseType())
+															      .setCodec_param(codec);
+			
+			connectEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectEncoderVideoChannel).add(connectEncoderAudioChannel).getList());
+			logic.getConnectBundle().add(connectEncoderBundle);			
+		}else if(vodType.equals(VodType.LOCAL_SEE_OUTER_USER)){
+			//点播外部用户，passby拉流
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
+			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
+								 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+								 .setUuid(vod.getUuid())
+								 .setSrc_user(vod.getDstUserNo())
+								 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", vod.getSourceLayerId())
+										 											.put("bundleid", vod.getSourceBundleId())
+										 											.put("video_channelid", vod.getSourceVideoChannelId())
+										 											.put("audio_channelid", vod.getSourceAudioChannelId())
+										 											.getMap())
+								 .setDst_number(vod.getSourceNo())
+								 .setVparam(codec);
+			
+			PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+			.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
+			.setPass_by_content(passByContent);
+			
+			logic.getPass_by().add(passby);
+		}else if(vodType.equals(VodType.LOCAL_SEE_OUTER_DEVICE)){
+			//点播外部设备，passby拉流
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
+			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+								 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+								 .setUuid(vod.getUuid())
+								 .setSrc_user(vod.getDstUserNo())
+								 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", vod.getSourceLayerId())
+										 											.put("bundleid", vod.getSourceBundleId())
+										 											.put("video_channelid", vod.getSourceVideoChannelId())
+										 											.put("audio_channelid", vod.getSourceAudioChannelId())
+										 											.getMap())
+								 .setDst_number(vod.getSourceNo())
+								 .setVparam(codec);
+			
+			PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+			.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+			.setPass_by_content(passByContent);
+			
+			logic.getPass_by().add(passby);
+		}
 		
 		//呼叫解码
 		ConnectBundleBO connectDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)

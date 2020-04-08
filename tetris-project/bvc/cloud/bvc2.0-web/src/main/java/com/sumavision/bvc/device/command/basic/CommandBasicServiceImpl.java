@@ -892,7 +892,8 @@ public class CommandBasicServiceImpl {
 			//专向会议的通知
 			if(group.getType().equals(GroupType.SECRET)){
 				
-				JSONObject message = new JSONObject();				
+				JSONObject message = new JSONObject();
+				boolean send = false;
 				if(member.isAdministrator()){
 					//当前正在处理主席
 					//对方成员拒绝导致的停止
@@ -907,6 +908,7 @@ public class CommandBasicServiceImpl {
 						}
 						//返回操作人的屏幕
 						returnSplits = secretSplits;
+						send = true;
 					}
 					//对方成员停止
 					if(stopMode==0 && userId.equals(secretMember.getUserId())){
@@ -920,6 +922,7 @@ public class CommandBasicServiceImpl {
 						}
 						//返回操作人的屏幕
 						returnSplits = secretSplits;
+						send = true;
 					}
 				}else{
 					//当前正在处理对方成员
@@ -935,10 +938,13 @@ public class CommandBasicServiceImpl {
 						}
 						//返回操作人的屏幕
 						returnSplits = chairSplits;
+						send = true;
 					}
 				}
 				//发送消息
-				messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName()));
+				if(send){
+					messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName()));
+				}
 			}
 			member.setMemberStatus(MemberStatus.DISCONNECT);
 			member.setCooperateStatus(MemberStatus.DISCONNECT);
@@ -1667,7 +1673,8 @@ public class CommandBasicServiceImpl {
 		Set<CommandGroupMemberPO> members = group.getMembers();
 		Set<CommandGroupForwardPO> forwards = group.getForwards();
 //		String commandString = commandCommonUtil.generateCommandString(group.getType());
-		String cooperateString = commandCommonUtil.generateCooperateString(group.getType());
+		GroupType groupType = group.getType();
+		String cooperateString = commandCommonUtil.generateCooperateString(groupType);
 		
 		//新成员中是否含有主席。
 		boolean newMembersContainsChairman = false;
@@ -1708,9 +1715,14 @@ public class CommandBasicServiceImpl {
 				if(usefulPlayersCount > 0){
 					CommandGroupUserPlayerPO player = cPlayers.get(cPlayers.size() - usefulPlayersCount);
 					CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
-					player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
 					player.setBusinessName(group.getName() + "：" + srcMember.getUserName());//添加成员名称
-					player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
+					if(groupType.equals(GroupType.SECRET)){
+						player.setBusinessId(group.getId().toString());
+						player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
+					}else{
+						player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
+						player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
+					}
 					
 					//用于返回的分屏信息
 					JSONObject split = new JSONObject();
@@ -1771,6 +1783,11 @@ public class CommandBasicServiceImpl {
 						player4c.setBusinessId(group.getId().toString());
 						player4c.setBusinessName(group.getName() + "：" + chairmanMember.getUserName());
 						player4c.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
+						if(groupType.equals(GroupType.SECRET)){
+							player4c.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
+						}else{
+							player4c.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
+						}
 						
 						//给转发设置目的
 						forward.setDstPlayer(player4c);
@@ -1803,7 +1820,11 @@ public class CommandBasicServiceImpl {
 						
 						player.setBusinessId(group.getId().toString());//如果需要改成c2m_forward.getId()，那么需要先save获得id
 						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + cooperateString);
-						player.setPlayerBusinessType(PlayerBusinessType.COOPERATE_COMMAND);
+						if(groupType.equals(GroupType.MEETING)){
+							player.setPlayerBusinessType(PlayerBusinessType.SPEAK_MEETING);
+						}else{
+							player.setPlayerBusinessType(PlayerBusinessType.COOPERATE_COMMAND);
+						}
 						
 						//用于返回的分屏信息
 						JSONObject split = new JSONObject();

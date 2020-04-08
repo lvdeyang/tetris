@@ -3,6 +3,7 @@ package com.sumavision.bvc.device.command.user;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,7 @@ import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
+import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
@@ -378,7 +380,7 @@ public class CommandUserServiceImpl {
 		}else{
 			throw new BaseException(StatusCode.FORBIDDEN, "不支持外部用户呼叫外部用户");
 		}
-		
+				
 		//校验呼叫业务是否已经存在
 		UserLiveCallPO exsitCall = userLiveCallDao.findByCalledUserIdAndCallUserId(calledUser.getId(), callUser.getId());
 		if(exsitCall != null){
@@ -427,11 +429,14 @@ public class CommandUserServiceImpl {
 			callEncoderAudioChannel = callEncoderAudioChannels.get(0);
 			
 		}else{
-			//TODO:new一个
+			//TODO:new一个，补充必要参数
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			callUserPlayer = new CommandGroupUserPlayerPO();
 			callEncoderBundleEntity = new BundlePO();
-			callEncoderVideoChannel = new ChannelSchemeDTO();
-			callEncoderAudioChannel = new ChannelSchemeDTO();
+			callEncoderBundleEntity.setBundleId(UUID.randomUUID().toString().replace("-", ""));
+			callEncoderBundleEntity.setAccessNodeUid(localLayerId);
+			callEncoderVideoChannel = new ChannelSchemeDTO().setChannelId(ChannelType.VIDEOENCODE1.getChannelId());
+			callEncoderAudioChannel = new ChannelSchemeDTO().setChannelId(ChannelType.AUDIOENCODE1.getChannelId());
 		}
 		
 		//被呼叫
@@ -463,10 +468,13 @@ public class CommandUserServiceImpl {
 			
 		}else{
 			//TODO:new一个
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			calledUserPlayer = new CommandGroupUserPlayerPO();
 			calledEncoderBundleEntity = new BundlePO();
-			calledEncoderVideoChannel = new ChannelSchemeDTO();
-			calledEncoderAudioChannel = new ChannelSchemeDTO();
+			callEncoderBundleEntity.setBundleId(UUID.randomUUID().toString().replace("-", ""));
+			callEncoderBundleEntity.setAccessNodeUid(localLayerId);
+			calledEncoderVideoChannel = new ChannelSchemeDTO().setChannelId(ChannelType.VIDEOENCODE1.getChannelId());
+			calledEncoderAudioChannel = new ChannelSchemeDTO().setChannelId(ChannelType.AUDIOENCODE1.getChannelId());
 		}
 		
 		UserLiveCallPO business = new UserLiveCallPO(
@@ -486,6 +494,9 @@ public class CommandUserServiceImpl {
 		
 		business.setCallType(callType);
 		business.setType(UserCallType.CALL);
+		if(uuid != null){
+			business.setUuid(uuid);
+		}
 		userLiveCallDao.save(business);
 		
 		if(!bCallUserLdap){		
@@ -552,6 +563,12 @@ public class CommandUserServiceImpl {
 			CommandGroupUserPlayerPO exsitCallUserPlayer = commandCommonServiceImpl.queryPlayerByBusiness(callUserInfo, PlayerBusinessType.USER_VOICE, exsitCall.getId().toString());
 			
 			return exsitCallUserPlayer;
+		}
+		
+		FolderUserMap calledUserfolderUserMap = folderUserMapDao.findByUserId(calledUser.getId());
+		boolean bCalledUserLdap = queryUtil.isLdapUser(callUser, calledUserfolderUserMap);
+		if(bCalledUserLdap){
+			throw new BaseException(StatusCode.FORBIDDEN, "跨系统用户请使用“呼叫”功能");
 		}
 		
 		//呼叫方
@@ -935,9 +952,7 @@ public class CommandUserServiceImpl {
 		if(call == null){
 			throw new BaseException(StatusCode.FORBIDDEN, "呼叫不存在！");
 		}
-		
-		CallType callType = call.getCallType();
-		
+				
 		//判断发起人是不是通话中的任何一个人
 		if(!user.getId().equals(call.getCalledUserId()) && !user.getId().equals(call.getCallUserId())){
 			throw new UserNotMatchBusinessException(user.getName(), businessId, PlayerBusinessType.USER_CALL.getName());
@@ -1221,140 +1236,201 @@ public class CommandUserServiceImpl {
 	private LogicBO openBundle(
 			UserLiveCallPO call, 
 			CodecParamBO codec,
-			Long userId) throws Exception{
+			Long userId) throws Exception{		
 		
+		CallType callType = call.getCallType();
+				
 		//呼叫设备
 		LogicBO logic = new LogicBO().setUserId(userId.toString())
-				 			 		 .setConnectBundle(new ArrayList<ConnectBundleBO>());
+				 			 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
+				 			 		 .setPass_by(new ArrayList<PassByBO>());
 		
-		//呼叫被叫编码
-		ConnectBundleBO connectCalledEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-																          .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-																		  .setLock_type("write")
-																		  .setBundleId(call.getCalledEncoderBundleId())
-																		  .setLayerId(call.getCalledEncoderLayerId())
-																		  .setBundle_type(call.getCalledEncoderBundleType());
-		
-		List<ConnectBO> calledEncodeConnectBOs = new ArrayList<ConnectBO>();
-		if(call.getCalledEncoderVideoChannelId() != null){
-			ConnectBO connectCalledEncoderVideoChannel = new ConnectBO().setChannelId(call.getCalledEncoderVideoChannelId())
-																	    .setChannel_status("Open")
-																	    .setBase_type(call.getCalledEncoderVideoBaseType())
-																	    .setCodec_param(codec);
-			calledEncodeConnectBOs.add(connectCalledEncoderVideoChannel);
-		}
+		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.OUTER_LOCAL)){
+			
+			//呼叫被叫编码
+			ConnectBundleBO connectCalledEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+																	          .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+																			  .setLock_type("write")
+																			  .setBundleId(call.getCalledEncoderBundleId())
+																			  .setLayerId(call.getCalledEncoderLayerId())
+																			  .setBundle_type(call.getCalledEncoderBundleType());
+			
+			List<ConnectBO> calledEncodeConnectBOs = new ArrayList<ConnectBO>();
+			if(call.getCalledEncoderVideoChannelId() != null){
+				ConnectBO connectCalledEncoderVideoChannel = new ConnectBO().setChannelId(call.getCalledEncoderVideoChannelId())
+																		    .setChannel_status("Open")
+																		    .setBase_type(call.getCalledEncoderVideoBaseType())
+																		    .setCodec_param(codec);
+				calledEncodeConnectBOs.add(connectCalledEncoderVideoChannel);
+			}
 
-		if(call.getCalledEncoderAudioChannelId() != null){
-			ConnectBO connectCalledEncoderAudioChannel = new ConnectBO().setChannelId(call.getCalledEncoderAudioChannelId())
-																	    .setChannel_status("Open")
-																	    .setBase_type(call.getCalledEncoderAudioBaseType())
-																	    .setCodec_param(codec);
-			calledEncodeConnectBOs.add(connectCalledEncoderAudioChannel);
-		}
+			if(call.getCalledEncoderAudioChannelId() != null){
+				ConnectBO connectCalledEncoderAudioChannel = new ConnectBO().setChannelId(call.getCalledEncoderAudioChannelId())
+																		    .setChannel_status("Open")
+																		    .setBase_type(call.getCalledEncoderAudioBaseType())
+																		    .setCodec_param(codec);
+				calledEncodeConnectBOs.add(connectCalledEncoderAudioChannel);
+			}
 
-		
-		connectCalledEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(calledEncodeConnectBOs).getList());
-		logic.getConnectBundle().add(connectCalledEncoderBundle);
-		
-		//呼叫被叫解码,看主叫编码
-		ConnectBundleBO connectCalledDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-//				  													      .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-																		  .setLock_type("write")
-																	      .setBundleId(call.getCalledDecoderBundleId())
-																	      .setLayerId(call.getCalledDecoderLayerId())
-																	      .setBundle_type(call.getCalledDecoderBundleType());
-		List<ConnectBO> calledDecodeConnectBOs = new ArrayList<ConnectBO>();
-		if(call.getCalledDecoderVideoChannelId() != null){
-			ForwardSetSrcBO calledDecoderVideoForwardSet = new ForwardSetSrcBO().setType("channel")
-																		 	    .setBundleId(call.getCallEncoderBundleId())
-																		 	    .setLayerId(call.getCallEncoderLayerId())
-																		 	    .setChannelId(call.getCallEncoderVideoChannelId());
-			ConnectBO connectCalledDecoderVideoChannel = new ConnectBO().setChannelId(call.getCalledDecoderVideoChannelId())
-																        .setChannel_status("Open")
-																        .setBase_type(call.getCalledDecoderVideoBaseType())
-																        .setCodec_param(codec)
-																        .setSource_param(calledDecoderVideoForwardSet);
-			calledDecodeConnectBOs.add(connectCalledDecoderVideoChannel);
-		}
+			
+			connectCalledEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(calledEncodeConnectBOs).getList());
+			logic.getConnectBundle().add(connectCalledEncoderBundle);
+			
+			//呼叫被叫解码,看主叫编码
+			ConnectBundleBO connectCalledDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+//					  													      .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+																			  .setLock_type("write")
+																		      .setBundleId(call.getCalledDecoderBundleId())
+																		      .setLayerId(call.getCalledDecoderLayerId())
+																		      .setBundle_type(call.getCalledDecoderBundleType());
+			List<ConnectBO> calledDecodeConnectBOs = new ArrayList<ConnectBO>();
+			if(call.getCalledDecoderVideoChannelId() != null){
+				ForwardSetSrcBO calledDecoderVideoForwardSet = new ForwardSetSrcBO().setType("channel")
+																			 	    .setBundleId(call.getCallEncoderBundleId())
+																			 	    .setLayerId(call.getCallEncoderLayerId())
+																			 	    .setChannelId(call.getCallEncoderVideoChannelId());
+				ConnectBO connectCalledDecoderVideoChannel = new ConnectBO().setChannelId(call.getCalledDecoderVideoChannelId())
+																	        .setChannel_status("Open")
+																	        .setBase_type(call.getCalledDecoderVideoBaseType())
+																	        .setCodec_param(codec)
+																	        .setSource_param(calledDecoderVideoForwardSet);
+				calledDecodeConnectBOs.add(connectCalledDecoderVideoChannel);
+			}
 
-		if(call.getCalledDecoderAudioChannelId() != null){
-			ForwardSetSrcBO calledDecoderAudioForwardSet = new ForwardSetSrcBO().setType("channel")
-																		 	    .setBundleId(call.getCallEncoderBundleId())
-																		 	    .setLayerId(call.getCallEncoderLayerId())
-																		 	    .setChannelId(call.getCallEncoderAudioChannelId());
-			ConnectBO connectCalledDecoderAudioChannel = new ConnectBO().setChannelId(call.getCalledDecoderAudioChannelId())
-																        .setChannel_status("Open")
-																        .setBase_type(call.getCalledDecoderAudioBaseType())
-																        .setCodec_param(codec)
-																        .setSource_param(calledDecoderAudioForwardSet);
-			calledDecodeConnectBOs.add(connectCalledDecoderAudioChannel);
-		}
+			if(call.getCalledDecoderAudioChannelId() != null){
+				ForwardSetSrcBO calledDecoderAudioForwardSet = new ForwardSetSrcBO().setType("channel")
+																			 	    .setBundleId(call.getCallEncoderBundleId())
+																			 	    .setLayerId(call.getCallEncoderLayerId())
+																			 	    .setChannelId(call.getCallEncoderAudioChannelId());
+				ConnectBO connectCalledDecoderAudioChannel = new ConnectBO().setChannelId(call.getCalledDecoderAudioChannelId())
+																	        .setChannel_status("Open")
+																	        .setBase_type(call.getCalledDecoderAudioBaseType())
+																	        .setCodec_param(codec)
+																	        .setSource_param(calledDecoderAudioForwardSet);
+				calledDecodeConnectBOs.add(connectCalledDecoderAudioChannel);
+			}
 
-		
-		connectCalledDecoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(calledDecodeConnectBOs).getList());
-		logic.getConnectBundle().add(connectCalledDecoderBundle);
-		
-		//呼叫主叫编码
-		ConnectBundleBO connectCallEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-															            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-																	    .setLock_type("write")
-																	    .setBundleId(call.getCallEncoderBundleId())
-																	    .setLayerId(call.getCallEncoderLayerId())
-																	    .setBundle_type(call.getCallEncoderBundleType());
-		List<ConnectBO> callEncodeConnectBOs = new ArrayList<ConnectBO>();
-		if(call.getCallEncoderVideoChannelId() != null){
-			ConnectBO connectCallEncoderVideoChannel = new ConnectBO().setChannelId(call.getCallEncoderVideoChannelId())
-																	  .setChannel_status("Open")
-																	  .setBase_type(call.getCallEncoderVideoBaseType())
-																	  .setCodec_param(codec);
-			callEncodeConnectBOs.add(connectCallEncoderVideoChannel);
+			
+			connectCalledDecoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(calledDecodeConnectBOs).getList());
+			logic.getConnectBundle().add(connectCalledDecoderBundle);
+		}else{
+			//LOCAL_OUTER，被叫是外部用户，生成passby
+			//查询本联网layerid
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
+			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
+								 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+								 .setUuid(call.getUuid())
+								 .setSrc_user(call.getCallUserno())
+								 .setLocal_encoder(new HashMapWrapper<String, String>().put("layerid", call.getCallEncoderLayerId())
+										 											   .put("bundleid", call.getCallEncoderBundleId())
+										                         					   .put("video_channelid", call.getCallEncoderVideoChannelId())
+										                         					   .put("audio_channelid", call.getCallEncoderAudioChannelId())
+										 											   .getMap())
+								 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", call.getCalledEncoderLayerId())
+										 											.put("bundleid", call.getCalledEncoderBundleId())
+										 											.put("video_channelid", call.getCalledEncoderVideoChannelId())
+										 											.put("audio_channelid", call.getCalledEncoderAudioChannelId())
+										 											.getMap())
+								 .setDst_number(call.getCalledUserno())
+								 .setVparam(codec);
+			
+			PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+			.setType(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
+			.setPass_by_content(passByContent);
+			
+			logic.getPass_by().add(passby);
 		}
-		if(call.getCallEncoderAudioChannelId() != null){
-			ConnectBO connectCallEncoderAudioChannel = new ConnectBO().setChannelId(call.getCallEncoderAudioChannelId())
-																      .setChannel_status("Open")
-																      .setBase_type(call.getCallEncoderAudioBaseType())
-																      .setCodec_param(codec);
-			callEncodeConnectBOs.add(connectCallEncoderAudioChannel);
-		}
 		
-		connectCallEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(callEncodeConnectBOs).getList());
-		logic.getConnectBundle().add(connectCallEncoderBundle);
+		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.LOCAL_OUTER)){
+			
+			//呼叫主叫编码
+			ConnectBundleBO connectCallEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+																            .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+																		    .setLock_type("write")
+																		    .setBundleId(call.getCallEncoderBundleId())
+																		    .setLayerId(call.getCallEncoderLayerId())
+																		    .setBundle_type(call.getCallEncoderBundleType());
+			List<ConnectBO> callEncodeConnectBOs = new ArrayList<ConnectBO>();
+			if(call.getCallEncoderVideoChannelId() != null){
+				ConnectBO connectCallEncoderVideoChannel = new ConnectBO().setChannelId(call.getCallEncoderVideoChannelId())
+																		  .setChannel_status("Open")
+																		  .setBase_type(call.getCallEncoderVideoBaseType())
+																		  .setCodec_param(codec);
+				callEncodeConnectBOs.add(connectCallEncoderVideoChannel);
+			}
+			if(call.getCallEncoderAudioChannelId() != null){
+				ConnectBO connectCallEncoderAudioChannel = new ConnectBO().setChannelId(call.getCallEncoderAudioChannelId())
+																	      .setChannel_status("Open")
+																	      .setBase_type(call.getCallEncoderAudioBaseType())
+																	      .setCodec_param(codec);
+				callEncodeConnectBOs.add(connectCallEncoderAudioChannel);
+			}
+			
+			connectCallEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(callEncodeConnectBOs).getList());
+			logic.getConnectBundle().add(connectCallEncoderBundle);
 
-		//呼叫主叫解码，看被叫编码
-		ConnectBundleBO connectCallDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-//				  													    .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-																		.setLock_type("write")
-																	    .setBundleId(call.getCallDecoderBundleId())
-																	    .setLayerId(call.getCallDecoderLayerId())
-																	    .setBundle_type(call.getCallDecoderBundleType());
-		List<ConnectBO> callDecodeConnectBOs = new ArrayList<ConnectBO>();
-		if(call.getCallDecoderVideoChannelId() != null){
-			ForwardSetSrcBO callDecoderVideoForwardSet = new ForwardSetSrcBO().setType("channel")
-																		 	  .setBundleId(call.getCalledEncoderBundleId())
-																		 	  .setLayerId(call.getCalledEncoderLayerId())
-																		 	  .setChannelId(call.getCalledEncoderVideoChannelId());
-			ConnectBO connectCallDecoderVideoChannel = new ConnectBO().setChannelId(call.getCallDecoderVideoChannelId())
-																      .setChannel_status("Open")
-																      .setBase_type(call.getCallDecoderVideoBaseType())
-																      .setCodec_param(codec)
-																      .setSource_param(callDecoderVideoForwardSet);
-			callDecodeConnectBOs.add(connectCallDecoderVideoChannel);
+			//呼叫主叫解码，看被叫编码
+			ConnectBundleBO connectCallDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+//					  													    .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+																			.setLock_type("write")
+																		    .setBundleId(call.getCallDecoderBundleId())
+																		    .setLayerId(call.getCallDecoderLayerId())
+																		    .setBundle_type(call.getCallDecoderBundleType());
+			List<ConnectBO> callDecodeConnectBOs = new ArrayList<ConnectBO>();
+			if(call.getCallDecoderVideoChannelId() != null){
+				ForwardSetSrcBO callDecoderVideoForwardSet = new ForwardSetSrcBO().setType("channel")
+																			 	  .setBundleId(call.getCalledEncoderBundleId())
+																			 	  .setLayerId(call.getCalledEncoderLayerId())
+																			 	  .setChannelId(call.getCalledEncoderVideoChannelId());
+				ConnectBO connectCallDecoderVideoChannel = new ConnectBO().setChannelId(call.getCallDecoderVideoChannelId())
+																	      .setChannel_status("Open")
+																	      .setBase_type(call.getCallDecoderVideoBaseType())
+																	      .setCodec_param(codec)
+																	      .setSource_param(callDecoderVideoForwardSet);
+				callDecodeConnectBOs.add(connectCallDecoderVideoChannel);
+			}
+			if(call.getCallDecoderAudioChannelId() != null){
+				ForwardSetSrcBO callDecoderAudioForwardSet = new ForwardSetSrcBO().setType("channel")
+																			 	  .setBundleId(call.getCalledEncoderBundleId())
+																			 	  .setLayerId(call.getCalledEncoderLayerId())
+																			 	  .setChannelId(call.getCalledEncoderAudioChannelId());
+				ConnectBO connectCallDecoderAudioChannel = new ConnectBO().setChannelId(call.getCallDecoderAudioChannelId())
+																	      .setChannel_status("Open")
+																	      .setBase_type(call.getCallDecoderAudioBaseType())
+																	      .setCodec_param(codec)
+																	      .setSource_param(callDecoderAudioForwardSet);
+				callDecodeConnectBOs.add(connectCallDecoderAudioChannel);
+			}
+			
+			connectCallDecoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(callDecodeConnectBOs).getList());
+			logic.getConnectBundle().add(connectCallDecoderBundle);
+		}else{
+			//OUTER_LOCAL，主叫是外部用户，生成passby
+			//查询本联网layerid
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
+			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_XT_CALL_LOCAL_USER)
+								 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+								 .setUuid(call.getUuid())
+								 .setSrc_user(call.getCallUserno())
+								 .setLocal_encoder(new HashMapWrapper<String, String>().put("layerid", call.getCalledEncoderLayerId())
+																					   .put("bundleid", call.getCalledEncoderBundleId())
+											                     					   .put("video_channelid", call.getCalledEncoderVideoChannelId())
+											                     					   .put("audio_channelid", call.getCalledEncoderAudioChannelId())
+										 											   .getMap())
+								 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", call.getCallEncoderLayerId())
+																					.put("bundleid", call.getCallEncoderBundleId())
+																					.put("video_channelid", call.getCallEncoderVideoChannelId())
+																					.put("audio_channelid", call.getCallEncoderAudioChannelId())
+										                                            .getMap())
+								 .setDst_number(call.getCalledUserno())
+								 .setVparam(codec);
+			
+			PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+			.setType(XtBusinessPassByContentBO.CMD_XT_CALL_LOCAL_USER)
+			.setPass_by_content(passByContent);
+			
+			logic.getPass_by().add(passby);
 		}
-		if(call.getCallDecoderAudioChannelId() != null){
-			ForwardSetSrcBO callDecoderAudioForwardSet = new ForwardSetSrcBO().setType("channel")
-																		 	  .setBundleId(call.getCalledEncoderBundleId())
-																		 	  .setLayerId(call.getCalledEncoderLayerId())
-																		 	  .setChannelId(call.getCalledEncoderAudioChannelId());
-			ConnectBO connectCallDecoderAudioChannel = new ConnectBO().setChannelId(call.getCallDecoderAudioChannelId())
-																      .setChannel_status("Open")
-																      .setBase_type(call.getCallDecoderAudioBaseType())
-																      .setCodec_param(codec)
-																      .setSource_param(callDecoderAudioForwardSet);
-			callDecodeConnectBOs.add(connectCallDecoderAudioChannel);
-		}
-		
-		connectCallDecoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(callDecodeConnectBOs).getList());
-		logic.getConnectBundle().add(connectCallDecoderBundle);
 			
 		return logic;
 	}
@@ -1372,10 +1448,8 @@ public class CommandUserServiceImpl {
 				UserLiveCallPO call, 
 				CodecParamBO codec,
 				Long userId) throws Exception{
-		
+				
 		CallType callType = call.getCallType();
-		//查询本联网layerid
-		String localLayerId = resourceRemoteService.queryLocalLayerId();
 		
 		LogicBO logic = new LogicBO().setUserId(userId.toString())
 									 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
@@ -1398,6 +1472,8 @@ public class CommandUserServiceImpl {
 			logic.getDisconnectBundle().add(disconnectCalledDecoderBundle);
 		}else{
 			//LOCAL_OUTER，生成passby
+			//查询本联网layerid
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
 																					 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
 																					 .setUuid(call.getUuid())
@@ -1438,6 +1514,8 @@ public class CommandUserServiceImpl {
 			logic.getDisconnectBundle().add(disconnectCallDecoderBundle);
 		}else{
 			//OUTER_LOCAL，生成passby
+			//查询本联网layerid
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_XT_CALL_LOCAL_USER)
 					 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
 					 .setUuid(call.getUuid())
