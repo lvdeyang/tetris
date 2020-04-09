@@ -156,7 +156,7 @@ public class CommandVodController {
 			String businessId,
 			HttpServletRequest request) throws Exception{
 		
-		synchronized (new StringBuffer().append(lockStartPrefix).append(businessId).toString().intern()) {
+		synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
 			Long userId = userUtils.getUserIdFromSession(request);
 			UserBO user = userUtils.queryUserById(userId);
 			
@@ -431,7 +431,7 @@ public class CommandVodController {
 			Long businessId,
 			HttpServletRequest request) throws Exception{
 		
-		synchronized (new StringBuffer().append(lockStartPrefix).append(businessId).toString().intern()) {
+		synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
 			
 			Long id = userUtils.getUserIdFromSession(request);
 			UserBO user = userUtils.queryUserById(id);
@@ -440,6 +440,46 @@ public class CommandVodController {
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandVodService.deviceStop(user, businessId, admin);
+			
+			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
+					   								   .getMap();
+		}
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/record/file/start")
+	public Object recordFileStart(
+			String businessType,
+			String businessInfo,
+			String url,
+			HttpServletRequest request) throws Exception{
+			
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
+			UserBO user = userUtils.queryUserById(userId);
+			CommandGroupUserPlayerPO player = commandVodService.recordVodStart(user, businessType, businessInfo, url, -1);
+			
+			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			
+			return _player;
+		}
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/record/file/stop")
+	public Object recordFileStop(
+			int serial,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
+			UserBO user = userUtils.queryUserById(userId);
+			
+			CommandGroupUserPlayerPO player = commandVodService.recordVodStop(user, serial);
 			
 			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
 					   								   .getMap();

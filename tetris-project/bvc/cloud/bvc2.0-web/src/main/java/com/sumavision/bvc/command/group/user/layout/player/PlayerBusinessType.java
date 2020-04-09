@@ -26,7 +26,7 @@ public enum PlayerBusinessType {
 	PLAY_USER("点播用户", "vodUser"),
 	PLAY_USER_ONESELF("本地视频", "localPreview"),//看自己的编码器，原来给客户端的code也是vodUser，客户端按照普通点播来处理；2月20日改用localPreview
 	PLAY_DEVICE("点播设备", "vodDevice"),
-	PLAY_RECORD("播放录像", ""),
+	PLAY_RECORD("播放录像", "vodRecordFile"),
 	USER_CALL("用户呼叫", "callUser"),
 	USER_VOICE("语音对讲", "voiceIntercom");
 	

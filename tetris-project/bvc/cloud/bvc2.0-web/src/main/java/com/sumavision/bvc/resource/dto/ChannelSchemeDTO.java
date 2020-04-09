@@ -41,6 +41,8 @@ public class ChannelSchemeDTO {
 	
 	private ParamScope paramScope;
 	
+	public ChannelSchemeDTO(){}
+	
 	public ChannelSchemeDTO(
 			Long id,
 			String bundleId,

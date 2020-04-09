@@ -624,7 +624,7 @@ public class CommandQueryController {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月15日 下午2:37:19
-	 * @param type 查询类型，command或group，如果null则认为command
+	 * @param type 查询类型，command或meeting，如果null则认为command
 	 * @return TreeNodeVO 会议树节点
 	 */
 	@JsonBody
@@ -649,6 +649,7 @@ public class CommandQueryController {
 		}
 		
 		List<CommandGroupPO> commands = commandGroupDao.findByMemberUserId(userId);
+		List <CommandGroupPO> enteredCommands = commandGroupDao.findEnteredGroupByMemberUserId(userId);
 		
 		//加入会议组节点
 		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
@@ -663,7 +664,23 @@ public class CommandQueryController {
 			if(!needType.equals(groupType)){
 				continue;
 			}
-			TreeNodeVO commandTree = new TreeNodeVO().set(command);
+			
+			boolean entered = false;
+			if(command.getUserId().equals(userId)){
+				//自己的指挥
+				if(GroupStatus.STOP.equals(command.getStatus())){
+					entered = false;
+				}else{
+					entered = true;
+				}
+			}else{
+				//别人的指挥
+				CommandGroupPO enteredCommand = commandCommonUtil.queryGroupById(enteredCommands, command.getId());
+				if(enteredCommand != null){
+					entered = true;
+				}
+			}
+			TreeNodeVO commandTree = new TreeNodeVO().set(command, entered);
 			commandRoot.getChildren().add(commandTree);
 		}
 		
