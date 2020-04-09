@@ -1,68 +1,27 @@
 package com.sumavision.bvc.device.command.cascade.util;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.service.ResourceService;
-import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
-import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
-import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
-import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
-import com.sumavision.bvc.command.group.enumeration.GroupType;
-import com.sumavision.bvc.command.group.enumeration.MemberStatus;
-import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
-import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
-import com.sumavision.bvc.command.group.record.CommandGroupRecordFragmentPO;
-import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
-import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
-import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
-import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
-import com.sumavision.bvc.config.ServerProps;
-import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
-import com.sumavision.bvc.system.enumeration.GearsLevel;
-import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
-
-import freemarker.template.Template;
 
 @Service
 public class CommandCascadeUtil {
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
-	
-	@Autowired
-	private CommandGroupDAO commandGroupDao;
-	
-	@Autowired
-	private ResourceService resourceService;
-	
-	@Autowired
-	private CommandCommonServiceImpl commandCommonServiceImpl;
 	
 	public GroupBO createCommand(CommandGroupPO group){
 		Set<CommandGroupMemberPO> members = group.getMembers();
@@ -233,7 +192,7 @@ public class CommandCascadeUtil {
 		//源号码列表
 		List<String> medialist = new ArrayList<String>();
 		for(BundlePO bundlePO : bundlePOs){
-			medialist.add(bundlePO.getBundleNum());
+			medialist.add(bundlePO.getUsername());
 		}
 		
 		GroupBO groupBO = new GroupBO()
@@ -274,7 +233,7 @@ public class CommandCascadeUtil {
 		//源号码列表
 		List<String> medialist = new ArrayList<String>();
 		for(BundlePO bundlePO : bundlePOs){
-			medialist.add(bundlePO.getBundleNum());
+			medialist.add(bundlePO.getUsername());
 		}
 		
 		GroupBO groupBO = new GroupBO()
@@ -418,7 +377,7 @@ public class CommandCascadeUtil {
 		//源号码列表
 		List<String> medialist = new ArrayList<String>();
 		for(BundlePO bundlePO : bundlePOs){
-			medialist.add(bundlePO.getBundleNum());
+			medialist.add(bundlePO.getUsername());
 		}
 		
 		GroupBO groupBO = new GroupBO()
@@ -459,7 +418,7 @@ public class CommandCascadeUtil {
 		//源号码列表
 		List<String> medialist = new ArrayList<String>();
 		for(BundlePO bundlePO : bundlePOs){
-			medialist.add(bundlePO.getBundleNum());
+			medialist.add(bundlePO.getUsername());
 		}
 		
 		GroupBO groupBO = new GroupBO()

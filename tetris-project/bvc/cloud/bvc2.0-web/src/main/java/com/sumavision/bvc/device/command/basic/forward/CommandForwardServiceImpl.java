@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -178,7 +177,7 @@ public class CommandForwardServiceImpl {
 							dstMember.getId(),
 							dstMember.getUserName(),
 							dstMember.getUserNum(),
-							bundle.getBundleNum(),
+							bundle.getUsername(),
 							bundle.getBundleId(),
 							bundle.getBundleName(),
 							bundle.getBundleType(),

@@ -55,6 +55,9 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class CommandVodService {
@@ -245,16 +248,48 @@ public class CommandVodService {
 		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
 		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-				
+		
+		LogicBO logicCloseOld = null;
+		
 		//点播--解码（播放器）
 		CommandGroupUserPlayerPO decoderUserPlayer = null;
 		if(locationIndex == -1){
 			decoderUserPlayer = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_USER);
 		}else{
-			decoderUserPlayer = commandCommonServiceImpl.userChosePlayerByLocationIndex(user.getId(), PlayerBusinessType.PLAY_USER, locationIndex);
+			decoderUserPlayer = commandCommonServiceImpl.userChosePlayerByLocationIndex(user.getId(), PlayerBusinessType.PLAY_USER, locationIndex, true);
+			
+			//先判断该播放器是否已被使用
+			String oldBusinessId = decoderUserPlayer.getBusinessId();
+			if(oldBusinessId != null){
+				
+				//播放器已被使用。判断原业务是否是点播
+				PlayerBusinessType oldType = decoderUserPlayer.getPlayerBusinessType();
+				if(PlayerBusinessType.PLAY_DEVICE.equals(oldType)
+						|| PlayerBusinessType.PLAY_USER.equals(oldType)){
+					
+					//是点播，先判断新旧是否一样
+					CommandVodPO oldVod = commandVodDao.findOne(Long.parseLong(oldBusinessId));					
+					if(PlayerBusinessType.PLAY_USER.equals(oldType)
+							&& oldVod.getSourceNo().equals(vodUser.getUserNo())){
+						
+						log.info("点播用户换源时与原有业务相同，不需处理");
+						return decoderUserPlayer;
+					}
+					
+					//停止旧的，点播新的
+					decoderUserPlayer.setPlayerBusinessType(PlayerBusinessType.PLAY_USER);
+					logicCloseOld = closeBundle(oldVod, codec, admin.getId(), false);
+					commandVodDao.delete(oldVod);
+					
+					
+				}else{
+					//不是点播业务，不允许
+					throw new PlayerIsBeingUsedException();
+				}
+			}
 		}
 		
-		CommandVodPO userVod = new CommandVodPO();
+		CommandVodPO userVod = null;
 		
 		//被点播--编码
 		if(!bVodUserLdap){
@@ -306,6 +341,7 @@ public class CommandVodService {
 		LogicBO logic = connectBundle(userVod, codec, admin.getId());
 		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
 		logic.merge(logicCast);
+		if(logicCloseOld != null) logic.merge(logicCloseOld);
 		
 		executeBusiness.execute(logic, user.getName() + "点播" + vodUser.getName() + "用户：");
 		
@@ -334,7 +370,7 @@ public class CommandVodService {
 		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
 		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-		LogicBO logic = closeBundle(vod, codec, admin.getId());
+		LogicBO logic = closeBundle(vod, codec, admin.getId(), true);
 		
 		//该点播可能是普通点播，也可能是用户的本地视频VodType.USER_ONESELF（自己看自己）
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(vod.getDstUserId());
@@ -399,7 +435,7 @@ public class CommandVodService {
 		ChannelSchemeDTO encoderAudioChannel = encoderAudioChannels.get(0);
 				
 		CommandVodPO userVod = new CommandVodPO(
-				VodType.DEVICE, null, encoderBundleEntity.getBundleNum(), null, 
+				VodType.DEVICE, null, encoderBundleEntity.getUsername(), null, 
 				encoderBundleEntity.getBundleId(), encoderBundleEntity.getBundleName(), encoderBundleEntity.getBundleType(),
 				encoderBundleEntity.getAccessNodeUid(), encoderVideoChannel.getChannelId(), encoderVideoChannel.getBaseType(), 
 				encoderAudioChannel.getChannelId(), encoderAudioChannel.getBaseType(), 
@@ -426,7 +462,7 @@ public class CommandVodService {
 	
 	/**
 	 * 点播设备<br/>
-	 * <b>作者:</b>wjw<br/>
+	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月25日 下午2:32:25
 	 * @param UserBO user 用户信息
@@ -437,20 +473,51 @@ public class CommandVodService {
 	 */
 	public CommandGroupUserPlayerPO deviceStart_Cascade(UserBO user, String bundleId, UserBO admin, int locationIndex) throws Exception{
 		
+		//参数模板
+		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();
+		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
+		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
+		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+		
+		LogicBO logicCloseOld = null;
+		
 		//点播--解码（播放器）
 		CommandGroupUserPlayerPO decoderUserPlayer = null;
 		if(locationIndex == -1){
 			decoderUserPlayer = commandCommonServiceImpl.userChoseUsefulPlayer(user.getId(), PlayerBusinessType.PLAY_DEVICE);
 		}else{
 			decoderUserPlayer = commandCommonServiceImpl.userChosePlayerByLocationIndex(user.getId(), PlayerBusinessType.PLAY_DEVICE, locationIndex, true);
-			//TODO:先判断该播放器是否已被使用
-		}
-		
-		//参数模板
-		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();
-		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+			
+			//先判断该播放器是否已被使用
+			String oldBusinessId = decoderUserPlayer.getBusinessId();
+			if(oldBusinessId != null){
+				
+				//播放器已被使用。判断原业务是否是点播
+				PlayerBusinessType oldType = decoderUserPlayer.getPlayerBusinessType();
+				if(PlayerBusinessType.PLAY_DEVICE.equals(oldType)
+						|| PlayerBusinessType.PLAY_USER.equals(oldType)){
+					
+					//是点播，先判断新旧是否一样
+					CommandVodPO oldVod = commandVodDao.findOne(Long.parseLong(oldBusinessId));					
+					if(PlayerBusinessType.PLAY_DEVICE.equals(oldType)
+							&& oldVod.getSourceBundleId().equals(bundleId)){
+						
+						log.info("点播设备换源时与原有业务相同，不需处理");
+						return decoderUserPlayer;
+					}
+					
+					//停止旧的，点播新的
+					decoderUserPlayer.setPlayerBusinessType(PlayerBusinessType.PLAY_DEVICE);
+					logicCloseOld = closeBundle(oldVod, codec, admin.getId(), false);
+					commandVodDao.delete(oldVod);
+					
+					
+				}else{
+					//不是点播业务，不允许
+					throw new PlayerIsBeingUsedException();
+				}
+			}
+		}		
 		
 		//被点播--编码
 		List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(bundleId).getList());
@@ -467,7 +534,7 @@ public class CommandVodService {
 			ChannelSchemeDTO encoderAudioChannel = encoderAudioChannels.get(0);
 					
 			userVod = new CommandVodPO(
-					VodType.DEVICE, null, encoderBundleEntity.getBundleNum(), null, 
+					VodType.DEVICE, null, encoderBundleEntity.getUsername(), null, 
 					encoderBundleEntity.getBundleId(), encoderBundleEntity.getBundleName(), encoderBundleEntity.getBundleType(),
 					encoderBundleEntity.getAccessNodeUid(), encoderVideoChannel.getChannelId(), encoderVideoChannel.getBaseType(), 
 					encoderAudioChannel.getChannelId(), encoderAudioChannel.getBaseType(), 
@@ -482,7 +549,7 @@ public class CommandVodService {
 			String audioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
 			
 			userVod = new CommandVodPO(
-					VodType.LOCAL_SEE_OUTER_DEVICE, null, encoderBundleEntity.getBundleNum(), null, 
+					VodType.LOCAL_SEE_OUTER_DEVICE, null, encoderBundleEntity.getUsername(), null, 
 					useBundleId, encoderBundleEntity.getBundleName(), encoderBundleEntity.getBundleType(),
 					localLayerId, videoChannelId, "outer_no_base_type", 
 					audioChannelId, "outer_no_base_type", 
@@ -502,6 +569,7 @@ public class CommandVodService {
 		LogicBO logic = connectBundle(userVod, codec, admin.getId());
 		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
 		logic.merge(logicCast);
+		if(logicCloseOld != null) logic.merge(logicCloseOld);
 		
 		executeBusiness.execute(logic, user.getName() + "点播" + encoderBundleEntity.getBundleName() + "设备：");
 		
@@ -516,6 +584,7 @@ public class CommandVodService {
 	 * @param UserBO user 用户
 	 * @param Long businessId 业务id
 	 * @param UserBO admin 管理员
+//	 * @param changeSource 慎用！一般都用false；换源业务时使用true，不改播放器，不挂播放器
 	 */
 	public CommandGroupUserPlayerPO deviceStop(UserBO user, Long businessId, UserBO admin) throws Exception{
 		
@@ -530,7 +599,7 @@ public class CommandVodService {
 		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
 		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-		LogicBO logic = closeBundle(vod, codec, admin.getId());
+		LogicBO logic = closeBundle(vod, codec, admin.getId(), true);
 		
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(vod.getDstUserId());
 		CommandGroupUserPlayerPO player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.PLAY_DEVICE, businessId.toString());
@@ -814,14 +883,17 @@ public class CommandVodService {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月24日 下午5:23:22
-	 * @param CommandVodPO vod 点播信息
-	 * @param Long userId adminId
+	 * @param vod 点播信息
+	 * @param codec 点播信息
+	 * @param userId adminId
+	 * @param closePlayer 是否关闭播放器，通常true，在换源业务时使用false
 	 * @return LogicBO 协议
 	 */
 	private LogicBO closeBundle(
 			CommandVodPO vod,
 			CodecParamBO codec,
-			Long userId) throws Exception{
+			Long userId,
+			boolean closePlayer) throws Exception{
 	
 		LogicBO logic = new LogicBO().setUserId(userId.toString())
 									 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
@@ -858,18 +930,37 @@ public class CommandVodService {
 			
 			logic.getPass_by().add(passby);
 		}else if(vodType.equals(VodType.LOCAL_SEE_OUTER_USER)){
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
+			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
+								 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
+								 .setUuid(vod.getUuid())
+								 .setSrc_user(vod.getDstUserNo())
+								 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", vod.getSourceLayerId())
+										 											.put("bundleid", vod.getSourceBundleId())
+										 											.put("video_channelid", vod.getSourceVideoChannelId())
+										 											.put("audio_channelid", vod.getSourceAudioChannelId())
+										 											.getMap())
+								 .setDst_number(vod.getSourceNo())
+								 .setVparam(codec);
 			
+			PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+			.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER)
+			.setPass_by_content(passByContent);
+			
+			logic.getPass_by().add(passby);
 		}
 		
-		//解码端一定是本地播放器
-		DisconnectBundleBO disconnectDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-//																           	 .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-																           	 .setBundleId(vod.getDstBundleId())
-																           	 .setBundle_type(vod.getDstBundleType())
-																           	 .setLayerId(vod.getDstLayerId());
-		
-		
-		logic.getDisconnectBundle().add(disconnectDecoderBundle);
+		if(closePlayer){
+			//解码端一定是本地播放器
+			DisconnectBundleBO disconnectDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+	//																           	 .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+																	           	 .setBundleId(vod.getDstBundleId())
+																	           	 .setBundle_type(vod.getDstBundleType())
+																	           	 .setLayerId(vod.getDstLayerId());
+			
+			
+			logic.getDisconnectBundle().add(disconnectDecoderBundle);
+		}
 		
 		return logic;
 	
