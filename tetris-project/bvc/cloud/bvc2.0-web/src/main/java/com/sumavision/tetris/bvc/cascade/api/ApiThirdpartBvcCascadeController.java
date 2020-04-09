@@ -31,7 +31,7 @@ import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping(value = "/api/hirdpart/bvc/cascade")
+@RequestMapping(value = "/api/thirdpart/bvc/cascade")
 public class ApiThirdpartBvcCascadeController {
 	
 	@Autowired
@@ -103,8 +103,7 @@ public class ApiThirdpartBvcCascadeController {
 		String layer_id = requestWrapper.getString("layer_id");
 		String seq = requestWrapper.getString("seq");
 		String cmd = requestWrapper.getString("cmd");
-		resourceRemoteService.queryNodeInfo(layer_id, seq, cmd);
-		return null;
+		return resourceRemoteService.queryNodeInfo(layer_id, seq, cmd);
 	}
 	
 	/**
