@@ -327,8 +327,8 @@ public class StatusXMLUtil {
 	public JSONObject createWholeResourceMessage(NotifyUserDeviceXML resourcesXml,String layerId) {
 		
 		JSONObject content = new JSONObject();
-		content.put("cmd", "");
-		content.put("type", "");
+		content.put("cmd", "send_node_message");
+		content.put("type", "sync");
 		content.put("commandname", "syncinfo");
 		content.put("content", XMLBeanUtils.beanToXml(NotifyUserDeviceXML.class, resourcesXml));
 		
@@ -438,8 +438,8 @@ public class StatusXMLUtil {
 	public JSONObject createRouteLinkMessage(NotifyRouteLinkXml routeLinkXml,String layerId) {
 		
 		JSONObject content = new JSONObject();
-		content.put("cmd", "");
-		content.put("type", "");
+		content.put("cmd", "send_node_message");
+		content.put("type", "sync");
 		content.put("commandname", "syncroutelink");
 		content.put("content", XMLBeanUtils.beanToXml(NotifyRouteLinkXml.class, routeLinkXml));
 		

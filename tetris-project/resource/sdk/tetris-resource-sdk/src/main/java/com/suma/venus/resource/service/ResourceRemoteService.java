@@ -10,13 +10,22 @@ import org.springframework.stereotype.Service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
+import com.suma.venus.resource.base.bo.UnbindResouceBO;
+import com.suma.venus.resource.base.bo.UnbindRolePrivilegeBO;
+import com.suma.venus.resource.base.bo.UnbindUserPrivilegeBO;
+import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.bo.DeviceInfoBO;
+import com.suma.venus.resource.bo.PrivilegeStatusBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.WorkNodeDao;
+import com.suma.venus.resource.lianwang.auth.AuthNotifyXml;
+import com.suma.venus.resource.lianwang.auth.DevAuthXml;
+import com.suma.venus.resource.lianwang.auth.UserAuthXml;
 import com.suma.venus.resource.lianwang.status.DeviceStatusXML;
 import com.suma.venus.resource.lianwang.status.NotifyRouteLinkXml;
 import com.suma.venus.resource.lianwang.status.NotifyUserDeviceXML;
@@ -39,6 +48,7 @@ import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.system.role.SystemRoleVO;
 
 /**
  * 联网新功能相关处理Service<br/>
@@ -210,6 +220,107 @@ public class ResourceRemoteService {
 			//更新路由
 			serInfoAndNodeService.updateSerNode(xmlBean);
 		}
+		
+		if ("authnotify".equals(cmd)) {
+			
+			AuthNotifyXml authNotifyXml = XMLBeanUtils.xmlToBean(xml, AuthNotifyXml.class);
+			String userNo = authNotifyXml.getUserid();
+			UserBO userBO = userService.queryUserByUserNo(userNo);
+			if (PrivilegeStatusBO.OPR_ADD.equals(authNotifyXml.getOperation())) {
+				bindUserPrivilegeFromXml(authNotifyXml, userBO.getId());
+			} else if (PrivilegeStatusBO.OPR_REMOVE.equals(authNotifyXml.getOperation())) {
+				unbindUserPrivilegeFromXml(authNotifyXml, userBO.getId());
+			} else if (PrivilegeStatusBO.OPR_EDIT.equals(authNotifyXml.getOperation())) {
+				// 修改第一步清除旧权限，第二部绑定新权限
+				unbindUserPrivilegeFromXml(authNotifyXml, userBO.getId());
+				bindUserPrivilegeFromXml(authNotifyXml, userBO.getId());
+			}
+			
+		}
+	}
+	
+	/**
+	 * 根据xml信息绑定授权<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月6日 下午6:17:18
+	 * @param AuthNotifyXml authNotifyXml
+	 * @param Long userId
+	 * @throws Exception 
+	 */
+	public void bindUserPrivilegeFromXml(AuthNotifyXml authNotifyXml, Long userId) throws Exception {
+		RoleAndResourceIdBO roleAndResourceIdBO = new RoleAndResourceIdBO();
+		roleAndResourceIdBO.setResourceCodes(new ArrayList<String>());
+		//查询私有角色
+		SystemRoleVO role = userService.queryPrivateRoleId(userId); 
+		roleAndResourceIdBO.setRoleId(Long.valueOf(role.getId()));
+		for (DevAuthXml devAuthXml : authNotifyXml.getDevlist()) {
+			String devId = devAuthXml.getDevid();
+			BundlePO bundle = bundleDao.findByUsername(devId);
+			if (null == bundle) {
+				continue;
+			}
+			if ("1".equals(devAuthXml.getAuth().substring(0, 1))) {
+				roleAndResourceIdBO.getResourceCodes().add(bundle.getBundleId() + "-w");
+			}
+			if ("1".equals(devAuthXml.getAuth().substring(1, 2))) {
+				roleAndResourceIdBO.getResourceCodes().add(bundle.getBundleId() + "-r");
+			}
+		}
+		for (UserAuthXml userAuthXml : authNotifyXml.getUserlist()) {
+			String authUserNo = userAuthXml.getUserid();
+			// UserBO authUserBO =
+			// userFeign.queryUserInfoByUserNo(authUserNo).get("user");
+			if ("1".equals(userAuthXml.getAuth().substring(0, 1))) {
+				roleAndResourceIdBO.getResourceCodes().add(authUserNo + "-w");
+			}
+			if ("1".equals(userAuthXml.getAuth().subSequence(1, 2))) {
+				roleAndResourceIdBO.getResourceCodes().add(authUserNo + "-hj");
+			}
+			if ("1".equals(userAuthXml.getAuth().subSequence(2, 3))) {
+				roleAndResourceIdBO.getResourceCodes().add(authUserNo + "-zk");
+			}
+			if ("1".equals(userAuthXml.getAuth().subSequence(4, 5))) {
+				roleAndResourceIdBO.getResourceCodes().add(authUserNo + "-r");
+			}
+		}
+		
+		// 绑定权限
+		userService.bindRolePrivilege(roleAndResourceIdBO);
+	}
+
+	/**
+	 * 根据xml解绑授权<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月6日 下午6:18:22
+	 * @param authNotifyXml
+	 * @param userId
+	 * @throws Exception 
+	 */
+	public void unbindUserPrivilegeFromXml(AuthNotifyXml authNotifyXml, Long userId) throws Exception {
+		UnbindRolePrivilegeBO unbindRolePrivilegeBO = new UnbindRolePrivilegeBO();
+		unbindRolePrivilegeBO.setUnbindPrivilege(new ArrayList<UnbindResouceBO>());
+		//查询私有角色
+		SystemRoleVO role = userService.queryPrivateRoleId(userId); 
+		unbindRolePrivilegeBO.setRoleId(Long.valueOf(role.getId()));
+		for (DevAuthXml devAuthXml : authNotifyXml.getDevlist()) {
+			String devId = devAuthXml.getDevid();
+			BundlePO bundle = bundleDao.findByUsername(devId);
+			if (null == bundle) {
+				continue;
+			}
+			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(bundle.getBundleId() + "-w", false));
+			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(bundle.getBundleId() + "-r", false));
+		}
+		for (UserAuthXml userAuthXml : authNotifyXml.getUserlist()) {
+			String authUserNo = userAuthXml.getUserid();
+			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(authUserNo + "-w", false));
+			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(authUserNo + "-r", false));
+			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(authUserNo + "-hj", false));
+			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(authUserNo + "-zk", false));
+		}
+		userService.unbindRolePrivilege(unbindRolePrivilegeBO);
 	}
 	
 	/**
@@ -229,6 +340,10 @@ public class ResourceRemoteService {
 			
 			SerNodePO local_node = nodes.get(0);
 			List<String> routers = JSONArray.parseArray(local_node.getNodeRouter(), String.class);
+			if(routers == null){
+				routers = new ArrayList<String>();
+			}
+			
 			if(status.equals("online")){
 				if(!routers.contains(other_node.getNodeUuid())){
 					routers.add(other_node.getNodeUuid());
@@ -299,7 +414,7 @@ public class ResourceRemoteService {
 			
 			for(SerNodePO node: allNodes){
 				if(node.getNodeFather() != null && !node.getNodeFather().equals("NULL")){
-					String[] fatherNodes = serNode.getNodeFather().split(",");
+					String[] fatherNodes = node.getNodeFather().split(",");
 					List<String> _fathers = Arrays.asList(fatherNodes);
 					if(_fathers.contains(serNode.getNodeUuid())){
 						sonList.add(node.getNodeUuid());
@@ -320,7 +435,9 @@ public class ResourceRemoteService {
 				nodeInfo.setSupers(new ArrayList<NodeVO>());
 				for(String father: fatherList){
 					NodeVO fatherNode = generateNodeVO(father, infos);
-					nodeInfo.getSupers().add(fatherNode);
+					if(fatherNode != null){
+						nodeInfo.getSupers().add(fatherNode);
+					}
 				}
 				if(nodeInfo.getSupers().size() > 0){
 					nodeInfo.getSupers().get(0).setIs_publish(true);
@@ -330,14 +447,18 @@ public class ResourceRemoteService {
 				nodeInfo.setRelations(new ArrayList<NodeVO>());
 				for(String relation: relationList){
 					NodeVO relationNode = generateNodeVO(relation, infos);
-					nodeInfo.getRelations().add(relationNode);
+					if(relationNode != null){
+						nodeInfo.getRelations().add(relationNode);
+					}
 				}
 			}
 			if(sonList.size() > 0){
 				nodeInfo.setSubors(new ArrayList<NodeVO>());
 				for(String son: sonList){
 					NodeVO sonNode = generateNodeVO(son, infos);
-					nodeInfo.getSubors().add(sonNode);
+					if(sonNode != null){
+						nodeInfo.getSubors().add(sonNode);
+					}
 				}
 			}
 			
@@ -499,6 +620,10 @@ public class ResourceRemoteService {
 															.append(info.getSerPort())
 															.toString());
 			}
+		}
+		
+		if(nodeVO.getApp_code() == null || nodeVO.getSig_code() == null){
+			nodeVO = null;
 		}
 		
 		return nodeVO;

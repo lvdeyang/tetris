@@ -61,6 +61,9 @@ import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.VirtualResourceService;
 import com.suma.venus.resource.util.XMLBeanUtils;
+import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
+import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 @Controller
@@ -107,6 +110,9 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private SerNodeDao serNodeDao;
+	
+	@Autowired
+	private TetrisDispatchService tetrisDispatchService;
 
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -662,12 +668,13 @@ public class BindResourceController extends ControllerBase {
 								}
 								authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
 								// 发送消息
-								JSONObject msgJson = authXmlUtil.createWholeAuthNotifyMessage(XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
-								authXmlUtil.sendAuthNotifyXmlMsg(connectCenterLayerID, msgJson.toJSONString());
+								JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(userBO.getUserNo(), XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
+								PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
+								
+								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 							}
 						}
 					}
-
 				}
 			} catch (Exception e) {
 				LOGGER.error("", e);
@@ -795,8 +802,10 @@ public class BindResourceController extends ControllerBase {
 								}
 								authNotifyXml.getUserlist().add(new UserAuthXml(entry.getKey(), authCode));
 								// 发送消息
-								JSONObject msgJson = authXmlUtil.createWholeAuthNotifyMessage(XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
-								authXmlUtil.sendAuthNotifyXmlMsg(connectCenterLayerID, msgJson.toJSONString());
+								JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(userBO.getUserNo(), XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
+								PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
+								
+								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 							}
 						}
 					}
@@ -925,7 +934,7 @@ public class BindResourceController extends ControllerBase {
 				bo.getUnbindPrivilege().add(unbind);
 			}
 			
-			return unbindRolePrivilege(bo);
+			return userQueryService.unbindRolePrivilege(bo);
 //			ResultBO result = userFeign.unbindRolePrivilege(bo);
 //			if (null == result || !result.isResult()) {
 //				return false;
@@ -934,60 +943,6 @@ public class BindResourceController extends ControllerBase {
 		return true;
 	}
 	
-	/**
-	 * 角色解绑权限<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年12月26日 下午2:02:39
-	 */
-	private boolean unbindRolePrivilege(UnbindRolePrivilegeBO param) throws Exception{
-		
-		if (null == param.getRoleId() || param.getRoleId() == 0l) {
-			return false;
-		}
-
-		if (null == param.getUnbindPrivilege() || param.getUnbindPrivilege().isEmpty()) {
-			return false;
-		}
-
-		//TODO: 新feign里面写
-//		RolePO role = roleService.findById(param.getRoleId());
-//		if (null == role) {
-//			data.put(ERRMSG, "用户角色为空");
-//			data.put("result", false);
-//			return data;
-//		}
-		List<String> resources = new ArrayList<String>();
-		for (UnbindResouceBO resource : param.getUnbindPrivilege()) {
-			resources.add(resource.getResourceCode());
-		}
-		List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resources);
-		List<Long> privilegeIds = new ArrayList<Long>();
-		for(PrivilegePO po: privileges){
-			privilegeIds.add(po.getId());
-		}
-		
-		List<RolePrivilegeMap> maps = rolePrivilegeMapDao.findByRoleIdAndPrivilegeIdIn(param.getRoleId(), privilegeIds);
-		if(maps != null && maps.size()>0){
-			rolePrivilegeMapDao.delete(maps);
-		}
-		
-		List<PrivilegePO> needDeletePrivileges = new ArrayList<PrivilegePO>();
-		for (UnbindResouceBO resource : param.getUnbindPrivilege()) {
-			for(PrivilegePO po: privileges){
-				if(po.getResourceIndentity().equals(resource.getResourceCode()) && resource.isbDelete()){
-					needDeletePrivileges.add(po);
-					break;
-				}
-			}
-		}
-		if(needDeletePrivileges.size() > 0){
-			privilegeDao.delete(needDeletePrivileges);
-		}
-		
-		return true;
-	}
-
 	/** 获取要绑定的资源ID集合 */
 	private List<String> getToBindPrivileges(List<String> prevCheckList, List<String> checkList) {
 		if (prevCheckList.isEmpty()) {
