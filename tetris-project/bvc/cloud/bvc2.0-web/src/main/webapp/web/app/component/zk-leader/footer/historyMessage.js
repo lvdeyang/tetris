@@ -393,33 +393,6 @@ define([
                     self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
                 });
 
-                //主席同意申请人发言
-                self.qt.on('speakApply', function (e) {
-                    var e = e.params;
-                    var ids=e.businessId.split('-'); //返回的格式是:会议id-成员id
-                    self.qt.confirm('业务提示', e.businessInfo, '拒绝', '同意', function () {
-                        ajax.post('/command/meeting/speak/apply/disagree', {id: ids[0],userIds:$.toJSON([ids[1]])}, null);
-                    }, function () {
-                        ajax.post('/command/meeting/speak/apply/agree', {id: ids[0],userIds:$.toJSON([ids[1]])}, null);
-                    });
-                });
-                //通知观看发言和讨论
-                self.qt.on('speakStart', function (e) {
-                    var e = e.params;
-                    self.qt.info(e.businessInfo);
-                    if (e.splits && e.splits.length > 0) {
-                        self.qt.invoke('speakStart', e.splits);
-                    }
-                });
-                //通知停止发言/停止讨论
-                self.qt.on('speakStop', function (e) {
-                    var e = e.params;
-                    self.qt.warning(e.businessInfo);
-                    if (e.splits && e.splits.length > 0) {
-                        self.qt.invoke('speakStop', e.splits);
-                    }
-                });
-
                 //websocket 开始指挥
                 self.qt.on('commandStart', function (e) {
                     e = e.params;

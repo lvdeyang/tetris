@@ -564,6 +564,9 @@ div.el-select-dropdown {
     position: fixed;
     top: 50%;
     right: 0;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
 }
 
 .recordTitle{
