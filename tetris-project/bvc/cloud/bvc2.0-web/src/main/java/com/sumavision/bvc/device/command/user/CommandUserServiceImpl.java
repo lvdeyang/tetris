@@ -24,12 +24,15 @@ import com.sumavision.bvc.command.group.enumeration.CallStatus;
 import com.sumavision.bvc.command.group.enumeration.CallType;
 import com.sumavision.bvc.command.group.enumeration.SchemeType;
 import com.sumavision.bvc.command.group.enumeration.UserCallType;
+import com.sumavision.bvc.command.group.enumeration.VodType;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.UserLiveCallPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
 import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
+import com.sumavision.bvc.command.group.vod.CommandVodPO;
+import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
@@ -98,6 +101,9 @@ public class CommandUserServiceImpl {
 	
 	@Autowired
 	private ResourceChannelDAO resourceChannelDao;
+	
+	@Autowired
+	private CommandCastServiceImpl commandCastServiceImpl;
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
@@ -692,14 +698,24 @@ public class CommandUserServiceImpl {
 		
 		//协议
 		LogicBO logic = openBundle(call, codec, admin.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, user.getId());
+		logic.merge(logicCast);
 		
 		executeBusiness.execute(logic, call.getCalledUsername() + "接听与" + call.getCallUsername() + "通话");
 		
 		return player;
 	}
 	
+	/** 级联 */
+	public CommandGroupUserPlayerPO acceptCall_CascadeById(UserBO user, Long id, UserBO admin) throws Exception{
+		
+		synchronized (new StringBuffer().append(lockProcessPrefix).append(id).toString().intern()) {
+			return acceptCall_Cascade(user, id, admin);
+		}
+	}
+	
 	/** 通常在外部系统接听时调用 */
-	public CommandGroupUserPlayerPO acceptCallByUuid(UserBO user, String uuid) throws Exception{
+	public CommandGroupUserPlayerPO acceptCall_CascadeByUuid(UserBO user, String uuid) throws Exception{
 		
 		UserLiveCallPO call = userLiveCallDao.findByUuid(uuid);
 		if(call == null){
@@ -759,6 +775,8 @@ public class CommandUserServiceImpl {
 		
 		//协议
 		LogicBO logic = openBundle(call, codec, admin.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, user.getId());
+		logic.merge(logicCast);
 		
 		executeBusiness.execute(logic, call.getCalledUsername() + "接听与" + call.getCallUsername() + "通话");
 		
@@ -771,7 +789,8 @@ public class CommandUserServiceImpl {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月17日 上午11:25:25
-	 * @param Long businessId 业务id
+	 * @param user 操作人
+	 * @param businessId 业务id
 	 */
 	public void refuseCall(UserBO user, Long businessId) throws Exception{
 		
@@ -791,6 +810,14 @@ public class CommandUserServiceImpl {
 		}catch(Exception e){
 			e.printStackTrace();
 			System.out.println("消息消费异常，id：" + call.getMessageId());
+		}
+		
+		//外部呼本地用户，直接按照关闭处理 TODO:测试
+		CallType callType = call.getCallType();
+		if(CallType.OUTER_LOCAL.equals(callType)){
+			UserBO admin = new UserBO(); admin.setId(-1L);
+			stopCall_Cascade(user, businessId, admin);
+			return;
 		}
 		
 		//被呼叫方
@@ -854,6 +881,11 @@ public class CommandUserServiceImpl {
 		
 		if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
 			LogicBO logic = closeBundle(call, codec, admin.getId());
+			List<CommandGroupUserPlayerPO> players = getPlayers(call);
+			LogicBO logicCast = commandCastServiceImpl.closeBundleCastDevice(
+					null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), 
+					players, null, user.getId());
+			logic.merge(logicCast);
 			executeBusiness.execute(logic, user.getName() + "停止通话");
 		}
 		
@@ -920,7 +952,7 @@ public class CommandUserServiceImpl {
 	}
 
 
-	/**  */
+	/** 通常在外部系统拒绝时调用 */
 	public CommandGroupUserPlayerPO stopCallByUuid(UserBO user, String uuid) throws Exception{
 		UserLiveCallPO call = userLiveCallDao.findByUuid(uuid);
 		if(call == null){
@@ -952,7 +984,7 @@ public class CommandUserServiceImpl {
 		if(call == null){
 			throw new BaseException(StatusCode.FORBIDDEN, "呼叫不存在！");
 		}
-				
+		
 		//判断发起人是不是通话中的任何一个人
 		if(!user.getId().equals(call.getCalledUserId()) && !user.getId().equals(call.getCallUserId())){
 			throw new UserNotMatchBusinessException(user.getName(), businessId, PlayerBusinessType.USER_CALL.getName());
@@ -965,7 +997,13 @@ public class CommandUserServiceImpl {
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
 		if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
+						
 			LogicBO logic = closeBundle(call, codec, admin.getId());
+			List<CommandGroupUserPlayerPO> players = getPlayers(call);
+			LogicBO logicCast = commandCastServiceImpl.closeBundleCastDevice(
+					null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), 
+					players, null, user.getId());
+			logic.merge(logicCast);
 			executeBusiness.execute(logic, user.getName() + "停止通话");
 		}
 		
@@ -1070,6 +1108,8 @@ public class CommandUserServiceImpl {
 		
 		//协议
 		LogicBO logic = openBundle(call, codec, admin.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, user.getId());
+		logic.merge(logicCast);
 		
 		executeBusiness.execute(logic, call.getCalledUsername() + "接听与" + call.getCallUsername() + "语音对讲");
 		
@@ -1164,6 +1204,11 @@ public class CommandUserServiceImpl {
 		
 		if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
 			LogicBO logic = closeBundle(call, codec, admin.getId());
+			List<CommandGroupUserPlayerPO> players = getPlayers(call);
+			LogicBO logicCast = commandCastServiceImpl.closeBundleCastDevice(
+					null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), 
+					players, null, user.getId());
+			logic.merge(logicCast);
 			executeBusiness.execute(logic, user.getName() + "停止语音对讲");
 		}
 		
@@ -1221,6 +1266,24 @@ public class CommandUserServiceImpl {
 		
 		return returnPlayer;
 		
+	}
+	
+	/** 获取呼叫任务中的2个播放器（主叫和被叫的） */
+	private List<CommandGroupUserPlayerPO> getPlayers(UserLiveCallPO call) throws Exception{
+		
+		List<CommandGroupUserPlayerPO> players = new ArrayList<CommandGroupUserPlayerPO>();
+		
+		//找呼叫方的player
+		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
+		CommandGroupUserPlayerPO callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
+		
+		//找被呼叫方的player
+		CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
+		CommandGroupUserPlayerPO calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
+		
+		players.add(callPlayer);
+		players.add(calledPlayer);
+		return players;		
 	}
 	
 	/**

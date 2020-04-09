@@ -108,10 +108,7 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private CommandGroupMemberDAO commandGroupMemberDao;
-	
-	@Autowired
-	private CommandGroupForwardDAO commandGroupForwardDao;
-	
+		
 	@Autowired
 	private ResourceBundleDAO resourceBundleDao;
 	
@@ -733,12 +730,13 @@ public class CommandBasicServiceImpl {
 			if(group.getType().equals(GroupType.BASIC) || group.getType().equals(GroupType.MEETING)){
 				String businessType = null;
 				if(GroupType.MEETING.equals(group.getType())){
-					businessType = "meetingStart";
+					businessType = "meetingStart";//自动接听 TODO: meetingStartNow
 				}else{
-					businessType = "commandStart";
+					businessType = "commandStart";//自动接听 TODO: commandStartNow
 				}
 				message.put("businessType", businessType);
 				message.put("businessInfo", "接受到 " + group.getName() + " 邀请，主席：" + chairman.getUserName() + "，是否进入？");
+//				message.put("businessInfo", group.getName() + " 开始了，主席：" + chairman.getUserName());
 			}else if(group.getType().equals(GroupType.SECRET)){
 				message.put("businessType", "secretStart");
 				message.put("businessInfo", chairman.getUserName() + " 邀请你专向" + commandString);

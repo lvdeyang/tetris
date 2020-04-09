@@ -714,18 +714,21 @@ public class TreeNodeVO {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月15日 下午2:33:09
-	 * @param CommandBroadcastSpeakPO command 指挥
+	 * @param command 指挥
+	 * @param entered 该成员是否已进入
 	 * @return TreeNodeVO 树节点
 	 */
-	public TreeNodeVO set(CommandGroupPO command){
+	public TreeNodeVO set(CommandGroupPO command, boolean entered){
 		this.setId(command.getId().toString())
 			.setUuid(command.getUuid())
 			.setName(command.getName())
 			.setType(TreeNodeType.COMMAND)
 			.setIcon(TreeNodeIcon.GROUP.getName())
 			.setKey(this.generateKey())
-			.setParam(JSON.toJSONString(new HashMapWrapper<String, String>().put("creator", command.getUserId().toString())
-																			.put("creatorName", command.getUserName()).getMap()));
+			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("creator", command.getUserId().toString())
+																			.put("creatorName", command.getUserName())
+																			.put("entered", entered)
+																			.getMap()));
 		if(GroupStatus.STOP.equals(command.getStatus())){
 			this.setBundleStatus("bundle-offline");
 		}else{

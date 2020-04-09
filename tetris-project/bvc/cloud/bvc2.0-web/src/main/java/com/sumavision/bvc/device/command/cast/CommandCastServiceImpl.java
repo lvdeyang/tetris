@@ -445,14 +445,16 @@ public class CommandCastServiceImpl {
 				}
 				if(castDevices != null){
 					for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
-						if(vod.getVodType().equals(VodType.DEVICE)
-								|| vod.getVodType().equals(VodType.USER)){
-							//点播设备或用户
+						if(vod.getVodType().equals(VodType.USER)
+								|| vod.getVodType().equals(VodType.USER_ONESELF)
+								|| vod.getVodType().equals(VodType.DEVICE)
+								|| vod.getVodType().equals(VodType.LOCAL_SEE_OUTER_DEVICE)
+								|| vod.getVodType().equals(VodType.LOCAL_SEE_OUTER_USER)){
+							//只要不是点播文件，都可以
 							ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcVodAndDstCastDevice(vod, castDevice, codec, MediaType.VIDEO);
 							ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcVodAndDstCastDevice(vod, castDevice, codec, MediaType.AUDIO);
 							logic.getForwardSet().add(forwardVideo);
 							logic.getForwardSet().add(forwardAudio);
-//						}else if(vod.getVodType().equals(VodType.FILE)){//点播文件目前没有PO，后续完善
 						}
 					}
 				}
@@ -478,7 +480,8 @@ public class CommandCastServiceImpl {
 			if(castDevices != null){
 				for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
 					if(call.getCallType()==null
-							|| call.getCallType().equals(CallType.LOCAL_LOCAL)){//TODO:这里要拓展几种类型
+							|| call.getCallType().equals(CallType.LOCAL_LOCAL)
+							|| call.getCallType().equals(CallType.LOCAL_OUTER)){
 						
 						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
 						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
@@ -503,7 +506,8 @@ public class CommandCastServiceImpl {
 			if(castCalledDevices != null){
 				for(CommandGroupUserPlayerCastDevicePO castDevice : castCalledDevices){
 					if(call.getCallType()==null
-							|| call.getCallType().equals(CallType.LOCAL_LOCAL)){//TODO:这里要拓展几种类型
+							|| call.getCallType().equals(CallType.LOCAL_LOCAL)
+							|| call.getCallType().equals(CallType.OUTER_LOCAL)){
 						
 						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCalledAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
 						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCalledAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
