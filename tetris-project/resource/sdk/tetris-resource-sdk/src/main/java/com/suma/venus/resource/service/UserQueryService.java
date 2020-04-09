@@ -12,6 +12,8 @@ import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.RoleBO;
+import com.suma.venus.resource.base.bo.UnbindResouceBO;
+import com.suma.venus.resource.base.bo.UnbindRolePrivilegeBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
@@ -26,6 +28,7 @@ import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.business.role.BusinessRoleQuery;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -43,6 +46,9 @@ public class UserQueryService {
 	
 	@Autowired
 	private SystemRoleQuery roleQuery;
+	
+	@Autowired
+	private BusinessRoleQuery businessRoleQuery;
 	
 	@Autowired
 	private PrivilegeDAO privilegeDao;
@@ -576,6 +582,82 @@ public class UserQueryService {
 		rolePrivilegeMapDao.save(maps);
 		
 		return true;
+	}
+	
+	/**
+	 * 角色解绑权限<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月26日 下午2:02:39
+	 */
+	public boolean unbindRolePrivilege(UnbindRolePrivilegeBO param) throws Exception{
+		
+		if (null == param.getRoleId() || param.getRoleId() == 0l) {
+			return false;
+		}
+
+		if (null == param.getUnbindPrivilege() || param.getUnbindPrivilege().isEmpty()) {
+			return false;
+		}
+
+		//TODO: 新feign里面写
+//		RolePO role = roleService.findById(param.getRoleId());
+//		if (null == role) {
+//			data.put(ERRMSG, "用户角色为空");
+//			data.put("result", false);
+//			return data;
+//		}
+		List<String> resources = new ArrayList<String>();
+		for (UnbindResouceBO resource : param.getUnbindPrivilege()) {
+			resources.add(resource.getResourceCode());
+		}
+		List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resources);
+		List<Long> privilegeIds = new ArrayList<Long>();
+		for(PrivilegePO po: privileges){
+			privilegeIds.add(po.getId());
+		}
+		
+		List<RolePrivilegeMap> maps = rolePrivilegeMapDao.findByRoleIdAndPrivilegeIdIn(param.getRoleId(), privilegeIds);
+		if(maps != null && maps.size()>0){
+			rolePrivilegeMapDao.delete(maps);
+		}
+		
+		List<PrivilegePO> needDeletePrivileges = new ArrayList<PrivilegePO>();
+		for (UnbindResouceBO resource : param.getUnbindPrivilege()) {
+			for(PrivilegePO po: privileges){
+				if(po.getResourceIndentity().equals(resource.getResourceCode()) && resource.isbDelete()){
+					needDeletePrivileges.add(po);
+					break;
+				}
+			}
+		}
+		if(needDeletePrivileges.size() > 0){
+			privilegeDao.delete(needDeletePrivileges);
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * 查询用户私有角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:14:40
+	 * @param Long userId 用户id
+	 * @return SystemRoleVO 角色
+	 */
+	public SystemRoleVO queryPrivateRoleId(Long userId) throws Exception{
+		
+		List<Long> userIds = new ArrayList<Long>();
+		userIds.add(userId);
+		
+		List<SystemRoleVO> roles = businessRoleQuery.findPrivateRoleByUserIds(userIds);
+		if(roles == null || roles.size() <= 0){
+			throw new BaseException(StatusCode.ERROR, "id为：" + userId + "的用户没有私有角色！");
+		}
+		
+		return roles.get(0);
+		
 	}
 	
 }

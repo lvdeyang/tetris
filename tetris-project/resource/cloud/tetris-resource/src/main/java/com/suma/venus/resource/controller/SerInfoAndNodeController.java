@@ -184,6 +184,7 @@ public class SerInfoAndNodeController extends ControllerBase {
 			BeanUtils.copyProperties(serInfoVO, serInfoPO);
 
 			serInfoPO.setSerUuid(BundlePO.createBundleId());
+			serInfoPO.setSerNode(self.getNodeUuid());
 			serInfoPO.setSerFactInfo(self.getNodeFactInfo());
 			serInfoPO.setSourceType(SOURCE_TYPE.SYSTEM);
 			serInfoPO.setSyncStatus(SYNC_STATUS.ASYNC);
@@ -253,6 +254,7 @@ public class SerInfoAndNodeController extends ControllerBase {
 			
 			serNodePO.setNodeUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 			
+			serNodePO.setNodeFather("NULL");
 			serNodePO.setNodeRelations("NULL");
 			serNodePO.setSourceType(SOURCE_TYPE.SYSTEM);
 			serNodePO.setSyncStatus(SYNC_STATUS.ASYNC);
@@ -289,8 +291,8 @@ public class SerInfoAndNodeController extends ControllerBase {
 			 }
 
 			serNodePOTemp.setNodeName(serNodeVO.getNodeName());
-			serNodePOTemp.setNodeFather(serNodeVO.getNodeFather());
-			serNodePOTemp.setNodeRelations(serNodeVO.getNodeRelations());
+			serNodePOTemp.setNodeFather(serNodeVO.getNodeFather().equals("")? "NULL": serNodeVO.getNodeFather());
+			serNodePOTemp.setNodeRelations(serNodeVO.getNodeRelations().equals("")? "NULL": serNodeVO.getNodeFather());
 			serNodePOTemp.setNodeFactInfo(serNodeVO.getNodeFactInfo());
 			serNodePOTemp.setSyncStatus(SYNC_STATUS.ASYNC);
 			serNodeDao.save(serNodePOTemp);
@@ -365,7 +367,7 @@ public class SerInfoAndNodeController extends ControllerBase {
 						
 			SerNodePO serNodePO = serNodeDao.findTopByNodeUuid(nodeUuid);
 
-			if (serNodePO.getSourceType().equals(SOURCE_TYPE.SYSTEM)) {
+			if (serNodePO.getSourceType().equals(SOURCE_TYPE.SYSTEM) && serNodePO.getSyncStatus().equals(SYNC_STATUS.SYNC)) {
 				List<LdapNodePo> ldapNodePoList = ldapNodeDao.getNodeInfoByUuid(nodeUuid);
 
 				if (!CollectionUtils.isEmpty(ldapNodePoList)) {
