@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -128,7 +126,7 @@ public class CommandForwardServiceImpl {
 			
 			List<ForwardReturnBO> result = new ArrayList<ForwardReturnBO>();
 			
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			Long creatorUserId = chairmanMember.getUserId();
 			CommandGroupAvtplPO g_avtpl = group.getAvtpl();
@@ -283,7 +281,7 @@ public class CommandForwardServiceImpl {
 			
 			List<ForwardReturnBO> result = new ArrayList<ForwardReturnBO>();
 			
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			Long creatorUserId = chairmanMember.getUserId();
 			CommandGroupAvtplPO g_avtpl = group.getAvtpl();
@@ -388,7 +386,7 @@ public class CommandForwardServiceImpl {
 			
 			List<Object> result = new ArrayList<Object>();
 			
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			chairmanMember.getUserId();
 			group.getAvtpl();
@@ -612,7 +610,7 @@ public class CommandForwardServiceImpl {
 			//<userId, [{serial:'屏幕序号'}]>
 			HashMap<Long, JSONArray> result = new HashMap<Long, JSONArray>();
 			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			chairmanMember.getUserId();

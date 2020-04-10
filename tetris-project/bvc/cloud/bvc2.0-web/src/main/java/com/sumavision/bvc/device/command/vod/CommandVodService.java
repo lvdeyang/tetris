@@ -359,6 +359,17 @@ public class CommandVodService {
 	 */
 	public CommandGroupUserPlayerPO userStop(UserBO user, Long businessId, UserBO admin) throws Exception{
 		
+		if(businessId == 0L){
+			//释放摄像头预览
+			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+			CommandGroupUserPlayerPO selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
+			if(selfPlayer != null){
+				selfPlayer.setFree();
+				commandGroupUserPlayerDao.save(selfPlayer);
+				return selfPlayer;
+			}
+		}
+		
 		CommandVodPO vod = commandVodDao.findOne(businessId);
 		
 		if(vod == null){

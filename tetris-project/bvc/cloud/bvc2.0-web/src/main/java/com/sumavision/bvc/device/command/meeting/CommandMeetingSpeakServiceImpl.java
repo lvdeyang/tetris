@@ -41,7 +41,6 @@ import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
@@ -123,7 +122,7 @@ public class CommandMeetingSpeakServiceImpl {
 			List<Long> consumeIds = new ArrayList<Long>();
 						
 			//发言人，校验是否已经在发言
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
 				if(userIdArray.contains(member.getUserId())){
@@ -192,7 +191,7 @@ public class CommandMeetingSpeakServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, "主席不需要申请发言");
 			}
 			
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, userId);
 			if(member.getCooperateStatus().equals(MemberStatus.CONNECT)){
 				throw new BaseException(StatusCode.FORBIDDEN, "您正在发言");
@@ -250,7 +249,7 @@ public class CommandMeetingSpeakServiceImpl {
 			message.put("businessType", "speakApplyAgree");
 			message.put("businessInfo", group.getName() + "主席同意发言，您已开始发言");
 			message.put("businessId", group.getId());
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
 				if(userIdArray.contains(member.getUserId())){
@@ -313,7 +312,7 @@ public class CommandMeetingSpeakServiceImpl {
 			
 			List<Long> consumeIds = new ArrayList<Long>();
 			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();			
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = commandCommonUtil.queryMembersByUserIds(members, userIds);
 			JSONObject message = new JSONObject();
 			message.put("businessType", "speakApplyDisagree");
@@ -358,7 +357,7 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 						
 			//发言人，校验是否已经在发言
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			CommandGroupMemberPO speakMember = commandCommonUtil.queryMemberByUserId(members, userId);
 			if(speakMember.getCooperateStatus().equals(MemberStatus.CONNECT)){
@@ -404,7 +403,7 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 						
 			//发言人，校验是否已经在发言
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
 				if(userIdArray.contains(member.getUserId())){
@@ -452,7 +451,7 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 						
 			//发言人，入会的，且没在发言的都进行发言
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
 				if(member.getMemberStatus().equals(MemberStatus.CONNECT)
@@ -493,7 +492,7 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 						
 			//发言人，在发言的都停止
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
 				if(member.getCooperateStatus().equals(MemberStatus.CONNECT)){
@@ -537,7 +536,7 @@ public class CommandMeetingSpeakServiceImpl {
 		GroupType groupType = group.getType();
 		
 		//协同成员，校验是否已经被授权协同
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		
 		//统计发言人名
 		List<String> speakNameList = new ArrayList<String>();
@@ -672,7 +671,7 @@ public class CommandMeetingSpeakServiceImpl {
 		
 		//生成connectBundle，携带转发信息
 		CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-		LogicBO logic = commandBasicServiceImpl.openBundle(speakMembers, null, needPlayers, allNeedForwards, null, codec, group.getUserId());
+		LogicBO logic = commandBasicServiceImpl.openBundle(null, null, needPlayers, allNeedForwards, null, codec, group.getUserId());
 		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, allNeedForwards, null, null, null, codec, group.getUserId());
 		logic.merge(logicCastDevice);
 		
@@ -700,8 +699,8 @@ public class CommandMeetingSpeakServiceImpl {
 	private void speakStop(CommandGroupPO group, List<CommandGroupMemberPO> speakMembers, int mode) throws Exception{
 		
 		List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
-		Set<CommandGroupForwardPO> forwards = group.getForwards();
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupForwardPO> forwards = group.getForwards();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<Long> consumeIds = new ArrayList<Long>();
 		List<Long> speakMemberIds = new ArrayList<Long>();
