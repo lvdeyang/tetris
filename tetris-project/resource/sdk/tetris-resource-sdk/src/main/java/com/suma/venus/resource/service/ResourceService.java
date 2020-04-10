@@ -243,6 +243,9 @@ public class ResourceService {
 			case CALL:// 呼叫
 				code = dstUserBO.getUserNo() + "-hj";
 				break;
+			case ZK:// 指挥
+				code = dstUserBO.getUserNo() + "-zk";
+				break;
 			default:
 				return false;
 			}
