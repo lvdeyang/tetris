@@ -5,45 +5,12 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class SourceGroupVO extends AbstractBaseVO<SourceGroupVO, SourceGroupPO>{
 
-	private Long id;
-	
-	private String uuid;
-	
-	private String updateTime;
-	
 	private String name;
 	
 	private String type;
 	
 	private String userId;
 	
-	public Long getId() {
-		return id;
-	}
-
-	public SourceGroupVO setId(Long id) {
-		this.id = id;
-		return this;
-	}
-
-	public String getUuid() {
-		return uuid;
-	}
-
-	public SourceGroupVO setUuid(String uuid) {
-		this.uuid = uuid;
-		return this;
-	}
-
-	public String getUpdateTime() {
-		return updateTime;
-	}
-
-	public SourceGroupVO setUpdateTime(String updateTime) {
-		this.updateTime = updateTime;
-		return this;
-	}
-
 	public String getName() {
 		return name;
 	}

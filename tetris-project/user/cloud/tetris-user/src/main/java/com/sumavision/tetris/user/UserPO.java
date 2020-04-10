@@ -63,6 +63,9 @@ public class UserPO extends AbstractBasePO{
 	/** 用户分类 */
 	private UserClassify classify;
 	
+	/** 用户级别 */
+	private Integer level;
+	
 	/** 用户当前ip */
 	//private String ip;
 	
@@ -208,6 +211,15 @@ public class UserPO extends AbstractBasePO{
 		this.equipType = equipType;
 	}*/
 	
+	@Column(name = "LEVEL")
+	public Integer getLevel() {
+		return level;
+	}
+
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
+
 	/**
 	 * 生产csv表头<br/>
 	 * <b>作者:</b>lvdeyang<br/>

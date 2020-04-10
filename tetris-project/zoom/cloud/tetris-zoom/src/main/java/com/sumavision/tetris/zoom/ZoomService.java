@@ -1015,6 +1015,206 @@ public class ZoomService {
 	}
 	
 	/**
+	 * 成员开启视频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:23:12
+	 * @param Long myZoomMemberId 会议成员id
+	 * @return ZoomMemberVO 会议成员
+	 */
+	public ZoomMemberVO openVideo(Long myZoomMemberId) throws Exception{
+		ZoomMemberPO selfMember = zoomMemberDao.findOne(myZoomMemberId);
+		if(selfMember == null){
+			throw new ZoomMemberNotFoundException(myZoomMemberId);
+		}
+		
+		ZoomPO zoom = zoomDao.findOne(selfMember.getZoomId());
+		if(zoom == null){
+			throw new ZoomNotFoundException(selfMember.getZoomId()); 
+		}
+		
+		WebRtcVO webRtc = webRtcRoomInfoQuery.findZoomWebRtc(zoom.getId());
+		
+		selfMember.setMyVideo(true);
+		zoomMemberDao.save(selfMember);
+		ZoomMemberVO openVideoMember = new ZoomMemberVO().set(selfMember);
+		
+		//通知成员
+		List<ZoomMemberPO> others = zoomMemberDao.findByZoomIdAndIdNot(zoom.getId(), myZoomMemberId);
+		List<ZoomMemberVO> members = ZoomMemberVO.getConverter(ZoomMemberVO.class).convert(others, ZoomMemberVO.class);
+		members.add(openVideoMember);
+		zoomQuery.queryBundleInfo(members, webRtc);
+		JSONObject content = JSON.parseObject(JSON.toJSONString(openVideoMember));
+		String businessId = "zoomOpenVideo";
+		List<ZoomMemberVO> jv220s = new ArrayList<ZoomMemberVO>();
+		
+		for(ZoomMemberVO m:members){
+			if(!m.getJoin()) continue;
+			if(m.getId().equals(openVideoMember.getId())) continue;
+			if(ZoomMemberType.TERMINl.toString().equals(m.getType())){
+				websocketMessageService.push(m.getUserId(), businessId, content, selfMember.getUserId(), selfMember.getRename());
+			}else if(ZoomMemberType.JV220.toString().equals(m.getType())){
+				jv220s.add(m);
+			}
+		}
+		if(jv220s.size() > 0){
+			terminalAgentService.push(zoom.getCode(), content, jv220s, businessId);
+		}
+		
+		return openVideoMember;
+	}
+	
+	/**
+	 * 成员关闭视频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:29:12
+	 * @param Long myZoomMemberId 会议成员id
+	 * @return ZoomMemberVO 会议成员
+	 */
+	public ZoomMemberVO closeVideo(Long myZoomMemberId) throws Exception{
+		ZoomMemberPO selfMember = zoomMemberDao.findOne(myZoomMemberId);
+		if(selfMember == null){
+			throw new ZoomMemberNotFoundException(myZoomMemberId);
+		}
+		
+		ZoomPO zoom = zoomDao.findOne(selfMember.getZoomId());
+		if(zoom == null){
+			throw new ZoomNotFoundException(selfMember.getZoomId()); 
+		}
+		
+		WebRtcVO webRtc = webRtcRoomInfoQuery.findZoomWebRtc(zoom.getId());
+		
+		selfMember.setMyVideo(false);
+		zoomMemberDao.save(selfMember);
+		ZoomMemberVO closeVideoMember = new ZoomMemberVO().set(selfMember);
+		
+		//通知成员
+		List<ZoomMemberPO> others = zoomMemberDao.findByZoomIdAndIdNot(zoom.getId(), myZoomMemberId);
+		List<ZoomMemberVO> members = ZoomMemberVO.getConverter(ZoomMemberVO.class).convert(others, ZoomMemberVO.class);
+		members.add(closeVideoMember);
+		zoomQuery.queryBundleInfo(members, webRtc);
+		JSONObject content = JSON.parseObject(JSON.toJSONString(closeVideoMember));
+		String businessId = "zoomCloseVideo";
+		List<ZoomMemberVO> jv220s = new ArrayList<ZoomMemberVO>();
+		
+		for(ZoomMemberVO m:members){
+			if(!m.getJoin()) continue;
+			if(m.getId().equals(closeVideoMember.getId())) continue;
+			if(ZoomMemberType.TERMINl.toString().equals(m.getType())){
+				websocketMessageService.push(m.getUserId(), businessId, content, selfMember.getUserId(), selfMember.getRename());
+			}else if(ZoomMemberType.JV220.toString().equals(m.getType())){
+				jv220s.add(m);
+			}
+		}
+		if(jv220s.size() > 0){
+			terminalAgentService.push(zoom.getCode(), content, jv220s, businessId);
+		}
+		
+		return closeVideoMember;
+	}
+	
+	/**
+	 * 成员开启音频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:30:53
+	 * @param Long myZoomMemberId 会议成员id
+	 * @return ZoomMemberVO 会议成员
+	 */
+	public ZoomMemberVO openAudio(Long myZoomMemberId) throws Exception{
+		ZoomMemberPO selfMember = zoomMemberDao.findOne(myZoomMemberId);
+		if(selfMember == null){
+			throw new ZoomMemberNotFoundException(myZoomMemberId);
+		}
+		
+		ZoomPO zoom = zoomDao.findOne(selfMember.getZoomId());
+		if(zoom == null){
+			throw new ZoomNotFoundException(selfMember.getZoomId()); 
+		}
+		
+		WebRtcVO webRtc = webRtcRoomInfoQuery.findZoomWebRtc(zoom.getId());
+		
+		selfMember.setMyAudio(true);
+		zoomMemberDao.save(selfMember);
+		ZoomMemberVO openAudioMember = new ZoomMemberVO().set(selfMember);
+		
+		//通知成员
+		List<ZoomMemberPO> others = zoomMemberDao.findByZoomIdAndIdNot(zoom.getId(), myZoomMemberId);
+		List<ZoomMemberVO> members = ZoomMemberVO.getConverter(ZoomMemberVO.class).convert(others, ZoomMemberVO.class);
+		members.add(openAudioMember);
+		zoomQuery.queryBundleInfo(members, webRtc);
+		JSONObject content = JSON.parseObject(JSON.toJSONString(openAudioMember));
+		String businessId = "zoomOpenAudio";
+		List<ZoomMemberVO> jv220s = new ArrayList<ZoomMemberVO>();
+		
+		for(ZoomMemberVO m:members){
+			if(!m.getJoin()) continue;
+			if(m.getId().equals(openAudioMember.getId())) continue;
+			if(ZoomMemberType.TERMINl.toString().equals(m.getType())){
+				websocketMessageService.push(m.getUserId(), businessId, content, selfMember.getUserId(), selfMember.getRename());
+			}else if(ZoomMemberType.JV220.toString().equals(m.getType())){
+				jv220s.add(m);
+			}
+		}
+		if(jv220s.size() > 0){
+			terminalAgentService.push(zoom.getCode(), content, jv220s, businessId);
+		}
+		
+		return openAudioMember;
+	}
+	
+	/**
+	 * 成员关闭音频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:30:53
+	 * @param Long myZoomMemberId 会议成员id
+	 * @return ZoomMemberVO 会议成员
+	 */
+	public ZoomMemberVO closeAudio(Long myZoomMemberId) throws Exception{
+		ZoomMemberPO selfMember = zoomMemberDao.findOne(myZoomMemberId);
+		if(selfMember == null){
+			throw new ZoomMemberNotFoundException(myZoomMemberId);
+		}
+		
+		ZoomPO zoom = zoomDao.findOne(selfMember.getZoomId());
+		if(zoom == null){
+			throw new ZoomNotFoundException(selfMember.getZoomId()); 
+		}
+		
+		WebRtcVO webRtc = webRtcRoomInfoQuery.findZoomWebRtc(zoom.getId());
+		
+		selfMember.setMyAudio(false);
+		zoomMemberDao.save(selfMember);
+		ZoomMemberVO closeAudioMember = new ZoomMemberVO().set(selfMember);
+		
+		//通知成员
+		List<ZoomMemberPO> others = zoomMemberDao.findByZoomIdAndIdNot(zoom.getId(), myZoomMemberId);
+		List<ZoomMemberVO> members = ZoomMemberVO.getConverter(ZoomMemberVO.class).convert(others, ZoomMemberVO.class);
+		members.add(closeAudioMember);
+		zoomQuery.queryBundleInfo(members, webRtc);
+		JSONObject content = JSON.parseObject(JSON.toJSONString(closeAudioMember));
+		String businessId = "zoomCloseAudio";
+		List<ZoomMemberVO> jv220s = new ArrayList<ZoomMemberVO>();
+		
+		for(ZoomMemberVO m:members){
+			if(!m.getJoin()) continue;
+			if(m.getId().equals(closeAudioMember.getId())) continue;
+			if(ZoomMemberType.TERMINl.toString().equals(m.getType())){
+				websocketMessageService.push(m.getUserId(), businessId, content, selfMember.getUserId(), selfMember.getRename());
+			}else if(ZoomMemberType.JV220.toString().equals(m.getType())){
+				jv220s.add(m);
+			}
+		}
+		if(jv220s.size() > 0){
+			terminalAgentService.push(zoom.getCode(), content, jv220s, businessId);
+		}
+		
+		return closeAudioMember;
+	}
+	
+	/**
 	 * 删除会议<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

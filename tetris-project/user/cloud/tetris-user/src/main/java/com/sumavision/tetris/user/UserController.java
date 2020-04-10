@@ -381,7 +381,9 @@ public class UserController {
 		ServerProps serverProps = userServerPropsQuery.queryProps();
 		
 		StringBufferWrapper redirectUrl = new StringBufferWrapper().append("http://")
-				   .append(serverProps.getIp())
+				   //TODO serverIp.properties
+				   //.append(serverProps.getIp())
+				   .append(serverProps.getIpFromProperties())
 				   .append(":")
 				   .append(serverProps.getPort())
 				   .append("/")

@@ -134,4 +134,98 @@ public class ApiZoomAndroidSourceGroupController {
 		return null;
 	}
 	
+	/**
+	 * 创建联系人分组<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月5日 上午10:49:39
+	 * @param String name 分组名称
+	 * @return SourceGroupVO 分组
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/create/contacts/group")
+	public Object createContacts(
+			String name,
+			HttpServletRequest request) throws Exception{
+		
+		return sourceGroupService.createContactsGroup(name);
+	}
+	
+	/**
+	 * 删除联系人组<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月5日 上午11:01:41
+	 * @param Long id 联系人组id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove/contacts/group")
+	public Object removeContacts(
+			Long id, 
+			HttpServletRequest request) throws Exception{
+		
+		sourceGroupService.removeContactsGroup(id);
+		return null;
+	}
+	
+	/**
+	 * 向联系人分组下添加联系人<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月5日 上午11:20:40
+	 * @param Long id 联系人分组id
+	 * @param JSONArray contactIds 联系人id列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/append/contacts")
+	public Object appendContacts(
+			Long id, 
+			String contactIds,
+			HttpServletRequest request) throws Exception{
+		
+		sourceGroupService.appendContacts(id, JSON.parseArray(contactIds, Long.class));
+		return null;
+	}
+	
+	/**
+	 * 从联系人分组中移除联系人<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月5日 上午11:41:06
+	 * @param JSONArray contactIds 联系人id列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove/contacts")
+	public Object removeContacts(
+			String contactIds,
+			HttpServletRequest request) throws Exception{
+		
+		sourceGroupService.removeContacts(JSON.parseArray(contactIds, Long.class));
+		return null;
+	}
+	
+	/**
+	 * 联系人更换分组<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月5日 上午11:59:21
+	 * @param Long id 目标联系人分组id
+	 * @param JSONArray contactIds 联系人id列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/change/contacts")
+	public Object changeContacts(
+			Long id, 
+			String contactIds,
+			HttpServletRequest request) throws Exception{
+		
+		sourceGroupService.changeContacts(id, JSON.parseArray(contactIds, Long.class));
+		return null;
+	}
+	
 }

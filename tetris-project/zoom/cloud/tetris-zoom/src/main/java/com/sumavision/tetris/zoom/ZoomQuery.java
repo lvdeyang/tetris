@@ -2,12 +2,16 @@ package com.sumavision.tetris.zoom;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.resouce.feign.resource.ResourceService;
 import com.sumavision.tetris.resouce.feign.resource.ResourceVO;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.zoom.webrtc.WebRtcVO;
 
 @Component
@@ -15,6 +19,22 @@ public class ZoomQuery {
 
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	/**
+	 * 查询用户信息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午3:26:37
+	 * @return user UserVO 用户基本信息
+	 */
+	public Map<String, Object> queryUserInfo() throws Exception{
+		UserVO user = userQuery.current();
+		return new HashMapWrapper<String, Object>().put("user", user)
+												   .getMap();
+	}
 	
 	/**
 	 * 封装会议成员的bundle信息<br/>
