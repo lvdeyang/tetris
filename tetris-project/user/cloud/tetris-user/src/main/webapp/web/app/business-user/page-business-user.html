@@ -11,7 +11,7 @@
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
 
             <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus sp_title"></span>&nbsp;添加用户</el-button>
-            <el-button type="warning" size="small" @click="handelDelete"><span class="icon-trash sp_title"></span>&nbsp;删除用户</el-button>
+            <!-- <el-button type="warning" size="small" @click="handelDelete"><span class="icon-trash sp_title"></span>&nbsp;删除用户</el-button> -->
 
             <el-button v-if="importInfo.status" size="small" disabled><span class="feather-icon-download-cloud" style="position:relative; right:1px;"></span>&nbsp;导出数据</el-button>
             <el-button v-else size="small" @click="handleExport"><span class="feather-icon-download-cloud" style="position:relative; right:1px;"></span>&nbsp;导出数据</el-button>
@@ -25,10 +25,10 @@
                             :data="table.rows"
                             :row-key="rowKey"
                             style="width:100%">
-                        <el-table-column
+                        <!-- <el-table-column
                                 type="selection"
                                 width="55">
-                        </el-table-column>
+                        </el-table-column> -->
                         <el-table-column
                                 label="昵称"
                                 prop="nickname">

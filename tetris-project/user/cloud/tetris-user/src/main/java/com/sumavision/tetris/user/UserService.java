@@ -42,6 +42,7 @@ import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
 import com.sumavision.tetris.user.event.TouristCreateEvent;
 import com.sumavision.tetris.user.event.TouristDeleteBatchEvent;
 import com.sumavision.tetris.user.event.TouristDeleteEvent;
+import com.sumavision.tetris.user.event.UserDeletedEvent;
 import com.sumavision.tetris.user.event.UserImportEventPublisher;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.user.exception.DeletedUserIsNotATouristException;
@@ -53,6 +54,7 @@ import com.sumavision.tetris.user.exception.MobileNotExistException;
 import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
+import com.sumavision.tetris.user.exception.UserCannotDeleteBecauseOnlineStatusException;
 import com.sumavision.tetris.user.exception.UserNotExistException;
 import com.sumavision.tetris.user.exception.UsernameAlreadyExistException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
@@ -424,6 +426,15 @@ public class UserService{
 		
 		if(user == null) return;
 		
+		List<TokenPO> tokens = tokenDao.findByUserId(user.getId());
+		if(tokens!=null && tokens.size()>0){
+			for(TokenPO token:tokens){
+				if(UserStatus.ONLINE.equals(token.getStatus())){
+					throw new UserCannotDeleteBecauseOnlineStatusException();
+				}
+			}
+		}
+		
 		if(UserClassify.COMPANY.equals(user.getClassify())){
 			
 			CompanyPO company = companyDao.findByUserId(user.getId());
@@ -489,6 +500,11 @@ public class UserService{
 				}
 			}
 		}
+		
+		UserDeletedEvent event = new UserDeletedEvent(applicationEventPublisher, new ArrayListWrapper<UserVO>().add(new UserVO().setId(user.getId())
+																																.setUserno(user.getUserno()))
+																											   .getList());
+		applicationEventPublisher.publishEvent(event);
 		
 	}
 	

@@ -365,7 +365,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		return this;
 	}
 	
-	public UserVO setCompanyInfo(CompanyPO entity){
+	public UserVO setCompanyInfo(CompanyPO entity) throws Exception{
 		if(entity != null){
 			this.setGroupId(entity.getId().toString())
 				.setIsGroupCreator(entity.getUserId().equals(this.getId().toString())?true:false)
@@ -381,7 +381,9 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		if(this.getLogo() == null) this.setLogo(CompanyPO.DEFAULT_LOGO);
 		UserServerPropsQuery userServerPropsQuery = SpringContext.getBean(UserServerPropsQuery.class);
 		ServerProps props = userServerPropsQuery.queryProps();
-		this.setLogo(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append(this.getLogo()).toString());
+		//TODO serverIp.properties
+		//props.getIp()
+		this.setLogo(new StringBufferWrapper().append("http://").append(props.getIpFromProperties()).append(":").append(props.getPort()).append(this.getLogo()).toString());
 		if(this.getLogoStyle() == null) this.setLogoStyle(CompanyPO.DEFAULT_LOGOSTYLE);
 		if(this.getLogoShortName() == null) this.setLogoShortName(CompanyPO.DEFAULT_LOGOSHORTNAME);
 		if(this.getPlatformFullName() == null) this.setPlatformFullName(CompanyPO.DEFAULT_PLATFORMFULLNAME);
