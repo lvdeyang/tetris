@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
@@ -21,6 +22,9 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
+import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.ScreenRectTemplateDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
@@ -29,12 +33,16 @@ import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Md5Encoder;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserVO;
 
 @Service
 public class BundleService extends CommonService<BundlePO> {
@@ -79,6 +87,15 @@ public class BundleService extends CommonService<BundlePO> {
 	
 	@Autowired
 	private FolderDao folderDao;
+	
+	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private PrivilegeDAO privilegeDao;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDao;
 	
 	/**
 	 * 检验设备密码<br/>
@@ -651,6 +668,7 @@ public class BundleService extends CommonService<BundlePO> {
 			userIds.add(user.getId());
 		}
 		
+		//删除设备
 		List<BundlePO> needRemoveBundles = bundleDao.findByUserIdNotIn(userIds);
 		List<String> bundleIds = new ArrayList<String>();
 		for(BundlePO bundle: needRemoveBundles){
@@ -660,9 +678,108 @@ public class BundleService extends CommonService<BundlePO> {
 		List<ChannelSchemePO> needRemoveChannels = channelSchemeDao.findByBundleIdIn(bundleIds);
 		List<ScreenSchemePO> needRemoveScreens = screenSchemeDao.findByBundleIdIn(bundleIds);
 		
+		//删除用户绑定分组
+		List<FolderUserMap> maps = folderUserMapDao.findByUserIdNotIn(userIds);
+		
+		//删除用户权限
+		List<String> indentities = new ArrayList<String>();
+		indentities.add("-1");
+		for(UserBO user: users){
+			if(user.getUserNo() != null){
+				indentities.add(user.getUserNo());
+			}
+		}
+		
+		//删除设备权限
+		List<String> bundleIndentities = new ArrayList<String>();
+		bundleIndentities.add("-1");
+		for(BundlePO bundle: needRemoveBundles){
+			if(bundle.getBundleId() != null){
+				bundleIndentities.add(bundle.getBundleId());
+			}
+		}
+		
+		List<PrivilegePO> privileges = privilegeDao.findByNotIndentify(indentities);
+		privileges.addAll(privilegeDao.findByIndentify(bundleIndentities));
+		
+		//删除角色权限绑定关系
+		List<Long> privilegeIds = new ArrayList<Long>();
+		for(PrivilegePO privilege: privileges){
+			privilegeIds.add(privilege.getId());
+		}
+		
+		List<RolePrivilegeMap> roleMaps = rolePrivilegeMapDao.findByPrivilegeIdIn(privilegeIds);
+		
 		bundleDao.delete(needRemoveBundles);
 		channelSchemeDao.delete(needRemoveChannels);
 		screenSchemeDao.delete(needRemoveScreens);
+		
+		folderUserMapDao.delete(maps);
+		privilegeDao.delete(privileges);
+		rolePrivilegeMapDao.delete(roleMaps);
+		
+	}
+	
+	/**
+	 * 删除用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 下午1:12:08
+	 * @param List<UserVO> users 用户信息
+	 */
+	public void removeUser(List<UserVO> users) throws Exception{
+		
+		List<Long> needRemoveUserIds = new ArrayList<Long>();
+		List<String> needRemoveUserNos = new ArrayList<String>();
+		for(UserVO user: users){
+			needRemoveUserIds.add(user.getId());
+			if(user.getUserno() != null){
+				needRemoveUserNos.add(user.getUserno());
+			}
+		}
+		
+		//删除设备
+		List<BundlePO> needRemoveBundles = bundleDao.findByUserIdIn(needRemoveUserIds);
+		List<String> bundleIds = new ArrayList<String>();
+		for(BundlePO bundle: needRemoveBundles){
+			bundleIds.add(bundle.getBundleId());
+		}
+		
+		List<ChannelSchemePO> needRemoveChannels = channelSchemeDao.findByBundleIdIn(bundleIds);
+		List<ScreenSchemePO> needRemoveScreens = screenSchemeDao.findByBundleIdIn(bundleIds);
+		
+		//删除用户绑定分组
+		List<FolderUserMap> maps = folderUserMapDao.findByUserIdIn(needRemoveUserIds);
+		
+		//删除用户权限
+		List<String> indentities = new ArrayList<String>();
+		indentities.add("-1");
+		indentities.addAll(needRemoveUserNos);
+		
+		//删除设备权限
+		for(BundlePO bundle: needRemoveBundles){
+			if(bundle.getBundleId() != null){
+				indentities.add(bundle.getBundleId());
+			}
+		}
+		
+		List<PrivilegePO> privileges = privilegeDao.findByIndentify(indentities);
+		
+		//删除角色权限绑定关系
+		List<Long> privilegeIds = new ArrayList<Long>();
+		for(PrivilegePO privilege: privileges){
+			privilegeIds.add(privilege.getId());
+		}
+		
+		List<RolePrivilegeMap> roleMaps = rolePrivilegeMapDao.findByPrivilegeIdIn(privilegeIds);
+		
+		bundleDao.delete(needRemoveBundles);
+		channelSchemeDao.delete(needRemoveChannels);
+		screenSchemeDao.delete(needRemoveScreens);
+		
+		folderUserMapDao.delete(maps);
+		privilegeDao.delete(privileges);
+		rolePrivilegeMapDao.delete(roleMaps);
 		
 	}
 	
@@ -754,5 +871,45 @@ public class BundleService extends CommonService<BundlePO> {
 	 */
 	public void deleteByUserIdIn(Collection<Long> userIds) throws Exception{
 		bundleDao.deleteByUserIdIn(userIds);
+	}
+	
+	//留着测试sip认证
+	public static void main(String[] args) throws Exception{
+		
+		String password = "{\n    \"uri\": \"sip:192.165.56.18:5060\",\n    \"realm\": \"192.165.56.18\",\n    \"nonce\": \"NTQ0MDU3ODoxOTIuMTY1LjU2LjE4OnN1bWF2aXNpb25yZA==\",\n    \"response\": \"\\\"64d0419cf3ee6806b79112fae26406d6\\\"\"\n}";
+		
+		JSONObject passwordJson = JSONObject.parseObject(password);
+		
+		String realm = "127.0.0.1";
+		String uri = "sip:10.1.1.244:5060";
+		String nonce = "MTUzNDM1OjEyNy4wLjAuMTpzdW1hdmlzaW9ucmQ=";
+		String userName = "pangzhiyuan_sip_encoder";
+		String online = "pangzhiyuan_sip_encoder";
+		
+		String hash1 = encode(new StringBuffer().append(userName)
+											   .append(":")
+											   .append(realm)
+											   .append(":")
+											   .append(online)
+											   .toString());
+		
+		String hash2 = encode(new StringBuffer().append("REGISTER")
+											   .append(":")
+											   .append(uri)
+											   .toString());
+		
+		String responseCheck = encode(new StringBuffer().append(hash1)
+														  .append(":")
+														  .append(nonce)
+														  .append(":")
+														  .append(hash2)
+														  .toString());
+		
+		System.out.println(responseCheck);
+		
+	}
+	
+	public static String encode(String message) throws Exception{
+		return DigestUtils.md5DigestAsHex(message.getBytes());
 	}
 }

@@ -47,6 +47,7 @@ import com.suma.venus.resource.vo.NodeVO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 
@@ -85,6 +86,9 @@ public class ResourceRemoteService {
 	
 	@Autowired
 	private UserQueryService userService;
+	
+	@Autowired
+	private Base64 base64;
 
 	/**
 	 * 获取联网接入id<br/>
@@ -613,7 +617,11 @@ public class ResourceRemoteService {
 			}
 			if(info.getSerNode().equals(nodeUuid) && info.getSerType().equals(SerInfoType.SIGNAL.getNum())){
 				nodeVO.setSig_code(info.getSerNo());
-				nodeVO.setSig_pwd(info.getSerPwd());
+				if(info.getSourceType().equals(SOURCE_TYPE.SYSTEM)){
+					nodeVO.setSig_pwd(info.getSerPwd());
+				}else{
+					nodeVO.setSig_pwd(base64.decode(info.getSerPwd()));
+				}
 				nodeVO.setSig_user(info.getSerNo());
 				nodeVO.setSip_addr(new StringBufferWrapper().append(info.getSerAddr())
 															.append(":")

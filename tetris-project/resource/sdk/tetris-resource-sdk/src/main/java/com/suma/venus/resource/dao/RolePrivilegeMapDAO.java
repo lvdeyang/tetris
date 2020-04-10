@@ -13,5 +13,7 @@ public interface RolePrivilegeMapDAO extends CommonDao<RolePrivilegeMap>{
 	public RolePrivilegeMap findByRoleIdAndPrivilegeId(Long roleId, Long privilegeId);
 	
 	public List<RolePrivilegeMap> findByRoleIdAndPrivilegeIdIn(Long roleId, Collection<Long> privilegeIds);
+
+	public List<RolePrivilegeMap> findByPrivilegeIdIn(Collection<Long> privilegeIds);
 	
 }

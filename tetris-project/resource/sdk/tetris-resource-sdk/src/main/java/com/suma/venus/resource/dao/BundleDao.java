@@ -149,6 +149,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	
 	public List<BundlePO> findByUserIdNotIn(Collection<Long> ids);
 	
+	public List<BundlePO> findByUserIdIn(Collection<Long> ids);
+	
 	/**
 	 *查询经纬度范围内的对应类型设备<br/>
 	 * <b>作者:</b>wjw<br/>
