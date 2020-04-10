@@ -107,6 +107,33 @@ public class CommandCommonUtil {
 	}
 	
 	/**
+	 * 根据目的成员和业务类型查找转发<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月9日 上午11:44:49
+	 * @param forwards
+	 * @param dstMemberIds
+	 * @param type 转发业务类型，如果为null则查全部类型
+	 * @param executeStatus 转发执行状态，如果为null则查全部状态
+	 * @return
+	 */
+	public List<CommandGroupForwardPO> queryForwardsByDstmemberIds(
+			Collection<CommandGroupForwardPO> forwards, Collection<Long> dstMemberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
+		List<CommandGroupForwardPO> needForwards = new ArrayList<CommandGroupForwardPO>();
+		for(CommandGroupForwardPO forward : forwards){
+			if(type==null || type.equals(forward.getForwardBusinessType())){
+				if(executeStatus==null || executeStatus.equals(forward.getExecuteStatus())){
+					if(dstMemberIds.contains(forward.getDstMemberId())){
+						needForwards.add(forward);
+					}
+				}
+			}
+		}
+		return needForwards;
+	}
+	
+	/**
 	 * @Title: 具备执行条件的转发：执行状态为UNDONE，源和目的成员都已经CONNECT<br/>
 	 * @description 搭配 CommandCommonServiceImpl 的 whetherCanBeDone 方法一起使用
 	 * @param members 必须覆盖forwards转发所涉及到的所有成员；建议从forward对应的group中get得到，避免脏读
@@ -114,7 +141,7 @@ public class CommandCommonUtil {
 	 * @throws Exception 
 	 * @return Set<CommandGroupForwardPO> needForwards 具备执行条件的转发列表
 	 */
-	private Set<CommandGroupForwardPO> queryForwardsReadyToBeDone(Collection<CommandGroupMemberPO> members, Collection<CommandGroupForwardPO> forwards) {
+	public Set<CommandGroupForwardPO> queryForwardsReadyToBeDone(Collection<CommandGroupMemberPO> members, Collection<CommandGroupForwardPO> forwards) {
 		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
 		Map<Long, CommandGroupMemberPO> map = membersSetToMap(members);
 		for(CommandGroupForwardPO forward : forwards){
@@ -206,7 +233,7 @@ public class CommandCommonUtil {
 	
 	/**
 	 * 根据源和目的成员，查找一个转发<br/>
-	 * <p>详细描述</p>
+	 * <p>快速查转发</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月19日 上午10:02:27
@@ -305,7 +332,7 @@ public class CommandCommonUtil {
 	/**
 	 * 
 	 * 通过转发和目标成员，查找该转发的目标播放器<br/>
-	 * <p>可以在 queryForwardBySrcAndDstMemberId() 方法后面使用</p>
+	 * <p>快速查播放器，可以在 queryForwardBySrcAndDstMemberId() 方法后面使用</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月19日 上午10:16:17
@@ -558,6 +585,26 @@ public class CommandCommonUtil {
 		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
 		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
 		return commandUserBos;
+	}
+	
+	/**
+	 * 根据id查询group<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月9日 下午2:25:36
+	 * @param groups
+	 * @param id
+	 * @return
+	 */
+	public CommandGroupPO queryGroupById(Collection<CommandGroupPO> groups, Long id){
+		if(groups == null) return null;
+		for(CommandGroupPO group : groups){
+			if(group.getId().equals(id)){
+				return group;
+			}
+		}
+		return null;
 	}
 	
 	/**

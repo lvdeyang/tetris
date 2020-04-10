@@ -108,10 +108,7 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private CommandGroupMemberDAO commandGroupMemberDao;
-	
-	@Autowired
-	private CommandGroupForwardDAO commandGroupForwardDao;
-	
+		
 	@Autowired
 	private ResourceBundleDAO resourceBundleDao;
 	
@@ -733,12 +730,13 @@ public class CommandBasicServiceImpl {
 			if(group.getType().equals(GroupType.BASIC) || group.getType().equals(GroupType.MEETING)){
 				String businessType = null;
 				if(GroupType.MEETING.equals(group.getType())){
-					businessType = "meetingStart";
+					businessType = "meetingStart";//自动接听 TODO: meetingStartNow
 				}else{
-					businessType = "commandStart";
+					businessType = "commandStart";//自动接听 TODO: commandStartNow
 				}
 				message.put("businessType", businessType);
 				message.put("businessInfo", "接受到 " + group.getName() + " 邀请，主席：" + chairman.getUserName() + "，是否进入？");
+//				message.put("businessInfo", group.getName() + " 开始了，主席：" + chairman.getUserName());
 			}else if(group.getType().equals(GroupType.SECRET)){
 				message.put("businessType", "secretStart");
 				message.put("businessInfo", chairman.getUserName() + " 邀请你专向" + commandString);
@@ -892,7 +890,8 @@ public class CommandBasicServiceImpl {
 			//专向会议的通知
 			if(group.getType().equals(GroupType.SECRET)){
 				
-				JSONObject message = new JSONObject();				
+				JSONObject message = new JSONObject();
+				boolean send = false;
 				if(member.isAdministrator()){
 					//当前正在处理主席
 					//对方成员拒绝导致的停止
@@ -907,6 +906,7 @@ public class CommandBasicServiceImpl {
 						}
 						//返回操作人的屏幕
 						returnSplits = secretSplits;
+						send = true;
 					}
 					//对方成员停止
 					if(stopMode==0 && userId.equals(secretMember.getUserId())){
@@ -920,6 +920,7 @@ public class CommandBasicServiceImpl {
 						}
 						//返回操作人的屏幕
 						returnSplits = secretSplits;
+						send = true;
 					}
 				}else{
 					//当前正在处理对方成员
@@ -935,10 +936,13 @@ public class CommandBasicServiceImpl {
 						}
 						//返回操作人的屏幕
 						returnSplits = chairSplits;
+						send = true;
 					}
 				}
 				//发送消息
-				messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName()));
+				if(send){
+					messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName()));
+				}
 			}
 			member.setMemberStatus(MemberStatus.DISCONNECT);
 			member.setCooperateStatus(MemberStatus.DISCONNECT);
@@ -1667,7 +1671,8 @@ public class CommandBasicServiceImpl {
 		Set<CommandGroupMemberPO> members = group.getMembers();
 		Set<CommandGroupForwardPO> forwards = group.getForwards();
 //		String commandString = commandCommonUtil.generateCommandString(group.getType());
-		String cooperateString = commandCommonUtil.generateCooperateString(group.getType());
+		GroupType groupType = group.getType();
+		String cooperateString = commandCommonUtil.generateCooperateString(groupType);
 		
 		//新成员中是否含有主席。
 		boolean newMembersContainsChairman = false;
@@ -1708,9 +1713,14 @@ public class CommandBasicServiceImpl {
 				if(usefulPlayersCount > 0){
 					CommandGroupUserPlayerPO player = cPlayers.get(cPlayers.size() - usefulPlayersCount);
 					CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
-					player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
 					player.setBusinessName(group.getName() + "：" + srcMember.getUserName());//添加成员名称
-					player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
+					if(groupType.equals(GroupType.SECRET)){
+						player.setBusinessId(group.getId().toString());
+						player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
+					}else{
+						player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
+						player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
+					}
 					
 					//用于返回的分屏信息
 					JSONObject split = new JSONObject();
@@ -1771,6 +1781,11 @@ public class CommandBasicServiceImpl {
 						player4c.setBusinessId(group.getId().toString());
 						player4c.setBusinessName(group.getName() + "：" + chairmanMember.getUserName());
 						player4c.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
+						if(groupType.equals(GroupType.SECRET)){
+							player4c.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
+						}else{
+							player4c.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
+						}
 						
 						//给转发设置目的
 						forward.setDstPlayer(player4c);
@@ -1803,7 +1818,11 @@ public class CommandBasicServiceImpl {
 						
 						player.setBusinessId(group.getId().toString());//如果需要改成c2m_forward.getId()，那么需要先save获得id
 						player.setBusinessName(group.getName() + "-" + cooperateMember.getUserName() + cooperateString);
-						player.setPlayerBusinessType(PlayerBusinessType.COOPERATE_COMMAND);
+						if(groupType.equals(GroupType.MEETING)){
+							player.setPlayerBusinessType(PlayerBusinessType.SPEAK_MEETING);
+						}else{
+							player.setPlayerBusinessType(PlayerBusinessType.COOPERATE_COMMAND);
+						}
 						
 						//用于返回的分屏信息
 						JSONObject split = new JSONObject();
@@ -1850,7 +1869,7 @@ public class CommandBasicServiceImpl {
 	 */
 	public Object removeMembers(Long groupId, List<Long> userIdList, int mode) throws Exception{
 		
-		//TODO:重复退出还有问题，会再次挂断编码器
+		//“重复退出会再次挂断编码器”已改好
 		
 		if(groupId==null || groupId.equals("")){
 			throw new BaseException(StatusCode.FORBIDDEN, "退出操作，会议id有误");
@@ -1872,6 +1891,11 @@ public class CommandBasicServiceImpl {
 //					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，不需退出，id: " + group.getId());
 					return new JSONArray();
 				}
+			}
+			
+			//防止专向指挥中调用此方法
+			if(group.getType().equals(GroupType.SECRET)){
+				throw new BaseException(StatusCode.FORBIDDEN, "正在专项，不能退出，只能“停止”");
 			}
 			
 			JSONArray chairSplits = new JSONArray();

@@ -203,6 +203,10 @@ public class CommandCommonServiceImpl {
 		
 	}
 	
+	public CommandGroupUserPlayerPO userChosePlayerByLocationIndex(Long userId, PlayerBusinessType businessType, int locationIndex) throws Exception{
+		return userChosePlayerByLocationIndex(userId, businessType, locationIndex, false);
+	}
+	
 	/**
 	 * 指定播放器序号，根据业务用户占用播放器--用户操作加锁<br/>
 	 * <p>详细描述</p>
@@ -212,10 +216,11 @@ public class CommandCommonServiceImpl {
 	 * @param userId
 	 * @param businessType
 	 * @param locationIndex 播放器序号
+	 * @param ignorePlayerBeingUsed 当前播放器正在被使用时，true则【不修改播放器信息】并返回该播放器，false则抛错。
 	 * @return
 	 * @throws Exception 指定的播放器已经被别的业务使用时抛PlayerIsBeingUsedException
 	 */
-	public CommandGroupUserPlayerPO userChosePlayerByLocationIndex(Long userId, PlayerBusinessType businessType, int locationIndex) throws Exception{
+	public CommandGroupUserPlayerPO userChosePlayerByLocationIndex(Long userId, PlayerBusinessType businessType, int locationIndex, boolean ignorePlayerBeingUsed) throws Exception{
 		
 		synchronized (userId) {
 			
@@ -233,7 +238,11 @@ public class CommandCommonServiceImpl {
 			}
 			
 			if(!userPlayer.getPlayerBusinessType().equals(PlayerBusinessType.NONE)){
-				throw new PlayerIsBeingUsedException();
+				if(ignorePlayerBeingUsed){
+					return userPlayer;
+				}else{
+					throw new PlayerIsBeingUsedException();
+				}
 			}
 						
 			userPlayer.setPlayerBusinessType(businessType);			

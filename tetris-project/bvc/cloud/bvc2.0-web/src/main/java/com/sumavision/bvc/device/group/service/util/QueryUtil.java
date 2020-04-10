@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
@@ -2074,6 +2075,13 @@ public class QueryUtil {
 	
 	public boolean isLdapUser(UserBO user, FolderUserMap folderUserMap){
 		if(folderUserMap!=null && "ldap".equals(folderUserMap.getCreator())){
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean isLdapBundle(BundlePO bundle){
+		if(SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())){
 			return true;
 		}
 		return false;
