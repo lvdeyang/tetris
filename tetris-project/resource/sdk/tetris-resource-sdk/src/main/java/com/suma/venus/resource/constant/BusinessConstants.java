@@ -11,7 +11,8 @@ public class BusinessConstants {
 	public enum BUSINESS_OPR_TYPE{
 		DIANBO("点播"),//点播
 		RECORD("录制"),//录制
-		CALL("呼叫");//呼叫
+		CALL("呼叫"),//呼叫
+		ZK("指挥");//指挥
 		
 		private String name;
 		
