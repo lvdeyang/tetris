@@ -124,7 +124,7 @@ public class ApiTerminalAuthController {
 			throw new MobileNotMatchedException(mobile, phone);
 		}
 		
-		userService.add(username, username, "", password, passwordRepeat, mobile, null, UserClassify.TERMINAL.getName(), false);
+		userService.add(username, username, "", password, passwordRepeat, mobile, null, null, UserClassify.TERMINAL.getName(), false);
 		
 		return null;
 	}
