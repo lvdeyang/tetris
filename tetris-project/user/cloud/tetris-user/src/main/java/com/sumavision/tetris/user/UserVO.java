@@ -45,6 +45,9 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/** 邮箱 */
 	private String mail;
 	
+	/** 用户级别 */
+	private Integer level;
+	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
 	
@@ -171,6 +174,15 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 
 	public UserVO setMail(String mail) {
 		this.mail = mail;
+		return this;
+	}
+
+	public Integer getLevel() {
+		return level;
+	}
+
+	public UserVO setLevel(Integer level) {
+		this.level = level;
 		return this;
 	}
 
@@ -354,6 +366,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setNickname(entity.getNickname())
 			.setMobile(entity.getMobile())
 			.setMail(entity.getMail())
+			.setLevel(entity.getLevel())
 			.setIcon(entity.getIcon())
 			.setUserno(entity.getUserno())
 			//.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())

@@ -40,6 +40,9 @@ public class UserVO{
 	/** 邮箱 */
 	private String mail;
 	
+	/** 用户级别 */
+	private Integer level;
+	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
 	
@@ -184,6 +187,15 @@ public class UserVO{
 
 	public UserVO setMail(String mail) {
 		this.mail = mail;
+		return this;
+	}
+
+	public Integer getLevel() {
+		return level;
+	}
+
+	public UserVO setLevel(Integer level) {
+		this.level = level;
 		return this;
 	}
 

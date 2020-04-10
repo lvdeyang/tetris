@@ -262,7 +262,7 @@ public class UserFeignController {
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, user.getNickname(), user.getMobile(), user.getMail(), tags, false, "", "", "");
+		return userService.edit(id, user.getNickname(), user.getMobile(), user.getMail(), null, tags, false, "", "", "");
 	}
 	
 	/**

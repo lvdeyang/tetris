@@ -15,7 +15,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.agent.service.TerminalAgentService;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
-import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserService;
 import com.sumavision.tetris.user.UserVO;
@@ -24,7 +23,6 @@ import com.sumavision.tetris.zoom.exception.UserNotFoundException;
 import com.sumavision.tetris.zoom.exception.ZoomMemberNotFoundException;
 import com.sumavision.tetris.zoom.exception.ZoomNotFoundException;
 import com.sumavision.tetris.zoom.exception.ZoomStopedException;
-import com.sumavision.tetris.zoom.history.HistoryService;
 import com.sumavision.tetris.zoom.jv220.Jv220UserAllocationQuery;
 import com.sumavision.tetris.zoom.webrtc.WebRtcRoomInfoQuery;
 import com.sumavision.tetris.zoom.webrtc.WebRtcRoomInfoService;
@@ -61,8 +59,8 @@ public class ZoomService {
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
 	
-	@Autowired
-	private HistoryService historyService;
+	//@Autowired
+	//private HistoryService historyService;
 	
 	@Autowired
 	private TerminalAgentService terminalAgentService;
@@ -305,10 +303,10 @@ public class ZoomService {
 		}
 		
 		//添加历史
-		if(!tourist){
+		/*if(!tourist){
 			String remark = new StringBufferWrapper().append("会议名称：").append(zoom.getName()).append("@@").append("创建者：").append(zoom.getCreatorUserRename()).toString();
 			historyService.addZoomHistory(zoom.getCode(), self.getId().toString(), remark);
-		}
+		}*/
 		
 		//数据转换
 		List<ZoomMemberPO> members = zoomMemberDao.findByZoomId(zoom.getId());
