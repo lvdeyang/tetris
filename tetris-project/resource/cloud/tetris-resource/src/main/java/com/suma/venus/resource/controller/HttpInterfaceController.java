@@ -943,7 +943,8 @@ public class HttpInterfaceController {
 			}
 
 			// 校验用户名密码
-			if (!"播放器".equals(bundle.getBundleAlias()) && !SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {// 播放器bundle和ldap的设备不进行用户微服务鉴权
+			if (!SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {//ldap的设备不进行用户微服务鉴权
+			//if (!"播放器".equals(bundle.getBundleAlias()) && !SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {// 播放器bundle和ldap的设备不进行用户微服务鉴权
 				boolean check = bundleService.checkBundleAndPassword(bundle, password);
 				if (!check) {
 					LOGGER.error("Fail to check username and password : 设备账号名或密码错误");

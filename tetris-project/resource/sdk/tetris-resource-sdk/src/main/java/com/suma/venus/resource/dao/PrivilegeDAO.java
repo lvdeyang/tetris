@@ -42,4 +42,10 @@ public interface PrivilegeDAO extends CommonDao<PrivilegePO>{
 	
 	@Query(value = "select * from privilegepo p left join role_privilege_map m on p.id = m.privilege_id where m.role_id in ?1", nativeQuery = true)
 	public List<PrivilegePO> findByRoleIdIn(Collection<Long> roleIds);
+	
+	@Query(value = "select * from privilegepo where SUBSTRING_INDEX(resource_indentity,'-',1) not in ?1", nativeQuery = true)
+	public List<PrivilegePO> findByNotIndentify(List<String> resources);
+	
+	@Query(value = "select * from privilegepo where SUBSTRING_INDEX(resource_indentity,'-',1) in ?1", nativeQuery = true)
+	public List<PrivilegePO> findByIndentify(List<String> resources);
 }

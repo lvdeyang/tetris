@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.user.event.TouristCreateEvent;
 import com.sumavision.tetris.user.event.TouristDeleteBatchEvent;
 import com.sumavision.tetris.user.event.TouristDeleteEvent;
+import com.sumavision.tetris.user.event.UserDeletedEvent;
 import com.sumavision.tetris.user.event.UserImportEvent;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.websocket.core.event.WebsocketSessionClosedEvent;
@@ -168,6 +170,27 @@ public class EventPublishController {
 			HttpServletRequest request) throws Exception{
 		
 		WebsocketSessionOpenEvent event = new WebsocketSessionOpenEvent(applicationEventPublisher, userId);
+		applicationEventPublisher.publishEvent(event);
+		
+		return null;
+	}
+	
+	/**
+	 * 用户删除事件代理<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 上午11:37:07
+	 * @param String users 用户信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/user/delete")
+	public Object userDelete(
+			String users,
+			HttpServletRequest request) throws Exception{
+		
+		List<UserVO> userList = JSONArray.parseArray(users, UserVO.class);
+		UserDeletedEvent event = new UserDeletedEvent(applicationEventPublisher, userList);
 		applicationEventPublisher.publishEvent(event);
 		
 		return null;

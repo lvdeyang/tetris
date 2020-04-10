@@ -24,4 +24,8 @@ public interface ResourceUserRegisteredFeign {
 	public JSONObject userOnline(
 			@RequestParam("userId") Long userId) throws Exception;
 	
+	@RequestMapping(value = "/event/publish/user/delete")
+	public JSONObject userDelete(
+			@RequestParam("users") String users) throws Exception;
+	
 }

@@ -218,7 +218,7 @@ public class SerInfoAndNodeController extends ControllerBase {
 				return data;
 			}
 
-			BeanUtils.copyProperties(serInfoVO, serInfoPO, "serUuid", "syncStatus", "sourceType", "serFactInfo");
+			BeanUtils.copyProperties(serInfoVO, serInfoPO, "serUuid", "syncStatus", "sourceType", "serNode", "serFactInfo");
 			serInfoPO.setSyncStatus(SYNC_STATUS.ASYNC);
 			serInfoDao.save(serInfoPO);
 			data.put(ERRMSG, "");

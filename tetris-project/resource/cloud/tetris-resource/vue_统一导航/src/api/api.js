@@ -41,7 +41,13 @@ axiosInstance.interceptors.request.use(function (config) {
 // 响应拦截器
 axiosInstance.interceptors.response.use(
   function (response) {
-    return response
+    if(response.data.status === 408) {
+      alert('超时，请重新登录!');
+      window.location.href = `${basePath}/web/app/login/login.html`;
+    }else{
+      return response
+    }
+
   },
   function (error) {
     if (error.response.status === 401) { // 认证出错,跳转至登录页面
