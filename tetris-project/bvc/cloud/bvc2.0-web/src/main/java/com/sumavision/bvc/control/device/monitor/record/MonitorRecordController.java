@@ -260,14 +260,23 @@ public class MonitorRecordController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
-		boolean result = resourceService.hasPrivilegeOfBundle(user.getId(), videoBundleId, BusinessConstants.BUSINESS_OPR_TYPE.RECORD);
-		if(!result){
-			throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 0);
-		}
-		if(audioBundleId!=null && !audioBundleId.equals(videoBundleId)){
-			result = resourceService.hasPrivilegeOfBundle(user.getId(), audioBundleId, BusinessConstants.BUSINESS_OPR_TYPE.RECORD);
+		if(bundleId != null){
+			//不选通道直接录制设备（新增）
+			boolean result = resourceService.hasPrivilegeOfBundle(user.getId(), bundleId, BusinessConstants.BUSINESS_OPR_TYPE.RECORD);
 			if(!result){
 				throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 0);
+			}
+		}else{
+			//选通道录制（原有方式）
+			boolean result = resourceService.hasPrivilegeOfBundle(user.getId(), videoBundleId, BusinessConstants.BUSINESS_OPR_TYPE.RECORD);
+			if(!result){
+				throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 0);
+			}
+			if(audioBundleId!=null && !audioBundleId.equals(videoBundleId)){
+				result = resourceService.hasPrivilegeOfBundle(user.getId(), audioBundleId, BusinessConstants.BUSINESS_OPR_TYPE.RECORD);
+				if(!result){
+					throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 0);
+				}
 			}
 		}
 		

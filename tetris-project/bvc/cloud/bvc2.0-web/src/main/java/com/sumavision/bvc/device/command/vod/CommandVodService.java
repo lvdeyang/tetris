@@ -796,7 +796,7 @@ public class CommandVodService {
 				 			 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
 				 			 		 .setPass_by(new ArrayList<PassByBO>());
 		
-		if(vodType==null || vodType.equals(VodType.USER) || vodType.equals(VodType.DEVICE)){			
+		if(vodType==null || vodType.equals(VodType.USER) || vodType.equals(VodType.USER_ONESELF) || vodType.equals(VodType.DEVICE)){
 			//呼叫编码
 			ConnectBundleBO connectEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
 															            .setOperateType(ConnectBundleBO.OPERATE_TYPE)

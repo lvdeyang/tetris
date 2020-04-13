@@ -454,6 +454,10 @@ public class CommandMeetingSpeakServiceImpl {
 			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
+				if(member.isAdministrator()){
+					//主席不能发言！
+					continue;
+				}
 				if(member.getMemberStatus().equals(MemberStatus.CONNECT)
 						&& member.getCooperateStatus().equals(MemberStatus.DISCONNECT)){
 					member.setCooperateStatus(MemberStatus.CONNECT);

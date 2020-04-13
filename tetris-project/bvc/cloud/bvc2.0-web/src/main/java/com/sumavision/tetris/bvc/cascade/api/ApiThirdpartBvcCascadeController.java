@@ -14,6 +14,8 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
+import com.sumavision.bvc.device.command.vod.CommandVodService;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.device.monitor.live.call.MonitorLiveCallService;
 import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
@@ -60,6 +62,9 @@ public class ApiThirdpartBvcCascadeController {
 	
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private CommandUserServiceImpl commandUserServiceImpl;
 	
 	/**
 	 * 查询服务节点<br/>
@@ -280,7 +285,8 @@ public class ApiThirdpartBvcCascadeController {
 						monitorLiveUserService.startXtSeeLocal(uuid, dstUser, srcUser.getId(), srcUser.getName(), srcUser.getUserNo());
 					}else if("call".equals(type)){
 						//开始xt用户呼叫本地用户
-						monitorLiveCallService.startXtCallLocal(uuid, dstUser, srcUser);
+//						monitorLiveCallService.startXtCallLocal(uuid, dstUser, srcUser);
+						commandUserServiceImpl.userCallUser_Cascade(srcUser, dstUser, -1, uuid);
 					}else if("paly-call".equals(type)){
 						//开始xt点播本地用户转xt呼叫本地用户
 						monitorLiveCallService.transXtCallLocal(uuid, dstUser, srcUser);
