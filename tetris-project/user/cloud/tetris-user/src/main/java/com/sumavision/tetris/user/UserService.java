@@ -837,6 +837,9 @@ public class UserService{
 	 * @return List<UserPO> 用户信息
 	 */
 	public List<UserPO> addLdapUser(List<UserVO> userVOs) throws Exception{
+		
+		UserVO self = userQuery.current();
+		
 		List<String> userUuids = new ArrayList<String>();
 		for(UserVO userVO: userVOs){
 			userUuids.add(userVO.getUuid());
@@ -868,6 +871,18 @@ public class UserService{
 		}
 		
 		userDao.save(userPOs);
+		
+		//绑定公司
+		CompanyPO company = companyDao.findByUserId(self.getId());
+		List<CompanyUserPermissionPO> permissions = new ArrayList<CompanyUserPermissionPO>();
+		for(UserPO user: userPOs){
+			CompanyUserPermissionPO permission = new CompanyUserPermissionPO();
+			permission.setUserId(user.getId().toString());
+			permission.setCompanyId(company.getId());
+			permissions.add(permission);
+		}
+		
+		companyUserPermissionDao.save(permissions);
 		
 		return userPOs;
 	}
