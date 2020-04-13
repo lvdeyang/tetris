@@ -169,7 +169,7 @@ public class ApiThirdpartBvcCascadeController {
 		String cmd = requestWrapper.getString("cmd");
 		String src_user = requestWrapper.getString("src_user");
 		String content = requestWrapper.getString("content");
-		protocolParser.parse(src_user, content);
+		protocolParser.parse(src_user, content.trim());
 		return new HashMapWrapper<String, String>().put("seq", seq)
 												   .put("cmd", cmd)
 												   .getMap();

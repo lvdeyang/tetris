@@ -14,6 +14,7 @@ import com.suma.application.ldap.node.LdapNodeDao;
 import com.suma.application.ldap.node.LdapNodePo;
 import com.suma.application.ldap.ser.LdapSerInfoDao;
 import com.suma.application.ldap.ser.LdapSerInfoPo;
+import com.suma.application.ldap.util.Base64Util;
 import com.suma.venus.resource.pojo.SerInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.dao.SerInfoDao;
@@ -64,6 +65,7 @@ public class SerInfoAndNodeSyncLdapUtils {
 						// 外部之前同步过的信息可能已经修改，直接save一波
 						BeanUtils.copyProperties(ldapSer, serInfoPOSync, "serUuid", "syncStatus", "sourceType");
 						// serInfoPOSync.setSyncStatus(SYNC_STATUS.SYNC);
+						serInfoPOSync.setSerPwd(Base64Util.decode(serInfoPOSync.getSerPwd()));
 						serInfoDao.save(serInfoPOSync);
 						successCnt++;
 

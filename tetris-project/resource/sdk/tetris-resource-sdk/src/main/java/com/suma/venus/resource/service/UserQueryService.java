@@ -109,6 +109,7 @@ public class UserQueryService {
 					user.setFolderId(map.getFolderId());
 					user.setFolderIndex(map.getFolderIndex().intValue());
 					user.setFolderUuid(map.getFolderUuid());
+					user.setCreater(map.getCreator());
 					break;
 				}
 			}
@@ -222,6 +223,7 @@ public class UserQueryService {
 			userBO.setFolderId(map.getFolderId());
 			userBO.setFolderIndex(map.getFolderIndex().intValue());
 			userBO.setFolderUuid(map.getFolderUuid());
+			userBO.setCreater(map.getCreator());
 		}
 		
 		return userBO;
@@ -256,6 +258,7 @@ public class UserQueryService {
 					user.setFolderId(map.getFolderId());
 					user.setFolderIndex(map.getFolderIndex().intValue());
 					user.setFolderUuid(map.getFolderUuid());
+					user.setCreater(map.getCreator());
 					break;
 				}
 			}
