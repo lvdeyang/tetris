@@ -31,4 +31,6 @@ public interface FolderUserMapDAO extends CommonDao<FolderUserMap>{
 	
 	public FolderUserMap findByUserNo(String userNo);
 	
+	public List<FolderUserMap> findByUserIdNotIn(Collection<Long> userIds);
+	
 }

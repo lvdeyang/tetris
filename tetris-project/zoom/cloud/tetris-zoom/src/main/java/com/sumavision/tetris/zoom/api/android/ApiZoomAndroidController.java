@@ -16,6 +16,7 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.zoom.ZoomMemberDAO;
 import com.sumavision.tetris.zoom.ZoomMemberType;
 import com.sumavision.tetris.zoom.ZoomMode;
+import com.sumavision.tetris.zoom.ZoomQuery;
 import com.sumavision.tetris.zoom.ZoomSecretLevel;
 import com.sumavision.tetris.zoom.ZoomService;
 
@@ -27,7 +28,24 @@ public class ApiZoomAndroidController {
 	private ZoomService zoomService;
 	
 	@Autowired
+	private ZoomQuery zoomQuery;
+	
+	@Autowired
 	private ZoomMemberDAO zoomMemberDao;
+	
+	/**
+	 * 查询用户信息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午3:26:37
+	 * @return user UserVO 用户基本信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/user/info")
+	public Object queryUserInfo(HttpServletRequest request) throws Exception{
+		return zoomQuery.queryUserInfo();
+	}
 	
 	/**
 	 * 创建会议<br/>
@@ -268,6 +286,68 @@ public class ApiZoomAndroidController {
 	public Object closeShareScreen(Long myZoomMemberId) throws Exception{
 		
 		return zoomService.closeShareScreen(myZoomMemberId);
+	}
+	
+	/**
+	 * 成员开启视频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:23:12
+	 * @param Long myZoomMemberId 会议成员id
+	 * @return ZoomMemberVO 会议成员
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/open/video")
+	public Object openVideo(Long myZoomMemberId) throws Exception{
+		
+		return zoomService.openVideo(myZoomMemberId);
+	}
+	
+	/**
+	 * 成员关闭视频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:29:12
+	 * @param Long myZoomMemberId 会议成员id
+	 * @return ZoomMemberVO 会议成员
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/close/video")
+	public Object closeVideo(Long myZoomMemberId) throws Exception{
+		
+		return zoomService.closeVideo(myZoomMemberId);
+	}
+	
+	/**
+	 * 成员开启音频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:30:53
+	 * @param Long myZoomMemberId 会议成员id
+	 * @return ZoomMemberVO 会议成员
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/open/audio")
+	public Object openAudio(Long myZoomMemberId) throws Exception{
+		
+		return zoomService.openAudio(myZoomMemberId);
+	}
+	
+	/**
+	 * 成员关闭音频<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:30:53
+	 * @param Long myZoomMemberId 会议成员id
+	 * @return ZoomMemberVO 会议成员
+	 */
+	@RequestMapping(value = "/close/audio")
+	public Object closeAudio(Long myZoomMemberId) throws Exception{
+		
+		return zoomService.closeAudio(myZoomMemberId);
 	}
 	
 	/**

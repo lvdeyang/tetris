@@ -8,14 +8,11 @@ import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.zoom.SourceGroupDAO;
 import com.sumavision.tetris.zoom.SourceGroupPO;
-import com.sumavision.tetris.zoom.SourceGroupType;
 import com.sumavision.tetris.zoom.ZoomDAO;
 import com.sumavision.tetris.zoom.ZoomPO;
 import com.sumavision.tetris.zoom.exception.SourceGroupNotFoundException;
 import com.sumavision.tetris.zoom.exception.ZoomNotFoundException;
 import com.sumavision.tetris.zoom.favorites.exception.FavoritesNotFoundException;
-import com.sumavision.tetris.zoom.history.HistoryDAO;
-import com.sumavision.tetris.zoom.history.HistoryPO;
 
 @Service
 @Transactional(rollbackFor = Exception.class)

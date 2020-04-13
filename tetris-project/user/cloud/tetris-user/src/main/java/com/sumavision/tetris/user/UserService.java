@@ -42,6 +42,7 @@ import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
 import com.sumavision.tetris.user.event.TouristCreateEvent;
 import com.sumavision.tetris.user.event.TouristDeleteBatchEvent;
 import com.sumavision.tetris.user.event.TouristDeleteEvent;
+import com.sumavision.tetris.user.event.UserDeletedEvent;
 import com.sumavision.tetris.user.event.UserImportEventPublisher;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.user.exception.DeletedUserIsNotATouristException;
@@ -53,10 +54,10 @@ import com.sumavision.tetris.user.exception.MobileNotExistException;
 import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
+import com.sumavision.tetris.user.exception.UserCannotDeleteBecauseOnlineStatusException;
 import com.sumavision.tetris.user.exception.UserNotExistException;
 import com.sumavision.tetris.user.exception.UsernameAlreadyExistException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
-import com.sumavision.tetris.user.exception.UsernoAlreadyExistInSystemException;
 import com.sumavision.tetris.user.exception.UsernoCannotBeNullException;
 
 /**
@@ -187,6 +188,7 @@ public class UserService{
 	 * @param String repeat 密码确认
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param String classify 用户类型
 	 * @param boolean emit 是否要发射事件
 	 * @return UserVO 用户
@@ -199,10 +201,11 @@ public class UserService{
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify,
             boolean emit) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, classify);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify);
 		
 		if(emit){
 			//发布用户注册事件
@@ -224,6 +227,7 @@ public class UserService{
 	 * @param String repeat 确认密码
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param String companyName 公司名称
 	 * @return UserVO 新建的用户
 	 */
@@ -235,10 +239,11 @@ public class UserService{
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify,
             String companyName) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, UserClassify.COMPANY.getName());
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, UserClassify.COMPANY.getName());
 		
 		CompanyVO company = null;
 		SystemRoleVO adminRole = null;
@@ -278,6 +283,7 @@ public class UserService{
 	 * @param String repeat 确认密码
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param String companyId 公司id
 	 * @return UserVO 新建的用户
 	 */
@@ -289,6 +295,7 @@ public class UserService{
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify,
             Long companyId) throws Exception{
 		
@@ -298,7 +305,7 @@ public class UserService{
 			throw new CompanyNotExistException(companyId);
 		}
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, classify);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify);
 		
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//加入公司
@@ -325,6 +332,7 @@ public class UserService{
 	 * @param String repeat 密码确认
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param String classify 用户类型
 	 * @return UserPO 用户
 	 */
@@ -336,6 +344,7 @@ public class UserService{
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify) throws Exception{
 		
 		if(username == null) throw new UsernameCannotBeNullException();
@@ -372,6 +381,7 @@ public class UserService{
 		user.setPassword(sha256Encoder.encode(password));
 		user.setMobile(mobile);
 		user.setMail(mail);
+		user.setLevel(level==null?1:level);
 		user.setAutoGeneration(false);
 		user.setClassify(UserClassify.fromName(classify));
 		user.setUpdateTime(new Date());
@@ -423,6 +433,15 @@ public class UserService{
 		UserPO user = userDao.findOne(id);
 		
 		if(user == null) return;
+		
+		List<TokenPO> tokens = tokenDao.findByUserId(user.getId());
+		if(tokens!=null && tokens.size()>0){
+			for(TokenPO token:tokens){
+				if(UserStatus.ONLINE.equals(token.getStatus())){
+					throw new UserCannotDeleteBecauseOnlineStatusException();
+				}
+			}
+		}
 		
 		if(UserClassify.COMPANY.equals(user.getClassify())){
 			
@@ -490,6 +509,11 @@ public class UserService{
 			}
 		}
 		
+		UserDeletedEvent event = new UserDeletedEvent(applicationEventPublisher, new ArrayListWrapper<UserVO>().add(new UserVO().setId(user.getId())
+																																.setUserno(user.getUserno()))
+																											   .getList());
+		applicationEventPublisher.publishEvent(event);
+		
 	}
 	
 	/**
@@ -501,6 +525,7 @@ public class UserService{
 	 * @param String nickname 用户昵称
 	 * @param String mobile 用户手机号
 	 * @param String mail 用户邮箱
+	 * @param Integer level 用户级别
 	 * @param boolean editPassword 是否修改密码
 	 * @param String oldPassword 旧密码
 	 * @param String newPassword 新密码
@@ -512,6 +537,7 @@ public class UserService{
 			String nickname,
             String mobile,
             String mail,
+            Integer level,
             String tags,
             boolean editPassword,
             String oldPassword,
@@ -550,6 +576,7 @@ public class UserService{
 		user.setNickname(nickname);
 		user.setMobile(mobile);
 		user.setMail(mail);
+		user.setLevel(level);
 		user.setUpdateTime(new Date());
 		if(tags != null) user.setTags(tags);
 		userDao.save(user);
@@ -632,6 +659,7 @@ public class UserService{
 				user.setClassify(UserClassify.COMPANY);
 				user.setMobile(columns[7]);
 				user.setMail(columns[8]);
+				user.setLevel(1);
 				user.setAutoGeneration(false);
 				users.add(user);
 			}
@@ -669,22 +697,47 @@ public class UserService{
 				usernos.add(user.getUserno());
 				usernames.add(user.getUsername());
 			}
+			
+			//忽略重复用户号码以及重复用户名的用户
+			List<UserPO> usersCopy = new ArrayList<UserPO>();
 			List<UserPO> duplicateUsers = userDao.findByCompanyIdAndUsernoIn(Long.valueOf(self.getGroupId()), usernos);
-			if(duplicateUsers!=null && duplicateUsers.size()>0){
+			List<UserPO> existUsers = userDao.findByUsernameIn(usernames);
+			for(UserPO user:users){
+				boolean repetitive = false;
+				for(UserPO duplicateUser:duplicateUsers){
+					if(duplicateUser.getUserno().equals(user.getUserno())){
+						repetitive = true;
+						break;
+					}
+				}
+				if(!repetitive){
+					for(UserPO existUser:existUsers){
+						if(existUser.getUsername().equals(user.getUsername())){
+							repetitive = true;
+							break;
+						}
+					}
+				}
+				if(!repetitive){
+					usersCopy.add(user);
+				}
+			}
+			users = usersCopy;
+			/*if(duplicateUsers!=null && duplicateUsers.size()>0){
 				Set<String> duplicateUsernos = new HashSet<String>();
 				for(UserPO user:duplicateUsers){
 					duplicateUsernos.add(user.getUserno());
 				}
 				throw new UsernoAlreadyExistInSystemException(duplicateUsernos);
-			}
-			List<UserPO> existUsers = userDao.findByUsernameIn(usernames);
-			if(existUsers!=null && existUsers.size()>0){
+			}*/
+			/*if(existUsers!=null && existUsers.size()>0){
 				Set<String> duplicateUsernames = new HashSet<String>();
 				for(UserPO user:existUsers){
 					duplicateUsernames.add(user.getUsername());
 				}
 				throw new UsernameAlreadyExistException(duplicateUsernames);
-			}
+			}*/
+			
 			userDao.save(users);
 			List<UserSystemRolePermissionPO> systemRolePermissions = new ArrayList<UserSystemRolePermissionPO>();
 			List<SystemRolePO> privateRoles = new ArrayList<SystemRolePO>();

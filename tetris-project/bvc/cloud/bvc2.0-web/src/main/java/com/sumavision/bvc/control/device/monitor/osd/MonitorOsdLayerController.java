@@ -92,7 +92,7 @@ public class MonitorOsdLayerController {
 	 * @param Long subtitleId 字幕id
 	 * @param String subtitleName 字幕名称
 	 * @param String subtitleUsername 字幕创建用户
-	 * @return MonitorOsdLayerPO 图层
+	 * @return MonitorOsdLayerVO 图层
 	 */
 	@JsonBody
 	@ResponseBody
@@ -219,17 +219,16 @@ public class MonitorOsdLayerController {
 	}
 	
 	/**
-	 * 修改一个图层<br/>
+	 * 修改字幕图层<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年5月7日 上午11:01:37
 	 * @param Long id 图层id
 	 * @param int x 万分比坐标
 	 * @param int y 万分比坐标
-	 * @param int layerIndex 图层顺序
-	 * @param Long subtitleId 图层内容资源id
-	 * @param String subtitleName 图层内容资源名称
-	 * @return MonitorOsdLayerPO 图层
+	 * @param Long subtitleId 字幕id
+	 * @param String subtitleName 字幕名称
+	 * @return MonitorOsdLayerVO 图层
 	 */
 	@JsonBody
 	@ResponseBody

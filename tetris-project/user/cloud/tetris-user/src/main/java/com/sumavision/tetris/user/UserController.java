@@ -224,6 +224,7 @@ public class UserController {
 	 * @param String repeat 密码确认
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param Long companyId 公司id
 	 * @param String companyName 公司名称
 	 * @return UserVO 用户数据
@@ -239,6 +240,7 @@ public class UserController {
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify,
             Long companyId,
             String companyName) throws Exception{
@@ -248,12 +250,12 @@ public class UserController {
 		//TODO 权限校验
 		
 		if(classify.equals(UserClassify.NORMAL.getName())){
-			return userService.add(nickname, username, userno, password, repeat, mobile, mail, classify, true);
+			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, true);
 		}else if(classify.equals(UserClassify.COMPANY.getName())){
 			if(companyId!=null && companyName==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, classify, companyId);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId);
 			}else if(companyName!=null && companyId==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, classify, companyName);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName);
 			}
 		}
 		return null;
@@ -291,6 +293,7 @@ public class UserController {
 	 * @param String nickname 昵称
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param boolean editPassword 是否修改密码
 	 * @param String oldPassword 旧密码
 	 * @param String newPassword 新密码
@@ -305,6 +308,7 @@ public class UserController {
 			String nickname,
             String mobile,
             String mail,
+            Integer level,
             String tags,
             boolean editPassword,
             String oldPassword,
@@ -315,7 +319,7 @@ public class UserController {
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, nickname, mobile, mail, tags, editPassword, oldPassword, newPassword, repeat);
+		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat);
 	}
 	
 	/**
@@ -381,7 +385,9 @@ public class UserController {
 		ServerProps serverProps = userServerPropsQuery.queryProps();
 		
 		StringBufferWrapper redirectUrl = new StringBufferWrapper().append("http://")
-				   .append(serverProps.getIp())
+				   //TODO serverIp.properties
+				   //.append(serverProps.getIp())
+				   .append(serverProps.getIpFromProperties())
 				   .append(":")
 				   .append(serverProps.getPort())
 				   .append("/")

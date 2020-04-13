@@ -60,6 +60,7 @@ define([
                         repeat: '',
                         mobile: '',
                         mail: '',
+                        level:1,
                         classify: '企业用户',
                         company: {
                             id: '',
@@ -74,6 +75,7 @@ define([
                         nickname: '',
                         mobile: '',
                         mail: '',
+                        level:1,
                         oldPassword: '',
                         newPassword: '',
                         repeat: '',
@@ -167,6 +169,7 @@ define([
                     self.dialog.editUser.nickname = row.nickname;
                     self.dialog.editUser.mobile = row.mobile;
                     self.dialog.editUser.mail = row.mail;
+                    self.dialog.editUser.level = row.level?row.level:1;
                     self.dialog.editUser.visible = true;
                 },
                 handleEditUserClose:function(){
@@ -175,6 +178,7 @@ define([
                     self.dialog.editUser.nickname = '';
                     self.dialog.editUser.mobile = '';
                     self.dialog.editUser.mail = '';
+                    self.dialog.editUser.level = 1;
                     self.dialog.editUser.editPassword = '';
                     self.dialog.editUser.oldPassword = '';
                     self.dialog.editUser.newPassword = '';
@@ -188,6 +192,7 @@ define([
                         nickname:self.dialog.editUser.nickname,
                         mobile:self.dialog.editUser.mobile,
                         mail:self.dialog.editUser.mail,
+                        level:self.dialog.editUser.level,
                         editPassword:self.dialog.editUser.editPassword,
                         oldPassword:self.dialog.editUser.oldPassword,
                         newPassword:self.dialog.editUser.newPassword,
@@ -250,6 +255,7 @@ define([
                     self.dialog.createUser.repeat = '';
                     self.dialog.createUser.mobile = '';
                     self.dialog.createUser.mail = '';
+                    self.dialog.createUser.level = 1;
                     self.dialog.createUser.classify = '企业用户';
                     self.dialog.createUser.visible = false;
                 },
@@ -264,6 +270,7 @@ define([
                         repeat:self.dialog.createUser.repeat,
                         mobile:self.dialog.createUser.mobile,
                         mail:self.dialog.createUser.mail,
+                        level:self.dialog.createUser.level,
                         classify:self.dialog.createUser.classify,
                         companyId:self.dialog.createUser.company.id
                     };

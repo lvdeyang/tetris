@@ -6,7 +6,7 @@ import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 public class ContactsVO extends AbstractBaseVO<ContactsVO, ContactsPO>{
 
 	/** 用户id */
-	private Long userId;
+	private String userId;
 	
 	/** 用户昵称 */
 	private String userNickname;
@@ -14,11 +14,11 @@ public class ContactsVO extends AbstractBaseVO<ContactsVO, ContactsPO>{
 	/** 重命名 */
 	private String rename;
 	
-	public Long getUserId() {
+	public String getUserId() {
 		return userId;
 	}
 
-	public ContactsVO setUserId(Long userId) {
+	public ContactsVO setUserId(String userId) {
 		this.userId = userId;
 		return this;
 	}
@@ -46,8 +46,8 @@ public class ContactsVO extends AbstractBaseVO<ContactsVO, ContactsPO>{
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
-			.setUserId(userId)
-			.setUserNickname(userNickname)
+			.setUserId(entity.getContactsUserId())
+			.setUserNickname(entity.getContactsUserNickname())
 			.setRename(rename);
 		return this;
 	}

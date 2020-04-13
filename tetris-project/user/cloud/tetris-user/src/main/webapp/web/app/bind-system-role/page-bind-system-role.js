@@ -30,6 +30,8 @@ define([
         }else if(type === 'business'){
             activeId = window.BASEPATH + 'index#/page-business-user';
         }
+        
+        var returnUserHash = type==='system'?'#/page-user':'#/page-business-user';
 
         //设置标题
         commons.setTitle(pageId);
@@ -45,6 +47,7 @@ define([
                 groups: context.getProp('groups'),
                 username:username,
                 activeId:activeId,
+                returnUserHash:returnUserHash,
                 table:{
                     rows:[],
                     pageSize:50,
