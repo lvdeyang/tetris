@@ -30,6 +30,8 @@ define([
             activeId = window.BASEPATH + 'index#/page-business-role';
         }
 
+        var returnUserHash = type==='system'?'#/page-system-role':'#/page-business-role';
+        
         //设置标题
         commons.setTitle(pageId);
 
@@ -44,6 +46,7 @@ define([
                 groups: context.getProp('groups'),
                 roleName:roleName,
                 activeId:activeId,
+                returnUserHash:returnUserHash,
                 table:{
                     rows:[],
                     pageSize:50,

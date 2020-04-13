@@ -52,3 +52,6 @@
     padding: 0;
     margin: 0;
 }
+
+#page-business-user-wrapper .condition-item{display:inline-block; width:190px; margin-left:10px;}
+#page-business-user-wrapper .condition-item input{height:33px; line-height:33px;}

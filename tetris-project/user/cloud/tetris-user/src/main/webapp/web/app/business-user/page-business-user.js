@@ -48,7 +48,11 @@ define([
                     pageSize: 50,
                     pageSizes: [50, 100, 200, 400],
                     currentPage: 0,
-                    total: 0
+                    total: 0,
+                    condition:{
+                    	nickname:'',
+                    	userno:''
+                    }
                 },
                 dialog: {
                     createUser: {
@@ -98,11 +102,14 @@ define([
                 },
                 load: function (currentPage) {
                     var self = this;
-                    self.table.rows.splice(0, self.table.rows.length);
-                    ajax.post('/user/subordinate/list', {
+                    var param = {
                         currentPage:currentPage,
                         pageSize:self.table.pageSize
-                    }, function(data){
+                    };
+                    if(self.table.condition.nickname) param.nickname = self.table.condition.nickname;
+                    if(self.table.condition.userno) param.userno = self.table.condition.userno;
+                    self.table.rows.splice(0, self.table.rows.length);
+                    ajax.post('/user/find/by/company/id/and/condition', param, function(data){
                         var total = data.total;
                         var rows = data.rows;
                         if(rows && rows.length>0){

@@ -19,6 +19,10 @@
             <el-button v-if="importInfo.status" size="small" disabled><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;正在处理第{{importInfo.currentUser}}条数据，总共{{importInfo.totalUsers}}</el-button>
             <el-button v-else size="small" @click="handleImport"><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;导入数据(已导入{{importInfo.importTimes}}次)</el-button>
 
+			<div class="condition-item"><el-input v-model="table.condition.nickname" placeholder="用户昵称过滤" clearable size="small"></el-input></div>
+			<div class="condition-item"><el-input v-model="table.condition.userno" placeholder="用户号码过滤" clearable size="small"></el-input></div>
+			<el-button type="primary" size="small" style="margin-left:10px;" @click="load(1)">查询</el-button>
+
             <div class="div_user_list">
                 <el-scrollbar style="height:100%;">
                     <el-table
