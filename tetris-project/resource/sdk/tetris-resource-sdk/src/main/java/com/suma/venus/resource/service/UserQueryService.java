@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.EncoderBO;
@@ -26,7 +27,9 @@ import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
+import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.business.role.BusinessRoleQuery;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -64,6 +67,9 @@ public class UserQueryService {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private WorkNodeService workNodeService;
 	
 	/**
 	 * 当前用户<br/>
@@ -661,6 +667,77 @@ public class UserQueryService {
 		
 		return roles.get(0);
 		
+	}
+	
+	/**
+	 * 批量给用户的播放器和编码器设置接入层<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 下午4:13:16
+	 * @param List<Long> userIds 用户ids
+	 */
+	public void setUserLayer(List<Long> userIds) throws Exception{
+		
+		List<WorkNodePO> layers = workNodeService.findByType(NodeType.ACCESS_JV210);
+		if(layers == null || layers.size() <= 0) return;
+		
+		List<BundlePO> bundles = bundleDao.findByUserIdIn(userIds);
+		
+		for(Long userId: userIds){
+			List<BundlePO> userBundles = new ArrayList<BundlePO>();
+			for(BundlePO bundle: bundles){
+				if(userId.equals(bundle.getUserId()) && (bundle.getDeviceModel().equals("player") || bundle.getDeviceModel().equals("encoder"))){
+					userBundles.add(bundle);
+				}
+			}
+			
+			WorkNodePO choseNode = choseWorkNode(layers, bundles);
+			for(BundlePO bundle: userBundles){
+				if(bundle.getAccessNodeUid() == null || StringUtils.isEmpty(bundle.getAccessNodeUid())){
+					bundle.setAccessNodeUid(choseNode.getNodeUid());
+				}
+			}
+			
+		}
+		
+		bundleDao.save(bundles);
+	}
+	
+	/**
+	 * 选择接入层<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 下午4:46:42
+	 * @param List<WorkNodePO> nodes 所有接入层
+	 * @param List<BundlePO> bundles 所有设备
+	 * @return WorkNodePO 接入层信息
+	 */
+	public WorkNodePO choseWorkNode(List<WorkNodePO> nodes, List<BundlePO> bundles) throws Exception{
+		
+		WorkNodePO chose = null;
+		
+		if(nodes != null && nodes.size() > 0){
+			List<String> layerIds = new ArrayList<String>();
+			for(WorkNodePO node: nodes){
+				layerIds.add(node.getNodeUid());
+			}
+			
+			int count = 0;
+			for(WorkNodePO node: nodes){
+				int number = 0;
+				for(BundlePO bundle: bundles){
+					if(bundle.getAccessNodeUid().equals(node.getNodeUid())){
+						number ++;
+					}
+				}
+				if(number >= count){
+					chose = node;
+					count = number;
+				}
+			}
+		}
+		
+		return chose;
 	}
 	
 }

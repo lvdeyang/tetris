@@ -15,6 +15,10 @@ public interface EncoderDecoderUserMapDAO extends CommonDao<EncoderDecoderUserMa
 	
 	public List<EncoderDecoderUserMap> findByUserIdIn(Collection<Long> userIds);
 	
+	public List<EncoderDecoderUserMap> findByUserIdNotIn(Collection<Long> userIds);
+	
 	public EncoderDecoderUserMap findByUserName(String userName);
+	
+	public List<EncoderDecoderUserMap> findByEncodeBundleIdOrDecodeBundleId(String encodeBundleId, String decodeBundleId);
 	
 }

@@ -20,6 +20,7 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.bo.mq.ResourceBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
+import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
@@ -32,6 +33,7 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
@@ -96,6 +98,9 @@ public class BundleService extends CommonService<BundlePO> {
 	
 	@Autowired
 	private RolePrivilegeMapDAO rolePrivilegeMapDao;
+	
+	@Autowired
+	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
 	
 	/**
 	 * 检验设备密码<br/>
@@ -433,9 +438,9 @@ public class BundleService extends CommonService<BundlePO> {
 			List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
 			List<String> bundleIds = new ArrayList<String>();
 			
-			//自动选择player接入层
+			/*//自动选择player接入层
 			List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_JV210);
-			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
+			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);*/
 				
 			// 创建17个播放器资源
 			for (int i = 1; i <= 17; i++) {
@@ -450,9 +455,9 @@ public class BundleService extends CommonService<BundlePO> {
 				bundlePO.setBundleNum(userNo + "_" + i);
 				bundlePO.setUserId(Long.valueOf(userId));
 				
-				if(choseWorkNode != null){
+				/*if(choseWorkNode != null){
 					bundlePO.setAccessNodeUid(choseWorkNode.getNodeUid());
-				}
+				}*/
 				
 				// 默认上线
 				bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
@@ -476,9 +481,9 @@ public class BundleService extends CommonService<BundlePO> {
 			encoder.setBundleNum(userNo + "_encoder");
 			encoder.setUserId(Long.valueOf(userId));
 			
-			if(choseWorkNode != null){
+			/*if(choseWorkNode != null){
 				encoder.setAccessNodeUid(choseWorkNode.getNodeUid());
-			}
+			}*/
 			
 			// 默认上线
 			encoder.setOnlineStatus(ONLINE_STATUS.OFFLINE);
@@ -579,9 +584,9 @@ public class BundleService extends CommonService<BundlePO> {
 			List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
 			List<String> bundleIds = new ArrayList<String>();
 			
-			//自动选择player接入层
+			/*//自动选择player接入层
 			List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_JV210);
-			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
+			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);*/
 				
 			// 创建17个播放器资源
 			for (int i = 1; i <= 17; i++) {
@@ -596,9 +601,9 @@ public class BundleService extends CommonService<BundlePO> {
 				bundlePO.setBundleNum(userNo + "_" + i);
 				bundlePO.setUserId(Long.valueOf(userId));
 				
-				if(choseWorkNode != null){
+				/*if(choseWorkNode != null){
 					bundlePO.setAccessNodeUid(choseWorkNode.getNodeUid());
-				}
+				}*/
 				
 				// 默认上线
 				bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
@@ -710,6 +715,9 @@ public class BundleService extends CommonService<BundlePO> {
 		
 		List<RolePrivilegeMap> roleMaps = rolePrivilegeMapDao.findByPrivilegeIdIn(privilegeIds);
 		
+		//删除用户绑定编解码器关系
+		List<EncoderDecoderUserMap> bundleMaps = encoderDecoderUserMapDao.findByUserIdNotIn(userIds);
+		
 		bundleDao.delete(needRemoveBundles);
 		channelSchemeDao.delete(needRemoveChannels);
 		screenSchemeDao.delete(needRemoveScreens);
@@ -717,6 +725,7 @@ public class BundleService extends CommonService<BundlePO> {
 		folderUserMapDao.delete(maps);
 		privilegeDao.delete(privileges);
 		rolePrivilegeMapDao.delete(roleMaps);
+		encoderDecoderUserMapDao.delete(bundleMaps);
 		
 	}
 	
@@ -773,6 +782,9 @@ public class BundleService extends CommonService<BundlePO> {
 		
 		List<RolePrivilegeMap> roleMaps = rolePrivilegeMapDao.findByPrivilegeIdIn(privilegeIds);
 		
+		//删除用户绑定编解码器
+		List<EncoderDecoderUserMap> bundleMaps = encoderDecoderUserMapDao.findByUserIdIn(needRemoveUserIds);
+		
 		bundleDao.delete(needRemoveBundles);
 		channelSchemeDao.delete(needRemoveChannels);
 		screenSchemeDao.delete(needRemoveScreens);
@@ -780,6 +792,7 @@ public class BundleService extends CommonService<BundlePO> {
 		folderUserMapDao.delete(maps);
 		privilegeDao.delete(privileges);
 		rolePrivilegeMapDao.delete(roleMaps);
+		encoderDecoderUserMapDao.delete(bundleMaps);
 		
 	}
 	
