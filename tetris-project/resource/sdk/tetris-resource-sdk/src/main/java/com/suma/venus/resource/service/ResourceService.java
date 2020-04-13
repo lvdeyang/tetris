@@ -76,6 +76,7 @@ import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 /**
  * 资源层统一资源查询Service
@@ -226,6 +227,43 @@ public class ResourceService {
 		}
 		return false;
 	}
+	
+	/**
+	 * 批量判断用户对设备的权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 下午4:26:56
+	 * @param Long userId 被查询用户id
+	 * @param List<String> bundleIds 被检测设备id列表
+	 * @param BUSINESS_OPR_TYPE businessType 业务类型
+	 * @return boolean
+	 */
+	public boolean hasPrivilegeOfBundle(Long userId, List<String> bundleIds, BUSINESS_OPR_TYPE businessType) throws Exception{
+		String suffix = null;
+		switch (businessType) {
+		case DIANBO:// 点播
+			suffix = "-w";
+			break;
+		case RECORD:// 录制
+			suffix = "-r";
+			break;
+		default:
+			return false;
+		}
+		List<String> codes = new ArrayList<String>();
+		for(String bundleId:bundleIds){
+			codes.add(new StringBufferWrapper().append(bundleId).append(suffix).toString());
+		}
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		for(String code:codes){
+			boolean hasPrivilege = false;
+			if (bo.getResourceCodes().contains(code)){
+				hasPrivilege = true;
+			}
+			if(!hasPrivilege) return false;
+		}
+		return true;
+	}
 
 	/** 根据用户id，目标用户id和业务类型判断用户对目标用户是否有权限 **/
 	public boolean hasPrivilegeOfUser(Long userId, Long dstUserId, BUSINESS_OPR_TYPE businessType) {
@@ -259,6 +297,51 @@ public class ResourceService {
 		}
 
 		return false;
+	}
+	
+	/**
+	 * 批量查询用户对用户权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 下午4:20:40
+	 * @param Long userId 被查询用户id
+	 * @param List<Long> dstUserIds 被检测用户id列表
+	 * @param BUSINESS_OPR_TYPE businessType 业务类型
+	 * @return boolean
+	 */
+	public boolean hasPrivilegeOfUser(Long userId, List<Long> dstUserIds, BUSINESS_OPR_TYPE businessType) throws Exception{
+		List<UserBO> dstUserBOs = userQueryService.queryUsersByUserIds(dstUserIds, null);
+		if(dstUserBOs==null || dstUserBOs.size()<=0) return false;
+		String suffix = null;
+		switch (businessType) {
+		case DIANBO:// 点播
+			suffix = "-w";
+			break;
+		case RECORD:// 录制
+			suffix = "-r";
+			break;
+		case CALL:// 呼叫
+			suffix = "-hj";
+			break;
+		case ZK:// 指挥
+			suffix = "-zk";
+			break;
+		default:
+			return false;
+		}
+		List<String> codes = new ArrayList<String>();
+		for(UserBO dstUser:dstUserBOs){
+			codes.add(new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString());
+		}
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		for(String code:codes){
+			boolean hasPrivilege = false;
+			if (bo.getResourceCodes().contains(code)){
+				hasPrivilege = true;
+			}
+			if(!hasPrivilege) return false;
+		}
+		return true;
 	}
 
 	/** 通过userId查询bundles */
