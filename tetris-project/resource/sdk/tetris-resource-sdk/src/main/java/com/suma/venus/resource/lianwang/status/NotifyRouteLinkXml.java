@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.suma.venus.resource.pojo.BundlePO;
 
-@XmlRootElement(name="Notify")
+@XmlRootElement(name="notify")
 public class NotifyRouteLinkXml {
 	
 	private String commandname = "syncroutelink";

@@ -1,53 +1,20 @@
 package com.sumavision.bvc.device.command.cascade.util;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.service.ResourceService;
-import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
-import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
-import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
-import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
-import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
-import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
-import com.sumavision.bvc.command.group.enumeration.GroupType;
-import com.sumavision.bvc.command.group.enumeration.MemberStatus;
-import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
-import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
-import com.sumavision.bvc.command.group.record.CommandGroupRecordFragmentPO;
-import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
-import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
-import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
-import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
-import com.sumavision.bvc.config.ServerProps;
-import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
-import com.sumavision.bvc.system.enumeration.GearsLevel;
-import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
-
-import freemarker.template.Template;
 
 @Service
 public class CommandCascadeUtil {
@@ -55,17 +22,8 @@ public class CommandCascadeUtil {
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
 	
-	@Autowired
-	private CommandGroupDAO commandGroupDao;
-	
-	@Autowired
-	private ResourceService resourceService;
-	
-	@Autowired
-	private CommandCommonServiceImpl commandCommonServiceImpl;
-	
 	public GroupBO createCommand(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
@@ -80,7 +38,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO deleteCommand(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
@@ -89,7 +47,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO startCommand(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		GroupBO groupBO = new GroupBO()
@@ -103,7 +61,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO stopCommand(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		GroupBO groupBO = new GroupBO()
@@ -115,7 +73,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO pauseCommand(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		GroupBO groupBO = new GroupBO()
@@ -127,7 +85,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO resumeCommand(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		GroupBO groupBO = new GroupBO()
@@ -139,7 +97,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO joinCommand(CommandGroupPO group, List<CommandGroupMemberPO> acceptMembers){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers);
@@ -154,7 +112,7 @@ public class CommandCascadeUtil {
 	
 	/** 按协议，非批量 */
 	public GroupBO exitCommand(CommandGroupPO group, CommandGroupMemberPO removeMember){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
@@ -168,7 +126,7 @@ public class CommandCascadeUtil {
 	
 	/** 按协议，非批量 */
 	public GroupBO kikoutCommand(CommandGroupPO group, CommandGroupMemberPO removeMember){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
@@ -181,7 +139,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO startCooperation(CommandGroupPO group, List<CommandGroupMemberPO> cooperateMembers){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 
@@ -200,7 +158,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO stopCooperation(CommandGroupPO group, List<CommandGroupMemberPO> cooperateMembers){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 
@@ -220,7 +178,7 @@ public class CommandCascadeUtil {
 	
 	/** 还需要支持转发用户 */
 	public GroupBO startCommandDeviceForward(CommandGroupPO group, List<BundlePO> bundlePOs, List<CommandGroupMemberPO> dstMembers) throws Exception{
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		
@@ -233,7 +191,7 @@ public class CommandCascadeUtil {
 		//源号码列表
 		List<String> medialist = new ArrayList<String>();
 		for(BundlePO bundlePO : bundlePOs){
-			medialist.add(bundlePO.getBundleNum());
+			medialist.add(bundlePO.getUsername());
 		}
 		
 		GroupBO groupBO = new GroupBO()
@@ -261,7 +219,7 @@ public class CommandCascadeUtil {
 	 * @throws Exception
 	 */
 	public GroupBO stopCommandDeviceForward(CommandGroupPO group, List<BundlePO> bundlePOs, List<CommandGroupMemberPO> dstMembers) throws Exception{
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		
@@ -274,7 +232,7 @@ public class CommandCascadeUtil {
 		//源号码列表
 		List<String> medialist = new ArrayList<String>();
 		for(BundlePO bundlePO : bundlePOs){
-			medialist.add(bundlePO.getBundleNum());
+			medialist.add(bundlePO.getUsername());
 		}
 		
 		GroupBO groupBO = new GroupBO()
@@ -288,7 +246,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO createMeeting(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
@@ -303,7 +261,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO deleteMeeting(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
@@ -312,7 +270,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO startMeeting(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		GroupBO groupBO = new GroupBO()
@@ -326,7 +284,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO stopMeeting(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		GroupBO groupBO = new GroupBO()
@@ -338,7 +296,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO pauseMeeting(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		GroupBO groupBO = new GroupBO()
@@ -350,7 +308,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO resumeMeeting(CommandGroupPO group){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		GroupBO groupBO = new GroupBO()
@@ -362,7 +320,7 @@ public class CommandCascadeUtil {
 	}
 	
 	public GroupBO joinMeeting(CommandGroupPO group, List<CommandGroupMemberPO> acceptMembers){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers);
@@ -377,7 +335,7 @@ public class CommandCascadeUtil {
 	
 	/** 按协议，非批量 */
 	public GroupBO exitMeeting(CommandGroupPO group, CommandGroupMemberPO removeMember){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
@@ -391,7 +349,7 @@ public class CommandCascadeUtil {
 	
 	/** 按协议，非批量 */
 	public GroupBO kikoutMeeting(CommandGroupPO group, CommandGroupMemberPO removeMember){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
@@ -405,7 +363,7 @@ public class CommandCascadeUtil {
 	
 	/** 还需要支持转发用户 */
 	public GroupBO startMeetingDeviceForward(CommandGroupPO group, List<BundlePO> bundlePOs, List<CommandGroupMemberPO> dstMembers) throws Exception{
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		
@@ -418,7 +376,7 @@ public class CommandCascadeUtil {
 		//源号码列表
 		List<String> medialist = new ArrayList<String>();
 		for(BundlePO bundlePO : bundlePOs){
-			medialist.add(bundlePO.getBundleNum());
+			medialist.add(bundlePO.getUsername());
 		}
 		
 		GroupBO groupBO = new GroupBO()
@@ -446,7 +404,7 @@ public class CommandCascadeUtil {
 	 * @throws Exception
 	 */
 	public GroupBO stopMeetingDeviceForward(CommandGroupPO group, List<BundlePO> bundlePOs, List<CommandGroupMemberPO> dstMembers) throws Exception{
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		
@@ -459,7 +417,7 @@ public class CommandCascadeUtil {
 		//源号码列表
 		List<String> medialist = new ArrayList<String>();
 		for(BundlePO bundlePO : bundlePOs){
-			medialist.add(bundlePO.getBundleNum());
+			medialist.add(bundlePO.getUsername());
 		}
 		
 		GroupBO groupBO = new GroupBO()
@@ -474,7 +432,7 @@ public class CommandCascadeUtil {
 
 	/** 指定发言，单个 */
 	public GroupBO speakerSetByChairman(CommandGroupPO group, CommandGroupMemberPO speakMember){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		
@@ -489,7 +447,7 @@ public class CommandCascadeUtil {
 	
 	/** 取消发言。主席/成员取消都用这个？ */
 	public GroupBO speakerSetCancel(String operateUserCode, CommandGroupPO group, CommandGroupMemberPO speakMember){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 //		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		
@@ -504,7 +462,7 @@ public class CommandCascadeUtil {
 	
 	/** 申请发言 */
 	public GroupBO speakerSetRequest(CommandGroupPO group, CommandGroupMemberPO speakMember){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 //		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		
@@ -529,7 +487,7 @@ public class CommandCascadeUtil {
 	 * @return
 	 */
 	public GroupBO speakerSetResponse(CommandGroupPO group, CommandGroupMemberPO speakMember, String code){
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 //		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		

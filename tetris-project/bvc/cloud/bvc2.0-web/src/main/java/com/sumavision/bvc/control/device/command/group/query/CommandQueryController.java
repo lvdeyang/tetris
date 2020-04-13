@@ -200,7 +200,7 @@ public class CommandQueryController {
 				
 //		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
 		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
@@ -268,7 +268,7 @@ public class CommandQueryController {
 				
 //		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
 		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		
 		JSONObject info = new JSONObject();
 		info.put("id", group.getId().toString());

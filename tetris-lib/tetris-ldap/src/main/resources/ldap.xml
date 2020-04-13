@@ -17,7 +17,7 @@
  	<context:component-scan base-package="com.suma.application.ldap.*"></context:component-scan>
  
 	<bean id="contextSourceTarget" class="org.springframework.ldap.core.support.LdapContextSource">
-	    <property name="url" value="ldap://10.10.40.116:389" />
+	    <property name="url" value="ldap://192.165.56.15:389" />
 	    <property name="base" value="dc=resource" />
 	    <property name="userDn" value="cn=Manager,dc=resource" />
 	    <property name="password" value="sumavisionrd" />
@@ -41,7 +41,7 @@
 	
 	<bean id="contextSource1"
 	    class="org.springframework.ldap.transaction.compensating.manager.TransactionAwareContextSourceProxy">
-	    <constructor-arg ref="contextSourceTarget" />
+	    <constructor-arg ref="contextSourceTarget1" />
 	</bean>
 	
 	<bean id="ldapTemplate1" class="org.springframework.ldap.core.LdapTemplate">

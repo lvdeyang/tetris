@@ -62,10 +62,14 @@ public class ProtocolParser {
 	 */
 	private String parseRootNodeName(String xml){
 		String rootNodeName = null;
-		if(xml.startsWith("<control")){
+		if(xml.indexOf("<control") >= 0){
 			rootNodeName = "control";
-		}else if(xml.startsWith("<notify")){
+		}else if(xml.indexOf("<notify") >= 0){
 			rootNodeName = "notify";
+		}else if(xml.indexOf("<Control") >= 0){
+			rootNodeName = "Control";
+		}else if(xml.indexOf("<Notify") >= 0){
+			rootNodeName = "Notify";
 		}
 		return rootNodeName;
 	}
@@ -82,78 +86,81 @@ public class ProtocolParser {
 		String rootNodeName = parseRootNodeName(xml);
 		XMLReader reader = new XMLReader(xml);
 		String commandname = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".commandname").toString());
-		String operation = reader.readString(new StringBufferWrapper().append(rootNodeName).append("operation").toString());
-		if("group".equals(commandname) && "create".equals(operation)){
-			String biztype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.biztype").toString());
-			if("cmd".equals(biztype)){
-				createCommand(reader, rootNodeName, srcNo);
-			}else if("cnf".equals(biztype)){
-				createConference(reader, rootNodeName, srcNo);
-			}
-		}else if("group".equals(commandname) && "destroy".equals(operation)){
-			deleteCommand(reader, rootNodeName, srcNo);
-		}else if("bizcmd".equals(commandname) && "start".equals(operation)){
-			startCommand(reader, rootNodeName, srcNo);
-		}else if("bizcmd".equals(commandname) && "stop".equals(operation)){
-			stopCommand(reader, rootNodeName, srcNo);
-		}else if("bizcmd".equals(commandname) && "pause".equals(operation)){
-			pauseCommand(reader, rootNodeName, srcNo);
-		}else if("bizcmd".equals(commandname) && "resume".equals(operation)){
-			resumeCommand(reader, rootNodeName, srcNo);
-		}else if("bizcmd".equals(commandname) && "maddinc".equals(operation)){
-			joinCommand(reader, rootNodeName, srcNo);
-		}else if("bizcmd".equals(commandname) && "mquit".equals(operation)){
-			String quittype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".quittype").toString());
-			if("r".equals(quittype)){
-				exitCommand(reader, rootNodeName, srcNo);
-			}else if("p".equals(quittype)){
-				kikoutCommand(reader, rootNodeName, srcNo);
-			}
-		}else if("bizcmd".equals(commandname) && "corpstart".equals(operation)){
-			cooperationStart(reader, rootNodeName, srcNo);
-		}else if("bizcmd".equals(commandname) && "corpstop".equals(operation)){
-			cooperationStop(reader, rootNodeName, srcNo);
-		}else if("bizcmd".equals(commandname) && "pullmediastart".equals(operation)){
-			startDeviceForwardInCommand(reader, rootNodeName, srcNo);
-		}else if("bizcmd".equals(commandname) && "pullmediastop".equals(operation)){
-			stopDeviceForwardInCommand(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "start".equals(operation)){
-			startConference(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "stop".equals(operation)){
-			stopConference(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "pause".equals(operation)){
-			pauseConference(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "resume".equals(operation)){
-			resumeConference(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "maddinc".equals(operation)){
-			joinConference(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "mquit".equals(operation)){
-			String quittype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".quittype").toString());
-			if("r".equals(quittype)){
-				exitConference(reader, rootNodeName, srcNo);
-			}else if("p".equals(quittype)){
-				kikoutConference(reader, rootNodeName, srcNo);
-			}
-		}else if("bizcnf".equals(commandname) && "pullmediastart".equals(operation)){
-			startDeviceForwardInConference(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "pullmediastop".equals(operation)){
-			stopDeviceForwardInConference(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "spkset".equals(operation)){
-			String spktype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".spktype").toString());
-			if("p".equals(spktype)){
-				speakerSetByChairman(reader, rootNodeName, srcNo);
-			}else if("r".equals(spktype)){
-				speakerSetByMember(reader, rootNodeName, srcNo);
-			}
-		}else if("bizcnf".equals(commandname) && "spkcal".equals(operation)){
-			speakerCancel(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "spkreq".equals(operation)){
-			speakerSetRequest(reader, rootNodeName, srcNo);
-		}else if("bizcnf".equals(commandname) && "spkres".equals(operation)){
-			speakerSetResponse(reader, rootNodeName, srcNo);
-		}else if("syncinfo".equals(commandname) || "syncroutelink".equals(commandname) || "authnotify".equals(commandname)){
+		if("syncinfo".equals(commandname) || "syncroutelink".equals(commandname) || "authnotify".equals(commandname)){
 			resourceRemoteService.notifyXml(commandname, xml);
+		}else{
+			String operation = reader.readString(new StringBufferWrapper().append(rootNodeName).append("operation").toString());
+			if("group".equals(commandname) && "create".equals(operation)){
+				String biztype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.biztype").toString());
+				if("cmd".equals(biztype)){
+					createCommand(reader, rootNodeName, srcNo);
+				}else if("cnf".equals(biztype)){
+					createConference(reader, rootNodeName, srcNo);
+				}
+			}else if("group".equals(commandname) && "destroy".equals(operation)){
+				deleteCommand(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "start".equals(operation)){
+				startCommand(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "stop".equals(operation)){
+				stopCommand(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "pause".equals(operation)){
+				pauseCommand(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "resume".equals(operation)){
+				resumeCommand(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "maddinc".equals(operation)){
+				joinCommand(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "mquit".equals(operation)){
+				String quittype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".quittype").toString());
+				if("r".equals(quittype)){
+					exitCommand(reader, rootNodeName, srcNo);
+				}else if("p".equals(quittype)){
+					kikoutCommand(reader, rootNodeName, srcNo);
+				}
+			}else if("bizcmd".equals(commandname) && "corpstart".equals(operation)){
+				cooperationStart(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "corpstop".equals(operation)){
+				cooperationStop(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "pullmediastart".equals(operation)){
+				startDeviceForwardInCommand(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "pullmediastop".equals(operation)){
+				stopDeviceForwardInCommand(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "start".equals(operation)){
+				startConference(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "stop".equals(operation)){
+				stopConference(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "pause".equals(operation)){
+				pauseConference(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "resume".equals(operation)){
+				resumeConference(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "maddinc".equals(operation)){
+				joinConference(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "mquit".equals(operation)){
+				String quittype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".quittype").toString());
+				if("r".equals(quittype)){
+					exitConference(reader, rootNodeName, srcNo);
+				}else if("p".equals(quittype)){
+					kikoutConference(reader, rootNodeName, srcNo);
+				}
+			}else if("bizcnf".equals(commandname) && "pullmediastart".equals(operation)){
+				startDeviceForwardInConference(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "pullmediastop".equals(operation)){
+				stopDeviceForwardInConference(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "spkset".equals(operation)){
+				String spktype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".spktype").toString());
+				if("p".equals(spktype)){
+					speakerSetByChairman(reader, rootNodeName, srcNo);
+				}else if("r".equals(spktype)){
+					speakerSetByMember(reader, rootNodeName, srcNo);
+				}
+			}else if("bizcnf".equals(commandname) && "spkcal".equals(operation)){
+				speakerCancel(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "spkreq".equals(operation)){
+				speakerSetRequest(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "spkres".equals(operation)){
+				speakerSetResponse(reader, rootNodeName, srcNo);
+			}
 		}
+		
 	}
 	
 	/**************

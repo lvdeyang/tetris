@@ -84,7 +84,7 @@ public class CommandFightTimeServiceImpl {
 				message.put("fightTime", DateUtil.format(fightTime, DateUtil.dateTimePattern));
 				
 				//给所有进入的成员推送，除了主席
-				Set<CommandGroupMemberPO> members = group.getMembers();
+				List<CommandGroupMemberPO> members = group.getMembers();
 				CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 				if(group.getType().equals(GroupType.SECRET)){
 					for(CommandGroupMemberPO member : members){

@@ -56,7 +56,7 @@ public class TreeUtils {
 		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
 		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		
 		//查询所有非点播的文件夹
 		List<FolderPO> totalFolders = resourceService.queryAllFolders();
@@ -98,7 +98,7 @@ public class TreeUtils {
 	private List<FolderBO> filterUsefulFolders(
 			List<FolderBO> allFolders,
 			List<BundleBO> bundles,
-			Set<CommandGroupMemberPO> users){
+			List<CommandGroupMemberPO> users){
 		
 		Set<FolderBO> usefulFolders = new HashSet<FolderBO>();
 		Set<Long> ids = new HashSet<Long>();
@@ -152,7 +152,7 @@ public class TreeUtils {
 			List<FolderBO> folders, 
 			List<BundleBO> bundles, 
 			List<ChannelBO> channels,
-			Set<CommandGroupMemberPO> members,
+			List<CommandGroupMemberPO> members,
 			List<UserBO> userBOs){
 		
 		if(userBOs == null) userBOs = new ArrayList<UserBO>();

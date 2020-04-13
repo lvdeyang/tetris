@@ -1,10 +1,7 @@
 package com.sumavision.bvc.device.command.basic.remind;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,15 +10,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
-import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
-import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
-import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
-import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -77,8 +70,8 @@ public class CommandRemindServiceImpl {
 			JSONObject chairSplit = new JSONObject();
 			group.setStatus(GroupStatus.REMIND);
 			commandGroupDao.save(group);
-			Set<CommandGroupMemberPO> members = group.getMembers();
-			Set<CommandGroupForwardPO> forwards = group.getForwards();
+			List<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupForwardPO> forwards = group.getForwards();
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			
 			//给主席找播放器，使用播放器中的第1个
@@ -147,8 +140,8 @@ public class CommandRemindServiceImpl {
 			JSONObject chairSplit = new JSONObject();
 			group.setStatus(GroupStatus.START);
 			commandGroupDao.save(group);
-			Set<CommandGroupMemberPO> members = group.getMembers();
-			Set<CommandGroupForwardPO> forwards = group.getForwards();
+			List<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupForwardPO> forwards = group.getForwards();
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			
 			//给主席找播放器，使用播放器中的第1个

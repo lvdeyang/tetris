@@ -2,8 +2,6 @@ package com.sumavision.bvc.command.group.basic;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -82,12 +80,12 @@ public class CommandGroupPO extends AbstractBasePO {
 	private GearsLevel currentGearLevel;
 	
 	/** 关联成员 */
-	private Set<CommandGroupMemberPO> members;
+	private List<CommandGroupMemberPO> members;
 	
 	/** 成员、议程配置、角色 通过各自PO中的groupId与group关联 */
 	
 	/** 关联转发 */
-	private Set<CommandGroupForwardPO> forwards;
+	private List<CommandGroupForwardPO> forwards;
 	
 	/** 关联转发点播 */
 	private List<CommandGroupForwardDemandPO> forwardDemands;
@@ -234,20 +232,20 @@ public class CommandGroupPO extends AbstractBasePO {
 	}
 	
 	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	public Set<CommandGroupMemberPO> getMembers() {
+	public List<CommandGroupMemberPO> getMembers() {
 		return members;
 	}
 
-	public void setMembers(Set<CommandGroupMemberPO> members) {
+	public void setMembers(List<CommandGroupMemberPO> members) {
 		this.members = members;
 	}
 	
 	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	public Set<CommandGroupForwardPO> getForwards() {
+	public List<CommandGroupForwardPO> getForwards() {
 		return forwards;
 	}
 
-	public void setForwards(Set<CommandGroupForwardPO> forwards) {
+	public void setForwards(List<CommandGroupForwardPO> forwards) {
 		this.forwards = forwards;
 	}
 	
