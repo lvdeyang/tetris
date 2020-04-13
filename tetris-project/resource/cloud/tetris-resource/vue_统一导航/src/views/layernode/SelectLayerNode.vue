@@ -98,6 +98,9 @@ export default{
             },{
                 value:'ACCESS_VODPROXY',
                 label:'点播代理服务设备'
+            },{
+                value:'ACCESS_LIANWANG',
+                label:'联网接入'
             }],
             filters:{
                 type:'',
