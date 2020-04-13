@@ -22,7 +22,7 @@ define([
                 switchStatus1: true, //树1的显示状态
                 switchStatus2: false, //树2的显示状态
                 switchStatus3: false, //树3的显示状态
-                people: false, //会议人员列表
+                differentiate: 1, //区分是指挥还是会议，1：指挥，2：会议
                 buttons: {
                     //过滤在线
                     filterOnline: true,
@@ -131,79 +131,71 @@ define([
                     entered: [],
                     remindIds: []
                 },
+                //会议组
+                meet: {
+                    currentId: '', //当前会议的id
+                    current: '',
+                    entered: [],
+                    remindIds: []
+                },
+
                 //给指挥起名字
+                dialogTitle: '',
                 dialog: {
                     resetName: {
                         visible: false,
                         name: ''
                     }
                 },
+                dialogVisible: false,
+                dialogInput: '',
                 //窗口高度
                 firstMenuHeight: '',
                 //滚动外容器的高度，动态的
                 contentStyleObj: {
                     height: ''
-                },
-                //会议列表相关
-                filterText: '', //搜索
-                myCommand: {
-                    totalData: [],
-                    filterData: []
-                },
-                joinCommand: {
-                    totalData: [],
-                    filterData: []
-                },
-                meetName: '', //会议名称
+                }
             }
         },
         methods: {
             //顶部切换标题点击事件
             toggleMenu1: function () {
+                var self=this;
+                this.refreshCommand(null,function () {
+                    self.currentGroupChange(self.group.currentId);
+                });
                 $('.triggerLi1').addClass('focusLight');
                 $('.triggerLi2').removeClass('focusLight');
-                $('.triggerLi3').removeClass('focusLight');
-                $('.highLight').css('left', '16px');
+                $('.highLight').css('left', '7px');
                 this.switchStatus1 = true;
                 this.switchStatus2 = false;
                 this.switchStatus3 = false;
-                this.people = false;
-                //进会后在切回来，group.current没变，还是会议的值，所以在从刷一次
-                this.currentGroupChange(this.group.currentId)
+                this.differentiate = 1;
             },
             toggleMenu2: function () {
                 var self = this;
+                self.refreshCommand('meeting',function () {
+                    self.currentGroupChange(self.meet.currentId);
+                    self.refreshEnteredGroups();
+                });
                 $('.triggerLi1').removeClass('focusLight');
                 $('.triggerLi2').addClass('focusLight');
-                $('.triggerLi3').removeClass('focusLight');
-                $('.highLight').css('left', '113px');
-                this.switchStatus1 = false;
-                this.switchStatus2 = true;
-                this.switchStatus3 = false;
-                this.people = false;
-                self.refreshCommand();
-                //切换时要重新获取高度
-                this.$nextTick(function () {
-                    //在下次 DOM 更新循环结束之后执行这个回调。在修改数据之后立即使用这个方法，获取更新后的DOM.
-                    self.footerHeight = window.getComputedStyle(self.$refs.footer).height;
-                    self.firstMenuHeight = window.getComputedStyle(self.$refs.secondMenu).height;
-                    self.contentStyleObj.height = (parseInt(self.firstMenuHeight) - parseInt(self.footerHeight)) + 'px';
-                    $('.scrollTab').css('height', self.contentStyleObj.height);
-                })
-            },
-            toggleMenu3: function () {
-                $('.triggerLi1').removeClass('focusLight');
-                $('.triggerLi2').removeClass('focusLight');
-                $('.triggerLi3').addClass('focusLight');
-                $('.highLight').css('left', '225px');
+                $('.highLight').css('left', '167px');
                 this.switchStatus1 = false;
                 this.switchStatus2 = false;
                 this.switchStatus3 = true;
-                this.people = false;
-                this.refreshCommand("meeting");
+                this.differentiate = 2;
+            },
+            //从头部2个tab切到左侧的时候
+            handleClick: function (tab) {
+                if (tab.index == 0) {
+                    this.switchStatus1 = false;
+                    this.switchStatus2 = true;
+                    this.switchStatus3 = false;
+                }
             },
 
-            //-----第一个树形菜单的复选框的勾选事件 start -----
+            //-----第二部分 菜单 复选框的勾选事件 start -----
             onUserCheckChange: function (data) {
                 var self = this;
                 for (var i = 0; i < self.institution.select.length; i++) {
@@ -286,7 +278,7 @@ define([
                     self.buttons.removeCommand = true;
                 }
             },
-            //-----第一个树形菜单的复选框的勾选事件 end -----
+            //-----第二部分 菜单 复选框的勾选事件 end -----
 
             //获取组织结构的数据以及刷新对应按钮
             refreshInstitution: function () {
@@ -400,67 +392,24 @@ define([
                 self.buttons.addCommand = false;
                 self.buttons.removeCommand = false;
             },
-            //获取指挥列表的数据以及刷新对应按钮，type取值为meeting/command，如果为空则相当于command
-            refreshCommand: function (type) {
+            //获取指挥/会议列表的数据，type取值为meeting/command，如果为空则相当于command
+            refreshCommand: function (type,callback) {
                 var self = this;
                 self.command.data.splice(0, self.command.data.length);
-                //先清空
-                self.myCommand.totalData = [];
-                self.myCommand.filterData = [];
-                self.joinCommand.totalData = [];
-                self.joinCommand.filterData = [];
                 ajax.post('/command/query/list', {type: type}, function (data) {
                     if (data && data.length > 0) {
                         var commands = data[0].children;
-                        var joinCommand = {
-                            icon: 'icon-folder-close',
-                            id: '-5',
-                            key: 'FOLDER@@-5',
-                            name: '可参加的指挥',
-                            type: 'FOLDER',
-                            children: []
-                        };
-                        var myCommand = {
-                            icon: 'icon-folder-close',
-                            id: '-6',
-                            key: 'FOLDER@@-6',
-                            name: '我创建的指挥',
-                            type: 'FOLDER',
-                            children: []
-                        };
                         if (commands && commands.length > 0) {
                             for (var i = 0; i < commands.length; i++) {
-                                var creator = $.parseJSON(commands[i].param).creator;
-                                if (creator == self.user.id) {
-                                    myCommand.children.push(commands[i]);
-                                    //我的会议
-                                    self.myCommand.totalData.push(commands[i]);
-                                    self.myCommand.filterData.push(commands[i]);
-                                } else {
-                                    joinCommand.children.push(commands[i]);
-                                    //我加入的会议
-                                    self.joinCommand.totalData.push(commands[i]);
-                                    self.joinCommand.filterData.push(commands[i]);
-                                }
+                                self.command.data.push(commands[i]);
                             }
                         }
-                        self.command.data.push(joinCommand);
-                        self.command.data.push(myCommand);
+                        if(typeof callback =='function'){
+                            callback();
+                        }
                     }
                 });
             },
-            refreshCommandButtonAction: function () {
-                var self = this;
-                self.buttons.filterOnline = false;
-                self.buttons.filterOffline = false;
-                self.buttons.batchCall = false;
-                self.buttons.batchVod = false;
-                self.buttons.batchIntercom = false;
-                self.buttons.enterCommand = true;
-                self.buttons.addCommand = false;
-                self.buttons.removeCommand = true;
-            },
-
 
             // --------点击呼出出菜单-----
             handleContextMenuClose: function () {
@@ -608,17 +557,33 @@ define([
                 if (!self.contextMenu.vod) {
                     return;
                 }
-                ajax.post('/command/basic/vod/member/start', {
-                    id: self.group.current.id,
-                    userId: self.dialog.resetName.commandId
-                }, function (data) {
-                    self.group.current.status = 'start';
-                    var splits = data.splits;
-                    if (splits && splits.length > 0) {
-                        self.qt.invoke('groupMembers', $.toJSON(splits));
-                    }
-                    self.handleContextMenuClose();
-                });
+                if (this.differentiate == 1) {
+                    ajax.post('/command/basic/vod/member/start', {
+                        id: self.group.current.id,
+                        userId: self.dialog.resetName.commandId
+                    }, function (data) {
+                        self.group.current.status = 'start';
+                        var splits = data.splits;
+                        if (splits && splits.length > 0) {
+                            self.qt.invoke('groupMembers', $.toJSON(splits));
+                        }
+                        self.handleContextMenuClose();
+                    });
+                } else {
+                    ajax.post('/command/basic/vod/member/start', {
+                        id: self.meet.current.id,
+                        userId: self.dialog.resetName.commandId
+                    }, function (data) {
+                        self.meet.current.status = 'start';
+                        var splits = data.splits;
+                        if (splits && splits.length > 0) {
+                            self.qt.invoke('groupMembers', $.toJSON(splits));
+                        }
+                        self.handleContextMenuClose();
+                    });
+                }
+
+
             },
             //专项指挥
             secretCommand: function () {
@@ -680,11 +645,9 @@ define([
                 }, {width: 700, height: 500});
                 self.contextMenu.visible = false;
             },
-
             //------弹出的菜单上的点击事件 end -----
 
-
-            //进入指挥
+            //点击 同意 进入指挥/会议
             enterCommand: function (commandIds, type) {
                 var self = this;
                 ajax.post('/command/basic/enter', {ids: $.toJSON(commandIds)}, function (data) {
@@ -692,100 +655,157 @@ define([
                         var playerSettings = [];
                         for (var i = 0; i < data.length; i++) {
                             var finded = false;
-                            for (var j = 0; j < self.group.entered.length; j++) {
-                                if (self.group.entered[j].id == data[i].id && self.group.entered[j].type === 'command') {
-                                    finded = true;
-                                    break;
+                            if (type == 'meet') {
+                                for (var j = 0; j < self.meet.entered.length; j++) {
+                                    if (self.meet.entered[j].id == data[i].id && self.meet.entered[j].type === 'command') {
+                                        finded = true;
+                                        break;
+                                    }
                                 }
-                            }
-                            if (!finded) {
-                                self.group.entered.push({
-                                    id: data[i].id,
-                                    name: data[i].name,
-                                    creator: data.creator,
-                                    type: 'command'
-                                });
-                            }
-                            if (i === 0 && !self.group.current) {
-                                self.group.currentId = data[i].id;
-                                self.group.current = data[i];
-                                self.currentGroupChange(self.group.currentId);
+                                if (!finded) {
+                                    self.meet.entered.push({
+                                        id: data[i].id,
+                                        name: data[i].name,
+                                        creator: data.creator,
+                                        type: 'command'
+                                    });
+                                }
+                                if (i === 0 && !self.meet.current) {
+                                    //类型一样，渲染的时候才会显示文字，而不是id
+                                    self.meet.currentId = data[i].id.toString();
+                                    self.meet.current = data[i];
+                                    self.currentGroupChange(self.meet.currentId);
+                                }
+                            } else {
+                                for (var j = 0; j < self.group.entered.length; j++) {
+                                    if (self.group.entered[j].id == data[i].id && self.group.entered[j].type === 'command') {
+                                        finded = true;
+                                        break;
+                                    }
+                                }
+                                if (!finded) {
+                                    self.group.entered.push({
+                                        id: data[i].id,
+                                        name: data[i].name,
+                                        creator: data.creator,
+                                        type: 'command'
+                                    });
+                                }
+                                //进会时 调返回的数据，为了不影响指挥的代码
+                                if (i === 0 && !self.group.current) {
+                                    self.group.currentId = data[i].id;
+                                    self.group.current = data[i];
+                                    self.currentGroupChange(self.group.currentId);
+                                }
                             }
                             if (data[i].splits && data[i].splits.length > 0) {
                                 for (var j = 0; j < data[i].splits.length; j++) {
                                     playerSettings.push(data[i].splits[j]);
                                 }
                             }
-                        }
-                        //进会时 调返回的数据，为了不影响指挥的代码
-                        if (type === 'meet') {
-                            self.group.currentId = data[0].id;
-                            self.group.current = data[0];
-                            self.currentGroupChange(self.group.currentId);
-                            if (data[0].splits && data[0].splits.length > 0) {
-                                for (var j = 0; j < data[0].splits.length; j++) {
-                                    playerSettings.push(data[0].splits[j]);
-                                }
+                            if (playerSettings.length > 0) {
+                                self.qt.invoke('enterGroups', $.toJSON(playerSettings));
                             }
-                        }
-                        if (playerSettings.length > 0) {
-                            self.qt.invoke('enterGroups', $.toJSON(playerSettings));
                         }
                     }
                 });
             },
-            //获取指挥工作台树形菜单的数据
+
+            //获取指挥工作台树形菜单已进入的指挥数据
             refreshEnteredGroups: function () {
                 var self = this;
-                self.group.entered.splice(0, self.group.entered.length);
-                ajax.post('/command/query/entered', null, function (data) {
-                    if (data && data.length > 0) {
-                        // 把每项放到entered中
-                        data.forEach(function (item) {
-                            self.group.entered.push(item);
-                        });
-
-                        // 过滤出status为'remind'的id
-                        var remindIds = data.filter(function (item) {
-                            return item.status === 'remind';
-                        }).map(function (item) {
-                            return item.id;
-                        });
-                        // self.group.remindIds里没有这个id的话，
-                        remindIds.forEach(function (id) {
-                            if (self.group.remindIds.indexOf(id) === -1) {
-                                self.group.remindIds.push(id);
-                            }
-                        });
-                        // 如果没有默认值
-                        if (!self.group.currentId) {
-                            // 优先是开启的
-                            var defaultItem = data.find(function (item) {
-                                return item.status === 'start';
+                if(self.differentiate ===1){
+                    self.group.entered.splice(0, self.group.entered.length);
+                    ajax.post('/command/query/entered', null, function (data) {
+                        if (data && data.length > 0) {
+                            // 把每项放到entered中
+                            data.forEach(function (item) {
+                                self.group.entered.push(item);
                             });
-                            // 其次是暂停的
-                            if (!defaultItem) {
-                                defaultItem = data.find(function (item) {
-                                    return item.status === 'pause';
-                                })
-                            }
 
-                            // 最后是随便
-                            if (!defaultItem) {
-                                defaultItem = data[0];
+                            // 过滤出status为'remind'的id
+                            var remindIds = data.filter(function (item) {
+                                return item.status === 'remind';
+                            }).map(function (item) {
+                                return item.id;
+                            });
+                            // self.group.remindIds里没有这个id的话，
+                            remindIds.forEach(function (id) {
+                                if (self.group.remindIds.indexOf(id) === -1) {
+                                    self.group.remindIds.push(id);
+                                }
+                            });
+                            // 如果没有默认值
+                            if (!self.group.currentId) {
+                                // 优先是开启的
+                                var defaultItem = data.find(function (item) {
+                                    return item.status === 'start';
+                                });
+                                // 其次是暂停的
+                                if (!defaultItem) {
+                                    defaultItem = data.find(function (item) {
+                                        return item.status === 'pause';
+                                    })
+                                }
+
+                                // 最后是随便
+                                if (!defaultItem) {
+                                    defaultItem = data[0];
+                                }
+                                self.group.currentId = defaultItem.id;
+                                self.currentGroupChange(self.group.currentId);
                             }
-                            self.group.currentId = defaultItem.id;
-                            self.currentGroupChange(self.group.currentId);
                         }
-                    }
-                });
+                    });
+                }else{
+                    self.meet.entered.splice(0, self.meet.entered.length);
+                    ajax.post('/command/query/entered', {type:'meeting'}, function (data) {
+                        if (data && data.length > 0) {
+                            // 把每项放到entered中
+                            data.forEach(function (item) {
+                                self.meet.entered.push(item);
+                            });
+                            // 过滤出status为'remind'的id
+                            var remindIds = data.filter(function (item) {
+                                return item.status === 'remind';
+                            }).map(function (item) {
+                                return item.id;
+                            });
+                            // self.group.remindIds里没有这个id的话，
+                            remindIds.forEach(function (id) {
+                                if (self.meet.remindIds.indexOf(id) === -1) {
+                                    self.meet.remindIds.push(id);
+                                }
+                            });
+                            // 如果没有默认值
+                            if (!self.meet.currentId) {
+                                // 优先是开启的
+                                var defaultItem = data.find(function (item) {
+                                    return item.status === 'start';
+                                });
+                                // 其次是暂停的
+                                if (!defaultItem) {
+                                    defaultItem = data.find(function (item) {
+                                        return item.status === 'pause';
+                                    })
+                                }
+                                // 最后是随便
+                                if (!defaultItem) {
+                                    defaultItem = data[0];
+                                }
+                                self.meet.currentId = defaultItem.id;
+                                self.currentGroupChange(self.meet.currentId);
+                            }
+                        }
+                    })
+                }
             },
 
             //----------第一个树形菜单底部的按钮图标 start----------
             // 过滤在线
             filterOnline: function () {
                 var self = this;
-                if (self.currentTab == 1) {
+                if (self.currentTab == 0) {
                     self.institution.data.splice(0, self.institution.data.length);
                     ajax.post('/command/query/find/institution/tree/user/filter/1', null, function (data) {
                         if (data && data.length > 0) {
@@ -794,7 +814,7 @@ define([
                             }
                         }
                     });
-                } else if (self.currentTab == 3) {
+                } else if (self.currentTab == 1) {
                     self.device.data.splice(0, self.device.data.length);
                     ajax.post('/command/query/find/institution/tree/bundle/2/false/1', null, function (data) {
                         if (data && data.length > 0) {
@@ -808,7 +828,7 @@ define([
             //过滤离线
             filterOffline: function () {
                 var self = this;
-                if (self.currentTab == 1) {
+                if (self.currentTab == 0) {
                     self.institution.data.splice(0, self.institution.data.length);
                     ajax.post('/command/query/find/institution/tree/user/filter/2', null, function (data) {
                         if (data && data.length > 0) {
@@ -817,7 +837,7 @@ define([
                             }
                         }
                     });
-                } else if (self.currentTab == 3) {
+                } else if (self.currentTab == 1) {
                     self.device.data.splice(0, self.device.data.length);
                     ajax.post('/command/query/find/institution/tree/bundle/2/false/2', null, function (data) {
                         if (data && data.length > 0) {
@@ -846,47 +866,75 @@ define([
             // 一键点播
             vodBatch: function () {
                 var self = this;
-                if (self.currentTab == 1) {
-                    //点播用户
-                    if (self.institution.select.length <= 0) {
-                        self.qt.warning('消息提示：您还没有选中用户');
-                        return;
+                var num=null;  //指定播放器点播，返回来的是播放器的位置
+                //右键点播放器会有个框表示选中
+                self.qt.invoke('getChosenPlayer',function (e) {
+                    num=e;
+                    if (self.currentTab == 0) {
+                        //点播用户
+                        if (self.institution.select.length <= 0) {
+                            self.qt.warning('消息提示：您还没有选中用户');
+                            return;
+                        }
+                        var userIds = [];
+                        for (var i = 0; i < self.institution.select.length; i++) {
+                            userIds.push(self.institution.select[i].id);
+                        }
+                        if(num < 0){
+                            ajax.post('/command/vod/user/start/batch', {userIds: $.toJSON(userIds)}, function (data) {
+                                self.qt.invoke('vodUsers', $.toJSON(data));
+                                self.cancelChoose();
+                            });
+                        }else{ //指定播放器点播用户
+                            if(self.institution.select.length>1){
+                                self.qt.warning('只能选择一项');
+                                return;
+                            }
+                            ajax.post('/command/vod/user/start/player', {userId: userIds[0],serial:num}, function (data) {
+                                self.qt.invoke('vodUsers', $.toJSON([data]));
+                                self.cancelChoose();
+                            });
+                        }
+
+                    }else if (self.currentTab == 1) {
+                        //点播设备
+                        if (self.device.select.length <= 0) {
+                            self.qt.warning('消息提示：您还没有选中设备');
+                            return;
+                        }
+                        var deviceIds = [];
+                        for (var i = 0; i < self.device.select.length; i++) {
+                            deviceIds.push(self.device.select[i].id);
+                        }
+                        if(num < 0){
+                            ajax.post('/command/vod/device/start/batch', {deviceIds: $.toJSON(deviceIds)}, function (data) {
+                                self.qt.invoke('vodDevices', $.toJSON(data));
+                            });
+                        }else{
+                            if(self.device.select.length>1){
+                                self.qt.warning('只能选择一项');
+                                return;
+                            }
+                            ajax.post('/command/vod/device/start/player', {deviceId: deviceIds[0],serial:num}, function (data) {
+                                self.qt.invoke('vodDevices', $.toJSON([data]));
+                            });
+                        }
+
+                    } else if (self.currentTab == 2) {
+                        //点播文件
+                        if (self.file.select.length <= 0) {
+                            self.qt.warning('消息提示：您还没有选中文件');
+                            return;
+                        }
+                        var resourceFileIds = [];
+                        for (var i = 0; i < self.file.select.length; i++) {
+                            resourceFileIds.push(self.file.select[i].id);
+                        }
+                        ajax.post('/command/vod/resource/file/start/batch', {resourceFileIds: $.toJSON(resourceFileIds)}, function (data) {
+                            self.qt.invoke('vodResourceFiles', $.toJSON(data));
+                        });
                     }
-                    var userIds = [];
-                    for (var i = 0; i < self.institution.select.length; i++) {
-                        userIds.push(self.institution.select[i].id);
-                    }
-                    ajax.post('/command/vod/user/start/batch', {userIds: $.toJSON(userIds)}, function (data) {
-                        self.cancelChoose();
-                        self.qt.invoke('vodUsers', $.toJSON(data));
-                    });
-                } else if (self.currentTab == 2) {
-                    //点播文件
-                    if (self.file.select.length <= 0) {
-                        self.qt.warning('消息提示：您还没有选中文件');
-                        return;
-                    }
-                    var resourceFileIds = [];
-                    for (var i = 0; i < self.file.select.length; i++) {
-                        resourceFileIds.push(self.file.select[i].id);
-                    }
-                    ajax.post('/command/vod/resource/file/start/batch', {resourceFileIds: $.toJSON(resourceFileIds)}, function (data) {
-                        self.qt.invoke('vodResourceFiles', $.toJSON(data));
-                    });
-                } else if (self.currentTab == 3) {
-                    //点播设备
-                    if (self.device.select.length <= 0) {
-                        self.qt.warning('消息提示：您还没有选中设备');
-                        return;
-                    }
-                    var deviceIds = [];
-                    for (var i = 0; i < self.device.select.length; i++) {
-                        deviceIds.push(self.device.select[i].id);
-                    }
-                    ajax.post('/command/vod/device/start/batch', {deviceIds: $.toJSON(deviceIds)}, function (data) {
-                        self.qt.invoke('vodDevices', $.toJSON(data));
-                    });
-                }
+                });
             },
             // 一键语音通话
             voiceIntercomBatch: function () {
@@ -904,11 +952,10 @@ define([
                     self.qt.invoke('voiceIntercoms', $.toJSON(data));
                 });
             },
-            //添加指挥
-            addCommand: function () {
+            //添加指挥/会议
+            addCommand: function (type) {  //type区分是建指挥还是建会议，1：指挥，2：会议
                 var self = this;
                 if (!self.buttons.addCommand) return;
-
                 var userIds = [];
                 for (var i = 0; i < self.institution.select.length; i++) {
                     userIds.push(self.institution.select[i].id);
@@ -917,19 +964,147 @@ define([
                     self.qt.warning('您还没有选择成员呢');
                     return false;
                 }
-                self.handleResetName('new');
+                self.handleResetName('new', type);
             },
-            //进入指挥
+            //关闭给指挥起名字弹框事件
+            resetNameClose: function () {
+                var self = this;
+                self.dialog.resetName.visible = false;
+                self.dialog.resetName.name = '';
+                self.cancelChoose();
+            },
+            //打开 给指挥起名字 的对话框显示
+            handleResetName: function (type1, type2) {
+                var self = this;
+                //为了提交时区分是新建还是修改
+                self.dialog.resetName.type = type1;
+                self.dialog.resetName.createType = type2;
+                //根据不同类型标题显示不同，修改时，把原有值赋过去
+                if (type2 == 1) {
+                    self.dialogTitle = "设置指挥名称";
+                    if (type1 === 'edit') {
+                        //报错要修改的那项的名字
+                        self.dialog.resetName.name = self.group.current.name;
+                    }
+                } else {
+                    self.dialogTitle = "设置会议名称";
+                }
+                self.dialog.resetName.visible = true;
+            },
+            //给指挥起名字的添加事件
+            resetNameCommit: function () {
+                var self = this;
+                if (!self.dialog.resetName.name || !(self.dialog.resetName.name.trim())) {
+                    self.$message({
+                        type: 'error',
+                        message: '名称不能为空！'
+                    });
+                    return;
+                } else {
+                    if (self.dialog.resetName.name && self.dialog.resetName.name.length > 255) {
+                        self.qt.error('名称字数不能超过255个字符');
+                        return;
+                    }
+                }
+                var userIds = [];
+                for (var i = 0; i < self.institution.select.length; i++) {
+                    userIds.push(self.institution.select[i].id);
+                }
+                self.dialog.resetName.name.replace(/^\s*|\s*$/g, ''); //去除头尾空格
+
+                if (self.dialog.resetName.createType == 1) {
+                    if (self.dialog.resetName.type === 'new') {
+                        // 新建
+                        ajax.post('/command/basic/save', {
+                            members: $.toJSON(userIds),
+                            name: self.dialog.resetName.name.trim()
+                        }, function (data) {
+                            data.type = 'command';
+                            data.select = [];
+                            self.group.current = data;
+                            self.group.entered.push({
+                                id: data.id,
+                                name: data.name,
+                                creator: data.creator,
+                                type: 'command'
+                            });
+                            self.group.currentId = data.id;
+                            self.qt.success('创建指挥工作组成功');
+                            self.resetNameClose();
+                        });
+                    } else {
+                        //   修改
+                        ajax.post('/command/basic/modify/name', {
+                            id: self.group.currentId,
+                            name: self.dialog.resetName.name.trim()
+                        }, function () {
+                            self.qt.success('修改成功！');
+                            self.resetNameClose();
+                            self.refreshCommand();
+                        });
+                    }
+                } else {
+                    ajax.post('/command/meeting/save', {
+                        members: $.toJSON(userIds),
+                        name: self.dialog.resetName.name.trim()
+                    }, function (data) {
+                        // error代表有重名的情况
+                        if (data.status == 'error') {
+                            self.dialogVisible = true;
+                            self.dialogInput = data.errorInfo.recommendedName;
+                            return;
+                        }
+                        self.meet.current = data;
+                        self.meet.entered.push({
+                            id: data.id,
+                            name: data.name,
+                            creator: data.creator,
+                            type: 'command'
+                        });
+                        self.meet.currentId = data.id;
+                        self.dialogVisible = false;
+                        self.qt.success('创建会议成功！');
+                        self.resetNameClose();
+                    });
+                }
+            },
+            // 同意修改会议名称按钮
+            agreeEditName: function () {
+                var self = this;
+                if (!self.dialogInput || !(self.dialogInput.trim())) {
+                    self.qt.error('会议名称不能为空！');
+                    return;
+                } else {
+                    if (self.dialogInput && self.dialogInput.length > 255) {
+                        self.qt.error('会议名称字数不能超过255个字符');
+                        return;
+                    }
+                }
+
+                var userIds = [];
+                for (var i = 0; i < self.institution.select.length; i++) {
+                    userIds.push(self.institution.select[i].id);
+                }
+
+                ajax.post('/command/meeting/save', {
+                    members: $.toJSON(userIds),
+                    name: self.dialogInput.trim()
+                }, function (data) {
+                    // error代表有重名的情况
+                    if (data.status == 'error') {
+                        self.dialogVisible = true;
+                        self.dialogInput = data.errorInfo.recommendedName;
+                        return;
+                    }
+                    self.dialog.resetName.visible = false;
+                    self.dialogVisible = false;
+                });
+            },
+            //第一排上面的按钮成员进入指挥
             enterCommandBatch: function () {
                 var self = this;
-                if (!self.buttons.enterCommand) return;
-                if (self.command.select.length <= 0) {
-                    self.qt.warning('消息提示：您还没有选择任何指挥组');
-                }
                 var ids = [];
-                for (var i = 0; i < self.command.select.length; i++) {
-                    ids.push(self.command.select[i].id);
-                }
+                ids.push(self.group.currentId)
                 ajax.post('/command/basic/enter', {ids: $.toJSON(ids)}, function (data) {
                     if (data && data.length > 0) {
                         var playerSettings = [];
@@ -949,7 +1124,6 @@ define([
                                     type: 'command'
                                 });
                             }
-
                             //当前没有指挥的话 就进入第一项
                             if (i === 0 && !self.group.current) {
                                 self.group.currentId = data[i].id;
@@ -958,12 +1132,10 @@ define([
                             }
                             $('.triggerLi1').addClass('focusLight');
                             $('.triggerLi2').removeClass('focusLight');
-                            $('.triggerLi3').removeClass('focusLight');
-                            $('.highLight').css('left', '16px');
+                            $('.highLight').css('left', '7px');
                             self.switchStatus1 = true;
                             self.switchStatus2 = false;
                             self.switchStatus3 = false;
-                            self.people = false;
                             if (data[i].splits && data[i].splits.length > 0) {
                                 for (var j = 0; j < data[i].splits.length; j++) {
                                     playerSettings.push(data[i].splits[j]);
@@ -1025,33 +1197,45 @@ define([
             },
             //----------第一个树形菜单底部的按钮图标 end----------
 
-
             //指挥工作台中的 下拉菜单
             currentGroupChange: function (v) {
+                console.log('下拉：'+v)
+                if (!v) return;
                 var self = this;
                 var currentGroup = null;
                 if (typeof v === 'object') {
                     currentGroup = v;
                 } else {
-                    for (var i = 0; i < self.group.entered.length; i++) {
-                        if (self.group.entered[i].id == v) {
-                            currentGroup = self.group.entered[i];
+                    for (var i = 0; i < self.command.data.length; i++) {
+                        if (self.command.data[i].id == v) {
+                            currentGroup = {
+                                id: self.command.data[i].id,
+                                name: self.command.data[i].name,
+                                status: "start",
+                                type: self.command.data[i].type,
+                                creator: JSON.parse(self.command.data[i].param).creator
+                            };
                             break;
                         }
                     }
                 }
-                if (currentGroup.type === 'command') {
-                    ajax.post('/command/basic/query/members', {id: currentGroup.id}, function (data, status) {
-                        if (status !== 200) return;
+                if (currentGroup.type.toLowerCase() === 'command') {
+                    ajax.post('/command/basic/query/members/list', {id: currentGroup.id}, function (data) {
                         data.type = 'command';
                         data.select = [];
                         var tree = [];
                         data.members.forEach(function (value) {
                             tree = tree.concat(value.children);
                         });
+                        self.refreshEnteredGroups();
                         //去掉根目录那层
-                        self.group.tree = tree;
-                        self.group.current = data;
+                        if (self.differentiate === 1) {
+                            self.group.tree = tree;
+                            self.group.current = data;
+                        } else {
+                            self.meet.tree = tree;
+                            self.meet.current = data;
+                        }
                         if (self.user.id == data.creator) {
                             self.buttons.addMember = true;
                             self.buttons.removeMember = true;
@@ -1108,42 +1292,47 @@ define([
                             }
                         }
                     }, null, [403, 404, 409, 500, 408]);
-                } else {
-
-                }
-            },
-            //刷新指挥工作台的树形菜单
-            refreshCurrentGroupMembers: function () {
-                var self = this;
-                if (self.group.current.type === 'command') {
-                    ajax.post('/command/basic/query/members', {id: self.group.current.id}, function (data) {
-                        data.type = 'command';
-                        data.select = [];
-                        self.group.current = data;
-                    });
                 }
             },
             //指挥工作台树形菜单的复选框
-            onCommandUserCheckChange: function (data) {
+            onCommandUserCheckChange: function (data, type) {
                 var self = this;
-                for (var i = 0; i < self.group.current.select.length; i++) {
-                    if (self.group.current.select[i] === data) {
-                        self.group.current.select.splice(i, 1);
-                        return;
+                if (type === '指挥') {
+                    for (var i = 0; i < self.group.current.select.length; i++) {
+                        if (self.group.current.select[i] === data) {
+                            self.group.current.select.splice(i, 1);
+                            return;
+                        }
                     }
+                    self.group.current.select.push(data);
+                } else {
+                    for (var i = 0; i < self.meet.current.select.length; i++) {
+                        if (self.meet.current.select[i] === data) {
+                            self.meet.current.select.splice(i, 1);
+                            return;
+                        }
+                    }
+                    self.meet.current.select.push(data);
                 }
-                self.group.current.select.push(data);
             },
-
 
             //-------指挥工作台的按钮底部按钮图标 start-------
             //添加成员
             addCommandMember: function () {
                 var self = this;
+                var id = '';
+                var type = '';
                 if (!self.buttons.addMember) return;
+                if (self.differentiate === 1) {
+                    id = self.group.current.id;
+                    type = self.group.current.type;
+                } else {
+                    id = self.meet.current.id;
+                    type = self.meet.current.type;
+                }
                 self.qt.window('/router/zk/leader/add/member', {
-                    id: self.group.current.id,
-                    type: self.group.current.type
+                    id: id,
+                    type: type
                 }, {
                     width: 1366,
                     height: 740
@@ -1153,56 +1342,81 @@ define([
             removeCommandMember: function () {
                 var self = this;
                 if (!self.buttons.removeMember) return;
-                if (self.group.current.select.length <= 0) {
-                    self.qt.warning('提示信息：您未选择任何成员');
-                    return;
-                }
-                self.qt.confirm('提示信息', '当前强退' + self.group.current.select.length + '个成员', '确定', function () {
-                    var members = [];
-                    for (var i = 0; i < self.group.current.select.length; i++) {
-                        members.push(self.group.current.select[i].id);
+                if(self.differentiate === 1){
+                    if (self.group.current.select.length <= 0) {
+                        self.qt.warning('提示信息：您未选择任何成员');
+                        return;
                     }
-                    ajax.post('/command/basic/remove/members', {
-                        id: self.group.current.id,
-                        members: $.toJSON(members)
-                    }, function (data) {
-                        self.currentGroupChange(self.group.current.id);
-                        if (data && data.length > 0) {
-                            self.qt.invoke('commandMemberDelete', data);
+                    self.qt.confirm('提示信息', '当前强退' + self.group.current.select.length + '个成员', '确定', function () {
+                        var members = [];
+                        for (var i = 0; i < self.group.current.select.length; i++) {
+                            members.push(self.group.current.select[i].id);
                         }
-                    }, null, [403]);
-                });
+                        ajax.post('/command/basic/remove/members', {
+                            id: self.group.current.id,
+                            members: $.toJSON(members)
+                        }, function (data) {
+                            self.currentGroupChange(self.group.current.id);
+                            if (data && data.length > 0) {
+                                self.qt.invoke('commandMemberDelete', data);
+                            }
+                        }, null, [403]);
+                    });
+                }else{
+                    if (self.meet.current.select.length <= 0) {
+                        self.qt.warning('提示信息：您未选择任何成员');
+                        return;
+                    }
+                    self.qt.confirm('提示信息', '当前强退' + self.meet.current.select.length + '个成员', '确定', function () {
+                        var members = [];
+                        for (var i = 0; i < self.meet.current.select.length; i++) {
+                            members.push(self.meet.current.select[i].id);
+                        }
+                        ajax.post('/command/basic/remove/members', {
+                            id: self.meet.current.id,
+                            members: $.toJSON(members)
+                        }, function (data) {
+                            self.currentGroupChange(self.meet.current.id);
+                            if (data && data.length > 0) {
+                                self.qt.invoke('commandMemberDelete', data);
+                            }
+                        }, null, [403]);
+                    });
+                }
             },
             //协同指挥/会议
             cooperativeCommand: function (name) {
                 var self = this;
                 if (!self.buttons.cooperativeCommand) return;
-                self.qt.window('/router/zk/leader/cooperation', {
-                    id: self.group.current.id,
-                    type: self.group.current.type,
-                    name: name,
-                    page: 'add'
-                }, {width: 980, height: 600});
+                if(self.differentiate === 1){
+                    self.qt.window('/router/zk/leader/cooperation', {
+                        id: self.group.current.id,
+                        type: self.group.current.type,
+                        name: name,
+                        page: 'add'
+                    }, {width: 980, height: 600});
+                }
             },
             //取消协同指挥/会议
             cancelCooperativeCommand: function (name) {
                 var self = this;
                 if (!self.buttons.cancelCooperative) return;
-                self.qt.window('/router/zk/leader/cooperation', {
-                    id: self.group.current.id,
-                    type: self.group.current.type,
-                    name: name,
-                    page: 'cancel'
-                }, {width: 980, height: 600});
-
+                if(self.differentiate === 1){
+                    self.qt.window('/router/zk/leader/cooperation', {
+                        id: self.group.current.id,
+                        type: self.group.current.type,
+                        name: name,
+                        page: 'cancel'
+                    }, {width: 980, height: 600});
+                }
             },
             //会议成员
             commandMembers: function () {
                 var self = this;
                 if (!self.buttons.cooperativeCommand) return;
                 self.qt.window('/router/zk/leader/cooperation', {
-                    id: self.group.current.id,
-                    type: self.group.current.type,
+                    id: self.meet.current.id,
+                    type: self.meet.current.type,
                     page: 'add',
                     tag: 'members'
                 }, {
@@ -1213,8 +1427,14 @@ define([
             //指挥/会议转发
             commandForward: function (name) {
                 var self = this;
+                var id='';
                 if (!self.buttons.commandForward) return;
-                self.qt.window('/router/zk/leader/forward', {id: self.group.current.id, name: name}, {
+                if(self.differentiate ===1){
+                    id=self.group.current.id;
+                }else{
+                    id=self.meet.current.id;
+                }
+                self.qt.window('/router/zk/leader/forward', {id: id, name: name}, {
                     width: 1024,
                     height: 768,
                     title: '指挥转发'
@@ -1223,14 +1443,20 @@ define([
             //对上静默
             silenceUp: function () {
                 var self = this;
+                var id='';
                 if (!self.buttons.silenceUp) return;
+                if(self.differentiate ===1){
+                    id=self.group.current.id;
+                }else{
+                    id=self.meet.current.id;
+                }
                 if (!self.buttons.silenceUpStart) {
-                    ajax.post('/command/basic/silence/up/start', {id: self.group.current.id}, function () {
+                    ajax.post('/command/basic/silence/up/start', {id: id}, function () {
                         self.buttons.silenceUpStart = true;
                         self.qt.warning('提示消息：操作成功');
                     });
                 } else {
-                    ajax.post('/command/basic/silence/up/stop', {id: self.group.current.id}, function () {
+                    ajax.post('/command/basic/silence/up/stop', {id: id}, function () {
                         self.buttons.silenceUpStart = false;
                         self.qt.warning('提示消息：操作成功');
                     });
@@ -1239,14 +1465,20 @@ define([
             //对下静默
             silenceDown: function () {
                 var self = this;
+                var id='';
                 if (!self.buttons.silenceDown) return;
+                if(self.differentiate ===1){
+                    id=self.group.current.id;
+                }else{
+                    id=self.meet.current.id;
+                }
                 if (!self.buttons.silenceDownStart) {
-                    ajax.post('/command/basic/silence/down/start', {id: self.group.current.id}, function () {
+                    ajax.post('/command/basic/silence/down/start', {id: id}, function () {
                         self.buttons.silenceDownStart = true;
                         self.qt.warning('提示消息：操作成功');
                     });
                 } else {
-                    ajax.post('/command/basic/silence/down/stop', {id: self.group.current.id}, function () {
+                    ajax.post('/command/basic/silence/down/stop', {id: id}, function () {
                         self.buttons.silenceDownStart = false;
                         self.qt.warning('提示消息：操作成功');
                     });
@@ -1255,8 +1487,14 @@ define([
             //发送通知
             sendMessage: function () {
                 var self = this;
+                var id='';
                 if (!self.buttons.sendMessage) return;
-                self.qt.window('/router/zk/leader/send/message', {id: self.group.current.id}, {
+                if(self.differentiate ===1){
+                    id=self.group.current.id;
+                }else{
+                    id=self.meet.current.id;
+                }
+                self.qt.window('/router/zk/leader/send/message', {id: id}, {
                     width: 1224,
                     height: 768
                 });
@@ -1264,15 +1502,21 @@ define([
             //指挥录制
             commandRecord: function () {
                 var self = this;
+                var id='';
+                if(self.differentiate ===1){
+                    id=self.group.current.id;
+                }else{
+                    id=self.meet.current.id;
+                }
                 if (self.buttons.isRecord) {
-                    ajax.post('/command/record/stop', {id: self.group.current.id}, function (data) {
+                    ajax.post('/command/record/stop', {id: id}, function () {
                         self.buttons.isRecord = false;
-                        self.qt.warning('业务提示：操作成功');
+                        self.qt.warning('业务提示：录制任务操作成功');
                     });
                 } else {
-                    ajax.post('/command/record/start', {id: self.group.current.id}, function (data) {
+                    ajax.post('/command/record/start', {id: id}, function () {
                         self.buttons.isRecord = true;
-                        self.qt.warning('业务提示：操作成功');
+                        self.qt.warning('业务提示：录制任务操作成功');
                     });
                 }
             },
@@ -1280,149 +1524,277 @@ define([
             commandRemind: function () {
                 var self = this;
                 if (!self.buttons.commandReminder) return;
-                if (self.buttons.isRemind) {
-                    ajax.post('/command/basic/remind/stop', {id: self.group.current.id}, function (data) {
-                        self.qt.warning('提示消息：操作成功');
-                        self.buttons.isRemind = false;
-                        for (var i = 0; i < self.group.remindIds.length; i++) {
-                            if (self.group.remindIds[i] == self.group.current.id) {
-                                self.group.remindIds.splice(i, 1);
-                                break;
+                if(self.differentiate === 1){
+                    if (self.buttons.isRemind) {
+                        ajax.post('/command/basic/remind/stop', {id: self.group.current.id}, function (data) {
+                            self.qt.warning('提示消息：操作成功');
+                            self.buttons.isRemind = false;
+                            for (var i = 0; i < self.group.remindIds.length; i++) {
+                                if (self.group.remindIds[i] == self.group.current.id) {
+                                    self.group.remindIds.splice(i, 1);
+                                    break;
+                                }
                             }
-                        }
-                        if (data.businessId == self.group.current.id) {
-                            self.group.current.status = data.status;
-                        }
-                        self.qt.invoke('commandRemindStop', $.toJSON(data));
-                    });
-                } else {
-                    ajax.post('/command/basic/remind', {id: self.group.current.id}, function (data) {
-                        self.qt.warning('提示消息：操作成功');
-                        self.buttons.isRemind = true;
-                        var finded = false;
-                        for (var i = 0; i < self.group.remindIds.length; i++) {
-                            if (self.group.remindIds[i] == self.group.current.id) {
-                                finded = true;
-                                break;
+                            if (data.businessId == self.group.current.id) {
+                                self.group.current.status = data.status;
                             }
-                        }
-                        if (!finded) {
-                            self.group.remindIds.push(self.group.current.id);
-                        }
-                        if (data.businessId == self.group.current.id) {
-                            self.group.current.status = data.status;
-                        }
-                        self.qt.invoke('commandRemind', $.toJSON(data));
-                    });
+                            self.qt.invoke('commandRemindStop', $.toJSON(data));
+                        });
+                    } else {
+                        ajax.post('/command/basic/remind', {id: self.group.current.id}, function (data) {
+                            self.qt.warning('提示消息：操作成功');
+                            self.buttons.isRemind = true;
+                            var finded = false;
+                            for (var i = 0; i < self.group.remindIds.length; i++) {
+                                if (self.group.remindIds[i] == self.group.current.id) {
+                                    finded = true;
+                                    break;
+                                }
+                            }
+                            if (!finded) {
+                                self.group.remindIds.push(self.group.current.id);
+                            }
+                            if (data.businessId == self.group.current.id) {
+                                self.group.current.status = data.status;
+                            }
+                            self.qt.invoke('commandRemind', $.toJSON(data));
+                        });
+                    }
+                }else{
+                    if (self.buttons.isRemind) {
+                        ajax.post('/command/basic/remind/stop', {id: self.meet.current.id}, function (data) {
+                            self.qt.warning('提示消息：操作成功');
+                            self.buttons.isRemind = false;
+                            for (var i = 0; i < self.meet.remindIds.length; i++) {
+                                if (self.meet.remindIds[i] == self.meet.current.id) {
+                                    self.meet.remindIds.splice(i, 1);
+                                    break;
+                                }
+                            }
+                            if (data.businessId == self.meet.current.id) {
+                                self.meet.current.status = data.status;
+                            }
+                            self.qt.invoke('commandRemindStop', $.toJSON(data));
+                        });
+                    } else {
+                        ajax.post('/command/basic/remind', {id: self.meet.current.id}, function (data) {
+                            self.qt.warning('提示消息：操作成功');
+                            self.buttons.isRemind = true;
+                            var finded = false;
+                            for (var i = 0; i < self.meet.remindIds.length; i++) {
+                                if (self.meet.remindIds[i] == self.meet.current.id) {
+                                    finded = true;
+                                    break;
+                                }
+                            }
+                            if (!finded) {
+                                self.meet.remindIds.push(self.meet.current.id);
+                            }
+                            if (data.businessId == self.meet.current.id) {
+                                self.meet.current.status = data.status;
+                            }
+                            self.qt.invoke('commandRemind', $.toJSON(data));
+                        });
+                    }
                 }
             },
             //开始指挥
             startCommand: function () {
                 var self = this;
-                if (self.group.current.status === 'pause') {
-                    ajax.post('/command/basic/pause/recover', {
-                        id: self.group.current.id
-                    }, function (data) {
-                        self.group.current.status = 'start';
-                        for (var i = 0; i < self.group.entered.length; i++) {
-                            if (self.group.entered[i].id == self.group.current.id) {
-                                self.group.entered[i].status = 'start';
-                                break;
+                if (self.differentiate === 1) {
+                    if (self.group.current.status === 'pause') {
+                        ajax.post('/command/basic/pause/recover', {
+                            id: self.group.current.id
+                        }, function () {
+                            self.group.current.status = 'start';
+                            for (var i = 0; i < self.group.entered.length; i++) {
+                                if (self.group.entered[i].id == self.group.current.id) {
+                                    self.group.entered[i].status = 'start';
+                                    break;
+                                }
                             }
-                        }
-                        self.buttons.commandPause = true;
-                        self.buttons.isPause = false;
-                    });
+                            self.buttons.commandPause = true;
+                            self.buttons.isPause = false;
+                        });
+                    } else {
+                        ajax.post('/command/basic/start', {
+                            id: self.group.current.id
+                        }, function (data) {
+                            self.group.current.status = 'start';
+                            var splits = data.splits;
+                            if (splits && splits.length > 0) {
+                                // 主席web通知qt进入指挥
+                                self.qt.invoke('groupMembers', $.toJSON(splits));
+                            }
+                        });
+                    }
                 } else {
-                    ajax.post('/command/basic/start', {
-                        id: self.group.current.id
-                    }, function (data) {
-                        self.group.current.status = 'start';
-                        var splits = data.splits;
-                        if (splits && splits.length > 0) {
-                            // 主席web通知qt进入指挥
-                            self.qt.invoke('groupMembers', $.toJSON(splits));
-                        }
-                    });
+                    if (self.meet.current.status === 'pause') {
+                        ajax.post('/command/basic/pause/recover', {
+                            id: self.meet.current.id
+                        }, function () {
+                            self.meet.current.status = 'start';
+                            for (var i = 0; i < self.meet.entered.length; i++) {
+                                if (self.meet.entered[i].id == self.group.current.id) {
+                                    self.meet.entered[i].status = 'start';
+                                    break;
+                                }
+                            }
+                            self.buttons.commandPause = true;
+                            self.buttons.isPause = false;
+                        });
+                    } else {
+                        ajax.post('/command/basic/start', {
+                            id: self.meet.current.id
+                        }, function (data) {
+                            self.meet.current.status = 'start';
+                            var splits = data.splits;
+                            if (splits && splits.length > 0) {
+                                // 主席web通知qt进入指挥
+                                self.qt.invoke('groupMembers', $.toJSON(splits));
+                            }
+                        });
+                    }
                 }
             },
             //暂停指挥
             pauseCommand: function () {
                 var self = this;
-                ajax.post('/command/basic/pause', {
-                    id: self.group.current.id
-                }, function (data) {
-                    self.group.current.status = 'pause';
-                    for (var i = 0; i < self.group.entered.length; i++) {
-                        if (self.group.entered[i].id == self.group.current.id) {
-                            self.group.entered[i].status = 'pause';
-                            break;
+                if(self.differentiate === 1){
+                    ajax.post('/command/basic/pause', {
+                        id: self.group.current.id
+                    }, function (data) {
+                        self.group.current.status = 'pause';
+                        for (var i = 0; i < self.group.entered.length; i++) {
+                            if (self.group.entered[i].id == self.group.current.id) {
+                                self.group.entered[i].status = 'pause';
+                                break;
+                            }
                         }
-                    }
-                    self.buttons.commandPause = false;
-                    self.buttons.isPause = true;
-                });
+                        self.buttons.commandPause = false;
+                        self.buttons.isPause = true;
+                    });
+                }else{
+                    ajax.post('/command/basic/pause', {
+                        id: self.meet.current.id
+                    }, function () {
+                        self.meet.current.status = 'pause';
+                        for (var i = 0; i < self.meet.entered.length; i++) {
+                            if (self.meet.entered[i].id == self.meet.current.id) {
+                                self.meet.entered[i].status = 'pause';
+                                break;
+                            }
+                        }
+                        self.buttons.commandPause = false;
+                        self.buttons.isPause = true;
+                    });
+                }
             },
             //退出指挥
             exitCommand: function (name) {
                 var self = this;
                 if (name === '会议') {
-                    self.switchStatus1 = false;
-                    self.switchStatus2 = false;
-                    self.switchStatus3 = true;
-                    self.people = false;
-                }
-                if (self.user.id == self.group.current.creator) {
-                    ajax.post('/command/basic/stop', {
-                        id: self.group.current.id
-                    }, function (data) {
-                        if (self.group.current.creator != self.user.id) {
+                    if (self.user.id == self.meet.current.creator) {
+                        ajax.post('/command/basic/stop', {
+                            id: self.meet.currentId
+                        }, function (data) {
+                            if (self.meet.current.creator != self.user.id) {
+                                for (var i = 0; i < self.meet.entered.length; i++) {
+                                    if (self.meet.entered[i].id == self.meet.current.id) {
+                                        self.meet.entered.splice(i, 1);
+                                        break;
+                                    }
+                                }
+                                if (self.meet.entered.length > 0) {
+                                    self.meet.current = self.meet.entered[0];
+                                    self.meet.currentId = self.meet.entered[0].id;
+                                    self.currentGroupChange(self.meet.currentId);
+                                } else {
+                                    self.meet.current = '';
+                                    self.meet.currentId = '';
+                                }
+                            } else {
+                                self.meet.current.status = 'stop';
+                            }
+                            self.qt.success('停止会议成功');
+                            self.qt.invoke('commandExit', $.toJSON(data));
+                            self.refreshCommand("meeting");
+                        });
+                    } else {
+                        ajax.post('/command/basic/exit', {
+                            id: self.meet.current.id
+                        }, function (data) {
+                            for (var i = 0; i < self.meet.entered.length; i++) {
+                                if (self.meet.entered[i].id == self.meet.current.id) {
+                                    self.meet.entered.splice(i, 1);
+                                    break;
+                                }
+                                if (self.meet.entered.length > 0) {
+                                    self.meet.currentId = self.meet.entered[i].id;
+                                    self.meet.current = self.meet.entered[i];
+                                    self.currentGroupChange(self.meet.currentId);
+                                } else {
+                                    self.meet.currentId = '';
+                                    self.meet.current = '';
+                                }
+                                if (data && data.length > 0) {
+                                    self.qt.invoke('commandExit', data);
+                                }
+                                self.qt.success('退出会议成功');
+                            }
+                        });
+                    }
+                } else {
+                    if (self.user.id == self.group.current.creator) {
+                        ajax.post('/command/basic/stop', {
+                            id: self.group.currentId
+                        }, function (data) {
+                            if (self.group.current.creator != self.user.id) {
+                                for (var i = 0; i < self.group.entered.length; i++) {
+                                    if (self.group.entered[i].id == self.group.current.id) {
+                                        self.group.entered.splice(i, 1);
+                                        break;
+                                    }
+                                }
+                                if (self.group.entered.length > 0) {
+                                    self.group.current = self.group.entered[0];
+                                    self.group.currentId = self.group.entered[0].id;
+                                    self.currentGroupChange(self.group.currentId);
+                                } else {
+                                    self.group.current = '';
+                                    self.group.currentId = '';
+                                }
+                            } else {
+                                self.group.current.status = 'stop';
+                            }
+                            self.qt.invoke('commandExit', $.toJSON(data));
+                            self.refreshCommand();
+                            self.qt.success('停止指挥成功');
+                        })
+                    } else {
+                        ajax.post('/command/basic/exit', {
+                            id: self.group.current.id
+                        }, function (data) {
                             for (var i = 0; i < self.group.entered.length; i++) {
                                 if (self.group.entered[i].id == self.group.current.id) {
                                     self.group.entered.splice(i, 1);
                                     break;
                                 }
+                                if (self.group.entered.length > 0) {
+                                    self.group.currentId = self.group.entered[i].id;
+                                    self.group.current = self.group.entered[i];
+                                    self.currentGroupChange(self.group.currentId);
+                                } else {
+                                    self.group.currentId = '';
+                                    self.group.current = '';
+                                }
+                                if (data && data.length > 0) {
+                                    self.qt.invoke('commandExit', data);
+                                }
+                                self.qt.success('退出指挥成功');
                             }
-                            if (self.group.entered.length > 0) {
-                                self.group.current = self.group.entered[0];
-                                self.group.currentId = self.group.entered[0].id;
-                                self.currentGroupChange(self.group.currentId);
-                            } else {
-                                self.group.current = '';
-                                self.group.currentId = '';
-                            }
-                        } else {
-                            self.group.current.status = 'stop';
-                        }
-                        self.qt.invoke('commandExit', $.toJSON(data));
-                        if (name === '会议') {
-                            self.refreshCommand("meeting");
-                        } else {
-                            self.refreshCommand();
-                        }
-                    });
-                } else {
-                    ajax.post('/command/basic/exit', {
-                        id: self.group.current.id
-                    }, function (data) {
-                        for (var i = 0; i < self.group.entered.length; i++) {
-                            if (self.group.entered[i].id == self.group.current.id) {
-                                self.group.entered.splice(i, 1);
-                                break;
-                            }
-                            if (self.group.entered.length > 0) {
-                                self.group.currentId = self.group.entered[i].id;
-                                self.group.current = self.group.entered[i];
-                                self.currentGroupChange(self.group.currentId);
-                            } else {
-                                self.group.currentId = '';
-                                self.group.current = '';
-                            }
-                            if (data && data.length > 0) {
-                                self.qt.invoke('commandExit', data);
-                            }
-                        }
-                    });
+                        });
+                    }
                 }
             },
             //按钮操作完后 取消组织结构的勾选
@@ -1434,138 +1806,36 @@ define([
                 self.institution.select = [];
             },
 
-            //关闭给指挥起名字弹框事件
-            resetNameClose: function () {
-                var self = this;
-                self.dialog.resetName.visible = false;
-                self.dialog.resetName.name = '';
-                self.cancelChoose();
-            },
-            //打开 给指挥起名字 的对话框显示
-            handleResetName: function (type) {
-                var self = this;
-                //为了提交时区分是新建还是修改
-                self.dialog.resetName.type = type;
-                //修改时，把原有值赋过去
-                if (type === 'edit') {
-                    if (self.command.select.length <= 0) {
-                        self.qt.warning('信息提示：请先选择要修改的项');
-                        return;
-                    } else if (self.command.select.length > 1) {
-                        self.qt.warning('信息提示：只能选择一项进行修改名称');
-                        return;
-                    }
-                    //报错要修改的那项的名字
-                    self.dialog.resetName.name = self.command.select[0].name;
-                }
-                self.dialog.resetName.visible = true;
-            },
-            //给指挥起名字的添加事件
-            resetNameCommit: function () {
-                var self = this;
-                if (!self.dialog.resetName.name) {
-                    self.$message({
-                        type: 'error',
-                        message: '名称不能为空！'
-                    });
-                    return;
-                }
-                var userIds = [];
-                for (var i = 0; i < self.institution.select.length; i++) {
-                    userIds.push(self.institution.select[i].id);
-                }
-                self.dialog.resetName.name.replace(/^\s*|\s*$/g, ''); //去除头尾空格
-                if (self.dialog.resetName.type === 'new') {
-                    // 新建
-                    ajax.post('/command/basic/save', {
-                        members: $.toJSON(userIds),
-                        name: self.dialog.resetName.name
-                    }, function (data) {
-                        data.type = 'command';
-                        data.select = [];
-                        self.group.current = data;
-                        self.group.entered.push({
-                            id: data.id,
-                            name: data.name,
-                            creator: data.creator,
-                            type: 'command'
-                        });
-                        self.group.currentId = data.id;
-                        self.currentGroupChange(self.group.currentId);
-                        self.qt.success('创建指挥工作组成功');
-                        self.resetNameClose();
-                    });
-                } else {
-                    //   修改
-                    ajax.post('/command/basic/modify/name', {
-                        id: self.command.select[0].id,
-                        name: self.dialog.resetName.name
-                    }, function (data) {
-                        self.qt.success('修改成功！');
-                        self.resetNameClose();
-                        self.refreshCommand();
-                    });
-                }
-            },
-
             //   ----------第三个tab相关的-----------------
-            filterCommandUserNode: function (value, data) {
-                if (!value) return true;
-                return data.name.indexOf(value) !== -1;
-            },
             //删除会议
-            removeMyCommand: function (id) {
+            removeMyCommand: function () {
                 var self = this;
-                ajax.post('/command/basic/remove', {ids: $.toJSON([id])}, function (data) {
-                    for (var i = 0; i < self.myCommand.totalData.length; i++) {
-                        if (self.myCommand.totalData[i].id === id) {
-                            self.myCommand.totalData.splice(i, 1);
-                        }
-                    }
-                    for (var i = 0; i < self.myCommand.filterData.length; i++) {
-                        if (self.myCommand.filterData[i].id === id) {
-                            self.myCommand.filterData.splice(i, 1);
-                        }
-                    }
+                var id = self.meet.currentId;
+                ajax.post('/command/basic/remove', {ids: $.toJSON([id])}, function () {
+                    // 重置currentId
+                    self.refreshCommand('meeting');
+                    self.qt.success('删除成功');
+                    setTimeout(function () {
+                        self.meet.currentId = self.command.data[0].id;
+                        self.meet.current = {
+                            creator: JSON.parse(self.command.data[0].param).creator,
+                            id: self.command.data[0].id,
+                            name: self.command.data[0].name,
+                            status: self.command.data[0].status,
+                            type: self.command.data[0].type
+                        };
+                        self.currentGroupChange(self.meet.currentId);
+                    }, 1000)
                 });
             },
-            //进入会议
-            enterMyCommand: function (id, action) {
+            //成员进入会议
+            enterMyCommand: function () {
                 var self = this;
+                var id = self.meet.currentId;
                 ajax.post('/command/basic/enter', {ids: $.toJSON([id])}, function (data) {
-                    self.meetName = data[0].name;
-                    self.switchStatus1 = false;
-                    self.switchStatus2 = false;
-                    self.switchStatus3 = false;
-                    self.people = true;
+                    //进入他人会议
+                    self.qt.linkedWebview('rightBar', {id: 'currentGroupChange', params: $.toJSON(data)});
 
-                    //进入自己建的会议
-                    if (action === 'start') {
-                        self.group.current.id = id;
-                        self.qt.set('currentGroupId', id);
-                        ajax.post('/command/basic/start', {
-                            id: id
-                        }, function (datas) {
-                            var splits = datas.splits;
-                            //防止从他人的会出来进自己会的时候 底部按钮显示不正确
-                            self.qt.linkedWebview('rightBar', {id: 'currentGroupChange', params: $.toJSON(data)});
-                            if (splits && splits.length > 0) {
-                                // 主席web通知qt进入指挥
-                                self.qt.invoke('groupMembers', $.toJSON(splits));
-                            }
-                        });
-                    } else {
-                        //进入他人会议
-                        self.qt.linkedWebview('rightBar', {id: 'currentGroupChange', params: $.toJSON(data)});
-                    }
-                });
-            },
-            //新建会议
-            makeCommand: function () {
-                var self = this;
-                self.qt.window('/router/zk/leader/dialog/create/group', {}, {
-                    width: 1366,
-                    height: 700
                 });
             },
             //安排会议
@@ -1601,7 +1871,7 @@ define([
             applySpeak: function () {
                 var self = this;
                 if (!self.buttons.isSpeaking) {
-                    ajax.post('/command/meeting/speak/apply', {id: self.group.current.id}, function (data) {
+                    ajax.post('/command/meeting/speak/apply', {id: self.meet.current.id}, function () {
                         self.qt.success('已向主席发出申请');
                     })
                 }
@@ -1610,7 +1880,7 @@ define([
             stopSpeak: function () {
                 var self = this;
                 if (self.buttons.isSpeaking) {
-                    ajax.post('/command/meeting/speak/stop/by/member', {id: self.group.current.id}, function (data) {
+                    ajax.post('/command/meeting/speak/stop/by/member', {id: self.meet.current.id}, function (data) {
                         self.qt.success('您停止了自己的发言');
                         self.buttons.isSpeaking = false;
                     })
@@ -1620,18 +1890,18 @@ define([
             assignSpeak: function () {
                 var self = this;
                 var ids = [];
-                if (!self.group.current.select.length) {
+                if (!self.meet.current.select.length) {
                     self.qt.warning('提示信息：您没有勾选任何用户');
                     return;
                 }
-                self.group.current.select.forEach(function (value) {
+                self.meet.current.select.forEach(function (value) {
                     ids.push(value.id);
                 });
                 ajax.post('/command/meeting/speak/appoint', {
-                    id: self.group.current.id,
+                    id: self.meet.current.id,
                     userIds: $.toJSON(ids)
                 }, function (data) {
-                    self.qt.success('操作成功');
+                    self.qt.success('指定发言操作成功');
                 });
 
             },
@@ -1639,81 +1909,57 @@ define([
             stopAssignSpeak: function () {
                 var self = this;
                 var ids = [];
-                if (!self.group.current.select.length) {
+                if (!self.meet.current.select.length) {
                     self.qt.warning('提示信息：您没有勾选任何用户');
                     return;
                 }
-                self.group.current.select.forEach(function (value) {
+                self.meet.current.select.forEach(function (value) {
                     ids.push(value.id);
                 });
                 ajax.post('/command/meeting/speak/stop/by/chairman', {
-                    id: self.group.current.id,
+                    id: self.meet.current.id,
                     userIds: $.toJSON(ids)
-                }, function (data) {
-                    self.qt.success('操作成功');
-                    self.group.current.select.forEach(function (value) {
+                }, function () {
+                    self.qt.success('停止指定发言操作成功');
+                    self.meet.current.select.forEach(function (value) {
                         value.checked = false;
                     });
-                    self.group.current.select = [];
+                    self.meet.current.select = [];
                 });
             },
             //全员讨论
             allDiscuss: function () {
                 var self = this;
                 if (!self.buttons.discussion) { //讨论
-                    ajax.post('/command/meeting/discuss/start', {id: self.group.current.id}, function (data) {
-                        self.qt.success('操作成功');
+                    ajax.post('/command/meeting/discuss/start', {id: self.meet.current.id}, function () {
+                        self.qt.success('全员讨论操作成功');
                         self.buttons.discussion = true;
                     })
                 } else { //停止讨论
-                    ajax.post('/command/meeting/discuss/stop', {id: self.group.current.id}, function (data) {
-                        self.qt.success('操作成功');
+                    ajax.post('/command/meeting/discuss/stop', {id: self.meet.current.id}, function () {
+                        self.qt.success('停止全员讨论操作成功');
                         self.buttons.discussion = false;
                     })
                 }
-            },
-            //退出会议并关闭窗体---暂时好像没用到
-            exitCurrentCommandAndCloseWindow: function () {
-                var self = this;
-                if (!self.group.current) {
-                    self.qt.linkedWebview('header', {
-                        id: 'closeWindow'
-                    });
-                } else {
-                    if (self.user.id == self.group.current.creator) {
-                        ajax.post('/command/basic/stop', {
-                            id: self.group.current.id
-                        }, function (data) {
-                            self.qt.linkedWebview('header', {
-                                id: 'closeWindow'
-                            });
-                        });
-                    } else {
-                        ajax.post('/command/basic/exit', {
-                            id: self.group.current.id
-                        }, function (data) {
-                            self.qt.linkedWebview('header', {
-                                id: 'closeWindow'
-                            });
-                        });
-                    }
-                }
-            },
+            }
         },
         computed: {
             groupCurrent: function () {
                 var self = this;
-                return self.group.current;
+                if(self.differentiate ===1){
+                    return self.group.current;
+                }else{
+                    return self.meet.current;
+                }
             }
         },
         watch: {
             currentTab: function () {
                 var self = this;
+                this.switchStatus1 = false;
+                this.switchStatus2 = true;
+                this.switchStatus3 = false;
                 if (self.currentTab == 0) {
-                    //指挥列表
-                    self.refreshCommand();
-                    self.refreshCommandButtonAction();
-                } else if (self.currentTab == 1) {
                     //组织结构
                     if (self.institution.data.length === 0) {
                         self.refreshInstitution();
@@ -1725,10 +1971,12 @@ define([
                         self.refreshFile();
                     }
                     self.refreshFileButtonAction();
-                } else if (self.currentTab == 3) {
+                } else if (self.currentTab == 1) {
+                    //设备资源
                     self.refreshDevice();
                     self.refreshDeviceButtonAction();
-                } else if (self.currentTab == 4) {
+                } else if (self.currentTab == 3) {
+                    //录像回放
                     self.refreshRecord();
                     self.refreshRecordButtonAction();
                 }
@@ -1795,31 +2043,6 @@ define([
                 // 这个tableHeight就是最后的height
                 this.contentStyleObj.height = (parseInt(val) - parseInt(this.footerHeight)) + 'px';
                 $('.scrollTab').css('height', this.contentStyleObj.height);
-            },
-            filterText: function (val) {
-                var self = this;
-                var myFilterData = [];
-                var joinFilterData = [];
-
-                if (self.myCommand.totalData && self.myCommand.totalData.length) {
-                    myFilterData = self.myCommand.totalData.filter(function (item) {
-                        if (item && item.name) {
-                            return item.name.indexOf(val) > -1;
-                        }
-                        return false;
-                    })
-                }
-
-                if (self.joinCommand.totalData && self.joinCommand.totalData.length) {
-                    joinFilterData = self.joinCommand.totalData.filter(function (item) {
-                        if (item && item.name) {
-                            return item.name.indexOf(val) > -1;
-                        }
-                        return false;
-                    })
-                }
-                self.myCommand.filterData = myFilterData;
-                self.joinCommand.filterData = joinFilterData;
             }
         },
         mounted: function () {
@@ -1854,9 +2077,11 @@ define([
                         }
                     }
                 });
-                self.refreshCommand();
-                self.refreshCommandButtonAction();
-                self.refreshCurrentGroupMembers();
+                self.refreshCommand(null,function () {
+                    self.refreshEnteredGroups();
+                });
+                self.refreshInstitution();
+                self.refreshInstitutionButtonAction();
 
                 //动态获取firsetMenu和footer的高度
                 window.onresize = function () {
@@ -1869,7 +2094,6 @@ define([
 
                 self.qt.get(['user'], function (variables) {
                     self.user = variables.user ? $.parseJSON(variables.user) : {};
-                    self.refreshEnteredGroups();
                 });
 
                 //从新建会议页面来，到这个页面时改变
@@ -1878,20 +2102,9 @@ define([
                     self.switchStatus1 = false;
                     self.switchStatus2 = false;
                     self.switchStatus3 = false;
-                    self.people = true;
-                    self.meetName = group.name;
                     group.type = 'command';
                     self.currentGroupChange(group);
                     self.qt.set('currentGroupId', group.id);
-                });
-
-                //从安排会议页面来，到这个页面时在刷新下数据
-                self.qt.on('refreshData', function (e) {
-                    self.switchStatus1 = false;
-                    self.switchStatus2 = false;
-                    self.switchStatus3 = true;
-                    self.people = false;
-                    self.refreshCommand("meeting");
                 });
 
                 //监听到添加成员，刷新树
@@ -1930,6 +2143,15 @@ define([
                                 self.group.currentId = '';
                                 self.group.current = '';
                             }
+                        } else if (self.meet.currentId == e.businessId) {
+                            if (self.group.entered.length > 0) {
+                                self.meet.currentId = self.meet.entered[0].id;
+                                self.meet.current = self.meet.entered[0];
+                                self.currentGroupChange(self.meet.currentId);
+                            } else {
+                                self.meet.currentId = '';
+                                self.meet.current = '';
+                            }
                         }
                     }
                     if (e.splits && e.splits.length > 0) {
@@ -1948,20 +2170,31 @@ define([
                 //成员同意 进入指挥
                 self.qt.on('linkEnterCommand', function (e) {
                     //加参数是为了区分进会时 ，不影响指挥的代码
-                    self.enterCommand([e.params]);
+                    self.switchStatus1 = true;
+                    self.switchStatus2 = false;
+                    self.switchStatus3 = false;
+                    self.differentiate = 1;
+                    $('.triggerLi1').addClass('focusLight');
+                    $('.triggerLi2').removeClass('focusLight');
+                    $('.highLight').css('left', '7px');
+                   self.refreshCommand(null,function () {
+                       self.enterCommand([e.params]);
+                   })
                 });
+
                 //成员同意进入会议
                 self.qt.on('linkEnterMeeting', function (e) {
                     self.switchStatus1 = false;
                     self.switchStatus2 = false;
-                    self.switchStatus3 = false;
-                    self.people = true;
+                    self.switchStatus3 = true;
+                    self.differentiate = 2;
                     $('.triggerLi1').removeClass('focusLight');
-                    $('.triggerLi2').removeClass('focusLight');
-                    $('.triggerLi3').addClass('focusLight');
-                    $('.highLight').css('left', '225px');
+                    $('.triggerLi2').addClass('focusLight');
+                    $('.highLight').css('left', '167px');
                     //加参数是为了区分进会时 ，不影响指挥的代码
-                    self.enterCommand([e.params], 'meet');
+                    self.refreshCommand('meet',function(){
+                        self.enterCommand([e.params], 'meet');
+                    })
                 });
 
                 // 监听有成员进入会议
@@ -1990,13 +2223,17 @@ define([
                             self.group.current = '';
                             self.group.currentId = '';
                         }
+                    } else if (self.meet.currentId == e.businessId) {
+                        if (self.meet.entered.length > 0) {
+                            self.meet.current = self.meet.entered[0];
+                            self.meet.currentId = self.meet.entered[0].id;
+                            self.currentGroupChange(self.meet.currentId);
+                        } else {
+                            self.meet.current = '';
+                            self.meet.currentId = '';
+                        }
                     }
                     self.refreshCommand("meeting");
-                });
-
-                //右上角叉的关闭按钮
-                self.qt.on('exitCurrentCommandAndCloseWindow', function () {
-                    self.exitCurrentCommandAndCloseWindow();
                 });
 
                 //监听到成员退出
@@ -2092,6 +2329,18 @@ define([
                             userIds: $.toJSON([ids[1]])
                         }, null);
                     });
+                });
+
+                //监听换一批人员
+                self.qt.on('replacePeople',function () {
+                    var id=self.differentiate === 1?self.group.currentId:self.meet.currentId;
+                    ajax.post('/command/basic/roll/all/vod/members',{id:id},function () {
+                        var splits = data.splits;
+                        if (splits && splits.length > 0) {
+                            // 主席web通知qt进入指挥
+                            self.qt.invoke('groupMembers', $.toJSON(splits));
+                        }
+                    })
                 })
             });
         }

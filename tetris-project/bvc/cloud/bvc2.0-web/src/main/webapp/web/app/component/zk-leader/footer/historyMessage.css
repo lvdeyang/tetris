@@ -92,6 +92,20 @@ html,body{
     color: #fff;
     cursor: default;
 }
+.change{
+    position: absolute;
+    top: 5px;
+    left: 17.5%;
+    border-radius: 13px;
+    background-color: #00729ef0;
+    color: #fff;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 28px;
+    text-align: center;
+}
 .forward{
     position: absolute;
     top:5px;
