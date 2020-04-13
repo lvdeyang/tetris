@@ -38,16 +38,6 @@ define([
             deviceCurrentChange: function (val) {
                 this.deviceCurrentPage = val;
             },
-            //过滤设备数据
-            // filterDeviceCommand:function(){
-            //     var self = this;
-            //     self.deviceData.filterData.splice(0, self.deviceData.filterData.length);
-            //     for(var i=0; i<self.deviceData.totalData.length; i++){
-            //         if(self.deviceData.totalData[i].fileName.indexOf(self.filterText)>=0){
-            //             self.deviceData.filterData.push(self.deviceData.totalData[i]);
-            //         }
-            //     }
-            // },
             search: function () {
                 var mode = this.recordMode;
                 var name = this.filterText;
@@ -62,7 +52,10 @@ define([
             stopTask: function (id) {
                 var self = this;
                 ajax.post('/monitor/record/stop/' + id, null, function () {
-                        self.qt.success('成功停止此条数据的录制');
+                    self.qt.success('成功停止此条数据的录制');
+                    self.deviceData.totalData=self.deviceData.totalData.filter(function (value) {
+                       return value.id !=id;
+                    })
                 })
             },
             //获取数据

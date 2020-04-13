@@ -81,7 +81,10 @@ define([
                 var self = this;
                 self.qt.invoke('hideService');
             },
-
+            //换一批人员
+            replace:function () {
+               this.qt.linkedWebview('rightBar',{id:'replacePeople'});
+            },
             //历史消息弹框
             showMessagePanel: function () {
                 var self = this;
@@ -97,7 +100,7 @@ define([
             //录制任务管理
             recManage:function () {
                 var self = this;
-                self.qt.window('/router/zk/leader/rec', null, {width: '100%', height: '100%'});
+                self.qt.window('/router/zk/leader/rec', null, {width: '100%', height: '90%'});
             },
             //分屏事件
             layoutChange: function (index) {

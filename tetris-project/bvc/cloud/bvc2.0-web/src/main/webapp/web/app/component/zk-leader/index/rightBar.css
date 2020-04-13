@@ -38,8 +38,8 @@ ul, li, div {
 /*顶部切换标题*/
 .switch {
     position: absolute;
-    right: 0;
-    width: 324px;
+    left: 50px;
+    width: 318px;
     height: 50px;
     border-radius: 12px 12px 0 0;
     background: #52cffb21;
@@ -48,7 +48,7 @@ ul, li, div {
 
 .switch li {
     display: inline-block;
-    width: 32%;
+    width: 49%;
     font-size: 18px;
     font-weight: bold;
     height: 50px;
@@ -65,18 +65,18 @@ ul, li, div {
 .highLight {
     position: absolute;
     top: 0;
-    left: 16px;
-    width: 90px;
+    left: 7px;
+    width: 145px;
     height: 4px;
     border-radius: 3px;
     background-color: #00e9ff;
-    box-shadow: 0 2px 10px #51dff4;
+    box-shadow: 0 1px 10px #51dff4;
     display: block;
 }
 
 li.focusLight {
     color: #00e9ff;
-    background: none;
+    background: #0c446f;
 }
 
 /*左侧的导航选项标题*/
@@ -101,7 +101,6 @@ li.focusLight {
 
 /* 禁止横向滚动条 */
 .secondMenu .el-scrollbar__wrap,
-.thirdMenu .el-scrollbar__wrap,
 .commandTable .el-scrollbar__wrap {
     overflow-x: hidden;
 }
@@ -114,17 +113,51 @@ li.focusLight {
     position: absolute;
     top: 50px;
     bottom: 50px;
-    left: 45px;
-    width: 324px;
-    padding: 20px 0;
+    left: 50px;
+    width: 318px;
+    padding: 5px 0;
     background-color: #1e52778c;
+    z-index: 9;
 }
 
+/*指挥上面的按钮*/
+.commandBtn{
+    height: 30px;
+    line-height: 30px;
+    color: #fff;
+    text-align: center;
+}
+.commandBtn span{
+    margin: 0 15px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.commandName{
+    display: inline-block;
+    width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+.commandTable{
+    position:absolute;
+    left:0;
+    top:63px;
+    width:310px;
+    bottom:215px;
+    overflow: hidden;
+}
+
+/*左侧tab对应的右侧的容器的宽度*/
 .el-tabs__content {
     position: absolute;
     top: 0;
     left: 50px;
     bottom: 50px;
+    width: 100%;
     background: #52cffb21;
     border-radius: 0 0 12px 12px;
     overflow: hidden;
@@ -156,6 +189,7 @@ img {
 /* 树形组件开始 */
 .el-tree {
     width: 320px;
+    min-height: 50px;
     background-color: transparent;
 }
 
@@ -203,7 +237,7 @@ img {
     display: inline-block;
     color: #cfdae6;
     font-size: 18px;
-    width: 98px;
+    width: 155px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -271,7 +305,14 @@ img {
 .el-radio-button__inner:hover {
     color: #fff;
 }
-
+.scrollTab{
+    position:absolute;
+    left:0;
+    top:0;
+    width:310px;
+    bottom:215px;
+    overflow: hidden;
+}
 /* 控制点击后的图标和内容的显示 end */
 
 /* 底部图标 */
@@ -359,7 +400,7 @@ img {
     position: absolute;
     top: 51px;
     bottom: 50px;
-    left: 0;
+    right: 0;
     width: 370px;
     background-color: #52cffb21;
     border-radius: 0 0 12px 12px;
@@ -420,7 +461,7 @@ img {
 div.el-select-dropdown {
     background-color: #204a6b;
     border: none;
-    max-width: 243px;
+    max-width: 300px;
 }
 
 .el-select-group__title {
@@ -431,7 +472,6 @@ div.el-select-dropdown {
 /*加出下拉菜单的横向滚动条*/
 .el-select-dropdown__item {
     width: 600px;
-    height: 40px;
     font-size: 18px;
     color: #409EFF;
     /*去掉省略号*/
@@ -456,10 +496,6 @@ div.el-select-dropdown {
     background-color: #173d5c;
     border-radius: 0 0 12px 12px;
     z-index: 4;
-}
-
-.thirdMenu .btnContainer {
-    height: 70px;
 }
 
 .option-button {
@@ -503,21 +539,16 @@ div.el-select-dropdown {
     position: absolute;
     top: 50px;
     bottom: 50px;
-    left: 45px;
-    width: 325px;
+    left: 50px;
+    width: 318px;
     background-color: #1e52778c;
-}
-
-.thirdMenu .el-input__inner {
-    background-color: #5b6265b8;
-    border: none;
 }
 
 .meetList {
     position: absolute;
     margin-top: 5px;
     bottom: 75px;
-    top: 50px;
+    top: 0;
 }
 
 .meetList .title {
@@ -526,19 +557,6 @@ div.el-select-dropdown {
     font-weight: bold;
 }
 
-.meetList ul {
-    min-height: 100px;
-}
-
-.meetList li {
-    margin: 2px 0;
-    padding: 0 5px;
-    height: 30px;
-    line-height: 30px;
-    color: #fff;
-    background-color: #052f54;
-    font-size: 14px;
-}
 
 .meetList .content {
     display: inline-block;
@@ -586,7 +604,11 @@ div.el-select-dropdown {
     border: 1px solid red;
 }
 
-
+.el-dialog__body {
+    padding: 30px 20px;
+    color: #efefef;
+    font-size: 16px;
+}
 
 
 
