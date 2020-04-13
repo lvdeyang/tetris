@@ -50,7 +50,7 @@
                     <div style="width:100%; height:100%; position:relative;">
 
                         <el-button type="primary" size="small" @click="handleCreateSystemRole"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加角色</el-button>
-                        <el-button type="warning" size="small" @click="handleDeleteSystemRole"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除角色</el-button>
+                        <!-- <el-button type="warning" size="small" @click="handleDeleteSystemRole"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除角色</el-button> -->
 
                         <div style="position:absolute; top:86px; left:0; bottom:0; right:0;">
                             <el-scrollbar style="height:100%;">
@@ -58,10 +58,10 @@
                                         :data="table.rows"
                                         :row-key="rowKey"
                                         style="width:100%">
-                                    <el-table-column
+                                    <!-- <el-table-column
                                             type="selection"
                                             width="55">
-                                    </el-table-column>
+                                    </el-table-column> -->
                                     <el-table-column
                                             label="角色"
                                             prop="name">

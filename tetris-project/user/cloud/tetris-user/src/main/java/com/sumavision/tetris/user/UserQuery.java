@@ -304,6 +304,38 @@ public class UserQuery {
 	}
 	
 	/**
+	 * 根据公司和条件查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午11:05:41
+	 * @param Long companyId 公司id
+	 * @param String nickname 用户昵称
+	 * @param String userno 用户号码
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	public Map<String, Object> findByCompanyIdAndCondition(
+			Long companyId, 
+			String nickname, 
+			String userno, 
+			int currentPage, 
+			int pageSize) throws Exception{
+		int total = userDao.countByCompanyIdAndCondition(companyId, nickname, userno);
+		String nicknameExpression = null;
+		if(nickname != null) nicknameExpression = new StringBufferWrapper().append("%").append(nickname).append("%").toString();
+		String usernoExpression = null;
+		if(userno != null) usernoExpression = new StringBufferWrapper().append("%").append(userno).append("%").toString();
+		
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> pagedEntities = userDao.findByCompanyIdAndCondition(companyId, nicknameExpression, usernoExpression, page);
+		List<UserPO> entities = pagedEntities.getContent();
+		List<UserVO> rows = UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", rows)
+												   .getMap();
+	}
+	
+	/**
 	 * 分页查询公司下的用户列表<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

@@ -55,6 +55,7 @@ import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
 import com.sumavision.tetris.user.exception.UserCannotDeleteBecauseOnlineStatusException;
+import com.sumavision.tetris.user.exception.UserColumnLengthException;
 import com.sumavision.tetris.user.exception.UserNotExistException;
 import com.sumavision.tetris.user.exception.UsernameAlreadyExistException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
@@ -360,19 +361,24 @@ public class UserService{
 			throw new UsernameAlreadyExistException(username);
 		}
 		
-		if(mobile != null){
+		if(mobile!=null && !"".equals(mobile)){
 			user = userDao.findByMobile(mobile);
 			if(user != null){
 				throw new MobileAlreadyExistException(mobile);
 			}
 		}
 		
-		if(mail != null){
+		if(mail!=null && !"".equals(mail)){
 			user = userDao.findByMail(mail);
 			if(user != null){
 				throw new MailAlreadyExistException(mail);
 			}
 		}
+		
+		if(nickname.length() > 255) throw new UserColumnLengthException("昵称长度不能超过255");
+		if(username.length() > 255) throw new UserColumnLengthException("用户名长度不能超过255");
+		if(mobile!=null && !"".equals(mobile) && mobile.length()>255) throw new UserColumnLengthException("手机号长度不能超过255");
+		if(mail!=null && !"".equals(mail) && mail.length()>255) throw new UserColumnLengthException("邮箱长度不能超过255");
 		
 		user = new UserPO();
 		user.setNickname(nickname);

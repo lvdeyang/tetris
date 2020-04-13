@@ -4,7 +4,7 @@
 
     <template slot="links">
         <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item><a href="#/page-system-role">{{roleName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a :href="returnUserHash">{{roleName}}</a></el-breadcrumb-item>
         <el-breadcrumb-item>角色授权</el-breadcrumb-item>
     </template>
 
@@ -13,7 +13,7 @@
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
 
             <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加授权</el-button>
-            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;解除授权</el-button>
+            <!-- <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;解除授权</el-button> -->
 
             <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
                 <el-scrollbar style="height:100%;">
@@ -21,10 +21,10 @@
                             :data="table.rows"
                             :row-key="rowKey"
                             style="width:100%">
-                        <el-table-column
+                        <!-- <el-table-column
                                 type="selection"
                                 width="55">
-                        </el-table-column>
+                        </el-table-column> -->
                         <el-table-column
                                 label="用户"
                                 prop="nickname">
