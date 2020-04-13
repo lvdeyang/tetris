@@ -3,15 +3,12 @@ package com.sumavision.bvc.device.command.message;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
@@ -241,7 +238,7 @@ public class CommandMessageServiceImpl {
 	 */
 	public void broadcastInstantMessage(Long userId, String name, Long groupId, String message) throws Exception{
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<Long> userIds = new ArrayList<Long>();
 		for(CommandGroupMemberPO member : members){
 			if(member.getMemberStatus().equals(MemberStatus.CONNECT) && !member.getUserId().equals(userId)){

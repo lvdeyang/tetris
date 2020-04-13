@@ -151,14 +151,14 @@ public class CommandCommonUtil {
 			if(forward.getExecuteStatus().equals(ExecuteStatus.UNDONE)
 					&& map.get(srcMemberId).getMemberStatus().equals(MemberStatus.CONNECT)
 					&& map.get(dstMemberId).getMemberStatus().equals(MemberStatus.CONNECT)){
-				//如果是协同指挥转发
-				if(ForwardBusinessType.COOPERATE_COMMAND.equals(forward.getForwardBusinessType())){
-					if(map.get(srcMemberId).getCooperateStatus().equals(MemberStatus.CONNECT)){
-						needForwards.add(forward);
-					}
-				}else{
+				//如果是协同指挥转发（取消）
+//				if(ForwardBusinessType.COOPERATE_COMMAND.equals(forward.getForwardBusinessType())){
+//					if(map.get(srcMemberId).getCooperateStatus().equals(MemberStatus.CONNECT)){
+//						needForwards.add(forward);
+//					}
+//				}else{
 					needForwards.add(forward);
-				}
+//				}
 			}
 		}
 		return needForwards;

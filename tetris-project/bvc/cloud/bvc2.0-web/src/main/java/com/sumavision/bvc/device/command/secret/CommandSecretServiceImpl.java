@@ -2,8 +2,6 @@ package com.sumavision.bvc.device.command.secret;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,7 +74,7 @@ public class CommandSecretServiceImpl {
 		List<CommandGroupPO> secretGroups = commandGroupDao.findByType(GroupType.SECRET);
 		for(CommandGroupPO secretGroup : secretGroups){
 			if(!secretGroup.getStatus().equals(GroupStatus.STOP)){
-				Set<CommandGroupMemberPO> members = secretGroup.getMembers();
+				List<CommandGroupMemberPO> members = secretGroup.getMembers();
 				for(CommandGroupMemberPO member : members){
 					if(member.getUserId().equals(creatorUserId)){
 						throw new BaseException(StatusCode.FORBIDDEN, "您已经在参加其他专向" + commandString);
@@ -175,7 +173,7 @@ public class CommandSecretServiceImpl {
 		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		if(group == null){
-			String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
+//			String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
 			throw new BaseException(StatusCode.FORBIDDEN, "专向会议已停止");
 		}
 		log.info("成员拒绝加入专向会议，会议：" + group.getName());
@@ -199,7 +197,7 @@ public class CommandSecretServiceImpl {
 		
 		//以forward的源，作为源和目的去查找专向转发
 		CommandGroupPO group = forward.getGroup();
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO member = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
 		Long forwardSrcUserId = member.getUserId();
 		
@@ -212,7 +210,7 @@ public class CommandSecretServiceImpl {
 				continue;
 			}
 			if(!secretGroup.getStatus().equals(GroupStatus.STOP)){
-				Set<CommandGroupMemberPO> secretMembers = secretGroup.getMembers();
+				List<CommandGroupMemberPO> secretMembers = secretGroup.getMembers();
 				//先判断成员是否都CONNECT
 				for(CommandGroupMemberPO secretMember : secretMembers){
 					if(!secretMember.getMemberStatus().equals(MemberStatus.CONNECT)){

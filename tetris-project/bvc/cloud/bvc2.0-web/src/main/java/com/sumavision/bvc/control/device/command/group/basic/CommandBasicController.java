@@ -3,8 +3,6 @@ package com.sumavision.bvc.control.device.command.group.basic;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +36,7 @@ import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.ForwardReturnBO;
+import com.sumavision.bvc.device.command.basic.page.CommandPageServiceImpl;
 import com.sumavision.bvc.device.command.basic.remind.CommandRemindServiceImpl;
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceLocalServiceImpl;
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl;
@@ -67,6 +66,9 @@ public class CommandBasicController {
 
 	@Autowired
 	private CommandSilenceLocalServiceImpl commandSilenceLocalServiceImpl;
+
+	@Autowired
+	private CommandPageServiceImpl commandPageServiceImpl;
 
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
@@ -164,7 +166,7 @@ public class CommandBasicController {
 			info.put("isRecord", false);
 		}
 		
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<UserBO> userBOs = commandCommonUtil.queryUsersByMembers(members);
 		
 		//成员列表节点
@@ -404,7 +406,7 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		Object result = commandBasicServiceImpl.start(Long.parseLong(id), -1);
-		return result;
+		return result;		
 	}
 	
 	/**
@@ -670,8 +672,40 @@ public class CommandBasicController {
 		}else{
 			return null;
 		}
-	}
+	}	
 	
+	/**
+	 * 主席换一批观看成员<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 下午6:34:36
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@ResponseBody
+	@JsonBody
+	@RequestMapping(value = "/roll/all/vod/members")
+	public Object rollAllVodMembers(
+			String id,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		List<CommandGroupUserPlayerPO> players = commandPageServiceImpl.rollAllVodMembers(userId, Long.parseLong(id));
+		List<CommandGroupUserPlayerSettingVO> playerVOs = new ArrayList<CommandGroupUserPlayerSettingVO>();
+		for(CommandGroupUserPlayerPO player : players){
+			CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
+			playerVOs.add(playerVO);
+		}
+		
+		return JSON.toJSONString(new HashMapWrapper<String, Object>()
+				.put("splits", playerVOs)
+				.getMap());
+	}
+
 	/**
 	 * 会议转发设备<br/>
 	 * <p>详细描述</p>

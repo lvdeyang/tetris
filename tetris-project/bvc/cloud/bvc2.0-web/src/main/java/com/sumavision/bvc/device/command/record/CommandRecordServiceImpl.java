@@ -3,7 +3,6 @@ package com.sumavision.bvc.device.command.record;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +27,6 @@ import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
@@ -129,8 +127,8 @@ public class CommandRecordServiceImpl {
 			record.setPlayerSplitLayout(userInfo.obtainUsingScheme().getPlayerSplitLayout());
 			record.setFragments(new ArrayList<CommandGroupRecordFragmentPO>());			
 			
-			Set<CommandGroupMemberPO> members = group.getMembers();
-			Set<CommandGroupForwardPO> forwards = group.getForwards();
+			List<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupForwardPO> forwards = group.getForwards();
 //			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
 			
 			CommandGroupMemberPO thisMember = commandCommonUtil.queryMemberByUserId(members, userId);
@@ -234,8 +232,8 @@ public class CommandRecordServiceImpl {
 //		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 		UserBO admin = new UserBO(); admin.setId(-1L);
 		String adminUserId = admin.getId().toString();
-		Set<CommandGroupMemberPO> members = group.getMembers();
-		Set<CommandGroupForwardPO> forwards = group.getForwards();
+		List<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupForwardPO> forwards = group.getForwards();
 //		List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
 		CommandGroupMemberPO thisMember = commandCommonUtil.queryMemberByUserId(members, userId);
 		List<CommandGroupUserPlayerPO> allPlayers = thisMember.getPlayers();

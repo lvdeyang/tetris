@@ -47,7 +47,7 @@ public class CommandCooperateController {
 		
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandCooperateServiceImpl.start(Long.parseLong(id), userIdArray);
+		commandCooperateServiceImpl.start_new(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -151,7 +151,7 @@ public class CommandCooperateController {
 		
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		JSONArray result = commandCooperateServiceImpl.revokeBatch(userIdArray, Long.parseLong(id));
+		JSONArray result = commandCooperateServiceImpl.revokeBatch_new(userIdArray, Long.parseLong(id));
 		
 		//应该是一个空数组
 		return result;

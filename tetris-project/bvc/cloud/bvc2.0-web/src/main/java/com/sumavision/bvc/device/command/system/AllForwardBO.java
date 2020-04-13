@@ -1,7 +1,6 @@
 package com.sumavision.bvc.device.command.system;
 
-import java.util.Set;
-
+import java.util.List;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.enumeration.UserCallType;
 import com.sumavision.bvc.command.group.enumeration.VodType;
@@ -118,7 +117,7 @@ public class AllForwardBO {
 	public AllForwardBO setByForward(CommandGroupForwardPO forward){
 		
 		CommandCommonUtil commandCommonUtil = SpringContext.getBean(CommandCommonUtil.class);
-		Set<CommandGroupMemberPO> members = forward.getGroup().getMembers();
+		List<CommandGroupMemberPO> members = forward.getGroup().getMembers();
 		CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
 		CommandGroupMemberPO dstMember = commandCommonUtil.queryMemberById(members, forward.getDstMemberId());
 		

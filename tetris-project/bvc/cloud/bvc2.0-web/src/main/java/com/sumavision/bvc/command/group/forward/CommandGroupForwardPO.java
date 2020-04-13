@@ -1,5 +1,6 @@
 package com.sumavision.bvc.command.group.forward;
 
+import java.util.Comparator;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -696,6 +697,29 @@ public class CommandGroupForwardPO extends AbstractBasePO{
 		this.dstAudioChannelName = null;
 		
 		return this;
+	}
+	
+	/**
+	 * 按id排序，从小到大<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 下午6:47:33
+	 */
+	public static final class ForwardComparatorFromId implements Comparator<CommandGroupForwardPO>{
+		@Override
+		public int compare(CommandGroupForwardPO o1, CommandGroupForwardPO o2) {
+			
+			long id1 = o1.getId();
+			long id2 = o2.getId();
+			
+			if(id1 > id2){
+				return 1;
+			}
+			if(id1 == id2){
+				return 0;
+			}
+			return -1;
+		}
 	}
 	
 }

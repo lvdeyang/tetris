@@ -869,7 +869,7 @@ public class MonitorApi92Controller {
 				if(dstUser != null){
 					if("call".equals(type)){
 						//xt用户同意接听呼叫
-						commandUserServiceImpl.acceptCallByUuid(srcUser, uuid);
+						commandUserServiceImpl.acceptCall_CascadeByUuid(srcUser, uuid);
 					}else if("paly-call".equals(type)){
 						//TODO: xt用户同意点播转呼叫
 					}

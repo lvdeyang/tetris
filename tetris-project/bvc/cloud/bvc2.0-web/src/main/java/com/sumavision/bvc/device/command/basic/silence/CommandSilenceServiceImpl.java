@@ -19,7 +19,6 @@ import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
-import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl.MemberLevelComparator;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
@@ -89,14 +88,14 @@ public class CommandSilenceServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
 			}
 			
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			CommandGroupMemberPO operateMember = commandCommonUtil.queryMemberByUserId(members, userId);
 			if(silenceToHigher) operateMember.setSilenceToHigher(true);
 			if(silenceToLower) operateMember.setSilenceToLower(true);
 			
 			//操作静默的user作为源查找会中所有的DONE转发relativeForwards
 			Set<CommandGroupForwardPO> needDelForwards = new HashSet<CommandGroupForwardPO>();
-			Set<CommandGroupForwardPO> forwards = group.getForwards();
+			List<CommandGroupForwardPO> forwards = group.getForwards();
 			List<Long> srcMemberIds = new ArrayListWrapper<Long>().add(operateMember.getId()).getList();
 			Set<CommandGroupForwardPO> relativeForwards = commandCommonUtil.queryForwardsBySrcmemberIds(forwards, srcMemberIds, null, ExecuteStatus.DONE);
 			
@@ -166,7 +165,7 @@ public class CommandSilenceServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
 			}
 			
-			Set<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> members = group.getMembers();
 			CommandGroupMemberPO operateMember = commandCommonUtil.queryMemberByUserId(members, userId);
 			if(stopSilenceToHigher) operateMember.setSilenceToHigher(false);
 			if(stopSilenceToLower) operateMember.setSilenceToLower(false);
