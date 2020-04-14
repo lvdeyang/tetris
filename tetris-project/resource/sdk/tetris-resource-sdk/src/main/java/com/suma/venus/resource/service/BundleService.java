@@ -438,9 +438,9 @@ public class BundleService extends CommonService<BundlePO> {
 			List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
 			List<String> bundleIds = new ArrayList<String>();
 			
-			/*//自动选择player接入层
+			//自动选择player接入层
 			List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_JV210);
-			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);*/
+			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
 				
 			// 创建17个播放器资源
 			for (int i = 1; i <= 17; i++) {
@@ -455,9 +455,9 @@ public class BundleService extends CommonService<BundlePO> {
 				bundlePO.setBundleNum(userNo + "_" + i);
 				bundlePO.setUserId(Long.valueOf(userId));
 				
-				/*if(choseWorkNode != null){
+				if(choseWorkNode != null){
 					bundlePO.setAccessNodeUid(choseWorkNode.getNodeUid());
-				}*/
+				}
 				
 				// 默认上线
 				bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
@@ -481,9 +481,9 @@ public class BundleService extends CommonService<BundlePO> {
 			encoder.setBundleNum(userNo + "_encoder");
 			encoder.setUserId(Long.valueOf(userId));
 			
-			/*if(choseWorkNode != null){
+			if(choseWorkNode != null){
 				encoder.setAccessNodeUid(choseWorkNode.getNodeUid());
-			}*/
+			}
 			
 			// 默认上线
 			encoder.setOnlineStatus(ONLINE_STATUS.OFFLINE);
@@ -584,9 +584,9 @@ public class BundleService extends CommonService<BundlePO> {
 			List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
 			List<String> bundleIds = new ArrayList<String>();
 			
-			/*//自动选择player接入层
+			//自动选择player接入层
 			List<WorkNodePO> tvosLayers = workNodeService.findByType(NodeType.ACCESS_JV210);
-			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);*/
+			WorkNodePO choseWorkNode = workNodeService.choseWorkNode(tvosLayers);
 				
 			// 创建17个播放器资源
 			for (int i = 1; i <= 17; i++) {
@@ -601,9 +601,9 @@ public class BundleService extends CommonService<BundlePO> {
 				bundlePO.setBundleNum(userNo + "_" + i);
 				bundlePO.setUserId(Long.valueOf(userId));
 				
-				/*if(choseWorkNode != null){
+				if(choseWorkNode != null){
 					bundlePO.setAccessNodeUid(choseWorkNode.getNodeUid());
-				}*/
+				}
 				
 				// 默认上线
 				bundlePO.setOnlineStatus(ONLINE_STATUS.OFFLINE);
