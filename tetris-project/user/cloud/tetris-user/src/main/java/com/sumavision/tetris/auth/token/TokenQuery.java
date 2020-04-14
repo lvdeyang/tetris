@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserStatus;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
 import com.sumavision.tetris.user.exception.TokenUpdatedException;
 
@@ -63,6 +64,7 @@ public class TokenQuery {
 			throw new TokenTimeoutException();
 		}
 		token.setLastModifyTime(now);
+		token.setStatus(UserStatus.ONLINE);
 		tokenDao.save(token);
 		return true;
 	}

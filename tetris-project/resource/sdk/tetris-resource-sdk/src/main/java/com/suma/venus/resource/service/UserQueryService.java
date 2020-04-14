@@ -432,7 +432,7 @@ public class UserQueryService {
 		userBO.setEmail(userVO.getMail());
 		userBO.setCreateTime(userVO.getUpdateTime());
 		userBO.setCreater("");
-		userBO.setLogined((userVO.getStatus() == null || userVO.getStatus() == "OFFLINE")? false: true);
+		userBO.setLogined((userVO.getStatus() == null || "OFFLINE".equals(userVO.getStatus()))? false: true);
 		userBO.setUserNo(userVO.getUserno());
 		userBO.setLocal_encoder(local_encoder);
 		userBO.setExternal_encoder(Jv210_encoder);
