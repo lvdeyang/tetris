@@ -11,21 +11,21 @@
         <!--第一部分,指挥相关的的菜单-->
         <div class="firstMenu" v-show="switchStatus1">
             <div class="commandBtn" v-if="group.currentId">
-                <el-tooltip class="item" effect="dark" content="开始" placement="top-start"
+                <el-tooltip class="item" effect="dark" :content="!buttons.isPause?'开始指挥':'恢复指挥'" placement="top-start"
                             v-if="group.current.creator==user.id">
-                    <span class="icon-play" @click="startCommand"></span>
+                    <span class="icon-play" :style="group.current.status !=='start'?'color:#fff;':'color:gray;'" @click="startCommand"></span>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="暂停" placement="top-start"
                             v-if="group.current.creator==user.id">
-                    <span class="icon-pause" @click="pauseCommand"></span>
+                    <span class="icon-pause" :style="group.current.status =='start'?'color:#fff;':'color:gray;'" @click="pauseCommand"></span>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="停止" placement="top-start"
                             v-if="group.current.creator==user.id">
-                    <span class="icon-stop" @click="exitCommand"></span>
+                    <span class="icon-stop" :style="group.current.status =='start'?'color:#fff;':'color:gray;'" @click="exitCommand"></span>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="进入" placement="top-start"
                             v-if="group.current.creator!=user.id" style="font-size: 20px">
-                    <span class="icon-signin" @click="enterCommandBatch"></span>
+                    <span class="icon-signin" :style="group.current.status =='start'?'color:#fff;':'color:gray;'" @click="enterCommandBatch"></span>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="退出" placement="top-start"
                             v-if="group.current.creator!=user.id" style="font-size: 20px">
@@ -33,7 +33,7 @@
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="删除" placement="top-start"
                             v-if="group.current.creator==user.id">
-                    <span class="el-icon-delete" @click="removeCommand"></span>
+                    <span class="el-icon-delete" :style="group.current.status =='start'?'color:gray;':'color:#fff;'" @click="removeCommand"></span>
                 </el-tooltip>
             </div>
             <!--下拉选项-->
@@ -51,9 +51,9 @@
                             <span class="commandName">{{ group.name }}</span>
                         </el-tooltip>
                         <span v-if="JSON.parse(group.param).creator == user.id" class="icon-user"
-                              style="margin-left:30px; font-size: 18px"></span>
-                        <span v-else class="icon-signin" style="margin-left:30px; font-size: 18px"
-                              @click="enterCommandBatch()"></span>
+                              style="font-size: 14px">[主席]</span>
+                        <span v-else-if="JSON.parse(group.param).entered" style="font-size: 14px">[已进入]</span>
+                        <span v-else style="font-size: 14px">[未进入]</span>
                     </el-option>
                 </el-select>
             </div>
@@ -311,35 +311,35 @@
                                      :check-strictly=true
                                      :props="props"
                                      :expand-on-click-node="false">
-                <span class="headline" slot-scope="{node,data}">
-                <span :class="data.type==='RECORD_PLAYBACK'?'handDown el-icon-tickets':''"
-                      style="font-size: 20px;margin: 5px;color: #00ceff"
-                      @click="handleContextMenuShow($event, data)"></span>
-                <el-checkbox v-if="data.type==='RECORD_PLAYBACK'" v-model="data.checked"
-                             @change="onRecordCheckChange(data)">
-                <span class="icon-file-alt"
-                      style="font-size:15px; position:relative; top:1px;"></span>
-                <span class="headFont">{{data.groupName}}</span>
-                <el-popover
-                        placement="top"
-                        width="200"
-                        trigger="click"
-                        :content="data.groupName">
-                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
-                </el-popover>
-                </el-checkbox>
-                <span v-else>
-                <span class="icon-folder-close"></span>
-                <span class="sheadFont">{{data.groupName}}</span>
-                <el-popover
-                        placement="top"
-                        width="200"
-                        trigger="click"
-                        :content="data.groupName">
-                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
-                </el-popover>
-                </span>
-                </span>
+                                <span class="headline" slot-scope="{node,data}">
+                                <span :class="data.type==='RECORD_PLAYBACK'?'handDown el-icon-tickets':''"
+                                      style="font-size: 20px;margin: 5px;color: #00ceff"
+                                      @click="handleContextMenuShow($event, data)"></span>
+                                <el-checkbox v-if="data.type==='RECORD_PLAYBACK' && data.level ==3" v-model="data.checked"
+                                             @change="onRecordCheckChange(data)">
+                                <span class="icon-file-alt"
+                                      style="font-size:15px; position:relative; top:1px;"></span>
+                                <span class="headFont">{{data.groupName}}</span>
+                                <el-popover
+                                        placement="top"
+                                        width="200"
+                                        trigger="click"
+                                        :content="data.groupName">
+                                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                </el-popover>
+                                </el-checkbox>
+                                <span v-else>
+                                <span class="icon-folder-close"></span>
+                                <span class="sheadFont">{{data.groupName}}</span>
+                                <el-popover
+                                        placement="top"
+                                        width="200"
+                                        trigger="click"
+                                        :content="data.groupName">
+                                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+                                </el-popover>
+                                </span>
+                                </span>
                             </el-tree>
                         </el-scrollbar>
                     </div>
@@ -435,17 +435,17 @@
             <!--树形菜单-->
             <div class="meetList">
                 <div class="commandBtn" v-if="meet.currentId">
-                    <el-tooltip class="item" effect="dark" content="开始" placement="top-start"
+                    <el-tooltip class="item" effect="dark" :content="!buttons.isPause?'开始会议':'恢复会议'" placement="top-start"
                                 v-if="meet.current.creator==user.id">
-                        <span class="icon-play" @click="startCommand"></span>
+                        <span class="icon-play" :style="meet.current.status !=='start'?'color:#fff;':'color:gray;'" @click="startCommand"></span>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="暂停" placement="top-start"
                                 v-if="meet.current.creator==user.id">
-                        <span class="icon-pause" @click="pauseCommand"></span>
+                        <span class="icon-pause" :style="meet.current.status =='start'?'color:#fff;':'color:gray;'" @click="pauseCommand"></span>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="停止" placement="top-start"
                                 v-if="meet.current.creator==user.id">
-                        <span class="icon-stop" @click="exitCommand('会议')"></span>
+                        <span class="icon-stop" :style="meet.current.status =='start'?'color:#fff;':'color:gray;'" @click="exitCommand('会议')"></span>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="进入" placement="top-start"
                                 v-if="meet.current.creator!=user.id" style="font-size: 20px">
@@ -457,7 +457,7 @@
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="删除" placement="top-start"
                                 v-if="meet.current.creator==user.id">
-                        <span class="el-icon-delete" @click="removeMyCommand()"></span>
+                        <span class="el-icon-delete" :style="meet.current.status =='start'?'color:gray;':'color:#fff;'" @click="removeMyCommand()"></span>
                     </el-tooltip>
                 </div>
                 <!--下拉选项-->
@@ -475,9 +475,9 @@
                                 <span class="commandName">{{ meet.name }}</span>
                             </el-tooltip>
                             <span v-if="JSON.parse(meet.param).creator == user.id" class="icon-user"
-                                  style="margin-left:30px; font-size: 18px"></span>
-                            <span v-else class="icon-signin" style="margin-left:30px; font-size: 18px"
-                                  @click="enterMyCommand()"></span>
+                                  style="font-size: 14px">[主席]</span>
+                            <span v-else-if="JSON.parse(meet.param).entered" style="font-size: 14px">[已进入]</span>
+                            <span v-else style="font-size: 14px">[未进入]</span>
                         </el-option>
                     </el-select>
                 </div>
