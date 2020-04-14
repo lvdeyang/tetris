@@ -770,8 +770,8 @@ public class TransformService {
 		
 		CodecParamVO codecParam = streamTranscodingVO.getTaskVO().getCodecParam();
 		Long maxBitrate = null;
-		if(codecParam.getVbitrate() != null && codecParam.getAbitrate() != null){
-			maxBitrate = (long) ((codecParam.getVbitrate() + codecParam.getAbitrate()) * 1.5);
+		if(codecParam.getVbitrate() != null || codecParam.getAbitrate() != null){
+			maxBitrate = (long) (((codecParam.getVbitrate()==null?0: codecParam.getVbitrate()) + (codecParam.getAbitrate() == null?0l: codecParam.getAbitrate())) * 1.5);
 		}
 		
 		/*******
@@ -928,8 +928,8 @@ public class TransformService {
 		
 		CodecParamVO codecParam = streamTranscodingVO.getTaskVO().getCodecParam();
 		Long outputBitrate = null;
-		if(codecParam.getVbitrate() != null && codecParam.getAbitrate() != null){
-			outputBitrate = (long) ((codecParam.getVbitrate() + codecParam.getAbitrate()) * 1.5);
+		if(codecParam.getVbitrate() != null || codecParam.getAbitrate() != null){
+			outputBitrate = (long) (((codecParam.getVbitrate()==null?0: codecParam.getVbitrate()) + (codecParam.getAbitrate() == null?0l: codecParam.getAbitrate())) * 1.5);
 		}
 		
 		List<OutParamVO> outputParams = task.getOutParam();

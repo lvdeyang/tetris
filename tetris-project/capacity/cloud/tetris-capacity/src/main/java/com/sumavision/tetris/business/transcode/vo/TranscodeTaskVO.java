@@ -27,6 +27,12 @@ public class TranscodeTaskVO {
 	private List<TaskBO> task_array;
 	
 	private List<OutputBO> output_array;
+	
+	private Integer system_type;
+	
+	private String url;
+	
+	private Object external_task_detail;
 
 	public String getTask_id() {
 		return task_id;
@@ -88,6 +94,33 @@ public class TranscodeTaskVO {
 
 	public TranscodeTaskVO setOutput_array(List<OutputBO> output_array) {
 		this.output_array = output_array;
+		return this;
+	}
+
+	public Integer getSystem_type() {
+		return system_type;
+	}
+
+	public TranscodeTaskVO setSystem_type(Integer system_type) {
+		this.system_type = system_type;
+		return this;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public TranscodeTaskVO setUrl(String url) {
+		this.url = url;
+		return this;
+	}
+
+	public Object getExternal_task_detail() {
+		return external_task_detail;
+	}
+
+	public TranscodeTaskVO setExternal_task_detail(Object external_task_detail) {
+		this.external_task_detail = external_task_detail;
 		return this;
 	}
 	
