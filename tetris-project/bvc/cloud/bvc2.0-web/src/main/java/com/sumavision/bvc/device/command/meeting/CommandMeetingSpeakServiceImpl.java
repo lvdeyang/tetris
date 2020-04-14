@@ -38,10 +38,13 @@ import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
@@ -87,6 +90,12 @@ public class CommandMeetingSpeakServiceImpl {
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserQuery userQuery;
 
 	/**
 	 * 指定发言<br/>
@@ -100,7 +109,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	public void speakAppoint(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -161,6 +170,7 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 			websocketMessageService.consumeAll(consumeIds);
 		}
+		operationLogService.send(user.getNickname(), "指定发言", user.getNickname() + "指定发言groupId:" + groupId + ", userIdArray:" + userIdArray.toString());
 	}
 	
 	/**
@@ -174,7 +184,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	public void speakApply(Long userId, Long groupId) throws Exception{
-
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -208,6 +218,7 @@ public class CommandMeetingSpeakServiceImpl {
 			
 			log.info(group.getName() + "申请发言");
 		}
+		operationLogService.send(user.getNickname(), "申请发言", user.getNickname() + "申请发言groupId:" + groupId);
 	}
 	
 	/**
@@ -222,7 +233,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	public void speakApplyAgree(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -283,6 +294,7 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 			websocketMessageService.consumeAll(consumeIds);
 		}
+		operationLogService.send(user.getNickname(), "同意申请发言", user.getNickname() + "同意申请发言groupId:" + groupId + ",userIds:" + userIdArray.toString());
 	}
 	
 
@@ -298,7 +310,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	public void speakApplyDisagree(Long userId, Long groupId, List<Long> userIds) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -330,6 +342,7 @@ public class CommandMeetingSpeakServiceImpl {
 			
 			log.info(group.getName() + " 主席拒绝了 " + speakMembers.get(0).getUserName() + " 等人的发言申请");
 		}
+		operationLogService.send(user.getNickname(), "拒绝申请发言", user.getNickname() + "拒绝申请发言groupId:" + groupId + ", userIds" + userIds.toString());
 	}
 	
 	/**
@@ -343,7 +356,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	public void speakStopByMember(Long userId, Long groupId) throws Exception{
-
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -370,6 +383,7 @@ public class CommandMeetingSpeakServiceImpl {
 			//这里有持久化
 			speakStop(group, speakMembers, 0);
 		}
+		operationLogService.send(user.getNickname(), "停止发言", user.getNickname() + "停止发言groupId:" + groupId);
 	}
 	
 	/**
@@ -384,7 +398,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	public void speakStopByChairman(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -423,6 +437,7 @@ public class CommandMeetingSpeakServiceImpl {
 			//这里有持久化
 			speakStop(group, speakMembers, 0);
 		}
+		operationLogService.send(user.getNickname(), "停止发言", user.getNickname() + "停止发言groupId:" + groupId + ", userIds" + userIdArray.toString());
 	}
 	
 	/**
@@ -436,7 +451,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	public void discussStart(Long userId, Long groupId) throws Exception{
-				
+		UserVO user = userQuery.current();		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -467,6 +482,7 @@ public class CommandMeetingSpeakServiceImpl {
 			
 			speakStart(group, speakMembers, 1);
 		}
+		operationLogService.send(user.getNickname(), "开启讨论模式", user.getNickname() + "开启讨论模式groupId:" + groupId);
 	}
 	
 	/**
@@ -480,7 +496,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	public void discussStop(Long userId, Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -507,6 +523,7 @@ public class CommandMeetingSpeakServiceImpl {
 			
 			speakStop(group, speakMembers, 1);
 		}
+		operationLogService.send(user.getNickname(), "停止讨论模式", user.getNickname() + "停止讨论模式groupId:" + groupId);
 	}
 	
 	
@@ -523,7 +540,6 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	private void speakStart(CommandGroupPO group, List<CommandGroupMemberPO> speakMembers, int mode) throws Exception{
-		
 		//需要呼叫的播放器
 		List<CommandGroupUserPlayerPO> needPlayers = new ArrayList<CommandGroupUserPlayerPO>();
 		//需要下发的转发
