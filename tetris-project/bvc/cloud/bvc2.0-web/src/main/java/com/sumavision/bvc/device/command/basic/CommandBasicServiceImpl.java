@@ -70,6 +70,7 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
@@ -83,6 +84,8 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
@@ -154,6 +157,12 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;	
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 
@@ -493,7 +502,7 @@ public class CommandBasicServiceImpl {
 		commandGroupDao.save(group);
 		
 		log.info(name + " 创建完成");
-		
+		operationLogService.send(creatorUserBo.getName(), "新建指挥", creatorUserBo.getName() + "新建指挥groupId:" + group.getId());
 		return group;
 	}
 	
@@ -509,7 +518,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public void modifyName(Long userId, Long groupId, String name) throws Exception{
-		
+		UserVO user = userQuery.current();
 		if(name==null || name.equals("")){
 			throw new BaseException(StatusCode.FORBIDDEN, "请输入名称");
 		}
@@ -525,6 +534,7 @@ public class CommandBasicServiceImpl {
 		}
 		group.setName(name);
 		commandGroupDao.save(group);
+		operationLogService.send(user.getNickname(), "修改指挥名称", user.getNickname() + "修改指挥名称" + group.getId());
 	}
 	
 	/**
@@ -539,7 +549,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public void remove(Long userId, List<Long> groupIds) throws Exception{
-		
+		UserVO user = userQuery.current();
 		List<CommandGroupPO> groups = commandGroupDao.findAll(groupIds);
 		
 		//校验
@@ -553,6 +563,7 @@ public class CommandBasicServiceImpl {
 		}
 		
 		commandGroupDao.deleteByIdIn(groupIds);
+		operationLogService.send(user.getNickname(), "删除指挥", user.getNickname() + "删除指挥groupIds:" + groupIds.toString());
 	}
 	
 	/**
@@ -568,7 +579,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public Object start(Long groupId, int locationIndex) throws Exception{
-		
+		UserVO user = userQuery.current();
 		JSONObject result = new JSONObject();
 		JSONArray chairSplits = new JSONArray();
 		
@@ -761,6 +772,7 @@ public class CommandBasicServiceImpl {
 		}
 		
 		result.put("splits", chairSplits);
+		operationLogService.send(user.getNickname(), "开启指挥", user.getNickname() + "开启指挥groupId:" + groupId);
 		return result;
 	}	
 	
@@ -778,7 +790,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public JSONArray stop(Long userId, Long groupId, int stopMode) throws Exception{
-		
+		UserVO user = userQuery.current();
 		if(groupId==null || groupId.equals("")){
 			throw new BaseException(StatusCode.FORBIDDEN, "停会操作，会议id有误");
 		}
@@ -996,7 +1008,7 @@ public class CommandBasicServiceImpl {
 		websocketMessageService.consumeAll(consumeIds);
 		
 		}
-		
+		operationLogService.send(user.getNickname(), "停止指挥", user.getNickname() + "停止指挥groupId:" + groupId);
 		return returnSplits;
 	}
 	
@@ -1012,7 +1024,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception 有会议无法进入时，会抛错
 	 */
 	public JSONArray enter(Long userId, List<Long> groupIds) throws Exception{
-		
+		UserVO user = userQuery.current();
 		JSONArray groupInfos = new JSONArray();
 		
 		List<CommandGroupPO> groups = commandGroupDao.findAll(groupIds);
@@ -1109,7 +1121,7 @@ public class CommandBasicServiceImpl {
 			
 			}
 		}
-		
+		operationLogService.send(user.getNickname(), "进入指挥", user.getNickname() + "进入指挥groupIds:" + groupIds.toString());
 		return groupInfos;
 	}
 	
@@ -1124,7 +1136,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public void refuse(Long userId, Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -1152,10 +1164,11 @@ public class CommandBasicServiceImpl {
 		membersResponse(group, null, refuseMembers);
 		
 		}
+		operationLogService.send(user.getNickname(), "拒绝加入指挥", user.getNickname() + "拒绝加入指挥groupId" + groupId);
 	}
 	
 	public JSONArray pause(Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -1226,14 +1239,14 @@ public class CommandBasicServiceImpl {
 			
 			ExecuteBusinessReturnBO returnBO = executeBusiness.execute(logic, group.getName() + " " + commandString + "暂停");
 			commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());
-			
+			operationLogService.send(user.getNickname(), "暂停指挥", user.getNickname() + "暂停指挥groupId:" + groupId);
 			return chairSplits;
 			
 		}
 	}
 	
 	public JSONArray pauseRecover(Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -1276,7 +1289,7 @@ public class CommandBasicServiceImpl {
 			websocketMessageService.consumeAll(consumeIds);
 			
 			log.info(group.getName() + " 会议取消暂停");
-			
+			operationLogService.send(user.getNickname(), "恢复指挥", user.getNickname() + "恢复指挥" + groupId);
 			return chairSplits;
 		}
 	}
@@ -1284,7 +1297,7 @@ public class CommandBasicServiceImpl {
 	
 	
 	public Object addMembers(Long groupId, List<Long> userIdList) throws Exception{
-		
+		UserVO self = userQuery.current();
 		JSONArray chairSplits = new JSONArray();
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
@@ -1686,7 +1699,7 @@ public class CommandBasicServiceImpl {
 //			List<CommandGroupMemberPO> acceptMembers = new ArrayList<CommandGroupMemberPO>();
 //			acceptMembers.add(chairman);
 //			membersResponse(group, acceptMembers, null);
-			
+			operationLogService.send(self.getNickname(), "添加成员", self.getNickname() + "添加成员userIds:" + userIdList.toString());
 			return chairSplits;			
 		}
 	}	
@@ -1964,7 +1977,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public Object removeMembers(Long groupId, List<Long> userIdList, int mode) throws Exception{
-		
+		UserVO user = userQuery.current();
 		//“重复退出会再次挂断编码器”已改好
 		
 		if(groupId==null || groupId.equals("")){
@@ -2189,7 +2202,7 @@ public class CommandBasicServiceImpl {
 				consumeIds.add(ws.getId());
 			}
 			websocketMessageService.consumeAll(consumeIds);
-			
+			operationLogService.send(user.getNickname(), "删除成员", user.getNickname() + "删除成员groupId:" + groupId + "userIds:" + userIdList.toString());
 			//退出，给成员返回exitMemberSplits；删人，给主席返回chairSplits
 			if(mode == 0) return exitMemberSplits;
 			return chairSplits;
@@ -2432,7 +2445,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public CommandGroupUserPlayerPO vodMemberStart(UserBO userBO, Long groupId, Long memberUserId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -2499,7 +2512,7 @@ public class CommandBasicServiceImpl {
 			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, needForwards, null, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);			
 			executeBusiness.execute(logic, dstMember.getUserName() + " 观看 " + srcMember.getUserName());
-			
+			operationLogService.send(user.getNickname(), "主席开始观看成员", user.getNickname() + "主席开始观看成员groupId:" + groupId + ", userId:" + memberUserId);
 			return player;
 		}
 	}
@@ -2517,7 +2530,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public CommandGroupUserPlayerPO vodMemberStop(Long userId, Long groupId, Long memberUserId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -2556,6 +2569,8 @@ public class CommandBasicServiceImpl {
 			if(needClosePlayers.size() > 0){
 				return needClosePlayers.get(0);
 			}
+			
+			operationLogService.send(user.getNickname(), "主席停止观看成员", user.getNickname() + "主席停止观看成员groupId:" + groupId + ",userId:" + memberUserId);
 			return null;
 		}
 	}
@@ -2590,7 +2605,6 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public LogicBO startGroupForwards(CommandGroupPO group, boolean doPersistence, boolean doProtocol) throws Exception{
-		
 		List<CommandGroupMemberPO> members = group.getMembers();
 		List<CommandGroupForwardPO> forwards = group.getForwards();
 		Set<CommandGroupForwardPO> needForwards = commandCommonUtil.queryForwardsReadyAndCanBeDone(members, forwards);

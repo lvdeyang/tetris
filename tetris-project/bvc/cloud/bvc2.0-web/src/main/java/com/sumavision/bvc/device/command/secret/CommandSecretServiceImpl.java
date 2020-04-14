@@ -18,9 +18,13 @@ import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,6 +48,12 @@ public class CommandSecretServiceImpl {
 
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 开始专向会议<br/>
@@ -85,11 +95,13 @@ public class CommandSecretServiceImpl {
 			}
 		}
 		
-		log.info(creatorUsername + "发起专向会议，成员用户userId：" + memberUserId);
-		
 		List<Long> userIdArray = new ArrayListWrapper<Long>().add(memberUserId).getList();		
 		CommandGroupPO group = commandBasicServiceImpl.save(creatorUserId, creatorUserId, creatorUsername, name, name, GroupType.SECRET, OriginType.INNER, userIdArray);
 		Object chairSplits = commandBasicServiceImpl.start(group.getId(), locationIndex);
+		
+		log.info(creatorUsername + "发起专向会议，成员用户userId：" + memberUserId);
+		operationLogService.send(creatorUsername, "开启专向指挥", creatorUsername + "发起专向会议，成员用户userId：" + memberUserId);
+		
 		return chairSplits;
 	}
 	
@@ -105,6 +117,8 @@ public class CommandSecretServiceImpl {
 	 */
 	public JSONObject stop(Long userId, Long groupId) throws Exception{
 		
+		UserVO user = userQuery.current();
+		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		log.info("专向会议停止：" + group.getName());
 		
@@ -115,6 +129,8 @@ public class CommandSecretServiceImpl {
 		commandBasicServiceImpl.startAllGroupForwards(groupIds, true, true);
 				
 		commandBasicServiceImpl.remove(group.getUserId(), groupIds);
+		
+		operationLogService.send(user.getNickname(), "停止专向指挥", user.getNickname()+"停止了专向指挥,groupId:"+groupId);
 		
 		if(splits.size() > 0){
 			return splits.getJSONObject(0);
@@ -133,7 +149,7 @@ public class CommandSecretServiceImpl {
 	 * @throws Exception
 	 */
 	public Object accept(Long userId, Long groupId) throws Exception{
-				
+		UserVO user = userQuery.current();		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		if(group == null){
 			String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
@@ -150,6 +166,7 @@ public class CommandSecretServiceImpl {
 		commandBasicServiceImpl.stopAllGroupForwardsBySrcMemberIds(groupIds, srcUserIds, true, true);
 			
 		JSONArray groupInfos = commandBasicServiceImpl.enter(userId, groupIds);
+		operationLogService.send(user.getNickname(), "同意加入专向指挥", user.getNickname() + "同意加入专向指挥，groupId:" + groupId);
 		if(groupInfos.size() > 0){
 			JSONArray splits = groupInfos.getJSONObject(0).getJSONArray("splits");
 			if(splits.size() > 0){
@@ -170,7 +187,7 @@ public class CommandSecretServiceImpl {
 	 * @throws Exception
 	 */
 	public void refuse(Long userId, Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		if(group == null){
 //			String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
@@ -182,6 +199,7 @@ public class CommandSecretServiceImpl {
 		
 		List<Long> groupIds = new ArrayListWrapper<Long>().add(groupId).getList();
 		commandBasicServiceImpl.remove(group.getUserId(), groupIds);
+		operationLogService.send(user.getNickname(), "拒绝加入专向指挥", user.getNickname() + "拒绝进入专向指挥，groupId:" + groupId);
 	}
 	
 	/**

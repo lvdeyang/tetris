@@ -39,11 +39,14 @@ import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
+import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
@@ -88,7 +91,13 @@ public class CommandCooperateServiceImpl {
 	private CommandCommonUtil commandCommonUtil;
 	
 	@Autowired
-	private ExecuteBusinessProxy executeBusiness;	
+	private ExecuteBusinessProxy executeBusiness;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	/**
 	 * 
@@ -103,7 +112,7 @@ public class CommandCooperateServiceImpl {
 	 * @throws Exception
 	 */
 	public Object start(Long groupId, List<Long> userIdArray) throws Exception{
-		
+		UserVO user = userQuery.current();
 		JSONArray chairSplits = new JSONArray();
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
@@ -294,7 +303,7 @@ public class CommandCooperateServiceImpl {
 //		membersResponse(group, acceptMembers, null);
 
 		}
-		
+		operationLogService.send(user.getNickname(), "开启协同指挥", user.getNickname() + "开启协同指挥，groupId:" + groupId + "，userIds:" + userIdArray.toString());
 		return chairSplits;
 	}
 	
@@ -311,7 +320,7 @@ public class CommandCooperateServiceImpl {
 	 * @throws Exception
 	 */
 	public Object start_new(Long groupId, List<Long> userIdArray) throws Exception{
-		
+		UserVO user = userQuery.current();
 		JSONArray chairSplits = new JSONArray();
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
@@ -532,7 +541,7 @@ public class CommandCooperateServiceImpl {
 		membersResponse_new(group, cooperateMembers, null);
 
 		}
-		
+		operationLogService.send(user.getNickname(), "开启协同指挥", user.getNickname() + "开启协同指挥，groupId:" + groupId + "，userIds:" + userIdArray.toString());
 		return chairSplits;
 	}
 
@@ -547,7 +556,7 @@ public class CommandCooperateServiceImpl {
 	 * @throws Exception
 	 */
 	public void agree(Long userId, Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -578,6 +587,7 @@ public class CommandCooperateServiceImpl {
 		membersResponse(group, acceptMembers, null);
 		
 		}
+		operationLogService.send(user.getNickname(), "同意协同指挥", user.getNickname() + "同意协同指挥，groupId:" + groupId);
 	}
 	
 	/**
@@ -591,7 +601,7 @@ public class CommandCooperateServiceImpl {
 	 * @throws Exception
 	 */
 	public void refuse(Long userId, Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -616,6 +626,7 @@ public class CommandCooperateServiceImpl {
 		membersResponse(group, null, refuseMembers);
 		
 		}
+		operationLogService.send(user.getNickname(), "拒绝协同指挥", user.getNickname() + "拒绝协同指挥groupId:" + groupId);
 	}
 	
 	/**
@@ -630,7 +641,7 @@ public class CommandCooperateServiceImpl {
 		 * @throws Exception
 		 */
 		public JSONArray revoke(Long userId, Long groupId) throws Exception{
-			
+			UserVO user = userQuery.current();
 			synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 				CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -729,7 +740,7 @@ public class CommandCooperateServiceImpl {
 					consumeIds.add(ws.getId());
 				}
 				websocketMessageService.consumeAll(consumeIds);
-				
+				operationLogService.send(user.getNickname(), "撤销协同指挥", user.getNickname() + "撤销协同指挥groupId:" + groupId + "，userId:" + userId);
 				return groupInfos;		
 			}
 		}
@@ -746,7 +757,7 @@ public class CommandCooperateServiceImpl {
 	 * @throws Exception
 	 */
 	public JSONArray revokeBatch(List<Long> userIds, Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 		
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -851,7 +862,7 @@ public class CommandCooperateServiceImpl {
 				consumeIds.add(ws.getId());
 			}
 			websocketMessageService.consumeAll(consumeIds);			
-			
+			operationLogService.send(user.getNickname(), "撤销协同指挥", user.getNickname() + "撤销协同指挥groupId:" + groupId + ", userIds:" + userIds.toString());
 			return groupInfos;
 		}
 	}
@@ -868,7 +879,7 @@ public class CommandCooperateServiceImpl {
 	 * @throws Exception
 	 */
 	public JSONArray revokeBatch_new(List<Long> userIds, Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 		
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -980,7 +991,7 @@ public class CommandCooperateServiceImpl {
 				consumeIds.add(ws.getId());
 			}
 			websocketMessageService.consumeAll(consumeIds);			
-			
+			operationLogService.send(user.getNickname(), "撤销协同指挥", user.getNickname() + "撤销协同指挥groupId:" + groupId + ", userIds:" + userIds.toString());
 			return groupInfos;
 		}
 	}
