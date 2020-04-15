@@ -692,7 +692,7 @@ public class CommandMeetingSpeakServiceImpl {
 		//生成connectBundle，携带转发信息
 		CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 		LogicBO logic = commandBasicServiceImpl.openBundle(null, null, needPlayers, allNeedForwards, null, codec, group.getUserId());
-		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, allNeedForwards, null, null, null, codec, group.getUserId());
+		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, allNeedForwards, null, null, null, codec, group.getUserId());
 		logic.merge(logicCastDevice);
 		
 		executeBusiness.execute(logic, group.getName() + " " + businessInfo + " " + speakMembers.size() + "个新发言人");

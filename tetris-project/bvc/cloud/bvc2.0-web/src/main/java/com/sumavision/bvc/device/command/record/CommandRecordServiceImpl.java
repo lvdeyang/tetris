@@ -28,6 +28,7 @@ import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
+import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
@@ -81,6 +82,9 @@ public class CommandRecordServiceImpl {
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
+	
+	@Autowired
+	private CommandCastServiceImpl commandCastServiceImpl;
 
 	@Autowired
 	private ResourceService resourceService;
@@ -517,6 +521,11 @@ public class CommandRecordServiceImpl {
 			}
 		}
 		commandGroupUserPlayerDao.save(players);
+		
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, players, null, null, null, null, codec, -1L);
+		executeBusiness.execute(logicCastDevice, "播放录像片段");
+		
 		return players;
 	}
 
@@ -541,6 +550,11 @@ public class CommandRecordServiceImpl {
 			needFreePlayers.add(player);
 		}
 		commandGroupUserPlayerDao.save(needFreePlayers);
+		
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(needFreePlayers, null, null, needFreePlayers, codec, -1L);
+		executeBusiness.execute(logicCastDevice, "停止播放录像片段");
+		
 		return needFreePlayers;
 		
 	}

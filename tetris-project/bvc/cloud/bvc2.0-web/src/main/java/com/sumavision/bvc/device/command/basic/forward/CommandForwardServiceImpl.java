@@ -407,6 +407,7 @@ public class CommandForwardServiceImpl {
 			
 			List<CommandGroupForwardDemandPO> needDemands = new ArrayList<CommandGroupForwardDemandPO>();
 			List<CommandGroupUserPlayerPO> needPlayers = new ArrayList<CommandGroupUserPlayerPO>();
+			List<CommandGroupUserPlayerPO> playFilePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 			for(CommandGroupForwardDemandPO demand : demands){
 				if(usefulPlayersCount > 0){
 					demand.setExecuteStatus(ForwardDemandStatus.DONE);
@@ -420,6 +421,7 @@ public class CommandForwardServiceImpl {
 						result.add(bo);
 					}else if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_FILE)){
 						//转发文件
+						playFilePlayers.add(player);
 						player.setBusinessName(group.getName() + "转发" + demand.getResourceName() + "文件");
 						player.setPlayerBusinessType(PlayerBusinessType.COMMAND_FORWARD_FILE);
 						player.setPlayUrl(demand.getPlayUrl());
@@ -447,7 +449,7 @@ public class CommandForwardServiceImpl {
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 			LogicBO logic = commandBasicServiceImpl.openBundle(null, needDemands, needPlayers, null, null, codec, group.getUserId());
-			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(needDemands, null, null, null, null, codec, group.getUserId());
+			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(needDemands, playFilePlayers, null, null, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);
 			
 			StringBufferWrapper description = new StringBufferWrapper()
@@ -618,6 +620,7 @@ public class CommandForwardServiceImpl {
 			
 //			List<CommandGroupForwardDemandPO> stopDemands = commandCommonUtil.queryForwardDemandsByIds(demands, demandIds);
 			List<CommandGroupUserPlayerPO> allNeedClosePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+			List<CommandGroupUserPlayerPO> playFilePlayers = new ArrayList<CommandGroupUserPlayerPO>();			
 			for(CommandGroupForwardDemandPO demand : stopDemands){
 				Long dstMemberId = demand.getDstMemberId();
 				CommandGroupMemberPO dstMember = commandCommonUtil.queryMemberById(members, dstMemberId);
@@ -625,6 +628,9 @@ public class CommandForwardServiceImpl {
 				List<CommandGroupUserPlayerPO> players = dstMember.getPlayers();
 				for(CommandGroupUserPlayerPO player : players){
 					if(player.getBundleId().equals(demand.getDstVideoBundleId())){
+						if(player.playingFile()){
+							playFilePlayers.add(player);
+						}
 						player.setFree();
 						needFreePlayers.add(player);
 						JSONObject split = new JSONObject();
@@ -655,7 +661,7 @@ public class CommandForwardServiceImpl {
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 			LogicBO logic = commandBasicServiceImpl.closeBundle(null, stopDemands, allNeedClosePlayers, codec, group.getUserId());
-			LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(stopDemands, null, null, allNeedClosePlayers, codec, group.getUserId());
+			LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(playFilePlayers, null, null, allNeedClosePlayers, codec, group.getUserId());
 			logic.merge(logicCastDevice);
 			executeBusiness.execute(logic, group.getName() + " 会议停止多个转发");
 			
