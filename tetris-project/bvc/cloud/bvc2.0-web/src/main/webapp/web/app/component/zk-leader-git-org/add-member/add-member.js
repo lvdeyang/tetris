@@ -1,11 +1,11 @@
 define([
-  'text!' + window.APPPATH + 'component/zk-leader/add-member/add-member.html',
+  'text!' + window.APPPATH + 'component/zk-leader/add-member-new/add-member-new.html',
   'restfull',
   'jquery',
   'vue',
   'config',
   'element-ui',
-  'css!' + window.APPPATH + 'component/zk-leader/add-member/add-member.css'
+  'css!' + window.APPPATH + 'component/zk-leader/add-member-new/add-member-new.css'
 ], function (tpl, ajax, $, Vue, config) {
 
   //组件名称
