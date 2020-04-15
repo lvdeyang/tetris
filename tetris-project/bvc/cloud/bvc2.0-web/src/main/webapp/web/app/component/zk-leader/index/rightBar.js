@@ -154,7 +154,8 @@ define([
                 //滚动外容器的高度，动态的
                 contentStyleObj: {
                     height: ''
-                }
+                },
+                filterText: ''
             }
         },
         methods: {
@@ -195,6 +196,11 @@ define([
                     this.switchStatus2 = true;
                     this.switchStatus3 = false;
                 }
+            },
+            //树形组件自定义过滤方法
+            filterNode: function (value, data) {
+                if (!value) return true;
+                return data.name.indexOf(value) !== -1;
             },
 
             //-----第二部分 菜单 复选框的勾选事件 start -----
@@ -546,9 +552,16 @@ define([
                     });
                 } else if (self.contextMenu.currentNode.type === 'RECORD_PLAYBACK') {
                     var recordId = self.contextMenu.currentNode.id;
-                    ajax.post('/command/record/start/playback', {recordId: recordId}, function (data) {
-                        self.qt.invoke('vodRecordFileStart', $.toJSON(data));
-                    });
+                    return false;
+                    if (self.contextMenu.currentNode.level == 2) {
+                        ajax.post('/command/record/start/playback', {recordId: recordId}, function (data) {
+                            self.qt.invoke('vodRecordFileStart', $.toJSON(data));
+                        });
+                    } else if (self.contextMenu.currentNode.level == 3) { //播放片段
+                        ajax.post('/command/record/start/playback/fragments', {fragmentIds: [recordId]}, function (data) {
+                            self.qt.invoke('vodRecordFileStart', $.toJSON(data));
+                        });
+                    }
                 }
                 self.handleContextMenuClose();
             },
@@ -711,6 +724,65 @@ define([
                         }
                     }
                 });
+            },
+            //不需要成员同意  自动进入指挥/会议
+            autoEnterCommand: function (data, type) {
+                var self = this;
+                if (data) {
+                    var playerSettings = [];
+                    var finded = false;
+                    if (type == 'meet') {
+                        for (var j = 0; j < self.meet.entered.length; j++) {
+                            if (self.meet.entered[j].id == data.id && self.meet.entered[j].type === 'command') {
+                                finded = true;
+                                break;
+                            }
+                        }
+                        if (!finded) {
+                            self.meet.entered.push({
+                                id: data.id,
+                                name: data.name,
+                                creator: data.creator,
+                                type: 'command'
+                            });
+                        }
+                        if (!self.meet.current) {
+                            //类型一样，渲染的时候才会显示文字，而不是id
+                            self.meet.currentId = data.id.toString();
+                            self.meet.current = data;
+                            self.currentGroupChange(self.meet.currentId);
+                        }
+                    } else {
+                        for (var j = 0; j < self.group.entered.length; j++) {
+                            if (self.group.entered[j].id == data.id && self.group.entered[j].type === 'command') {
+                                finded = true;
+                                break;
+                            }
+                        }
+                        if (!finded) {
+                            self.group.entered.push({
+                                id: data.id,
+                                name: data.name,
+                                creator: data.creator,
+                                type: 'command'
+                            });
+                        }
+                        //进会时 调返回的数据，为了不影响指挥的代码
+                        if (!self.group.current) {
+                            self.group.currentId = data.id;
+                            self.group.current = data;
+                            self.currentGroupChange(self.group.currentId);
+                        }
+                    }
+                    if (data.splits && data.splits.length > 0) {
+                        for (var j = 0; j < data.splits.length; j++) {
+                            playerSettings.push(data.splits[j]);
+                        }
+                    }
+                    if (playerSettings.length > 0) {
+                        self.qt.invoke('enterGroups', $.toJSON(playerSettings));
+                    }
+                }
             },
 
             //获取指挥工作台树形菜单已进入的指挥数据
@@ -941,19 +1013,17 @@ define([
                         ajax.post('/command/vod/resource/file/start/batch', {resourceFileIds: $.toJSON(resourceFileIds)}, function (data) {
                             self.qt.invoke('vodResourceFiles', $.toJSON(data));
                         });
-                    }else if (self.currentTab == 3) {
+                    } else if (self.currentTab == 3) {
                         //点播录像
                         if (self.record.select.length <= 0) {
                             self.qt.warning('消息提示', '您还没有选中文件');
                             return;
                         }
-                        console.log(self.record.select)
                         var recordIds = [];
                         for (var i = 0; i < self.record.select.length; i++) {
                             recordIds.push(self.record.select[i].id);
                         }
-                        ajax.post('/command/record/start/playback/fragments', {recordId: recordIds}, function (data) {
-                            console.log(data)
+                        ajax.post('/command/record/start/playback/fragments', {fragmentIds: recordIds}, function (data) {
                             self.qt.invoke('vodResourceFiles', $.toJSON([data]));
                         });
                     }
@@ -1202,7 +1272,6 @@ define([
             //指挥工作台中的 下拉菜单
             currentGroupChange: function (v) {
                 console.log('下拉：' + v)
-                console.log(this.group)
                 if (!v) return;
                 var self = this;
                 var currentGroup = null;
@@ -1336,17 +1405,17 @@ define([
                 if (!self.buttons.addMember) return;
                 if (self.differentiate === 1) {
                     id = self.group.current.id;
-                    type = self.group.current.type;
+                    type = 'command';
                 } else {
                     id = self.meet.current.id;
-                    type = self.meet.current.type;
+                    type = 'meeting';
                 }
                 self.qt.window('/router/zk/leader/add/member', {
                     id: id,
                     type: type
                 }, {
-                    width: 1366,
-                    height: 740
+                    width: 1000,
+                    height: 600
                 });
             },
             //强退成员
@@ -1954,9 +2023,12 @@ define([
             }
         },
         watch: {
+            filterText: function (val) {
+                this.$refs.tree.filter(val);
+            },
             currentTab: function () {
                 var self = this;
-                if(self.currentTab == -1)return;
+                if (self.currentTab == -1) return;
                 this.switchStatus1 = false;
                 this.switchStatus2 = true;
                 this.switchStatus3 = false;
@@ -2108,7 +2180,12 @@ define([
                 //监听到添加成员，刷新树
                 self.qt.on('commandMemberAdd', function (e) {
                     e = e.params;
-                    self.currentGroupChange(self.group.current.id);
+                    var type=e.type;
+                    if(type === 'command'){
+                        self.currentGroupChange(self.group.current.id);
+                    }else if(type === 'meeting'){
+                        self.currentGroupChange(self.meet.current.id);
+                    }
                     self.qt.invoke('groupMembers', e);
                 });
 
@@ -2339,7 +2416,39 @@ define([
                             self.qt.invoke('groupMembers', $.toJSON(splits));
                         }
                     })
-                })
+                });
+
+                //开始指挥，不需要成员同意自动进入指挥
+                self.qt.on('autoCommandStart', function (e) {
+                    //加参数是为了区分进会时 ，不影响指挥的代码
+                    self.switchStatus1 = true;
+                    self.switchStatus2 = false;
+                    self.switchStatus3 = false;
+                    self.differentiate = 1;
+                    $('.triggerLi1').addClass('focusLight');
+                    $('.triggerLi2').removeClass('focusLight');
+                    $('.highLight').css('left', '7px');
+                    self.refreshCommand(null, function () {
+                        self.autoEnterCommand(e.params);
+                    });
+                    self.qt.success(e.params.businessInfo);
+                });
+
+                //开始会议，不需要成员同意自动进入指挥
+                self.qt.on('autoMeetingStart', function (e) {
+                    self.switchStatus1 = false;
+                    self.switchStatus2 = false;
+                    self.switchStatus3 = true;
+                    self.differentiate = 2;
+                    $('.triggerLi1').removeClass('focusLight');
+                    $('.triggerLi2').addClass('focusLight');
+                    $('.highLight').css('left', '167px');
+                    //加参数是为了区分进会时 ，不影响指挥的代码
+                    self.refreshCommand('meet', function () {
+                        self.autoEnterCommand(e.params, 'meet');
+                    });
+                    self.qt.success(e.params.businessInfo);
+                });
             });
         }
     });

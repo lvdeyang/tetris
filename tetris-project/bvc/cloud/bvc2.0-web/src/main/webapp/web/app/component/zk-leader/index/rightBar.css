@@ -143,8 +143,8 @@ li.focusLight {
 
 .commandTable{
     position:absolute;
-    left:0;
-    top:63px;
+    left: -9px;
+    top: 75px;
     width:310px;
     bottom:215px;
     overflow: hidden;
@@ -437,8 +437,7 @@ img {
 
 /*下拉框样式修改*/
 .el-input__inner {
-    background-color: #1e67a09e;
-    border: none;
+    background-color: transparent;
     height: 40px;
     line-height: 40px;
     font-size: 18px;
@@ -446,6 +445,7 @@ img {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    border: 2px solid #7e9eb7;
 }
 
 /*箭头的样式*/
