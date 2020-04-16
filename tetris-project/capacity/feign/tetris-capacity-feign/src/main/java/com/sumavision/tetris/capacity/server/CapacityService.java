@@ -43,8 +43,8 @@ public class CapacityService {
 	 * <b>日期：</b>2019年12月16日 上午9:19:33
 	 * @param String transcodeInfo 流转码信息
 	 */
-	public void addTranscode(String transcodeInfo) throws Exception{
-		JsonBodyResponseParser.parseObject(capacityFeign.addTranscode(transcodeInfo), null);
+	public String addTranscode(String transcodeInfo) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.addTranscode(transcodeInfo), String.class);
 	}
 	
 	/**
@@ -52,10 +52,32 @@ public class CapacityService {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年12月16日 上午9:20:04
-	 * @param String id 任务标识
+	 * @param String task 任务信息
 	 */
-	public void deleteTranscode(String id) throws Exception{
-		JsonBodyResponseParser.parseObject(capacityFeign.deleteTranscode(id), null);
+	public String deleteTranscode(String task) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.deleteTranscode(task), String.class);
+	}
+	
+	/**
+	 * 重启流转码<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月14日 上午9:20:04
+	 * @param String task 任务信息
+	 */
+	public String rebootTranscode(String task) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.rebootTranscode(task), String.class);
+	}
+	
+	/**
+	 * 停止流转码<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月14日 上午9:20:04
+	 * @param String task 任务信息
+	 */
+	public String stopTranscode(String task) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.stopTranscode(task), String.class);
 	}
 	
 	/**

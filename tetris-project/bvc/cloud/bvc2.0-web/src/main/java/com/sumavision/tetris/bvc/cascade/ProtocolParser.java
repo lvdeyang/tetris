@@ -5,11 +5,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.w3c.dom.Node;
 
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
+import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
@@ -18,10 +24,13 @@ import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl;
 import com.sumavision.bvc.device.command.cooperate.CommandCooperateServiceImpl;
 import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
+import com.sumavision.tetris.auth.login.LoginService;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.commons.util.xml.XMLReader;
+import com.sumavision.tetris.mvc.constant.HttpConstant;
+import com.sumavision.tetris.mvc.wrapper.CopyHeaderHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -51,6 +60,35 @@ public class ProtocolParser {
 	
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private LoginService loginService;
+	
+	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
+	/**
+	 * 重新绑定当前线程的请求，写入用户登录信息爱<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月15日 下午5:49:38
+	 * @param String srcNo 可能是操作用户号码，也可能是app号码
+	 * @param String commandname 命令头 
+	 */
+	private void rebindRequest(String srcNo, String commandname) throws Exception{
+		Long userId = 2l;
+		if(!"syncinfo".equals(commandname) && !"syncroutelink".equals(commandname) && !"authnotify".equals(commandname)){
+			FolderUserMap map = folderUserMapDao.findByUserNo(srcNo);
+			if(map != null) userId = map.getUserId();
+		}
+		
+		String token = loginService.doUserIdLogin(userId);
+		
+		ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
+		final CopyHeaderHttpServletRequestWrapper request = new CopyHeaderHttpServletRequestWrapper(attributes.getRequest());
+		request.addHeader(HttpConstant.HEADER_AUTH_TOKEN, token);
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request));
+	}
 	
 	/**
 	 * 解析根节点节点名称<br/>
@@ -86,6 +124,7 @@ public class ProtocolParser {
 		String rootNodeName = parseRootNodeName(xml);
 		XMLReader reader = new XMLReader(xml);
 		String commandname = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".commandname").toString());
+		rebindRequest(srcNo, commandname);
 		if("syncinfo".equals(commandname) || "syncroutelink".equals(commandname) || "authnotify".equals(commandname)){
 			resourceRemoteService.notifyXml(commandname, xml);
 		}else{

@@ -126,7 +126,7 @@ public class CommandSilenceServiceImpl {
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 			LogicBO logic = commandBasicServiceImpl.openBundle(null, null, null, null, needDelForwards, codec, group.getUserId());
-			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, needDelForwards, null, null, codec, group.getUserId());
+			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, null, needDelForwards, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);
 			
 			//录制更新

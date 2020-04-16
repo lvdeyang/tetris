@@ -105,12 +105,12 @@ public interface BundleDao extends CommonDao<BundlePO> {
 			SOURCE_TYPE sourceType);
 
 	/** 查询状态为未同步 需要向ldap服务器同步的设备信息 **/
-	@Query("select b from BundlePO b where b.deviceModel='jv210' and (b.bundleAlias!='播放器' or b.bundleAlias is null) "
+	@Query("select b from BundlePO b where b.deviceModel='jv210'"
 			+ "and (b.syncStatus='ASYNC' or b.syncStatus is null) and (b.sourceType='SYSTEM' or b.sourceType is null) and b.folderId is not null")
 	public List<BundlePO> findBundlesSyncToLdap();
 
 	/** 查询全部可以向ldap服务器同步的设备信息 **/
-	@Query("select b from BundlePO b where b.deviceModel='jv210' and (b.bundleAlias!='播放器' or b.bundleAlias is null) "
+	@Query("select b from BundlePO b where b.deviceModel='jv210'"
 			+ "and (b.sourceType='SYSTEM' or b.sourceType is null) and b.folderId is not null")
 	public List<BundlePO> findAllBundlesSyncToLdap();
 

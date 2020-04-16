@@ -49,7 +49,27 @@ public interface CapacityFeign {
 	 * @param String id 流转码任务标识
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/delete")
-	public JSONObject deleteTranscode(@RequestParam("id") String id) throws Exception;
+	public JSONObject deleteTranscode(@RequestParam("task") String task) throws Exception;
+	
+	/**
+	 * 重启流转码<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月14日 上午9:15:51
+	 * @param String id 流转码任务标识
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/reboot")
+	public JSONObject rebootTranscode(@RequestParam("task") String task) throws Exception;
+	
+	/**
+	 * 停止流转码<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月14日 上午10:15:51
+	 * @param String id 流转码任务标识
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/stop")
+	public JSONObject stopTranscode(@RequestParam("task") String task) throws Exception;
 	
 	/**
 	 * 刷源<br/>

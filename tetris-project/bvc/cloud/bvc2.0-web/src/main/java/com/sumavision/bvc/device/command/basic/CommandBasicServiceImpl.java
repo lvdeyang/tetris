@@ -1,7 +1,6 @@
 package com.sumavision.bvc.device.command.basic;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -21,13 +20,11 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.service.ResourceService;
-import com.sumavision.bvc.basic.dao.BasicRoleDAO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
-import com.sumavision.bvc.command.group.dao.CommandGroupForwardDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.enumeration.EditStatus;
@@ -47,12 +44,10 @@ import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlaye
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
-import com.sumavision.bvc.device.command.bo.SplitBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
-import com.sumavision.bvc.device.command.exception.HasNotUsefulPlayerException;
 import com.sumavision.bvc.device.command.exception.UserHasNoAvailableEncoderException;
 import com.sumavision.bvc.device.command.exception.UserHasNoFolderException;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
@@ -104,6 +99,9 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CommandBasicServiceImpl {
 	
+	/** 是否强制接听进入指挥和会议，false需要点击同意 */
+	private static boolean autoEnter = false;
+	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
 	
@@ -112,7 +110,7 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private CommandGroupMemberDAO commandGroupMemberDao;
-		
+	
 	@Autowired
 	private ResourceBundleDAO resourceBundleDao;
 	
@@ -140,9 +138,6 @@ public class CommandBasicServiceImpl {
 	@Autowired
 	private CommandVodService commandVodService;
 
-	@Autowired
-	private BasicRoleDAO basicRoleDao;
-	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
 	
@@ -504,8 +499,259 @@ public class CommandBasicServiceImpl {
 		log.info(name + " 创建完成");
 		operationLogService.send(creatorUserBo.getName(), "新建指挥", creatorUserBo.getName() + "新建指挥groupId:" + group.getId());
 		return group;
-	}
+	}	
 	
+	/**
+	 * 刷新一个会议信息<br/>
+	 * <p>刷新内容：用户换编码器，编码器换接入层，重建参数模板</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 下午6:50:51
+	 * @param group
+	 * @return
+	 * @throws Exception
+	 */
+	private CommandGroupPO refresh(CommandGroupPO group) throws Exception{
+		
+		Long creatorUserId = group.getUserId();
+		UserBO creatorUserBo = resourceService.queryUserById(group.getUserId(), TerminalType.QT_ZK);
+		
+		//清除需要重新生成的数据
+		List<CommandGroupForwardPO> forwards = group.getForwards();		
+		forwards.removeAll(forwards);
+		
+		//参数模板
+		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();
+		AvtplPO sys_avtpl = (AvtplPO)result.get("avtpl");
+		Set<AvtplGearsPO> sys_gears = sys_avtpl.getGears();
+//		g_avtpl.setGears(new HashSet<CommandGroupAvtplGearsPO>());
+		CommandGroupAvtplPO g_avtpl = group.getAvtpl().set(sys_avtpl);//new CommandGroupAvtplPO().set(sys_avtpl);
+		g_avtpl.getGears().removeAll(g_avtpl.getGears());
+		CommandGroupAvtplGearsPO currentGear = null;
+		for(AvtplGearsPO sys_gear:sys_gears){
+			CommandGroupAvtplGearsPO g_gear = new CommandGroupAvtplGearsPO().set(sys_gear);
+			g_avtpl.getGears().add(g_gear);
+			g_gear.setAvtpl(g_avtpl);
+			currentGear = g_gear;
+			break;
+		}
+		group.setAvtpl(g_avtpl);
+		g_avtpl.setGroup(group);
+		group.setCurrentGearLevel(currentGear.getLevel());
+		
+		//保存以获得id
+//		commandGroupDao.save(group);
+		
+		List<Long> userIdList = new ArrayList<Long>();
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		for(CommandGroupMemberPO member : members){
+			userIdList.add(member.getUserId());
+		}
+		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
+		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
+		List<FolderPO> allFolders = resourceService.queryAllFolders();
+		
+		List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(userIdList);
+		
+		if(creatorUserBo.getFolderUuid() == null){
+			throw new UserHasNoFolderException(creatorUserBo.getName());
+		}
+		//从List<UserBO>取出bundleId列表，注意判空；给UserBO中的folderId赋值
+		List<String> bundleIds = new ArrayList<String>();
+		for(UserBO user : commandUserBos){
+			bundleIds.add(commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user));
+			for(FolderPO folder : allFolders){
+				if(folder.getUuid().equals(user.getFolderUuid())){
+					user.setFolderId(folder.getId());
+					break;
+				}
+			}
+		}
+		
+		//从bundleId列表查询所有的bundlePO
+		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(bundleIds);
+		
+		//从bundleId列表查询所有的视频编码1通道
+		List<ChannelSchemeDTO> videoEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.VIDEOENCODE1.getChannelId());
+		//通过视频编码通道来校验编码器是否可用
+		if(videoEncode1Channels.size() < commandUserBos.size()){
+			for(UserBO user : commandUserBos){
+				
+				//外部系统用户则跳过
+				if(queryUtil.isLdapUser(user, folderUserMaps)){
+					continue;
+				}
+				
+				boolean hasChannel = false;
+				for(ChannelSchemeDTO channel : videoEncode1Channels){
+					String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+					if(encoderId!=null && channel.getBundleId().equals(encoderId)){
+						hasChannel = true;
+						break;
+					}
+				}
+				if(!hasChannel){
+					throw new UserHasNoAvailableEncoderException(user.getName());
+				}
+			}
+		}
+		
+		//从bundleId列表查询所有的音频编码1通道
+		List<ChannelSchemeDTO> audioEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.AUDIOENCODE1.getChannelId());
+					
+		for(CommandGroupMemberPO member : members){
+			UserBO user = queryUtil.queryUserById(commandUserBos, member.getUserId());
+			if(user == null){
+				continue;//后续考虑删除成员
+			}
+			
+			//跳过ldap用户
+			if(queryUtil.isLdapUser(user, folderUserMaps)){
+				member.setOriginType(OriginType.OUTER);
+				continue;
+			}
+			
+			String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+			BundlePO bundle = queryUtil.queryBundlePOByBundleId(srcBundleEntities, encoderId);
+			//校验编码器是否存在
+			if(bundle == null){
+				throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 的编码器异常！");
+			}
+			//校验编码器是否有layerId
+			if(bundle.getAccessNodeUid() == null){
+				throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 的编码器未上线！");
+			}
+			if(member.getSrcBundleId().equals(encoderId)){
+				if(!bundle.getAccessNodeUid().equals(member.getSrcLayerId())){
+					//bundle不变，layer变了
+					member.setSrcLayerId(bundle.getAccessNodeUid());
+				}
+			}else{
+				//bundle变了
+				member.setSrcBundleId(bundle.getBundleId());
+				member.setSrcBundleName(bundle.getBundleName());
+				member.setSrcBundleType(bundle.getDeviceModel());
+				member.setSrcVenusBundleType(bundle.getBundleType());
+				member.setSrcLayerId(bundle.getAccessNodeUid());
+				
+				//遍历视频通道
+				for(ChannelSchemeDTO videoChannel : videoEncode1Channels){
+					if(videoChannel.getBundleId().equals(encoderId)){
+						member.setSrcVideoChannelId(videoChannel.getChannelId());
+						break;
+					}
+				}
+				
+				//遍历音频通道
+				for(ChannelSchemeDTO audioChannel : audioEncode1Channels){
+					if(audioChannel.getBundleId().equals(encoderId)){
+						member.setSrcAudioChannelId(audioChannel.getChannelId());
+						break;
+					}
+				}
+			}
+			
+		}
+		
+		for(CommandGroupMemberPO member : members){
+			if(member.isAdministrator()){
+				//建立所有成员到主席的转发（在下边）				
+			}else{
+				//建立主席到成员的转发
+				CommandGroupForwardPO c2m_forward = new CommandGroupForwardPO(
+						ForwardBusinessType.BASIC_COMMAND,
+						ExecuteStatus.UNDONE,
+						ForwardDstType.USER,
+						member.getId(),
+						chairmanMember.getId(),
+						chairmanMember.getSrcBundleId(),
+						chairmanMember.getSrcBundleName(),
+						chairmanMember.getSrcVenusBundleType(),
+						chairmanMember.getSrcLayerId(),
+						chairmanMember.getSrcVideoChannelId(),
+						"VenusVideoIn",//videoBaseType,
+						chairmanMember.getSrcBundleId(),
+						chairmanMember.getSrcBundleName(),
+						chairmanMember.getSrcBundleType(),
+						chairmanMember.getSrcLayerId(),
+						chairmanMember.getSrcAudioChannelId(),
+						"VenusAudioIn",//String audioBaseType,
+						null,//member.getDstBundleId(),
+						null,//member.getDstBundleName(),
+						null,//member.getDstBundleType(),
+						null,//member.getDstLayerId(),
+						null,//member.getDstVideoChannelId(),
+						"VenusVideoOut",//String dstVideoBaseType,
+						null,//member.getDstAudioChannelId(),
+						null,//member.getDstBundleName(),
+						null,//member.getDstBundleType(),
+						null,//member.getDstLayerId(),
+						null,//member.getDstAudioChannelId(),
+						"VenusAudioOut",//String dstAudioBaseType,
+						creatorUserId,
+						g_avtpl.getId(),//Long avTplId,
+						currentGear.getId(),//Long gearId,
+						DstDeviceType.WEBSITE_PLAYER,
+						null,//LiveType type,
+						null,//Long osdId,
+						null//String osdUsername);
+						);
+				c2m_forward.setGroup(group);
+				forwards.add(c2m_forward);
+				
+				//建立成员到主席的转发
+				CommandGroupForwardPO m2c_forward = new CommandGroupForwardPO(
+						ForwardBusinessType.BASIC_COMMAND,
+						ExecuteStatus.UNDONE,
+						ForwardDstType.USER,
+						chairmanMember.getId(),
+						member.getId(),
+						member.getSrcBundleId(),
+						member.getSrcBundleName(),
+						member.getSrcVenusBundleType(),
+						member.getSrcLayerId(),
+						member.getSrcVideoChannelId(),
+						"VenusVideoIn",//videoBaseType,
+						member.getSrcBundleId(),
+						member.getSrcBundleName(),
+						member.getSrcBundleType(),
+						member.getSrcLayerId(),
+						member.getSrcAudioChannelId(),
+						"VenusAudioIn",//String audioBaseType,
+						null,//chairmanMember.getDstBundleId(),
+						null,//chairmanMember.getDstBundleName(),
+						null,//chairmanMember.getDstBundleType(),
+						null,//chairmanMember.getDstLayerId(),
+						null,//chairmanMember.getDstVideoChannelId(),
+						null,//String dstVideoBaseType,
+						null,//chairmanMember.getDstAudioChannelId(),
+						null,//chairmanMember.getDstBundleName(),
+						null,//chairmanMember.getDstBundleType(),
+						null,//chairmanMember.getDstLayerId(),
+						null,//chairmanMember.getDstAudioChannelId(),
+						null,//String dstAudioBaseType,
+						creatorUserId,
+						g_avtpl.getId(),//Long avTplId,
+						currentGear.getId(),//Long gearId,
+						DstDeviceType.WEBSITE_PLAYER,
+						null,//LiveType type,
+						null,//Long osdId,
+						null//String osdUsername);
+						);
+				m2c_forward.setGroup(group);
+				forwards.add(m2c_forward);
+				
+			}
+		}
+		
+		group.setForwards(forwards);		
+		commandGroupDao.save(group);
+		
+		log.info(group.getName() + " 刷新完成");		
+		return group;
+	}
+
 	/**
 	 * 修改会议名称<br/>
 	 * <p>详细描述</p>
@@ -586,6 +832,12 @@ public class CommandBasicServiceImpl {
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 					
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		
+		//普通指挥、会议，刷新会议数据
+		if(!group.getType().equals(GroupType.SECRET)){
+			refresh(group);
+		}
+		
 		//后需考虑支持重复开始
 		if(!group.getStatus().equals(GroupStatus.STOP)){
 //			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已开始，请不要重复开始，id: " + group.getId());
@@ -598,95 +850,9 @@ public class CommandBasicServiceImpl {
 		group.setStartTime(startTime);
 		List<CommandGroupMemberPO> members = group.getMembers();
 		
-		//专向会议中，除主席外的另一个成员
-		CommandGroupMemberPO secretMember = null;
-		for(CommandGroupMemberPO member : members){
-			if(!member.isAdministrator()){
-				secretMember = member;
-				break;
-			}
-		}
-		
 		//处理主席
 		CommandGroupMemberPO chairman = commandCommonUtil.queryChairmanMember(members);
-		//TODO:先不选播放器
-//		for(CommandGroupMemberPO member : members){
-//			if(member.isAdministrator()){
-//				chairman = member;
-//				chairman.setMemberStatus(MemberStatus.CONNECT);
-//				//查找播放器
-//				List<CommandGroupUserPlayerPO> players = new ArrayList<CommandGroupUserPlayerPO>();
-//				if(locationIndex == -1){
-//					players = commandCommonServiceImpl.userChoseUsefulPlayers(member.getUserId(), PlayerBusinessType.BASIC_COMMAND, members.size()-1, false);
-//				}else{
-//					//只根据locationIndex选择一个播放器
-//					CommandGroupUserPlayerPO player = commandCommonServiceImpl.userChosePlayerByLocationIndex(member.getUserId(), PlayerBusinessType.PLAY_DEVICE, locationIndex);
-//					players.add(player);
-//				}
-//				int usefulPlayersCount = players.size();
-//				if(group.getType().equals(GroupType.SECRET) && usefulPlayersCount < 1){
-//					throw new HasNotUsefulPlayerException();
-//				}
-//				log.info(new StringBufferWrapper()
-//						.append(group.getName()).append(" 指挥开始，")
-//						.append("成员总数（除主席）为 ").append(members.size()-1)
-//						.append(" 主席可用的播放器数为 ").append(usefulPlayersCount).toString());
-//				
-//				//处理所有给主席的转发
-//				for(CommandGroupForwardPO forward : forwards){
-//					if(chairman.getId().equals(forward.getDstMemberId())){
-//						if(usefulPlayersCount > 0){
-//							CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount);
-//							CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
-//							if(group.getType().equals(GroupType.BASIC)){
-//								player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
-//								player.setBusinessName(group.getName() + "：" + srcMember.getUserName());//添加成员名称
-//								player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
-//							}else if(group.getType().equals(GroupType.SECRET)){
-//								player.setBusinessId(group.getId().toString());
-//								player.setBusinessName("正在与" + secretMember.getUserName() + "专向" + commandString);
-//								player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
-//							}else if(group.getType().equals(GroupType.MEETING)){
-//								player.setBusinessId(group.getId().toString() + "-" + srcMember.getUserId());
-//								player.setBusinessName(group.getName() + "：" + srcMember.getUserName());//添加成员名称
-//								player.setPlayerBusinessType(PlayerBusinessType.CHAIRMAN_BASIC_COMMAND);
-//							}
-//							
-//							//用于返回的分屏信息
-//							JSONObject split = new JSONObject();
-//							split.put("serial", player.getLocationIndex());
-//							split.put("bundleId", player.getBundleId());
-//							split.put("bundleNo", player.getCode());
-//							split.put("businessId", player.getBusinessId());
-//							split.put("status", "start");
-//							if(group.getType().equals(GroupType.BASIC) || group.getType().equals(GroupType.MEETING)){
-//								split.put("businessType", PlayerBusinessType.CHAIRMAN_BASIC_COMMAND.getCode());
-//								split.put("businessInfo", player.getBusinessName());
-//							}else if(group.getType().equals(GroupType.SECRET)){
-//								split.put("businessType", PlayerBusinessType.SECRET_COMMAND.getCode());
-//								split.put("businessInfo", player.getBusinessName());
-//							}
-//							Date fightTime = commandFightTimeServiceImpl.calculateCurrentFightTime(group);
-//							if(fightTime != null){
-//								split.put("fightTime", DateUtil.format(fightTime, DateUtil.dateTimePattern));
-//							}
-//							chairSplits.add(split);
-//							
-//							//给转发设置目的
-//							forward.setDstPlayer(player);
-//							player.setMember(chairman);
-//							usefulPlayersCount--;
-//						}else{
-//							forward.setExecuteStatus(ExecuteStatus.NO_AVAILABLE_PLAYER);
-//						}
-//					}
-//				}
-//				if(chairman.getPlayers() == null) chairman.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
-//				chairman.getPlayers().clear();
-//				chairman.getPlayers().addAll(players);
-//				break;
-//			}
-//		}
+		chairman.setMemberStatus(MemberStatus.CONNECT);
 		
 		//处理其它成员
 		for(CommandGroupMemberPO member : members){
@@ -697,72 +863,45 @@ public class CommandBasicServiceImpl {
 			
 			member.setMemberStatus(MemberStatus.CONNECTING);
 			
-//			//查找播放器
-//			CommandGroupUserPlayerPO player = commandCommonServiceImpl.userChoseUsefulPlayer(member.getUserId(), PlayerBusinessType.BASIC_COMMAND, true);
-//			if(player == null){
-//				log.info(new StringBufferWrapper().append(commandString + "成员 ").append(member.getUserName()).
-//						append(" id: ").append(member.getId()).append(" 没有可用的播放器").toString());
-//			}
-//			
-//			//处理给该成员的转发
-//			for(CommandGroupForwardPO forward : forwards){
-//				if(member.getId().equals(forward.getDstMemberId())){
-//					if(null != player){
-//						
-//						player.setBusinessId(group.getId().toString());
-//						if(group.getType().equals(GroupType.BASIC)){
-//							player.setBusinessName(group.getName() + "：" + chairman.getUserName());
-//							player.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
-//						}else if(group.getType().equals(GroupType.SECRET)){
-//							player.setBusinessName("正在与" + chairman.getUserName() + "专向" + commandString);
-//							player.setPlayerBusinessType(PlayerBusinessType.SECRET_COMMAND);
-//						}else if(group.getType().equals(GroupType.MEETING)){
-//							player.setBusinessName(group.getName());
-//							player.setPlayerBusinessType(PlayerBusinessType.BASIC_COMMAND);
-//						}
-//						
-//						//给转发设置目的
-//						forward.setDstPlayer(player);
-//						
-//						if(member.getPlayers() == null) member.setPlayers(new ArrayList<CommandGroupUserPlayerPO>());
-//						member.getPlayers().clear();
-//						member.getPlayers().add(player);
-//						player.setMember(member);
-//					}else{
-//						forward.setExecuteStatus(ExecuteStatus.NO_AVAILABLE_PLAYER);
-//					}
-//				}
-//			}
-			
 			JSONObject message = new JSONObject();
 			message.put("fromUserId", chairman.getUserId());
 			message.put("fromUserName", chairman.getUserName());
 			message.put("businessId", group.getId().toString());
 			if(group.getType().equals(GroupType.BASIC) || group.getType().equals(GroupType.MEETING)){
-				String businessType = null;
-				if(GroupType.MEETING.equals(group.getType())){
-					businessType = "meetingStart";//自动接听 TODO: meetingStartNow
-				}else{
-					businessType = "commandStart";//自动接听 TODO: commandStartNow
+				if(!autoEnter){
+					String businessType = null;
+					if(GroupType.MEETING.equals(group.getType())){
+						businessType = "meetingStart";//自动接听 TODO: meetingStartNow
+					}else{
+						businessType = "commandStart";//自动接听 TODO: commandStartNow
+					}
+					message.put("businessType", businessType);
+					message.put("businessInfo", "接受到 " + group.getName() + " 邀请，主席：" + chairman.getUserName() + "，是否进入？");
+					
+					//发送消息
+					WebsocketMessageVO ws = websocketMessageService.send(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName());
+					member.setMessageId(ws.getId());						
 				}
-				message.put("businessType", businessType);
-				message.put("businessInfo", "接受到 " + group.getName() + " 邀请，主席：" + chairman.getUserName() + "，是否进入？");
-//				message.put("businessInfo", group.getName() + " 开始了，主席：" + chairman.getUserName());
 			}else if(group.getType().equals(GroupType.SECRET)){
 				message.put("businessType", "secretStart");
 				message.put("businessInfo", chairman.getUserName() + " 邀请你专向" + commandString);
+				
+				//发送消息
+				WebsocketMessageVO ws = websocketMessageService.send(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName());
+				member.setMessageId(ws.getId());
 			}
-			
-			//发送消息。后续考虑使用CommandGroupPO.startTime作为唯一标识
-			WebsocketMessageVO ws = websocketMessageService.send(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairman.getUserId(), chairman.getUserName());
-			member.setMessageId(ws.getId());
 		}
 		
 		commandGroupDao.save(group);
 		
-		//呼叫主席
-		List<CommandGroupMemberPO> acceptMembers = new ArrayList<CommandGroupMemberPO>();
-		acceptMembers.add(chairman);
+		//自动接听则所有人接听，否则主席接听；专向指挥只有主席接听
+		List<CommandGroupMemberPO> acceptMembers = null;
+		if(autoEnter && !group.getType().equals(GroupType.SECRET)){
+			acceptMembers = members;
+		}else{
+			acceptMembers = new ArrayList<CommandGroupMemberPO>();
+			acceptMembers.add(chairman);			
+		}
 		//测试代码
 //		for(CommandGroupMemberPO member : members){
 //			acceptMembers.add(member);
@@ -825,6 +964,7 @@ public class CommandBasicServiceImpl {
 		List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
 		List<CommandGroupMemberPO> connectMembers = new ArrayList<CommandGroupMemberPO>();
 		List<CommandGroupUserPlayerPO> needClosePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+		List<CommandGroupUserPlayerPO> playFilePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 		List<Long> consumeIds = new ArrayList<Long>();
 		List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
 		CommandGroupMemberPO chairman = commandCommonUtil.queryChairmanMember(members);
@@ -871,6 +1011,9 @@ public class CommandBasicServiceImpl {
 			JSONArray splits = new JSONArray();
 			List<CommandGroupUserPlayerPO> players = member.getPlayers();
 			for(CommandGroupUserPlayerPO player : players){
+				if(player.playingFile()){
+					playFilePlayers.add(player);
+				}
 				player.setFree();
 				JSONObject split = new JSONObject();
 				split.put("serial", player.getLocationIndex());
@@ -994,7 +1137,7 @@ public class CommandBasicServiceImpl {
 		CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 		CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 		LogicBO logic = closeBundle(connectMembers, needDelDemands, needClosePlayers, codec, group.getUserId());
-		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(needDelDemands, null, null, needClosePlayers, codec, group.getUserId());
+		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(playFilePlayers, null, null, needClosePlayers, codec, group.getUserId());
 		logic.merge(logicCastDevice);
 		LogicBO logicStopRecord = commandRecordServiceImpl.stop(null, groupId, false);
 		logic.merge(logicStopRecord);
@@ -1067,7 +1210,7 @@ public class CommandBasicServiceImpl {
 				acceptMembers.add(thisMember);
 				//如果该成员状态为DISCONNECT，说明是已经拒绝了会议，现在重新进入，需要重选播放器
 				if(thisMember.getMemberStatus().equals(MemberStatus.DISCONNECT)){
-//					chosePlayersForMembers(group, acceptMembers);//TODO:放进membersResponse
+//					chosePlayersForMembers(group, acceptMembers);//后选播放器:放进membersResponse
 					membersResponse(group, acceptMembers, null);
 				}else if(thisMember.getMemberStatus().equals(MemberStatus.CONNECT)){
 					//break;
@@ -1105,8 +1248,8 @@ public class CommandBasicServiceImpl {
 			message.put("id", group.getId());
 			message.put("name", group.getName());
 			message.put("status", group.getStatus().getCode());
-			message.put("commander", chairmanMember.getId());
-			message.put("creator", chairmanMember.getId());
+			message.put("commander", chairmanMember.getUserId());
+			message.put("creator", chairmanMember.getUserId());
 			message.put("splits", splits);
 			//已经启动的会议，添加作战时间
 			GroupStatus groupStatus = group.getStatus();
@@ -1230,7 +1373,7 @@ public class CommandBasicServiceImpl {
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 			LogicBO logic = openBundle(null, null, null, null, needDelForwards, codec, group.getUserId());
-			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, needDelForwards, null, null, codec, group.getUserId());
+			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, null, needDelForwards, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);
 			
 			//录制更新
@@ -1669,26 +1812,31 @@ public class CommandBasicServiceImpl {
 				return chairSplits;
 			}
 			
-//			chairSplits = chosePlayersForMembers(group, newMembers);//TODO:去掉
+//			chairSplits = chosePlayersForMembers(group, newMembers);//后选播放器:去掉
 			
-			//发消息给新成员
-			for(CommandGroupMemberPO member : newMembers){
-				String businessType = null;
-				if(GroupType.MEETING.equals(group.getType())){
-					businessType = "meetingStart";
-				}else{
-					businessType = "commandStart";
+			//发消息给新成员（这里不用考虑专向指挥）
+			if(!autoEnter){
+				for(CommandGroupMemberPO member : newMembers){
+					String businessType = null;
+					if(GroupType.MEETING.equals(group.getType())){
+						businessType = "meetingStart";
+					}else{
+						businessType = "commandStart";
+					}
+					JSONObject message = new JSONObject();
+					message.put("businessType", businessType);
+					message.put("fromUserId", chairmanMember.getUserId());
+					message.put("fromUserName", chairmanMember.getUserName());
+					message.put("businessId", group.getId().toString());
+					message.put("businessInfo", "接受到 " + group.getName() + " 邀请，主席：" + chairmanMember.getUserName() + "，是否进入？");
+					
+					//发送消息。后续考虑使用CommandGroupPO.startTime作为唯一标识
+					WebsocketMessageVO ws = websocketMessageService.send(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairmanMember.getUserId(), chairmanMember.getUserName());
+					member.setMessageId(ws.getId());
 				}
-				JSONObject message = new JSONObject();
-				message.put("businessType", businessType);
-				message.put("fromUserId", chairmanMember.getUserId());
-				message.put("fromUserName", chairmanMember.getUserName());
-				message.put("businessId", group.getId().toString());
-				message.put("businessInfo", "接受到 " + group.getName() + " 邀请，主席：" + chairmanMember.getUserName() + "，是否进入？");
-				
-				//发送消息。后续考虑使用CommandGroupPO.startTime作为唯一标识
-				WebsocketMessageVO ws = websocketMessageService.send(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairmanMember.getUserId(), chairmanMember.getUserName());
-				member.setMessageId(ws.getId());
+			}else{
+				//自动接听，所有新成员自动接听
+				membersResponse(group, newMembers, null);
 			}
 			
 			websocketMessageService.consumeAll(consumeIds);
@@ -1826,7 +1974,7 @@ public class CommandBasicServiceImpl {
 						append(" id: ").append(member.getId()).append(" 没有可用的播放器").toString());
 			}
 			
-			member.setMemberStatus(MemberStatus.CONNECTING);
+			member.setMemberStatus(MemberStatus.CONNECTING);//TODO:这个需要吗？
 			
 			//处理主席为源、该成员为目的的普通会议转发
 			for(CommandGroupForwardPO forward : forwards){
@@ -2051,6 +2199,7 @@ public class CommandBasicServiceImpl {
 			
 			//释放这些退出或删除成员的播放器，同时如果是删人就给被删的成员发消息
 			List<CommandGroupUserPlayerPO> needFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+			List<CommandGroupUserPlayerPO> playFilePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 			List<CommandGroupMemberPO> needCloseRemoveMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO removeMember : removeMembers){
 				
@@ -2062,6 +2211,9 @@ public class CommandBasicServiceImpl {
 				JSONArray splits = new JSONArray();
 				List<CommandGroupUserPlayerPO> thisMemberFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 				for(CommandGroupUserPlayerPO player : removeMember.getPlayers()){
+					if(player.playingFile()){
+						playFilePlayers.add(player);
+					}
 					player.setFree();
 					needFreePlayers.add(player);
 //					removeMember.getPlayers().remove(player);
@@ -2076,7 +2228,7 @@ public class CommandBasicServiceImpl {
 				removeMember.getPlayers().removeAll(thisMemberFreePlayers);
 				
 				//如果是删人，发消息
-				if(mode == 1){
+				if(mode == 1 && !group.getStatus().equals(GroupStatus.STOP)){
 					JSONObject message = new JSONObject();
 					message.put("businessType", "commandMemberDelete");
 					message.put("businessId", group.getId().toString());
@@ -2179,7 +2331,7 @@ public class CommandBasicServiceImpl {
 				CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 				CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 				LogicBO logic = closeBundle(needCloseRemoveMembers, needDelDemandsForEncoder, needFreePlayers, codec, group.getUserId());
-				LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(needDelDemandsForEncoder, null, null, needFreePlayers, codec, group.getUserId());
+				LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(playFilePlayers, null, null, needFreePlayers, codec, group.getUserId());
 				logic.merge(logicCastDevice);
 				StringBufferWrapper description = new StringBufferWrapper().append(group.getName());
 				if(mode == 0){//退出
@@ -2230,7 +2382,7 @@ public class CommandBasicServiceImpl {
 		//考虑如果停会之后执行，有没有问题
 		
 		//给新进入成员和主席选播放器
-		chosePlayersForMembers(group, acceptMembers);//TODO:放进来
+		chosePlayersForMembers(group, acceptMembers);//后选播放器
 		
 		//消息消费
 		try {
@@ -2265,7 +2417,6 @@ public class CommandBasicServiceImpl {
 		List<String> acceptMemberNamesList = new ArrayList<String>();
 		
 		for(CommandGroupMemberPO acceptMember : acceptMembers){
-			acceptMember.setMemberStatus(MemberStatus.CONNECT);
 			acceptMemberIds.add(acceptMember.getId());
 			acceptMemberNamesList.add(acceptMember.getUserName());
 			allPlayers.addAll(acceptMember.getPlayers());
@@ -2273,14 +2424,46 @@ public class CommandBasicServiceImpl {
 		//save CONNECT状态
 //		commandGroupDao.save(group);
 		
-		String acceptMemberNames = StringUtils.join(acceptMemberNamesList.toArray(), ",");
+		//自动接听：给新进的人发消息，通知其开会。在会议开启时，也会给主席发，通知split信息。【专向指挥除外】
+		if(autoEnter && !group.getType().equals(GroupType.SECRET)){
+			for(CommandGroupMemberPO acceptMember : acceptMembers){
+				JSONObject message = new JSONObject();
+				message.put("id", group.getId());
+				message.put("name", group.getName());
+				message.put("status", group.getStatus().getCode());
+				message.put("commander", chairmanMember.getUserId());
+				message.put("creator", chairmanMember.getUserId());
+				List<BusinessPlayerVO> splits = new ArrayList<BusinessPlayerVO>();
+				for(CommandGroupUserPlayerPO player : acceptMember.getPlayers()){
+					BusinessPlayerVO split = new BusinessPlayerVO().set(player);
+					splits.add(split);
+				}
+				message.put("splits", splits);
+				message.put("businessId", group.getId().toString());
+				String businessType = null;
+				if(GroupType.MEETING.equals(group.getType())){
+					businessType = "meetingStartNow";//自动接听
+				}else{
+					businessType = "commandStartNow";//自动接听
+				}
+				message.put("businessType", businessType);
+				message.put("businessInfo", group.getName() + " 开始了，主席：" + chairmanMember.getUserName());
+				messageCaches.add(new MessageSendCacheBO(acceptMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
+			}
+		}
 		
-		//给会里的所有人发送消息
+		
+		//给进会的所有人发送消息
 //		GroupType groupType = group.getType();
+		String acceptMemberNames = StringUtils.join(acceptMemberNamesList.toArray(), ",");
 		if(acceptMembers.size() > 0){
 			for(CommandGroupMemberPO member : members){
 				
-				if(!MemberStatus.CONNECT.equals(member.getMemberStatus())){// || member.isAdministrator()){
+				if(!MemberStatus.CONNECT.equals(member.getMemberStatus())){
+					continue;
+				}
+				//接听成员有主席时（通常是开启会议时），不给主席发
+				if(acceptMemberIds.contains(chairmanMember.getId()) && member.isAdministrator()){
 					continue;
 				}
 				
@@ -2288,53 +2471,23 @@ public class CommandBasicServiceImpl {
 				message.put("businessType", "commandMemberOnline");
 				message.put("businessId", group.getId().toString());
 				message.put("businessInfo", acceptMemberNames + " 进入" + group.getName());
-	//			message.put("memberId", acceptMember.getId().toString());//不止一个member，换这个参数应该也不需要
+	//			message.put("memberId", acceptMember.getId().toString());//memberId这个参数并没有使用；况且这里不止一个member
 				
 				//这里把所有的播放器全部返回，不管是不是本次业务的
 				List<BusinessPlayerVO> splits = new ArrayList<BusinessPlayerVO>();
 				for(CommandGroupUserPlayerPO player : member.getPlayers()){
-	//				if(PlayerBusinessType.COOPERATE_COMMAND.equals(player.getPlayerBusinessType())){
 					BusinessPlayerVO split = new BusinessPlayerVO().set(player);
 					splits.add(split);
-	//				}
 				}
-				message.put("splits", splits);			
+				message.put("splits", splits);
 				messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
 			}
 		}
 		
-//		for(CommandGroupMemberPO acceptMember : acceptMembers){
-//			acceptMember.setMemberStatus(MemberStatus.CONNECT);
-//			acceptMemberIds.add(acceptMember.getId());
-//			allPlayers.addAll(acceptMember.getPlayers());
-//			
-//			//成员上线消息（主席进入时不发送）
-//			if(!acceptMember.isAdministrator()){
-//				JSONObject message = new JSONObject();
-//				message.put("businessType", "commandMemberOnline");
-//				message.put("businessInfo", acceptMember.getUserName() + " 进入" + group.getName());
-//				message.put("businessId", group.getId().toString());
-//				message.put("memberId", acceptMember.getId().toString());
-//				//发送
-//				for(CommandGroupMemberPO member : members){
-//					if(member.getId().equals(acceptMember.getId())) continue;
-//					if(member.isAdministrator()){
-//						//给主席添加分屏信息
-//						CommandGroupForwardPO forward = commandCommonUtil.queryForwardBySrcAndDstMemberId(forwards, acceptMember.getId(), member.getId());
-//						CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByForwardAndDstMember(forward, member);
-//						if(player != null){
-//							SplitBO split = new SplitBO().set(player);
-//							JSONArray splits = new JSONArray();
-//							splits.add((split));
-//							message.put("splits", splits);
-//						}
-//					}
-////					WebsocketMessageVO ws = websocketMessageService.send(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, member.getUserId(), member.getUserName());
-////					consumeIds.add(ws.getId());
-//					messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, member.getUserId(), member.getUserName()));
-//				}
-//			}
-//		}
+		//发完消息再把成员状态置为CONNECT
+		for(CommandGroupMemberPO acceptMember : acceptMembers){
+			acceptMember.setMemberStatus(MemberStatus.CONNECT);
+		}
 		
 		//处理拒绝用户，释放播放器
 		List<Long> refuseMemberIds = new ArrayList<Long>();
@@ -2411,7 +2564,7 @@ public class CommandBasicServiceImpl {
 		CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 		LogicBO logic = openBundle(acceptMembers, null, allPlayers, needForwards, null, codec, group.getUserId());
 		LogicBO logicDis = closeBundle(null, null, needFreePlayers, codec, group.getUserId());
-		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, needForwards, null, null, null, codec, group.getUserId());
+		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, needForwards, null, null, null, codec, group.getUserId());
 		logic.merge(logicDis);
 		logic.merge(logicCastDevice);
 		
@@ -2463,9 +2616,9 @@ public class CommandBasicServiceImpl {
 			}
 			//如果点播自己，则创建一个看自己的编码器的“本地视频”点播用户业务
 			if(memberUserId.equals(userId)){
-				throw new BaseException(StatusCode.FORBIDDEN, "请观看其它成员");
-//				UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-//				return commandVodService.seeOneselfStart(userBO, admin);
+//				throw new BaseException(StatusCode.FORBIDDEN, "请观看其它成员");
+				UserBO admin = new UserBO();admin.setId(-1L);
+				return commandVodService.seeOneselfUserStart(userBO, admin);
 			}
 			
 			//找到转发，如果已经执行则抛错			
@@ -2509,7 +2662,7 @@ public class CommandBasicServiceImpl {
 			List<CommandGroupUserPlayerPO> allPlayers = new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList();
 			Set<CommandGroupForwardPO> needForwards = new HashSetWrapper<CommandGroupForwardPO>().add(forward).getSet();
 			LogicBO logic = openBundle(null, null, allPlayers, needForwards, null, codec, group.getUserId());
-			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, needForwards, null, null, null, codec, group.getUserId());
+			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, needForwards, null, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);			
 			executeBusiness.execute(logic, dstMember.getUserName() + " 观看 " + srcMember.getUserName());
 			operationLogService.send(user.getNickname(), "主席开始观看成员", user.getNickname() + "主席开始观看成员groupId:" + groupId + ", userId:" + memberUserId);
@@ -2618,7 +2771,7 @@ public class CommandBasicServiceImpl {
 		CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 		CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 		LogicBO logic = openBundle(null, null, null, needForwards, null, codec, group.getUserId());		
-		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, needForwards, null, null, null, codec, group.getUserId());
+		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, needForwards, null, null, null, codec, group.getUserId());
 		logic.merge(logicCastDevice);
 		
 		//录制更新
@@ -2713,7 +2866,7 @@ public class CommandBasicServiceImpl {
 				CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 				CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 				LogicBO logic1 = openBundle(null, null, null, null, needDelForwards, codec, group.getUserId());
-				LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, needDelForwards, null, null, codec, group.getUserId());
+				LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, null, needDelForwards, null, null, codec, group.getUserId());
 				logic1.merge(logicCastDevice);
 //				logic.merge(logic1);
 				

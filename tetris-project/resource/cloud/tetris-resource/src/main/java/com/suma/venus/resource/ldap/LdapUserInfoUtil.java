@@ -29,7 +29,7 @@ public class LdapUserInfoUtil {
 		ldapUser.setUserAccount(user.getName());
 		//TODO：这里的密码没用
 		ldapUser.setUserPwd(Base64Util.encode(user.getId().toString()));
-		ldapUser.setUserLevel(0);
+		ldapUser.setUserLevel(1);
 		ldapUser.setUserType(user.isAdmin() ? 2 : 1);
 		ldapUser.setUserOrg(user.getFolderUuid());
 		ldapUser.setUserNode(self.getNodeUuid());
@@ -53,8 +53,6 @@ public class LdapUserInfoUtil {
 		user.setUserno(ldapUser.getUserNo());
 		user.setNickname(ldapUser.getUserName());
 		user.setUsername(ldapUser.getUserAccount());
-		//userNode用来绑定节点--这里取巧放在GroupName里面
-		user.setGroupName(ldapUser.getUserNode());
 		
 		return user;
 	}

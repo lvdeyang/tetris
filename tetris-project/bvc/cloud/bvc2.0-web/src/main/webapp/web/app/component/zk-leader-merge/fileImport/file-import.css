@@ -1,0 +1,80 @@
+.fileImport{
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, #204a6b, #327ab1, #1c6fb1, #204a6b);
+    overflow: hidden;
+}
+.title{
+    height: 30px;
+    line-height: 30px;
+    font-size: 20px;
+    color: #fff;
+    text-align: center;
+
+}
+
+.left,.right{
+    float: left;
+    width: 59%;
+    height: 100%;
+    overflow: hidden;
+}
+.left{
+    width: 40%;
+    border-right: 1px solid #d5d5d5;
+}
+/*重置table的样式*/
+.el-table{
+    color: #e0e1e2;
+}
+.el-table, .el-table__expanded-cell {
+    background-color: #0a0a0a38;
+}
+.el-table th, .el-table tr {
+    background-color: #0000004d;
+}
+.el-table--enable-row-hover .el-table__body tr:hover>td{
+    background-color: #34675d;
+    color: #fff;
+}
+.el-table--striped .el-table__body tr.el-table__row--striped.current-row td, .el-table__body tr.current-row>td, .el-table__body tr.hover-row.current-row>td, .el-table__body tr.hover-row.el-table__row--striped.current-row>td, .el-table__body tr.hover-row.el-table__row--striped>td, .el-table__body tr.hover-row>td{
+    background-color: #34675d;
+}
+
+/*重置分页样式*/
+.el-pagination__total,.el-pagination__jump {
+    color: #c0c1c3;
+}
+
+/*重置对话框样式*/
+.el-dialog__wrapper{
+    top:-80px;
+    overflow: hidden;
+}
+.el-dialog{
+    background-color: #869daf;
+}
+
+/*重置树形菜单*/
+.el-tree {
+    background: #06060663;
+    color: #c7c7c7;
+}
+.el-input__inner{
+    color: #c1c5ce;
+    background-color:#1f1d1d73;
+}
+.el-range-editor .el-range-input {
+    background-color: #0d6079;
+}
+
+.el-tree-node__content:hover {
+    background-color: #001f7533;
+}
+
+.el-tree-node:focus>.el-tree-node__content{
+    background-color: #001f7533;
+}
+.el-scrollbar__wrap{
+    overflow-x: hidden;
+}

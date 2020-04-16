@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
@@ -26,9 +25,9 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.WorkNodePO;
-import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.business.role.BusinessRoleQuery;
@@ -113,7 +112,7 @@ public class UserQueryService {
 			for(FolderUserMap map: folderUserMaps){
 				if(user.getId().equals(map.getUserId())){
 					user.setFolderId(map.getFolderId());
-					user.setFolderIndex(map.getFolderIndex().intValue());
+					user.setFolderIndex(map.getFolderIndex() != null? map.getFolderIndex().intValue(): 0);
 					user.setFolderUuid(map.getFolderUuid());
 					user.setCreater(map.getCreator());
 					break;
@@ -285,7 +284,28 @@ public class UserQueryService {
 		
 		List<UserVO> users = userQuery.queryUsersByRole(roleId);
 		
-		return transferUserVo2Bo(users);
+		List<UserBO> allUsers = transferUserVo2Bo(users);
+		
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user: allUsers){
+			userIds.add(user.getId());
+		}
+		
+		//给用户赋予文件夹信息
+		List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(userIds);
+		for(UserBO user: allUsers){
+			for(FolderUserMap map: folderUserMaps){
+				if(user.getId().equals(map.getUserId())){
+					user.setFolderId(map.getFolderId());
+					user.setFolderIndex(map.getFolderIndex().intValue());
+					user.setFolderUuid(map.getFolderUuid());
+					user.setCreater(map.getCreator());
+					break;
+				}
+			}
+		}
+		
+		return allUsers;
 	}
 	
 	/**

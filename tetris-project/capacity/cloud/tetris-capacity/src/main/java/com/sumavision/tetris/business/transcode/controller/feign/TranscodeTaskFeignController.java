@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.transcode.service.ExternalTaskService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
+import com.sumavision.tetris.business.transcode.vo.TaskVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -20,6 +22,9 @@ public class TranscodeTaskFeignController {
 	
 	@Autowired
 	private TranscodeTaskService transcodeTaskService;
+	
+	@Autowired
+	private ExternalTaskService externalTaskService;
 
 	/**
 	 * 添加流转码任务<br/>
@@ -37,7 +42,11 @@ public class TranscodeTaskFeignController {
 		
 		TranscodeTaskVO transcode = JSONObject.parseObject(transcodeInfo, TranscodeTaskVO.class);
 		
-		transcodeTaskService.addTranscodeTask(transcode);
+		if(transcode.getSystem_type() == null || transcode.getSystem_type().equals(0)){
+			transcodeTaskService.addTranscodeTask(transcode);
+		}else if(transcode.getSystem_type().equals(1)){
+			return externalTaskService.addExternalTask(transcode);
+		}
 		
 		return null;
 	}
@@ -53,10 +62,16 @@ public class TranscodeTaskFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/delete")
 	public Object delete(
-			String id,
+			String task,
 			HttpServletRequest request) throws Exception{
 		
-		transcodeTaskService.deleteTranscodeTask(id);
+		TaskVO taskVO = JSONObject.parseObject(task, TaskVO.class);
+		
+		if(taskVO.getSystem_type() == null || taskVO.getSystem_type().equals(0)){
+			transcodeTaskService.deleteTranscodeTask(taskVO.getTask_id());
+		}else if(taskVO.getSystem_type().equals(1)){
+			return externalTaskService.deleteExternalTask(taskVO);
+		}
 		
 		return null;
 	}
@@ -148,4 +163,53 @@ public class TranscodeTaskFeignController {
 		return null;
 	}
 	
+	/**
+	 * 重启转码任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月14日 上午10:46:18
+	 * @param String task 任务信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/reboot")
+	public Object reboot(
+			String task,
+			HttpServletRequest request) throws Exception{
+		
+		TaskVO taskVO = JSONObject.parseObject(task, TaskVO.class);
+		
+		if(taskVO.getSystem_type() == null || taskVO.getSystem_type().equals(0)){
+			
+		}else if(taskVO.getSystem_type().equals(1)){
+			return externalTaskService.rebootExternalTask(taskVO);
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * 停止转码任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月14日 上午10:46:18
+	 * @param String task 任务信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/stop")
+	public Object stop(
+			String task,
+			HttpServletRequest request) throws Exception{
+		
+		TaskVO taskVO = JSONObject.parseObject(task, TaskVO.class);
+		
+		if(taskVO.getSystem_type() == null || taskVO.getSystem_type().equals(0)){
+			
+		}else if(taskVO.getSystem_type().equals(1)){
+			return externalTaskService.stopExternalTask(taskVO);
+		}
+		
+		return null;
+	}
 }

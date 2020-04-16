@@ -18,5 +18,9 @@ public interface UserLiveCallDAO extends MetBaseDAO<UserLiveCallPO>{
 	 * @return UserLiveCallPO 
 	 */
 	public UserLiveCallPO findByCalledUserIdAndCallUserId(Long calledUserId, Long callUserId);
+	
+	public UserLiveCallPO findByCalledDecoderBundleId(String calledDecoderBundleId);
+	
+	public UserLiveCallPO findByCallDecoderBundleId(String callDecoderBundleId);
 
 }

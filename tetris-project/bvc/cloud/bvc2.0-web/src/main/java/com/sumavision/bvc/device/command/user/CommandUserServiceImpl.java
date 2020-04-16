@@ -698,7 +698,7 @@ public class CommandUserServiceImpl {
 		
 		//协议
 		LogicBO logic = openBundle(call, codec, admin.getId());
-		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, user.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, user.getId());
 		logic.merge(logicCast);
 		
 		executeBusiness.execute(logic, call.getCalledUsername() + "接听与" + call.getCallUsername() + "通话");
@@ -775,7 +775,7 @@ public class CommandUserServiceImpl {
 		
 		//协议
 		LogicBO logic = openBundle(call, codec, admin.getId());
-		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, user.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, user.getId());
 		logic.merge(logicCast);
 		
 		executeBusiness.execute(logic, call.getCalledUsername() + "接听与" + call.getCallUsername() + "通话");
@@ -1108,7 +1108,7 @@ public class CommandUserServiceImpl {
 		
 		//协议
 		LogicBO logic = openBundle(call, codec, admin.getId());
-		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, user.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, user.getId());
 		logic.merge(logicCast);
 		
 		executeBusiness.execute(logic, call.getCalledUsername() + "接听与" + call.getCallUsername() + "语音对讲");

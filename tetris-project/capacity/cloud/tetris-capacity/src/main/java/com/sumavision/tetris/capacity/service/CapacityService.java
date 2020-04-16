@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +110,10 @@ public class CapacityService {
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		all.setMsg_id(msg_id);
 		
+		Date date = new Date();
+        String str = "yyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(str);
+        System.out.println(sdf.format(date));
 		System.out.println("create:  " + JSONObject.toJSONString(all));
 		
 		return createAll(all, ip, port);
@@ -152,6 +158,10 @@ public class CapacityService {
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		all.setMsg_id(msg_id);
 		
+		Date date = new Date();
+        String str = "yyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(str);
+        System.out.println(sdf.format(date));
 		System.out.println("delete:  " + JSONObject.toJSONString(all));
 		
 		deleteAll(all, ip, port);
@@ -989,7 +999,11 @@ public class CapacityService {
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		output.setMsg_id(msg_id);
 		
-		System.out.println(JSONObject.toJSONString(output));
+		Date date = new Date();
+        String str = "yyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(str);
+        System.out.println(sdf.format(date));
+		System.out.println("create-output" + JSONObject.toJSONString(output));
 		
 		return createOutputs(output, capacityIp);
 	}
@@ -1032,6 +1046,12 @@ public class CapacityService {
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		output.setMsg_id(msg_id);
+		
+		Date date = new Date();
+        String str = "yyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(str);
+        System.out.println(sdf.format(date));
+		System.out.println("delete-output" + JSONObject.toJSONString(output));
 		
 		deleteOutputs(output, capacityIp);
 		

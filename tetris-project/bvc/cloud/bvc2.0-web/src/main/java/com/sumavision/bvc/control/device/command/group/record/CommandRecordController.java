@@ -175,6 +175,36 @@ public class CommandRecordController {
 	}
 	
 	/**
+	 * 开始播放多段指挥录像<br/>
+	 * <p>任选的多个指挥录像片段</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午10:13:01
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/start/playback/fragments")
+	public Object startPlaybackFragments(
+			String fragmentIds,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		List<Long> fragmentIdsArray = JSONArray.parseArray(fragmentIds, Long.class);
+		
+		List<CommandGroupUserPlayerPO> players = commandRecordServiceImpl.startPlayFragments(user.getId(), fragmentIdsArray);
+		JSONArray result = new JSONArray();
+		for(CommandGroupUserPlayerPO player : players){
+			result.add(new CommandGroupUserPlayerSettingVO().set(player));
+		}
+		return result;
+		
+	}
+
+	/**
 	 * 停止一个片段播放<br/>
 	 * <p>通常点击页面上播放器的叉子触发</p>
 	 * <b>作者:</b>zsy<br/>

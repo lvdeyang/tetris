@@ -349,6 +349,18 @@ public class CommandGroupUserPlayerPO extends AbstractBasePO {
 		this.setMember(null);
 		return this;
 	}
+	
+	/** 该播放器是否正在播放文件 */
+	public boolean playingFile(){
+		PlayerBusinessType businessType = this.playerBusinessType;
+		if(PlayerBusinessType.PLAY_FILE.equals(businessType)
+				|| PlayerBusinessType.PLAY_RECORD.equals(businessType)
+				|| PlayerBusinessType.PLAY_COMMAND_RECORD.equals(businessType)
+				|| PlayerBusinessType.COMMAND_FORWARD_FILE.equals(businessType)){
+			return true;
+		}
+		return false;
+	}
 
 	/**
 	 * 播放器索引排序，从小到大<br/>

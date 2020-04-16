@@ -18,7 +18,7 @@ define([
                 baseUrl: window.BASEPATH,
                 user: '',
                 qt: '',
-                currentTab: '0',
+                currentTab: '-1', //默认不高亮
                 switchStatus1: true, //树1的显示状态
                 switchStatus2: false, //树2的显示状态
                 switchStatus3: false, //树3的显示状态
@@ -154,37 +154,40 @@ define([
                 //滚动外容器的高度，动态的
                 contentStyleObj: {
                     height: ''
-                }
+                },
+                filterText: ''
             }
         },
         methods: {
             //顶部切换标题点击事件
             toggleMenu1: function () {
-                var self=this;
-                this.refreshCommand(null,function () {
+                var self = this;
+                this.refreshCommand(null, function () {
                     self.currentGroupChange(self.group.currentId);
                 });
                 $('.triggerLi1').addClass('focusLight');
                 $('.triggerLi2').removeClass('focusLight');
-                $('.highLight').css('left', '7px');
+                $(".highLight").css({"display": "block", "left": "7px"});
                 this.switchStatus1 = true;
                 this.switchStatus2 = false;
                 this.switchStatus3 = false;
                 this.differentiate = 1;
+                this.currentTab = '-1';
             },
             toggleMenu2: function () {
                 var self = this;
-                self.refreshCommand('meeting',function () {
+                self.refreshCommand('meeting', function () {
                     self.currentGroupChange(self.meet.currentId);
                     self.refreshEnteredGroups();
                 });
                 $('.triggerLi1').removeClass('focusLight');
                 $('.triggerLi2').addClass('focusLight');
-                $('.highLight').css('left', '167px');
+                $(".highLight").css({"display": "block", "left": "167px"});
                 this.switchStatus1 = false;
                 this.switchStatus2 = false;
                 this.switchStatus3 = true;
                 this.differentiate = 2;
+                this.currentTab = '-1';
             },
             //从头部2个tab切到左侧的时候
             handleClick: function (tab) {
@@ -193,6 +196,11 @@ define([
                     this.switchStatus2 = true;
                     this.switchStatus3 = false;
                 }
+            },
+            //树形组件自定义过滤方法
+            filterNode: function (value, data) {
+                if (!value) return true;
+                return data.name.indexOf(value) !== -1;
             },
 
             //-----第二部分 菜单 复选框的勾选事件 start -----
@@ -393,7 +401,7 @@ define([
                 self.buttons.removeCommand = false;
             },
             //获取指挥/会议列表的数据，type取值为meeting/command，如果为空则相当于command
-            refreshCommand: function (type,callback) {
+            refreshCommand: function (type, callback) {
                 var self = this;
                 self.command.data.splice(0, self.command.data.length);
                 ajax.post('/command/query/list', {type: type}, function (data) {
@@ -404,7 +412,7 @@ define([
                                 self.command.data.push(commands[i]);
                             }
                         }
-                        if(typeof callback =='function'){
+                        if (typeof callback == 'function') {
                             callback();
                         }
                     }
@@ -544,9 +552,16 @@ define([
                     });
                 } else if (self.contextMenu.currentNode.type === 'RECORD_PLAYBACK') {
                     var recordId = self.contextMenu.currentNode.id;
-                    ajax.post('/command/record/start/playback', {recordId: recordId}, function (data) {
-                        self.qt.invoke('vodRecordFileStart', $.toJSON(data));
-                    });
+                    return false;
+                    if (self.contextMenu.currentNode.level == 2) {
+                        ajax.post('/command/record/start/playback', {recordId: recordId}, function (data) {
+                            self.qt.invoke('vodRecordFileStart', $.toJSON(data));
+                        });
+                    } else if (self.contextMenu.currentNode.level == 3) { //播放片段
+                        ajax.post('/command/record/start/playback/fragments', {fragmentIds: [recordId]}, function (data) {
+                            self.qt.invoke('vodRecordFileStart', $.toJSON(data));
+                        });
+                    }
                 }
                 self.handleContextMenuClose();
             },
@@ -710,11 +725,70 @@ define([
                     }
                 });
             },
+            //不需要成员同意  自动进入指挥/会议
+            autoEnterCommand: function (data, type) {
+                var self = this;
+                if (data) {
+                    var playerSettings = [];
+                    var finded = false;
+                    if (type == 'meet') {
+                        for (var j = 0; j < self.meet.entered.length; j++) {
+                            if (self.meet.entered[j].id == data.id && self.meet.entered[j].type === 'command') {
+                                finded = true;
+                                break;
+                            }
+                        }
+                        if (!finded) {
+                            self.meet.entered.push({
+                                id: data.id,
+                                name: data.name,
+                                creator: data.creator,
+                                type: 'command'
+                            });
+                        }
+                        if (!self.meet.current) {
+                            //类型一样，渲染的时候才会显示文字，而不是id
+                            self.meet.currentId = data.id.toString();
+                            self.meet.current = data;
+                            self.currentGroupChange(self.meet.currentId);
+                        }
+                    } else {
+                        for (var j = 0; j < self.group.entered.length; j++) {
+                            if (self.group.entered[j].id == data.id && self.group.entered[j].type === 'command') {
+                                finded = true;
+                                break;
+                            }
+                        }
+                        if (!finded) {
+                            self.group.entered.push({
+                                id: data.id,
+                                name: data.name,
+                                creator: data.creator,
+                                type: 'command'
+                            });
+                        }
+                        //进会时 调返回的数据，为了不影响指挥的代码
+                        if (!self.group.current) {
+                            self.group.currentId = data.id;
+                            self.group.current = data;
+                            self.currentGroupChange(self.group.currentId);
+                        }
+                    }
+                    if (data.splits && data.splits.length > 0) {
+                        for (var j = 0; j < data.splits.length; j++) {
+                            playerSettings.push(data.splits[j]);
+                        }
+                    }
+                    if (playerSettings.length > 0) {
+                        self.qt.invoke('enterGroups', $.toJSON(playerSettings));
+                    }
+                }
+            },
 
             //获取指挥工作台树形菜单已进入的指挥数据
             refreshEnteredGroups: function () {
                 var self = this;
-                if(self.differentiate ===1){
+                if (self.differentiate === 1) {
                     self.group.entered.splice(0, self.group.entered.length);
                     ajax.post('/command/query/entered', null, function (data) {
                         if (data && data.length > 0) {
@@ -757,9 +831,9 @@ define([
                             }
                         }
                     });
-                }else{
+                } else {
                     self.meet.entered.splice(0, self.meet.entered.length);
-                    ajax.post('/command/query/entered', {type:'meeting'}, function (data) {
+                    ajax.post('/command/query/entered', {type: 'meeting'}, function (data) {
                         if (data && data.length > 0) {
                             // 把每项放到entered中
                             data.forEach(function (item) {
@@ -866,10 +940,10 @@ define([
             // 一键点播
             vodBatch: function () {
                 var self = this;
-                var num=null;  //指定播放器点播，返回来的是播放器的位置
+                var num = null;  //指定播放器点播，返回来的是播放器的位置
                 //右键点播放器会有个框表示选中
-                self.qt.invoke('getChosenPlayer',function (e) {
-                    num=e;
+                self.qt.invoke('getChosenPlayer', function (e) {
+                    num = e;
                     if (self.currentTab == 0) {
                         //点播用户
                         if (self.institution.select.length <= 0) {
@@ -880,23 +954,26 @@ define([
                         for (var i = 0; i < self.institution.select.length; i++) {
                             userIds.push(self.institution.select[i].id);
                         }
-                        if(num < 0){
+                        if (num < 0) {
                             ajax.post('/command/vod/user/start/batch', {userIds: $.toJSON(userIds)}, function (data) {
                                 self.qt.invoke('vodUsers', $.toJSON(data));
                                 self.cancelChoose();
                             });
-                        }else{ //指定播放器点播用户
-                            if(self.institution.select.length>1){
+                        } else { //指定播放器点播用户
+                            if (self.institution.select.length > 1) {
                                 self.qt.warning('只能选择一项');
                                 return;
                             }
-                            ajax.post('/command/vod/user/start/player', {userId: userIds[0],serial:num}, function (data) {
+                            ajax.post('/command/vod/user/start/player', {
+                                userId: userIds[0],
+                                serial: num
+                            }, function (data) {
                                 self.qt.invoke('vodUsers', $.toJSON([data]));
                                 self.cancelChoose();
                             });
                         }
 
-                    }else if (self.currentTab == 1) {
+                    } else if (self.currentTab == 1) {
                         //点播设备
                         if (self.device.select.length <= 0) {
                             self.qt.warning('消息提示：您还没有选中设备');
@@ -906,16 +983,19 @@ define([
                         for (var i = 0; i < self.device.select.length; i++) {
                             deviceIds.push(self.device.select[i].id);
                         }
-                        if(num < 0){
+                        if (num < 0) {
                             ajax.post('/command/vod/device/start/batch', {deviceIds: $.toJSON(deviceIds)}, function (data) {
                                 self.qt.invoke('vodDevices', $.toJSON(data));
                             });
-                        }else{
-                            if(self.device.select.length>1){
+                        } else {
+                            if (self.device.select.length > 1) {
                                 self.qt.warning('只能选择一项');
                                 return;
                             }
-                            ajax.post('/command/vod/device/start/player', {deviceId: deviceIds[0],serial:num}, function (data) {
+                            ajax.post('/command/vod/device/start/player', {
+                                deviceId: deviceIds[0],
+                                serial: num
+                            }, function (data) {
                                 self.qt.invoke('vodDevices', $.toJSON([data]));
                             });
                         }
@@ -932,6 +1012,19 @@ define([
                         }
                         ajax.post('/command/vod/resource/file/start/batch', {resourceFileIds: $.toJSON(resourceFileIds)}, function (data) {
                             self.qt.invoke('vodResourceFiles', $.toJSON(data));
+                        });
+                    } else if (self.currentTab == 3) {
+                        //点播录像
+                        if (self.record.select.length <= 0) {
+                            self.qt.warning('消息提示', '您还没有选中文件');
+                            return;
+                        }
+                        var recordIds = [];
+                        for (var i = 0; i < self.record.select.length; i++) {
+                            recordIds.push(self.record.select[i].id);
+                        }
+                        ajax.post('/command/record/start/playback/fragments', {fragmentIds: recordIds}, function (data) {
+                            self.qt.invoke('vodResourceFiles', $.toJSON([data]));
                         });
                     }
                 });
@@ -1104,7 +1197,7 @@ define([
             enterCommandBatch: function () {
                 var self = this;
                 var ids = [];
-                ids.push(self.group.currentId)
+                ids.push(self.group.currentId);
                 ajax.post('/command/basic/enter', {ids: $.toJSON(ids)}, function (data) {
                     if (data && data.length > 0) {
                         var playerSettings = [];
@@ -1130,12 +1223,6 @@ define([
                                 self.group.current = data[i];
                                 self.currentGroupChange(self.group.currentId);
                             }
-                            $('.triggerLi1').addClass('focusLight');
-                            $('.triggerLi2').removeClass('focusLight');
-                            $('.highLight').css('left', '7px');
-                            self.switchStatus1 = true;
-                            self.switchStatus2 = false;
-                            self.switchStatus3 = false;
                             if (data[i].splits && data[i].splits.length > 0) {
                                 for (var j = 0; j < data[i].splits.length; j++) {
                                     playerSettings.push(data[i].splits[j]);
@@ -1145,42 +1232,27 @@ define([
                         if (playerSettings.length > 0) {
                             self.qt.invoke('enterGroups', $.toJSON(playerSettings));
                         }
+                        self.refreshCommand();
                     }
                 });
             },
             //删除指挥
             removeCommand: function () {
                 var self = this;
-                if (!self.buttons.removeCommand) return;
-                if (self.command.select.length <= 0) {
-                    self.qt.warning('信息提示：您没有选择任何指挥组');
-                    return;
-                }
-                var ids = [];
-                for (var i = 0; i < self.command.select.length; i++) {
-                    ids.push(self.command.select[i].id);
-                }
-                ajax.post('/command/basic/remove', {ids: $.toJSON(ids)}, function (data) {
-                    self.command.select.splice(0, self.command.select.length);
-                    self.refreshCommand();
-
-                    for (var i = 0; i < ids.length; i++) {
-                        for (var j = 0; j < self.group.entered.length; j++) {
-                            if (ids[i] == self.group.entered[j].id) {
-                                self.group.entered.splice(j, 1);
-                                if (self.group.currentId == ids[i]) {
-                                    self.group.currentId = '';
-                                    self.group.current = '';
-                                }
-                                break;
-                            }
-                        }
-                    }
-                    if (!self.group.current && self.group.entered.length > 0) {
-                        self.group.current = self.group.entered[0];
-                        self.group.currentId = self.group.entered[0].id;
+                var id = self.group.currentId;
+                ajax.post('/command/basic/remove', {ids: $.toJSON([id])}, function (data) {
+                    self.qt.success('删除成功');
+                    self.refreshCommand(null, function () {
+                        self.group.currentId = self.command.data[0].id;
+                        self.group.current = {
+                            creator: JSON.parse(self.command.data[0].param).creator,
+                            id: self.command.data[0].id,
+                            name: self.command.data[0].name,
+                            status: self.command.data[0].status,
+                            type: self.command.data[0].type
+                        };
                         self.currentGroupChange(self.group.currentId);
-                    }
+                    });
                 });
             },
             //点播录制文件
@@ -1199,99 +1271,107 @@ define([
 
             //指挥工作台中的 下拉菜单
             currentGroupChange: function (v) {
-                console.log('下拉：'+v)
+                console.log('下拉：' + v)
                 if (!v) return;
                 var self = this;
                 var currentGroup = null;
                 if (typeof v === 'object') {
                     currentGroup = v;
                 } else {
-                    for (var i = 0; i < self.command.data.length; i++) {
-                        if (self.command.data[i].id == v) {
-                            currentGroup = {
-                                id: self.command.data[i].id,
-                                name: self.command.data[i].name,
-                                status: "start",
-                                type: self.command.data[i].type,
-                                creator: JSON.parse(self.command.data[i].param).creator
-                            };
-                            break;
-                        }
+                    var param = null;
+                    if (self.differentiate === 2) {
+                        param = 'meeting';
                     }
-                }
-                if (currentGroup.type.toLowerCase() === 'command') {
-                    ajax.post('/command/basic/query/members/list', {id: currentGroup.id}, function (data) {
-                        data.type = 'command';
-                        data.select = [];
-                        var tree = [];
-                        data.members.forEach(function (value) {
-                            tree = tree.concat(value.children);
-                        });
-                        self.refreshEnteredGroups();
-                        //去掉根目录那层
-                        if (self.differentiate === 1) {
-                            self.group.tree = tree;
-                            self.group.current = data;
-                        } else {
-                            self.meet.tree = tree;
-                            self.meet.current = data;
-                        }
-                        if (self.user.id == data.creator) {
-                            self.buttons.addMember = true;
-                            self.buttons.removeMember = true;
-                            self.buttons.commandReminder = true;
-                            if (data.status === 'remind') {
-                                self.buttons.isRemind = true;
-                            } else {
-                                self.buttons.isRemind = false;
+                    self.command.data.splice(0, self.command.data.length);
+                    //点击指挥\会议列表下拉框时，默认进行查询操作，实时显示已开启、停止的指挥\会议
+                    self.refreshCommand(param, function () {
+                        for (var i = 0; i < self.command.data.length; i++) {
+                            if (self.command.data[i].id == v) {
+                                currentGroup = {
+                                    id: self.command.data[i].id,
+                                    name: self.command.data[i].name,
+                                    status: "start",
+                                    type: self.command.data[i].type,
+                                    creator: JSON.parse(self.command.data[i].param).creator
+                                };
+                                break;
                             }
-                            self.buttons.cooperativeCommand = true;
-                            self.buttons.cancelCooperative = true;
-                            self.buttons.commandForward = true;
-                            self.buttons.silenceUp = true;
-                            self.buttons.silenceDown = true;
-                            self.buttons.sendMessage = true;
-                            self.buttons.commandRecord = true;
-                            self.buttons.isRecord = data.isRecord;
-                            self.buttons.commandRestart = true;
-                            if (data.status === 'pause') {
-                                self.buttons.commandPause = false;
-                                self.buttons.isPause = true;
-                            } else {
-                                self.buttons.commandPause = true;
-                                self.buttons.isPause = false;
-                            }
-                            self.buttons.exitCommand = true;
-                        } else {
-                            self.buttons.addMember = false;
-                            self.buttons.removeMember = false;
-                            self.buttons.commandReminder = false;
-                            self.buttons.cooperativeCommand = true;
-                            self.buttons.cancelCooperative = true;
-                            self.buttons.commandForward = false;
-                            self.buttons.silenceUp = false;
-                            self.buttons.silenceDown = false;
-                            self.buttons.sendMessage = false;
-                            self.buttons.commandRecord = false;
-                            self.buttons.isRecord = false;
-                            self.buttons.commandPause = false;
-                            self.buttons.commandRestart = false;
-                            self.buttons.isPause = false;
-                            self.buttons.exitCommand = true;
                         }
-                        if (data.status === 'remind') {
-                            var finded = false;
-                            for (var i = 0; i < self.group.remindIds.length; i++) {
-                                if (self.group.remindIds[i] == data.id) {
-                                    finded = true;
-                                    break;
+                        if (currentGroup.type.toLowerCase() === 'command') {
+                            ajax.post('/command/basic/query/members/list', {id: currentGroup.id}, function (data) {
+                                data.type = 'command';
+                                data.select = [];
+                                var tree = [];
+                                data.members.forEach(function (value) {
+                                    tree = tree.concat(value.children);
+                                });
+                                self.refreshEnteredGroups();
+                                //去掉根目录那层
+                                if (self.differentiate === 1) {
+                                    self.group.tree = tree;
+                                    self.group.current = data;
+                                } else {
+                                    self.meet.tree = tree;
+                                    self.meet.current = data;
                                 }
-                            }
-                            if (!finded) {
-                                self.group.remindIds.push(data.id);
-                            }
+                                if (self.user.id == data.creator) {
+                                    self.buttons.addMember = true;
+                                    self.buttons.removeMember = true;
+                                    self.buttons.commandReminder = true;
+                                    if (data.status === 'remind') {
+                                        self.buttons.isRemind = true;
+                                    } else {
+                                        self.buttons.isRemind = false;
+                                    }
+                                    self.buttons.cooperativeCommand = true;
+                                    self.buttons.cancelCooperative = true;
+                                    self.buttons.commandForward = true;
+                                    self.buttons.silenceUp = true;
+                                    self.buttons.silenceDown = true;
+                                    self.buttons.sendMessage = true;
+                                    self.buttons.commandRecord = true;
+                                    self.buttons.isRecord = data.isRecord;
+                                    self.buttons.commandRestart = true;
+                                    if (data.status === 'pause') {
+                                        self.buttons.commandPause = false;
+                                        self.buttons.isPause = true;
+                                    } else {
+                                        self.buttons.commandPause = true;
+                                        self.buttons.isPause = false;
+                                    }
+                                    self.buttons.exitCommand = true;
+                                } else {
+                                    self.buttons.addMember = false;
+                                    self.buttons.removeMember = false;
+                                    self.buttons.commandReminder = false;
+                                    self.buttons.cooperativeCommand = true;
+                                    self.buttons.cancelCooperative = true;
+                                    self.buttons.commandForward = false;
+                                    self.buttons.silenceUp = false;
+                                    self.buttons.silenceDown = false;
+                                    self.buttons.sendMessage = false;
+                                    self.buttons.commandRecord = false;
+                                    self.buttons.isRecord = false;
+                                    self.buttons.commandPause = false;
+                                    self.buttons.commandRestart = false;
+                                    self.buttons.isPause = false;
+                                    self.buttons.exitCommand = true;
+                                }
+                                if (data.status === 'remind') {
+                                    var finded = false;
+                                    for (var i = 0; i < self.group.remindIds.length; i++) {
+                                        if (self.group.remindIds[i] == data.id) {
+                                            finded = true;
+                                            break;
+                                        }
+                                    }
+                                    if (!finded) {
+                                        self.group.remindIds.push(data.id);
+                                    }
+                                }
+                            }, null, [403, 404, 409, 500, 408]);
                         }
-                    }, null, [403, 404, 409, 500, 408]);
+                    })
                 }
             },
             //指挥工作台树形菜单的复选框
@@ -1325,24 +1405,24 @@ define([
                 if (!self.buttons.addMember) return;
                 if (self.differentiate === 1) {
                     id = self.group.current.id;
-                    type = self.group.current.type;
+                    type = 'command';
                 } else {
                     id = self.meet.current.id;
-                    type = self.meet.current.type;
+                    type = 'meeting';
                 }
                 self.qt.window('/router/zk/leader/add/member', {
                     id: id,
                     type: type
                 }, {
-                    width: 1366,
-                    height: 740
+                    width: 1000,
+                    height: 600
                 });
             },
             //强退成员
             removeCommandMember: function () {
                 var self = this;
                 if (!self.buttons.removeMember) return;
-                if(self.differentiate === 1){
+                if (self.differentiate === 1) {
                     if (self.group.current.select.length <= 0) {
                         self.qt.warning('提示信息：您未选择任何成员');
                         return;
@@ -1362,7 +1442,7 @@ define([
                             }
                         }, null, [403]);
                     });
-                }else{
+                } else {
                     if (self.meet.current.select.length <= 0) {
                         self.qt.warning('提示信息：您未选择任何成员');
                         return;
@@ -1388,7 +1468,7 @@ define([
             cooperativeCommand: function (name) {
                 var self = this;
                 if (!self.buttons.cooperativeCommand) return;
-                if(self.differentiate === 1){
+                if (self.differentiate === 1) {
                     self.qt.window('/router/zk/leader/cooperation', {
                         id: self.group.current.id,
                         type: self.group.current.type,
@@ -1401,7 +1481,7 @@ define([
             cancelCooperativeCommand: function (name) {
                 var self = this;
                 if (!self.buttons.cancelCooperative) return;
-                if(self.differentiate === 1){
+                if (self.differentiate === 1) {
                     self.qt.window('/router/zk/leader/cooperation', {
                         id: self.group.current.id,
                         type: self.group.current.type,
@@ -1427,12 +1507,12 @@ define([
             //指挥/会议转发
             commandForward: function (name) {
                 var self = this;
-                var id='';
+                var id = '';
                 if (!self.buttons.commandForward) return;
-                if(self.differentiate ===1){
-                    id=self.group.current.id;
-                }else{
-                    id=self.meet.current.id;
+                if (self.differentiate === 1) {
+                    id = self.group.current.id;
+                } else {
+                    id = self.meet.current.id;
                 }
                 self.qt.window('/router/zk/leader/forward', {id: id, name: name}, {
                     width: 1024,
@@ -1443,12 +1523,12 @@ define([
             //对上静默
             silenceUp: function () {
                 var self = this;
-                var id='';
+                var id = '';
                 if (!self.buttons.silenceUp) return;
-                if(self.differentiate ===1){
-                    id=self.group.current.id;
-                }else{
-                    id=self.meet.current.id;
+                if (self.differentiate === 1) {
+                    id = self.group.current.id;
+                } else {
+                    id = self.meet.current.id;
                 }
                 if (!self.buttons.silenceUpStart) {
                     ajax.post('/command/basic/silence/up/start', {id: id}, function () {
@@ -1465,12 +1545,12 @@ define([
             //对下静默
             silenceDown: function () {
                 var self = this;
-                var id='';
+                var id = '';
                 if (!self.buttons.silenceDown) return;
-                if(self.differentiate ===1){
-                    id=self.group.current.id;
-                }else{
-                    id=self.meet.current.id;
+                if (self.differentiate === 1) {
+                    id = self.group.current.id;
+                } else {
+                    id = self.meet.current.id;
                 }
                 if (!self.buttons.silenceDownStart) {
                     ajax.post('/command/basic/silence/down/start', {id: id}, function () {
@@ -1487,12 +1567,12 @@ define([
             //发送通知
             sendMessage: function () {
                 var self = this;
-                var id='';
+                var id = '';
                 if (!self.buttons.sendMessage) return;
-                if(self.differentiate ===1){
-                    id=self.group.current.id;
-                }else{
-                    id=self.meet.current.id;
+                if (self.differentiate === 1) {
+                    id = self.group.current.id;
+                } else {
+                    id = self.meet.current.id;
                 }
                 self.qt.window('/router/zk/leader/send/message', {id: id}, {
                     width: 1224,
@@ -1502,11 +1582,11 @@ define([
             //指挥录制
             commandRecord: function () {
                 var self = this;
-                var id='';
-                if(self.differentiate ===1){
-                    id=self.group.current.id;
-                }else{
-                    id=self.meet.current.id;
+                var id = '';
+                if (self.differentiate === 1) {
+                    id = self.group.current.id;
+                } else {
+                    id = self.meet.current.id;
                 }
                 if (self.buttons.isRecord) {
                     ajax.post('/command/record/stop', {id: id}, function () {
@@ -1524,7 +1604,7 @@ define([
             commandRemind: function () {
                 var self = this;
                 if (!self.buttons.commandReminder) return;
-                if(self.differentiate === 1){
+                if (self.differentiate === 1) {
                     if (self.buttons.isRemind) {
                         ajax.post('/command/basic/remind/stop', {id: self.group.current.id}, function (data) {
                             self.qt.warning('提示消息：操作成功');
@@ -1560,7 +1640,7 @@ define([
                             self.qt.invoke('commandRemind', $.toJSON(data));
                         });
                     }
-                }else{
+                } else {
                     if (self.buttons.isRemind) {
                         ajax.post('/command/basic/remind/stop', {id: self.meet.current.id}, function (data) {
                             self.qt.warning('提示消息：操作成功');
@@ -1660,7 +1740,7 @@ define([
             //暂停指挥
             pauseCommand: function () {
                 var self = this;
-                if(self.differentiate === 1){
+                if (self.differentiate === 1) {
                     ajax.post('/command/basic/pause', {
                         id: self.group.current.id
                     }, function (data) {
@@ -1674,7 +1754,7 @@ define([
                         self.buttons.commandPause = false;
                         self.buttons.isPause = true;
                     });
-                }else{
+                } else {
                     ajax.post('/command/basic/pause', {
                         id: self.meet.current.id
                     }, function () {
@@ -1699,12 +1779,9 @@ define([
                             id: self.meet.currentId
                         }, function (data) {
                             if (self.meet.current.creator != self.user.id) {
-                                for (var i = 0; i < self.meet.entered.length; i++) {
-                                    if (self.meet.entered[i].id == self.meet.current.id) {
-                                        self.meet.entered.splice(i, 1);
-                                        break;
-                                    }
-                                }
+                                self.meet.entered = self.meet.entered.filter(function (value) {
+                                    return value.id != self.meet.current.id;
+                                });
                                 if (self.meet.entered.length > 0) {
                                     self.meet.current = self.meet.entered[0];
                                     self.meet.currentId = self.meet.entered[0].id;
@@ -1725,13 +1802,12 @@ define([
                             id: self.meet.current.id
                         }, function (data) {
                             for (var i = 0; i < self.meet.entered.length; i++) {
-                                if (self.meet.entered[i].id == self.meet.current.id) {
-                                    self.meet.entered.splice(i, 1);
-                                    break;
-                                }
+                                self.meet.entered = self.meet.entered.filter(function (value) {
+                                    return value.id != self.meet.current.id;
+                                });
                                 if (self.meet.entered.length > 0) {
-                                    self.meet.currentId = self.meet.entered[i].id;
-                                    self.meet.current = self.meet.entered[i];
+                                    self.meet.currentId = self.meet.entered[0].id;
+                                    self.meet.current = self.meet.entered[0];
                                     self.currentGroupChange(self.meet.currentId);
                                 } else {
                                     self.meet.currentId = '';
@@ -1750,12 +1826,9 @@ define([
                             id: self.group.currentId
                         }, function (data) {
                             if (self.group.current.creator != self.user.id) {
-                                for (var i = 0; i < self.group.entered.length; i++) {
-                                    if (self.group.entered[i].id == self.group.current.id) {
-                                        self.group.entered.splice(i, 1);
-                                        break;
-                                    }
-                                }
+                                self.group.entered = self.group.entered.filter(function (value) {
+                                    return value.id != self.group.current.id;
+                                });
                                 if (self.group.entered.length > 0) {
                                     self.group.current = self.group.entered[0];
                                     self.group.currentId = self.group.entered[0].id;
@@ -1775,23 +1848,20 @@ define([
                         ajax.post('/command/basic/exit', {
                             id: self.group.current.id
                         }, function (data) {
-                            for (var i = 0; i < self.group.entered.length; i++) {
-                                if (self.group.entered[i].id == self.group.current.id) {
-                                    self.group.entered.splice(i, 1);
-                                    break;
-                                }
-                                if (self.group.entered.length > 0) {
-                                    self.group.currentId = self.group.entered[i].id;
-                                    self.group.current = self.group.entered[i];
-                                    self.currentGroupChange(self.group.currentId);
-                                } else {
-                                    self.group.currentId = '';
-                                    self.group.current = '';
-                                }
-                                if (data && data.length > 0) {
-                                    self.qt.invoke('commandExit', data);
-                                }
-                                self.qt.success('退出指挥成功');
+                            self.qt.success('退出指挥成功');
+                            self.group.entered = self.group.entered.filter(function (value) {
+                                return value.id != self.group.current.id;
+                            });
+                            if (self.group.entered.length > 0) {
+                                self.group.currentId = self.group.entered[0].id;
+                                self.group.current = self.group.entered[0];
+                                self.currentGroupChange(self.group.currentId);
+                            } else {
+                                self.group.currentId = '';
+                                self.group.current = '';
+                            }
+                            if (data && data.length > 0) {
+                                self.qt.invoke('commandExit', data);
                             }
                         });
                     }
@@ -1813,9 +1883,7 @@ define([
                 var id = self.meet.currentId;
                 ajax.post('/command/basic/remove', {ids: $.toJSON([id])}, function () {
                     // 重置currentId
-                    self.refreshCommand('meeting');
-                    self.qt.success('删除成功');
-                    setTimeout(function () {
+                    self.refreshCommand('meeting', function () {
                         self.meet.currentId = self.command.data[0].id;
                         self.meet.current = {
                             creator: JSON.parse(self.command.data[0].param).creator,
@@ -1825,7 +1893,8 @@ define([
                             type: self.command.data[0].type
                         };
                         self.currentGroupChange(self.meet.currentId);
-                    }, 1000)
+                    });
+                    self.qt.success('删除成功');
                 });
             },
             //成员进入会议
@@ -1946,30 +2015,31 @@ define([
         computed: {
             groupCurrent: function () {
                 var self = this;
-                if(self.differentiate ===1){
+                if (self.differentiate === 1) {
                     return self.group.current;
-                }else{
+                } else {
                     return self.meet.current;
                 }
             }
         },
         watch: {
+            filterText: function (val) {
+                this.$refs.tree.filter(val);
+            },
             currentTab: function () {
                 var self = this;
+                if (self.currentTab == -1) return;
                 this.switchStatus1 = false;
                 this.switchStatus2 = true;
                 this.switchStatus3 = false;
+                $('.highLight').css('display', 'none');
                 if (self.currentTab == 0) {
                     //组织结构
-                    if (self.institution.data.length === 0) {
-                        self.refreshInstitution();
-                    }
+                    self.refreshInstitution();
                     self.refreshInstitutionButtonAction();
                 } else if (self.currentTab == 2) {
                     //文件资源
-                    if (self.file.data.length === 0) {
-                        self.refreshFile();
-                    }
+                    self.refreshFile();
                     self.refreshFileButtonAction();
                 } else if (self.currentTab == 1) {
                     //设备资源
@@ -2077,10 +2147,10 @@ define([
                         }
                     }
                 });
-                self.refreshCommand(null,function () {
+                self.refreshCommand(null, function () {
                     self.refreshEnteredGroups();
                 });
-                self.refreshInstitution();
+                // self.refreshInstitution();
                 self.refreshInstitutionButtonAction();
 
                 //动态获取firsetMenu和footer的高度
@@ -2110,7 +2180,12 @@ define([
                 //监听到添加成员，刷新树
                 self.qt.on('commandMemberAdd', function (e) {
                     e = e.params;
-                    self.currentGroupChange(self.group.current.id);
+                    var type=e.type;
+                    if(type === 'command'){
+                        self.currentGroupChange(self.group.current.id);
+                    }else if(type === 'meeting'){
+                        self.currentGroupChange(self.meet.current.id);
+                    }
                     self.qt.invoke('groupMembers', e);
                 });
 
@@ -2177,9 +2252,9 @@ define([
                     $('.triggerLi1').addClass('focusLight');
                     $('.triggerLi2').removeClass('focusLight');
                     $('.highLight').css('left', '7px');
-                   self.refreshCommand(null,function () {
-                       self.enterCommand([e.params]);
-                   })
+                    self.refreshCommand(null, function () {
+                        self.enterCommand([e.params]);
+                    })
                 });
 
                 //成员同意进入会议
@@ -2192,7 +2267,7 @@ define([
                     $('.triggerLi2').addClass('focusLight');
                     $('.highLight').css('left', '167px');
                     //加参数是为了区分进会时 ，不影响指挥的代码
-                    self.refreshCommand('meet',function(){
+                    self.refreshCommand('meet', function () {
                         self.enterCommand([e.params], 'meet');
                     })
                 });
@@ -2332,16 +2407,48 @@ define([
                 });
 
                 //监听换一批人员
-                self.qt.on('replacePeople',function () {
-                    var id=self.differentiate === 1?self.group.currentId:self.meet.currentId;
-                    ajax.post('/command/basic/roll/all/vod/members',{id:id},function () {
+                self.qt.on('replacePeople', function () {
+                    var id = self.differentiate === 1 ? self.group.currentId : self.meet.currentId;
+                    ajax.post('/command/basic/roll/all/vod/members', {id: id}, function (data) {
                         var splits = data.splits;
                         if (splits && splits.length > 0) {
                             // 主席web通知qt进入指挥
                             self.qt.invoke('groupMembers', $.toJSON(splits));
                         }
                     })
-                })
+                });
+
+                //开始指挥，不需要成员同意自动进入指挥
+                self.qt.on('autoCommandStart', function (e) {
+                    //加参数是为了区分进会时 ，不影响指挥的代码
+                    self.switchStatus1 = true;
+                    self.switchStatus2 = false;
+                    self.switchStatus3 = false;
+                    self.differentiate = 1;
+                    $('.triggerLi1').addClass('focusLight');
+                    $('.triggerLi2').removeClass('focusLight');
+                    $('.highLight').css('left', '7px');
+                    self.refreshCommand(null, function () {
+                        self.autoEnterCommand(e.params);
+                    });
+                    self.qt.success(e.params.businessInfo);
+                });
+
+                //开始会议，不需要成员同意自动进入指挥
+                self.qt.on('autoMeetingStart', function (e) {
+                    self.switchStatus1 = false;
+                    self.switchStatus2 = false;
+                    self.switchStatus3 = true;
+                    self.differentiate = 2;
+                    $('.triggerLi1').removeClass('focusLight');
+                    $('.triggerLi2').addClass('focusLight');
+                    $('.highLight').css('left', '167px');
+                    //加参数是为了区分进会时 ，不影响指挥的代码
+                    self.refreshCommand('meet', function () {
+                        self.autoEnterCommand(e.params, 'meet');
+                    });
+                    self.qt.success(e.params.businessInfo);
+                });
             });
         }
     });
