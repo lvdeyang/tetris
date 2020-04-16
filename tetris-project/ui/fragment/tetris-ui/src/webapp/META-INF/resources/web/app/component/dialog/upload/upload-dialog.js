@@ -3,13 +3,18 @@
  */
 define([
     'text!' + window.APPPATH + 'component/dialog/upload/upload-dialog.html',
+    window.APPPATH + 'component/dialog/upload/upload-dialog.i18n',
     'restfull',
     'jquery',
     'file',
     'vue',
+    'context',
     'element-ui',
     'css!' + window.APPPATH + 'component/dialog/upload/upload-dialog.css'
-], function(tpl, ajax, $, File, Vue){
+], function(tpl, i18n, ajax, $, File, Vue, context){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pluginName = 'mi-upload-dialog';
 
@@ -62,6 +67,7 @@ define([
         template: tpl,
         data:function(){
             return {
+                i18n:i18n,
                 visible:false,
                 files:[],
                 requires:[]

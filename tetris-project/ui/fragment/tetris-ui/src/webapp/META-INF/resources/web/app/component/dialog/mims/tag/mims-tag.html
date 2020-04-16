@@ -1,13 +1,13 @@
 <el-dialog
         class="mi-tag-dialog"
-        title="选择标签"
+        :title="i18n.dialogTitle"
         :visible.sync="visible"
         width="640px"
         :before-close="handleTagClose">
 
     <div class="content">
         <div class="content-wrapper">
-            <el-input placeholder="搜索标签" size="small" suffix-icon="el-icon-search"></el-input>
+            <el-input :placeholder="i18n.placeholderIconSearch" size="small" suffix-icon="el-icon-search"></el-input>
             <div class="tree-wrapper">
                 <el-tree
                         v-loading="loading"
@@ -28,7 +28,7 @@
 
     <span slot="footer" class="dialog-footer">
         <div class="footer">
-            <el-button size="small" type="primary" @click="handleTagBindingOk" :loading="loading" style="float:right;">确 定</el-button>
+            <el-button size="small" type="primary" @click="handleTagBindingOk" :loading="loading" style="float:right;">{{i18n.handleTagBindingOk}}</el-button>
         </div>
     </span>
 </el-dialog>

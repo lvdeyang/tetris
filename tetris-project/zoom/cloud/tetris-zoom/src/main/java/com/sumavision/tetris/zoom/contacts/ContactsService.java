@@ -1,12 +1,17 @@
 package com.sumavision.tetris.zoom.contacts;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenQuery;
+import com.sumavision.tetris.auth.token.TokenVO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserStatus;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.zoom.SourceGroupDAO;
 import com.sumavision.tetris.zoom.SourceGroupPO;
@@ -24,6 +29,9 @@ public class ContactsService {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private TokenQuery tokenQuery;
 	
 	/**
 	 * 添加联系人<br/>
@@ -61,7 +69,26 @@ public class ContactsService {
 			contacts.setRename(rename);
 			contacts.setSourceGroupId(sourceGroupId);
 			contactsDao.save(contacts);
-			return new ContactsVO().set(contacts);
+			
+			List<Long> userIds = new ArrayListWrapper<Long>().add(userId).getList();
+			List<TokenVO> tokens = new ArrayList<TokenVO>();
+			List<TokenVO> androidTokens = tokenQuery.findByUserIdInAndType(userIds, TerminalType.ZOOM_ANDROID);
+			List<TokenVO> qtTokens = tokenQuery.findByUserIdInAndType(userIds, TerminalType.ZOOM_QT);
+			if(androidTokens!=null && androidTokens.size()>0) tokens.addAll(androidTokens);
+			if(qtTokens!=null && qtTokens.size()>0) tokens.addAll(qtTokens);
+			
+			String status = UserStatus.OFFLINE.toString();
+			List<String> onlineTerminalTypes = new ArrayList<String>();
+			for(TokenVO token:tokens){
+				if(UserStatus.ONLINE.toString().equals(token.getStatus())){
+					status = UserStatus.ONLINE.toString();
+					onlineTerminalTypes.add(token.getType());
+				}
+			}
+			
+			return new ContactsVO().set(contacts)
+								   .setStatus(status)
+								   .setOnlineTerminalTypes(onlineTerminalTypes);
 		}
 		
 		return null;
@@ -88,7 +115,25 @@ public class ContactsService {
 		entity.setRename(rename);
 		contactsDao.save(entity);
 		
-		return new ContactsVO().set(entity);
+		List<Long> userIds = new ArrayListWrapper<Long>().add(Long.valueOf(entity.getUserId())).getList();
+		List<TokenVO> tokens = new ArrayList<TokenVO>();
+		List<TokenVO> androidTokens = tokenQuery.findByUserIdInAndType(userIds, TerminalType.ZOOM_ANDROID);
+		List<TokenVO> qtTokens = tokenQuery.findByUserIdInAndType(userIds, TerminalType.ZOOM_QT);
+		if(androidTokens!=null && androidTokens.size()>0) tokens.addAll(androidTokens);
+		if(qtTokens!=null && qtTokens.size()>0) tokens.addAll(qtTokens);
+		
+		String status = UserStatus.OFFLINE.toString();
+		List<String> onlineTerminalTypes = new ArrayList<String>();
+		for(TokenVO token:tokens){
+			if(UserStatus.ONLINE.toString().equals(token.getStatus())){
+				status = UserStatus.ONLINE.toString();
+				onlineTerminalTypes.add(token.getType());
+			}
+		}
+		
+		return new ContactsVO().set(entity)
+							   .setStatus(status)
+							   .setOnlineTerminalTypes(onlineTerminalTypes);
 	}
 	
 	/**

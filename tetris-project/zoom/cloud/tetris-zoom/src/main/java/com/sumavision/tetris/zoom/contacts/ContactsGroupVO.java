@@ -21,6 +21,12 @@ public class ContactsGroupVO {
 	
 	private String userId;
 	
+	private Integer countOnline;
+	
+	private Integer countOffline;
+	
+	private Integer countTotal;
+	
 	private List<ContactsVO> contacts;
 	
 	public Long getId() {
@@ -74,6 +80,33 @@ public class ContactsGroupVO {
 
 	public ContactsGroupVO setUserId(String userId) {
 		this.userId = userId;
+		return this;
+	}
+
+	public Integer getCountOnline() {
+		return countOnline;
+	}
+
+	public ContactsGroupVO setCountOnline(Integer countOnline) {
+		this.countOnline = countOnline;
+		return this;
+	}
+
+	public Integer getCountOffline() {
+		return countOffline;
+	}
+
+	public ContactsGroupVO setCountOffline(Integer countOffline) {
+		this.countOffline = countOffline;
+		return this;
+	}
+
+	public Integer getCountTotal() {
+		return countTotal;
+	}
+
+	public ContactsGroupVO setCountTotal(Integer countTotal) {
+		this.countTotal = countTotal;
 		return this;
 	}
 

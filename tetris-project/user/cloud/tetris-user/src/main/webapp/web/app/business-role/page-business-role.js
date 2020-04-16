@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'business-role/page-business-role.html',
+    window.APPPATH + 'business-role/page-business-role.i18n',
     'config',
     'restfull',
     'jquery',
@@ -12,7 +13,10 @@ define([
     'element-ui',
     'mi-frame',
     'css!' + window.APPPATH + 'business-role/page-business-role.css'
-], function (tpl, config, ajax, $, context, commons, Vue) {
+], function (tpl, i18n, config, ajax, $, context, commons, Vue) {
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-business-role';
 
@@ -30,6 +34,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                i18n:i18n,
                 activeId: window.BASEPATH + 'index#/page-business-role',
                 table: {
                     rows: [],
@@ -131,17 +136,17 @@ define([
                     var row = scope.row;
                     var h = self.$createElement;
                     self.$msgbox({
-                        title:'危险操作',
+                        title:self.i18n.msgboxHandleRowDeleteTitle,
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
-                                h('p', null, ['此操作将永久删除该角色，且不可恢复，是否继续?'])
+                                h('p', null, [self.i18n.msgboxHandleRowDeleteContent])
                             ])
                         ]),
                         type:'wraning',
                         showCancelButton: true,
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
+                        confirmButtonText: self.i18n.msgboxHandleRowDeleteConfirmButtonText,
+                        cancelButtonText: self.i18n.msgboxHandleRowDeleteCancelButtonText,
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){

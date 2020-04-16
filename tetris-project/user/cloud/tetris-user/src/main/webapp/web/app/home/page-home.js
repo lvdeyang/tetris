@@ -1,5 +1,6 @@
 define([
     'text!' + window.APPPATH + 'home/page-home.html',
+    window.APPPATH + 'home/page-home.i18n',
     'config',
     'restfull',
     'context',
@@ -8,7 +9,10 @@ define([
     'element-ui',
     'mi-frame',
     'css!' + window.APPPATH + 'home/page-home.css'
-], function(tpl, config, ajax, context, commons, Vue){
+], function(tpl, i18n, config, ajax, context, commons, Vue){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-home';
 
@@ -26,6 +30,7 @@ define([
                 menus:context.getProp('menus'),
                 user:context.getProp('user'),
                 groups:context.getProp('groups'),
+                i18n:i18n,
                 loading:false
             },
             methods:{

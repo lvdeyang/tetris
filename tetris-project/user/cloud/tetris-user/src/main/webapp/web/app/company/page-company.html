@@ -1,10 +1,10 @@
 <mi-frame id="page-company-wrapper" :menus="menus" :user="user" :groups="groups">
 
-    <template slot="title">组织架构</template>
+    <template slot="title">{{i18n.title}}</template>
 
     <template slot="links">
-        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item>组织架构</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-home">{{i18n.homePage}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>{{i18n.currentPage}}</el-breadcrumb-item>
     </template>
 
     <template>
@@ -18,14 +18,14 @@
                             style="width:100%">
                         </el-table-column>
                         <el-table-column
-                                label="公司"
+                                :label="i18n.tableColumnName"
                                 prop="name">
                         </el-table-column>
                         <el-table-column
-                                label="操作"
+                                :label="i18n.tableColumnOperation"
                                 width="250">
                             <template slot-scope="scope">
-                                <el-tooltip class="item" effect="dark" content="公司架构" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" :content="i18n.tipGotoOrganization" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-tickets" style="font-size:20px; padding:0; position:relative; top:1px; left:1px; margin-left:20px;" @click="gotoOrganization(scope)"></el-button>
                                 </el-tooltip>
                             </template>

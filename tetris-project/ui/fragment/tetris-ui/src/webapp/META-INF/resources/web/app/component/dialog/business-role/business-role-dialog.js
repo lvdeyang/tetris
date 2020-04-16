@@ -3,12 +3,17 @@
  */
 define([
     'text!' + window.APPPATH + 'component/dialog/business-role/business-role-dialog.html',
+    window.APPPATH + 'component/dialog/business-role/business-role-dialog.i18n',
     'restfull',
     'jquery',
     'vue',
+    'context',
     'element-ui',
     'css!' + window.APPPATH + 'component/dialog/business-role/business-role-dialog.css'
-], function(tpl, ajax, $, Vue){
+], function(tpl, i18n, ajax, $, Vue, context){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pluginName = 'mi-business-role-dialog';
 
@@ -18,6 +23,7 @@ define([
         template: tpl,
         data:function(){
             return {
+                i18n:i18n,
                 visible:false,
                 uri:'',
                 except:[],
@@ -90,7 +96,7 @@ define([
                 var selected = self.selected;
                 if(!selected || selected.length<=0){
                     self.$message({
-                        message:'您没有选择任何数据！',
+                        message:self.i18n.messageWarning,
                         type:'warning'
                     });
                     return;

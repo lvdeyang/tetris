@@ -1,0 +1,64 @@
+/**
+ * Created by lvdeyang on 2020/4/15 0015.
+ */
+define(function(){
+
+    var zhCN = {
+        title:'存储管理',
+        homePage:'首页',
+        currentPage:'存储管理',
+        handleCreate:'添加存储',
+        handleDelete:'删除存储',
+        tableColumnName:'名称',
+        tableColumnServerGadgetName:'小工具',
+        tableColumnRemark:'备注',
+        tableColumnOperation:'操作',
+        tipHandleRowEdit:'编辑存储',
+        tipHandleRowConfig:'设置存储',
+        tipHandleRowDelete:'删除存储',
+        dialogCreateStorageTitle:'添加存储',
+        labelCreateStorageName:'存储名称',
+        labelCreateStorageRootPath:'存储根路径',
+        labelCreateStorageUpload:'上传根路径',
+        placeholderCreateStorageUploadIp:'IP地址',
+        placeholderCreateStorageUploadProtocol:'协议',
+        placeholderCreateStorageUploadPort:'端口',
+        labelCreateStoragePreview:'预览根路径',
+        placeholderCreateStoragePreviewIp:'IP地址',
+        placeholderCreateStoragePreviewProtocol:'协议',
+        placeholderCreateStoragePreviewPort:'端口',
+        labelCreateStorageServerGadgetType:'服务器小工具',
+        labelOptionSumavisionGadget:'数码视讯小工具',
+        labelCreateStorageControl:'小工具控制地址',
+        placeholderCreateStorageControlIp:'IP地址',
+        placeholderCreateStorageControlProtocol:'协议',
+        placeholderCreateStorageControlPort:'端口',
+        labelCreateStorageRemark:'备注',
+        handleCreateStorageClose:'取消',
+        handleCreateStorageCommit:'确定',
+        dialogEditStorageTitle:'编辑存储',
+        labelEditStorageName:'存储名称',
+        labelEditStorageRootPath:'存储根路径',
+        labelEditStorageUpload:'上传根路径',
+        placeholderEditStorageUploadIp:'IP地址',
+        placeholderEditStorageUploadProtocol:'协议',
+        placeholderEditStorageUploadPort:'端口',
+        labelEditStoragePreview:'预览根路径',
+        placeholderEditStoragePreviewIp:'IP地址',
+        placeholderEditStoragePreviewProtocol:'协议',
+        placeholderEditStoragePreviewPort:'端口',
+        labelEditStorageServerGadgetType:'服务器小工具',
+        labelEditStorageControl:'小工具控制地址',
+        placeholderEditStorageControlIp:'IP地址',
+        placeholderEditStorageControlProtocol:'协议',
+        placeholderEditStorageControlPort:'端口',
+        labelEditStorageRemark:'备注',
+        handleEditStorageClose:'取消',
+        handleEditStorageCommit:'确定'
+    };
+
+    return{
+        'default':zhCN,
+        'zh-CN':zhCN
+    }
+});

@@ -1,5 +1,7 @@
 package com.sumavision.tetris.zoom.contacts;
 
+import java.util.List;
+
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -13,6 +15,12 @@ public class ContactsVO extends AbstractBaseVO<ContactsVO, ContactsPO>{
 	
 	/** 重命名 */
 	private String rename;
+	
+	/** 联系人状态 */
+	private String status;
+	
+	/** 在线终端类型 */
+	private List<String> onlineTerminalTypes;
 	
 	public String getUserId() {
 		return userId;
@@ -38,6 +46,24 @@ public class ContactsVO extends AbstractBaseVO<ContactsVO, ContactsPO>{
 
 	public ContactsVO setRename(String rename) {
 		this.rename = rename;
+		return this;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public ContactsVO setStatus(String status) {
+		this.status = status;
+		return this;
+	}
+
+	public List<String> getOnlineTerminalTypes() {
+		return onlineTerminalTypes;
+	}
+
+	public ContactsVO setOnlineTerminalTypes(List<String> onlineTerminalTypes) {
+		this.onlineTerminalTypes = onlineTerminalTypes;
 		return this;
 	}
 

@@ -3,12 +3,17 @@
  */
 define([
     'text!' + window.APPPATH + 'component/dialog/user/user-dialog.html',
+    window.APPPATH + 'component/dialog/user/user-dialog.i18n',
     'restfull',
     'jquery',
     'vue',
+    'context',
     'element-ui',
     'css!' + window.APPPATH + 'component/dialog/user/user-dialog.css'
-], function(tpl, ajax, $, Vue){
+], function(tpl, i18n, ajax, $, Vue, context){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pluginName = 'mi-user-dialog';
 
@@ -18,6 +23,7 @@ define([
         template: tpl,
         data:function(){
             return {
+                i18n:i18n,
                 visible:false,
                 uri:'',
                 except:[],

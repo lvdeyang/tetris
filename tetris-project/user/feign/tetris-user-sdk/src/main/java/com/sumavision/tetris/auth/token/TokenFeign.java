@@ -22,4 +22,16 @@ public interface TokenFeign {
 	@RequestMapping(value = "/token/feign/check/token")
 	public JSONObject checkToken(@RequestParam("token") String token, @RequestParam("terminalType") String terminalType);
 	
+	/**
+	 * 批量查询用户状态<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月14日 上午11:41:08
+	 * @param JSONArray userIds 用户id列表
+	 * @param String terminalType 终端类型
+	 * @return List<TokenVO> 用户状态列表
+	 */
+	@RequestMapping(value = "/token/feign/find/by/user/id/in/and/type")
+	public JSONObject findByUserIdInAndType(@RequestParam("userIds") String userIds, @RequestParam("terminalType") String terminalType);
+	
 }
