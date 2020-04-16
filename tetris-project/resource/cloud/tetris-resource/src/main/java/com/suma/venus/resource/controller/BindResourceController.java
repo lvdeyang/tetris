@@ -38,6 +38,7 @@ import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
+import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
@@ -50,8 +51,10 @@ import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
+import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
+import com.suma.venus.resource.pojo.SerInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
@@ -110,6 +113,9 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private SerNodeDao serNodeDao;
+	
+	@Autowired
+	private SerInfoDao serInfoDao;
 	
 	@Autowired
 	private TetrisDispatchService tetrisDispatchService;
@@ -646,11 +652,14 @@ public class BindResourceController extends ControllerBase {
 //					String oprusername = principal.getName();
 //					UserBO oprUserBO = userFeign.queryUserInfo(oprusername).get("user");
 					UserBO oprUserBO = userQueryService.current();
-					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, new ArrayList<String>(), readCheckList,
-							writeCheckList, new ArrayList<String>());
+					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, new ArrayList<String>(), new ArrayList<String>(), 
+							readCheckList, writeCheckList, new ArrayList<String>(), new ArrayList<String>());
 					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
+					
 					for (UserBO userBO : userBOs) {
+						String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
 						if ("ldap".equals(userBO.getCreater())) {
 							for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
 								BundlePO bundle = bundleDao.findByBundleId(entry.getKey());
@@ -668,7 +677,7 @@ public class BindResourceController extends ControllerBase {
 								}
 								authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
 								// 发送消息
-								JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(userBO.getUserNo(), XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
+								JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(appInfo.getSerNo(), appNo, XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
 								PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
 								
 								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
@@ -784,12 +793,15 @@ public class BindResourceController extends ControllerBase {
 //					String oprusername = principal.getName();
 //					UserBO oprUserBO = userFeign.queryUserInfo(oprusername).get("user");
 					UserBO oprUserBO = userQueryService.current();
-					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, readCheckList, writeCheckList,
-							hjCheckList);
+					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, prevZKCheckeList, 
+							readCheckList, writeCheckList, hjCheckList, zkCheckList);
 					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
+					
 					for (UserBO userBO : userBOs) {
 						if ("ldap".equals(userBO.getCreater())) {
+							String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
 							for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
 								AuthNotifyXml authNotifyXml = new AuthNotifyXml();
 								authNotifyXml.setAuthnodeid(self.getNodeUuid());
@@ -802,7 +814,7 @@ public class BindResourceController extends ControllerBase {
 								}
 								authNotifyXml.getUserlist().add(new UserAuthXml(entry.getKey(), authCode));
 								// 发送消息
-								JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(userBO.getUserNo(), XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
+								JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(appInfo.getSerNo(), appNo, XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
 								PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
 								
 								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
@@ -823,10 +835,10 @@ public class BindResourceController extends ControllerBase {
 		return data;
 	}
 
-	private Map<String, PrivilegeStatusBO> getPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList,
-			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList) {
-		Map<String, PrivilegeStatusBO> privilegeStatusMap = createPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, readCheckList, writeCheckList,
-				hjCheckList);
+	private Map<String, PrivilegeStatusBO> getPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList, List<String> prevZKCheckeList,
+			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList, List<String> zkCheckList) {
+		Map<String, PrivilegeStatusBO> privilegeStatusMap = createPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, prevZKCheckeList,
+				readCheckList, writeCheckList, hjCheckList, zkCheckList);
 		for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
 			if (preReadCheckList.contains(entry.getKey())) {
 				entry.getValue().setPrevCanRead(true);
@@ -837,6 +849,9 @@ public class BindResourceController extends ControllerBase {
 			if (prevHJCheckeList.contains(entry.getKey())) {
 				entry.getValue().setPrevCanHJ(true);
 			}
+			if (prevZKCheckeList.contains(entry.getKey())) {
+				entry.getValue().setPrevCanZK(true);
+			}
 			if (readCheckList.contains(entry.getKey())) {
 				entry.getValue().setNowCanRead(true);
 			}
@@ -846,12 +861,15 @@ public class BindResourceController extends ControllerBase {
 			if (hjCheckList.contains(entry.getKey())) {
 				entry.getValue().setNowCanHJ(true);
 			}
+			if (zkCheckList.contains(entry.getKey())) {
+				entry.getValue().setNowCanZK(true);
+			}
 		}
 		return privilegeStatusMap;
 	}
 
-	private Map<String, PrivilegeStatusBO> createPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList,
-			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList) {
+	private Map<String, PrivilegeStatusBO> createPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList, List<String> prevZKCheckeList,
+			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList, List<String> zkCheckList) {
 		Map<String, PrivilegeStatusBO> privilegeStatusMap = new HashMap<>();
 		for (String code : preReadCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
@@ -862,6 +880,9 @@ public class BindResourceController extends ControllerBase {
 		for (String code : prevHJCheckeList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
+		for (String code : prevZKCheckeList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
 		for (String code : readCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
@@ -869,6 +890,9 @@ public class BindResourceController extends ControllerBase {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		for (String code : hjCheckList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
+		for (String code : zkCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		return privilegeStatusMap;

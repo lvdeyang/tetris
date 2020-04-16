@@ -29,6 +29,8 @@ public interface SerInfoDao extends CommonDao<SerInfoPO> {
 	
 	public List<SerInfoPO> findBySerNodeInAndSerTypeAndSourceType(Collection<String> serNodes, Integer serType, SOURCE_TYPE sourceType);
 
+	@Query(value = "select info.ser_no from ser_infopo info LEFT JOIN ser_nodepo node ON info.ser_node = node.node_uuid LEFT JOIN folder_user_map map ON node.node_uuid = map.user_node where info.ser_type = ?1 AND map.user_no = ?2", nativeQuery = true)
+	public String findByTypeAndUserNo(Integer type, String userNo);
 }
 
 

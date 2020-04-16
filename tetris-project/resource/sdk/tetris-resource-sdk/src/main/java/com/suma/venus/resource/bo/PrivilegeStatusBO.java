@@ -168,5 +168,21 @@ public class PrivilegeStatusBO {
 	public void setNowCanHJ(boolean nowCanHJ) {
 		this.nowCanHJ = nowCanHJ;
 	}
+
+	public boolean isPrevCanZK() {
+		return prevCanZK;
+	}
+
+	public void setPrevCanZK(boolean prevCanZK) {
+		this.prevCanZK = prevCanZK;
+	}
+
+	public boolean isNowCanZK() {
+		return nowCanZK;
+	}
+
+	public void setNowCanZK(boolean nowCanZK) {
+		this.nowCanZK = nowCanZK;
+	}
 	
 }

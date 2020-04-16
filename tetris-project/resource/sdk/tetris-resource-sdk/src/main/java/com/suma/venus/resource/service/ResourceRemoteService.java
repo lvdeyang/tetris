@@ -166,6 +166,7 @@ public class ResourceRemoteService {
 	 */
 	public void notifyXml(String cmd, String xml) throws Exception{
 
+		System.out.println(xml);
 		// 获取联网发来的notify消息
 		if ("syncinfo".equals(cmd)) {
 			NotifyUserDeviceXML xmlBean = XMLBeanUtils.xmlToBean(xml, NotifyUserDeviceXML.class);
