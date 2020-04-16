@@ -165,9 +165,11 @@ public class DepartSyncLdapUtils {
 			List<FolderUserMap> needAddMaps = new ArrayList<FolderUserMap>();
 			for(LdapUserPo ldapUser: needAddLdapUser){
 				UserVO addUser = null;
+				LdapUserPo addLdapUser = null;
 				for(UserVO _user: _users){
 					if(_user.getUuid().equals(ldapUser.getUserUuid())){
 						addUser = _user;
+						addLdapUser = ldapUser;
 						break;
 					}
 				}
@@ -180,15 +182,16 @@ public class DepartSyncLdapUtils {
 					}
 				}
 				
-				if(addUser != null && addFolder != null){
+				if(addUser != null && addFolder != null && addLdapUser != null && addLdapUser != null){
 					FolderUserMap map = new FolderUserMap();
 					map.setCreator("ldap");
 					map.setFolderId(addFolder.getId());
+					map.setFolderIndex(0l);
 					map.setFolderUuid(addFolder.getUuid());
 					map.setUserId(addUser.getId());
 					map.setUserUuid(addUser.getUuid());
 					map.setUserName(addUser.getUsername());
-					map.setUserNode(addUser.getGroupName());
+					map.setUserNode(addLdapUser.getUserNode());
 					map.setUserNo(addUser.getUserno());
 					
 					needAddMaps.add(map);
