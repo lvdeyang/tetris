@@ -73,6 +73,10 @@
                         <el-button type="text" style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c" @click="deleteFile(scope.row.id)">
                         <span class="icon-trash"></span></el-button>
                         </el-tooltip>
+                        <el-tooltip class="item" effect="dark" content="下载任务" placement="bottom">
+                            <el-button type="text" style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c" @click="downLoadFile(scope.row)">
+                                <span class="icon-arrow-down"></span></el-button>
+                        </el-tooltip>
                     </template>
                 </el-table-column>
             </el-table>

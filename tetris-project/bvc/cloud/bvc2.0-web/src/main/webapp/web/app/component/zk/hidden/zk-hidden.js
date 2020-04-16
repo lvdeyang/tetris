@@ -187,7 +187,7 @@ define([
                                 self.qt.linkedWebview('historyMessage', {id:'cooperationStopMessage', params:e});
                             }
 
-                            //指挥
+                            //开启指挥  需要成员同意
                             if(e.businessType === 'commandStart'){
                                 self.qt.linkedWebview('business', {id:'commandStart', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
@@ -216,12 +216,16 @@ define([
                                 self.qt.linkedWebview('business', {id:'commandMemberDelete', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'commandMemberDelete', params:e});
+                            }else if(e.businessType === 'commandStartNow'){ //开启指挥，不需要成员同意
+                                self.qt.linkedWebview('rightBar', {id:'autoCommandStart', params:e});
                             }
 
-                            //会议
+                            //开始会议 需要成员同意
                             if(e.businessType === 'meetingStart'){
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'meetingStart', params:e});
+                            }else if(e.businessType === 'meetingStartNow'){ //开始指挥 不需要成员同意
+                                self.qt.linkedWebview('rightBar', {id:'autoMeetingStart', params:e});
                             }
 
                             //协同指挥

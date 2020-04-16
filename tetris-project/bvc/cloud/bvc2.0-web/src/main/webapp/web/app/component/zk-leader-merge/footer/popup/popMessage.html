@@ -1,0 +1,51 @@
+<div class="container">
+    <div class="title">历史消息</div>
+    <div class="pop">
+        <div  style="overflow:hidden;height: 550px">
+            <el-tabs v-model="currentTab" type="card">
+                <el-tab-pane label="历史邀请" name="0">
+                    <div style="height:510px;">
+                        <el-scrollbar style="height: 100%">
+                            <div class="msg" v-for="(item,index) in msgData" :key="item.id">
+                                <p class="videoType" v-show="item.message.businessType === 'callUser'">
+                                    <span class="icon-facetime-video"></span>
+                                    <span>【视频通话】</span>
+                                </p>
+                                <p class="content">{{item.message.businessInfo}}</p>
+                                <div class="btns">
+                                    <span @click="ignore($event,index,item)">忽略</span>
+                                    <span @click="refuse($event,index,item)">拒绝</span>
+                                    <span @click="accept($event,index,item)">同意</span>
+                                </div>
+                            </div>
+                        </el-scrollbar>
+                    </div>
+                </el-tab-pane>
+                <el-tab-pane label="历史消息" name="1">
+                    <div style="position:relative; height:510px;">
+                        <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
+                            <el-scrollbar style="height: 100%">
+                                <div class="msg" v-for="(item,index) in historyInstantMsg" :key="item.id">
+                                    <p class="content">{{item}}</p>
+                                </div>
+                            </el-scrollbar>
+                        </div>
+                        <div style="position:absolute; left:0; bottom:0; right:0; height:50px; padding-top:9px">
+                            <el-pagination
+                                @current-change="handleCurrentChange"
+                                style="float:right"
+                                layout="prev, pager, next"
+                                :page-size="page.pageSize"
+                                :total="page.total">
+                            </el-pagination>
+                        </div>
+
+                    </div>
+                </el-tab-pane>
+            </el-tabs>
+        </div>
+    </div>
+    <div class="closeBtn">
+        <img src="../../../../../../images/zk-leader/close.png" @click="closePop">
+    </div>
+</div>
