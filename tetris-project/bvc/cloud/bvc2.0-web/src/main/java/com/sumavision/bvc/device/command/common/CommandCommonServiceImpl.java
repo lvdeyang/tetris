@@ -33,7 +33,10 @@ import com.sumavision.bvc.device.command.exception.PlayerIsBeingUsedException;
 import com.sumavision.bvc.device.command.secret.CommandSecretServiceImpl;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.group.bo.BundleBO;
+import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.enumeration.CodecParamType;
+import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
+import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.util.MeetingUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.AvtplNotFoundException;
@@ -132,6 +135,25 @@ public class CommandCommonServiceImpl {
 												   .getMap();
 	}
 	
+	/**
+	 * 取系统默认参数模板BO<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月15日 下午1:26:33
+	 * @return
+	 * @throws Exception
+	 */
+	public CodecParamBO queryDefaultAvCodecParamBO() throws Exception{
+		
+		Map<String, Object> result = queryDefaultAvCodec();
+		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
+		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
+		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+		
+		return codec;
+	}
+
 	/**
 	 * 根据业务用户占用播放器--用户操作加锁<br/>
 	 * <b>负载均衡满足不了，得用redis<br/>

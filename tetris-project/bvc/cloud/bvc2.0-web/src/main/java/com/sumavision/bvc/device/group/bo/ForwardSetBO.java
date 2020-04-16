@@ -345,6 +345,38 @@ public class ForwardSetBO {
 		
 		return this;
 	}
+	public ForwardSetBO setByMediapushAndDstCastDevice(String mediaPushUuid, CommandGroupUserPlayerCastDevicePO castDevice, CodecParamBO codec, MediaType mediaType){
+		ForwardSetSrcBO src = new ForwardSetSrcBO();
+		ForwardSetDstBO dst = new ForwardSetDstBO();
+		if(MediaType.VIDEO.equals(mediaType)){
+			//视频转发
+			src.setType("mediaPush")
+			   .setUuid(mediaPushUuid);
+			dst.setBase_type("VenusVideoOut")
+			   .setLayerId(castDevice.getDstLayerId())
+			   .setBundleId(castDevice.getDstBundleId())
+			   .setChannelId(castDevice.getDstVideoChannelId())
+			   .setBundle_type(castDevice.getDstVenusBundleType())
+			   .setCodec_param(codec);
+		}else if(MediaType.AUDIO.equals(mediaType)){
+			//音频转发
+			src.setType("mediaPush")
+			   .setUuid(mediaPushUuid);
+			dst.setBase_type("VenusAudioOut")
+			   .setLayerId(castDevice.getDstLayerId())
+			   .setBundleId(castDevice.getDstBundleId())
+			   .setChannelId(castDevice.getDstAudioChannelId())
+			   .setBundle_type(castDevice.getDstVenusBundleType())
+			   .setCodec_param(codec);
+		}
+		
+		//空源src要发null
+		this.setSrc(src);
+		this.setDst(dst);
+		
+		return this;
+	}
+
 	public ForwardSetBO setBySrcVodAndDstCastDevice(CommandVodPO vod, CommandGroupUserPlayerCastDevicePO castDevice, CodecParamBO codec, MediaType mediaType){
 		ForwardSetSrcBO src = new ForwardSetSrcBO();
 		ForwardSetDstBO dst = new ForwardSetDstBO();

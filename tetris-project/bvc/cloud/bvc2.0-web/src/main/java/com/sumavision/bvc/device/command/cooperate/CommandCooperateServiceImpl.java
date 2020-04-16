@@ -1566,7 +1566,7 @@ public class CommandCooperateServiceImpl {
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 			LogicBO logic = commandBasicServiceImpl.openBundle(null, null, needPlayers, allNeedForwards, null, codec, group.getUserId());
-			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, allNeedForwards, null, null, null, codec, group.getUserId());
+			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, allNeedForwards, null, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);
 			
 			executeBusiness.execute(logic, group.getName() + " 协同会议成员接听和拒绝");
@@ -1736,7 +1736,7 @@ public class CommandCooperateServiceImpl {
 		CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 		CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 		LogicBO logic = commandBasicServiceImpl.openBundle(null, null, null, forwardsReadyAndCanBeDone, null, codec, group.getUserId());
-		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, forwardsReadyAndCanBeDone, null, null, null, codec, group.getUserId());
+		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, forwardsReadyAndCanBeDone, null, null, null, codec, group.getUserId());
 		logic.merge(logicCastDevice);		
 		
 		executeBusiness.execute(logic, group.getName() + " 协同会议成员接听和拒绝");

@@ -136,6 +136,10 @@ public class CommandVodService {
 		
 		commandGroupUserPlayerDao.save(player);
 		
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, codec, -1L);
+		executeBusiness.execute(logicCastDevice, user.getName() + player.getBusinessName());
+		
 		return player;
 	}
 	
@@ -156,6 +160,11 @@ public class CommandVodService {
 		player.setBusinessName(null);
 		player.setPlayUrl(null);
 		commandGroupUserPlayerDao.save(player);
+		
+		List<CommandGroupUserPlayerPO> allNeedClosePlayers = new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList();
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(allNeedClosePlayers, null, null, allNeedClosePlayers, codec, -1L);
+		executeBusiness.execute(logicCastDevice, user.getName() + " 停止点播文件");
 		
 		return player;
 		
@@ -219,7 +228,7 @@ public class CommandVodService {
 		
 		//点播协议
 		LogicBO logic = connectBundle(userVod, codec, admin.getId());
-		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
 		logic.merge(logicCast);
 		
 		executeBusiness.execute(logic, user.getName() + "点播" + vodUser.getName() + "用户：");
@@ -339,7 +348,7 @@ public class CommandVodService {
 		
 		//点播协议
 		LogicBO logic = connectBundle(userVod, codec, admin.getId());
-		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
 		logic.merge(logicCast);
 		if(logicCloseOld != null) logic.merge(logicCloseOld);
 		
@@ -463,7 +472,7 @@ public class CommandVodService {
 		
 		//点播协议
 		LogicBO logic = connectBundle(userVod, codec, admin.getId());
-		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
 		logic.merge(logicCast);
 		
 		executeBusiness.execute(logic, user.getName() + "点播" + encoderBundleEntity.getBundleName() + "设备：");
@@ -578,7 +587,7 @@ public class CommandVodService {
 		
 		//点播协议
 		LogicBO logic = connectBundle(userVod, codec, admin.getId());
-		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
 		logic.merge(logicCast);
 		if(logicCloseOld != null) logic.merge(logicCloseOld);
 		
@@ -689,7 +698,7 @@ public class CommandVodService {
 		
 		//点播协议
 		LogicBO logic = connectBundle(userVod, codec, admin.getId());
-		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
+		LogicBO logicCast = commandCastServiceImpl.openBundleCastDevice(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(userVod).getList(), null, codec, user.getId());
 		logic.merge(logicCast);
 		
 		executeBusiness.execute(logic, user.getName() + "用户观看自己");
@@ -760,6 +769,10 @@ public class CommandVodService {
 		
 		commandGroupUserPlayerDao.save(player);
 		
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, codec, -1L);
+		executeBusiness.execute(logicCastDevice, user.getName() + player.getBusinessName());
+		
 		return player;
 	}
 
@@ -770,6 +783,11 @@ public class CommandVodService {
 		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);		
 		player.setFree();
 		commandGroupUserPlayerDao.save(player);
+		
+		List<CommandGroupUserPlayerPO> allNeedClosePlayers = new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList();
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(allNeedClosePlayers, null, null, allNeedClosePlayers, codec, -1L);
+		executeBusiness.execute(logicCastDevice, user.getName() + " 停止点播录制文件");
 		
 		return player;		
 	}
