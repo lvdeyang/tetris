@@ -448,7 +448,7 @@ public class CommandForwardServiceImpl {
 			//生成logic下发协议
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-			LogicBO logic = commandBasicServiceImpl.openBundle(null, needDemands, needPlayers, null, null, codec, group.getUserId());
+			LogicBO logic = commandBasicServiceImpl.openBundle(null, needDemands, needPlayers, null, null, codec, chairmanMember.getUserNum());
 			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(needDemands, playFilePlayers, null, null, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);
 			
@@ -660,7 +660,7 @@ public class CommandForwardServiceImpl {
 			//发协议
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-			LogicBO logic = commandBasicServiceImpl.closeBundle(null, stopDemands, allNeedClosePlayers, codec, group.getUserId());
+			LogicBO logic = commandBasicServiceImpl.closeBundle(null, stopDemands, allNeedClosePlayers, codec, chairmanMember.getUserNum());
 			LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(playFilePlayers, null, null, allNeedClosePlayers, codec, group.getUserId());
 			logic.merge(logicCastDevice);
 			executeBusiness.execute(logic, group.getName() + " 会议停止多个转发");

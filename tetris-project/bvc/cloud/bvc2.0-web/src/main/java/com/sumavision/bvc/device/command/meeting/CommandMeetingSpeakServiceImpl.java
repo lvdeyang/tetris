@@ -24,12 +24,14 @@ import com.sumavision.bvc.command.group.enumeration.GroupSpeakType;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
+import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
@@ -40,6 +42,8 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
+import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
+import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -96,6 +100,12 @@ public class CommandMeetingSpeakServiceImpl {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private CommandCascadeUtil commandCascadeUtil;
+	
+	@Autowired
+	private ConferenceCascadeService conferenceCascadeService;
 
 	/**
 	 * 指定发言<br/>
@@ -158,6 +168,18 @@ public class CommandMeetingSpeakServiceImpl {
 					throw new BaseException(StatusCode.FORBIDDEN, speakMember.getUserName() + " 还未进入");
 				}
 				messageCaches.add(new MessageSendCacheBO(speakMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
+			}
+			
+			//级联
+			GroupType type = group.getType();
+			if(!OriginType.OUTER.equals(group.getOriginType())){
+				if(GroupType.MEETING.equals(type)){
+					//级联指定发言只有单个协议，没有批量
+					for(CommandGroupMemberPO speakMember : speakMembers){
+						GroupBO groupBO = commandCascadeUtil.speakerSetByChairman(group, speakMember);
+						conferenceCascadeService.speakerSetByChairman(groupBO);
+					}
+				}
 			}
 			
 			//这里有持久化
@@ -371,6 +393,7 @@ public class CommandMeetingSpeakServiceImpl {
 						
 			//发言人，校验是否已经在发言
 			List<CommandGroupMemberPO> members = group.getMembers();
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			CommandGroupMemberPO speakMember = commandCommonUtil.queryMemberByUserId(members, userId);
 			if(speakMember.getCooperateStatus().equals(MemberStatus.CONNECT)){
@@ -378,6 +401,17 @@ public class CommandMeetingSpeakServiceImpl {
 				speakMembers.add(speakMember);
 			}else{
 				return;
+			}
+			
+			//级联，这里的判断条件有所变化，发起人如果不是OUTER，就给其它发级联协议
+			//TODO:成员能自己取消吗？
+			GroupType type = group.getType();
+			if(!OriginType.OUTER.equals(speakMember.getOriginType())){
+				if(GroupType.MEETING.equals(type)){
+					//级联取消发言只有单个协议，没有批量
+					GroupBO groupBO = commandCascadeUtil.speakerSetCancel(speakMember.getUserNum(), group, speakMember);
+					conferenceCascadeService.speakerSetCancel(groupBO);
+				}
 			}
 			
 			//这里有持久化
@@ -418,6 +452,7 @@ public class CommandMeetingSpeakServiceImpl {
 						
 			//发言人，校验是否已经在发言
 			List<CommandGroupMemberPO> members = group.getMembers();
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
 				if(userIdArray.contains(member.getUserId())){
@@ -430,6 +465,18 @@ public class CommandMeetingSpeakServiceImpl {
 //						}else if(groupType.equals(GroupType.MEETING)){
 //							throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 正在发言");
 //						}
+					}
+				}
+			}
+			
+			//级联
+			GroupType type = group.getType();
+			if(!OriginType.OUTER.equals(group.getOriginType())){
+				if(GroupType.MEETING.equals(type)){
+					//级联取消发言只有单个协议，没有批量
+					for(CommandGroupMemberPO speakMember : speakMembers){
+						GroupBO groupBO = commandCascadeUtil.speakerSetCancel(chairmanMember.getUserNum(), group, speakMember);
+						conferenceCascadeService.speakerSetCancel(groupBO);
 					}
 				}
 			}
@@ -557,6 +604,7 @@ public class CommandMeetingSpeakServiceImpl {
 		
 		//协同成员，校验是否已经被授权协同
 		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		
 		//统计发言人名
 		List<String> speakNameList = new ArrayList<String>();
@@ -576,6 +624,10 @@ public class CommandMeetingSpeakServiceImpl {
 		
 		//除主席外，给每个成员查找speakMembers.size()个播放器，建立转发
 		for(CommandGroupMemberPO member : members){
+			
+			if(OriginType.OUTER.equals(member.getOriginType())){
+				continue;
+			}
 			
 			if(member.isAdministrator()){
 				continue;
@@ -661,7 +713,7 @@ public class CommandMeetingSpeakServiceImpl {
 					
 					//给转发设置目的
 					c2m_forward.setDstPlayer(player);
-					c2m_forward.setExecuteStatus(ExecuteStatus.UNDONE);//TODO:UNDONE不行就改成WAITING_FOR_RESPONSE
+					c2m_forward.setExecuteStatus(ExecuteStatus.UNDONE);//UNDONE不行就改成WAITING_FOR_RESPONSE
 					player.setMember(member);
 					usefulPlayersCount--;
 				}else{
@@ -691,7 +743,7 @@ public class CommandMeetingSpeakServiceImpl {
 		
 		//生成connectBundle，携带转发信息
 		CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-		LogicBO logic = commandBasicServiceImpl.openBundle(null, null, needPlayers, allNeedForwards, null, codec, group.getUserId());
+		LogicBO logic = commandBasicServiceImpl.openBundle(null, null, needPlayers, allNeedForwards, null, codec, chairmanMember.getUserNum());
 		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, allNeedForwards, null, null, null, codec, group.getUserId());
 		logic.merge(logicCastDevice);
 		
@@ -748,6 +800,11 @@ public class CommandMeetingSpeakServiceImpl {
 		
 		//除主席外，处理所有成员，包括被撤销的
 		for(CommandGroupMemberPO member : members){
+			
+			if(OriginType.OUTER.equals(member.getOriginType())){
+				continue;
+			}
+			
 			if(member.isAdministrator()){// || revokeMemberIds.contains(member.getId())){
 				continue;
 			}
@@ -793,7 +850,7 @@ public class CommandMeetingSpeakServiceImpl {
 		//发协议（删转发协议不用发，通过挂断播放器来删）
 		CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 		CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-		LogicBO logic = commandBasicServiceImpl.closeBundle(null, null, needFreePlayers, codec, group.getUserId());
+		LogicBO logic = commandBasicServiceImpl.closeBundle(null, null, needFreePlayers, codec, chairmanMember.getUserNum());
 		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(null, null, null, needFreePlayers, codec, group.getUserId());
 		logic.merge(logicCastDevice);
 		
