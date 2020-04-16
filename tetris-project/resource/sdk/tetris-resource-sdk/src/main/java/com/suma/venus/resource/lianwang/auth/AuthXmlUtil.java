@@ -51,11 +51,12 @@ public class AuthXmlUtil {
 		return json;
 	}
 	
-	public JSONObject createAuthNotifyMessage(String dstUser, String xml,String layerId) {
+	public JSONObject createAuthNotifyMessage(String srcNo, String dstUser, String xml,String layerId) {
 		
 		JSONObject content = new JSONObject();
 		content.put("cmd", "send_node_message");
-		content.put("type", "sync");
+		content.put("type", "app");
+		content.put("src_user", srcNo);
 		content.put("commandname", "authnotify");
 		content.put("dst_no", dstUser);
 		content.put("content", xml);
@@ -64,10 +65,8 @@ public class AuthXmlUtil {
 		passbyJson.put("bundle_id", "");
 		passbyJson.put("layer_id", layerId);
 		passbyJson.put("pass_by_content", content);
-		JSONObject msgBodyJson = new JSONObject();
-		msgBodyJson.put("pass_by", passbyJson);
 
-		return msgBodyJson;
+		return passbyJson;
 	}
 
 }

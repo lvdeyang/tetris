@@ -18,7 +18,7 @@ public class ResourceUserOfflineListener implements ApplicationListener<Websocke
 	@Override
 	public void onApplicationEvent(WebsocketSessionClosedEvent event) {
 		try {
-			resourceUserRegisteredFeign.userOnline(event.getUserId());
+			resourceUserRegisteredFeign.userOffline(event.getUserId());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

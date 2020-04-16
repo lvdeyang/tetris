@@ -79,7 +79,8 @@ public class MonitorRecordController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年5月15日 上午9:04:10
 	 * @param @PathVariable Long id 录制文件id
-	 * @return String 下载地址
+	 * @return String downloadUrl 下载地址
+	 * @return long duration 文件时长 单位：秒
 	 */
 	@JsonBody
 	@ResponseBody

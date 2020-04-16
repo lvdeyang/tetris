@@ -320,7 +320,7 @@ public class UserQuery {
 			String userno, 
 			int currentPage, 
 			int pageSize) throws Exception{
-		int total = userDao.countByCompanyIdAndCondition(companyId, nickname, userno);
+		
 		String nicknameExpression = null;
 		if(nickname != null) nicknameExpression = new StringBufferWrapper().append("%").append(nickname).append("%").toString();
 		String usernoExpression = null;
@@ -330,6 +330,9 @@ public class UserQuery {
 		Page<UserPO> pagedEntities = userDao.findByCompanyIdAndCondition(companyId, nicknameExpression, usernoExpression, page);
 		List<UserPO> entities = pagedEntities.getContent();
 		List<UserVO> rows = UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
+		
+		int total = userDao.countByCompanyIdAndCondition(companyId, nicknameExpression, usernoExpression);
+		
 		return new HashMapWrapper<String, Object>().put("total", total)
 												   .put("rows", rows)
 												   .getMap();

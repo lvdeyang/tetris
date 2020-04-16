@@ -112,9 +112,9 @@ public class LdapEquipDao extends LdapBaseDao {
 		mods[2] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
 				new BasicAttribute("equipAddr", equip.getEquipAddr()));
 		mods[3] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-				new BasicAttribute("equipPort", equip.getEquipPort()));
+				new BasicAttribute("equipPort", equip.getEquipPort().toString()));
 		mods[4] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-				new BasicAttribute("equipType", equip.getEquipType()));
+				new BasicAttribute("equipType", equip.getEquipType().toString()));
 		mods[5] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
 				new BasicAttribute("equipPwd", equip.getEquipPwd()));
 		mods[6] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,

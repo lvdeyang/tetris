@@ -32,7 +32,7 @@ public class XMLBeanUtils {
     public static <T> T xmlToBean(String xmlPath, Class<T> load) throws JAXBException, IOException {
         JAXBContext context = JAXBContext.newInstance(load);
         Unmarshaller unmarshaller = context.createUnmarshaller();
-        return (T) unmarshaller.unmarshal(new StringReader(xmlPath));
+        return (T) unmarshaller.unmarshal(new StringReader(xmlPath.toLowerCase()));
     }
     
     public static void main(String[] args){

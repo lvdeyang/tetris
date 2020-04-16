@@ -78,7 +78,7 @@ public class LdapDepartInfoUtil {
 //				ldapDepart.setOrgCmdRelation(parentFolder.getUuid());
 			}
 		}
-		ldapDepart.setOrgFactInfo(self.getNodeUuid());
+		ldapDepart.setOrgFactInfo(self.getNodeFactInfo());
 
 		return ldapDepart;
 	}

@@ -1,27 +1,27 @@
 <mi-frame id="page-business-user-wrapper" :menus="menus" :user="user" :groups="groups" :active-id="activeId">
 
-    <template slot="title">企业用户管理</template>
+    <template slot="title">{{i18n.title}}</template>
 
     <template slot="links">
-        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item>企业用户管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-home">{{i18n.homePage}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>{{i18n.currentPage}}</el-breadcrumb-item>
     </template>
 
     <template>
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
 
-            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus sp_title"></span>&nbsp;添加用户</el-button>
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus sp_title"></span>&nbsp;{{i18n.handleCreate}}</el-button>
             <!-- <el-button type="warning" size="small" @click="handelDelete"><span class="icon-trash sp_title"></span>&nbsp;删除用户</el-button> -->
 
-            <el-button v-if="importInfo.status" size="small" disabled><span class="feather-icon-download-cloud" style="position:relative; right:1px;"></span>&nbsp;导出数据</el-button>
-            <el-button v-else size="small" @click="handleExport"><span class="feather-icon-download-cloud" style="position:relative; right:1px;"></span>&nbsp;导出数据</el-button>
+            <el-button v-if="importInfo.status" size="small" disabled><span class="feather-icon-download-cloud" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleExportDisabled}}</el-button>
+            <el-button v-else size="small" @click="handleExport"><span class="feather-icon-download-cloud" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleExport}}</el-button>
 
-            <el-button v-if="importInfo.status" size="small" disabled><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;正在处理第{{importInfo.currentUser}}条数据，总共{{importInfo.totalUsers}}</el-button>
-            <el-button v-else size="small" @click="handleImport"><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;导入数据(已导入{{importInfo.importTimes}}次)</el-button>
+            <el-button v-if="importInfo.status" size="small" disabled><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleImportDisabled0}}{{importInfo.currentUser}}{{i18n.handleImportDisabled1}}{{importInfo.totalUsers}}</el-button>
+            <el-button v-else size="small" @click="handleImport"><span class="feather-icon-upload-cloud" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleImport0}}{{importInfo.importTimes}}{{i18n.handleImport1}}</el-button>
 
-			<div class="condition-item"><el-input v-model="table.condition.nickname" placeholder="用户昵称过滤" clearable size="small"></el-input></div>
-			<div class="condition-item"><el-input v-model="table.condition.userno" placeholder="用户号码过滤" clearable size="small"></el-input></div>
-			<el-button type="primary" size="small" style="margin-left:10px;" @click="load(1)">查询</el-button>
+			<div class="condition-item"><el-input v-model="table.condition.nickname" :placeholder="i18n.placeholderConditionNickname" clearable size="small"></el-input></div>
+			<div class="condition-item"><el-input v-model="table.condition.userno" :placeholder="i18n.placeholderConditionUserno" clearable size="small"></el-input></div>
+			<el-button type="primary" size="small" style="margin-left:10px;" @click="load(1)">{{i18n.load}}</el-button>
 
             <div class="div_user_list">
                 <el-scrollbar style="height:100%;">
@@ -34,15 +34,15 @@
                                 width="55">
                         </el-table-column> -->
                         <el-table-column
-                                label="昵称"
+                                :label="i18n.tableColumnNickname"
                                 prop="nickname">
                         </el-table-column>
                         <el-table-column
-                                label="账号"
+                                :label="i18n.tableColumnUsername"
                                 prop="username">
                         </el-table-column>
                         <el-table-column
-                                label="号码"
+                                :label="i18n.tableColumnUserno"
                                 prop="userno">
                         </el-table-column>
                         <!-- <el-table-column
@@ -50,28 +50,28 @@
                                 prop="status">
                         </el-table-column> -->
                         <el-table-column
-                                label="手机号"
+                                :label="i18n.tableColumnMobile"
                                 prop="mobile">
                         </el-table-column>
                         <el-table-column
-                                label="邮箱"
+                                :label="i18n.tableColumnMail"
                                 prop="mail">
                         </el-table-column>
                         <el-table-column
-                                label="用户级别">
+                                :label="i18n.tableColumnLevel">
                         	<template slot-scope="scope">{{scope.row.level?scope.row.level:1}}</template>        
                         </el-table-column>
                         <el-table-column
-                                label="操作"
+                                :label="i18n.tableColumnOperation"
                                 width="250">
                             <template slot-scope="scope">
-                                <el-tooltip class="item" effect="dark" content="修改用户" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" class="bt_list_handle" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="绑定角色" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" :content="i18n.tipGotoBindBusinessRole" placement="bottom-end">
                                     <el-button type="text" icon="feather-icon-lock" class="bt_list_handle bt_list_center_handle" @click="gotoBindBusinessRole(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="删除用户" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowDelete" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" class="bt_list_handle bt_list_center_handle" @click="handleRowDelete(scope)"></el-button>
                                 </el-tooltip>
                             </template>
@@ -97,7 +97,7 @@
         </el-card>
 
         <el-dialog
-                title="新建用户"
+                :title="i18n.dialogCreateUserTitle"
                 :visible.sync="dialog.createUser.visible"
                 width="500px"
                 :before-close="handleCreateUserClose">
@@ -105,34 +105,34 @@
             <div class="div_create">
                 <el-scrollbar style="height:100%;">
                     <el-form label-width="80px">
-                        <el-form-item label="昵称:">
+                        <el-form-item :label="i18n.labelCreateUserNickname">
                             <el-input v-model="dialog.createUser.nickname"></el-input>
                         </el-form-item>
-                        <el-form-item label="账号:">
+                        <el-form-item :label="i18n.labelCreateUserUsername">
                             <el-input v-model="dialog.createUser.username"></el-input>
                         </el-form-item>
-                        <el-form-item label="号码:">
+                        <el-form-item :label="i18n.labelCreateUserUserno">
                             <el-input v-model="dialog.createUser.userno"></el-input>
                         </el-form-item>
-                        <el-form-item label="密码:">
+                        <el-form-item :label="i18n.labelCreateUserPassword">
                             <el-input type="password" v-model="dialog.createUser.password"></el-input>
                         </el-form-item>
-                        <el-form-item label="确认:">
-                            <el-input type="password" v-model="dialog.createUser.repeat" placeholder="请再次输入密码！"></el-input>
+                        <el-form-item :label="i18n.labelCreateUserRepeat">
+                            <el-input type="password" v-model="dialog.createUser.repeat" :placeholder="i18n.placeholderCreateUserRepeat"></el-input>
                         </el-form-item>
-                        <el-form-item label="手机:">
+                        <el-form-item :label="i18n.labelCreateUserMobile">
                             <el-input v-model="dialog.createUser.mobile"></el-input>
                         </el-form-item>
-                        <el-form-item label="邮箱:">
+                        <el-form-item :label="i18n.labelCreateUserMail">
                             <el-input v-model="dialog.createUser.mail"></el-input>
                         </el-form-item>
-                        <el-form-item label="用户级别:">
-                            <el-input-number v-model="dialog.createUser.level" :min="1" :max="1000" label="用户级别"></el-input-number>
+                        <el-form-item :label="i18n.labelCreateUserLevel">
+                            <el-input-number v-model="dialog.createUser.level" :min="1" :max="1000" :label="i18n.labelCreateUserNumber"></el-input-number>
                         </el-form-item>
-                        <el-form-item label="类型:">
+                        <el-form-item :label="i18n.labelCreateUserClassify">
                             <el-input v-model="dialog.createUser.classify" disabled></el-input>
                         </el-form-item>
-                        <el-form-item label="公司名称:">
+                        <el-form-item :label="i18n.labelCreateUserCompanyName">
                             <el-input v-model="dialog.createUser.company.name" disabled></el-input>
                         </el-form-item>
                     </el-form>
@@ -140,55 +140,55 @@
             </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.createUser.visible = false">取消</el-button>
-                <el-button size="medium" type="primary" @click="handleCreateUserSubmit" :loading="dialog.createUser.loading">确定</el-button>
+                <el-button size="medium" @click="dialog.createUser.visible = false">{{i18n.handleCreateUserCancel}}</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateUserSubmit" :loading="dialog.createUser.loading">{{i18n.handleCreateUserSubmit}}</el-button>
             </span>
 
         </el-dialog>
 
         <!-- 修改流程对话框 -->
         <el-dialog
-                title="修改用户"
+                :title="i18n.dialogEditUserTitle"
                 :visible.sync="dialog.editUser.visible"
                 width="500px"
                 :before-close="handleEditUserClose">
 
             <div>
                 <el-form label-width="80px">
-                    <el-form-item label="昵称:">
+                    <el-form-item :label="i18n.labelEditUserNickname">
                         <el-input v-model="dialog.editUser.nickname"></el-input>
                     </el-form-item>
-                    <el-form-item label="手机:">
+                    <el-form-item :label="i18n.labelEditUserMobile">
                         <el-input v-model="dialog.editUser.mobile"></el-input>
                     </el-form-item>
-                    <el-form-item label="邮箱:">
+                    <el-form-item :label="i18n.labelEditUserMail">
                         <el-input v-model="dialog.editUser.mail"></el-input>
                     </el-form-item>
-                    <el-form-item label="用户级别:">
-                            <el-input-number v-model="dialog.editUser.level" :min="1" :max="1000" label="用户级别"></el-input-number>
+                    <el-form-item :label="i18n.labelEditUserLevel">
+                            <el-input-number v-model="dialog.editUser.level" :min="1" :max="1000" :label="i18n.labelEditUserLevelNumber"></el-input-number>
                         </el-form-item>
                     <div class="div_change_pw">
                         <el-button class="bt_change_pw" type="text" @click="dialog.editUser.editPassword=!dialog.editUser.editPassword">
-                            修改密码
+                            {{i18n.labelEditUserEditPassword}}
                             <span v-if="dialog.editUser.editPassword" class="el-icon-arrow-up"></span>
                             <span v-else class="el-icon-arrow-down"></span>
                         </el-button>
                     </div>
-                    <el-form-item v-if="dialog.editUser.editPassword" label="旧密码:">
+                    <el-form-item v-if="dialog.editUser.editPassword" :label="i18n.labelEditUserOldPassword">
                         <el-input type="password" v-model="dialog.editUser.oldPassword"></el-input>
                     </el-form-item>
-                    <el-form-item v-if="dialog.editUser.editPassword" label="新密码:">
+                    <el-form-item v-if="dialog.editUser.editPassword" :label="i18n.labelEditUserNewPassword">
                         <el-input type="password" v-model="dialog.editUser.newPassword"></el-input>
                     </el-form-item>
-                    <el-form-item v-if="dialog.editUser.editPassword" label="确认:">
-                        <el-input type="password" v-model="dialog.editUser.repeat" placeholder="再次输入新密码！"></el-input>
+                    <el-form-item v-if="dialog.editUser.editPassword" :label="i18n.labelEditUserRepeat">
+                        <el-input type="password" v-model="dialog.editUser.repeat" :placeholder="i18n.placeholderEditUserRepeat"></el-input>
                     </el-form-item>
                 </el-form>
             </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="dialog.editUser.visible = false">取消</el-button>
-                <el-button size="medium" type="primary" @click="handleEditUserSubmit" :loading="dialog.editUser.loading">确定</el-button>
+                <el-button size="medium" @click="dialog.editUser.visible = false">{{i18n.handleEditUserCancel}}</el-button>
+                <el-button size="medium" type="primary" @click="handleEditUserSubmit" :loading="dialog.editUser.loading">{{i18n.handleEditUserSubmit}}</el-button>
             </span>
 
         </el-dialog>

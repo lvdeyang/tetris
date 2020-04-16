@@ -136,9 +136,9 @@ public class LdapUserDao extends LdapBaseDao {
 			mods[3] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
 					new BasicAttribute("userPwd", user.getUserPwd()));
 			mods[4] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-					new BasicAttribute("userLevel", user.getUserLevel()));
+					new BasicAttribute("userLevel", user.getUserLevel().toString()));
 			mods[5] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-					new BasicAttribute("userType", user.getUserType()));
+					new BasicAttribute("userType", user.getUserType().toString()));
 			mods[6] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
 					new BasicAttribute("userOrg", user.getUserOrg()));
 			mods[7] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
@@ -155,9 +155,9 @@ public class LdapUserDao extends LdapBaseDao {
 			mods[3] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
 					new BasicAttribute("userPwd", user.getUserPwd()));
 			mods[4] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-					new BasicAttribute("userLevel", user.getUserLevel()));
+					new BasicAttribute("userLevel", user.getUserLevel().toString()));
 			mods[5] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
-					new BasicAttribute("userType", user.getUserType()));
+					new BasicAttribute("userType", user.getUserType().toString()));
 			mods[6] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE,
 					new BasicAttribute("userNode", user.getUserNode()));
 		}

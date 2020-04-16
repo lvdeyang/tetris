@@ -1,13 +1,13 @@
 <el-dialog
         class="mi-user-dialog"
-        title="选择用户"
+        :title="i18n.dialogTitle"
         :visible.sync="visible"
         width="640px"
         :before-close="handleUserClose">
 
     <div class="content">
         <div class="content-wrapper">
-            <el-input placeholder="搜索用户" size="small" suffix-icon="el-icon-search"></el-input>
+            <el-input :placeholder="i18n.placeholderIconSearch" size="small" suffix-icon="el-icon-search"></el-input>
             <div class="table-wrapper">
                 <el-table
                         :data="rows"
@@ -20,11 +20,11 @@
                             width="55">
                     </el-table-column>
                     <el-table-column
-                            label="用户"
+                            :label="i18n.tableColumnNickname"
                             prop="nickname">
                     </el-table-column>
                     <el-table-column
-                            label="账号"
+                            :label="i18n.tableColumnUsername"
                             prop="username">
                     </el-table-column>
                 </el-table>
@@ -43,7 +43,7 @@
                     layout="prev, pager, next"
                     :total="total">
             </el-pagination>
-            <el-button size="small" type="primary" @click="handleUserBindingOk" :loading="loading" style="float:right;">确 定</el-button>
+            <el-button size="small" type="primary" @click="handleUserBindingOk" :loading="loading" style="float:right;">{{i18n.handleUserBindingOk}}</el-button>
         </div>
     </span>
 </el-dialog>

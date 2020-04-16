@@ -927,6 +927,38 @@ public class UserService{
 		
 		companyUserPermissionDao.save(permissions);
 		
+		//创建私有角色
+		List<SystemRolePO> privateRoles = new ArrayList<SystemRolePO>();
+		for(UserPO user:userPOs){
+			SystemRolePO privateRole = new SystemRolePO();
+			privateRole.setAutoGeneration(true);
+			privateRole.setName(SystemRolePO.generatePrivateRoleName(user.getId()));
+			privateRole.setType(SystemRoleType.PRIVATE);
+			privateRole.setUpdateTime(new Date());
+			privateRoles.add(privateRole);
+		}
+		systemRoleDao.save(privateRoles);
+		
+		//用户关联角色
+		List<UserSystemRolePermissionPO> rolePermissions = new ArrayList<UserSystemRolePermissionPO>();
+		for(UserPO user:userPOs){
+			SystemRolePO target = null;
+			for(SystemRolePO role:privateRoles){
+				if(role.belong(user.getId())){
+					target = role;
+					break;
+				}
+			}
+			UserSystemRolePermissionPO permission = new UserSystemRolePermissionPO();
+			permission.setAutoGeneration(true);
+			permission.setRoleId(target.getId());
+			permission.setRoleType(SystemRoleType.PRIVATE);
+			permission.setUserId(user.getId());
+			permission.setUpdateTime(new Date());
+			rolePermissions.add(permission);
+		}
+		userSystemRolePermissionDao.save(rolePermissions);
+		
 		return userPOs;
 	}
 	

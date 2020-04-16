@@ -1,17 +1,17 @@
 <mi-frame id="page-system-storage-wrapper" :menus="menus" :user="user" :groups="groups">
 
-    <template slot="title">存储管理</template>
+    <template slot="title">{{i18n.title}}</template>
 
     <template slot="links">
-        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
-        <el-breadcrumb-item>存储管理</el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-home">{{i18n.homePage}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>{{i18n.currentPage}}</el-breadcrumb-item>
     </template>
 
     <template>
         <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
 
-            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加存储</el-button>
-            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除存储</el-button>
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleCreate}}</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleDelete}}</el-button>
 
             <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
                 <el-scrollbar style="height:100%;">
@@ -20,15 +20,15 @@
                             :row-key="rowKey"
                             style="width:100%">
                         <el-table-column
-                                label="名称"
+                                :label="i18n.tableColumnName"
                                 prop="name">
                         </el-table-column>
                         <el-table-column
-                                label="小工具"
+                                :label="i18n.tableColumnServerGadgetName"
                                 prop="serverGadgetName">
                         </el-table-column>
                         <el-table-column
-                                label="备注"
+                                :label="i18n.tableColumnRemark"
                                 prop="remark">
                         </el-table-column>
                         <el-table-column
@@ -40,16 +40,16 @@
                             </template>
                         </el-table-column>
                         <el-table-column
-                                label="操作"
+                                :label="i18n.tableColumnOperation"
                                 width="150">
                             <template slot-scope="scope">
-                                <el-tooltip class="item" effect="dark" content="编辑存储" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="设置存储" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowConfig" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-setting" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowConfig(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="删除存储" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowDelete" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
                                 </el-tooltip>
                             </template>
@@ -77,7 +77,7 @@
     <template>
 
         <el-dialog
-                title="添加存储"
+                :title="i18n.dialogCreateStorageTitle"
                 :visible.sync="dialog.createStorage.visible"
                 width="600px"
                 :before-close="handleCreateStorageClose">
@@ -87,59 +87,59 @@
                     <div style="width:100%; height:100%; padding:10px 20px;">
                         <el-scrollbar style="height:100%;">
                             <el-form label-width="100px" label-position="top">
-                                <el-form-item label="存储名称">
+                                <el-form-item :label="i18n.labelCreateStorageName">
                                     <el-input v-model="dialog.createStorage.name"></el-input>
                                 </el-form-item>
-                                <el-form-item label="存储根路径">
+                                <el-form-item :label="i18n.labelCreateStorageRootPath">
                                     <el-input v-model="dialog.createStorage.rootPath"></el-input>
                                 </el-form-item>
-                                <el-form-item label="上传根路径">
+                                <el-form-item :label="i18n.labelCreateStorageUpload">
                                     <div clas="url-path-form">
-                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.createStorage.upload.ip" placeholder="IP地址">
-                                            <el-select style="width:100px; float:left;" v-model="dialog.createStorage.upload.protocol" slot="prepend" placeholder="协议">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.createStorage.upload.ip" :placeholder="i18n.placeholderCreateStorageUploadIp">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.createStorage.upload.protocol" slot="prepend" :placeholder="i18n.placeholderCreateStorageUploadProtocol">
                                                 <el-option label="ftp://" value="ftp://"></el-option>
                                             </el-select>
                                         </el-input>
-                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.createStorage.upload.port" placeholder="端口">
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.createStorage.upload.port" :placeholder="i18n.placeholderCreateStorageUploadPort">
                                             <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
                                             <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
                                         </el-input>
                                     </div>
                                 </el-form-item>
-                                <el-form-item label="预览根路径">
+                                <el-form-item :label="i18n.labelCreateStoragePreview">
                                     <div clas="url-path-form">
-                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.createStorage.preview.ip" placeholder="IP地址">
-                                            <el-select style="width:100px; float:left;" v-model="dialog.createStorage.preview.protocol" slot="prepend" placeholder="协议">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.createStorage.preview.ip" :placeholder="i18n.placeholderCreateStoragePreviewIp">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.createStorage.preview.protocol" slot="prepend" :placeholder="i18n.placeholderCreateStoragePreviewProtocol">
                                                 <el-option label="http://" value="http://"></el-option>
                                                 <el-option label="https://" value="https://"></el-option>
                                             </el-select>
                                         </el-input>
-                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.createStorage.preview.port" placeholder="端口">
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.createStorage.preview.port" :placeholder="i18n.placeholderCreateStoragePreviewPort">
                                             <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
                                             <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
                                         </el-input>
                                     </div>
                                 </el-form-item>
-                                <el-form-item label="服务器小工具">
+                                <el-form-item :label="i18n.labelCreateStorageServerGadgetType">
                                     <el-select style="width:100%; float:left;" v-model="dialog.createStorage.serverGadgetType">
-                                        <el-option label="数码视讯小工具" value="SUMAVISION_GADGET"></el-option>
+                                        <el-option :label="i18n.labelOptionSumavisionGadget" value="SUMAVISION_GADGET"></el-option>
                                     </el-select>
                                 </el-form-item>
-                                <el-form-item label="小工具控制地址">
+                                <el-form-item :label="i18n.labelCreateStorageControl">
                                     <div clas="url-path-form">
-                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.createStorage.control.ip" placeholder="IP地址">
-                                            <el-select style="width:100px; float:left;" v-model="dialog.createStorage.control.protocol" slot="prepend" placeholder="协议">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.createStorage.control.ip" :placeholder="i18n.placeholderCreateStorageControlIp">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.createStorage.control.protocol" slot="prepend" :placeholder="i18n.placeholderCreateStorageControlProtocol">
                                                 <el-option label="http://" value="http://"></el-option>
                                                 <el-option label="https://" value="https://"></el-option>
                                             </el-select>
                                         </el-input>
-                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.createStorage.control.port" placeholder="端口">
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.createStorage.control.port" :placeholder="i18n.placeholderCreateStorageControlPort">
                                             <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
                                             <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
                                         </el-input>
                                     </div>
                                 </el-form-item>
-                                <el-form-item label="备注">
+                                <el-form-item :label="i18n.labelCreateStorageRemark">
                                     <el-input type="textarea" rows="4" v-model="dialog.createStorage.remark"></el-input>
                                 </el-form-item>
                             </el-form>
@@ -149,8 +149,8 @@
             </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="small" @click="handleCreateStorageClose">取消</el-button>
-                <el-button size="small" type="primary" @click="handleCreateStorageCommit" :loading="dialog.createStorage.loading">确 定</el-button>
+                <el-button size="small" @click="handleCreateStorageClose">{{i18n.handleCreateStorageClose}}</el-button>
+                <el-button size="small" type="primary" @click="handleCreateStorageCommit" :loading="dialog.createStorage.loading">{{i18n.handleCreateStorageCommit}}</el-button>
             </span>
         </el-dialog>
 
@@ -159,7 +159,7 @@
     <template>
 
         <el-dialog
-                title="编辑存储"
+                :title="i18n.dialogEditStorageTitle"
                 :visible.sync="dialog.editStorage.visible"
                 width="600px"
                 :before-close="handleEditStorageClose">
@@ -169,59 +169,59 @@
                     <div style="width:100%; height:100%; padding:10px 20px;">
                         <el-scrollbar style="height:100%;">
                             <el-form label-width="100px" label-position="top">
-                                <el-form-item label="存储名称">
+                                <el-form-item :label="i18n.labelEditStorageName">
                                     <el-input v-model="dialog.editStorage.name"></el-input>
                                 </el-form-item>
-                                <el-form-item label="存储根路径">
+                                <el-form-item :label="i18n.labelEditStorageRootPath">
                                     <el-input v-model="dialog.editStorage.rootPath"></el-input>
                                 </el-form-item>
-                                <el-form-item label="上传根路径">
+                                <el-form-item :label="i18n.labelEditStorageUpload">
                                     <div clas="url-path-form">
-                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.editStorage.upload.ip" placeholder="IP地址">
-                                            <el-select style="width:100px; float:left;" v-model="dialog.editStorage.upload.protocol" slot="prepend" placeholder="协议">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.editStorage.upload.ip" :placeholder="i18n.placeholderEditStorageUploadIp">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.editStorage.upload.protocol" slot="prepend" :placeholder="i18n.placeholderEditStorageUploadProtocol">
                                                 <el-option label="ftp://" value="ftp://"></el-option>
                                             </el-select>
                                         </el-input>
-                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.editStorage.upload.port" placeholder="端口">
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.editStorage.upload.port" :placeholder="i18n.placeholderEditStorageUploadPort">
                                             <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
                                             <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
                                         </el-input>
                                     </div>
                                 </el-form-item>
-                                <el-form-item label="预览根路径">
+                                <el-form-item :label="i18n.labelEditStoragePreview">
                                     <div clas="url-path-form">
-                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.editStorage.preview.ip" placeholder="IP地址">
-                                            <el-select style="width:100px; float:left;" v-model="dialog.editStorage.preview.protocol" slot="prepend" placeholder="协议">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.editStorage.preview.ip" :placeholder="i18n.placeholderEditStoragePreviewIp">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.editStorage.preview.protocol" slot="prepend" :placeholder="i18n.placeholderEditStoragePreviewProtocol">
                                                 <el-option label="http://" value="http://"></el-option>
                                                 <el-option label="https://" value="https://"></el-option>
                                             </el-select>
                                         </el-input>
-                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.editStorage.preview.port" placeholder="端口">
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.editStorage.preview.port" :placeholder="i18n.placeholderEditStoragePreviewPort">
                                             <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
                                             <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
                                         </el-input>
                                     </div>
                                 </el-form-item>
-                                <el-form-item label="服务器小工具">
+                                <el-form-item :label="i18n.labelEditStorageServerGadgetType">
                                     <el-select style="width:100%; float:left;" v-model="dialog.editStorage.serverGadgetType">
-                                        <el-option label="数码视讯小工具" value="SUMAVISION_GADGET"></el-option>
+                                        <el-option :label="i18n.labelOptionSumavisionGadget" value="SUMAVISION_GADGET"></el-option>
                                     </el-select>
                                 </el-form-item>
-                                <el-form-item label="小工具控制地址">
+                                <el-form-item :label="i18n.labelEditStorageControl">
                                     <div clas="url-path-form">
-                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.editStorage.control.ip" placeholder="IP地址">
-                                            <el-select style="width:100px; float:left;" v-model="dialog.editStorage.control.protocol" slot="prepend" placeholder="协议">
+                                        <el-input class="url-path-form-ip" style="width:330px; float:left;" v-model="dialog.editStorage.control.ip" :placeholder="i18n.placeholderEditStorageControlIp">
+                                            <el-select style="width:100px; float:left;" v-model="dialog.editStorage.control.protocol" slot="prepend" :placeholder="i18n.placeholderEditStorageControlProtocol">
                                                 <el-option label="http://" value="http://"></el-option>
                                                 <el-option label="https://" value="https://"></el-option>
                                             </el-select>
                                         </el-input>
-                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.editStorage.control.port" placeholder="端口">
+                                        <el-input class="url-path-form-port" style="width:230px; float:left;" v-model="dialog.editStorage.control.port" :placeholder="i18n.placeholderEditStorageControlPort">
                                             <span style="float:left; font-weight:700;" slot="prepend">&nbsp;&nbsp;:&nbsp;&nbsp;</span>
                                             <span style="float:left; font-weight:700;" slot="append">&nbsp;&nbsp;/&nbsp;&nbsp;</span>
                                         </el-input>
                                     </div>
                                 </el-form-item>
-                                <el-form-item label="备注">
+                                <el-form-item :label="i18n.labelEditStorageRemark">
                                     <el-input type="textarea" rows="4" v-model="dialog.editStorage.remark"></el-input>
                                 </el-form-item>
                             </el-form>
@@ -231,8 +231,8 @@
             </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="small" @click="handleEditStorageClose">取消</el-button>
-                <el-button size="small" type="primary" @click="handleEditStorageCommit" :loading="dialog.editStorage.loading">确 定</el-button>
+                <el-button size="small" @click="handleEditStorageClose">{{i18n.handleEditStorageClose}}</el-button>
+                <el-button size="small" type="primary" @click="handleEditStorageCommit" :loading="dialog.editStorage.loading">{{i18n.handleEditStorageCommit}}</el-button>
             </span>
         </el-dialog>
 

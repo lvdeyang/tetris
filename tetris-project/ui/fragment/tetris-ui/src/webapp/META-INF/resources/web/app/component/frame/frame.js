@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'component/frame/frame.html',
+    window.APPPATH + 'component/frame/frame.i18n',
     'restfull',
     'context',
     'menu',
@@ -10,7 +11,10 @@ define([
     'element-ui',
     'mi-sub-title',
     'css!' + window.APPPATH + 'component/frame/frame.css'
-], function(tpl, ajax, context, menuUtil, Vue){
+], function(tpl, i18n, ajax, context, menuUtil, Vue){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pluginName = 'mi-frame';
 
@@ -32,6 +36,7 @@ define([
         template: tpl,
         data:function(){
             return {
+                i18n:i18n,
                 logo:{
 
                     logoUrl:'',
