@@ -3,12 +3,17 @@
  */
 define([
     'text!' + window.APPPATH + 'component/dialog/system-role/system-role-dialog.html',
+    window.APPPATH + 'component/dialog/system-role/system-role-dialog.i18n',
     'restfull',
     'jquery',
     'vue',
+    'context',
     'element-ui',
     'css!' + window.APPPATH + 'component/dialog/system-role/system-role-dialog.css',
-], function(tpl, ajax, $, Vue){
+], function(tpl, i18n, ajax, $, Vue, context){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pluginName = 'mi-system-role-dialog';
 
@@ -16,6 +21,7 @@ define([
         template: tpl,
         data:function(){
             return {
+                i18n:i18n,
                 __buffer:null,
                 dialog:{
                     visible:false,
@@ -77,7 +83,7 @@ define([
                 var currentNodes = self.tree.checked;
                 if(!currentNodes){
                     self.$message({
-                        message: '您没有选择任何数据！',
+                        message: self.i18n.messageWarning,
                         type: 'warning'
                     });
                 }

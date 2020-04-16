@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'development/basic/page-development-basic.html',
+    window.APPPATH + 'development/basic/page-development-basic.i18n',
     'config',
     'restfull',
     'context',
@@ -11,7 +12,10 @@ define([
     'element-ui',
     'mi-frame',
     'css!' + window.APPPATH + 'development/basic/page-development-basic.css'
-], function(tpl, config, ajax, context, commons, Vue){
+], function(tpl, i18n, config, ajax, context, commons, Vue){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-development-basic';
 
@@ -29,6 +33,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                i18n:i18n,
                 appId:'',
                 dialog:{
                     resetAppSecret:{
@@ -50,17 +55,17 @@ define([
                     var self = this;
                     var h = self.$createElement;
                     self.$msgbox({
-                        title:'重置开发者密码？',
+                        title:self.i18n.msgboxTitle,
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
-                                h('p', null, ['请注意：所有使用旧AppSecret的接口将立即失效，请尽快更新AppSecret信息。'])
+                                h('p', null, [self.i18n.msgboxContent])
                             ])
                         ]),
                         type:'wraning',
                         showCancelButton: true,
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
+                        confirmButtonText: self.i18n.msgboxConfirmButtonText,
+                        cancelButtonText: self.i18n.msgboxCancelButtonText,
                         beforeClose:function(action, instance, done){
                             if(action === 'confirm'){
                                 self.dialog.resetAppSecret.visible = true;
@@ -90,7 +95,7 @@ define([
                         if(status !== 200) return;
                         self.$message({
                             status:'success',
-                            message:'修改成功！'
+                            message:self.i18n.resetAppSecretMessageSuccess
                         });
                         self.handleResetAppSecretClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);

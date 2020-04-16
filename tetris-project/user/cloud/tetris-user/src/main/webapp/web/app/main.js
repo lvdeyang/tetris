@@ -163,7 +163,8 @@ require([
                .setProp('router', router)
                .setProp('user', appInfo.user)
                .setProp('groups', appInfo.groups || [])
-               .setProp('token', window.TOKEN);
+               .setProp('token', window.TOKEN)
+               .setProp('locale', appInfo.locale);
 
         //处理皮肤
         if(appInfo.user.themeUrl) $('head').prepend('<link rel="stylesheet" type="text/css" href="'+window.BASEPATH + appInfo.user.themeUrl+'"/>');

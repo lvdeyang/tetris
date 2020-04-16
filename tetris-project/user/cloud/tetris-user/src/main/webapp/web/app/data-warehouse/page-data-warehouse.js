@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'data-warehouse/page-data-warehouse.html',
+    window.APPPATH + 'data-warehouse/page-data-warehouse.i18n',
     'config',
     'jquery',
     'restfull',
@@ -12,7 +13,10 @@ define([
     'element-ui',
     'mi-frame',
     'css!' + window.APPPATH + 'data-warehouse/page-data-warehouse.css'
-], function (tpl, config, $, ajax, context, commons, Vue) {
+], function (tpl, i18n, config, $, ajax, context, commons, Vue) {
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-data-warehouse';
 
@@ -28,6 +32,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                i18n:i18n,
                 activeId: window.BASEPATH + 'index#/page-data-warehouse',
                 token: '',
                 tree: {

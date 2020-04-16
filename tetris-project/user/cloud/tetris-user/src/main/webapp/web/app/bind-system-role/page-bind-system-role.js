@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'bind-system-role/page-bind-system-role.html',
+    window.APPPATH + 'bind-system-role/page-bind-system-role.i18n',
     'config',
     'jquery',
     'restfull',
@@ -14,7 +15,10 @@ define([
     'mi-system-role-dialog',
     'mi-business-role-dialog',
     'css!' + window.APPPATH + 'bind-system-role/page-bind-system-role.css'
-], function(tpl, config, $, ajax, context, commons, Vue){
+], function(tpl, i18n, config, $, ajax, context, commons, Vue){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-bind-system-role';
 
@@ -45,6 +49,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                i18n:i18n,
                 username:username,
                 activeId:activeId,
                 returnUserHash:returnUserHash,

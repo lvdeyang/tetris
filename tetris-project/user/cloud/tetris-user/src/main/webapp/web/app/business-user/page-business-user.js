@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'business-user/page-business-user.html',
+    window.APPPATH + 'business-user/page-business-user.i18n',
     'config',
     'restfull',
     'jquery',
@@ -15,7 +16,10 @@ define([
     'mi-user-dialog',
     'mi-upload-dialog',
     'css!' + window.APPPATH + 'business-user/page-business-user.css'
-], function (tpl, config, ajax, $, context, commons, Vue) {
+], function (tpl, i18n, config, ajax, $, context, commons, Vue) {
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-business-user';
 
@@ -35,6 +39,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                i18n:i18n,
                 activeId: window.BASEPATH + 'index#/page-business-user',
                 importInfo:{
                     status:false,

@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'bind-user/page-bind-user.html',
+    window.APPPATH + 'bind-user/page-bind-user.i18n',
     'config',
     'jquery',
     'restfull',
@@ -13,7 +14,10 @@ define([
     'mi-frame',
     'mi-user-dialog',
     'css!' + window.APPPATH + 'bind-user/page-bind-user.css'
-], function(tpl, config, $, ajax, context, commons, Vue){
+], function(tpl, i18n, config, $, ajax, context, commons, Vue){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-bind-user';
 
@@ -44,6 +48,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                i18n:i18n,
                 roleName:roleName,
                 activeId:activeId,
                 returnUserHash:returnUserHash,

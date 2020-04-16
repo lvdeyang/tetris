@@ -1,5 +1,6 @@
 define([
     'text!' + window.APPPATH + 'organization/page-organization.html',
+    window.APPPATH + 'organization/page-organization.i18n',
     'config',
     'restfull',
     'jquery',
@@ -10,7 +11,10 @@ define([
     'mi-frame',
     'mi-sub-title',
     'mi-user-dialog'
-], function(tpl, config, ajax, $, context, commons, Vue){
+], function(tpl, i18n, config, ajax, $, context, commons, Vue){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-organization';
 
@@ -31,6 +35,7 @@ define([
                 menus:context.getProp('menus'),
                 user:context.getProp('user'),
                 groups:context.getProp('groups'),
+                i18n:i18n,
                 companyName:companyName,
                 activeId:window.BASEPATH + 'index#/page-company',
                 tree:{

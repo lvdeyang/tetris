@@ -1,13 +1,13 @@
 <el-dialog
         class="mi-business-role-dialog"
-        title="选择角色"
+        :title="i18n.title"
         :visible.sync="visible"
         width="640px"
         :before-close="handleRoleClose">
 
     <div class="content">
         <div class="content-wrapper">
-            <el-input placeholder="搜索角色" size="small" suffix-icon="el-icon-search"></el-input>
+            <el-input :placeholder="i18n.placeholderIconSearch" size="small" suffix-icon="el-icon-search"></el-input>
             <div class="table-wrapper">
                 <el-table
                         :data="rows"
@@ -20,7 +20,7 @@
                             width="55">
                     </el-table-column>
                     <el-table-column
-                            label="角色"
+                            :label="i18n.tableColumnName"
                             prop="name">
                     </el-table-column>
                 </el-table>
@@ -39,7 +39,7 @@
                     layout="prev, pager, next"
                     :total="total">
             </el-pagination>
-            <el-button size="small" type="primary" @click="handleRoleBindingOk" :loading="loading" style="float:right;">确 定</el-button>
+            <el-button size="small" type="primary" @click="handleRoleBindingOk" :loading="loading" style="float:right;">{{i18n.handleRoleBindingOk}}</el-button>
         </div>
     </span>
 </el-dialog>

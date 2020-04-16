@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'system-theme/page-system-theme.html',
+    window.APPPATH + 'system-theme/page-system-theme.i18n',
     'config',
     'restfull',
     'context',
@@ -11,7 +12,10 @@ define([
     'element-ui',
     'mi-frame',
     'css!' + window.APPPATH + 'system-theme/page-system-theme.css'
-], function(tpl, config, ajax, context, commons, Vue){
+], function(tpl, i18n, config, ajax, context, commons, Vue){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-system-theme';
 
@@ -29,7 +33,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
-
+                i18n:i18n,
                 table:{
                     rows:[],
                     pageSize:50,
