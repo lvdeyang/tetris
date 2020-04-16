@@ -43,3 +43,8 @@ html, body {
 .zk-business-cooperation .el-scrollbar__wrap {
     overflow-x: hidden;
 }
+
+.el-input__inner{
+    background-color: #0e3d941f;
+    color: #c0c1c3;
+}

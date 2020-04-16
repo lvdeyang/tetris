@@ -1,11 +1,14 @@
 <div class="zk-business-cooperation">
     <div style="position:absolute; left:75px; top:90px; width: 825px; bottom:60px;">
+        <el-input placeholder="输入关键字进行过滤" v-model="filterText"></el-input>
         <div style="width:100%; height:100%; position:relative; padding:10px;">
             <el-scrollbar style="height:100%;">
                 <el-tree
+                        ref="tree"
                         :data="tree.data"
                         node-key="id"
-                        :props="tree.props">
+                        :props="tree.props"
+                        :filter-node-method="filterNode">
                         <span slot-scope="{node,data}">
                             <template v-if="tag!=='members'">
                                 <el-checkbox v-if="data.type==='USER'" v-model="tree.select" :label="data.id">

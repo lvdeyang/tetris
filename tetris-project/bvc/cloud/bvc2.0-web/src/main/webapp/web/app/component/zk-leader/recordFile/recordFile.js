@@ -102,11 +102,8 @@ define([
                 ajax.post('/monitor/record/download/url/'+param.id,{url:param.previewUrl},function (data) {
                     console.log(data)
                     if(data){
-                        self.qt.info('开始下载,前端坐不了 需要qt来做');
-                        // var a=document.createElement('a');
-                        // a.setAttribute('href','http://192.165.56.71:8084/web/app/component/frame/frame.html');
-                        // a.setAttribute('download','文件吗');
-                        // a.click();
+                        self.qt.success('开始下载');
+                        self.qt.linkedWebview('rightBar',{id:'downloadFile',param:data.downloadUrl});
                     }else{
                         self.qt.warning('无效地址，不能下载');
                     }

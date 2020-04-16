@@ -202,7 +202,7 @@
                       <img class="fontPic" src="../../../../../images/zk-leader/organization.png" draggable="false">
                     </span>
                     <div class="scrollTab" v-if="switchStatus2">
-                        <el-input placeholder="输入关键字进行过滤" v-model="filterText" style="left: 3px">
+                        <el-input placeholder="输入关键字进行过滤" v-model="filterText" style="left: 3px;width: 300px">
                         </el-input>
                         <el-scrollbar style="height:100%">
                             <el-tree :data="institution.data"  ref="tree" node-key="id" :props="props"  :filter-node-method="filterNode">

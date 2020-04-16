@@ -71,3 +71,11 @@
     color: #bcc2ce;
 }
 
+.el-table__body-wrapper{
+    height: 100%;
+    overflow: hidden;
+}
+.el-scrollbar__wrap{
+    overflow-x: hidden;
+}
+
