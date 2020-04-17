@@ -72,7 +72,8 @@ public class UpdateBatchBundlesUtil {
 	private LockScreenParamDao lockScreenParamDao;
 
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-	public BatchLockBundleRespParam lockAndUpdateBatchBundles(Map<String, LockBundleParam> lockBundleParamsMap, Set<String> bundleIdSet, Long userId, boolean mustLockAll)
+	public BatchLockBundleRespParam lockAndUpdateBatchBundles(Map<String, LockBundleParam> lockBundleParamsMap,
+			Map<String, Integer> lockCountMap, Set<String> bundleIdSet, Long userId, boolean mustLockAll)
 			throws Exception {
 
 		long startTime = System.currentTimeMillis();
@@ -82,7 +83,8 @@ public class UpdateBatchBundlesUtil {
 		int successCnt = 0;
 
 		List<BundlePO> originBundlePOList = bundleDao.findByBundleIdIn(bundleIdSet);
-		LOGGER.info("lockAndUpdateBatchBundles, query all BundlePO time=" + (System.currentTimeMillis() - startTime) + ", originBundlePOList size=" + originBundlePOList.size());
+		LOGGER.info("lockAndUpdateBatchBundles, query all BundlePO time=" + (System.currentTimeMillis() - startTime)
+				+ ", originBundlePOList size=" + originBundlePOList.size());
 
 		// 先将涉及的bundlePO统一查出，在内存中处理
 		// lockBundlePOList是原始查出的数据List
@@ -95,8 +97,8 @@ public class UpdateBatchBundlesUtil {
 			}
 		}
 
-		LOGGER.info(
-				"lockAndUpdateBatchBundles, query and reassemble all LockBundleParamPO time=" + (System.currentTimeMillis() - startTime) + " ,size=" + lockBundleParamPOMap.size());
+		LOGGER.info("lockAndUpdateBatchBundles, query and reassemble all LockBundleParamPO time="
+				+ (System.currentTimeMillis() - startTime) + " ,size=" + lockBundleParamPOMap.size());
 
 		// 将涉及的 LockChannelParamPO 统一查出 在内存中处理
 		// originlockChannelParamPOList 是原始查出的 数据list
@@ -106,12 +108,13 @@ public class UpdateBatchBundlesUtil {
 		if (!CollectionUtils.isEmpty(originlockChannelParamPOList)) {
 
 			for (LockChannelParamPO lockChannelParamPO : originlockChannelParamPOList) {
-				lockChannelParamPOMap.put(lockChannelParamPO.getBundleId() + "-" + lockChannelParamPO.getChannelId(), lockChannelParamPO);
+				lockChannelParamPOMap.put(lockChannelParamPO.getBundleId() + "-" + lockChannelParamPO.getChannelId(),
+						lockChannelParamPO);
 			}
 		}
 
-		LOGGER.info("lockAndUpdateBatchBundles, query and reassemble all LockChannelParamPO time=" + (System.currentTimeMillis() - startTime) + " ,size="
-				+ lockChannelParamPOMap.size());
+		LOGGER.info("lockAndUpdateBatchBundles, query and reassemble all LockChannelParamPO time="
+				+ (System.currentTimeMillis() - startTime) + " ,size=" + lockChannelParamPOMap.size());
 
 		// 将涉及的 ChannelSchemePO 统一查出 在内存中处理
 		// originChannelSchemePOList 是原始查出的 数据list
@@ -121,11 +124,13 @@ public class UpdateBatchBundlesUtil {
 
 		if (!CollectionUtils.isEmpty(originChannelSchemePOList)) {
 			for (ChannelSchemePO channelSchemePO : originChannelSchemePOList) {
-				channelSchemePOMap.put(channelSchemePO.getBundleId() + "-" + channelSchemePO.getChannelId(), channelSchemePO);
+				channelSchemePOMap.put(channelSchemePO.getBundleId() + "-" + channelSchemePO.getChannelId(),
+						channelSchemePO);
 			}
 		}
 
-		LOGGER.info("lockAndUpdateBatchBundles, query and reassemble all ChannelSchemePO time=" + (System.currentTimeMillis() - startTime) + " ,size=" + channelSchemePOMap.size());
+		LOGGER.info("lockAndUpdateBatchBundles, query and reassemble all ChannelSchemePO time="
+				+ (System.currentTimeMillis() - startTime) + " ,size=" + channelSchemePOMap.size());
 
 		// 将涉及的 ScreenSchemePO 统一查出 在内存中处理
 		// originSceenSchemePOList 是原始查出的 数据list
@@ -134,11 +139,14 @@ public class UpdateBatchBundlesUtil {
 		Map<String, ScreenSchemePO> screenSchemePOMap = new HashMap<String, ScreenSchemePO>();
 		if (!CollectionUtils.isEmpty(originSceenSchemePOList)) {
 			for (ScreenSchemePO screenSchemePO : originSceenSchemePOList) {
-				screenSchemePOMap.put(screenSchemePO.getBundleId() + "-" + screenSchemePO.getScreenId(), screenSchemePO);
+				screenSchemePOMap.put(screenSchemePO.getBundleId() + "-" + screenSchemePO.getScreenId(),
+						screenSchemePO);
 			}
 		}
 
-		// LOGGER.info("lockAndUpdateBatchBundles, query and reassemble all ScreenSchemePO time=" + (System.currentTimeMillis() - startTime) + " ,size=" + screenSchemePOMap.size());
+		// LOGGER.info("lockAndUpdateBatchBundles, query and reassemble all
+		// ScreenSchemePO time=" + (System.currentTimeMillis() - startTime) + " ,size="
+		// + screenSchemePOMap.size());
 
 		// 将涉及的 LockScreenParamPO 统一查出 在内存中处理
 		// originLockScreenParamPOList 是原始查出的 数据list
@@ -148,12 +156,15 @@ public class UpdateBatchBundlesUtil {
 
 		if (!CollectionUtils.isEmpty(originLockScreenParamPOList)) {
 			for (LockScreenParamPO lockScreenParamPO : originLockScreenParamPOList) {
-				lockScreenParamPOMap.put(lockScreenParamPO.getBundleId() + "-" + lockScreenParamPO.getScreenId(), lockScreenParamPO);
+				lockScreenParamPOMap.put(lockScreenParamPO.getBundleId() + "-" + lockScreenParamPO.getScreenId(),
+						lockScreenParamPO);
 			}
 		}
 
-		//LOGGER.info(
-		//		"lockAndUpdateBatchBundles, query and reassemble all LockScreenParamPO time=" + (System.currentTimeMillis() - startTime) + " ,size=" + lockScreenParamPOMap.size());
+		// LOGGER.info(
+		// "lockAndUpdateBatchBundles, query and reassemble all LockScreenParamPO time="
+		// + (System.currentTimeMillis() - startTime) + " ,size=" +
+		// lockScreenParamPOMap.size());
 
 		// 待批量提交到数据库操作的 所有 List
 		List<BundlePO> bundlePOList = new ArrayList<BundlePO>();
@@ -168,6 +179,7 @@ public class UpdateBatchBundlesUtil {
 			BatchLockBundleRespBody lockBundleRespBody = new BatchLockBundleRespBody();
 
 			LockBundleParam lockParam = lockBundleParamsMap.get(bundlePO.getBundleId());
+			Integer lockCount = lockCountMap.get(bundlePO.getBundleId());
 
 			if (LockStatus.IDLE == bundlePO.getLockStatus()) {
 				// bundle当前未被锁定
@@ -179,7 +191,7 @@ public class UpdateBatchBundlesUtil {
 					if (null == bundlePO.getOperateCount() || bundlePO.getOperateCount() < 0) {
 						bundlePO.setOperateCount(0);
 					}
-					bundlePO.setOperateCount(bundlePO.getOperateCount() + 1);
+					bundlePO.setOperateCount(bundlePO.getOperateCount() + lockCount);
 				}
 
 				bundlePOList.add(bundlePO);
@@ -202,7 +214,8 @@ public class UpdateBatchBundlesUtil {
 				LockBundleParamPO lockBundleParamPO = lockBundleParamPOMap.get(bundlePO.getBundleId());
 				if (null != lockBundleParamPO && !lockBundleParamPO.getUserId().equals(lockParam.getUserId())) {
 
-					LOGGER.info("one bundle lock failed, lockBundleParamPO=" + JSONObject.toJSONString(lockBundleParamPO));
+					LOGGER.info(
+							"one bundle lock failed, lockBundleParamPO=" + JSONObject.toJSONString(lockBundleParamPO));
 
 					if (mustLockAll) {
 						throw new Exception(ErrorCode.BUNDLE_BUSY.toString());
@@ -237,7 +250,8 @@ public class UpdateBatchBundlesUtil {
 						// lockChannelParamService.findByBundleIdAndChannelId(lockParam.getBundleId(),
 						// channelBody.getChannel_id());
 
-						LockChannelParamPO lockChannelParamPO = lockChannelParamPOMap.get(lockParam.getBundleId() + "-" + channelBody.getChannel_id());
+						LockChannelParamPO lockChannelParamPO = lockChannelParamPOMap
+								.get(lockParam.getBundleId() + "-" + channelBody.getChannel_id());
 						if (null != lockChannelParamPO) {
 							// 该通道上存在任务参数
 							lockChannelParamPO.setChannelParam(JSONObject.toJSONString(channelBody.getChannel_param()));
@@ -258,7 +272,8 @@ public class UpdateBatchBundlesUtil {
 							// ChannelSchemePO channelSchemePO =
 							// channelSchemeService.findByBundleIdAndChannelId(lockParam.getBundleId(),
 							// channelBody.getChannel_id());
-							ChannelSchemePO channelSchemePO = channelSchemePOMap.get(lockParam.getBundleId() + "-" + channelBody.getChannel_id());
+							ChannelSchemePO channelSchemePO = channelSchemePOMap
+									.get(lockParam.getBundleId() + "-" + channelBody.getChannel_id());
 
 							channelSchemePO.setChannelStatus(LockStatus.BUSY);
 							channelSchemePO.setOperateIndex(channelSchemePO.getOperateIndex() + 1);
@@ -274,7 +289,8 @@ public class UpdateBatchBundlesUtil {
 						// ScreenSchemePO screenSchemePO =
 						// screenSchemeDao.findByBundleIdAndScreenId(lockParam.getBundleId(),
 						// screenBody.getScreen_id());
-						ScreenSchemePO screenSchemePO = screenSchemePOMap.get(lockParam.getBundleId() + "-" + screenBody.getScreen_id());
+						ScreenSchemePO screenSchemePO = screenSchemePOMap
+								.get(lockParam.getBundleId() + "-" + screenBody.getScreen_id());
 
 						if (null != screenSchemePO) {
 							if (LockStatus.IDLE.equals(screenSchemePO.getStatus())) {
@@ -294,11 +310,12 @@ public class UpdateBatchBundlesUtil {
 								// LockScreenParamPO lockScreenParamPO =
 								// lockScreenParamDao.findByBundleIdAndScreenId(lockParam.getBundleId(),
 								// screenBody.getScreen_id());
-								LockScreenParamPO lockScreenParamPO = lockScreenParamPOMap.get(lockParam.getBundleId() + "-" + screenBody.getScreen_id());
+								LockScreenParamPO lockScreenParamPO = lockScreenParamPOMap
+										.get(lockParam.getBundleId() + "-" + screenBody.getScreen_id());
 
 								if (lockScreenParamPO == null) {
-									
-									//兜底 走到这里其实是数据库之前的操作有异常了
+
+									// 兜底 走到这里其实是数据库之前的操作有异常了
 									lockScreenParamPO = new LockScreenParamPO();
 									lockScreenParamPO.setBundleId(lockParam.getBundleId());
 									lockScreenParamPO.setScreenId(screenBody.getScreen_id());
@@ -337,7 +354,8 @@ public class UpdateBatchBundlesUtil {
 			successCnt++;
 		}
 
-		//LOGGER.info("lockAndUpdateBatchBundles,logical operate time=" + (System.currentTimeMillis() - startTime));
+		// LOGGER.info("lockAndUpdateBatchBundles,logical operate time=" +
+		// (System.currentTimeMillis() - startTime));
 
 		// 这种save的效率 ?
 		// 经测试，效率还可
@@ -348,9 +366,11 @@ public class UpdateBatchBundlesUtil {
 		lockScreenParamDao.save(lockScreenParamPOList);
 		lockBundleParamDao.save(lockBundleParamPOList);
 
-		LOGGER.info("lockAndUpdateBatchBundles after time=" + (System.currentTimeMillis() - startTime) + " , bundlePOList size=" + bundlePOList.size()
-				+ " , channelSchemePOList size=" + channelSchemePOList.size() + " , lockChannelParamPOList size=" + lockChannelParamPOList.size() + " , screenSchemePOList size="
-				+ screenSchemePOList.size() + " , lockScreenParamPOList size=" + lockScreenParamPOList.size() + " , lockBundleParamPOList size=" + lockBundleParamPOList.size());
+		LOGGER.info("lockAndUpdateBatchBundles after time=" + (System.currentTimeMillis() - startTime)
+				+ " , bundlePOList size=" + bundlePOList.size() + " , channelSchemePOList size="
+				+ channelSchemePOList.size() + " , lockChannelParamPOList size=" + lockChannelParamPOList.size()
+				+ " , screenSchemePOList size=" + screenSchemePOList.size() + " , lockScreenParamPOList size="
+				+ lockScreenParamPOList.size() + " , lockBundleParamPOList size=" + lockBundleParamPOList.size());
 
 		resp.setSuccessCnt(successCnt);
 		resp.setOperateBundlesResult(batchLockBundleRespBodyList);
@@ -365,7 +385,8 @@ public class UpdateBatchBundlesUtil {
 	}
 
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-	public BatchLockBundleRespParam unlockAndUpdateBatchBundles(Map<String, LockBundleParam> releaseBundleParamMap, Set<String> bundleIdSet, String businessMode) {
+	public BatchLockBundleRespParam unlockAndUpdateBatchBundles(Map<String, LockBundleParam> releaseBundleParamMap,
+			Map<String, Integer> releaseCountMap, Set<String> bundleIdSet, String businessMode) {
 		long startTime = System.currentTimeMillis();
 
 		BatchLockBundleRespParam resp = new BatchLockBundleRespParam();
@@ -373,8 +394,8 @@ public class UpdateBatchBundlesUtil {
 		int successCnt = 0;
 
 		List<BundlePO> releaseBundlePOList = bundleDao.findByBundleIdIn(bundleIdSet);
-		LOGGER.info(
-				"unlockAndUpdateBatchBundles, query all BundlePO time=" + (System.currentTimeMillis() - startTime) + ", releaseBundlePOList size=" + releaseBundlePOList.size());
+		LOGGER.info("unlockAndUpdateBatchBundles, query all BundlePO time=" + (System.currentTimeMillis() - startTime)
+				+ ", releaseBundlePOList size=" + releaseBundlePOList.size());
 
 		// 将涉及的 ChannelSchemePO 统一查出 在内存中处理
 		// originChannelSchemePOList 是原始查出的 数据list
@@ -382,14 +403,15 @@ public class UpdateBatchBundlesUtil {
 		List<ChannelSchemePO> originChannelSchemePOList = channelSchemeDao.findByBundleIdIn(bundleIdSet);
 
 		// TODO lamda 过滤
-		List<ChannelSchemePO> originBusyChannelSchemePOList = originChannelSchemePOList.stream().filter(a -> a.getChannelStatus().equals(LockStatus.BUSY))
-				.collect(Collectors.toList());
+		List<ChannelSchemePO> originBusyChannelSchemePOList = originChannelSchemePOList.stream()
+				.filter(a -> a.getChannelStatus().equals(LockStatus.BUSY)).collect(Collectors.toList());
 
 		// TODO lamda分组
-		Map<String, List<ChannelSchemePO>> channelSchemePOMap = originBusyChannelSchemePOList.stream().collect(Collectors.groupingBy(ChannelSchemePO::getBundleId));
+		Map<String, List<ChannelSchemePO>> channelSchemePOMap = originBusyChannelSchemePOList.stream()
+				.collect(Collectors.groupingBy(ChannelSchemePO::getBundleId));
 
-		LOGGER.info("unlockAndUpdateBatchBundles, query and reassemble all channelSchemePOMap time=" + (System.currentTimeMillis() - startTime) + " ,size="
-				+ channelSchemePOMap.size());
+		LOGGER.info("unlockAndUpdateBatchBundles, query and reassemble all channelSchemePOMap time="
+				+ (System.currentTimeMillis() - startTime) + " ,size=" + channelSchemePOMap.size());
 
 		// 将涉及的 ScreenSchemePO 统一查出 在内存中处理
 		// originSceenSchemePOList 是原始查出的 数据list
@@ -397,13 +419,15 @@ public class UpdateBatchBundlesUtil {
 		List<ScreenSchemePO> originSceenSchemePOList = screenSchemeDao.findByBundleIdIn(bundleIdSet);
 
 		// TODO lamda 过滤
-		List<ScreenSchemePO> originBusySceenSchemePOList = originSceenSchemePOList.stream().filter(a -> a.getStatus().equals(LockStatus.BUSY)).collect(Collectors.toList());
+		List<ScreenSchemePO> originBusySceenSchemePOList = originSceenSchemePOList.stream()
+				.filter(a -> a.getStatus().equals(LockStatus.BUSY)).collect(Collectors.toList());
 
 		// TODO lamda 分组
-		Map<String, List<ScreenSchemePO>> screenSchemePOMap = originBusySceenSchemePOList.stream().collect(Collectors.groupingBy(ScreenSchemePO::getBundleId));
+		Map<String, List<ScreenSchemePO>> screenSchemePOMap = originBusySceenSchemePOList.stream()
+				.collect(Collectors.groupingBy(ScreenSchemePO::getBundleId));
 
-		LOGGER.info(
-				"unlockAndUpdateBatchBundles, query and reassemble all screenSchemePOMap time=" + (System.currentTimeMillis() - startTime) + " ,size=" + screenSchemePOMap.size());
+		LOGGER.info("unlockAndUpdateBatchBundles, query and reassemble all screenSchemePOMap time="
+				+ (System.currentTimeMillis() - startTime) + " ,size=" + screenSchemePOMap.size());
 
 		List<BundlePO> bundlePOList = new ArrayList<>();
 		List<ChannelSchemePO> channelSchemePOList = new ArrayList<>();
@@ -414,16 +438,19 @@ public class UpdateBatchBundlesUtil {
 			BatchLockBundleRespBody releaseBundleRespBody = new BatchLockBundleRespBody();
 			LockBundleParam releaseBundleParam = releaseBundleParamMap.get(bundlePO.getBundleId());
 
+			Integer releaseCount = releaseCountMap.get(bundlePO.getBundleId());
+
 			if (releaseBundleParam.isOperateCountSwitch()) {
 				if (null == bundlePO.getOperateCount()) {
 					bundlePO.setOperateCount(0);
 				} else {
-					bundlePO.setOperateCount(bundlePO.getOperateCount() - 1);
+					bundlePO.setOperateCount(bundlePO.getOperateCount() - releaseCount);
 
 				}
 			}
 
-			if (!releaseBundleParam.isOperateCountSwitch() || (releaseBundleParam.isOperateCountSwitch() && bundlePO.getOperateCount() == 0)) {
+			if (!releaseBundleParam.isOperateCountSwitch()
+					|| (releaseBundleParam.isOperateCountSwitch() && bundlePO.getOperateCount() == 0)) {
 
 				// 还可以优化
 				// List<ChannelSchemePO> busyChannels =
@@ -454,8 +481,9 @@ public class UpdateBatchBundlesUtil {
 						screenSchemePOList.add(busyScreen);
 					}
 				}
-				
-				LOGGER.info("unlockAndUpdateBatchBundles, logical operate time=" + (System.currentTimeMillis() - startTime));
+
+				LOGGER.info("unlockAndUpdateBatchBundles, logical operate time="
+						+ (System.currentTimeMillis() - startTime));
 
 				lockChannelParamDao.deleteByBundleId(bundlePO.getBundleId());
 				lockScreenParamDao.deleteByBundleId(bundlePO.getBundleId());
@@ -483,8 +511,9 @@ public class UpdateBatchBundlesUtil {
 		screenSchemeDao.save(screenSchemePOList);
 		bundleDao.save(bundlePOList);
 
-		LOGGER.info("unlockAndUpdateBatchBundles saveAll cost time=" + (System.currentTimeMillis() - startTime) + " , channelSchemePOList size=" + channelSchemePOList.size()
-				+ " , screenSchemePOList size=" + screenSchemePOList.size() + " , bundlePOList size=" + bundlePOList.size());
+		LOGGER.info("unlockAndUpdateBatchBundles saveAll cost time=" + (System.currentTimeMillis() - startTime)
+				+ " , channelSchemePOList size=" + channelSchemePOList.size() + " , screenSchemePOList size="
+				+ screenSchemePOList.size() + " , bundlePOList size=" + bundlePOList.size());
 
 		resp.setSuccessCnt(successCnt);
 		resp.setOperateBundlesResult(batchReleaseBundleRespBodyList);
@@ -493,15 +522,16 @@ public class UpdateBatchBundlesUtil {
 
 	}
 
-	private void operateLockChannelParam(LockBundleParam lockParam, List<ChannelSchemePO> channelSchemePOList, List<LockChannelParamPO> lockChannelParamPOList,
-			Map<String, ChannelSchemePO> channelSchemePOMap) {
+	private void operateLockChannelParam(LockBundleParam lockParam, List<ChannelSchemePO> channelSchemePOList,
+			List<LockChannelParamPO> lockChannelParamPOList, Map<String, ChannelSchemePO> channelSchemePOMap) {
 		if (null != lockParam.getChannels()) {
 			for (ChannelBody channelBody : lockParam.getChannels()) {
 				// ChannelSchemePO channelSchemePO =
 				// channelSchemeService.findByBundleIdAndChannelId(lockParam.getBundleId(),
 				// channelBody.getChannel_id());
-				ChannelSchemePO channelSchemePO = channelSchemePOMap.get(lockParam.getBundleId() + "-" + channelBody.getChannel_id());
-				
+				ChannelSchemePO channelSchemePO = channelSchemePOMap
+						.get(lockParam.getBundleId() + "-" + channelBody.getChannel_id());
+
 				channelSchemePO.setChannelStatus(LockStatus.BUSY);
 				channelSchemePO.setOperateIndex(channelSchemePO.getOperateIndex() + 1);
 				// channelSchemeService.save(channelSchemePO);
@@ -518,14 +548,15 @@ public class UpdateBatchBundlesUtil {
 		}
 	}
 
-	private void operateLockScreenParam(LockBundleParam lockParam, List<ScreenSchemePO> screenSchemePOList, List<LockScreenParamPO> lockScreenParamPOList,
-			Map<String, ScreenSchemePO> screenSchemePOMap) {
+	private void operateLockScreenParam(LockBundleParam lockParam, List<ScreenSchemePO> screenSchemePOList,
+			List<LockScreenParamPO> lockScreenParamPOList, Map<String, ScreenSchemePO> screenSchemePOMap) {
 		if (null != lockParam.getScreens()) {
 			for (ScreenBody screenBody : lockParam.getScreens()) {
 				// ScreenSchemePO screenSchemePO =
 				// screenSchemeDao.findByBundleIdAndScreenId(lockParam.getBundleId(),
 				// screenBody.getScreen_id());
-				ScreenSchemePO screenSchemePO = screenSchemePOMap.get(lockParam.getBundleId() + "-" + screenBody.getScreen_id());
+				ScreenSchemePO screenSchemePO = screenSchemePOMap
+						.get(lockParam.getBundleId() + "-" + screenBody.getScreen_id());
 
 				if (null != screenSchemePO) {
 					screenSchemePO.setStatus(LockStatus.BUSY);

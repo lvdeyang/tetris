@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sumavision.tetris.record.device.DevicePO.EDeviceOnlineStatus;
+import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
 import com.sumavision.tetris.resouce.feign.bundle.BundleFeignVO;
-import com.sumavision.tetris.resouce.feign.bundle.BundleService;
 
 @Controller
 @RequestMapping(value = "/record/device")
@@ -23,7 +23,7 @@ public class DeviceController {
 	DeviceDAO deviceDAO;
 
 	@Autowired
-	private BundleService bundleService;
+	private BundleFeignService bundleService;
 
 	@RequestMapping("/query")
 	@ResponseBody
