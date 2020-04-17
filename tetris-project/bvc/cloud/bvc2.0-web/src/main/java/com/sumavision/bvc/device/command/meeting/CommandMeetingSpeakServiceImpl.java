@@ -224,19 +224,33 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 			
 			List<CommandGroupMemberPO> members = group.getMembers();
-			CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, userId);
-			if(member.getCooperateStatus().equals(MemberStatus.CONNECT)){
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+			CommandGroupMemberPO speakMember = commandCommonUtil.queryMemberByUserId(members, userId);
+			if(speakMember.getCooperateStatus().equals(MemberStatus.CONNECT)){
 				throw new BaseException(StatusCode.FORBIDDEN, "您正在发言");
 			}
 			
-			JSONObject message = new JSONObject();
-			message.put("businessType", "speakApply");
-			message.put("businessInfo", member.getUserName() + "申请发言");
-			message.put("businessId", group.getId().toString() + "-" + member.getUserId());
+			//如果主席和申请人都不在该系统，则不需要处理
+			if(OriginType.OUTER.equals(chairmanMember.getOriginType())
+					&& OriginType.OUTER.equals(speakMember.getOriginType())){
+				return;
+			}
 			
-			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
-			WebsocketMessageVO ws = websocketMessageService.send(chairmanMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
-			websocketMessageService.consume(ws.getId());
+			//级联
+			if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
+				//主席在该系统
+				JSONObject message = new JSONObject();
+				message.put("businessType", "speakApply");
+				message.put("businessInfo", speakMember.getUserName() + "申请发言");
+				message.put("businessId", group.getId().toString() + "-" + speakMember.getUserId());
+				
+				WebsocketMessageVO ws = websocketMessageService.send(chairmanMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
+				websocketMessageService.consume(ws.getId());
+			}else{
+				//主席在外部系统（那么申请人在该系统）
+				GroupBO groupBO = commandCascadeUtil.speakerSetRequest(group, speakMember);
+				conferenceCascadeService.speakerSetRequest(groupBO);
+			}
 			
 			log.info(group.getName() + "申请发言");
 		}
@@ -251,7 +265,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * <b>日期：</b>2020年3月26日 上午11:34:35
 	 * @param userId 操作人（应该是主席）
 	 * @param groupId
-	 * @param userIdArray 被拒绝的用户
+	 * @param userIdArray 被同意的用户
 	 * @throws Exception
 	 */
 	public void speakApplyAgree(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
@@ -259,7 +273,6 @@ public class CommandMeetingSpeakServiceImpl {
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
-//			GroupType groupType = group.getType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
@@ -283,13 +296,17 @@ public class CommandMeetingSpeakServiceImpl {
 			message.put("businessInfo", group.getName() + "主席同意发言，您已开始发言");
 			message.put("businessId", group.getId());
 			List<CommandGroupMemberPO> members = group.getMembers();
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
 				if(userIdArray.contains(member.getUserId())){
 					if(member.getCooperateStatus().equals(MemberStatus.DISCONNECT)){
 						member.setCooperateStatus(MemberStatus.CONNECT);
 						speakMembers.add(member);
-						messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
+						//通知本系统内的发言人
+						if(!OriginType.OUTER.equals(member.getOriginType())){
+							messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
+						}
 					}else{
 //						if(groupType.equals(GroupType.BASIC)){
 //							throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经被授权协同会议");
@@ -304,6 +321,15 @@ public class CommandMeetingSpeakServiceImpl {
 			for(CommandGroupMemberPO speakMember : speakMembers){
 				if(!speakMember.getMemberStatus().equals(MemberStatus.CONNECT)){
 					throw new BaseException(StatusCode.FORBIDDEN, speakMember.getUserName() + " 还未进入");
+				}
+			}
+			
+			//级联，如果主席是本系统的，则通知其它系统
+			if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
+				//级联同意发言只有单个协议，没有批量
+				for(CommandGroupMemberPO speakMember : speakMembers){
+					GroupBO groupBO = commandCascadeUtil.speakerSetResponse(group, speakMember, "1");
+					conferenceCascadeService.speakerSetResponse(groupBO);
 				}
 			}
 			
@@ -328,7 +354,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * <b>日期：</b>2020年3月26日 上午11:37:12
 	 * @param userId 操作人（应该是主席）
 	 * @param groupId
-	 * @param userIdArray 被同意的用户
+	 * @param userIds 被拒绝的用户
 	 * @throws Exception
 	 */
 	public void speakApplyDisagree(Long userId, Long groupId, List<Long> userIds) throws Exception{
@@ -347,14 +373,27 @@ public class CommandMeetingSpeakServiceImpl {
 			List<Long> consumeIds = new ArrayList<Long>();
 			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();			
 			List<CommandGroupMemberPO> members = group.getMembers();
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			List<CommandGroupMemberPO> speakMembers = commandCommonUtil.queryMembersByUserIds(members, userIds);
 			JSONObject message = new JSONObject();
 			message.put("businessType", "speakApplyDisagree");
 			message.put("businessInfo", "主席拒绝了您的发言申请");
 			message.put("businessId", group.getId().toString());
 			for(CommandGroupMemberPO speakMember : speakMembers){
+				if(OriginType.OUTER.equals(speakMember.getOriginType())){
+					continue;
+				}
 				messageCaches.add(new MessageSendCacheBO(speakMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
-			}			
+			}
+			
+			//级联，如果主席是本系统的，则通知其它系统
+			if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
+				//级联拒绝发言只有单个协议，没有批量
+				for(CommandGroupMemberPO speakMember : speakMembers){
+					GroupBO groupBO = commandCascadeUtil.speakerSetResponse(group, speakMember, "0");
+					conferenceCascadeService.speakerSetResponse(groupBO);
+				}
+			}
 			
 			for(MessageSendCacheBO cache : messageCaches){
 				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType());
@@ -393,7 +432,7 @@ public class CommandMeetingSpeakServiceImpl {
 						
 			//发言人，校验是否已经在发言
 			List<CommandGroupMemberPO> members = group.getMembers();
-			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+//			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			CommandGroupMemberPO speakMember = commandCommonUtil.queryMemberByUserId(members, userId);
 			if(speakMember.getCooperateStatus().equals(MemberStatus.CONNECT)){
@@ -404,7 +443,7 @@ public class CommandMeetingSpeakServiceImpl {
 			}
 			
 			//级联，这里的判断条件有所变化，发起人如果不是OUTER，就给其它发级联协议
-			//TODO:成员能自己取消吗？
+			//TODO:级联协议里，成员能自己取消吗？
 			GroupType type = group.getType();
 			if(!OriginType.OUTER.equals(speakMember.getOriginType())){
 				if(GroupType.MEETING.equals(type)){
@@ -471,7 +510,7 @@ public class CommandMeetingSpeakServiceImpl {
 			
 			//级联
 			GroupType type = group.getType();
-			if(!OriginType.OUTER.equals(group.getOriginType())){
+			if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
 				if(GroupType.MEETING.equals(type)){
 					//级联取消发言只有单个协议，没有批量
 					for(CommandGroupMemberPO speakMember : speakMembers){

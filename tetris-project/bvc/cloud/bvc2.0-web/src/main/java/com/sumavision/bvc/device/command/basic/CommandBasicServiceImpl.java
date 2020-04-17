@@ -947,8 +947,6 @@ public class CommandBasicServiceImpl {
 			}
 		}
 		
-		commandGroupDao.save(group);
-		
 		//自动接听则所有在线的人接听，否则只有主席接听；专向指挥只有主席接听
 		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
 		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
@@ -962,12 +960,17 @@ public class CommandBasicServiceImpl {
 				UserBO commandUserBo = queryUtil.queryUserById(commandUserBos, member.getUserId());
 				if(commandUserBo.isLogined()){
 					acceptMembers.add(member);
+				}else{
+					//没在线的，置为DISCONNECT。不用按照“拒绝”处理
+					member.setMemberStatus(MemberStatus.DISCONNECT);
 				}
 			}
 		}else{
 			acceptMembers = new ArrayList<CommandGroupMemberPO>();
 			acceptMembers.add(chairman);			
 		}
+		
+		commandGroupDao.save(group);
 		
 		if(!OriginType.OUTER.equals(group.getOriginType())){
 			if(GroupType.BASIC.equals(groupType)){
@@ -1290,6 +1293,7 @@ public class CommandBasicServiceImpl {
 //					}
 //				}
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			GroupType groupType = group.getType();
 			List<CommandGroupMemberPO> members = group.getMembers();
 			
 			//主席member
@@ -1303,13 +1307,23 @@ public class CommandBasicServiceImpl {
 			if(!thisMember.isAdministrator()){
 				List<CommandGroupMemberPO> acceptMembers = new ArrayList<CommandGroupMemberPO>();
 				acceptMembers.add(thisMember);
-				//如果该成员状态为DISCONNECT，说明是已经拒绝了会议，现在重新进入，需要重选播放器
-				if(thisMember.getMemberStatus().equals(MemberStatus.DISCONNECT)){
-//					chosePlayersForMembers(group, acceptMembers);//后选播放器:放进membersResponse
-					membersResponse(group, acceptMembers, null);
-				}else if(thisMember.getMemberStatus().equals(MemberStatus.CONNECT)){
-					//break;
+				//如果该成员状态为CONNECT则不需处理，否则按接听处理
+				if(thisMember.getMemberStatus().equals(MemberStatus.CONNECT)){
+					
 				}else{
+					
+					//级联，如果该“进入”成员是本系统成员，则通知外部系统
+					if(!OriginType.OUTER.equals(thisMember.getOriginType())){
+						if(GroupType.BASIC.equals(groupType)){
+							GroupBO groupBO = commandCascadeUtil.joinCommand(group, acceptMembers);
+							commandCascadeService.join(groupBO);
+						}else if(GroupType.MEETING.equals(groupType)){
+							GroupBO groupBO = commandCascadeUtil.joinMeeting(group, acceptMembers);
+							conferenceCascadeService.start(groupBO);
+						}
+					}
+					
+//					chosePlayersForMembers(group, acceptMembers);//后选播放器:放进membersResponse
 					membersResponse(group, acceptMembers, null);
 				}
 			}
@@ -1930,8 +1944,19 @@ public class CommandBasicServiceImpl {
 					member.setMessageId(ws.getId());
 				}
 			}else{
-				//自动接听，所有新成员自动接听
-				membersResponse(group, newMembers, null);
+				//自动接听，只给在线的成员自动上线
+				List<CommandGroupMemberPO> onlineNewMembers = new ArrayList<CommandGroupMemberPO>();
+				for(CommandGroupMemberPO newMember : newMembers){
+					if(newMember.isAdministrator()) continue;
+					UserBO commandUserBo = queryUtil.queryUserById(commandUserBos, newMember.getUserId());
+					if(commandUserBo.isLogined()){
+						onlineNewMembers.add(newMember);
+					}else{
+						//没在线的，置为DISCONNECT。不用按照“拒绝”处理
+						newMember.setMemberStatus(MemberStatus.DISCONNECT);
+					}
+				}
+				membersResponse(group, onlineNewMembers, null);
 			}
 			
 			websocketMessageService.consumeAll(consumeIds);

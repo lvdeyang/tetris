@@ -91,20 +91,17 @@ public class CommandCascadeService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月31日 上午11:49:52
-	 * @param String src_user 操作用户号码
+	 * @param GroupBO group 业务数据
 	 * @param String type all, device, user, app
-	 * @param String protocol xml协议
-	 * @param List<MinfoBO> mlist 成员列表
+	 * @param Template template xml协议模板
 	 */
 	private void sendPassBy(
-			String src_user,
+			GroupBO group,
 			String type,
-			String protocol,
-			List<MinfoBO> mlist) throws Exception{
-		
-		System.out.println(protocol);
+			Template template) throws Exception{
 		
 		//根据用户号码或设备号码查询隶属应用号码列表（过滤本应用）
+		List<MinfoBO> mlist = group.getMlist();
 		List<DeviceInfoBO> devices = new ArrayList<DeviceInfoBO>();
 		for(MinfoBO m:mlist){
 			DeviceInfoBO device = new DeviceInfoBO();
@@ -118,12 +115,17 @@ public class CommandCascadeService {
 			return;
 		}
 		
+		StringWriter writer = new StringWriter();
+		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
+		String protocol = writer.toString();
+		System.out.println(protocol);
+		
 		//查询本联网layerid
 		String localLayerId = resourceRemoteService.queryLocalLayerId();
 		
 		JSONObject passbyContent = new JSONObject();
 		passbyContent.put("cmd", "send_node_message");
-		passbyContent.put("src_user", src_user);
+		passbyContent.put("src_user", group.getOp());
 		passbyContent.put("type", type);
 		passbyContent.put("dst_no", dstnos);
 		passbyContent.put("content", protocol);
@@ -148,10 +150,7 @@ public class CommandCascadeService {
 	public void create(GroupBO group) throws Exception{
 		String fullName = generateFullName("createCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -165,10 +164,7 @@ public class CommandCascadeService {
 	public void delete(GroupBO group) throws Exception{
 		String fullName = generateFullName("deleteCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -185,10 +181,7 @@ public class CommandCascadeService {
 	public void start(GroupBO group) throws Exception{
 		String fullName = generateFullName("startCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -203,10 +196,7 @@ public class CommandCascadeService {
 	public void stop(GroupBO group) throws Exception{
 		String fullName = generateFullName("stopCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -221,10 +211,7 @@ public class CommandCascadeService {
 	public void pause(GroupBO group) throws Exception{
 		String fullName = generateFullName("pauseCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -239,10 +226,7 @@ public class CommandCascadeService {
 	public void resume(GroupBO group) throws Exception{
 		String fullName = generateFullName("resumeCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -258,10 +242,7 @@ public class CommandCascadeService {
 	public void join(GroupBO group) throws Exception{
 		String fullName = generateFullName("memberEnterCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -277,10 +258,7 @@ public class CommandCascadeService {
 	public void exit(GroupBO group) throws Exception{
 		String fullName = generateFullName("memberExitCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -296,10 +274,7 @@ public class CommandCascadeService {
 	public void kikout(GroupBO group) throws Exception{
 		String fullName = generateFullName("memberKikoutCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -315,10 +290,7 @@ public class CommandCascadeService {
 	public void startCooperation(GroupBO group) throws Exception{
 		String fullName = generateFullName("cooperationCmdStart.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -334,10 +306,7 @@ public class CommandCascadeService {
 	public void stopCooperation(GroupBO group) throws Exception{
 		String fullName = generateFullName("cooperationCmdStop.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -354,10 +323,7 @@ public class CommandCascadeService {
 	public void startDeviceForward(GroupBO group) throws Exception{
 		String fullName = generateFullName("mediaTransmitStartInCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -374,10 +340,7 @@ public class CommandCascadeService {
 	public void stopDeviceForward(GroupBO group) throws Exception{
 		String fullName = generateFullName("mediaTransmitStopInCmd.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 }
