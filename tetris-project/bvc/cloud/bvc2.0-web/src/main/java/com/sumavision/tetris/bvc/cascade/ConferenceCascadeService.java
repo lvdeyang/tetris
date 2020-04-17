@@ -87,8 +87,7 @@ public class ConferenceCascadeService {
 			String protocol,
 			List<MinfoBO> mlist) throws Exception{
 		
-		//查询本联网layerid
-		String localLayerId = resourceRemoteService.queryLocalLayerId();
+		System.out.println(protocol);
 		
 		//根据用户号码或设备号码查询隶属应用号码列表（过滤本应用）
 		List<DeviceInfoBO> devices = new ArrayList<DeviceInfoBO>();
@@ -96,8 +95,16 @@ public class ConferenceCascadeService {
 			DeviceInfoBO device = new DeviceInfoBO();
 			device.setCode(m.getMid());
 			device.setType(m.getMtype().equals("usr")?"user":"device");
+			devices.add(device);
 		}
 		List<String> dstnos = resourceRemoteService.querySerNodeList(devices);
+		
+		if(dstnos.size() == 0){
+			return;
+		}
+		
+		//查询本联网layerid
+		String localLayerId = resourceRemoteService.queryLocalLayerId();
 		
 		JSONObject passbyContent = new JSONObject();
 		passbyContent.put("cmd", "send_node_message");

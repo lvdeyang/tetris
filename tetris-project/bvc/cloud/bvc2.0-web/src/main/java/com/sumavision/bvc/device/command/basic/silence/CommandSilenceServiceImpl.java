@@ -89,6 +89,7 @@ public class CommandSilenceServiceImpl {
 			}
 			
 			List<CommandGroupMemberPO> members = group.getMembers();
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			CommandGroupMemberPO operateMember = commandCommonUtil.queryMemberByUserId(members, userId);
 			if(silenceToHigher) operateMember.setSilenceToHigher(true);
 			if(silenceToLower) operateMember.setSilenceToLower(true);
@@ -125,7 +126,7 @@ public class CommandSilenceServiceImpl {
 			//生成forwardDel的logic
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-			LogicBO logic = commandBasicServiceImpl.openBundle(null, null, null, null, needDelForwards, codec, group.getUserId());
+			LogicBO logic = commandBasicServiceImpl.openBundle(null, null, null, null, needDelForwards, codec, chairmanMember.getUserNum());
 			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, null, needDelForwards, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);
 			
@@ -169,7 +170,7 @@ public class CommandSilenceServiceImpl {
 			CommandGroupMemberPO operateMember = commandCommonUtil.queryMemberByUserId(members, userId);
 			if(stopSilenceToHigher) operateMember.setSilenceToHigher(false);
 			if(stopSilenceToLower) operateMember.setSilenceToLower(false);
-			commandGroupDao.save(group);//TODO:需要吗？
+			commandGroupDao.save(group);//需要吗？
 			
 			//恢复会中的转发
 			commandBasicServiceImpl.startGroupForwards(group, true, true);

@@ -124,7 +124,7 @@ public class CommandPageServiceImpl {
 			//生成connectBundle，携带转发信息
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-			LogicBO logic = commandBasicServiceImpl.openBundle(null, null, null, allNeedForwards, null, codec, group.getUserId());
+			LogicBO logic = commandBasicServiceImpl.openBundle(null, null, null, allNeedForwards, null, codec, chairmanMember.getUserNum());
 			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, null, allNeedForwards, null, null, null, codec, group.getUserId());
 			logic.merge(logicCastDevice);
 			

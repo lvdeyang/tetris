@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.sumavision.bvc.control.utils.UserUtils;
-import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.cooperate.CommandCooperateServiceImpl;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -47,7 +46,7 @@ public class CommandCooperateController {
 		
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandCooperateServiceImpl.start_new(Long.parseLong(id), userIdArray);
+		commandCooperateServiceImpl.start(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -151,7 +150,7 @@ public class CommandCooperateController {
 		
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		JSONArray result = commandCooperateServiceImpl.revokeBatch_new(userIdArray, Long.parseLong(id));
+		JSONArray result = commandCooperateServiceImpl.revokeBatch(userIdArray, Long.parseLong(id));
 		
 		//应该是一个空数组
 		return result;
