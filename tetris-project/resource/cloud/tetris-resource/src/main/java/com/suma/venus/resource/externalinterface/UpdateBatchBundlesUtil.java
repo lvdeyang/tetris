@@ -339,7 +339,7 @@ public class UpdateBatchBundlesUtil {
 					if (null == bundlePO.getOperateCount() || bundlePO.getOperateCount() < 0) {
 						bundlePO.setOperateCount(0);
 					}
-					bundlePO.setOperateCount(bundlePO.getOperateCount() + 1);
+					bundlePO.setOperateCount(bundlePO.getOperateCount() + lockCount);
 				}
 
 				// bundleService.save(bundle);
