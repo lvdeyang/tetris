@@ -144,16 +144,28 @@ public class InterfaceToResource {
 
 		// 使用map建索引
 		Map<String, LockBundleParam> lockBundleParamsMap = new HashMap<>();
+		Map<String, Integer> lockBundleCountMap = new HashMap<>();
 
 		Set<String> bundleIdSet = new HashSet<>();
 
 		for (LockBundleParam lockBundleParam : batchLockBundleParam.getBundles()) {
+
+			if (lockBundleCountMap.get(lockBundleParam.getBundleId()) == null) {
+				lockBundleCountMap.put(lockBundleParam.getBundleId(), 1);
+			} else {
+				Integer tempCount = lockBundleCountMap.get(lockBundleParam.getBundleId());
+				lockBundleCountMap.put(lockBundleParam.getBundleId(), tempCount + 1);
+			}
+
 			lockBundleParamsMap.put(lockBundleParam.getBundleId(), lockBundleParam);
 			bundleIdSet.add(lockBundleParam.getBundleId());
 		}
-
+		
+		LOGGER.info("lockBundleCountMap= " + JSONObject.toJSONString(lockBundleCountMap));
+		
 		synchronized (this) {
-			return updateBatchBundlesUtil.lockAndUpdateBatchBundles(lockBundleParamsMap, bundleIdSet, batchLockBundleParam.getUserId(), batchLockBundleParam.isMustLockAll());
+			return updateBatchBundlesUtil.lockAndUpdateBatchBundles(lockBundleParamsMap, lockBundleCountMap,
+					bundleIdSet, batchLockBundleParam.getUserId(), batchLockBundleParam.isMustLockAll());
 		}
 
 	}
@@ -166,7 +178,8 @@ public class InterfaceToResource {
 
 		// 并发操作统一bundle时需加锁，释放完成后提交事务
 		synchronized (bundleId.intern()) {
-			BundlePO bundle = updateSingleBundleUtil.unlockAndUpdateSingleBundle(businessMode, bundleId, releaseParam.isOperateCountSwitch());
+			BundlePO bundle = updateSingleBundleUtil.unlockAndUpdateSingleBundle(businessMode, bundleId,
+					releaseParam.isOperateCountSwitch());
 			resp.setOperate_index(bundle.getOperateIndex());
 			resp.setOperate_count(bundle.getOperateCount());
 		}
@@ -178,7 +191,8 @@ public class InterfaceToResource {
 	/** 批量释放bundle */
 	@Deprecated
 	@Transactional(rollbackFor = Exception.class)
-	public BatchLockBundleRespParam batchReleaseBundle(BatchLockBundleParam batchReleaseParam, String businessMode) throws Exception {
+	public BatchLockBundleRespParam batchReleaseBundle(BatchLockBundleParam batchReleaseParam, String businessMode)
+			throws Exception {
 
 		BatchLockBundleRespParam resp = new BatchLockBundleRespParam();
 		List<BatchLockBundleRespBody> batchReleaseBundleRespBodyList = new ArrayList<BatchLockBundleRespBody>();
@@ -192,7 +206,8 @@ public class InterfaceToResource {
 			BatchLockBundleRespBody releaseBundleRespBody = new BatchLockBundleRespBody();
 
 			synchronized (bundleId.intern()) {
-				BundlePO bundle = updateSingleBundleUtil.unlockAndUpdateSingleBundle(businessMode, bundleId, releaseBundleParam.isOperateCountSwitch());
+				BundlePO bundle = updateSingleBundleUtil.unlockAndUpdateSingleBundle(businessMode, bundleId,
+						releaseBundleParam.isOperateCountSwitch());
 
 				releaseBundleRespBody.setBundleId(releaseBundleParam.getBundleId());
 				releaseBundleRespBody.setOperateResult(true);
@@ -213,20 +228,35 @@ public class InterfaceToResource {
 
 	/** 批量释放bundle */
 	@Transactional(rollbackFor = Exception.class)
-	public BatchLockBundleRespParam batchReleaseBundleNew(BatchLockBundleParam batchReleaseParam, String businessMode) throws Exception {
+	public BatchLockBundleRespParam batchReleaseBundleNew(BatchLockBundleParam batchReleaseParam, String businessMode)
+			throws Exception {
 
 		// 使用map建索引
 		Map<String, LockBundleParam> releaseBundleParamsMap = new HashMap<>();
-
+		Map<String, Integer> releaseCountMap = new HashMap<>();
+		
 		Set<String> bundleIdSet = new HashSet<>();
+		
+		
 
 		for (LockBundleParam releaseBundleParam : batchReleaseParam.getBundles()) {
+			
+			if (releaseCountMap.get(releaseBundleParam.getBundleId()) == null) {
+				releaseCountMap.put(releaseBundleParam.getBundleId(), 1);
+			} else {
+				Integer tempCount = releaseCountMap.get(releaseBundleParam.getBundleId());
+				releaseCountMap.put(releaseBundleParam.getBundleId(), tempCount + 1);
+			}
+			
 			releaseBundleParamsMap.put(releaseBundleParam.getBundleId(), releaseBundleParam);
 			bundleIdSet.add(releaseBundleParam.getBundleId());
 		}
 		
+		LOGGER.info("releaseCountMap= " + JSONObject.toJSONString(releaseCountMap));
+
 		synchronized (this) {
-			return updateBatchBundlesUtil.unlockAndUpdateBatchBundles(releaseBundleParamsMap, bundleIdSet, businessMode);
+			return updateBatchBundlesUtil.unlockAndUpdateBatchBundles(releaseBundleParamsMap, releaseCountMap, bundleIdSet,
+					businessMode);
 		}
 
 	}
@@ -250,8 +280,10 @@ public class InterfaceToResource {
 			String channel_identifier = channel.getBundle_id() + channel.getChannel_id();
 			// 并发操作同一通道时加锁,完成单个通道锁定后提交事务
 			synchronized (channel_identifier.intern()) {
-				ChannelSchemePO channelSchemePO = updateSingleChannelUtil.lockAndUpdateSingleChannel(lockChannelParam, channel);
-				channelStatusParams.add(new ChannelStatusParam(channel.getBundle_id(), channel.getChannel_id(), channelSchemePO.getOperateIndex()));
+				ChannelSchemePO channelSchemePO = updateSingleChannelUtil.lockAndUpdateSingleChannel(lockChannelParam,
+						channel);
+				channelStatusParams.add(new ChannelStatusParam(channel.getBundle_id(), channel.getChannel_id(),
+						channelSchemePO.getOperateIndex()));
 			}
 		}
 		respBody.setResult(ResponseBody.SUCCESS);
@@ -278,7 +310,8 @@ public class InterfaceToResource {
 			// 并发操作同一通道时需加锁,完成单个通道锁定后提交事务
 			synchronized (channel_identifier.intern()) {
 				ChannelSchemePO channelSchemePO = updateSingleChannelUtil.unlockAndUpdateSinggleChannel(channel);
-				channelStatusParams.add(new ChannelStatusParam(channel.getBundle_id(), channel.getChannel_id(), channelSchemePO.getOperateIndex()));
+				channelStatusParams.add(new ChannelStatusParam(channel.getBundle_id(), channel.getChannel_id(),
+						channelSchemePO.getOperateIndex()));
 			}
 		}
 
@@ -316,47 +349,50 @@ public class InterfaceToResource {
 			}
 
 			// 通知用户权限服务创建虚拟用户
-			/*Boolean beDevice = BundlePO.beDeviceBundle(bundlePO.getDeviceModel());
-			UserResultBO userResult = userFeign.createVirtualUser(bundlePO.getUsername(), bundlePO.getOnlinePassword(), beDevice);
-			if (null == userResult || null == userResult.getUserId()) {
-				LOGGER.error("Fail to create bundle : 创建设备账号失败");
-				result.put("result", com.suma.venus.resource.bo.ResponseBody.FAIL);
-				return result;
-			}*/
+			/*
+			 * Boolean beDevice = BundlePO.beDeviceBundle(bundlePO.getDeviceModel());
+			 * UserResultBO userResult = userFeign.createVirtualUser(bundlePO.getUsername(),
+			 * bundlePO.getOnlinePassword(), beDevice); if (null == userResult || null ==
+			 * userResult.getUserId()) { LOGGER.error("Fail to create bundle : 创建设备账号失败");
+			 * result.put("result", com.suma.venus.resource.bo.ResponseBody.FAIL); return
+			 * result; }
+			 */
 
 			// 通知用户权限服务创建虚拟角色
-			/*RoleResultBO roleResult = userFeign.createVirtualRole(bundlePO.getUsername());
-			if (null == roleResult || null == roleResult.getRoleId()) {
-				LOGGER.error("Fail to create bundle : 创建用户角色失败");
-				result.put("result", com.suma.venus.resource.bo.ResponseBody.FAIL);
-				return result;
-			}*/
+			/*
+			 * RoleResultBO roleResult =
+			 * userFeign.createVirtualRole(bundlePO.getUsername()); if (null == roleResult
+			 * || null == roleResult.getRoleId()) {
+			 * LOGGER.error("Fail to create bundle : 创建用户角色失败"); result.put("result",
+			 * com.suma.venus.resource.bo.ResponseBody.FAIL); return result; }
+			 */
 
 			// 绑定虚拟角色和bundle权限
-			/*RoleAndResourceIdBO roleAndResourceIdBO = new RoleAndResourceIdBO();
-			roleAndResourceIdBO.setRoleId(roleResult.getRoleId());
-			roleAndResourceIdBO.setResourceCodes(new ArrayList<String>());
-			roleAndResourceIdBO.getResourceCodes().add(bundlePO.getBundleId());
-			ResultBO bindResult = userFeign.bindRolePrivilege(roleAndResourceIdBO);
-			if (null == bindResult || !bindResult.isResult()) {
-				LOGGER.error("Fail to create bundle : 用户绑定设备失败");
-				result.put("result", com.suma.venus.resource.bo.ResponseBody.FAIL);
-				return result;
-			}*/
+			/*
+			 * RoleAndResourceIdBO roleAndResourceIdBO = new RoleAndResourceIdBO();
+			 * roleAndResourceIdBO.setRoleId(roleResult.getRoleId());
+			 * roleAndResourceIdBO.setResourceCodes(new ArrayList<String>());
+			 * roleAndResourceIdBO.getResourceCodes().add(bundlePO.getBundleId()); ResultBO
+			 * bindResult = userFeign.bindRolePrivilege(roleAndResourceIdBO); if (null ==
+			 * bindResult || !bindResult.isResult()) {
+			 * LOGGER.error("Fail to create bundle : 用户绑定设备失败"); result.put("result",
+			 * com.suma.venus.resource.bo.ResponseBody.FAIL); return result; }
+			 */
 
 			// 给管理员默认角色绑定该设备权限
-			/*Map<String, Object> adminRoleResult = userFeign.queryRoleByName("管理员默认角色");
-			RoleBO defaultAdminRole = JSONObject.parseObject(JSONObject.toJSONString(adminRoleResult.get("role")), RoleBO.class);
-			roleAndResourceIdBO.setRoleId(defaultAdminRole.getId());
-			roleAndResourceIdBO.setResourceCodes(new ArrayList<String>());
-			roleAndResourceIdBO.getResourceCodes().add(bundlePO.getBundleId() + "-r");
-			roleAndResourceIdBO.getResourceCodes().add(bundlePO.getBundleId() + "-w");
-			bindResult = userFeign.bindRolePrivilege(roleAndResourceIdBO);
-			if (null == bindResult || !bindResult.isResult()) {
-				LOGGER.error("Fail to create bundle : 管理员绑定设备失败");
-				result.put("result", com.suma.venus.resource.bo.ResponseBody.FAIL);
-				return result;
-			}*/
+			/*
+			 * Map<String, Object> adminRoleResult = userFeign.queryRoleByName("管理员默认角色");
+			 * RoleBO defaultAdminRole =
+			 * JSONObject.parseObject(JSONObject.toJSONString(adminRoleResult.get("role")),
+			 * RoleBO.class); roleAndResourceIdBO.setRoleId(defaultAdminRole.getId());
+			 * roleAndResourceIdBO.setResourceCodes(new ArrayList<String>());
+			 * roleAndResourceIdBO.getResourceCodes().add(bundlePO.getBundleId() + "-r");
+			 * roleAndResourceIdBO.getResourceCodes().add(bundlePO.getBundleId() + "-w");
+			 * bindResult = userFeign.bindRolePrivilege(roleAndResourceIdBO); if (null ==
+			 * bindResult || !bindResult.isResult()) {
+			 * LOGGER.error("Fail to create bundle : 管理员绑定设备失败"); result.put("result",
+			 * com.suma.venus.resource.bo.ResponseBody.FAIL); return result; }
+			 */
 		}
 		// 设备默认分组
 		bundlePO.setFolderId(folderDao.findByParentId(-1l).get(0).getId());
