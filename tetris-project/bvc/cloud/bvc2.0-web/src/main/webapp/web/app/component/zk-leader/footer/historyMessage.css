@@ -11,27 +11,27 @@ html,body{
 .screenCtrl{
     position: absolute;
     padding-left: 15px;
-    top:0;
+    top:35px;
     left: 0;
-    width: 16%;
     text-align: center;
     color: #fff;
     font-size: 20px;
-    background: url("../../../../../images/zk-leader/splitScreen.png") no-repeat center;
+    background:#204ea285 url(../../../../../images/zk-leader/splitScreen.png) no-repeat center;
     background-size: 100% 100%;
 }
 .screenCtrl div{
     float: left;
     width: 26px;
     height: 22px;
-    margin: 10px 6px;
+    margin: 10px;
 }
 
 .msgBg{
     position: absolute;
-    top:5px;
-    left:20%;
-    z-index: 1;
+    top: 0;
+    left: 22%;
+    width: 100px;
+    height: 30px;
 }
 .msgContent {
     position: absolute;
@@ -73,38 +73,24 @@ html,body{
     line-height: 20px;
 }
 
-.tagMessage {
+.btn{
     position: absolute;
-    top: 48px;
-    left:21%;
-    border: 1px solid #f8a036;
-    border-radius: 13px;
-    background-color: #f8a036;
+    top:0;
+    left: 0;
+    width: 22%;
+    height: 32px;
 }
-.record{
-    position: absolute;
-    top: 80px;
-    left:21%;
-    padding: 0 5px;
-    border: 1px solid #f8a036;
-    border-radius: 13px;
+.btn div{
+    float: left;
+    padding: 3px;
+    margin: 1px;
     background-color: #f8a036;
-    color: #fff;
-    cursor: default;
-}
-.change{
-    position: absolute;
-    top: 5px;
-    left: 17.5%;
-    border-radius: 50%;
-    background-color: #00729ef0;
+    border-radius: 13px;
     color: #fff;
     cursor: pointer;
-    width: 30px;
-    height: 30px;
-    font-size: 20px;
     text-align: center;
 }
+
 .forward{
     position: absolute;
     top:5px;
@@ -199,6 +185,20 @@ img{
     margin-top: 6px;
 }
 
+@media screen and(max-width: 1600px) {
+    .btn{
+        width:28%;
+    }
+    .screenCtrl{
+        top:77%;
+    }
+}
+@media screen and(max-width: 1400px) {
+    .btn{
+        width:28%;
+    }
+}
+
 @media screen and (max-width:1366px){
     .message{
         width: 90%;
@@ -208,6 +208,9 @@ img{
     }
     .sendMsgContent{
         width: 74%;
+    }
+    .screenCtrl{
+        top:75%;
     }
 }
 
@@ -221,6 +224,9 @@ img{
     .sendMsgContent{
         width: 74%;
     }
+    /*.screenCtrl{*/
+        /*top:75%;*/
+    /*}*/
 }
 
 @media screen and (max-width:800px){

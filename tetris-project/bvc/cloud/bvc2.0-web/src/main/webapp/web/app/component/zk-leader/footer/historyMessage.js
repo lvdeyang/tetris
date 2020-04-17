@@ -102,6 +102,10 @@ define([
                 var self = this;
                 self.qt.window('/router/zk/leader/rec', null, {width: '100%', height: '90%'});
             },
+            //下载任务
+            download:function () {
+              this.qt.invoke('slotOpenTransferDlg');
+            },
             //分屏事件
             layoutChange: function (index) {
                 var self = this;
