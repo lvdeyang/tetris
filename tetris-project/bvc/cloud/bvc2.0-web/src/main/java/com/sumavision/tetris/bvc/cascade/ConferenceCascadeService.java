@@ -76,20 +76,17 @@ public class ConferenceCascadeService {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月31日 上午11:49:52
-	 * @param String src_user 操作用户号码
+	 * @param GroupBO group 业务数据
 	 * @param String type all, device, user, app
-	 * @param String protocol xml协议
-	 * @param List<MinfoBO> mlist 成员列表
+	 * @param Template template xml协议模板
 	 */
 	private void sendPassBy(
-			String src_user,
+			GroupBO group,
 			String type,
-			String protocol,
-			List<MinfoBO> mlist) throws Exception{
-		
-		System.out.println(protocol);
+			Template template) throws Exception{
 		
 		//根据用户号码或设备号码查询隶属应用号码列表（过滤本应用）
+		List<MinfoBO> mlist = group.getMlist();
 		List<DeviceInfoBO> devices = new ArrayList<DeviceInfoBO>();
 		for(MinfoBO m:mlist){
 			DeviceInfoBO device = new DeviceInfoBO();
@@ -103,12 +100,17 @@ public class ConferenceCascadeService {
 			return;
 		}
 		
+		StringWriter writer = new StringWriter();
+		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
+		String protocol = writer.toString();
+		System.out.println(protocol);
+		
 		//查询本联网layerid
 		String localLayerId = resourceRemoteService.queryLocalLayerId();
 		
 		JSONObject passbyContent = new JSONObject();
 		passbyContent.put("cmd", "send_node_message");
-		passbyContent.put("src_user", src_user);
+		passbyContent.put("src_user", group.getOp());
 		passbyContent.put("type", type);
 		passbyContent.put("dst_no", dstnos);
 		passbyContent.put("content", protocol);
@@ -127,7 +129,7 @@ public class ConferenceCascadeService {
 	 * @return String 模板全名
 	 */
 	private String generateFullName(String fileName) throws Exception{
-		return new StringBufferWrapper().append("com/sumavision/tetris/bvc/cascade/templates/cmd/")
+		return new StringBufferWrapper().append("com/sumavision/tetris/bvc/cascade/templates/cnf/")
 										.append(fileName)
 										.toString();
 	}
@@ -147,10 +149,7 @@ public class ConferenceCascadeService {
 	public void create(GroupBO group) throws Exception{
 		String fullName = generateFullName("createCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -164,10 +163,7 @@ public class ConferenceCascadeService {
 	public void delete(GroupBO group) throws Exception{
 		String fullName = generateFullName("deleteCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -184,10 +180,7 @@ public class ConferenceCascadeService {
 	public void start(GroupBO group) throws Exception{
 		String fullName = generateFullName("startCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -202,10 +195,7 @@ public class ConferenceCascadeService {
 	public void stop(GroupBO group) throws Exception{
 		String fullName = generateFullName("stopCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -220,10 +210,7 @@ public class ConferenceCascadeService {
 	public void pause(GroupBO group) throws Exception{
 		String fullName = generateFullName("pauseCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -238,10 +225,7 @@ public class ConferenceCascadeService {
 	public void resume(GroupBO group) throws Exception{
 		String fullName = generateFullName("resumeCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -257,10 +241,7 @@ public class ConferenceCascadeService {
 	public void join(GroupBO group) throws Exception{
 		String fullName = generateFullName("memberEnterCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -276,10 +257,7 @@ public class ConferenceCascadeService {
 	public void exit(GroupBO group) throws Exception{
 		String fullName = generateFullName("memberExitCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -295,10 +273,7 @@ public class ConferenceCascadeService {
 	public void kikout(GroupBO group) throws Exception{
 		String fullName = generateFullName("memberKikoutCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -315,10 +290,7 @@ public class ConferenceCascadeService {
 	public void startDeviceForward(GroupBO group) throws Exception{
 		String fullName = generateFullName("mediaTransmitStartInCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -335,10 +307,7 @@ public class ConferenceCascadeService {
 	public void stopDeviceForward(GroupBO group) throws Exception{
 		String fullName = generateFullName("mediaTransmitStopInCnf.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -354,10 +323,7 @@ public class ConferenceCascadeService {
 	public void speakerSetByChairman(GroupBO group) throws Exception{
 		String fullName = generateFullName("speakerSetByChairmanNotice.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -373,10 +339,7 @@ public class ConferenceCascadeService {
 	public void speakerSetCancel(GroupBO group) throws Exception{
 		String fullName = generateFullName("speakerSetCancel.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -392,10 +355,7 @@ public class ConferenceCascadeService {
 	public void speakerSetRequest(GroupBO group) throws Exception{
 		String fullName = generateFullName("speakerSetRequest.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 	
 	/**
@@ -412,9 +372,6 @@ public class ConferenceCascadeService {
 	public void speakerSetResponse(GroupBO group) throws Exception{
 		String fullName = generateFullName("speakerSetResponse.xml");
 		Template template = templateLoader.load(fullName);
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		sendPassBy(group.getOp(), NO_TYPE_APP, protocol, group.getMlist());
+		sendPassBy(group, NO_TYPE_APP, template);
 	}
 }
