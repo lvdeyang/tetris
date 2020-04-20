@@ -369,6 +369,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			.setLevel(entity.getLevel())
 			.setIcon(entity.getIcon())
 			.setUserno(entity.getUserno())
+			.setClassify(entity.getClassify().toString())
 			//.setStatus(entity.getStatus()==null?"":entity.getStatus().getName())
 			//.setToken(entity.getToken())
 			//.setIp(entity.getIp())

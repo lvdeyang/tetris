@@ -261,6 +261,7 @@ public class ApiThirdpartBvcCascadeController {
 	@ResponseBody
 	@RequestMapping(value = "/streaming")
 	public Object streaming(HttpServletRequest request) throws Exception{
+		
 		HttpServletRequestParser parser = new HttpServletRequestParser(request);
 		JSONObject params = parser.parseJSON();
 		System.out.println("*******************************************");
@@ -275,8 +276,9 @@ public class ApiThirdpartBvcCascadeController {
 		String dst_no = params.getString("dst_no");
 		
 		try{
+			//做一下用户登录
+			protocolParser.rebindRequest(src_userno, "streaming");
 			UserBO srcUser = userUtils.queryUserByUserno(src_userno);
-			
 			UserBO dstUser = userUtils.queryUserByUserno(dst_no);
 			if("start".equals(operate)){
 				if(dstUser != null){
@@ -319,13 +321,23 @@ public class ApiThirdpartBvcCascadeController {
 						monitorLiveUserService.stop(uuid, srcUser.getId(), srcUser.getUserNo());
 					}else if("call".equals(type)){
 						//停止xt用户呼叫本地用户
-						monitorLiveCallService.stop(uuid, srcUser.getId());
+						//monitorLiveCallService.stop(uuid, srcUser.getId());
+						commandUserServiceImpl.stopCallByUuid(srcUser, uuid);
 					}else if("paly-call".equals(type)){
 						//停止xt点播本地用户转xt呼叫本地用户
 					}
 				}else{
 					//停止点播设备
 					monitorLiveDeviceService.stop(uuid, srcUser.getId(), srcUser.getUserNo());
+				}
+			}else if("accept".equals(operate)){
+				if(dstUser != null){
+					if("call".equals(type)){
+						//xt用户同意接听呼叫
+						commandUserServiceImpl.acceptCall_CascadeByUuid(srcUser, uuid);
+					}else if("paly-call".equals(type)){
+						//TODO: xt用户同意点播转呼叫
+					}
 				}
 			}
 		}catch(Exception e){

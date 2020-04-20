@@ -30,13 +30,17 @@ import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenQuery;
+import com.sumavision.tetris.auth.token.TokenVO;
 import com.sumavision.tetris.business.role.BusinessRoleQuery;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
+import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserStatus;
 import com.sumavision.tetris.user.UserVO;
 
 @Service
@@ -66,6 +70,9 @@ public class UserQueryService {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private TokenQuery tokenQuery;
 	
 	@Autowired
 	private WorkNodeService workNodeService;
@@ -115,6 +122,9 @@ public class UserQueryService {
 					user.setFolderIndex(map.getFolderIndex() != null? map.getFolderIndex().intValue(): 0);
 					user.setFolderUuid(map.getFolderUuid());
 					user.setCreater(map.getCreator());
+					if("ldap".equals(map.getCreator())){
+						user.setLogined(map.isUserStatus());
+					}
 					break;
 				}
 			}
@@ -199,6 +209,19 @@ public class UserQueryService {
 		
 		UserVO user = userQuery.queryUserByNo(userNo);
 		
+		if(UserClassify.LDAP.toString().equals(user.getClassify())){
+			FolderUserMap userStatus = folderUserMapDao.findByUserId(user.getId());
+			user.setStatus(userStatus==null?UserStatus.OFFLINE.toString():(userStatus.isUserStatus()?UserStatus.ONLINE.toString():UserStatus.OFFLINE.toString()));
+		}else{
+			List<TokenVO> tokens = tokenQuery.findByUserIdInAndType(new ArrayListWrapper<Long>().add(user.getId()).getList(), TerminalType.QT_ZK);
+			if(tokens==null || tokens.size()<=0){
+				user.setStatus(UserStatus.OFFLINE.toString());
+			}else{
+				TokenVO token = tokens.get(0);
+				user.setStatus(token.getStatus());
+			}
+		}
+		
 		BundlePO encoder = bundleDao.findByUserIdAndDeviceModel(user.getId(), "encoder");
 		
 		EncoderDecoderUserMap map = encoderDecoderUserMapDao.findByUserId(user.getId());
@@ -229,6 +252,9 @@ public class UserQueryService {
 			userBO.setFolderIndex(map.getFolderIndex().intValue());
 			userBO.setFolderUuid(map.getFolderUuid());
 			userBO.setCreater(map.getCreator());
+			if("ldap".equals(map.getCreator())){
+				userBO.setLogined(map.isUserStatus());
+			}
 		}
 		
 		return userBO;
@@ -264,6 +290,9 @@ public class UserQueryService {
 					user.setFolderIndex(map.getFolderIndex().intValue());
 					user.setFolderUuid(map.getFolderUuid());
 					user.setCreater(map.getCreator());
+					if("ldap".equals(map.getCreator())){
+						user.setLogined(map.isUserStatus());
+					}
 					break;
 				}
 			}
@@ -300,6 +329,9 @@ public class UserQueryService {
 					user.setFolderIndex(map.getFolderIndex().intValue());
 					user.setFolderUuid(map.getFolderUuid());
 					user.setCreater(map.getCreator());
+					if("ldap".equals(map.getCreator())){
+						user.setLogined(map.isUserStatus());
+					}
 					break;
 				}
 			}
