@@ -380,11 +380,22 @@ public class ResourseLayerTask extends asyncTask {
 				resultMap.put(ResultMap.BUNDLE_RESULT_MAP_LIST, bundleResultMapList);
 				//添加每个bundle的锁定结果
 				List<BatchLockBundleRespBody> batchLockBundleRespBodyList = batchLockBundleRespParam.getOperateBundlesResult();
-				for(BatchLockBundleRespBody batchLockBundleRespBody : batchLockBundleRespBodyList){
+				
+				//将batchLockBundleRespBodyList按照bundleSchemeBOs的顺讯重新排序为orderedRespBodyList
+				List<BatchLockBundleRespBody> orderedRespBodyList = new ArrayList<BatchLockBundleRespBody>();
+				for(BundleSchemeBO bundleSchemeBO : bundleSchemeBOs){
+					for(BatchLockBundleRespBody batchLockBundleRespBody : batchLockBundleRespBodyList){
+						if(batchLockBundleRespBody.getBundleId().equals(bundleSchemeBO.getBundleId())){
+							orderedRespBodyList.add(batchLockBundleRespBody);
+							break;
+						}
+					}
+				}
+				for(BatchLockBundleRespBody batchLockBundleRespBody : orderedRespBodyList){
 					boolean operateResult = batchLockBundleRespBody.isOperateResult();
 					if(operateResult){
 						log.info("bundle " + batchLockBundleRespBody.getBundleId()  + " 锁定后锁定计数为 " + batchLockBundleRespBody.getOperate_count());
-						ResultMap bundleResultMap = ResultMap.ok(batchLockBundleRespBody.getOperate_index());
+						ResultMap bundleResultMap = ResultMap.ok(batchLockBundleRespBody.getOperate_index());//锁定不需要加入计数，如果需要，参考解锁的代码
 						bundleResultMapList.add(bundleResultMap);
 					}else{
 						log.info("bundle " + batchLockBundleRespBody.getBundleId()  + " 锁定失败，锁定计数为 " + batchLockBundleRespBody.getOperate_count());

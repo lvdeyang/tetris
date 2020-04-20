@@ -7,7 +7,7 @@
 	<subject>${subject}</subject>
 	<bizinfo>
 		<biztype>cmd</biztype>
-		<bizname>${biztype}</bizname>
+		<bizname>${bizname}</bizname>
 		<creatorid>${creatorid}</creatorid>
 		<topid>${topid}</topid>
 		<mlist>
