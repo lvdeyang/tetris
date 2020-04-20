@@ -174,7 +174,7 @@ public class CommandUserCallController {
 //			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandUserServiceImpl.acceptCall_CascadeById(callUser, businessId, admin);
+			CommandGroupUserPlayerPO player = commandUserServiceImpl.acceptCall_Cascade(callUser, businessId, null);
 			
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 			
@@ -200,7 +200,7 @@ public class CommandUserCallController {
 			Long callUserId = userUtils.getUserIdFromSession(request);
 			UserBO callUser = userUtils.queryUserById(callUserId);
 			
-			commandUserServiceImpl.refuseCall(callUser, businessId);
+			commandUserServiceImpl.stopCall_Cascade(callUser, businessId, null);
 			
 			return null;
 		}
@@ -225,10 +225,10 @@ public class CommandUserCallController {
 			UserBO user = userUtils.queryUserById(userId);
 			
 //			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); 
-			admin.setId(-1L);
+//			UserBO admin = new UserBO(); 
+//			admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandUserServiceImpl.stopCallById(user, businessId, admin);
+			CommandGroupUserPlayerPO player = commandUserServiceImpl.stopCall_Cascade(user, businessId, null);
 			
 			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
 													   .getMap();
