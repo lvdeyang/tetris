@@ -697,7 +697,7 @@ public class CommandUserServiceImpl {
 	 * @param Long businessId 业务id
 	 * @return CommandGroupUserPlayerPO 播放器信息
 	 */
-	public CommandGroupUserPlayerPO acceptCall(UserBO user, Long businessId, UserBO admin) throws Exception{
+	/*public CommandGroupUserPlayerPO acceptCall(UserBO user, Long businessId, UserBO admin) throws Exception{
 		
 		UserLiveCallPO call = userLiveCallDao.findOne(businessId);
 		
@@ -737,18 +737,18 @@ public class CommandUserServiceImpl {
 		executeBusiness.execute(logic, call.getCalledUsername() + "接听与" + call.getCallUsername() + "通话");
 		
 		return player;
-	}
+	}*/
 	
 	/** 级联 */
-	public CommandGroupUserPlayerPO acceptCall_CascadeById(UserBO user, Long id, UserBO admin) throws Exception{
+	/*public CommandGroupUserPlayerPO acceptCall_CascadeById(UserBO user, Long id, UserBO admin) throws Exception{
 		
 		synchronized (new StringBuffer().append(lockProcessPrefix).append(id).toString().intern()) {
 			return acceptCall_Cascade(user, id, admin);
 		}
-	}
+	}*/
 	
 	/** 通常在外部系统接听时调用 */
-	public CommandGroupUserPlayerPO acceptCall_CascadeByUuid(UserBO user, String uuid) throws Exception{
+	/*public CommandGroupUserPlayerPO acceptCall_CascadeByUuid(UserBO user, String uuid) throws Exception{
 		
 		UserLiveCallPO call = userLiveCallDao.findByUuid(uuid);
 		if(call == null){
@@ -759,7 +759,7 @@ public class CommandUserServiceImpl {
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			return acceptCall_Cascade(user, call.getId(), admin);
 		}
-	}
+	}*/
 	
 	/**
 	 * 同意呼叫<br/>
@@ -768,14 +768,19 @@ public class CommandUserServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月6日 下午5:18:35
 	 * @param user 操作人
-	 * @param businessId 业务id
-	 * @param admin
+	 * @param businessId 业务id，与uuid必须有一个null
+	 * @param uuid 业务uuid，与businessId必须有一个null
 	 * @return CommandGroupUserPlayerPO 播放器信息
 	 * @throws Exception
 	 */
-	public CommandGroupUserPlayerPO acceptCall_Cascade(UserBO user, Long businessId, UserBO admin) throws Exception{
+	public CommandGroupUserPlayerPO acceptCall_Cascade(UserBO user, Long businessId, String uuid) throws Exception{
 		
-		UserLiveCallPO call = userLiveCallDao.findOne(businessId);
+		UserLiveCallPO call = null;
+		if(businessId != null){
+			call = userLiveCallDao.findOne(businessId);
+		}else{
+			call = userLiveCallDao.findByUuid(uuid);
+		}
 		
 		if(call == null){
 			throw new BaseException(StatusCode.FORBIDDEN, "对方已挂断");
@@ -785,6 +790,8 @@ public class CommandUserServiceImpl {
 		if(!user.getId().equals(call.getCalledUserId())){
 			throw new UserNotMatchBusinessException(user.getName(), businessId, PlayerBusinessType.USER_CALL.getName());
 		}
+		
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		//消息消费
 		try{
@@ -825,7 +832,7 @@ public class CommandUserServiceImpl {
 	 * @param user 操作人
 	 * @param businessId 业务id
 	 */
-	public void refuseCall(UserBO user, Long businessId) throws Exception{
+	/*public void refuseCall(UserBO user, Long businessId) throws Exception{
 		
 		UserLiveCallPO call = userLiveCallDao.findOne(businessId);
 		
@@ -882,7 +889,7 @@ public class CommandUserServiceImpl {
 		WebsocketMessageVO ws = websocketMessageService.send(callUserInfo.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, user.getId(), user.getName());
 		websocketMessageService.consume(ws.getId());
 		
-	}
+	}*/
 	
 	/**
 	 * 停止呼叫<br/>
@@ -978,14 +985,12 @@ public class CommandUserServiceImpl {
 		
 	}*/
 	
-	public CommandGroupUserPlayerPO stopCallById(UserBO user, Long businessId, UserBO admin) throws Exception{
+	/*public CommandGroupUserPlayerPO stopCallById(UserBO user, Long businessId, UserBO admin) throws Exception{
 		synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
 			return stopCall_Cascade(user, businessId, admin);
 		}
 	}
-
-
-	/** 通常在外部系统拒绝时调用 */
+	
 	public CommandGroupUserPlayerPO stopCallByUuid(UserBO user, String uuid) throws Exception{
 		UserLiveCallPO call = userLiveCallDao.findByUuid(uuid);
 		if(call == null){
@@ -996,8 +1001,7 @@ public class CommandUserServiceImpl {
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			return stopCall_Cascade(user, call.getId(), admin);
 		}
-	}
-
+	}*/
 
 	/**
 	 * 停止呼叫 - 支持级联<br/>
@@ -1006,14 +1010,20 @@ public class CommandUserServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月6日 下午3:45:53
 	 * @param user 操作人
-	 * @param businessId 业务id
-	 * @param admin
+	 * @param businessId 业务id，与uuid必须有一个null
+	 * @param uuid 业务uuid，与businessId必须有一个null
 	 * @return CommandGroupUserPlayerPO 用户释放播放器信息
 	 * @throws Exception
 	 */
-	private CommandGroupUserPlayerPO stopCall_Cascade(UserBO user, Long businessId, UserBO admin) throws Exception{
+	public CommandGroupUserPlayerPO stopCall_Cascade(UserBO user, Long businessId, String uuid) throws Exception{
 		
-		UserLiveCallPO call = userLiveCallDao.findOne(businessId);		
+		UserLiveCallPO call = null;
+		if(businessId != null){
+			call = userLiveCallDao.findOne(businessId);
+		}else{
+			call = userLiveCallDao.findByUuid(uuid);
+		}
+		
 		if(call == null){
 			throw new BaseException(StatusCode.FORBIDDEN, "呼叫不存在！");
 		}
@@ -1022,6 +1032,8 @@ public class CommandUserServiceImpl {
 		if(!user.getId().equals(call.getCalledUserId()) && !user.getId().equals(call.getCallUserId())){
 			throw new UserNotMatchBusinessException(user.getName(), businessId, PlayerBusinessType.USER_CALL.getName());
 		}
+		
+		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		//参数模板
 		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();
@@ -1062,7 +1074,7 @@ public class CommandUserServiceImpl {
 				message.put("businessType", CommandCommonConstant.MESSAGE_CALL_STOP);
 				message.put("fromUserId", user.getId());
 				message.put("fromUserName", user.getName());
-				message.put("businessInfo", user.getName() + "停止了视频通话");
+				message.put("businessInfo", user.getName() + "挂断了视频通话");
 				message.put("serial", calledPlayer.getLocationIndex());
 				
 				WebsocketMessageVO ws = websocketMessageService.send(call.getCalledUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, user.getId(), user.getName());
@@ -1094,7 +1106,7 @@ public class CommandUserServiceImpl {
 				message.put("businessType", CommandCommonConstant.MESSAGE_CALL_STOP);
 				message.put("fromUserId", user.getId());
 				message.put("fromUserName", user.getName());
-				message.put("businessInfo", user.getName() + "停止了视频通话");
+				message.put("businessInfo", user.getName() + "挂断了视频通话");
 				message.put("serial", callPlayer.getLocationIndex());
 				
 				WebsocketMessageVO ws = websocketMessageService.send(call.getCallUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, user.getId(), user.getName());
