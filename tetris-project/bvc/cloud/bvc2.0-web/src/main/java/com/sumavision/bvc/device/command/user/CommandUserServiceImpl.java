@@ -391,6 +391,11 @@ public class CommandUserServiceImpl {
 		UserLiveCallPO exsitCall = userLiveCallDao.findByCalledUserIdAndCallUserId(calledUser.getId(), callUser.getId());
 		if(exsitCall != null){
 			
+			if(uuid != null){
+				exsitCall.setUuid(uuid);
+			}
+			userLiveCallDao.save(exsitCall);
+			
 			if(exsitCall.getType().equals(UserCallType.VOICE)){
 				throw new BaseException(StatusCode.FORBIDDEN, "双方正在语音对讲！");
 			}
