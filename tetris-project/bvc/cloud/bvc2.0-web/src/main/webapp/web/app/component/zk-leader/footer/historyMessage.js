@@ -437,7 +437,6 @@ define([
                     e = e.params;
                     self.qt.warning(e.businessInfo);
                     self.qt.linkedWebview('rightBar', {id: 'usercommandStop', params: e});
-                    self.qt.invoke('commandExit', $.toJSON(e.splits));
                 });
 
                 self.qt.on('commandMemberOnline', function (e) {

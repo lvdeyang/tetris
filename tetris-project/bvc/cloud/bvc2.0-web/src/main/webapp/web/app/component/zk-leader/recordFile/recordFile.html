@@ -37,13 +37,15 @@
         <div style="height: 565px;">
            <el-scrollbar style="height: 100%">
                <el-table
+                       class="table"
                        :data="pageData"
                        style="width: 100%">
                    <el-table-column label="选择" width="50" center>
                        　　　　　　<template slot-scope="scope">
                        　　　　　　　　<el-radio
                            　　　　　　　　　　class="radio"
-                           　　　　　　　　　　v-model="fileSelect">
+                           　　　　　　　　　　v-model="fileSelect"
+                                            :label="scope.row" >
                        　　　　　　　　</el-radio>
                        　　　　　　</template>
                    </el-table-column>

@@ -79,3 +79,11 @@
     overflow-x: hidden;
 }
 
+.table .el-radio__label{
+    display: none;
+}
+
+.el-pagination__total,.el-pagination__jump{
+    color: #afafaf;
+}
+

@@ -576,16 +576,6 @@ div.el-select-dropdown {
     background: #00000030;
 }
 
-/*悬浮发言按钮*/
-.suspend {
-    position: fixed;
-    top: 50%;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    cursor: pointer;
-}
-
 .recordTitle{
     margin: 0;
     height: 30px;

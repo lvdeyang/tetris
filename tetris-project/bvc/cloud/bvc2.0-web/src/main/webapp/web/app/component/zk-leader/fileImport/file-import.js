@@ -174,9 +174,15 @@ define([
                     self.qt.warning('请选择右侧表格的文件');
                     return;
                 }
+                var param=[];
+
+                self.checkBoxData.forEach(function (value) {
+                    param.push({name:value.name,previewUrl:value.fullPath});
+                });
+
                 ajax.post('/monitor/vod/add', {
                     folderId: self.checkedId,
-                    resources: JSON.stringify(self.checkBoxData)
+                    resources: JSON.stringify(param)
                 }, function (data) {
                     self.qt.success('操作成功');
                     self.getFileDatas();
