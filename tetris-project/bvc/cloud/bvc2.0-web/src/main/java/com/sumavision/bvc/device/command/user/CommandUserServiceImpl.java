@@ -482,8 +482,8 @@ public class CommandUserServiceImpl {
 			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			calledUserPlayer = new CommandGroupUserPlayerPO();
 			calledEncoderBundleEntity = new BundlePO();
-			callEncoderBundleEntity.setBundleId(UUID.randomUUID().toString().replace("-", ""));
-			callEncoderBundleEntity.setAccessNodeUid(localLayerId);
+			calledEncoderBundleEntity.setBundleId(UUID.randomUUID().toString().replace("-", ""));
+			calledEncoderBundleEntity.setAccessNodeUid(localLayerId);
 			calledEncoderVideoChannel = new ChannelSchemeDTO().setChannelId(ChannelType.VIDEOENCODE1.getChannelId());
 			calledEncoderAudioChannel = new ChannelSchemeDTO().setChannelId(ChannelType.AUDIOENCODE1.getChannelId());
 		}
@@ -539,7 +539,7 @@ public class CommandUserServiceImpl {
 			
 			//参数模板
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-
+			
 			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
 								 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
@@ -785,6 +785,7 @@ public class CommandUserServiceImpl {
 			call = userLiveCallDao.findOne(businessId);
 		}else{
 			call = userLiveCallDao.findByUuid(uuid);
+			businessId = call.getId();
 		}
 		
 		if(call == null){
@@ -812,8 +813,12 @@ public class CommandUserServiceImpl {
 		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
-		CommandGroupUserPlayerPO player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, businessId.toString());
+		CallType callType = call.getCallType();
+		CommandGroupUserPlayerPO player = null;
+		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.OUTER_LOCAL)){
+			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
+			player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, businessId.toString());
+		}
 		
 		call.setStatus(CallStatus.ONGOING);
 		userLiveCallDao.save(call);
@@ -1027,6 +1032,7 @@ public class CommandUserServiceImpl {
 			call = userLiveCallDao.findOne(businessId);
 		}else{
 			call = userLiveCallDao.findByUuid(uuid);
+			businessId = call.getId();
 		}
 		
 		if(call == null){
