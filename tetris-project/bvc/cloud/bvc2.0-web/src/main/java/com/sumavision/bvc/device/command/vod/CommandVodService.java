@@ -395,7 +395,7 @@ public class CommandVodService {
 		//该点播可能是普通点播，也可能是用户的本地视频VodType.USER_ONESELF（自己看自己）
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(vod.getDstUserId());
 		CommandGroupUserPlayerPO player = null;
-		if(vod.getVodType().equals(VodType.USER)){
+		if(vod.getVodType().equals(VodType.USER) || vod.getVodType().equals(VodType.LOCAL_SEE_OUTER_USER)){
 			player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.PLAY_USER, businessId.toString());
 		}else if(vod.getVodType().equals(VodType.USER_ONESELF)){
 			player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.PLAY_USER_ONESELF, businessId.toString());

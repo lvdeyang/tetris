@@ -802,6 +802,7 @@ public class UserQuery {
 		CompanyPO companyPO = companyDao.findByUserId(userId);
 		if(companyPO != null){
 			UserPO user = userDao.findByCompanyIdAndUserno(companyPO.getId(), userno);
+			if(user == null) return null;
 			return new UserVO().set(user);
 		}else{
 			return null;

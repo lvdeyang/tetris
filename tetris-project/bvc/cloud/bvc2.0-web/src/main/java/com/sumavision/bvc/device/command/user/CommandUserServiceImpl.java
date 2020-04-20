@@ -399,7 +399,7 @@ public class CommandUserServiceImpl {
 			if(exsitCall.getMessageId() != null){
 				websocketMessageService.resend(exsitCall.getMessageId());
 			}
-			
+			if(CallType.OUTER_LOCAL.equals(callType)) return null;
 			CommandGroupUserInfoPO callUserInfo = commandGroupUserInfoDao.findByUserId(exsitCall.getCallUserId());
 			
 			CommandGroupUserPlayerPO exsitCallUserPlayer = commandCommonServiceImpl.queryPlayerByBusiness(callUserInfo, PlayerBusinessType.USER_CALL, exsitCall.getId().toString());
@@ -527,6 +527,39 @@ public class CommandUserServiceImpl {
 			WebsocketMessageVO ws = websocketMessageService.send(calledUser.getId(), message.toJSONString(), WebsocketMessageType.COMMAND, callUser.getId(), callUser.getName());
 			business.setMessageId(ws.getId());
 			userLiveCallDao.save(business);
+		}else{
+			
+			LogicBO logic = new LogicBO().setUserId("-1")
+			 		 .setPass_by(new ArrayList<PassByBO>());
+			
+			//参数模板
+			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+
+			String localLayerId = resourceRemoteService.queryLocalLayerId();
+			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
+								 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+								 .setUuid(business.getUuid())
+								 .setSrc_user(business.getCallUserno())
+								 .setLocal_encoder(new HashMapWrapper<String, String>().put("layerid", business.getCallEncoderLayerId())
+										 											   .put("bundleid", business.getCallEncoderBundleId())
+										                         					   .put("video_channelid", business.getCallEncoderVideoChannelId())
+										                         					   .put("audio_channelid", business.getCallEncoderAudioChannelId())
+										 											   .getMap())
+								 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", business.getCalledEncoderLayerId())
+										 											.put("bundleid", business.getCalledEncoderBundleId())
+										 											.put("video_channelid", business.getCalledEncoderVideoChannelId())
+										 											.put("audio_channelid", business.getCalledEncoderAudioChannelId())
+										 											.getMap())
+								 .setDst_number(business.getCalledUserno())
+								 .setVparam(codec);
+			
+			PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+			.setType(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
+			.setPass_by_content(passByContent);
+			
+			logic.getPass_by().add(passby);
+			
+			executeBusiness.execute(logic, "点播系统：本地用户呼叫xt用户");
 		}
 		
 		return callUserPlayer;
@@ -861,7 +894,7 @@ public class CommandUserServiceImpl {
 	 * @param UserBO admin admin
 	 * @return CommandGroupUserPlayerPO 用户占用播放器信息
 	 */
-	public CommandGroupUserPlayerPO stopCall(UserBO user, Long businessId, UserBO admin) throws Exception{
+	/*public CommandGroupUserPlayerPO stopCall(UserBO user, Long businessId, UserBO admin) throws Exception{
 		
 		UserLiveCallPO call = userLiveCallDao.findOne(businessId);
 		
@@ -943,7 +976,7 @@ public class CommandUserServiceImpl {
 		
 		return returnPlayer;
 		
-	}
+	}*/
 	
 	public CommandGroupUserPlayerPO stopCallById(UserBO user, Long businessId, UserBO admin) throws Exception{
 		synchronized (new StringBuffer().append(lockProcessPrefix).append(businessId).toString().intern()) {
@@ -996,73 +1029,86 @@ public class CommandUserServiceImpl {
 		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
+		LogicBO logic = closeBundle(call, codec, admin.getId());
 		if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
 						
-			LogicBO logic = closeBundle(call, codec, admin.getId());
 			List<CommandGroupUserPlayerPO> players = getPlayers(call);
 			LogicBO logicCast = commandCastServiceImpl.closeBundleCastDevice(
 					null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), 
 					players, null, user.getId());
 			logic.merge(logicCast);
-			executeBusiness.execute(logic, user.getName() + "停止通话");
 		}
+		executeBusiness.execute(logic, user.getName() + "停止通话");
 		
-		//被呼叫方
-		CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
-		CommandGroupUserPlayerPO calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_CALL, businessId.toString());
-		calledPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
-		calledPlayer.setBusinessId(null);
-		calledPlayer.setBusinessName(null);
-		commandGroupUserPlayerDao.save(calledPlayer);
-		
-		//呼叫方
-		CommandGroupUserInfoPO callUserInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
-		CommandGroupUserPlayerPO callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(callUserInfo, PlayerBusinessType.USER_CALL, businessId.toString());
-		callPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
-		callPlayer.setBusinessId(null);
-		callPlayer.setBusinessName(null);
-		commandGroupUserPlayerDao.save(callPlayer);
-		
-		userLiveCallDao.delete(call);
-		
+		CallType callType = call.getCallType();
 		CommandGroupUserPlayerPO returnPlayer = null;
 		
-		//如果用户是被呼叫方
-		if(user.getId().equals(calledUserInfo.getUserId())){
-			//被叫方给呼叫方发消息
-			JSONObject message = new JSONObject();
-			message.put("businessType", CommandCommonConstant.MESSAGE_CALL_STOP);
-			message.put("fromUserId", user.getId());
-			message.put("fromUserName", user.getName());
-			message.put("businessInfo", user.getName() + "停止了视频通话");
-			message.put("serial", callPlayer.getLocationIndex());
+		//如果被叫是本系统用户
+		CommandGroupUserPlayerPO calledPlayer = null;
+		if(CallType.LOCAL_LOCAL.equals(callType)
+				|| CallType.OUTER_LOCAL.equals(callType)){
+			CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
+			calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_CALL, businessId.toString());
+			calledPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
+			calledPlayer.setBusinessId(null);
+			calledPlayer.setBusinessName(null);
+			commandGroupUserPlayerDao.save(calledPlayer);
 			
-			WebsocketMessageVO ws = websocketMessageService.send(callUserInfo.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, user.getId(), user.getName());
-			websocketMessageService.consume(ws.getId());
+			//如果用户是呼叫方
+			if(user.getId().equals(call.getCallUserId())){
+				
+				//给被叫方发消息
+				JSONObject message = new JSONObject();
+				message.put("businessType", CommandCommonConstant.MESSAGE_CALL_STOP);
+				message.put("fromUserId", user.getId());
+				message.put("fromUserName", user.getName());
+				message.put("businessInfo", user.getName() + "停止了视频通话");
+				message.put("serial", calledPlayer.getLocationIndex());
+				
+				WebsocketMessageVO ws = websocketMessageService.send(call.getCalledUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, user.getId(), user.getName());
+				websocketMessageService.consume(ws.getId());
+				
+//				returnPlayer = callPlayer;
+			}
+		}
+
+		//如果呼叫方是本系统用户
+		CommandGroupUserPlayerPO callPlayer = null;
+		if(CallType.LOCAL_LOCAL.equals(callType)
+				|| CallType.LOCAL_OUTER.equals(callType)){
+			CommandGroupUserInfoPO callUserInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
+			callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(callUserInfo, PlayerBusinessType.USER_CALL, businessId.toString());
+			callPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
+			callPlayer.setBusinessId(null);
+			callPlayer.setBusinessName(null);
+			commandGroupUserPlayerDao.save(callPlayer);
 			
-			returnPlayer = calledPlayer;
+			//如果用户是呼叫方，应返回callPlayer
+			returnPlayer = callPlayer;
+			
+			//如果用户是被呼叫方
+			if(user.getId().equals(call.getCalledUserId())){
+				
+				//给呼叫方发消息
+				JSONObject message = new JSONObject();
+				message.put("businessType", CommandCommonConstant.MESSAGE_CALL_STOP);
+				message.put("fromUserId", user.getId());
+				message.put("fromUserName", user.getName());
+				message.put("businessInfo", user.getName() + "停止了视频通话");
+				message.put("serial", callPlayer.getLocationIndex());
+				
+				WebsocketMessageVO ws = websocketMessageService.send(call.getCallUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, user.getId(), user.getName());
+				websocketMessageService.consume(ws.getId());
+				
+				returnPlayer = calledPlayer;
+			}
 		}
 		
-		//如果用户是呼叫方
-		if(user.getId().equals(callUserInfo.getUserId())){
-			//被叫方给呼叫方发消息
-			JSONObject message = new JSONObject();
-			message.put("businessType", CommandCommonConstant.MESSAGE_CALL_STOP);
-			message.put("fromUserId", user.getId());
-			message.put("fromUserName", user.getName());
-			message.put("businessInfo", user.getName() + "停止了视频通话");
-			message.put("serial", calledPlayer.getLocationIndex());
-			
-			WebsocketMessageVO ws = websocketMessageService.send(calledUserInfo.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, user.getId(), user.getName());
-			websocketMessageService.consume(ws.getId());
-			
-			returnPlayer = callPlayer;
-		}
+		userLiveCallDao.delete(call);
 		
 		return returnPlayer;
 		
 	}
-
 
 	/**
 	 * 同意语音对讲<br/>
@@ -1274,15 +1320,19 @@ public class CommandUserServiceImpl {
 		List<CommandGroupUserPlayerPO> players = new ArrayList<CommandGroupUserPlayerPO>();
 		
 		//找呼叫方的player
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
-		CommandGroupUserPlayerPO callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
+		try{
+			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
+			CommandGroupUserPlayerPO callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
+			players.add(callPlayer);
+		}catch(Exception e){}
 		
 		//找被呼叫方的player
-		CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
-		CommandGroupUserPlayerPO calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
+		try{
+			CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
+			CommandGroupUserPlayerPO calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
+			players.add(calledPlayer);
+		}catch(Exception e){}
 		
-		players.add(callPlayer);
-		players.add(calledPlayer);
 		return players;		
 	}
 	
@@ -1379,7 +1429,7 @@ public class CommandUserServiceImpl {
 		}else{
 			//LOCAL_OUTER，被叫是外部用户，生成passby
 			//查询本联网layerid
-			String localLayerId = resourceRemoteService.queryLocalLayerId();
+			/*String localLayerId = resourceRemoteService.queryLocalLayerId();
 			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
 								 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
 								 .setUuid(call.getUuid())
@@ -1401,7 +1451,7 @@ public class CommandUserServiceImpl {
 			.setType(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
 			.setPass_by_content(passByContent);
 			
-			logic.getPass_by().add(passby);
+			logic.getPass_by().add(passby);*/
 		}
 		
 		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.LOCAL_OUTER)){
@@ -1519,20 +1569,22 @@ public class CommandUserServiceImpl {
 									 .setPass_by(new ArrayList<PassByBO>());
 		
 		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.OUTER_LOCAL)){
-			//关闭被叫用户设备
-			DisconnectBundleBO disconnectCalledEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-																			           .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-																				       .setBundleId(call.getCalledEncoderBundleId())
-																				       .setBundle_type(call.getCalledEncoderBundleType())
-																				       .setLayerId(call.getCalledEncoderLayerId());
-			DisconnectBundleBO disconnectCalledDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-	//																		           .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-																				       .setBundleId(call.getCalledDecoderBundleId())
-																				       .setBundle_type(call.getCalledDecoderBundleType())
-																				       .setLayerId(call.getCalledDecoderLayerId());
-			
-			logic.getDisconnectBundle().add(disconnectCalledEncoderBundle);
-			logic.getDisconnectBundle().add(disconnectCalledDecoderBundle);
+			if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
+				//关闭被叫用户设备
+				DisconnectBundleBO disconnectCalledEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+																				           .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+																					       .setBundleId(call.getCalledEncoderBundleId())
+																					       .setBundle_type(call.getCalledEncoderBundleType())
+																					       .setLayerId(call.getCalledEncoderLayerId());
+				DisconnectBundleBO disconnectCalledDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+		//																		           .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+																					       .setBundleId(call.getCalledDecoderBundleId())
+																					       .setBundle_type(call.getCalledDecoderBundleType())
+																					       .setLayerId(call.getCalledDecoderLayerId());
+				
+				logic.getDisconnectBundle().add(disconnectCalledEncoderBundle);
+				logic.getDisconnectBundle().add(disconnectCalledDecoderBundle);
+			}
 		}else{
 			//LOCAL_OUTER，生成passby
 			//查询本联网layerid
@@ -1562,19 +1614,21 @@ public class CommandUserServiceImpl {
 		}
 		
 		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.LOCAL_OUTER)){
-			//关闭主叫用户设备
-			DisconnectBundleBO disconnectCallEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-																			         .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-																				     .setBundleId(call.getCallEncoderBundleId())
-																				     .setBundle_type(call.getCallEncoderBundleType())
-																				     .setLayerId(call.getCallEncoderLayerId());
-			DisconnectBundleBO disconnectCallDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-	//																		         .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-																				     .setBundleId(call.getCallDecoderBundleId())
-																				     .setBundle_type(call.getCallDecoderBundleType())
-																				     .setLayerId(call.getCallDecoderLayerId());
-			logic.getDisconnectBundle().add(disconnectCallEncoderBundle);
-			logic.getDisconnectBundle().add(disconnectCallDecoderBundle);
+			if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
+				//关闭主叫用户设备
+				DisconnectBundleBO disconnectCallEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+																				         .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+																					     .setBundleId(call.getCallEncoderBundleId())
+																					     .setBundle_type(call.getCallEncoderBundleType())
+																					     .setLayerId(call.getCallEncoderLayerId());
+				DisconnectBundleBO disconnectCallDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+		//																		         .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+																					     .setBundleId(call.getCallDecoderBundleId())
+																					     .setBundle_type(call.getCallDecoderBundleType())
+																					     .setLayerId(call.getCallDecoderLayerId());
+				logic.getDisconnectBundle().add(disconnectCallEncoderBundle);
+				logic.getDisconnectBundle().add(disconnectCallDecoderBundle);
+			}
 		}else{
 			//OUTER_LOCAL，生成passby
 			//查询本联网layerid

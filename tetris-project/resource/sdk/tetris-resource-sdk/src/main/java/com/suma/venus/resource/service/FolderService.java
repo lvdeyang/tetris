@@ -13,10 +13,13 @@ import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
+import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.SerNodePO;
 
 @Service
 public class FolderService extends CommonService<FolderPO> implements InitializingBean {
@@ -32,6 +35,9 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private SerNodeDao serNodeDao;
 
 	/**
 	 * 初始化根节点数据
@@ -123,6 +129,7 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 	 * @param Long maxIndex
 	 */
 	public void setFolderToUsers(FolderPO folder, List<UserBO> users, Long maxIndex) {
+		SerNodePO sysnode = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user: users){
 			userIds.add(user.getId());
@@ -153,6 +160,8 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 				map.setUserId(user.getId());
 				map.setUserUuid(user.getUser().getUuid());
 				map.setUserName(user.getName());
+				map.setUserNo(user.getUserNo());
+				map.setUserNode(sysnode.getNodeUuid());
 				map.setCreator(user.getCreater());
 				map.setSyncStatus(0);
 				needSaveMaps.add(map);

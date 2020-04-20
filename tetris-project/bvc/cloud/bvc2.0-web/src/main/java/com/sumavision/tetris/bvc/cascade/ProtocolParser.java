@@ -75,7 +75,7 @@ public class ProtocolParser {
 	 * @param String srcNo 可能是操作用户号码，也可能是app号码
 	 * @param String commandname 命令头 
 	 */
-	private void rebindRequest(String srcNo, String commandname) throws Exception{
+	public void rebindRequest(String srcNo, String commandname) throws Exception{
 		Long userId = 2l;
 		if(!"syncinfo".equals(commandname) && !"syncroutelink".equals(commandname) && !"authnotify".equals(commandname)){
 			FolderUserMap map = folderUserMapDao.findByUserNo(srcNo);

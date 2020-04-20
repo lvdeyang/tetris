@@ -19,6 +19,9 @@ public class ContactsMessageVO extends AbstractBaseVO<ContactsMessageVO, Contact
 	/** 消息发送者在对方联系人中的id */
 	private Long fromContactsId;
 	
+	/** 消息发送者在对方联系人中的分组id */
+	private Long fromSourceGroupId;
+	
 	/** 消息内容 */
 	private String message;
 	
@@ -49,6 +52,15 @@ public class ContactsMessageVO extends AbstractBaseVO<ContactsMessageVO, Contact
 
 	public ContactsMessageVO setFromContactsId(Long fromContactsId) {
 		this.fromContactsId = fromContactsId;
+		return this;
+	}
+
+	public Long getFromSourceGroupId() {
+		return fromSourceGroupId;
+	}
+
+	public ContactsMessageVO setFromSourceGroupId(Long fromSourceGroupId) {
+		this.fromSourceGroupId = fromSourceGroupId;
 		return this;
 	}
 

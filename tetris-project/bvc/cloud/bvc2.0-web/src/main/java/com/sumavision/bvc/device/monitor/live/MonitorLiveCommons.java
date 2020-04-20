@@ -127,7 +127,8 @@ public class MonitorLiveCommons {
 	 * @return String 联网的接入层id
 	 */
 	public String queryNetworkLayerId() throws Exception{
-		List<WorkNodePO> layers = workNodeDao.findByType(NodeType.ACCESS_NETWORK);
+		//List<WorkNodePO> layers = workNodeDao.findByType(NodeType.ACCESS_NETWORK);
+		List<WorkNodePO> layers = workNodeDao.findByType(NodeType.ACCESS_LIANWANG);
 		if(layers==null||layers.size()<=0){
 			return null;
 		}else{
