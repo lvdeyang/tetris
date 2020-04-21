@@ -11,8 +11,10 @@ html,body{
 .screenCtrl{
     position: absolute;
     padding-left: 15px;
-    top:35px;
+    /*top:35px;*/
+    top:0;
     left: 0;
+    width: 20%;
     text-align: center;
     color: #fff;
     font-size: 20px;
@@ -75,7 +77,8 @@ html,body{
 
 .btn{
     position: absolute;
-    top:0;
+    /*top:0;*/
+    top:54%;
     left: 0;
     width: 22%;
     height: 32px;
@@ -185,17 +188,30 @@ img{
     margin-top: 6px;
 }
 
+@media screen and(max-width: 1680px) {
+    .screenCtrl div{
+        margin: 4px;
+    }
+    .btn{
+        width: 29%;
+    }
+}
+
 @media screen and(max-width: 1600px) {
     .btn{
-        width:28%;
+        width:33%;
     }
-    .screenCtrl{
-        top:77%;
+    .screenCtrl div{
+        margin: 3px;
     }
 }
 @media screen and(max-width: 1400px) {
     .btn{
-        width:28%;
+        top:45%;
+        width: 32%;
+      }
+    .screenCtrl div{
+        margin: 3px;
     }
 }
 
@@ -209,8 +225,8 @@ img{
     .sendMsgContent{
         width: 74%;
     }
-    .screenCtrl{
-        top:75%;
+    .screenCtrl div{
+        margin: 1px;
     }
 }
 

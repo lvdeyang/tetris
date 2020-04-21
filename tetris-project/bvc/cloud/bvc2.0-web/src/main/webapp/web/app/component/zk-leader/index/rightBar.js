@@ -576,6 +576,7 @@ define([
                 } else if (self.contextMenu.currentNode.type === 'VOD_RESOURCE') {
                     var resourceFileId = self.contextMenu.currentNode.id;
                     ajax.post('/command/vod/resource/file/start', {resourceFileId: resourceFileId}, function (data) {
+                        console.log(data)
                         self.qt.invoke('vodResourceFiles', $.toJSON([data]));
                     });
                 } else if (self.contextMenu.currentNode.type === 'RECORD_PLAYBACK') {
@@ -1737,6 +1738,7 @@ define([
                         });
                     }
                 } else {
+                    self.qt.set('currentGroupId', self.meet.current.id);
                     if (self.meet.current.status === 'pause') {
                         ajax.post('/command/basic/pause/recover', {
                             id: self.meet.current.id
@@ -2339,6 +2341,7 @@ define([
                         }
                     }
                     self.refreshCommand("meeting");
+                    self.qt.invoke('commandExit', $.toJSON(e.splits));
                 });
 
                 //监听到成员退出
