@@ -144,7 +144,7 @@ public class CommandMeetingController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/speak/apply")
-	public Object speakApplyAgree(
+	public Object speakApply(
 			String id,
 			HttpServletRequest request) throws Exception{
 		

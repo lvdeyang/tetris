@@ -409,7 +409,7 @@ public class CommandCommonUtil {
 	 * @param dstCodes
 	 * @return
 	 */
-	public CommandGroupForwardDemandPO queryForwardDemandByBySrcAndDstCode(
+	public CommandGroupForwardDemandPO queryForwardDemandBySrcAndDstCode(
 			List<CommandGroupForwardDemandPO> demands, String srcCode, String dstCode) {
 		for(CommandGroupForwardDemandPO demand : demands){
 			if(srcCode.equals(demand.getSrcCode()) && dstCode.equals(demand.getDstCode())){

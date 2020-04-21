@@ -180,6 +180,29 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private ConferenceCascadeService conferenceCascadeService;
+		
+	public CommandGroupPO save(
+			Long creatorUserId,
+			Long chairmanUserId,
+			String creatorUsername,
+			String name,
+			String subject,
+			GroupType type,
+			OriginType originType,
+			List<Long> userIdList
+			) throws Exception{
+		
+		return save(
+				creatorUserId,
+				chairmanUserId,
+				creatorUsername,
+				name,
+				subject,
+				type,
+				originType,
+				userIdList,
+				null);
+	}
 	
 	/**
 	 * 
@@ -194,6 +217,7 @@ public class CommandBasicServiceImpl {
 	 * @param name 名称
 	 * @param type BASIC或SECRET
 	 * @param userIdList 成员的userId列表
+	 * @param uuid 级联时使用，非级联为null
 	 * @return
 	 * @throws Exception
 	 */
@@ -205,7 +229,8 @@ public class CommandBasicServiceImpl {
 			String subject,
 			GroupType type,
 			OriginType originType,
-			List<Long> userIdList
+			List<Long> userIdList,
+			String uuid
 			) throws Exception{
 		
 		UserBO creatorUserBo = resourceService.queryUserById(creatorUserId, TerminalType.QT_ZK);
@@ -251,6 +276,9 @@ public class CommandBasicServiceImpl {
 		}
 		
 		CommandGroupPO group = new CommandGroupPO();
+		if(uuid != null){
+			group.setUuid(uuid);
+		}
 		group.setName(name);
 		group.setSubject(subject);
 		group.setType(type);
@@ -1450,6 +1478,18 @@ public class CommandBasicServiceImpl {
 			
 			commandGroupDao.save(group);
 			
+			//级联
+			GroupType groupType = group.getType();
+			if(!OriginType.OUTER.equals(group.getOriginType())){
+				if(GroupType.BASIC.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.pauseCommand(group);
+					commandCascadeService.pause(groupBO);
+				}else if(GroupType.MEETING.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.pauseMeeting(group);
+					conferenceCascadeService.pause(groupBO);
+				}
+			}
+			
 			//给成员推送message
 			List<Long> consumeIds = new ArrayList<Long>();
 			List<CommandGroupMemberPO> members = group.getMembers();
@@ -1507,6 +1547,18 @@ public class CommandBasicServiceImpl {
 			}
 			group.setStatus(GroupStatus.START);
 			commandGroupDao.save(group);//需要吗？
+			
+			//级联
+			GroupType groupType = group.getType();
+			if(!OriginType.OUTER.equals(group.getOriginType())){
+				if(GroupType.BASIC.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.resumeCommand(group);
+					commandCascadeService.resume(groupBO);
+				}else if(GroupType.MEETING.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.resumeMeeting(group);
+					conferenceCascadeService.resume(groupBO);
+				}
+			}
 			
 			//恢复会中的转发
 			startGroupForwards(group, true, true);
@@ -2271,6 +2323,7 @@ public class CommandBasicServiceImpl {
 	 * @return 1删人时给主席返回chairSplits；0退出时给退出成员返回exitMemberSplits；后续优化
 	 * @throws Exception
 	 */
+	@Deprecated
 	public Object removeMembers(Long groupId, List<Long> userIdList, int mode) throws Exception{
 		UserVO user = userQuery.current();
 		//“重复退出会再次挂断编码器”已改好
@@ -2506,6 +2559,351 @@ public class CommandBasicServiceImpl {
 			if(mode == 0) return exitMemberSplits;
 			return chairSplits;
 		}
+	}
+	
+	/**
+	 * 
+	 * 删除成员/成员退出<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月12日 下午6:14:57
+	 * @param groupId
+	 * @param userIdList
+	 * @param mode 0为主席同意的主动退出（列表和转发都保留），2为主席强退，删人，1为保留字段
+	 * @return 1删人时给主席返回chairSplits；0退出时给退出成员返回exitMemberSplits；后续优化
+	 * @throws Exception
+	 */
+	public Object removeMembers2(Long groupId, List<Long> userIdList, int mode) throws Exception{
+		UserVO user = userQuery.current();
+		//“重复退出会再次挂断编码器”已改好
+		
+		if(groupId==null || groupId.equals("")){
+			throw new BaseException(StatusCode.FORBIDDEN, "退出操作，会议id有误");
+		}
+		
+		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
+			
+			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			
+			if(group == null){
+//				throw new BaseException(StatusCode.FORBIDDEN, "会议不存在，id: " + groupId);
+				log.info("进行退出/删人操作的会议不存在，id：" + groupId);
+				return new JSONArray();
+			}
+			
+			//会议停止状态下不能“退出”
+			if(mode == 0){
+				if(group.getStatus().equals(GroupStatus.STOP)){
+//					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，不需退出，id: " + group.getId());
+					return new JSONArray();
+				}
+			}
+			
+			//防止专向指挥中调用此方法
+			if(group.getType().equals(GroupType.SECRET)){
+				throw new BaseException(StatusCode.FORBIDDEN, "正在专项，不能退出，只能“停止”");
+			}
+			
+			JSONArray chairSplits = new JSONArray();
+			JSONArray exitMemberSplits = new JSONArray();
+			List<Long> consumeIds = new ArrayList<Long>();
+			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
+			
+			List<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupForwardPO> forwards = group.getForwards();
+			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+			
+			if(userIdList.contains(chairmanMember.getUserId())){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "不能删除主席");
+			}
+			
+			List<CommandGroupMemberPO> removeMembers = new ArrayList<CommandGroupMemberPO>();
+			List<Long> removeMemberIds = new ArrayList<Long>();
+			for(CommandGroupMemberPO member : members){
+				if(userIdList.contains(member.getUserId())){
+					removeMembers.add(member);
+					removeMemberIds.add(member.getId());
+				}
+			}
+			
+			//以这些成员为源和目的的转发
+			Set<CommandGroupForwardPO> needDelForwards = commandCommonUtil.queryForwardsByMemberIds(forwards, removeMemberIds, null, null);
+			
+			//以这些成员为目的的转发点播
+			List<CommandGroupForwardDemandPO> needDelDemands = commandCommonUtil.queryForwardDemandsByDstmemberIds(demands, removeMemberIds, null, null);
+			//已成功，需要关闭编码器的转发点播
+			List<CommandGroupForwardDemandPO> needDelDemandsForEncoder = commandCommonUtil.queryForwardDemandsByDstmemberIds(demands, removeMemberIds, null, ForwardDemandStatus.DONE);
+			//直接删除转发点播
+			demands.removeAll(needDelDemands);
+			
+			//这两个变量用来生成message用
+			StringBufferWrapper removeMembersNames = new StringBufferWrapper();
+			JSONArray removeMemberIdsJSONArray = new JSONArray();
+			for(CommandGroupMemberPO removeMember : removeMembers){
+				removeMembersNames.append(removeMember.getUserName()).append("，");
+				removeMemberIdsJSONArray.add(removeMember.getId().toString());
+			}
+			removeMembersNames.append("被从 ").append(group.getName()).append(" 中移除");
+			
+			//释放这些退出或删除成员的播放器，同时如果是删人就给被删的成员发消息
+			List<CommandGroupUserPlayerPO> needFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+			List<CommandGroupUserPlayerPO> playFilePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+			List<CommandGroupMemberPO> needCloseRemoveMembers = new ArrayList<CommandGroupMemberPO>();
+			for(CommandGroupMemberPO removeMember : removeMembers){
+				
+				//只有进入的成员，才需要挂断编码器
+				if(MemberStatus.CONNECT.equals(removeMember.getMemberStatus())){
+					needCloseRemoveMembers.add(removeMember);
+				}
+				
+				JSONArray splits = new JSONArray();
+				List<CommandGroupUserPlayerPO> thisMemberFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+				for(CommandGroupUserPlayerPO player : removeMember.getPlayers()){
+					if(player.playingFile()){
+						playFilePlayers.add(player);
+					}
+					player.setFree();
+					needFreePlayers.add(player);
+//					removeMember.getPlayers().remove(player);
+					thisMemberFreePlayers.add(player);
+					
+					//给退出成员返回的splits数组，后续优化
+					JSONObject split = new JSONObject();
+					split.put("serial", player.getLocationIndex());
+					splits.add(split);
+					exitMemberSplits.add(split);
+				}
+				removeMember.getPlayers().removeAll(thisMemberFreePlayers);
+				
+				//会议进行中，发消息
+				if(!group.getStatus().equals(GroupStatus.STOP)){
+					JSONObject message = new JSONObject();
+					if(mode == 2){
+						message.put("businessInfo", "您已被移出 " + group.getName());
+					}else{
+						message.put("businessInfo", group.getName() + " 主席同意，您已退出");
+					}
+					message.put("businessType", "commandMemberDelete");
+					message.put("businessId", group.getId().toString());
+//					message.put("memberIds", removeMemberIdsJSONArray);
+					message.put("splits", splits);
+					messageCaches.add(new MessageSendCacheBO(removeMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairmanMember.getUserId(), chairmanMember.getUserName()));
+				}
+			}
+			
+			//释放其它成员的播放器，同时发消息
+			for(CommandGroupMemberPO member : members){
+				List<CommandGroupUserPlayerPO> thisMemberFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+				if(removeMemberIds.contains(member.getId())){
+					//这里不处理退出和删除的成员
+					continue;
+				}
+				JSONArray splits = new JSONArray();
+				for(CommandGroupForwardPO forward : needDelForwards){
+					if(removeMemberIds.contains(forward.getDstMemberId())){
+						//该成员的播放器已经在上边释放
+						continue;
+					}
+					if(member.getId().equals(forward.getDstMemberId())){
+						//目的是该成员的，找播放器
+						for(CommandGroupUserPlayerPO player : member.getPlayers()){
+							if(player.getBundleId().equals(forward.getDstVideoBundleId())){
+								player.setFree();
+								needFreePlayers.add(player);
+								thisMemberFreePlayers.add(player);
+//								member.getPlayers().remove(player);
+								
+								JSONObject split = new JSONObject();
+								split.put("serial", player.getLocationIndex());
+								splits.add(split);
+								if(member.isAdministrator()){
+									//给主席的split									
+									chairSplits.add(split);
+								}
+							}
+						}
+					}
+				}
+				member.getPlayers().removeAll(thisMemberFreePlayers);
+				
+				//给其他成员发消息				
+				if(!group.getStatus().equals(GroupStatus.STOP)){
+					
+					//不给主席发
+					if(member.isAdministrator()){
+						continue;
+					}
+					
+					//退出，成员下线消息，这里默认认为removeMembers只有一个元素
+					JSONObject message = new JSONObject();
+					if(mode ==2){
+						message.put("businessInfo", removeMembersNames.toString());
+					}else{
+						message.put("businessInfo", removeMembers.get(0).getUserName() + " 成员退出");
+					}
+					message.put("businessType", "commandMemberOffline");
+					message.put("businessId", group.getId().toString());
+					message.put("memberId", removeMembers.get(0).getId().toString());
+					message.put("splits", splits);
+					messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND, chairmanMember.getUserId(), chairmanMember.getUserName()));
+				}
+			}
+			
+			if(mode == 0){
+				//成员主动退出
+				List<CommandGroupForwardPO> needRemoveCooForwards = new ArrayList<CommandGroupForwardPO>();
+				for(CommandGroupMemberPO removeMember : removeMembers){
+					removeMember.setMemberStatus(MemberStatus.DISCONNECT);
+					removeMember.setCooperateStatus(MemberStatus.DISCONNECT);
+					removeMember.setSilenceToHigher(false);
+					removeMember.setSilenceToLower(false);
+				}
+				//所有的forward都保留（目前有普通和协同2种，协同的需要删除）
+				for(CommandGroupForwardPO forward : needDelForwards){
+					if(ForwardBusinessType.COOPERATE_COMMAND.equals(forward.getForwardBusinessType())
+							&& removeMemberIds.contains(forward.getSrcMemberId())){
+						needRemoveCooForwards.add(forward);
+					}else{
+						forward.clearDst();
+						forward.setExecuteStatus(ExecuteStatus.UNDONE);
+					}
+				}
+				forwards.removeAll(needRemoveCooForwards);
+			}else if(mode == 2){
+				//主席强退，删人
+				members.removeAll(removeMembers);
+				forwards.removeAll(needDelForwards);
+			}
+			
+			commandGroupDao.save(group);
+			
+			//会议进行中，发协议（删转发协议不用发，通过挂断播放器来删）
+			if(!group.getStatus().equals(GroupStatus.STOP)){
+				CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
+				CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
+				LogicBO logic = closeBundle(needCloseRemoveMembers, needDelDemandsForEncoder, needFreePlayers, codec, chairmanMember.getUserNum());
+				LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(playFilePlayers, null, null, needFreePlayers, codec, group.getUserId());
+				logic.merge(logicCastDevice);
+				StringBufferWrapper description = new StringBufferWrapper().append(group.getName());
+				if(mode == 0){//退出
+					description.append(removeMembers.get(0).getUserName()).append(" 成员退出");
+				}else if(mode == 1){//删人
+					description = removeMembersNames;
+				}
+				
+				//录制更新
+				LogicBO logicRecord = commandRecordServiceImpl.update(group.getUserId(), group, 1, false);
+				logic.merge(logicRecord);
+				
+				ExecuteBusinessReturnBO returnBO = executeBusiness.execute(logic, description.toString());
+				commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());
+			}
+
+			//发消息
+			for(MessageSendCacheBO cache : messageCaches){
+				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
+			operationLogService.send(user.getNickname(), "成员退出", user.getNickname() + "成员退出groupId:" + groupId + "userIds:" + userIdList.toString());
+			//所有情况都给主席返回chairSplits
+			//if(mode == 0) return exitMemberSplits;
+			return chairSplits;
+		}
+	}
+
+	public void exitApply(Long userId, Long groupId) throws Exception{
+		
+		UserVO user = userQuery.current();
+		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
+			
+			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			
+			if(group.getStatus().equals(GroupStatus.STOP)){
+				return;
+			}
+			
+			if(group.getUserId().equals(userId)){
+				throw new BaseException(StatusCode.FORBIDDEN, "主席不能退出");
+			}
+			
+			List<CommandGroupMemberPO> members = group.getMembers();
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+			CommandGroupMemberPO exitMember = commandCommonUtil.queryMemberByUserId(members, userId);
+			
+			//如果主席和申请人都不在该系统，则不需要处理
+			if(OriginType.OUTER.equals(chairmanMember.getOriginType())
+					&& OriginType.OUTER.equals(exitMember.getOriginType())){
+				return;
+			}
+			
+			//级联
+			if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
+				//主席在该系统
+				JSONObject message = new JSONObject();
+				message.put("businessType", "speakApply");
+				message.put("businessInfo", exitMember.getUserName() + "申请退出" + group.getName());
+				message.put("businessId", group.getId().toString() + "-" + exitMember.getUserId());
+				
+				WebsocketMessageVO ws = websocketMessageService.send(chairmanMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
+				websocketMessageService.consume(ws.getId());
+			}else{
+				//主席在外部系统（那么申请人在该系统）
+//				GroupBO groupBO = commandCascadeUtil.exitCommandRequest(group, exitMember);
+//				conferenceCascadeService.speakerSetRequest(groupBO);
+			}
+			
+			log.info(group.getName() + "申请发言");
+		}
+		operationLogService.send(user.getNickname(), "申请退出", user.getNickname() + "申请退出groupId:" + groupId);
+	}
+	
+	public void exitApplyDisagree(Long userId, Long groupId, List<Long> userIds) throws Exception{
+		UserVO user = userQuery.current();
+		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
+			
+			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			
+			if(group.getStatus().equals(GroupStatus.STOP) || userIds.size()==0){
+				return;
+			}
+			
+			List<Long> consumeIds = new ArrayList<Long>();
+			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();			
+			List<CommandGroupMemberPO> members = group.getMembers();
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+			List<CommandGroupMemberPO> exitMembers = commandCommonUtil.queryMembersByUserIds(members, userIds);
+			JSONObject message = new JSONObject();
+			message.put("businessType", "exitApplyDisagree");
+			message.put("businessInfo", "主席不同意您退出");
+			message.put("businessId", group.getId().toString());
+			for(CommandGroupMemberPO exitMember : exitMembers){
+				if(OriginType.OUTER.equals(exitMember.getOriginType())){
+					continue;
+				}
+				messageCaches.add(new MessageSendCacheBO(exitMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
+			}
+			
+			//级联，如果主席是本系统的，则通知其它系统
+			if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
+				//级联拒绝只有单个协议，没有批量
+//				for(CommandGroupMemberPO exitMember : exitMembers){
+//					GroupBO groupBO = commandCascadeUtil.exitCommandResponse(group, exitMember, "0");
+//					commandCascadeService.exitSetResponse(groupBO);
+//				}
+			}
+			
+			for(MessageSendCacheBO cache : messageCaches){
+				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
+			
+			log.info(group.getName() + " 主席拒绝了 " + exitMembers.get(0).getUserName() + " 等人退出");
+		}
+		operationLogService.send(user.getNickname(), "拒绝申请退出", user.getNickname() + "拒绝申请退出groupId:" + groupId + ", userIds" + userIds.toString());
 	}
 	
 	/**
