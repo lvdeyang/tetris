@@ -124,7 +124,48 @@ public class CommandCascadeUtil {
 		return groupBO;
 	}
 	
-	/** 按协议，非批量 */
+	/** 申请退出 */
+	public GroupBO exitCommandRequest(CommandGroupPO group, CommandGroupMemberPO exitMember){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+//		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(exitMember.getUserNum())
+				.setMid(exitMember.getUserNum())
+				.setMlist(mlist);
+		
+		return groupBO;
+	}
+
+	/**
+	 * 申请退出响应<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月4日 下午1:38:55
+	 * @param group
+	 * @param speakMember
+	 * @param code 响应，0表示不同意、1表示同意 
+	 * @return
+	 */
+	public GroupBO exitCommandResponse(CommandGroupPO group, CommandGroupMemberPO exitMember, String code){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setMid(exitMember.getUserNum())
+				.setCode(code)
+				.setMlist(mlist);
+		
+		return groupBO;
+	}
+
+	/** 主席将成员退出。按协议，非批量 */
 	public GroupBO kikoutCommand(CommandGroupPO group, CommandGroupMemberPO removeMember){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
@@ -489,11 +530,11 @@ public class CommandCascadeUtil {
 	public GroupBO speakerSetResponse(CommandGroupPO group, CommandGroupMemberPO speakMember, String code){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
-//		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
-				.setOp(speakMember.getUserNum())
+				.setOp(chairmanMember.getUserNum())
 				.setMid(speakMember.getUserNum())
 				.setCode(code)
 				.setMlist(mlist);
