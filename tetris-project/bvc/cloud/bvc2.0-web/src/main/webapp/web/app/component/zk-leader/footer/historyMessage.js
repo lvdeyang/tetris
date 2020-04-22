@@ -435,7 +435,6 @@ define([
                 //websocket 停止指挥  成员监听到停止指挥，先会到右侧菜单处理一些事情
                 self.qt.on('commandStop', function (e) {
                     e = e.params;
-                    self.qt.warning(e.businessInfo);
                     self.qt.linkedWebview('rightBar', {id: 'usercommandStop', params: e});
                 });
 

@@ -27,7 +27,7 @@
                             v-if="group.current.creator!=user.id" style="font-size: 20px">
                     <span class="icon-signin" :style="group.current.status =='start'?'color:#fff;':'color:gray;'" @click="enterCommandBatch"></span>
                 </el-tooltip>
-                <el-tooltip class="item" effect="dark" content="退出" placement="top-start"
+                <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start"
                             v-if="group.current.creator!=user.id" style="font-size: 20px">
                     <span class="icon-signout" @click="exitCommand"></span>
                 </el-tooltip>
@@ -453,7 +453,7 @@
                                 v-if="meet.current.creator!=user.id" style="font-size: 20px">
                         <span class="icon-signin" @click="enterMyCommand()"></span>
                     </el-tooltip>
-                    <el-tooltip class="item" effect="dark" content="退出" placement="top-start"
+                    <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start"
                                 v-if="meet.current.creator!=user.id" style="font-size: 20px">
                         <span class="icon-signout" @click="exitCommand('会议')"></span>
                     </el-tooltip>

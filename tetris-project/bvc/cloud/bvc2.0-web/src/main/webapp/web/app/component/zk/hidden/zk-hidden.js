@@ -218,6 +218,14 @@ define([
                                 self.qt.linkedWebview('historyMessage', {id:'commandMemberDelete', params:e});
                             }else if(e.businessType === 'commandStartNow'){ //开启指挥，不需要成员同意
                                 self.qt.linkedWebview('rightBar', {id:'autoCommandStart', params:e});
+                            }else if(e.businessType === 'exitApply'){
+                                self.qt.linkedWebview('rightBar', {id:'agreeExitApply', params:e}); //通知主席有人申请退出
+                            }else if(e.businessType === 'exitApplyAgree'){ //通知申请人被同意
+                                self.qt.linkedWebview('rightBar', {id:'applyExitAgree', params:e});
+
+                            }else if(e.businessType === 'exitApplyDisagree'){ //通知申请人被拒绝
+                                self.qt.linkedWebview('rightBar', {id:'applyExitDisagree', params:e});
+
                             }
 
                             //开始会议 需要成员同意
