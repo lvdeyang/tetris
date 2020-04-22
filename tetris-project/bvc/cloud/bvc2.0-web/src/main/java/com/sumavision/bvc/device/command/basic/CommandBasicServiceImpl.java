@@ -246,33 +246,38 @@ public class CommandBasicServiceImpl {
 			userIdList.add(creatorUserId);
 		}
 		
-		String creatorEncoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(creatorUserBo);
-		List<BundlePO> creatorBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(creatorEncoderId).getList());
-		if(creatorBundleEntities.size() == 0){
-			throw new UserHasNoAvailableEncoderException(creatorUserBo.getName());
+		//本系统创建，则校验主席有编码器
+		if(!OriginType.OUTER.equals(originType)){
+			String creatorEncoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(creatorUserBo);
+			List<BundlePO> creatorBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(creatorEncoderId).getList());
+			if(creatorBundleEntities.size() == 0){
+				throw new UserHasNoAvailableEncoderException(creatorUserBo.getName());
+			}
 		}
 		
 		//会议组重名校验
-		List<CommandGroupPO> existGroups = commandGroupDao.findByName(name);
-		if(existGroups!=null && existGroups.size()>0){
-			List<CommandGroupPO> likeGroups = commandGroupDao.findByNameLike(name + "-%");
-			String recommendedName0 = name + "-";
-			String recommendedName = null;
-			boolean ok = false;
-			for(int i=2; ; i++){
-				ok = true;
-				recommendedName = recommendedName0 + i;
-				for(CommandGroupPO likeGroup : likeGroups){
-					if(recommendedName.equals(likeGroup.getName())){
-						ok = false;
+		if(!OriginType.OUTER.equals(originType)){
+			List<CommandGroupPO> existGroups = commandGroupDao.findByName(name);
+			if(existGroups!=null && existGroups.size()>0){
+				List<CommandGroupPO> likeGroups = commandGroupDao.findByNameLike(name + "-%");
+				String recommendedName0 = name + "-";
+				String recommendedName = null;
+				boolean ok = false;
+				for(int i=2; ; i++){
+					ok = true;
+					recommendedName = recommendedName0 + i;
+					for(CommandGroupPO likeGroup : likeGroups){
+						if(recommendedName.equals(likeGroup.getName())){
+							ok = false;
+							break;
+						}
+					}
+					if(ok){
 						break;
 					}
 				}
-				if(ok){
-					break;
-				}
+				throw new CommandGroupNameAlreadyExistedException(name, recommendedName);
 			}
-			throw new CommandGroupNameAlreadyExistedException(name, recommendedName);
 		}
 		
 		CommandGroupPO group = new CommandGroupPO();
@@ -404,8 +409,11 @@ public class CommandBasicServiceImpl {
 			memberPO.setUserId(user.getId());
 			memberPO.setUserName(user.getName());
 			memberPO.setUserNum(user.getUserNo());
-			memberPO.setFolderId(user.getFolderId());			
 			memberPO.setGroup(group);
+			if(user.getFolderId() == null){
+				throw new BaseException(StatusCode.FORBIDDEN, memberPO.getUserName() + " 没有组织机构！");
+			}
+			memberPO.setFolderId(user.getFolderId());
 			members.add(memberPO);
 			
 			if(queryUtil.isLdapUser(user, folderUserMaps)){
@@ -680,6 +688,12 @@ public class CommandBasicServiceImpl {
 				continue;//后续考虑删除成员
 			}
 			
+			//重设folderId
+			if(user.getFolderId() == null){
+				throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 没有组织机构！");
+			}
+			member.setFolderId(user.getFolderId());
+			
 			//跳过ldap用户
 			if(queryUtil.isLdapUser(user, folderUserMaps)){
 //				member.setOriginType(OriginType.OUTER);
@@ -724,8 +738,7 @@ public class CommandBasicServiceImpl {
 						break;
 					}
 				}
-			}
-			
+			}			
 		}
 		
 		for(CommandGroupMemberPO member : members){

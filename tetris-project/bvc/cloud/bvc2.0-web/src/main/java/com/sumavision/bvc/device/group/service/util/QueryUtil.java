@@ -2057,7 +2057,7 @@ public class QueryUtil {
 		return null;
 	}
 
-	public FolderUserMap queryUserMapById(Collection<FolderUserMap> folderUserMaps, Long userId){
+	public FolderUserMap queryUserMapByUserId(Collection<FolderUserMap> folderUserMaps, Long userId){
 		if(folderUserMaps == null) return null;
 		for(FolderUserMap folderUserMap : folderUserMaps){
 			if(folderUserMap.getUserId().equals(userId)){
@@ -2068,7 +2068,7 @@ public class QueryUtil {
 	}
 	
 	public boolean isLdapUser(UserBO user, Collection<FolderUserMap> folderUserMaps){
-		FolderUserMap folderUserMap = queryUserMapById(folderUserMaps, user.getId());
+		FolderUserMap folderUserMap = queryUserMapByUserId(folderUserMaps, user.getId());
 		boolean result = isLdapUser(user, folderUserMap);
 		return result;
 	}
