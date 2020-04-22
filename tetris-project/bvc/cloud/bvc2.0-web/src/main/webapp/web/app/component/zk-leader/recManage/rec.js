@@ -30,7 +30,7 @@ define([
         computed: {
             //设备的分页
             pageData: function () {
-                return this.deviceData.totalData.slice((this.deviceCurrentPage - 1) * 3, this.deviceCurrentPage * 3);
+                return this.deviceData.totalData.slice((this.deviceCurrentPage - 1) * 10, this.deviceCurrentPage * 10);
             }
         },
         methods: {
