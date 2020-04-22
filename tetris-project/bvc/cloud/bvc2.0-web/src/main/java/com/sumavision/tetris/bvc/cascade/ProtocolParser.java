@@ -77,7 +77,7 @@ public class ProtocolParser {
 	 */
 	public void rebindRequest(String srcNo, String commandname) throws Exception{
 		Long userId = 2l;
-		if(!"syncinfo".equals(commandname) && !"syncroutelink".equals(commandname) && !"authnotify".equals(commandname)){
+		if(srcNo!=null && !"".equals(srcNo) && "syncinfo".equals(commandname) && !"syncroutelink".equals(commandname) && !"authnotify".equals(commandname)){
 			FolderUserMap map = folderUserMapDao.findByUserNo(srcNo);
 			if(map != null) userId = map.getUserId();
 		}
@@ -108,6 +108,14 @@ public class ProtocolParser {
 			rootNodeName = "Control";
 		}else if(xml.indexOf("<Notify") >= 0){
 			rootNodeName = "Notify";
+		}else if(xml.indexOf("<Response") >= 0){
+			rootNodeName = "Response";
+		}else if(xml.indexOf("<response") >= 0){
+			rootNodeName = "response";
+		}else if(xml.indexOf("<Request") >= 0){
+			rootNodeName = "Request";
+		}else if(xml.indexOf("<request") >= 0){
+			rootNodeName = "request";
 		}
 		return rootNodeName;
 	}

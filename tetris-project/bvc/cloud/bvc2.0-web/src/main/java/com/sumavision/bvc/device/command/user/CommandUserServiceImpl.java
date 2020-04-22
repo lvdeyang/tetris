@@ -1077,6 +1077,9 @@ public class CommandUserServiceImpl {
 			calledPlayer.setBusinessName(null);
 			commandGroupUserPlayerDao.save(calledPlayer);
 			
+			//如果用户是被呼叫方，返回callPlayer
+			returnPlayer = calledPlayer;
+			
 			//如果用户是呼叫方
 			if(user.getId().equals(call.getCallUserId())){
 				
@@ -1340,24 +1343,26 @@ public class CommandUserServiceImpl {
 	/** 获取呼叫任务中的2个播放器（主叫和被叫的） */
 	private List<CommandGroupUserPlayerPO> getPlayers(UserLiveCallPO call) throws Exception{
 		
+		CallType callType = call.getCallType();
 		List<CommandGroupUserPlayerPO> players = new ArrayList<CommandGroupUserPlayerPO>();
 		
 		//找呼叫方的player
-		try{
+		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.LOCAL_OUTER)){
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
 			CommandGroupUserPlayerPO callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
 			players.add(callPlayer);
-		}catch(Exception e){}
+		}
 		
 		//找被呼叫方的player
-		try{
+		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.OUTER_LOCAL)){
 			CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
 			CommandGroupUserPlayerPO calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
 			players.add(calledPlayer);
-		}catch(Exception e){}
+		}
 		
 		return players;		
 	}
+
 	
 	/**
 	 * 用户通话协议处理 -- 业务数据库可以控制音视频<br/>

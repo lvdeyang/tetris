@@ -29,6 +29,7 @@ import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.util.HttpServletRequestParser;
 import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
+import com.sumavision.tetris.user.UserClassify;
 
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -322,7 +323,7 @@ public class ApiThirdpartBvcCascadeController {
 					}else if("call".equals(type)){
 						//停止xt用户呼叫本地用户
 						//monitorLiveCallService.stop(uuid, srcUser.getId());
-						commandUserServiceImpl.stopCall_Cascade(srcUser, null, uuid);
+						commandUserServiceImpl.stopCall_Cascade(UserClassify.LDAP.toString().equals(srcUser.getCreater())?srcUser:dstUser, null, uuid);
 					}else if("paly-call".equals(type)){
 						//停止xt点播本地用户转xt呼叫本地用户
 					}
