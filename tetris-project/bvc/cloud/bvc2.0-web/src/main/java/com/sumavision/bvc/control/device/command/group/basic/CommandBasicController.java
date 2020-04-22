@@ -188,7 +188,7 @@ public class CommandBasicController {
 		for(CommandGroupMemberPO member : members){
 			if(member.isAdministrator()) continue;
 			UserBO userBO = queryUtil.queryUserById(userBOs, member.getUserId());
-			FolderPO folder = queryUtil.queryFolderPOById(totalFolders, chairmanMember.getFolderId());
+			FolderPO folder = queryUtil.queryFolderPOById(totalFolders, member.getFolderId());
 			TreeNodeVO commandTree = new TreeNodeVO().setWithInfo(member, userBO, folder);
 			commandRoot.getChildren().add(commandTree);
 		}
@@ -469,9 +469,55 @@ public class CommandBasicController {
 		List<Long> userIdList = new ArrayListWrapper<Long>().add(userId).getList();
 		Object splits = commandBasicServiceImpl.removeMembers(Long.parseLong(id), userIdList, 0);
 		return splits;
+	}	
+	
+	/** 成员申请退出 */
+	@ResponseBody
+	@JsonBody
+	@RequestMapping(value = "/exit/apply")
+	public Object exitApply(
+			String id,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		commandBasicServiceImpl.exitApply(userId, Long.parseLong(id));
+		return null;
 	}
 	
+	/** 主席同意成员退出 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/exit/apply/agree")
+	public Object exitApplyAgree(
+			String id,
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+//		UserVO user = userUtils.getUserFromSession(request);
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
+		
+		commandBasicServiceImpl.removeMembers2(Long.parseLong(id), userIdArray, 0);
+		
+		return null;
+	}
 	
+	/** 主席不同意成员退出 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/exit/apply/disagree")
+	public Object exitApplyDisagree(
+			String id,
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
+		
+		commandBasicServiceImpl.exitApplyDisagree(user.getId(), Long.parseLong(id), userIdArray);
+		
+		return null;
+	}
+
 	//添加成员
 	@ResponseBody
 	@JsonBody
@@ -482,12 +528,12 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
-		Object splits = commandBasicServiceImpl.addMembers(Long.parseLong(id), userIdArray);
+		Object splits = commandBasicServiceImpl.addOrEnterMembers(Long.parseLong(id), userIdArray);
 		return splits;
-	}	
+	}
 		
 	/**
-	 * 强推成员<br/>
+	 * 强退成员<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -507,7 +553,7 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
-		Object splits = commandBasicServiceImpl.removeMembers(Long.parseLong(id), userIdArray, 1);
+		Object splits = commandBasicServiceImpl.removeMembers2(Long.parseLong(id), userIdArray, 2);
 		return splits;
 	}
 	

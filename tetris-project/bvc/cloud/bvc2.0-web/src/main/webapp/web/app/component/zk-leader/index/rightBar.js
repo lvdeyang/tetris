@@ -155,7 +155,9 @@ define([
                 contentStyleObj: {
                     height: ''
                 },
-                filterText: ''
+                filterText: '',
+                //退出时退的是指挥还是会议，1：指挥，2：会议
+                agreeExitCommand: 0
             }
         },
         methods: {
@@ -198,7 +200,7 @@ define([
                 }
             },
             //树形组件自定义过滤方法, 触发页面显示配置的筛选
-            filterNode:function(value, data, node) {
+            filterNode: function (value, data, node) {
                 // 如果什么都没填就直接返回
                 if (!value) return true;
                 // 如果传入的value和data中的label相同说明是匹配到了
@@ -209,7 +211,7 @@ define([
                 return this.checkBelongToChooseNode(value, data, node);
             },
             // 判断传入的节点是不是选中节点的子节点
-            checkBelongToChooseNode:function(value, data, node) {
+            checkBelongToChooseNode: function (value, data, node) {
                 var level = node.level;
                 // 如果传入的节点本身就是一级节点就不用校验了
                 if (level === 1) {
@@ -226,7 +228,7 @@ define([
                     }
                     // 否则的话再往上一层做匹配
                     parentData = parentData.parent;
-                    index ++;
+                    index++;
                 }
                 // 没匹配到返回false
                 return false;
@@ -576,6 +578,7 @@ define([
                 } else if (self.contextMenu.currentNode.type === 'VOD_RESOURCE') {
                     var resourceFileId = self.contextMenu.currentNode.id;
                     ajax.post('/command/vod/resource/file/start', {resourceFileId: resourceFileId}, function (data) {
+                        console.log(data)
                         self.qt.invoke('vodResourceFiles', $.toJSON([data]));
                     });
                 } else if (self.contextMenu.currentNode.type === 'RECORD_PLAYBACK') {
@@ -1737,6 +1740,7 @@ define([
                         });
                     }
                 } else {
+                    self.qt.set('currentGroupId', self.meet.current.id);
                     if (self.meet.current.status === 'pause') {
                         ajax.post('/command/basic/pause/recover', {
                             id: self.meet.current.id
@@ -1828,24 +1832,9 @@ define([
                     } else {
                         ajax.post('/command/basic/exit', {
                             id: self.meet.current.id
-                        }, function (data) {
-                            for (var i = 0; i < self.meet.entered.length; i++) {
-                                self.meet.entered = self.meet.entered.filter(function (value) {
-                                    return value.id != self.meet.current.id;
-                                });
-                                if (self.meet.entered.length > 0) {
-                                    self.meet.currentId = self.meet.entered[0].id;
-                                    self.meet.current = self.meet.entered[0];
-                                    self.currentGroupChange(self.meet.currentId);
-                                } else {
-                                    self.meet.currentId = '';
-                                    self.meet.current = '';
-                                }
-                                if (data && data.length > 0) {
-                                    self.qt.invoke('commandExit', data);
-                                }
-                                self.qt.success('退出会议成功');
-                            }
+                        }, function () {
+                            self.qt.success('已向主席发出退出会议申请');
+                            self.agreeExitCommand=2;
                         });
                     }
                 } else {
@@ -1873,24 +1862,11 @@ define([
                             self.qt.success('停止指挥成功');
                         })
                     } else {
-                        ajax.post('/command/basic/exit', {
+                        ajax.post('/command/basic/exit/apply', {
                             id: self.group.current.id
-                        }, function (data) {
-                            self.qt.success('退出指挥成功');
-                            self.group.entered = self.group.entered.filter(function (value) {
-                                return value.id != self.group.current.id;
-                            });
-                            if (self.group.entered.length > 0) {
-                                self.group.currentId = self.group.entered[0].id;
-                                self.group.current = self.group.entered[0];
-                                self.currentGroupChange(self.group.currentId);
-                            } else {
-                                self.group.currentId = '';
-                                self.group.current = '';
-                            }
-                            if (data && data.length > 0) {
-                                self.qt.invoke('commandExit', data);
-                            }
+                        }, function () {
+                            self.qt.success('已向主席发出退出指挥申请');
+                            self.agreeExitCommand=1;
                         });
                     }
                 }
@@ -2210,10 +2186,10 @@ define([
                 //监听到添加成员，刷新树
                 self.qt.on('commandMemberAdd', function (e) {
                     e = e.params;
-                    var type=e.type;
-                    if(type === 'command'){
+                    var type = e.type;
+                    if (type === 'command') {
                         self.currentGroupChange(self.group.current.id);
-                    }else if(type === 'meeting'){
+                    } else if (type === 'meeting') {
                         self.currentGroupChange(self.meet.current.id);
                     }
                     self.qt.invoke('groupMembers', e);
@@ -2313,6 +2289,7 @@ define([
                 //websocket 停止指挥  成员监听到主席停止指挥，关闭成员播放器
                 self.qt.on('usercommandStop', function (e) {
                     e = e.params;
+                    self.qt.warning(e.businessInfo);
                     for (var i = 0; i < self.group.entered.length; i++) {
                         if (self.group.entered[i].id == e.businessId) {
                             self.group.entered.splice(i, 1);
@@ -2339,6 +2316,7 @@ define([
                         }
                     }
                     self.refreshCommand("meeting");
+                    self.qt.invoke('commandExit', $.toJSON(e.splits));
                 });
 
                 //监听到成员退出
@@ -2406,17 +2384,60 @@ define([
                     self.buttons.isSpeaking = false;
                 });
 
-                //通知申请人被同意
+                //通知申请人发言被同意
                 self.qt.on('speakApplyAgree', function (e) {
                     var e = e.params;
                     self.qt.info(e.businessInfo);
                     self.buttons.isSpeaking = true;
                 });
-                //通知申请人被拒绝
+                //通知申请人发言被拒绝
                 self.qt.on('speakApplyDisagree', function (e) {
                     var e = e.params;
                     self.qt.info(e.businessInfo);
                     self.buttons.isSpeaking = false;
+                });
+
+                //通知申请人退出指挥/会议被同意
+                self.qt.on('applyExitAgree', function (e) {
+                    var e = e.params;
+                    self.qt.info(e.businessInfo);
+                    if (e.splits && e.splits.length > 0) {
+                        self.qt.invoke('commandExit', e.splits);
+                        if(self.agreeExitCommand === 1){
+                            self.group.entered = self.group.entered.filter(function (value) {
+                                return value.id != self.group.current.id;
+                            });
+                            if (self.group.entered.length > 0) {
+                                self.group.currentId = self.group.entered[0].id;
+                                self.group.current = self.group.entered[0];
+                                self.currentGroupChange(self.group.currentId);
+                            } else {
+                                self.group.currentId = '';
+                                self.group.current = '';
+                            }
+                        }else{
+                            for (var i = 0; i < self.meet.entered.length; i++) {
+                                self.meet.entered = self.meet.entered.filter(function (value) {
+                                    return value.id != self.meet.current.id;
+                                });
+                                if (self.meet.entered.length > 0) {
+                                    self.meet.currentId = self.meet.entered[0].id;
+                                    self.meet.current = self.meet.entered[0];
+                                    self.currentGroupChange(self.meet.currentId);
+                                } else {
+                                    self.meet.currentId = '';
+                                    self.meet.current = '';
+                                }
+                            }
+                        }
+                    }
+                });
+
+                //通知申请人退出/会议被拒绝
+                self.qt.on('applyExitDisagree', function (e) {
+                    var e = e.params;
+                    self.qt.info(e.businessInfo);
+                    self.agreeExitCommand=0;
                 });
 
                 //通知 主席 同意/拒绝成员发言申请
@@ -2430,6 +2451,23 @@ define([
                         }, null);
                     }, function () {
                         ajax.post('/command/meeting/speak/apply/agree', {
+                            id: ids[0],
+                            userIds: $.toJSON([ids[1]])
+                        }, null);
+                    });
+                });
+
+                //通知主席  同意/拒绝成员退出申请
+                self.qt.on('agreeExitApply', function (e) {
+                    var e = e.params;
+                    var ids = e.businessId.split('-');
+                    self.qt.confirm('业务提示', e.businessInfo, '拒绝', '同意', function () {
+                        ajax.post('/command/basic/exit/apply/disagree', {
+                            id: ids[0],
+                            userIds: $.toJSON([ids[1]])
+                        }, null);
+                    }, function () {
+                        ajax.post('/command/basic/exit/apply/agree', {
                             id: ids[0],
                             userIds: $.toJSON([ids[1]])
                         }, null);
@@ -2480,10 +2518,9 @@ define([
                     self.qt.success(e.params.businessInfo);
                 });
 
-            //    下载录制文件
-                self.qt.on('downloadFile',function (e) {
-                    console.log(e);
-                    self.qt.invoke('slotDownload',e.param);
+                //下载录制文件
+                self.qt.on('downloadFile', function (e) {
+                    self.qt.invoke('slotDownload', e.param);
                 })
             });
         }

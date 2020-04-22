@@ -27,7 +27,7 @@
                             v-if="group.current.creator!=user.id" style="font-size: 20px">
                     <span class="icon-signin" :style="group.current.status =='start'?'color:#fff;':'color:gray;'" @click="enterCommandBatch"></span>
                 </el-tooltip>
-                <el-tooltip class="item" effect="dark" content="退出" placement="top-start"
+                <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start"
                             v-if="group.current.creator!=user.id" style="font-size: 20px">
                     <span class="icon-signout" @click="exitCommand"></span>
                 </el-tooltip>
@@ -453,7 +453,7 @@
                                 v-if="meet.current.creator!=user.id" style="font-size: 20px">
                         <span class="icon-signin" @click="enterMyCommand()"></span>
                     </el-tooltip>
-                    <el-tooltip class="item" effect="dark" content="退出" placement="top-start"
+                    <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start"
                                 v-if="meet.current.creator!=user.id" style="font-size: 20px">
                         <span class="icon-signout" @click="exitCommand('会议')"></span>
                     </el-tooltip>
@@ -606,17 +606,17 @@
                 <div :class="'option-button '+(buttons.isSpeaking?'':'disable')" title="停止发言" @click="stopSpeak">
                     <img v-if="buttons.isSpeaking" :src="baseUrl+'images/zk-leader/hangUp.png'"/>
                 </div>
+                <!--悬浮按钮-->
+                <div class="option-button" v-if="buttons.speak">
+                    <img :src="baseUrl+'images/zk-leader/speak.png'" title="申请发言" @mousedown="itemMousemove"
+                         @click="applySpeak">
+                </div>
                 <div class="option-button" v-if="meet.current.creator==user.id" title="刷新"
                      @click="currentGroupChange(meet.currentId)">
                     <span style="position: absolute;top: 40px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
                     <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"
                                style="font-size: 36px;color: rgb(255, 255, 255);position: absolute;top: -5px;left: 10px;"></el-button>
                 </div>
-            </div>
-            <!--悬浮按钮-->
-            <div v-if="buttons.speak">
-                <img class="suspend" :src="baseUrl+'images/zk-leader/speak.png'" title="申请发言" @mousedown="itemMousemove"
-                     @click="applySpeak">
             </div>
         </div>
     </div>

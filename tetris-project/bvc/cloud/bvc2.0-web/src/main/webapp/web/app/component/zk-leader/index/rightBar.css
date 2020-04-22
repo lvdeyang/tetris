@@ -500,9 +500,12 @@ div.el-select-dropdown {
 .option-button {
     position: relative;
     float: left;
-    margin: 5px 9px;
-    width: 60px;
-    height: 60px;
+    margin: 5px 3px;
+    width: 55px;
+    height: 55px;
+    /*margin: 5px 9px;*/
+    /*width: 60px;*/
+    /*height: 60px;*/
     background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
     border-radius: 12px;
 }
@@ -574,16 +577,6 @@ div.el-select-dropdown {
     bottom: 50px;
     width: 317px;
     background: #00000030;
-}
-
-/*悬浮发言按钮*/
-.suspend {
-    position: fixed;
-    top: 50%;
-    right: 0;
-    width: 100px;
-    height: 100px;
-    cursor: pointer;
 }
 
 .recordTitle{

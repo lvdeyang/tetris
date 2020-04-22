@@ -100,7 +100,6 @@ define([
             downLoadFile:function (param) {
                 var self=this;
                 ajax.post('/monitor/record/download/url/'+param.id,{url:param.previewUrl},function (data) {
-                    console.log(data)
                     if(data){
                         self.qt.success('开始下载');
                         self.qt.linkedWebview('rightBar',{id:'downloadFile',param:data.downloadUrl});
@@ -115,8 +114,8 @@ define([
                 //播放地址： this.fileSelect.previewUrl
                 ajax.post('/command/vod/record/file/start',{
                     businessType:'vodRecordFile',
-                    businessInfo:'点播'+this.fileSelect. fileName+'文件',
-                    url:this.fileSelect.previewUrl
+                    businessInfo:'点播'+self.fileSelect.fileName+'文件',
+                    url:self.fileSelect.previewUrl
                 },function (data) {
                     self.qt.linkedWebview('hidden',{id:'playRecordFile', params:$.toJSON([data])});
                     self.close();

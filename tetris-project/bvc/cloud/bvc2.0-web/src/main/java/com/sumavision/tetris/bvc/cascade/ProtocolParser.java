@@ -264,7 +264,7 @@ public class ProtocolParser {
 			}
 		}
 		
-		commandBasicServiceImpl.save(creator.getId(), chairman.getId(), creator.getNickname(), bizname, subject, GroupType.BASIC, OriginType.OUTER, userIds);
+		commandBasicServiceImpl.save(creator.getId(), chairman.getId(), creator.getNickname(), bizname, subject, GroupType.BASIC, OriginType.OUTER, userIds, gid);
 	}
 	
 	/**
@@ -414,7 +414,7 @@ public class ProtocolParser {
 		Long groupId = commandGroupDao.findIdByUuid(gid);
 		String mid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".mid").toString());
 		UserVO user = userQuery.findByUserno(mid);
-		commandBasicServiceImpl.removeMembers(groupId, new ArrayListWrapper<Long>().add(user.getId()).getList(), 1);
+		commandBasicServiceImpl.removeMembers2(groupId, new ArrayListWrapper<Long>().add(user.getId()).getList(), 2);
 	}
 	
 	/**
@@ -576,7 +576,7 @@ public class ProtocolParser {
 			}
 		}
 		
-		commandBasicServiceImpl.save(creator.getId(), chairman.getId(), creator.getNickname(), bizname, subject, GroupType.MEETING, OriginType.OUTER, userIds);
+		commandBasicServiceImpl.save(creator.getId(), chairman.getId(), creator.getNickname(), bizname, subject, GroupType.MEETING, OriginType.OUTER, userIds, gid);
 	}
 	
 	/**

@@ -52,6 +52,7 @@
     overflow: hidden;
 }
 .el-dialog{
+    width: 70%;
     background-color: #869daf;
 }
 
