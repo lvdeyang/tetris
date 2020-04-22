@@ -482,8 +482,8 @@ public class CommandUserServiceImpl {
 			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			calledUserPlayer = new CommandGroupUserPlayerPO();
 			calledEncoderBundleEntity = new BundlePO();
-			callEncoderBundleEntity.setBundleId(UUID.randomUUID().toString().replace("-", ""));
-			callEncoderBundleEntity.setAccessNodeUid(localLayerId);
+			calledEncoderBundleEntity.setBundleId(UUID.randomUUID().toString().replace("-", ""));
+			calledEncoderBundleEntity.setAccessNodeUid(localLayerId);
 			calledEncoderVideoChannel = new ChannelSchemeDTO().setChannelId(ChannelType.VIDEOENCODE1.getChannelId());
 			calledEncoderAudioChannel = new ChannelSchemeDTO().setChannelId(ChannelType.AUDIOENCODE1.getChannelId());
 		}
@@ -539,7 +539,7 @@ public class CommandUserServiceImpl {
 			
 			//参数模板
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-
+			
 			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
 								 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
@@ -785,6 +785,7 @@ public class CommandUserServiceImpl {
 			call = userLiveCallDao.findOne(businessId);
 		}else{
 			call = userLiveCallDao.findByUuid(uuid);
+			businessId = call.getId();
 		}
 		
 		if(call == null){
@@ -812,8 +813,12 @@ public class CommandUserServiceImpl {
 		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
 		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 		
-		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
-		CommandGroupUserPlayerPO player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, businessId.toString());
+		CallType callType = call.getCallType();
+		CommandGroupUserPlayerPO player = null;
+		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.OUTER_LOCAL)){
+			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
+			player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, businessId.toString());
+		}
 		
 		call.setStatus(CallStatus.ONGOING);
 		userLiveCallDao.save(call);
@@ -1027,6 +1032,7 @@ public class CommandUserServiceImpl {
 			call = userLiveCallDao.findOne(businessId);
 		}else{
 			call = userLiveCallDao.findByUuid(uuid);
+			businessId = call.getId();
 		}
 		
 		if(call == null){
@@ -1070,6 +1076,9 @@ public class CommandUserServiceImpl {
 			calledPlayer.setBusinessId(null);
 			calledPlayer.setBusinessName(null);
 			commandGroupUserPlayerDao.save(calledPlayer);
+			
+			//如果用户是被呼叫方，返回callPlayer
+			returnPlayer = calledPlayer;
 			
 			//如果用户是呼叫方
 			if(user.getId().equals(call.getCallUserId())){
@@ -1334,24 +1343,26 @@ public class CommandUserServiceImpl {
 	/** 获取呼叫任务中的2个播放器（主叫和被叫的） */
 	private List<CommandGroupUserPlayerPO> getPlayers(UserLiveCallPO call) throws Exception{
 		
+		CallType callType = call.getCallType();
 		List<CommandGroupUserPlayerPO> players = new ArrayList<CommandGroupUserPlayerPO>();
 		
 		//找呼叫方的player
-		try{
+		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.LOCAL_OUTER)){
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
 			CommandGroupUserPlayerPO callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
 			players.add(callPlayer);
-		}catch(Exception e){}
+		}
 		
 		//找被呼叫方的player
-		try{
+		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.OUTER_LOCAL)){
 			CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
 			CommandGroupUserPlayerPO calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_CALL, call.getId().toString());
 			players.add(calledPlayer);
-		}catch(Exception e){}
+		}
 		
 		return players;		
 	}
+
 	
 	/**
 	 * 用户通话协议处理 -- 业务数据库可以控制音视频<br/>
