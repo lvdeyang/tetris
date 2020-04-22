@@ -486,6 +486,34 @@ public class RouterController {
 	}
 	
 	/**
+	 * 字幕管理<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月22日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/subtitle/manage")
+	public ModelAndView zkLeaderSubtitle(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/subtitleManage/subtitle");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 字幕发布<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月22日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/subtitle/layer")
+	public ModelAndView zkLeaderSubtitleLayer(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/subtitle-layer/subtitleLayer");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 选择成员创建会议对话框<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
