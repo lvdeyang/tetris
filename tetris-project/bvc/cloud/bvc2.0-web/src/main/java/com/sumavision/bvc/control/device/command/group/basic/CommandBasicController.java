@@ -188,7 +188,7 @@ public class CommandBasicController {
 		for(CommandGroupMemberPO member : members){
 			if(member.isAdministrator()) continue;
 			UserBO userBO = queryUtil.queryUserById(userBOs, member.getUserId());
-			FolderPO folder = queryUtil.queryFolderPOById(totalFolders, chairmanMember.getFolderId());
+			FolderPO folder = queryUtil.queryFolderPOById(totalFolders, member.getFolderId());
 			TreeNodeVO commandTree = new TreeNodeVO().setWithInfo(member, userBO, folder);
 			commandRoot.getChildren().add(commandTree);
 		}
@@ -528,7 +528,7 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
-		Object splits = commandBasicServiceImpl.addMembers(Long.parseLong(id), userIdArray);
+		Object splits = commandBasicServiceImpl.addOrEnterMembers(Long.parseLong(id), userIdArray);
 		return splits;
 	}
 		

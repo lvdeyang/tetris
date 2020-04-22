@@ -108,16 +108,21 @@ public class ConferenceCascadeService {
 		//查询本联网layerid
 		String localLayerId = resourceRemoteService.queryLocalLayerId();
 		
-		JSONObject passbyContent = new JSONObject();
-		passbyContent.put("cmd", "send_node_message");
-		passbyContent.put("src_user", group.getOp());
-		passbyContent.put("type", type);
-		passbyContent.put("dst_no", dstnos);
-		passbyContent.put("content", protocol);
+		List<PassByBO> passbyBOs = new ArrayList<PassByBO>();
+		for(String dstno : dstnos){
+			JSONObject passbyContent = new JSONObject();
+			passbyContent.put("cmd", "send_node_message");
+			passbyContent.put("src_user", group.getOp());
+			passbyContent.put("type", type);
+			passbyContent.put("dst_no", dstno);
+			passbyContent.put("content", protocol);
+			
+			PassByBO passBy = new PassByBO().setLayer_id(localLayerId)
+											.setPass_by_content(passbyContent);
+			passbyBOs.add(passBy);
+		}
 		
-		PassByBO passBy = new PassByBO().setLayer_id(localLayerId)
-										.setPass_by_content(passbyContent);
-		tetrisDispatchService.passby(new ArrayListWrapper<PassByBO>().add(passBy).getList());
+		tetrisDispatchService.passby(passbyBOs);
 	}
 	
 	/**

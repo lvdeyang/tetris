@@ -95,7 +95,7 @@ public class CommandCascadeUtil {
 		
 		return groupBO;
 	}
-	
+	/** maddinc 指挥进行中的时候加人或进入 */
 	public GroupBO joinCommand(CommandGroupPO group, List<CommandGroupMemberPO> acceptMembers){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
@@ -359,7 +359,7 @@ public class CommandCascadeUtil {
 		
 		return groupBO;
 	}
-	
+	/** maddinc 会议进行中的时候加人或进入 */
 	public GroupBO joinMeeting(CommandGroupPO group, List<CommandGroupMemberPO> acceptMembers){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
