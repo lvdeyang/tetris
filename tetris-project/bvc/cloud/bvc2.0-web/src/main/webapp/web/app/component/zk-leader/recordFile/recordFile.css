@@ -1,7 +1,7 @@
 .recordFile{
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, #204a6b, #216873, #1c7ab1, #204a6b);
+    background-color: #0F1537;
 }
 .left,.right{
     float: left;

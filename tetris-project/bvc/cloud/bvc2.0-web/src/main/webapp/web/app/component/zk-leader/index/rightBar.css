@@ -115,7 +115,6 @@ li.focusLight {
     left: 50px;
     width: 318px;
     padding: 5px 0;
-    background-color: #1e52778c;
     z-index: 9;
 }
 
@@ -143,7 +142,7 @@ li.focusLight {
 
 .commandTable{
     position:absolute;
-    left: -9px;
+    left: 0;
     top: 75px;
     width:310px;
     bottom:215px;
@@ -155,7 +154,7 @@ li.focusLight {
     position: absolute;
     top: 0;
     left: 50px;
-    bottom: 50px;
+    bottom: 140px;
     width: 100%;
     background: #52cffb21;
     border-radius: 0 0 12px 12px;
@@ -224,7 +223,7 @@ img {
     display: inline-block;
     color: #cfdae6;
     font-size: 18px;
-    width: 235px;
+    width: 220px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
@@ -309,7 +308,7 @@ img {
     left:0;
     top:0;
     width:310px;
-    bottom:215px;
+    bottom:0;
     overflow: hidden;
 }
 /* 控制点击后的图标和内容的显示 end */
@@ -321,7 +320,6 @@ img {
     bottom: 0;
     width: 320px;
     z-index: 4;
-    min-height: 80px;
     background-color: #173d5c;
     border-radius: 0 0 12px 12px;
 }
@@ -329,13 +327,19 @@ img {
 .customIcon {
     position: relative;
     float: left;
-    margin: 10px;
+    margin: 5px 10px;
     width: 60px;
     height: 60px;
     line-height: 72px;
     text-align: center;
     border-radius: 12px;
     background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
+}
+
+.el-button--text {
+    position: absolute;
+    top: -3px;
+    left: 10px;
 }
 
 /*禁用的按钮都不显示*/
@@ -401,7 +405,6 @@ img {
     bottom: 50px;
     right: 0;
     width: 370px;
-    background-color: #52cffb21;
     border-radius: 0 0 12px 12px;
 }
 
@@ -503,9 +506,6 @@ div.el-select-dropdown {
     margin: 5px 3px;
     width: 55px;
     height: 55px;
-    /*margin: 5px 9px;*/
-    /*width: 60px;*/
-    /*height: 60px;*/
     background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
     border-radius: 12px;
 }
@@ -533,7 +533,11 @@ div.el-select-dropdown {
 }
 
 .el-dialog {
-    background: -webkit-linear-gradient(left top, #2a697a, #0D4C6B, #113E65);
+    background: linear-gradient(to right, #193d65,#1d4979,#1b395a);
+}
+.el-dialog__title {
+    color: #a0a0a0;
+    font-weight: 600;
 }
 
 /*第三部分菜单*/
@@ -543,7 +547,6 @@ div.el-select-dropdown {
     bottom: 50px;
     left: 50px;
     width: 318px;
-    background-color: #1e52778c;
 }
 
 .meetList {

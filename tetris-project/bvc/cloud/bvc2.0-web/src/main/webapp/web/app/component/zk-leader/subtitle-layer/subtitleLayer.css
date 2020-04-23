@@ -1,8 +1,8 @@
 .layer{
     width: 100%;
     height: 100%;
-    background-color: #206ec366;
     overflow: hidden;
+    background-color: #0F1537;
 }
 
 .left,.right{
@@ -19,7 +19,7 @@
 /* 更改table表格的样式 */
 .el-table,
 .el-table__expanded-cell {
-    background-color: #234c4a87;
+    background-color: transparent;
     color: #c2f9ff;
 }
 
@@ -54,15 +54,15 @@
 
 /*更改对话框样式*/
 .el-dialog{
-    background: linear-gradient(to right,#4ca6af,#0F9EBE,#1986B1,#155592);
+    background: linear-gradient(to right, #1B2751,#3a489a,#1D2A56);
 }
 .el-form-item__label {
     font-size: 16px;
-    color: #2b3c5f;
+    color: #c2c2c3;
 }
 
 .el-dialog__title {
-    color: #384256;
+    color: #9c9c9c;
     font-weight: 600;
 }
 .el-textarea__inner,.el-input-number__decrease, .el-input-number__increase{

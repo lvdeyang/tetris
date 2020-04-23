@@ -17,8 +17,10 @@
                         label="操作"
                         width="150">
                     <template slot-scope="scope">
-                        <el-button type="warning" size="mini" icon="el-icon-edit" @click="editRow(scope.row)"></el-button>
-                        <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteRow(scope.row.id)"></el-button>
+                        <el-button type="warning" size="mini" icon="el-icon-edit"
+                                   @click="editRow(scope.row)"></el-button>
+                        <el-button type="danger" size="mini" icon="el-icon-delete"
+                                   @click="deleteRow(scope.row.id)"></el-button>
                         </el-button>
                     </template>
                 </el-table-column>
@@ -31,7 +33,7 @@
     </div>
 
     <div class="right" v-show="rightShow">
-        <el-button type="primary" @click="dialogFormVisible=true">添加图层</el-button>
+        <el-button type="primary" @click="dialogFormVisible=true;rightBtnShow=false;">添加图层</el-button>
         <!--内容-->
         <div style="position:absolute; top:40px; left:30%; bottom:50px; right:0;overflow: hidden">
             <el-table
@@ -63,10 +65,15 @@
                         label="操作"
                         width="250">
                     <template slot-scope="scope">
-                        <el-button type="warning" size="mini" icon="el-icon-edit" @click="editRow(scope.row)"></el-button>
-                        <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteRow(scope.row.id)"></el-button>
-                        <el-button type="primary" size="mini" icon="el-icon-sort-up"></el-button>
-                        <el-button type="primary" size="mini" icon="el-icon-sort-down"></el-button>
+                        <el-button type="warning" size="mini" icon="el-icon-edit"
+                                   :disabled="scope.row.type !== 'SUBTITLE'"
+                                   @click="editRightRow(scope.row)"></el-button>
+                        <el-button type="danger" size="mini" icon="el-icon-delete"
+                                   @click="deleteRightRow(scope.row.id)"></el-button>
+                        <el-button type="primary" size="mini" icon="el-icon-sort-up"
+                                   :disabled="scope.row.layerIndex <= 0" @click="sortRow(scope.row,'up')"></el-button>
+                        <el-button type="primary" size="mini" icon="el-icon-sort-down"
+                                   :disabled="scope.row.layerIndex == rightData.length-1" @click="sortRow(scope.row,'down')"></el-button>
                     </template>
                 </el-table-column>
             </el-table>
@@ -99,14 +106,15 @@
     <!--右侧按钮对应的对话框-->
     <el-dialog title="添加图层" :visible.sync="dialogFormVisible">
         <el-form :model="form">
-            <el-form-item label="图层类型" :label-width="formLabelWidth">
+            <el-form-item v-if="!rightBtnShow" label="图层类型" :label-width="formLabelWidth">
                 <el-select v-model="form.layerType" placeholder="请选择">
                     <el-option v-for="(item,index) in layerType" :label="item" :value="item" :key="index"></el-option>
                 </el-select>
             </el-form-item>
             <el-form-item label="选择字幕" :label-width="formLabelWidth">
                 <el-input v-if="form.layerType!=='字幕'" v-model="form.subtitleName" disabled></el-input>
-                <el-input v-else v-model="form.subtitleName" readonly placeholder="点击我！" @click.native="handleAddLayerSelectSubtitle"></el-input>
+                <el-input v-else v-model="form.subtitleName" readonly placeholder="点击我！"
+                          @click.native="handleAddLayerSelectSubtitle"></el-input>
             </el-form-item>
             <el-form-item label="横坐标百分比" :label-width="formLabelWidth">
                 <el-input-number size="medium" :min="0" :max="100" v-model="form.x"></el-input-number>
@@ -117,14 +125,14 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
-            <el-button type="primary" @click="rightAddConfirm">确 定</el-button>
-            <el-button type="primary" @click="rightEditConfirm">修 改</el-button>
+            <el-button v-if="!rightBtnShow" type="primary" @click="rightAddConfirm">确 定</el-button>
+            <el-button v-if="rightBtnShow" type="primary" @click="rightEditConfirm">修 改</el-button>
         </div>
     </el-dialog>
 
-
+    <!--选择字幕弹框-->
     <el-dialog title="选择字幕" :visible.sync="dialogTableVisible">
-        <el-table :data="gridData"  highlight-current-row @row-click="chooseRow">
+        <el-table :data="gridData" highlight-current-row @row-click="chooseRow">
             <el-table-column property="name" label="名称" width="150"></el-table-column>
             <el-table-column property="username" label="创建人" width="200"></el-table-column>
             <el-table-column property="content" label="内容"></el-table-column>
@@ -138,4 +146,18 @@
             <el-button type="primary" @click="chooseConfirm">确 定</el-button>
         </div>
     </el-dialog>
+
+    <!--删除出现的弹框-->
+    <el-dialog
+            title="危险操作"
+            :visible.sync="deleteVisible"
+            width="30%">
+        <el-button type="warning" icon="el-icon-warning" circle></el-button>
+        <span>此操作将永久删除图层，且不可恢复，是否继续?</span>
+        <span slot="footer" class="dialog-footer">
+    <el-button @click="deleteVisible = false">取 消</el-button>
+    <el-button type="primary" @click="confirmDel">确 定</el-button>
+  </span>
+    </el-dialog>
+
 </div>
