@@ -159,6 +159,25 @@ public class ConferenceCascadeService {
 	}
 	
 	/**
+	 * 更新会议<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 上午11:06:30
+	 * @param String gid 组id
+	 * @param String subject 会议主题
+	 * @param String bizname 会议名称
+	 * @param String creatorid 创建者号码
+	 * @param String topid 指挥：最上级id，会议：主席id
+	 * @param List<MinfoBO> mAddList 指挥成员列表
+	 * @param List<MinfoBO> mlist 需要级联的成员信息（想发谁就传谁吧）
+	 */
+	public void update(GroupBO group) throws Exception{
+		String fullName = generateFullName("updateCnf.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
+	
+	/**
 	 * 删除会议<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -169,6 +188,30 @@ public class ConferenceCascadeService {
 	 */
 	public void delete(GroupBO group) throws Exception{
 		String fullName = generateFullName("deleteCnf.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
+	
+	/**
+	 * 全量信息同步<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 上午10:47:14
+	 * @param String gid 组id
+	 * @param String op 操作用户号码
+	 * @param String subject 主题
+	 * @param String stime 开始时间
+	 * @param String bizname 指挥名称
+	 * @param String creatorid 创建用户号码
+	 * @param String topid 最高级用户号码
+	 * @param List<MinfoBO> mAddList 指挥成员列表
+	 * @param String mode 会议模式，0表示主席模式、1表示讨论模式
+	 * @param String status 会议状态，0表示正常业务、1表示暂停
+	 * @param String spkid 发言者用户号码
+	 * @param List<MinfoBO> mlist 需要级联的成员信息（想发谁就传谁吧）
+	 */
+	public void info(GroupBO group) throws Exception{
+		String fullName = generateFullName("cnfInfo.xml");
 		Template template = templateLoader.load(fullName);
 		sendPassBy(group, NO_TYPE_APP, template);
 	}
@@ -268,6 +311,39 @@ public class ConferenceCascadeService {
 	}
 	
 	/**
+	 * 成员退出请求<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 上午9:54:58
+	 * @param String gid 组id
+	 * @param String op 操作用户号码
+	 * @param String mid 可处理当前请求用户的号码
+	 * @param List<MinfoBO> mlist 需要级联的成员信息（可处理当前请求的用户）
+	 */
+	public void exitRequest(GroupBO group) throws Exception{
+		String fullName = generateFullName("memberExitCmdRequest.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
+	
+	/**
+	 * 成员退出请求响应<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 上午9:58:21
+	 * @param String gid 组id
+	 * @param String op 操作用户号码
+	 * @param String mid 退出成员用户号码
+	 * @param String code 响应，0表示不同意、1表示同意
+	 * @param List<MinfoBO> mlist 需要级联的成员信息（退出的成员）
+	 */
+	public void exitResponse(GroupBO group) throws Exception{
+		String fullName = generateFullName("memberExitCmdResponse.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
+	
+	/**
 	 * 踢出成员<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -334,6 +410,21 @@ public class ConferenceCascadeService {
 	}
 	
 	/**
+	 * 成员主动发言通知<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 下午12:01:07
+	 * @param String gid 组id
+	 * @param String op 操作用户号码
+	 * @param String mid 发言人号码
+	 */
+	public void speakerSetProactiveNotice(GroupBO group) throws Exception{
+		String fullName = generateFullName("speakerSetProactiveNotice.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
+	
+	/**
 	 * 取消发言<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -378,6 +469,36 @@ public class ConferenceCascadeService {
 	 */
 	public void speakerSetResponse(GroupBO group) throws Exception{
 		String fullName = generateFullName("speakerSetResponse.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
+	
+	/**
+	 * 开启讨论模式<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 上午11:41:08
+	 * @param String gid 组id
+	 * @param String op 操作用户号码
+	 * @param List<MinfoBO> mlist 需要级联的成员信息（全员）
+	 */
+	public void discussStart(GroupBO group) throws Exception{
+		String fullName = generateFullName("discussStart.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
+	
+	/**
+	 * 停止讨论模式<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 上午11:41:08
+	 * @param String gid 组id
+	 * @param String op 操作用户号码
+	 * @param List<MinfoBO> mlist 需要级联的成员信息（全员）
+	 */
+	public void discussStop(GroupBO group) throws Exception{
+		String fullName = generateFullName("discussStop.xml");
 		Template template = templateLoader.load(fullName);
 		sendPassBy(group, NO_TYPE_APP, template);
 	}

@@ -72,6 +72,7 @@ public class XMLReader {
 				}
 			}
 		}
+		if(currentNode == null) return null;
 		if(keys.length > 1){
 			for(int i=1; i<keys.length; i++){
 				String scopeKey = keys[i];
