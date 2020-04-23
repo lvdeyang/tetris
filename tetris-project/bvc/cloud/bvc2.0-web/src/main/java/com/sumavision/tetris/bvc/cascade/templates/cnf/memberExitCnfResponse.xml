@@ -1,14 +1,10 @@
-<!-- 退出会议请求响应 -->
 <response>
 	<commandname>bizcnf</commandname>
 	<operation>mquitres</operation>
-	<seq>3fa306388e4d11e8b445060400ef5315</seq>
-	<ts>1533630770000</ts>
-	<gid>123</gid>
-	<!-- 处理成员退出请求处理的成员ID -->
-	<op>00000000001</op>
-	<!--  退出成员ID -->
-	<mid>00000000002</mid>
-	<!-- 响应，0表示不同意、1表示同意-->
-	<code>1</code>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<mid>${mid}</mid>
+	<code>${code}</code>
 </response>

@@ -2,9 +2,9 @@
 	<commandname>bizcnf</commandname>
 	<operation>spkset</operation>
 	<spktype>r</spktype>
-	<seq>3fa306388e4d11e8b445060400ef5315</seq>
-	<ts>1533630770000</ts>
-	<gid>123</gid>
-	<op>00000000001</op>
-	<mid>00000000002</mid>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<mid>${mid}</mid>
 </notify>

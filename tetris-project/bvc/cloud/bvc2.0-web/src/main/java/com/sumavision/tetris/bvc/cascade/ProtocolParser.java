@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -136,7 +134,7 @@ public class ProtocolParser {
 		if("syncinfo".equals(commandname) || "syncroutelink".equals(commandname) || "authnotify".equals(commandname)){
 			resourceRemoteService.notifyXml(commandname, xml);
 		}else{
-			String operation = reader.readString(new StringBufferWrapper().append(rootNodeName).append("operation").toString());
+			String operation = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".operation").toString());
 			if("group".equals(commandname) && "create".equals(operation)){
 				String biztype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.biztype").toString());
 				if("cmd".equals(biztype)){
@@ -378,9 +376,7 @@ public class ProtocolParser {
 		for(UserVO user:users){
 			userIds.add(user.getId());
 		}
-		for(Long userId:userIds){
-			commandBasicServiceImpl.enter(userId, new ArrayListWrapper<Long>().add(groupId).getList());
-		}
+		commandBasicServiceImpl.addOrEnterMembers(groupId, userIds);
 	}
 	
 	/**
@@ -397,7 +393,7 @@ public class ProtocolParser {
 		Long groupId = commandGroupDao.findIdByUuid(gid);
 		String mid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".mid").toString());
 		UserVO user = userQuery.findByUserno(mid);
-		commandBasicServiceImpl.removeMembers(groupId, new ArrayListWrapper<Long>().add(user.getId()).getList(), 0);
+		commandBasicServiceImpl.removeMembers2(groupId, new ArrayListWrapper<Long>().add(user.getId()).getList(), 0);
 	}
 	
 	/**
@@ -738,7 +734,13 @@ public class ProtocolParser {
 	 * @param String srcNo 操作用户号码
 	 */
 	public void speakerSetByMember(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
-		speakerSetByChairman(reader, rootNodeName, srcNo);
+		String gid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString());
+		Long groupId = commandGroupDao.findIdByUuid(gid);
+		String op = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString());
+		UserVO operator = userQuery.findByUserno(op);
+		String mid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".mid").toString());
+		UserVO speaker = userQuery.findByUserno(mid);
+		commandMeetingSpeakServiceImpl.speakApplyAgree(operator.getId(), groupId, new ArrayListWrapper<Long>().add(speaker.getId()).getList());
 	}
 	
 	/**
@@ -795,7 +797,7 @@ public class ProtocolParser {
 		if("0".equals(code)){
 			commandMeetingSpeakServiceImpl.speakApplyDisagree(operator.getId(), groupId, new ArrayListWrapper<Long>().add(speaker.getId()).getList());
 		}else if("1".equals(code)){
-			commandMeetingSpeakServiceImpl.speakApplyAgree(operator.getId(), groupId, new ArrayListWrapper<Long>().add(speaker.getId()).getList());
+			//commandMeetingSpeakServiceImpl.speakApplyAgree(operator.getId(), groupId, new ArrayListWrapper<Long>().add(speaker.getId()).getList());
 		}
 	}
 	
