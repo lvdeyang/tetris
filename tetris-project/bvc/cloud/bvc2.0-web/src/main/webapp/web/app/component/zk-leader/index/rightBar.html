@@ -207,7 +207,7 @@
                     <div class="scrollTab" v-if="switchStatus2">
                         <el-input placeholder="输入关键字进行过滤" v-model="filterText" style="left: 3px;width: 300px">
                         </el-input>
-                        <el-scrollbar style="height:100%">
+                        <el-scrollbar style="height:90%">
                             <el-tree :data="institution.data"  ref="tree" node-key="id" :props="props"  :filter-node-method="filterNode">
                                 <span class="headline" slot-scope="{node,data}">
                                     <span :class="data.type==='USER'?'handDown el-icon-tickets':''"
@@ -243,7 +243,7 @@
                 <img class="fontPic" src="../../../../../images/zk-leader/equipment.png" draggable="false">
                 </span>
                     <div class="scrollTab" v-if="switchStatus2">
-                        <el-scrollbar style="height:100%">
+                        <el-scrollbar style="height:90%">
                             <el-tree :data="device.data" node-key="id" :props="props">
                 <span class="headline" slot-scope="{node,data}">
                 <span :class="data.type==='BUNDLE'?'handDown el-icon-tickets':''"
@@ -276,7 +276,7 @@
                       <img class="fontPic" src="../../../../../images/zk-leader/fileResource.png" draggable="false">
                     </span>
                     <div class="scrollTab" v-if="switchStatus2">
-                        <el-scrollbar style="height:100%">
+                        <el-scrollbar style="height:90%">
                             <el-tree :data="file.data" node-key="id" :props="props">
                                 <span class="headline" slot-scope="{node,data}">
                                     <span :class="data.type==='VOD_RESOURCE'?'handDown el-icon-tickets':''"
@@ -311,7 +311,7 @@
                 <img class="fontPic" src="../../../../../images/zk-leader/record.png" draggable="false">
                 </span>
                     <div class="scrollTab" v-if="switchStatus2">
-                        <el-scrollbar style="height:100%">
+                        <el-scrollbar style="height:90%">
                             <el-tree :data="record.data" node-key="id"
                                      :check-strictly=true
                                      :props="props"
@@ -398,8 +398,8 @@
                 </div>
 
                 <div class="customIcon" v-if="currentTab==3" @click="playRecordFile">
-                    <span style="position: absolute;top: 15px;font-size: 9px;color: #fff;left: 3px;">查看录制文件</span>
-                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-printer"></el-button>
+                    <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 10px;">录制文件</span>
+                    <el-button type="text" class="button-refresh" size="small" icon="icon-camera"></el-button>
                 </div>
 
                 <div class="customIcon" v-else-if="currentTab==0" @click="refreshInstitution">
@@ -409,12 +409,12 @@
 
                 <div v-else-if="currentTab==2">
                     <div class="customIcon" @click="openOutFile">
-                        <span style="position: absolute;top: 15px;font-size: 9px;color: #fff;left: 3px;">外部文件管理</span>
+                        <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 10px;">外部文件</span>
                         <el-button type="text" size="small" icon="el-icon-printer"></el-button>
                     </div>
 
                     <div class="customIcon" @click="fileImport">
-                        <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 9px;">文件导入</span>
+                        <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 10px;">文件导入</span>
                         <el-button type="text" size="small" icon="el-icon-upload"></el-button>
                     </div>
 

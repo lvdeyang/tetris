@@ -1,7 +1,7 @@
 .outFile {
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, #204a6b, #327ab1, #1c6fb1, #204a6b);
+    background-color: #182050;
     overflow: hidden;
 }
 
@@ -13,7 +13,7 @@
     background-color: #0a0a0a38;
 }
 .el-table th, .el-table tr {
-    background-color: #0000004d;
+    background-color: transparent;
 }
 .el-table--enable-row-hover .el-table__body tr:hover>td {
     background-color: #34675d;
@@ -31,5 +31,19 @@
     overflow: hidden;
 }
 .el-dialog{
-    background-color: #869daf;
+    width: 75%;
+    background: linear-gradient(to right, #242d63,#182050,#182050);
+}
+
+.el-dialog__title {
+    color: #9c9c9c;
+    font-weight: 600;
+}
+.el-form-item__label {
+    font-size: 16px;
+    color: #c2c2c3;
+}
+
+.el-input__inner{
+    background-color: #1d191914;
 }

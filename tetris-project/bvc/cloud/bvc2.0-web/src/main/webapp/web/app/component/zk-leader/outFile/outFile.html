@@ -97,9 +97,9 @@
             </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
-            <el-button @click="closeDialog">关 闭</el-button>
-            <el-button v-if="!editButton" type="primary" @click="addSubmit">确 定</el-button>
-            <el-button v-if="editButton" type="primary" @click="editSubmit">修 改</el-button>
+            <el-button @click="closeDialog" size="small">关 闭</el-button>
+            <el-button v-if="!editButton" size="small" type="primary" @click="addSubmit">确 定</el-button>
+            <el-button v-if="editButton" size="small" type="primary" @click="editSubmit">修 改</el-button>
         </div>
     </el-dialog>
 

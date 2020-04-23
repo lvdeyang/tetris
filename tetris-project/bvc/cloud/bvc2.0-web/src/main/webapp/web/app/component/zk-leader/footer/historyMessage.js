@@ -88,14 +88,15 @@ define([
             //历史消息弹框
             showMessagePanel: function () {
                 var self = this;
-                self.qt.get(['currentGroupId'], function (variables) {
-                    var currentGroupId = variables.currentGroupId;
-                    if(!currentGroupId){
-                        self.qt.error('未获取到当前会议id!');
-                    }else {
-                        self.qt.window('/router/zk/leader/footer/pop', {currentGroupId: currentGroupId}, {width:'100%', height:'100%'});
-                    }
-                });
+                // self.qt.get(['currentGroupId'], function (variables) {
+                //     var currentGroupId = variables.currentGroupId;
+                //     if(!currentGroupId){
+                //         self.qt.error('未获取到当前会议id!');
+                //     }else {
+                        self.qt.window('/router/zk/leader/footer/pop', null, {width:'100%', height:'100%'});
+                        // self.qt.window('/router/zk/leader/footer/pop', {currentGroupId: currentGroupId}, {width:'100%', height:'100%'});
+                //     }
+                // });
             },
             //录制任务管理
             recManage:function () {

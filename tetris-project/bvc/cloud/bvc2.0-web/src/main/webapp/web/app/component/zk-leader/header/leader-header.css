@@ -36,13 +36,9 @@ html, body {
     text-align: center;
 }
 
-.date {
+.date,.time {
     color: #e9eaec;
     font-size: 16px;
-}
-
-.time {
-    font-size: 18px;
     font-weight: bold;
 }
 
