@@ -578,18 +578,16 @@ define([
                 } else if (self.contextMenu.currentNode.type === 'VOD_RESOURCE') {
                     var resourceFileId = self.contextMenu.currentNode.id;
                     ajax.post('/command/vod/resource/file/start', {resourceFileId: resourceFileId}, function (data) {
-                        console.log(data)
                         self.qt.invoke('vodResourceFiles', $.toJSON([data]));
                     });
                 } else if (self.contextMenu.currentNode.type === 'RECORD_PLAYBACK') {
                     var recordId = self.contextMenu.currentNode.id;
-                    return false;
                     if (self.contextMenu.currentNode.level == 2) {
                         ajax.post('/command/record/start/playback', {recordId: recordId}, function (data) {
                             self.qt.invoke('vodRecordFileStart', $.toJSON(data));
                         });
                     } else if (self.contextMenu.currentNode.level == 3) { //播放片段
-                        ajax.post('/command/record/start/playback/fragments', {fragmentIds: [recordId]}, function (data) {
+                        ajax.post('/command/record/start/playback/fragments', {fragmentIds: $.toJSON([recordId])}, function (data) {
                             self.qt.invoke('vodRecordFileStart', $.toJSON(data));
                         });
                     }
@@ -609,10 +607,7 @@ define([
                         userId: self.dialog.resetName.commandId
                     }, function (data) {
                         self.group.current.status = 'start';
-                        var splits = data.splits;
-                        if (splits && splits.length > 0) {
-                            self.qt.invoke('groupMembers', $.toJSON(splits));
-                        }
+                        self.qt.invoke('groupMembers', $.toJSON([data]));
                         self.handleContextMenuClose();
                     });
                 } else {
@@ -621,10 +616,7 @@ define([
                         userId: self.dialog.resetName.commandId
                     }, function (data) {
                         self.meet.current.status = 'start';
-                        var splits = data.splits;
-                        if (splits && splits.length > 0) {
-                            self.qt.invoke('groupMembers', $.toJSON(splits));
-                        }
+                        self.qt.invoke('groupMembers', $.toJSON([data]));
                         self.handleContextMenuClose();
                     });
                 }
@@ -1054,8 +1046,8 @@ define([
                         for (var i = 0; i < self.record.select.length; i++) {
                             recordIds.push(self.record.select[i].id);
                         }
-                        ajax.post('/command/record/start/playback/fragments', {fragmentIds: recordIds}, function (data) {
-                            self.qt.invoke('vodResourceFiles', $.toJSON([data]));
+                        ajax.post('/command/record/start/playback/fragments', {fragmentIds: $.toJSON(recordIds)}, function (data) {
+                            self.qt.invoke('vodResourceFiles', $.toJSON(data));
                         });
                     }
                 });
@@ -1878,6 +1870,10 @@ define([
                     value.checked = false;
                 });
                 self.institution.select = [];
+            },
+            //发布字幕
+            publish:function () {
+                this.qt.window('/router//zk/leader/subtitle/layer',null,{width:'100%',height:'90%'});
             },
 
             //   ----------第三个tab相关的-----------------

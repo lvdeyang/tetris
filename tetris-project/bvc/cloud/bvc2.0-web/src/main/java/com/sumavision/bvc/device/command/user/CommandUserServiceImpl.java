@@ -1047,10 +1047,7 @@ public class CommandUserServiceImpl {
 		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		//参数模板
-		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();
-		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		
 		LogicBO logic = closeBundle(call, codec, admin.getId());
 		if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
@@ -1268,22 +1265,6 @@ public class CommandUserServiceImpl {
 			throw new UserNotMatchBusinessException(user.getName(), businessId, PlayerBusinessType.USER_VOICE.getName());
 		}
 		
-		//参数模板
-		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();
-		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
-		
-		if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
-			LogicBO logic = closeBundle(call, codec, admin.getId());
-			List<CommandGroupUserPlayerPO> players = getPlayers(call);
-			LogicBO logicCast = commandCastServiceImpl.closeBundleCastDevice(
-					null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), 
-					players, null, user.getId());
-			logic.merge(logicCast);
-			executeBusiness.execute(logic, user.getName() + "停止语音对讲");
-		}
-		
 		//被呼叫方
 		CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
 		CommandGroupUserPlayerPO calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_VOICE, businessId.toString());
@@ -1301,6 +1282,18 @@ public class CommandUserServiceImpl {
 		commandGroupUserPlayerDao.save(callPlayer);
 		
 		userLiveCallDao.delete(call);
+		
+		//通话进行中则发协议
+		if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
+			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+			LogicBO logic = closeBundle(call, codec, admin.getId());
+			List<CommandGroupUserPlayerPO> players = new ArrayListWrapper<CommandGroupUserPlayerPO>().add(callPlayer).add(calledPlayer).getList();
+			LogicBO logicCast = commandCastServiceImpl.closeBundleCastDevice(
+					null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), 
+					players, null, user.getId());
+			logic.merge(logicCast);
+			executeBusiness.execute(logic, user.getName() + "停止语音对讲");
+		}
 		
 		CommandGroupUserPlayerPO returnPlayer = null;
 		
@@ -1340,7 +1333,7 @@ public class CommandUserServiceImpl {
 		
 	}
 	
-	/** 获取呼叫任务中的2个播放器（主叫和被叫的） */
+	/** USER_CALL，只能获取呼叫的，不能获取语音的2个播放器（主叫和被叫的） */
 	private List<CommandGroupUserPlayerPO> getPlayers(UserLiveCallPO call) throws Exception{
 		
 		CallType callType = call.getCallType();
@@ -1366,7 +1359,9 @@ public class CommandUserServiceImpl {
 	
 	/**
 	 * 用户通话协议处理 -- 业务数据库可以控制音视频<br/>
-	 * <b>作者:</b>wjw<br/>
+	 * <p>需要在接听后才能调用，该方法不会判断通话是否在进行</p>
+	 * <p>级联被呼叫时，不生成给呼叫方的passby，因为已经在主叫方发起业务的时候(userCallUser_Cascade)就发过passby了，此时呼叫已经建立</p>
+	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月17日 上午9:55:27
 	 * @param UserLiveCallPO call 用户呼叫业务信息
@@ -1375,7 +1370,7 @@ public class CommandUserServiceImpl {
 	 * @return LogicBO 协议
 	 */
 	private LogicBO openBundle(
-			UserLiveCallPO call, 
+			UserLiveCallPO call,
 			CodecParamBO codec,
 			Long userId) throws Exception{		
 		
@@ -1578,7 +1573,8 @@ public class CommandUserServiceImpl {
 	
 	/**
 	 * 用户通话挂断协议<br/>
-	 * <b>作者:</b>wjw<br/>
+	 * <p>该方法会判断通话是否在进行，如果没有进行，则只生成passby给级联使用</p>
+	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月17日 下午2:02:19
 	 * @param UserLiveCallPO call 用户呼叫业务信息

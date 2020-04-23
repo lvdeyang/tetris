@@ -145,6 +145,7 @@ public class ConferenceCascadeService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月30日 下午7:32:54
 	 * @param String gid 组id
+	 * @param String op 操作用户号码
 	 * @param String subject 会议主题
 	 * @param String biztype 会议名称
 	 * @param String creatorid 创建者号码
@@ -182,6 +183,7 @@ public class ConferenceCascadeService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月30日 下午7:35:17
 	 * @param String gid 组id
+	 * @param String op 操作用户号码
 	 * @param List<MinfoBO> mlist 需要级联的成员信息（全员）
 	 */
 	public void delete(GroupBO group) throws Exception{

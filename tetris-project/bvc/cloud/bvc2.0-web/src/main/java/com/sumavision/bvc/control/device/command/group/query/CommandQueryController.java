@@ -144,7 +144,7 @@ public class CommandQueryController {
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				if(("ldap".equals(user.getCreater())) ||
+				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
 //					(!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
 					if(filterMode == 0
@@ -213,7 +213,7 @@ public class CommandQueryController {
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
 					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
 					if(member!=null
@@ -314,7 +314,7 @@ public class CommandQueryController {
 			for(UserBO user:users){
 				if(user.getId().equals(chairmanUserBO.getId())) continue;
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				if("ldap".equals(user.getCreater()) ||
 						   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
 					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
 					if(member!=null
@@ -366,7 +366,7 @@ public class CommandQueryController {
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null) && !encoderId.equals("")){// && user.getDecoderId()!=null)){
 					if(!memberUserIds.contains(user.getId())){
 						filteredUsers.add(user);

@@ -212,7 +212,6 @@ define([
                 return true;
             },
             onCommandCheckChange: function (data) {
-                console.log(data)
                 var self = this;
                 for (var i = 0; i < self.command.select.length; i++) {
                     if (self.command.select[i] === data) {
@@ -406,7 +405,6 @@ define([
                 self.contextMenu.top = '';
             },
             handleContextMenuShow:function(e, data, type) {
-                console.log(e.target)
                 if(e.target.className === 'headline'){
                 if (data.type === 'FOLDER') return;
                 var self = this;
@@ -469,7 +467,7 @@ define([
             callUserBatch: function () {
                 var self = this;
                 if (self.institution.select.length <= 0) {
-                    self.qt.alert('消息提示', '您还没有选中用户');
+                    self.qt.warning('消息提示', '您还没有选中用户');
                     return;
                 }
                 var userIds = [];
@@ -491,7 +489,7 @@ define([
             voiceIntercomBatch:function(){
                 var self = this;
                 if(self.institution.select.length <= 0){
-                    self.qt.alert('消息提示', '您还没有选中用户');
+                    self.qt.warning('消息提示', '您还没有选中用户');
                     return;
                 }
                 var userIds = [];
@@ -541,7 +539,7 @@ define([
                 if (self.currentTab == 0) {
                     //点播用户
                     if (self.institution.select.length <= 0) {
-                        self.qt.alert('消息提示', '您还没有选中用户');
+                        self.qt.warning('消息提示', '您还没有选中用户');
                         return;
                     }
                     var userIds = [];
@@ -554,7 +552,7 @@ define([
                 } else if (self.currentTab == 1) {
                     //点播设备
                     if (self.device.select.length <= 0) {
-                        self.qt.alert('消息提示', '您还没有选中设备');
+                        self.qt.warning('消息提示', '您还没有选中设备');
                         return;
                     }
                     var deviceIds = [];
@@ -567,7 +565,7 @@ define([
                 } else if (self.currentTab == 2) {
                     //点播文件
                     if (self.file.select.length <= 0) {
-                        self.qt.alert('消息提示', '您还没有选中文件');
+                        self.qt.warning('消息提示', '您还没有选中文件');
                         return;
                     }
                     var resourceFileIds = [];
@@ -580,7 +578,7 @@ define([
                 } else if (self.currentTab == 3) {
                     //点播录像
                     if (self.record.select.length <= 0) {
-                        self.qt.alert('消息提示', '您还没有选中文件');
+                        self.qt.warning('消息提示', '您还没有选中文件');
                         return;
                     }
                     var recordIds = [];
@@ -715,7 +713,7 @@ define([
                 var self = this;
                 if(!self.buttons.removeCommand) return;
                 if(self.tree.command.select.length <= 0){
-                    self.qt.alert('信息提示', '您没有选择任何指挥组');
+                    self.qt.warning('信息提示', '您没有选择任何指挥组');
                     return
                 };
                 var ids = [];
@@ -854,7 +852,7 @@ define([
                 var self = this;
                 if(!self.buttons.removeMember) return;
                 if(self.group.current.select.length <= 0){
-                    self.qt.alert('提示信息', '您未选择任何成员');
+                    self.qt.warning('提示信息', '您未选择任何成员');
                     return;
                 }
                 self.qt.confirm('提示信息', '当前强退'+self.group.current.select.length+'个成员', '取消', '确定', null, function(){
@@ -878,7 +876,7 @@ define([
                 if(!self.buttons.commandReminder) return;
                 if(self.buttons.isRemind){
                     ajax.post('/command/basic/remind/stop', {id:self.group.current.id}, function(data){
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                         self.buttons.isRemind = false;
                         for(var i=0; i<self.group.remindIds.length; i++){
                             if(self.group.remindIds[i] == self.group.current.id){
@@ -893,7 +891,7 @@ define([
                     });
                 }else{
                     ajax.post('/command/basic/remind', {id:self.group.current.id}, function(data){
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                         self.buttons.isRemind = true;
                         var finded = false;
                         for(var i=0; i<self.group.remindIds.length; i++){
@@ -928,12 +926,12 @@ define([
                 if(self.buttons.silenceUpStart){
                     ajax.post('/command/basic/silence/up/start', {id:self.group.current.id}, function(){
                         self.buttons.silenceUpStart = false;
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                     });
                 }else{
                     ajax.post('/command/basic/silence/up/stop', {id:self.group.current.id}, function(){
                         self.buttons.silenceUpStart = true;
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                     });
                 }
             },
@@ -943,12 +941,12 @@ define([
                 if(self.buttons.silenceDownStart){
                     ajax.post('/command/basic/silence/down/start', {id:self.group.current.id}, function(){
                         self.buttons.silenceDownStart = false;
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                     });
                 }else{
                     ajax.post('/command/basic/silence/down/stop', {id:self.group.current.id}, function(){
                         self.buttons.silenceDownStart = true;
-                        self.qt.alert('提示消息', '操作成功');
+                        self.qt.warning('提示消息', '操作成功');
                     });
                 }
             },
@@ -962,12 +960,12 @@ define([
                 if(self.buttons.isRecord){
                     ajax.post('/command/record/stop', {id:self.group.current.id}, function(data){
                         self.buttons.isRecord = false;
-                        self.qt.alert('业务提示', '操作成功');
+                        self.qt.warning('业务提示', '操作成功');
                     });
                 }else{
                     ajax.post('/command/record/start', {id:self.group.current.id}, function(data){
                         self.buttons.isRecord = true;
-                        self.qt.alert('业务提示', '操作成功');
+                        self.qt.warning('业务提示', '操作成功');
                     });
                 }
             },
@@ -1231,7 +1229,7 @@ define([
                     var callUserInfo = e.params;
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
-                    self.qt.alert('业务提示', businessInfo);
+                    self.qt.warning('业务提示', businessInfo);
                     self.qt.invoke('callUserStop', $.toJSON({serial:serial}));
                 });
                 //websocket 停止呼叫
@@ -1239,7 +1237,7 @@ define([
                     var callUserInfo = e.params;
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
-                    self.qt.alert('业务提示', businessInfo);
+                    self.qt.warning('业务提示', businessInfo);
                     self.qt.invoke('callUserStop', $.toJSON({serial:serial}));
                 });
 
@@ -1269,7 +1267,7 @@ define([
                     var callUserInfo = e.params;
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
-                    self.qt.alert('业务提示', businessInfo);
+                    self.qt.warning('业务提示', businessInfo);
                     self.qt.invoke('voiceIntercomStop', $.toJSON({serial:serial}));
                 });
                 //websocket 停止语音对讲
@@ -1277,7 +1275,7 @@ define([
                     var callUserInfo = e.params;
                     var businessInfo = callUserInfo.businessInfo;
                     var serial = callUserInfo.serial;
-                    self.qt.alert('业务提示', businessInfo);
+                    self.qt.warning('业务提示', businessInfo);
                     self.qt.invoke('voiceIntercomStop', $.toJSON({serial:serial}));
                 });
 
@@ -1299,7 +1297,7 @@ define([
                 //同意授权指挥
                 self.qt.on('cooperationAgree', function(e){
                     var e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     if(e.splits && e.splits.length>0){
                         self.qt.invoke('cooperationGrant', e.splits);
                     }
@@ -1307,12 +1305,12 @@ define([
                 //拒绝协同指挥
                 self.qt.on('cooperationRefuse', function(e){
                     var e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                 });
                 //撤销协同指挥授权
                 self.qt.on('cooperationRevoke', function(e){
                     var e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     if(e.splits && e.splits.length>0){
                         self.qt.invoke('cooperationRevoke', e.splits);
                     }
@@ -1380,13 +1378,13 @@ define([
                             self.group.currentId = '';
                         }
                     }
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     self.qt.invoke('commandExit', $.toJSON(e.splits));
                 });
 
                 self.qt.on('commandMemberOnline', function(e){
                     e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     if(e.splits && e.splits.length>0){
                         self.qt.invoke('groupMembers', $.toJSON(e.splits));
                     }
@@ -1394,7 +1392,7 @@ define([
 
                 self.qt.on('commandMemberOffline', function(e){
                     e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     if(e.splits && e.splits.length>0){
                         self.qt.invoke('commandExit', e.splits);
                     }
@@ -1402,7 +1400,7 @@ define([
 
                 self.qt.on('commandPause', function(e){
                     e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     //self.qt.invoke('commandPause', e.splits);
                 });
 
@@ -1413,7 +1411,7 @@ define([
 
                 self.qt.on('commandMemberDelete', function(e){
                     e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     var memberIds = e.memberIds;
                     var beDeleted = false;
                     if(memberIds && memberIds.length>0){
@@ -1527,7 +1525,7 @@ define([
 
                 self.qt.on('commandForwardStop', function(e){
                     e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     if(e.splits && e.splits.length>0){
                         self.qt.invoke('commandForwardStop', $.toJSON(e.splits));
                     }
@@ -1572,7 +1570,7 @@ define([
 
                 self.qt.on('commandMessageStop', function(e){
                     e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     self.qt.invoke('commandMessageStop', $.toJSON({businessId:e.businessId}));
                 });
 
@@ -1597,13 +1595,13 @@ define([
 
                 self.qt.on('secretRefuse', function(e){
                     e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial:e.serial}]));
                 });
 
                 self.qt.on('secretStop', function(e){
                     e = e.params;
-                    self.qt.alert('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示', e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial:e.serial}]));
                 });
 

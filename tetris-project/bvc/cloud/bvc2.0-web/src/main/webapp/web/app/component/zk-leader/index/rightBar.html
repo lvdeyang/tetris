@@ -130,9 +130,9 @@
                 <!--修改指挥名称 只有主席才能修改名称，也就是指挥创建者和当前用户的Id一致时才能修改-->
                 <div :class="'option-button'+(buttons.addMember?'':' disable')" title="修改指挥名称"
                      @click="handleResetName('edit',1)">
-                    <span style="position: absolute;top: 43px;font-size: 8px;color: #fff;left: 7px;">修改指挥名称</span>
+                    <span style="position: absolute;top: 40px;font-size: 8px;color: #fff;left: 4px;">修改指挥名称</span>
                     <span class="icon-edit"
-                          style="position: absolute;left: 17px;font-size: 33px;color: #fff;top: 10px;"></span>
+                          style="position: absolute;left: 13px;font-size: 33px;color: #fff;top: 8px;"></span>
                 </div>
                 <div :class="'option-button '+(buttons.cooperativeCommand?'':'disable')" title="协同指挥"
                      @click="cooperativeCommand('指挥')">
@@ -183,6 +183,9 @@
                          :src="baseUrl+'images/zk-leader/able/commandReminderPause.png'"/>
                     <img v-if="!buttons.commandReminder"
                          :src="baseUrl+'images/zk-leader/disable/commandReminder.png'"/>
+                </div>
+                <div class="option-button" title="发布字幕" @click="publish">
+                    <img :src="baseUrl+'images/zk-leader/able/releaseSubtitle.png'"/>
                 </div>
                 <div class="option-button" @click="currentGroupChange(group.currentId)">
                     <span style="position: absolute;top: 40px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
@@ -602,6 +605,9 @@
                     <img v-if="buttons.commandReminder && buttons.isRemind"
                          :src="baseUrl+'images/zk-leader/able/commandReminderPause.png'"/>
                     <img v-if="!buttons.commandReminder" :src="baseUrl+'images/zk-leader/disable/commandReminder.png'"/>
+                </div>
+                <div class="option-button" title="发布字幕" @click="publish">
+                    <img :src="baseUrl+'images/zk-leader/able/releaseSubtitle.png'"/>
                 </div>
                 <div :class="'option-button '+(buttons.isSpeaking?'':'disable')" title="停止发言" @click="stopSpeak">
                     <img v-if="buttons.isSpeaking" :src="baseUrl+'images/zk-leader/hangUp.png'"/>

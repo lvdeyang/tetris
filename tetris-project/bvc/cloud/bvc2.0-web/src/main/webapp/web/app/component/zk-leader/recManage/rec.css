@@ -25,7 +25,7 @@ body {
 /* 更改table表格的样式 */
 .el-table,
 .el-table__expanded-cell {
-  background-color: #2d716d87;
+  background-color: #234c4a87;
   color: #c2f9ff;
 }
 

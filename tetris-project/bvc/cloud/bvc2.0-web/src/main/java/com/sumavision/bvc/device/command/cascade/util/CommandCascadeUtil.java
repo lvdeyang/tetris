@@ -1,5 +1,6 @@
 package com.sumavision.bvc.device.command.cascade.util;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -8,19 +9,38 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.bo.DeviceInfoBO;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.group.bo.PassByBO;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
+
+import freemarker.template.Template;
 
 @Service
 public class CommandCascadeUtil {
 	
 	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private QueryUtil queryUtil;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 	
 	public GroupBO createCommand(CommandGroupPO group){
 		List<CommandGroupMemberPO> members = group.getMembers();
@@ -39,9 +59,11 @@ public class CommandCascadeUtil {
 	
 	public GroupBO deleteCommand(CommandGroupPO group){
 		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
 				.setMlist(mlist);
 		return groupBO;
 	}
@@ -544,20 +566,95 @@ public class CommandCascadeUtil {
 	
 	private List<MinfoBO> generateMinfoBOList(Collection<CommandGroupMemberPO> members){
 		List<MinfoBO> mlist = new ArrayList<MinfoBO>();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		for(CommandGroupMemberPO member : members){
-			MinfoBO minfo = setMember(member);
+			MinfoBO minfo = setMember(member, chairmanMember);
 			mlist.add(minfo);
 		}
 		return mlist;
 	}
 	
-	private MinfoBO setMember(CommandGroupMemberPO member){
+	private MinfoBO setMember(CommandGroupMemberPO member, CommandGroupMemberPO chairmanMember){
 		MinfoBO minfo = new MinfoBO()
 				.setMid(member.getUserNum())
 				.setMname(member.getUserName())
 				.setMtype(member.getMemberType().getProtocalId());
+		if(!member.getUuid().equals(chairmanMember.getUuid())){
+			minfo.setPid(chairmanMember.getUserNum());
+		}
 		//TODO:pid 上级成员ID；会议组成员的上级成员ID为主席；ZH组成员的上级成员为其直接上级；主席 和最高级ZH员无上级不应显示此标签
 		return minfo;
+	}
+	
+	private void filter(
+			GroupBO group,
+			String type,
+			Template template) throws Exception{
+		
+		//根据用户号码或设备号码查询隶属应用号码列表（过滤本应用）
+		List<MinfoBO> mlist = group.getMlist();
+		List<DeviceInfoBO> devices = new ArrayList<DeviceInfoBO>();
+		for(MinfoBO m:mlist){
+			DeviceInfoBO device = new DeviceInfoBO();
+			device.setCode(m.getMid());
+			device.setType(m.getMtype().equals("usr")?"user":"device");
+			devices.add(device);
+		}
+		List<String> dstnos = resourceRemoteService.querySerNodeList(devices);
+		
+		
+		
+		
+		List<String> userCodes = new ArrayList<String>();
+		List<MinfoBO> newMlist = group.getMlist();
+		List<DeviceInfoBO> newDevices = new ArrayList<DeviceInfoBO>();
+		for(MinfoBO m:newMlist){
+			DeviceInfoBO device = new DeviceInfoBO();
+			device.setCode(m.getMid());
+			device.setType(m.getMtype().equals("usr")?"user":"device");
+			newDevices.add(device);
+			userCodes.add(m.getMid());
+			
+			if(dstnos.contains(m.getMid())){
+				
+			}else{
+				
+			}
+		}
+		List<String> newDstnos = resourceRemoteService.querySerNodeList(newDevices);
+		if(userCodes.size() > 0){
+			List<FolderUserMap> userMaps = folderUserMapDao.findByUserNoIn(userCodes);
+//			FolderUserMap userMap = queryUtil.queryUserMapByUserId(userMaps, )
+		}
+		
+		
+		
+		if(dstnos.size() == 0){
+			return;
+		}
+		
+		StringWriter writer = new StringWriter();
+		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
+		String protocol = writer.toString();
+		System.out.println(protocol);
+		
+		//查询本联网layerid
+//		String localLayerId = resourceRemoteService.queryLocalLayerId();
+		
+		List<PassByBO> passbyBOs = new ArrayList<PassByBO>();
+		for(String dstno : dstnos){
+			JSONObject passbyContent = new JSONObject();
+			passbyContent.put("cmd", "send_node_message");
+			passbyContent.put("src_user", group.getOp());
+			passbyContent.put("type", type);
+			passbyContent.put("dst_no", dstno);
+			passbyContent.put("content", protocol);
+			
+//			PassByBO passBy = new PassByBO().setLayer_id(localLayerId)
+//											.setPass_by_content(passbyContent);
+//			passbyBOs.add(passBy);
+		}
+		
 	}
 
 	private String generateUuid(){
