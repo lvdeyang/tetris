@@ -131,6 +131,8 @@ export const syncSerNodeToLdap = params => { return axiosInstance.post(`${basePa
 export const syncSerInfoFromLdap = params => { return axiosInstance.post(`${basePath}/serInfo/syncSerInfoFromLdap`, qs.stringify(params)).then(res => res.data) }
 export const syncSerInfoToLdap = params => { return axiosInstance.post(`${basePath}/serInfo/syncSerInfoToLdap`, qs.stringify(params)).then(res => res.data) }
 export const queryFatherNodeOptions = params => { return axiosInstance.post(`${basePath}/serInfo/queryFatherNodeOptions`, qs.stringify(params)).then(res => res.data) }
+export const ldapBackUp = params => { return axiosInstance.post(`${basePath}/serInfo/ldap/backup`, qs.stringify(params)).then(res => res.data) }
+export const ldapResume = params => { return axiosInstance.post(`${basePath}/serInfo/ldap/resume`, qs.stringify(params)).then(res => res.data) }
 
 export const syncEquipInfoFromLdap = params => { return axiosInstance.post(`${basePath}/bundle/syncFromLdap`, qs.stringify(params)).then(res => res.data) }
 export const syncEquipInfToLdap = params => { return axiosInstance.post(`${basePath}/bundle/syncToLdap`, qs.stringify(params)).then(res => res.data) }

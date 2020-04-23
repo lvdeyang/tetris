@@ -28,6 +28,9 @@ public class SerNodePO extends CommonPO<SerNodePO>{
 	/** 节点路由信息 */
 	private String nodeRouter;
 	
+	/** 订阅节点 */
+	private String nodePublisher;
+	
 	private SYNC_STATUS syncStatus = SYNC_STATUS.ASYNC;
 	
 	private SOURCE_TYPE sourceType = SOURCE_TYPE.SYSTEM;
@@ -118,5 +121,14 @@ public class SerNodePO extends CommonPO<SerNodePO>{
 
 	public void setNodeRouter(String nodeRouter) {
 		this.nodeRouter = nodeRouter;
+	}
+	
+	@Column
+	public String getNodePublisher() {
+		return nodePublisher;
+	}
+
+	public void setNodePublisher(String nodePublisher) {
+		this.nodePublisher = nodePublisher;
 	}
 }

@@ -39,6 +39,7 @@ public class LdapSerInfoUtil {
 	public LdapSerInfoPo pojoModifyToLdap(SerInfoPO pojo, LdapSerInfoPo ldapSerInfoPo) {
 
 		BeanUtils.copyProperties(pojo, ldapSerInfoPo, "serUuid", "syncStatus", "sourceType");
+		ldapSerInfoPo.setSerPwd(Base64Util.encode(pojo.getSerPwd()));
 
 		return ldapSerInfoPo;
 	}

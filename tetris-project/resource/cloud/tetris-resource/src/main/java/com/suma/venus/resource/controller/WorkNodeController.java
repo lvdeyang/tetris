@@ -90,6 +90,14 @@ public class WorkNodeController extends ControllerBase {
 					return data;
 				}
 			}
+			//联网接入只能有一个校验
+			if(NodeType.ACCESS_LIANWANG.toString().equals(vo.getType())){
+				List<WorkNodePO> lianwangs = workNodeService.findByType(NodeType.ACCESS_LIANWANG);
+				if (null != lianwangs && lianwangs.size() > 0) {
+					data.put(ERRMSG, "联网接入已存在");
+					return data;
+				}
+			}
 			WorkNodePO po = vo.toPO();
 			workNodeService.save(po);
 //            if(null == po.getNodeUid() || po.getNodeUid().isEmpty()){

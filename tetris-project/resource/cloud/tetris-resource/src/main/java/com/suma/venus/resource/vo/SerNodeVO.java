@@ -27,6 +27,9 @@ public class SerNodeVO {
 
 	// 厂商信息
 	private String nodeFactInfo;
+	
+	// 订阅节点
+	private String nodePublisher;
 
 	private SYNC_STATUS syncStatus;
 
@@ -120,6 +123,14 @@ public class SerNodeVO {
 
 	public void setSourceType(SOURCE_TYPE sourceType) {
 		this.sourceType = sourceType;
+	}
+
+	public String getNodePublisher() {
+		return nodePublisher;
+	}
+
+	public void setNodePublisher(String nodePublisher) {
+		this.nodePublisher = nodePublisher;
 	}
 
 }
