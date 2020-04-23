@@ -8,7 +8,7 @@
 	<mlist>
 		<#if croplist??>
 			<#list croplist as m>
-				<mid>${m.mid}</mid>
+				<mid>${m}</mid>
 			</#list>
 		</#if>
 	</mlist>

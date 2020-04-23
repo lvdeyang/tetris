@@ -2,6 +2,7 @@ package com.sumavision.bvc.control.device.command.group.user;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.servlet.http.HttpServletRequest;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
@@ -193,11 +195,14 @@ public class CommandUserInfoController {
 		}catch(Exception e){			
 		}
 		
-		return new HashMapWrapper<String, Object>()
+		Map<String, Object> map = new HashMapWrapper<String, Object>()
 				.put("user", user)
 				.put("players", players)
 				.put("localEncoder", encoderBundleVO)
 				.getMap();
+		System.out.println("getUserAndPlayers: " + JSON.toJSON(map));
+		
+		return map;
 	}
 	
 	/**
