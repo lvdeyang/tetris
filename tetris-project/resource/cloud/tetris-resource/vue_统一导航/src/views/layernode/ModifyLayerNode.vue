@@ -139,6 +139,22 @@
           {
             label : "流转发器接入",
             value : "ACCESS_S100"
+          },
+          {
+            label : "webrtc接入",
+            value : "ACCESS_WEBRTC"
+          },
+          {
+            label : "联网接入",
+            value : "ACCESS_LIANWANG"
+          },
+          {
+            label : "LDAP目录资源服务设备",
+            value : "ACCESS_LDAP"
+          },
+          {
+            label : "综合运维服务设备",
+            value : "ACCESS_OMMS"
           }
         ],
         id : this.$route.query.id,

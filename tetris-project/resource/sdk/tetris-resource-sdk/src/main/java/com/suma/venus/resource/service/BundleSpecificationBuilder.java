@@ -70,4 +70,51 @@ public class BundleSpecificationBuilder {
 			}
 		};
 	}
+	
+	/**
+	 * 学习使用SpringDataJPA之Specification复杂查询<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月16日 下午5:09:53
+	 */
+	public static Specification<BundlePO> getBundleSpecification(String deviceModel, String sourceType, String keyword, Long userId) {
+
+		return new Specification<BundlePO>() {
+
+			@Override
+			public Predicate toPredicate(Root<BundlePO> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
+
+				List<Predicate> predicateList = new ArrayList<>();
+
+				// deviceModel 类型
+				if (!StringUtils.isEmpty(deviceModel)) {
+					predicateList.add(cb.equal(root.get("deviceModel").as(String.class), deviceModel));
+				}
+
+				if (!StringUtils.isEmpty(sourceType)) {
+					predicateList.add(cb.equal(root.get("sourceType").as(String.class), sourceType));
+				}
+
+				if (!StringUtils.isEmpty(keyword)) {
+
+					List<Predicate> bundleKeywordPredicateList = new ArrayList<>();
+
+					bundleKeywordPredicateList.add(cb.like(root.get("bundleName").as(String.class), "%" + keyword + "%"));
+					bundleKeywordPredicateList.add(cb.like(root.get("username").as(String.class), "%" + keyword + "%"));
+
+					Predicate[] preKeywords = new Predicate[bundleKeywordPredicateList.size()];
+					predicateList.add(cb.or(bundleKeywordPredicateList.toArray(preKeywords)));
+
+				}
+
+				if (null != userId && userId > 0){
+					predicateList.add(cb.equal(root.get("userId").as(Long.class), userId));
+				}
+
+				Predicate[] pre = new Predicate[predicateList.size()];
+				return query.where(predicateList.toArray(pre)).getRestriction();
+
+			}
+		};
+	}
 }

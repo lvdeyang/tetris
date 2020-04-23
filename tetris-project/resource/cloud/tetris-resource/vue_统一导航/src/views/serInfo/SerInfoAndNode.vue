@@ -41,6 +41,13 @@
             </el-dropdown>
         </el-form-item>
 
+        <el-form-item :span="3">
+          <el-button type="primary" v-on:click="handleLdapBackUp()" v-loading="ldapLoading" v-if="activeTab==='serNodeTab'">LDAP备份</el-button>
+        </el-form-item>
+
+        <el-form-item :span="3">
+          <el-button type="primary" v-on:click="handleLdapResume()" v-loading="ldapLoading" v-if="activeTab==='serNodeTab'">LDAP恢复</el-button>
+        </el-form-item>
 
         <!--
         <el-form-item :span="3">
@@ -219,6 +226,17 @@
           </el-button>
         </el-form-item>
 
+        <el-form-item label="订阅节点" prop="nodePublish" v-if="serNodeEditBtnVisible">
+            <el-select v-model="serNodeEditForm.nodePublisher" placeholder="请先选择上级服务节点">
+                <el-option
+                  v-for="item in fatherTag"
+                  :key="item.nodeUuid"
+                  :label="item.nodeName"
+                  :value="item.nodeUuid">
+                </el-option>
+            </el-select>
+        </el-form-item>
+
         <el-form-item label="关联服务节点" prop="nodeRelations" v-if="serNodeEditBtnVisible">
             <el-tag
               v-for="tag in relationTag"
@@ -308,7 +326,9 @@ import {
     delSerNode,
     queryFatherNodeOptions,
     modifySerNode,
-    modifySerInfo
+    modifySerInfo,
+    ldapBackUp,
+    ldapResume
 } from "../../api/api";
 
 export default {
@@ -321,6 +341,7 @@ export default {
             total: 0,
             page: 1,
             listLoading: false,
+            ldapLoading: false,
             sels: [], //列表选中列
 
             serInfoEditFormVisible: false, //编辑界面是否显示
@@ -364,7 +385,8 @@ export default {
                 nodeName:"",
                 nodeFather:'',
                 nodeRelations: '',
-                nodeFactInfo: ""
+                nodeFactInfo: "",
+                nodePublisher: ""
             },
 
             serInfoEditFormRules: {
@@ -568,8 +590,6 @@ export default {
                     } else {
                         this.fatherNodeOptions = res.serNodeVOs;
                         //console.log("queryFatherNodeOptions, success", JSON.stringify(res.serNodeVOs));
-
-
                     }
                 });
 
@@ -772,7 +792,8 @@ export default {
                             nodeName: this.serNodeEditForm.nodeName,
                             nodeFather: nodeFatherArray.join(','),
                             nodeRelations: nodeRelationArray.join(','),
-                            nodeFactInfo: this.serNodeEditForm.nodeFactInfo
+                            nodeFactInfo: this.serNodeEditForm.nodeFactInfo,
+                            nodePublisher: this.serNodeEditForm.nodePublisher
                         };
 
                         modifySerNode(para).then(res => {
@@ -955,7 +976,6 @@ export default {
             });
         },
 
-
         handleCleanUpLdap: function() {
             this.$confirm("确认清空上传到LDAP何从LDAP下载的所有信息么？", "提示", {}).then(() => {
                 this.editLoading = true;
@@ -1029,6 +1049,11 @@ export default {
             }
           }
 
+          //订阅节点更新
+          if(tag.nodeUuid == self.serNodeEditForm.nodePublisher){
+            self.serNodeEditForm.nodePublisher = "";
+          }
+
         },
 
         handleDialogCommit: function(){
@@ -1083,7 +1108,46 @@ export default {
           self.dialog.node.type = "father";
           self.dialog.node.table.data = self.fatherNodeOptions;
           self.dialog.node.visible = true;
-        }
+        },
+
+        handleLdapBackUp: function(){
+          this.ldapLoading = true;
+          ldapBackUp(null).then(res => {
+            console.log(res);
+            if(res.status !== 200){
+              this.$message({
+                message:response.message,
+                type:'error'
+              });
+              this.ldapLoading = false;
+            }else{
+              this.$message({
+                message:"备份成功",
+                type:'success'
+              });
+              this.ldapLoading = false;
+            }
+          });
+        },
+
+        handleLdapResume: function(){
+          this.ldapLoading = true;
+          ldapResume(null).then(res => {
+            if(res.status !== 200){
+              this.$message({
+                message:response.message,
+                type:'error'
+              });
+              this.ldapLoading = false;
+            }else{
+              this.$message({
+                message:"恢复成功",
+                type:'success'
+              });
+              this.ldapLoading = false;
+            }
+          });
+        },
     },
 
     mounted() {

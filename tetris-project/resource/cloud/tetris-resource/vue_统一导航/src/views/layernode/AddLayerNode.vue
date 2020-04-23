@@ -156,6 +156,18 @@
           {
             label : "webrtc接入",
             value : "ACCESS_WEBRTC"
+          },
+          {
+            label : "联网接入",
+            value : "ACCESS_LIANWANG"
+          },
+          {
+            label : "LDAP目录资源服务设备",
+            value : "ACCESS_LDAP"
+          },
+          {
+            label : "综合运维服务设备",
+            value : "ACCESS_OMMS"
           }
         ],
         nodeForm : {
