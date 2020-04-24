@@ -2451,7 +2451,7 @@ public class CommandBasicServiceImpl {
 					
 					//TODO:如果有新节点，则要发maddfull
 					if(newNodeMemberInfos.size() > 0){
-						GroupBO maddfullBO = commandCascadeUtil.maddfullCommand(group, oldMemberInfos, newAndEnterMembers);
+						GroupBO maddfullBO = commandCascadeUtil.maddfullCommand(group, newNodeMemberInfos);
 						commandCascadeService.info(maddfullBO);
 					}
 					
@@ -2462,7 +2462,7 @@ public class CommandBasicServiceImpl {
 					
 					//TODO:如果有新节点，则要发maddfull
 					if(newNodeMemberInfos.size() > 0){
-						GroupBO maddfullBO = commandCascadeUtil.maddfullMeeting(group, oldMemberInfos, newAndEnterMembers);
+						GroupBO maddfullBO = commandCascadeUtil.maddfullMeeting(group, newNodeMemberInfos);
 						conferenceCascadeService.info(maddfullBO);
 					}
 					
@@ -3181,8 +3181,8 @@ public class CommandBasicServiceImpl {
 				//会议进行中，统计播放器，给退出成员发消息
 				if(!group.getStatus().equals(GroupStatus.STOP)){					
 					
-					//如果操作人在本系统
-					if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
+//					//如果操作人在本系统
+//					if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
 						
 						//如果退出人在本系统，统计它的播放器，websocket通知
 						if(!OriginType.OUTER.equals(removeMember.getOriginType())){
@@ -3226,7 +3226,7 @@ public class CommandBasicServiceImpl {
 							if(mode == 0){							
 							
 								//如果退出人在外部系统，级联通知发言人所在系统（该通知只发送，收到后不处理，通过“成员主动退出通知”来处理）							
-								if(!OriginType.OUTER.equals(removeMember.getOriginType())){
+								if(OriginType.OUTER.equals(removeMember.getOriginType())){
 									if(GroupType.BASIC.equals(groupType)){
 										GroupBO groupBO = commandCascadeUtil.exitCommandResponse(group, removeMember, "1");
 										commandCascadeService.exitResponse(groupBO);
@@ -3257,7 +3257,7 @@ public class CommandBasicServiceImpl {
 								}
 							}
 						}
-					}
+//					}
 				}
 			}
 			
@@ -3556,7 +3556,9 @@ public class CommandBasicServiceImpl {
 		for(CommandGroupMemberPO acceptMember : acceptMembers){
 			acceptMemberIds.add(acceptMember.getId());
 			acceptMemberNamesList.add(acceptMember.getUserName());
-			allPlayers.addAll(acceptMember.getPlayers());
+			if(acceptMember.getPlayers() != null){
+				allPlayers.addAll(acceptMember.getPlayers());
+			}
 		}
 		//save CONNECT状态
 //		commandGroupDao.save(group);
