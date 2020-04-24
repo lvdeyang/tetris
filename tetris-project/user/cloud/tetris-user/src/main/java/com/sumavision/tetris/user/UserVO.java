@@ -105,6 +105,9 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	/** 用户标签,以“,”分割 */
 	private List<String> tags;
 	
+	/** 异常登录次数 */
+	private int errorLoginTimes;
+	
 	public String getUsername() {
 		return username;
 	}
@@ -357,6 +360,15 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 		return this;
 	}
 
+	public int getErrorLoginTimes() {
+		return errorLoginTimes;
+	}
+
+	public UserVO setErrorLoginTimes(int errorLoginTimes) {
+		this.errorLoginTimes = errorLoginTimes;
+		return this;
+	}
+
 	@Override
 	public UserVO set(UserPO entity){
 		this.setId(entity.getId())
@@ -376,6 +388,7 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 			//.setEquipType(entity.getEquipType() != null ? entity.getEquipType().toString() : null)
 			.setAutoGeneration(entity.isAutoGeneration());
 		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(UserPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
+		this.setErrorLoginTimes(entity.getErrorLoginTimes()==null?0:entity.getErrorLoginTimes());
 		return this;
 	}
 	

@@ -99,6 +99,9 @@ public class UserVO{
 	
 	/** 用户标签 */
 	private List<String> tags;
+	
+	/** 异常登录次数 */
+	private int errorLoginTimes;
 
 	public Long getId() {
 		return id;
@@ -375,6 +378,15 @@ public class UserVO{
 
 	public UserVO setUsername(String username) {
 		this.username = username;
+		return this;
+	}
+	
+	public int getErrorLoginTimes() {
+		return errorLoginTimes;
+	}
+
+	public UserVO setErrorLoginTimes(int errorLoginTimes) {
+		this.errorLoginTimes = errorLoginTimes;
 		return this;
 	}
 	
