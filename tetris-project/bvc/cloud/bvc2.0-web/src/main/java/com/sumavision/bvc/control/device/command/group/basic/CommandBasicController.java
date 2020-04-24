@@ -43,6 +43,8 @@ import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -457,7 +459,7 @@ public class CommandBasicController {
 	}	
 	
 	
-	//退出会议
+	/** 成员主动退出（已废弃，改为申请） */
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/exit")
@@ -465,10 +467,11 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
-		List<Long> userIdList = new ArrayListWrapper<Long>().add(userId).getList();
-		Object splits = commandBasicServiceImpl.removeMembers(Long.parseLong(id), userIdList, 0);
-		return splits;
+//		Long userId = userUtils.getUserIdFromSession(request);
+//		List<Long> userIdList = new ArrayListWrapper<Long>().add(userId).getList();
+//		Object splits = commandBasicServiceImpl.removeMembers(Long.parseLong(id), userIdList, 0);
+//		return splits;
+		throw new BaseException(StatusCode.FORBIDDEN, "请向主席申请退出");
 	}	
 	
 	/** 成员申请退出 */
@@ -496,9 +499,9 @@ public class CommandBasicController {
 //		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandBasicServiceImpl.removeMembers2(Long.parseLong(id), userIdArray, 0);
+		Object splits = commandBasicServiceImpl.removeMembers2(Long.parseLong(id), userIdArray, 0);
 		
-		return null;
+		return splits;
 	}
 	
 	/** 主席不同意成员退出 */
