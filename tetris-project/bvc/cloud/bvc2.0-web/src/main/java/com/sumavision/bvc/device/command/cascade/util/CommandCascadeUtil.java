@@ -1,6 +1,5 @@
 package com.sumavision.bvc.device.command.cascade.util;
 
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -9,23 +8,16 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.suma.venus.resource.bo.DeviceInfoBO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
-import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
-import com.sumavision.bvc.device.group.bo.PassByBO;
-import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
-
-import freemarker.template.Template;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 
 @Service
 public class CommandCascadeUtil {
@@ -35,12 +27,6 @@ public class CommandCascadeUtil {
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
-	
-	@Autowired
-	private QueryUtil queryUtil;
-	
-	@Autowired
-	private ResourceRemoteService resourceRemoteService;
 	
 	public GroupBO createCommand(CommandGroupPO group){
 		List<CommandGroupMemberPO> members = group.getMembers();
@@ -117,22 +103,50 @@ public class CommandCascadeUtil {
 		
 		return groupBO;
 	}
-	/** maddinc 指挥进行中的时候加人或进入 */
-	public GroupBO joinCommand(CommandGroupPO group, List<CommandGroupMemberPO> acceptMembers){
+	
+	/**
+	 * 指挥进行中的时候加人或进入<br/>
+	 * <p>用于生成和发送maddinc协议</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 下午4:40:25
+	 * @param group
+	 * @param oldMemberInfos 该参数决定了将maddinc协议发送给哪些节点，可以直接使用加人之前的用户列表，避免发给新加入业务的节点。null则会使用group.getMembers的成员
+	 * @param acceptMembers
+	 * @return
+	 */
+	public GroupBO joinCommand(CommandGroupPO group, List<MinfoBO> oldMemberInfos, List<CommandGroupMemberPO> acceptMembers){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
-		List<MinfoBO> mlist = generateMinfoBOList(members);
-		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers);
+		if(oldMemberInfos == null){
+			oldMemberInfos = generateMinfoBOList(members);
+		}
+		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers, chairmanMember);
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
 				.setOp(chairmanMember.getUserNum())
-				.setMlist(mlist)
+				.setMlist(oldMemberInfos)
+				.setmAddList(mAddList);
+		
+		return groupBO;
+	}
+
+	//TODO:
+	public GroupBO maddfullCommand(CommandGroupPO group, List<MinfoBO> newMemberInfos, List<CommandGroupMemberPO> acceptMembers){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+//		List<MinfoBO> mlist = generateMinfoBOList(members);
+		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers, chairmanMember);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setMlist(newMemberInfos)
 				.setmAddList(mAddList);
 		
 		return groupBO;
 	}
 	
-	/** 按协议，非批量 */
+	/** 退出指挥通知，包括主动和被动 */
 	public GroupBO exitCommand(CommandGroupPO group, CommandGroupMemberPO removeMember){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
@@ -146,23 +160,25 @@ public class CommandCascadeUtil {
 		return groupBO;
 	}
 	
-	/** 申请退出 */
+	/** 申请退出指挥 */
 	public GroupBO exitCommandRequest(CommandGroupPO group, CommandGroupMemberPO exitMember){
+		
 		List<CommandGroupMemberPO> members = group.getMembers();
-		List<MinfoBO> mlist = generateMinfoBOList(members);
-//		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		MinfoBO m = setMember(chairmanMember, chairmanMember);
+		List<MinfoBO> mlist = new ArrayListWrapper<MinfoBO>().add(m).getList();
 		
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
 				.setOp(exitMember.getUserNum())
-				.setMid(exitMember.getUserNum())
+				.setMid(chairmanMember.getUserNum())
 				.setMlist(mlist);
 		
 		return groupBO;
 	}
 
 	/**
-	 * 申请退出响应<br/>
+	 * 申请退出指挥响应<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -172,10 +188,11 @@ public class CommandCascadeUtil {
 	 * @param code 响应，0表示不同意、1表示同意 
 	 * @return
 	 */
-	public GroupBO exitCommandResponse(CommandGroupPO group, CommandGroupMemberPO exitMember, String code){
+	public GroupBO exitCommandResponse(CommandGroupPO group, CommandGroupMemberPO exitMember, String code){		
 		List<CommandGroupMemberPO> members = group.getMembers();
-		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		MinfoBO exitM = setMember(exitMember, chairmanMember);
+		List<MinfoBO> mlist = new ArrayListWrapper<MinfoBO>().add(exitM).getList();
 		
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
@@ -314,7 +331,7 @@ public class CommandCascadeUtil {
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
-//				.setOp(chairmanMember.getUserNum())
+				.setOp(chairmanMember.getUserNum())
 				.setSubject(group.getSubject())
 				.setBizname(group.getName())
 				.setCreatorid(chairmanMember.getUserNum())
@@ -325,9 +342,11 @@ public class CommandCascadeUtil {
 	
 	public GroupBO deleteMeeting(CommandGroupPO group){
 		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
 				.setMlist(mlist);
 		return groupBO;
 	}
@@ -381,22 +400,50 @@ public class CommandCascadeUtil {
 		
 		return groupBO;
 	}
-	/** maddinc 会议进行中的时候加人或进入 */
-	public GroupBO joinMeeting(CommandGroupPO group, List<CommandGroupMemberPO> acceptMembers){
+	
+	/**
+	 * 会议进行中的时候加人或进入<br/>
+	 * <p>用于生成和发送maddinc协议</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 下午4:40:25
+	 * @param group
+	 * @param oldMemberInfos 该参数决定了将maddinc协议发送给哪些节点，可以直接使用加人之前的用户列表，避免发给新加入业务的节点。null则会使用group.getMembers的成员
+	 * @param acceptMembers
+	 * @return
+	 */
+	public GroupBO joinMeeting(CommandGroupPO group, List<MinfoBO> oldMemberInfos, List<CommandGroupMemberPO> acceptMembers){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
-		List<MinfoBO> mlist = generateMinfoBOList(members);
-		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers);
+		if(oldMemberInfos == null){
+			oldMemberInfos = generateMinfoBOList(members);
+		}
+		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers, chairmanMember);
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
 				.setOp(chairmanMember.getUserNum())
-				.setMlist(mlist)
+				.setMlist(oldMemberInfos)
 				.setmAddList(mAddList);
 		
 		return groupBO;
 	}
 	
-	/** 按协议，非批量 */
+	//TODO:
+	public GroupBO maddfullMeeting(CommandGroupPO group, List<MinfoBO> newMemberInfos, List<CommandGroupMemberPO> acceptMembers){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+//		List<MinfoBO> mlist = generateMinfoBOList(members);
+		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers, chairmanMember);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setMlist(newMemberInfos)
+				.setmAddList(mAddList);
+		
+		return groupBO;
+	}
+	
+	/** 退出会议通知，包括主动和被动 */
 	public GroupBO exitMeeting(CommandGroupPO group, CommandGroupMemberPO removeMember){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
@@ -405,6 +452,50 @@ public class CommandCascadeUtil {
 				.setGid(group.getUuid())
 				.setOp(chairmanMember.getUserNum())
 				.setMid(removeMember.getUserNum())
+				.setMlist(mlist);
+		
+		return groupBO;
+	}
+	
+	/** 申请退出会议 */
+	public GroupBO exitMeetingRequest(CommandGroupPO group, CommandGroupMemberPO exitMember){
+		
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		MinfoBO m = setMember(chairmanMember, chairmanMember);
+		List<MinfoBO> mlist = new ArrayListWrapper<MinfoBO>().add(m).getList();
+		
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(exitMember.getUserNum())
+				.setMid(chairmanMember.getUserNum())
+				.setMlist(mlist);
+		
+		return groupBO;
+	}
+
+	/**
+	 * 申请会议退出响应<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月4日 下午1:38:55
+	 * @param group
+	 * @param speakMember
+	 * @param code 响应，0表示不同意、1表示同意 
+	 * @return
+	 */
+	public GroupBO exitMeetingResponse(CommandGroupPO group, CommandGroupMemberPO exitMember, String code){		
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		MinfoBO exitM = setMember(exitMember, chairmanMember);
+		List<MinfoBO> mlist = new ArrayListWrapper<MinfoBO>().add(exitM).getList();
+		
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setMid(exitMember.getUserNum())
+				.setCode(code)
 				.setMlist(mlist);
 		
 		return groupBO;
@@ -493,8 +584,8 @@ public class CommandCascadeUtil {
 		return groupBO;
 	}
 
-	/** 指定发言，单个 */
-	public GroupBO speakerSetByChairman(CommandGroupPO group, CommandGroupMemberPO speakMember){
+	/** 指定发言/申请发言被同意的通知，单个 */
+	public GroupBO speakerSet(CommandGroupPO group, CommandGroupMemberPO speakMember){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
@@ -526,8 +617,9 @@ public class CommandCascadeUtil {
 	/** 申请发言 */
 	public GroupBO speakerSetRequest(CommandGroupPO group, CommandGroupMemberPO speakMember){
 		List<CommandGroupMemberPO> members = group.getMembers();
-		List<MinfoBO> mlist = generateMinfoBOList(members);
-//		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		MinfoBO m = setMember(chairmanMember, chairmanMember);
+		List<MinfoBO> mlist = new ArrayListWrapper<MinfoBO>().add(m).getList();
 		
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
@@ -551,8 +643,9 @@ public class CommandCascadeUtil {
 	 */
 	public GroupBO speakerSetResponse(CommandGroupPO group, CommandGroupMemberPO speakMember, String code){
 		List<CommandGroupMemberPO> members = group.getMembers();
-		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		MinfoBO speakM = setMember(speakMember, chairmanMember);
+		List<MinfoBO> mlist = new ArrayListWrapper<MinfoBO>().add(speakM).getList();
 		
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
@@ -564,9 +657,41 @@ public class CommandCascadeUtil {
 		return groupBO;
 	}
 	
-	private List<MinfoBO> generateMinfoBOList(Collection<CommandGroupMemberPO> members){
-		List<MinfoBO> mlist = new ArrayList<MinfoBO>();
+	public GroupBO discussStart(CommandGroupPO group){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setMlist(mlist);
+		
+		return groupBO;
+	}
+	
+	public GroupBO discussStop(CommandGroupPO group){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setMlist(mlist);
+		
+		return groupBO;
+	}
+	
+	/** 必须保证members包含主席 */
+	public List<MinfoBO> generateMinfoBOList(Collection<CommandGroupMemberPO> members){
+		return generateMinfoBOList(members, null);
+	}
+	
+	/** 当members可能不包含主席时，需要输入主席 */
+	public List<MinfoBO> generateMinfoBOList(Collection<CommandGroupMemberPO> members, CommandGroupMemberPO chairmanMember){
+		List<MinfoBO> mlist = new ArrayList<MinfoBO>();
+		if(chairmanMember == null){
+			chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		}
 		for(CommandGroupMemberPO member : members){
 			MinfoBO minfo = setMember(member, chairmanMember);
 			mlist.add(minfo);
@@ -579,84 +704,72 @@ public class CommandCascadeUtil {
 				.setMid(member.getUserNum())
 				.setMname(member.getUserName())
 				.setMtype(member.getMemberType().getProtocalId());
+		//TODO:pid 上级成员ID；会议组成员的上级成员ID为主席；ZH组成员的上级成员为其直接上级；主席 和最高级ZH员无上级不应显示此标签
 		if(!member.getUuid().equals(chairmanMember.getUuid())){
 			minfo.setPid(chairmanMember.getUserNum());
 		}
-		//TODO:pid 上级成员ID；会议组成员的上级成员ID为主席；ZH组成员的上级成员为其直接上级；主席 和最高级ZH员无上级不应显示此标签
 		return minfo;
 	}
 	
-	private void filter(
-			GroupBO group,
-			String type,
-			Template template) throws Exception{
-		
-		//根据用户号码或设备号码查询隶属应用号码列表（过滤本应用）
-		List<MinfoBO> mlist = group.getMlist();
-		List<DeviceInfoBO> devices = new ArrayList<DeviceInfoBO>();
-		for(MinfoBO m:mlist){
-			DeviceInfoBO device = new DeviceInfoBO();
-			device.setCode(m.getMid());
-			device.setType(m.getMtype().equals("usr")?"user":"device");
-			devices.add(device);
-		}
-		List<String> dstnos = resourceRemoteService.querySerNodeList(devices);
-		
-		
-		
-		
-		List<String> userCodes = new ArrayList<String>();
-		List<MinfoBO> newMlist = group.getMlist();
-		List<DeviceInfoBO> newDevices = new ArrayList<DeviceInfoBO>();
-		for(MinfoBO m:newMlist){
-			DeviceInfoBO device = new DeviceInfoBO();
-			device.setCode(m.getMid());
-			device.setType(m.getMtype().equals("usr")?"user":"device");
-			newDevices.add(device);
-			userCodes.add(m.getMid());
-			
-			if(dstnos.contains(m.getMid())){
-				
-			}else{
-				
+	/**
+	 * 比对查找新节点用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月23日 上午9:35:15
+	 * @param List<MinfoBO> oldMembers 旧用户列表
+	 * @param List<MinfoBO> mewMembers 新用户列表
+	 * @return List<MinfoBO> 比对结果
+	 */
+	public List<MinfoBO> filterAddedNodeMinfo(List<MinfoBO> oldMembers, List<MinfoBO> mewMembers) throws Exception{
+		List<String> oldMemberCodes = new ArrayList<String>();
+		if(oldMembers!=null && oldMembers.size()>0){
+			for(MinfoBO member:oldMembers){
+				oldMemberCodes.add(member.getMid());
 			}
 		}
-		List<String> newDstnos = resourceRemoteService.querySerNodeList(newDevices);
-		if(userCodes.size() > 0){
-			List<FolderUserMap> userMaps = folderUserMapDao.findByUserNoIn(userCodes);
-//			FolderUserMap userMap = queryUtil.queryUserMapByUserId(userMaps, )
+		List<String> newMemberCodes = new ArrayList<String>();
+		if(mewMembers!=null && mewMembers.size()>0){
+			for(MinfoBO member:mewMembers){
+				newMemberCodes.add(member.getMid());
+			}
 		}
-		
-		
-		
-		if(dstnos.size() == 0){
-			return;
+		List<FolderUserMap> oldUserMaps = null;
+		if(oldMemberCodes.size() > 0){
+			oldUserMaps = folderUserMapDao.findByUserNoIn(oldMemberCodes);
 		}
-		
-		StringWriter writer = new StringWriter();
-		template.process(JSON.parseObject(JSON.toJSONString(group)), writer);
-		String protocol = writer.toString();
-		System.out.println(protocol);
-		
-		//查询本联网layerid
-//		String localLayerId = resourceRemoteService.queryLocalLayerId();
-		
-		List<PassByBO> passbyBOs = new ArrayList<PassByBO>();
-		for(String dstno : dstnos){
-			JSONObject passbyContent = new JSONObject();
-			passbyContent.put("cmd", "send_node_message");
-			passbyContent.put("src_user", group.getOp());
-			passbyContent.put("type", type);
-			passbyContent.put("dst_no", dstno);
-			passbyContent.put("content", protocol);
-			
-//			PassByBO passBy = new PassByBO().setLayer_id(localLayerId)
-//											.setPass_by_content(passbyContent);
-//			passbyBOs.add(passBy);
+		List<FolderUserMap> newUserMaps = null;
+		if(oldMemberCodes.size() > 0){
+			newUserMaps = folderUserMapDao.findByUserNoIn(newMemberCodes);
 		}
-		
+		List<String> addedUserCodes = new ArrayList<String>();
+		if(newUserMaps!=null && newUserMaps.size()>0){
+			for(FolderUserMap newMap:newUserMaps){
+				boolean finded = false;
+				if(oldUserMaps!=null && oldUserMaps.size()>0){
+					for(FolderUserMap oldMap:oldUserMaps){
+						if(oldMap.getUserNode().equals(newMap.getUserNode())){
+							finded = true;
+							break;
+						}
+					}
+				}
+				if(!finded){
+					addedUserCodes.add(newMap.getUserNo());
+				}
+			}
+		}
+		List<MinfoBO> addedNodeMinfo = new ArrayList<MinfoBO>();
+		for(String code:addedUserCodes){
+			for(MinfoBO member:mewMembers){
+				if(code.equals(member.getMid())){
+					addedNodeMinfo.add(member);
+					break;
+				}
+			}
+		}
+		return addedNodeMinfo;
 	}
-
+	
 	private String generateUuid(){
 		return UUID.randomUUID().toString().replaceAll("-", "");
 	}
