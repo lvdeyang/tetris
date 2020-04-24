@@ -1,14 +1,10 @@
-<!-- 退出指挥请求响应 -->
 <response>
 	<commandname>bizcmd</commandname>
 	<operation>mquitres</operation>
 	<seq>${seq}</seq>
 	<ts>${ts}</ts>
 	<gid>${gid}</gid>
-	<!-- 处理成员退出请求处理的成员ID -->
 	<op>${op}</op>
-	<!--  退出成员ID -->
 	<mid>${mid}</mid>
-	<!-- 响应，0表示不同意、1表示同意-->
 	<code>${code}</code>
 </response>

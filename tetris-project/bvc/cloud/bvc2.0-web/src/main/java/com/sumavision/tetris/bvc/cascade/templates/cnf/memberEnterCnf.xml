@@ -8,10 +8,14 @@
 	<mlist>
 		<#if mAddList??>
 			<#list mAddList as m>
-				<mid>${m.mid}</mid>
-				<mname>${m.mname}</mname>
-				<mtype>${m.mtype}</mtype>
-				<pid>${m.pid}</pid>
+				<minfo>
+					<mid>${mid}</mid>
+					<mname>${mname}</mname>
+					<mtype>${mtype}</mtype>
+					<#if m.pid??>
+						<pid>${m.pid}</pid>
+					</#if>
+				</minfo>
 			</#list>
 		</#if>
 	</mlist>

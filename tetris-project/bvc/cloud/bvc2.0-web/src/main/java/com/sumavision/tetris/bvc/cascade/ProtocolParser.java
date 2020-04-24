@@ -23,7 +23,12 @@ import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl
 import com.sumavision.bvc.device.command.cooperate.CommandCooperateServiceImpl;
 import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
 import com.sumavision.tetris.auth.login.LoginService;
+import com.sumavision.tetris.bvc.cascade.bo.AuthCommandBO;
+import com.sumavision.tetris.bvc.cascade.bo.CrossCommandBO;
+import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
+import com.sumavision.tetris.bvc.cascade.bo.ReplaceCommandBO;
+import com.sumavision.tetris.bvc.cascade.bo.SecretCommandBO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.commons.util.xml.XMLReader;
@@ -142,9 +147,18 @@ public class ProtocolParser {
 				}else if("cnf".equals(biztype)){
 					createConference(reader, rootNodeName, srcNo);
 				}
+			}else if("group".equals(commandname) && "update".equals(operation)){
+				String biztype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.biztype").toString());
+				if("cmd".equals(biztype)){
+					updateCommand(reader, rootNodeName, srcNo);
+				}else if("cnf".equals(biztype)){
+					updateConference(reader, rootNodeName, srcNo);
+				}
 			}else if("group".equals(commandname) && "destroy".equals(operation)){
 				deleteCommand(reader, rootNodeName, srcNo);
 			}else if("bizcmd".equals(commandname) && "start".equals(operation)){
+				startCommand(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "maddfull".equals(operation)){
 				startCommand(reader, rootNodeName, srcNo);
 			}else if("bizcmd".equals(commandname) && "stop".equals(operation)){
 				stopCommand(reader, rootNodeName, srcNo);
@@ -161,6 +175,10 @@ public class ProtocolParser {
 				}else if("p".equals(quittype)){
 					kikoutCommand(reader, rootNodeName, srcNo);
 				}
+			}else if("bizcmd".equals(commandname) && "mquitreq".equals(operation)){
+				exitCommandRequest(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "mquitres".equals(operation)){
+				exitCommandResponse(reader, rootNodeName, srcNo);
 			}else if("bizcmd".equals(commandname) && "corpstart".equals(operation)){
 				cooperationStart(reader, rootNodeName, srcNo);
 			}else if("bizcmd".equals(commandname) && "corpstop".equals(operation)){
@@ -171,6 +189,8 @@ public class ProtocolParser {
 				stopDeviceForwardInCommand(reader, rootNodeName, srcNo);
 			}else if("bizcnf".equals(commandname) && "start".equals(operation)){
 				startConference(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "maddfull".equals(operation)){
+				infoConference(reader, rootNodeName, srcNo);
 			}else if("bizcnf".equals(commandname) && "stop".equals(operation)){
 				stopConference(reader, rootNodeName, srcNo);
 			}else if("bizcnf".equals(commandname) && "pause".equals(operation)){
@@ -186,6 +206,10 @@ public class ProtocolParser {
 				}else if("p".equals(quittype)){
 					kikoutConference(reader, rootNodeName, srcNo);
 				}
+			}else if("bizcnf".equals(commandname) && "mquitreq".equals(operation)){
+				exitConferenceRequest(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "mquitres".equals(operation)){
+				exitConferenceResponse(reader, rootNodeName, srcNo);
 			}else if("bizcnf".equals(commandname) && "pullmediastart".equals(operation)){
 				startDeviceForwardInConference(reader, rootNodeName, srcNo);
 			}else if("bizcnf".equals(commandname) && "pullmediastop".equals(operation)){
@@ -266,6 +290,38 @@ public class ProtocolParser {
 	}
 	
 	/**
+	 * 更新指挥<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 上午10:32:52
+	 * @param XMLReader reader 协议
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void updateCommand(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		GroupBO group = new GroupBO();
+		group.setGid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString()))
+			 .setSubject(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".subject").toString()))
+			 .setBizname(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.bizname").toString()))
+			 .setCreatorid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.creatorid").toString()))
+			 .setTopid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.topid").toString()));
+		
+		List<Node> nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.mlist.minfo").toString());
+		if(nodes!=null && nodes.size()>0){
+			group.setMlist(new ArrayList<MinfoBO>());
+			for(Node node:nodes){
+				MinfoBO minfo = new MinfoBO();
+				minfo.setMid(reader.readString("mid", node))
+					 .setMname(reader.readString("mname", node))
+					 .setMtype(reader.readString("mtype", node))
+					 .setMstatus(reader.readString("mstatus", node))
+					 .setPid(reader.readString("pid", node));
+				group.getMlist().add(minfo);
+			}
+		}
+	}
+	
+	/**
 	 * 删除指挥<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -294,6 +350,88 @@ public class ProtocolParser {
 		String gid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString());
 		Long groupId = commandGroupDao.findIdByUuid(gid);
 		commandBasicServiceImpl.start(groupId, -1);
+	}
+	
+	/**
+	 * 全量信息同步<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 上午9:56:11
+	 * @param XMLReader reader 协议
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void infoCommand(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		GroupBO group = new GroupBO();
+		group.setGid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString()))
+			.setOp(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString()))
+			.setSubject(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".subject").toString()))
+			.setStime(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".stime").toString()))
+			.setBizname(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.bizname").toString()))
+			.setCreatorid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.creatorid").toString()))
+			.setTopid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.topid").toString()))
+			.setStatus(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".cmdstatus.status").toString()));
+		
+		List<Node> nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.mlist.minfo").toString());
+		if(nodes!=null && nodes.size()>0){
+			group.setMlist(new ArrayList<MinfoBO>());
+			for(Node node:nodes){
+				MinfoBO minfo = new MinfoBO();
+				minfo.setMid(reader.readString("mid", node))
+					 .setMname(reader.readString("mname", node))
+					 .setMtype(reader.readString("mtype", node))
+					 .setMstatus(reader.readString("mstatus", node))
+					 .setPid(reader.readString("pid", node));
+				group.getMlist().add(minfo);
+			}
+		}
+		
+		nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".cmdstatus.authitem").toString());
+		if(nodes!=null && nodes.size()>0){
+			AuthCommandBO authitem = new AuthCommandBO();
+			authitem.setOp(reader.readString("op", nodes.get(0)))
+					.setAccepauthid(reader.readString("accepauthid", nodes.get(0)))
+					.setCmdedid(reader.readString("cmdedid", nodes.get(0)));
+			group.setAuthitem(authitem);
+		}
+		
+		nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".cmdstatus.replaceitem").toString());
+		if(nodes!=null && nodes.size()>0){
+			ReplaceCommandBO replaceitem = new ReplaceCommandBO();
+			replaceitem.setOp(reader.readString("op", nodes.get(0)))
+					   .setTargid(reader.readString("targid", nodes.get(0)));
+			group.setReplaceitem(replaceitem);
+		}
+		
+		nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".cmdstatus.secretlist.secretitem").toString());
+		if(nodes!=null && nodes.size()>0){
+			group.setSecretlist(new ArrayList<SecretCommandBO>());
+			for(Node node:nodes){
+				SecretCommandBO secretitem = new SecretCommandBO();
+				secretitem.setUpid(reader.readString("upid", node))
+						  .setDownid(reader.readString("downid", node));
+				group.getSecretlist().add(secretitem);
+			}
+		}
+		
+		nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".cmdstatus.croplist.cropitem").toString());
+		if(nodes!=null && nodes.size()>0){
+			group.setCroplist(new ArrayList<String>());
+			for(Node node:nodes){
+				group.getCroplist().add(reader.readString("mid", node));
+			}
+		}
+		
+		nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".cmdstatus.croslist.crossitem").toString());
+		if(nodes!=null && nodes.size()>0){
+			group.setCroslist(new ArrayList<CrossCommandBO>());
+			for(Node node:nodes){
+				CrossCommandBO crossitem = new CrossCommandBO();
+				crossitem.setUpid(reader.readString("upid", node))
+						 .setDownid(reader.readString("downid", node));
+				group.getCroslist().add(crossitem);
+			}
+		}
 	}
 	
 	/**
@@ -394,6 +532,45 @@ public class ProtocolParser {
 		String mid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".mid").toString());
 		UserVO user = userQuery.findByUserno(mid);
 		commandBasicServiceImpl.removeMembers2(groupId, new ArrayListWrapper<Long>().add(user.getId()).getList(), 0);
+	}
+	
+	/**
+	 * 退出指挥请求<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月1日 上午11:09:48
+	 * @param XMLReader reader 协议
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void exitCommandRequest(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		String gid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString());
+		Long groupId = commandGroupDao.findIdByUuid(gid);
+		String op = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString());
+		UserVO user = userQuery.findByUserno(op);
+		commandBasicServiceImpl.exitApply(user.getId(), groupId);
+	}
+	
+	/**
+	 * 退出指挥响应<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月1日 上午11:09:48
+	 * @param XMLReader reader 协议
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void exitCommandResponse(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		String code = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".code").toString());
+		if("0".equals(code)){
+			String gid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString());
+			Long groupId = commandGroupDao.findIdByUuid(gid);
+			String op = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString());
+			UserVO oUser = userQuery.findByUserno(op);
+			String mid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".mid").toString());
+			UserVO mUser = userQuery.findByUserno(mid);
+			commandBasicServiceImpl.exitApplyDisagree(oUser.getId(), groupId, new ArrayListWrapper<Long>().add(mUser.getId()).getList());
+		}
 	}
 	
 	/**
@@ -576,6 +753,19 @@ public class ProtocolParser {
 	}
 	
 	/**
+	 * 更新会议信息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 上午10:34:19
+	 * @param XMLReader reader 协议
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void updateConference(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		updateCommand(reader, rootNodeName, srcNo);
+	}
+	
+	/**
 	 * 删除会议<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -599,6 +789,43 @@ public class ProtocolParser {
 	 */
 	public void startConference(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
 		startCommand(reader, rootNodeName, srcNo);
+	}
+	
+	/**
+	 * 会议全量信息同步<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 上午10:39:45
+	 * @param XMLReader reader 协议
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void infoConference(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		GroupBO group = new GroupBO();
+		group.setGid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString()))
+			.setOp(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString()))
+			.setSubject(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".subject").toString()))
+			.setStime(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".stime").toString()))
+			.setBizname(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.bizname").toString()))
+			.setCreatorid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.creatorid").toString()))
+			.setTopid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.topid").toString()))
+			.setMode(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".cnfstatus.mode").toString()))
+			.setStatus(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".cnfstatus.status").toString()))
+			.setSpkid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".cnfstatus.spkid").toString()));
+		
+		List<Node> nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.mlist.minfo").toString());
+		if(nodes!=null && nodes.size()>0){
+			group.setMlist(new ArrayList<MinfoBO>());
+			for(Node node:nodes){
+				MinfoBO minfo = new MinfoBO();
+				minfo.setMid(reader.readString("mid", node))
+					 .setMname(reader.readString("mname", node))
+					 .setMtype(reader.readString("mtype", node))
+					 .setMstatus(reader.readString("mstatus", node))
+					 .setPid(reader.readString("pid", node));
+				group.getMlist().add(minfo);
+			}
+		}
 	}
 	
 	/**
@@ -664,6 +891,32 @@ public class ProtocolParser {
 	 */
 	public void exitConference(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
 		exitCommand(reader, rootNodeName, srcNo);
+	}
+	
+	/**
+	 * 退出会议请求<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 上午9:53:52
+	 * @param XMLReader reader 协议
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void exitConferenceRequest(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		exitCommandRequest(reader, rootNodeName, srcNo);
+	}
+	
+	/**
+	 * 退出会议响应<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 上午9:53:52
+	 * @param XMLReader reader 协议
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void exitConferenceResponse(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		exitCommandResponse(reader, rootNodeName, srcNo);
 	}
 	
 	/**
