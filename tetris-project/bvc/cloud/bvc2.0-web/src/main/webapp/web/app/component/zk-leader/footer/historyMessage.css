@@ -40,8 +40,8 @@ html, body {
 
 .subtitle {
     position: absolute;
-    top: 37%;
-    left: 22%;
+    top: 54%;
+    left: 22.5%;
     padding: 0 10px;
     height: 30px;
     line-height: 30px;
@@ -49,6 +49,7 @@ html, body {
     border-radius: 5px;
     color: #18e5ff;
     cursor: default;
+    font-weight: 600;
 }
 
 .msgContent {
@@ -103,7 +104,7 @@ html, body {
 
 .btn div {
     float: left;
-    padding: 3px;
+    padding: 2px 5px;
     margin: 1px;
     background-color: #f8a036;
     border-radius: 13px;

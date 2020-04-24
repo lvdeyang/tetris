@@ -22,19 +22,18 @@ define([
                 dialogCurrentPage: 1,
                 leftData: [],
                 rightData: [],
-                gridData:[],
+                gridData: [],
                 dialogLeftVisible: false,
-                dialogFormVisible:false,
-                dialogTableVisible:false,
+                dialogFormVisible: false,
+                dialogTableVisible: false,
                 name: '',
-                form:{
-                    name: '',
+                form: {
                     layerType: '字幕',
                     x: 0,
                     y: 0,
-                    subtitleName:'',
-                    subtitle:'', //添加的时候要传的字幕相关的东西
-                    osdId:'' //添加的时候要传的Id
+                    subtitleName: '',
+                    subtitle: '', //添加的时候要传的字幕相关的东西
+                    osdId: '' //添加的时候要传的Id
                 },
                 formLabelWidth: '120px',
                 rightShow: false, //右侧表格是否显示
@@ -43,6 +42,10 @@ define([
                 btnShow: false,
                 //右侧
                 layerType: [],
+                rightBtnShow: false, //右侧添加和编辑对话框应该显示确定还是修改按钮
+                editRightId: '',
+                deleteVisible: false, //删除对话框
+                deleteId: ''
             }
         },
         computed: {
@@ -50,12 +53,12 @@ define([
             pageData: function () {
                 return this.leftData.slice((this.leftCurrentPage - 1) * 10, this.leftCurrentPage * 10);
             },
-        //  右侧表格的分页
-            rightPageData:function () {
+            //  右侧表格的分页
+            rightPageData: function () {
                 return this.rightData.slice((this.rightCurrentPage - 1) * 10, this.rightCurrentPage * 10);
             },
             // 弹出层表格的分页
-            dialogPageData:function () {
+            dialogPageData: function () {
                 return this.gridData.slice((this.dialogCurrentPage - 1) * 10, this.dialogCurrentPage * 10);
             }
         },
@@ -67,8 +70,8 @@ define([
             rightCurrentChange: function (val) {
                 this.rightCurrentPage = val;
             },
-            dialogCurrentChange:function (val) {
-                this.dialogCurrentPage=val;
+            dialogCurrentChange: function (val) {
+                this.dialogCurrentPage = val;
             },
             //获取左侧表格数据
             refreshLeftData: function () {
@@ -136,87 +139,171 @@ define([
             clickRow: function (row) {
                 var self = this;
                 self.rightShow = true;
-                self.form.osdId=row.id;
-                self.rightData.splice(0,self.rightData.length);
-                ajax.post('/monitor/osd/layer/load',{osdId:row.id},function (data) {
-                    self.rightData=data;
+                self.form.osdId = row.id;
+                self.rightData.splice(0, self.rightData.length);
+                ajax.post('/monitor/osd/layer/load', {osdId: row.id}, function (data) {
+                    self.rightData = data;
                 })
             },
             //点击  输入框 出字幕
-            handleAddLayerSelectSubtitle:function () {
-                this.dialogTableVisible=true;
+            handleAddLayerSelectSubtitle: function () {
+                this.dialogTableVisible = true;
                 this.refreshSubtitle();
             },
             //字幕表格数据
-            refreshSubtitle:function () {
-              var self=this;
-                self.gridData.splice(0,self.gridData.length);
-              ajax.post('/monitor/subtitle/load/all', {
-                  currentPage: self.dialogCurrentPage,
-                  pageSize: '10'
-              },function (data) {
-                  if (data.rows && data.rows.length > 0) {
-                      var commands = data.rows;
-                      for (var i = 0; i < commands.length; i++) {
-                          self.gridData.push(commands[i]);
-                      }
-                  }
-              })
+            refreshSubtitle: function () {
+                var self = this;
+                self.gridData.splice(0, self.gridData.length);
+                ajax.post('/monitor/subtitle/load/all', {
+                    currentPage: self.dialogCurrentPage,
+                    pageSize: '10'
+                }, function (data) {
+                    if (data.rows && data.rows.length > 0) {
+                        var commands = data.rows;
+                        for (var i = 0; i < commands.length; i++) {
+                            self.gridData.push(commands[i]);
+                        }
+                    }
+                })
             },
             //对话框表格的选中行
-            chooseRow:function (row) {
-                this.form.subtitleName=row.name;
-                this.form.subtitle=row;
+            chooseRow: function (row) {
+                this.form.subtitleName = row.name;
+                this.form.subtitle = row;
             },
             //对话框表格的确定
-            chooseConfirm:function () {
-                this.dialogTableVisible=false;
+            chooseConfirm: function () {
+                this.dialogTableVisible = false;
             },
             //添加图层
-            rightAddConfirm:function(){
-                var self=this;
-                var url=null;
-                if(this.form.layerType === '字幕'){
-                    ajax.post('/monitor/osd/layer/add/subtitle/layer',{
-                        osdId:self.form.osdId,
-                        x:parseInt(self.form.x),
+            rightAddConfirm: function () {
+                var self = this;
+                var url = null;
+                this.rightBtnShow = false;
+                if (this.form.layerType === '字幕') {
+                    ajax.post('/monitor/osd/layer/add/subtitle/layer', {
+                        osdId: self.form.osdId,
+                        x: parseInt(self.form.x),
                         y: parseInt(self.form.y),
-                        layerIndex:self.rightData.length,
+                        layerIndex: self.rightData.length,
                         subtitleId: self.form.subtitle.id,
                         subtitleName: self.form.subtitleName,
                         subtitleUsername: self.form.subtitle.username
-                    },function () {
+                    }, function () {
                         self.qt.success('添加字幕图层成功');
-                        self.dialogFormVisible=false;
-                        ajax.post('/monitor/osd/layer/load',{osdId:self.form.osdId},function (data) {
-                            self.rightData=data;
+                        self.dialogFormVisible = false;
+                        ajax.post('/monitor/osd/layer/load', {osdId: self.form.osdId}, function (data) {
+                            self.rightData = data;
                         })
                     });
                     return;
-                }else if(this.form.layerType === '日期'){
-                    url='/monitor/osd/layer/add/date/layer';
-                }else if(this.form.layerType === '时间'){
-                    url='/monitor/osd/layer/add/datetime/layer';
+                } else if (this.form.layerType === '日期') {
+                    url = '/monitor/osd/layer/add/date/layer';
+                } else if (this.form.layerType === '时间') {
+                    url = '/monitor/osd/layer/add/datetime/layer';
 
-                }else if(this.form.layerType === '设备名称'){
-                    url='/monitor/osd/layer/add/devname/layer';
+                } else if (this.form.layerType === '设备名称') {
+                    url = '/monitor/osd/layer/add/devname/layer';
                 }
-                ajax.post(url,{
+                ajax.post(url, {
                     osdId: self.form.osdId,
-                    x:parseInt(self.form.x),
+                    x: parseInt(self.form.x),
                     y: parseInt(self.form.y),
-                    layerIndex:self.rightData.length
-                },function () {
+                    layerIndex: self.rightData.length
+                }, function () {
                     self.qt.success('添加图层成功');
-                    self.dialogFormVisible=false;
-                    ajax.post('/monitor/osd/layer/load',{osdId:self.form.osdId},function (data) {
-                        self.rightData=data;
+                    self.dialogFormVisible = false;
+                    ajax.post('/monitor/osd/layer/load', {osdId: self.form.osdId}, function (data) {
+                        self.rightData = data;
                     })
                 })
             },
+            editRightRow: function (row) {
+                this.dialogFormVisible = true;
+                this.form = {
+                    layerType: '字幕',
+                    x: row.x,
+                    y: row.y,
+                    subtitleName: row.subtitleName,
+                    subtitleId: row.subtitleId,
+                    osdId: this.form.osdId //添加的时候要传的Id
+                };
+                this.rightBtnShow = true;
+                this.editRightId = row.id;
+            },
             //修改图层
-            rightEditConfirm:function () {
-
+            rightEditConfirm: function () {
+                var self = this;
+                ajax.post('/monitor/osd/layer/edit/subtitle/layer/' + self.editRightId, {
+                    x: self.form.x,
+                    y: self.form.y,
+                    subtitleId: self.form.subtitleId,
+                    subtitleName: self.form.subtitleName
+                }, function (data) {
+                    self.qt.success('修改图层成功');
+                    self.dialogFormVisible = false;
+                    ajax.post('/monitor/osd/layer/load', {osdId: self.form.osdId}, function (data) {
+                        self.rightData = data;
+                    })
+                })
+            },
+            //删除图层
+            deleteRightRow: function (id) {
+                this.deleteVisible = true;
+                this.deleteId = id;
+            },
+            // 确定删除
+            confirmDel: function () {
+                var self = this;
+                this.deleteVisible = false;
+                ajax.post('/monitor/osd/layer/remove/' + self.deleteId, null, function () {
+                    self.qt.success('删除成功');
+                    ajax.post('/monitor/osd/layer/load', {osdId: self.form.osdId}, function (data) {
+                        self.rightData = data;
+                    })
+                })
+            },
+            //排序
+            sortRow: function (row, type) {
+                var self = this;
+                var index = null;
+                for (var i = 0; i < self.rightData.length; i++) {
+                    if (self.rightData[i] === row) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (type === 'up') {
+                    self.rightData.splice(i, 1);
+                    self.rightData.splice(i - 1, 0, row);
+                } else {
+                    self.rightData.splice(i, 1);
+                    self.rightData.splice(i + 1, 0, row);
+                }
+                self.layerSort();
+            },
+            layerSort:function(){
+                var self = this;
+                var layers = [];
+                for(var i=0; i<self.rightData.length; i++){
+                    layers.push({
+                        id:self.rightData[i].id,
+                        layerIndex:i
+                    });
+                }
+                if(layers.length > 0){
+                    ajax.post('/monitor/osd/layer/sort', {
+                        layers: $.toJSON(layers)
+                    }, function(){
+                        for(var i=0; i<self.rightData.length; i++){
+                            self.rightData[i].layerIndex = i;
+                        }
+                        self.$message({
+                            type:'success',
+                            message:'重新排序！'
+                        })
+                    });
+                }
             },
             cancel: function () {
                 var self = this;

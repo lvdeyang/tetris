@@ -36,16 +36,15 @@
 
         <div class="btn">
             <!--查看历史消息-->
-            <div class="tagMessage">
-                <img src="../../../../../images/zk-leader/history.png" alt="" @click="showMessagePanel">
-            </div>
+            <div class="tagMessage" @click="showMessagePanel">历史消息</div>
             <!--录制任务管理-->
-            <div class="record" @click="recManage">录制任务管理</div>
+            <div class="record" @click="recManage">录制任务</div>
             <!--下载任务-->
             <div class="download" @click="download">下载任务</div>
             <!--换一批-->
-            <div class="change" title="下一页" @click="replace" style="width: 20px;height: 20px;line-height: 20px;">
+            <div class="change" @click="replace">
                 <span class="icon-step-forward"></span>
+                <span>下一页</span>
             </div>
         </div>
 

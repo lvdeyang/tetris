@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -13,8 +14,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UnbindResouceBO;
 import com.suma.venus.resource.base.bo.UnbindRolePrivilegeBO;
-import com.suma.venus.resource.base.bo.UnbindUserPrivilegeBO;
-import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.bo.DeviceInfoBO;
 import com.suma.venus.resource.bo.PrivilegeStatusBO;
@@ -34,20 +33,19 @@ import com.suma.venus.resource.lianwang.status.UserStatusXML;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
-import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
-import com.suma.venus.resource.service.router.RouterService;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.SerInfoPO;
 import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
+import com.suma.venus.resource.service.router.RouterService;
 import com.suma.venus.resource.util.XMLBeanUtils;
 import com.suma.venus.resource.vo.NodeInfoVO;
 import com.suma.venus.resource.vo.NodeVO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
-import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.system.role.SystemRoleVO;
 
@@ -438,10 +436,12 @@ public class ResourceRemoteService {
 				for(String father: fatherList){
 					NodeVO fatherNode = generateNodeVO(father, infos);
 					if(fatherNode != null){
+						if(father.equals(serNode.getNodePublisher())) fatherNode.setIs_publish(true);
 						nodeInfo.getSupers().add(fatherNode);
 					}
 				}
-				if(nodeInfo.getSupers().size() > 0){
+				//没指定订阅就get(0)
+				if((serNode.getNodePublisher() == null || StringUtils.isEmpty(serNode.getNodePublisher())) && nodeInfo.getSupers().size() > 0){
 					nodeInfo.getSupers().get(0).setIs_publish(true);
 				}
 			}

@@ -112,7 +112,7 @@
       <el-col :span="24" class="toolbar">
         <el-button size="small" type="primary" @click="submitPrivilege">提交</el-button>
         <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20" ></el-input>
-        <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :total="total" style="float:right;">
+        <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :current-page="pageNum" :total="total" style="float:right;">
         </el-pagination>
       </el-col>
 
@@ -465,6 +465,10 @@
   // 获取资源列表
   getResources: function () {
 
+    if(!this.resourceTableShow){
+      this.pageNum = 1;
+    }
+
     if (!this.currentRoleRow) {
       this.$message({
         message: '请先选择角色',
@@ -541,6 +545,10 @@
   },
 
   getUsers: function () {
+
+    if(this.resourceTableShow){
+      this.pageNum = 1;
+    }
 
     if (!this.currentRoleRow) {
       this.$message({

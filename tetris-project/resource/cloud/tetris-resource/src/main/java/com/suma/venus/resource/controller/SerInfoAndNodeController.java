@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -18,22 +20,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
-import com.suma.application.ldap.contants.LdapContants;
 import com.suma.application.ldap.node.LdapNodeDao;
 import com.suma.application.ldap.node.LdapNodePo;
 import com.suma.application.ldap.ser.LdapSerInfoDao;
 import com.suma.application.ldap.ser.LdapSerInfoPo;
-import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.SerInfoPO;
-import com.suma.venus.resource.pojo.SerNodePO;
-import com.suma.venus.resource.util.SerInfoAndNodeSyncLdapUtils;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
+import com.suma.venus.resource.pojo.SerInfoPO;
+import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.service.LdapService;
+import com.suma.venus.resource.util.SerInfoAndNodeSyncLdapUtils;
 import com.suma.venus.resource.vo.SerInfoVO;
 import com.suma.venus.resource.vo.SerNodeVO;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping("serInfo")
@@ -55,6 +57,9 @@ public class SerInfoAndNodeController extends ControllerBase {
 
 	@Autowired
 	private SerInfoAndNodeSyncLdapUtils serInfoAndNodeSyncLdapUtils;
+	
+	@Autowired
+	private LdapService ldapService;
 
 	@RequestMapping("querySerInfo")
 	@ResponseBody
@@ -290,9 +295,10 @@ public class SerInfoAndNodeController extends ControllerBase {
 				return data;
 			 }
 
+			serNodePOTemp.setNodePublisher(serNodeVO.getNodePublisher());
 			serNodePOTemp.setNodeName(serNodeVO.getNodeName());
 			serNodePOTemp.setNodeFather(serNodeVO.getNodeFather().equals("")? "NULL": serNodeVO.getNodeFather());
-			serNodePOTemp.setNodeRelations(serNodeVO.getNodeRelations().equals("")? "NULL": serNodeVO.getNodeFather());
+			serNodePOTemp.setNodeRelations(serNodeVO.getNodeRelations().equals("")? "NULL": serNodeVO.getNodeRelations());
 			serNodePOTemp.setNodeFactInfo(serNodeVO.getNodeFactInfo());
 			serNodePOTemp.setSyncStatus(SYNC_STATUS.ASYNC);
 			serNodeDao.save(serNodePOTemp);
@@ -444,6 +450,38 @@ public class SerInfoAndNodeController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		data.put(ERRMSG, serInfoAndNodeSyncLdapUtils.handleCleanUpSerNode());
 		return data;
+	}
+	
+	/**
+	 * LDAP数据备份<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月22日 下午3:14:17
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/ldap/backup")
+	public Object ldapBackUp(HttpServletRequest request) throws Exception{
+	
+		ldapService.ldapBackup();
+		
+		return null;
+	}
+	
+	/**
+	 * LDAP数据恢复<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月22日 下午3:14:40
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/ldap/resume")
+	public Object ldapResume(HttpServletRequest request) throws Exception{
+	
+		ldapService.ldapResume();
+		
+		return null;
 	}
 
 }

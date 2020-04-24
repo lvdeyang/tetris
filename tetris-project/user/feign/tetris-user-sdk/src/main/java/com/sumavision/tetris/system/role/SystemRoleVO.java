@@ -1,5 +1,7 @@
 package com.sumavision.tetris.system.role;
 
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+
 /**
  * 系统角色<br/>
  * <b>作者:</b>lvdeynag<br/>
@@ -73,6 +75,18 @@ public class SystemRoleVO {
 	public SystemRoleVO setLevel_2(SystemRoleLevel level_2) {
 		this.level_2 = level_2;
 		return this;
+	}
+	
+	/**
+	 * 判断是否是用户的私有角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月15日 下午6:44:39
+	 * @param Long userId 用户id
+	 * @return boolean 判断结果
+	 */
+	public boolean belong(Long userId){
+		return new StringBufferWrapper().append("private_u_").append(userId).toString().equals(this.name);
 	}
 	
 }

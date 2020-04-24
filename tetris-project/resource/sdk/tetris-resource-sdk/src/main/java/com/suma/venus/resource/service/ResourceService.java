@@ -38,6 +38,7 @@ import com.suma.venus.resource.base.bo.ExternChannelParamTemplateBody;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.RectBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
+import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.ScreenBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
@@ -54,6 +55,8 @@ import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
+import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.ScreenRectTemplateDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.dao.VirtualResourceDao;
@@ -67,16 +70,18 @@ import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
-import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.LockBundleParamPO;
 import com.suma.venus.resource.pojo.LockChannelParamPO;
 import com.suma.venus.resource.pojo.LockScreenParamPO;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.ScreenRectTemplatePO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.system.role.SystemRoleVO;
 
 /**
  * 资源层统一资源查询Service
@@ -160,6 +165,12 @@ public class ResourceService {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private PrivilegeDAO privilegeDao;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDao;
 
 	/** 通过userId查询具有权限的user */
 	public List<UserBO> queryUserresByUserId(Long userId, TerminalType terminalType) {
@@ -1539,16 +1550,30 @@ public class ResourceService {
 			List<VirtualResourcePO> virtualResourcePOs = new ArrayList<VirtualResourcePO>();
 			List<JSONObject> jsonList = new ArrayList<JSONObject>();
 			Set<String> resourceIds = new HashSet<String>();
-
+			
+			//里面的用户只可能是同一个，所以先按照用户只是同一个来处理
+			Long _userId = null;
+			for (JSONObject onDemandResource : onDemandResources) {
+				Long userId = onDemandResource.getLong("userId");
+				if(userId != null){
+					_userId = userId;
+					break;
+				}
+			}
+			
+			SystemRoleVO roleVO = null;
+			if(_userId != null){
+				roleVO = userQueryService.queryPrivateRoleId(_userId);
+			}
+			
 			// 绑定资源权限
-//			UserAndResourceIdBO userAndResourceIds = new UserAndResourceIdBO();
-//			List<String> resourceCodes = new ArrayList<String>();
+			RoleAndResourceIdBO roleAndResourceIdBO = new RoleAndResourceIdBO();
+			roleAndResourceIdBO.setResourceCodes(new ArrayList<String>());
 			for (JSONObject onDemandResource : onDemandResources) {
 				String resourceId = BundlePO.createBundleId();
 				resourceIds.add(resourceId);
-//				Long userId = onDemandResource.getLong("userId");
-//				resourceCodes.add(resourceId);
-//				userAndResourceIds.setUserId(userId);
+
+				roleAndResourceIdBO.getResourceCodes().add(resourceId);
 				// 点播资源实体属性
 				for (Entry<String, Object> entry : onDemandResource.entrySet()) {
 					virtualResourcePOs.add(new VirtualResourcePO(entry.getKey(), String.valueOf(entry.getValue()), resourceId));
@@ -1560,13 +1585,13 @@ public class ResourceService {
 				}
 			}
 
-//			userAndResourceIds.setResourceCodes(resourceCodes);
-//			ResultBO result = userFeign.bindUserPrivilege(userAndResourceIds);
-//			if(null==result || !result.isResult()){
-//				LOGGER.error("Fail to bind resource on user whose id=" + userAndResourceIds.getUserId());
-//			}
-
 			virtualResourceDao.save(virtualResourcePOs);
+			
+			if(roleVO != null){
+				roleAndResourceIdBO.setRoleId(Long.valueOf(roleVO.getId()));
+				userQueryService.bindRolePrivilege(roleAndResourceIdBO);
+			}
+			
 			for (String resourceId : resourceIds) {
 				jsonList.add(virtualResourceService.packageResource(resourceId));
 			}
@@ -1713,6 +1738,15 @@ public class ResourceService {
 			for (String resourceId : resourceIds) {
 				virtualResourceDao.deleteByResourceId(resourceId);
 			}
+			if(resourceIds != null && resourceIds.size() > 0){
+				
+				List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resourceIds);
+				List<RolePrivilegeMap> maps = rolePrivilegeMapDao.findByResourceIdIn(resourceIds);
+				
+				privilegeDao.delete(privileges);
+				rolePrivilegeMapDao.delete(maps);
+			}
+
 		} catch (Exception e) {
 			LOGGER.error("Fail to delete on-demand resources", e);
 			return false;
@@ -2112,4 +2146,5 @@ public class ResourceService {
 		channelBody.setExtern_type(channelTemplate.getExternType());
 		return channelBody;
 	}
+	
 }

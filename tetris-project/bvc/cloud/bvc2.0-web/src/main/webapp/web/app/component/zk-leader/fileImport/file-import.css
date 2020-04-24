@@ -1,8 +1,8 @@
 .fileImport{
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, #204a6b, #327ab1, #1c6fb1, #204a6b);
     overflow: hidden;
+    background-color: #0F1537;
 }
 .title{
     height: 30px;
@@ -53,8 +53,13 @@
 }
 .el-dialog{
     width: 70%;
-    background-color: #869daf;
+    background: linear-gradient(to right, #1B2751,#3a489a,#1D2A56);
 }
+.el-dialog__title {
+    color: #9c9c9c;
+    font-weight: 600;
+}
+
 
 /*重置树形菜单*/
 .el-tree {

@@ -42,7 +42,7 @@ public class UserOfflineListener implements ApplicationListener<WebsocketSession
 	public void onApplicationEvent(WebsocketSessionClosedEvent event) {
 		try {
 			FolderUserMap map = folderUserMapDao.findByUserId(event.getUserId());
-			if(map != null && map.getFolderId() != null){
+			if(map != null && map.getFolderId() != null && map.getSyncStatus().equals(1)){
 				FolderPO folder = folderDao.findOne(map.getFolderId());
 				
 				//本系统下的用户不在map里面存状态

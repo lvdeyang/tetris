@@ -65,6 +65,7 @@ import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.service.BundleService;
+import com.suma.venus.resource.service.BundleSpecificationBuilder;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ChannelTemplateService;
 import com.suma.venus.resource.service.ExtraInfoService;
@@ -264,10 +265,18 @@ public class BundleManageController extends ControllerBase {
 		try {
 			List<BundlePO> bundlePOs1 = bundleService.queryByUserIdAndDevcieModelAndKeyword(userId, deviceModel,
 					sourceType, keyword);
+			
+			List<BundlePO> bundlePOs2 = bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, userId));
 
 			// 过滤掉devicemodel为空的数据 ??
 			List<BundlePO> bundlePOs = bundlePOs1.stream().filter(b -> (null != b.getDeviceModel()))
 					.collect(Collectors.toList());
+			
+			for(BundlePO bundle: bundlePOs2){
+				if(!bundlePOs.contains(bundle)){
+					bundlePOs.add(bundle);
+				}
+			}
 
 			List<BundleVO> bundles = new ArrayList<BundleVO>();
 			int from = (pageNum - 1) * countPerPage;
@@ -1050,5 +1059,5 @@ public class BundleManageController extends ControllerBase {
 
 		return data;
 	}
-
+	
 }
