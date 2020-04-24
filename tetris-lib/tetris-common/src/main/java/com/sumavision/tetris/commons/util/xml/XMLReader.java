@@ -76,6 +76,7 @@ public class XMLReader {
 		if(keys.length > 1){
 			for(int i=1; i<keys.length; i++){
 				String scopeKey = keys[i];
+				boolean finded = false;
 				for(int j=0; j<currentNode.getChildNodes().getLength(); j++){
 					Node scopeNode = currentNode.getChildNodes().item(j);
 					if(scopeNode.getNodeName().equals(scopeKey)){
@@ -84,9 +85,11 @@ public class XMLReader {
 						}else{
 							currentNode = scopeNode;
 						}
+						finded = true;
 						break;
 					}
 				}
+				if(!finded) return null;
 			}
 		}else{
 			return currentNode.getTextContent();
@@ -148,9 +151,11 @@ public class XMLReader {
 				}
 			}
 		}
+		if(currentNode == null) return null;;
 		if(keys.length > 1){
 			for(int i=1; i<keys.length; i++){
 				String scopeKey = keys[i];
+				boolean finded = false;
 				for(int j=0; j<currentNode.getChildNodes().getLength(); j++){
 					Node scopeNode = currentNode.getChildNodes().item(j);
 					if(scopeNode.getNodeName().equals(scopeKey)){
@@ -159,9 +164,11 @@ public class XMLReader {
 						}else{
 							currentNode = scopeNode;
 						}
+						finded = true;
 						break;
 					}
 				}
+				if(!finded) return null;
 			}
 		}else{
 			return currentNode.getAttributes().getNamedItem(attribute).getNodeValue();
@@ -214,12 +221,15 @@ public class XMLReader {
 				}
 			}
 		}
+		if(currentNode == null) return null;
 		if(keys.length > 1){
 			for(int i=1; i<keys.length; i++){
 				String scopeKey = keys[i];
+				boolean finded = false;
 				for(int j=0; j<currentNode.getChildNodes().getLength(); j++){
 					Node scopeNode = currentNode.getChildNodes().item(j);					
 					if(scopeNode.getNodeName().equals(scopeKey)){
+						finded = true;
 						if(keys.length == i+1){
 							currentNodeList.add(scopeNode);
 						}else{
@@ -227,6 +237,7 @@ public class XMLReader {
 						}
 					}
 				}
+				if(!finded) return null;
 			}
 		}
 		return currentNodeList;
