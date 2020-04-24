@@ -23,6 +23,7 @@ define(function(){
         tableColumnMobile:'手机号',
         tableColumnMail:'邮箱',
         tableColumnLevel:'用户级别',
+        tableColumnLock:'锁定状态',
         tableColumnOperation:'操作',
         tipHandleRowEdit:'修改用户',
         tipGotoBindBusinessRole:'绑定角色',

@@ -72,6 +72,9 @@ public class UserPO extends AbstractBasePO{
 	/** 用户当前设备类型 */
 	//private UserEquipType equipType;
 	
+	/** 异常登录次数 */
+	private Integer errorLoginTimes;
+	
 	@Column(name = "USERNAME")
 	public String getUsername() {
 		return username;
@@ -218,6 +221,15 @@ public class UserPO extends AbstractBasePO{
 
 	public void setLevel(Integer level) {
 		this.level = level;
+	}
+
+	@Column(name = "ERROR_LOGIN_TIMES")
+	public Integer getErrorLoginTimes() {
+		return errorLoginTimes;
+	}
+
+	public void setErrorLoginTimes(Integer errorLoginTimes) {
+		this.errorLoginTimes = errorLoginTimes;
 	}
 
 	/**

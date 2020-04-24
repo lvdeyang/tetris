@@ -214,6 +214,42 @@ public class UserController {
 	}
 	
 	/**
+	 * 锁定用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午3:49:20
+	 * @param @PathVariable Long id 用户id
+	 * @return UserVO 用户
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/lock/{id}")
+	public Object lock(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		return userService.lock(id);
+	}
+	
+	/**
+	 * 解除锁定用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午3:49:20
+	 * @param @PathVariable Long id 用户id
+	 * @return UserVO 用户
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/unlock/{id}")
+	public Object unlock(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		return userService.unlock(id);
+	}
+	
+	/**
 	 * 添加一个用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

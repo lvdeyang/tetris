@@ -119,6 +119,11 @@ define([
                         var rows = data.rows;
                         if(rows && rows.length>0){
                             for(var i=0; i<rows.length; i++){
+                            	if(rows[i].errorLoginTimes >= 10){
+                            		rows[i].locked = true;
+                            	}else{
+                            		rows[i].locked = false;
+                            	}
                                 self.table.rows.push(rows[i]);
                             }
                             self.table.total = total;
@@ -173,6 +178,39 @@ define([
                         //self.load(1);
                         self.loopImportStatus();
                     });
+                },
+                handelUserLockStatusChange:function(scope){
+                	var self = this;
+                	var rows = self.table.rows;
+                	if(scope.row.locked){
+                		ajax.post('/user/lock/' + scope.row.id, null, function(data){
+                			 for(var i=0; i<rows.length; i++){
+                				 if(rows[i].id === data.id){
+                					 rows[i].errorLoginTimes = data.errorLoginTimes;
+                					 rows[i].locked = true;
+                					 break;
+                				 }
+                			 }
+                			 self.$message({
+                				 type:'success',
+                				 message:'锁定成功！'
+                			 });
+                		});
+                	}else{
+                		ajax.post('/user/unlock/' + scope.row.id, null, function(data){
+               			 for(var i=0; i<rows.length; i++){
+               				 if(rows[i].id === data.id){
+               					 rows[i].errorLoginTimes = data.errorLoginTimes;
+               					 rows[i].locked = false;
+               					 break;
+               				 }
+               			 }
+               			 self.$message({
+               				 type:'success',
+               				 message:'解除锁定成功！'
+               			 });
+               		});
+                	}
                 },
                 handleRowEdit: function (scope) {
                     var self = this;

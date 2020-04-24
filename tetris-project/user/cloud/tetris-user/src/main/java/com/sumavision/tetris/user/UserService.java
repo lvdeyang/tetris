@@ -120,6 +120,42 @@ public class UserService{
 	private TokenDAO tokenDao;
 	
 	/**
+	 * 锁定用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午3:44:02
+	 * @param Long id 用户id
+	 * @return UserVO 用户
+	 */
+	public UserVO lock(Long id) throws Exception{
+		UserPO user = userDao.findOne(id);
+		if(user == null){
+			throw new UserNotExistException(id);
+		}
+		user.setErrorLoginTimes(10);
+		userDao.save(user);
+		return new UserVO().set(user);
+	}
+	
+	/**
+	 * 解除锁定哟用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午3:44:31
+	 * @param Long id 用户id
+	 * @return UserVO 用户
+	 */
+	public UserVO unlock(Long id) throws Exception{
+		UserPO user = userDao.findOne(id);
+		if(user == null){
+			throw new UserNotExistException(id);
+		}
+		user.setErrorLoginTimes(0);
+		userDao.save(user);
+		return new UserVO().set(user);
+	}
+	
+	/**
 	 * 添加一个游客<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -356,6 +392,8 @@ public class UserService{
 		
 		if(!password.equals(repeat)) throw new RepeatNotMatchPasswordException();
 		
+		userQuery.checkPassword(password);
+		
 		UserPO user = userDao.findByUsername(username);
 		if(user != null){
 			throw new UsernameAlreadyExistException(username);
@@ -562,6 +600,8 @@ public class UserService{
 			
 			if(!newPassword.equals(repeat)) throw new RepeatNotMatchPasswordException();
 			
+			userQuery.checkPassword(newPassword);
+			
 			user.setPassword(sha256Encoder.encode(newPassword));
 		}
 		
@@ -616,6 +656,8 @@ public class UserService{
 			}
 			
 			if(!newPassword.equals(repeat)) throw new RepeatNotMatchPasswordException();
+			
+			userQuery.checkPassword(newPassword);
 			
 			user.setPassword(sha256Encoder.encode(newPassword));
 		}

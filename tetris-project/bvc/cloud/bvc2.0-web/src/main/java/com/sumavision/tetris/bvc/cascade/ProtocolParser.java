@@ -227,6 +227,10 @@ public class ProtocolParser {
 				speakerSetRequest(reader, rootNodeName, srcNo);
 			}else if("bizcnf".equals(commandname) && "spkres".equals(operation)){
 				speakerSetResponse(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "discstart".equals(operation)){
+				discussStart(reader, rootNodeName, srcNo);
+			}else if("bizcnf".equals(commandname) && "discstop".equals(operation)){
+				discussStop(reader, rootNodeName, srcNo);
 			}
 		}
 		
@@ -679,7 +683,15 @@ public class ProtocolParser {
 		}
 		
 		List<String> bundleIds = bundleDao.findBundleIdByBundleNumIn(mediaIds);
-		commandForwardServiceImpl.forwardDevice(groupId, bundleIds, userIds);
+		
+		users = userQuery.findByUsernoIn(mediaIds);
+		List<Long> srcUserIds = new ArrayList<Long>();
+		if(users!=null && users.size()>0){
+			for(UserVO user:users){
+				srcUserIds.add(user.getId());
+			}
+		}
+		commandForwardServiceImpl.forward(groupId, srcUserIds, bundleIds, userIds);
 	}
 	
 	/**
@@ -692,7 +704,24 @@ public class ProtocolParser {
 	 * @param String srcNo 操作用户号码
 	 */
 	public void stopDeviceForwardInCommand(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
-		
+		String gid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString());
+		String op = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString());
+		UserVO oUser = userQuery.findByUserno(op);
+		List<Node> nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".mlist.mid").toString());
+		List<String> usernos = new ArrayList<String>();
+		if(nodes!=null && nodes.size()>0){
+			for(Node node:nodes){
+				usernos.add(node.getTextContent());
+			}
+		}
+		nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".medialist.mediasrcid").toString());
+		List<String> mediaIds = new ArrayList<String>();
+		if(nodes!=null && nodes.size()>0){
+			for(Node node:nodes){
+				mediaIds.add(node.getTextContent());
+			}
+		}
+		commandForwardServiceImpl.stopBySrcAndDstCodes(oUser.getId(), gid, mediaIds, usernos);
 	}
 	
 	/**************
@@ -955,7 +984,7 @@ public class ProtocolParser {
 	 * @param String srcNo 操作用户号码
 	 */
 	public void stopDeviceForwardInConference(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
-		
+		stopDeviceForwardInCommand(reader, rootNodeName, srcNo);
 	}
 	
 	/**
@@ -1052,6 +1081,40 @@ public class ProtocolParser {
 		}else if("1".equals(code)){
 			//commandMeetingSpeakServiceImpl.speakApplyAgree(operator.getId(), groupId, new ArrayListWrapper<Long>().add(speaker.getId()).getList());
 		}
+	}
+	
+	/**
+	 * 开启讨论模式<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午4:52:07
+	 * @param XMLReader reader 协议 
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void discussStart(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		String gid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString());
+		Long groupId = commandGroupDao.findIdByUuid(gid);
+		String op = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString());
+		UserVO operator = userQuery.findByUserno(op);
+		commandMeetingSpeakServiceImpl.discussStart(operator.getId(), groupId);
+	}
+	
+	/**
+	 * 关闭讨论模式<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午4:52:07
+	 * @param XMLReader reader 协议 
+	 * @param String rootNodeName 协议根节点名称
+	 * @param String srcNo 操作用户号码
+	 */
+	public void discussStop(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+		String gid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString());
+		Long groupId = commandGroupDao.findIdByUuid(gid);
+		String op = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString());
+		UserVO operator = userQuery.findByUserno(op);
+		commandMeetingSpeakServiceImpl.discussStop(operator.getId(), groupId);
 	}
 	
 }
