@@ -9,9 +9,9 @@
 		<#if mAddList??>
 			<#list mAddList as m>
 				<minfo>
-					<mid>${mid}</mid>
-					<mname>${mname}</mname>
-					<mtype>${mtype}</mtype>
+					<mid>${m.mid}</mid>
+					<mname>${m.mname}</mname>
+					<mtype>${m.mtype}</mtype>
 					<#if m.pid??>
 						<pid>${m.pid}</pid>
 					</#if>
