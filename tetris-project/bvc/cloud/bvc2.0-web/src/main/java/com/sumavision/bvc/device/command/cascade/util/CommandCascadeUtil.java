@@ -2,6 +2,7 @@ package com.sumavision.bvc.device.command.cascade.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +14,8 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
+import com.sumavision.bvc.command.group.enumeration.GroupStatus;
+import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
@@ -131,17 +134,32 @@ public class CommandCascadeUtil {
 		return groupBO;
 	}
 
-	//TODO:
-	public GroupBO maddfullCommand(CommandGroupPO group, List<MinfoBO> newMemberInfos, List<CommandGroupMemberPO> acceptMembers){
+	//TODO:group.getMembers()需要包含新成员
+	public GroupBO maddfullCommand(CommandGroupPO group, List<MinfoBO> newNodeMemberInfos){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
-//		List<MinfoBO> mlist = generateMinfoBOList(members);
-		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers, chairmanMember);
+		String stime = DateUtil.format(group.getStartTime(), DateUtil.dateTimePattern);//如果getStartTime为空，会得到空字符串
+		String status = group.getStatus().equals(GroupStatus.PAUSE)?"1":"0";//0表示正常业务、1表示暂停业务
+		List<String> croplist = new ArrayList<String>();
+		for(CommandGroupMemberPO member : members){
+			if(member.getCooperateStatus().equals(MemberStatus.CONNECT)){
+				croplist.add(member.getUserNum());
+			}
+		}
+		List<MinfoBO> mAddList = generateMinfoBOList(members);
+//		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers, chairmanMember);
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
 				.setOp(chairmanMember.getUserNum())
-				.setMlist(newMemberInfos)
-				.setmAddList(mAddList);
+				.setSubject(group.getSubject())
+				.setStime(stime)
+				.setBizname(group.getName())
+				.setCreatorid(chairmanMember.getUserNum())
+				.setTopid(chairmanMember.getUserNum())
+				.setmAddList(mAddList)//
+				.setStatus(status)
+				.setCroplist(croplist)//协同成员号码列表
+				.setMlist(newNodeMemberInfos);//新节点的成员，用于确定发送目的节点
 		
 		return groupBO;
 	}
@@ -429,7 +447,7 @@ public class CommandCascadeUtil {
 	}
 	
 	//TODO:
-	public GroupBO maddfullMeeting(CommandGroupPO group, List<MinfoBO> newMemberInfos, List<CommandGroupMemberPO> acceptMembers){
+	public GroupBO maddfullMeeting000(CommandGroupPO group, List<MinfoBO> newNodeMemberInfos, List<CommandGroupMemberPO> acceptMembers){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 //		List<MinfoBO> mlist = generateMinfoBOList(members);
@@ -437,12 +455,44 @@ public class CommandCascadeUtil {
 		GroupBO groupBO = new GroupBO()
 				.setGid(group.getUuid())
 				.setOp(chairmanMember.getUserNum())
-				.setMlist(newMemberInfos)
+				.setMlist(newNodeMemberInfos)
 				.setmAddList(mAddList);
 		
 		return groupBO;
 	}
 	
+	//TODO:group.getMembers()需要包含新成员
+	public GroupBO maddfullMeeting(CommandGroupPO group, List<MinfoBO> newNodeMemberInfos){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		String stime = DateUtil.format(group.getStartTime(), DateUtil.dateTimePattern);//如果getStartTime为空，会得到空字符串
+		String mode = "0";//0表示主席模式、1表示讨论模式，后续支持
+		String status = group.getStatus().equals(GroupStatus.PAUSE)?"1":"0";//0表示正常业务、1表示暂停业务
+		List<String> croplist = new ArrayList<String>();
+		for(CommandGroupMemberPO member : members){
+			if(member.getCooperateStatus().equals(MemberStatus.CONNECT)){
+				croplist.add(member.getUserNum());
+			}
+		}
+		List<MinfoBO> mAddList = generateMinfoBOList(members);
+//		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers, chairmanMember);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setSubject(group.getSubject())
+				.setStime(stime)
+				.setBizname(group.getName())
+				.setCreatorid(chairmanMember.getUserNum())
+				.setTopid(chairmanMember.getUserNum())
+				.setmAddList(mAddList)//
+				.setMode(mode)
+				.setStatus(status)
+				.setCroplist(croplist)//协同成员号码列表
+				.setMlist(newNodeMemberInfos);//新节点的成员，用于确定发送目的节点
+		
+		return groupBO;
+	}
+
 	/** 退出会议通知，包括主动和被动 */
 	public GroupBO exitMeeting(CommandGroupPO group, CommandGroupMemberPO removeMember){
 		List<CommandGroupMemberPO> members = group.getMembers();

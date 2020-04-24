@@ -32,6 +32,8 @@
 	<cnfstatus>
 		<mode>${mode}</mode>
 		<status>${status}</status>
-		<spkid>${spkid}</spkid>
+		<#if spkid??>
+			<spkid>${spkid}</spkid>
+		</#if>
 	</cnfstatus>
 </notify>

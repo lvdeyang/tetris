@@ -862,34 +862,37 @@ public class CommandMeetingSpeakServiceImpl {
 		//释放这些退出或删除成员的播放器，同时如果是删人就给被删的成员发消息
 		List<CommandGroupUserPlayerPO> needFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 		
-		//除主席外，处理所有成员，包括被撤销的
+		//处理所有成员，包括被撤销的，主席不停转发不删播放器，发消息
 		for(CommandGroupMemberPO member : members){
 			
 			if(OriginType.OUTER.equals(member.getOriginType())){
 				continue;
 			}
 			
-			if(member.isAdministrator()){// || revokeMemberIds.contains(member.getId())){
-				continue;
-			}
+//			if(member.isAdministrator()){// || revokeMemberIds.contains(member.getId())){
+//				continue;
+//			}
 			List<CommandGroupUserPlayerPO> thisMemberFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 			JSONArray splits = new JSONArray();
-			for(CommandGroupForwardPO forward : relativeForwards){
-				if(member.getId().equals(forward.getDstMemberId())){
-					//目的是该成员的，找播放器
-					for(CommandGroupUserPlayerPO player : member.getPlayers()){
-						//播放器对应转发目的，且 这是一条协同转发，且 该转发的源是一个被撤销协同的成员
-						if(player.getBundleId().equals(forward.getDstVideoBundleId())
-								//&& forward.getForwardBusinessType().equals(ForwardBusinessType.COOPERATE_COMMAND)//这个条件上头查询已经有了
-								&& speakMemberIds.contains(forward.getSrcMemberId())){
-							player.setFree();
-							needFreePlayers.add(player);
-							thisMemberFreePlayers.add(player);
-							allNeedDelForwards.add(forward);
-							
-							JSONObject split = new JSONObject();
-							split.put("serial", player.getLocationIndex());
-							splits.add(split);
+			//主席不停转发不删播放器
+			if(!member.isAdministrator()){
+				for(CommandGroupForwardPO forward : relativeForwards){
+					if(member.getId().equals(forward.getDstMemberId())){
+						//目的是该成员的，找播放器
+						for(CommandGroupUserPlayerPO player : member.getPlayers()){
+							//播放器对应转发目的，且 这是一条协同转发，且 该转发的源是一个被撤销协同的成员
+							if(player.getBundleId().equals(forward.getDstVideoBundleId())
+									//&& forward.getForwardBusinessType().equals(ForwardBusinessType.COOPERATE_COMMAND)//这个条件上头查询已经有了
+									&& speakMemberIds.contains(forward.getSrcMemberId())){
+								player.setFree();
+								needFreePlayers.add(player);
+								thisMemberFreePlayers.add(player);
+								allNeedDelForwards.add(forward);
+								
+								JSONObject split = new JSONObject();
+								split.put("serial", player.getLocationIndex());
+								splits.add(split);
+							}
 						}
 					}
 				}
