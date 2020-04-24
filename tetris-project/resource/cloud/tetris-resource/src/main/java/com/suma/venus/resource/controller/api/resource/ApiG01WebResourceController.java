@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.suma.venus.resource.service.ApiResourceService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
 /**
  * G01资源接口<br/>
@@ -35,10 +36,12 @@ public class ApiG01WebResourceController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/bundle/add")
-	public Object bundleAdd(
-			String bundleIp,
-			String daId,
-			HttpServletRequest request) throws Exception{
+	public Object bundleAdd(HttpServletRequest request) throws Exception{
+		
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		
+		String bundleIp = requestWrapper.getString("bundleIp");
+		String daId = requestWrapper.getString("daId");
 		
 		return apiResourceService.addG01Bundle(bundleIp, daId);
 	}
@@ -55,10 +58,12 @@ public class ApiG01WebResourceController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/bundle/certify")
-	public Object bundleCertify(
-			String bundleIp,
-			String daId,
-			HttpServletRequest request) throws Exception{
+	public Object bundleCertify(HttpServletRequest request) throws Exception{
+		
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		
+		String bundleIp = requestWrapper.getString("bundleIp");
+		String daId = requestWrapper.getString("daId");
 		
 		return apiResourceService.certifyG01Bundle(bundleIp, daId);
 	}
@@ -73,11 +78,14 @@ public class ApiG01WebResourceController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/bundle/delete")
-	public Object bundleDelete(
-			String bundleId,
-			HttpServletRequest request) throws Exception{
+	public Object bundleDelete(HttpServletRequest request) throws Exception{
+		
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		
+		String bundleId = requestWrapper.getString("bundleId");
 		
 		apiResourceService.deleteG01Bundle(bundleId);
+		
 		return null;
 	}
 	
