@@ -200,7 +200,7 @@
 
     import selectLayerNode from '../layernode/SelectLayerNode';
 
-    let basePath = process.env.RESOURCE_ROOT
+    let basePath = document.location.origin;
 
     export default {
         components: { selectLayerNode },

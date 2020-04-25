@@ -60,7 +60,7 @@
   // import apiConfig from '../../../config/api.config';
   // let requestIP = document.location.host.split(":")[0];
 
-  let basePath = process.env.RESOURCE_ROOT
+  let basePath = document.location.origin;
 
   export default {
       name: "templateManage",

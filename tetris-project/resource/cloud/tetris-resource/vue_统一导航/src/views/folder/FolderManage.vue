@@ -197,11 +197,9 @@
     queryBundlesWithoutFolder,queryUsersWithoutFolder,setFolderToUsers,resetFolderOfUsers,queryRootOptions,setRoot,syncFolderToLdap,
     syncFolderFromLdap,cleanupFolderLdap,changeNodePosition,resetRootNode,exportFolder,exportUser} from '../../api/api';
 
-  let requestIP = document.location.host.split(":")[0];
-
   //let basePath = process.env.RESOURCE_ROOT;
 
-  let basePath = "http://" + requestIP + ":8093";
+  let basePath = document.location.origin;
 
   export default {
 		data() {
