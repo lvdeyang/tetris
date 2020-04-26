@@ -133,7 +133,7 @@ define([
                     }),
                     members:$.toJSON(members)
                 }, function(){
-                    self.qt.warning('title', '操作成功');
+                    self.qt.warning('发送成功');
                 });
             },
             //停止按钮

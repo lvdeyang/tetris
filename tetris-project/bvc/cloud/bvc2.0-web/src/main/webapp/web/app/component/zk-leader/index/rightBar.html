@@ -13,27 +13,27 @@
             <div class="commandBtn" v-if="group.currentId">
                 <el-tooltip class="item" effect="dark" :content="!buttons.isPause?'开始指挥':'恢复指挥'" placement="top-start"
                             v-if="group.current.creator==user.id">
-                    <span class="icon-play" :style="group.current.status !=='start'?'color:#fff;':'color:gray;'" @click="startCommand"></span>
+                    <el-button type="text" :disabled="group.current.status =='start'" class="icon-play" @click="startCommand"></el-button>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="暂停" placement="top-start"
                             v-if="group.current.creator==user.id">
-                    <span class="icon-pause" :style="group.current.status =='start'?'color:#fff;':'color:gray;'" @click="pauseCommand"></span>
+                    <el-button type="text" :disabled="group.current.status =='stop' || group.current.status =='pause'" class="icon-pause" @click="pauseCommand"></el-button>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="停止" placement="top-start"
                             v-if="group.current.creator==user.id">
-                    <span class="icon-stop" :style="group.current.status =='start'?'color:#fff;':'color:gray;'" @click="exitCommand"></span>
+                    <el-button type="text" :disabled="group.current.status =='stop'" class="icon-stop" @click="exitCommand"></el-button>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="进入" placement="top-start"
                             v-if="group.current.creator!=user.id" style="font-size: 20px">
-                    <span class="icon-signin" :style="group.current.status =='start'?'color:#fff;':'color:gray;'" @click="enterCommandBatch"></span>
+                    <el-button type="text" :disabled="!buttons.enterCommand" class="icon-signin" @click="enterCommandBatch"></el-button>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start"
                             v-if="group.current.creator!=user.id" style="font-size: 20px">
-                    <span class="icon-signout" @click="exitCommand"></span>
+                    <el-button type="text" :disabled="!buttons.exitCommand" class="icon-signout" @click="exitCommand"></el-button>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="删除" placement="top-start"
                             v-if="group.current.creator==user.id">
-                    <span class="el-icon-delete" :style="group.current.status =='start'?'color:gray;':'color:#fff;'" @click="removeCommand"></span>
+                    <el-button type="text" :disabled="group.current.status !=='stop'" class="el-icon-delete" @click="removeCommand"></el-button>
                 </el-tooltip>
             </div>
             <!--下拉选项-->
@@ -169,7 +169,7 @@
                     <img v-if="buttons.sendMessage" :src="baseUrl+'images/zk-leader/able/sendMessage.png'"/>
                 </div>
                 <div :class="'option-button '+(buttons.commandRecord?'':'disable')"
-                     :title="buttons.isRecord?'关闭会议录制':'开启会议录制'" @click="commandRecord">
+                     :title="buttons.isRecord?'关闭指挥录制':'开启指挥录制'" @click="commandRecord">
                     <img v-if="buttons.commandRecord && !buttons.isRecord"
                          :src="baseUrl+'images/zk-leader/able/zhihui/commandRecord.png'"/>
                     <img v-if="buttons.commandRecord && buttons.isRecord"
@@ -442,27 +442,27 @@
                 <div class="commandBtn" v-if="meet.currentId">
                     <el-tooltip class="item" effect="dark" :content="!buttons.isPause?'开始会议':'恢复会议'" placement="top-start"
                                 v-if="meet.current.creator==user.id">
-                        <span class="icon-play" :style="meet.current.status !=='start'?'color:#fff;':'color:gray;'" @click="startCommand"></span>
+                        <el-button type="text" :disabled="meet.current.status =='start'" class="icon-play" @click="startCommand"></el-button>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="暂停" placement="top-start"
                                 v-if="meet.current.creator==user.id">
-                        <span class="icon-pause" :style="meet.current.status =='start'?'color:#fff;':'color:gray;'" @click="pauseCommand"></span>
+                        <el-button type="text" :disabled="meet.current.status =='stop' || meet.current.status =='pause'" class="icon-pause" @click="pauseCommand"></el-button>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="停止" placement="top-start"
                                 v-if="meet.current.creator==user.id">
-                        <span class="icon-stop" :style="meet.current.status =='start'?'color:#fff;':'color:gray;'" @click="exitCommand('会议')"></span>
+                        <el-button type="text" :disabled="meet.current.status =='stop'" class="icon-stop" @click="exitCommand('会议')"></el-button>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="进入" placement="top-start"
                                 v-if="meet.current.creator!=user.id" style="font-size: 20px">
-                        <span class="icon-signin" @click="enterMyCommand()"></span>
+                        <el-button type="text" :disabled="!buttons.enterMeet" class="icon-signin" @click="enterMyCommand()"></el-button>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="申请退出" placement="top-start"
                                 v-if="meet.current.creator!=user.id" style="font-size: 20px">
-                        <span class="icon-signout" @click="exitCommand('会议')"></span>
+                        <el-button type="text" :disabled="!buttons.exitMeet" class="icon-signout" @click="exitCommand('会议')"></el-button>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="删除" placement="top-start"
                                 v-if="meet.current.creator==user.id">
-                        <span class="el-icon-delete" :style="meet.current.status =='start'?'color:gray;':'color:#fff;'" @click="removeMyCommand()"></span>
+                        <el-button type="text" :disabled="meet.current.status !=='stop'" class="el-icon-delete" @click="removeMyCommand()"></el-button>
                     </el-tooltip>
                 </div>
                 <!--下拉选项-->
@@ -614,8 +614,7 @@
                 </div>
                 <!--悬浮按钮-->
                 <div class="option-button" v-if="buttons.speak">
-                    <img :src="baseUrl+'images/zk-leader/speak.png'" title="申请发言" @mousedown="itemMousemove"
-                         @click="applySpeak">
+                    <img :src="baseUrl+'images/zk-leader/speak.png'" title="申请发言" @click="applySpeak">
                 </div>
                 <div class="option-button" v-if="meet.current.creator==user.id" title="刷新"
                      @click="currentGroupChange(meet.currentId)">

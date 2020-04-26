@@ -288,6 +288,20 @@ define([
                         title: '第' + e.serial + '屏关联解码器'
                     });
                 });
+                //字幕
+                self.qt.on('osdSet',function (e) {
+                    console.log(e)
+                    self.qt.window('/router//zk/leader/publish/subtitle',{serial:e.serial},{
+                        width: 900,
+                        height: 600,
+                        title: '第' + e.serial + '屏关联解码器'
+                    })
+                });
+
+                //从关联设备页面跳过来执行
+                self.qt.on('showBundleTitle',function (e) {
+                    self.qt.invoke('changeBindDevices',$.toJSON([e.params]));
+                });
                 //--------视频界面上的按钮操作弹框 end-------
 
                 //websocket 用户呼叫
@@ -608,13 +622,13 @@ define([
 
                 self.qt.on('secretRefuse', function (e) {
                     e = e.params;
-                    self.qt.warning('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示：'+ e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial: e.serial}]));
                 });
 
                 self.qt.on('secretStop', function (e) {
                     e = e.params;
-                    self.qt.warning('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示：'+ e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial: e.serial}]));
                 });
 
