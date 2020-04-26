@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,8 @@ import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Service
 public class CommandCascadeUtil {
@@ -30,6 +34,9 @@ public class CommandCascadeUtil {
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private UserQuery userQuery;
 	
 	public GroupBO createCommand(CommandGroupPO group){
 		List<CommandGroupMemberPO> members = group.getMembers();
@@ -114,7 +121,7 @@ public class CommandCascadeUtil {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月23日 下午4:40:25
 	 * @param group
-	 * @param oldMemberInfos 该参数决定了将maddinc协议发送给哪些节点，可以直接使用加人之前的用户列表，避免发给新加入业务的节点。null则会使用group.getMembers的成员
+	 * @param oldMemberInfos 该参数决定了将maddinc协议发送给哪些节点，可以直接使用加人之前的原用户列表，避免发给新加入业务的节点。null则会使用group.getMembers的成员
 	 * @param acceptMembers
 	 * @return
 	 */
@@ -446,21 +453,6 @@ public class CommandCascadeUtil {
 		return groupBO;
 	}
 	
-	//TODO:
-	public GroupBO maddfullMeeting000(CommandGroupPO group, List<MinfoBO> newNodeMemberInfos, List<CommandGroupMemberPO> acceptMembers){
-		List<CommandGroupMemberPO> members = group.getMembers();
-		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
-//		List<MinfoBO> mlist = generateMinfoBOList(members);
-		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers, chairmanMember);
-		GroupBO groupBO = new GroupBO()
-				.setGid(group.getUuid())
-				.setOp(chairmanMember.getUserNum())
-				.setMlist(newNodeMemberInfos)
-				.setmAddList(mAddList);
-		
-		return groupBO;
-	}
-	
 	//TODO:group.getMembers()需要包含新成员
 	public GroupBO maddfullMeeting(CommandGroupPO group, List<MinfoBO> newNodeMemberInfos){
 		List<CommandGroupMemberPO> members = group.getMembers();
@@ -468,11 +460,15 @@ public class CommandCascadeUtil {
 		String stime = DateUtil.format(group.getStartTime(), DateUtil.dateTimePattern);//如果getStartTime为空，会得到空字符串
 		String mode = "0";//0表示主席模式、1表示讨论模式，后续支持
 		String status = group.getStatus().equals(GroupStatus.PAUSE)?"1":"0";//0表示正常业务、1表示暂停业务
-		List<String> croplist = new ArrayList<String>();
+		List<String> spkidlist = new ArrayList<String>();
 		for(CommandGroupMemberPO member : members){
 			if(member.getCooperateStatus().equals(MemberStatus.CONNECT)){
-				croplist.add(member.getUserNum());
+				spkidlist.add(member.getUserNum());
 			}
+		}
+		String spkid = null;//发言人号码。多人使用逗号分隔，后续改成只能1人发言
+		if(spkidlist.size() > 0){
+			spkid = StringUtils.join(spkidlist.toArray(), ",");
 		}
 		List<MinfoBO> mAddList = generateMinfoBOList(members);
 //		List<MinfoBO> mAddList = generateMinfoBOList(acceptMembers, chairmanMember);
@@ -487,7 +483,7 @@ public class CommandCascadeUtil {
 				.setmAddList(mAddList)//
 				.setMode(mode)
 				.setStatus(status)
-				.setCroplist(croplist)//协同成员号码列表
+				.setSpkid(spkid)//协同成员号码列表
 				.setMlist(newNodeMemberInfos);//新节点的成员，用于确定发送目的节点
 		
 		return groupBO;
@@ -750,9 +746,11 @@ public class CommandCascadeUtil {
 	}
 	
 	private MinfoBO setMember(CommandGroupMemberPO member, CommandGroupMemberPO chairmanMember){
+		String mstatus = member.getMemberStatus().equals(MemberStatus.CONNECT)?"1":"2";//成员状态，1表示正在业务、2表示暂时离开、3表示已退出
 		MinfoBO minfo = new MinfoBO()
 				.setMid(member.getUserNum())
 				.setMname(member.getUserName())
+				.setMstatus(mstatus)
 				.setMtype(member.getMemberType().getProtocalId());
 		//TODO:pid 上级成员ID；会议组成员的上级成员ID为主席；ZH组成员的上级成员为其直接上级；主席 和最高级ZH员无上级不应显示此标签
 		if(!member.getUuid().equals(chairmanMember.getUuid())){
@@ -763,6 +761,7 @@ public class CommandCascadeUtil {
 	
 	/**
 	 * 比对查找新节点用户<br/>
+	 * <p>查找出mewMembers比oldMembers新增节点上的用户，即查找mewMembers与oldMembers相比，mewMembers在oldMembers所在节点以外节点上的用户</p>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月23日 上午9:35:15
@@ -818,6 +817,27 @@ public class CommandCascadeUtil {
 			}
 		}
 		return addedNodeMinfo;
+	}	
+
+	/**
+	 * 将用户号码转为用户id列表<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月25日 上午10:44:30
+	 * @param usernos
+	 * @return
+	 * @throws Exception
+	 */
+	public List<Long> fromUserNosToIds(Collection<String> usernos) throws Exception{
+		//成员id列表
+		List<Long> userIdList = new ArrayList<Long>();
+		if(usernos==null || usernos.size()==0) return userIdList;
+		List<UserVO> users = userQuery.findByUsernoIn(usernos);
+		for(UserVO user:users){
+			userIdList.add(user.getId());
+		}
+		return userIdList;
 	}
 	
 	private String generateUuid(){

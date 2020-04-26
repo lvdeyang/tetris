@@ -9,7 +9,7 @@ const _import = require('../../router/_import_' + process.env.NODE_ENV) // Ëé∑Âè
 //let basePath = process.env.RESOURCE_ROOT
 let requestIP = document.location.host.split(':')[0]
 
-let basePath = "http://" + requestIP + ":8093";
+let basePath = document.location.origin;
 
 let queryRouterUrl = routerConfig.queryRouterUrl
 let useLocalRoute = process.env.USELOCALROUTE

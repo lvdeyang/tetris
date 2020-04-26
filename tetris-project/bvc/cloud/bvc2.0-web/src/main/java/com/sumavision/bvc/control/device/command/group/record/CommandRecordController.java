@@ -124,7 +124,7 @@ public class CommandRecordController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		//根据userId查找record
-		List<CommandGroupRecordPO> records = commandGroupRecordDao.findAll();//findByRecordUserIdAndRun(user.getId(), false);
+		List<CommandGroupRecordPO> records = commandGroupRecordDao.findByRecordUserIdAndRun(user.getId(), false);
 		HashMap<Long, List<CommandGroupRecordPO>> groupRecordMap = new HashMap<Long, List<CommandGroupRecordPO>>();
 		for(CommandGroupRecordPO record : records){
 			List<CommandGroupRecordPO> groupRecords = groupRecordMap.get(record.getGroupId());

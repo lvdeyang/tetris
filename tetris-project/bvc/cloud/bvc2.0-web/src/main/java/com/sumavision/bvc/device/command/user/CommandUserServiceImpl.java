@@ -612,7 +612,7 @@ public class CommandUserServiceImpl {
 		FolderUserMap calledUserfolderUserMap = folderUserMapDao.findByUserId(calledUser.getId());
 		boolean bCalledUserLdap = queryUtil.isLdapUser(callUser, calledUserfolderUserMap);
 		if(bCalledUserLdap){
-			throw new BaseException(StatusCode.FORBIDDEN, "跨系统用户请使用“呼叫”功能");
+			throw new BaseException(StatusCode.FORBIDDEN, "跨系统用户请使用“视频呼叫”");
 		}
 		
 		//呼叫方

@@ -116,8 +116,7 @@ public class CommandGroupUserPlayerSettingVO {
 		this.castDevices = castDevices;
 	}
 
-	//关联上屏的VO不需要在这里添加显示
-	@Deprecated
+	//关联上屏的设备VO
 	private CommandGroupUserPlayerSettingVO setCastDevicesByPO(List<CommandGroupUserPlayerCastDevicePO> castDevices) {
 		this.setCastDevices(new ArrayList<CommandGroupUserPlayerCastDeviceVO>()); 
 		if(castDevices == null) return this;
@@ -147,9 +146,9 @@ public class CommandGroupUserPlayerSettingVO {
 			GroupStatus status = commandGroupDao.findStatusById(groupId);
 			this.setStatus(status.toString().toLowerCase());
 		}
-		
-//		List<CommandGroupUserPlayerCastDevicePO> devices = entity.getCastDevices();
-//		this.setCastDevicesByPO(devices);
+		//上屏设备
+		List<CommandGroupUserPlayerCastDevicePO> devices = entity.getCastDevices();
+		this.setCastDevicesByPO(devices);
 		
 		return this;
 	}

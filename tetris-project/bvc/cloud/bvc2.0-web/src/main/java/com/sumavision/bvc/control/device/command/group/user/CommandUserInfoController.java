@@ -28,6 +28,7 @@ import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
 import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserLayoutShemeVO;
+import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
 import com.sumavision.bvc.control.device.monitor.device.MonitorDeviceController;
 import com.sumavision.bvc.control.device.monitor.device.WebSipPlayerVO;
 import com.sumavision.bvc.control.utils.UserUtils;
@@ -139,7 +140,8 @@ public class CommandUserInfoController {
 		List<CommandGroupUserLayoutShemePO> shemePOs = userInfo.getLayoutSchemes();
 		for(CommandGroupUserLayoutShemePO schemePO : shemePOs){
 			if(schemePO.getIsUsing()){
-				CommandGroupUserLayoutShemeVO schemeVO = new CommandGroupUserLayoutShemeVO().set(schemePO);
+				CommandGroupUserLayoutShemeVO schemeVO = new CommandGroupUserLayoutShemeVO().set(schemePO);				
+				System.out.println("getCurrent: " + JSON.toJSON(schemeVO));
 				
 				return schemeVO;
 			}
@@ -239,8 +241,8 @@ public class CommandUserInfoController {
 	}
 	
 	/**
-	 * 设置播放器关联的上屏设备<br/>
-	 * <p>详细描述</p>
+	 * 全量设置播放器关联的上屏设备<br/>
+	 * <p>该接口没有被前端使用</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月26日 上午10:36:12
@@ -264,7 +266,9 @@ public class CommandUserInfoController {
 		List<String> bundleIdsList = JSONArray.parseArray(bundleIds, String.class);
 		commandCastServiceImpl.setCastDevices(player, bundleIdsList);
 		
-		return null;
+		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
+		
+		return playerVO;
 	}
 	
 	/**
@@ -292,7 +296,9 @@ public class CommandUserInfoController {
 		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
 		commandCastServiceImpl.editCastDevices(player, new ArrayListWrapper<String>().add(bundleId).getList(), null);
 		
-		return null;
+		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
+		
+		return playerVO;
 	}
 	
 	/**
@@ -320,7 +326,9 @@ public class CommandUserInfoController {
 		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(userInfo.getPlayers(), serial);
 		commandCastServiceImpl.editCastDevices(player, null, new ArrayListWrapper<String>().add(bundleId).getList());
 		
-		return null;
+		CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
+		
+		return playerVO;
 	}
 	
 	/**
