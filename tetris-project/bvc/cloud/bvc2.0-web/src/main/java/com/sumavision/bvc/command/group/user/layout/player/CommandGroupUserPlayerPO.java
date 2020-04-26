@@ -107,6 +107,12 @@ public class CommandGroupUserPlayerPO extends AbstractBasePO {
 	
 	/** 关联用户信息 */
 	private CommandGroupUserInfoPO userInfo;
+	
+	/** osd id */
+	private Long osdId;
+	
+	/** osd 名称 */
+	private String osdName;
 
 	@Column(name = "LOCATION_INDEX")
 	public int getLocationIndex() {
@@ -309,6 +315,24 @@ public class CommandGroupUserPlayerPO extends AbstractBasePO {
 		this.userInfo = userInfo;
 	}
 	
+	@Column(name = "OSD_ID")
+	public Long getOsdId() {
+		return osdId;
+	}
+
+	public void setOsdId(Long osdId) {
+		this.osdId = osdId;
+	}
+
+	@Column(name = "OSD_NAME")
+	public String getOsdName() {
+		return osdName;
+	}
+
+	public void setOsdName(String osdName) {
+		this.osdName = osdName;
+	}
+
 	public CommandGroupUserPlayerPO set(PlayerBundleBO entity){
 		this.setCode(entity.getUsername());
 		this.setUsername(entity.getUsername());

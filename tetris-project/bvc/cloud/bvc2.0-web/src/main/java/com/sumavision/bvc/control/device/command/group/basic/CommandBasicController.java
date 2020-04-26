@@ -36,6 +36,7 @@ import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.ForwardReturnBO;
+import com.sumavision.bvc.device.command.basic.osd.CommandOsdServiceImpl;
 import com.sumavision.bvc.device.command.basic.page.CommandPageServiceImpl;
 import com.sumavision.bvc.device.command.basic.remind.CommandRemindServiceImpl;
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceLocalServiceImpl;
@@ -92,6 +93,9 @@ public class CommandBasicController {
 
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private CommandOsdServiceImpl commandOsdServiceImpl;
 	
 	/**
 	 * 查询会议的所有成员及状态<br/>
@@ -1080,6 +1084,42 @@ public class CommandBasicController {
 		return null;
 	}
 	
+	/**
+	 * 设置osd<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 下午2:51:02
+	 * @param Integer serial 布局序号
+	 * @param Long osdId osd id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/set/osd")
+	public Object setOsd(
+			Integer serial,
+			Long osdId,
+			HttpServletRequest request) throws Exception{
+		
+		commandOsdServiceImpl.setOsd(serial, osdId);
+		return null;
+	}
 	
+	/**
+	 * 清除字幕<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 下午2:53:37
+	 * @param Integer serial 布局序号
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/clear/osd")
+	public Object clearOsd(
+			Integer serial,
+			HttpServletRequest request) throws Exception{
+		
+		commandOsdServiceImpl.clearOsd(serial);
+		return null;
+	}
 	
 }
