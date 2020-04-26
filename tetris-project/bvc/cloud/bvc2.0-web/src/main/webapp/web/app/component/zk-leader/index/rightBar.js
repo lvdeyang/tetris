@@ -2502,12 +2502,6 @@ define([
                     self.qt.success(e.params.businessInfo);
                 });
 
-                //指挥转发，不需要同意
-                self.qr.on('commandForward',function (e) {
-                    console.log(e)
-                    self.qt.invoke('commandForward', $.toJSON(e.splits));
-                });
-
                 //开始会议，不需要成员同意自动进入指挥
                 self.qt.on('autoMeetingStart', function (e) {
                     self.switchStatus1 = false;

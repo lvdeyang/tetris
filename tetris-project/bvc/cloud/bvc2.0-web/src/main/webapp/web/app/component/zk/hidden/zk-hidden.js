@@ -289,7 +289,7 @@ define([
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'commandForwardStop', params:e});
                             }else if(e.businessType === 'commandForward'){ //转发不需要成员同意
-                                self.qt.linkedWebview('rightBar',{id:'commandForward',params:e});
+                                self.qt.linkedWebview('historyMessage',{id:'commandForward',params:e});
                             }
 
                             //指挥提醒

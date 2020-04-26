@@ -540,6 +540,12 @@ define([
                     }
                 });
 
+                //指挥转发，不需要同意
+                self.qt.on('commandForward',function (e) {
+                    self.qt.info(e.params.businessInfo);
+                    self.qt.invoke('commandForward', $.toJSON(e.params.splits));
+                });
+
                 self.qt.on('commandForwardFile', function (e) {
                     e = e.params;
                     var forwards = e.forwards;
