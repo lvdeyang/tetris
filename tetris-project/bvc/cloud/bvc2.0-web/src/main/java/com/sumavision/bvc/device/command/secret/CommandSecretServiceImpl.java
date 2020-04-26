@@ -8,6 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
+import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
@@ -18,7 +22,9 @@ import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.log.OperationLogService;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -44,16 +50,25 @@ public class CommandSecretServiceImpl {
 	private CommandGroupDAO commandGroupDao;
 	
 	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
 	private CommandBasicServiceImpl commandBasicServiceImpl;
 
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+
+	@Autowired
+	private QueryUtil queryUtil;
 	
 	@Autowired
 	private OperationLogService operationLogService;
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private ResourceService resourceService;
 	
 	/**
 	 * 开始专向会议<br/>
@@ -74,6 +89,13 @@ public class CommandSecretServiceImpl {
 			String name,
 			Long memberUserId,
 			int locationIndex) throws Exception{
+		
+		UserBO memberUser = resourceService.queryUserById(memberUserId, TerminalType.QT_ZK);
+		FolderUserMap memberUserMap = folderUserMapDao.findByUserId(memberUser.getId());
+		boolean bMemberUserLdap = queryUtil.isLdapUser(memberUser, memberUserMap);
+		if(bMemberUserLdap){
+			throw new BaseException(StatusCode.FORBIDDEN, "跨系统用户请使用“视频呼叫”");
+		}
 		
 		String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
 		
