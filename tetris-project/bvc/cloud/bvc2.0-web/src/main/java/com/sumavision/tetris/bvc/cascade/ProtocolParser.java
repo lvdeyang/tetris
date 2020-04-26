@@ -20,6 +20,7 @@ import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl;
+import com.sumavision.bvc.device.command.cascade.CommandCascadeServiceImpl;
 import com.sumavision.bvc.device.command.cooperate.CommandCooperateServiceImpl;
 import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
 import com.sumavision.tetris.auth.login.LoginService;
@@ -39,6 +40,9 @@ import com.sumavision.tetris.user.UserVO;
 
 @Component
 public class ProtocolParser {
+
+	@Autowired
+	private CommandCascadeServiceImpl commandCascadeServiceImpl;
 
 	@Autowired
 	private CommandBasicServiceImpl commandBasicServiceImpl;
@@ -131,7 +135,7 @@ public class ProtocolParser {
 	 * @param String srcNo 操作用户号码
 	 * @param String xml 大白本协议
 	 */
-	public void parse(String srcNo, String xml) throws Exception{
+	public synchronized void parse(String srcNo, String xml) throws Exception{
 		String rootNodeName = parseRootNodeName(xml);
 		XMLReader reader = new XMLReader(xml);
 		String commandname = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".commandname").toString());
@@ -159,7 +163,7 @@ public class ProtocolParser {
 			}else if("bizcmd".equals(commandname) && "start".equals(operation)){
 				startCommand(reader, rootNodeName, srcNo);
 			}else if("bizcmd".equals(commandname) && "maddfull".equals(operation)){
-				startCommand(reader, rootNodeName, srcNo);
+				infoCommand(reader, rootNodeName, srcNo);
 			}else if("bizcmd".equals(commandname) && "stop".equals(operation)){
 				stopCommand(reader, rootNodeName, srcNo);
 			}else if("bizcmd".equals(commandname) && "pause".equals(operation)){
@@ -254,7 +258,7 @@ public class ProtocolParser {
 		String subject = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".subject").toString());
 		String bizname = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.bizname").toString());
 		String creatorid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.creatorid").toString());
-		String topid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.topid").toString());
+//		String topid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.topid").toString());
 		List<MinfoBO> minfos = new ArrayList<MinfoBO>();
 		List<Node> nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.mlist.minfo").toString());
 		if(nodes!=null && nodes.size()>0){
@@ -378,7 +382,7 @@ public class ProtocolParser {
 		
 		List<Node> nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.mlist.minfo").toString());
 		if(nodes!=null && nodes.size()>0){
-			group.setMlist(new ArrayList<MinfoBO>());
+			group.setmAddList(new ArrayList<MinfoBO>());
 			for(Node node:nodes){
 				MinfoBO minfo = new MinfoBO();
 				minfo.setMid(reader.readString("mid", node))
@@ -386,7 +390,7 @@ public class ProtocolParser {
 					 .setMtype(reader.readString("mtype", node))
 					 .setMstatus(reader.readString("mstatus", node))
 					 .setPid(reader.readString("pid", node));
-				group.getMlist().add(minfo);
+				group.getmAddList().add(minfo);
 			}
 		}
 		
@@ -436,6 +440,8 @@ public class ProtocolParser {
 				group.getCroslist().add(crossitem);
 			}
 		}
+		
+		commandCascadeServiceImpl.memberAddFull(group, GroupType.BASIC);
 	}
 	
 	/**
@@ -742,7 +748,7 @@ public class ProtocolParser {
 		String subject = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".subject").toString());
 		String bizname = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.bizname").toString());
 		String creatorid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.creatorid").toString());
-		String topid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.topid").toString());
+//		String topid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.topid").toString());
 		List<MinfoBO> minfos = new ArrayList<MinfoBO>();
 		List<Node> nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.mlist.minfo").toString());
 		if(nodes!=null && nodes.size()>0){
@@ -844,7 +850,7 @@ public class ProtocolParser {
 		
 		List<Node> nodes = reader.readNodeList(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.mlist.minfo").toString());
 		if(nodes!=null && nodes.size()>0){
-			group.setMlist(new ArrayList<MinfoBO>());
+			group.setmAddList(new ArrayList<MinfoBO>());
 			for(Node node:nodes){
 				MinfoBO minfo = new MinfoBO();
 				minfo.setMid(reader.readString("mid", node))
@@ -852,9 +858,11 @@ public class ProtocolParser {
 					 .setMtype(reader.readString("mtype", node))
 					 .setMstatus(reader.readString("mstatus", node))
 					 .setPid(reader.readString("pid", node));
-				group.getMlist().add(minfo);
+				group.getmAddList().add(minfo);
 			}
 		}
+		
+		commandCascadeServiceImpl.memberAddFull(group, GroupType.MEETING);
 	}
 	
 	/**
