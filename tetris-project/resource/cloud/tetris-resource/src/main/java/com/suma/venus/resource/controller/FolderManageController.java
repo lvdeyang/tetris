@@ -1877,6 +1877,7 @@ public class FolderManageController extends ControllerBase {
 				folderUserMap.setFolderUuid(folderUuid);
 				folderUserMap.setUserId(userBO.getId());
 				folderUserMap.setUserUuid(userBO.getUser().getUuid());
+				folderUserMap.setUserNo(userBO.getUserNo());
 				folderUserMap.setUserName(nickName);
 				folderUserMap.setSyncStatus(0);
 				folderUserMap.setCreator(userBO.getCreater());

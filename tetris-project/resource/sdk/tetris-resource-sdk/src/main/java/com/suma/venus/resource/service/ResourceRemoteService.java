@@ -489,6 +489,8 @@ public class ResourceRemoteService {
 		response.put("cmd", cmd);
 		response.put("no", no);
 		
+		SerNodePO serNode = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+		
 		List<SerNodePO> allNodes = serNodeDao.findAll();
 		SerNodePO self = querySelf(allNodes);
 		SerNodePO end = null;
@@ -497,14 +499,24 @@ public class ResourceRemoteService {
 			
 			BundlePO bundle = bundleDao.findByUsername(no);
 			if(bundle != null){
-				nodeUuid = bundle.getEquipNode();
+				if(SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())){
+					nodeUuid = bundle.getEquipNode();
+				}else {
+					nodeUuid = serNode.getNodeUuid();
+				}
+				
 			}
 			
 		}else if(type.equals("user")){
 			
 			FolderUserMap userMap = folderUserMapDao.findByUserNo(no);
 			if(userMap != null){
-				nodeUuid = userMap.getUserNode(); 
+				if("ldap".equals(userMap.getCreator())){
+					nodeUuid = userMap.getUserNode(); 
+				}else {
+					nodeUuid = serNode.getNodeUuid();
+				}
+				
 			}
 			
 		}else if(type.equals("app")){
@@ -518,13 +530,20 @@ public class ResourceRemoteService {
 			
 			BundlePO bundle = bundleDao.findByUsername(no);
 			if(bundle != null){
-				//设备
-				nodeUuid = bundle.getEquipNode();
+				if(SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())){
+					nodeUuid = bundle.getEquipNode();
+				}else {
+					nodeUuid = serNode.getNodeUuid();
+				}
 			}else{
 				FolderUserMap userMap = folderUserMapDao.findByUserNo(no);
 				if(userMap != null){
 					//用户
-					nodeUuid = userMap.getUserNode(); 
+					if("ldap".equals(userMap.getCreator())){
+						nodeUuid = userMap.getUserNode(); 
+					}else {
+						nodeUuid = serNode.getNodeUuid();
+					}
 				}else {
 					SerInfoPO serInfo = serInfoDao.findBySerNo(no);
 					if(serInfo != null){
