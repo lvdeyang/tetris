@@ -5,7 +5,8 @@ let requestIP = document.location.host.split(':')[0]
 
 // TODO
 //let basePath = process.env.RESOURCE_ROOT + '/suma-venus-resource'
-let basePath = process.env.RESOURCE_ROOT
+//let basePath = process.env.RESOURCE_ROOT
+let basePath = document.location.origin;
 let loginUrl = process.env.USER_ROOT + '/vue'
 
 if (basePath.indexOf('__requestIP__') !== -1) {
