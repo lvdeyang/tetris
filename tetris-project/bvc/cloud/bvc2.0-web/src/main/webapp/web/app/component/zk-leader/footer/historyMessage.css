@@ -38,7 +38,7 @@ html, body {
     height: 30px;
 }
 
-.subtitle {
+/*.subtitle {
     position: absolute;
     top: 54%;
     left: 22.5%;
@@ -50,13 +50,13 @@ html, body {
     color: #18e5ff;
     cursor: default;
     font-weight: 600;
-}
+}*/
 
 .msgContent {
     position: absolute;
     top: 0;
     left: 29%;
-    right: 0;
+    right: 110px;
     height: 70px;
     font-size: 16px;
     color: #eaeaec;
@@ -104,10 +104,12 @@ html, body {
 
 .btn div {
     float: left;
-    padding: 2px 5px;
+    padding: 8px 6px;
+    font-size:12px;
     margin: 1px;
-    background-color: #f8a036;
-    border-radius: 13px;
+    background-color: #213f9c;
+    border:1px solid #5d77c1;
+    border-radius: 2px;
     color: #fff;
     cursor: pointer;
     text-align: center;
@@ -132,11 +134,11 @@ img {
 
 .el-button {
     position: absolute;
-    padding: 18px 8px;
+    /*padding: 18px 8px;*/
     top: 5px;
     right: 0;
     background: #204a6b;
-    border-radius: 0 10px 10px 0;
+    border-radius: 10px;
     border: 0;
     font-weight: bold;
     font-size: 14px;
@@ -152,23 +154,24 @@ img {
 .sendMsg {
     position: absolute;
     left: 29%;
-    right: 0;
+    right: 110px;
     top: 69px;
     height: 40px;
     box-sizing: border-box;
-    background-color: #2d4e684a;
+    background-color: #2d4e6885;
     box-sizing: border-box;
 }
 
 .sendMsgContent {
-    width: 90%;
-    height: 34px;
+    width: 100%;
+    height: 100%;
     float: left;
     border: 0;
-    background-color: #41444645;
-    color: #f8a036;
+    background-color: #2d4e6800;
+    color: #fff;
     font-size: 16px;
     text-indent: 10px;
+    box-sizing: border-box;
 }
 
 .sendMsgContent:focus {
@@ -176,40 +179,41 @@ img {
 }
 
 .sendMsgContent::-webkit-input-placeholder {
-    color: #f8a036;
+    color: #fff;
     font-size: 16px;
 }
 
 .sendMsgContent:-moz-placeholder, body {
-    color: #00e9ff;
+    color: #fff;
     font-size: 16px;
 }
 
 .sendMsgContent::-moz-placeholder {
-    color: #00e9ff;
+    color: #fff;
     font-size: 16px;
 }
 
 .sendMsgContent:-ms-input-placeholder {
-    color: #00e9ff;
+    color: #fff;
     font-size: 16px;
 }
 
 .sendMsgBtn {
+    position:absolute;
+    right:0;
     margin: 0;
+    padding: 6px 10px;
     display: inline-block;
-    width: 98px;
-    height: 24px;
-    line-height: 22px;
-    border-radius: 11px;
+    border-radius: 15px;
     color: rgb(255, 255, 255);
     text-align: center;
     float: left;
     cursor: pointer;
     border: 0;
-    background-color: #f8a036;
+    background-color: #2562f7;
     font-size: 14px;
-    margin-top: 6px;
+    margin-top:4px;
+    margin-right:4px;
 }
 
 @media screen and(max-width: 1680px) {

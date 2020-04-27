@@ -1880,7 +1880,7 @@ define([
             },
             //发布字幕
             publish: function () {
-                this.qt.window('/router//zk/leader/subtitle/layer', null, {width: '100%', height: '90%'});
+                this.qt.window('/router//zk/leader/subtitle/layer', null, {width: '85%', height: '93%'});
             },
 
             //   ----------第三个tab相关的-----------------
