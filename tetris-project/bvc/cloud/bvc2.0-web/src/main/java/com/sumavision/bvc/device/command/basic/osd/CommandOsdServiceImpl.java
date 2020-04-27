@@ -13,6 +13,8 @@ import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
+import com.sumavision.bvc.device.command.bo.PlayerInfoBO;
+import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.ConnectBO;
@@ -45,6 +47,9 @@ public class CommandOsdServiceImpl {
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
+	
+	@Autowired
+	private CommandCastServiceImpl ccommandCastServiceImpl;
 	
 	@Autowired
 	private MonitorOsdService monitorOsdService;
@@ -109,6 +114,8 @@ public class CommandOsdServiceImpl {
 		if(PlayerBusinessType.NONE.equals(player.getPlayerBusinessType())) return;
 		
 		//获取源
+		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true);
+		
 		List<BundleDTO> bundles = packBundles(player);
 		
 		//获取参数模板
@@ -118,8 +125,8 @@ public class CommandOsdServiceImpl {
 			 			 			 .setConnectBundle(new ArrayList<ConnectBundleBO>());
 		
 		//获取字幕协议
-		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol("", "");
-		OsdWrapperBO setOsd = monitorOsdService.protocol(osd, "", "");
+		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol(playerInfo.getSrcCode(), playerInfo.getSrcInfo());
+		OsdWrapperBO setOsd = monitorOsdService.protocol(osd, playerInfo.getSrcCode(), playerInfo.getSrcInfo());
 		
 		for(BundleDTO bundle:bundles){
 			ConnectBundleBO connectDstVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
@@ -168,6 +175,8 @@ public class CommandOsdServiceImpl {
 		if(PlayerBusinessType.NONE.equals(player.getPlayerBusinessType())) return;
 		
 		//获取源
+		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true);
+		
 		List<BundleDTO> bundles = packBundles(player);
 		
 		//获取参数模板
@@ -177,7 +186,7 @@ public class CommandOsdServiceImpl {
 			 			 			 .setConnectBundle(new ArrayList<ConnectBundleBO>());
 		
 		//获取字幕协议
-		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol("", "");
+		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol(playerInfo.getSrcCode(), playerInfo.getSrcInfo());
 		
 		for(BundleDTO bundle:bundles){
 			ConnectBundleBO connectDstVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)

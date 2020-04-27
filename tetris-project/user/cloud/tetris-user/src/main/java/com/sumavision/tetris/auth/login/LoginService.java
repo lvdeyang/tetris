@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.auth.login.exception.AppIdCannotBeNullException;
+import com.sumavision.tetris.auth.login.exception.DonotSupportRoamLoginException;
+import com.sumavision.tetris.auth.login.exception.QtZkLoginRepeatedlyException;
 import com.sumavision.tetris.auth.login.exception.SignCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.SignVerifyFailException;
 import com.sumavision.tetris.auth.login.exception.TimestampCannotBeNullException;
@@ -18,6 +20,7 @@ import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.user.BasicDevelopmentDAO;
 import com.sumavision.tetris.user.BasicDevelopmentPO;
 import com.sumavision.tetris.user.BasicDevelopmentQuery;
+import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.UserQuery;
@@ -96,6 +99,11 @@ public class LoginService {
 		
 		UserPO user = userDao.findByUsername(username);
 		if(user == null) throw new UsernameNotExistException(username);
+		
+		if(UserClassify.LDAP.equals(user.getClassify())){
+			throw new DonotSupportRoamLoginException();
+		}
+		
 		if(user.getErrorLoginTimes()!=null && user.getErrorLoginTimes().intValue()>=10){
 			throw new TooManyAbnormalLoginTimesException();
 		} 
@@ -105,6 +113,13 @@ public class LoginService {
 			userDao.saveAndFlush(user);
 			throw new PasswordErrorException(username, password);
 		} 
+		if(TerminalType.QT_ZK.equals(terminalType)){
+			//指控终端重复登录校验
+			TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
+			if(UserStatus.ONLINE.equals(token.getStatus())){
+				throw new QtZkLoginRepeatedlyException();
+			}
+		}
 		return doPasswordLoginTransactional(user, terminalType, ip);
 	}
 	
