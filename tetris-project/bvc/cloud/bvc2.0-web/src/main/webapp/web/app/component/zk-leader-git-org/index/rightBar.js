@@ -1264,14 +1264,14 @@ define([
             id: self.group.current.id
           }, function (data) {
             self.buttons.isRecord = false;
-            self.qt.warning('业务提示', '操作成功');
+            self.qt.warning('业务提示：操作成功');
           });
         } else {
           ajax.post('/command/record/start', {
             id: self.group.current.id
           }, function (data) {
             self.buttons.isRecord = true;
-            self.qt.warning('业务提示', '操作成功');
+            self.qt.warning('业务提示：操作成功');
           });
         }
       },

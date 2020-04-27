@@ -216,4 +216,38 @@ public interface CapacityFeign {
 	 */
 	@RequestMapping(value = "/capacity/transform/feign/delete/all")
 	public JSONObject deleteTransformAllOutput(@RequestParam("id") String id) throws Exception;
+	
+	/**
+	 * 添加push任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 上午8:54:26
+	 * @param String task push任务信息
+	 * @return String 任务标识
+	 */
+	@RequestMapping(value = "/push/task/feign/add/task")
+	public JSONObject addPushTask(@RequestParam("task") String task) throws Exception;
+	
+	/**
+	 * 删除push任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 上午8:57:34
+	 * @param String taskId 任务标识
+	 */
+	@RequestMapping(value = "/push/task/feign/delete/task")
+	public JSONObject deletePushTask(@RequestParam("taskId") String taskId) throws Exception;
+	
+	/**
+	 * 切换push备份源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 上午9:00:15
+	 * @param String taskId 任务标识
+	 * @param String index 切换源索引
+	 */
+	@RequestMapping(value = "/push/task/feign/change/index")
+	public JSONObject changePushBackUp(@RequestParam("taskId") String taskId,
+									@RequestParam("index") String index) throws Exception;
+	
 }
