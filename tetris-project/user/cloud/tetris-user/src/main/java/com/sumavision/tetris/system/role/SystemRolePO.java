@@ -5,6 +5,8 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
+
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -78,6 +80,30 @@ public class SystemRolePO extends AbstractBasePO{
 
 	public void setCompanyId(Long companyId) {
 		this.companyId = companyId;
+	}
+	
+	/**
+	 * 生成用户私有角色名<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 上午10:51:08
+	 * @param Long userId 用户id
+	 * @return 用户私有角色名
+	 */
+	public static String generatePrivateRoleName(Long userId){
+		return new StringBufferWrapper().append("private_u_").append(userId).toString();
+	}
+	
+	/**
+	 * 判断是否是用户的私有角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月15日 下午6:44:39
+	 * @param Long userId 用户id
+	 * @return boolean 判断结果
+	 */
+	public boolean belong(Long userId){
+		return new StringBufferWrapper().append("private_u_").append(userId).toString().equals(this.name);
 	}
 	
 }

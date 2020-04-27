@@ -171,4 +171,39 @@ public class UserBindBundleController {
 		return bind;
 	}
 	
+	/**
+	 * 解绑<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 下午3:31:31
+	 * @param Long userId 用户id
+	 * @param String type 编码器/解码器
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/unbind")
+	public Object unbind(
+			Long userId,
+			String type,
+			HttpServletRequest request) throws Exception{
+		
+		EncoderDecoderUserMap map = encoderDecoderUserMapDao.findByUserId(userId);
+		if("编码器".equals(type)){
+			map.setEncodeBundleId(null);
+			map.setEncodeBundleName(null);
+			map.setEncodeDeviceModel(null);
+			map.setEncodeId(null);
+		}
+		if("解码器".equals(type)){
+			map.setDecodeBundleId(null);
+			map.setDecodeBundleName(null);
+			map.setDecodeDeviceModel(null);
+			map.setDecodeId(null);
+		}
+		
+		encoderDecoderUserMapDao.save(map);
+		
+		return null;
+	}
+	
 }

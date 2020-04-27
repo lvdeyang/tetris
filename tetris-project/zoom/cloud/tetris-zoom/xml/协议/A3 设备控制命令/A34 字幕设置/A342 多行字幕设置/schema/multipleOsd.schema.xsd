@@ -1,0 +1,41 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<!-- 字幕单项信息，每个字段含义、是否为必选与单行字幕设置完全一致 -->
+	<xsd:complexType name="osditem_type">
+		<xsd:sequence>
+			<xsd:element name="index" type="Integer0_7" />
+			<xsd:element name="show" type="xsd:boolean" />
+			<xsd:element name="left" type="Integer0_99" />
+			<xsd:element name="top" type="Integer0_99" />
+			<xsd:element name="fontname" type="FontName_type" />
+			<xsd:element name="fontsize" type="Integer1_9" />
+			<xsd:element name="color" type="Color_type" default="255-255-255" />
+			<xsd:element name="text" type="Text_type" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 字幕列表 -->
+	<xsd:complexType name="osdlist_type">
+		<xsd:sequence>
+			<xsd:element name="osditem" type="osditem_type"
+				minOccurs="1" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="control">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="commandname" type="xsd:string" />
+				<xsd:element name="seq" type="seqType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<xsd:element name="devname" type="devnameType" />
+				<xsd:element name="devid" type="deviceIDType" />
+				<xsd:element name="osdlist" type="osdlist_type" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

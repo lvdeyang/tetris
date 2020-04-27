@@ -2,10 +2,7 @@ package com.sumavision.bvc.control.device.command.group.basic;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,33 +17,35 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.FolderPO;
-import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
 import com.sumavision.bvc.control.device.group.vo.tree.TreeNodeVO;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeIcon;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeType;
+import com.sumavision.bvc.control.utils.TreeUtils;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.ForwardReturnBO;
+import com.sumavision.bvc.device.command.basic.osd.CommandOsdServiceImpl;
+import com.sumavision.bvc.device.command.basic.page.CommandPageServiceImpl;
 import com.sumavision.bvc.device.command.basic.remind.CommandRemindServiceImpl;
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceLocalServiceImpl;
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
-import com.sumavision.bvc.device.group.bo.BundleBO;
-import com.sumavision.bvc.device.group.bo.ChannelBO;
-import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -72,6 +71,9 @@ public class CommandBasicController {
 	private CommandSilenceLocalServiceImpl commandSilenceLocalServiceImpl;
 
 	@Autowired
+	private CommandPageServiceImpl commandPageServiceImpl;
+
+	@Autowired
 	private CommandGroupDAO commandGroupDao;
 
 	@Autowired
@@ -81,6 +83,9 @@ public class CommandBasicController {
 	private UserUtils userUtils;
 
 	@Autowired
+	private TreeUtils treeUtils;
+
+	@Autowired
 	private QueryUtil queryUtil;
 
 	@Autowired
@@ -88,6 +93,9 @@ public class CommandBasicController {
 
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private CommandOsdServiceImpl commandOsdServiceImpl;
 	
 	/**
 	 * 查询会议的所有成员及状态<br/>
@@ -117,7 +125,7 @@ public class CommandBasicController {
 		info.put("status", group.getStatus().getCode());
 		info.put("commander", group.getUserId());
 		info.put("creator", group.getUserId());
-		Object membersArray = queryGroupTree(group.getId());
+		Object membersArray = treeUtils.queryGroupTree(group.getId());
 		info.put("members", membersArray);
 		List<CommandGroupRecordPO> runningRecords = commandGroupRecordDao.findByGroupIdAndRun(group.getId(), true);
 		if(runningRecords.size() > 0){
@@ -164,7 +172,7 @@ public class CommandBasicController {
 			info.put("isRecord", false);
 		}
 		
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		List<UserBO> userBOs = commandCommonUtil.queryUsersByMembers(members);
 		
 		//成员列表节点
@@ -186,7 +194,7 @@ public class CommandBasicController {
 		for(CommandGroupMemberPO member : members){
 			if(member.isAdministrator()) continue;
 			UserBO userBO = queryUtil.queryUserById(userBOs, member.getUserId());
-			FolderPO folder = queryUtil.queryFolderPOById(totalFolders, chairmanMember.getFolderId());
+			FolderPO folder = queryUtil.queryFolderPOById(totalFolders, member.getFolderId());
 			TreeNodeVO commandTree = new TreeNodeVO().setWithInfo(member, userBO, folder);
 			commandRoot.getChildren().add(commandTree);
 		}
@@ -218,19 +226,21 @@ public class CommandBasicController {
 		String createTime = DateUtil.format(date, DateUtil.dateTimePattern);
 		//未输入则生成一个name
 		if(name==null || name.equals("")){
+			String commandString = commandCommonUtil.generateCommandString(GroupType.BASIC);
 			name = new StringBuilder().append(user.getName())
 				   .append(" ")
 				   .append(createTime)
 				   .append(" ")
-				   .append("会议")
+				   .append(commandString)
 				   .toString();
 		}
+		String subject = name;
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
 		
 		CommandGroupPO group = null;
 		try{
-			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, GroupType.BASIC, userIdArray);
+			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, subject, GroupType.BASIC, OriginType.INNER, userIdArray);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();
@@ -249,7 +259,7 @@ public class CommandBasicController {
 		info.put("status", "状态得扩展");
 		info.put("commander", group.getUserId());
 		info.put("creator", group.getUserId());
-		Object membersArray = queryGroupTree(group.getId());
+		Object membersArray = treeUtils.queryGroupTree(group.getId());
 		info.put("members", membersArray);
 				
 		return info;
@@ -341,7 +351,7 @@ public class CommandBasicController {
 		for(int i=0; i<groupInfos.size(); i++){
 			JSONObject groupInfo = groupInfos.getJSONObject(i);
 			Long groupId = Long.parseLong(groupInfo.getString("id"));
-			Object members = queryGroupTree(groupId);
+			Object members = treeUtils.queryGroupTree(groupId);
 			groupInfo.put("members", members);
 		}
 		
@@ -402,7 +412,7 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		Object result = commandBasicServiceImpl.start(Long.parseLong(id), -1);
-		return result;
+		return result;		
 	}
 	
 	/**
@@ -453,7 +463,7 @@ public class CommandBasicController {
 	}	
 	
 	
-	//退出会议
+	/** 成员主动退出（已废弃，改为申请） */
 	@ResponseBody
 	@JsonBody
 	@RequestMapping(value = "/exit")
@@ -461,13 +471,60 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
+//		Long userId = userUtils.getUserIdFromSession(request);
+//		List<Long> userIdList = new ArrayListWrapper<Long>().add(userId).getList();
+//		Object splits = commandBasicServiceImpl.removeMembers(Long.parseLong(id), userIdList, 0);
+//		return splits;
+		throw new BaseException(StatusCode.FORBIDDEN, "请向主席申请退出");
+	}	
+	
+	/** 成员申请退出 */
+	@ResponseBody
+	@JsonBody
+	@RequestMapping(value = "/exit/apply")
+	public Object exitApply(
+			String id,
+			HttpServletRequest request) throws Exception{
+		
 		Long userId = userUtils.getUserIdFromSession(request);
-		List<Long> userIdList = new ArrayListWrapper<Long>().add(userId).getList();
-		Object splits = commandBasicServiceImpl.removeMembers(Long.parseLong(id), userIdList, 0);
+		commandBasicServiceImpl.exitApply(userId, Long.parseLong(id));
+		return null;
+	}
+	
+	/** 主席同意成员退出 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/exit/apply/agree")
+	public Object exitApplyAgree(
+			String id,
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+//		UserVO user = userUtils.getUserFromSession(request);
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
+		
+		Object splits = commandBasicServiceImpl.removeMembers2(Long.parseLong(id), userIdArray, 0);
+		
 		return splits;
 	}
 	
-	
+	/** 主席不同意成员退出 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/exit/apply/disagree")
+	public Object exitApplyDisagree(
+			String id,
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
+		
+		commandBasicServiceImpl.exitApplyDisagree(user.getId(), Long.parseLong(id), userIdArray);
+		
+		return null;
+	}
+
 	//添加成员
 	@ResponseBody
 	@JsonBody
@@ -478,12 +535,12 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
-		Object splits = commandBasicServiceImpl.addMembers(Long.parseLong(id), userIdArray);
+		Object splits = commandBasicServiceImpl.addOrEnterMembers(Long.parseLong(id), userIdArray);
 		return splits;
-	}	
+	}
 		
 	/**
-	 * 强推成员<br/>
+	 * 强退成员<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -503,7 +560,7 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
-		Object splits = commandBasicServiceImpl.removeMembers(Long.parseLong(id), userIdArray, 1);
+		Object splits = commandBasicServiceImpl.removeMembers2(Long.parseLong(id), userIdArray, 2);
 		return splits;
 	}
 	
@@ -668,8 +725,40 @@ public class CommandBasicController {
 		}else{
 			return null;
 		}
-	}
+	}	
 	
+	/**
+	 * 主席换一批观看成员<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 下午6:34:36
+	 * @param id
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@ResponseBody
+	@JsonBody
+	@RequestMapping(value = "/roll/all/vod/members")
+	public Object rollAllVodMembers(
+			String id,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		List<CommandGroupUserPlayerPO> players = commandPageServiceImpl.rollAllVodMembers(userId, Long.parseLong(id));
+		List<CommandGroupUserPlayerSettingVO> playerVOs = new ArrayList<CommandGroupUserPlayerSettingVO>();
+		for(CommandGroupUserPlayerPO player : players){
+			CommandGroupUserPlayerSettingVO playerVO = new CommandGroupUserPlayerSettingVO().set(player);
+			playerVOs.add(playerVO);
+		}
+		
+		return JSON.toJSONString(new HashMapWrapper<String, Object>()
+				.put("splits", playerVOs)
+				.getMap());
+	}
+
 	/**
 	 * 会议转发设备<br/>
 	 * <p>详细描述</p>
@@ -996,180 +1085,41 @@ public class CommandBasicController {
 	}
 	
 	/**
-	 * @Title: 设备组成员树<br/>
-	 * @param groupId 设备组id
-	 * @throws Exception 
-	 * @return 设备组树信息
-	 */
-//	@ResponseBody
-//	@JsonBody
-//	@RequestMapping(value = "/query/tree/{groupId}", method = RequestMethod.GET)
-	private Object queryGroupTree(Long groupId) throws Exception{
-		
-//		List<UserBO> filteredUsers = new ArrayList<UserBO>();
-		List<FolderBO> folders = new ArrayList<FolderBO>();
-		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
-		
-		CommandGroupPO group = commandGroupDao.findOne(groupId);
-		Set<CommandGroupMemberPO> members = group.getMembers();
-		
-		//查询所有非点播的文件夹
-		List<FolderPO> totalFolders = resourceService.queryAllFolders();
-		for(FolderPO folder:totalFolders){
-			if(!FolderType.ON_DEMAND.equals(folder.getFolderType())){
-				folders.add(new FolderBO().set(folder));
-			}
-		}
-		
-		//过滤掉无用的文件夹
-		List<FolderBO> usefulFolders = filterUsefulFolders(folders, null, members);
-		
-		//得到所有的相关用户
-		List<UserBO> userBOs = commandCommonUtil.queryUsersByMembers(members);
-		
-		//找所有的根
-		List<FolderBO> roots = findRoots(usefulFolders);
-		for(FolderBO root:roots){
-			TreeNodeVO _root = new TreeNodeVO().set(root)
-											   .setChildren(new ArrayList<TreeNodeVO>());
-			_roots.add(_root);
-			recursionFolder(_root, usefulFolders, null, null, members, userBOs);
-		}
-		
-		return _roots;
-	}
-	
-	/**
-	 * 过滤出有用的文件夹<br/>
-	 * <p>即子孙含有bundles或users的文件夹</p>
-	 * <b>作者:</b>zsy<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年12月3日 上午11:39:48
-	 * @param allFolders 过滤前的文件夹
-	 * @param bundles
-	 * @param users
-	 * @return 过滤后的文件夹
-	 */
-	private List<FolderBO> filterUsefulFolders(
-			List<FolderBO> allFolders,
-			List<BundleBO> bundles,
-			Set<CommandGroupMemberPO> users){
-		
-		Set<FolderBO> usefulFolders = new HashSet<FolderBO>();
-		Set<Long> ids = new HashSet<Long>();
-		if(bundles!=null && bundles.size()>0){
-			for(BundleBO bundle : bundles){
-				ids.add(bundle.getFolderId());
-			}
-		}
-		if(users!=null && users.size()>0){
-			for(CommandGroupMemberPO user : users){
-				ids.add(user.getFolderId());
-			}
-		}
-		
-		Set<Long> newIds = new HashSet<Long>();
-		for(Long id : ids){
-			for(FolderBO folder : allFolders){
-				if(folder.getId().equals(id)){
-					usefulFolders.add(folder);
-					
-					String parentPath = folder.getParentPath();
-					if(parentPath != null){
-						String[] parentPathStrings = parentPath.split("/");
-						for(String path : parentPathStrings){
-							if(!path.equals("")){
-								newIds.add(Long.parseLong(path));
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		if(newIds.size() > 0){
-			for(Long id : newIds){
-				for(FolderBO folder : allFolders){
-					if(folder.getId().equals(id)){
-						usefulFolders.add(folder);
-					}
-				}
-			}
-		}
-		
-		return new ArrayList<FolderBO>(usefulFolders);
-	}
-	
-	/**递归组文件夹层级。
-	 * userBOs列表可以通过commandCommonUtil.queryUsersByMembers(members)获得，用来给members提供用户的在线状态*/
-	private void recursionFolder(
-			TreeNodeVO root, 
-			List<FolderBO> folders, 
-			List<BundleBO> bundles, 
-			List<ChannelBO> channels,
-			Set<CommandGroupMemberPO> members,
-			List<UserBO> userBOs){
-		
-		if(userBOs == null) userBOs = new ArrayList<UserBO>();
-		
-		//往里装文件夹
-		for(FolderBO folder:folders){
-			if(folder.getParentId()!=null && folder.getParentId().toString().equals(root.getId())){
-				TreeNodeVO folderNode = new TreeNodeVO().set(folder)
-														.setChildren(new ArrayList<TreeNodeVO>());
-				root.getChildren().add(folderNode);
-				recursionFolder(folderNode, folders, bundles, channels, members, userBOs);
-			}
-		}
-		
-		//往里装设备
-		if(bundles!=null && bundles.size()>0){
-			for(BundleBO bundle:bundles){
-				if(bundle.getFolderId()!=null && root.getId().equals(bundle.getFolderId().toString())){
-					TreeNodeVO bundleNode = new TreeNodeVO().set(bundle)
-															.setChildren(new ArrayList<TreeNodeVO>());
-					root.getChildren().add(bundleNode);
-					if(!BundleBO.BundleRealType.XT.toString().equals(bundle.getRealType()) && channels!=null && channels.size()>0){
-						for(ChannelBO channel:channels){
-							if(channel.getBundleId().equals(bundleNode.getId())){
-								TreeNodeVO channelNode = new TreeNodeVO().set(channel, bundle);
-								bundleNode.getChildren().add(channelNode);
-							}
-						}
-					}
-				}
-			}
-		}
-		
-		//往里装用户
-		if(members!=null && members.size()>0){
-			for(CommandGroupMemberPO member : members){
-				if(member.getFolderId()!=null && root.getId().equals(member.getFolderId().toString())){
-					UserBO userBO = queryUtil.queryUserById(userBOs, member.getUserId());
-					TreeNodeVO userNode = new TreeNodeVO().set(member, userBO);
-					root.getChildren().add(userNode);
-				}
-			}
-		}
-		
-	}
-	
-	/**
-	 * 查找根节点<br/>
+	 * 设置osd<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年4月17日 下午1:32:53
-	 * @param List<FolderBO> folders 查找范围
-	 * @return List<FolderBO> 根节点列表
+	 * <b>日期：</b>2020年4月26日 下午2:51:02
+	 * @param Integer serial 布局序号
+	 * @param Long osdId osd id
 	 */
-	private List<FolderBO> findRoots(List<FolderBO> folders){
-		List<FolderBO> roots = new ArrayList<FolderBO>();
-		for(FolderBO folder:folders){
-			if(folder!=null && (folder.getParentId()==null || folder.getParentId()==TreeNodeVO.FOLDERID_ROOT)){
-				roots.add(folder);
-			}
-		}
-		return roots;
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/set/osd")
+	public Object setOsd(
+			Integer serial,
+			Long osdId,
+			HttpServletRequest request) throws Exception{
+		
+		commandOsdServiceImpl.setOsd(serial, osdId);
+		return null;
+	}
+	
+	/**
+	 * 清除字幕<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 下午2:53:37
+	 * @param Integer serial 布局序号
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/clear/osd")
+	public Object clearOsd(
+			Integer serial,
+			HttpServletRequest request) throws Exception{
+		
+		commandOsdServiceImpl.clearOsd(serial);
+		return null;
 	}
 	
 }

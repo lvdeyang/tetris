@@ -1,0 +1,16 @@
+<notify>
+	<commandname>bizcmd</commandname>
+	<operation>maddinc</operation>
+	<seq>3fa306388e4d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<op>00000000001</op>
+	<mlist>
+		<minfo>
+			<mid>00000000003</mid>
+			<mname>李四</mname>
+			<mtype>usr</mtype>
+			<pid>00000000001</pid>
+		</minfo>
+	</mlist>
+</notify>

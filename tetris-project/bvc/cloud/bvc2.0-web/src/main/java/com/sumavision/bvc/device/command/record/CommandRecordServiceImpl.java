@@ -3,7 +3,6 @@ package com.sumavision.bvc.device.command.record;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,7 @@ import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
+import com.sumavision.bvc.command.group.dao.CommandGroupRecordFragmentDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
@@ -28,7 +28,7 @@ import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
-import com.sumavision.bvc.device.command.common.CommandCommonConstant;
+import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
@@ -69,6 +69,9 @@ public class CommandRecordServiceImpl {
 	private CommandGroupRecordDAO commandGroupRecordDao;
 	
 	@Autowired
+	private CommandGroupRecordFragmentDAO commandGroupRecordFragmentDao;
+	
+	@Autowired
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
 	
 	@Autowired
@@ -79,6 +82,9 @@ public class CommandRecordServiceImpl {
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
+	
+	@Autowired
+	private CommandCastServiceImpl commandCastServiceImpl;
 
 	@Autowired
 	private ResourceService resourceService;
@@ -129,8 +135,8 @@ public class CommandRecordServiceImpl {
 			record.setPlayerSplitLayout(userInfo.obtainUsingScheme().getPlayerSplitLayout());
 			record.setFragments(new ArrayList<CommandGroupRecordFragmentPO>());			
 			
-			Set<CommandGroupMemberPO> members = group.getMembers();
-			Set<CommandGroupForwardPO> forwards = group.getForwards();
+			List<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupForwardPO> forwards = group.getForwards();
 //			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
 			
 			CommandGroupMemberPO thisMember = commandCommonUtil.queryMemberByUserId(members, userId);
@@ -234,8 +240,8 @@ public class CommandRecordServiceImpl {
 //		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 		UserBO admin = new UserBO(); admin.setId(-1L);
 		String adminUserId = admin.getId().toString();
-		Set<CommandGroupMemberPO> members = group.getMembers();
-		Set<CommandGroupForwardPO> forwards = group.getForwards();
+		List<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupForwardPO> forwards = group.getForwards();
 //		List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
 		CommandGroupMemberPO thisMember = commandCommonUtil.queryMemberByUserId(members, userId);
 		List<CommandGroupUserPlayerPO> allPlayers = thisMember.getPlayers();
@@ -448,13 +454,41 @@ public class CommandRecordServiceImpl {
 		
 		CommandGroupRecordPO record = commandGroupRecordDao.findOne(recordId);
 		List<CommandGroupRecordFragmentPO> fragments = record.getFragments();
+		
+		return playFragments(userId, fragments);
+	}
+	
+	/**
+	 * 播放多段会议录像<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 下午3:36:18
+	 * @param userId
+	 * @param ids 片段fragment的id
+	 * @return
+	 * @throws Exception
+	 */
+	public List<CommandGroupUserPlayerPO> startPlayFragments(Long userId, List<Long> fragmentIds) throws Exception{
+		
+		if(fragmentIds==null || fragmentIds.size()==0){
+			return new ArrayList<CommandGroupUserPlayerPO>();
+		}
+		
+		List<CommandGroupRecordFragmentPO> fragments = commandGroupRecordFragmentDao.findByIdIn(fragmentIds);
+		
+		return playFragments(userId, fragments);
+	}
+	
+	/** 播放多个片段 */
+	private List<CommandGroupUserPlayerPO> playFragments(Long userId, List<CommandGroupRecordFragmentPO> fragments) throws Exception{
 		List<CommandGroupUserPlayerPO> players = commandCommonServiceImpl.userChoseUsefulPlayers(userId, PlayerBusinessType.PLAY_COMMAND_RECORD, fragments.size(), false);
 		int usefulPlayersCount = players.size();
 		for(CommandGroupRecordFragmentPO fragment : fragments){
 			if(usefulPlayersCount > 0){
 				CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount);
 				//recordId-fragmentId@@UUID 该规则不需要记录
-				player.setBusinessId(record.getId().toString() + "-" + fragment.getId().toString() + "@@" + UUID.randomUUID().toString().replaceAll("-", ""));
+				player.setBusinessId(fragment.getRecord().getId().toString() + "-" + fragment.getId().toString() + "@@" + UUID.randomUUID().toString().replaceAll("-", ""));
 				//录像：xxx会议，xx成员，开始时间
 				player.setBusinessName("录像：" + fragment.getInfo() + " " + DateUtil.format(fragment.getStartTime(), DateUtil.dateTimePattern));
 				player.setPlayerBusinessType(PlayerBusinessType.PLAY_COMMAND_RECORD);
@@ -487,9 +521,14 @@ public class CommandRecordServiceImpl {
 			}
 		}
 		commandGroupUserPlayerDao.save(players);
+		
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, players, null, null, null, null, codec, -1L);
+		executeBusiness.execute(logicCastDevice, "播放录像片段");
+		
 		return players;
 	}
-	
+
 	/**
 	 * 停止多个片段播放<br/>
 	 * <p>详细描述</p>
@@ -511,6 +550,11 @@ public class CommandRecordServiceImpl {
 			needFreePlayers.add(player);
 		}
 		commandGroupUserPlayerDao.save(needFreePlayers);
+		
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(needFreePlayers, null, null, needFreePlayers, codec, -1L);
+		executeBusiness.execute(logicCastDevice, "停止播放录像片段");
+		
 		return needFreePlayers;
 		
 	}

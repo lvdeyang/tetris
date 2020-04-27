@@ -1,11 +1,11 @@
 define([
-    'text!' + window.APPPATH + 'component/zk/business/add-member/zk-business-add-member.html',
+    'text!' + window.APPPATH + 'component/zk/business/add-member-new/zk-business-add-member-new.html',
     'restfull',
     'jquery',
     'vue',
     'config',
     'element-ui',
-    'css!' + window.APPPATH + 'component/zk/business/add-member/zk-business-add-member.css'
+    'css!' + window.APPPATH + 'component/zk/business/add-member-new/zk-business-add-member-new.css'
 ], function(tpl, ajax, $, Vue, config){
 
 	//组件名称
@@ -54,7 +54,7 @@ define([
             handleAddMemberCommit:function(){
                 var self = this;
                 if(self.tree.select.length <= 0){
-                    self.qt.alert('提示信息', '您没有勾选任何用户');
+                    self.qt.warning('提示信息', '您没有勾选任何用户');
                     return;
                 }
                 var members = [];

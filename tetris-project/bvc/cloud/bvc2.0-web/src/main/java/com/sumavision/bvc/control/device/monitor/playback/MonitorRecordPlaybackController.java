@@ -138,10 +138,12 @@ public class MonitorRecordPlaybackController {
 	 * @param String bundleRealType "XT||NULL"
 	 * @param String bundleId 设备id
 	 * @param Long recordUserId 录制的用户id
+	 * @param String timeLowerLimit 时间下限
+	 * @param String timeUpperLimit 时间上限
 	 * @param int currentPage 当前页码
 	 * @param int pageSize 每页数据量
 	 * @return long total 总数据量
-	 * @return List<MonitorRecordVO> rows 录制文件列表
+	 * @return List<RecordFileVO> rows 录制文件列表
 	 */
 	@JsonBody
 	@ResponseBody

@@ -5,15 +5,24 @@
         "children": [
             {
                 "path": "/RecordStrategy", 
-                "component": "record/recordStrategy"
+                "component": "record/recordStrategy",
+                "meta": {
+                    "title":  "收录策略"
+                }
             },
             {
                 "path": "/RecordDevice", 
-                "component": "record/recordDevice"
+                "component": "record/recordDevice",
+                "meta": {
+                    "title":  "收录设备"
+                }
             },
             {
                 "path": "/RecordFile", 
-                "component": "record/recordFile"
+                "component": "record/recordFile",
+                "meta": {
+                    "title":  "收录文件"
+                }
             },
             {
                 "path": "/RecordStorage", 

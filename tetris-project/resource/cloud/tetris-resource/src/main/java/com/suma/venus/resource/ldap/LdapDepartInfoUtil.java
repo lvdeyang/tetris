@@ -14,9 +14,11 @@ import com.suma.application.ldap.contants.LdapContants;
 import com.suma.application.ldap.department.po.LdapDepartmentPo;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderDao;
+import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.service.BundleService;
@@ -63,7 +65,7 @@ public class LdapDepartInfoUtil {
 		return folderPO;
 	}
 
-	public LdapDepartmentPo pojoToLdap(FolderPO folderPO) {
+	public LdapDepartmentPo pojoToLdap(FolderPO folderPO, SerNodePO self) {
 		LdapDepartmentPo ldapDepart = new LdapDepartmentPo();
 		ldapDepart.setOrgUuid(folderPO.getUuid());
 		ldapDepart.setOrgName(folderPO.getName());
@@ -76,7 +78,7 @@ public class LdapDepartInfoUtil {
 //				ldapDepart.setOrgCmdRelation(parentFolder.getUuid());
 			}
 		}
-		ldapDepart.setOrgFactInfo(LdapContants.DEFAULT_FACT_UUID);
+		ldapDepart.setOrgFactInfo(self.getNodeFactInfo());
 
 		return ldapDepart;
 	}

@@ -2,26 +2,23 @@ package com.sumavision.bvc.command.group.basic;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.sumavision.bvc.command.group.enumeration.EditStatus;
+import com.sumavision.bvc.command.group.enumeration.GroupSpeakType;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
-import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.system.enumeration.GearsLevel;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -39,6 +36,9 @@ public class CommandGroupPO extends AbstractBasePO {
 	
 	/** 组名称 */
 	private String name;
+	
+	/** 主题（标准里的，暂时按照一个指挥一个主题来做） */
+	private String subject;
 	
 	/** 创建用户id */
 	private Long userId;
@@ -61,11 +61,17 @@ public class CommandGroupPO extends AbstractBasePO {
 	/** 组类型 */
 	private GroupType type;
 	
+	/** 发言类型 */
+	private GroupSpeakType speakType = GroupSpeakType.CHAIRMAN;
+	
+	/** 来源类型，本系统创建/外部系统创建 */
+	private OriginType originType = OriginType.INNER;
+	
 	/** 组状态 */
-	private GroupStatus status;
+	private GroupStatus status = GroupStatus.STOP;
 	
 	/** 编辑类型：正常（预设），临时，已删除 */
-	private EditStatus editStatus;
+	private EditStatus editStatus = EditStatus.NORMAL;
 	
 	/** 参数方案 */
 	private CommandGroupAvtplPO avtpl;
@@ -74,12 +80,12 @@ public class CommandGroupPO extends AbstractBasePO {
 	private GearsLevel currentGearLevel;
 	
 	/** 关联成员 */
-	private Set<CommandGroupMemberPO> members;
+	private List<CommandGroupMemberPO> members;
 	
 	/** 成员、议程配置、角色 通过各自PO中的groupId与group关联 */
 	
 	/** 关联转发 */
-	private Set<CommandGroupForwardPO> forwards;
+	private List<CommandGroupForwardPO> forwards;
 	
 	/** 关联转发点播 */
 	private List<CommandGroupForwardDemandPO> forwardDemands;
@@ -109,6 +115,15 @@ public class CommandGroupPO extends AbstractBasePO {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	@Column(name = "SUBJECT")
+	public String getSubject() {
+		return subject;
+	}
+
+	public void setSubject(String subject) {
+		this.subject = subject;
 	}
 
 	@Column(name = "START_TIME")
@@ -158,6 +173,26 @@ public class CommandGroupPO extends AbstractBasePO {
 	}
 
 	@Enumerated(value = EnumType.STRING)
+	@Column(name = "SPEAK_TYPE")
+	public GroupSpeakType getSpeakType() {
+		return speakType;
+	}
+
+	public void setSpeakType(GroupSpeakType speakType) {
+		this.speakType = speakType;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "ORIGIN_TYPE")
+	public OriginType getOriginType() {
+		return originType;
+	}
+
+	public void setOriginType(OriginType originType) {
+		this.originType = originType;
+	}
+
+	@Enumerated(value = EnumType.STRING)
 	@Column(name = "STATUS")
 	public GroupStatus getStatus() {
 		return status;
@@ -197,20 +232,20 @@ public class CommandGroupPO extends AbstractBasePO {
 	}
 	
 	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	public Set<CommandGroupMemberPO> getMembers() {
+	public List<CommandGroupMemberPO> getMembers() {
 		return members;
 	}
 
-	public void setMembers(Set<CommandGroupMemberPO> members) {
+	public void setMembers(List<CommandGroupMemberPO> members) {
 		this.members = members;
 	}
 	
 	@OneToMany(mappedBy = "group", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-	public Set<CommandGroupForwardPO> getForwards() {
+	public List<CommandGroupForwardPO> getForwards() {
 		return forwards;
 	}
 
-	public void setForwards(Set<CommandGroupForwardPO> forwards) {
+	public void setForwards(List<CommandGroupForwardPO> forwards) {
 		this.forwards = forwards;
 	}
 	

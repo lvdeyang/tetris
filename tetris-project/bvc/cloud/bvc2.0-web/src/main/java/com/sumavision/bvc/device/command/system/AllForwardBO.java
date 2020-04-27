@@ -1,7 +1,6 @@
 package com.sumavision.bvc.device.command.system;
 
-import java.util.Set;
-
+import java.util.List;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.enumeration.UserCallType;
 import com.sumavision.bvc.command.group.enumeration.VodType;
@@ -118,13 +117,13 @@ public class AllForwardBO {
 	public AllForwardBO setByForward(CommandGroupForwardPO forward){
 		
 		CommandCommonUtil commandCommonUtil = SpringContext.getBean(CommandCommonUtil.class);
-		Set<CommandGroupMemberPO> members = forward.getGroup().getMembers();
+		List<CommandGroupMemberPO> members = forward.getGroup().getMembers();
 		CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
 		CommandGroupMemberPO dstMember = commandCommonUtil.queryMemberById(members, forward.getDstMemberId());
 		
 		this.id = forward.getId().toString();
 		this.time = DateUtil.format(forward.getUpdateTime(), DateUtil.dateTimePattern);
-		this.businessType = "会议";
+		this.businessType = "多人业务";
 		this.srcType = "用户";
 		this.srcInfo = srcMember==null?forward.getVideoBundleName():srcMember.getUserName();
 		this.srcBundleId = forward.getVideoBundleId();

@@ -38,6 +38,7 @@ import com.suma.venus.resource.base.bo.ExternChannelParamTemplateBody;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.RectBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
+import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.ScreenBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
@@ -54,6 +55,8 @@ import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
+import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.dao.ScreenRectTemplateDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.dao.VirtualResourceDao;
@@ -67,15 +70,18 @@ import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
-import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.LockBundleParamPO;
 import com.suma.venus.resource.pojo.LockChannelParamPO;
 import com.suma.venus.resource.pojo.LockScreenParamPO;
+import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
 import com.suma.venus.resource.pojo.ScreenRectTemplatePO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.system.role.SystemRoleVO;
 
 /**
  * 资源层统一资源查询Service
@@ -159,6 +165,12 @@ public class ResourceService {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private PrivilegeDAO privilegeDao;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDao;
 
 	/** 通过userId查询具有权限的user */
 	public List<UserBO> queryUserresByUserId(Long userId, TerminalType terminalType) {
@@ -182,7 +194,7 @@ public class ResourceService {
 					// 绑定的用户资源的resouceCode格式:userNo-r(录制)/userNo-w(点播)/userNo-hj(呼叫)
 					if (code.endsWith("-r") || code.endsWith("-w")) {
 						userNoSet.add(code.substring(0, code.length() - 2));
-					} else if (code.endsWith("-hj")) {
+					} else if (code.endsWith("-hj") || code.endsWith("-zk")) {
 						userNoSet.add(code.substring(0, code.length() - 3));
 					} else {
 						userNoSet.add(code);
@@ -226,6 +238,43 @@ public class ResourceService {
 		}
 		return false;
 	}
+	
+	/**
+	 * 批量判断用户对设备的权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 下午4:26:56
+	 * @param Long userId 被查询用户id
+	 * @param List<String> bundleIds 被检测设备id列表
+	 * @param BUSINESS_OPR_TYPE businessType 业务类型
+	 * @return boolean
+	 */
+	public boolean hasPrivilegeOfBundle(Long userId, List<String> bundleIds, BUSINESS_OPR_TYPE businessType) throws Exception{
+		String suffix = null;
+		switch (businessType) {
+		case DIANBO:// 点播
+			suffix = "-w";
+			break;
+		case RECORD:// 录制
+			suffix = "-r";
+			break;
+		default:
+			return false;
+		}
+		List<String> codes = new ArrayList<String>();
+		for(String bundleId:bundleIds){
+			codes.add(new StringBufferWrapper().append(bundleId).append(suffix).toString());
+		}
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		for(String code:codes){
+			boolean hasPrivilege = false;
+			if (bo.getResourceCodes().contains(code)){
+				hasPrivilege = true;
+			}
+			if(!hasPrivilege) return false;
+		}
+		return true;
+	}
 
 	/** 根据用户id，目标用户id和业务类型判断用户对目标用户是否有权限 **/
 	public boolean hasPrivilegeOfUser(Long userId, Long dstUserId, BUSINESS_OPR_TYPE businessType) {
@@ -243,6 +292,9 @@ public class ResourceService {
 			case CALL:// 呼叫
 				code = dstUserBO.getUserNo() + "-hj";
 				break;
+			case ZK:// 指挥
+				code = dstUserBO.getUserNo() + "-zk";
+				break;
 			default:
 				return false;
 			}
@@ -256,6 +308,51 @@ public class ResourceService {
 		}
 
 		return false;
+	}
+	
+	/**
+	 * 批量查询用户对用户权限<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 下午4:20:40
+	 * @param Long userId 被查询用户id
+	 * @param List<Long> dstUserIds 被检测用户id列表
+	 * @param BUSINESS_OPR_TYPE businessType 业务类型
+	 * @return boolean
+	 */
+	public boolean hasPrivilegeOfUser(Long userId, List<Long> dstUserIds, BUSINESS_OPR_TYPE businessType) throws Exception{
+		List<UserBO> dstUserBOs = userQueryService.queryUsersByUserIds(dstUserIds, null);
+		if(dstUserBOs==null || dstUserBOs.size()<=0) return false;
+		String suffix = null;
+		switch (businessType) {
+		case DIANBO:// 点播
+			suffix = "-w";
+			break;
+		case RECORD:// 录制
+			suffix = "-r";
+			break;
+		case CALL:// 呼叫
+			suffix = "-hj";
+			break;
+		case ZK:// 指挥
+			suffix = "-zk";
+			break;
+		default:
+			return false;
+		}
+		List<String> codes = new ArrayList<String>();
+		for(UserBO dstUser:dstUserBOs){
+			codes.add(new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString());
+		}
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		for(String code:codes){
+			boolean hasPrivilege = false;
+			if (bo.getResourceCodes().contains(code)){
+				hasPrivilege = true;
+			}
+			if(!hasPrivilege) return false;
+		}
+		return true;
 	}
 
 	/** 通过userId查询bundles */
@@ -1453,16 +1550,30 @@ public class ResourceService {
 			List<VirtualResourcePO> virtualResourcePOs = new ArrayList<VirtualResourcePO>();
 			List<JSONObject> jsonList = new ArrayList<JSONObject>();
 			Set<String> resourceIds = new HashSet<String>();
-
+			
+			//里面的用户只可能是同一个，所以先按照用户只是同一个来处理
+			Long _userId = null;
+			for (JSONObject onDemandResource : onDemandResources) {
+				Long userId = onDemandResource.getLong("userId");
+				if(userId != null){
+					_userId = userId;
+					break;
+				}
+			}
+			
+			SystemRoleVO roleVO = null;
+			if(_userId != null){
+				roleVO = userQueryService.queryPrivateRoleId(_userId);
+			}
+			
 			// 绑定资源权限
-//			UserAndResourceIdBO userAndResourceIds = new UserAndResourceIdBO();
-//			List<String> resourceCodes = new ArrayList<String>();
+			RoleAndResourceIdBO roleAndResourceIdBO = new RoleAndResourceIdBO();
+			roleAndResourceIdBO.setResourceCodes(new ArrayList<String>());
 			for (JSONObject onDemandResource : onDemandResources) {
 				String resourceId = BundlePO.createBundleId();
 				resourceIds.add(resourceId);
-//				Long userId = onDemandResource.getLong("userId");
-//				resourceCodes.add(resourceId);
-//				userAndResourceIds.setUserId(userId);
+
+				roleAndResourceIdBO.getResourceCodes().add(resourceId);
 				// 点播资源实体属性
 				for (Entry<String, Object> entry : onDemandResource.entrySet()) {
 					virtualResourcePOs.add(new VirtualResourcePO(entry.getKey(), String.valueOf(entry.getValue()), resourceId));
@@ -1474,13 +1585,13 @@ public class ResourceService {
 				}
 			}
 
-//			userAndResourceIds.setResourceCodes(resourceCodes);
-//			ResultBO result = userFeign.bindUserPrivilege(userAndResourceIds);
-//			if(null==result || !result.isResult()){
-//				LOGGER.error("Fail to bind resource on user whose id=" + userAndResourceIds.getUserId());
-//			}
-
 			virtualResourceDao.save(virtualResourcePOs);
+			
+			if(roleVO != null){
+				roleAndResourceIdBO.setRoleId(Long.valueOf(roleVO.getId()));
+				userQueryService.bindRolePrivilege(roleAndResourceIdBO);
+			}
+			
 			for (String resourceId : resourceIds) {
 				jsonList.add(virtualResourceService.packageResource(resourceId));
 			}
@@ -1627,6 +1738,15 @@ public class ResourceService {
 			for (String resourceId : resourceIds) {
 				virtualResourceDao.deleteByResourceId(resourceId);
 			}
+			if(resourceIds != null && resourceIds.size() > 0){
+				
+				List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resourceIds);
+				List<RolePrivilegeMap> maps = rolePrivilegeMapDao.findByResourceIdIn(resourceIds);
+				
+				privilegeDao.delete(privileges);
+				rolePrivilegeMapDao.delete(maps);
+			}
+
 		} catch (Exception e) {
 			LOGGER.error("Fail to delete on-demand resources", e);
 			return false;
@@ -2026,4 +2146,5 @@ public class ResourceService {
 		channelBody.setExtern_type(channelTemplate.getExternType());
 		return channelBody;
 	}
+	
 }

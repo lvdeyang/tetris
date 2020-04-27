@@ -1,0 +1,52 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<!-- 命令名称类型，bizcnf表示会议组业务命令，bizcmd表示ZH组业务命令 -->
+	<xsd:simpleType name="commandnameType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="bizcnf" />
+			<xsd:enumeration value="bizcmd" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 成员列表 -->
+	<xsd:complexType name="mlistType">
+		<xsd:sequence>
+			<xsd:element name="mid" type="userIDType" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 媒体源（用户或设备编号）列表 -->
+	<xsd:complexType name="medialistType">
+		<xsd:sequence>
+			<xsd:element name="mediasrcid" type="userIDType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="notify">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- commandname命令名称 -->
+				<xsd:element name="commandname" type="commandnameType" />
+				<!-- 操作名称，类型定义见A.6.3.1启动分组业务，开启媒体转发通知取值为pullmediastart，停 止媒体转发通知取值为pullmediastop -->
+				<xsd:element name="operation" type="operationType" />
+				<!-- seq命令序号 -->
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<!-- 业务组ID -->
+				<xsd:element name="gid" type="xsd:string" />
+				<!-- 本操作发起成员ID -->
+				<xsd:element name="op" type="userIDType" />
+				<!-- 本操作相关成员ID，媒体接收成员ID列表 -->
+				<xsd:element name="mlist" type="mlistType" />
+				<!-- 媒体源（用户或设备编号）列表 -->
+				<xsd:element name="medialist" type="medialistType" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

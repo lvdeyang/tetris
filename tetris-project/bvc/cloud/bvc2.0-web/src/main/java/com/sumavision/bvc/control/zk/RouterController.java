@@ -346,6 +346,20 @@ public class RouterController {
 	}
 	
 	/**
+	 * 页脚发布字幕弹框<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年04月26日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/publish/subtitle")
+	public ModelAndView zkLeaderPublishSubtitle(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/publish-subtitle/publishSubtitle");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 页脚云台控制<br/>
 	 * <b>作者:</b>yxc<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -402,6 +416,20 @@ public class RouterController {
 	}
 	
 	/**
+	 * 底部  录制任务管理<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月28日 上午17:21:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/rec")
+	public ModelAndView zkLeaderRec(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/recManage/recManage");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 头部  设置作战时间<br/>
 	 * <b>作者:</b>yxc<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -411,6 +439,90 @@ public class RouterController {
 	@RequestMapping(value = "/zk/leader/set/fightTime")
 	public ModelAndView zkLeaderFightTime(String token){
 		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/set-fightTime/fightTime");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 添加录制任务<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月2日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/addRecord")
+	public ModelAndView zkLeaderaddRecord(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/addRecord/add-record");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 点播录制文件<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月2日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/record/file")
+	public ModelAndView zkLeaderRecord(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/recordFile/record-file");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 外部文件管理<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月3日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/out/file")
+	public ModelAndView zkLeaderOutFile(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/outFile/outFile");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 外部文件导入<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月3日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/file/import")
+	public ModelAndView zkLeaderFileImport(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/fileImport/file-import");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 字幕管理<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月22日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/subtitle/manage")
+	public ModelAndView zkLeaderSubtitle(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/subtitleManage/subtitle");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 字幕发布<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月22日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/subtitle/layer")
+	public ModelAndView zkLeaderSubtitleLayer(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/subtitle-layer/subtitleLayer");
 		mv.addObject("token", token);
 		return mv;
 	}

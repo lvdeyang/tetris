@@ -35,7 +35,7 @@ public class ResourceSyncLdapTask {
 	@Autowired
 	FolderDao folderDao;
 	
-	@Scheduled(fixedDelay = delay)
+	//@Scheduled(fixedDelay = delay)
 	public void sync(){
 		
 		LOGGER.info("ResourceSyncLdapTask in");

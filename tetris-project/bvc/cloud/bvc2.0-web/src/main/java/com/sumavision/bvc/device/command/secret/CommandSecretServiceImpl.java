@@ -2,26 +2,35 @@ package com.sumavision.bvc.device.command.secret;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
+import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.bvc.log.OperationLogService;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -41,10 +50,25 @@ public class CommandSecretServiceImpl {
 	private CommandGroupDAO commandGroupDao;
 	
 	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
 	private CommandBasicServiceImpl commandBasicServiceImpl;
 
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+
+	@Autowired
+	private QueryUtil queryUtil;
+	
+	@Autowired
+	private OperationLogService operationLogService;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	@Autowired
+	private ResourceService resourceService;
 	
 	/**
 	 * 开始专向会议<br/>
@@ -66,29 +90,40 @@ public class CommandSecretServiceImpl {
 			Long memberUserId,
 			int locationIndex) throws Exception{
 		
+		UserBO memberUser = resourceService.queryUserById(memberUserId, TerminalType.QT_ZK);
+		FolderUserMap memberUserMap = folderUserMapDao.findByUserId(memberUser.getId());
+		boolean bMemberUserLdap = queryUtil.isLdapUser(memberUser, memberUserMap);
+		if(bMemberUserLdap){
+			throw new BaseException(StatusCode.FORBIDDEN, "跨系统用户请使用“视频呼叫”");
+		}
+		
+		String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
+		
 		if(creatorUserId.equals(memberUserId)){
-			throw new BaseException(StatusCode.FORBIDDEN, "请选择其他成员进行专向会议");
+			throw new BaseException(StatusCode.FORBIDDEN, "请选择其他成员进行专向" + commandString);
 		}
 		
 		List<CommandGroupPO> secretGroups = commandGroupDao.findByType(GroupType.SECRET);
 		for(CommandGroupPO secretGroup : secretGroups){
 			if(!secretGroup.getStatus().equals(GroupStatus.STOP)){
-				Set<CommandGroupMemberPO> members = secretGroup.getMembers();
+				List<CommandGroupMemberPO> members = secretGroup.getMembers();
 				for(CommandGroupMemberPO member : members){
 					if(member.getUserId().equals(creatorUserId)){
-						throw new BaseException(StatusCode.FORBIDDEN, "您已经在参加其他专向会议");
+						throw new BaseException(StatusCode.FORBIDDEN, "您已经在参加其他专向" + commandString);
 					}else if(member.getUserId().equals(memberUserId)){
-						throw new BaseException(StatusCode.FORBIDDEN, "对方已经在参加其他专向会议");
+						throw new BaseException(StatusCode.FORBIDDEN, "对方已经在参加其他专向" + commandString);
 					}
 				}
 			}
 		}
 		
-		log.info(creatorUsername + "发起专向会议，成员用户userId：" + memberUserId);
-		
 		List<Long> userIdArray = new ArrayListWrapper<Long>().add(memberUserId).getList();		
-		CommandGroupPO group = commandBasicServiceImpl.save(creatorUserId, creatorUserId, creatorUsername, name, GroupType.SECRET, userIdArray);
+		CommandGroupPO group = commandBasicServiceImpl.save(creatorUserId, creatorUserId, creatorUsername, name, name, GroupType.SECRET, OriginType.INNER, userIdArray);
 		Object chairSplits = commandBasicServiceImpl.start(group.getId(), locationIndex);
+		
+		log.info(creatorUsername + "发起专向会议，成员用户userId：" + memberUserId);
+		operationLogService.send(creatorUsername, "开启专向指挥", creatorUsername + "发起专向会议，成员用户userId：" + memberUserId);
+		
 		return chairSplits;
 	}
 	
@@ -104,6 +139,8 @@ public class CommandSecretServiceImpl {
 	 */
 	public JSONObject stop(Long userId, Long groupId) throws Exception{
 		
+		UserVO user = userQuery.current();
+		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		log.info("专向会议停止：" + group.getName());
 		
@@ -114,6 +151,8 @@ public class CommandSecretServiceImpl {
 		commandBasicServiceImpl.startAllGroupForwards(groupIds, true, true);
 				
 		commandBasicServiceImpl.remove(group.getUserId(), groupIds);
+		
+		operationLogService.send(user.getNickname(), "停止专向指挥", user.getNickname()+"停止了专向指挥,groupId:"+groupId);
 		
 		if(splits.size() > 0){
 			return splits.getJSONObject(0);
@@ -132,10 +171,11 @@ public class CommandSecretServiceImpl {
 	 * @throws Exception
 	 */
 	public Object accept(Long userId, Long groupId) throws Exception{
-				
+		UserVO user = userQuery.current();		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		if(group == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "专向会议已停止");
+			String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
+			throw new BaseException(StatusCode.FORBIDDEN, "专向" + commandString + "已停止");
 		}
 		log.info("成员同意加入专向会议：" + group.getName());
 		
@@ -148,6 +188,7 @@ public class CommandSecretServiceImpl {
 		commandBasicServiceImpl.stopAllGroupForwardsBySrcMemberIds(groupIds, srcUserIds, true, true);
 			
 		JSONArray groupInfos = commandBasicServiceImpl.enter(userId, groupIds);
+		operationLogService.send(user.getNickname(), "同意加入专向指挥", user.getNickname() + "同意加入专向指挥，groupId:" + groupId);
 		if(groupInfos.size() > 0){
 			JSONArray splits = groupInfos.getJSONObject(0).getJSONArray("splits");
 			if(splits.size() > 0){
@@ -168,9 +209,10 @@ public class CommandSecretServiceImpl {
 	 * @throws Exception
 	 */
 	public void refuse(Long userId, Long groupId) throws Exception{
-		
+		UserVO user = userQuery.current();
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		if(group == null){
+//			String commandString = commandCommonUtil.generateCommandString(GroupType.SECRET);
 			throw new BaseException(StatusCode.FORBIDDEN, "专向会议已停止");
 		}
 		log.info("成员拒绝加入专向会议，会议：" + group.getName());
@@ -179,6 +221,7 @@ public class CommandSecretServiceImpl {
 		
 		List<Long> groupIds = new ArrayListWrapper<Long>().add(groupId).getList();
 		commandBasicServiceImpl.remove(group.getUserId(), groupIds);
+		operationLogService.send(user.getNickname(), "拒绝加入专向指挥", user.getNickname() + "拒绝进入专向指挥，groupId:" + groupId);
 	}
 	
 	/**
@@ -194,7 +237,7 @@ public class CommandSecretServiceImpl {
 		
 		//以forward的源，作为源和目的去查找专向转发
 		CommandGroupPO group = forward.getGroup();
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO member = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
 		Long forwardSrcUserId = member.getUserId();
 		
@@ -207,7 +250,7 @@ public class CommandSecretServiceImpl {
 				continue;
 			}
 			if(!secretGroup.getStatus().equals(GroupStatus.STOP)){
-				Set<CommandGroupMemberPO> secretMembers = secretGroup.getMembers();
+				List<CommandGroupMemberPO> secretMembers = secretGroup.getMembers();
 				//先判断成员是否都CONNECT
 				for(CommandGroupMemberPO secretMember : secretMembers){
 					if(!secretMember.getMemberStatus().equals(MemberStatus.CONNECT)){

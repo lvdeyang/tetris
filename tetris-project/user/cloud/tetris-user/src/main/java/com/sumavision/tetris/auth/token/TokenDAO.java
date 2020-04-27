@@ -31,7 +31,26 @@ public interface TokenDAO extends BaseDAO<TokenPO>{
 	 */
 	public TokenPO findByUserIdAndType(Long userId, TerminalType type);
 	
+	/**
+	 * 批量获取用户特定终端类型登录的token<<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 上午9:59:17
+	 * @param Collection<Long> userIds 用户id列表
+	 * @param TerminalType type 终端类型
+	 * @return List<TokenPO> token列表
+	 */
 	public List<TokenPO> findByUserIdInAndType(Collection<Long> userIds, TerminalType type);
+	
+	/**
+	 * 查询用户所有的token<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月10日 上午10:01:07
+	 * @param Long userId 用户id
+	 * @return List<TokenPO> token列表
+	 */
+	public List<TokenPO> findByUserId(Long userId);
 	
 	/**
 	 * 根据token代码和终端类型查询token<br/>

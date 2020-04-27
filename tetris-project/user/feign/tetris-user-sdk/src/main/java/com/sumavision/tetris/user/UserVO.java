@@ -17,6 +17,8 @@ public class UserVO{
 	
 	private String updateTime;
 	
+	private String username;
+	
 	/** 用户名 */
 	private String nickname;
 	
@@ -38,6 +40,9 @@ public class UserVO{
 	/** 邮箱 */
 	private String mail;
 	
+	/** 用户级别 */
+	private Integer level;
+	
 	/** 是否是自动生成的 */
 	private boolean autoGeneration;
 	
@@ -55,6 +60,9 @@ public class UserVO{
 	
 	/** 用户隶属组织id */
 	private String groupId;
+	
+	/** 是否是组织创建者 */
+	private Boolean isGroupCreator;
 	
 	/** 用户隶属组织名称 */
 	private String groupName;
@@ -91,6 +99,9 @@ public class UserVO{
 	
 	/** 用户标签 */
 	private List<String> tags;
+	
+	/** 异常登录次数 */
+	private int errorLoginTimes;
 
 	public Long getId() {
 		return id;
@@ -182,6 +193,15 @@ public class UserVO{
 		return this;
 	}
 
+	public Integer getLevel() {
+		return level;
+	}
+
+	public UserVO setLevel(Integer level) {
+		this.level = level;
+		return this;
+	}
+
 	public boolean isAutoGeneration() {
 		return autoGeneration;
 	}
@@ -233,6 +253,15 @@ public class UserVO{
 
 	public UserVO setGroupId(String groupId) {
 		this.groupId = groupId;
+		return this;
+	}
+
+	public Boolean getIsGroupCreator() {
+		return isGroupCreator;
+	}
+
+	public UserVO setIsGroupCreator(Boolean isGroupCreator) {
+		this.isGroupCreator = isGroupCreator;
 		return this;
 	}
 
@@ -341,6 +370,24 @@ public class UserVO{
 
 	public void setTags(List<String> tags) {
 		this.tags = tags;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public UserVO setUsername(String username) {
+		this.username = username;
+		return this;
+	}
+	
+	public int getErrorLoginTimes() {
+		return errorLoginTimes;
+	}
+
+	public UserVO setErrorLoginTimes(int errorLoginTimes) {
+		this.errorLoginTimes = errorLoginTimes;
+		return this;
 	}
 	
 }

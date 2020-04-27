@@ -1,0 +1,11 @@
+<control>
+	<commandname>customosd</commandname>
+	<seq>69d66d4e8e1d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<devname>member1</devname>
+	<devid>00000000001</devid>
+	<customtype>1</customtype>
+	<customdata>
+		<!-- 此处填自定义字幕的内容 -->
+	</customdata>
+</control>

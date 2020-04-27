@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'system-storage/page-system-storage-config.html',
+    window.APPPATH + 'system-storage/page-system-storage-config.i18n',
     'config',
     'jquery',
     'restfull',
@@ -13,7 +14,10 @@ define([
     'element-ui',
     'mi-frame',
     'css!' + window.APPPATH + 'system-storage/page-system-storage-config.css'
-], function (tpl, config, $, ajax, context, commons, Vue, d3) {
+], function (tpl, i18n, config, $, ajax, context, commons, Vue, d3) {
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-system-storage-config';
 
@@ -32,8 +36,8 @@ define([
             data: {
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
-                groups: context.getProp('groups')
-
+                groups: context.getProp('groups'),
+                i18n:i18n
             },
             computed: {},
             watch: {},

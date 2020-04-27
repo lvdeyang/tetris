@@ -1,0 +1,27 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			targetNamespace="http://www.w3.org/namespace/"
+			xmlns:tg="http://www.w3.org/namespace/">
+			
+	<xsd:simpleType name="deviceIDType">
+		<xsd:restriction base="ID">
+			<xsd:pattern value="\d{11}" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!--用户编码类型 -->
+	<xsd:simpleType name="userIDType">
+		<xsd:restriction base="ID">
+			<xsd:pattern value="\d{11}" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!--uuid类型 -->
+	<xsd:simpleType name="uuidType">
+		<xsd:restriction base="ID">
+			<xsd:maxLength value="32" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+</xsd:schema>

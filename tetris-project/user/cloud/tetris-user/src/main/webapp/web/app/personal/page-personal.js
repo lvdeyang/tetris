@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'personal/page-personal.html',
+    window.APPPATH + 'personal/page-personal.i18n',
     'config',
     'restfull',
     'context',
@@ -12,7 +13,10 @@ define([
     'mi-frame',
     'mi-tag-dialog',
     'css!' + window.APPPATH + 'personal/page-personal.css'
-], function (tpl, config, ajax, context, commons, Vue) {
+], function (tpl, i18n, config, ajax, context, commons, Vue) {
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-personal';
 
@@ -30,6 +34,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                i18n:i18n,
                 loading: false,
                 tab: {
                     current: "个人信息"

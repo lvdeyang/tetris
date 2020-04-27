@@ -2,6 +2,8 @@ package com.sumavision.tetris.zoom.contacts;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Lob;
 import javax.persistence.Table;
 
@@ -21,7 +23,7 @@ public class ContactsMessagePO extends AbstractBasePO{
 	private static final long serialVersionUID = 1L;
 
 	/** 消息发送成员id */
-	private Long fromUserId;
+	private String fromUserId;
 	
 	/** 消息发送成员会议名称 */
 	private String fromUserNickname;
@@ -30,17 +32,20 @@ public class ContactsMessagePO extends AbstractBasePO{
 	private String message;
 	
 	/** 消息目标成员id */
-	private Long toUserId;
+	private String toUserId;
 	
 	/** 消息目标成员会议名称 */
 	private String toUserNickname;
+	
+	/** 消息类型 */
+	private ContactsMessageType type;
 
 	@Column(name = "FROM_USER_ID")
-	public Long getFromUserId() {
+	public String getFromUserId() {
 		return fromUserId;
 	}
 
-	public void setFromUserId(Long fromUserId) {
+	public void setFromUserId(String fromUserId) {
 		this.fromUserId = fromUserId;
 	}
 
@@ -64,11 +69,11 @@ public class ContactsMessagePO extends AbstractBasePO{
 	}
 
 	@Column(name = "TO_USER_ID")
-	public Long getToUserId() {
+	public String getToUserId() {
 		return toUserId;
 	}
 
-	public void setToUserId(Long toUserId) {
+	public void setToUserId(String toUserId) {
 		this.toUserId = toUserId;
 	}
 
@@ -79,6 +84,16 @@ public class ContactsMessagePO extends AbstractBasePO{
 
 	public void setToUserNickname(String toUserNickname) {
 		this.toUserNickname = toUserNickname;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "TYPE")
+	public ContactsMessageType getType() {
+		return type;
+	}
+
+	public void setType(ContactsMessageType type) {
+		this.type = type;
 	}
 	
 }

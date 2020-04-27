@@ -1,0 +1,23 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<xsd:element name="control">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="commandname" type="xsd:string" />
+				<xsd:element name="seq" type="seqType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<xsd:element name="devname" type="devnameType" />
+				<!-- 设备编码id类型 -->
+				<xsd:element name="devid" type="deviceIDType" />
+				<!-- 自定义字幕类型标识 -->
+				<xsd:element name="customtype" type="xsd:string" />
+				<!-- 自定义字幕详细信息 -->
+				<xsd:element name="customdata" type="xsd:string" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

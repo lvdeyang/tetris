@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<!-- 授权操作类型，add表示新增、edit表示编辑、remove表示删除全部权限 -->
+	<xsd:simpleType name="operation_type">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="add" />
+			<xsd:enumeration value="edit" />
+			<xsd:enumeration value="remove" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!--功能、视频资源权限类型 -->
+	<xsd:simpleType name="authType">
+		<xsd:restriction base="ID">
+			<xsd:pattern value="\d{16}" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<!--用户可使用权限的其他用户信息 -->
+	<xsd:complexType name="userauthitemType">
+		<xsd:sequence>
+			<!--用户可使用权限的用户id -->
+			<xsd:element name="userid" type="userIDType" />
+			<!--用户包含点播、呼叫、ZH、会议、录制、回放、下载、控制等权限 -->
+			<!--用户权限16位，后8位为保留位，前八位从左到右分别代表点播、呼叫、ZH、会议、录制、回 放、下载、控制，每一位中1代表具备该权限，0代表不具备该权限 -->
+			<xsd:element name="auth" type="authType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<!--用户可使用权限的设备信息 -->
+	<xsd:complexType name="devauthitemType">
+		<xsd:sequence>
+			<!--用户可使用权限的设备id -->
+			<xsd:element name="devid" type="deviceIDType" />
+			<!--设备包含点播、录制、回放、下载、控制、画面调节等权限 -->
+			<!-- 设备权限16位，后10位为保留位，前六位从左到右分别代表点播、录制、回放、下载、控制、 画面调节，每一位中1代表具备该权限，0代表不具备该权限 -->
+			<xsd:element name="auth" type="authType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<!--用户可使用权限的其他用户列表 -->
+	<xsd:complexType name="userauthlistType">
+		<xsd:sequence>
+			<xsd:element name="useritem" type="userauthitemType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<!--用户可使用权限的设备列表 -->
+	<xsd:complexType name="devauthlistType">
+		<xsd:sequence>
+			<xsd:element name="devitem" type="devauthitemType"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<xsd:element name="control">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- commandname命令名称 -->
+				<xsd:element name="commandname" type="xsd:string" fixed="authnotify" />
+				<!-- 操作类型 -->
+				<xsd:element name="operation" type="operation_type" />
+				<!-- seq命令序号 -->
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<!-- 授权操作服务节点 -->
+				<xsd:element name="authnodeid" type="uuidType" />
+				<!-- 授权操作用户ID -->
+				<xsd:element name="authuserid" type="userIDType" />
+				<!-- 接受授权用户ID -->
+				<xsd:element name="userid" type="userIDType" />
+				<!-- 用户操作权限列表 -->
+				<xsd:element name="userlist" type="userauthlistType" />
+				<!-- 设备操作权限列表 -->
+				<xsd:element name="devlist" type="devauthlistType" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

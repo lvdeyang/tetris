@@ -216,8 +216,8 @@ public class MonitorVodController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月30日 上午9:24:22
 	 * @param Long folderId 点播资源文件夹id
-	 * @param String name 点播资源名称
-	 * @param String previewUrl 点播资源预览地址
+	 * @param JSONString resources 点播资源列表
+	 * 			{name:点播资源名称, previewUrl:点播资源预览地址}
 	 * @return List<TreeNodeVO> 树节点
 	 */
 	@JsonBody

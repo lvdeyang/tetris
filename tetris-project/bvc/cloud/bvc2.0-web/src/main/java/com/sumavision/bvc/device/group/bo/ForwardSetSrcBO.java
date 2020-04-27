@@ -13,7 +13,7 @@ import java.util.List;
 public class ForwardSetSrcBO {
 	
 	/**
-	 * 源的类型 channel/combineVideo/combineAudio
+	 * 源的类型 channel/combineVideo/combineAudio/mediaPush
 	 */
 	private String type = "";
 	

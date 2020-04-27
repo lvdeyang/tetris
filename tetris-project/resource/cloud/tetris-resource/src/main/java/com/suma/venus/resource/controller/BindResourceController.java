@@ -38,6 +38,9 @@ import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
 import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
+import com.suma.venus.resource.dao.SerInfoDao;
+import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.feign.UserQueryFeign;
 import com.suma.venus.resource.lianwang.auth.AuthNotifyXml;
 import com.suma.venus.resource.lianwang.auth.AuthXmlUtil;
@@ -48,12 +51,22 @@ import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
 import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
+import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.RolePrivilegeMap;
+import com.suma.venus.resource.pojo.SerInfoPO;
+import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
+import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.service.BundleService;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.VirtualResourceService;
 import com.suma.venus.resource.util.XMLBeanUtils;
+import com.sumavision.tetris.bvc.business.dispatch.TetrisDispatchService;
+import com.sumavision.tetris.bvc.business.dispatch.bo.PassByBO;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 @Controller
@@ -91,13 +104,21 @@ public class BindResourceController extends ControllerBase {
 	
 	@Autowired
 	private FolderDao folderDao;
-
-	// 联网中心消息服务注册ID
-	@Value("${connectCenterLayerID}")
-	private String connectCenterLayerID;
 	
 	@Autowired
 	private UserQueryService userQueryService;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private SerNodeDao serNodeDao;
+	
+	@Autowired
+	private SerInfoDao serInfoDao;
+	
+	@Autowired
+	private TetrisDispatchService tetrisDispatchService;
 
 	@RequestMapping(value = "/getAllUser", method = RequestMethod.POST)
 	@ResponseBody
@@ -385,6 +406,7 @@ public class BindResourceController extends ControllerBase {
 				boolean hasReadPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-r");
 				boolean hasWritePrivilege = privilegeCodes.contains(userBO.getUserNo() + "-w");
 				boolean hasHJPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-hj");
+				boolean hasZKPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-zk");
 				UserresPrivilegeBO userresPrivilege = getUserresPrivilegeFromUserBO(userBO);
 				if (hasReadPrivilege) {
 					userresPrivilege.setHasReadPrivilege(true);
@@ -394,6 +416,9 @@ public class BindResourceController extends ControllerBase {
 				}
 				if (hasHJPrivilege) {
 					userresPrivilege.setHasHJPrivilege(true);
+				}
+				if (hasZKPrivilege){
+					userresPrivilege.setHasZKPrivilege(true);
 				}
 				userresPrivilegeBOs.add(userresPrivilege);
 			}
@@ -627,9 +652,14 @@ public class BindResourceController extends ControllerBase {
 //					String oprusername = principal.getName();
 //					UserBO oprUserBO = userFeign.queryUserInfo(oprusername).get("user");
 					UserBO oprUserBO = userQueryService.current();
-					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, new ArrayList<String>(), readCheckList,
-							writeCheckList, new ArrayList<String>());
+					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, new ArrayList<String>(), new ArrayList<String>(), 
+							readCheckList, writeCheckList, new ArrayList<String>(), new ArrayList<String>());
+					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
+					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
+					
 					for (UserBO userBO : userBOs) {
+						String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
 						if ("ldap".equals(userBO.getCreater())) {
 							for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
 								BundlePO bundle = bundleDao.findByBundleId(entry.getKey());
@@ -637,7 +667,7 @@ public class BindResourceController extends ControllerBase {
 									continue;
 								}
 								AuthNotifyXml authNotifyXml = new AuthNotifyXml();
-								authNotifyXml.setAuthnodeid(LdapContants.DEFAULT_NODE_UUID);
+								authNotifyXml.setAuthnodeid(self.getNodeUuid());
 								authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
 								authNotifyXml.setUserid(userBO.getUserNo());
 								authNotifyXml.setOperation(entry.getValue().getDevOprType());
@@ -647,12 +677,13 @@ public class BindResourceController extends ControllerBase {
 								}
 								authNotifyXml.getDevlist().add(new DevAuthXml(bundle.getUsername(), authCode));
 								// 发送消息
-								JSONObject msgJson = authXmlUtil.createWholeAuthNotifyMessage(XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
-								authXmlUtil.sendAuthNotifyXmlMsg(connectCenterLayerID, msgJson.toJSONString());
+								JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(appInfo.getSerNo(), appNo, XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
+								PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
+								
+								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 							}
 						}
 					}
-
 				}
 			} catch (Exception e) {
 				LOGGER.error("", e);
@@ -671,17 +702,19 @@ public class BindResourceController extends ControllerBase {
 	@ResponseBody
 	public Map<String, Object> submitUserresPrivilege(@RequestParam(value = "roleId") Long roleId, @RequestParam(value = "prevReadChecks") String prevReadChecks,
 			@RequestParam(value = "prevWriteChecks") String prevWriteChecks, @RequestParam(value = "prevHJChecks") String prevHJChecks,
-			@RequestParam(value = "readChecks") String readChecks, @RequestParam(value = "writeChecks") String writeChecks, @RequestParam(value = "hjChecks") String hjChecks,
-			Principal principal) {
+			@RequestParam(value = "prevZKChecks") String prevZKChecks, @RequestParam(value = "readChecks") String readChecks, @RequestParam(value = "writeChecks") String writeChecks, 
+			@RequestParam(value = "hjChecks") String hjChecks, @RequestParam(value = "zkChecks") String zkChecks, Principal principal) {
 		Map<String, Object> data = makeAjaxData();
 
 		try {
 			List<String> preReadCheckList = new ArrayList<String>();
 			List<String> prevWriteCheckList = new ArrayList<String>();
 			List<String> prevHJCheckeList = new ArrayList<String>();
+			List<String> prevZKCheckeList = new ArrayList<String>();
 			List<String> readCheckList = new ArrayList<String>();
 			List<String> writeCheckList = new ArrayList<String>();
 			List<String> hjCheckList = new ArrayList<String>();
+			List<String> zkCheckList = new ArrayList<String>();
 			if (null != prevReadChecks && !prevReadChecks.isEmpty()) {
 				preReadCheckList = Arrays.asList(prevReadChecks.split(","));
 			}
@@ -690,6 +723,9 @@ public class BindResourceController extends ControllerBase {
 			}
 			if (null != prevHJChecks && !prevHJChecks.isEmpty()) {
 				prevHJCheckeList = Arrays.asList(prevHJChecks.split(","));
+			}
+			if (null != prevZKChecks && !prevZKChecks.isEmpty()) {
+				prevZKCheckeList = Arrays.asList(prevZKChecks.split(","));
 			}
 			if (null != readChecks && !readChecks.isEmpty()) {
 				readCheckList = Arrays.asList(readChecks.split(","));
@@ -700,10 +736,14 @@ public class BindResourceController extends ControllerBase {
 			if (null != hjChecks && !hjChecks.isEmpty()) {
 				hjCheckList = Arrays.asList(hjChecks.split(","));
 			}
+			if (null != zkChecks && !zkChecks.isEmpty()) {
+				zkCheckList = Arrays.asList(zkChecks.split(","));
+			}
 
 			List<String> toBindReadCheckList = getToBindPrivileges(preReadCheckList, readCheckList);
 			List<String> toBindWriteCheckList = getToBindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toBindHJCheckList = getToBindPrivileges(prevHJCheckeList, hjCheckList);
+			List<String> toBindZKCheckList = getToBindPrivileges(prevZKCheckeList, zkCheckList);
 			List<String> toBindChecks = new ArrayList<String>();
 			for (String readCheck : toBindReadCheckList) {
 				toBindChecks.add(readCheck + "-r");
@@ -714,6 +754,9 @@ public class BindResourceController extends ControllerBase {
 			for (String hjCheck : toBindHJCheckList) {
 				toBindChecks.add(hjCheck + "-hj");
 			}
+			for (String zkCheck : toBindZKCheckList) {
+				toBindChecks.add(zkCheck + "-zk");
+			}
 			if (!bindResourceCodes(roleId, toBindChecks)) {
 				data.put(ERRMSG, "绑定失败");
 				return data;
@@ -722,6 +765,7 @@ public class BindResourceController extends ControllerBase {
 			List<String> toUnbindReadCheckList = getToUnbindPrivileges(preReadCheckList, readCheckList);
 			List<String> toUnbindWriteCheList = getToUnbindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toUnbindHJCheckList = getToUnbindPrivileges(prevHJCheckeList, hjCheckList);
+			List<String> toUnbindZKCheckList = getToUnbindPrivileges(prevZKCheckeList, zkCheckList);
 			List<String> toUnbindChecks = new ArrayList<String>();
 			for (String readCheck : toUnbindReadCheckList) {
 				toUnbindChecks.add(readCheck + "-r");
@@ -731,6 +775,9 @@ public class BindResourceController extends ControllerBase {
 			}
 			for (String hjCheck : toUnbindHJCheckList) {
 				toUnbindChecks.add(hjCheck + "-hj");
+			}
+			for (String zkCheck : toUnbindZKCheckList) {
+				toUnbindChecks.add(zkCheck + "-zk");
 			}
 			if (!unbindResourceCodes(roleId, toUnbindChecks)) {
 				data.put(ERRMSG, "解绑失败");
@@ -746,13 +793,18 @@ public class BindResourceController extends ControllerBase {
 //					String oprusername = principal.getName();
 //					UserBO oprUserBO = userFeign.queryUserInfo(oprusername).get("user");
 					UserBO oprUserBO = userQueryService.current();
-					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, readCheckList, writeCheckList,
-							hjCheckList);
+					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, prevZKCheckeList, 
+							readCheckList, writeCheckList, hjCheckList, zkCheckList);
+					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
+					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
+					
 					for (UserBO userBO : userBOs) {
 						if ("ldap".equals(userBO.getCreater())) {
+							String appNo = serInfoDao.findByTypeAndUserNo(SerInfoType.APPLICATION.getNum(), userBO.getUserNo());
 							for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
 								AuthNotifyXml authNotifyXml = new AuthNotifyXml();
-								authNotifyXml.setAuthnodeid(LdapContants.DEFAULT_NODE_UUID);
+								authNotifyXml.setAuthnodeid(self.getNodeUuid());
 								authNotifyXml.setAuthuserid(oprUserBO.getUserNo());
 								authNotifyXml.setUserid(userBO.getUserNo());
 								authNotifyXml.setOperation(entry.getValue().getUserOprType());
@@ -762,8 +814,10 @@ public class BindResourceController extends ControllerBase {
 								}
 								authNotifyXml.getUserlist().add(new UserAuthXml(entry.getKey(), authCode));
 								// 发送消息
-								JSONObject msgJson = authXmlUtil.createWholeAuthNotifyMessage(XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
-								authXmlUtil.sendAuthNotifyXmlMsg(connectCenterLayerID, msgJson.toJSONString());
+								JSONObject msgJson = authXmlUtil.createAuthNotifyMessage(appInfo.getSerNo(), appNo, XMLBeanUtils.beanToXml(AuthNotifyXml.class, authNotifyXml), connectCenterLayerID);
+								PassByBO passByBO = JSONObject.parseObject(msgJson.toJSONString(), PassByBO.class);
+								
+								tetrisDispatchService.dispatch(new ArrayListWrapper<PassByBO>().add(passByBO).getList());
 							}
 						}
 					}
@@ -781,10 +835,10 @@ public class BindResourceController extends ControllerBase {
 		return data;
 	}
 
-	private Map<String, PrivilegeStatusBO> getPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList,
-			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList) {
-		Map<String, PrivilegeStatusBO> privilegeStatusMap = createPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, readCheckList, writeCheckList,
-				hjCheckList);
+	private Map<String, PrivilegeStatusBO> getPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList, List<String> prevZKCheckeList,
+			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList, List<String> zkCheckList) {
+		Map<String, PrivilegeStatusBO> privilegeStatusMap = createPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, prevZKCheckeList,
+				readCheckList, writeCheckList, hjCheckList, zkCheckList);
 		for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
 			if (preReadCheckList.contains(entry.getKey())) {
 				entry.getValue().setPrevCanRead(true);
@@ -795,6 +849,9 @@ public class BindResourceController extends ControllerBase {
 			if (prevHJCheckeList.contains(entry.getKey())) {
 				entry.getValue().setPrevCanHJ(true);
 			}
+			if (prevZKCheckeList.contains(entry.getKey())) {
+				entry.getValue().setPrevCanZK(true);
+			}
 			if (readCheckList.contains(entry.getKey())) {
 				entry.getValue().setNowCanRead(true);
 			}
@@ -804,12 +861,15 @@ public class BindResourceController extends ControllerBase {
 			if (hjCheckList.contains(entry.getKey())) {
 				entry.getValue().setNowCanHJ(true);
 			}
+			if (zkCheckList.contains(entry.getKey())) {
+				entry.getValue().setNowCanZK(true);
+			}
 		}
 		return privilegeStatusMap;
 	}
 
-	private Map<String, PrivilegeStatusBO> createPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList,
-			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList) {
+	private Map<String, PrivilegeStatusBO> createPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList, List<String> prevZKCheckeList,
+			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList, List<String> zkCheckList) {
 		Map<String, PrivilegeStatusBO> privilegeStatusMap = new HashMap<>();
 		for (String code : preReadCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
@@ -820,6 +880,9 @@ public class BindResourceController extends ControllerBase {
 		for (String code : prevHJCheckeList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
+		for (String code : prevZKCheckeList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
 		for (String code : readCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
@@ -827,6 +890,9 @@ public class BindResourceController extends ControllerBase {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		for (String code : hjCheckList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
+		for (String code : zkCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		return privilegeStatusMap;
@@ -872,7 +938,7 @@ public class BindResourceController extends ControllerBase {
 			bo.setRoleId(roleId);
 			bo.setResourceCodes(toBindChecks);
 			
-			return bindRolePrivilege(bo);
+			return userQueryService.bindRolePrivilege(bo);
 //			ResultBO result = userFeign.bindRolePrivilege(bo);
 //			if (null == result || !result.isResult()) {
 //				return false;
@@ -881,70 +947,6 @@ public class BindResourceController extends ControllerBase {
 		return true;
 	}
 	
-	/**
-	 * 角色绑定权限<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年12月26日 下午2:00:49
-	 * @param RoleAndResourceIdBO param
-	 * @return boolean
-	 */
-	private boolean bindRolePrivilege(RoleAndResourceIdBO param) throws Exception{
-		
-		LOGGER.info("=================/bindRolePrivilege===========BindRolePrivilegeBO is " + ((null == param) ? "null" : JSONObject.toJSON(param).toString()));
-
-		if (null == param.getRoleId() || param.getRoleId() == 0l) {
-			return false;
-		}
-
-		if (null == param.getResourceCodes() || param.getResourceCodes().isEmpty()) {
-			return false;
-		}
-
-		//TODO: feign中加
-//		RolePO role = roleService.findById(param.getRoleId());
-//		if (null == role) {
-//			return false;
-//		}
-		List<String> resources = new ArrayList<String>();
-		for (String resource : param.getResourceCodes()) {
-			resources.add(resource);
-		}
-		
-		List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resources);
-		
-		// 先保存权限
-		List<RolePrivilegeMap> maps = new ArrayList<RolePrivilegeMap>();
-		for (String resource : param.getResourceCodes()) {
-			PrivilegePO privilege = null;
-			for(PrivilegePO _privilege: privileges){
-				if(_privilege.getResourceIndentity().equals(resource)){
-					privilege = _privilege;
-					break;
-				}
-			}
-			if (null == privilege) {
-				PrivilegePO p = new PrivilegePO();
-				p.setbEdit(false);
-				p.setName("roleId-" + param.getRoleId() + "-privilege-" + resource);
-				p.setpCode("customcode");
-				p.setPrivilegeType(EPrivilegeType.CUSTOM);
-				p.setResourceIndentity(resource);
-				privilegeDao.save(p);
-				privilege = p;
-				// 进行绑定
-			}
-			RolePrivilegeMap mapR = new RolePrivilegeMap();
-			mapR.setPrivilegeId(privilege.getId());
-			mapR.setRoleId(param.getRoleId());
-			maps.add(mapR);
-		}
-		
-		rolePrivilegeMapDao.save(maps);
-		
-		return true;
-	}
-
 	private boolean unbindResourceCodes(Long roleId, List<String> toUnbindCheckList) throws Exception{
 		if (!toUnbindCheckList.isEmpty()) {
 			UnbindRolePrivilegeBO bo = new UnbindRolePrivilegeBO();
@@ -956,7 +958,7 @@ public class BindResourceController extends ControllerBase {
 				bo.getUnbindPrivilege().add(unbind);
 			}
 			
-			return unbindRolePrivilege(bo);
+			return userQueryService.unbindRolePrivilege(bo);
 //			ResultBO result = userFeign.unbindRolePrivilege(bo);
 //			if (null == result || !result.isResult()) {
 //				return false;
@@ -965,60 +967,6 @@ public class BindResourceController extends ControllerBase {
 		return true;
 	}
 	
-	/**
-	 * 角色解绑权限<br/>
-	 * <b>作者:</b>wjw<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年12月26日 下午2:02:39
-	 */
-	private boolean unbindRolePrivilege(UnbindRolePrivilegeBO param) throws Exception{
-		
-		if (null == param.getRoleId() || param.getRoleId() == 0l) {
-			return false;
-		}
-
-		if (null == param.getUnbindPrivilege() || param.getUnbindPrivilege().isEmpty()) {
-			return false;
-		}
-
-		//TODO: 新feign里面写
-//		RolePO role = roleService.findById(param.getRoleId());
-//		if (null == role) {
-//			data.put(ERRMSG, "用户角色为空");
-//			data.put("result", false);
-//			return data;
-//		}
-		List<String> resources = new ArrayList<String>();
-		for (UnbindResouceBO resource : param.getUnbindPrivilege()) {
-			resources.add(resource.getResourceCode());
-		}
-		List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resources);
-		List<Long> privilegeIds = new ArrayList<Long>();
-		for(PrivilegePO po: privileges){
-			privilegeIds.add(po.getId());
-		}
-		
-		List<RolePrivilegeMap> maps = rolePrivilegeMapDao.findByRoleIdAndPrivilegeIdIn(param.getRoleId(), privilegeIds);
-		if(maps != null && maps.size()>0){
-			rolePrivilegeMapDao.delete(maps);
-		}
-		
-		List<PrivilegePO> needDeletePrivileges = new ArrayList<PrivilegePO>();
-		for (UnbindResouceBO resource : param.getUnbindPrivilege()) {
-			for(PrivilegePO po: privileges){
-				if(po.getResourceIndentity().equals(resource.getResourceCode()) && resource.isbDelete()){
-					needDeletePrivileges.add(po);
-					break;
-				}
-			}
-		}
-		if(needDeletePrivileges.size() > 0){
-			privilegeDao.delete(needDeletePrivileges);
-		}
-		
-		return true;
-	}
-
 	/** 获取要绑定的资源ID集合 */
 	private List<String> getToBindPrivileges(List<String> prevCheckList, List<String> checkList) {
 		if (prevCheckList.isEmpty()) {

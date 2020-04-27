@@ -21,6 +21,9 @@ public class CommandVodPO extends AbstractBasePO{
 	
 	private Long sourceUserId;
 	
+	/** 被点播用户/设备号码 */
+	private String sourceNo;
+	
 	private String sourceUserName;
 	
 	private String sourceBundleId;
@@ -44,6 +47,9 @@ public class CommandVodPO extends AbstractBasePO{
 	 ************/
 	
 	private Long dstUserId;
+	
+	/** 发起人的号码；不是播放器的！！！ */
+	private String dstUserNo;
 	
 	private String dstUserName;
 	
@@ -77,6 +83,14 @@ public class CommandVodPO extends AbstractBasePO{
 
 	public void setSourceUserId(Long sourceUserId) {
 		this.sourceUserId = sourceUserId;
+	}
+
+	public String getSourceNo() {
+		return sourceNo;
+	}
+
+	public void setSourceNo(String sourceNo) {
+		this.sourceNo = sourceNo;
 	}
 
 	public String getSourceUserName() {
@@ -149,6 +163,14 @@ public class CommandVodPO extends AbstractBasePO{
 
 	public void setDstUserId(Long dstUserId) {
 		this.dstUserId = dstUserId;
+	}
+
+	public String getDstUserNo() {
+		return dstUserNo;
+	}
+
+	public void setDstUserNo(String dstUserNo) {
+		this.dstUserNo = dstUserNo;
 	}
 
 	public String getDstUserName() {
@@ -233,13 +255,14 @@ public class CommandVodPO extends AbstractBasePO{
 
 	public CommandVodPO(){}
 
-	public CommandVodPO(VodType vodType, Long sourceUserId, String sourceUserName, String sourceBundleId,
+	public CommandVodPO(VodType vodType, Long sourceUserId, String sourceNo, String sourceUserName, String sourceBundleId,
 			String sourceBundleName, String sourceBundleType, String sourceLayerId, String sourceVideoChannelId,
-			String sourceVideoBaseType, String sourceAudioChannelId, String sourceAudioBaseType, Long dstUserId,
+			String sourceVideoBaseType, String sourceAudioChannelId, String sourceAudioBaseType, Long dstUserId, String dstUserNo,
 			String dstUserName, String dstBundleId, String dstBundleName, String dstBundleType, String dstLayerId,
 			String dstVideoChannelId, String dstVideoBaseType, String dstAudioChannelId, String dstAudioBaseType) {
 		this.vodType = vodType;
 		this.sourceUserId = sourceUserId;
+		this.sourceNo = sourceNo;
 		this.sourceUserName = sourceUserName;
 		this.sourceBundleId = sourceBundleId;
 		this.sourceBundleName = sourceBundleName;
@@ -250,6 +273,7 @@ public class CommandVodPO extends AbstractBasePO{
 		this.sourceAudioChannelId = sourceAudioChannelId;
 		this.sourceAudioBaseType = sourceAudioBaseType;
 		this.dstUserId = dstUserId;
+		this.dstUserNo = dstUserNo;
 		this.dstUserName = dstUserName;
 		this.dstBundleId = dstBundleId;
 		this.dstBundleName = dstBundleName;

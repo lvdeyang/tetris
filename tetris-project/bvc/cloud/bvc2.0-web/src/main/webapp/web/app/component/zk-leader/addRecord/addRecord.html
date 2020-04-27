@@ -1,0 +1,24 @@
+<div class="addRecord">
+    <div class="search">
+      <div>
+          <el-select v-model="recordMode" placeholder="请选择">
+              <el-option value="MANUAL" label="手动录制">手动录制</el-option>
+              <el-option value="SCHEDULING" label="排期录制">排期录制</el-option>
+          </el-select>
+      </div>
+        <el-input v-model="inputName" placeholder="请输入文件名称"></el-input>
+        <el-date-picker
+                v-if="recordMode==='SCHEDULING'"
+                v-model="date"
+                type="datetimerange"
+                range-separator="至"
+                start-placeholder="开始日期"
+                end-placeholder="结束日期">
+        </el-date-picker>
+    </div>
+    <!--底部按钮-->
+    <div style="height:50px; width:100%; text-align:right; box-sizing:border-box;">
+        <el-button size="small" @click="submit" type="primary">确定提交</el-button>
+        <el-button size="small" @click="cancel" type="warning">关闭页面</el-button>
+    </div>
+</div>

@@ -89,7 +89,7 @@
 
     <title>侧边栏</title>
 </head>
-<body>
+<body onselectstart="return false;" unselectable="on">
     <div id="app" class="page-wrapper">
         <leader-rightbar ref="rightBar"></leader-rightbar>
     </div>

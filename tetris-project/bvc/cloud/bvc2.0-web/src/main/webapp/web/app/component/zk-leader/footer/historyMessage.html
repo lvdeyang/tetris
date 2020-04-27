@@ -2,10 +2,10 @@
     <div class="message">
         <!--切分屏按钮-->
         <div class="screenCtrl">
-            <!--<div title="1屏" @click="layoutChange(0)">
+            <div title="1屏" @click="layoutChange(0)">
                 <img v-if="!buttons.one" :src="baseUrl+'images/zk-leader/btns/one.png'"/>
                 <img v-else :src="baseUrl+'images/zk-leader/btns/oneActive.png'"/>
-            </div>-->
+            </div>
             <div title="2屏" @click="layoutChange(5)">
                 <img v-if="!buttons.two" :src="baseUrl+'images/zk-leader/btns/two.png'"/>
                 <img v-else :src="baseUrl+'images/zk-leader/btns/twoActive.png'"/>
@@ -31,10 +31,23 @@
         <div class="msgBg">
             <img src="../../../../../images/zk-leader/msg.png" alt="">
         </div>
-        <!--查看历史消息-->
-        <div class="tagMessage">
-            <img src="../../../../../images/zk-leader/history.png" alt="" @click="showMessagePanel">
+
+        <div class="subtitle" title="字幕管理" @click="subtitleOpen">字幕管理</div>
+
+        <div class="btn">
+            <!--查看历史消息-->
+            <div class="tagMessage" @click="showMessagePanel">历史消息</div>
+            <!--录制任务管理-->
+            <div class="record" @click="recManage">录制任务</div>
+            <!--下载任务-->
+            <div class="download" @click="download">下载任务</div>
+            <!--换一批-->
+            <div class="change" @click="replace">
+                <span class="icon-step-forward"></span>
+                <span>下一页</span>
+            </div>
         </div>
+
         <!--滚动消息-->
         <div class="msgContent" ref="msgContent">
             <div id="message-container"

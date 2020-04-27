@@ -31,7 +31,7 @@ public class MonitorOsdLayerPO extends AbstractBasePO{
 	/** 位置坐标百分比 */
 	private Integer y;
 	
-	/** 字幕的id值，用于添加和删除字幕的标识，可以标识图层或者行号 */
+	/** 字幕的id值，用于添加和删除字幕的标识，可以标识图层或者行号 0~7*/
 	private Integer layerIndex;
 	
 	/** 取值为0和1,1为显示；0为不显示；当为0时，代表删除一个字幕 */

@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
 import com.sumavision.bvc.control.utils.UserUtils;
-import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.cooperate.CommandCooperateServiceImpl;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 

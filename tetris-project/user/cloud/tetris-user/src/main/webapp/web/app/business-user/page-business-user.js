@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'business-user/page-business-user.html',
+    window.APPPATH + 'business-user/page-business-user.i18n',
     'config',
     'restfull',
     'jquery',
@@ -15,7 +16,10 @@ define([
     'mi-user-dialog',
     'mi-upload-dialog',
     'css!' + window.APPPATH + 'business-user/page-business-user.css'
-], function (tpl, config, ajax, $, context, commons, Vue) {
+], function (tpl, i18n, config, ajax, $, context, commons, Vue) {
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-business-user';
 
@@ -35,6 +39,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                i18n:i18n,
                 activeId: window.BASEPATH + 'index#/page-business-user',
                 importInfo:{
                     status:false,
@@ -48,7 +53,11 @@ define([
                     pageSize: 50,
                     pageSizes: [50, 100, 200, 400],
                     currentPage: 0,
-                    total: 0
+                    total: 0,
+                    condition:{
+                    	nickname:'',
+                    	userno:''
+                    }
                 },
                 dialog: {
                     createUser: {
@@ -60,6 +69,7 @@ define([
                         repeat: '',
                         mobile: '',
                         mail: '',
+                        level:1,
                         classify: '企业用户',
                         company: {
                             id: '',
@@ -74,6 +84,7 @@ define([
                         nickname: '',
                         mobile: '',
                         mail: '',
+                        level:1,
                         oldPassword: '',
                         newPassword: '',
                         repeat: '',
@@ -96,15 +107,23 @@ define([
                 },
                 load: function (currentPage) {
                     var self = this;
-                    self.table.rows.splice(0, self.table.rows.length);
-                    ajax.post('/user/subordinate/list', {
+                    var param = {
                         currentPage:currentPage,
                         pageSize:self.table.pageSize
-                    }, function(data){
+                    };
+                    if(self.table.condition.nickname) param.nickname = self.table.condition.nickname;
+                    if(self.table.condition.userno) param.userno = self.table.condition.userno;
+                    self.table.rows.splice(0, self.table.rows.length);
+                    ajax.post('/user/find/by/company/id/and/condition', param, function(data){
                         var total = data.total;
                         var rows = data.rows;
                         if(rows && rows.length>0){
                             for(var i=0; i<rows.length; i++){
+                            	if(rows[i].errorLoginTimes >= 10){
+                            		rows[i].locked = true;
+                            	}else{
+                            		rows[i].locked = false;
+                            	}
                                 self.table.rows.push(rows[i]);
                             }
                             self.table.total = total;
@@ -160,6 +179,39 @@ define([
                         self.loopImportStatus();
                     });
                 },
+                handelUserLockStatusChange:function(scope){
+                	var self = this;
+                	var rows = self.table.rows;
+                	if(scope.row.locked){
+                		ajax.post('/user/lock/' + scope.row.id, null, function(data){
+                			 for(var i=0; i<rows.length; i++){
+                				 if(rows[i].id === data.id){
+                					 rows[i].errorLoginTimes = data.errorLoginTimes;
+                					 rows[i].locked = true;
+                					 break;
+                				 }
+                			 }
+                			 self.$message({
+                				 type:'success',
+                				 message:'锁定成功！'
+                			 });
+                		});
+                	}else{
+                		ajax.post('/user/unlock/' + scope.row.id, null, function(data){
+               			 for(var i=0; i<rows.length; i++){
+               				 if(rows[i].id === data.id){
+               					 rows[i].errorLoginTimes = data.errorLoginTimes;
+               					 rows[i].locked = false;
+               					 break;
+               				 }
+               			 }
+               			 self.$message({
+               				 type:'success',
+               				 message:'解除锁定成功！'
+               			 });
+               		});
+                	}
+                },
                 handleRowEdit: function (scope) {
                     var self = this;
                     var row = scope.row;
@@ -167,6 +219,7 @@ define([
                     self.dialog.editUser.nickname = row.nickname;
                     self.dialog.editUser.mobile = row.mobile;
                     self.dialog.editUser.mail = row.mail;
+                    self.dialog.editUser.level = row.level?row.level:1;
                     self.dialog.editUser.visible = true;
                 },
                 handleEditUserClose:function(){
@@ -175,6 +228,7 @@ define([
                     self.dialog.editUser.nickname = '';
                     self.dialog.editUser.mobile = '';
                     self.dialog.editUser.mail = '';
+                    self.dialog.editUser.level = 1;
                     self.dialog.editUser.editPassword = '';
                     self.dialog.editUser.oldPassword = '';
                     self.dialog.editUser.newPassword = '';
@@ -188,6 +242,7 @@ define([
                         nickname:self.dialog.editUser.nickname,
                         mobile:self.dialog.editUser.mobile,
                         mail:self.dialog.editUser.mail,
+                        level:self.dialog.editUser.level,
                         editPassword:self.dialog.editUser.editPassword,
                         oldPassword:self.dialog.editUser.oldPassword,
                         newPassword:self.dialog.editUser.newPassword,
@@ -250,6 +305,7 @@ define([
                     self.dialog.createUser.repeat = '';
                     self.dialog.createUser.mobile = '';
                     self.dialog.createUser.mail = '';
+                    self.dialog.createUser.level = 1;
                     self.dialog.createUser.classify = '企业用户';
                     self.dialog.createUser.visible = false;
                 },
@@ -264,6 +320,7 @@ define([
                         repeat:self.dialog.createUser.repeat,
                         mobile:self.dialog.createUser.mobile,
                         mail:self.dialog.createUser.mail,
+                        level:self.dialog.createUser.level,
                         classify:self.dialog.createUser.classify,
                         companyId:self.dialog.createUser.company.id
                     };

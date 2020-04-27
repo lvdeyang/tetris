@@ -11,7 +11,7 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum GroupType {
 
 	BASIC("普通", "1", true),
-	COOPERATE("协同", "2", true),
+//	COOPERATE("协同", "2", true),
 	SECRET("专向", "3", true),
 	MEETING("会议", "11", true);
 	

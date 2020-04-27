@@ -19,7 +19,18 @@ public class FolderUserMap extends CommonPO<FolderUserMap>{
 	
 	private Long userId;
 	
+	private String userUuid;
+	
 	private String userName;
+	
+	/** 用户所在节点 */
+	private String userNode;
+	
+	/** 用户状态--暂时用来记录ldap用户的状态 */
+	private boolean userStatus;
+	
+	/** 用户号码--暂时用来记录ldap的用户号码 */
+	private String userNo;
 	
 	/** 索引顺序编号 */ 
 	private Long folderIndex;
@@ -53,6 +64,14 @@ public class FolderUserMap extends CommonPO<FolderUserMap>{
 		this.userId = userId;
 	}
 
+	public String getUserUuid() {
+		return userUuid;
+	}
+
+	public void setUserUuid(String userUuid) {
+		this.userUuid = userUuid;
+	}
+
 	public String getUserName() {
 		return userName;
 	}
@@ -83,6 +102,30 @@ public class FolderUserMap extends CommonPO<FolderUserMap>{
 
 	public void setCreator(String creator) {
 		this.creator = creator;
+	}
+
+	public String getUserNode() {
+		return userNode;
+	}
+
+	public void setUserNode(String userNode) {
+		this.userNode = userNode;
+	}
+
+	public boolean isUserStatus() {
+		return userStatus;
+	}
+
+	public void setUserStatus(boolean userStatus) {
+		this.userStatus = userStatus;
+	}
+
+	public String getUserNo() {
+		return userNo;
+	}
+
+	public void setUserNo(String userNo) {
+		this.userNo = userNo;
 	}
 	
 }

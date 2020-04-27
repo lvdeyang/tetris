@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -34,6 +36,7 @@ import com.sumavision.tetris.system.role.SystemRolePO;
 import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.theme.SystemThemeDAO;
 import com.sumavision.tetris.system.theme.SystemThemePO;
+import com.sumavision.tetris.user.exception.PasswordComplexityException;
 
 @Component
 public class UserQuery {
@@ -56,47 +59,23 @@ public class UserQuery {
 	private SystemRoleDAO systemRoleDao;
 	
 	/**
-	 * 用户登录校验<br/>
+	 * 检验密码复杂度<br/>
+	 * <p>包含数字，字母，长度8~20位</p>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年3月7日 下午2:39:14
-	 * @param String token 登录token
-	 * @return boolean 判断结果
+	 * <b>日期：</b>2020年4月24日 下午12:00:45
+	 * @param String password 密码
+	 * @return boolean 检验结果
 	 */
-	/*public boolean checkToken(String token) throws Exception{
-		UserPO user = userDao.findByToken(token);
-		if(user == null){
-			LOG.error(new StringBufferWrapper().append("token 无效：").append(token).toString());
-			throw new TokenUpdatedException();
-		}
-		Date now = new Date();
-		Date timeScope = DateUtil.addSecond(user.getLastModifyTime(), HttpConstant.TOKEN_TIMEOUT);
-		if(!timeScope.after(now)){
-			LOG.error(new StringBufferWrapper().append("token 超时：").append(token).toString());
-			throw new TokenTimeoutException();
-		}
-		user.setLastModifyTime(now);
-		userDao.save(user);
-		return true;
-	}*/
-	
-	/**
-	 * 检查当前用户的token是否可用<br/>
-	 * <b>作者:</b>lvdeyang<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2019年7月26日 下午3:26:04
-	 * @param UserPO user 用户
-	 * @return boolean token有效性
-	 */
-	/*public boolean userTokenUseable(UserPO user) throws Exception{
-		if(user.getToken() == null) return false;
-		Date now = new Date();
-		Date timeScope = DateUtil.addSecond(user.getLastModifyTime(), HttpConstant.TOKEN_TIMEOUT);
-		if(!timeScope.after(now)){
-			return false;
+	public boolean checkPassword(String password) throws Exception{
+		String check = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z_]{8,20}$";
+		Pattern regex = Pattern.compile(check);
+		Matcher matcher = regex.matcher(password);
+		if(!matcher.matches()){
+			throw new PasswordComplexityException("密码要包含数字，字母，长度8~20位");
 		}
 		return true;
-	}*/
+	}
 	
 	/**
 	 * 根据游客id查询游客<br/>
@@ -107,7 +86,7 @@ public class UserQuery {
 	 * @return UserVO 游客
 	 */
 	public UserVO findTourist(String userUuId) throws Exception{
-		UserPO user = userDao.findByUuid(userUuId);
+		UserPO user = userDao.findOne(Long.valueOf(userUuId));
 		if(user.getUsername()==null || "".equals(user.getUsername())){
 			return new UserVO().set(user);
 		}
@@ -193,6 +172,7 @@ public class UserQuery {
 			.setIcon(userEntity.getIcon())
 			.setToken(tokenEntity.getToken())
 			.setId(userEntity.getId())
+			.setUserno(userEntity.getUserno())
 			.setIp(tokenEntity.getIp());
 		if(userEntity.getTags() != null && !userEntity.getTags().isEmpty()) user.setTags(Arrays.asList(userEntity.getTags().split(UserPO.SEPARATOR_TAG))); else user.setTags(new ArrayList<String>());
 		
@@ -300,6 +280,41 @@ public class UserQuery {
 		Pageable page = new PageRequest(currentPage-1, pageSize);
 		Page<UserPO> users = userDao.findWithExceptOrderByUpdateTimeDesc(except, page);
 		return users.getContent();
+	}
+	
+	/**
+	 * 根据公司和条件查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午11:05:41
+	 * @param Long companyId 公司id
+	 * @param String nickname 用户昵称
+	 * @param String userno 用户号码
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	public Map<String, Object> findByCompanyIdAndCondition(
+			Long companyId, 
+			String nickname, 
+			String userno, 
+			int currentPage, 
+			int pageSize) throws Exception{
+		
+		String nicknameExpression = null;
+		if(nickname != null) nicknameExpression = new StringBufferWrapper().append("%").append(nickname).append("%").toString();
+		String usernoExpression = null;
+		if(userno != null) usernoExpression = new StringBufferWrapper().append("%").append(userno).append("%").toString();
+		
+		Pageable page = new PageRequest(currentPage-1, pageSize);
+		Page<UserPO> pagedEntities = userDao.findByCompanyIdAndCondition(companyId, nicknameExpression, usernoExpression, page);
+		List<UserPO> entities = pagedEntities.getContent();
+		List<UserVO> rows = UserVO.getConverter(UserVO.class).convert(entities, UserVO.class);
+		
+		int total = userDao.countByCompanyIdAndCondition(companyId, nicknameExpression, usernoExpression);
+		
+		return new HashMapWrapper<String, Object>().put("total", total)
+												   .put("rows", rows)
+												   .getMap();
 	}
 	
 	/**
@@ -766,6 +781,7 @@ public class UserQuery {
 		CompanyPO companyPO = companyDao.findByUserId(userId);
 		if(companyPO != null){
 			UserPO user = userDao.findByCompanyIdAndUserno(companyPO.getId(), userno);
+			if(user == null) return null;
 			return new UserVO().set(user);
 		}else{
 			return null;

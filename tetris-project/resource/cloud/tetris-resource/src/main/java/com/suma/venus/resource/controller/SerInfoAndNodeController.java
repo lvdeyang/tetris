@@ -1,9 +1,12 @@
 package com.suma.venus.resource.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,22 +20,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.alibaba.fastjson.JSON;
-import com.suma.application.ldap.contants.LdapContants;
 import com.suma.application.ldap.node.LdapNodeDao;
 import com.suma.application.ldap.node.LdapNodePo;
 import com.suma.application.ldap.ser.LdapSerInfoDao;
 import com.suma.application.ldap.ser.LdapSerInfoPo;
-import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.pojo.SerInfoPO;
-import com.suma.venus.resource.pojo.SerNodePO;
-import com.suma.venus.resource.util.SerInfoAndNodeSyncLdapUtils;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
+import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
+import com.suma.venus.resource.pojo.SerInfoPO;
+import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.service.LdapService;
+import com.suma.venus.resource.util.SerInfoAndNodeSyncLdapUtils;
 import com.suma.venus.resource.vo.SerInfoVO;
 import com.suma.venus.resource.vo.SerNodeVO;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping("serInfo")
@@ -54,6 +57,9 @@ public class SerInfoAndNodeController extends ControllerBase {
 
 	@Autowired
 	private SerInfoAndNodeSyncLdapUtils serInfoAndNodeSyncLdapUtils;
+	
+	@Autowired
+	private LdapService ldapService;
 
 	@RequestMapping("querySerInfo")
 	@ResponseBody
@@ -110,6 +116,48 @@ public class SerInfoAndNodeController extends ControllerBase {
 			// 修改为查出所有 临时版本
 			// List<SerNodePO> pos = serNodeDao.findAll();
 			
+			SerNodePO local = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+			String fatherNodes = local.getNodeFather();
+			String relationNodes = local.getNodeRelations();
+			List<SerNodePO> needRemovePos = new ArrayList<SerNodePO>();
+			
+			for(SerNodePO po: pos){
+				String father = po.getNodeFather();
+				if(father != null && !father.equals("NULL")){
+					String[] fathers = father.split(",");
+					for(String str: fathers){
+						if(str.equals(local.getNodeUuid())){
+							needRemovePos.add(po);
+							break;
+						}
+					}
+				}
+			}
+			
+			if(fatherNodes != null && !fatherNodes.equals("NULL")){
+				String[] nodes = fatherNodes.split(",");
+				for(String node: nodes){
+					for(SerNodePO po: pos){
+						if(po.getNodeUuid().equals(node)){
+							needRemovePos.add(po);
+							break;
+						}
+					}
+				}
+			}
+			if(relationNodes != null && !relationNodes.equals("NULL")){
+				String[] nodes = relationNodes.split(",");
+				for(String node: nodes){
+					for(SerNodePO po: pos){
+						if(po.getNodeUuid().equals(node)){
+							needRemovePos.add(po);
+							break;
+						}
+					}
+				}
+			}
+			
+			pos.removeAll(needRemovePos);
 			
 			List<SerNodeVO> vos = SerNodeVO.transFromPOs(pos);
 
@@ -135,11 +183,14 @@ public class SerInfoAndNodeController extends ControllerBase {
 		}
 
 		try {
+			SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+			
 			SerInfoPO serInfoPO = new SerInfoPO();
 			BeanUtils.copyProperties(serInfoVO, serInfoPO);
 
 			serInfoPO.setSerUuid(BundlePO.createBundleId());
-			serInfoPO.setSerFactInfo(LdapContants.DEFAULT_FACT_UUID);
+			serInfoPO.setSerNode(self.getNodeUuid());
+			serInfoPO.setSerFactInfo(self.getNodeFactInfo());
 			serInfoPO.setSourceType(SOURCE_TYPE.SYSTEM);
 			serInfoPO.setSyncStatus(SYNC_STATUS.ASYNC);
 
@@ -172,7 +223,7 @@ public class SerInfoAndNodeController extends ControllerBase {
 				return data;
 			}
 
-			BeanUtils.copyProperties(serInfoVO, serInfoPO, "serUuid", "syncStatus", "sourceType", "serFactInfo");
+			BeanUtils.copyProperties(serInfoVO, serInfoPO, "serUuid", "syncStatus", "sourceType", "serNode", "serFactInfo");
 			serInfoPO.setSyncStatus(SYNC_STATUS.ASYNC);
 			serInfoDao.save(serInfoPO);
 			data.put(ERRMSG, "");
@@ -195,23 +246,20 @@ public class SerInfoAndNodeController extends ControllerBase {
 
 		try {
 			
-			SerNodePO serNodePOTemp = serNodeDao.findTopByNodeUuid(LdapContants.DEFAULT_NODE_UUID);
-
-			if (serNodePOTemp != null) {
+			List<SerNodePO> serNodes = serNodeDao.findBySourceType(SOURCE_TYPE.SYSTEM);
+			
+			if (serNodes != null && serNodes.size() > 0) {
 				data.put(ERRMSG, "不能再新增");
 				return data;
 			}
 
 			SerNodePO serNodePO = new SerNodePO();
 			BeanUtils.copyProperties(serNodeVO, serNodePO);
-			serNodePO.setNodeUuid(LdapContants.DEFAULT_NODE_UUID);
+//			serNodePO.setNodeUuid(LdapContants.DEFAULT_NODE_UUID);
 			
-			// 临时代码
-			// serNodePO.setNodeUuid(UUID.randomUUID().toString().replaceAll("-", ""));
+			serNodePO.setNodeUuid(UUID.randomUUID().toString().replaceAll("-", ""));
 			
-			serNodePO.setNodeFactInfo(LdapContants.DEFAULT_FACT_UUID);
-			
-			
+			serNodePO.setNodeFather("NULL");
 			serNodePO.setNodeRelations("NULL");
 			serNodePO.setSourceType(SOURCE_TYPE.SYSTEM);
 			serNodePO.setSyncStatus(SYNC_STATUS.ASYNC);
@@ -247,8 +295,11 @@ public class SerInfoAndNodeController extends ControllerBase {
 				return data;
 			 }
 
+			serNodePOTemp.setNodePublisher(serNodeVO.getNodePublisher());
 			serNodePOTemp.setNodeName(serNodeVO.getNodeName());
-			serNodePOTemp.setNodeFather(serNodeVO.getNodeFather());
+			serNodePOTemp.setNodeFather(serNodeVO.getNodeFather().equals("")? "NULL": serNodeVO.getNodeFather());
+			serNodePOTemp.setNodeRelations(serNodeVO.getNodeRelations().equals("")? "NULL": serNodeVO.getNodeRelations());
+			serNodePOTemp.setNodeFactInfo(serNodeVO.getNodeFactInfo());
 			serNodePOTemp.setSyncStatus(SYNC_STATUS.ASYNC);
 			serNodeDao.save(serNodePOTemp);
 
@@ -259,7 +310,6 @@ public class SerInfoAndNodeController extends ControllerBase {
 		}
 
 		return data;
-
 	}
 
 	@RequestMapping("/delSerInfo")
@@ -323,7 +373,7 @@ public class SerInfoAndNodeController extends ControllerBase {
 						
 			SerNodePO serNodePO = serNodeDao.findTopByNodeUuid(nodeUuid);
 
-			if (serNodePO.getSourceType().equals(SOURCE_TYPE.SYSTEM)) {
+			if (serNodePO.getSourceType().equals(SOURCE_TYPE.SYSTEM) && serNodePO.getSyncStatus().equals(SYNC_STATUS.SYNC)) {
 				List<LdapNodePo> ldapNodePoList = ldapNodeDao.getNodeInfoByUuid(nodeUuid);
 
 				if (!CollectionUtils.isEmpty(ldapNodePoList)) {
@@ -400,6 +450,38 @@ public class SerInfoAndNodeController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		data.put(ERRMSG, serInfoAndNodeSyncLdapUtils.handleCleanUpSerNode());
 		return data;
+	}
+	
+	/**
+	 * LDAP数据备份<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月22日 下午3:14:17
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/ldap/backup")
+	public Object ldapBackUp(HttpServletRequest request) throws Exception{
+	
+		ldapService.ldapBackup();
+		
+		return null;
+	}
+	
+	/**
+	 * LDAP数据恢复<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月22日 下午3:14:40
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/ldap/resume")
+	public Object ldapResume(HttpServletRequest request) throws Exception{
+	
+		ldapService.ldapResume();
+		
+		return null;
 	}
 
 }

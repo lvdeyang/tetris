@@ -1,0 +1,39 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<!--预置位单项信息 -->
+	<xsd:complexType name="pointindexitem_type">
+		<xsd:sequence>
+			<!-- 预置位名称 -->
+			<xsd:element name="pointindexname" type="xsd:string" />
+			<!-- 预置位索引值 -->
+			<xsd:element name="pointindexvalue" type="xsd:integer" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!--预置位信息表 -->
+	<xsd:complexType name="pointindexlist_type">
+		<xsd:sequence>
+			<xsd:element name="pointindexitem" type="pointindexitem_type"
+				minOccurs="0" maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="response">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="commandname" type="xsd:string"
+					fixed="pointindexoperation" />
+				<xsd:element name="operation" type="xsd:string" fiexed="response" />
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<xsd:element name="devname" type="xsd:string" />
+				<xsd:element name="devid" type="deviceIDType" />
+				<xsd:element name="pointindexlist" type="pointindexlis_type" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

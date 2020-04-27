@@ -1,6 +1,7 @@
-html,body{
+html, body {
     background-color: transparent;
 }
+
 .message {
     position: absolute;
     top: 0;
@@ -8,31 +9,49 @@ html,body{
     width: 100%;
     height: 90px;
 }
-.screenCtrl{
+
+.screenCtrl {
     position: absolute;
     padding-left: 15px;
-    top:0;
+    top: 0;
     left: 0;
-    width: 16%;
+    width: 20%;
     text-align: center;
     color: #fff;
     font-size: 20px;
-    background: url("../../../../../images/zk-leader/splitScreen.png") no-repeat center;
+    background: #204ea285 url(../../../../../images/zk-leader/splitScreen.png) no-repeat center;
     background-size: 100% 100%;
 }
-.screenCtrl div{
+
+.screenCtrl div {
     float: left;
     width: 26px;
     height: 22px;
-    margin: 10px 9px;
+    margin: 10px;
 }
 
-.msgBg{
+.msgBg {
     position: absolute;
-    top:5px;
-    left:20%;
-    z-index: 1;
+    top: 0;
+    left: 22%;
+    width: 100px;
+    height: 30px;
 }
+
+.subtitle {
+    position: absolute;
+    top: 54%;
+    left: 22.5%;
+    padding: 0 10px;
+    height: 30px;
+    line-height: 30px;
+    background: linear-gradient(to left, #2B75A3, #164773, #2C78A5);
+    border-radius: 5px;
+    color: #18e5ff;
+    cursor: default;
+    font-weight: 600;
+}
+
 .msgContent {
     position: absolute;
     top: 0;
@@ -41,64 +60,80 @@ html,body{
     height: 70px;
     font-size: 16px;
     color: #eaeaec;
-    background:#13a9d691 url(../../../../../images/zk-leader/msgContent.png) no-repeat center;
+    background: #13a9d691 url(../../../../../images/zk-leader/msgContent.png) no-repeat center;
     overflow: hidden;
 }
 
-.msgContent p{
+.msgContent p {
     margin: 0;
     padding: 0 5px;
     line-height: 23px;
-    word-break:break-all;
-    word-wrap:break-word ;
+    word-break: break-all;
+    word-wrap: break-word;
 }
 
 /*修改消息界面和 整体的默认的滚动条样式*/
-::-webkit-scrollbar{/*滚动条整体样式*/
-    width: 4px;     /*高宽分别对应横竖滚动条的尺寸*/
+::-webkit-scrollbar { /*滚动条整体样式*/
+    width: 4px; /*高宽分别对应横竖滚动条的尺寸*/
     height: 4px;
 }
-::-webkit-scrollbar-thumb {/*滚动条里面小方块*/
+
+::-webkit-scrollbar-thumb { /*滚动条里面小方块*/
     border-radius: 5px;
-    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
-    background: rgba(0,0,0,0.2);
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.2);
 }
-::-webkit-scrollbar-track {/*滚动条里面轨道*/
-    -webkit-box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+
+::-webkit-scrollbar-track { /*滚动条里面轨道*/
+    -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
     border-radius: 0;
-    background: rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .note {
     line-height: 20px;
 }
 
-.tagMessage {
+.btn {
     position: absolute;
-    top: 48px;
-    left:21%;
-    border: 1px solid #f8a036;
-    border-radius: 13px;
-    background-color: #f8a036;
+    top: 54%;
+    left: 0;
+    width: 22%;
+    height: 32px;
 }
-.forward{
+
+.btn div {
+    float: left;
+    padding: 2px 5px;
+    margin: 1px;
+    background-color: #f8a036;
+    border-radius: 13px;
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+}
+
+.forward {
     position: absolute;
-    top:5px;
+    top: 5px;
     right: 0;
     border: 1px solid #f8a036;
     border-radius: 13px;
     background-color: #f8a036;
 }
-img{
+
+img {
     display: block;
     width: 100%;
     height: 100%;
+    /*禁止图片拖拽*/
+    -webkit-user-drag: none;
 }
 
-.el-button{
+.el-button {
     position: absolute;
     padding: 18px 8px;
-    top:5px;
+    top: 5px;
     right: 0;
     background: #204a6b;
     border-radius: 0 10px 10px 0;
@@ -107,25 +142,26 @@ img{
     font-size: 14px;
     color: #00e9ff;
 }
-.el-button:active,.el-button:hover,.el-button:focus {
+
+.el-button:active, .el-button:hover, .el-button:focus {
     color: #00e9ff;
     background-color: #204a6b;
     outline: 0;
 }
 
-.sendMsg{
-    position:absolute;
-    left:29%;
+.sendMsg {
+    position: absolute;
+    left: 29%;
     right: 0;
-    top:69px;
-    height:40px;
-    box-sizing:border-box;
-    background-color:#2d4e684a;
+    top: 69px;
+    height: 40px;
+    box-sizing: border-box;
+    background-color: #2d4e684a;
     box-sizing: border-box;
 }
 
-.sendMsgContent{
-    width: 46%;
+.sendMsgContent {
+    width: 90%;
     height: 34px;
     float: left;
     border: 0;
@@ -135,28 +171,31 @@ img{
     text-indent: 10px;
 }
 
-.sendMsgContent:focus{
-    outline:0;
+.sendMsgContent:focus {
+    outline: 0;
 }
 
-.sendMsgContent::-webkit-input-placeholder{
-    color:#f8a036;
-    font-size:16px;
-}
-.sendMsgContent:-moz-placeholder,body{
-    color:#00e9ff;
-    font-size:16px;
-}
-.sendMsgContent::-moz-placeholder{
-    color:#00e9ff;
-    font-size:16px;
-}
-.sendMsgContent:-ms-input-placeholder{
-    color:#00e9ff;
-    font-size:16px;
+.sendMsgContent::-webkit-input-placeholder {
+    color: #f8a036;
+    font-size: 16px;
 }
 
-.sendMsgBtn{
+.sendMsgContent:-moz-placeholder, body {
+    color: #00e9ff;
+    font-size: 16px;
+}
+
+.sendMsgContent::-moz-placeholder {
+    color: #00e9ff;
+    font-size: 16px;
+}
+
+.sendMsgContent:-ms-input-placeholder {
+    color: #00e9ff;
+    font-size: 16px;
+}
+
+.sendMsgBtn {
     margin: 0;
     display: inline-block;
     width: 98px;
@@ -173,50 +212,96 @@ img{
     margin-top: 6px;
 }
 
-@media screen and (max-width:1366px){
-    .message{
+@media screen and(max-width: 1680px) {
+    .screenCtrl div {
+        margin: 4px;
+    }
+    .btn {
+        width: 29%;
+    }
+}
+
+@media screen and(max-width: 1600px) {
+    .btn {
+        width: 33%;
+    }
+
+    .screenCtrl div {
+        margin: 3px;
+    }
+}
+
+@media screen and(max-width: 1400px) {
+    .btn {
+        top: 45%;
+        width: 32%;
+    }
+
+    .screenCtrl div {
+        margin: 3px;
+    }
+}
+
+@media screen and (max-width: 1366px) {
+    .message {
         width: 90%;
     }
-    .msgContent, .sendMsg{
+
+    .msgContent, .sendMsg {
         left: 34%;
     }
-    .sendMsgContent{
+
+    .sendMsgContent {
         width: 74%;
+    }
+
+    .screenCtrl div {
+        margin: 1px;
     }
 }
 
-@media screen and (max-width:1100px){
-    .message{
+@media screen and (max-width: 1100px) {
+    .message {
         width: 90%;
     }
-    .msgContent, .sendMsg{
+
+    .msgContent, .sendMsg {
         left: 36%;
     }
-    .sendMsgContent{
+
+    .sendMsgContent {
         width: 74%;
     }
+
+    /*.screenCtrl{*/
+    /*top:75%;*/
+    /*}*/
 }
 
-@media screen and (max-width:800px){
-    .message{
+@media screen and (max-width: 800px) {
+    .message {
         width: 86%;
     }
-    .msgContent, .sendMsg{
+
+    .msgContent, .sendMsg {
         left: 44%;
     }
-    .sendMsgContent{
+
+    .sendMsgContent {
         width: 66%;
     }
 }
 
-@media screen and (max-width:600px){
-    .message{
-        width:84%;
+@media screen and (max-width: 600px) {
+    .message {
+        width: 84%;
     }
-    .msgContent, .sendMsg{
+
+    .msgContent, .sendMsg {
         left: 48%;
     }
-    .sendMsgContent{
+
+    .sendMsgContent {
         width: 66%;
     }
 }

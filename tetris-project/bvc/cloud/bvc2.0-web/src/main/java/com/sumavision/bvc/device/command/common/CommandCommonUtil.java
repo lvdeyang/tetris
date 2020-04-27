@@ -23,6 +23,7 @@ import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
+import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
@@ -33,11 +34,15 @@ import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlaye
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
 import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
+import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.system.enumeration.GearsLevel;
 import com.sumavision.tetris.auth.token.TerminalType;
 
 @Service
 public class CommandCommonUtil {
+	
+	@Autowired
+	private ServerProps serverProps;
 	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
@@ -58,7 +63,7 @@ public class CommandCommonUtil {
 	 * @return Set<CommandGroupForwardPO> needForwards 符合条件的转发列表
 	 */
 	public Set<CommandGroupForwardPO> queryForwardsByMemberIds(
-			Set<CommandGroupForwardPO> forwards, List<Long> memberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
+			Collection<CommandGroupForwardPO> forwards, Collection<Long> memberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
 		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
 		for(CommandGroupForwardPO forward : forwards){
 			if(type==null || type.equals(forward.getForwardBusinessType())){
@@ -87,12 +92,39 @@ public class CommandCommonUtil {
 	 * @return
 	 */
 	public Set<CommandGroupForwardPO> queryForwardsBySrcmemberIds(
-			Set<CommandGroupForwardPO> forwards, List<Long> srcMemberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
+			Collection<CommandGroupForwardPO> forwards, Collection<Long> srcMemberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
 		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
 		for(CommandGroupForwardPO forward : forwards){
 			if(type==null || type.equals(forward.getForwardBusinessType())){
 				if(executeStatus==null || executeStatus.equals(forward.getExecuteStatus())){
 					if(srcMemberIds.contains(forward.getSrcMemberId())){
+						needForwards.add(forward);
+					}
+				}
+			}
+		}
+		return needForwards;
+	}
+	
+	/**
+	 * 根据目的成员和业务类型查找转发<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月9日 上午11:44:49
+	 * @param forwards
+	 * @param dstMemberIds
+	 * @param type 转发业务类型，如果为null则查全部类型
+	 * @param executeStatus 转发执行状态，如果为null则查全部状态
+	 * @return
+	 */
+	public List<CommandGroupForwardPO> queryForwardsByDstmemberIds(
+			Collection<CommandGroupForwardPO> forwards, Collection<Long> dstMemberIds, ForwardBusinessType type, ExecuteStatus executeStatus) {
+		List<CommandGroupForwardPO> needForwards = new ArrayList<CommandGroupForwardPO>();
+		for(CommandGroupForwardPO forward : forwards){
+			if(type==null || type.equals(forward.getForwardBusinessType())){
+				if(executeStatus==null || executeStatus.equals(forward.getExecuteStatus())){
+					if(dstMemberIds.contains(forward.getDstMemberId())){
 						needForwards.add(forward);
 					}
 				}
@@ -109,7 +141,7 @@ public class CommandCommonUtil {
 	 * @throws Exception 
 	 * @return Set<CommandGroupForwardPO> needForwards 具备执行条件的转发列表
 	 */
-	private Set<CommandGroupForwardPO> queryForwardsReadyToBeDone(Set<CommandGroupMemberPO> members, Set<CommandGroupForwardPO> forwards) {
+	public Set<CommandGroupForwardPO> queryForwardsReadyToBeDone(Collection<CommandGroupMemberPO> members, Collection<CommandGroupForwardPO> forwards) {
 		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
 		Map<Long, CommandGroupMemberPO> map = membersSetToMap(members);
 		for(CommandGroupForwardPO forward : forwards){
@@ -119,14 +151,14 @@ public class CommandCommonUtil {
 			if(forward.getExecuteStatus().equals(ExecuteStatus.UNDONE)
 					&& map.get(srcMemberId).getMemberStatus().equals(MemberStatus.CONNECT)
 					&& map.get(dstMemberId).getMemberStatus().equals(MemberStatus.CONNECT)){
-				//如果是协同指挥转发
-				if(ForwardBusinessType.COOPERATE_COMMAND.equals(forward.getForwardBusinessType())){
-					if(map.get(srcMemberId).getCooperateStatus().equals(MemberStatus.CONNECT)){
-						needForwards.add(forward);
-					}
-				}else{
+				//如果是协同指挥转发（取消）
+//				if(ForwardBusinessType.COOPERATE_COMMAND.equals(forward.getForwardBusinessType())){
+//					if(map.get(srcMemberId).getCooperateStatus().equals(MemberStatus.CONNECT)){
+//						needForwards.add(forward);
+//					}
+//				}else{
 					needForwards.add(forward);
-				}
+//				}
 			}
 		}
 		return needForwards;
@@ -144,7 +176,7 @@ public class CommandCommonUtil {
 	 * @param forwards 转发列表
 	 * @return
 	 */
-	public Set<CommandGroupForwardPO> queryForwardsReadyAndCanBeDone(Set<CommandGroupMemberPO> members, Set<CommandGroupForwardPO> forwards) {
+	public Set<CommandGroupForwardPO> queryForwardsReadyAndCanBeDone(Collection<CommandGroupMemberPO> members, Collection<CommandGroupForwardPO> forwards) {
 		Set<CommandGroupForwardPO> needForwards = new HashSet<CommandGroupForwardPO>();
 		Set<CommandGroupForwardPO> readyForwards = queryForwardsReadyToBeDone(members, forwards);
 		for(CommandGroupForwardPO forward : readyForwards){
@@ -156,7 +188,7 @@ public class CommandCommonUtil {
 	}
 	
 	//把Set<CommandGroupMemberPO>以id为key转为map，供queryForwardsNeedToBeDone调用
-	private Map<Long, CommandGroupMemberPO> membersSetToMap (Set<CommandGroupMemberPO> members) {
+	private Map<Long, CommandGroupMemberPO> membersSetToMap (Collection<CommandGroupMemberPO> members) {
 		Map<Long, CommandGroupMemberPO> map = new HashMap<Long, CommandGroupMemberPO>();
 		if (members == null) {
 			return map;
@@ -174,7 +206,7 @@ public class CommandCommonUtil {
 	 * @throws Exception 
 	 * @return CommandGroupForwardPO forward 转发
 	 */
-	public CommandGroupForwardPO queryForwardByDstVideoBundleId(Set<CommandGroupForwardPO> forwards, String dstVideoBundleId) {
+	public CommandGroupForwardPO queryForwardByDstVideoBundleId(Collection<CommandGroupForwardPO> forwards, String dstVideoBundleId) {
 		for(CommandGroupForwardPO forward : forwards){
 			if(dstVideoBundleId.equals(forward.getDstVideoBundleId())){
 				return forward;
@@ -190,7 +222,7 @@ public class CommandCommonUtil {
 	 * @throws Exception 
 	 * @return CommandGroupForwardPO forward 转发
 	 */
-	public CommandGroupForwardPO queryForwardByDstAudioBundleId(Set<CommandGroupForwardPO> forwards, String dstAudioBundleId) {
+	public CommandGroupForwardPO queryForwardByDstAudioBundleId(Collection<CommandGroupForwardPO> forwards, String dstAudioBundleId) {
 		for(CommandGroupForwardPO forward : forwards){
 			if(dstAudioBundleId.equals(forward.getDstAudioBundleId())){
 				return forward;
@@ -201,7 +233,7 @@ public class CommandCommonUtil {
 	
 	/**
 	 * 根据源和目的成员，查找一个转发<br/>
-	 * <p>详细描述</p>
+	 * <p>快速查转发</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月19日 上午10:02:27
@@ -210,7 +242,7 @@ public class CommandCommonUtil {
 	 * @param dstMemberId 如果为空，则忽略该参数
 	 * @return
 	 */
-	public CommandGroupForwardPO queryForwardBySrcAndDstMemberId(Set<CommandGroupForwardPO> forwards, Long srcMemberId, Long dstMemberId) {
+	public CommandGroupForwardPO queryForwardBySrcAndDstMemberId(Collection<CommandGroupForwardPO> forwards, Long srcMemberId, Long dstMemberId) {
 		for(CommandGroupForwardPO forward : forwards){
 			if(srcMemberId==null || srcMemberId.equals(forward.getSrcMemberId())){
 				if(dstMemberId==null || dstMemberId.equals(forward.getDstMemberId())){
@@ -234,6 +266,25 @@ public class CommandCommonUtil {
 	public CommandGroupUserPlayerPO queryPlayerByBundleId(Collection<CommandGroupUserPlayerPO> players, String bundleId) {
 		for(CommandGroupUserPlayerPO player : players){
 			if(player.getBundleId().equals(bundleId)){
+				return player;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 根据号码code查找播放器<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 下午1:08:54
+	 * @param players
+	 * @param code
+	 * @return
+	 */
+	public CommandGroupUserPlayerPO queryPlayerByCode(Collection<CommandGroupUserPlayerPO> players, String code) {
+		for(CommandGroupUserPlayerPO player : players){
+			if(player.getCode().equals(code)){
 				return player;
 			}
 		}
@@ -281,7 +332,7 @@ public class CommandCommonUtil {
 	/**
 	 * 
 	 * 通过转发和目标成员，查找该转发的目标播放器<br/>
-	 * <p>可以在 queryForwardBySrcAndDstMemberId() 方法后面使用</p>
+	 * <p>快速查播放器，可以在 queryForwardBySrcAndDstMemberId() 方法后面使用</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月19日 上午10:16:17
@@ -348,6 +399,27 @@ public class CommandCommonUtil {
 	}
 	
 	/**
+	 * 根据源号码和目的号码查询转发调度<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月4日 下午2:00:49
+	 * @param demands
+	 * @param srcCodes
+	 * @param dstCodes
+	 * @return
+	 */
+	public CommandGroupForwardDemandPO queryForwardDemandBySrcAndDstCode(
+			List<CommandGroupForwardDemandPO> demands, String srcCode, String dstCode) {
+		for(CommandGroupForwardDemandPO demand : demands){
+			if(srcCode.equals(demand.getSrcCode()) && dstCode.equals(demand.getDstCode())){
+				return demand;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * @Title: 根据dstVideoBundleId查找转发点播<br/>
 	 * @param List<CommandGroupForwardDemandPO> forwards 转发点播列表
 	 * @param String dstVideoBundleId
@@ -394,7 +466,7 @@ public class CommandCommonUtil {
 	 * @param id
 	 * @return
 	 */
-	public CommandGroupMemberPO queryMemberById(Set<CommandGroupMemberPO> members, Long id){
+	public CommandGroupMemberPO queryMemberById(Collection<CommandGroupMemberPO> members, Long id){
 		for(CommandGroupMemberPO member : members){
 			if(id.equals(member.getId())){
 				return member;
@@ -413,7 +485,7 @@ public class CommandCommonUtil {
 	 * @param userId
 	 * @return
 	 */
-	public CommandGroupMemberPO queryMemberByUserId(Set<CommandGroupMemberPO> members, Long userId){
+	public CommandGroupMemberPO queryMemberByUserId(Collection<CommandGroupMemberPO> members, Long userId){
 		for(CommandGroupMemberPO member : members){
 			if(userId.equals(member.getUserId())){
 				return member;
@@ -432,7 +504,7 @@ public class CommandCommonUtil {
 	 * @param userIds
 	 * @return
 	 */
-	public List<CommandGroupMemberPO> queryMembersByUserIds(Set<CommandGroupMemberPO> members, List<Long> userIds){
+	public List<CommandGroupMemberPO> queryMembersByUserIds(Collection<CommandGroupMemberPO> members, List<Long> userIds){
 		List<CommandGroupMemberPO> target = new ArrayList<CommandGroupMemberPO>();
 		for(CommandGroupMemberPO member : members){
 			if(userIds.contains(member.getUserId())){
@@ -460,7 +532,7 @@ public class CommandCommonUtil {
 		}
 		return null;
 	}
-	public CommandGroupMemberPO queryChairmanMember(Set<CommandGroupMemberPO> members){
+	public CommandGroupMemberPO queryChairmanMember(Collection<CommandGroupMemberPO> members){
 		for(CommandGroupMemberPO member : members){
 			if(member.isAdministrator()){
 				return member;
@@ -513,6 +585,68 @@ public class CommandCommonUtil {
 		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
 		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
 		return commandUserBos;
+	}
+	
+	/**
+	 * 根据id查询group<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月9日 下午2:25:36
+	 * @param groups
+	 * @param id
+	 * @return
+	 */
+	public CommandGroupPO queryGroupById(Collection<CommandGroupPO> groups, Long id){
+		if(groups == null) return null;
+		for(CommandGroupPO group : groups){
+			if(group.getId().equals(id)){
+				return group;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 *生成“指挥”/“会议”字符串<br/>
+	 * <p>对于指挥</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 下午6:17:34
+	 * @param type
+	 * @return
+	 */
+	public String generateCommandString(GroupType type){
+		if(GroupType.MEETING.equals(type)){
+			return "会议";
+		}else{
+			//普通指挥和专向指挥
+			return serverProps.getCommandString();
+		}
+	}
+	
+	/**
+	 *生成“协同指挥”/“协同会议”/“发言”字符串<br/>
+	 * <p>考虑是用“协同”还是用“协同指挥”</p>
+	 * <p>当页面主动请求后台时，会按照指挥/会议区分协同/发言，不会混用接口；但是成员入会时，cooperate的成员就需要通过这里解析为“协同”/“发言”</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月27日 下午6:17:34
+	 * @param type
+	 * @return
+	 */
+	public String generateCooperateString(GroupType type){
+		if(GroupType.MEETING.equals(type)){
+			return "发言";
+		}else{
+			//普通指挥和专向指挥
+//			if(serverProps.getCommandString().equals("指挥")){
+//				return "协同指挥";
+//			}else{
+//				return "协同会议";
+//			}
+			return "协同" + serverProps.getCommandString();
+		}
 	}
 	
 }

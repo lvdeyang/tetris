@@ -66,12 +66,12 @@
                     </el-menu-item>
                     <el-submenu class="no-border-bottom-style right" index="2">
                         <template slot="title"><span v-if="!user.icon" class="icon-user" style="padding:0 5px; margin-right:5px;"></span>{{user.nickname}}</template>
-                        <el-menu-item index="2-1">个人中心</el-menu-item>
-                        <el-menu-item index="2-2">注销登录</el-menu-item>
+                        <el-menu-item index="2-1">{{i18n.itemPersonal}}</el-menu-item>
+                        <el-menu-item index="2-2">{{i18n.itemLogout}}</el-menu-item>
                     </el-submenu>
                     <el-menu-item class="no-border-bottom-style right" index="3"><span class="icon-flag" style="position:relative; top:1px; padding:0 5px;"></span></el-menu-item>
                     <el-menu-item class="no-border-bottom-style right" index="4"><span class="el-icon-bell" style="position:relative; left:3px; bottom:1px;"></span></el-menu-item>
-                    <el-menu-item class="no-border-bottom-style right" index="5" @click="gotoportal"><a class="feather-icon-globe" style="position:relative; left:0px; bottom:1px;">&nbsp;门户首页</a></el-menu-item>
+                    <el-menu-item class="no-border-bottom-style right" index="5" @click="gotoportal"><a class="feather-icon-globe" style="position:relative; left:0px; bottom:1px;">&nbsp;{{i18n.homePage}}</a></el-menu-item>
                     <el-menu-item class="no-border-bottom-style" index="5" @click="sideMenuToggle"><span class="icon-reorder" style="font-size:18px; position:relative; top:1px; padding:0 5px;"></span></el-menu-item>
                 </el-menu>
             </div>
@@ -98,7 +98,7 @@
                         <!--<strong>Copyright © {{footer.company.time}}</strong>
                         &nbsp;版权归<a :href="footer.company.link" class="company" target="_blank">{{footer.company.name}}</a>所有.-->
                         <strong>Copyright © {{footer.company.time}}</strong>
-                        &nbsp;版权归<a :href="user.groupHomeLink" class="company" target="_blank">{{user.groupName}}</a>所有.
+                        &nbsp;<a :href="user.groupHomeLink" class="company" target="_blank">{{user.groupName}}</a>
                     </div>
                     <div class="minimize">
                         <el-breadcrumb separator="" style="float:right;">

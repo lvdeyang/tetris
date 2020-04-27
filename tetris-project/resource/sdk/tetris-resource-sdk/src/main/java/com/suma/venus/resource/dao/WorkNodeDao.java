@@ -20,6 +20,8 @@ public interface WorkNodeDao extends CommonDao<WorkNodePO>{
 	
 	public List<WorkNodePO> findByType(NodeType type);
 	
+	public WorkNodePO findTopByType(NodeType type);
+	
 	@Query("select node from WorkNodePO node where node.name like %?1%")
 	public List<WorkNodePO> findByNameLike(String name);
 }

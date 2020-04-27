@@ -100,13 +100,19 @@
           </template>
         </el-table-column>
 
+        <el-table-column width="150" :render-header="renderCheckZKHeader">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasZKPrivilege" @change="handleCheckZKChange(scope.row)"></el-checkbox>
+          </template>
+        </el-table-column>
+
       </el-table>
 
       <!--工具条-->
       <el-col :span="24" class="toolbar">
         <el-button size="small" type="primary" @click="submitPrivilege">提交</el-button>
         <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20" ></el-input>
-        <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :total="total" style="float:right;">
+        <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :current-page="pageNum" :total="total" style="float:right;">
         </el-pagination>
       </el-col>
 
@@ -167,9 +173,11 @@
       prevReadChecks: [], // 之前的录制权限
       prevWriteChecks: [], // 之前的点播权限
       prevHJChecks: [],
+      prevZKChecks: [],
       readChecks: [], // 新的录制权限
       writeChecks: [], // 新的点播权限
       HJchecks: [],
+      ZKchecks:[],
       detailDialogVisible: false,
       detailInfos: [],
       users: [],
@@ -178,7 +186,8 @@
       userTableShow: false,
       checkReadAll: false,
       checkWriteAll: false,
-      checkHJAll: false
+      checkHJAll: false,
+      checkZKAll: false
     }
   },
   methods: {
@@ -250,6 +259,11 @@
       <el-checkbox v-model={this.checkHJAll} onChange={this.handleCheckHJAllChange}>呼叫</el-checkbox>
   )
   },
+  renderCheckZKHeader: function (h, data) { // 自定义特殊表格头单元
+    return (
+      <el-checkbox v-model={this.checkZKAll} onChange={this.handleCheckZKAllChange}>指挥</el-checkbox>
+  )
+  },
   handleCheckReadAllChange: function (val) {
     if (this.resourceTableShow) { // 设备
       if (val) {
@@ -319,6 +333,21 @@
       }
     }
   },
+  handleCheckZKAllChange: function (val) {
+    if (this.userTableShow) { // 用户
+      if (val) {
+        for (let user of this.users) {
+          this.ZKchecks.push(user.userNo)
+          user.hasZKPrivilege = true
+        }
+      } else {
+        this.ZKchecks = []
+        for (let user of this.users) {
+          user.hasZKPrivilege = false
+        }
+      }
+    }
+  },
   handleCheckReadChange: function (row) {
     if (this.resourceTableShow) {
       if (row.hasReadPrivilege) {
@@ -382,6 +411,20 @@
       }
     }
   },
+  handleCheckZKChange: function (row) {
+    if (this.userTableShow) {
+      if (row.hasZKPrivilege) {
+        this.ZKchecks.push(row.userNo)
+        // 全选判断
+        if (this.ZKchecks.length === this.users.length) {
+          this.checkZKAll = true
+        }
+      } else {
+        this.ZKchecks.splice(this.ZKchecks.indexOf(row.userNo), 1)
+        this.checkHJAll = false
+      }
+    }
+  },
   // 获取角色列表
   getRoles: function () {
     let param = {
@@ -422,6 +465,10 @@
   // 获取资源列表
   getResources: function () {
 
+    if(!this.resourceTableShow){
+      this.pageNum = 1;
+    }
+
     if (!this.currentRoleRow) {
       this.$message({
         message: '请先选择角色',
@@ -438,6 +485,7 @@
     this.checkReadAll = false
     this.checkWriteAll = false
     this.checkHJAll = false
+    this.checkZKAll = false
     this.countPerPage = 20
     if (/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)) {
       this.countPerPage = parseInt(this.filters.countPerPage)
@@ -498,6 +546,10 @@
 
   getUsers: function () {
 
+    if(this.resourceTableShow){
+      this.pageNum = 1;
+    }
+
     if (!this.currentRoleRow) {
       this.$message({
         message: '请先选择角色',
@@ -513,7 +565,9 @@
     this.readChecks = []
     this.writeChecks = []
     this.prevHJChecks = []
+    this.prevZKChecks = []
     this.HJchecks = []
+    this.ZKchecks = []
     this.checkReadAll = false
     this.checkWriteAll = false
     this.checkHJAll = false
@@ -552,6 +606,10 @@
           this.prevHJChecks.push(user.userNo)
           this.HJchecks.push(user.userNo)
         }
+        if (user.hasZKPrivilege) {
+          this.prevZKChecks.push(user.userNo)
+          this.ZKchecks.push(user.userNo)
+        }
       }
 
       // 全选判断
@@ -563,6 +621,9 @@
       }
       if (this.HJchecks.length === this.users.length) {
         this.checkHJAll = true
+      }
+      if (this.ZKchecks.length === this.users.length) {
+        this.checkZKAll = true
       }
     }
 
@@ -604,9 +665,11 @@
       prevReadChecks: this.prevReadChecks.join(','),
       prevWriteChecks: this.prevWriteChecks.join(','),
       prevHJChecks: this.prevHJChecks.join(','),
+      prevZKChecks: this.prevZKChecks.join(','),
       readChecks: this.readChecks.join(','),
       writeChecks: this.writeChecks.join(','),
-      hjChecks: this.HJchecks.join(',')
+      hjChecks: this.HJchecks.join(','),
+      zkChecks: this.ZKchecks.join(',')
     }
     this.userTableLoading = true
     submitUserresPrivilege(param).then((res) => {
@@ -624,6 +687,7 @@
       this.prevReadChecks = [].concat(this.readChecks)
       this.prevWriteChecks = [].concat(this.writeChecks)
       this.prevHJChecks = [].concat(this.HJchecks)
+      this.prevZKChecks = [].concat(this.ZKchecks)
     }
     this.userTableLoading = false
   })

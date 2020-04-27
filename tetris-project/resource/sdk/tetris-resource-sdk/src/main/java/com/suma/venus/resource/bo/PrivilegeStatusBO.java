@@ -19,6 +19,9 @@ public class PrivilegeStatusBO {
 	//之前是否具有呼叫权限
 	private boolean prevCanHJ = false;
 	
+	//之前是否具有指挥权限
+	private boolean prevCanZK = false;
+	
 	//现在是否有录制权限
 	private boolean nowCanRead = false;
 	
@@ -27,6 +30,9 @@ public class PrivilegeStatusBO {
 	
 	//现在是或否有呼叫权限
 	private boolean nowCanHJ = false;
+	
+	//现在是否具有指挥权限
+	private boolean nowCanZK = false;
 	
 	public PrivilegeStatusBO() {}
 	
@@ -46,10 +52,10 @@ public class PrivilegeStatusBO {
 	}
 	
 	public String getUserOprType(){
-		if(!prevCanRead && !prevCanWrite && !prevCanHJ){
+		if(!prevCanRead && !prevCanWrite && !prevCanHJ && !prevCanZK){
 			//之前的权限为空，则为add
 			return OPR_ADD;
-		}else if(!nowCanRead && !nowCanWrite && !nowCanHJ){
+		}else if(!nowCanRead && !nowCanWrite && !nowCanHJ && !nowCanZK){
 			return OPR_REMOVE;
 		} else {
 			return OPR_EDIT;
@@ -69,7 +75,12 @@ public class PrivilegeStatusBO {
 		}else {
 			sBuilder.append("0");
 		}
-		sBuilder.append("11");
+		if(nowCanZK){//指挥置位
+			sBuilder.append("1");
+		}else {
+			sBuilder.append("0");
+		}
+		sBuilder.append("1");
 //		if(nowCanWrite){//ZH、会议置位
 //		}else{
 //			sBuilder.append("00");
@@ -156,6 +167,22 @@ public class PrivilegeStatusBO {
 
 	public void setNowCanHJ(boolean nowCanHJ) {
 		this.nowCanHJ = nowCanHJ;
+	}
+
+	public boolean isPrevCanZK() {
+		return prevCanZK;
+	}
+
+	public void setPrevCanZK(boolean prevCanZK) {
+		this.prevCanZK = prevCanZK;
+	}
+
+	public boolean isNowCanZK() {
+		return nowCanZK;
+	}
+
+	public void setNowCanZK(boolean nowCanZK) {
+		this.nowCanZK = nowCanZK;
 	}
 	
 }

@@ -1,0 +1,10 @@
+<response>
+	<commandname>bizcmd</commandname>
+	<operation>mquitres</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<mid>${mid}</mid>
+	<code>${code}</code>
+</response>

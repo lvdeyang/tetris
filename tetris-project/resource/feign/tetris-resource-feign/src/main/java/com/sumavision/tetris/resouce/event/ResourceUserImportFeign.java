@@ -14,6 +14,7 @@ public interface ResourceUserImportFeign {
 	public JSONObject userImport(
 			@RequestParam("userId") String userId,
 			@RequestParam("nickname") String nickname,
-			@RequestParam("userno") String userno) throws Exception;
+			@RequestParam("userno") String userno,
+			@RequestParam("roleIds") String roleIds) throws Exception;
 	
 }

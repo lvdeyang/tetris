@@ -63,6 +63,16 @@ public class ApiThirdpartLoginFilter extends ZuulFilter{
 		return null;
 	}
 
+	public static void main(String[] args) throws Exception{
+		String nonce = "1";
+		String message = new StringBufferWrapper().append(nonce)
+												  .append(":")
+												  .append(HttpConstant.HEADER_FEIGN_CLIENT_KEY)
+												  .toString();
+		Md5Encoder md5Encoder = new Md5Encoder();
+		System.out.println(md5Encoder.encode(message));
+	}
+	
 	@Override
 	public String filterType() {
 		return "pre";

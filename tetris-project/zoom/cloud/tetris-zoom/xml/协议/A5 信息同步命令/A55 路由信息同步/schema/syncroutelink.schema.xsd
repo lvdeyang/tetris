@@ -1,0 +1,37 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+	<!-- 全局连通矩阵从左到右对应的服务节点 -->
+	<xsd:complexType name="nodelistType">
+		<xsd:sequence>
+			<xsd:element name="nid" type="uuidType" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	<!-- 矩阵表述类型，raw表示原始格式矩阵表述，tight表示经过游程编码的矩阵表述 -->
+	<!-- 连通矩阵内容，矩阵中(i,j)元素若为1，则表明i,j两个服务节点可直接连通，若为0则不可 直接连通； -->
+	<!-- 若连通矩阵宽度较小，则建议按原始格式传输矩阵，方法为逐行扫描，跨行以“,”分隔；若 连通矩阵宽度较大，则建议按紧凑格式传输矩阵，方法为以除矩阵主对角线的上三角元素进行逐行扫描， 
+		并以0的个数为起始，进行游程长度编码，将每个游程长度以“,”分隔 例： 有5个服务节点A~E，连通矩阵如下， A B C D E 原始格式矩阵"11111,11001,10111,10110,11101" 
+		紧凑格式矩阵，逐行扫描1111001110，游程编码后"0,4,2,3,1" -->
+	<xsd:simpleType name="matrixtype">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="raw" />
+			<xsd:enumeration value="tight" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:element name="notify">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- commandname命令名称 -->
+				<xsd:element name="commandname" type="xsd:string" fixed="syncroutelink" />
+				<!-- seq命令序号 -->
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<xsd:element name="matsize" type="xsd:integer" />
+				<xsd:element name="mattype" type="matrixType" />
+				<xsd:element name="matcontent" type="xsd:string" />
+				<xsd:element name="nlist" type="nodelistType" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

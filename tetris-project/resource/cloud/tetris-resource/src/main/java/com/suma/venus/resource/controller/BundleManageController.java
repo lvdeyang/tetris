@@ -46,6 +46,7 @@ import com.suma.venus.resource.constant.VenusParamConstant;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.BundleLoginBlackListDao;
 import com.suma.venus.resource.dao.ChannelSchemeDao;
+import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
@@ -59,10 +60,12 @@ import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
+import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.ScreenSchemePO;
 import com.suma.venus.resource.service.BundleService;
+import com.suma.venus.resource.service.BundleSpecificationBuilder;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ChannelTemplateService;
 import com.suma.venus.resource.service.ExtraInfoService;
@@ -137,6 +140,9 @@ public class BundleManageController extends ControllerBase {
 
 	@Autowired
 	private CapacityService capacityService;
+	
+	@Autowired
+	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
 
 	@Value("${spring.cloud.client.ipAddress}")
 	private String clientIP;
@@ -259,10 +265,18 @@ public class BundleManageController extends ControllerBase {
 		try {
 			List<BundlePO> bundlePOs1 = bundleService.queryByUserIdAndDevcieModelAndKeyword(userId, deviceModel,
 					sourceType, keyword);
+			
+			List<BundlePO> bundlePOs2 = bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, userId));
 
 			// 过滤掉devicemodel为空的数据 ??
 			List<BundlePO> bundlePOs = bundlePOs1.stream().filter(b -> (null != b.getDeviceModel()))
 					.collect(Collectors.toList());
+			
+			for(BundlePO bundle: bundlePOs2){
+				if(!bundlePOs.contains(bundle)){
+					bundlePOs.add(bundle);
+				}
+			}
 
 			List<BundleVO> bundles = new ArrayList<BundleVO>();
 			int from = (pageNum - 1) * countPerPage;
@@ -367,7 +381,26 @@ public class BundleManageController extends ControllerBase {
 
 		// 删除设备上的锁定参数（如果有）
 		lockBundleParamDao.deleteByBundleId(bundleId);
-
+		
+		//删除用户绑定编解码器关系
+		List<EncoderDecoderUserMap> maps = encoderDecoderUserMapDao.findByEncodeBundleIdOrDecodeBundleId(bundleId, bundleId);
+		for(EncoderDecoderUserMap map: maps){
+			if(map.getEncodeBundleId() != null && map.getEncodeBundleId().equals(bundleId)){
+				map.setEncodeBundleId(null);
+				map.setEncodeBundleName(null);
+				map.setEncodeDeviceModel(null);
+				map.setEncodeId(null);
+			}
+			if(map.getDecodeBundleId() != null && map.getDecodeBundleId().equals(bundleId)){
+				map.setDecodeBundleId(null);
+				map.setDecodeBundleName(null);
+				map.setDecodeDeviceModel(null);
+				map.setDecodeId(null);
+			}
+		}
+		
+		encoderDecoderUserMapDao.save(maps);
+		
 		// 删除设备账号对应的黑名单数据
 //			bundleLoginBlackListDao.deleteByLoginId(bundle.getCurrentLoginId());
 
@@ -1026,5 +1059,5 @@ public class BundleManageController extends ControllerBase {
 
 		return data;
 	}
-
+	
 }

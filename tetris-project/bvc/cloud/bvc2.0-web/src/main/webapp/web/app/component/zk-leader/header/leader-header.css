@@ -20,7 +20,6 @@ html, body {
 }
 
 .leftTime {
-    opacity:0;
     position: relative;
     float: left;
     width: 260px;
@@ -37,13 +36,9 @@ html, body {
     text-align: center;
 }
 
-.date {
+.date,.time {
     color: #e9eaec;
     font-size: 16px;
-}
-
-.time {
-    font-size: 18px;
     font-weight: bold;
 }
 
@@ -59,7 +54,6 @@ html, body {
 }
 
 .center {
-    opacity:0;
     float: left;
     width: 500px;
     height: 90px;

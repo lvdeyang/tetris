@@ -1,0 +1,44 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<!-- 命令名称类型，bizcnf表示会议组业务命令，bizcmd表示ZH组业务命令 -->
+	<xsd:simpleType name="commandnameType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="bizcnf" />
+			<xsd:enumeration value="bizcmd" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 成员退出类型，p表示成员被强制退出，r表示成员主动退出 -->
+	<xsd:simpleType name="quitType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="p" />
+			<xsd:enumeration value="r" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<xsd:element name="notify">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- commandname命令名称 -->
+				<xsd:element name="commandname" type="commandnameType" />
+				<!-- 操作名称，类型定义见A.6.3.1启动分组业务，成员退出通知取值为mquit -->
+				<xsd:element name="operation" type="operationType" />
+				<!-- 成员退出类型 -->
+				<xsd:element name="quittype" type="quitType" />
+				<!-- seq命令序号 -->
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<!-- 业务组ID -->
+				<xsd:element name="gid" type="xsd:string" />
+				<!-- 本操作发起成员ID -->
+				<xsd:element name="op" type="userIDType" />
+				<!-- 本操作相关成员ID，退出成员ID -->
+				<xsd:element name="mid" type="userIDType" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

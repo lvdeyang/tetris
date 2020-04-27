@@ -1,0 +1,57 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<xsd:simpleType name="commandnameType">
+		<xsd:restriction base="xsd:string">
+			<xsd:enumeration value="bizcnf" />
+			<xsd:enumeration value="bizcmd" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!-- 状态，1表示正在业务、2表示暂时离开 -->
+	<xsd:simpleType name="statusType">
+		<xsd:restriction base="xsd:integer">
+			<xsd:enumeration value="1" />
+			<xsd:enumeration value="2" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	
+	<!--成员信息 -->
+	<xsd:complexType name="mitemType">
+		<xsd:sequence>
+			<xsd:element name="mid" type="userIDType" />
+			<xsd:element name="mstatus" type="statusType" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<!-- 成员列表 -->
+	<xsd:complexType name="mlistType">
+		<xsd:sequence>
+			<xsd:element name="minfo" type="mitemType" minOccurs="0"
+				maxOccurs="unbounded" />
+		</xsd:sequence>
+	</xsd:complexType>
+	
+	<xsd:element name="notify">
+		<xsd:complexType>
+			<xsd:sequence>
+				<!-- commandname命令名称 -->
+				<xsd:element name="commandname" type="commandnameType" />
+				<!-- 操作名称，类型定义见A.6.3.1启动分组业务，成员状态更新取值为mstatus -->
+				<xsd:element name="operation" type="operationType" />
+				<!-- seq命令序号 -->
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<!-- 业务组ID -->
+				<xsd:element name="gid" type="xsd:string" />
+				<!-- 本操作发起成员ID -->
+				<xsd:element name="op" type="userIDType" />
+				<!-- 本操作相关成员列表 -->
+				<xsd:element name="mlist" type="mlistType" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

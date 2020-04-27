@@ -40,6 +40,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 
 	public BundlePO findByUsername(String username);
 	
+	public List<BundlePO> findByUsernameIn(Collection<String> usernames);
+	
 	public BundlePO findByUserIdAndDeviceModel(Long userId, String deviceModel);
 	
 	public List<BundlePO> findByUserIdInAndDeviceModel(Collection<Long> userIds, String deviceModel);
@@ -103,12 +105,12 @@ public interface BundleDao extends CommonDao<BundlePO> {
 			SOURCE_TYPE sourceType);
 
 	/** 查询状态为未同步 需要向ldap服务器同步的设备信息 **/
-	@Query("select b from BundlePO b where b.deviceModel='jv210' and (b.bundleAlias!='播放器' or b.bundleAlias is null) "
+	@Query("select b from BundlePO b where b.deviceModel='jv210'"
 			+ "and (b.syncStatus='ASYNC' or b.syncStatus is null) and (b.sourceType='SYSTEM' or b.sourceType is null) and b.folderId is not null")
 	public List<BundlePO> findBundlesSyncToLdap();
 
 	/** 查询全部可以向ldap服务器同步的设备信息 **/
-	@Query("select b from BundlePO b where b.deviceModel='jv210' and (b.bundleAlias!='播放器' or b.bundleAlias is null) "
+	@Query("select b from BundlePO b where b.deviceModel='jv210'"
 			+ "and (b.sourceType='SYSTEM' or b.sourceType is null) and b.folderId is not null")
 	public List<BundlePO> findAllBundlesSyncToLdap();
 
@@ -147,6 +149,8 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	
 	public List<BundlePO> findByUserIdNotIn(Collection<Long> ids);
 	
+	public List<BundlePO> findByUserIdIn(Collection<Long> ids);
+	
 	/**
 	 *查询经纬度范围内的对应类型设备<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -168,4 +172,7 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	public void deleteByUserIdIn(Collection<Long> userIds);
 	
 	public BundlePO findByDeviceModelAndUsername(String deviceModel, String username);
+	
+	@Query(value = "select bundleId from com.suma.venus.resource.pojo.BundlePO where bundleNum in ?1")
+	public List<String> findBundleIdByBundleNumIn(Collection<String> bundleNums);
 }

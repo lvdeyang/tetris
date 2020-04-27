@@ -21,13 +21,13 @@ public class NetworkMapPO extends AbstractBasePO{
 	private Long inputId;
 	
 	/** 输入调度id */
-	private int inputSid;
+	private Long inputSid;
 	
 	/** 输出持久化id */
 	private Long outputId;
 	
 	/** 输出调度id */
-	private int outputSid;
+	private Long outputSid;
 
 	public Long getInputId() {
 		return inputId;
@@ -37,11 +37,11 @@ public class NetworkMapPO extends AbstractBasePO{
 		this.inputId = inputId;
 	}
 
-	public int getInputSid() {
+	public Long getInputSid() {
 		return inputSid;
 	}
 
-	public void setInputSid(int inputSid) {
+	public void setInputSid(Long inputSid) {
 		this.inputSid = inputSid;
 	}
 
@@ -53,11 +53,11 @@ public class NetworkMapPO extends AbstractBasePO{
 		this.outputId = outputId;
 	}
 
-	public int getOutputSid() {
+	public Long getOutputSid() {
 		return outputSid;
 	}
 
-	public void setOutputSid(int outputSid) {
+	public void setOutputSid(Long outputSid) {
 		this.outputSid = outputSid;
 	}
 	

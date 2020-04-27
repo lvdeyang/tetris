@@ -268,6 +268,8 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3)" + 
 				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
 				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
+				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
+				"AND IF(?8 IS NULL OR ?8='', TRUE, FILE_NAME like ?8) " +
 				"AND STATUS<>?6 \n#pageable\n",
 		countQuery = "SELECT COUNT(ID) FROM BVC_MONITOR_RECORD WHERE " + 
 				"mode=?1 " + 
@@ -275,6 +277,8 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 				"AND IF(?3 IS NULL OR ?3='', TRUE, START_TIME>=?3)" + 
 				"AND IF(?4 IS NULL OR ?4='', TRUE, START_TIME<=?4)" + 
 				"AND IF(?5 IS NULL OR ?5='', TRUE, USER_ID=?5) " +
+				"AND IF(?7 IS NULL OR ?7='', TRUE, RECORD_USER_ID=?7) " +
+				"AND IF(?8 IS NULL OR ?8='', TRUE, FILE_NAME like ?8) " +
 				"AND STATUS<>?6",
 		nativeQuery = true
 	)
@@ -285,6 +289,8 @@ public interface MonitorRecordDAO extends MetBaseDAO<MonitorRecordPO>{
 			Date endTime,
 			Long userId,
 			String status,
+			Long recordUserId,
+			String fileNameReg,
 			Pageable pageable);
 	
 }

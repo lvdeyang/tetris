@@ -182,7 +182,7 @@ public class MonitorLiveDeviceService {
 		
 		monitorLiveDeviceDao.save(live);
 		
-		LogicBO logic = openBundle(live, codec, osd, null, null, userId);
+		LogicBO logic = openBundle(live, codec, osd, localEncoder, null, userId);
 		
 		logic.setPass_by(new ArrayList<PassByBO>());
 		

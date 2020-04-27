@@ -5,7 +5,8 @@ let requestIP = document.location.host.split(':')[0]
 
 // TODO
 //let basePath = process.env.RESOURCE_ROOT + '/suma-venus-resource'
-let basePath = process.env.RESOURCE_ROOT
+//let basePath = process.env.RESOURCE_ROOT
+let basePath = document.location.origin;
 let loginUrl = process.env.USER_ROOT + '/vue'
 
 if (basePath.indexOf('__requestIP__') !== -1) {
@@ -41,7 +42,13 @@ axiosInstance.interceptors.request.use(function (config) {
 // 响应拦截器
 axiosInstance.interceptors.response.use(
   function (response) {
-    return response
+    if(response.data.status === 408) {
+      alert('超时，请重新登录!');
+      window.location.href = `${basePath}/web/app/login/login.html`;
+    }else{
+      return response
+    }
+
   },
   function (error) {
     if (error.response.status === 401) { // 认证出错,跳转至登录页面
@@ -125,6 +132,8 @@ export const syncSerNodeToLdap = params => { return axiosInstance.post(`${basePa
 export const syncSerInfoFromLdap = params => { return axiosInstance.post(`${basePath}/serInfo/syncSerInfoFromLdap`, qs.stringify(params)).then(res => res.data) }
 export const syncSerInfoToLdap = params => { return axiosInstance.post(`${basePath}/serInfo/syncSerInfoToLdap`, qs.stringify(params)).then(res => res.data) }
 export const queryFatherNodeOptions = params => { return axiosInstance.post(`${basePath}/serInfo/queryFatherNodeOptions`, qs.stringify(params)).then(res => res.data) }
+export const ldapBackUp = params => { return axiosInstance.post(`${basePath}/serInfo/ldap/backup`, qs.stringify(params)).then(res => res.data) }
+export const ldapResume = params => { return axiosInstance.post(`${basePath}/serInfo/ldap/resume`, qs.stringify(params)).then(res => res.data) }
 
 export const syncEquipInfoFromLdap = params => { return axiosInstance.post(`${basePath}/bundle/syncFromLdap`, qs.stringify(params)).then(res => res.data) }
 export const syncEquipInfToLdap = params => { return axiosInstance.post(`${basePath}/bundle/syncToLdap`, qs.stringify(params)).then(res => res.data) }
@@ -134,6 +143,7 @@ export const queryUserBindBundles = params => { return axiosInstance.post(`${bas
 export const setUserBindBundles = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/bind`, qs.stringify(params)).then(res => res.data) }
 export const queryEncoders = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/query/encoders`, qs.stringify(params)).then(res => res.data) }
 export const queryDecoders = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/query/decoders`, qs.stringify(params)).then(res => res.data) }
+export const unbindUserBindBundles = params => { return axiosInstance.post(`${basePath}/user/bind/bundle/unbind`, qs.stringify(params)).then(res => res.data) }
 
 export const logout = params => { return axiosInstance.post(`${basePath}/do/logout`, qs.stringify(params)).then(res => res.data) }
 

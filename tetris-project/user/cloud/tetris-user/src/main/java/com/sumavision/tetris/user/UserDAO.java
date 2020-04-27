@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
 
@@ -108,6 +109,43 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 */
 	@Query(value = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1", nativeQuery = true)
 	public int countByCompanyId(Long companyId);
+	
+	/**
+	 * 根据公司以及条件分页查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午10:54:40
+	 * @param Long companyId 公司id
+	 * @param String nickname 昵称
+	 * @param String userno 用户号码
+	 * @param Page<UserPO> page 分页信息
+	 * @return Page<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
+					+"AND IF(?2 IS NULL OR ?2='', TRUE, NICKNAME like ?2) "
+					+"AND IF(?3 IS NULL OR ?3='', TRUE, USERNO like ?3) "
+					+ "\n#pageable\n",
+			countQuery = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
+					+"AND IF(?2 IS NULL OR ?2='', TRUE, NICKNAME like ?2) "
+					+"AND IF(?3 IS NULL OR ?3='', TRUE, USERNO like ?3) ",
+			nativeQuery = true)
+	public Page<UserPO> findByCompanyIdAndCondition(Long companyId, String nicknameExpression, String usernoExpression, Pageable page);
+
+	/**
+	 * 根据公司以及条件统计用户数量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午10:57:51
+	 * @param Long companyId 公司id
+	 * @param String nickname 昵称
+	 * @param String userno 用户号码
+	 * @return int 用户数量
+	 */
+	@Query(value = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
+					+"AND IF(?2 IS NULL OR ?2='', TRUE, NICKNAME like ?2) "
+					+"AND IF(?3 IS NULL OR ?3='', TRUE, USERNO like ?3) ",
+			nativeQuery = true)
+	public int countByCompanyIdAndCondition(Long companyId, String nicknameExpression, String usernoExpression);
 	
 	/**
 	 * 分页查询公司下的用户（带例外）<br/>
@@ -379,5 +417,26 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @return List<UserPO>
 	 */
 	public List<UserPO> findByUsernoIn(Collection<String> usernos);
+	
+	/**
+	 * 根据用户ids和用户类型删除用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午2:13:55
+	 * @param Collection<Long> userIds 用户id列表
+	 * @param UserClassify classify 用户类型
+	 */
+	@Transactional
+	public void deleteByIdInAndClassify(Collection<Long> userIds, UserClassify classify);
+	
+	/**
+	 * 删除用户类型所有用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午5:22:14
+	 * @param UserClassify classify 用户类型
+	 */
+	@Transactional
+	public void deleteByClassify(UserClassify classify);
 	
 }

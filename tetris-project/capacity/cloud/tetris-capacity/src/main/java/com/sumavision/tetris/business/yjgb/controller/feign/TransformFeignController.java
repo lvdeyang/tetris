@@ -76,6 +76,7 @@ public class TransformFeignController {
 	public Object deleteOutput(String id, HttpServletRequest request) throws Exception {
 		
 		//删除任务全部输出
+		System.out.println("删除任务全部输出" + id);
 		transformService.deleteAllOutput(id);
 		
 		return null;

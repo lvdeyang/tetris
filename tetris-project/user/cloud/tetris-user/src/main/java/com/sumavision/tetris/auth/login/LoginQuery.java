@@ -1,5 +1,8 @@
 package com.sumavision.tetris.auth.login;
 
+import java.io.InputStream;
+import java.util.Properties;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +12,6 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.config.server.ServerProps;
 import com.sumavision.tetris.config.server.UserServerPropsQuery;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
-import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
 
@@ -41,19 +43,29 @@ public class LoginQuery {
 		UserPO user = userDao.findOne(tokenEntity.getUserId());
 		String redirectUrl = null;
 		ServerProps props = userServerPropsQuery.queryProps();
-		redirectUrl = new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-home").toString();
-		/*if(UserClassify.INTERNAL.equals(user.getClassify())){
-			ServerProps props = userServerPropsQuery.queryProps();
-			redirectUrl = new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-user").toString();
-		}else if(UserClassify.COMPANY.equals(user.getClassify())){
-			ServerProps props = userServerPropsQuery.queryProps();
-			redirectUrl = new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-business-user").toString();
-			//com.sumavision.tetris.mims.config.server.ServerProps props = mimsServerPropsQuery.queryProps();
-			//redirectUrl = new StringBufferWrapper().append("http://").append(props.getFtpIp()).append(":").append(props.getPort()).append("/index/material/").append(token).toString();
-		}else if(UserClassify.NORMAL.equals(user.getClassify())){
-			com.sumavision.tetris.mims.config.server.ServerProps props = mimsServerPropsQuery.queryProps();
-			redirectUrl = new StringBufferWrapper().append("http://").append(props.getFtpIp()).append(":").append(props.getPort()).append("/index/media/picture/").append(token).toString();
-		}*/
+		Properties properties = new Properties();
+		
+		InputStream in = null;
+		try{
+			in = LoginQuery.class.getClassLoader().getResourceAsStream("serverIp.properties");
+			properties.load(in);
+			String ip = properties.getProperty("ip");
+			redirectUrl = new StringBufferWrapper().append("http://").append(ip).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-home").toString();
+			/*if(UserClassify.INTERNAL.equals(user.getClassify())){
+				ServerProps props = userServerPropsQuery.queryProps();
+				redirectUrl = new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-user").toString();
+			}else if(UserClassify.COMPANY.equals(user.getClassify())){
+				ServerProps props = userServerPropsQuery.queryProps();
+				redirectUrl = new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/index/").append(token).append("#/page-business-user").toString();
+				//com.sumavision.tetris.mims.config.server.ServerProps props = mimsServerPropsQuery.queryProps();
+				//redirectUrl = new StringBufferWrapper().append("http://").append(props.getFtpIp()).append(":").append(props.getPort()).append("/index/material/").append(token).toString();
+			}else if(UserClassify.NORMAL.equals(user.getClassify())){
+				com.sumavision.tetris.mims.config.server.ServerProps props = mimsServerPropsQuery.queryProps();
+				redirectUrl = new StringBufferWrapper().append("http://").append(props.getFtpIp()).append(":").append(props.getPort()).append("/index/media/picture/").append(token).toString();
+			}*/
+		}finally{
+			if(in != null) in.close();
+		}
 		
 		return redirectUrl;
 	}

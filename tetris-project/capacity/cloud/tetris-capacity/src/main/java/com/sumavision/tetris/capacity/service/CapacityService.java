@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.service;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +110,10 @@ public class CapacityService {
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		all.setMsg_id(msg_id);
 		
+		Date date = new Date();
+        String str = "yyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(str);
+        System.out.println(sdf.format(date));
 		System.out.println("create:  " + JSONObject.toJSONString(all));
 		
 		return createAll(all, ip, port);
@@ -152,6 +158,10 @@ public class CapacityService {
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		all.setMsg_id(msg_id);
 		
+		Date date = new Date();
+        String str = "yyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(str);
+        System.out.println(sdf.format(date));
 		System.out.println("delete:  " + JSONObject.toJSONString(all));
 		
 		deleteAll(all, ip, port);
@@ -844,12 +854,12 @@ public class CapacityService {
 	 * @param PutTaskSourceRequest source 不带msg_id的source
 	 * @return TaskBaseResponse
 	 */
-	public TaskBaseResponse modifyTaskSourceAddMsgId(String taskId, PutTaskSourceRequest source) throws Exception{
+	public TaskBaseResponse modifyTaskSourceAddMsgId(String taskId, String capacityIp, PutTaskSourceRequest source) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		source.setMsg_id(msg_id);
 		
-		return modifyTaskSource(taskId, source);
+		return modifyTaskSource(taskId, capacityIp, source);
 		
 	}
 	
@@ -862,10 +872,10 @@ public class CapacityService {
 	 * @param PutTaskSourceRequest source 修改任务源参数
 	 * @return TaskResponse 返回
 	 */
-	private TaskBaseResponse modifyTaskSource(String taskId, PutTaskSourceRequest source) throws Exception{
+	private TaskBaseResponse modifyTaskSource(String taskId, String capacityIp, PutTaskSourceRequest source) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(capacityIp)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)
@@ -989,7 +999,11 @@ public class CapacityService {
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		output.setMsg_id(msg_id);
 		
-		System.out.println(JSONObject.toJSONString(output));
+		Date date = new Date();
+        String str = "yyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(str);
+        System.out.println(sdf.format(date));
+		System.out.println("create-output" + JSONObject.toJSONString(output));
 		
 		return createOutputs(output, capacityIp);
 	}
@@ -1032,6 +1046,12 @@ public class CapacityService {
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		output.setMsg_id(msg_id);
+		
+		Date date = new Date();
+        String str = "yyy-MM-dd HH:mm:ss";
+        SimpleDateFormat sdf = new SimpleDateFormat(str);
+        System.out.println(sdf.format(date));
+		System.out.println("delete-output" + JSONObject.toJSONString(output));
 		
 		deleteOutputs(output, capacityIp);
 		

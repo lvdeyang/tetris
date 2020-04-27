@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
-import com.google.gson.JsonArray;
 import com.sumavision.tetris.business.director.service.DirectorTaskService;
-import com.sumavision.tetris.business.director.vo.OutputsVO;
 import com.sumavision.tetris.business.director.vo.DirectorTaskVO;
+import com.sumavision.tetris.business.director.vo.OutputsVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller

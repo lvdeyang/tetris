@@ -10,6 +10,7 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum ForwardDemandBusinessType {
 	
 	FORWARD_DEVICE("转发设备", "设备"),
+//	FORWARD_USER("转发设备", "用户"),
 	FORWARD_FILE("转发文件", "文件");
 //	FORWARD_RECORD("转发录像"),
 //	PLAYER_CAST_DEVICE("播放器上屏");

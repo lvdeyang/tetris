@@ -1,0 +1,12 @@
+<notify>
+	<commandname>bizcnf</commandname>
+	<operation>start</operation>
+	<seq>3fa306388e4d11e8b445060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<!-- 本操作发起成员ID-->
+	<op>00000000001</op>
+	<grouptype>preset</grouptype>
+	<subject>XX项目第三次研讨会</subject>
+	<stime>2018-08-10 08:00:00</stime>
+</notify>

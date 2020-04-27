@@ -1,0 +1,8 @@
+<notify>
+	<commandname>bizcnf</commandname>
+	<operation>pause</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+</notify>

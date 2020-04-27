@@ -36,6 +36,7 @@ import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.enumeration.InputResponseEnum;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
+import com.sumavision.tetris.capacity.util.http.HttpUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -146,7 +147,7 @@ public class TranscodeTaskService {
 									 .toString();
 		}
 		if(inputBO.getFile() != null){
-			uniq = inputBO.getFile().getUrl();
+			uniq = uuid;
 		}
 		if(inputBO.getUdp_pcm() != null){
 			uniq = new StringBuffer().append(inputBO.getUdp_pcm().getSource_ip())
@@ -672,7 +673,7 @@ public class TranscodeTaskService {
 									 .toString();
 		}
 		if(inputBO.getFile() != null){
-			uniq = inputBO.getFile().getUrl();
+			uniq = inputBO.getId();
 		}
 		if(inputBO.getUdp_pcm() != null){
 			uniq = new StringBuffer().append(inputBO.getUdp_pcm().getSource_ip())
@@ -933,7 +934,7 @@ public class TranscodeTaskService {
 						
 					}
 					
-					capacityService.modifyTaskSourceAddMsgId(task.getId(), source);
+					capacityService.modifyTaskSourceAddMsgId(task.getId(), capacityIp, source);
 				}
 				
 				output.setTask(JSON.toJSONString(tasks));
@@ -994,7 +995,7 @@ public class TranscodeTaskService {
 						
 					}
 					
-					capacityService.modifyTaskSourceAddMsgId(task.getId(), source);
+					capacityService.modifyTaskSourceAddMsgId(task.getId(), output.getCapacityIp(), source);
 					
 				}
 				

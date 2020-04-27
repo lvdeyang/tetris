@@ -166,11 +166,13 @@ public class FolderManageController extends ControllerBase {
 				data.put(ERRMSG, "根节点不能删除");
 				return data;
 			}
-
+			
 			// 调整同级数据的index
-			int oldIndex = folder.getFolderIndex();
-			FolderPO parentFolder = folderDao.findOne(folder.getParentId());
-			handleOldParentFolderIndexChange(parentFolder, oldIndex);
+			if(folder.getFolderIndex() != null){
+				int oldIndex = folder.getFolderIndex();
+				FolderPO parentFolder = folderDao.findOne(folder.getParentId());
+				handleOldParentFolderIndexChange(parentFolder, oldIndex);
+			}
 
 			folderService.delete(folder);
 
@@ -828,6 +830,8 @@ public class FolderManageController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			int successCnt = departSyncLdapUtils.handleSyncToLdap();
+			
+			departSyncLdapUtils.handleFolderUserSyncToLdap();
 
 			data.put("successCnt", successCnt);
 		} catch (Exception e) {
@@ -844,6 +848,8 @@ public class FolderManageController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			int successCnt = departSyncLdapUtils.handleSyncFromLdap();
+			
+			departSyncLdapUtils.handleFolderUserSyncFromLdap();
 
 			data.put("successCnt", successCnt);
 		} catch (Exception e) {
@@ -952,25 +958,13 @@ public class FolderManageController extends ControllerBase {
 
 					}
 
-					//TODO:Ldap没做
-					Map<String, List<UserBO>> usersMap = userFeign.queryUsersByFolderUuid(externalFolder.getUuid());
-
-					if (!CollectionUtils.isEmpty(usersMap.get("users"))) {
-
-						StringBuilder sb = new StringBuilder();
-
-						for (UserBO userBO : usersMap.get("users")) {
-							sb.append(userBO.getName()).append(",");
-						}
-
-						userFeign.resetFolderOfUsers(sb.toString().substring(0, sb.toString().length() - 1));
-					}
-
 				}
 
 				// 再从本地删除从ldap下载下来的目录数据
 				folderDao.delete(externalFolderPOs);
 			}
+			
+			departSyncLdapUtils.handleFolderUserCleanUpLdap();
 
 		} catch (Exception e) {
 			LOGGER.error("LDAP sync error", e);
@@ -1319,7 +1313,7 @@ public class FolderManageController extends ControllerBase {
 		userNodeVO.setName(user.getUserName());
 		userNodeVO.setBeFolder(false);
 		userNodeVO.setUsername(user.getUserName());
-		userNodeVO.setFolderIndex(user.getFolderIndex().intValue());
+		userNodeVO.setFolderIndex(user.getFolderIndex() == null ? null: user.getFolderIndex().intValue());
 		userNodeVO.setNodeType("USER");
 		userNodeVO.setSystemSourceType(user.getCreator().equals("ldap") ? false : true);
 		return userNodeVO;
@@ -1882,6 +1876,8 @@ public class FolderManageController extends ControllerBase {
 				folderUserMap.setFolderIndex(folderPO.getFolderIndex().longValue());
 				folderUserMap.setFolderUuid(folderUuid);
 				folderUserMap.setUserId(userBO.getId());
+				folderUserMap.setUserUuid(userBO.getUser().getUuid());
+				folderUserMap.setUserNo(userBO.getUserNo());
 				folderUserMap.setUserName(nickName);
 				folderUserMap.setSyncStatus(0);
 				folderUserMap.setCreator(userBO.getCreater());

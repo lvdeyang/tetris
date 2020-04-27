@@ -54,6 +54,13 @@
                                 prop="type"
                                 label="类型">
                         </el-table-column>
+                        <el-table-column
+                          label="操作"
+                          width="100">
+                          <template slot-scope="scope">
+                            <el-button @click="handleRemove(scope.row)" type="text" size="small">解绑</el-button>
+                          </template>
+                        </el-table-column>
                     </el-table>
                 </el-scrollbar>
             </div>
@@ -185,7 +192,6 @@
                                         ref="selectDecoderTable"
                                         :data="dialog.selectDecoder.table.data"
                                         height="100%"
-                                        row-key="selectDecoderTableRowKey"
                                         style="width:100%"
                                         highlight-current-row
                                         @current-change="selectDecoderCurrentChange">
@@ -237,7 +243,8 @@ import{
     queryUserBindBundles,
     setUserBindBundles,
     queryEncoders,
-    queryDecoders
+    queryDecoders,
+    unbindUserBindBundles
 }from '../../api/api'
 
 export default{
@@ -364,34 +371,53 @@ export default{
                     }else{
                         var data = response.data;
                         if(data.userId){
-                            self.form.encodeId = data.encodeId;
-                            self.form.encodeBundleId = data.encodeBundleId;
-                            self.form.encodeBundleName = data.encodeBundleName;
-                            self.form.encodeDeviceModel = data.encodeDeviceModel;
-                            self.form.encodeUsername = data.encodeUsername;
-                            self.form.encodeIp = data.encodeIp;
-                            self.form.decodeId = data.decodeId;
-                            self.form.decodeBundleId = data.decodeBundleId;
-                            self.form.decodeBundleName = data.decodeBundleName;
-                            self.form.decodeDeviceModel = data.decodeDeviceModel;
-                            self.form.decodeUsername = data.decodeUsername;
-                            self.form.decodeIp = data.decodeIp;
-                            self.table.data.push({
-                                bundleId:data.encodeBundleId,
-                                bundleName:data.encodeBundleName,
-                                deviceModel:data.encodeDeviceModel,
-                                username:data.encodeUserName,
-                                ip:data.encodeIp,
-                                type:'编码器'
-                            });
-                            self.table.data.push({
-                                bundleId:data.decodeBundleId,
-                                bundleName:data.decodeBundleName,
-                                deviceModel:data.decodeDeviceModel,
-                                username:data.decodeUserName,
-                                ip:data.decodeIp,
-                                type:'解码器'
-                            });
+                            if(data.encodeBundleId){
+                                self.form.encodeId = data.encodeId;
+                                self.form.encodeBundleId = data.encodeBundleId;
+                                self.form.encodeBundleName = data.encodeBundleName;
+                                self.form.encodeDeviceModel = data.encodeDeviceModel;
+                                self.form.encodeUsername = data.encodeUsername;
+                                self.form.encodeIp = data.encodeIp;
+                                self.table.data.push({
+                                  bundleId:data.encodeBundleId,
+                                  bundleName:data.encodeBundleName,
+                                  deviceModel:data.encodeDeviceModel,
+                                  username:data.encodeUserName,
+                                  ip:data.encodeIp,
+                                  type:'编码器'
+                                });
+                            }else{
+                                self.form.encodeId = '',
+                                self.form.encodeBundleId = '',
+                                self.form.encodeBundleName = '',
+                                self.form.encodeDeviceModel = '',
+                                self.form.encodeUsername = '';
+                                self.form.encodeIp = '';
+                            }
+                            if(data.decodeBundleId){
+                                self.form.decodeId = data.decodeId;
+                                self.form.decodeBundleId = data.decodeBundleId;
+                                self.form.decodeBundleName = data.decodeBundleName;
+                                self.form.decodeDeviceModel = data.decodeDeviceModel;
+                                self.form.decodeUsername = data.decodeUsername;
+                                self.form.decodeIp = data.decodeIp;
+                                self.table.data.push({
+                                  bundleId:data.decodeBundleId,
+                                  bundleName:data.decodeBundleName,
+                                  deviceModel:data.decodeDeviceModel,
+                                  username:data.decodeUserName,
+                                  ip:data.decodeIp,
+                                  type:'解码器'
+                                });
+                            }else{
+                                self.form.decodeId = '',
+                                self.form.decodeBundleId = '';
+                                self.form.decodeBundleName = '';
+                                self.form.decodeDeviceModel = '';
+                                self.form.decodeUsername = '';
+                                self.form.decodeIp = '';
+                            }
+
                         }else{
                             self.form.encodeId = '',
                             self.form.encodeBundleId = '',
@@ -609,6 +635,27 @@ export default{
         selectDecoderCurrentChange:function(currentRow){
             var self = this;
             self.dialog.selectDecoder.table.current = currentRow;
+        },
+        handleRemove: function(row){
+            var self = this;
+            unbindUserBindBundles({
+              userId:self.tree.currentUser.id,
+              type:row.type
+            }).then(response => {
+              if(response.status !== 200){
+                self.$message({
+                  message:response.message,
+                  type:'error'
+                });
+              }else{
+                var table = self.table.data;
+                for(var i=table.length-1; i>=0; i--){
+                  if(row.type == table[i].type){
+                    table.splice(i, 1);
+                  }
+                }
+              }
+            });
         }
 
     },

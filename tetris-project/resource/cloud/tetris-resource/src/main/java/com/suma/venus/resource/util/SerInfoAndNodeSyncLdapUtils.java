@@ -14,6 +14,7 @@ import com.suma.application.ldap.node.LdapNodeDao;
 import com.suma.application.ldap.node.LdapNodePo;
 import com.suma.application.ldap.ser.LdapSerInfoDao;
 import com.suma.application.ldap.ser.LdapSerInfoPo;
+import com.suma.application.ldap.util.Base64Util;
 import com.suma.venus.resource.pojo.SerInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.dao.SerInfoDao;
@@ -64,6 +65,7 @@ public class SerInfoAndNodeSyncLdapUtils {
 						// 外部之前同步过的信息可能已经修改，直接save一波
 						BeanUtils.copyProperties(ldapSer, serInfoPOSync, "serUuid", "syncStatus", "sourceType");
 						// serInfoPOSync.setSyncStatus(SYNC_STATUS.SYNC);
+						serInfoPOSync.setSerPwd(Base64Util.decode(serInfoPOSync.getSerPwd()));
 						serInfoDao.save(serInfoPOSync);
 						successCnt++;
 
@@ -93,13 +95,13 @@ public class SerInfoAndNodeSyncLdapUtils {
 				try {
 
 					List<LdapSerInfoPo> ldapSerInfoPoList = ldapSerInfoDao.getSerInfoByUuid(serInfoPO.getSerUuid());
-
+					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					if (!CollectionUtils.isEmpty(ldapSerInfoPoList)) {
 						LdapSerInfoPo ldapSerInfo = ldapSerInfoUtil.pojoModifyToLdap(serInfoPO,
 								ldapSerInfoPoList.get(0));
 						ldapSerInfoDao.update(ldapSerInfo);
 					} else {
-						LdapSerInfoPo ldapSerInfo = ldapSerInfoUtil.pojoToLdap(serInfoPO);
+						LdapSerInfoPo ldapSerInfo = ldapSerInfoUtil.pojoToLdap(serInfoPO, self);
 						ldapSerInfoDao.save(ldapSerInfo);
 					}
 
@@ -169,6 +171,7 @@ public class SerInfoAndNodeSyncLdapUtils {
 
 					if (serNodePOTemp != null && serNodePOTemp.getSourceType().equals(SOURCE_TYPE.EXTERNAL)) {
 						serNodePOTemp.setNodeName(ldapNode.getNodeName());
+						serNodePOTemp.setNodeFather(ldapNode.getNodeFather());
 						serNodePOTemp.setNodeRelations(ldapNode.getNodeRelations());
 						serNodePOTemp.setNodeFactInfo(ldapNode.getNodeFactInfo());
 						serNodePOTemp.setSyncStatus(SYNC_STATUS.SYNC);
@@ -237,6 +240,7 @@ public class SerInfoAndNodeSyncLdapUtils {
 					successSerNodePOs.add(serNodePO);
 
 				} catch (Exception e) {
+					e.printStackTrace();
 					LOGGER.warn("update ldapNode error， e=" + e.getStackTrace().toString());
 				}
 
@@ -285,6 +289,12 @@ public class SerInfoAndNodeSyncLdapUtils {
 			if (!CollectionUtils.isEmpty(externalSerNodePOList)) {
 				serNodeDao.delete(externalSerNodePOList);
 			}
+			
+			//清除关联关系
+			SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+			self.setNodeFather("NULL");
+			self.setNodeRelations("NULL");
+			self.setNodeRouter(null);
 
 			return "";
 

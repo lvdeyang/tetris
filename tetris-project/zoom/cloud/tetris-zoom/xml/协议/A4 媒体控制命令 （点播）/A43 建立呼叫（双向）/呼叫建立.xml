@@ -1,0 +1,12 @@
+<control>
+	<commandname>mediacall</commandname>
+	<operation>start</operation>
+	<seq>660bf8d0946411e8b446060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<src>
+		<userid>00000000001</userid>
+	</src>
+	<dst>
+		<userid>00000000002</userid>
+	</dst>
+</control>

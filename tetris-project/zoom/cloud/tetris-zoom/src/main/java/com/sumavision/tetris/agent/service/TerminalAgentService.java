@@ -37,7 +37,9 @@ import com.sumavision.tetris.zoom.ZoomDAO;
 import com.sumavision.tetris.zoom.ZoomMemberPO;
 import com.sumavision.tetris.zoom.ZoomMemberType;
 import com.sumavision.tetris.zoom.ZoomMemberVO;
+import com.sumavision.tetris.zoom.ZoomMode;
 import com.sumavision.tetris.zoom.ZoomPO;
+import com.sumavision.tetris.zoom.ZoomSecretLevel;
 import com.sumavision.tetris.zoom.ZoomService;
 import com.sumavision.tetris.zoom.ZoomVO;
 
@@ -111,8 +113,11 @@ public class TerminalAgentService {
 		UserVO callUser = userQuery.current();
 		UserVO calledUser = userQuery.findByUserno(calledNo);
 		
-		//TODO:调用拉人建会接口
-		ZoomVO zoom = null;
+		List<String> usernos = new ArrayList<String>();
+		usernos.add(calledNo);
+		
+		//调用拉人建会接口
+		ZoomVO zoom = zoomService.create(calledUser.getNickname(), ZoomMode.DISCUSSION_MODE, calledUser.getNickname(), true, true, ZoomSecretLevel.PRIVATE, ZoomMemberType.JV220, usernos);
 		
 		PassByVO passBy = zoomVo2PassByVO(zoom);
 		passBy.setOperate("call_user")

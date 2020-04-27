@@ -108,9 +108,9 @@
 		
 		<!-- 模板引擎 -->
 		<dependency>
-		    <groupId>com.quhaodian.discover</groupId>
-		    <artifactId>discover-freemaker</artifactId>
-		    <version>1.8.2</version>
+		    <groupId>org.freemarker</groupId>
+		    <artifactId>freemarker</artifactId>
+		    <version>2.3.29</version>
 		</dependency>
 		
 		<!-- ftp -->

@@ -75,6 +75,7 @@ import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.VirtualResourceDao;
+import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.externalinterface.InterfaceToResource;
 import com.suma.venus.resource.feign.TokenFeign;
 import com.suma.venus.resource.feign.UserQueryFeign;
@@ -100,6 +101,7 @@ import com.suma.venus.resource.pojo.WorkNodePO;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ExtraInfoService;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.WorkNodeService;
@@ -180,10 +182,9 @@ public class HttpInterfaceController {
 
 	@Autowired
 	private BundleHeartBeatService bundleHeartBeatService;
-
-	// 联网中心消息服务注册ID
-	@Value("${connectCenterLayerID:suma-venus-access-lianwang}")
-	private String connectCenterLayerID;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
 
 	// 业务使用方式：vod|meeting
 	@Value("${businessMode:vod}")
@@ -854,6 +855,7 @@ public class HttpInterfaceController {
 
 			if (status_change && po.getSourceType() != SOURCE_TYPE.EXTERNAL && po.getSyncStatus() == SYNC_STATUS.SYNC) {
 				// 发送状态改变notify增量消息
+				String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 				List<BundlePO> bundles = new ArrayList<BundlePO>();
 				bundles.add(po);
 				statusXMLUtil.sendResourcesXmlMessage(null, bundles, null, connectCenterLayerID, 1500);
@@ -892,6 +894,7 @@ public class HttpInterfaceController {
 
 				if (po.getSourceType() != SOURCE_TYPE.EXTERNAL && po.getSyncStatus() == SYNC_STATUS.SYNC) {
 					// 发送状态改变notify增量消息
+					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					List<BundlePO> bundles = new ArrayList<BundlePO>();
 					bundles.add(po);
 					statusXMLUtil.sendResourcesXmlMessage(null, bundles, null, connectCenterLayerID, 1500);
@@ -940,7 +943,8 @@ public class HttpInterfaceController {
 			}
 
 			// 校验用户名密码
-			if (!"播放器".equals(bundle.getBundleAlias()) && !SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {// 播放器bundle和ldap的设备不进行用户微服务鉴权
+			if (!SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {//ldap的设备不进行用户微服务鉴权
+			//if (!"播放器".equals(bundle.getBundleAlias()) && !SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {// 播放器bundle和ldap的设备不进行用户微服务鉴权
 				boolean check = bundleService.checkBundleAndPassword(bundle, password);
 				if (!check) {
 					LOGGER.error("Fail to check username and password : 设备账号名或密码错误");
@@ -1374,6 +1378,8 @@ public class HttpInterfaceController {
 				jsonResult.put("msg", "ok");
 				return jsonResult;
 			}
+			
+			String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 			if (contentType.startsWith("application/command+xml+packet_")) {// 如果是分片包
 				// 提取分片信息
 				// seq表示消息内容序列号，len表示消息内容总长度，cur表示当前包号，max表示分包总数
@@ -1715,6 +1721,7 @@ public class HttpInterfaceController {
 			UserBO userBO = JSONObject.parseObject(JSONObject.toJSONString(userJson.get("user")), UserBO.class);
 			if (null != userBO) {
 				// 通过消息队列发送用户状态改变的notify消息
+				String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 				List<UserBO> localUserBOs = new ArrayList<UserBO>();
 				localUserBOs.add(userBO);
 				statusXMLUtil.sendResourcesXmlMessage(null, null, localUserBOs, connectCenterLayerID, 1500);
@@ -1743,6 +1750,7 @@ public class HttpInterfaceController {
 			List<BundlePO> bundlePOs = new ArrayList<BundlePO>();
 			List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
 			List<String> bundleIds = new ArrayList<String>();
+			String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 			// 创建17个播放器资源
 			for (int i = 1; i <= 17; i++) {
 				BundlePO bundlePO = new BundlePO();

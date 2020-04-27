@@ -3,6 +3,7 @@
  */
 define([
     'text!' + window.APPPATH + 'organization-personal-settings/page-organization-personal-settings.html',
+    window.APPPATH + 'organization-personal-settings/page-organization-personal-settings.i18n',
     'config',
     'restfull',
     'jquery',
@@ -14,7 +15,10 @@ define([
     'mi-theme-dialog',
     'mi-upload-dialog',
     'css!' + window.APPPATH + 'organization-personal-settings/page-organization-personal-settings.css'
-], function(tpl, config, ajax, $, context, commons, Vue){
+], function(tpl, i18n, config, ajax, $, context, commons, Vue){
+
+    var locale = context.getProp('locale');
+    var i18n = !locale?i18n.default:i18n[locale]?i18n[locale]:i18n.default;
 
     var pageId = 'page-organization-personal-settings';
 
@@ -32,6 +36,7 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                i18n:i18n,
                 basePath:window.BASEPATH,
                 company:'',
                 selected:{

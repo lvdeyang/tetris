@@ -5,9 +5,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.auth.login.exception.AppIdCannotBeNullException;
+import com.sumavision.tetris.auth.login.exception.DonotSupportRoamLoginException;
+import com.sumavision.tetris.auth.login.exception.QtZkLoginRepeatedlyException;
 import com.sumavision.tetris.auth.login.exception.SignCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.SignVerifyFailException;
 import com.sumavision.tetris.auth.login.exception.TimestampCannotBeNullException;
+import com.sumavision.tetris.auth.login.exception.TooManyAbnormalLoginTimesException;
 import com.sumavision.tetris.auth.login.exception.UnknownAppIdException;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
@@ -17,6 +20,7 @@ import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.user.BasicDevelopmentDAO;
 import com.sumavision.tetris.user.BasicDevelopmentPO;
 import com.sumavision.tetris.user.BasicDevelopmentQuery;
+import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.UserQuery;
@@ -28,7 +32,6 @@ import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 import com.sumavision.tetris.user.exception.UsernameNotExistException;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class LoginService {
 
 	@Autowired
@@ -60,6 +63,7 @@ public class LoginService {
 	 * @param Long userId 用户名id
 	 * @return String token
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public String doUserIdLogin(Long userId) throws Exception{
 		TokenPO token = tokenDao.findByUserIdAndType(userId, TerminalType.API);
 		if(token == null){
@@ -95,8 +99,44 @@ public class LoginService {
 		
 		UserPO user = userDao.findByUsername(username);
 		if(user == null) throw new UsernameNotExistException(username);
+		
+		if(UserClassify.LDAP.equals(user.getClassify())){
+			throw new DonotSupportRoamLoginException();
+		}
+		
+		if(user.getErrorLoginTimes()!=null && user.getErrorLoginTimes().intValue()>=10){
+			throw new TooManyAbnormalLoginTimesException();
+		} 
 		password = sha256Encoder.encode(password);
-		if(!user.getPassword().equals(password)) throw new PasswordErrorException(username, password);
+		if(!user.getPassword().equals(password)){
+			user.setErrorLoginTimes((user.getErrorLoginTimes()==null?1:(user.getErrorLoginTimes()+1)));
+			userDao.saveAndFlush(user);
+			throw new PasswordErrorException(username, password);
+		} 
+		if(TerminalType.QT_ZK.equals(terminalType)){
+			//指控终端重复登录校验
+			TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
+			if(UserStatus.ONLINE.equals(token.getStatus())){
+				throw new QtZkLoginRepeatedlyException();
+			}
+		}
+		return doPasswordLoginTransactional(user, terminalType, ip);
+	}
+	
+	/**
+	 * 处理用户名密码登录事务操作-支持多终端登录<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年3月5日 下午5:13:08
+	 * @param UserPO user 用户
+	 * @param TerminalType terminalType 终端类型
+	 * @param String ip 登录ip
+	 * @return String token
+	 */
+	@Transactional(rollbackFor = Exception.class)
+	private String doPasswordLoginTransactional(UserPO user, TerminalType terminalType, String ip) throws Exception{
+		user.setErrorLoginTimes(0);
+		userDao.save(user);
 		
 		TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
 		boolean result = false;
@@ -132,6 +172,7 @@ public class LoginService {
 	 * @param String sign 签名
 	 * @return String token
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public String doAppSecretLogin(
 			String appId, 
 			String timestamp, 
@@ -167,6 +208,7 @@ public class LoginService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年3月8日 上午10:38:16
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void doLogout() throws Exception{
 		UserVO user = userQuery.current();
 		TokenPO token = tokenDao.findByToken(user.getToken());

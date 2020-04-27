@@ -1,6 +1,6 @@
 <el-dialog
         class="mi-system-role-dialog"
-        title="绑定角色"
+        :title="i18n.title"
         width="600px"
         :visible.sync="dialog.visible"
         @closed="closed">
@@ -20,8 +20,8 @@
     </div>
 
     <span slot="footer" class="dialog.footer">
-        <el-button size="medium" @click="dialog.visible = false">取 消</el-button>
-        <el-button size="medium" type="primary" :loading="dialog.loading" @click="handleOkButton">确 定</el-button>
+        <el-button size="medium" @click="dialog.visible = false">{{i18n.handleCancelButton}}</el-button>
+        <el-button size="medium" type="primary" :loading="dialog.loading" @click="handleOkButton">{{i18n.handleOkButton}}</el-button>
     </span>
 
 </el-dialog>

@@ -1,0 +1,19 @@
+<?xml version="1.0"  encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			elementFormDefault="qualified" 
+			attributeFormDefault="unqualified">
+			
+	<xsd:element name="request">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="commandname" type="xsd:string" fixed="pointindexoperation" />
+				<xsd:element name="operation" type="xsd:string" fiexed="query" />
+				<xsd:element name="seq" type="uuidType" />
+				<xsd:element name="ts" type="xsd:unsignedLong" />
+				<xsd:element name="devname" type="xsd:string" />
+				<xsd:element name="devid" type="deviceIDType" />
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+	
+</xsd:schema>

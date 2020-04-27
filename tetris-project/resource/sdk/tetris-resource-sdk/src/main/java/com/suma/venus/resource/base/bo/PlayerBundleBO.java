@@ -15,9 +15,10 @@ public class PlayerBundleBO {
 	
 	private List<String> channelIds;
 	
-	/**播放器号码*/
+	/**无用*/
 	private String bundleNum;
 	
+	/**播放器号码*/
 	private String username;
 	
 	private String password;

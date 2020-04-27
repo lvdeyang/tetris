@@ -135,9 +135,10 @@ public class UserUtils {
 	 */
 	public UserBO queryUserByUserno(String userno) throws Exception{
 		try{
-			Map<String, UserBO> resultMap = userFeign.queryLdapUserByUserNo(userno);
-			if(resultMap==null || resultMap.size()<=0 || resultMap.get("user")==null) return null;
-			return resultMap.get("user");
+			return userQueryService.queryUserByUserNo(userno);
+			//Map<String, UserBO> resultMap = userFeign.queryLdapUserByUserNo(userno);
+			//if(resultMap==null || resultMap.size()<=0 || resultMap.get("user")==null) return null;
+			//return resultMap.get("user");
 		}catch(Exception e){
 			return null;
 		}

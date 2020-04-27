@@ -22,7 +22,7 @@ require.config({
         'config':window.APPPATH + 'config',
         
         /* components */
-        'zk-business-add-member':window.APPPATH + 'component/zk/business/add-member/zk-business-add-member'
+        'zk-business-add-member':window.APPPATH + 'component/zk/business/add-member-new/zk-business-add-member-new'
 
     },
     shim:{
@@ -60,7 +60,7 @@ require([
     'config',
     'restfull',
     'element-ui',
-    'zk-business-add-member'
+    'zk-business-add-member-new'
 ], function(storage, Vue, config, ajax){
 
     var app = null;

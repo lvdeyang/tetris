@@ -33,7 +33,10 @@ import com.sumavision.bvc.device.command.exception.PlayerIsBeingUsedException;
 import com.sumavision.bvc.device.command.secret.CommandSecretServiceImpl;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.group.bo.BundleBO;
+import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.enumeration.CodecParamType;
+import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
+import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.util.MeetingUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.AvtplNotFoundException;
@@ -113,7 +116,7 @@ public class CommandCommonServiceImpl {
 			avTpls = avtplDao.findByUsageType(AvtplUsageType.COMMAND);
 			AvtplPO sys_avtpl = meetingUtil.generateAvtpl(CodecParamType.DEFAULT.getName(), "COMMAND1");
 			avTpls.add(sys_avtpl);
-//			throw new AvtplNotFoundException("缺少会议系统参数模板！");
+//			throw new AvtplNotFoundException("缺少会议.系统参数模板！");
 		}
 		targetAvtpl = avTpls.get(0);
 		//查询codec模板档位
@@ -124,7 +127,7 @@ public class CommandCommonServiceImpl {
 		}
 		
 		if(targetGear == null){
-			throw new AvtplNotFoundException("会议系统参数模板没有创建档位！");
+			throw new AvtplNotFoundException("会议.系统参数模板没有创建档位！");
 		}
 		
 		return new HashMapWrapper<String, Object>().put("avtpl", targetAvtpl)
@@ -132,6 +135,25 @@ public class CommandCommonServiceImpl {
 												   .getMap();
 	}
 	
+	/**
+	 * 取系统默认参数模板BO<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月15日 下午1:26:33
+	 * @return
+	 * @throws Exception
+	 */
+	public CodecParamBO queryDefaultAvCodecParamBO() throws Exception{
+		
+		Map<String, Object> result = queryDefaultAvCodec();
+		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
+		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
+		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+		
+		return codec;
+	}
+
 	/**
 	 * 根据业务用户占用播放器--用户操作加锁<br/>
 	 * <b>负载均衡满足不了，得用redis<br/>
@@ -203,6 +225,10 @@ public class CommandCommonServiceImpl {
 		
 	}
 	
+	public CommandGroupUserPlayerPO userChosePlayerByLocationIndex(Long userId, PlayerBusinessType businessType, int locationIndex) throws Exception{
+		return userChosePlayerByLocationIndex(userId, businessType, locationIndex, false);
+	}
+	
 	/**
 	 * 指定播放器序号，根据业务用户占用播放器--用户操作加锁<br/>
 	 * <p>详细描述</p>
@@ -212,10 +238,11 @@ public class CommandCommonServiceImpl {
 	 * @param userId
 	 * @param businessType
 	 * @param locationIndex 播放器序号
+	 * @param ignorePlayerBeingUsed 当前播放器正在被使用时，true则【不修改播放器信息】并返回该播放器，false则抛错。
 	 * @return
 	 * @throws Exception 指定的播放器已经被别的业务使用时抛PlayerIsBeingUsedException
 	 */
-	public CommandGroupUserPlayerPO userChosePlayerByLocationIndex(Long userId, PlayerBusinessType businessType, int locationIndex) throws Exception{
+	public CommandGroupUserPlayerPO userChosePlayerByLocationIndex(Long userId, PlayerBusinessType businessType, int locationIndex, boolean ignorePlayerBeingUsed) throws Exception{
 		
 		synchronized (userId) {
 			
@@ -233,7 +260,11 @@ public class CommandCommonServiceImpl {
 			}
 			
 			if(!userPlayer.getPlayerBusinessType().equals(PlayerBusinessType.NONE)){
-				throw new PlayerIsBeingUsedException();
+				if(ignorePlayerBeingUsed){
+					return userPlayer;
+				}else{
+					throw new PlayerIsBeingUsedException();
+				}
 			}
 						
 			userPlayer.setPlayerBusinessType(businessType);			

@@ -1,90 +1,32 @@
 <div class="zk-business-add-member">
-  <div style="position:absolute; left:75px;right:75px; top:85px;bottom: 60px">
-    <div style="width:100%; height:100%; position:relative; padding:10px;">
-      <el-scrollbar style="height:100%;">
-        <div class="checkbox">
-          <el-select v-model="selected1" filterable @blur="searchBlur($event,1)" @change='func2()'>
-            <el-option v-for="option in options2" :value="option.id" :label="option.name" :key="option.id">
-              {{ option.name }}
-            </el-option>
-          </el-select>
-          <el-select v-model="selected2" filterable @blur="searchBlur($event,2)" @change='func3()'>
-            <el-option v-for="option in options3" :value="option.id" :label="option.name" :key="option.id">
-              {{ option.name }}
-            </el-option>
-          </el-select>
-          <el-select v-model="selected3" filterable @blur="searchBlur($event,3)" @change='func4()'>
-            <el-option v-for="option in options4" :value="option.id" :label="option.name" :key="option.id">
-              {{ option.name }}
-            </el-option>
-          </el-select>
-          <el-select v-model="selected4" filterable @blur="searchBlur($event,4)" @change='func5()'>
-            <el-option v-for="option in options5" :value="option.id" :label="option.name" :key="option.id">
-              {{ option.name }}
-            </el-option>
-          </el-select>
-          <el-select v-model="selected5" filterable @blur="searchBlur($event,5)" @change='func6()'>
-            <el-option v-for="option in options6" :value="option.id" :label="option.name" :key="option.id">
-              {{ option.name }}
-            </el-option>
-          </el-select>
-          <el-button @click="reset" size="medium" type="primary">清空选项</el-button>
+    <div style="position:absolute; left:75px; top:90px;width: 825px;bottom: 60px">
+        <el-input placeholder="输入关键字进行过滤" v-model="filterText"></el-input>
+        <div style="width:100%; height:405px; position:relative; padding:10px;">
+            <el-scrollbar style="height:100%;">
+                <el-tree
+                        ref="tree"
+                        :data="tree.data"
+                        node-key="id"
+                        :props="tree.props"
+                        :filter-node-method="filterNode">
+                        <span slot-scope="{node,data}">
+                            <el-checkbox v-if="data.type==='USER'" @change="onUserCheckChange(data)">
+                                <span :class="data.icon" :style="data.style+' position:relative; top:1px;'"></span>
+                                <span style="position:relative; top:1px;font-size: 18px;color: #cfdae6;">{{data.name}}</span>
+                            </el-checkbox>
+                            <span v-else>
+                                <span :class="data.icon" :style="data.style"></span>
+                                <span style="font-size:18px;">{{data.name}}</span>
+                            </span>
+                        </span>
+                </el-tree>
+            </el-scrollbar>
         </div>
-
-        <div class="table" style="margin-top: 10px;float: left;width: 45%;background-color: #0d283c;">
-          <el-input style="width:40%; float:left;margin: 0 5px" v-model="filterText" placeholder="筛选用户"></el-input>
-          <el-button type="primary" size="small" @click="changeSearch">搜索</el-button>
-          <el-button type="success" size="small" @click="selectAll">选择全部</el-button>
-          <el-button type="success" size="small" @click="unsetAll">取消选择</el-button>
-          <el-table ref="multipleTable" :data="pageData" tooltip-effect="dark" style="width: 100%;margin-top: 10px"
-            border @select="handleSelect" @select-all="selectCurrentPage">
-            <el-table-column type="selection" width="55">
-            </el-table-column>
-            <el-table-column label="ID" width="120">
-              <template slot-scope="scope">{{ scope.row.id }}</template>
-            </el-table-column>
-            <el-table-column prop="name" label="用户名">
-            </el-table-column>
-          </el-table>
-
-          <el-pagination background @current-change="handleCurrentChange" :current-page="leftCurrentPage"
-            :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper" :total=searchTableData.length>
-          </el-pagination>
-        </div>
-        <div class="haveChoosed">
-          <div>
-            <el-button type="success" size="small" @click="unsetSomeAll">取消选择</el-button>
-            <el-input style="width:70%;" v-model="searchText" placeholder="搜索" suffix-icon="icon-filter">
-            </el-input>
-          </div>
-          <div class="selectedTag">
-            <el-table ref="selectTable" :data="selectedPage" :row-key="getRowKey" tooltip-effect="dark"
-              style="width: 100%" border @selection-change="deleteChange">
-              <el-table-column type="selection" :reserve-selection="true" width="55">
-              </el-table-column>
-              <el-table-column prop="name" label="用户名">
-              </el-table-column>
-              <el-table-column label="操作" width="110">
-                <template slot-scope="scope">
-                  <span class="el-icon-delete" style="color: #ff9900fa;font-weight: bold" @click="deleteSelected(scope.row)">删除</span>
-                </template>
-              </el-table-column>
-            </el-table>
-
-            <el-pagination background @current-change="selectCurrentChange" :current-page="rightCurrentPage"
-              :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
-              :total="searchSelectedData.length">
-            </el-pagination>
-          </div>
-        </div>
-      </el-scrollbar>
     </div>
-  </div>
 
-  <div class="title">添加成员</div>
-  <div
-    style="position:absolute; left:0; bottom:5px; height:50px;line-height: 50px; right:0; text-align:center;">
-    <el-button size="medium" @click="handleWindowClose">取消</el-button>
-    <el-button size="medium" type="primary" @click="handleAddMemberCommit">确定</el-button>
-  </div>
+    <div class="title">添加成员</div>
+    <div style="position:absolute; left:0; bottom:10px; height:50px; right:0; padding:4px 10px 14px 10px; text-align:center;">
+        <el-button size="medium" @click="handleWindowClose">取消</el-button>
+        <el-button size="medium" type="primary" @click="handleAddMemberCommit">确定</el-button>
+    </div>
 </div>

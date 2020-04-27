@@ -19,6 +19,7 @@ public interface BaseDAO <T extends AbstractBasePO>{
 	public List<T> findAll(Iterable<Long> ids);
 	public long count();
 	public T save(T t);
+	public T saveAndFlush(T t);
 	public List<T> save(Iterable<T> list);
 	public void delete(T t);
 	public void delete(Long id);

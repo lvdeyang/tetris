@@ -262,7 +262,7 @@ public class UserFeignController {
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, user.getNickname(), user.getMobile(), user.getMail(), tags, false, "", "", "");
+		return userService.edit(id, user.getNickname(), user.getMobile(), user.getMail(), null, tags, false, "", "", "");
 	}
 	
 	/**
@@ -537,5 +537,61 @@ public class UserFeignController {
 		
 		List<String> usernoList = JSONArray.parseArray(usernos, String.class);
 		return userQuery.findByUsernoIn(usernoList);
+	}
+	
+	/**
+	 * 根据用户ids删除ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午2:15:22
+	 * @param String userIds 用户ids
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/ldap/user/by/ids")
+	public Object deleteLdapUser(
+			String userIds,
+			HttpServletRequest request) throws Exception{
+		
+		List<Long> userIdList = JSONArray.parseArray(userIds, Long.class);
+		userDAO.deleteByIdInAndClassify(userIdList, UserClassify.LDAP);
+		return null;
+	}
+	
+	/**
+	 * 删除所有ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午5:23:24
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/ldap/user")
+	public Object deleteLdapUsers(HttpServletRequest request) throws Exception{
+		
+		userDAO.deleteByClassify(UserClassify.LDAP);
+		return null;
+	}
+	
+	/**
+	 * 添加ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午3:52:42
+	 * @param String users 用户信息
+	 * @return List<UserVO> 持久化过的用户信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/ldap/user")
+	public Object addLdapUser(
+			String users,
+			HttpServletRequest request) throws Exception{
+		
+		List<UserVO> userVOs = JSONArray.parseArray(users, UserVO.class);
+		List<UserPO> userPOs = userService.addLdapUser(userVOs);
+		
+		List<UserVO> view_users = UserVO.getConverter(UserVO.class).convert(userPOs, UserVO.class);
+		return view_users;
 	}
 }

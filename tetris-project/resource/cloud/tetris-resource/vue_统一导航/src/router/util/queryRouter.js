@@ -6,8 +6,10 @@ import routers from '../../routes.js'
 const _import = require('../../router/_import_' + process.env.NODE_ENV) // 获取组件的方法
 
 // TODO
-let basePath = process.env.RESOURCE_ROOT
+//let basePath = process.env.RESOURCE_ROOT
 let requestIP = document.location.host.split(':')[0]
+
+let basePath = document.location.origin;
 
 let queryRouterUrl = routerConfig.queryRouterUrl
 let useLocalRoute = process.env.USELOCALROUTE

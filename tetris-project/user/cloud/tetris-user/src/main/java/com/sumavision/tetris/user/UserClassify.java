@@ -21,7 +21,8 @@ public enum UserClassify {
 	INTERNAL("系统内置用户", false),
 	COMPANY("企业用户", true),
 	NORMAL("普通用户", true),
-	TOURIST("游客", false);
+	TOURIST("游客", false),
+	LDAP("ldap", true);
 	
 	private String name;
 	

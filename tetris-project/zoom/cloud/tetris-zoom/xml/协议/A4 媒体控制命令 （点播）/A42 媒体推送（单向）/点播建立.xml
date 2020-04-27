@@ -1,0 +1,22 @@
+<control>
+	<commandname>mediapush</commandname>
+	<operation>start</operation>
+	<seq>660bf8d0946411e8b446060400ef5315</seq>
+	<ts>1533630770000</ts>
+	<src>
+		<!-- userid可以为用户ID或设备ID -->
+		<userid>00000000001</userid>
+		<postfix>这个不知道是干啥的</postfix>
+		<!-- online offline ringing 这个也不知道是干啥的-->
+		<ring>online</ring>
+		<!-- 若包含url值，表示点播用户或设备的媒体文件；若不包含url值，表示直接点播用户或设备 -->
+		<url>http://mediaserver/file1</url>
+		<video>h.264</video>
+		<audio>g.711</audio>
+	</src>
+	<dst>
+		<userid>00000000002</userid>
+		<video>h.264</video>
+		<audio>g.711</audio>
+	</dst>
+</control>

@@ -32,7 +32,7 @@ define([
                 var self = this;
                 ajax.post('/heart/beat', null, function(data, status, message){
                     if(status !== 200){
-                        //self.qt.alert('请求失败', message);
+                        //self.qt.warning('请求失败', message);
                     }
                 }, null, [404, 403, 408, 409, 500]);
             }
@@ -124,6 +124,11 @@ define([
                 self.qt.on('playVoice', function (e) {
                     self.qt.invoke('voiceIntercoms', e.params);
                 });
+
+                //播放录像文件
+                self.qt.on('playRecordFile', function (e) {
+                    self.qt.invoke('vodRecordFileStart', e.params);
+                });
 		
                 self.qt.get(['user'], function (variables) {
                     self.user = variables.user ? $.parseJSON(variables.user) : {};
@@ -134,9 +139,9 @@ define([
                     ajax.editPsdPost('http://' + self.gateIp + ':' + self.gatePort + '/tetris-user/api/zk/websocket/server/addr',
                             null,
                             function (addr, status) {
-                        console.log(addr);
                         var onmessage = function(e){
                             var e = $.parseJSON(e.data);
+                            console.log(e)
                             //呼叫用户消息
                             if(e.businessType === 'callUser'){
                                 self.qt.linkedWebview('business', {id:'callUserMessage', params:e});
@@ -182,7 +187,7 @@ define([
                                 self.qt.linkedWebview('historyMessage', {id:'cooperationStopMessage', params:e});
                             }
 
-                            //指挥
+                            //开启指挥  需要成员同意
                             if(e.businessType === 'commandStart'){
                                 self.qt.linkedWebview('business', {id:'commandStart', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
@@ -211,6 +216,24 @@ define([
                                 self.qt.linkedWebview('business', {id:'commandMemberDelete', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'commandMemberDelete', params:e});
+                            }else if(e.businessType === 'commandStartNow'){ //开启指挥，不需要成员同意
+                                self.qt.linkedWebview('rightBar', {id:'autoCommandStart', params:e});
+                            }else if(e.businessType === 'exitApply'){
+                                self.qt.linkedWebview('rightBar', {id:'agreeExitApply', params:e}); //通知主席有人申请退出
+                            }else if(e.businessType === 'exitApplyAgree'){ //通知申请人被同意
+                                self.qt.linkedWebview('rightBar', {id:'applyExitAgree', params:e});
+
+                            }else if(e.businessType === 'exitApplyDisagree'){ //通知申请人被拒绝
+                                self.qt.linkedWebview('rightBar', {id:'applyExitDisagree', params:e});
+
+                            }
+
+                            //开始会议 需要成员同意
+                            if(e.businessType === 'meetingStart'){
+                                //监听呼叫消息，消息状态要在底部滚动
+                                self.qt.linkedWebview('historyMessage', {id:'meetingStart', params:e});
+                            }else if(e.businessType === 'meetingStartNow'){ //开始指挥 不需要成员同意
+                                self.qt.linkedWebview('rightBar', {id:'autoMeetingStart', params:e});
                             }
 
                             //协同指挥
@@ -232,6 +255,26 @@ define([
                                 self.qt.linkedWebview('historyMessage', {id:'cooperationRevoke', params:e});
                             }
 
+                            //主席指定发言，通知发言人
+                            if(e.businessType === 'speakAppoint'){
+                                self.qt.info(e.businessInfo)
+                            }else if(e.businessType === 'speakApply'){ //通知主席有人申请发言
+                                //监听呼叫消息，消息状态要在底部滚动
+                                self.qt.linkedWebview('rightBar', {id:'agreeSpeakApply', params:e});
+
+                            }else if(e.businessType === 'speakApplyAgree'){ //通知申请人被同意
+                                self.qt.linkedWebview('rightBar', {id:'speakApplyAgree', params:e});
+
+                            }else if(e.businessType === 'speakApplyDisagree'){ //通知申请人被拒绝
+                                self.qt.linkedWebview('rightBar', {id:'speakApplyDisagree', params:e});
+
+                            }else if(e.businessType === 'speakStop'){ //通知全员停止发言/停止讨论
+                                self.qt.linkedWebview('rightBar', {id:'speakStop', params:e});
+
+                            }else if(e.businessType === 'speakStart'){ //通知观看发言/开始讨论
+                                self.qt.linkedWebview('rightBar', {id:'speakStart', params:e});
+                            }
+
                             //指挥转发
                             if(e.businessType === 'commandForwardDevice'){
                                 self.qt.linkedWebview('business', {id:'commandForwardDevice', params:e});
@@ -245,17 +288,19 @@ define([
                                 self.qt.linkedWebview('business', {id:'commandForwardStop', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'commandForwardStop', params:e});
+                            }else if(e.businessType === 'commandForward'){ //转发不需要成员同意
+                                self.qt.linkedWebview('historyMessage',{id:'commandForward',params:e});
                             }
 
                             //指挥提醒
                             if(e.businessType === 'commandRemind'){
                                 self.qt.linkedWebview('business', {id:'commandRemind', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
-                                self.qt.linkedWebview('historyMessage', {id:'commandRemind', params:e});
+                                self.qt.linkedWebview('rightBar', {id:'commandRemind', params:e});
                             }else if(e.businessType === 'commandRemindStop'){
                                 self.qt.linkedWebview('business', {id:'commandRemindStop', params:e});
                                 //监听呼叫消息，消息状态要在底部滚动
-                                self.qt.linkedWebview('historyMessage', {id:'commandRemindStop', params:e});
+                                self.qt.linkedWebview('rightBar', {id:'commandRemindStop', params:e});
                             }
 
                             //指挥消息
@@ -305,7 +350,9 @@ define([
                             setTimeout(createWebsocket, 5*1000);
                         };
                         var createWebsocket = function(){
-                            var webSocket = new WebSocket(addr + window.TOKEN);
+                        	//把IP替换为虚拟IP
+                        	var virtualAddr = addr.replace(/[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/,self.gateIp);
+                            var webSocket = new WebSocket(virtualAddr + window.TOKEN);
                             webSocket.onopen = onopen;
                             webSocket.onmessage = onmessage;
                             webSocket.onerror = onerror;

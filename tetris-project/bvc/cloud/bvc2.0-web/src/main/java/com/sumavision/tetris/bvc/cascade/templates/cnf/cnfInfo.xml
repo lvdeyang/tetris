@@ -1,0 +1,39 @@
+<notify>
+	<commandname>bizcnf</commandname>
+	<operation>maddfull</operation>
+	<seq>${seq}</seq>
+	<ts>${ts}</ts>
+	<gid>${gid}</gid>
+	<op>${op}</op>
+	<grouptype>preset</grouptype>
+	<subject>${subject}</subject>
+	<stime>${stime}</stime>
+	<bizinfo>
+		<biztype>cnf</biztype>
+		<bizname>${bizname}</bizname>
+		<creatorid>${creatorid}</creatorid>
+		<topid>${topid}</topid>
+		<mlist>
+			<#if mAddList??>
+				<#list mAddList as m>
+					<minfo>
+						<mid>${m.mid}</mid>
+						<mname>${m.mname}</mname>
+						<mtype>${m.mtype}</mtype>
+						<mstatus>${m.mstatus}</mstatus>
+						<#if m.pid??>
+							<pid>${m.pid}</pid>
+						</#if>
+					</minfo>
+				</#list>	
+			</#if>
+		</mlist>
+	</bizinfo>
+	<cnfstatus>
+		<mode>${mode}</mode>
+		<status>${status}</status>
+		<#if spkid??>
+			<spkid>${spkid}</spkid>
+		</#if>
+	</cnfstatus>
+</notify>

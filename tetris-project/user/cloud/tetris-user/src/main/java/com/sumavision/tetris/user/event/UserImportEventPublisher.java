@@ -1,10 +1,12 @@
 package com.sumavision.tetris.user.event;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.context.ApplicationEventPublisher;
 
+import com.sumavision.tetris.system.role.UserSystemRolePermissionPO;
 import com.sumavision.tetris.user.UserPO;
 
 public class UserImportEventPublisher implements Runnable{
@@ -13,6 +15,9 @@ public class UserImportEventPublisher implements Runnable{
 	
 	/** 导入的用户 */
 	private List<UserPO> users;
+	
+	/** 用户角色绑定关系 */
+	private List<UserSystemRolePermissionPO> userSystemRolePermissions;
 	
 	/** 用户总数 */
 	private Long totalUsers;
@@ -31,11 +36,13 @@ public class UserImportEventPublisher implements Runnable{
 	public UserImportEventPublisher(
 			ApplicationEventPublisher applicationEventPublisher, 
 			List<UserPO> users, 
+			List<UserSystemRolePermissionPO> userSystemRolePermissions,
 			String companyId, 
 			String companyName,
 			ConcurrentHashMap<String, UserImportEventPublisher> cache){
 		this.applicationEventPublisher = applicationEventPublisher;
 		this.users = users;
+		this.userSystemRolePermissions = userSystemRolePermissions;
 		this.companyId = companyId;
 		this.companyName = companyName;
 		this.cache = cache;
@@ -47,7 +54,15 @@ public class UserImportEventPublisher implements Runnable{
 	public void run() {
 		for(UserPO user:users){
 			this.currentNum += 1;
-			UserImportEvent event = new UserImportEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), user.getUserno(), this.companyId, this.companyName);
+			List<String> roleIds = new ArrayList<String>();
+			if(userSystemRolePermissions!=null && userSystemRolePermissions.size()>0){
+				for(UserSystemRolePermissionPO permission:userSystemRolePermissions){
+					if(permission.getUserId().equals(user.getId())){
+						roleIds.add(permission.getRoleId().toString());
+					}
+				}
+			}
+			UserImportEvent event = new UserImportEvent(applicationEventPublisher, user.getId().toString(), user.getNickname(), user.getUserno(), this.companyId, this.companyName, roleIds);
 			applicationEventPublisher.publishEvent(event);
 		}
 		this.cache.remove(this.companyId);

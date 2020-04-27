@@ -214,6 +214,42 @@ public class UserController {
 	}
 	
 	/**
+	 * 锁定用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午3:49:20
+	 * @param @PathVariable Long id 用户id
+	 * @return UserVO 用户
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/lock/{id}")
+	public Object lock(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		return userService.lock(id);
+	}
+	
+	/**
+	 * 解除锁定用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午3:49:20
+	 * @param @PathVariable Long id 用户id
+	 * @return UserVO 用户
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/unlock/{id}")
+	public Object unlock(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		return userService.unlock(id);
+	}
+	
+	/**
 	 * 添加一个用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -224,6 +260,7 @@ public class UserController {
 	 * @param String repeat 密码确认
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param Long companyId 公司id
 	 * @param String companyName 公司名称
 	 * @return UserVO 用户数据
@@ -239,6 +276,7 @@ public class UserController {
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify,
             Long companyId,
             String companyName) throws Exception{
@@ -248,12 +286,12 @@ public class UserController {
 		//TODO 权限校验
 		
 		if(classify.equals(UserClassify.NORMAL.getName())){
-			return userService.add(nickname, username, userno, password, repeat, mobile, mail, classify, true);
+			return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, true);
 		}else if(classify.equals(UserClassify.COMPANY.getName())){
 			if(companyId!=null && companyName==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, classify, companyId);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyId);
 			}else if(companyName!=null && companyId==null){
-				return userService.add(nickname, username, userno, password, repeat, mobile, mail, classify, companyName);
+				return userService.add(nickname, username, userno, password, repeat, mobile, mail, level, classify, companyName);
 			}
 		}
 		return null;
@@ -291,6 +329,7 @@ public class UserController {
 	 * @param String nickname 昵称
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param boolean editPassword 是否修改密码
 	 * @param String oldPassword 旧密码
 	 * @param String newPassword 新密码
@@ -305,6 +344,7 @@ public class UserController {
 			String nickname,
             String mobile,
             String mail,
+            Integer level,
             String tags,
             boolean editPassword,
             String oldPassword,
@@ -315,7 +355,31 @@ public class UserController {
 		
 		//TODO 权限校验
 		
-		return userService.edit(id, nickname, mobile, mail, tags, editPassword, oldPassword, newPassword, repeat);
+		return userService.edit(id, nickname, mobile, mail, level, tags, editPassword, oldPassword, newPassword, repeat);
+	}
+	
+	/**
+	 * 根据公司和条件查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午11:05:41
+	 * @param String nickname 用户昵称
+	 * @param String userno 用户号码
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/company/id/and/condition")
+	public Object findByCompanyIdAndCondition(
+			String nickname, 
+			String userno, 
+			int currentPage, 
+			int pageSize) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		return userQuery.findByCompanyIdAndCondition(Long.valueOf(user.getGroupId()), nickname, userno, currentPage, pageSize);
 	}
 	
 	/**
@@ -381,7 +445,9 @@ public class UserController {
 		ServerProps serverProps = userServerPropsQuery.queryProps();
 		
 		StringBufferWrapper redirectUrl = new StringBufferWrapper().append("http://")
-				   .append(serverProps.getIp())
+				   //TODO serverIp.properties
+				   //.append(serverProps.getIp())
+				   .append(serverProps.getIpFromProperties())
 				   .append(":")
 				   .append(serverProps.getPort())
 				   .append("/")
@@ -506,7 +572,7 @@ public class UserController {
 		}
 		return status;
 	}
-	
+
 }
 
 

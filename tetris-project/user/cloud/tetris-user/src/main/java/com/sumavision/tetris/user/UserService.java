@@ -13,6 +13,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenDAO;
+import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.business.role.BusinessRoleService;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -39,6 +42,7 @@ import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
 import com.sumavision.tetris.user.event.TouristCreateEvent;
 import com.sumavision.tetris.user.event.TouristDeleteBatchEvent;
 import com.sumavision.tetris.user.event.TouristDeleteEvent;
+import com.sumavision.tetris.user.event.UserDeletedEvent;
 import com.sumavision.tetris.user.event.UserImportEventPublisher;
 import com.sumavision.tetris.user.event.UserRegisteredEvent;
 import com.sumavision.tetris.user.exception.DeletedUserIsNotATouristException;
@@ -50,10 +54,11 @@ import com.sumavision.tetris.user.exception.MobileNotExistException;
 import com.sumavision.tetris.user.exception.PasswordCannotBeNullException;
 import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.RepeatNotMatchPasswordException;
+import com.sumavision.tetris.user.exception.UserCannotDeleteBecauseOnlineStatusException;
+import com.sumavision.tetris.user.exception.UserColumnLengthException;
 import com.sumavision.tetris.user.exception.UserNotExistException;
 import com.sumavision.tetris.user.exception.UsernameAlreadyExistException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
-import com.sumavision.tetris.user.exception.UsernoAlreadyExistInSystemException;
 import com.sumavision.tetris.user.exception.UsernoCannotBeNullException;
 
 /**
@@ -111,6 +116,45 @@ public class UserService{
 	@Autowired
 	private UserImportInfoService userImportInfoService;
 	
+	@Autowired
+	private TokenDAO tokenDao;
+	
+	/**
+	 * 锁定用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午3:44:02
+	 * @param Long id 用户id
+	 * @return UserVO 用户
+	 */
+	public UserVO lock(Long id) throws Exception{
+		UserPO user = userDao.findOne(id);
+		if(user == null){
+			throw new UserNotExistException(id);
+		}
+		user.setErrorLoginTimes(10);
+		userDao.save(user);
+		return new UserVO().set(user);
+	}
+	
+	/**
+	 * 解除锁定哟用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月24日 下午3:44:31
+	 * @param Long id 用户id
+	 * @return UserVO 用户
+	 */
+	public UserVO unlock(Long id) throws Exception{
+		UserPO user = userDao.findOne(id);
+		if(user == null){
+			throw new UserNotExistException(id);
+		}
+		user.setErrorLoginTimes(0);
+		userDao.save(user);
+		return new UserVO().set(user);
+	}
+	
 	/**
 	 * 添加一个游客<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -122,6 +166,7 @@ public class UserService{
 	 */
 	public UserVO addTourist(String nickname) throws Exception{
 		UserPO tourist = new UserPO();
+		userDao.save(tourist);
 		tourist.setNickname(nickname);
 		tourist.setUserno(new StringBufferWrapper().append("t").append(tourist.getId()).toString());
 		tourist.setClassify(UserClassify.TOURIST);
@@ -180,6 +225,7 @@ public class UserService{
 	 * @param String repeat 密码确认
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param String classify 用户类型
 	 * @param boolean emit 是否要发射事件
 	 * @return UserVO 用户
@@ -192,10 +238,11 @@ public class UserService{
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify,
             boolean emit) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, classify);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify);
 		
 		if(emit){
 			//发布用户注册事件
@@ -217,6 +264,7 @@ public class UserService{
 	 * @param String repeat 确认密码
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param String companyName 公司名称
 	 * @return UserVO 新建的用户
 	 */
@@ -228,10 +276,11 @@ public class UserService{
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify,
             String companyName) throws Exception{
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, UserClassify.COMPANY.getName());
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, UserClassify.COMPANY.getName());
 		
 		CompanyVO company = null;
 		SystemRoleVO adminRole = null;
@@ -271,6 +320,7 @@ public class UserService{
 	 * @param String repeat 确认密码
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param String companyId 公司id
 	 * @return UserVO 新建的用户
 	 */
@@ -282,6 +332,7 @@ public class UserService{
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify,
             Long companyId) throws Exception{
 		
@@ -291,7 +342,7 @@ public class UserService{
 			throw new CompanyNotExistException(companyId);
 		}
 		
-		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, classify);
+		UserPO user = addUser(nickname, username, userno, password, repeat, mobile, mail, level, classify);
 		
 		if(user.getClassify().equals(UserClassify.COMPANY)){
 			//加入公司
@@ -318,6 +369,7 @@ public class UserService{
 	 * @param String repeat 密码确认
 	 * @param String mobile 手机号
 	 * @param String mail 邮箱
+	 * @param Integer level 用户级别
 	 * @param String classify 用户类型
 	 * @return UserPO 用户
 	 */
@@ -329,6 +381,7 @@ public class UserService{
             String repeat,
             String mobile,
             String mail,
+            Integer level,
             String classify) throws Exception{
 		
 		if(username == null) throw new UsernameCannotBeNullException();
@@ -339,24 +392,31 @@ public class UserService{
 		
 		if(!password.equals(repeat)) throw new RepeatNotMatchPasswordException();
 		
+		userQuery.checkPassword(password);
+		
 		UserPO user = userDao.findByUsername(username);
 		if(user != null){
 			throw new UsernameAlreadyExistException(username);
 		}
 		
-		if(mobile != null){
+		if(mobile!=null && !"".equals(mobile)){
 			user = userDao.findByMobile(mobile);
 			if(user != null){
 				throw new MobileAlreadyExistException(mobile);
 			}
 		}
 		
-		if(mail != null){
+		if(mail!=null && !"".equals(mail)){
 			user = userDao.findByMail(mail);
 			if(user != null){
 				throw new MailAlreadyExistException(mail);
 			}
 		}
+		
+		if(nickname.length() > 255) throw new UserColumnLengthException("昵称长度不能超过255");
+		if(username.length() > 255) throw new UserColumnLengthException("用户名长度不能超过255");
+		if(mobile!=null && !"".equals(mobile) && mobile.length()>255) throw new UserColumnLengthException("手机号长度不能超过255");
+		if(mail!=null && !"".equals(mail) && mail.length()>255) throw new UserColumnLengthException("邮箱长度不能超过255");
 		
 		user = new UserPO();
 		user.setNickname(nickname);
@@ -365,10 +425,28 @@ public class UserService{
 		user.setPassword(sha256Encoder.encode(password));
 		user.setMobile(mobile);
 		user.setMail(mail);
+		user.setLevel(level==null?1:level);
 		user.setAutoGeneration(false);
 		user.setClassify(UserClassify.fromName(classify));
 		user.setUpdateTime(new Date());
 		userDao.save(user);
+		
+		//创建私有角色
+		SystemRolePO privateRole = new SystemRolePO();
+		privateRole.setAutoGeneration(true);
+		privateRole.setName(SystemRolePO.generatePrivateRoleName(user.getId()));
+		privateRole.setType(SystemRoleType.PRIVATE);
+		privateRole.setUpdateTime(new Date());
+		systemRoleDao.save(privateRole);
+		
+		//用户关联角色
+		UserSystemRolePermissionPO permission = new UserSystemRolePermissionPO();
+		permission.setAutoGeneration(true);
+		permission.setRoleId(privateRole.getId());
+		permission.setRoleType(SystemRoleType.PRIVATE);
+		permission.setUserId(user.getId());
+		permission.setUpdateTime(new Date());
+		userSystemRolePermissionDao.save(permission);
 		
 		return user;
 	}
@@ -399,6 +477,15 @@ public class UserService{
 		UserPO user = userDao.findOne(id);
 		
 		if(user == null) return;
+		
+		List<TokenPO> tokens = tokenDao.findByUserId(user.getId());
+		if(tokens!=null && tokens.size()>0){
+			for(TokenPO token:tokens){
+				if(UserStatus.ONLINE.equals(token.getStatus())){
+					throw new UserCannotDeleteBecauseOnlineStatusException();
+				}
+			}
+		}
 		
 		if(UserClassify.COMPANY.equals(user.getClassify())){
 			
@@ -447,7 +534,29 @@ public class UserService{
 		
 		List<UserSystemRolePermissionPO> permissions = userSystemRolePermissionDao.findByUserId(id);
 		
-		userSystemRolePermissionDao.deleteInBatch(permissions);
+		if(permissions!=null && permissions.size()>0){
+			//清除用户权限
+			userSystemRolePermissionDao.deleteInBatch(permissions);
+			//清除私有角色
+			UserSystemRolePermissionPO privatePermission = null;
+			for(UserSystemRolePermissionPO permission:permissions){
+				if(SystemRoleType.PRIVATE.equals(permission.getRoleType())){
+					privatePermission = permission;
+					break;
+				}
+			}
+			if(privatePermission != null){
+				SystemRolePO privateRole = systemRoleDao.findOne(privatePermission.getRoleId());
+				if(privateRole != null){
+					systemRoleDao.delete(privateRole);
+				}
+			}
+		}
+		
+		UserDeletedEvent event = new UserDeletedEvent(applicationEventPublisher, new ArrayListWrapper<UserVO>().add(new UserVO().setId(user.getId())
+																																.setUserno(user.getUserno()))
+																											   .getList());
+		applicationEventPublisher.publishEvent(event);
 		
 	}
 	
@@ -460,6 +569,7 @@ public class UserService{
 	 * @param String nickname 用户昵称
 	 * @param String mobile 用户手机号
 	 * @param String mail 用户邮箱
+	 * @param Integer level 用户级别
 	 * @param boolean editPassword 是否修改密码
 	 * @param String oldPassword 旧密码
 	 * @param String newPassword 新密码
@@ -471,6 +581,7 @@ public class UserService{
 			String nickname,
             String mobile,
             String mail,
+            Integer level,
             String tags,
             boolean editPassword,
             String oldPassword,
@@ -488,6 +599,8 @@ public class UserService{
 			if(newPassword == null) throw new PasswordCannotBeNullException();
 			
 			if(!newPassword.equals(repeat)) throw new RepeatNotMatchPasswordException();
+			
+			userQuery.checkPassword(newPassword);
 			
 			user.setPassword(sha256Encoder.encode(newPassword));
 		}
@@ -509,6 +622,7 @@ public class UserService{
 		user.setNickname(nickname);
 		user.setMobile(mobile);
 		user.setMail(mail);
+		user.setLevel(level);
 		user.setUpdateTime(new Date());
 		if(tags != null) user.setTags(tags);
 		userDao.save(user);
@@ -543,6 +657,8 @@ public class UserService{
 			
 			if(!newPassword.equals(repeat)) throw new RepeatNotMatchPasswordException();
 			
+			userQuery.checkPassword(newPassword);
+			
 			user.setPassword(sha256Encoder.encode(newPassword));
 		}
 		
@@ -575,7 +691,7 @@ public class UserService{
 		List<UserSystemRolePermissionPO> userSystemRolePermissions = new ArrayList<UserSystemRolePermissionPO>();
 		for(int i=1; i<lines.length; i++){
 			String line = lines[i];
-			String[] columns = line.split(",");
+			String[] columns = line.split(",",-1);
 			String[] roleNamesInColumn = columns[6].split("#");
 			for(String name:roleNamesInColumn){
 				if(!"".equals(name)){
@@ -591,6 +707,7 @@ public class UserService{
 				user.setClassify(UserClassify.COMPANY);
 				user.setMobile(columns[7]);
 				user.setMail(columns[8]);
+				user.setLevel(1);
 				user.setAutoGeneration(false);
 				users.add(user);
 			}
@@ -628,30 +745,96 @@ public class UserService{
 				usernos.add(user.getUserno());
 				usernames.add(user.getUsername());
 			}
+			
+			//忽略重复用户号码以及重复用户名的用户
+			List<UserPO> usersCopy = new ArrayList<UserPO>();
 			List<UserPO> duplicateUsers = userDao.findByCompanyIdAndUsernoIn(Long.valueOf(self.getGroupId()), usernos);
-			if(duplicateUsers!=null && duplicateUsers.size()>0){
+			List<UserPO> existUsers = userDao.findByUsernameIn(usernames);
+			for(UserPO user:users){
+				boolean repetitive = false;
+				for(UserPO duplicateUser:duplicateUsers){
+					if(duplicateUser.getUserno().equals(user.getUserno())){
+						repetitive = true;
+						break;
+					}
+				}
+				if(!repetitive){
+					for(UserPO existUser:existUsers){
+						if(existUser.getUsername().equals(user.getUsername())){
+							repetitive = true;
+							break;
+						}
+					}
+				}
+				if(!repetitive){
+					usersCopy.add(user);
+				}
+			}
+			users = usersCopy;
+			/*if(duplicateUsers!=null && duplicateUsers.size()>0){
 				Set<String> duplicateUsernos = new HashSet<String>();
 				for(UserPO user:duplicateUsers){
 					duplicateUsernos.add(user.getUserno());
 				}
 				throw new UsernoAlreadyExistInSystemException(duplicateUsernos);
-			}
-			List<UserPO> existUsers = userDao.findByUsernameIn(usernames);
-			if(existUsers!=null && existUsers.size()>0){
+			}*/
+			/*if(existUsers!=null && existUsers.size()>0){
 				Set<String> duplicateUsernames = new HashSet<String>();
 				for(UserPO user:existUsers){
 					duplicateUsernames.add(user.getUsername());
 				}
 				throw new UsernameAlreadyExistException(duplicateUsernames);
-			}
+			}*/
+			
 			userDao.save(users);
+			List<UserSystemRolePermissionPO> systemRolePermissions = new ArrayList<UserSystemRolePermissionPO>();
+			List<SystemRolePO> privateRoles = new ArrayList<SystemRolePO>();
 			for(UserPO user:users){
+				//绑定系统角色
+				UserSystemRolePermissionPO systemRolePermission = new UserSystemRolePermissionPO();
+				systemRolePermission.setRoleId(3l);
+				systemRolePermission.setAutoGeneration(false);
+				systemRolePermission.setRoleType(SystemRoleType.SYSTEM);
+				systemRolePermission.setUserId(user.getId());
+				systemRolePermission.setUpdateTime(new Date());
+				systemRolePermissions.add(systemRolePermission);
+				
+				//绑定导入角色
 				CompanyUserPermissionPO permission = new CompanyUserPermissionPO();
 				permission.setUserId(user.getId().toString());
 				permission.setCompanyId(Long.valueOf(self.getGroupId()));
 				companyUserPermissions.add(permission);
+				
+				//创建私有角色
+				SystemRolePO privateRole = new SystemRolePO();
+				privateRole.setAutoGeneration(true);
+				privateRole.setName(SystemRolePO.generatePrivateRoleName(user.getId()));
+				privateRole.setType(SystemRoleType.PRIVATE);
+				privateRole.setUpdateTime(new Date());
+				privateRoles.add(privateRole);
 			}
+			userSystemRolePermissionDao.save(systemRolePermissions);
 			companyUserPermissionDao.save(companyUserPermissions);
+			systemRoleDao.save(privateRoles);
+			
+			//私有角色授权
+			List<UserSystemRolePermissionPO> privatePermissions = new ArrayList<UserSystemRolePermissionPO>();
+			for(UserPO user:users){
+				String privateRoleName = new StringBufferWrapper().append("private_u_").append(user.getId()).toString();
+				for(SystemRolePO privateRole:privateRoles){
+					if(privateRoleName.equals(privateRole.getName())){
+						UserSystemRolePermissionPO privatePermission = new UserSystemRolePermissionPO();
+						privatePermission.setAutoGeneration(true);
+						privatePermission.setRoleId(privateRole.getId());
+						privatePermission.setRoleType(SystemRoleType.PRIVATE);
+						privatePermission.setUserId(user.getId());
+						privatePermission.setUpdateTime(new Date());
+						privatePermissions.add(privatePermission);
+						break;
+					}
+				}
+			}
+			userSystemRolePermissionDao.save(privatePermissions);
 		}
 		
 		if(roles.size() > 0){
@@ -703,7 +886,7 @@ public class UserService{
 		
 		//发射事件
 		if(users.size() > 0){
-			UserImportEventPublisher userImportEventPublisher = new UserImportEventPublisher(applicationEventPublisher, users, self.getGroupId(), self.getGroupName(), publishers);
+			UserImportEventPublisher userImportEventPublisher = new UserImportEventPublisher(applicationEventPublisher, users, userSystemRolePermissions, self.getGroupId(), self.getGroupName(), publishers);
 			this.publishers.put(self.getGroupId(), userImportEventPublisher);
 			userImportEventPublisher.publish();
 		}
@@ -711,6 +894,114 @@ public class UserService{
 		//更新导入次数
 		userImportInfoService.addTimes(self.getGroupId());
 		
+	}
+	
+	/**
+	 * 终端用户离线<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月25日 下午5:55:38
+	 * @param Long userId 用户id
+	 * @param TerminalType type 终端类型
+	 */
+	public void userOffline(Long userId, TerminalType type) throws Exception{
+		
+		TokenPO token = tokenDao.findByUserIdAndType(userId, type);
+		if(token != null){
+			token.setStatus(UserStatus.OFFLINE);
+			tokenDao.save(token);
+		}
+	}
+	
+	/**
+	 * 添加ldap用户<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月26日 下午3:48:05
+	 * @param List<UserVO> userVOs 用户信息
+	 * @return List<UserPO> 用户信息
+	 */
+	public List<UserPO> addLdapUser(List<UserVO> userVOs) throws Exception{
+		
+		UserVO self = userQuery.current();
+		
+		List<String> userUuids = new ArrayList<String>();
+		for(UserVO userVO: userVOs){
+			userUuids.add(userVO.getUuid());
+		}
+		
+		List<UserPO> users = userDao.findByUuidIn(userUuids);
+		
+		List<UserPO> userPOs = new ArrayList<UserPO>();
+		for(UserVO userVO: userVOs){
+			UserPO userPO = null;
+			for(UserPO user: users){
+				if(user.getUuid().equals(userVO.getUuid())){
+					userPO = user;
+					break;
+				}
+			}
+			
+			if(userPO == null){
+				userPO = new UserPO();
+			}
+			
+			userPO.setUuid(userVO.getUuid());
+			userPO.setClassify(UserClassify.LDAP);
+			userPO.setUsername(userVO.getUsername());
+			userPO.setNickname(userVO.getNickname());
+			userPO.setUserno(userVO.getUserno());
+			
+			userPOs.add(userPO);
+		}
+		
+		userDao.save(userPOs);
+		
+		//绑定公司
+		CompanyPO company = companyDao.findByUserId(self.getId());
+		List<CompanyUserPermissionPO> permissions = new ArrayList<CompanyUserPermissionPO>();
+		for(UserPO user: userPOs){
+			CompanyUserPermissionPO permission = new CompanyUserPermissionPO();
+			permission.setUserId(user.getId().toString());
+			permission.setCompanyId(company.getId());
+			permissions.add(permission);
+		}
+		
+		companyUserPermissionDao.save(permissions);
+		
+		//创建私有角色
+		List<SystemRolePO> privateRoles = new ArrayList<SystemRolePO>();
+		for(UserPO user:userPOs){
+			SystemRolePO privateRole = new SystemRolePO();
+			privateRole.setAutoGeneration(true);
+			privateRole.setName(SystemRolePO.generatePrivateRoleName(user.getId()));
+			privateRole.setType(SystemRoleType.PRIVATE);
+			privateRole.setUpdateTime(new Date());
+			privateRoles.add(privateRole);
+		}
+		systemRoleDao.save(privateRoles);
+		
+		//用户关联角色
+		List<UserSystemRolePermissionPO> rolePermissions = new ArrayList<UserSystemRolePermissionPO>();
+		for(UserPO user:userPOs){
+			SystemRolePO target = null;
+			for(SystemRolePO role:privateRoles){
+				if(role.belong(user.getId())){
+					target = role;
+					break;
+				}
+			}
+			UserSystemRolePermissionPO permission = new UserSystemRolePermissionPO();
+			permission.setAutoGeneration(true);
+			permission.setRoleId(target.getId());
+			permission.setRoleType(SystemRoleType.PRIVATE);
+			permission.setUserId(user.getId());
+			permission.setUpdateTime(new Date());
+			rolePermissions.add(permission);
+		}
+		userSystemRolePermissionDao.save(rolePermissions);
+		
+		return userPOs;
 	}
 	
 }

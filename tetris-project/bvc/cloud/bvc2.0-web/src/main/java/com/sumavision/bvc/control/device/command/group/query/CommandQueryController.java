@@ -46,6 +46,7 @@ import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
+import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.control.device.group.vo.tree.TreeNodeVO;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeIcon;
 import com.sumavision.bvc.control.device.group.vo.tree.enumeration.TreeNodeType;
@@ -70,6 +71,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @Controller
 @RequestMapping(value = "/command/query")
 public class CommandQueryController {
+
+	@Autowired
+	private ServerProps serverProps;
 
 	@Autowired
 	private UserUtils userUtils;
@@ -140,7 +144,7 @@ public class CommandQueryController {
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
 //					(!"ldap".equals(user.getCreater()) && userMap!=null && userMap.getEncodeBundleId()!=null) && !userMap.getEncodeBundleId().equals("")){//过滤掉编码器uuid为null和空字符串，其它情况无法过滤
 					if(filterMode == 0
@@ -196,7 +200,7 @@ public class CommandQueryController {
 				
 //		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
 		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
@@ -209,7 +213,7 @@ public class CommandQueryController {
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
 					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
 					if(member!=null
@@ -264,7 +268,7 @@ public class CommandQueryController {
 				
 //		List<Long> memberUserIds = commandGroupMemberDao.findUserIdsByGroupId(Long.parseLong(id));
 		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
-		Set<CommandGroupMemberPO> members = group.getMembers();
+		List<CommandGroupMemberPO> members = group.getMembers();
 		
 		JSONObject info = new JSONObject();
 		info.put("id", group.getId().toString());
@@ -310,7 +314,7 @@ public class CommandQueryController {
 			for(UserBO user:users){
 				if(user.getId().equals(chairmanUserBO.getId())) continue;
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				if("ldap".equals(user.getCreater()) ||
 						   (!"ldap".equals(user.getCreater()) && encoderId!=null)){// && user.getDecoderId()!=null)){
 					CommandGroupMemberPO member = commandCommonUtil.queryMemberByUserId(members, user.getId());
 					if(member!=null
@@ -362,7 +366,7 @@ public class CommandQueryController {
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				if(("ldap".equals(user.getCreater()) && user.getDecoderId()!=null) ||
+				if("ldap".equals(user.getCreater()) ||
 				   (!"ldap".equals(user.getCreater()) && encoderId!=null) && !encoderId.equals("")){// && user.getDecoderId()!=null)){
 					if(!memberUserIds.contains(user.getId())){
 						filteredUsers.add(user);
@@ -620,31 +624,63 @@ public class CommandQueryController {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月15日 下午2:37:19
+	 * @param type 查询类型，command或meeting，如果null则认为command
 	 * @return TreeNodeVO 会议树节点
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/list")
-	public Object list(HttpServletRequest request) throws Exception{
+	public Object list(
+			String type,
+			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
+		if(type == null) type = "command";
+		GroupType needType = null;
+		switch (type){
+		case "meeting":
+			needType = GroupType.MEETING;
+			break;
+		case "command":
+		default:
+			needType = GroupType.BASIC;
+			break;
+		}
+		
 		List<CommandGroupPO> commands = commandGroupDao.findByMemberUserId(userId);
+		List <CommandGroupPO> enteredCommands = commandGroupDao.findEnteredGroupByMemberUserId(userId);
 		
 		//加入会议组节点
 		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
-											     .setName("会议组列表")
+											     .setName(serverProps.getCommandString() + "组列表")
 											     .setType(TreeNodeType.FOLDER)
 											     .setKey()
 											     .setIcon(TreeNodeIcon.FOLDER.getName())
 											     .setChildren(new ArrayList<TreeNodeVO>());
 		
 		for(CommandGroupPO command: commands){
-			GroupType type = command.getType();
-			if(!type.equals(GroupType.BASIC)){
+			GroupType groupType = command.getType();
+			if(!needType.equals(groupType)){
 				continue;
 			}
-			TreeNodeVO commandTree = new TreeNodeVO().set(command);
+			
+			boolean entered = false;
+			if(command.getUserId().equals(userId)){
+				//自己的指挥
+				if(GroupStatus.STOP.equals(command.getStatus())){
+					entered = false;
+				}else{
+					entered = true;
+				}
+			}else{
+				//别人的指挥
+				CommandGroupPO enteredCommand = commandCommonUtil.queryGroupById(enteredCommands, command.getId());
+				if(enteredCommand != null){
+					entered = true;
+				}
+			}
+			TreeNodeVO commandTree = new TreeNodeVO().set(command, entered);
 			commandRoot.getChildren().add(commandTree);
 		}
 		
@@ -658,6 +694,7 @@ public class CommandQueryController {
 	 * <b>作者:</b>Administrator<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月12日 上午10:21:58
+	 * @param type 查询类型，command或group，如果null则认为command
 	 * @param request
 	 * @return
 	 * @throws Exception
@@ -665,24 +702,38 @@ public class CommandQueryController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/entered")
-	public Object findEnterdCommandGroup(HttpServletRequest request) throws Exception{
+	public Object findEnterdCommandGroup(
+			String type,
+			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		JSONArray groups = new JSONArray();
 		
+		if(type == null) type = "command";
+		GroupType needType = null;
+		switch (type){
+		case "meeting":
+			needType = GroupType.MEETING;
+			break;
+		case "command":
+		default:
+			needType = GroupType.BASIC;
+			break;
+		}
+		
 		List <CommandGroupPO> commands = commandGroupDao.findEnteredGroupByMemberUserId(userId);
 		
 		for(CommandGroupPO command : commands){
-			GroupType type = command.getType();
-			if(!type.equals(GroupType.BASIC)){
+			GroupType groupType = command.getType();
+			if(!needType.equals(groupType)){
 				continue;
 			}
 			JSONObject group = new JSONObject();
 			group.put("id", command.getId().toString());
 			group.put("name", command.getName());
 			group.put("creator", command.getUserId().toString());
-			if(type.equals(GroupType.BASIC)){// || type.equals(GroupType.COOPERATE) || type.equals(GroupType.SECRET)){
+			if(groupType.equals(GroupType.BASIC)){// || type.equals(GroupType.COOPERATE) || type.equals(GroupType.SECRET)){
 				group.put("type", "command");
 			}else{
 				group.put("type", "meeting");

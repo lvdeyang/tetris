@@ -218,6 +218,8 @@ public class ProcessReceivedMsg {
     	String bundleType = bundle.getBundle_type();
     	String deviceModel = bundle.getDevice_model();
     	
+    	String layerId = responseBo.getMessage().getMessage_header().getDestination_id();
+    	
     	if(deviceModel != null){
     		if(deviceModel.equals("5G")){
         		processCloseBundle5GMsg(bundle);
@@ -227,7 +229,7 @@ public class ProcessReceivedMsg {
     	}else{
 	    	switch (bundleType) {
 			case "VenusTerminal":
-				processCloseBundleVenusTerminalMsg(bundle);
+				processCloseBundleVenusTerminalMsg(bundle, layerId);
 				break;
 			case "VenusVirtual":
 				processCloseBundleVenusVirtualMsg(bundle);
@@ -808,6 +810,8 @@ public class ProcessReceivedMsg {
     	String bundleId = bundle.getBundle_id();
     	
     	if(layerId.equals(NodeType.NETWORK.getId())){
+    		
+    		networkService.processOpenBundleVenusTerminalMsg(bundle);
     		
     	}else{
     		
@@ -1677,24 +1681,30 @@ public class ProcessReceivedMsg {
     
     /**处理close_bundle信息的VenusTerminal类型信息
      * @throws Exception */
-    private void processCloseBundleVenusTerminalMsg(BundleBO bundle) throws Exception{
+    private void processCloseBundleVenusTerminalMsg(BundleBO bundle, String layerId) throws Exception{
     	
     	String bundleId = bundle.getBundle_id();
     	
-    	TerminalBindRepeaterPO bind = terminalBindRepeaterDao.findByBundleId(bundleId);
-    	
-    	if(bind == null) throw new Exception(bundle.getBundle_id() + "该终端未绑定转发器！");
-    	
-    	if(bind.getDeviceModel().equals("jv210")){
+		if(layerId.equals(NodeType.NETWORK.getId())){
     		
-    		processCloseBundleJv210Msg(bundle, bind);
+    		networkService.processOpenBundleVenusTerminalMsg(bundle);
     		
-    	}else if(bind.getDeviceModel().equals("jv220")){
-    		
-    		processCloseBundleJv220Msg(bundle, bind);
-    		
+    	}else{
+        	
+        	TerminalBindRepeaterPO bind = terminalBindRepeaterDao.findByBundleId(bundleId);
+        	
+        	if(bind == null) throw new Exception(bundle.getBundle_id() + "该终端未绑定转发器！");
+        	
+        	if(bind.getDeviceModel().equals("jv210")){
+        		
+        		processCloseBundleJv210Msg(bundle, bind);
+        		
+        	}else if(bind.getDeviceModel().equals("jv220")){
+        		
+        		processCloseBundleJv220Msg(bundle, bind);
+        		
+        	}
     	}
-    	
     }
     
     /**处理close_bundle信息的jv210类型信息
@@ -2013,7 +2023,7 @@ public class ProcessReceivedMsg {
     
     /**处理pullData线程
      * @throws Exception */
-    private void processPullDataRunable(String dstId, String srcId, String srcBundleId, String srcChannelId,
+    public void processPullDataRunable(String dstId, String srcId, String srcBundleId, String srcChannelId,
 			String dstBundleId, String dstChannelId, String ip, String port) throws Exception{
     	
     	Thread pullDataThread = new Thread(new Runnable() {

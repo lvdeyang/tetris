@@ -20,6 +20,7 @@ import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.common.service.LockService;
 import com.sumavision.tetris.business.yjgb.vo.CodecParamVO;
+import com.sumavision.tetris.business.yjgb.vo.FileVO;
 import com.sumavision.tetris.business.yjgb.vo.InputParamVO;
 import com.sumavision.tetris.business.yjgb.vo.MimsVO;
 import com.sumavision.tetris.business.yjgb.vo.OutParamVO;
@@ -28,6 +29,8 @@ import com.sumavision.tetris.business.yjgb.vo.StreamTranscodingVO;
 import com.sumavision.tetris.business.yjgb.vo.TaskVO;
 import com.sumavision.tetris.capacity.bo.input.CommonTsBO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
+import com.sumavision.tetris.capacity.bo.input.InputFileBO;
+import com.sumavision.tetris.capacity.bo.input.InputFileObjectBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramAudioBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramVideoBO;
@@ -57,6 +60,7 @@ import com.sumavision.tetris.capacity.bo.task.ResampleBO;
 import com.sumavision.tetris.capacity.bo.task.ScaleBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
+import com.sumavision.tetris.capacity.bo.task.X264BO;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
@@ -129,23 +133,32 @@ public class TransformService {
 			isRecord = record.isRecord();
 		}
 		
-		String sourceUrl = streamTranscodingVO.getAssetUrl();
-		if(!sourceUrl.startsWith("udp")){
-			throw new BaseException(StatusCode.FORBIDDEN, "源地址不是udp！");
+		String uniq = "";
+		
+		if(streamTranscodingVO.getFiles() != null && streamTranscodingVO.getFiles().size() > 0){
+			
+			uniq = uuid;
+			
+		}else{
+			
+			String sourceUrl = streamTranscodingVO.getAssetUrl();
+			if(!sourceUrl.startsWith("udp")){
+				throw new BaseException(StatusCode.FORBIDDEN, "源地址不是udp！");
+			}
+			
+			String sourceIp = sourceUrl.split("@")[1].split(":")[0];
+			
+			Long sourcePort = Long.valueOf(sourceUrl.split("@")[1].split(":")[1]);
+			
+			uniq = new StringBufferWrapper().append(sourceIp)
+										    .append("@")
+										    .append(sourcePort)
+										    .toString();
 		}
-		
-		String sourceIp = sourceUrl.split("@")[1].split(":")[0];
-		
-		Long sourcePort = Long.valueOf(sourceUrl.split("@")[1].split(":")[1]);
-		
-		String uniq = new StringBufferWrapper().append(sourceIp)
-											   .append("@")
-											   .append(sourcePort)
-											   .toString();
 		
 		String recordName = new StringBufferWrapper().append("/home/hls/").append(uuid).toString();
 			
-		save(uuid, uniq, BusinessType.YJGB, isRecord, recordName, record.getRecordCallback(), streamTranscodingVO);
+		save(uuid, uniq, BusinessType.YJGB, isRecord, recordName, record == null? null: record.getRecordCallback(), streamTranscodingVO);
 		
 		return uuid;
 		
@@ -613,72 +626,89 @@ public class TransformService {
 												  .append(id)
 												  .toString();
 		
-		Integer bePcm = streamTranscodingVO.getBePCM();
-		String sourceUrl = streamTranscodingVO.getAssetUrl();
-		
 		InputBO inputBO = new InputBO();
-		if(bePcm.equals(0)){
+		if(streamTranscodingVO.getFiles() != null && streamTranscodingVO.getFiles().size() > 0){
 			
-			//udp_ts			
-			String sourceIp = sourceUrl.split("@")[1].split(":")[0];
-			
-			int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
-			
-			CommonTsBO udp_ts = new CommonTsBO().setSource_ip(sourceIp)
-												.setSource_port(sourcePort);
-			
-			inputBO.setId(inputId)
-				   .setUdp_ts(udp_ts);
-		}else if(bePcm.equals(1)){
-			
-			//udp_pcm
-			String sourceIp = sourceUrl.split("@")[1].split(":")[0];
-			
-			int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
-			
-			InputParamVO inputParam = streamTranscodingVO.getInputParam();
-			
-			String sampleFmt = "u8";
-			if(inputParam.getSourPrecision().equals(8l)){
-				sampleFmt = "u8";
-			}else if(inputParam.getSourPrecision().equals(16l)){
-				sampleFmt = "s16";
+			InputFileBO file = new InputFileBO();
+			file.setFile_array(new ArrayList<InputFileObjectBO>());
+			for(FileVO fileVO: streamTranscodingVO.getFiles()){
+				InputFileObjectBO fileObject = new InputFileObjectBO().setUrl(fileVO.getUrl())
+																	  .setLoop_count(fileVO.getCount())
+																	  .setStart_ms(fileVO.getSeek() == null?0: fileVO.getSeek().intValue());
+				
+				file.getFile_array().add(fileObject);
 			}
 			
-			String channelLayout = "mono";
-			if(inputParam.getSourChannel().equals(1l)){
-				channelLayout = "mono";
-			}else if(inputParam.getSourChannel().equals(2l)){
-				channelLayout = "stereo";
+			inputBO.setId(inputId)
+		           .setFile(file);
+			
+		}else{
+			Integer bePcm = streamTranscodingVO.getBePCM();
+			String sourceUrl = streamTranscodingVO.getAssetUrl();
+			
+			if(bePcm.equals(0)){
+				
+				//udp_ts			
+				String sourceIp = sourceUrl.split("@")[1].split(":")[0];
+				
+				int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
+				
+				CommonTsBO udp_ts = new CommonTsBO().setSource_ip(sourceIp)
+													.setSource_port(sourcePort);
+				
+				inputBO.setId(inputId)
+					   .setUdp_ts(udp_ts);
+			}else if(bePcm.equals(1)){
+				
+				//udp_pcm
+				String sourceIp = sourceUrl.split("@")[1].split(":")[0];
+				
+				int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
+				
+				InputParamVO inputParam = streamTranscodingVO.getInputParam();
+				
+				String sampleFmt = "u8";
+				if(inputParam.getSourPrecision().equals(8l)){
+					sampleFmt = "u8";
+				}else if(inputParam.getSourPrecision().equals(16l)){
+					sampleFmt = "s16";
+				}
+				
+				String channelLayout = "mono";
+				if(inputParam.getSourChannel().equals(1l)){
+					channelLayout = "mono";
+				}else if(inputParam.getSourChannel().equals(2l)){
+					channelLayout = "stereo";
+				}
+				
+				UdpPcmBO udp_pcm = new UdpPcmBO().setSource_ip(sourceIp)
+												 .setSource_port(sourcePort)
+												 .setSample_rate(inputParam.getSourSample().intValue())
+												 .setSample_fmt(sampleFmt)
+												 .setChannel_layout(channelLayout);
+				
+				inputBO.setId(inputId)
+					   .setUdp_pcm(udp_pcm);
+				
+			}else if(bePcm.equals(2)){
+				
+				//TODO：暂时不管
+			}else if(bePcm.equals(3)){
+				
+				//rtp_es
+				String sourceIp = sourceUrl.split("@")[1].split(":")[0];
+				
+				int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
+				
+				String type = streamTranscodingVO.getMediaType();
+				
+				RtpEsBO rtp_es = new RtpEsBO().setLocal_port(sourcePort)
+						 					  .setType(type)
+						 					  .setCodec("auto");
+				
+				inputBO.setId(inputId)
+					   .setRtp_es(rtp_es);
 			}
-			
-			UdpPcmBO udp_pcm = new UdpPcmBO().setSource_ip(sourceIp)
-											 .setSource_port(sourcePort)
-											 .setSample_rate(inputParam.getSourSample().intValue())
-											 .setSample_fmt(sampleFmt)
-											 .setChannel_layout(channelLayout);
-			
-			inputBO.setId(inputId)
-				   .setUdp_pcm(udp_pcm);
-			
-		}else if(bePcm.equals(2)){
-			
-			//TODO：暂时不管
-		}else if(bePcm.equals(3)){
-			
-			//rtp_es
-			String sourceIp = sourceUrl.split("@")[1].split(":")[0];
-			
-			int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
-			
-			String type = streamTranscodingVO.getMediaType();
-			
-			RtpEsBO rtp_es = new RtpEsBO().setLocal_port(sourcePort)
-					 					  .setType(type)
-					 					  .setCodec("auto");
-			
-			inputBO.setId(inputId)
-				   .setRtp_es(rtp_es);
 		}
 		
 		if(streamTranscodingVO.getProgNum() == null){
@@ -738,6 +768,12 @@ public class TransformService {
 		
 		List<TaskBO> tasks = new ArrayList<TaskBO>();
 		
+		CodecParamVO codecParam = streamTranscodingVO.getTaskVO().getCodecParam();
+		Long maxBitrate = null;
+		if(codecParam.getVbitrate() != null || codecParam.getAbitrate() != null){
+			maxBitrate = (long) (((codecParam.getVbitrate()==null?0: codecParam.getVbitrate()) + (codecParam.getAbitrate() == null?0l: codecParam.getAbitrate())) * 1.5);
+		}
+		
 		/*******
 		 * 音频  *
 		 *******/
@@ -757,8 +793,6 @@ public class TransformService {
 				                       .setType("audio")
 				                       .setRaw_source(audioSource)
 				                       .setEncode_array(new ArrayList<EncodeBO>());
-		
-		CodecParamVO codecParam = streamTranscodingVO.getTaskVO().getCodecParam();
 		
 		EncodeBO audioEncode = new EncodeBO().setEncode_id(encodeAudioId)
 											 .setProcess_array(new ArrayList<PreProcessingBO>());
@@ -845,7 +879,8 @@ public class TransformService {
 			if(codecParam.getVcodec().equals("0")){
 				
 				Mpeg2BO mpeg2 = new Mpeg2BO().setBitrate(codecParam.getVbitrate() == null? 1500000: codecParam.getVbitrate().intValue())
-											 .setRatio(codecParam.getVratio() == null? "16:9": codecParam.getVratio())
+											 .setMax_bitrate(maxBitrate == null? 1500000: maxBitrate.intValue())
+		              						 .setRatio(codecParam.getVratio() == null? "16:9": codecParam.getVratio())
 											 .setWidth(width)
 											 .setHeight(height);
 				videoEncode.setMpeg2(mpeg2);
@@ -854,9 +889,11 @@ public class TransformService {
 			}else if(codecParam.getVcodec().equals("1")){
 				
 				H264BO h264 = new H264BO().setBitrate(codecParam.getVbitrate() == null? 1500000: codecParam.getVbitrate().intValue())
+										  .setMax_bitrate(maxBitrate == null? 1500000: maxBitrate.intValue())
 										  .setRatio(codecParam.getVratio() == null? "16:9": codecParam.getVratio())
 										  .setWidth(width)
-										  .setHeight(height);
+										  .setHeight(height)
+										  .setX264(new X264BO());
 				videoEncode.setH264(h264);
 				
 			}
@@ -888,6 +925,12 @@ public class TransformService {
 		List<OutputBO> outputs = new ArrayList<OutputBO>();
 		
 		TaskVO task = streamTranscodingVO.getTaskVO();
+		
+		CodecParamVO codecParam = streamTranscodingVO.getTaskVO().getCodecParam();
+		Long outputBitrate = null;
+		if(codecParam.getVbitrate() != null || codecParam.getAbitrate() != null){
+			outputBitrate = (long) (((codecParam.getVbitrate()==null?0: codecParam.getVbitrate()) + (codecParam.getAbitrate() == null?0l: codecParam.getAbitrate())) * 1.5);
+		}
 		
 		List<OutParamVO> outputParams = task.getOutParam();
 		
@@ -938,6 +981,7 @@ public class TransformService {
 																	.setIp(outputIp)
 																	.setPort(outputPort)
 																	.setLocal_ip(outParam.getLocalIp() == null?capacityProps.getIp(): outParam.getLocalIp())
+																	.setBitrate(outputBitrate == null?8000000: outputBitrate.intValue())
 																	.setProgram_array(new ArrayList<OutputProgramBO>());
 					
 					OutputProgramBO program = new OutputProgramBO().setProgram_number(outParam.getProgNum() == null?301: outParam.getProgNum())

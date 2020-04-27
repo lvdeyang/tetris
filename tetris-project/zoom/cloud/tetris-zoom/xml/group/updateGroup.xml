@@ -1,0 +1,33 @@
+<control>
+	<commandname>group</commandname>
+	<operation>update</operation>
+	<seq>1882caf88e2411e8b445060400ef1253</seq>
+	<ts>1533630770000</ts>
+	<gid>123</gid>
+	<subject>XX项目第三次研讨会</subject>
+	<bizinfo>
+		<biztype>cnf</biztype>
+		<bizname>研发一组</bizname>
+		<creatorid>00000000001</creatorid>
+		<topid>00000000001</topid>
+		<mlist>
+			<minfo>
+				<mid>00000000001</mid>
+				<mname>li</mname>
+				<mtype>usr</mtype>
+			</minfo>
+			<minfo>
+				<mid>00000000002</mid>
+				<mname>张三</mname>
+				<mtype>usr</mtype>
+				<pid>00000000001</pid>
+			</minfo>
+			<minfo>
+				<mid>00000000003</mid>
+				<mname>李四</mname>
+				<mtype>usr</mtype>
+				<pid>00000000001</pid>
+			</minfo>
+		</mlist>
+	</bizinfo>
+</control>

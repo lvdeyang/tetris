@@ -55,7 +55,7 @@
 			<groupId>com.sumavision.tetris</groupId>
 			<artifactId>tetris-user-feign</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-			<scope>test</scope>
+			<scope>compile</scope>
 		</dependency>
 		
 		<!-- menu-feign 

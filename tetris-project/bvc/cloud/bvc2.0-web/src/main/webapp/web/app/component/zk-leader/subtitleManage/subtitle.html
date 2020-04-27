@@ -1,0 +1,82 @@
+<div class="subtitle">
+    <el-button type="primary" @click="dialogFormVisible=true">添加字幕模板</el-button>
+    <!--内容-->
+    <div style="position:absolute; top:40px; left:0; bottom:50px; right:0;overflow: hidden">
+        <el-table
+                :data="pageData"
+                style="width: 100%"
+                height="95%">
+            <el-table-column
+                    prop="name"
+                    label="名称">
+            </el-table-column>
+            <el-table-column
+                    prop="font"
+                    label="字体">
+                <template></template>
+            </el-table-column>
+            <el-table-column
+                    prop="height"
+                    label="字号">
+            </el-table-column>
+            <el-table-column
+                    prop="color"
+                    label="颜色">
+            </el-table-column>
+            <el-table-column
+                    prop="content"
+                    label="内容">
+            </el-table-column>
+            <el-table-column
+                    label="操作"
+                    width="150">
+                <template slot-scope="scope">
+                    <el-button type="warning" size="mini" icon="el-icon-edit" @click="editRow(scope.row)"></el-button>
+                    <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteRow(scope.row.id)"></el-button>
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination background @current-change="currentChange" :current-page="currentPage"
+                       :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
+                       :total="data.length">
+        </el-pagination>
+    </div>
+    <!--底部按钮-->
+    <div style="height:50px; position:absolute; left:0; bottom:0; width:100%; text-align:right; padding-top:9px; padding-right:10px; box-sizing:border-box;">
+        <el-button size="small" @click="cancel" type="warning">关闭页面</el-button>
+    </div>
+
+    <!--添加对话框-->
+    <el-dialog title="字幕模板" :visible.sync="dialogFormVisible">
+        <el-form :model="form">
+            <el-form-item label="字幕名称" :label-width="formLabelWidth">
+                <el-input v-model="form.name"></el-input>
+            </el-form-item>
+            <el-form-item label="字体" :label-width="formLabelWidth">
+                <el-select v-model="form.font" placeholder="请选择字体">
+                    <el-option v-for="(item,index) in fontData" :label="item" :key="index" :value="item"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="字号" :label-width="formLabelWidth">
+                <el-input-number v-model="form.fontsize" :min="0" :max="100"></el-input-number>
+            </el-form-item>
+            <el-form-item label="字体颜色" :label-width="formLabelWidth">
+                <el-color-picker v-model="form.color"></el-color-picker>
+            </el-form-item>
+            <el-form-item label="字幕内容" :label-width="formLabelWidth">
+                <el-input
+                        type="textarea"
+                        :rows="2"
+                        placeholder="请输入内容"
+                        v-model="form.textarea">
+                </el-input>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button v-if="!btnShow" type="primary" @click="addSubtitle">添 加</el-button>
+            <el-button v-if="btnShow" type="primary" @click="editSubtitle">修 改</el-button>
+        </div>
+    </el-dialog>
+</div>

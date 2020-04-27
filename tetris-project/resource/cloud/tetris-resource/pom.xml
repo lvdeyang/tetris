@@ -76,11 +76,11 @@
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
         </dependency>
         
-       	<dependency>
+       	<!-- <dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
 			<optional>true</optional>
-		</dependency>
+		</dependency> -->
 		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -136,6 +136,13 @@
 		    <version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
+		<!-- websocket-message-feign -->
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-websocket-message-feign</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
+		
 		<!-- tetris-ui -->
 		<dependency>
 			<groupId>com.sumavision.tetris</groupId>
@@ -143,27 +150,12 @@
     		<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
-		<!-- activeMq相关 -->
 		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-core</artifactId>
-			<version>5.7.0</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.apache.activemq/activemq-pool -->
-		<dependency>
-			<groupId>org.apache.activemq</groupId>
-			<artifactId>activemq-pool</artifactId>
-			<version>5.15.1</version>
+			<groupId>com.sumavision.tetris</groupId>
+			<artifactId>tetris-activemq-service</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 		
-		<!-- ldap -->
-		<dependency>
-	  	  <groupId>org.springframework.ldap</groupId>
-	      <artifactId>spring-ldap-core</artifactId>
-	      <version>2.0.4.RELEASE</version>
-	 	</dependency>
-	 	
         <dependency>
 		   <groupId>com.sumavision.tetris</groupId>
 		   <artifactId>tetris-common</artifactId>
@@ -181,11 +173,24 @@
 		   <artifactId>tetris-orm</artifactId>
 		   <version>0.0.1-SNAPSHOT</version>
 		</dependency>
+		
+		<dependency>
+		   <groupId>com.sumavision.tetris</groupId>
+		   <artifactId>tetris-ldap</artifactId>
+		   <version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	 	
 	 	<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-csv</artifactId>
 			<version>1.8</version>
+		</dependency>
+		
+		<!-- ssh2 -->
+		<dependency>
+		    <groupId>com.jcraft</groupId>
+		    <artifactId>jsch</artifactId>
+		    <version>0.1.55</version>
 		</dependency>
 		
     </dependencies>

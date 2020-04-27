@@ -6,27 +6,41 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.ResourceIdListBO;
+import com.suma.venus.resource.base.bo.RoleAndResourceIdBO;
 import com.suma.venus.resource.base.bo.RoleBO;
+import com.suma.venus.resource.base.bo.UnbindResouceBO;
+import com.suma.venus.resource.base.bo.UnbindRolePrivilegeBO;
 import com.suma.venus.resource.base.bo.UserAndResourceIdBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.dao.PrivilegeDAO;
+import com.suma.venus.resource.dao.RolePrivilegeMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.PrivilegePO;
+import com.suma.venus.resource.pojo.PrivilegePO.EPrivilegeType;
+import com.suma.venus.resource.pojo.RolePrivilegeMap;
+import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenQuery;
+import com.sumavision.tetris.auth.token.TokenVO;
+import com.sumavision.tetris.business.role.BusinessRoleQuery;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
+import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserStatus;
 import com.sumavision.tetris.user.UserVO;
 
 @Service
@@ -40,7 +54,13 @@ public class UserQueryService {
 	private SystemRoleQuery roleQuery;
 	
 	@Autowired
+	private BusinessRoleQuery businessRoleQuery;
+	
+	@Autowired
 	private PrivilegeDAO privilegeDao;
+	
+	@Autowired
+	private RolePrivilegeMapDAO rolePrivilegeMapDao;
 	
 	@Autowired
 	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
@@ -50,6 +70,12 @@ public class UserQueryService {
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
+	private TokenQuery tokenQuery;
+	
+	@Autowired
+	private WorkNodeService workNodeService;
 	
 	/**
 	 * 当前用户<br/>
@@ -93,8 +119,12 @@ public class UserQueryService {
 			for(FolderUserMap map: folderUserMaps){
 				if(user.getId().equals(map.getUserId())){
 					user.setFolderId(map.getFolderId());
-					user.setFolderIndex(map.getFolderIndex().intValue());
+					user.setFolderIndex(map.getFolderIndex() != null? map.getFolderIndex().intValue(): 0);
 					user.setFolderUuid(map.getFolderUuid());
+					user.setCreater(map.getCreator());
+					if("ldap".equals(map.getCreator())){
+						user.setLogined(map.isUserStatus());
+					}
 					break;
 				}
 			}
@@ -179,6 +209,19 @@ public class UserQueryService {
 		
 		UserVO user = userQuery.queryUserByNo(userNo);
 		
+		if(UserClassify.LDAP.toString().equals(user.getClassify())){
+			FolderUserMap userStatus = folderUserMapDao.findByUserId(user.getId());
+			user.setStatus(userStatus==null?UserStatus.OFFLINE.toString():(userStatus.isUserStatus()?UserStatus.ONLINE.toString():UserStatus.OFFLINE.toString()));
+		}else{
+			List<TokenVO> tokens = tokenQuery.findByUserIdInAndType(new ArrayListWrapper<Long>().add(user.getId()).getList(), TerminalType.QT_ZK);
+			if(tokens==null || tokens.size()<=0){
+				user.setStatus(UserStatus.OFFLINE.toString());
+			}else{
+				TokenVO token = tokens.get(0);
+				user.setStatus(token.getStatus());
+			}
+		}
+		
 		BundlePO encoder = bundleDao.findByUserIdAndDeviceModel(user.getId(), "encoder");
 		
 		EncoderDecoderUserMap map = encoderDecoderUserMapDao.findByUserId(user.getId());
@@ -208,6 +251,10 @@ public class UserQueryService {
 			userBO.setFolderId(map.getFolderId());
 			userBO.setFolderIndex(map.getFolderIndex().intValue());
 			userBO.setFolderUuid(map.getFolderUuid());
+			userBO.setCreater(map.getCreator());
+			if("ldap".equals(map.getCreator())){
+				userBO.setLogined(map.isUserStatus());
+			}
 		}
 		
 		return userBO;
@@ -242,6 +289,10 @@ public class UserQueryService {
 					user.setFolderId(map.getFolderId());
 					user.setFolderIndex(map.getFolderIndex().intValue());
 					user.setFolderUuid(map.getFolderUuid());
+					user.setCreater(map.getCreator());
+					if("ldap".equals(map.getCreator())){
+						user.setLogined(map.isUserStatus());
+					}
 					break;
 				}
 			}
@@ -262,7 +313,31 @@ public class UserQueryService {
 		
 		List<UserVO> users = userQuery.queryUsersByRole(roleId);
 		
-		return transferUserVo2Bo(users);
+		List<UserBO> allUsers = transferUserVo2Bo(users);
+		
+		List<Long> userIds = new ArrayList<Long>();
+		for(UserBO user: allUsers){
+			userIds.add(user.getId());
+		}
+		
+		//给用户赋予文件夹信息
+		List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(userIds);
+		for(UserBO user: allUsers){
+			for(FolderUserMap map: folderUserMaps){
+				if(user.getId().equals(map.getUserId())){
+					user.setFolderId(map.getFolderId());
+					user.setFolderIndex(map.getFolderIndex().intValue());
+					user.setFolderUuid(map.getFolderUuid());
+					user.setCreater(map.getCreator());
+					if("ldap".equals(map.getCreator())){
+						user.setLogined(map.isUserStatus());
+					}
+					break;
+				}
+			}
+		}
+		
+		return allUsers;
 	}
 	
 	/**
@@ -388,6 +463,7 @@ public class UserQueryService {
 			local_encoder = new EncoderBO();
 			local_encoder.setEncoderId(encoder.getBundleId());
 			local_encoder.setEncoderName(encoder.getBundleName());
+			local_encoder.setEncoderNo(encoder.getUsername());
 			local_encoder.setEncoderType(EncoderBO.ENCODER_TYPE.fromName(encoder.getDeviceModel()));
 		}
 		
@@ -407,8 +483,8 @@ public class UserQueryService {
 		userBO.setPhone(userVO.getMobile());
 		userBO.setEmail(userVO.getMail());
 		userBO.setCreateTime(userVO.getUpdateTime());
-		userBO.setCreater("");
-		userBO.setLogined((userVO.getStatus() == null || userVO.getStatus() == "OFFLINE")? false: true);
+		userBO.setCreater(userVO.getClassify().toString());
+		userBO.setLogined((userVO.getStatus() == null || "OFFLINE".equals(userVO.getStatus()))? false: true);
 		userBO.setUserNo(userVO.getUserno());
 		userBO.setLocal_encoder(local_encoder);
 		userBO.setExternal_encoder(Jv210_encoder);
@@ -479,6 +555,241 @@ public class UserQueryService {
 		}
 		
 		return roleBOs;
+	}
+	
+	/**
+	 * 导入用户权限绑定<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月3日 上午10:24:07
+	 * @param String userno 用户号码
+	 * @param List<String> roleIds 角色ids
+	 */
+	public void importUserPrivilage(String userno, List<String> roleIds) throws Exception{
+		
+		List<String> toBindChecks = new ArrayList<String>();
+		toBindChecks.add(userno + "-r");
+		toBindChecks.add(userno + "-w");
+		toBindChecks.add(userno + "-hj");
+		toBindChecks.add(userno + "-zk");
+		
+		for(String roleId: roleIds){
+			RoleAndResourceIdBO bo = new RoleAndResourceIdBO();
+			bo.setRoleId(Long.valueOf(roleId));
+			bo.setResourceCodes(new ArrayListWrapper<String>().addAll(toBindChecks).getList());
+			
+			bindRolePrivilege(bo);
+		}
+
+	}
+	
+	/**
+	 * 角色绑定权限<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月26日 下午2:00:49
+	 * @param RoleAndResourceIdBO param
+	 * @return boolean
+	 */
+	public boolean bindRolePrivilege(RoleAndResourceIdBO param) throws Exception{
+		
+		if (null == param.getRoleId() || param.getRoleId() == 0l) {
+			return false;
+		}
+
+		if (null == param.getResourceCodes() || param.getResourceCodes().isEmpty()) {
+			return false;
+		}
+
+		//TODO: feign中加
+//		RolePO role = roleService.findById(param.getRoleId());
+//		if (null == role) {
+//			return false;
+//		}
+		List<String> resources = new ArrayList<String>();
+		for (String resource : param.getResourceCodes()) {
+			resources.add(resource);
+		}
+		
+		List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resources);
+		
+		// 先保存权限
+		List<RolePrivilegeMap> maps = new ArrayList<RolePrivilegeMap>();
+		for (String resource : param.getResourceCodes()) {
+			PrivilegePO privilege = null;
+			for(PrivilegePO _privilege: privileges){
+				if(_privilege.getResourceIndentity().equals(resource)){
+					privilege = _privilege;
+					break;
+				}
+			}
+			if (null == privilege) {
+				PrivilegePO p = new PrivilegePO();
+				p.setbEdit(false);
+				p.setName("roleId-" + param.getRoleId() + "-privilege-" + resource);
+				p.setpCode("customcode");
+				p.setPrivilegeType(EPrivilegeType.CUSTOM);
+				p.setResourceIndentity(resource);
+				privilegeDao.save(p);
+				privilege = p;
+				// 进行绑定
+			}
+			RolePrivilegeMap mapR = new RolePrivilegeMap();
+			mapR.setPrivilegeId(privilege.getId());
+			mapR.setRoleId(param.getRoleId());
+			maps.add(mapR);
+		}
+		
+		rolePrivilegeMapDao.save(maps);
+		
+		return true;
+	}
+	
+	/**
+	 * 角色解绑权限<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月26日 下午2:02:39
+	 */
+	public boolean unbindRolePrivilege(UnbindRolePrivilegeBO param) throws Exception{
+		
+		if (null == param.getRoleId() || param.getRoleId() == 0l) {
+			return false;
+		}
+
+		if (null == param.getUnbindPrivilege() || param.getUnbindPrivilege().isEmpty()) {
+			return false;
+		}
+
+		//TODO: 新feign里面写
+//		RolePO role = roleService.findById(param.getRoleId());
+//		if (null == role) {
+//			data.put(ERRMSG, "用户角色为空");
+//			data.put("result", false);
+//			return data;
+//		}
+		List<String> resources = new ArrayList<String>();
+		for (UnbindResouceBO resource : param.getUnbindPrivilege()) {
+			resources.add(resource.getResourceCode());
+		}
+		List<PrivilegePO> privileges = privilegeDao.findByResourceIndentityIn(resources);
+		List<Long> privilegeIds = new ArrayList<Long>();
+		for(PrivilegePO po: privileges){
+			privilegeIds.add(po.getId());
+		}
+		
+		List<RolePrivilegeMap> maps = rolePrivilegeMapDao.findByRoleIdAndPrivilegeIdIn(param.getRoleId(), privilegeIds);
+		if(maps != null && maps.size()>0){
+			rolePrivilegeMapDao.delete(maps);
+		}
+		
+		List<PrivilegePO> needDeletePrivileges = new ArrayList<PrivilegePO>();
+		for (UnbindResouceBO resource : param.getUnbindPrivilege()) {
+			for(PrivilegePO po: privileges){
+				if(po.getResourceIndentity().equals(resource.getResourceCode()) && resource.isbDelete()){
+					needDeletePrivileges.add(po);
+					break;
+				}
+			}
+		}
+		if(needDeletePrivileges.size() > 0){
+			privilegeDao.delete(needDeletePrivileges);
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * 查询用户私有角色<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月7日 下午2:14:40
+	 * @param Long userId 用户id
+	 * @return SystemRoleVO 角色
+	 */
+	public SystemRoleVO queryPrivateRoleId(Long userId) throws Exception{
+		
+		List<Long> userIds = new ArrayList<Long>();
+		userIds.add(userId);
+		
+		List<SystemRoleVO> roles = businessRoleQuery.findPrivateRoleByUserIds(userIds);
+		if(roles == null || roles.size() <= 0){
+			throw new BaseException(StatusCode.ERROR, "id为：" + userId + "的用户没有私有角色！");
+		}
+		
+		return roles.get(0);
+		
+	}
+	
+	/**
+	 * 批量给用户的播放器和编码器设置接入层<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 下午4:13:16
+	 * @param List<Long> userIds 用户ids
+	 */
+	public void setUserLayer(List<Long> userIds) throws Exception{
+		
+		List<WorkNodePO> layers = workNodeService.findByType(NodeType.ACCESS_JV210);
+		if(layers == null || layers.size() <= 0) return;
+		
+		List<BundlePO> bundles = bundleDao.findByUserIdIn(userIds);
+		
+		for(Long userId: userIds){
+			List<BundlePO> userBundles = new ArrayList<BundlePO>();
+			for(BundlePO bundle: bundles){
+				if(userId.equals(bundle.getUserId()) && (bundle.getDeviceModel().equals("player") || bundle.getDeviceModel().equals("encoder"))){
+					userBundles.add(bundle);
+				}
+			}
+			
+			WorkNodePO choseNode = choseWorkNode(layers, bundles);
+			for(BundlePO bundle: userBundles){
+				if(bundle.getAccessNodeUid() == null || StringUtils.isEmpty(bundle.getAccessNodeUid())){
+					bundle.setAccessNodeUid(choseNode.getNodeUid());
+				}
+			}
+			
+		}
+		
+		bundleDao.save(bundles);
+	}
+	
+	/**
+	 * 选择接入层<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 下午4:46:42
+	 * @param List<WorkNodePO> nodes 所有接入层
+	 * @param List<BundlePO> bundles 所有设备
+	 * @return WorkNodePO 接入层信息
+	 */
+	public WorkNodePO choseWorkNode(List<WorkNodePO> nodes, List<BundlePO> bundles) throws Exception{
+		
+		WorkNodePO chose = null;
+		
+		if(nodes != null && nodes.size() > 0){
+			List<String> layerIds = new ArrayList<String>();
+			for(WorkNodePO node: nodes){
+				layerIds.add(node.getNodeUid());
+			}
+			
+			int count = 0;
+			for(WorkNodePO node: nodes){
+				int number = 0;
+				for(BundlePO bundle: bundles){
+					if(bundle.getAccessNodeUid().equals(node.getNodeUid())){
+						number ++;
+					}
+				}
+				if(number >= count){
+					chose = node;
+					count = number;
+				}
+			}
+		}
+		
+		return chose;
 	}
 	
 }

@@ -64,7 +64,7 @@ public class MonitorOsdLayerService {
 		
 		Set<MonitorOsdLayerPO> existLayers = osd.getLayers();
 		if(existLayers!=null && existLayers.size()>7){
-			throw new MonitorOsdLayerMoreThanMaximumException(7);
+			throw new MonitorOsdLayerMoreThanMaximumException(8);
 		}
 		
 		MonitorOsdLayerPO layer = new MonitorOsdLayerPO();
