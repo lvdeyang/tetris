@@ -21,6 +21,7 @@ public enum PlayerBusinessType {
 //	DEMAND_FORWARD("会议转发点播", ""),//废弃
 	COMMAND_FORWARD_DEVICE("会议转发设备", "commandForwardDevice"),
 	COMMAND_FORWARD_FILE("会议转发文件", "commandForwardFile"),
+	COMMAND_FORWARD_USER("会议转发用户", "commandForwardUser"),
 	PLAY_COMMAND_RECORD("播放会议录像", "vodRecordFile"),
 	PLAY_FILE("点播文件", "vodResourceFile"),
 	PLAY_USER("点播用户", "vodUser"),

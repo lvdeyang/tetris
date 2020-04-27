@@ -83,7 +83,7 @@ public class MonitorVodController {
 		if(resources==null || resources.size()<=0) return _roots;
 		
 		for(VodResourceVO resource:resources){
-			folderIds.add(resource.getFolderId());
+			if(resource.getFolderId() != null) folderIds.add(resource.getFolderId());
 		}
 		
 		List<FolderPO> foldersTree = resourceQueryUtil.queryFoldersTree(folderIds);

@@ -14,6 +14,7 @@ import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
@@ -75,6 +76,9 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 	 ***视频源****
 	 ************/
 	
+	/** 源来源，本系统/外部系统ldap */
+	private OriginType srcOriginType = OriginType.INNER;
+	
 	/** 当视频源是设备时存设备id */
 	private String videoBundleId;
 	
@@ -124,6 +128,9 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 	/************
 	 ***视频目的***
 	 ************/
+	
+	/** 目的成员来源，本系统/外部系统ldap */
+	private OriginType dstOriginType = OriginType.INNER;
 	
 	/** 目标成员名称（用于显示） */
 	private String dstUserName;
@@ -252,6 +259,16 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 		this.playUrl = playUrl;
 	}
 
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "SRC_ORIGIN_TYPE")
+	public OriginType getSrcOriginType() {
+		return srcOriginType;
+	}
+
+	public void setSrcOriginType(OriginType srcOriginType) {
+		this.srcOriginType = srcOriginType;
+	}
+
 	@Column(name = "VIDEO_BUNDLE_ID")
 	public String getVideoBundleId() {
 		return videoBundleId;
@@ -376,6 +393,16 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 
 	public void setAudioChannelName(String audioChannelName) {
 		this.audioChannelName = audioChannelName;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "DST_ORIGIN_TYPE")
+	public OriginType getDstOriginType() {
+		return dstOriginType;
+	}
+
+	public void setDstOriginType(OriginType dstOriginType) {
+		this.dstOriginType = dstOriginType;
 	}
 
 	@Column(name = "DST_USER_NAME")
@@ -628,6 +655,8 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 	
 	//建立设备转发使用
 	public CommandGroupForwardDemandPO(
+			OriginType srcOriginType,
+			OriginType dstOriginType,
 			ForwardDemandBusinessType demandType,
 			ForwardDemandStatus executeStatus,
 			ForwardDstType forwardDstType,
@@ -667,6 +696,8 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 			Long osdId,
 			String osdUsername) throws Exception{
 		
+		this.srcOriginType = srcOriginType;
+		this.dstOriginType = dstOriginType;
 		this.demandType = demandType;
 		this.executeStatus = executeStatus;
 		this.forwardDstType = forwardDstType;
