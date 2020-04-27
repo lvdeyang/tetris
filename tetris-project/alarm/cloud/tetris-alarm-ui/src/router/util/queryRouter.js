@@ -18,10 +18,14 @@ let errorUrl = process.env.ALARM_ROOT + 'web/app/error/request-fail.html'
 // console.log('routerData=' + JSON.stringify(routerData))
 
 if (queryRouterUrl.indexOf('__requestIP__') !== -1) {
+  console.log(useLocalRoute)
+  console.log('queryRouterUrl=' + queryRouterUrl)
   queryRouterUrl = queryRouterUrl.replace('__requestIP__', requestIP)
+  console.log('queryRouterUrl=' + queryRouterUrl)
 }
 
 if (loginUrl.indexOf('__requestIP__') !== -1) {
+  console.log(useLocalRoute)
   loginUrl = loginUrl.replace('__requestIP__', requestIP)
 }
 

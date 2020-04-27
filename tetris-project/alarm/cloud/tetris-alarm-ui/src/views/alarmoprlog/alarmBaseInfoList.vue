@@ -392,7 +392,7 @@ export default {
           type: 'error'
         })
       } else {
-        if (res.sameNum != 0) {
+        if (res.sameNum !== 0) {
           this.$message({
             message: '导入' + res.importNum + '条告警基本信息, 另外' + res.sameNum + '条编码重复信息未导入',
             type: 'success'
