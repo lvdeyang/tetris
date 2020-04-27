@@ -346,6 +346,20 @@ public class RouterController {
 	}
 	
 	/**
+	 * 页脚发布字幕弹框<br/>
+	 * <b>作者:</b>yxc<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年04月26日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/publish/subtitle")
+	public ModelAndView zkLeaderPublishSubtitle(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/publish-subtitle/publishSubtitle");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 页脚云台控制<br/>
 	 * <b>作者:</b>yxc<br/>
 	 * <b>版本：</b>1.0<br/>

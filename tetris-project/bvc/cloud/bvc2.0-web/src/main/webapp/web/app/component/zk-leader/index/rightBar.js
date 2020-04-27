@@ -34,8 +34,10 @@ define([
                     batchVod: true,
                     //批量语音呼叫
                     batchIntercom: true,
-                    //进入指挥
+                    //是否可用进入指挥
                     enterCommand: true,
+                    //是否可用 进入会议
+                    enterMeet:true,
                     //添加指挥
                     addCommand: true,
                     //删除指挥
@@ -70,8 +72,10 @@ define([
                     commandRestart: true,
                     //指挥状态
                     isPause: false,
-                    //退出指挥
-                    exitCommand: true,
+                    //是否可点退出指挥按钮
+                    exitCommand: false,
+                    //是否可点 退出 会议
+                    exitMeet:false,
                     //发言
                     speak: true, //按钮是否显示
                     isSpeaking: false, //控制显示哪个按钮,是否正在发言
@@ -339,7 +343,6 @@ define([
                 self.buttons.batchCall = true;
                 self.buttons.batchVod = true;
                 self.buttons.batchIntercom = true;
-                self.buttons.enterCommand = false;
                 self.buttons.addCommand = true;
                 self.buttons.removeCommand = false;
             },
@@ -362,7 +365,6 @@ define([
                 self.buttons.batchCall = false;
                 self.buttons.batchVod = true;
                 self.buttons.batchIntercom = false;
-                self.buttons.enterCommand = false;
                 self.buttons.addCommand = false;
                 self.buttons.removeCommand = false;
             },
@@ -385,7 +387,6 @@ define([
                 self.buttons.batchCall = false;
                 self.buttons.batchVod = true;
                 self.buttons.batchIntercom = false;
-                self.buttons.enterCommand = false;
                 self.buttons.addCommand = false;
                 self.buttons.removeCommand = false;
             },
@@ -426,7 +427,6 @@ define([
                 self.buttons.batchCall = false;
                 self.buttons.batchVod = false;
                 self.buttons.batchIntercom = false;
-                self.buttons.enterCommand = false;
                 self.buttons.addCommand = false;
                 self.buttons.removeCommand = false;
             },
@@ -438,9 +438,7 @@ define([
                     if (data && data.length > 0) {
                         var commands = data[0].children;
                         if (commands && commands.length > 0) {
-                            for (var i = 0; i < commands.length; i++) {
-                                self.command.data.push(commands[i]);
-                            }
+                            self.command.data=commands;
                         }
                         if (typeof callback == 'function') {
                             callback();
@@ -685,7 +683,7 @@ define([
             },
             //------弹出的菜单上的点击事件 end -----
 
-            //点击 同意 进入指挥/会议
+            //点击 同意 进入指挥/会议,此版本不会走这
             enterCommand: function (commandIds, type) {
                 var self = this;
                 ajax.post('/command/basic/enter', {ids: $.toJSON(commandIds)}, function (data) {
@@ -1254,6 +1252,8 @@ define([
                         }
                         if (playerSettings.length > 0) {
                             self.qt.invoke('enterGroups', $.toJSON(playerSettings));
+                            self.buttons.exitCommand = true;
+                            self.buttons.enterCommand = false;
                         }
                         self.refreshCommand();
                     }
@@ -1305,7 +1305,6 @@ define([
                     if (self.differentiate === 2) {
                         param = 'meeting';
                     }
-                    self.command.data.splice(0, self.command.data.length);
                     //点击指挥\会议列表下拉框时，默认进行查询操作，实时显示已开启、停止的指挥\会议
                     self.refreshCommand(param, function () {
                         for (var i = 0; i < self.command.data.length; i++) {
@@ -1315,8 +1314,18 @@ define([
                                     name: self.command.data[i].name,
                                     status: "start",
                                     type: self.command.data[i].type,
-                                    creator: JSON.parse(self.command.data[i].param).creator
+                                    creator: JSON.parse(self.command.data[i].param).creator,
+                                    entered: JSON.parse(self.command.data[i].param).entered
                                 };
+                                if(JSON.parse(self.command.data[i].param).entered){
+                                    if(self.differentiate === 1){
+                                        self.buttons.exitCommand=true;
+                                        self.buttons.enterCommand=false;
+                                    }else{
+                                        self.buttons.exitMeet=true;
+                                        self.buttons.enterMeet=false;
+                                    }
+                                }
                                 break;
                             }
                         }
@@ -1362,7 +1371,6 @@ define([
                                         self.buttons.commandPause = true;
                                         self.buttons.isPause = false;
                                     }
-                                    self.buttons.exitCommand = true;
                                 } else {
                                     self.buttons.addMember = false;
                                     self.buttons.removeMember = false;
@@ -1378,7 +1386,6 @@ define([
                                     self.buttons.commandPause = false;
                                     self.buttons.commandRestart = false;
                                     self.buttons.isPause = false;
-                                    self.buttons.exitCommand = true;
                                 }
                                 if (data.status === 'remind') {
                                     var finded = false;
@@ -1822,11 +1829,11 @@ define([
                             self.refreshCommand("meeting");
                         });
                     } else {
-                        ajax.post('/command/basic/exit', {
+                        ajax.post('/command/basic/exit/apply', {
                             id: self.meet.current.id
                         }, function () {
                             self.qt.success('已向主席发出退出会议申请');
-                            self.agreeExitCommand=2;
+                            self.agreeExitCommand = 2;
                         });
                     }
                 } else {
@@ -1858,7 +1865,7 @@ define([
                             id: self.group.current.id
                         }, function () {
                             self.qt.success('已向主席发出退出指挥申请');
-                            self.agreeExitCommand=1;
+                            self.agreeExitCommand = 1;
                         });
                     }
                 }
@@ -1872,8 +1879,8 @@ define([
                 self.institution.select = [];
             },
             //发布字幕
-            publish:function () {
-                this.qt.window('/router//zk/leader/subtitle/layer',null,{width:'100%',height:'90%'});
+            publish: function () {
+                this.qt.window('/router//zk/leader/subtitle/layer', null, {width: '100%', height: '90%'});
             },
 
             //   ----------第三个tab相关的-----------------
@@ -1904,7 +1911,8 @@ define([
                 ajax.post('/command/basic/enter', {ids: $.toJSON([id])}, function (data) {
                     //进入他人会议
                     self.qt.linkedWebview('rightBar', {id: 'currentGroupChange', params: $.toJSON(data)});
-
+                    self.buttons.exitMeet = true;
+                    self.buttons.enterMeet = false;
                 });
             },
             //安排会议
@@ -1914,27 +1922,6 @@ define([
                     width: 1366,
                     height: 700
                 });
-            },
-            //悬浮按钮鼠标移动事件
-            itemMousemove: function (e) {
-                var odiv = e.target;        //获取目标元素
-
-                //算出鼠标相对元素的位置
-                var disY = e.clientY - odiv.offsetTop;
-                document.onmousemove = function (e) {       //鼠标按下并移动的事件
-                    //用鼠标的位置减去鼠标相对元素的位置，得到元素的位置
-                    var top = e.clientY - disY;
-                    //防止拖拽超过范围
-                    if (top <= 113 || top > 700) {
-                        return;
-                    }
-                    //移动当前元素
-                    odiv.style.top = top + 'px';
-                };
-                document.onmouseup = function (e) {
-                    document.onmousemove = null;
-                    document.onmouseup = null;
-                };
             },
             //申请发言
             applySpeak: function () {
@@ -2087,7 +2074,6 @@ define([
                         self.buttons.commandPause = true;
                         self.buttons.isPause = false;
                     }
-                    self.buttons.exitCommand = true;
                     self.buttons.speak = false;
                     self.buttons.meetBtn = true;
                 } else {
@@ -2105,7 +2091,6 @@ define([
                     self.buttons.commandPause = false;
                     self.buttons.commandRestart = false;
                     self.buttons.isPause = false;
-                    self.buttons.exitCommand = true;
                     self.buttons.speak = true;
                     self.buttons.meetBtn = false;
                 }
@@ -2152,7 +2137,6 @@ define([
                 self.refreshCommand(null, function () {
                     self.refreshEnteredGroups();
                 });
-                // self.refreshInstitution();
                 self.refreshInstitutionButtonAction();
 
                 //动态获取firsetMenu和footer的高度
@@ -2399,7 +2383,9 @@ define([
                     self.qt.info(e.businessInfo);
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('commandExit', e.splits);
-                        if(self.agreeExitCommand === 1){
+                        if (self.agreeExitCommand === 1) {
+                            self.buttons.exitCommand = false;
+                            self.buttons.enterCommand = true;
                             self.group.entered = self.group.entered.filter(function (value) {
                                 return value.id != self.group.current.id;
                             });
@@ -2411,7 +2397,9 @@ define([
                                 self.group.currentId = '';
                                 self.group.current = '';
                             }
-                        }else{
+                        } else {
+                            self.buttons.exitMeet=false;
+                            self.buttons.enterMeet=true;
                             for (var i = 0; i < self.meet.entered.length; i++) {
                                 self.meet.entered = self.meet.entered.filter(function (value) {
                                     return value.id != self.meet.current.id;
@@ -2419,7 +2407,9 @@ define([
                                 if (self.meet.entered.length > 0) {
                                     self.meet.currentId = self.meet.entered[0].id;
                                     self.meet.current = self.meet.entered[0];
-                                    self.currentGroupChange(self.meet.currentId);
+                                    setTimeout(function () {
+                                        self.currentGroupChange(self.meet.currentId);
+                                    },500)
                                 } else {
                                     self.meet.currentId = '';
                                     self.meet.current = '';
@@ -2433,7 +2423,14 @@ define([
                 self.qt.on('applyExitDisagree', function (e) {
                     var e = e.params;
                     self.qt.info(e.businessInfo);
-                    self.agreeExitCommand=0;
+                    self.agreeExitCommand = 0;
+                    if(self.differentiate === 1){
+                        self.buttons.exitCommand = true;
+                        self.buttons.enterCommand = false;
+                    }else{
+                        self.buttons.exitMeet=true;
+                        self.buttons.enterMeet=false;
+                    }
                 });
 
                 //通知 主席 同意/拒绝成员发言申请
@@ -2463,10 +2460,17 @@ define([
                             userIds: $.toJSON([ids[1]])
                         }, null);
                     }, function () {
+                        //主席界面销毁成员播放器
                         ajax.post('/command/basic/exit/apply/agree', {
-                            id: ids[0],
-                            userIds: $.toJSON([ids[1]])
-                        }, null);
+                                id: ids[0],
+                                userIds: $.toJSON([ids[1]])
+                            }, function (data) {
+                                self.currentGroupChange(self.meet.current.id);
+                                if (data && data.length > 0) {
+                                    self.qt.invoke('commandMemberDelete', data);
+                                }
+                            }, null, [403]
+                        );
                     });
                 });
 

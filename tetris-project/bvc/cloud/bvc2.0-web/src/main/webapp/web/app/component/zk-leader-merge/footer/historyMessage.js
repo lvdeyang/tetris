@@ -598,13 +598,13 @@ define([
 
                 self.qt.on('secretRefuse', function (e) {
                     e = e.params;
-                    self.qt.warning('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示：'+ e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial: e.serial}]));
                 });
 
                 self.qt.on('secretStop', function (e) {
                     e = e.params;
-                    self.qt.warning('业务提示', e.businessInfo);
+                    self.qt.warning('业务提示：'+ e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial: e.serial}]));
                 });
 

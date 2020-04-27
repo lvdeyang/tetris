@@ -67,6 +67,7 @@ define([
                     serial:self.dialog.decodeBind.serial,
                     bundleId:bundleId
                 }, function(data, status){
+                    console.log(data)
                     self.dialog.decodeBind.loading = false;
                     if(status!=200) return;
                     self.dialog.decodeBind.table.data.push({
@@ -75,6 +76,7 @@ define([
                     });
                     self.refreshDecodeBindTree();
                     self.dialog.decodeBind.tree.currentBundle = '';
+                    self.qt.linkedWebview('historyMessage',{id:'showBundleTitle', params:data});
                 }, null, [403, 404, 408, 409, 500]);
             },
             //删除事件
@@ -84,7 +86,7 @@ define([
                 ajax.post('/command/user/info/remove/player/cast/device', {
                     serial:self.dialog.decodeBind.serial,
                     bundleId:row.bundleId
-                }, function(){
+                }, function(data){
                     for(var i=0; i<self.dialog.decodeBind.table.data.length; i++){
                         if(self.dialog.decodeBind.table.data[i].bundleId == row.bundleId){
                             self.dialog.decodeBind.table.data.splice(i, 1);
@@ -92,6 +94,7 @@ define([
                         }
                     }
                     self.refreshDecodeBindTree();
+                    self.qt.linkedWebview('historyMessage',{id:'showBundleTitle', params:data});
                 });
             },
             //获取树形结构的数据

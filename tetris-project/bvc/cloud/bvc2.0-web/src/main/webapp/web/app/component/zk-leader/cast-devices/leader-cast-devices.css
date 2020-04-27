@@ -18,11 +18,16 @@ html, body{overflow:hidden;}
 }
 .treeContent{
     width: 370px;
-    height: 100%;
     border-right: 1px solid #1c3e5d;
     position: absolute;
     top: 50px;
+    bottom: 50px;
     left: 75px;
+    overflow: hidden;
+}
+
+.el-scrollbar__wrap{
+    overflow-x: hidden;
 }
 
 .el-tree{

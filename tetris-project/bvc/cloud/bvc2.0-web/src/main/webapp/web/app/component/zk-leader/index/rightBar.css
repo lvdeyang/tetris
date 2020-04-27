@@ -341,6 +341,11 @@ img {
     top: -3px;
     left: 10px;
 }
+.commandBtn .el-button--text{
+    position: unset;
+    margin-top: -20px;
+    font-size: 18px;
+}
 
 /*禁用的按钮都不显示*/
 .disable {
