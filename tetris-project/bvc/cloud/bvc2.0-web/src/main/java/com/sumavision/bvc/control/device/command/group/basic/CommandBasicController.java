@@ -784,7 +784,7 @@ public class CommandBasicController {
 		List<String> bundleIds = JSONArray.parseArray(src, String.class);
 		List<Long> userIds = JSONArray.parseArray(dst, Long.class);
 		
-		List<ForwardReturnBO> result = commandForwardServiceImpl.forwardDevice(Long.parseLong(id), bundleIds, userIds);
+		List<ForwardReturnBO> result = commandForwardServiceImpl.forward(Long.parseLong(id), null, bundleIds, userIds);
 		
 		return result;
 	}

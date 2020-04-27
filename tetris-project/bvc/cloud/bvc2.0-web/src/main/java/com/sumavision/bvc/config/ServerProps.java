@@ -28,6 +28,19 @@ public class ServerProps {
 	 */
 	@Value("${command.localPreviewMode}")
 	private int localPreviewMode;
+	
+	/** 2个ntp服务的IP和端口 */
+	@Value("${command.ntp1IP}")
+	private String ntp1IP;
+	
+	@Value("${command.ntp1Port}")
+	private String ntp1Port;
+	
+	@Value("${command.ntp2IP}")
+	private String ntp2IP;
+	
+	@Value("${command.ntp2Port}")
+	private String ntp2Port;
 
 	public String getId() {
 		return id;
@@ -67,6 +80,38 @@ public class ServerProps {
 
 	public void setLocalPreviewMode(int localPreviewMode) {
 		this.localPreviewMode = localPreviewMode;
+	}
+
+	public String getNtp1IP() {
+		return ntp1IP;
+	}
+
+	public void setNtp1IP(String ntp1ip) {
+		ntp1IP = ntp1ip;
+	}
+
+	public String getNtp1Port() {
+		return ntp1Port;
+	}
+
+	public void setNtp1Port(String ntp1Port) {
+		this.ntp1Port = ntp1Port;
+	}
+
+	public String getNtp2IP() {
+		return ntp2IP;
+	}
+
+	public void setNtp2IP(String ntp2ip) {
+		ntp2IP = ntp2ip;
+	}
+
+	public String getNtp2Port() {
+		return ntp2Port;
+	}
+
+	public void setNtp2Port(String ntp2Port) {
+		this.ntp2Port = ntp2Port;
 	}
 	
 }

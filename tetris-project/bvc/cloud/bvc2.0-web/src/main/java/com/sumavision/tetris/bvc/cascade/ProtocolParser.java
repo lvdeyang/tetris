@@ -688,7 +688,7 @@ public class ProtocolParser {
 			}
 		}
 		
-		List<String> bundleIds = bundleDao.findBundleIdByBundleNumIn(mediaIds);
+		List<String> bundleIds = bundleDao.findBundleIdByUsernameIn(mediaIds);
 		
 		users = userQuery.findByUsernoIn(mediaIds);
 		List<Long> srcUserIds = new ArrayList<Long>();

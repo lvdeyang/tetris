@@ -250,4 +250,14 @@ public interface CapacityFeign {
 	public JSONObject changePushBackUp(@RequestParam("taskId") String taskId,
 									@RequestParam("index") String index) throws Exception;
 	
+	/**
+	 * 批量删除push任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月27日 上午11:19:10
+	 * @param String taskIds 任务ids
+	 */
+	@RequestMapping(value = "/push/task/feign/batch/delete/task")
+	public JSONObject batchDeletePushTask(@RequestParam("taskIds") String taskIds) throws Exception;
+	
 }

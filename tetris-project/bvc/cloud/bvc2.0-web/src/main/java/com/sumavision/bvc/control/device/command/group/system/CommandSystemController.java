@@ -2,6 +2,8 @@ package com.sumavision.bvc.control.device.command.group.system;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.system.AllForwardBO;
 import com.sumavision.bvc.device.command.system.CommandSystemServiceImpl;
@@ -20,6 +23,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @Controller
 @RequestMapping(value = "/command/system")
 public class CommandSystemController {
+	
+	@Autowired
+	private ServerProps serverProps;
 
 	@Autowired
 	private CommandSystemServiceImpl commandSystemServiceImpl;
@@ -76,6 +82,19 @@ public class CommandSystemController {
 		return JSON.toJSONString(new HashMapWrapper<String, Object>()
 				.put("systemTime", systemTime)
 				.getMap());
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/get/ntp/info")
+	public Object getNtpInfo(HttpServletRequest request) throws Exception{
+		Map<String, Object> map = new HashMapWrapper<String, Object>()
+				.put("ntp1IP", serverProps.getNtp1IP())
+				.put("ntp1Port", serverProps.getNtp1Port())
+				.put("ntp2IP", serverProps.getNtp2IP())
+				.put("ntp2Port", serverProps.getNtp2Port())
+				.getMap();
+		return JSON.toJSONString(map);
 	}
 	
 }

@@ -4140,7 +4140,7 @@ public class CommandBasicServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月22日
 	 * @param membersForEncoder 成员列表，仅用于呼叫编码器。仅应该在成员进会的时候呼叫，否则会多计数
-	 * @param demandsForEncoderAndForward 转发点播列表，用于呼叫其中的编码器，以及生成编码器给解码器的转发forwardSet
+	 * @param demandsForEncoderAndForward 【仅当目的成员是INNER的时候才会处理】转发点播列表，生成2条协议：呼叫其中的编码器，以及生成编码器给解码器的转发forwardSet
 	 * @param players 播放器列表，方法中会判断播放器的业务属性，如果不是实时流业务则不生成logic协议
 	 * @param forwards 转发列表，生成forwardSet，在逻辑层被转换为connectBundle
 	 * @param delForwards 删除转发列表，生成forwardDel，在逻辑层被转换为connectBundle
@@ -4221,27 +4221,53 @@ public class CommandBasicServiceImpl {
 		if(null == demandsForEncoderAndForward) demandsForEncoderAndForward = new ArrayList<CommandGroupForwardDemandPO>();
 		for(CommandGroupForwardDemandPO demand : demandsForEncoderAndForward){
 			//只对设备转发处理；文件转发没有编码器
-			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)){
-				//呼叫转发点播中的源的编码器
-				ConnectBundleBO connectVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-						          .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-								  .setLock_type("write")
-								  .setBundleId(demand.getVideoBundleId())
-								  .setLayerId(demand.getVideoLayerId())
-								  .setBundle_type(demand.getVideoBundleType());
-				ConnectBO connectVideoChannel = new ConnectBO().setChannelId(demand.getVideoChannelId())
-					   .setChannel_status("Open")
-					   .setBase_type("VenusVideoIn")
-					   .setCodec_param(codec);
-				connectVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectVideoChannel).getList());
-				logic.getConnectBundle().add(connectVideoBundle);
+			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)
+					&& !OriginType.OUTER.equals(demand.getDstOriginType())){
 				
-				if(demand.getAudioChannelId()!=null && !demand.getAudioChannelId().equals("")){
-						ConnectBO connectAudioChannel = new ConnectBO().setChannelId(demand.getAudioChannelId())
-																	   .setChannel_status("Open")
-																	   .setBase_type("VenusAudioIn")
-																	   .setCodec_param(codec);
-						connectVideoBundle.getChannels().add(connectAudioChannel);
+				//呼叫转发点播中的源的编码器
+				if(!OriginType.OUTER.equals(demand.getSrcOriginType())){
+					ConnectBundleBO connectVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+							          .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+									  .setLock_type("write")
+									  .setBundleId(demand.getVideoBundleId())
+									  .setLayerId(demand.getVideoLayerId())
+									  .setBundle_type(demand.getVideoBundleType());
+					ConnectBO connectVideoChannel = new ConnectBO().setChannelId(demand.getVideoChannelId())
+						   .setChannel_status("Open")
+						   .setBase_type("VenusVideoIn")
+						   .setCodec_param(codec);
+					connectVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectVideoChannel).getList());
+					logic.getConnectBundle().add(connectVideoBundle);
+					
+					if(demand.getAudioChannelId()!=null && !demand.getAudioChannelId().equals("")){
+							ConnectBO connectAudioChannel = new ConnectBO().setChannelId(demand.getAudioChannelId())
+																		   .setChannel_status("Open")
+																		   .setBase_type("VenusAudioIn")
+																		   .setCodec_param(codec);
+							connectVideoBundle.getChannels().add(connectAudioChannel);
+					}
+				}else{
+					//passby呼叫跨系统的源设备
+					if(localLayerId == null){
+						localLayerId = resourceRemoteService.queryLocalLayerId();
+					}
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+										 .setUuid(demand.getUuid())
+										 .setSrc_user(chairmanUserNum)//以主席的身份发起点播
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", demand.getVideoLayerId())
+												 											.put("bundleid", demand.getVideoBundleId())
+												 											.put("video_channelid", demand.getVideoChannelId())
+												 											.put("audio_channelid", demand.getAudioChannelId())
+												 											.getMap())
+										 .setDst_number(demand.getSrcCode())
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
 				}
 				
 				//转发
@@ -4258,38 +4284,36 @@ public class CommandBasicServiceImpl {
 		
 		//呼叫播放器
 		if(null == players) players = new ArrayList<CommandGroupUserPlayerPO>();
-//		for(CommandGroupMemberPO member : membersForEncoder){
-			for(CommandGroupUserPlayerPO player : players){
-				//播放文件和播放录像不需要呼叫
-				if(player.getPlayerBusinessType().equals(PlayerBusinessType.COMMAND_FORWARD_FILE)){
+		for(CommandGroupUserPlayerPO player : players){
+			//播放文件和播放录像不需要呼叫
+			if(player.getPlayerBusinessType().equals(PlayerBusinessType.COMMAND_FORWARD_FILE)){
 //						|| player.getPlayerBusinessType().equals(PlayerBusinessType.COMMAND_FORWARD_RECORD)){
-					continue;
-				}
-				ConnectBundleBO connectDstVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-//											 .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-										 .setLock_type("write")
-									     .setBundleId(player.getBundleId())
-									     .setLayerId(player.getLayerId())
-									     .setBundle_type(player.getBundleType());
-				ConnectBO connectDstVideoChannel = new ConnectBO().setChannelId(player.getVideoChannelId())
-						      .setChannel_status("Open")
-						      .setBase_type("VenusVideoOut")
-						      .setCodec_param(codec);
-				
-				//设置osd内容
-				
-				connectDstVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectDstVideoChannel).getList());
-				logic.getConnectBundle().add(connectDstVideoBundle);
-				
-				if(player.getAudioChannelId()!=null && player.getAudioChannelId()!=null){
-					ConnectBO connectDstAudioChannel = new ConnectBO().setChannelId(player.getAudioChannelId())
-																      .setChannel_status("Open")
-																      .setBase_type("VenusAudioOut")
-																      .setCodec_param(codec);					
-					connectDstVideoBundle.getChannels().add(connectDstAudioChannel);
-				}
+				continue;
 			}
-//		}
+			ConnectBundleBO connectDstVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+//											 .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+									 .setLock_type("write")
+								     .setBundleId(player.getBundleId())
+								     .setLayerId(player.getLayerId())
+								     .setBundle_type(player.getBundleType());
+			ConnectBO connectDstVideoChannel = new ConnectBO().setChannelId(player.getVideoChannelId())
+					      .setChannel_status("Open")
+					      .setBase_type("VenusVideoOut")
+					      .setCodec_param(codec);
+			
+			//设置osd内容
+			
+			connectDstVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectDstVideoChannel).getList());
+			logic.getConnectBundle().add(connectDstVideoBundle);
+			
+			if(player.getAudioChannelId()!=null && player.getAudioChannelId()!=null){
+				ConnectBO connectDstAudioChannel = new ConnectBO().setChannelId(player.getAudioChannelId())
+															      .setChannel_status("Open")
+															      .setBase_type("VenusAudioOut")
+															      .setCodec_param(codec);					
+				connectDstVideoBundle.getChannels().add(connectDstAudioChannel);
+			}
+		}
 		
 		//转发（对于目的在外部系统的转发，因为getDstVideoBundleId和getDstAudioBundleId都是null，所以不会生成转发协议）
 		if(null == forwards) forwards = new HashSet<CommandGroupForwardPO>();
@@ -4328,7 +4352,7 @@ public class CommandBasicServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月24日 上午11:14:28
 	 * @param membersForEncoder 成员列表，仅用于挂断编码器
-	 * @param demandsForEncoder 转发点播列表，仅用于挂断其中的编码器
+	 * @param demandsForEncoder 转发点播列表，仅用于挂断其中的编码器。仅当目的成员是INNER的时候才会处理
 	 * @param players 播放器列表，方法中会判断播放器的业务属性，如果不是实时流业务则不生成logic协议
 	 * @param codec
 	 * @param chairmanUserNum 主席的号码
@@ -4390,14 +4414,40 @@ public class CommandBasicServiceImpl {
 		if(null == demandsForEncoder) demandsForEncoder = new ArrayList<CommandGroupForwardDemandPO>();
 		for(CommandGroupForwardDemandPO demand : demandsForEncoder){
 			//只对设备转发处理；文件转发没有编码器
-			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)){
-				DisconnectBundleBO disconnectVideoBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-								       .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-									   .setBundleId(demand.getVideoBundleId())
-									   .setBundle_type(demand.getVideoBundleType())
-									   .setLayerId(demand.getVideoLayerId());
+			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)
+					&& !OriginType.OUTER.equals(demand.getDstOriginType())){
 				
-				logic.getDisconnectBundle().add(disconnectVideoBundle);
+				if(!OriginType.OUTER.equals(demand.getSrcOriginType())){
+					DisconnectBundleBO disconnectVideoBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+									       .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+										   .setBundleId(demand.getVideoBundleId())
+										   .setBundle_type(demand.getVideoBundleType())
+										   .setLayerId(demand.getVideoLayerId());
+					
+					logic.getDisconnectBundle().add(disconnectVideoBundle);
+				}else{
+					//passby停止跨系统的源设备
+					if(localLayerId == null){
+						localLayerId = resourceRemoteService.queryLocalLayerId();
+					}
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
+										 .setUuid(demand.getUuid())
+										 .setSrc_user(chairmanUserNum)//以主席的身份停止点播
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", demand.getVideoLayerId())
+												 											.put("bundleid", demand.getVideoBundleId())
+												 											.put("video_channelid", demand.getVideoChannelId())
+												 											.put("audio_channelid", demand.getAudioChannelId())
+												 											.getMap())
+										 .setDst_number(demand.getSrcCode())
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
+				}
 			}
 		}
 		
