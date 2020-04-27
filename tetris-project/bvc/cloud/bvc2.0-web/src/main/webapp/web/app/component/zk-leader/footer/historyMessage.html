@@ -32,7 +32,7 @@
             <img src="../../../../../images/zk-leader/msg.png" alt="">
         </div>
 
-        <div class="subtitle" title="字幕管理" @click="subtitleOpen">字幕管理</div>
+        <!--<div class="subtitle" title="字幕管理" @click="subtitleOpen">字幕管理</div>-->
 
         <div class="btn">
             <!--查看历史消息-->
@@ -41,10 +41,14 @@
             <div class="record" @click="recManage">录制任务</div>
             <!--下载任务-->
             <div class="download" @click="download">下载任务</div>
+
+            <!-- 字幕管理 -->
+            <div class="subtitle" title="字幕管理" @click="subtitleOpen">字幕管理</div>
+
             <!--换一批-->
             <div class="change" @click="replace">
                 <span class="icon-step-forward"></span>
-                <span>下一页</span>
+                <!--<span>下一页</span>-->
             </div>
         </div>
 
@@ -56,10 +60,14 @@
             </div>
         </div>
         <div class="sendMsg">
-            <input type="text" placeholder="发送内容" class="sendMsgContent" v-model="instantMessage" @keyup="keyCodeSend"/>
-            <button class="sendMsgBtn" @click="sendInstantMessage">发送</button>
+            <div style="width:100%; height:100%; position:relative;">
+                <div style="position:absolute; left:0; top:0; right:100px; bottom:0;">
+                    <input type="text" placeholder="发送内容" class="sendMsgContent" v-model="instantMessage" @keyup="keyCodeSend"/>
+                </div>
+                <button class="sendMsgBtn" @click="sendInstantMessage">发送</button>
+            </div>
         </div>
     </div>
     <!--底部折叠按钮-->
-    <el-button @click="showOrHide">》折叠列表</el-button>
+    <el-button size="small" @click="showOrHide">》折叠列表</el-button>
 </div>

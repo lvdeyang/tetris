@@ -28,7 +28,7 @@ define([
                     color: '#409EFF',
                     textarea: ''
                 },
-                formLabelWidth: '120px',
+                formLabelWidth: '80px',
                 btnShow:false,
                 editId:''
             }

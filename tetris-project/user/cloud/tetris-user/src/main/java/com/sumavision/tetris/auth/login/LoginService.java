@@ -116,7 +116,7 @@ public class LoginService {
 		if(TerminalType.QT_ZK.equals(terminalType)){
 			//指控终端重复登录校验
 			TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
-			if(UserStatus.ONLINE.equals(token.getStatus())){
+			if(token!=null && UserStatus.ONLINE.equals(token.getStatus())){
 				throw new QtZkLoginRepeatedlyException();
 			}
 		}

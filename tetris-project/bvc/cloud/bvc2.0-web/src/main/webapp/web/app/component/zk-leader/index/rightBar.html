@@ -683,9 +683,11 @@
             width="350px">
         <el-input v-model="dialog.resetName.name" placeholder="起个名吧" style="width:100%;"></el-input>
         <span slot="footer" class="dialog-footer">
-            <el-button size="medium" @click="resetNameClose">取消</el-button>
-            <el-button v-if="dialogTitle.indexOf('指挥')" size="medium" type="primary"
-                       @click="resetNameCommit">确定</el-button>
+            <div class="btn-dialog-cancel" @click="resetNameClose">取 消</div>
+            <div class="btn-dialog-submit" v-if="dialogTitle.indexOf('指挥')" @click="resetNameCommit">确 定</div>
+            <br style="clear:both;"/>
+            <!--<el-button size="medium" @click="resetNameClose">取消</el-button>
+            <el-button v-if="dialogTitle.indexOf('指挥')" size="medium" type="primary" @click="resetNameCommit">确定</el-button>-->
         </span>
     </el-dialog>
 
