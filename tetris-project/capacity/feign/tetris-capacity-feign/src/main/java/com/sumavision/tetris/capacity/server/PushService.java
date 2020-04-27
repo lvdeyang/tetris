@@ -1,9 +1,12 @@
 package com.sumavision.tetris.capacity.server;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Service
@@ -46,6 +49,17 @@ public class PushService {
 	 */
 	public void changePushBackup(String taskId, String index) throws Exception{
 		JsonBodyResponseParser.parseObject(capacityFeign.changePushBackUp(taskId, index), null);
+	}
+	
+	/**
+	 * 批量删除push任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月27日 上午11:21:29
+	 * @param List<String> taskIds 任务ids
+	 */
+	public void batchDeleteTask(List<String> taskIds) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.batchDeletePushTask(JSON.toJSONString(taskIds)), null);
 	}
 	
 }
