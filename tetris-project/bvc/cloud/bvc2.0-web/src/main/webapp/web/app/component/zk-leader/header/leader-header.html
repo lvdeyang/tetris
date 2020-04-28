@@ -1,30 +1,18 @@
 <div class="zk-header">
     <div class="content">
-        <div class="leftTime">
-            <p>
-                <span style="font-size: 14px;margin-right: 10px">天文</span>
-                <span class="date">{{date}}</span>
-            </p>
-            <p>
-                <span style="font-size: 14px;margin-right: 10px">时间</span>
-                <span class="time">{{time}}</span>
-            </p>
+        <div class="leftTime leftTime1">
+            <p class="date">{{date}}</p>
+            <p class="time">{{time}}</p>
         </div>
-        <div class="leftTime">
-            <p>
-                <span style="font-size: 14px;margin-right: 10px">指挥</span>
-                <span class="date">{{date}}</span>
-            </p>
-            <p>
-                <span style="font-size: 14px;margin-right: 10px">时间</span>
-                <span class="time">{{time}}</span>
-            </p>
+        <div class="leftTime leftTime2">
+            <p class="date">{{date}}</p>
+            <p class="time">{{time}}</p>
             <!--<p>-->
-                <!--<span style="font-size: 14px">作战</span>-->
-                <!--<span class="date">{{fightDate}}</span></p>-->
+            <!--<span style="font-size: 14px">作战</span>-->
+            <!--<span class="date">{{fightDate}}</span></p>-->
             <!--<p>-->
-                <!--<span style="font-size: 14px">时间</span>-->
-                <!--<span class="time">{{fightTime}}</span>-->
+            <!--<span style="font-size: 14px">时间</span>-->
+            <!--<span class="time">{{fightTime}}</span>-->
             <!--</p>-->
             <!--<span class="el-icon-time setTimeIcon" style="position: absolute;right: 22px;bottom: 23px;font-size: 24px;cursor: pointer;color: #cafffa" @click="openSetTime"></span>-->
         </div>
@@ -32,22 +20,21 @@
             <span>网络化作战指挥系统</span>
         </div>
         <div class="right">
-            <span class="icon-user" style="font-size: 30px;position: absolute;left: 40px;top:28px;"></span>
+            <span class="icon-user" style="font-size: 30px;position: absolute;left: 40px;top:28px;color: #b7d0dc"></span>
             <div style="position: absolute;top:0;left: 70px;height: 100%;width: 140px;overflow:hidden;">
-                <span :class="usernameLength>=10? 'username animate':'username'">{{user.name}}</span>
-                <!--<span :class="usernameLength>=10? 'username animate':'username'">我和我的祖国，一刻也不能分割</span>-->
+                <span :class="usernameLength>=5? 'username animate':'username'">{{user.name}}</span>
             </div>
         </div>
         <div class="right">
-            <p style="font-size: 14px;line-height: 54px;margin-left: -10px">
+            <p style="font-size: 14px;line-height: 54px;margin-left: -10px;color: #b7d0dc">
                 <span style="margin: 0 8px">设置</span>
                 <span style="margin: 0 30px">管理</span>
                 <span style="margin: 0">退出</span>
             </p>
-            <p>
-                <span class="setting icon-cog" @click="showSettings" title="系统设置"></span>
-                <span class="setting icon-th-large" title="系统管理" style="margin-right: 10px"></span>
-                <span class="setting icon-off" title="退出" @click="closeExit"></span>
+            <p class="images">
+                <img src="../../../../../images/zk-leader/setting.png" @click="showSettings" title="系统设置">
+                <img src="../../../../../images/zk-leader/management.png" alt=""  title="系统管理">
+                <img src="../../../../../images/zk-leader/exit.png" alt="" title="退出" @click="closeExit">
             </p>
         </div>
     </div>

@@ -247,8 +247,8 @@ define([
                 //云台控制
                 self.qt.on('cloudControl', function (e) {
                     self.qt.window('/router/zk/leader/cloud/control', {serial: e.serial}, {
-                        width: 900,
-                        height: 600,
+                        width: 600,
+                        height: 598,
                         title: '第' + e.serial + '屏关联解码器'
                     });
                 });

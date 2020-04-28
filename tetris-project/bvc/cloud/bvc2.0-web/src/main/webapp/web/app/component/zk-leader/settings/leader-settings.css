@@ -9,19 +9,30 @@ html, body {
 }
 
 .zk-settings {
-    background: #000 url("../../../../../images/zk-leader/popMsg.png") no-repeat center;
-    background-size: 100% 100%;
+    background-color: #0F2A4D;
     color: white;
 }
-
-.title {
-    position: absolute;
-    top: 38px;
-    left: 448px;
-    font-size: 18px;
-    font-weight: bold;
+.win-header {
+    height: 40px;
+    background-color: #3668a9;
+    border-radius: 4px 4px 0 0;
 }
 
+.win-header .win-header-title {
+    float: left;
+    color: #fff;
+    line-height: 40px;
+    padding: 0 10px;
+}
+
+.win-header .win-header-close {
+    float: right;
+    color: #fff;
+    line-height: 40px;
+    padding: 0 10px;
+    font-size: 20px;
+    cursor: pointer;
+}
 .content {
     position: absolute;
     top: 65px;
@@ -64,20 +75,13 @@ html, body {
     margin-left: 80px;
 }
 
-.close {
-    position: absolute;
-    left: 50%;
-    bottom: 3px;
-    height: 60px;
-}
-
 .el-form-item__label{
     color:#d2ced2;
     font-size: 18px;
 }
 .el-input__inner{
-    background-color: transparent;
-    border: 1px solid #909fc3 ;
+    background-color: #0B2D5A;
+    border: 1px solid #123e80;
     width: 350px;
 }
 
@@ -98,9 +102,30 @@ html, body {
     color: #6dc3ff;
 }
 .el-table--enable-row-hover .el-table__body tr:hover>td{
-    background-color: #173144;
+    background-color: #0A2F66;
 }
 .el-table td{
     color: #fff;
     border-bottom: 1px solid #3c3f44;
+}
+.el-button--primary {
+    background-color: #2562F7;
+    border: none;
+    border-radius: 33px;
+    color: #fff;
+}
+
+.el-button--primary:focus, .el-button--primary:hover {
+    background-color: #2562F7;
+    border: none;
+}
+.el-button--default {
+    background-color: #204A6B;
+    border: none;
+    border-radius: 33px;
+    color: #fff;
+}
+.el-button--default:focus, .el-button--default:hover {
+    background-color: #204A6B;
+    border: none;
 }
