@@ -54,6 +54,7 @@ public class UserOnlineListener implements ApplicationListener<WebsocketSessionO
 					userBO.setLogined(true);
 					List<UserBO> localUserBOs = new ArrayList<UserBO>();
 					localUserBOs.add(userBO);
+					System.out.println("用户" + userBO.getName() + "上线了。。。。。。。。。");
 					statusXMLUtil.sendResourcesXmlMessage(null, null, localUserBOs, connectCenterLayerID, 1500);
 				}
 			}

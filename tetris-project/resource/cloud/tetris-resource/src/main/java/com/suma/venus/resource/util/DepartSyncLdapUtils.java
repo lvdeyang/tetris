@@ -244,6 +244,7 @@ public class DepartSyncLdapUtils {
 		List<Long> userIds = new ArrayList<Long>();
 		for(FolderUserMap map: maps){
 			userIds.add(map.getUserId());
+			map.setSyncStatus(1);
 		}
 		
 		List<UserBO> users = userService.queryUsersByUserIds(userIds, TerminalType.PC_PORTAL);
@@ -260,6 +261,8 @@ public class DepartSyncLdapUtils {
 				ldapUserDao.save(ldapUser);
 			}
 		}
+		
+		folderUserMapDao.save(maps);
 	}
 
 	public String handleCleanUpLdap() {
@@ -313,6 +316,11 @@ public class DepartSyncLdapUtils {
 		//删除ldap用户
 		userFeignService.deleteLdapUser();
 		
+		List<FolderUserMap> localMaps = folderUserMapDao.findLocalLdapMap();
+		for(FolderUserMap localMap: localMaps){
+			localMap.setSyncStatus(0);
+		}
+		folderUserMapDao.save(localMaps);
 	}
 
 }
