@@ -1,5 +1,8 @@
 <div class="container">
-    <div class="title">历史消息</div>
+    <div class="win-header">
+        <span class="win-header-title">历史消息</span>
+        <span class="win-header-close" @click="closePop"><span class="el-icon-close"></span></span>
+    </div>
     <div class="pop">
         <div  style="overflow:hidden;height: 550px">
             <el-tabs v-model="currentTab" type="card">
@@ -39,13 +42,9 @@
                                 :total="page.total">
                             </el-pagination>
                         </div>
-
                     </div>
                 </el-tab-pane>
             </el-tabs>
         </div>
-    </div>
-    <div class="closeBtn">
-        <img src="../../../../../../images/zk-leader/close.png" @click="closePop">
     </div>
 </div>

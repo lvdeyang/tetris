@@ -31,22 +31,28 @@
         </div>
     </div>
     <template v-if="tag==='members'">
-        <div class="title">会议成员</div>
+        <div class="win-header">
+        <span class="win-header-title">会议成员</span>
+        <span class="win-header-close" @click="handleWindowClose"><span class="el-icon-close"></span></span>
+        </div>
     </template>
     <template v-else>
         <div v-if=" pageName=='指挥'">
-            <div class="title" v-if="page==='add'">协同指挥</div>
-            <div class="title" v-else="page==='cancel'">取消协同</div>
+            <div class="win-header">
+                <span class="win-header-title" v-if="page==='add'">协同指挥</span>
+                <span class="win-header-title" v-else="page==='cancel'">取消协同</span>
+                <span class="win-header-close" @click="handleWindowClose"><span class="el-icon-close"></span></span>
+            </div>
         </div>
         <div v-else-if="pageName=='会议'">
-            <div class="title" v-if="page==='add'">会议协同</div>
-            <div class="title" v-else="page==='cancel'">取消协同</div>
+            <span class="win-header-title" v-if="page==='add'">会议协同</span>
+            <span class="win-header-title" v-else="page==='cancel'">取消协同</span>
+            <span class="win-header-close" @click="handleWindowClose"><span class="el-icon-close"></span></span>
         </div>
     </template>
 
 
     <div style="position:absolute; left:0; bottom:10px; height:50px; right:0; padding:4px 10px 14px 10px; text-align:center;">
-        <el-button size="medium" @click="handleWindowClose">取消</el-button>
         <el-button size="medium" type="primary" v-if="tag!=='members'" @click="handleAddMemberCommit">确定</el-button>
     </div>
 </div>

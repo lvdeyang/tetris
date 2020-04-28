@@ -15,7 +15,7 @@ html, body {
     padding-left: 15px;
     top: 0;
     left: 0;
-    width: 20%;
+    width: 26%;
     text-align: center;
     color: #fff;
     font-size: 20px;
@@ -27,35 +27,21 @@ html, body {
     float: left;
     width: 26px;
     height: 22px;
-    margin: 10px;
+    margin: 8px;
 }
 
 .msgBg {
     position: absolute;
     top: 0;
-    left: 22%;
+    left: 27%;
     width: 100px;
     height: 30px;
 }
 
-/*.subtitle {
-    position: absolute;
-    top: 54%;
-    left: 22.5%;
-    padding: 0 10px;
-    height: 30px;
-    line-height: 30px;
-    background: linear-gradient(to left, #2B75A3, #164773, #2C78A5);
-    border-radius: 5px;
-    color: #18e5ff;
-    cursor: default;
-    font-weight: 600;
-}*/
-
 .msgContent {
     position: absolute;
     top: 0;
-    left: 29%;
+    left: 34%;
     right: 110px;
     height: 70px;
     font-size: 16px;
@@ -98,18 +84,14 @@ html, body {
     position: absolute;
     top: 54%;
     left: 0;
-    width: 22%;
+    width: 30%;
     height: 32px;
 }
 
 .btn div {
     float: left;
-    padding: 8px 6px;
     font-size:12px;
     margin: 1px;
-    background-color: #213f9c;
-    border:1px solid #5d77c1;
-    border-radius: 2px;
     color: #fff;
     cursor: pointer;
     text-align: center;
@@ -132,9 +114,14 @@ img {
     -webkit-user-drag: none;
 }
 
+div.change{
+   width: 80px;
+    height: 22px;
+    cursor: pointer;
+}
 .el-button {
     position: absolute;
-    /*padding: 18px 8px;*/
+    padding: 13px;
     top: 5px;
     right: 0;
     background: #204a6b;
@@ -153,7 +140,7 @@ img {
 
 .sendMsg {
     position: absolute;
-    left: 29%;
+    left: 34%;
     right: 110px;
     top: 69px;
     height: 40px;
@@ -270,16 +257,12 @@ img {
     }
 
     .msgContent, .sendMsg {
-        left: 36%;
+        left: 40%;
     }
 
     .sendMsgContent {
         width: 74%;
     }
-
-    /*.screenCtrl{*/
-    /*top:75%;*/
-    /*}*/
 }
 
 @media screen and (max-width: 800px) {

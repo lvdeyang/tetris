@@ -8,7 +8,6 @@
             <!--筛选条件-->
             <div class="add">
                 <div class="btn-add-external-folder" @click="search">添加外部文件夹</div>
-                <!--<el-button type="primary" @click="search">添加外部文件夹</el-button>-->
             </div>
             <!--内容-->
             <div style="position:absolute; left:0; top:32px; right:0; bottom:0;">
@@ -57,7 +56,7 @@
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="删除" placement="bottom">
-                                            <el-button type="text" style="padding:0; font-size:20px; margin-left:30px;color: red" @click="removeRow(scope.row.id)">
+                                            <el-button type="text" style="padding:0; font-size:20px; margin-left:30px;color: #d64040" @click="removeRow(scope.row.id)">
                                                 <span class="icon-trash"></span></el-button>
                                         </el-tooltip>
                                     </template>

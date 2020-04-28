@@ -98,7 +98,7 @@ body{
 }
 
 .el-table--enable-row-hover .el-table__body tr:hover td{
-    background-color:#0595b9;
+    background-color:#061f3e;
 }
 
 .subtitle .el-table--enable-row-hover .el-table__body tr:hover {
@@ -116,7 +116,7 @@ body{
 }
 
 .subtitle .el-button--text{
-    color:#476e94;
+    color:#72b7fb;
 }
 
 /* 更改输入框背景色 */

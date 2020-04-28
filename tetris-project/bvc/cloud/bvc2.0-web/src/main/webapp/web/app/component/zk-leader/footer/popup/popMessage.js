@@ -46,16 +46,18 @@ define([
                     pageSize:self.page.pageSize
                 }, function(data){
                     var data=data.data;
-                    var total = data.total;
-                    var rows = data.rows;
-                    if(rows && rows.length>0){
-                        for(var i=0; i<rows.length; i++){
-                            var message = $.parseJSON( rows[i].message).message;
-                            self.historyInstantMsg.push(message);
+                    if(data){
+                        var total = data.total;
+                        var rows = data.rows;
+                        if(rows && rows.length>0){
+                            for(var i=0; i<rows.length; i++){
+                                var message = $.parseJSON( rows[i].message).message;
+                                self.historyInstantMsg.push(message);
+                            }
                         }
+                        self.page.total = total;
+                        self.page.currentPage = currentPage;
                     }
-                    self.page.total = total;
-                    self.page.currentPage = currentPage;
                 });
             },
             handleCurrentChange:function(currentPage){

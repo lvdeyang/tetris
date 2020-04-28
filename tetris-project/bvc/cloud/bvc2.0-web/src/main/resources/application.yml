@@ -1,12 +1,12 @@
 spring:
   application:
-    name: tetris-bvc-business-zsy
+    name: tetris-bvc-business-yxc
   cloud:
 #    config:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.131
+      ipAddress: 192.165.153.50
   profiles:
     active: pro
   datasource:
@@ -14,7 +14,7 @@ spring:
 #      url: jdbc:mysql://localhost:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
 #      username: root
 #      password: sumavisionrd
-      url: jdbc:mysql://192.165.56.131:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      url: jdbc:mysql://192.165.56.18:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: sumadb
       password: Sumavision@300079
       driver-class-name: com.mysql.jdbc.Driver
@@ -30,7 +30,7 @@ spring:
 #      url: jdbc:mysql://localhost:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
 #      username: root
 #      password: sumavisionrd
-      url: jdbc:mysql://192.165.56.131:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      url: jdbc:mysql://192.165.56.18:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: sumadb
       password: Sumavision@300079
       driver-class-name: com.mysql.jdbc.Driver
@@ -67,7 +67,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.131:8081/eureka/
+      defaultZone: http://192.165.56.18:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true

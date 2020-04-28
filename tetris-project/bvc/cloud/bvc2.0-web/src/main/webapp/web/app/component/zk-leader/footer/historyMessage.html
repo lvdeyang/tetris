@@ -26,30 +26,34 @@
                 <img v-if="!buttons.sixteen" :src="baseUrl+'images/zk-leader/btns/sixteen.png'"/>
                 <img v-else :src="baseUrl+'images/zk-leader/btns/sixteenActive.png'"/>
             </div>
+            <!--换一批-->
+            <div class="change" @click="replace">
+                <img src="../../../../../images/zk-leader/change.png" alt="换一批">
+            </div>
         </div>
         <!--历史消息-->
         <div class="msgBg">
             <img src="../../../../../images/zk-leader/msg.png" alt="">
         </div>
 
-        <!--<div class="subtitle" title="字幕管理" @click="subtitleOpen">字幕管理</div>-->
-
         <div class="btn">
             <!--查看历史消息-->
-            <div class="tagMessage" @click="showMessagePanel">历史消息</div>
+            <div class="tagMessage" @click="showMessagePanel">
+                <img src="../../../../../images/zk-leader/historyMsg.png" alt="历史消息">
+            </div>
             <!--录制任务管理-->
-            <div class="record" @click="recManage">录制任务</div>
+            <div class="record" @click="recManage">
+                <img src="../../../../../images/zk-leader/recordManage.png" alt="录制任务">
+                </div>
             <!--下载任务-->
-            <div class="download" @click="download">下载任务</div>
+            <div class="download" @click="download">
+                <img src="../../../../../images/zk-leader/downloadManage.png" alt="下载任务">
+                </div>
 
             <!-- 字幕管理 -->
-            <div class="subtitle" title="字幕管理" @click="subtitleOpen">字幕管理</div>
-
-            <!--换一批-->
-            <div class="change" @click="replace">
-                <span class="icon-step-forward"></span>
-                <!--<span>下一页</span>-->
-            </div>
+            <div class="subtitle" title="字幕管理" @click="subtitleOpen">
+                <img src="../../../../../images/zk-leader/subtitleManage.png" alt="字幕管理">
+                </div>
         </div>
 
         <!--滚动消息-->

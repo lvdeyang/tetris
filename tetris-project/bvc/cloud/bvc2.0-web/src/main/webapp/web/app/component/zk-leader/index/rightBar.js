@@ -37,7 +37,7 @@ define([
                     //是否可用进入指挥
                     enterCommand: true,
                     //是否可用 进入会议
-                    enterMeet:true,
+                    enterMeet: true,
                     //添加指挥
                     addCommand: true,
                     //删除指挥
@@ -75,7 +75,7 @@ define([
                     //是否可点退出指挥按钮
                     exitCommand: false,
                     //是否可点 退出 会议
-                    exitMeet:false,
+                    exitMeet: false,
                     //发言
                     speak: true, //按钮是否显示
                     isSpeaking: false, //控制显示哪个按钮,是否正在发言
@@ -438,7 +438,7 @@ define([
                     if (data && data.length > 0) {
                         var commands = data[0].children;
                         if (commands && commands.length > 0) {
-                            self.command.data=commands;
+                            self.command.data = commands;
                         }
                         if (typeof callback == 'function') {
                             callback();
@@ -1087,7 +1087,7 @@ define([
                 self.dialog.resetName.name = '';
                 self.cancelChoose();
             },
-            //打开 给指挥起名字 的对话框显示
+            //打开 给指挥起名字 的对话框显示 type1:区分修改还是新建，type2:区分是指挥还是会议
             handleResetName: function (type1, type2) {
                 var self = this;
                 //为了提交时区分是新建还是修改
@@ -1102,11 +1102,14 @@ define([
                     }
                 } else {
                     self.dialogTitle = "设置会议名称";
+                    if (type1 === 'edit') {
+                        self.dialog.resetName.name = self.meet.current.name;
+                    }
                 }
                 self.dialog.resetName.visible = true;
             },
             //给指挥起名字的添加事件
-            resetNameCommit: function () {
+            resetNameCommit: function (type) {
                 var self = this;
                 if (!self.dialog.resetName.name || !(self.dialog.resetName.name.trim())) {
                     self.$message({
@@ -1126,9 +1129,9 @@ define([
                 }
                 self.dialog.resetName.name.replace(/^\s*|\s*$/g, ''); //去除头尾空格
 
-                if (self.dialog.resetName.createType == 1) {
+                if (self.dialog.resetName.createType == 1) {  //指挥
                     if (self.dialog.resetName.type === 'new') {
-                        // 新建
+                        // 新建指挥
                         ajax.post('/command/basic/save', {
                             members: $.toJSON(userIds),
                             name: self.dialog.resetName.name.trim()
@@ -1158,28 +1161,40 @@ define([
                         });
                     }
                 } else {
-                    ajax.post('/command/meeting/save', {
-                        members: $.toJSON(userIds),
-                        name: self.dialog.resetName.name.trim()
-                    }, function (data) {
-                        // error代表有重名的情况
-                        if (data.status == 'error') {
-                            self.dialogVisible = true;
-                            self.dialogInput = data.errorInfo.recommendedName;
-                            return;
-                        }
-                        self.meet.current = data;
-                        self.meet.entered.push({
-                            id: data.id,
-                            name: data.name,
-                            creator: data.creator,
-                            type: 'command'
+                    //新建会议
+                    if (self.dialog.resetName.type === 'new') {
+                        ajax.post('/command/meeting/save', {
+                            members: $.toJSON(userIds),
+                            name: self.dialog.resetName.name.trim()
+                        }, function (data) {
+                            // error代表有重名的情况
+                            if (data.status == 'error') {
+                                self.dialogVisible = true;
+                                self.dialogInput = data.errorInfo.recommendedName;
+                                return;
+                            }
+                            self.meet.current = data;
+                            self.meet.entered.push({
+                                id: data.id,
+                                name: data.name,
+                                creator: data.creator,
+                                type: 'command'
+                            });
+                            self.meet.currentId = data.id;
+                            self.dialogVisible = false;
+                            self.qt.success('创建会议成功！');
+                            self.resetNameClose();
                         });
-                        self.meet.currentId = data.id;
-                        self.dialogVisible = false;
-                        self.qt.success('创建会议成功！');
-                        self.resetNameClose();
-                    });
+                    } else {
+                        ajax.post('/command/basic/modify/name', {
+                            id: self.meet.currentId,
+                            name: self.dialog.resetName.name.trim()
+                        }, function () {
+                            self.qt.success('修改成功！');
+                            self.resetNameClose();
+                            self.refreshCommand('meeting');
+                        });
+                    }
                 }
             },
             // 同意修改会议名称按钮
@@ -1317,13 +1332,13 @@ define([
                                     creator: JSON.parse(self.command.data[i].param).creator,
                                     entered: JSON.parse(self.command.data[i].param).entered
                                 };
-                                if(JSON.parse(self.command.data[i].param).entered){
-                                    if(self.differentiate === 1){
-                                        self.buttons.exitCommand=true;
-                                        self.buttons.enterCommand=false;
-                                    }else{
-                                        self.buttons.exitMeet=true;
-                                        self.buttons.enterMeet=false;
+                                if (JSON.parse(self.command.data[i].param).entered) {
+                                    if (self.differentiate === 1) {
+                                        self.buttons.exitCommand = true;
+                                        self.buttons.enterCommand = false;
+                                    } else {
+                                        self.buttons.exitMeet = true;
+                                        self.buttons.enterMeet = false;
                                     }
                                 }
                                 break;
@@ -2398,8 +2413,8 @@ define([
                                 self.group.current = '';
                             }
                         } else {
-                            self.buttons.exitMeet=false;
-                            self.buttons.enterMeet=true;
+                            self.buttons.exitMeet = false;
+                            self.buttons.enterMeet = true;
                             for (var i = 0; i < self.meet.entered.length; i++) {
                                 self.meet.entered = self.meet.entered.filter(function (value) {
                                     return value.id != self.meet.current.id;
@@ -2409,7 +2424,7 @@ define([
                                     self.meet.current = self.meet.entered[0];
                                     setTimeout(function () {
                                         self.currentGroupChange(self.meet.currentId);
-                                    },500)
+                                    }, 500)
                                 } else {
                                     self.meet.currentId = '';
                                     self.meet.current = '';
@@ -2424,12 +2439,12 @@ define([
                     var e = e.params;
                     self.qt.info(e.businessInfo);
                     self.agreeExitCommand = 0;
-                    if(self.differentiate === 1){
+                    if (self.differentiate === 1) {
                         self.buttons.exitCommand = true;
                         self.buttons.enterCommand = false;
-                    }else{
-                        self.buttons.exitMeet=true;
-                        self.buttons.enterMeet=false;
+                    } else {
+                        self.buttons.exitMeet = true;
+                        self.buttons.enterMeet = false;
                     }
                 });
 

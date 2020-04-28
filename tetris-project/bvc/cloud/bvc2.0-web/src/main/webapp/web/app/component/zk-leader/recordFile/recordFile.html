@@ -6,15 +6,14 @@
     <div class="win-body">
         <div style="width:100%; height:100%; position:relative;">
             <div class="left">
-                <!--<div class="title">设备列表</div>-->
                 <div style="height: 100%">
                     <span style="color: yellow">请先选择设备或用户</span>
                     <div class="btn-select-ok" @click="confirm">确定选择</div>
-                    <!--<el-button type="primary" size="mini" @click="confirm">确定选择</el-button>-->
                     <el-scrollbar style="height:100%">
                         <el-tree :data="record.data" :props="props" node-key="id">
                             <span style="display:inline-block; width:100%;" slot-scope="{node,data}">
-                                <el-radio v-if="data.type==='USER' || data.type==='BUNDLE'" v-model="record.select" :label="data">
+                                <el-radio v-if="data.type==='USER' || data.type==='BUNDLE'" v-model="record.select"
+                                          :label="data">
                                     <span :class="data.icon"
                                           :style="data.style+' position:relative; top:1px;'"></span>
                                     <span style="position:relative; top:1px;">{{data.name}}</span>
@@ -30,7 +29,6 @@
 
             </div>
             <div class="right">
-                <!--<div class="title">文件列表</div>-->
                 <div style="width:100%; height:100%; position:relative;">
                     <div>
                         <el-date-picker
@@ -42,22 +40,23 @@
                                 end-placeholder="结束日期">
                         </el-date-picker>
                         <div class="btn-filter" @click="filtrate">确定选择</div>
-                        <!--<el-button type="primary" size="mini" @click="filtrate">筛选</el-button>-->
                     </div>
                     <div style="position:absolute; top:42px; left:0; right:0; bottom:0;">
-                        <div style="width:100%; height:100%; position:relative;">
+                        <div>
                             <div style="position:absolute; top:0; left:0; right:0; bottom:50px;">
-                                <div style="width:100%; height:100%; position:relative;">
-                                    <!--<el-scrollbar style="height: 100%">-->
+                                <el-scrollbar style="height: 100%">
                                     <el-table
                                             class="table"
                                             :data="pageData"
-                                            style="width:100%"
-                                            height="100%">
+                                            style="width:100%">
                                         <el-table-column label="选择" width="50" center>
-                                　　　　　　<template slot-scope="scope">
-                                　　　　　　　　<el-radio class="radio" v-model="fileSelect" :label="scope.row"></el-radio>
-                                　　　　　　</template>
+                                            　　　　　　
+                                            <template slot-scope="scope">
+                                                　　　　　　　　
+                                                <el-radio class="radio" v-model="fileSelect"
+                                                          :label="scope.row"></el-radio>
+                                                　　　　　　
+                                            </template>
                                         </el-table-column>
                                         <el-table-column
                                                 prop="fileName"
@@ -80,19 +79,24 @@
                                                 label="操作"
                                                 width="150">
                                             <template slot-scope="scope">
-                                                <el-tooltip class="item" effect="dark" content="删除任务" placement="bottom">
-                                                    <el-button type="text" style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c" @click="deleteFile(scope.row.id)">
+                                                <el-tooltip class="item" effect="dark" content="删除任务"
+                                                            placement="bottom">
+                                                    <el-button type="text"
+                                                               style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c"
+                                                               @click="deleteFile(scope.row.id)">
                                                         <span class="icon-trash"></span></el-button>
                                                 </el-tooltip>
-                                                <el-tooltip class="item" effect="dark" content="下载任务" placement="bottom">
-                                                    <el-button type="text" style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c" @click="downLoadFile(scope.row)">
+                                                <el-tooltip class="item" effect="dark" content="下载任务"
+                                                            placement="bottom">
+                                                    <el-button type="text"
+                                                               style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c"
+                                                               @click="downLoadFile(scope.row)">
                                                         <span class="icon-arrow-down"></span></el-button>
                                                 </el-tooltip>
                                             </template>
                                         </el-table-column>
                                     </el-table>
-                                    <!--</el-scrollbar>-->
-                                </div>
+                                </el-scrollbar>
                             </div>
                             <div style="height:50px; position:absolute; left:0; right:0; bottom:0; padding-top:9px; box-sizing:border-box;">
                                 <el-pagination background @current-change="currentChange" :current-page="currentPage"
@@ -101,14 +105,11 @@
                                 </el-pagination>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
             <div class="btn">
                 <div class="btn-handle-record" @click="confirmSubmit">确定播放</div>
-                <!--<el-button type="primary" size="small" @click="confirmSubmit">确定播放</el-button>
-                <el-button type="warning" size="small" @click="close">关闭页面</el-button>-->
             </div>
         </div>
     </div>
