@@ -386,11 +386,15 @@ public class UserService{
 		
 		if(username == null) throw new UsernameCannotBeNullException();
 		
+		if(userno == null) throw new UsernoCannotBeNullException(nickname);
+		
 		if(nickname == null) nickname = username;
 		
 		if(password == null) throw new PasswordCannotBeNullException();
 		
 		if(!password.equals(repeat)) throw new RepeatNotMatchPasswordException();
+		
+		userQuery.checkUserno(userno);
 		
 		userQuery.checkPassword(password);
 		
@@ -731,6 +735,7 @@ public class UserService{
 			Set<String> usernames = new HashSet<String>();
 			for(UserPO user:users){
 				if(user.getUserno() == null) throw new UsernoCannotBeNullException(user.getNickname());
+				userQuery.checkUserno(user.getUserno());
 				if(user.getUsername() == null) throw new UsernameCannotBeNullException();
 				for(String userno:usernos){
 					if(userno.equals(user.getUserno())){

@@ -37,6 +37,7 @@ import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.theme.SystemThemeDAO;
 import com.sumavision.tetris.system.theme.SystemThemePO;
 import com.sumavision.tetris.user.exception.PasswordComplexityException;
+import com.sumavision.tetris.user.exception.UsernoComplexityException;
 
 @Component
 public class UserQuery {
@@ -57,6 +58,24 @@ public class UserQuery {
 	
 	@Autowired
 	private SystemRoleDAO systemRoleDao;
+	
+	/**
+	 * 检查用户号码<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月28日 下午1:37:00
+	 * @param String userno 用户号码
+	 * @return boolean 检验结果
+	 */
+	public boolean checkUserno(String userno) throws Exception{
+		String check = "^\\d{11}$";
+		Pattern regex = Pattern.compile(check);
+		Matcher matcher = regex.matcher(userno);
+		if(!matcher.matches()){
+			throw new UsernoComplexityException(userno);
+		}
+		return true;
+	}
 	
 	/**
 	 * 检验密码复杂度<br/>
