@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
@@ -40,6 +41,7 @@ import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.util.MeetingUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.AvtplNotFoundException;
+import com.sumavision.bvc.device.monitor.live.exception.UserHasNoPermissionForBusinessException;
 import com.sumavision.bvc.device.system.AvtplService;
 import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.enumeration.AvtplUsageType;
@@ -565,6 +567,36 @@ public class CommandCommonServiceImpl {
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * 用户对用户操作的权限校验<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午2:20:34
+	 * @param Long targetUserId 呼叫目标用户
+	 * @param Long userId 操作业务用户
+	 */
+	public void authorizeUser(Long targetUserId, Long userId, BUSINESS_OPR_TYPE type) throws Exception{
+		boolean authorized = resourceService.hasPrivilegeOfUser(userId, targetUserId, type);
+		if(!authorized){
+			throw new UserHasNoPermissionForBusinessException(type, 1);
+		}
+	}
+	
+	/**
+	 * 用户对设备的权限校验<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午2:15:11
+	 * @param String bundleId 音频设备id
+	 * @param Long userId 业务用户id
+	 */
+	public void authorizeBundle(String bundleId, Long userId, BUSINESS_OPR_TYPE type) throws Exception{
+		boolean authorized = resourceService.hasPrivilegeOfBundle(userId, bundleId, type);
+		if(!authorized){
+			throw new UserHasNoPermissionForBusinessException(type, 0);
+		}
 	}
 	
 	private static int compareLevelByParentPath(String path1, String path2){

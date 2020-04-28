@@ -21,6 +21,7 @@ import com.sumavision.bvc.command.group.dao.CommandGroupForwardDemandDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.dao.CommandVodDAO;
 import com.sumavision.bvc.command.group.dao.UserLiveCallDAO;
+import com.sumavision.bvc.command.group.enumeration.CallStatus;
 import com.sumavision.bvc.command.group.enumeration.CallType;
 import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
@@ -234,7 +235,7 @@ public class CommandCastServiceImpl {
 	 * @param removeDevices 必须来自player.getCastDevices()
 	 * @throws Exception
 	 */
-	@Deprecated
+	/**@Deprecated
 	private void changeCastDevices1(
 			CommandGroupUserPlayerPO player,
 			List<CommandGroupUserPlayerCastDevicePO> addDevices,
@@ -244,7 +245,7 @@ public class CommandCastServiceImpl {
 		if(null == addDevices) addDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
 		if(null == removeDevices) removeDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
 		
-		//TODO:判重
+		//考虑判重
 		
 		//保存获得id
 		for(CommandGroupUserPlayerCastDevicePO addDevice : addDevices){
@@ -279,7 +280,7 @@ public class CommandCastServiceImpl {
 			CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 			
 			//给新增设备生成forwardSet
-			LogicBO logicVodStart = openBundleCastDeviceWithRestrict2(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(vod).getList(), null, codec, admin.getId(), addDevices);
+			LogicBO logicVodStart = openBundleCastDeviceWithRestrict2(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(vod).getList(), null, null, codec, admin.getId(), addDevices);
 			logic.merge(logicVodStart);
 			
 			//给删除设备生成disconnectBundle
@@ -287,7 +288,7 @@ public class CommandCastServiceImpl {
 			logic.merge(logicVodStop);
 		}
 		
-		//TODO:待测：查找给播放器的call，从呼叫方与被叫方各查一遍，最多只会有一个
+		//待测：查找给播放器的call，从呼叫方与被叫方各查一遍，最多只会有一个
 		UserLiveCallPO call = userLiveCallDao.findByCalledDecoderBundleId(player.getBundleId());
 		if(call == null){
 			call = userLiveCallDao.findByCallDecoderBundleId(player.getBundleId());
@@ -349,7 +350,7 @@ public class CommandCastServiceImpl {
 		}
 		
 		executeBusiness.execute(logic, "播放器修改上屏列表" + description);
-	}
+	}*/
 	
 	/**
 	 * 修改播放器的上屏设备<br/>
@@ -407,7 +408,7 @@ public class CommandCastServiceImpl {
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			
 			//给新增设备生成forwardSet
-			LogicBO logicPlayFileStart = openBundleCastDeviceWithRestrict2(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, codec, admin.getId(), addDevices);
+			LogicBO logicPlayFileStart = openBundleCastDeviceWithRestrict2(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, null, codec, admin.getId(), addDevices);
 			logic.merge(logicPlayFileStart);
 			
 			//给删除设备生成disconnectBundle
@@ -427,7 +428,7 @@ public class CommandCastServiceImpl {
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			
 			//给新增设备生成forwardSet
-			LogicBO logicVodStart = openBundleCastDeviceWithRestrict2(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(vod).getList(), null, codec, admin.getId(), addDevices);
+			LogicBO logicVodStart = openBundleCastDeviceWithRestrict2(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(vod).getList(), null, null, codec, admin.getId(), addDevices);
 			logic.merge(logicVodStart);
 			
 			//给删除设备生成disconnectBundle
@@ -441,22 +442,15 @@ public class CommandCastServiceImpl {
 		}
 		
 		//TODO:这里可能有问题，：查找给播放器的call，从呼叫方与被叫方各查一遍，最多只会有一个
-		UserLiveCallPO call = userLiveCallDao.findByCalledDecoderBundleId(player.getBundleId());
-		if(call == null){
-			call = userLiveCallDao.findByCallDecoderBundleId(player.getBundleId());
-		}else{
-			//这是被叫的播放器
-			if(getPlayerSrcInfo){
-				return new PlayerInfoBO(true, call.getCallUsername(), call.getCallUserno());
-			}
-		}
+		UserLiveCallPO call = userLiveCallDao.findByCallDecoderBundleId(player.getBundleId());
+		UserLiveCallPO called = userLiveCallDao.findByCalledDecoderBundleId(player.getBundleId());
 		if(call != null){
 			
-			description = "，有一个相关呼叫call，id：" + call.getId();
+			description = "，作为主叫方，有一个相关呼叫call，id：" + call.getId();
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			
 			//给新增设备生成forwardSet
-			LogicBO logicCallStart = openBundleCastDeviceWithRestrict2(null, null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, admin.getId(), addDevices);
+			LogicBO logicCallStart = openBundleCastDeviceWithRestrict2(null, null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), null, codec, admin.getId(), addDevices);
 			logic.merge(logicCallStart);
 			
 			//给删除设备生成disconnectBundle
@@ -466,6 +460,23 @@ public class CommandCastServiceImpl {
 			//这是主叫的播放器
 			if(getPlayerSrcInfo){
 				return new PlayerInfoBO(true, call.getCalledUsername(), call.getCalledUserno());
+			}
+		}else if(called != null){
+			
+			description = "，作为被叫方，有一个相关呼叫called，id：" + called.getId();
+			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+			
+			//给新增设备生成forwardSet
+			LogicBO logicCallStart = openBundleCastDeviceWithRestrict2(null, null, null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(called).getList(), codec, admin.getId(), addDevices);
+			logic.merge(logicCallStart);
+			
+			//给删除设备生成disconnectBundle
+			LogicBO logicCallStop = closeBundleCastDeviceWithRestrict2(null, null, null, null, codec, admin.getId(), removeDevices);
+			logic.merge(logicCallStop);
+			
+			//这是被叫的播放器
+			if(getPlayerSrcInfo){
+				return new PlayerInfoBO(true, called.getCallUsername(), called.getCallUserno());
 			}
 		}
 		
@@ -480,7 +491,7 @@ public class CommandCastServiceImpl {
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 			
 			//给新增设备生成forwardSet
-			LogicBO logic1 = openBundleCastDeviceWithRestrict2(null, null, new HashSetWrapper<CommandGroupForwardPO>().add(forward).getSet(), null, null, null, codec, admin.getId(), addDevices);
+			LogicBO logic1 = openBundleCastDeviceWithRestrict2(null, null, new HashSetWrapper<CommandGroupForwardPO>().add(forward).getSet(), null, null, null, null, codec, admin.getId(), addDevices);
 			logic.merge(logic1);
 			
 			//给删除设备生成disconnectBundle
@@ -510,7 +521,7 @@ public class CommandCastServiceImpl {
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 
 			//给新增设备生成forwardSet和mediaPushSet
-			LogicBO logic3 = openBundleCastDeviceWithRestrict2(new ArrayListWrapper<CommandGroupForwardDemandPO>().add(demand).getList(), null, null, null, null, null, codec, admin.getId(), addDevices);
+			LogicBO logic3 = openBundleCastDeviceWithRestrict2(new ArrayListWrapper<CommandGroupForwardDemandPO>().add(demand).getList(), null, null, null, null, null, null, codec, admin.getId(), addDevices);
 			logic.merge(logic3);
 			
 			//给删除设备生成mediaPushDel和disconnectBundle
@@ -528,7 +539,7 @@ public class CommandCastServiceImpl {
 
 	/**
 	 * 播放器关联上屏<br/>
-	 * <p>通常可以在openBundle方法后边使用</p>
+	 * <p>通常可以在openBundle方法后边使用，把新增的业务都传进来，生成logic协议</p>
 	 * <b>作者:</b>zsu<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月22日 下午3:22:49
@@ -536,6 +547,8 @@ public class CommandCastServiceImpl {
 	 * @param playFilePlayers 正在播放文件的播放器，用于生成mediaPush
 	 * @param forwards 转发，用于生成forwardSet
 	 * @param delForwards 删除转发，用于生成forwardDel
+	 * @param vods 点播
+	 * @param calls 呼叫
 	 * @param codec
 	 * @param userId 暂时无用，会被替换为Admin的userId
 	 * @return LogicBO
@@ -549,11 +562,12 @@ public class CommandCastServiceImpl {
 			List<UserLiveCallPO> calls,//已完成，待测
 			CodecParamBO codec,
 			Long userId){
-		return openBundleCastDeviceWithRestrict2(demandsForForward, playFilePlayers, forwards, delForwards, vods, calls, codec, userId, null);
+		return openBundleCastDeviceWithRestrict2(demandsForForward, playFilePlayers, forwards, delForwards, vods, calls, calls, codec, userId, null);
 	}
 	
 	/** restrictCastDevices 是指定的上屏设备，为null时按照播放器player.getCastDevices()正常查找；
 	 * 慎用：非null时，则强制使用restrictCastDevices作为上屏设备，即使它是不包含任何元素的空表 */
+	@Deprecated
 	private LogicBO openBundleCastDeviceWithRestrict1(
 			List<CommandGroupForwardDemandPO> demandsForForwardAndVod,
 			Set<CommandGroupForwardPO> forwards,
@@ -613,7 +627,7 @@ public class CommandCastServiceImpl {
 			List<CommandGroupUserPlayerCastDevicePO> castDevices = null;
 			if(restrictCastDevices == null){
 				if(call.getCalledEncoderBundleId() != null){
-					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCalledEncoderBundleId());
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCalledDecoderBundleId());
 					if(player != null){
 						castDevices = player.getCastDevices();
 					}
@@ -639,7 +653,7 @@ public class CommandCastServiceImpl {
 			List<CommandGroupUserPlayerCastDevicePO> castCalledDevices = null;
 			if(restrictCastDevices == null){
 				if(call.getCallEncoderBundleId() != null){
-					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCallEncoderBundleId());
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCallDecoderBundleId());
 					if(player != null){
 						castCalledDevices = player.getCastDevices();
 					}
@@ -770,8 +784,25 @@ public class CommandCastServiceImpl {
 		return logic;		
 	}
 	
-	/** restrictCastDevices 是指定的上屏设备，为null时按照播放器player.getCastDevices()正常查找；
-		 * 慎用：非null时，则强制使用restrictCastDevices作为上屏设备，即使它是不包含任何元素的空表 */
+	/**
+	 * 该private方法主要用于修改播放器关联的解码器时，最后一个参数<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月28日 上午11:57:24
+	 * @param demandsForForward
+	 * @param playFilePlayers
+	 * @param forwards
+	 * @param delForwards
+	 * @param vods
+	 * @param calls 主叫播放器涉及到的呼叫
+	 * @param calleds 被叫播放器涉及到的呼叫
+	 * @param codec
+	 * @param userId
+	 * @param restrictCastDevices 指定的上屏设备，为null时按照播放器player.getCastDevices()正常查找；慎用：非null时，则强制使用restrictCastDevices作为上屏设备，即使它是不包含任何元素的空表，通常用于“给播放器添加了解码器”的时候
+	 * 
+	 * @return
+	 */
 	private LogicBO openBundleCastDeviceWithRestrict2(
 			List<CommandGroupForwardDemandPO> demandsForForward,
 			List<CommandGroupUserPlayerPO> playFilePlayers,
@@ -779,6 +810,7 @@ public class CommandCastServiceImpl {
 			Set<CommandGroupForwardPO> delForwards,
 			List<CommandVodPO> vods,
 			List<UserLiveCallPO> calls,//已完成，待测
+			List<UserLiveCallPO> calleds,//已完成，待测
 			CodecParamBO codec,
 			Long userId,
 			List<CommandGroupUserPlayerCastDevicePO> restrictCastDevices){
@@ -871,37 +903,15 @@ public class CommandCastServiceImpl {
 		if(null == calls) calls = new ArrayList<UserLiveCallPO>();
 		for(UserLiveCallPO call : calls){
 			
-			//呼叫方
-			List<CommandGroupUserPlayerCastDevicePO> castDevices = null;
-			if(restrictCastDevices == null){
-				if(call.getCalledEncoderBundleId() != null){
-					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCalledEncoderBundleId());
-					if(player != null){
-						castDevices = player.getCastDevices();
-					}
-				}
-			}else{
-				castDevices = restrictCastDevices;
-			}
-			if(castDevices != null){
-				for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
-					if(call.getCallType()==null
-							|| call.getCallType().equals(CallType.LOCAL_LOCAL)
-							|| call.getCallType().equals(CallType.LOCAL_OUTER)){
-						
-						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
-						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
-						logic.getForwardSet().add(forwardVideo);
-						logic.getForwardSet().add(forwardAudio);
-					}
-				}
+			if(!CallStatus.ONGOING.equals(call.getStatus())){
+				continue;
 			}
 			
-			//被呼叫方
+			//呼叫方的播放器，看被叫方的源
 			List<CommandGroupUserPlayerCastDevicePO> castCalledDevices = null;
 			if(restrictCastDevices == null){
 				if(call.getCallEncoderBundleId() != null){
-					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCallEncoderBundleId());
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCallDecoderBundleId());
 					if(player != null){
 						castCalledDevices = player.getCastDevices();
 					}
@@ -913,10 +923,45 @@ public class CommandCastServiceImpl {
 				for(CommandGroupUserPlayerCastDevicePO castDevice : castCalledDevices){
 					if(call.getCallType()==null
 							|| call.getCallType().equals(CallType.LOCAL_LOCAL)
-							|| call.getCallType().equals(CallType.OUTER_LOCAL)){
+							|| call.getCallType().equals(CallType.LOCAL_OUTER)){
 						
-						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCalledAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
-						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCalledAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
+						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
+						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
+						logic.getForwardSet().add(forwardVideo);
+						logic.getForwardSet().add(forwardAudio);
+					}
+				}
+			}
+		}
+		
+		//呼叫：restrictCastDevices 不为null时可能有问题
+		if(null == calleds) calleds = new ArrayList<UserLiveCallPO>();
+		for(UserLiveCallPO called : calleds){
+			
+			if(!CallStatus.ONGOING.equals(called.getStatus())){
+				continue;
+			}
+			
+			//被叫方的播放器，看呼叫方的源
+			List<CommandGroupUserPlayerCastDevicePO> castDevices = null;
+			if(restrictCastDevices == null){
+				if(called.getCalledEncoderBundleId() != null){
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(called.getCalledDecoderBundleId());
+					if(player != null){
+						castDevices = player.getCastDevices();
+					}
+				}
+			}else{
+				castDevices = restrictCastDevices;
+			}
+			if(castDevices != null){
+				for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
+					if(called.getCallType()==null
+							|| called.getCallType().equals(CallType.LOCAL_LOCAL)
+							|| called.getCallType().equals(CallType.OUTER_LOCAL)){
+						
+						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCalledAndDstCastDevice(called, castDevice, codec, MediaType.VIDEO);
+						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCalledAndDstCastDevice(called, castDevice, codec, MediaType.AUDIO);
 						logic.getForwardSet().add(forwardVideo);
 						logic.getForwardSet().add(forwardAudio);
 					}

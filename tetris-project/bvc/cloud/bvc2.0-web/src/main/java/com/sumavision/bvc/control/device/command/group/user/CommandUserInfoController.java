@@ -129,8 +129,6 @@ public class CommandUserInfoController {
 					commandVodService.seeOneselfUserStart(userBO, admin);
 				}
 			}
-			log.info("serverProps.LOCAL_PREVIEW_MODE: " + serverProps.getLocalPreviewMode());
-			log.info("serverProps.COMMAND_STRING: " + serverProps.getCommandString());
 		}catch(Exception e){
 			log.info(user.getName() + " 用户添加本地视频预览失败");
 			e.printStackTrace();

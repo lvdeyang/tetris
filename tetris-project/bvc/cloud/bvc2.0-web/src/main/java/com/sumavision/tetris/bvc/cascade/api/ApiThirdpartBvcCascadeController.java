@@ -164,7 +164,7 @@ public class ApiThirdpartBvcCascadeController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/conversion/information")
-	public Object conversionInformation(HttpServletRequest request) throws Exception{
+	public synchronized Object conversionInformation(HttpServletRequest request) throws Exception{
 		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
 		String seq = requestWrapper.getString("seq");
 		String cmd = requestWrapper.getString("cmd");
@@ -261,7 +261,7 @@ public class ApiThirdpartBvcCascadeController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/streaming")
-	public Object streaming(HttpServletRequest request) throws Exception{
+	public synchronized Object streaming(HttpServletRequest request) throws Exception{
 		
 		HttpServletRequestParser parser = new HttpServletRequestParser(request);
 		JSONObject params = parser.parseJSON();

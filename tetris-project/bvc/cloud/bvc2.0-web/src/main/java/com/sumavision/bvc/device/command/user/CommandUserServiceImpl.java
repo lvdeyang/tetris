@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
@@ -230,7 +231,7 @@ public class CommandUserServiceImpl {
 	 * @param locationIndex 指定播放器序号，序号从0起始；-1为自动选择
 	 * @return CommandGroupUserPlayerPO 播放器占用信息
 	 */
-	public CommandGroupUserPlayerPO userCallUser(UserBO callUser, UserBO calledUser, int locationIndex) throws Exception{
+	/*public CommandGroupUserPlayerPO userCallUser(UserBO callUser, UserBO calledUser, int locationIndex) throws Exception{
 		
 		if(callUser.getId().equals(calledUser.getId())){
 			throw new BaseException(StatusCode.FORBIDDEN, "请选择其他成员进行呼叫");
@@ -344,7 +345,7 @@ public class CommandUserServiceImpl {
 		userLiveCallDao.save(business);
 		
 		return callUserPlayer;
-	}
+	}*/
 	
 	/**
 	 * 用户呼叫用户 - 支持级联<br/>
@@ -360,7 +361,9 @@ public class CommandUserServiceImpl {
 	 * @throws Exception
 	 */
 	public CommandGroupUserPlayerPO userCallUser_Cascade(UserBO callUser, UserBO calledUser, int locationIndex, String uuid) throws Exception{
-				
+		
+//		commandCommonServiceImpl.authorizeUser(calledUser.getId(), callUser.getId(), BUSINESS_OPR_TYPE.CALL);
+		
 		if(callUser.getId().equals(calledUser.getId())){
 			throw new BaseException(StatusCode.FORBIDDEN, "请选择其他成员进行呼叫");
 		}
@@ -581,6 +584,8 @@ public class CommandUserServiceImpl {
 	 * @return CommandGroupUserPlayerPO 播放器信息
 	 */
 	public CommandGroupUserPlayerPO userVoiceUser(UserBO callUser, UserBO calledUser, int locationIndex) throws Exception{
+		
+//		commandCommonServiceImpl.authorizeUser(calledUser.getId(), callUser.getId(), BUSINESS_OPR_TYPE.CALL);
 		
 		if(callUser.getId().equals(calledUser.getId())){
 			throw new BaseException(StatusCode.FORBIDDEN, "请选择其他成员进行呼叫");

@@ -417,7 +417,7 @@ public class ForwardSetBO {
 		return this;
 	}
 	
-	/** 用于生成发起呼叫人的上屏转发 */
+	/** 用于生成发起呼叫人的上屏转发，看被叫方的源 */
 	public ForwardSetBO setBySrcCallAndDstCastDevice(UserLiveCallPO call, CommandGroupUserPlayerCastDevicePO castDevice, CodecParamBO codec, MediaType mediaType){
 		ForwardSetSrcBO src = new ForwardSetSrcBO();
 		ForwardSetDstBO dst = new ForwardSetDstBO();
@@ -458,7 +458,7 @@ public class ForwardSetBO {
 		return this;
 	}
 	
-	/** 用于生成被呼叫人的上屏转发 */
+	/** 用于生成被呼叫人的上屏转发，看呼叫方的源 */
 	public ForwardSetBO setBySrcCalledAndDstCastDevice(UserLiveCallPO call, CommandGroupUserPlayerCastDevicePO castDevice, CodecParamBO codec, MediaType mediaType){
 		ForwardSetSrcBO src = new ForwardSetSrcBO();
 		ForwardSetDstBO dst = new ForwardSetDstBO();
