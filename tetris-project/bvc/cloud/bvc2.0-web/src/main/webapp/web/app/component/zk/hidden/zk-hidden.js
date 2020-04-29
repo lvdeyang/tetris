@@ -136,7 +136,7 @@ define([
                     self.gatePort = variables.user ? $.parseJSON(variables.user).gatePort : '';
                 
                     //请求websocket连接地址
-                    ajax.editPsdPost('http://' + self.gateIp + ':' + self.gatePort + '/tetris-user/api/zk/websocket/server/addr',
+                    ajax.editPsdPost(window.location.protocol + '//' + self.gateIp + ':' + self.gatePort + '/tetris-user/api/zk/websocket/server/addr',
                             null,
                             function (addr, status) {
                         var onmessage = function(e){
@@ -350,6 +350,10 @@ define([
                             setTimeout(createWebsocket, 5*1000);
                         };
                         var createWebsocket = function(){
+                        	if(window.location.protocol === 'https:'){
+                        		addr = addr.replace('ws:', 'wss:')
+                        				   .replace('8084', '8204');
+                        	}
                         	//把IP替换为虚拟IP
                         	var virtualAddr = addr.replace(/[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/,self.gateIp);
                             var webSocket = new WebSocket(virtualAddr + window.TOKEN);
