@@ -29,6 +29,7 @@ import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
+import com.suma.venus.resource.pojo.SerInfoPO.SerInfoType;
 import com.suma.venus.resource.pojo.SerInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.service.LdapService;
@@ -180,6 +181,14 @@ public class SerInfoAndNodeController extends ControllerBase {
 		if (serInfoVO == null) {
 			data.put(ERRMSG, "参数错误");
 			return data;
+		}
+		
+		if(serInfoVO.getSerType().equals(SerInfoType.APPLICATION.getNum())){
+			SerInfoPO serInfo = serInfoDao.findBySourceTypeAndSerType(SOURCE_TYPE.SYSTEM, SerInfoType.APPLICATION.getNum());
+			if(serInfo != null){
+				data.put(ERRMSG, "应用服务单元已存在！");
+				return data;
+			}
 		}
 
 		try {
