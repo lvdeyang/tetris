@@ -208,16 +208,18 @@ define([
                         //     }
                         // })
 
-                        ajax.editPsdPost('http://' + self.gateIp + ':' + self.gatePort + '/user/api/modifyPassword',
+                        ajax.editPsdPost(window.location.protocol + '//' + self.gateIp + ':' + self.gatePort + '/tetris-user/api/zk/auth/modify/passward',
                             {
                                 userId: self.user.id,
                                 oldPassword: self.ruleForm.oldPass,
                                 newPassword: self.ruleForm.newPass
                             },
-                            function (data, status) {
+                            function (data, status, message) {
                             	if(status == 200){
                             		self.qt.success('修改密码成功');
                                    self.closeMask();
+                            	}else {
+                            		self.qt.errot(message);
                             	}
                             }, null, [403]);
                     } else {
