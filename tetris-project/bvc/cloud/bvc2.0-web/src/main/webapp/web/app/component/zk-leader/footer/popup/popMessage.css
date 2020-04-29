@@ -11,33 +11,36 @@ body, div, p {
     height: 100%;
     background-color: #000;
 }
-.title {
-    position: absolute;
-    top: 12.5%;
-    left: 50%;
-    margin-left: -55px;
-    font-size: 18px;
-    font-weight: bold;
+.win-header {
+    height: 40px;
+    background-color: #3668a9;
+    border-radius: 4px 4px 0 0;
+}
+
+.win-header .win-header-title {
+    float: left;
     color: #fff;
-    text-align: center;
-    z-index: 1;
+    line-height: 40px;
+    padding: 0 10px;
+}
+
+.win-header .win-header-close {
+    float: right;
+    color: #fff;
+    line-height: 40px;
+    padding: 0 10px;
+    font-size: 20px;
+    cursor: pointer;
 }
 
 .pop {
     position: absolute;
-    /*padding-top: 110px;*/
-    /*top: 120px;*/
-    /*left: 339px;*/
-    /*width: 63.54%;*/
-    /*height: 641px;*/
     height:700px;
     padding-top: 80px;
     top: 8.07%;
     left: 17.66%;
     width: 63.54%;
-    /*height: 59.35%;*/
-    background: url("../../../../../../images/zk-leader/popMsg.png") no-repeat center;
-    background-size: 100% 100%;
+    background-color: #0F2A4D;
     overflow: hidden;
     padding-left: 80px;
     padding-right: 85px;
@@ -50,9 +53,6 @@ body, div, p {
 
 
 .msg {
-    /*margin: 15px 162px;*/
-    /*padding: 20px 30px;*/
-    /*margin: 0.79% 8.43%;*/
     margin: 0.79% 0;
     padding: 1.04% 1.56%;
     background-color: #1e2343;

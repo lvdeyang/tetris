@@ -239,16 +239,14 @@ public interface CapacityFeign {
 	public JSONObject deletePushTask(@RequestParam("taskId") String taskId) throws Exception;
 	
 	/**
-	 * 切换push备份源<br/>
+	 * 切换push节目单<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月26日 上午9:00:15
-	 * @param String taskId 任务标识
-	 * @param String index 切换源索引
+	 * @param String changeSchedule 节目单信息
 	 */
-	@RequestMapping(value = "/push/task/feign/change/index")
-	public JSONObject changePushBackUp(@RequestParam("taskId") String taskId,
-									@RequestParam("index") String index) throws Exception;
+	@RequestMapping(value = "/push/task/feign/change/schedule")
+	public JSONObject changePushSchedule(@RequestParam("changeSchedule") String changeSchedule) throws Exception;
 	
 	/**
 	 * 批量删除push任务<br/>

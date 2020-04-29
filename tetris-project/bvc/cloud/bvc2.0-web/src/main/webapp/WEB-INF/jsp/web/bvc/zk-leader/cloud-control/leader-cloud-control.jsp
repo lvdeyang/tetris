@@ -84,7 +84,6 @@
         *{font-family:'Microsoft YaHei';}
         html,
         body{width:100%; height:100%; margin:0; padding:0;}
-        body{background-color:#F2F3F7; min-width:670px;}
         aside,main{height:100%!important;}
         .page-wrapper{width:100%; height:100%; padding:0; border:0; position:relative;}
         .page-body{position:absolute; top:92px; left:0; right:0; bottom:0; padding:15px 0 15px 15px;}

@@ -19,7 +19,7 @@ define([
             return {
                 protocolSuccess: false,
                 speed: 8,
-                direct:0,
+                direct: 0,
                 points: [],
                 serial: '',
                 dialog: {
@@ -33,16 +33,16 @@ define([
         },
         methods: {
             //关闭弹窗
-            closeDialog:function () {
+            closeDialog: function () {
                 this.qt.destroy();
             },
             //qt实现鼠标抬起事件
-            qtFunction:function () {
+            qtFunction: function () {
                 var self = this;
                 self.qt.on('mouseup', function (e) {
                     if (self.protocolSuccess) {
                         self.stop();
-                        self.direct=0;
+                        self.direct = 0;
                     }
                     self.qt.unbind('mouseup');
                 });
@@ -55,7 +55,7 @@ define([
                     direction: direction,
                     serial: self.serial,
                     speed: self.speed
-                },function () {
+                }, function () {
                     self.qtFunction();
                 });
             },
@@ -67,7 +67,7 @@ define([
                     direction: direction,
                     serial: self.serial,
                     speed: self.speed
-                },function () {
+                }, function () {
                     self.qtFunction();
                 });
             },
@@ -75,16 +75,16 @@ define([
             zoom: function (direction) {
                 var self = this;
                 self.protocolSuccess = true;
-                if(direction == 'OUT'){
-                    self.direct=1;
-                }else if(direction == 'IN'){
-                    self.direct=2;
+                if (direction == 'OUT') {
+                    self.direct = 1;
+                } else if (direction == 'IN') {
+                    self.direct = 2;
                 }
                 ajax.post('/zk/cloud/control/zoom', {
                     direction: direction,
                     serial: self.serial,
                     speed: self.speed
-                },function () {
+                }, function () {
                     self.qtFunction();
                 });
             },
@@ -92,16 +92,16 @@ define([
             focus: function (direction) {
                 var self = this;
                 self.protocolSuccess = true;
-                if(direction == 'NEAR'){
-                    self.direct=3;
-                }else if(direction == 'FAR'){
-                    self.direct=4;
+                if (direction == 'NEAR') {
+                    self.direct = 3;
+                } else if (direction == 'FAR') {
+                    self.direct = 4;
                 }
                 ajax.post('/zk/cloud/control/focus', {
                     direction: direction,
                     serial: self.serial,
                     speed: self.speed
-                },function () {
+                }, function () {
                     self.qtFunction();
                 });
             },
@@ -109,16 +109,16 @@ define([
             aperture: function (direction) {
                 var self = this;
                 self.protocolSuccess = true;
-                if(direction == 'MINUS'){
-                    self.direct=5;
-                }else if(direction == 'PLUS'){
-                    self.direct=6;
+                if (direction == 'MINUS') {
+                    self.direct = 5;
+                } else if (direction == 'PLUS') {
+                    self.direct = 6;
                 }
                 ajax.post('/zk/cloud/control/aperture', {
                     direction: direction,
                     serial: self.serial,
                     speed: self.speed
-                },function () {
+                }, function () {
                     self.qtFunction();
                 });
             },
@@ -227,7 +227,7 @@ define([
                     beforeClose: function (action, instance, done) {
                         instance.confirmButtonLoading = true;
                         if (action === 'confirm') {
-                            ajax.post('/zk/cloud/control/invoke/point', {id:point.id}, function (data, status) {
+                            ajax.post('/zk/cloud/control/invoke/point', {id: point.id}, function (data, status) {
                                 instance.confirmButtonLoading = false;
                                 done();
                                 if (status !== 200) return;

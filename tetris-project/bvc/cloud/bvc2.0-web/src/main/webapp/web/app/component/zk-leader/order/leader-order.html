@@ -1,5 +1,8 @@
 <div class="zk-business-forward">
-    <div class="title">点播资源</div>
+    <div class="win-header">
+        <span class="win-header-title">点播资源</span>
+        <span class="win-header-close" @click="handleClose"><span class="el-icon-close"></span></span>
+    </div>
 
     <div style="position:absolute;top:75px;left:75px;right:75px;bottom:75px;background-color: #1E2343;border-radius: 13px">
         <el-tabs v-model="currentTab" type="card">
@@ -106,7 +109,6 @@
     </div>
 
     <div style="height:50px; width:100%; position:absolute; left:0; bottom:0;text-align: center">
-        <el-button size="medium" @click="handleClose">取消/关闭</el-button>
         <el-button size="medium" type="primary" @click="handleOrder">确定</el-button>
     </div>
 </div>

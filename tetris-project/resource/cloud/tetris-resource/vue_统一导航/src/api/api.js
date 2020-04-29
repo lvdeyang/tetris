@@ -86,6 +86,7 @@ export const getVirtualResourceDetailInfo = params => { return axiosInstance.pos
 export const getNodes = params => { return axiosInstance.post(`${basePath}/layernode/query`, qs.stringify(params)).then(res => res.data) }
 export const deleteNodes = params => { return axiosInstance.post(`${basePath}/layernode/delete`, qs.stringify(params)).then(res => res.data) }
 export const saveNode = params => { return axiosInstance.post(`${basePath}/layernode/save`, qs.stringify(params)).then(res => res.data) }
+export const updateNode = params => { return axiosInstance.post(`${basePath}/layernode/update`, qs.stringify(params)).then(res => res.data) }
 export const getNodeById = params => { return axiosInstance.post(`${basePath}/layernode/getNode`, qs.stringify(params)).then(res => res.data) }
 
 export const queryFolderTree = params => {return axiosInstance.post(`${basePath}/folder/query/tree`, qs.stringify(params)).then(res => res.data)}

@@ -1,5 +1,8 @@
 <div class="zk-business-command-message">
-    <div class="title">发送通知</div>
+    <div class="win-header">
+        <span class="win-header-title">发送通知</span>
+        <span class="win-header-close" @click="handleWindowClose"><span class="el-icon-close"></span></span>
+    </div>
 
     <el-tabs tab-position="left" v-model="currentTab" style="position: absolute;top: 100px;left: 70px;height: 80%;right: 72px;">
         <el-tab-pane label="新建通知" name="0">
@@ -162,7 +165,6 @@
             <div style="height:100%; width:100%; position:absolute;left:0; right:0; top:0; padding-top:11px;text-align: center;">
                 <el-button size="medium" type="danger" @click="handleMessageList">操作</el-button>
                 <el-button size="medium" type="primary" @click="handleSendMessage">发送</el-button>
-                <el-button size="medium" @click="handleWindowClose">取消</el-button>
             </div>
         </div>
     </div>

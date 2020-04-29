@@ -105,7 +105,7 @@ body{
 }
 
 .el-table--enable-row-hover .el-table__body tr:hover td{
-    background-color:#0595b9;
+    background-color:#061f3e;
 }
 
 .outFile .el-table--enable-row-hover .el-table__body tr:hover {
@@ -123,7 +123,7 @@ body{
 }
 
 .outFile .el-button--text{
-    color:#476e94;
+    color:#72b7fb;
 }
 
 /*重置对话框样式*/

@@ -112,6 +112,36 @@ public class WorkNodeController extends ControllerBase {
 
 		return data;
 	}
+	
+	@RequestMapping("/update")
+	@ResponseBody
+	public Map<String, Object> update(@RequestParam(name = "json") String json) {
+		Map<String, Object> data = makeAjaxData();
+		LOGGER.info("WorkNodeController save json=" + json);
+
+		try {
+			WorkNodeVO vo = JSONObject.parseObject(json, WorkNodeVO.class);
+			if (null != vo.getNodeUid()) {// 校验nodeUid是否重复
+				WorkNodePO checkNode = workNodeService.findByNodeUid(vo.getNodeUid());
+				if (null != checkNode && !checkNode.getId().equals(vo.getId())) {
+					data.put(ERRMSG, "层节点ID " + vo.getNodeUid() + "已存在");
+					return data;
+				}
+			}
+			WorkNodePO po = vo.toPO();
+			workNodeService.save(po);
+//            if(null == po.getNodeUid() || po.getNodeUid().isEmpty()){
+//            	po.setNodeUid("suma-venus-access-" + po.getId());
+//            	workNodeService.save(po);
+//            }
+			data.put("nodeUid", po.getNodeUid());
+		} catch (Exception e) {
+			LOGGER.error(e.toString());
+			data.put(ERRMSG, "内部错误");
+		}
+
+		return data;
+	}
 
 	@RequestMapping("/delete")
 	@ResponseBody

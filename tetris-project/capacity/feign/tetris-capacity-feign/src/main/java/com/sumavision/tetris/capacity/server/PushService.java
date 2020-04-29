@@ -40,15 +40,14 @@ public class PushService {
 	}
 	
 	/**
-	 * 切换push备份源<br/>
+	 * 切换push节目单<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月26日 上午9:15:34
-	 * @param String taskId 任务标识
-	 * @param String index 切换到源的索引
+	 * @param String changeSchedule 节目单信息
 	 */
-	public void changePushBackup(String taskId, String index) throws Exception{
-		JsonBodyResponseParser.parseObject(capacityFeign.changePushBackUp(taskId, index), null);
+	public void changePushBackup(String changeSchedule) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.changePushSchedule(changeSchedule), null);
 	}
 	
 	/**
