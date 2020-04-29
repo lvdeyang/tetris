@@ -229,7 +229,7 @@ define([
                     self.dialog.editUser.mobile = '';
                     self.dialog.editUser.mail = '';
                     self.dialog.editUser.level = 1;
-                    self.dialog.editUser.editPassword = '';
+                    self.dialog.editUser.editPassword = false;
                     self.dialog.editUser.oldPassword = '';
                     self.dialog.editUser.newPassword = '';
                     self.dialog.editUser.repeat = '';
