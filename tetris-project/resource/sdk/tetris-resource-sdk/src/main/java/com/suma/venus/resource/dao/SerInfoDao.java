@@ -21,6 +21,8 @@ public interface SerInfoDao extends CommonDao<SerInfoPO> {
 
 	public List<SerInfoPO> findBySourceType(SOURCE_TYPE sourceType);
 	
+	public SerInfoPO findBySourceTypeAndSerType(SOURCE_TYPE sourceType, Integer serType);
+	
 	public List<SerInfoPO> findBySerNodeIn(Collection<String> nodes);
 	
 	public SerInfoPO findBySerNo(String no);
