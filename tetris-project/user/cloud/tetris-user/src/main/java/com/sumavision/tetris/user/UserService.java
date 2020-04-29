@@ -671,6 +671,33 @@ public class UserService{
 		return new UserVO().set(user);
 	}
 	
+	/**
+	 * 修改用户密码<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午8:01:48
+	 * @param Long userId 用户id
+	 * @param String oldPassword 旧密码
+	 * @param String newPassword 新密码
+	 * @return UserVO 修改后的用户
+	 */
+	public UserVO modifyPassword(
+			Long userId,
+			String oldPassword,
+			String newPassword) throws Exception{
+		
+		UserPO entity = userDao.findOne(userId);
+		
+		oldPassword = sha256Encoder.encode(oldPassword);
+		if(!entity.getPassword().equals(oldPassword)) throw new PasswordErrorException();
+		
+		userQuery.checkPassword(newPassword);
+		entity.setPassword(sha256Encoder.encode(newPassword));
+		userDao.save(entity);
+		
+		return new UserVO().set(entity);
+	}
+	
 	/** 用户导入事件发布管理 */
 	private ConcurrentHashMap<String, UserImportEventPublisher> publishers = new ConcurrentHashMap<String, UserImportEventPublisher>();
 	

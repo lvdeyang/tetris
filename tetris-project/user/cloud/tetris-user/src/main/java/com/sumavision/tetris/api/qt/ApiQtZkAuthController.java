@@ -1,20 +1,15 @@
 package com.sumavision.tetris.api.qt;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sumavision.tetris.api.exception.MobileNotMatchedException;
-import com.sumavision.tetris.api.exception.MobileVerificationCodeErrorException;
-import com.sumavision.tetris.api.exception.MobileVerificationCodeTimeoutException;
 import com.sumavision.tetris.auth.login.LoginService;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.mvc.constant.HttpConstant;
-import com.sumavision.tetris.mvc.ext.context.HttpSessionContext;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserService;
@@ -47,7 +42,7 @@ public class ApiQtZkAuthController {
 	 * @param verificationCode 验证码
 	 * @param sessionToken session标识
 	 */
-	@JsonBody
+	/*@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/modify/passward")
 	public Object modifyPassward(
@@ -75,6 +70,30 @@ public class ApiQtZkAuthController {
 		}
 		
 		userService.modifyPassword(username, mobile, password, passwordRepeat);
+		
+		return null;
+	}*/
+	
+	/**
+	 * 修改用户密码<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午8:01:48
+	 * @param Long userId 用户id
+	 * @param String oldPassword 旧密码
+	 * @param String newPassword 新密码
+	 * @return UserVO 修改后的用户
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/modify/passward")
+	public Object modifyPassward(
+			Long userId,
+			String oldPassword,
+			String newPassword,
+			HttpServletRequest request) throws Exception{
+		
+		userService.modifyPassword(userId, oldPassword, newPassword);
 		
 		return null;
 	}
