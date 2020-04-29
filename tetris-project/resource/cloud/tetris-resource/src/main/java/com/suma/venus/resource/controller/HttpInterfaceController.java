@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,7 +77,6 @@ import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.dao.VirtualResourceDao;
-import com.suma.venus.resource.dao.WorkNodeDao;
 import com.suma.venus.resource.externalinterface.InterfaceToResource;
 import com.suma.venus.resource.feign.TokenFeign;
 import com.suma.venus.resource.feign.UserQueryFeign;
@@ -91,22 +92,24 @@ import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.pojo.BundlePO.SOURCE_TYPE;
 import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
-import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.SerInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO;
 import com.suma.venus.resource.pojo.VirtualResourcePO;
 import com.suma.venus.resource.pojo.WorkNodePO;
+import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ExtraInfoService;
+import com.suma.venus.resource.service.LianwangPassbyService;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.WorkNodeService;
 import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.util.XMLBeanUtils;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 /**
  * Http对外接口
@@ -185,6 +188,9 @@ public class HttpInterfaceController {
 	
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private LianwangPassbyService lianwangPassbyService;
 
 	// 业务使用方式：vod|meeting
 	@Value("${businessMode:vod}")
@@ -1825,4 +1831,47 @@ public class HttpInterfaceController {
 		return new com.suma.venus.resource.base.bo.ResponseBody(com.suma.venus.resource.base.bo.ResponseBody.FAIL,
 				errorCode);
 	}
+	
+	/**
+	 * 存联网passby<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 上午9:26:13
+	 * @param String uuid 业务uuid
+	 * @param String layerId 联网layerId
+	 * @param String type 业务类型
+	 * @param String protocol passby
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/lianwang/passby")
+	public Object addLianwangPassby(
+			String uuid, 
+			String layerId, 
+			String type, 
+			String protocol,
+			HttpServletRequest request) throws Exception{
+		
+		lianwangPassbyService.save(uuid, layerId, type, protocol);
+		return null;
+	}
+	
+	/**
+	 * 删除联网passby<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 上午9:48:59
+	 * @param String uuid 业务uuid
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove/lianwang/passby")
+	public Object removeLianwangPassby(
+			String uuid, 
+			HttpServletRequest request) throws Exception{
+		
+		lianwangPassbyService.delete(uuid);
+		return null;
+	}
+	
 }

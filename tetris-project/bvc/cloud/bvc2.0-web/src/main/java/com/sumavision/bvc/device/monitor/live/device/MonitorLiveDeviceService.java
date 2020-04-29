@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
@@ -45,6 +46,7 @@ import com.sumavision.bvc.device.monitor.osd.exception.MonitorOsdNotExistExcepti
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskDAO;
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskPO;
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskService;
+import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.system.dao.AVtplGearsDAO;
 import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
@@ -102,6 +104,9 @@ public class MonitorLiveDeviceService {
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
+	
+	@Autowired
+	private ResourceServiceClient resourceServiceClient;
 
 	/**
 	 * xt看本地设备<br/>
@@ -203,6 +208,12 @@ public class MonitorLiveDeviceService {
 										.setPass_by_content(passByContent);
 		
 		logic.getPass_by().add(passby);
+		
+		resourceServiceClient.addLianwangPassby(
+				live.getUuid(), 
+				networkLayerId, 
+				XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER, 
+				JSON.toJSONString(passby));
 		
 		executeBusiness.execute(logic, "点播系统：xt点播本地设备");
 		
@@ -477,6 +488,12 @@ public class MonitorLiveDeviceService {
 		
 		logic.getPass_by().add(passby);
 		
+		resourceServiceClient.addLianwangPassby(
+				live.getUuid(), 
+				networkLayerId, 
+				XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER, 
+				JSON.toJSONString(passby));
+		
 		executeBusiness.execute(logic, "点播系统：本地点播xt设备");
 		
 		return live;
@@ -620,6 +637,8 @@ public class MonitorLiveDeviceService {
 		
 		monitorLiveDeviceDao.delete(live);
 		
+		resourceServiceClient.removeLianwangPassby(live.getUuid());
+		
 		executeBusiness.execute(logic, "点播系统：停止xt点播本地设备任务");
 		
 	}
@@ -695,6 +714,8 @@ public class MonitorLiveDeviceService {
 		logic.getPass_by().add(passby);
 		
 		monitorLiveDeviceDao.delete(live);
+		
+		resourceServiceClient.removeLianwangPassby(live.getUuid());
 		
 		executeBusiness.execute(logic, "点播系统：停止本地点播xt设备");
 		
