@@ -407,7 +407,9 @@ export default {
                 serName:"",
                 serAddr:"",
                 serPort: 5060,
-                serPwd: ""
+                serPwd: "",
+                serType: "",
+                serPro: ""
             },
 
             serNodeEditFormRules: {

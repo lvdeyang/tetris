@@ -56,7 +56,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-  import {saveNode,getNodeById} from '../../api/api';
+  import {updateNode,getNodeById} from '../../api/api';
 
   export default {
     name: "ModifyLayernode",
@@ -220,7 +220,7 @@
           json : JSON.stringify(this.nodeForm)
         };
 
-        saveNode(param).then(res => {
+        updateNode(param).then(res => {
           if(res.errMsg){
             this.$message({
               message: res.errMsg,
