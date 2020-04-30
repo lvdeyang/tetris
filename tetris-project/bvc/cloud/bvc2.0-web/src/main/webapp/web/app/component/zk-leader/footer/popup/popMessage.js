@@ -40,6 +40,10 @@ define([
             load:function(currentPage){
                 var self = this;
                 self.historyInstantMsg.splice(0, self.historyInstantMsg.length);
+                if(!self.currentGroupId){
+                    self.qt.error('请先选择一个会议才能查看消息');
+                    return;
+                }
                 ajax.post('/command/message/query/history/instant/message', {
                     commandId:self.currentGroupId,
                     currentPage:currentPage,
@@ -249,6 +253,7 @@ define([
             var self = this;
             self.qt = new QtContext('popMessage', function () {
                 self.qt.get(['currentGroupId'], function (variables) {
+                    console.log(variables)
                     self.currentGroupId = variables.currentGroupId;
                 });
 

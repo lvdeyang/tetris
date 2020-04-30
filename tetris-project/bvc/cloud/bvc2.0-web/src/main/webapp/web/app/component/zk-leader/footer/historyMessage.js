@@ -89,6 +89,7 @@ define([
             showMessagePanel: function () {
                 var self = this;
                 // self.qt.get(['currentGroupId'], function (variables) {
+                //     console.log(variables)
                 //     var currentGroupId = variables.currentGroupId;
                 //     if(!currentGroupId){
                 //         self.qt.error('未获取到当前会议id!');
