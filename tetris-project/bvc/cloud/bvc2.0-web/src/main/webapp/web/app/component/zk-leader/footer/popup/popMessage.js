@@ -20,7 +20,7 @@ define([
                 historyInstantMsg:[],
                 page:{
                     currentPage:0,
-                    pageSize:30,
+                    pageSize:10,
                     total:0
                 },
                 currentGroupId:''
@@ -248,8 +248,9 @@ define([
         mounted: function () {
             var self = this;
             self.qt = new QtContext('popMessage', function () {
-                var params = self.qt.getWindowParams();
-                self.currentGroupId = params.currentGroupId;
+                self.qt.get(['currentGroupId'], function (variables) {
+                    self.currentGroupId = variables.currentGroupId;
+                });
 
                 // 初始化ajax
                 ajax.init({

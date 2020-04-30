@@ -31,7 +31,7 @@
     cursor: pointer;
 }
 
-.directBtn {
+.el-button.directBtn {
     position: absolute;
     top: 4px;
     left: 44px;
@@ -41,7 +41,7 @@
     border: none;
 }
 
-.horizBtn {
+.el-button.horizBtn {
     position: absolute;
     top: 47px;
     left: 5px;

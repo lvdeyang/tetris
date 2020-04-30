@@ -167,10 +167,6 @@ define([
         methods: {
             //顶部切换标题点击事件
             toggleMenu1: function () {
-                var self = this;
-                this.refreshCommand(null, function () {
-                    self.currentGroupChange(self.group.currentId);
-                });
                 $('.triggerLi1').addClass('focusLight');
                 $('.triggerLi2').removeClass('focusLight');
                 $(".highLight").css({"display": "block", "left": "7px"});
@@ -179,13 +175,10 @@ define([
                 this.switchStatus3 = false;
                 this.differentiate = 1;
                 this.currentTab = '-1';
+                this.refreshCommand(null);
             },
             toggleMenu2: function () {
                 var self = this;
-                self.refreshCommand('meeting', function () {
-                    self.currentGroupChange(self.meet.currentId);
-                    self.refreshEnteredGroups();
-                });
                 $('.triggerLi1').removeClass('focusLight');
                 $('.triggerLi2').addClass('focusLight');
                 $(".highLight").css({"display": "block", "left": "167px"});
@@ -194,6 +187,14 @@ define([
                 this.switchStatus3 = true;
                 this.differentiate = 2;
                 this.currentTab = '-1';
+                self.refreshCommand('meeting',function () {
+                    self.refreshEnteredGroups();
+
+                    self.qt.get(['currentGroupId'], function (variables) {
+                        console.log(variables)
+                    })
+                });
+
             },
             //从头部2个tab切到左侧的时候
             handleClick: function (tab) {
@@ -439,9 +440,9 @@ define([
                         var commands = data[0].children;
                         if (commands && commands.length > 0) {
                             self.command.data = commands;
-                        }
-                        if (typeof callback == 'function') {
-                            callback();
+                            if (typeof callback == 'function') {
+                                callback();
+                            }
                         }
                     }
                 });
@@ -470,12 +471,6 @@ define([
                     self.contextMenu.resetName = name;
                     //记住指挥的id,观看的时候的时候用到
                     self.dialog.resetName.commandId = data.id;
-
-                    //区分下是不是当前用户建的指挥,目的是只有主席才能改名字
-                    if (data.param) {
-                        var param = JSON.parse(data.param);
-                        self.contextMenu.currentNode.creator = param.creator;
-                    }
 
                     if (data.type === 'USER') {
                         self.contextMenu.call = true;
@@ -521,6 +516,11 @@ define([
                             self.contextMenu.removeRecord = false;
                         }
                     }
+                    //区分下是不是当前用户建的指挥,目的是只有主席才能改名字
+                    // if (typeof data.param=='object') {
+                    //     var param = JSON.parse(data.param);
+                    //     self.contextMenu.currentNode.creator = param.creator;
+                    // }
                 }
             },
 
@@ -889,6 +889,7 @@ define([
                                     defaultItem = data[0];
                                 }
                                 self.meet.currentId = defaultItem.id;
+                                self.qt.set('currentGroupId', self.meet.currentId);
                                 self.currentGroupChange(self.meet.currentId);
                             }
                         }
@@ -1109,7 +1110,7 @@ define([
                 self.dialog.resetName.visible = true;
             },
             //给指挥起名字的添加事件
-            resetNameCommit: function (type) {
+            resetNameCommit: function () {
                 var self = this;
                 if (!self.dialog.resetName.name || !(self.dialog.resetName.name.trim())) {
                     self.$message({
@@ -1280,17 +1281,22 @@ define([
                 var id = self.group.currentId;
                 ajax.post('/command/basic/remove', {ids: $.toJSON([id])}, function (data) {
                     self.qt.success('删除成功');
-                    self.refreshCommand(null, function () {
-                        self.group.currentId = self.command.data[0].id;
-                        self.group.current = {
-                            creator: JSON.parse(self.command.data[0].param).creator,
-                            id: self.command.data[0].id,
-                            name: self.command.data[0].name,
-                            status: self.command.data[0].status,
-                            type: self.command.data[0].type
-                        };
+                    self.refreshCommand(null);
+                    for (var j = 0; j < self.group.entered.length; j++) {
+                        if (id == self.group.entered[j].id) {
+                            self.group.entered.splice(j, 1);
+                            if (self.group.currentId == id) {
+                                self.group.currentId = '';
+                                self.group.current = '';
+                            }
+                            break;
+                        }
+                    }
+                    if (!self.group.current && self.group.entered.length > 0) {
+                        self.group.current = self.group.entered[0];
+                        self.group.currentId = self.group.entered[0].id;
                         self.currentGroupChange(self.group.currentId);
-                    });
+                    }
                 });
             },
             //点播录制文件
@@ -1352,7 +1358,6 @@ define([
                                 data.members.forEach(function (value) {
                                     tree = tree.concat(value.children);
                                 });
-                                self.refreshEnteredGroups();
                                 //去掉根目录那层
                                 if (self.differentiate === 1) {
                                     self.group.tree = tree;
@@ -1481,9 +1486,9 @@ define([
                             id: self.group.current.id,
                             members: $.toJSON(members)
                         }, function (data) {
-                            self.currentGroupChange(self.group.current.id);
-                            if (data && data.length > 0) {
+                            if (data) {
                                 self.qt.invoke('commandMemberDelete', data);
+                                self.currentGroupChange(self.group.current.id);
                             }
                         }, null, [403]);
                     });
@@ -1501,9 +1506,9 @@ define([
                             id: self.meet.current.id,
                             members: $.toJSON(members)
                         }, function (data) {
-                            self.currentGroupChange(self.meet.current.id);
-                            if (data && data.length > 0) {
+                            if (data) {
                                 self.qt.invoke('commandMemberDelete', data);
+                                self.currentGroupChange(self.meet.current.id);
                             }
                         }, null, [403]);
                     });
@@ -2149,6 +2154,7 @@ define([
                         }
                     }
                 });
+
                 self.refreshCommand(null, function () {
                     self.refreshEnteredGroups();
                 });
@@ -2180,14 +2186,14 @@ define([
 
                 //监听到添加成员，刷新树
                 self.qt.on('commandMemberAdd', function (e) {
-                    e = e.params;
                     var type = e.type;
+                    var x = e.params;
+                    self.qt.invoke('groupMembers', x);
                     if (type === 'command') {
                         self.currentGroupChange(self.group.current.id);
                     } else if (type === 'meeting') {
                         self.currentGroupChange(self.meet.current.id);
                     }
-                    self.qt.invoke('groupMembers', e);
                 });
 
                 // 监听退成员时
