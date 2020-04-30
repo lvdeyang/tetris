@@ -189,10 +189,6 @@ define([
                 this.currentTab = '-1';
                 self.refreshCommand('meeting',function () {
                     self.refreshEnteredGroups();
-
-                    self.qt.get(['currentGroupId'], function (variables) {
-                        console.log(variables)
-                    })
                 });
 
             },
