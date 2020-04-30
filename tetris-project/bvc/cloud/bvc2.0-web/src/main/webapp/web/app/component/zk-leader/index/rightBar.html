@@ -417,7 +417,7 @@
         </div>
 
         <!--第三部分的菜单-->
-        <div class="thirdMenu" v-if="switchStatus3">
+        <div class="thirdMenu" v-show="switchStatus3">
             <!--树形菜单-->
             <div class="meetList">
                 <div class="commandBtn" v-if="meet.currentId">
@@ -668,8 +668,8 @@
         <el-input v-model="dialog.resetName.name" placeholder="起个名吧" style="width:100%;"></el-input>
         <span slot="footer" class="dialog-footer">
             <div class="btn-dialog-cancel" @click="resetNameClose">取 消</div>
-            <div class="btn-dialog-submit" v-if="dialogTitle.indexOf('指挥')>-1" @click="resetNameCommit(1)">确 定</div>
-            <div class="btn-dialog-submit" v-if="dialogTitle.indexOf('会议')>-1" @click="resetNameCommit(2)">确 定</div>
+            <div class="btn-dialog-submit" v-if="dialogTitle.indexOf('指挥')>-1" @click="resetNameCommit">确 定</div>
+            <div class="btn-dialog-submit" v-if="dialogTitle.indexOf('会议')>-1" @click="resetNameCommit">确 定</div>
             <br style="clear:both;"/>
         </span>
     </el-dialog>

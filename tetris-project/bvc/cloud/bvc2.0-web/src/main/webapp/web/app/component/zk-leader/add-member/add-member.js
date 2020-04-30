@@ -102,11 +102,11 @@ define([
                     id: self.groupId,
                     members: $.toJSON(members)
                 }, function (data) {
-                    self.qt.linkedWebview('rightBar', $.toJSON({
+                    self.qt.linkedWebview('rightBar', {
                         id: 'commandMemberAdd',
-                        params: data,
+                        params: $.toJSON(data),
                         type: self.groupType
-                    }));
+                    });
                     self.handleWindowClose();
                 });
             }
