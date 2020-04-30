@@ -149,13 +149,17 @@ public class LoginService {
 		}
 		if(!result && token!=null){
 			token.newToken();
-			token.setStatus(UserStatus.ONLINE);
+			if(!TerminalType.QT_ZK.equals(terminalType)){
+				token.setStatus(UserStatus.ONLINE);
+			}
 		}else if(!result && token == null){
 			token = new TokenPO();
 			token.setUserId(user.getId());
 			token.setType(terminalType);
 			token.newToken();
-			token.setStatus(UserStatus.ONLINE);
+			if(!TerminalType.QT_ZK.equals(terminalType)){
+				token.setStatus(UserStatus.ONLINE);
+			}
 		}
 		token.setIp(ip);
 		tokenDao.save(token);
