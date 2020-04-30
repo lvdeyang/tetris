@@ -609,14 +609,14 @@ public class UserService{
 			user.setPassword(sha256Encoder.encode(newPassword));
 		}
 		
-		if(mobile != null){
+		if(mobile!=null && !"".equals(mobile)){
 			UserPO userExist = userDao.findByMobileWithExcept(mobile, user.getId());
 			if(userExist != null){
 				throw new MobileAlreadyExistException(mobile);
 			}
 		}
 		
-		if(mail != null){
+		if(mail!=null && !"".equals(mail)){
 			UserPO userExist = userDao.findByMailWithExcept(mail, user.getId());
 			if(userExist != null){
 				throw new MailAlreadyExistException(mail);
