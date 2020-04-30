@@ -15,6 +15,9 @@ public class WebsocketSessionOpenEvent extends ApplicationEvent{
 	/** 用户id */
 	private Long userId;
 	
+	/** token */
+	private String token;
+	
 	public Long getUserId() {
 		return userId;
 	}
@@ -23,9 +26,18 @@ public class WebsocketSessionOpenEvent extends ApplicationEvent{
 		this.userId = userId;
 	}
 
-	public WebsocketSessionOpenEvent(Object source, Long userId) {
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+	public WebsocketSessionOpenEvent(Object source, Long userId, String token) {
 		super(source);
 		this.userId = userId;
+		this.token = token;
 	}
 
 }

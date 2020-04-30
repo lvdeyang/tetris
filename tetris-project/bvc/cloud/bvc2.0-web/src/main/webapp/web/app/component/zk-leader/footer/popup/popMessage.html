@@ -4,7 +4,7 @@
         <span class="win-header-close" @click="closePop"><span class="el-icon-close"></span></span>
     </div>
     <div class="pop">
-        <div  style="overflow:hidden;height: 550px">
+        <div style="overflow:hidden;height: 550px">
             <el-tabs v-model="currentTab" type="card">
                 <el-tab-pane label="历史邀请" name="0">
                     <div style="height:510px;">
@@ -35,11 +35,12 @@
                         </div>
                         <div style="position:absolute; left:0; bottom:0; right:0; height:50px; padding-top:9px">
                             <el-pagination
-                                @current-change="handleCurrentChange"
-                                style="float:right"
-                                layout="prev, pager, next"
-                                :page-size="page.pageSize"
-                                :total="page.total">
+                                    background
+                                    @current-change="handleCurrentChange"
+                                    style="float:right"
+                                    layout="prev, pager, next"
+                                    :page-size="page.pageSize"
+                                    :total="page.total">
                             </el-pagination>
                         </div>
                     </div>

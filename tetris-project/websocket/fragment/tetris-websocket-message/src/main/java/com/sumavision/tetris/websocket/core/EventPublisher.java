@@ -32,8 +32,8 @@ public class EventPublisher {
 	 * <b>日期：</b>2020年4月6日 下午1:51:55
 	 * @param Long userId 上线的用户id
 	 */
-	public void publishWebsocketSessionOpenEvent(Long userId){
-		WebsocketSessionOpenEvent event = new WebsocketSessionOpenEvent(applicationEventPublisher, userId);
+	public void publishWebsocketSessionOpenEvent(Long userId, String token){
+		WebsocketSessionOpenEvent event = new WebsocketSessionOpenEvent(applicationEventPublisher, userId, token);
 		applicationEventPublisher.publishEvent(event);
 	}
 	

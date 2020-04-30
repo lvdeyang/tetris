@@ -18,10 +18,16 @@ define([
         data: function () {
             return {
                 user: '',
-                usernameLength:'',
-                timer: '',
-                date: '',
-                time: '',
+                usernameLength: '',
+                cleartimer1: null,
+                cleartimer2: null,
+                timer1: null,
+                timer2: null,
+                date: '---',
+                time: '---',
+                // systemDate:'',//系统日期
+                // systemTime:'', //系统时间
+                systemTimer: null,
                 fightDate: '---',
                 fightTime: '---',
                 //弹出对话框的表单
@@ -39,12 +45,6 @@ define([
                 var self = this;
                 self.qt.window('/router/zk/leader/settings', null, {width: 980, height: 600});
             },
-            // exitCommand:function(){
-            //     var self = this;
-            //     self.qt.confirm('提示', '确定关闭软件？', '是', function(){
-            //         self.qt.linkedWebview('rightBar', {id:'exitCurrentCommandAndCloseWindow'});
-            //     });
-            // },
             //退出
             closeExit: function () {
                 var self = this;
@@ -69,15 +69,52 @@ define([
         },
         mounted: function () {
             var self = this;
-            //获取天文时间
-            var timeInterval = function () {
-                self.date = new Date().format('yyyy-MM-dd');
-                self.time = new Date().format('HH : mm : ss');
-            };
-            timeInterval();
-            self.timer = setInterval(timeInterval, 1000);
-
             self.qt = new QtContext('header', function () {
+                var timeInterval = function () {
+                    self.fightDate = new Date().format('yyyy-MM-dd');
+                    self.date = new Date().format('yyyy-MM-dd');
+                    self.fightTime = new Date().format('HH : mm : ss');
+                    self.time = new Date().format('HH : mm : ss');
+                };
+                timeInterval();
+                clearInterval(self.systemTimer);
+                self.systemTimer = setInterval(timeInterval, 1000);
+
+                //作战时间
+                self.qt.invoke('slotGetCommandTime');
+                self.qt.on('commandTime', function (e) {
+                    console.log(e)
+                    if (e) {
+                        var c = new Date(e.data);
+                        clearInterval(self.systemTimer);
+
+                        self.fightDate = self.timeFormat(c).split(' ')[0];
+                        self.fightTime = self.timeFormat(c).split(' ')[1];
+                        clearInterval(self.cleartimer1);
+                        self.cleartimer1 = setInterval(function () {
+                            c.setSeconds(c.getSeconds() + 1);//+1s
+                            self.fightDate = self.timeFormat(c).split(' ')[0];
+                            self.fightTime = self.timeFormat(c).split(' ')[1];
+                        }, 1000);
+                    }
+                });
+
+                //天文时间
+                self.qt.invoke('slotGetAstroTime');
+                self.qt.on('astroTime', function (e) {
+                    if (e) {
+                        var c = new Date(e.data);
+                        clearInterval(self.systemTimer);
+                        self.date = self.timeFormat(c).split(' ')[0];
+                        self.time = self.timeFormat(c).split(' ')[1];
+                        clearInterval(self.cleartimer2);
+                        self.cleartimer2 = setInterval(function () {
+                            c.setSeconds(c.getSeconds() + 1);//+1s
+                            self.date = self.timeFormat(c).split(' ')[0];
+                            self.time = self.timeFormat(c).split(' ')[1];
+                        }, 1000);
+                    }
+                });
 
                 //初始化ajax
                 ajax.init({
@@ -103,30 +140,23 @@ define([
 
                 self.qt.get(['user'], function (variables) {
                     self.user = variables.user ? $.parseJSON(variables.user) : {};
-                    self.usernameLength=self.user.name.length;
+                    self.usernameLength = self.user.name.length;
                     self.qt.on('signalRecvMsgFromHtml', function (msg) {
                         alert('header' + msg);
                     });
                 });
 
-                // self.qt.on('closeWindow', function(){
-                //     self.closeExit();
-                // });
+                clearInterval(self.timer1);
+                self.timer1 = setInterval(function () {
+                    self.qt.invoke('slotGetCommandTime');
+                    console.log(11)
+                }, 30000);
 
-                // TODO: 获取作战时间 linkwebview
-                // var d = new Date(2019, 11, 31, 23, 59, 45);//2015-1-1 1:1:1
-                // var c = new Date('2020-01-20 12:23:23');
-                // console.log(c)
-                // console.log(d)
-                // self.fightDate = self.timeFormat(d).split(' ')[0];
-                // self.fightTime = self.timeFormat(d).split(' ')[1];
-                // setInterval(function () {
-                //     d.setSeconds(d.getSeconds() + 1);//+1s
-                //     self.fightDate = self.timeFormat(d).split(' ')[0];
-                //     self.fightTime = self.timeFormat(d).split(' ')[1];
-                // }, 1000);
+                clearInterval(self.timer2);
+                self.timer2 = setInterval(function () {
+                    self.qt.invoke('slotGetAstroTime');
+                }, 30000);
             });
-            self.fightDate='2020-01-20'
         }
     });
 

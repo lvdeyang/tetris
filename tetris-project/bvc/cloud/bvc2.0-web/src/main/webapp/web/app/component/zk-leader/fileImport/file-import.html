@@ -7,8 +7,6 @@
         <div style="width:100%; height:100%; position:relative;">
             <!--左侧-->
             <div class="left">
-                <!--<p class="title">已导入文件</p>
-                <div style="height: 100%"></div>-->
                 <el-scrollbar style="height: 100%">
                     <el-tree
                             ref="treeForm"
@@ -31,10 +29,8 @@
             <div class="right">
                 <div style="width:100%; height:100%; position:relative;">
                     <div>
-                        <!--<el-button type="primary" size="mini" @click="search">选择目录</el-button>-->
                         <div class="btn-select-folder" @click="search">选择目录</div>
                         <el-input size="small" style="width: 300px" placeholder="请输入路径选择" v-model="filterInput"></el-input>
-                        <!--<el-button type="primary" size="mini" @click="filter">查找</el-button>-->
                         <div class="btn-handle-search" @click="filter">查找</div>
                     </div>
                     <div style="position:absolute; left:0; top:40px; right:0; bottom:0;">
@@ -74,7 +70,6 @@
                                     </el-table>
                                     <div style="margin-top:10px;text-align: right">
                                         <div class="btn-import-commit" @click="confirmImport">确定导入</div>
-                                        <!--<el-button type="primary" size="medium" @click="confirmImport">确定导入</el-button>-->
                                     </div>
                                 </div>
                             </div>
@@ -86,11 +81,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <!--<div style="height: 600px;overflow: hidden">
-                        <el-scrollbar style="height: 100%">
-                        </el-scrollbar>
-                    </div>-->
                 </div>
             </div>
         </div>
@@ -124,12 +114,6 @@
             <div class="btn-dialog-cancel" @click="dialogVisible=false">取 消</div>
             <div class="btn-dialog-submit" @click="addSubmit">确 定</div>
             <br style="clear:both;"/>
-            <!--<el-button @click="dialogVisible=false" size="small">关 闭</el-button>
-            <el-button type="primary" @click="addSubmit" size="small">确 定</el-button>-->
         </div>
     </el-dialog>
-
-    <!--<div style="position:absolute;bottom:0;width: 100%;height: 50px;line-height: 50px;text-align: right">
-        <el-button type="warning" size="small" @click="cancel">关闭页面</el-button>
-    </div>-->
 </div>

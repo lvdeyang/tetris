@@ -80,7 +80,9 @@ public class TokenQuery {
 			throw new TokenTimeoutException();
 		}
 		token.setLastModifyTime(now);
-		token.setStatus(UserStatus.ONLINE);
+		if(!TerminalType.QT_ZK.equals(token.getType())){
+			token.setStatus(UserStatus.ONLINE);
+		}
 		tokenDao.save(token);
 		return true;
 	}

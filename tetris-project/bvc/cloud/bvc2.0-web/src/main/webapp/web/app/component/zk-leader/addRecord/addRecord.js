@@ -21,49 +21,68 @@ define([
                 date: '', //查询日期
                 inputName: '',
                 recordId: '', //录制用户/设备的id
-                category:'', //用于区分是录制用户还是设备
-                trueType:''
+                category: '', //用于区分是录制用户还是设备
+                trueType: '',
+                serial: '', //播放器上的录制的屏幕序号
+                callbackId: '',  //录制成功后 qt要执行的方法
+                callbackParam: '' //录制成功后，qt执行方法要传的参数
             }
         },
         methods: {
             //提交
             submit: function () {
-                var self=this;
-                if(self.category === 'USER'){
-                    ajax.post('/monitor/record/add/record/user/task',{
-                        targetUserId:self.recordId,
-                        mode:self.recordMode,
-                        fileName:self.inputName,
-                        startTime:self.format(this.date[0]),
-                        endTime:self.format(this.date[1])
-                    },function () {
+                var self = this;
+                if (self.category === 'USER') {
+                    ajax.post('/monitor/record/add/record/user/task', {
+                        targetUserId: self.recordId,
+                        mode: self.recordMode,
+                        fileName: self.inputName,
+                        startTime: self.format(this.date[0]),
+                        endTime: self.format(this.date[1])
+                    }, function () {
                         self.qt.success('添加录制任务成功!');
                         self.qt.destroy();
                     })
-                }else if(self.category ==='BUNDLE'){
-                    if(self.trueType === 'XT'){
-                        ajax.post('/monitor/record/add/xt/device',{
-                             mode:self.recordMode,
-                             fileName:self.inputName,
-                             startTime:self.format(this.date[0]),
-                             endTime:self.format(this.date[1]),
-                            bundleId:self.recordId
-                        },function () {
+                } else if (self.category === 'BUNDLE') {
+                    if (self.trueType === 'XT') {
+                        ajax.post('/monitor/record/add/xt/device', {
+                            mode: self.recordMode,
+                            fileName: self.inputName,
+                            startTime: self.format(this.date[0]),
+                            endTime: self.format(this.date[1]),
+                            bundleId: self.recordId
+                        }, function () {
                             self.qt.success('添加录制任务成功!!');
                             self.qt.destroy();
                         })
-                    }else if(self.trueType === 'BVC'){
-                        ajax.post('/monitor/record/add',{
-                            mode:self.recordMode,
-                            fileName:self.inputName,
-                            startTime:self.format(this.date[0]),
-                            endTime:self.format(this.date[1]),
-                            bundleId:self.recordId
-                        },function () {
+                    } else if (self.trueType === 'BVC') {
+                        ajax.post('/monitor/record/add', {
+                            mode: self.recordMode,
+                            fileName: self.inputName,
+                            startTime: self.format(this.date[0]),
+                            endTime: self.format(this.date[1]),
+                            bundleId: self.recordId
+                        }, function () {
                             self.qt.success('添加录制任务成功!!!');
                             self.qt.destroy();
                         })
                     }
+                } else if (!self.category) { //播放器上的录制按钮
+                    ajax.post('/command/record/player/start', {
+                        serial: self.serial,
+                        mode: self.recordMode,
+                        fileName: self.inputName,
+                        startTime: self.format(this.date[0]),
+                        endTime: self.format(this.date[1])
+                    }, function (data, status) {
+                        if (status != 200) {
+                            self.qt.invoke(self.callbackId, self.callbackParam, false);
+                            return;
+                        }
+                        self.qt.invoke(self.callbackId, self.callbackParam, true);
+                        self.qt.success('录制任务开始!!!');
+                        self.qt.destroy();
+                    }, null, [403])
                 }
             },
             //关闭页面
@@ -74,7 +93,7 @@ define([
             //格式化日期
             format: function (str) {
                 if (str) {
-                    str=str.toString();
+                    str = str.toString();
                     var str = str.substring(0, 24);
                     var d = new Date(str);
                     var a = [d.getFullYear(), d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()];
@@ -92,9 +111,13 @@ define([
             var self = this;
             self.qt = new QtContext('addRecord', function () {
                 var params = self.qt.getWindowParams();
+                console.log(params)
                 self.recordId = params.paramId;
-                self.category=params.paramType;
-                self.trueType=params.realType;
+                self.category = params.paramType;
+                self.trueType = params.realType;
+                self.serial = params.serial;
+                self.callbackId = params.callbackId;
+                self.callbackParam = params.callbackParam;
                 //初始化ajax
                 ajax.init({
                     login: config.ajax.login,
@@ -122,7 +145,6 @@ define([
                     self.user = variables.user ? $.parseJSON(variables.user) : {};
                     self.gateIp = variables.user ? $.parseJSON(variables.user).gateIp : '';
                     self.gatePort = variables.user ? $.parseJSON(variables.user).gatePort : '';
-
                 });
             });
         }

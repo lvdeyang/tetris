@@ -24,7 +24,7 @@ define([
                 form: {
                     name: '',
                     font: '黑体',
-                    fontsize: 20,
+                    fontsize: 5,
                     color: '#409EFF',
                     textarea: ''
                 },

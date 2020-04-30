@@ -346,8 +346,12 @@ define([
                             console.log('已成功连接websocket...');
                         };
                         var onerror = function(){
+                            //console.log('websocket异常断开，30秒后重连...');
+                            //setTimeout(createWebsocket, 5*1000);
+                        };
+                        var onclose = function(){
                             console.log('websocket异常断开，30秒后重连...');
-                            setTimeout(createWebsocket, 5*1000);
+                            setTimeout(createWebsocket, 30*1000);
                         };
                         var createWebsocket = function(){
                         	if(window.location.protocol === 'https:'){
@@ -360,7 +364,7 @@ define([
                             webSocket.onopen = onopen;
                             webSocket.onmessage = onmessage;
                             webSocket.onerror = onerror;
-                            webSocket.onclose = onerror;
+                            webSocket.onclose = onclose;
                         };
                         createWebsocket();
 
