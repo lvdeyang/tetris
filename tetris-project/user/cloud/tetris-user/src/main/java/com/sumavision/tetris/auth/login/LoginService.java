@@ -158,6 +158,8 @@ public class LoginService {
 			token.newToken();
 			if(!TerminalType.QT_ZK.equals(terminalType)){
 				token.setStatus(UserStatus.ONLINE);
+			}else{
+				token.setStatus(UserStatus.OFFLINE);
 			}
 		}else if(!result && token == null){
 			token = new TokenPO();
@@ -166,6 +168,8 @@ public class LoginService {
 			token.newToken();
 			if(!TerminalType.QT_ZK.equals(terminalType)){
 				token.setStatus(UserStatus.ONLINE);
+			}else{
+				token.setStatus(UserStatus.OFFLINE);
 			}
 		}
 		token.setIp(ip);
