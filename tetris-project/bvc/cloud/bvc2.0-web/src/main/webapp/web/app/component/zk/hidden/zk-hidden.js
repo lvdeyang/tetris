@@ -342,8 +342,8 @@ define([
 	                            self.qt.linkedWebview('historyMessage', {id: 'receiveInstantMessage', params: e});
 	                        }
 	                        
-	                        //重复登录踢人
-	                        if(e.businessType === 'forceOffLine'){
+	                        //重复登录踢人---这个地方就叫businessId不叫businessType
+	                        if(e.businessId === 'forceOffLine'){
 	                        	self.qt.invoke('forceOffLine');
 	                        }
                         };
