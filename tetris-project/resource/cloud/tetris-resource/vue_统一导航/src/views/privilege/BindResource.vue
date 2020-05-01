@@ -491,6 +491,12 @@
       this.countPerPage = parseInt(this.filters.countPerPage)
     }
 
+    if(this.resourceTableShow){
+      if(this.countPerPage * (this.pageNum - 1) > this.total){
+        this.pageNum = Math.ceil(this.total / this.countPerPage);
+      }
+    }
+
     let param = {
       roleId: this.currentRoleRow.id,
       bindType: this.filters.bindType,
@@ -574,6 +580,12 @@
     this.countPerPage = 20
     if (/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)) {
       this.countPerPage = parseInt(this.filters.countPerPage)
+    }
+
+    if(!this.resourceTableShow){
+      if(this.countPerPage * (this.pageNum - 1) > this.total){
+        this.pageNum = Math.ceil(this.total / this.countPerPage);
+      }
     }
 
     let param = {
