@@ -19,6 +19,9 @@ public class UserresPrivilegeBO {
 	
 	//指挥权限
 	private boolean hasZKPrivilege = false;
+	
+	//会议权限
+	private boolean hasHYPrivilege = false;
 
 	public Long getId() {
 		return id;
@@ -74,6 +77,14 @@ public class UserresPrivilegeBO {
 
 	public void setHasZKPrivilege(boolean hasZKPrivilege) {
 		this.hasZKPrivilege = hasZKPrivilege;
+	}
+
+	public boolean isHasHYPrivilege() {
+		return hasHYPrivilege;
+	}
+
+	public void setHasHYPrivilege(boolean hasHYPrivilege) {
+		this.hasHYPrivilege = hasHYPrivilege;
 	}
 	
 }

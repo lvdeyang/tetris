@@ -318,6 +318,11 @@
             if (/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)) {
               this.countPerPage = parseInt(this.filters.countPerPage)
             }
+
+            if(this.countPerPage * (pageNum - 1) > this.total){
+              pageNum = Math.ceil(this.total / this.countPerPage);
+            }
+
             let param = {
                 deviceModel: this.filters.deviceModel,
                 keyword: this.filters.keyword,

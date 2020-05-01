@@ -12,7 +12,8 @@ public class BusinessConstants {
 		DIANBO("点播"),//点播
 		RECORD("录制"),//录制
 		CALL("呼叫"),//呼叫
-		ZK("指挥");//指挥
+		ZK("指挥"),//指挥
+		HY("会议");//会议
 		
 		private String name;
 		

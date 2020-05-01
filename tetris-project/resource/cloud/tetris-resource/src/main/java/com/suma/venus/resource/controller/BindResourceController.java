@@ -407,6 +407,7 @@ public class BindResourceController extends ControllerBase {
 				boolean hasWritePrivilege = privilegeCodes.contains(userBO.getUserNo() + "-w");
 				boolean hasHJPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-hj");
 				boolean hasZKPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-zk");
+				boolean hasHYPrivilege = privilegeCodes.contains(userBO.getUserNo() + "-hy");
 				UserresPrivilegeBO userresPrivilege = getUserresPrivilegeFromUserBO(userBO);
 				if (hasReadPrivilege) {
 					userresPrivilege.setHasReadPrivilege(true);
@@ -419,6 +420,9 @@ public class BindResourceController extends ControllerBase {
 				}
 				if (hasZKPrivilege){
 					userresPrivilege.setHasZKPrivilege(true);
+				}
+				if (hasHYPrivilege){
+					userresPrivilege.setHasHYPrivilege(true);
 				}
 				userresPrivilegeBOs.add(userresPrivilege);
 			}
@@ -652,8 +656,8 @@ public class BindResourceController extends ControllerBase {
 //					String oprusername = principal.getName();
 //					UserBO oprUserBO = userFeign.queryUserInfo(oprusername).get("user");
 					UserBO oprUserBO = userQueryService.current();
-					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, new ArrayList<String>(), new ArrayList<String>(), 
-							readCheckList, writeCheckList, new ArrayList<String>(), new ArrayList<String>());
+					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>(),
+							readCheckList, writeCheckList, new ArrayList<String>(), new ArrayList<String>(), new ArrayList<String>());
 					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
@@ -702,8 +706,9 @@ public class BindResourceController extends ControllerBase {
 	@ResponseBody
 	public Map<String, Object> submitUserresPrivilege(@RequestParam(value = "roleId") Long roleId, @RequestParam(value = "prevReadChecks") String prevReadChecks,
 			@RequestParam(value = "prevWriteChecks") String prevWriteChecks, @RequestParam(value = "prevHJChecks") String prevHJChecks,
-			@RequestParam(value = "prevZKChecks") String prevZKChecks, @RequestParam(value = "readChecks") String readChecks, @RequestParam(value = "writeChecks") String writeChecks, 
-			@RequestParam(value = "hjChecks") String hjChecks, @RequestParam(value = "zkChecks") String zkChecks, Principal principal) {
+			@RequestParam(value = "prevZKChecks") String prevZKChecks, @RequestParam(value = "prevHYChecks") String prevHYChecks, 
+			@RequestParam(value = "readChecks") String readChecks, @RequestParam(value = "writeChecks") String writeChecks, @RequestParam(value = "hjChecks") String hjChecks, 
+			@RequestParam(value = "zkChecks") String zkChecks, @RequestParam(value = "hyChecks") String hyChecks, Principal principal) {
 		Map<String, Object> data = makeAjaxData();
 
 		try {
@@ -711,10 +716,12 @@ public class BindResourceController extends ControllerBase {
 			List<String> prevWriteCheckList = new ArrayList<String>();
 			List<String> prevHJCheckeList = new ArrayList<String>();
 			List<String> prevZKCheckeList = new ArrayList<String>();
+			List<String> prevHYCheckeList = new ArrayList<String>();
 			List<String> readCheckList = new ArrayList<String>();
 			List<String> writeCheckList = new ArrayList<String>();
 			List<String> hjCheckList = new ArrayList<String>();
 			List<String> zkCheckList = new ArrayList<String>();
+			List<String> hyCheckList = new ArrayList<String>();
 			if (null != prevReadChecks && !prevReadChecks.isEmpty()) {
 				preReadCheckList = Arrays.asList(prevReadChecks.split(","));
 			}
@@ -726,6 +733,9 @@ public class BindResourceController extends ControllerBase {
 			}
 			if (null != prevZKChecks && !prevZKChecks.isEmpty()) {
 				prevZKCheckeList = Arrays.asList(prevZKChecks.split(","));
+			}
+			if (null != prevHYChecks && !prevHYChecks.isEmpty()) {
+				prevHYCheckeList = Arrays.asList(prevHYChecks.split(","));
 			}
 			if (null != readChecks && !readChecks.isEmpty()) {
 				readCheckList = Arrays.asList(readChecks.split(","));
@@ -739,11 +749,15 @@ public class BindResourceController extends ControllerBase {
 			if (null != zkChecks && !zkChecks.isEmpty()) {
 				zkCheckList = Arrays.asList(zkChecks.split(","));
 			}
+			if (null != hyChecks && !hyChecks.isEmpty()) {
+				hyCheckList = Arrays.asList(hyChecks.split(","));
+			}
 
 			List<String> toBindReadCheckList = getToBindPrivileges(preReadCheckList, readCheckList);
 			List<String> toBindWriteCheckList = getToBindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toBindHJCheckList = getToBindPrivileges(prevHJCheckeList, hjCheckList);
 			List<String> toBindZKCheckList = getToBindPrivileges(prevZKCheckeList, zkCheckList);
+			List<String> toBindHYCheckList = getToBindPrivileges(prevHYCheckeList, hyCheckList);
 			List<String> toBindChecks = new ArrayList<String>();
 			for (String readCheck : toBindReadCheckList) {
 				toBindChecks.add(readCheck + "-r");
@@ -757,6 +771,9 @@ public class BindResourceController extends ControllerBase {
 			for (String zkCheck : toBindZKCheckList) {
 				toBindChecks.add(zkCheck + "-zk");
 			}
+			for (String hyCheck : toBindHYCheckList) {
+				toBindChecks.add(hyCheck + "-hy");
+			}
 			if (!bindResourceCodes(roleId, toBindChecks)) {
 				data.put(ERRMSG, "绑定失败");
 				return data;
@@ -766,6 +783,7 @@ public class BindResourceController extends ControllerBase {
 			List<String> toUnbindWriteCheList = getToUnbindPrivileges(prevWriteCheckList, writeCheckList);
 			List<String> toUnbindHJCheckList = getToUnbindPrivileges(prevHJCheckeList, hjCheckList);
 			List<String> toUnbindZKCheckList = getToUnbindPrivileges(prevZKCheckeList, zkCheckList);
+			List<String> toUnbindHYCheckList = getToUnbindPrivileges(prevHYCheckeList, hyCheckList);
 			List<String> toUnbindChecks = new ArrayList<String>();
 			for (String readCheck : toUnbindReadCheckList) {
 				toUnbindChecks.add(readCheck + "-r");
@@ -778,6 +796,9 @@ public class BindResourceController extends ControllerBase {
 			}
 			for (String zkCheck : toUnbindZKCheckList) {
 				toUnbindChecks.add(zkCheck + "-zk");
+			}
+			for (String hyCheck : toUnbindHYCheckList) {
+				toUnbindChecks.add(hyCheck + "-hy");
 			}
 			if (!unbindResourceCodes(roleId, toUnbindChecks)) {
 				data.put(ERRMSG, "解绑失败");
@@ -793,8 +814,8 @@ public class BindResourceController extends ControllerBase {
 //					String oprusername = principal.getName();
 //					UserBO oprUserBO = userFeign.queryUserInfo(oprusername).get("user");
 					UserBO oprUserBO = userQueryService.current();
-					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, prevZKCheckeList, 
-							readCheckList, writeCheckList, hjCheckList, zkCheckList);
+					Map<String, PrivilegeStatusBO> privilegeStatusMap = getPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, prevZKCheckeList, prevHYCheckeList,
+							readCheckList, writeCheckList, hjCheckList, zkCheckList, hyCheckList);
 					String connectCenterLayerID = resourceRemoteService.queryLocalLayerId();
 					SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
 					SerInfoPO appInfo = serInfoDao.findBySerNodeAndSerType(self.getNodeUuid(), SerInfoType.APPLICATION.getNum());
@@ -835,10 +856,13 @@ public class BindResourceController extends ControllerBase {
 		return data;
 	}
 
-	private Map<String, PrivilegeStatusBO> getPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList, List<String> prevZKCheckeList,
-			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList, List<String> zkCheckList) {
-		Map<String, PrivilegeStatusBO> privilegeStatusMap = createPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, prevZKCheckeList,
-				readCheckList, writeCheckList, hjCheckList, zkCheckList);
+	private Map<String, PrivilegeStatusBO> getPrivilegeStatusMap(
+			List<String> preReadCheckList, List<String> prevWriteCheckList, 
+			List<String> prevHJCheckeList, List<String> prevZKCheckeList, List<String> prevHYCheckeList,
+			List<String> readCheckList, List<String> writeCheckList,
+			List<String> hjCheckList, List<String> zkCheckList, List<String> hyCheckList) {
+		Map<String, PrivilegeStatusBO> privilegeStatusMap = createPrivilegeStatusMap(preReadCheckList, prevWriteCheckList, prevHJCheckeList, prevZKCheckeList, prevHYCheckeList,
+				readCheckList, writeCheckList, hjCheckList, zkCheckList, hyCheckList);
 		for (Entry<String, PrivilegeStatusBO> entry : privilegeStatusMap.entrySet()) {
 			if (preReadCheckList.contains(entry.getKey())) {
 				entry.getValue().setPrevCanRead(true);
@@ -868,8 +892,11 @@ public class BindResourceController extends ControllerBase {
 		return privilegeStatusMap;
 	}
 
-	private Map<String, PrivilegeStatusBO> createPrivilegeStatusMap(List<String> preReadCheckList, List<String> prevWriteCheckList, List<String> prevHJCheckeList, List<String> prevZKCheckeList,
-			List<String> readCheckList, List<String> writeCheckList, List<String> hjCheckList, List<String> zkCheckList) {
+	private Map<String, PrivilegeStatusBO> createPrivilegeStatusMap(
+			List<String> preReadCheckList, List<String> prevWriteCheckList, 
+			List<String> prevHJCheckeList, List<String> prevZKCheckeList, List<String> prevHYCheckeList,
+			List<String> readCheckList, List<String> writeCheckList, 
+			List<String> hjCheckList, List<String> zkCheckList, List<String> hyCheckList) {
 		Map<String, PrivilegeStatusBO> privilegeStatusMap = new HashMap<>();
 		for (String code : preReadCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
@@ -883,6 +910,9 @@ public class BindResourceController extends ControllerBase {
 		for (String code : prevZKCheckeList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
+		for (String code : prevHYCheckeList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
 		for (String code : readCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
@@ -893,6 +923,9 @@ public class BindResourceController extends ControllerBase {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		for (String code : zkCheckList) {
+			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
+		}
+		for (String code : hyCheckList) {
 			privilegeStatusMap.put(code, new PrivilegeStatusBO(code));
 		}
 		return privilegeStatusMap;
