@@ -279,7 +279,7 @@ public class ApiThirdpartBvcCascadeController {
 		try{
 			//做一下用户登录
 			protocolParser.rebindRequest(src_userno, "streaming");
-			UserBO srcUser = userUtils.queryUserByUserno(src_userno);
+			UserBO srcUser = userUtils.queryUserByUserno(src_userno.replace("<sip:", ""));
 			UserBO dstUser = userUtils.queryUserByUserno(dst_no);
 			if("start".equals(operate)){
 				if(dstUser != null){
@@ -290,9 +290,9 @@ public class ApiThirdpartBvcCascadeController {
 						//开始xt用户呼叫本地用户
 //						monitorLiveCallService.startXtCallLocal(uuid, dstUser, srcUser);
 						commandUserServiceImpl.userCallUser_Cascade(srcUser, dstUser, -1, uuid);
-					}else if("paly-call".equals(type)){
+					}else if("play-call".equals(type)){
 						//开始xt点播本地用户转xt呼叫本地用户
-						monitorLiveCallService.transXtCallLocal(uuid, dstUser, srcUser);
+						commandUserServiceImpl.transOuterVodInnerToCall(uuid, dstUser, srcUser);
 					}
 				}else{
 					//开始点播设备
@@ -336,8 +336,9 @@ public class ApiThirdpartBvcCascadeController {
 					if("call".equals(type)){
 						//xt用户同意接听呼叫
 						commandUserServiceImpl.acceptCall_Cascade(dstUser, null, uuid);
-					}else if("paly-call".equals(type)){
+					}else if("play-call".equals(type)){
 						//TODO: xt用户同意点播转呼叫
+						commandUserServiceImpl.acceptCall_Cascade(dstUser, null, uuid);
 					}
 				}
 			}

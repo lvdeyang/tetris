@@ -16,11 +16,14 @@ import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.control.device.command.group.vo.record.GroupVO;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
+import com.sumavision.bvc.control.device.monitor.record.MonitorRecordTaskVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
+import com.sumavision.bvc.device.command.record.CommandVodRecordParser;
 import com.sumavision.bvc.device.command.secret.CommandSecretServiceImpl;
+import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -46,6 +49,10 @@ public class CommandRecordController {
 	
 	@Autowired
 	CommandSecretServiceImpl commandSecretServiceImpl;
+
+	
+	@Autowired
+	CommandVodRecordParser commandVodRecordParser;
 	
 	/**
 	 * 开始录制<br/>
@@ -231,6 +238,39 @@ public class CommandRecordController {
 		}
 		return null;
 		
+	}
+	
+	/**
+	 * 按播放器开始录制（与指挥无关）<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午6:57:47
+	 * @param serial
+	 * @param mode
+	 * @param fileName
+	 * @param startTime
+	 * @param endTime
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/player/start")
+	public Object playerStart(
+			int serial,
+			String mode, 
+			String fileName, 
+			String startTime, 
+			String endTime,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);
+		
+		MonitorRecordPO task = commandVodRecordParser.playerStartRecord(user, serial, mode, fileName, startTime, endTime);
+		
+		return new MonitorRecordTaskVO().set(task);
 	}
 	
 }

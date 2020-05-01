@@ -152,7 +152,7 @@ public class MonitorLiveDeviceService {
 		//参数校验
 		isVideoBundleNotNull(videoBundleId, "internal");
 		regularizedAudioParams(audioBundleId, audioChannelId, "internal", "internal");
-		authorize(videoBundleId, audioBundleId, userId);
+//		authorize(videoBundleId, audioBundleId, userId);//TODO: 暂时注释
 		
 		//本地编码器
 		BundlePO localEncoder = bundleDao.findByBundleId(videoBundleId);
@@ -215,7 +215,7 @@ public class MonitorLiveDeviceService {
 				XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER, 
 				JSON.toJSONString(passby));
 		
-		executeBusiness.execute(logic, "点播系统：xt点播本地设备");
+		executeBusiness.execute(logic, "点播系统：xt点播本地设备 " + videoBundleName);
 		
 		return live;
 	}
@@ -639,7 +639,7 @@ public class MonitorLiveDeviceService {
 		
 		resourceServiceClient.removeLianwangPassby(live.getUuid());
 		
-		executeBusiness.execute(logic, "点播系统：停止xt点播本地设备任务");
+		executeBusiness.execute(logic, "点播系统：停止xt点播本地设备 " + live.getVideoBundleName());
 		
 	}
 	

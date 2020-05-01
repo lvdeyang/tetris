@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
@@ -126,6 +127,9 @@ public class CommandForwardServiceImpl {
 	private CommandCascadeUtil commandCascadeUtil;
 	
 	@Autowired
+	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
 	private CommandCascadeService commandCascadeService;
 	
 	@Autowired
@@ -158,6 +162,7 @@ public class CommandForwardServiceImpl {
 			
 			List<Long> consumeIds = new ArrayList<Long>();
 			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
+			String localLayerId = null;//联网id
 			
 			GroupType groupType = group.getType();
 			List<CommandGroupMemberPO> members = group.getMembers();
@@ -205,10 +210,12 @@ public class CommandForwardServiceImpl {
 					
 					String srcVideoChannelId = null;
 					String srcAudioChannelId = null;
+					String srcLayerId = null;
 					OriginType srcOriginType = null;
 					boolean bDeviceLdap =  queryUtil.isLdapBundle(bundle);
 					if(!bDeviceLdap){
 						srcOriginType = OriginType.INNER;
+						srcLayerId = bundle.getAccessNodeUid();
 						//遍历视频通道
 						for(ChannelSchemeDTO videoChannel : videoEncode1Channels){
 							if(bundle.getBundleId().equals(videoChannel.getBundleId())){
@@ -228,6 +235,10 @@ public class CommandForwardServiceImpl {
 						srcOriginType = OriginType.OUTER;
 						srcVideoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
 						srcAudioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+						if(localLayerId == null){
+							localLayerId = resourceRemoteService.queryLocalLayerId();
+						}
+						srcLayerId = localLayerId;
 					}
 					
 					//建立 CommandGroupForwardDemandPO
@@ -244,13 +255,13 @@ public class CommandForwardServiceImpl {
 							bundle.getBundleId(),
 							bundle.getBundleName(),
 							bundle.getBundleType(),
-							bundle.getAccessNodeUid(),
+							srcLayerId,
 							srcVideoChannelId,
 							"VenusVideoIn",//videoBaseType,
 							bundle.getBundleId(),
 							bundle.getBundleName(),
 							bundle.getBundleType(),
-							bundle.getAccessNodeUid(),
+							srcLayerId,
 							srcAudioChannelId,
 							"VenusAudioIn",//String audioBaseType,
 							null,//member.getDstBundleId(),
@@ -939,11 +950,15 @@ public class CommandForwardServiceImpl {
 			if(cascade){
 				List<CommandGroupMemberPO> dstMembers = new ArrayListWrapper<CommandGroupMemberPO>().add(dstMember).getList();
 				if(GroupType.BASIC.equals(groupType)){
-					GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
-					groupBOs.add(groupBO);
+					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())){
+						GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
+						groupBOs.add(groupBO);
+					}
 				}else if(GroupType.MEETING.equals(groupType)){
-					GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
-					groupBOs.add(groupBO);
+					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())){
+						GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
+						groupBOs.add(groupBO);
+					}
 				}
 			}
 			

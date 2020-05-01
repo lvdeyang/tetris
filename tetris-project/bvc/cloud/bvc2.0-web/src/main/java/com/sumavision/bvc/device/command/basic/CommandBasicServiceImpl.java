@@ -4413,9 +4413,10 @@ public class CommandBasicServiceImpl {
 		//挂断转发点播中的源的编码器
 		if(null == demandsForEncoder) demandsForEncoder = new ArrayList<CommandGroupForwardDemandPO>();
 		for(CommandGroupForwardDemandPO demand : demandsForEncoder){
-			//只对设备转发处理；文件转发没有编码器
+			//只对设备转发处理，文件转发没有编码器；只对目的为INNER的处理；只对DONE的处理
 			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)
-					&& !OriginType.OUTER.equals(demand.getDstOriginType())){
+					&& !OriginType.OUTER.equals(demand.getDstOriginType())
+					&& ForwardDemandStatus.DONE.equals(demand.getExecuteStatus())){
 				
 				if(!OriginType.OUTER.equals(demand.getSrcOriginType())){
 					DisconnectBundleBO disconnectVideoBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)

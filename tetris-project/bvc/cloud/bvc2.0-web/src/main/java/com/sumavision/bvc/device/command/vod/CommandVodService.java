@@ -251,6 +251,7 @@ public class CommandVodService {
 	public CommandGroupUserPlayerPO userStart_Cascade(UserBO user, UserBO vodUser, UserBO admin, int locationIndex) throws Exception{
 		
 //		commandCommonServiceImpl.authorizeUser(vodUser.getId(), user.getId(), BUSINESS_OPR_TYPE.DIANBO);
+//		commandCommonServiceImpl.authorizeUsers(new ArrayListWrapper<Long>().add(vodUser.getId()).getList(), user.getId(), BUSINESS_OPR_TYPE.DIANBO);
 		
 		FolderUserMap vodUserfolderUserMap = folderUserMapDao.findByUserId(vodUser.getId());
 		boolean bVodUserLdap = queryUtil.isLdapUser(user, vodUserfolderUserMap);

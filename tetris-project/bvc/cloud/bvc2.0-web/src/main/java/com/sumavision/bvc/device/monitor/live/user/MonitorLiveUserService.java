@@ -128,7 +128,7 @@ public class MonitorLiveUserService {
 //		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
 		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
-		authorize(user.getId(), userId);
+//		authorize(user.getId(), userId);//TODO: 暂时注释
 		
 		//参数模板
 		Map<String, Object> result = commons.queryDefaultAvCodec();
@@ -193,7 +193,7 @@ public class MonitorLiveUserService {
 				XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_USER, 
 				JSON.toJSONString(passby));
 		
-		executeBusiness.execute(logic, "点播系统：xt点播本地用户");
+		executeBusiness.execute(logic, "点播系统：xt点播本地用户 " + live.getSrcUsername());
 		
 		return live;
 	}
@@ -558,7 +558,7 @@ public class MonitorLiveUserService {
 		
 		resourceServiceClient.removeLianwangPassby(live.getUuid());
 		
-		executeBusiness.execute(logic, "点播系统：停止xt点播本地用户");
+		executeBusiness.execute(logic, "点播系统：停止xt点播本地用户 " + live.getSrcUsername());
 	}
 	
 	

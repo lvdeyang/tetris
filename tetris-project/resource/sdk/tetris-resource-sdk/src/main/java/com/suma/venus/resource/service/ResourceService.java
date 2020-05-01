@@ -280,7 +280,7 @@ public class ResourceService {
 	public boolean hasPrivilegeOfUser(Long userId, Long dstUserId, BUSINESS_OPR_TYPE businessType) {
 		try {
 //			UserBO dstUserBO = userFeign.queryUserInfoById(dstUserId).get("user");
-			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId, null);
+			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId, TerminalType.QT_ZK);
 			String code = null;// 权限码
 			switch (businessType) {
 			case DIANBO:// 点播
@@ -353,6 +353,40 @@ public class ResourceService {
 			if(!hasPrivilege) return false;
 		}
 		return true;
+	}
+	
+	public UserBO hasNoPrivilegeOfUsers(Long userId, List<Long> dstUserIds, BUSINESS_OPR_TYPE businessType) throws Exception{
+		List<UserBO> dstUserBOs = userQueryService.queryUsersByUserIds(dstUserIds, null);
+		if(dstUserBOs==null || dstUserBOs.size()<=0) return null;
+		String suffix = null;
+		switch (businessType) {
+		case DIANBO:// 点播
+			suffix = "-w";
+			break;
+		case RECORD:// 录制
+			suffix = "-r";
+			break;
+		case CALL:// 呼叫
+			suffix = "-hj";
+			break;
+		case ZK:// 指挥
+			suffix = "-zk";
+			break;
+		default:
+			return null;
+		}
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		for(UserBO dstUser:dstUserBOs){
+			String code = new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString();
+			boolean hasPrivilege = false;
+			if (bo.getResourceCodes().contains(code)){
+				hasPrivilege = true;
+			}
+			if(!hasPrivilege){
+				return dstUser;
+			}
+		}
+		return null;
 	}
 
 	/** 通过userId查询bundles */

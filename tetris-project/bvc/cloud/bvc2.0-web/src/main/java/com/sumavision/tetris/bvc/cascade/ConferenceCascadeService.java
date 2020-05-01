@@ -321,7 +321,7 @@ public class ConferenceCascadeService {
 	 * @param List<MinfoBO> mlist 需要级联的成员信息（可处理当前请求的用户）
 	 */
 	public void exitRequest(GroupBO group) throws Exception{
-		String fullName = generateFullName("memberExitCmdRequest.xml");
+		String fullName = generateFullName("memberExitCnfRequest.xml");
 		Template template = templateLoader.load(fullName);
 		sendPassBy(group, NO_TYPE_APP, template);
 	}
@@ -338,7 +338,7 @@ public class ConferenceCascadeService {
 	 * @param List<MinfoBO> mlist 需要级联的成员信息（退出的成员）
 	 */
 	public void exitResponse(GroupBO group) throws Exception{
-		String fullName = generateFullName("memberExitCmdResponse.xml");
+		String fullName = generateFullName("memberExitCnfResponse.xml");
 		Template template = templateLoader.load(fullName);
 		sendPassBy(group, NO_TYPE_APP, template);
 	}

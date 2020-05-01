@@ -585,6 +585,24 @@ public class CommandCommonServiceImpl {
 	}
 	
 	/**
+	 * 用户对多个用户操作的权限校验<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月1日 上午11:27:26
+	 * @param targetUserIds
+	 * @param userId
+	 * @param type
+	 * @throws Exception
+	 */
+	public void authorizeUsers(List<Long> targetUserIds, Long userId, BUSINESS_OPR_TYPE type) throws Exception{
+		UserBO noAuthUser = resourceService.hasNoPrivilegeOfUsers(userId, targetUserIds, type);
+		if(noAuthUser != null){
+			throw new UserHasNoPermissionForBusinessException(type, noAuthUser.getName(), 1);
+		}
+	}
+	
+	/**
 	 * 用户对设备的权限校验<br/>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>

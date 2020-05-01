@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
-import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
@@ -20,6 +19,7 @@ import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
+import com.sumavision.bvc.command.group.dao.CommandVodDAO;
 import com.sumavision.bvc.command.group.dao.UserLiveCallDAO;
 import com.sumavision.bvc.command.group.enumeration.CallStatus;
 import com.sumavision.bvc.command.group.enumeration.CallType;
@@ -33,10 +33,12 @@ import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
 import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
 import com.sumavision.bvc.command.group.vod.CommandVodPO;
+import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.command.exception.PlayerIsBeingUsedException;
 import com.sumavision.bvc.device.command.exception.UserDoesNotLoginException;
 import com.sumavision.bvc.device.command.exception.UserHasNoAvailableEncoderException;
 import com.sumavision.bvc.device.command.exception.UserNotMatchBusinessException;
@@ -55,6 +57,8 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
+import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserDAO;
+import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserPO;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -69,21 +73,21 @@ import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageType;
 import com.sumavision.tetris.websocket.message.WebsocketMessageVO;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Transactional(rollbackFor = Exception.class)
 @Service
 public class CommandUserServiceImpl {
-	
-	/** 发起业务时，synchronized锁的前缀 */
-	private static final String lockStartPrefix = "vod-or-call-userId-";
-	
-	/** 响应、停止业务时，synchronized锁的前缀 */
-	private static final String lockProcessPrefix = "vod-or-call-businessId-";
 	
 	@Autowired 
 	private CommandCommonUtil commandCommonUtil;
 	
 	@Autowired 
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
+	
+	@Autowired 
+	private MonitorLiveUserDAO monitorLiveUserDao;
 	
 	@Autowired 
 	private ResourceService resourceService;
@@ -96,6 +100,9 @@ public class CommandUserServiceImpl {
 	
 	@Autowired
 	private QueryUtil queryUtil;
+	
+	@Autowired
+	private UserUtils userUtils;
 	
 	@Autowired
 	private ResourceBundleDAO resourceBundleDao;
@@ -114,6 +121,9 @@ public class CommandUserServiceImpl {
 	
 	@Autowired
 	private UserLiveCallDAO userLiveCallDao;
+	
+	@Autowired
+	private CommandVodDAO commandVodDao;
 	
 	@Autowired
 	private FolderUserMapDAO folderUserMapDao;
@@ -219,6 +229,82 @@ public class CommandUserServiceImpl {
 		layoutScheme.setUserInfo(userInfo);
 		
 		return layoutScheme;
+	}
+	
+	/**
+	 * 由本系统的客户端发起，将点播用户转为呼叫<br/>
+	 * <p>点播转呼叫注意事项：<br/>
+		 * 		同意后，不呼被叫编码，可以不用呼叫主叫解码（体现在openBundle）<br/>
+		 * 		停止（拒绝也是停止）：如果已经开始，那么正常停止；如果没有开始，则需要挂断被叫编码，挂断主叫解码（体现在closeBundle）</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月30日 下午1:15:22
+	 * @param vodId 点播id
+	 * @param locationIndex 播放器序号
+	 * @return
+	 * @throws Exception
+	 */
+	public CommandGroupUserPlayerPO transVodToCall(Long vodId, int locationIndex) throws Exception{
+		
+		/**
+		 * 点播转呼叫注意事项：
+		 * 		同意后，不呼被叫编码，可以不用呼叫主叫解码（体现在openBundle）
+		 * 		停止（拒绝也是停止）：如果已经开始，那么正常停止；如果没有开始，则需要挂断被叫编码，挂断主叫解码（体现在closeBundle）
+		 */
+				
+		if(vodId == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "用户点播id有误");
+		}
+		
+		CommandVodPO vod = commandVodDao.findOne(vodId);
+		if(vod == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "用户点播不存在！id：" + vodId);
+		}
+		
+		//加一个vodType校验
+		VodType vodType = vod.getVodType();
+		if(VodType.USER.equals(vodType) || VodType.USER_ONESELF.equals(vodType) || VodType.LOCAL_SEE_OUTER_USER.equals(vodType)){			
+		}else{
+			throw new BaseException(StatusCode.FORBIDDEN, "请选择用户进行呼叫");
+		}
+		//加一个播放器业务校验
+		
+		UserBO callUser = userUtils.queryUserById(vod.getDstUserId());
+		UserBO calledUser = userUtils.queryUserById(vod.getSourceUserId());
+		
+		CommandGroupUserPlayerPO callUserPlayer = userCallUser_Cascade(callUser, calledUser, locationIndex, vod.getUuid(), vodId);
+
+		commandVodDao.delete(vod);
+		
+		log.info(callUser.getName() + " 点播 " + calledUser.getName() + " 用户，被转换为呼叫，等待对方接听");
+		
+		return callUserPlayer;
+		
+	}
+	
+	/**
+	 * 被联网触发。把“被外部系统的点播”，转为“被外部系统呼叫”<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月30日 下午1:14:46
+	 * @param uuid 点播uuid
+	 * @param calledUser 本地被叫用户
+	 * @param callUser 外部系统主叫用户
+	 * @throws Exception
+	 */
+	public void transOuterVodInnerToCall(String uuid, UserBO calledUser, UserBO callUser) throws Exception{
+		
+		log.info("外部系统用户 " + callUser.getName() + "点播本系统用户 " + calledUser.getName() + " ，被转换为呼叫");
+		
+		//去92的表里找到点播用户，直接删掉
+//		CommandVodPO vod = commandVodDao.findByUuid(uuid);
+		MonitorLiveUserPO liveUser = monitorLiveUserDao.findByUuid(uuid);
+		monitorLiveUserDao.delete(liveUser);
+		
+		//校验
+		
+		userCallUser_Cascade(callUser, calledUser, -1, uuid);
 	}
 	
 	/**
@@ -347,6 +433,10 @@ public class CommandUserServiceImpl {
 		return callUserPlayer;
 	}*/
 	
+	public CommandGroupUserPlayerPO userCallUser_Cascade(UserBO callUser, UserBO calledUser, int locationIndex, String uuid) throws Exception{
+		return userCallUser_Cascade(callUser, calledUser, locationIndex, uuid, null);
+	}
+	
 	/**
 	 * 用户呼叫用户 - 支持级联<br/>
 	 * <p>详细描述</p>
@@ -357,10 +447,11 @@ public class CommandUserServiceImpl {
 	 * @param calledUser 被呼叫用户
 	 * @param locationIndex 仅当被叫用户为本地用户时，可以指定播放器序号，序号从0起始；-1为自动选择，当被叫用户为外部系统用户时使用-1
 	 * @param uuid 外部系统呼入时，联网生成uuid；内部系统使用必须为null
+	 * @param formerVodId 默认null。这是从点播转为呼叫时，记录点播的id
 	 * @return CommandGroupUserPlayerPO 播放器占用信息
 	 * @throws Exception
 	 */
-	public CommandGroupUserPlayerPO userCallUser_Cascade(UserBO callUser, UserBO calledUser, int locationIndex, String uuid) throws Exception{
+	public CommandGroupUserPlayerPO userCallUser_Cascade(UserBO callUser, UserBO calledUser, int locationIndex, String uuid, Long formerVodId) throws Exception{
 		
 //		commandCommonServiceImpl.authorizeUser(calledUser.getId(), callUser.getId(), BUSINESS_OPR_TYPE.CALL);
 		
@@ -425,7 +516,13 @@ public class CommandUserServiceImpl {
 			if(locationIndex == -1){
 				callUserPlayer = commandCommonServiceImpl.userChoseUsefulPlayer(callUser.getId(), PlayerBusinessType.USER_CALL);
 			}else{
-				callUserPlayer = commandCommonServiceImpl.userChosePlayerByLocationIndex(callUser.getId(), PlayerBusinessType.USER_CALL, locationIndex);
+				callUserPlayer = commandCommonServiceImpl.userChosePlayerByLocationIndex(callUser.getId(), PlayerBusinessType.USER_CALL, locationIndex, true);
+				//校验是否可以用来点播转呼叫
+				if(!isPlayerIdleOrVodUser(callUserPlayer, calledUser)){
+					throw new PlayerIsBeingUsedException();
+				}
+				//此时PlayerBusinessType可能为PLAY_USER，需要改成USER_CALL
+				callUserPlayer.setPlayerBusinessType(PlayerBusinessType.USER_CALL);
 			}
 			
 			//呼叫方
@@ -443,7 +540,7 @@ public class CommandUserServiceImpl {
 			callEncoderAudioChannel = callEncoderAudioChannels.get(0);
 			
 		}else{
-			//TODO:new一个，补充必要参数
+			//new一个，补充必要参数
 			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			callUserPlayer = new CommandGroupUserPlayerPO();
 			callEncoderBundleEntity = new BundlePO();
@@ -481,7 +578,7 @@ public class CommandUserServiceImpl {
 			calledEncoderAudioChannel = calledEncoderAudioChannels.get(0);
 			
 		}else{
-			//TODO:new一个
+			//new一个
 			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			calledUserPlayer = new CommandGroupUserPlayerPO();
 			calledEncoderBundleEntity = new BundlePO();
@@ -508,6 +605,7 @@ public class CommandUserServiceImpl {
 		
 		business.setCallType(callType);
 		business.setType(UserCallType.CALL);
+		business.setFormerVodId(formerVodId);
 		if(uuid != null){
 			business.setUuid(uuid);
 		}
@@ -567,7 +665,7 @@ public class CommandUserServiceImpl {
 			
 			logic.getPass_by().add(passby);
 			
-			executeBusiness.execute(logic, "点播系统：本地用户呼叫xt用户");
+			executeBusiness.execute(logic, "本地用户呼叫外部系统用户");
 		}
 		
 		return callUserPlayer;
@@ -867,7 +965,7 @@ public class CommandUserServiceImpl {
 			System.out.println("消息消费异常，id：" + call.getMessageId());
 		}
 		
-		//外部呼本地用户，直接按照关闭处理 TODO:测试
+		//外部呼本地用户，直接按照关闭处理
 		CallType callType = call.getCallType();
 		if(CallType.OUTER_LOCAL.equals(callType)){
 			UserBO admin = new UserBO(); admin.setId(-1L);
@@ -1041,7 +1139,7 @@ public class CommandUserServiceImpl {
 		}
 		
 		if(call == null){
-			throw new BaseException(StatusCode.FORBIDDEN, "呼叫不存在！");
+			throw new BaseException(StatusCode.FORBIDDEN, "通话已挂断");
 		}
 		
 		//判断发起人是不是通话中的任何一个人
@@ -1338,6 +1436,40 @@ public class CommandUserServiceImpl {
 		
 	}
 	
+	/** 一个播放器是否可以用来将点播用户转为呼叫，即该播放器是否空闲，或者正在点播特定用户 */
+	private boolean isPlayerIdleOrVodUser(CommandGroupUserPlayerPO player, UserBO calledUser){
+		
+		PlayerBusinessType type = player.getPlayerBusinessType();
+		
+		//空闲则true
+		if(PlayerBusinessType.NONE.equals(type)){
+			return true;
+		}
+		
+		//USER_CALL时，没有业务则true，有业务则false
+		String id = player.getBusinessId();
+		if(PlayerBusinessType.USER_CALL.equals(type)){
+			if(id == null) return true;
+			else return false;
+		}
+		
+		//不在点播用户则false
+		if(!PlayerBusinessType.PLAY_USER.equals(type)){
+			return false;
+		}
+		
+		//在点播calledUser则true，否则false
+		CommandVodPO vod = commandVodDao.findOne(Long.parseLong(id));
+		if(vod == null){
+			log.warn("点播转呼叫，未查到点播任务，id：" + id + "播放器序号：" + player.getLocationIndex());
+			return false;
+		}
+		if(calledUser.getId().equals(vod.getSourceUserId())){
+			return true;
+		}
+		return false;		
+	}
+	
 	/** USER_CALL，只能获取呼叫的，不能获取语音的2个播放器（主叫和被叫的） */
 	private List<CommandGroupUserPlayerPO> getPlayers(UserLiveCallPO call) throws Exception{
 		
@@ -1388,36 +1520,38 @@ public class CommandUserServiceImpl {
 		
 		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.OUTER_LOCAL)){
 			
-			//呼叫被叫编码
-			ConnectBundleBO connectCalledEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-																	          .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-																			  .setLock_type("write")
-																			  .setBundleId(call.getCalledEncoderBundleId())
-																			  .setLayerId(call.getCalledEncoderLayerId())
-																			  .setBundle_type(call.getCalledEncoderBundleType());
-			
-			List<ConnectBO> calledEncodeConnectBOs = new ArrayList<ConnectBO>();
-			if(call.getCalledEncoderVideoChannelId() != null){
-				ConnectBO connectCalledEncoderVideoChannel = new ConnectBO().setChannelId(call.getCalledEncoderVideoChannelId())
-																		    .setChannel_status("Open")
-																		    .setBase_type(call.getCalledEncoderVideoBaseType())
-																		    .setCodec_param(codec);
-				calledEncodeConnectBOs.add(connectCalledEncoderVideoChannel);
+			//呼叫被叫编码：如果是“点播转换的呼叫”，则不呼
+			if(call.getFormerVodId() == null){
+				ConnectBundleBO connectCalledEncoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+																		          .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+																				  .setLock_type("write")
+																				  .setBundleId(call.getCalledEncoderBundleId())
+																				  .setLayerId(call.getCalledEncoderLayerId())
+																				  .setBundle_type(call.getCalledEncoderBundleType());
+				
+				List<ConnectBO> calledEncodeConnectBOs = new ArrayList<ConnectBO>();
+				if(call.getCalledEncoderVideoChannelId() != null){
+					ConnectBO connectCalledEncoderVideoChannel = new ConnectBO().setChannelId(call.getCalledEncoderVideoChannelId())
+																			    .setChannel_status("Open")
+																			    .setBase_type(call.getCalledEncoderVideoBaseType())
+																			    .setCodec_param(codec);
+					calledEncodeConnectBOs.add(connectCalledEncoderVideoChannel);
+				}
+	
+				if(call.getCalledEncoderAudioChannelId() != null){
+					ConnectBO connectCalledEncoderAudioChannel = new ConnectBO().setChannelId(call.getCalledEncoderAudioChannelId())
+																			    .setChannel_status("Open")
+																			    .setBase_type(call.getCalledEncoderAudioBaseType())
+																			    .setCodec_param(codec);
+					calledEncodeConnectBOs.add(connectCalledEncoderAudioChannel);
+				}
+	
+				
+				connectCalledEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(calledEncodeConnectBOs).getList());
+				logic.getConnectBundle().add(connectCalledEncoderBundle);
 			}
-
-			if(call.getCalledEncoderAudioChannelId() != null){
-				ConnectBO connectCalledEncoderAudioChannel = new ConnectBO().setChannelId(call.getCalledEncoderAudioChannelId())
-																		    .setChannel_status("Open")
-																		    .setBase_type(call.getCalledEncoderAudioBaseType())
-																		    .setCodec_param(codec);
-				calledEncodeConnectBOs.add(connectCalledEncoderAudioChannel);
-			}
-
 			
-			connectCalledEncoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(calledEncodeConnectBOs).getList());
-			logic.getConnectBundle().add(connectCalledEncoderBundle);
-			
-			//呼叫被叫解码,看主叫编码
+			//呼叫被叫解码，看主叫编码
 			ConnectBundleBO connectCalledDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
 //					  													      .setOperateType(ConnectBundleBO.OPERATE_TYPE)
 																			  .setLock_type("write")
@@ -1455,8 +1589,8 @@ public class CommandUserServiceImpl {
 			connectCalledDecoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(calledDecodeConnectBOs).getList());
 			logic.getConnectBundle().add(connectCalledDecoderBundle);
 		}else{
-			//LOCAL_OUTER，被叫是外部用户，生成passby
-			//查询本联网layerid
+			//LOCAL_OUTER，被叫是外部用户。这里不再生成给呼叫方的passby，因为已经在主叫方发起业务的时候(userCallUser_Cascade)就发过passby了，此时呼叫已经建立
+			//相当于打开被叫编码
 			/*String localLayerId = resourceRemoteService.queryLocalLayerId();
 			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
 								 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
@@ -1546,7 +1680,7 @@ public class CommandUserServiceImpl {
 			connectCallDecoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(callDecodeConnectBOs).getList());
 			logic.getConnectBundle().add(connectCallDecoderBundle);
 		}else{
-			//OUTER_LOCAL，主叫是外部用户，生成passby
+			//OUTER_LOCAL，主叫是外部用户，生成passby，相当于打开主叫编码
 			//查询本联网layerid
 			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_XT_CALL_LOCAL_USER)
@@ -1598,25 +1732,30 @@ public class CommandUserServiceImpl {
 									 .setPass_by(new ArrayList<PassByBO>());
 		
 		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.OUTER_LOCAL)){
-			if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
-				//关闭被叫用户设备
+			if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())
+					|| call.getFormerVodId() != null){
+				//关闭被叫编码：如果已经开始，或者“该呼叫是点播转换来的”，即call.getFormerVodId()!=null
 				DisconnectBundleBO disconnectCalledEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 																				           .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 																					       .setBundleId(call.getCalledEncoderBundleId())
 																					       .setBundle_type(call.getCalledEncoderBundleType())
 																					       .setLayerId(call.getCalledEncoderLayerId());
+				logic.getDisconnectBundle().add(disconnectCalledEncoderBundle);
+			}
+			if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
+				//关闭被叫解码
 				DisconnectBundleBO disconnectCalledDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 		//																		           .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 																					       .setBundleId(call.getCalledDecoderBundleId())
 																					       .setBundle_type(call.getCalledDecoderBundleType())
 																					       .setLayerId(call.getCalledDecoderLayerId());
 				
-				logic.getDisconnectBundle().add(disconnectCalledEncoderBundle);
+				
 				logic.getDisconnectBundle().add(disconnectCalledDecoderBundle);
 			}
 		}else{
 			//LOCAL_OUTER，生成passby
-			//查询本联网layerid
+			//相当于关闭被叫编码
 			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER)
 																					 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
@@ -1644,23 +1783,27 @@ public class CommandUserServiceImpl {
 		
 		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.LOCAL_OUTER)){
 			if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())){
-				//关闭主叫用户设备
+				//关闭主叫编码：如果已经开始
 				DisconnectBundleBO disconnectCallEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 																				         .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 																					     .setBundleId(call.getCallEncoderBundleId())
 																					     .setBundle_type(call.getCallEncoderBundleType())
 																					     .setLayerId(call.getCallEncoderLayerId());
+				logic.getDisconnectBundle().add(disconnectCallEncoderBundle);
+			}
+			if(CallStatus.ONGOING.equals(call.getStatus()) || CallStatus.PAUSE.equals(call.getStatus())
+					|| call.getFormerVodId() != null){
+				//关闭主叫解码：如果已经开始，或者“该呼叫是点播转换来的”，即call.getFormerVodId()!=null
 				DisconnectBundleBO disconnectCallDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 		//																		         .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 																					     .setBundleId(call.getCallDecoderBundleId())
 																					     .setBundle_type(call.getCallDecoderBundleType())
 																					     .setLayerId(call.getCallDecoderLayerId());
-				logic.getDisconnectBundle().add(disconnectCallEncoderBundle);
 				logic.getDisconnectBundle().add(disconnectCallDecoderBundle);
 			}
 		}else{
 			//OUTER_LOCAL，生成passby
-			//查询本联网layerid
+			//相当于关闭主叫编码
 			String localLayerId = resourceRemoteService.queryLocalLayerId();
 			XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_XT_CALL_LOCAL_USER)
 					 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
