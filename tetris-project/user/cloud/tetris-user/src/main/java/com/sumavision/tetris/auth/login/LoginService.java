@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.auth.login.exception.AppIdCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.DonotSupportRoamLoginException;
-import com.sumavision.tetris.auth.login.exception.QtZkLoginRepeatedlyException;
 import com.sumavision.tetris.auth.login.exception.SignCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.SignVerifyFailException;
 import com.sumavision.tetris.auth.login.exception.TimestampCannotBeNullException;
@@ -31,6 +30,7 @@ import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 import com.sumavision.tetris.user.exception.UsernameNotExistException;
+import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
 @Service
 public class LoginService {
@@ -58,6 +58,9 @@ public class LoginService {
 	
 	@Autowired
 	private BasicDevelopmentDAO basicDevelopmentDao;
+	
+	@Autowired
+	private WebsocketMessageService websocketMessageService;
 	
 	/**
 	 * 强制用户id登录<br/>
@@ -124,7 +127,8 @@ public class LoginService {
 			//指控终端重复登录校验
 			TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
 			if(token!=null && UserStatus.ONLINE.equals(token.getStatus())){
-				throw new QtZkLoginRepeatedlyException();
+				//重复登录踢人下线
+				websocketMessageService.push(user.getId().toString(), "forceOffLine", null, user.getId().toString(), user.getNickname());
 			}
 		}
 		return doPasswordLoginTransactional(user, terminalType, ip);
@@ -156,21 +160,13 @@ public class LoginService {
 		}
 		if(!result && token!=null){
 			token.newToken();
-			if(!TerminalType.QT_ZK.equals(terminalType)){
-				token.setStatus(UserStatus.ONLINE);
-			}else{
-				token.setStatus(UserStatus.OFFLINE);
-			}
+			token.setStatus(UserStatus.ONLINE);
 		}else if(!result && token == null){
 			token = new TokenPO();
 			token.setUserId(user.getId());
 			token.setType(terminalType);
 			token.newToken();
-			if(!TerminalType.QT_ZK.equals(terminalType)){
-				token.setStatus(UserStatus.ONLINE);
-			}else{
-				token.setStatus(UserStatus.OFFLINE);
-			}
+			token.setStatus(UserStatus.ONLINE);
 		}
 		token.setIp(ip);
 		tokenDao.save(token);

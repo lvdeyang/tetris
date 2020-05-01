@@ -574,6 +574,7 @@ public class UserQueryService {
 		toBindChecks.add(userno + "-w");
 		toBindChecks.add(userno + "-hj");
 		toBindChecks.add(userno + "-zk");
+		toBindChecks.add(userno + "-hy");
 		
 		for(String roleId: roleIds){
 			RoleAndResourceIdBO bo = new RoleAndResourceIdBO();

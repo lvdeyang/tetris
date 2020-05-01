@@ -328,25 +328,31 @@ define([
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'secretStop', params:e});
                             }
-                        //停止客户端的音/视频
-                        if (e.businessType === 'stopVideoSend') {
-                            self.qt.invoke('stopVideoSend', {});
-                            self.qt.warning('主席已将您的视频关闭');
-                        } else if (e.businessType === 'stopAudioSend') {
-                            self.qt.invoke('stopAudioSend', {});
-                            self.qt.warning('主席已将您的音频关闭');
-                        }
-
-                        //收到即时消息
-                        if(e.businessType === 'receiveInstantMessage'){
-                            self.qt.linkedWebview('historyMessage', {id: 'receiveInstantMessage', params: e});
-                        }
+	                        //停止客户端的音/视频
+	                        if (e.businessType === 'stopVideoSend') {
+	                            self.qt.invoke('stopVideoSend', {});
+	                            self.qt.warning('主席已将您的视频关闭');
+	                        } else if (e.businessType === 'stopAudioSend') {
+	                            self.qt.invoke('stopAudioSend', {});
+	                            self.qt.warning('主席已将您的音频关闭');
+	                        }
+	
+	                        //收到即时消息
+	                        if(e.businessType === 'receiveInstantMessage'){
+	                            self.qt.linkedWebview('historyMessage', {id: 'receiveInstantMessage', params: e});
+	                        }
+	                        
+	                        //重复登录踢人
+	                        if(e.businessType === 'forceOffLine'){
+	                        	self.qt.invoke('forceOffLine');
+	                        }
                         };
                         var onopen = function(){
                             console.log('已成功连接websocket...');
                         };
                         var onerror = function(){
-                            //console.log('websocket异常断开，30秒后重连...');
+                            console.log('websocket异常(error)断开，30秒后重连...');
+                            console.log(arguments);
                             //setTimeout(createWebsocket, 5*1000);
                         };
                         var onclose = function(){

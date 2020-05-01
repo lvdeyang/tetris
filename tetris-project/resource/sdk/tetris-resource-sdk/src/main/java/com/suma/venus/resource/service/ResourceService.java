@@ -194,7 +194,7 @@ public class ResourceService {
 					// 绑定的用户资源的resouceCode格式:userNo-r(录制)/userNo-w(点播)/userNo-hj(呼叫)
 					if (code.endsWith("-r") || code.endsWith("-w")) {
 						userNoSet.add(code.substring(0, code.length() - 2));
-					} else if (code.endsWith("-hj") || code.endsWith("-zk")) {
+					} else if (code.endsWith("-hj") || code.endsWith("-zk") || code.endsWith("-hy")) {
 						userNoSet.add(code.substring(0, code.length() - 3));
 					} else {
 						userNoSet.add(code);
@@ -295,6 +295,9 @@ public class ResourceService {
 			case ZK:// 指挥
 				code = dstUserBO.getUserNo() + "-zk";
 				break;
+			case HY:// 指挥
+				code = dstUserBO.getUserNo() + "-hy";
+				break;
 			default:
 				return false;
 			}
@@ -336,6 +339,9 @@ public class ResourceService {
 			break;
 		case ZK:// 指挥
 			suffix = "-zk";
+			break;
+		case HY:// 会议
+			suffix = "-hy";
 			break;
 		default:
 			return false;
