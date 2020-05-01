@@ -68,7 +68,7 @@ public class UserQuery {
 	 * @return boolean 检验结果
 	 */
 	public boolean checkUserno(String userno) throws Exception{
-		String check = "^\\d{1, 11}$";
+		String check = "^\\d{1,11}$";
 		Pattern regex = Pattern.compile(check);
 		Matcher matcher = regex.matcher(userno);
 		if(!matcher.matches()){
