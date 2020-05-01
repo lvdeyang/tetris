@@ -135,7 +135,7 @@ public class MonitorOsdService {
 		Set<Integer> notUsed = new HashSet<Integer>();
 		
 		Set<MonitorOsdLayerPO> layerEntites = osdEntity.getLayers();
-		if(layerEntites!=null && layerEntites.size()>0) {
+		if(layerEntites!=null && layerEntites.size()>=0) {
 			for(MonitorOsdLayerPO layerEntity:layerEntites){
 				if(layerEntity.getType().equals(MonitorOsdLayerType.SUBTITLE)){
 					if(layerEntity.getContentId() != null) subtitleIds.add(layerEntity.getContentId());

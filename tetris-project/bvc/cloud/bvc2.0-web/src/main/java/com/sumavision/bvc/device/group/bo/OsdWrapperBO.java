@@ -10,6 +10,9 @@ public class OsdWrapperBO {
 	/** 源的设备名称 */
 	private String devname;
 	
+	/** 分辨率 */
+	private String resolution;
+	
 	/** 图层列表 */
 	private Collection<OsdBO> layers;
 
@@ -28,6 +31,15 @@ public class OsdWrapperBO {
 
 	public OsdWrapperBO setDevname(String devname) {
 		this.devname = devname;
+		return this;
+	}
+
+	public String getResolution() {
+		return resolution;
+	}
+
+	public OsdWrapperBO setResolution(String resolution) {
+		this.resolution = resolution;
 		return this;
 	}
 

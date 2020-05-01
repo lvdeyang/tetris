@@ -48,10 +48,15 @@ import com.sumavision.bvc.device.group.bo.ForwardSetBO;
 import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
+import com.sumavision.bvc.device.group.bo.OsdWrapperBO;
+import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
 import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
+import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
+import com.sumavision.bvc.device.monitor.osd.MonitorOsdService;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -92,6 +97,9 @@ public class CommandCastServiceImpl {
 	private CommandGroupForwardDemandDAO commandGroupForwardDemandDao;
 	
 	@Autowired
+	private MonitorOsdDAO monitorOsdDao;
+	
+	@Autowired
 	private ResourceBundleDAO resourceBundleDao;
 	
 	@Autowired
@@ -102,6 +110,9 @@ public class CommandCastServiceImpl {
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
+	
+	@Autowired
+	private MonitorOsdService monitorOsdService;
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
@@ -396,7 +407,8 @@ public class CommandCastServiceImpl {
 		 		 .setForwardDel(new ArrayList<ForwardDelBO>())
 		 		 .setMediaPushSet(new ArrayList<MediaPushSetBO>())
 		 		 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
-		 		 .setMediaPushDel(new ArrayList<MediaPushSetBO>());
+		 		 .setMediaPushDel(new ArrayList<MediaPushSetBO>())
+		 		 .setPass_by(new ArrayList<PassByBO>());
 		
 		String description = "";
 		
@@ -532,6 +544,40 @@ public class CommandCastServiceImpl {
 				return new PlayerInfoBO(true, demand.getVideoBundleName(), demand.getSrcCode());
 			}
 		}
+		
+		//字幕
+		if(player.getOsdId() != null){
+			
+			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+			PlayerInfoBO playerInfo = changeCastDevices2(player, null, null, false, true);
+			
+			//清除字幕协议
+			OsdWrapperBO clearOsd = monitorOsdService.clearProtocol(playerInfo.getSrcCode(), playerInfo.getSrcInfo());
+			clearOsd.setResolution(codec.getVideo_param().getResolution());
+			for(CommandGroupUserPlayerCastDevicePO removeDevice : removeDevices){
+				PassByBO passByBO = new PassByBO()
+						.setBundle_id(removeDevice.getDstBundleId())
+						.setLayer_id(removeDevice.getDstLayerId())
+						.setType("osds")
+						.setPass_by_content(clearOsd);
+				logic.getPass_by().add(passByBO);
+			}
+			
+			//下发字幕协议
+			MonitorOsdPO osd = monitorOsdDao.findOne(player.getOsdId());
+			if(osd != null){
+				OsdWrapperBO setOsd = monitorOsdService.protocol(osd, playerInfo.getSrcCode(), playerInfo.getSrcInfo());
+				setOsd.setResolution(codec.getVideo_param().getResolution());
+				for(CommandGroupUserPlayerCastDevicePO addDevice : addDevices){
+					PassByBO passByBO = new PassByBO()
+							.setBundle_id(addDevice.getDstBundleId())
+							.setLayer_id(addDevice.getDstLayerId())
+							.setType("osds")
+							.setPass_by_content(setOsd);
+					logic.getPass_by().add(passByBO);
+				}
+			}			
+		}		
 		
 		if(doLogic) executeBusiness.execute(logic, "播放器修改上屏列表" + description);
 		return playerInfoBO;
