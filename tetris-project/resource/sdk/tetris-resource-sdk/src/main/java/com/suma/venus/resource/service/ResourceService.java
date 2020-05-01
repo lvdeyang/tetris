@@ -279,6 +279,7 @@ public class ResourceService {
 	/** 根据用户id，目标用户id和业务类型判断用户对目标用户是否有权限 **/
 	public boolean hasPrivilegeOfUser(Long userId, Long dstUserId, BUSINESS_OPR_TYPE businessType) {
 		try {
+			if(userId.equals(dstUserId)) return true;
 //			UserBO dstUserBO = userFeign.queryUserInfoById(dstUserId).get("user");
 			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId, TerminalType.QT_ZK);
 			String code = null;// 权限码
@@ -346,9 +347,12 @@ public class ResourceService {
 		default:
 			return false;
 		}
+		//所有需要校验的权限码
 		List<String> codes = new ArrayList<String>();
 		for(UserBO dstUser:dstUserBOs){
-			codes.add(new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString());
+			if(!dstUser.getId().equals(userId)){//如果是对自己，就不用add
+				codes.add(new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString());
+			}
 		}
 		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
 		for(String code:codes){
@@ -383,6 +387,9 @@ public class ResourceService {
 		}
 		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
 		for(UserBO dstUser:dstUserBOs){
+			if(dstUser.getId().equals(userId)){
+				continue;//如果是对自己，则不用校验
+			}
 			String code = new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString();
 			boolean hasPrivilege = false;
 			if (bo.getResourceCodes().contains(code)){
