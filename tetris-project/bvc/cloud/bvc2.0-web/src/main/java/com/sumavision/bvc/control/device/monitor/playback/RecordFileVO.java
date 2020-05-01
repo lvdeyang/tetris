@@ -109,7 +109,7 @@ public class RecordFileVO extends AbstractBaseVO<RecordFileVO, MonitorRecordPO>{
 			.setFileName(entity.getFileName())
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(layer==null?"0.0.0.0":layer.getIp()).append(":").append(layer==null?"0":layer.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setStartTime(DateUtil.format(entity.getStartTime(), DateUtil.dateTimePattern))
-			.setEndTime(entity.getEndTime()==null?DateUtil.format(new Date(), DateUtil.dateTimePattern):DateUtil.format(entity.getEndTime(), DateUtil.dateTimePattern))
+			.setEndTime(entity.getEndTime()==null?"录制中...":DateUtil.format(entity.getEndTime(), DateUtil.dateTimePattern))
 			.setRemoveable(entity.getUserId().equals(userId)?(MonitorRecordStatus.STOP.equals(entity.getStatus())?true:false):false)
 			.setPlayable(layer==null?false:true);
 		return this;
