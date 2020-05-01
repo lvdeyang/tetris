@@ -1907,6 +1907,8 @@ define([
                 var self = this;
                 var id = self.meet.currentId;
                 ajax.post('/command/basic/remove', {ids: $.toJSON([id])}, function () {
+                	self.meet.currentId = '';
+                	self.meet.current = '';
                     // 重置currentId
                     self.refreshCommand('meeting', function () {
                         self.meet.currentId = self.command.data[0].id;
