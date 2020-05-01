@@ -111,9 +111,10 @@
                         <el-input name="username" class="border-radius-2px" placeholder="账号/邮箱/手机号">
                             <span slot="prefix" class="feather-icon-user" style="font-size:20px; position:relative; top:9px;"></span>
                         </el-input>
-                        <el-input name="password" type="password" class="border-radius-2px" placeholder="密码" style="margin-top:20px;">
+                        <el-input type="password" v-model="passwordInput" class="border-radius-2px" placeholder="密码" style="margin-top:20px;">
                             <span slot="prefix" class="feather-icon-lock" style="font-size:20px; position:relative; top:9px;"></span>
                         </el-input>
+                        <input name="password" type="hidden" v-model="passwordEncode"></input>
                         <div style="margin-top:20px;">
                             <el-button type="text" style="padding:0; float:right;">忘记密码？</el-button>
                             <hr style="border:0; clear:both; padding:0; margin:0;"/>
@@ -159,15 +160,26 @@
         new Vue({
             el: '#page-login-wrapper',
             data: {
-                mode:'password' //password|phone|wechat|qq
+                mode:'password', //password|phone|wechat|qq
+                passwordInput:'',
+                passwordEncode:''
             },
             computed:{
 
             },
             watch:{
-
+				passwordInput:function(){
+					var self = this;
+					self.passwordEncode = self.encodePassword(self.passwordInput);
+				}
             },
             methods:{
+            	encodePassword:function(text){
+            		for(var i=0; i<5; i++){
+            			text = window.btoa(text);
+            		}
+            		return text;
+            	},
                 passwordModeTabStyle:function(){
                     var self = this;
                     if(self.mode === 'password'){

@@ -1311,9 +1311,11 @@ define([
 
             //指挥工作台中的 下拉菜单
             currentGroupChange: function (v) {
+            	var self = this;
+            	var groupId = typeof v==='object'?v.id:v;
+            	self.qt.set('currentGroupId', groupId);
                 console.log('下拉：' + v)
                 if (!v) return;
-                var self = this;
                 var currentGroup = null;
                 if (typeof v === 'object') {
                     currentGroup = v;

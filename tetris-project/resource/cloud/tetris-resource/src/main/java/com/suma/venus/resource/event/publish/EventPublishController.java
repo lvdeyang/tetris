@@ -169,7 +169,7 @@ public class EventPublishController {
 			Long userId,
 			HttpServletRequest request) throws Exception{
 		
-		WebsocketSessionOpenEvent event = new WebsocketSessionOpenEvent(applicationEventPublisher, userId);
+		WebsocketSessionOpenEvent event = new WebsocketSessionOpenEvent(applicationEventPublisher, userId, null);
 		applicationEventPublisher.publishEvent(event);
 		
 		return null;

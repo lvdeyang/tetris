@@ -1,5 +1,7 @@
 package com.suma.venus.resource.service;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -7,6 +9,7 @@ import com.suma.venus.resource.dao.LianwangPassbyDAO;
 import com.suma.venus.resource.pojo.LianwangPassbyPO;
 
 @Service
+@Transactional(rollbackOn = Exception.class)
 public class LianwangPassbyService {
 
 	@Autowired

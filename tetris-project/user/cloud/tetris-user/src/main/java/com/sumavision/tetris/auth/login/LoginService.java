@@ -16,6 +16,7 @@ import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
 import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.auth.token.TokenQuery;
+import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.user.BasicDevelopmentDAO;
 import com.sumavision.tetris.user.BasicDevelopmentPO;
@@ -48,6 +49,9 @@ public class LoginService {
 	
 	@Autowired
 	private Sha256Encoder sha256Encoder;
+	
+	@Autowired
+	private Base64 base64;
 	
 	@Autowired
 	private BasicDevelopmentQuery basicDevelopmentQuery;
@@ -107,6 +111,9 @@ public class LoginService {
 		if(user.getErrorLoginTimes()!=null && user.getErrorLoginTimes().intValue()>=10){
 			throw new TooManyAbnormalLoginTimesException();
 		} 
+		for(int i=0; i<5; i++){
+			password = base64.decode(password);
+		}
 		password = sha256Encoder.encode(password);
 		if(!user.getPassword().equals(password)){
 			user.setErrorLoginTimes((user.getErrorLoginTimes()==null?1:(user.getErrorLoginTimes()+1)));
@@ -151,6 +158,8 @@ public class LoginService {
 			token.newToken();
 			if(!TerminalType.QT_ZK.equals(terminalType)){
 				token.setStatus(UserStatus.ONLINE);
+			}else{
+				token.setStatus(UserStatus.OFFLINE);
 			}
 		}else if(!result && token == null){
 			token = new TokenPO();
@@ -159,6 +168,8 @@ public class LoginService {
 			token.newToken();
 			if(!TerminalType.QT_ZK.equals(terminalType)){
 				token.setStatus(UserStatus.ONLINE);
+			}else{
+				token.setStatus(UserStatus.OFFLINE);
 			}
 		}
 		token.setIp(ip);
