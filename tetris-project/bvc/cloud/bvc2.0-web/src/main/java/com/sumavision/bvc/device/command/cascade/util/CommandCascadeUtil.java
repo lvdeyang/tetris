@@ -837,7 +837,8 @@ public class CommandCascadeUtil {
 				boolean finded = false;
 				if(oldUserMaps!=null && oldUserMaps.size()>0){
 					for(FolderUserMap oldMap:oldUserMaps){
-						if(oldMap.getUserNode().equals(newMap.getUserNode())){
+						if((oldMap.getUserNode()==null && newMap.getUserNode()==null)
+								|| (oldMap.getUserNode()!=null && oldMap.getUserNode().equals(newMap.getUserNode()))){
 							finded = true;
 							break;
 						}

@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
@@ -234,6 +235,12 @@ public class CommandBasicServiceImpl {
 			String uuid
 			) throws Exception{
 		
+		CommandGroupPO group1 = commandGroupDao.findByUuid(uuid);
+		if(group1 != null){
+			log.warn("级联建会，uuid已经存在：" + uuid);
+			return group1;
+		}
+		
 		UserBO creatorUserBo = resourceService.queryUserById(creatorUserId, TerminalType.QT_ZK);
 		if(creatorUserBo == null){
 			throw new BaseException(StatusCode.FORBIDDEN, "当前用户已失效，请重新登录");
@@ -245,10 +252,14 @@ public class CommandBasicServiceImpl {
 		//确保成员中有创建者
 		if(!userIdList.contains(creatorUserId)){
 			userIdList.add(creatorUserId);
-		}
+		}		
 		
-		//本系统创建，则校验主席有编码器
+		//本系统创建，则鉴权，则校验主席有编码器
 		if(!OriginType.OUTER.equals(originType)){
+			
+			//鉴权，区分指挥与会议
+//			commandCommonServiceImpl.authorizeUsers(userIdList, chairmanUserId, BUSINESS_OPR_TYPE.ZK);
+			
 			String creatorEncoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(creatorUserBo);
 			List<BundlePO> creatorBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(creatorEncoderId).getList());
 			if(creatorBundleEntities.size() == 0){
@@ -946,14 +957,30 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public Object start(Long groupId, int locationIndex, boolean refresh, List<Long> enterUserIds, Date startTime, GroupStatus groupStatus) throws Exception{
+		
 		UserVO user = userQuery.current();
 		JSONObject result = new JSONObject();
 		JSONArray chairSplits = new JSONArray();
+		
+		if(groupId == null || "".equals(groupId)){
+			log.warn("开始会议，会议id有误");
+			return result;
+		}
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 					
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		GroupType groupType = group.getType();
+		List<Long> userIdList = new ArrayList<Long>();
+		List<CommandGroupMemberPO> members = group.getMembers();
+		for(CommandGroupMemberPO member : members){
+			userIdList.add(member.getUserId());
+		}
+		
+		//本系统创建的，则鉴权，区分指挥与会议
+//		if(!OriginType.OUTER.equals(group.getOriginType())){
+//			commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.ZK);
+//		}
 		
 		//普通指挥、会议，刷新会议数据
 		if(!groupType.equals(GroupType.SECRET) && refresh){
@@ -973,17 +1000,14 @@ public class CommandBasicServiceImpl {
 			group.setStatus(GroupStatus.START);
 		}
 		if(startTime == null) startTime = new Date();
-		group.setStartTime(startTime);
-		List<CommandGroupMemberPO> members = group.getMembers();
+		group.setStartTime(startTime);		
 		
 		//处理主席
 		CommandGroupMemberPO chairman = commandCommonUtil.queryChairmanMember(members);
 		chairman.setMemberStatus(MemberStatus.CONNECT);
 		
-		//处理其它成员
-		List<Long> userIdList = new ArrayList<Long>();
+		//处理其它成员		
 		for(CommandGroupMemberPO member : members){
-			userIdList.add(member.getUserId());
 			
 			if(member.isAdministrator()){
 				continue;
@@ -1090,15 +1114,19 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public JSONArray stop(Long userId, Long groupId, int stopMode) throws Exception{
+		
 		UserVO user = userQuery.current();
-		if(groupId==null || groupId.equals("")){
-			throw new BaseException(StatusCode.FORBIDDEN, "停会操作，会议id有误");
-		}
 		
 		//通常返回主席的屏幕；在专向会议中，由对方成员停止或拒绝，返回对方成员的屏幕
 		JSONArray returnSplits = new JSONArray();
 		JSONArray chairSplits = new JSONArray();
 		JSONArray secretSplits = new JSONArray();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("停会操作，会议id有误");
+			return chairSplits;
+//			throw new BaseException(StatusCode.FORBIDDEN, "停会操作，会议id有误");
+		}
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 					
@@ -2094,6 +2122,11 @@ public class CommandBasicServiceImpl {
 			GroupType groupType = group.getType();
 			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> enterMembers = new ArrayList<CommandGroupMemberPO>();
+			
+			//本系统创建的，则鉴权，区分指挥与会议
+//			if(!OriginType.OUTER.equals(group.getOriginType())){
+//				commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.ZK);
+//			}
 			
 			//记录加人之前的用户列表
 			List<MinfoBO> oldMemberInfos = commandCascadeUtil.generateMinfoBOList(members);
@@ -4413,9 +4446,10 @@ public class CommandBasicServiceImpl {
 		//挂断转发点播中的源的编码器
 		if(null == demandsForEncoder) demandsForEncoder = new ArrayList<CommandGroupForwardDemandPO>();
 		for(CommandGroupForwardDemandPO demand : demandsForEncoder){
-			//只对设备转发处理；文件转发没有编码器
+			//只对设备转发处理，文件转发没有编码器；只对目的为INNER的处理；只对DONE的处理
 			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)
-					&& !OriginType.OUTER.equals(demand.getDstOriginType())){
+					&& !OriginType.OUTER.equals(demand.getDstOriginType())
+					&& ForwardDemandStatus.DONE.equals(demand.getExecuteStatus())){
 				
 				if(!OriginType.OUTER.equals(demand.getSrcOriginType())){
 					DisconnectBundleBO disconnectVideoBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)

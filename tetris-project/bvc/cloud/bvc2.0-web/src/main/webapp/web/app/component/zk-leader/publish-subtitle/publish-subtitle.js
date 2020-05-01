@@ -38,7 +38,7 @@ define([
             refreshLeftData: function () {
                 var self = this;
                 self.leftData.splice(0, self.leftData.length);
-                ajax.post('/monitor/osd/load', {
+                ajax.post('/monitor/osd/load/all', {
                     currentPage: self.leftCurrentPage,
                     pageSize: '10'
                 }, function (data) {

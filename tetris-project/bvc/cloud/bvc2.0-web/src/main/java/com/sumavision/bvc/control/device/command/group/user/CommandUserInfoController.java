@@ -129,8 +129,6 @@ public class CommandUserInfoController {
 					commandVodService.seeOneselfUserStart(userBO, admin);
 				}
 			}
-			log.info("serverProps.LOCAL_PREVIEW_MODE: " + serverProps.getLocalPreviewMode());
-			log.info("serverProps.COMMAND_STRING: " + serverProps.getCommandString());
 		}catch(Exception e){
 			log.info(user.getName() + " 用户添加本地视频预览失败");
 			e.printStackTrace();
@@ -141,7 +139,7 @@ public class CommandUserInfoController {
 		for(CommandGroupUserLayoutShemePO schemePO : shemePOs){
 			if(schemePO.getIsUsing()){
 				CommandGroupUserLayoutShemeVO schemeVO = new CommandGroupUserLayoutShemeVO().set(schemePO);				
-				System.out.println("getCurrent: " + JSON.toJSON(schemeVO));
+				log.info("getCurrent: " + JSON.toJSON(schemeVO));
 				
 				return schemeVO;
 			}
@@ -189,12 +187,17 @@ public class CommandUserInfoController {
 			UserBO userBo = resourceService.queryUserById(user.getId(), TerminalType.QT_ZK);
 			EncoderBO localEncoder = userBo.getLocal_encoder();
 			String bundleId = localEncoder.getEncoderId();
+//			log.info("bundleId: " + bundleId);
+//			List<BundlePO> playerBundlePOs = bundleDao.findByUserIdAndDeviceModel(user.getId(), "encoder");
 			List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(bundleId).getList());
 			BundlePO encoderBundlePO = encoderBundleEntities.get(0);
+//			log.info("encoderBundlePO: " + encoderBundlePO);
 			PlayerBundleBO encoderBundleBO = resourceQueryUtil.generateByBundlePO(encoderBundlePO);
+//			log.info("encoderBundleBO: " + encoderBundleBO);
 			encoderBundleVO = new WebSipPlayerVO().set(encoderBundleBO);
 			encoderBundleVO.setIp(clientIp).setPort(port);
-		}catch(Exception e){			
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		
 		Map<String, Object> map = new HashMapWrapper<String, Object>()
@@ -202,7 +205,7 @@ public class CommandUserInfoController {
 				.put("players", players)
 				.put("localEncoder", encoderBundleVO)
 				.getMap();
-		System.out.println("getUserAndPlayers: " + JSON.toJSON(map));
+		log.info("getUserAndPlayers: " + JSON.toJSON(map));
 		
 		return map;
 	}

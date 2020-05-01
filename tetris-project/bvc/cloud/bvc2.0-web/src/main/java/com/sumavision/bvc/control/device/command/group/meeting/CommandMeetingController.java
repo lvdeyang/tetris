@@ -93,7 +93,7 @@ public class CommandMeetingController {
 		JSONObject info = new JSONObject();
 		info.put("id", group.getId().toString());
 		info.put("name", group.getName());
-		info.put("status", "状态得扩展");
+		info.put("status", group.getStatus().getCode());
 		info.put("commander", group.getUserId());
 		info.put("creator", group.getUserId());
 		Object membersArray = treeUtils.queryGroupTree(group.getId());

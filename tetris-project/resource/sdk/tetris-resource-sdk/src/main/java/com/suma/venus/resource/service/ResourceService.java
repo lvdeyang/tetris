@@ -279,8 +279,9 @@ public class ResourceService {
 	/** 根据用户id，目标用户id和业务类型判断用户对目标用户是否有权限 **/
 	public boolean hasPrivilegeOfUser(Long userId, Long dstUserId, BUSINESS_OPR_TYPE businessType) {
 		try {
+			if(userId.equals(dstUserId)) return true;
 //			UserBO dstUserBO = userFeign.queryUserInfoById(dstUserId).get("user");
-			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId, null);
+			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId, TerminalType.QT_ZK);
 			String code = null;// 权限码
 			switch (businessType) {
 			case DIANBO:// 点播
@@ -346,9 +347,12 @@ public class ResourceService {
 		default:
 			return false;
 		}
+		//所有需要校验的权限码
 		List<String> codes = new ArrayList<String>();
 		for(UserBO dstUser:dstUserBOs){
-			codes.add(new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString());
+			if(!dstUser.getId().equals(userId)){//如果是对自己，就不用add
+				codes.add(new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString());
+			}
 		}
 		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
 		for(String code:codes){
@@ -359,6 +363,43 @@ public class ResourceService {
 			if(!hasPrivilege) return false;
 		}
 		return true;
+	}
+	
+	public UserBO hasNoPrivilegeOfUsers(Long userId, List<Long> dstUserIds, BUSINESS_OPR_TYPE businessType) throws Exception{
+		List<UserBO> dstUserBOs = userQueryService.queryUsersByUserIds(dstUserIds, null);
+		if(dstUserBOs==null || dstUserBOs.size()<=0) return null;
+		String suffix = null;
+		switch (businessType) {
+		case DIANBO:// 点播
+			suffix = "-w";
+			break;
+		case RECORD:// 录制
+			suffix = "-r";
+			break;
+		case CALL:// 呼叫
+			suffix = "-hj";
+			break;
+		case ZK:// 指挥
+			suffix = "-zk";
+			break;
+		default:
+			return null;
+		}
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		for(UserBO dstUser:dstUserBOs){
+			if(dstUser.getId().equals(userId)){
+				continue;//如果是对自己，则不用校验
+			}
+			String code = new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString();
+			boolean hasPrivilege = false;
+			if (bo.getResourceCodes().contains(code)){
+				hasPrivilege = true;
+			}
+			if(!hasPrivilege){
+				return dstUser;
+			}
+		}
+		return null;
 	}
 
 	/** 通过userId查询bundles */

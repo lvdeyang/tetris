@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
@@ -181,7 +182,7 @@ public class CommandVodService {
 	 * @param locationIndex 指定播放器序号，序号从0起始；-1为自动选择
 	 * @return CommandGroupUserPlayerPO 播放器
 	 */
-	public CommandGroupUserPlayerPO userStart(UserBO user, UserBO vodUser, UserBO admin, int locationIndex) throws Exception{
+	/*public CommandGroupUserPlayerPO userStart(UserBO user, UserBO vodUser, UserBO admin, int locationIndex) throws Exception{
 				
 		//点播--解码（播放器）
 		CommandGroupUserPlayerPO decoderUserPlayer = null;
@@ -234,7 +235,7 @@ public class CommandVodService {
 		executeBusiness.execute(logic, user.getName() + "点播" + vodUser.getName() + "用户：");
 		
 		return decoderUserPlayer;
-	}
+	}*/
 	
 	/**
 	 * 点播用户<br/>
@@ -248,6 +249,9 @@ public class CommandVodService {
 	 * @return CommandGroupUserPlayerPO 播放器
 	 */
 	public CommandGroupUserPlayerPO userStart_Cascade(UserBO user, UserBO vodUser, UserBO admin, int locationIndex) throws Exception{
+		
+//		commandCommonServiceImpl.authorizeUser(vodUser.getId(), user.getId(), BUSINESS_OPR_TYPE.DIANBO);
+//		commandCommonServiceImpl.authorizeUsers(new ArrayListWrapper<Long>().add(vodUser.getId()).getList(), user.getId(), BUSINESS_OPR_TYPE.DIANBO);
 		
 		FolderUserMap vodUserfolderUserMap = folderUserMapDao.findByUserId(vodUser.getId());
 		boolean bVodUserLdap = queryUtil.isLdapUser(user, vodUserfolderUserMap);
@@ -428,7 +432,7 @@ public class CommandVodService {
 	 * @param locationIndex 指定播放器序号，序号从0起始；-1为自动选择
 	 * @return CommandGroupUserPlayerPO 播放器信息
 	 */
-	public CommandGroupUserPlayerPO deviceStart(UserBO user, String bundleId, UserBO admin, int locationIndex) throws Exception{
+	/*public CommandGroupUserPlayerPO deviceStart(UserBO user, String bundleId, UserBO admin, int locationIndex) throws Exception{
 		
 		//点播--解码（播放器）
 		CommandGroupUserPlayerPO decoderUserPlayer = null;
@@ -478,7 +482,7 @@ public class CommandVodService {
 		executeBusiness.execute(logic, user.getName() + "点播" + encoderBundleEntity.getBundleName() + "设备：");
 		
 		return decoderUserPlayer;
-	}
+	}*/
 	
 	/**
 	 * 点播设备<br/>
@@ -492,6 +496,8 @@ public class CommandVodService {
 	 * @return CommandGroupUserPlayerPO 播放器信息
 	 */
 	public CommandGroupUserPlayerPO deviceStart_Cascade(UserBO user, String bundleId, UserBO admin, int locationIndex) throws Exception{
+		
+//		commandCommonServiceImpl.authorizeBundle(bundleId, user.getId(), BUSINESS_OPR_TYPE.DIANBO);
 		
 		//参数模板
 		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();

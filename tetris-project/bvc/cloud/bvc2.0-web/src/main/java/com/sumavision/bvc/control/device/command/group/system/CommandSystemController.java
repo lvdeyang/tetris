@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.system.AllForwardBO;
@@ -87,14 +88,14 @@ public class CommandSystemController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/get/ntp/info")
-	public Object getNtpInfo(HttpServletRequest request) throws Exception{
-		Map<String, Object> map = new HashMapWrapper<String, Object>()
-				.put("ntp1IP", serverProps.getNtp1IP())
-				.put("ntp1Port", serverProps.getNtp1Port())
-				.put("ntp2IP", serverProps.getNtp2IP())
-				.put("ntp2Port", serverProps.getNtp2Port())
-				.getMap();
-		return JSON.toJSONString(map);
+	public Object getNtpInfo(HttpServletRequest request) throws Exception{		
+		JSONObject result = new JSONObject();
+		result.put("ntp1IP", serverProps.getNtp1IP());
+		result.put("ntp1Port", serverProps.getNtp1Port());
+		result.put("ntp2IP", serverProps.getNtp2IP());
+		result.put("ntp2Port", serverProps.getNtp2Port());
+		System.out.println("ntpInfo: " + result);
+		return result;
 	}
 	
 }
