@@ -129,7 +129,7 @@
         <!--工具条-->
         <el-col :span="24" class="toolbar">
           <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20" @change="pageChange"></el-input>
-          <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :total="total" style="float:right;">
+          <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :current-page="pageNum" :page-size="countPerPage" :total="total" style="float:right;">
             </el-pagination>
         </el-col>
 
