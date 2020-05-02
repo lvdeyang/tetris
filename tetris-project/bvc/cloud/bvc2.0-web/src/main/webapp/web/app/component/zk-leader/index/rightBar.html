@@ -524,7 +524,7 @@
                 </div>
             </div>
 
-            <div class="btnContainer">
+            <div class="btnContainer" v-if="meet.currentId && currentTab=='-1' && differentiate==2">
                 <div :class="'option-button '+(buttons.addMember?'':'disable')" title="添加成员" @click="addCommandMember">
                     <img v-if="buttons.addMember" :src="baseUrl+'images/zk-leader/able/addMember.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/addMember.png'"/>

@@ -1362,7 +1362,7 @@ define([
                                 break;
                             }
                         }
-                        if (currentGroup.type.toLowerCase() === 'command') {
+                        if (currentGroup && currentGroup.type.toLowerCase() === 'command') {
                             ajax.post('/command/basic/query/members/list', {id: currentGroup.id}, function (data) {
                                 data.type = 'command';
                                 data.select = [];
