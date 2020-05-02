@@ -700,6 +700,13 @@
           this.disableSetFolderBtn = true;
           this.disableDeleteFolderBtn = false;
         }
+
+        if(!d.systemSourceType){
+          this.disableAddFolderBtn = true;
+          this.disableModifyFolderBtn = true;
+          this.disableSetFolderBtn = true;
+          this.disableDeleteFolderBtn = true;
+        }
       },
 
       handleNodeDragEnd : function(draggingNode, dropNode, dropType, ev){
