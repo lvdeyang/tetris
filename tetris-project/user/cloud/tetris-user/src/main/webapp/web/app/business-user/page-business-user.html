@@ -76,13 +76,15 @@
                                 width="250">
                             <template slot-scope="scope">
                                 <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowEdit" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-edit" class="bt_list_handle" @click="handleRowEdit(scope)"></el-button>
+                                	<el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-edit" class="bt_list_handle" disabled></el-button>
+                                    <el-button v-else type="text" icon="el-icon-edit" class="bt_list_handle" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" :content="i18n.tipGotoBindBusinessRole" placement="bottom-end">
                                     <el-button type="text" icon="feather-icon-lock" class="bt_list_handle bt_list_center_handle" @click="gotoBindBusinessRole(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" :content="i18n.tipHandleRowDelete" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-delete" class="bt_list_handle bt_list_center_handle" @click="handleRowDelete(scope)"></el-button>
+                                	<el-button v-if="scope.row.classify==='LDAP'" type="text" icon="el-icon-delete" class="bt_list_handle bt_list_center_handle" disabled></el-button>
+                                    <el-button v-else type="text" icon="el-icon-delete" class="bt_list_handle bt_list_center_handle" @click="handleRowDelete(scope)"></el-button>
                                 </el-tooltip>
                             </template>
                         </el-table-column>

@@ -47,7 +47,7 @@
                                 <el-scrollbar style="height: 100%">
                                     <el-table
                                             class="table"
-                                            :data="pageData"
+                                            :data="files"
                                             style="width:100%">
                                         <el-table-column label="选择" width="50" center>
                                             　　　　　　
@@ -100,8 +100,8 @@
                             </div>
                             <div style="height:50px; position:absolute; left:0; right:0; bottom:0; padding-top:9px; box-sizing:border-box;">
                                 <el-pagination background @current-change="currentChange" :current-page="currentPage"
-                                               :page-size="3" :pager-count="5" layout="total, prev, pager, next, jumper"
-                                               :total="files.length">
+                                               :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next, jumper"
+                                               :total="total">
                                 </el-pagination>
                             </div>
                         </div>

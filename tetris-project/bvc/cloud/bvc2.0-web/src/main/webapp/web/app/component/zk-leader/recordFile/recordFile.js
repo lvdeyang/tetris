@@ -30,6 +30,8 @@ define([
                 },
                 //录制文件树
                 files: [],
+                total:0,
+                pageSize:10,
                 currentPage: 1,
                 startTime: '',
                 endTime: '',
@@ -38,13 +40,13 @@ define([
             }
         },
         computed: {
-            pageData: function () {
-                return this.files.slice((this.currentPage - 1) * 10, this.currentPage * 10);
-            }
+            
         },
         methods: {
             currentChange: function (val) {
-                this.currentPage = val;
+            	var self = this;
+            	self.currentPage = val;
+                self.confirm();
             },
             //获取左侧树形菜单的数据
             refreshRecordFile: function () {
@@ -63,7 +65,8 @@ define([
                 var self = this;
                 var data = self.record.select;
                 var id = data.type == 'BUNDLE' ? data.id : null;
-                var bundleRealType = data.type == 'BUNDLE' && data.param.realType == 'XT' ? data.param.realType : null;
+                var param = $.parseJSON(data.param);
+                var bundleRealType = data.type == 'BUNDLE' && param.realType == 'XT' ? param.realType : null;
                 var startTime=self.date?self.format(self.date[0]):null;
                 var endTime=self.date?self.format(self.date[1]):null;
                 if (!self.record.select) {
@@ -76,13 +79,21 @@ define([
                     bundleId: id, //设备id,type为BUNDLE时设置此字段
                     recordUserId: data.type == 'USER' ? data.id : null, // 录制的用户id,type为USER时设置此字段
                     currentPage: self.currentPage,
-                    pageSize: 10
+                    pageSize: self.pageSize
                 };
                 if(startTime) param.timeLowerLimit = startTime;
                 if(endTime) param.timeUpperLimit = endTime;
+                self.files.splice(0, self.files.length);
                 ajax.post('/monitor/record/playback/find/by/condition', param, function (data) {
-                        self.files = data.rows;
-                })
+                	var total = data.total;
+                	var rows = data.rows;
+                	if(rows && rows.length>0){
+                		for(var i=0; i<rows.length; i++){
+                			self.files.push(rows[i]);
+                		}
+                		self.total = total;
+                	}
+                });
             },
             //日期筛选
             filtrate: function () {
