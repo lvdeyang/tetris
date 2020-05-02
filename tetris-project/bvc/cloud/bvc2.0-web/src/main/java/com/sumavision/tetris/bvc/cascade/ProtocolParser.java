@@ -154,9 +154,9 @@ public class ProtocolParser {
 			}else if("group".equals(commandname) && "update".equals(operation)){
 				String biztype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.biztype").toString());
 				if("cmd".equals(biztype)){
-					updateCommand(reader, rootNodeName, srcNo);
+					updateCommand(reader, rootNodeName, srcNo, GroupType.BASIC);
 				}else if("cnf".equals(biztype)){
-					updateConference(reader, rootNodeName, srcNo);
+					updateConference(reader, rootNodeName, srcNo, GroupType.MEETING);
 				}
 			}else if("group".equals(commandname) && "destroy".equals(operation)){
 				deleteCommand(reader, rootNodeName, srcNo);
@@ -305,8 +305,9 @@ public class ProtocolParser {
 	 * @param XMLReader reader 协议
 	 * @param String rootNodeName 协议根节点名称
 	 * @param String srcNo 操作用户号码
+	 * @param GroupType type 因为与指挥会议公用了此方法，所以需要传入BASIC/MEETING
 	 */
-	public void updateCommand(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
+	public void updateCommand(XMLReader reader, String rootNodeName, String srcNo, GroupType type) throws Exception{
 		GroupBO group = new GroupBO();
 		group.setGid(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString()))
 			 .setSubject(reader.readString(new StringBufferWrapper().append(rootNodeName).append(".subject").toString()))
@@ -327,6 +328,8 @@ public class ProtocolParser {
 				group.getMlist().add(minfo);
 			}
 		}
+		
+		commandCascadeServiceImpl.groupUpdate(group, type);
 	}
 	
 	/**
@@ -795,9 +798,10 @@ public class ProtocolParser {
 	 * @param XMLReader reader 协议
 	 * @param String rootNodeName 协议根节点名称
 	 * @param String srcNo 操作用户号码
+	 * @param GroupType type 类型
 	 */
-	public void updateConference(XMLReader reader, String rootNodeName, String srcNo) throws Exception{
-		updateCommand(reader, rootNodeName, srcNo);
+	public void updateConference(XMLReader reader, String rootNodeName, String srcNo, GroupType type) throws Exception{
+		updateCommand(reader, rootNodeName, srcNo, type);
 	}
 	
 	/**

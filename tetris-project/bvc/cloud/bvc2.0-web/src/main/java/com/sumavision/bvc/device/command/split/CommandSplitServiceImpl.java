@@ -9,10 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
+import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
 import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
+import com.sumavision.bvc.device.command.bo.PlayerInfoBO;
+import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -37,6 +40,9 @@ public class CommandSplitServiceImpl {
 	
 	@Autowired
 	private CommandUserServiceImpl commandUserServiceImpl;
+	
+	@Autowired
+	private CommandCastServiceImpl commandCastServiceImpl;
 
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
@@ -144,15 +150,51 @@ public class CommandSplitServiceImpl {
 		synchronized (userId) {
 			
 			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+			CommandGroupUserPlayerPO oldPlayer = null;
+			CommandGroupUserPlayerPO newPlayer = null;
 			//当前方案的所有播放器
 			List<CommandGroupUserPlayerPO> players = userInfo.obtainUsingSchemePlayers();
 			for(CommandGroupUserPlayerPO player : players){
 				if(player.getLocationIndex() == oldIndex){
-					player.setLocationIndex(newIndex);
+//					player.setLocationIndex(newIndex);
+					newPlayer = player;
 				}else if(player.getLocationIndex() == newIndex){
-					player.setLocationIndex(oldIndex);
+//					player.setLocationIndex(oldIndex);
+					oldPlayer = player;
 				}
 			}
+			
+			List<CommandGroupUserPlayerCastDevicePO> oldDevices = oldPlayer.getCastDevices();
+			if(oldDevices == null) oldDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
+			List<CommandGroupUserPlayerCastDevicePO> newDevices = newPlayer.getCastDevices();
+			if(newDevices == null) newDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
+			
+			List<CommandGroupUserPlayerCastDevicePO> oldDevicesCopy = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
+			List<String> oldBundleIds = new ArrayList<String>();
+			for(CommandGroupUserPlayerCastDevicePO oldDevice : oldDevices){
+				oldDevicesCopy.add(oldDevice);
+				oldBundleIds.add(oldDevice.getDstBundleId());
+			}
+			List<CommandGroupUserPlayerCastDevicePO> newDevicesCopy = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
+			List<String> newBundleIds = new ArrayList<String>();
+			for(CommandGroupUserPlayerCastDevicePO newDevice : newDevices){
+				newDevicesCopy.add(newDevice);
+				newBundleIds.add(newDevice.getDstBundleId());
+			}
+			
+			PlayerInfoBO newPlayerInfoBO = commandCastServiceImpl.changeCastDevices2(newPlayer, null, null, false, true, true);
+			PlayerInfoBO oldPlayerInfoBO = commandCastServiceImpl.changeCastDevices2(oldPlayer, null, null, false, true, true);
+			
+			//先解绑
+			commandCastServiceImpl.changeCastDevices2(newPlayer, null, newDevicesCopy, true, !oldPlayerInfoBO.isHasBusiness(), false);
+			commandCastServiceImpl.changeCastDevices2(oldPlayer, null, oldDevicesCopy, true, !newPlayerInfoBO.isHasBusiness(), false);
+			
+			//再绑新的
+			commandCastServiceImpl.editCastDevices(newPlayer, oldBundleIds, null);
+			commandCastServiceImpl.editCastDevices(oldPlayer, newBundleIds, null);
+			
+			newPlayer.setLocationIndex(newIndex);
+			oldPlayer.setLocationIndex(oldIndex);
 			
 			commandGroupUserInfoDao.save(userInfo);
 			

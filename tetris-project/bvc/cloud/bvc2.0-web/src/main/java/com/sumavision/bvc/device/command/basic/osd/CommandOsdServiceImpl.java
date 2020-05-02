@@ -115,7 +115,7 @@ public class CommandOsdServiceImpl {
 		if(PlayerBusinessType.NONE.equals(player.getPlayerBusinessType())) return;
 		
 		//获取源
-		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true);
+		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true, true);
 		
 		List<BundleDTO> bundles = packBundles(player);
 		
@@ -179,7 +179,7 @@ public class CommandOsdServiceImpl {
 		if(PlayerBusinessType.NONE.equals(player.getPlayerBusinessType())) return;
 		
 		//获取源
-		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true);
+		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true, true);
 		
 		List<BundleDTO> bundles = packBundles(player);
 		
