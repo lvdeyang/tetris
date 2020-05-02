@@ -32,6 +32,8 @@ import com.sumavision.bvc.device.monitor.record.MonitorRecordService;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -312,6 +314,8 @@ public class MonitorRecordController {
 			audioChannelName = encodeAudio.getName();
 		}
 		
+		if(fileName==null || "".equals(fileName)) throw new BaseException(StatusCode.FORBIDDEN, "文件名不能为空！");
+		
 		MonitorRecordPO task = monitorRecordService.addLocalDevice(
 				mode, fileName, startTime, endTime, 
 				videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
@@ -351,6 +355,8 @@ public class MonitorRecordController {
 			throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 0);
 		}
 		
+		if(fileName==null || "".equals(fileName)) throw new BaseException(StatusCode.FORBIDDEN, "文件名不能为空！");
+		
 		MonitorRecordPO task = monitorRecordService.addXtDevice(mode, fileName, startTime, endTime, bundleId, user.getId(), user.getUserno());
 		
 		return new MonitorRecordTaskVO().set(task);
@@ -385,6 +391,8 @@ public class MonitorRecordController {
 		if(!result){
 			throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 1);
 		}
+		
+		if(fileName==null || "".equals(fileName)) throw new BaseException(StatusCode.FORBIDDEN, "文件名不能为空！");
 		
 		UserBO targetUser = userUtils.queryUserById(targetUserId, TerminalType.PC_PLATFORM);
 		

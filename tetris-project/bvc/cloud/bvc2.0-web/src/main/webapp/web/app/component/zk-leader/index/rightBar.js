@@ -738,6 +738,11 @@ define([
                             if (playerSettings.length > 0) {
                                 self.qt.invoke('enterGroups', $.toJSON(playerSettings));
                             }
+                            if (type == 'meet') {
+                            	self.toggleMenu2();
+                            }else{
+                            	self.toggleMenu1();
+                            }
                         }
                     }
                 });
@@ -799,6 +804,11 @@ define([
                     if (playerSettings.length > 0) {
                         self.qt.invoke('enterGroups', $.toJSON(playerSettings));
                     }
+                }
+                if(type == 'meet'){
+                	self.toggleMenu2();
+                }else{
+                	self.toggleMenu1();
                 }
             },
 
@@ -1145,6 +1155,7 @@ define([
                             self.group.currentId = data.id;
                             self.qt.success('创建指挥工作组成功');
                             self.resetNameClose();
+                            self.currentGroupChange(self.group.currentId);
                         });
                     } else {
                         //   修改
@@ -1155,6 +1166,7 @@ define([
                             self.qt.success('修改成功！');
                             self.resetNameClose();
                             self.refreshCommand();
+                            self.currentGroupChange(self.group.currentId);
                         });
                     }
                 } else {
@@ -1181,6 +1193,7 @@ define([
                             self.dialogVisible = false;
                             self.qt.success('创建会议成功！');
                             self.resetNameClose();
+                            self.currentGroupChange(self.meet.currentId);
                         });
                     } else {
                         ajax.post('/command/basic/modify/name', {
@@ -1190,6 +1203,7 @@ define([
                             self.qt.success('修改成功！');
                             self.resetNameClose();
                             self.refreshCommand('meeting');
+                            self.currentGroupChange(self.meet.currentId);
                         });
                     }
                 }
