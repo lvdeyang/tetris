@@ -141,8 +141,26 @@ public class CommandCascadeUtil {
 		
 		return groupBO;
 	}
+	
+	/** 静态组信息同步 */
+	public GroupBO updateCommand(CommandGroupPO group){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setSubject(group.getSubject())
+				.setBizname(group.getName())
+				.setCreatorid(chairmanMember.getUserNum())
+				.setTopid(chairmanMember.getUserNum())
+				.setmAddList(mlist)//成员列表
+				.setMlist(mlist);//发送目标成员列表，与成员列表相同
+		
+		return groupBO;
+	}
 
-	//TODO:group.getMembers()需要包含新成员
+	/**全量信息同步。注意：group.getMembers()需要包含新成员 */
 	public GroupBO maddfullCommand(CommandGroupPO group, List<MinfoBO> newNodeMemberInfos){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
@@ -490,6 +508,24 @@ public class CommandCascadeUtil {
 				.setOp(chairmanMember.getUserNum())
 				.setMlist(oldMemberInfos)
 				.setmAddList(mAddList);
+		
+		return groupBO;
+	}
+	
+	/** 静态组信息同步。主席/讨论模式在哪里？ */
+	public GroupBO updateMeeting(CommandGroupPO group){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setSubject(group.getSubject())
+				.setBizname(group.getName())
+				.setCreatorid(chairmanMember.getUserNum())
+				.setTopid(chairmanMember.getUserNum())
+				.setmAddList(mlist)//成员列表
+				.setMlist(mlist);//发送目标成员列表，与成员列表相同
 		
 		return groupBO;
 	}

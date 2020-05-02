@@ -258,7 +258,11 @@ public class CommandBasicServiceImpl {
 		if(!OriginType.OUTER.equals(originType)){
 			
 			//鉴权，区分指挥与会议
-//			commandCommonServiceImpl.authorizeUsers(userIdList, chairmanUserId, BUSINESS_OPR_TYPE.ZK);
+//			if(type.equals(GroupType.BASIC)){
+//				commandCommonServiceImpl.authorizeUsers(userIdList, chairmanUserId, BUSINESS_OPR_TYPE.ZK);
+//			}else if(type.equals(GroupType.MEETING)){
+//				commandCommonServiceImpl.authorizeUsers(userIdList, chairmanUserId, BUSINESS_OPR_TYPE.HY);
+//			}
 			
 			String creatorEncoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(creatorUserBo);
 			List<BundlePO> creatorBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(creatorEncoderId).getList());
@@ -862,7 +866,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public void modifyName(Long userId, Long groupId, String name) throws Exception{
-		UserVO user = userQuery.current();
+		UserVO user = userQuery.current();		
 		if(name==null || name.equals("")){
 			throw new BaseException(StatusCode.FORBIDDEN, "请输入名称");
 		}
@@ -873,11 +877,28 @@ public class CommandBasicServiceImpl {
 		}
 		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		if(!GroupStatus.STOP.equals(group.getStatus())){
+			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经开始，请停止后再删除。id: " + group.getId());
+		}
 		if(!group.getUserId().equals(userId)){
 			throw new BaseException(StatusCode.FORBIDDEN, "只有主席才能修改");
 		}
 		group.setName(name);
 		commandGroupDao.save(group);
+		
+		//级联 groupUpdate
+		if(!OriginType.OUTER.equals(group.getOriginType())){
+			GroupType groupType = group.getType();
+			if(GroupStatus.STOP.equals(group.getStatus())){
+				if(GroupType.BASIC.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.updateCommand(group);
+					commandCascadeService.update(groupBO);						
+				}else if(GroupType.MEETING.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.updateMeeting(group);
+					conferenceCascadeService.update(groupBO);			
+				}
+			}
+		}
 		operationLogService.send(user.getNickname(), "修改指挥名称", user.getNickname() + "修改指挥名称" + group.getId());
 	}
 	
@@ -894,6 +915,7 @@ public class CommandBasicServiceImpl {
 	 */
 	public void remove(Long userId, List<Long> groupIds) throws Exception{
 		UserVO user = userQuery.current();
+		groupIds.remove(null);
 		List<CommandGroupPO> groups = commandGroupDao.findAll(groupIds);
 		StringBuffer dis = new StringBuffer();
 		
@@ -979,7 +1001,11 @@ public class CommandBasicServiceImpl {
 		
 		//本系统创建的，则鉴权，区分指挥与会议
 //		if(!OriginType.OUTER.equals(group.getOriginType())){
-//			commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.ZK);
+//			if(groupType.equals(GroupType.BASIC)){
+//				commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.ZK);
+//			}else if(groupType.equals(GroupType.MEETING)){
+//				commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.HY);
+//			}
 //		}
 		
 		//普通指挥、会议，刷新会议数据
@@ -2125,7 +2151,11 @@ public class CommandBasicServiceImpl {
 			
 			//本系统创建的，则鉴权，区分指挥与会议
 //			if(!OriginType.OUTER.equals(group.getOriginType())){
-//				commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.ZK);
+//				if(groupType.equals(GroupType.BASIC)){
+//					commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.ZK);
+//				}else if(groupType.equals(GroupType.MEETING)){
+//					commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.HY);
+//				}
 //			}
 			
 			//记录加人之前的用户列表
@@ -2558,39 +2588,51 @@ public class CommandBasicServiceImpl {
 			//级联，必须在membersResponse之后，这样MemberStatus才是对的
 			if(!OriginType.OUTER.equals(group.getOriginType())){
 				
-				//开会中则 maddinc maddfull，停会则 groupUpdate
-				List<CommandGroupMemberPO> newAndEnterMembers = new ArrayList<CommandGroupMemberPO>();
-				newAndEnterMembers.addAll(newMembers);
-				newAndEnterMembers.addAll(enterMembers);
-				
-				//记录新加入的用户列表
-				List<MinfoBO> newMemberInfos = commandCascadeUtil.generateMinfoBOList(newAndEnterMembers, chairmanMember);
-				//得到位于新节点上的用户列表
-				List<MinfoBO> newNodeMemberInfos = commandCascadeUtil.filterAddedNodeMinfo(oldMemberInfos, newMemberInfos);
-				
-				if(GroupType.BASIC.equals(groupType)){
-					
-					GroupBO groupBO = commandCascadeUtil.joinCommand(group, oldMemberInfos, newAndEnterMembers);
-					commandCascadeService.join(groupBO);
-					
-					//TODO:如果有新节点，则要发maddfull
-					if(newNodeMemberInfos.size() > 0){
-						GroupBO maddfullBO = commandCascadeUtil.maddfullCommand(group, newNodeMemberInfos);
-						commandCascadeService.info(maddfullBO);
-						log.info(newNodeMemberInfos.size() + "个成员所在的节点新参与指挥，全量同步该指挥：" + group.getName());
+				//停会则 groupUpdate
+				if(GroupStatus.STOP.equals(group.getStatus())){
+					if(GroupType.BASIC.equals(groupType)){
+						GroupBO groupBO = commandCascadeUtil.updateCommand(group);
+						commandCascadeService.update(groupBO);						
+					}else if(GroupType.MEETING.equals(groupType)){
+						GroupBO groupBO = commandCascadeUtil.updateMeeting(group);
+						conferenceCascadeService.update(groupBO);			
 					}
+				}
+				//开会中则 maddinc maddfull
+				else{					
+					List<CommandGroupMemberPO> newAndEnterMembers = new ArrayList<CommandGroupMemberPO>();
+					newAndEnterMembers.addAll(newMembers);
+					newAndEnterMembers.addAll(enterMembers);
 					
-				}else if(GroupType.MEETING.equals(groupType)){
+					//记录新加入的用户列表
+					List<MinfoBO> newMemberInfos = commandCascadeUtil.generateMinfoBOList(newAndEnterMembers, chairmanMember);
+					//得到位于新节点上的用户列表
+					List<MinfoBO> newNodeMemberInfos = commandCascadeUtil.filterAddedNodeMinfo(oldMemberInfos, newMemberInfos);
 					
-					GroupBO groupBO = commandCascadeUtil.joinMeeting(group, oldMemberInfos, newAndEnterMembers);
-					conferenceCascadeService.join(groupBO);
-					
-					//TODO:如果有新节点，则要发maddfull
-					if(newNodeMemberInfos.size() > 0){
-						GroupBO maddfullBO = commandCascadeUtil.maddfullMeeting(group, newNodeMemberInfos);
-						conferenceCascadeService.info(maddfullBO);
-						log.info(newNodeMemberInfos.size() + "个成员所在的节点新参与会议，全量同步该会议：" + group.getName());
-					}					
+					if(GroupType.BASIC.equals(groupType)){
+						
+						GroupBO groupBO = commandCascadeUtil.joinCommand(group, oldMemberInfos, newAndEnterMembers);
+						commandCascadeService.join(groupBO);
+						
+						//如果有新节点，则要发maddfull
+						if(newNodeMemberInfos.size() > 0){
+							GroupBO maddfullBO = commandCascadeUtil.maddfullCommand(group, newNodeMemberInfos);
+							commandCascadeService.info(maddfullBO);
+							log.info(newNodeMemberInfos.size() + "个成员所在的节点新参与指挥，全量同步该指挥：" + group.getName());
+						}
+						
+					}else if(GroupType.MEETING.equals(groupType)){
+						
+						GroupBO groupBO = commandCascadeUtil.joinMeeting(group, oldMemberInfos, newAndEnterMembers);
+						conferenceCascadeService.join(groupBO);
+						
+						//如果有新节点，则要发maddfull
+						if(newNodeMemberInfos.size() > 0){
+							GroupBO maddfullBO = commandCascadeUtil.maddfullMeeting(group, newNodeMemberInfos);
+							conferenceCascadeService.info(maddfullBO);
+							log.info(newNodeMemberInfos.size() + "个成员所在的节点新参与会议，全量同步该会议：" + group.getName());
+						}					
+					}
 				}
 			}
 			
@@ -3287,8 +3329,9 @@ public class CommandBasicServiceImpl {
 							messageCaches.add(new MessageSendCacheBO(removeMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));								
 						}
 						
-						//如果操作人在本系统
-						if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
+						//如果业务进行中，且操作人在本系统
+						if(!OriginType.OUTER.equals(chairmanMember.getOriginType())
+								&& !GroupStatus.STOP.equals(group.getStatus())){
 							
 							//如果是申请退出被同意
 							if(mode == 0){							
@@ -3442,7 +3485,7 @@ public class CommandBasicServiceImpl {
 				commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());
 			}
 			
-			//级联：如果有老节点，则给它停会删会
+			//级联：如果有老节点，则给它停会删会；业务停止时给剩余成员的所有节点发update
 			if(!OriginType.OUTER.equals(group.getOriginType())){
 				
 				//最终的用户列表
@@ -3451,6 +3494,12 @@ public class CommandBasicServiceImpl {
 				List<MinfoBO> oldNodeMemberInfos = commandCascadeUtil.filterAddedNodeMinfo(finalMemberInfos, orgMemberInfos);
 				
 				if(GroupType.BASIC.equals(groupType)){
+					
+					//业务停止时给剩余成员的所有节点发update
+					if(group.getStatus().equals(GroupStatus.STOP)){
+						GroupBO groupBO = commandCascadeUtil.updateCommand(group);
+						commandCascadeService.update(groupBO);
+					}
 					
 					//如果有老节点，则给它停会删会
 					if(oldNodeMemberInfos.size() > 0){
@@ -3472,6 +3521,12 @@ public class CommandBasicServiceImpl {
 					}					
 				}else if(GroupType.MEETING.equals(groupType)){
 					
+					//业务停止时给剩余成员的所有节点发update
+					if(group.getStatus().equals(GroupStatus.STOP)){						
+						GroupBO groupBO = commandCascadeUtil.updateMeeting(group);
+						conferenceCascadeService.update(groupBO);
+					}
+			
 					//如果有老节点，则给它停会删会
 					if(oldNodeMemberInfos.size() > 0){
 						

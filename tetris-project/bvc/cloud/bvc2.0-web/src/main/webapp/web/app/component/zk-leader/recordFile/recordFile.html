@@ -86,11 +86,11 @@
                                                 <el-tooltip class="item" effect="dark" content="删除文件"
                                                             placement="bottom">
                                                     <el-button v-if="scope.row.removeable" type="text"
-                                                               style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c" disabled>
-                                                        <span class="icon-trash"></span></el-button>
-                                                    <el-button v-else type="text"
                                                                style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c"
                                                                @click="deleteFile(scope.row.id)">
+                                                        <span class="icon-trash"></span></el-button>
+                                                    <el-button v-else type="text"
+                                                               style="padding:0; font-size:20px; margin-left:30px;color: #ffbb1c" disabled>
                                                         <span class="icon-trash"></span></el-button>
                                                 </el-tooltip>
                                                 <el-tooltip class="item" effect="dark" content="下载文件"

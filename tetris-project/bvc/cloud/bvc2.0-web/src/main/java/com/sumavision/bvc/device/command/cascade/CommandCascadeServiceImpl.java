@@ -154,10 +154,9 @@ public class CommandCascadeServiceImpl {
 		CommandGroupPO group = commandGroupDao.findByUuid(uuid);
 		if(group != null){
 			//如果有之前没删掉的，则停会，删会
-			log.warn(uuid + " 全量信息同步，查到uuid相同的会议/指挥，重置：" + group.getName());
+			log.warn(uuid + " 全量信息同步，可能是重启恢复中，查到uuid相同的会议/指挥，删除重建：" + group.getName());
 			commandBasicServiceImpl.stop(user.getId(), group.getId(), 0);
 			commandBasicServiceImpl.remove(user.getId(), new ArrayListWrapper<Long>().add(group.getId()).getList());
-			return;
 		}
 		
 		
@@ -235,5 +234,30 @@ public class CommandCascadeServiceImpl {
 	/** 静态信息同步，要支持成员变更，名称，类型，主题等 */
 	public void groupUpdate(GroupBO groupBO, GroupType type) throws Exception{
 		
+		UserVO user = userQuery.findByUserno(groupBO.getCreatorid());		
+		String uuid = groupBO.getGid();
+		CommandGroupPO group = commandGroupDao.findByUuid(uuid);
+		if(group == null){
+			log.info(uuid + " 静态组信息更新，没有找到uuid相同的会议/指挥，新建：" + groupBO.getBizname());
+		}else{
+			//如果已经存在，则停会，删会
+			log.warn(uuid + " 静态组信息更新，查到uuid相同的会议/指挥，删除重建：" + group.getName());
+			if(!GroupStatus.STOP.equals(group.getStatus())){
+				commandBasicServiceImpl.stop(group.getUserId(), group.getId(), 0);
+			}
+			commandBasicServiceImpl.remove(group.getUserId(), new ArrayListWrapper<Long>().add(group.getId()).getList());
+		}		
+		
+		//建会
+		List<MinfoBO> mlist = groupBO.getMlist();
+		Set<String> usernos = new HashSet<String>();
+		for(MinfoBO m : mlist){
+			usernos.add(m.getMid());
+		}
+		//成员id列表
+		List<Long> userIdList = commandCascadeUtil.fromUserNosToIds(usernos);
+		group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getUsername(), groupBO.getBizname(), groupBO.getSubject(), type, OriginType.OUTER, userIdList, uuid);
+		
+		log.info(type + " 静态组信息更新，成员总数 " + userIdList.size());		
 	}
 }
