@@ -109,6 +109,9 @@ public class MonitorRecordPO extends AbstractBasePO{
 	/** 做业务的用户号码 */
 	private String userno;
 	
+	/** 做业务的用户昵称 */
+	private String nickname;
+	
 	/** 录制类型标识录制用户还是录制设备 */
 	private MonitorRecordType type;
 	
@@ -386,6 +389,15 @@ public class MonitorRecordPO extends AbstractBasePO{
 
 	public void setUserno(String userno) {
 		this.userno = userno;
+	}
+
+	@Column(name = "NICKNAME")
+	public String getNickname() {
+		return nickname;
+	}
+
+	public void setNickname(String nickname) {
+		this.nickname = nickname;
 	}
 
 	@Enumerated(value = EnumType.STRING)

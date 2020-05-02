@@ -147,11 +147,11 @@ public class CommandVodRecordParser {
 			FolderUserMap srcUserMap = folderUserMapDao.findByUserId(srcUser.getId());
 			boolean bSrcUserLdap = queryUtil.isLdapUser(srcUser, srcUserMap);
 			if(!bSrcUserLdap){
-				MonitorRecordPO task = monitorRecordService.addLocalUser(mode, fileName, startTime, endTime, srcUser, user.getId(), user.getUserno());
+				MonitorRecordPO task = monitorRecordService.addLocalUser(mode, fileName, startTime, endTime, srcUser, user.getId(), user.getUserno(), user.getName());
 				return task;
 			}else{
 				//录制本地用户
-				MonitorRecordPO task = monitorRecordService.addXtUser(mode, fileName, startTime, endTime, srcUser, user.getId(), user.getUserno());
+				MonitorRecordPO task = monitorRecordService.addXtUser(mode, fileName, startTime, endTime, srcUser, user.getId(), user.getUserno(), user.getName());
 				return task;
 			}
 			
@@ -191,11 +191,11 @@ public class CommandVodRecordParser {
 						mode, fileName, startTime, endTime, 
 						videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 						audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-						user.getId(), user.getUserno());
+						user.getId(), user.getUserno(), user.getName());
 
 				return task;
 			}else{
-				MonitorRecordPO task = monitorRecordService.addXtDevice(mode, fileName, startTime, endTime, bundleId, user.getId(), user.getUserno());
+				MonitorRecordPO task = monitorRecordService.addXtDevice(mode, fileName, startTime, endTime, bundleId, user.getId(), user.getUserno(), user.getName());
 
 				return task;
 			}

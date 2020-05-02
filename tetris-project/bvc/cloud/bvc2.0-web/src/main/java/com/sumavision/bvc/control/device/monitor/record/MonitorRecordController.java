@@ -320,7 +320,7 @@ public class MonitorRecordController {
 				mode, fileName, startTime, endTime, 
 				videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 				audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-				user.getId(), user.getUserno());
+				user.getId(), user.getUserno(), user.getName());
 		
 		return new MonitorRecordTaskVO().set(task);
 	}
@@ -357,7 +357,7 @@ public class MonitorRecordController {
 		
 		if(fileName==null || "".equals(fileName)) throw new BaseException(StatusCode.FORBIDDEN, "文件名不能为空！");
 		
-		MonitorRecordPO task = monitorRecordService.addXtDevice(mode, fileName, startTime, endTime, bundleId, user.getId(), user.getUserno());
+		MonitorRecordPO task = monitorRecordService.addXtDevice(mode, fileName, startTime, endTime, bundleId, user.getId(), user.getUserno(), user.getName());
 		
 		return new MonitorRecordTaskVO().set(task);
 	}
@@ -399,10 +399,10 @@ public class MonitorRecordController {
 		MonitorRecordPO task = null;
 		if("ldap".equals(targetUser.getCreater())){
 			//录制xt用户
-			task = monitorRecordService.addXtUser(mode, fileName, startTime, endTime, targetUser, user.getId(), user.getUserno());
+			task = monitorRecordService.addXtUser(mode, fileName, startTime, endTime, targetUser, user.getId(), user.getUserno(), user.getName());
 		}else{
 			//录制本地用户
-			task = monitorRecordService.addLocalUser(mode, fileName, startTime, endTime, targetUser, user.getId(), user.getUserno());
+			task = monitorRecordService.addLocalUser(mode, fileName, startTime, endTime, targetUser, user.getId(), user.getUserno(), user.getName());
 		}
 		
 		return new MonitorRecordTaskVO().set(task);
