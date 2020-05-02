@@ -109,19 +109,19 @@
             <el-table-column label="操作" width="250">
                 <template slot-scope="scope">
                     <el-button type="text" @click="handleDetail(scope.row)" size="small">详情</el-button>
-                    <el-button type="text" @click="handleModify(scope.row)" size="small">修改</el-button>
-                    <el-button type="text" @click="handleSetLayerId(scope.row)" size="small">设置接入</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleModify(scope.row)" size="small">修改</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleSetLayerId(scope.row)" size="small">设置接入</el-button>
                     <!--<el-button type="text" v-if="scope.row.onlineStatus=='ONLINE'" @click="handleLogout(scope.row)" size="small">踢出</el-button>-->
-                    <el-button type="text" @click="handleClear(scope.row)" size="small">重置</el-button>
-                    <el-button type="text" @click="handleDelete(scope.row)" size="small">删除</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleClear(scope.row)" size="small">重置</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleDelete(scope.row)" size="small">删除</el-button>
                 </template>
             </el-table-column>
 
             <el-table-column label="能力" width="150">
                 <template slot-scope="scope">
                     <!--<el-button type="text" v-if="scope.row.bundleType!='VenusTerminal'" @click="abilityConfig(scope.row)" size="small">配置</el-button>-->
-                    <el-button type="text" @click="abilityConfig(scope.row)" size="small">配置</el-button>
-                    <el-button type="text" @click="abilityDetail(scope.row)" size="small">通道信息</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="abilityConfig(scope.row)" size="small">配置</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="abilityDetail(scope.row)" size="small">通道信息</el-button>
                 </template>
             </el-table-column>
         </el-table>
