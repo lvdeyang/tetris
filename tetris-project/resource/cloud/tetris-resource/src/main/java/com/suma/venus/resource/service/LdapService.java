@@ -90,7 +90,7 @@ public class LdapService {
 	private void shell(String ip, String cmd) throws Exception{
 		
 		JSch jSch = new JSch();
-		Session session = jSch.getSession("root", ip, 22);
+		Session session = jSch.getSession("root", ip, 822);
 		session.setPassword("sumavisionrd");
 		
 		Properties sshConfig = new Properties();

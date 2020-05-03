@@ -541,6 +541,10 @@
       }
     }
 
+    if(this.filters.deviceModel != '' || this.filters.keyword != '' || this.folderTreeSelected.value != ''){
+      this.pageNum = 1;
+    }
+
     let param = {
       roleId: this.currentRoleRow.id,
       bindType: this.filters.bindType,
@@ -634,6 +638,10 @@
       if(this.countPerPage * (this.pageNum - 1) > this.total){
         this.pageNum = Math.ceil(this.total / this.countPerPage);
       }
+    }
+
+    if(this.filters.keyword != '' || this.folderTreeSelected.value != ''){
+      this.pageNum = 1;
     }
 
     let param = {
