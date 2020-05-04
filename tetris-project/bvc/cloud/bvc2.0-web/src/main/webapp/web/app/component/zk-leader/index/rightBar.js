@@ -544,50 +544,93 @@ define([
                     self.handleContextMenuClose();
                 });
             },
+
+
+
+
             //点播
             vod: function () {
                 var self = this;
-                if (!self.contextMenu.vod) {
-                    return;
-                }
-                if (self.contextMenu.currentNode.type === 'USER') {
-                    var userId = self.contextMenu.currentNode.id;
-                    if (self.contextMenu.scope === 'command' && self.group.current.creator == self.user.id) {
-                        ajax.post('/command/basic/vod/member/start', {
-                            id: self.group.current.id,
-                            userId: userId
-                        }, function (data) {
-                            self.qt.invoke('groupMembers', $.toJSON([data]));
-                        });
-                    } else {
-                        ajax.post('/command/vod/user/start', {userId: userId}, function (data) {
-                            self.qt.invoke('vodUsers', $.toJSON([data]));
+                self.qt.invoke('getChosenPlayer', function (e) {
+
+
+                    num = e;
+                    if (!self.contextMenu.vod) {
+                        return;
+                    }
+
+                    if (self.contextMenu.currentNode.type === 'USER') {
+                        var userId = self.contextMenu.currentNode.id;
+                        if (num < 0) {
+                            if (self.contextMenu.scope === 'command' && self.group.current.creator == self.user.id) {
+                                ajax.post('/command/basic/vod/member/start', {
+                                    id: self.group.current.id,
+                                    userId: userId
+                                }, function (data) {
+                                    self.qt.invoke('groupMembers', $.toJSON([data]));
+                                });
+                            } else {
+                                ajax.post('/command/vod/user/start', {userId: userId}, function (data) {
+                                    self.qt.invoke('vodUsers', $.toJSON([data]));
+                                });
+                            }
+                        } else { //指定播放器点播用户
+                            ajax.post('/command/vod/user/start/player', {
+                                userId: userId,
+                                serial: num
+                            }, function (data) {
+                                self.qt.invoke('vodUsers', $.toJSON([data]));
+                                self.cancelChoose();
+                            });
+                        }
+                    }
+                    else if (self.contextMenu.currentNode.type === 'BUNDLE') {
+                        var deviceId = self.contextMenu.currentNode.id;
+                        if (num < 0) {
+                            ajax.post('/command/vod/device/start', {deviceId: deviceId}, function (data) {
+                                self.qt.invoke('vodDevices', $.toJSON([data]));
+                            });
+                        } else {
+                            ajax.post('/command/vod/device/start/player', {
+                                deviceId: deviceId,
+                                serial: num
+                            }, function (data) {
+                                self.qt.invoke('vodDevices', $.toJSON([data]));
+                            });
+
+                        }
+
+
+                    }
+                    else if (self.contextMenu.currentNode.type === 'VOD_RESOURCE') {
+                        var resourceFileId = self.contextMenu.currentNode.id;
+                        ajax.post('/command/vod/resource/file/start', {resourceFileId: resourceFileId}, function (data) {
+                            self.qt.invoke('vodResourceFiles', $.toJSON([data]));
                         });
                     }
-                } else if (self.contextMenu.currentNode.type === 'BUNDLE') {
-                    var deviceId = self.contextMenu.currentNode.id;
-                    ajax.post('/command/vod/device/start', {deviceId: deviceId}, function (data) {
-                        self.qt.invoke('vodDevices', $.toJSON([data]));
-                    });
-                } else if (self.contextMenu.currentNode.type === 'VOD_RESOURCE') {
-                    var resourceFileId = self.contextMenu.currentNode.id;
-                    ajax.post('/command/vod/resource/file/start', {resourceFileId: resourceFileId}, function (data) {
-                        self.qt.invoke('vodResourceFiles', $.toJSON([data]));
-                    });
-                } else if (self.contextMenu.currentNode.type === 'RECORD_PLAYBACK') {
-                    var recordId = self.contextMenu.currentNode.id;
-                    if (self.contextMenu.currentNode.level == 2) {
-                        ajax.post('/command/record/start/playback', {recordId: recordId}, function (data) {
-                            self.qt.invoke('vodRecordFileStart', $.toJSON(data));
-                        });
-                    } else if (self.contextMenu.currentNode.level == 3) { //播放片段
-                        ajax.post('/command/record/start/playback/fragments', {fragmentIds: $.toJSON([recordId])}, function (data) {
-                            self.qt.invoke('vodRecordFileStart', $.toJSON(data));
-                        });
+                    else if (self.contextMenu.currentNode.type === 'RECORD_PLAYBACK') {
+                        var recordId = self.contextMenu.currentNode.id;
+                        if (self.contextMenu.currentNode.level == 2) {
+                            ajax.post('/command/record/start/playback', {recordId: recordId}, function (data) {
+                                self.qt.invoke('vodRecordFileStart', $.toJSON(data));
+                            });
+                        } else if (self.contextMenu.currentNode.level == 3) { //播放片段
+                            ajax.post('/command/record/start/playback/fragments', {fragmentIds: $.toJSON([recordId])}, function (data) {
+                                self.qt.invoke('vodRecordFileStart', $.toJSON(data));
+                            });
+                        }
                     }
-                }
-                self.handleContextMenuClose();
+                    self.handleContextMenuClose();
+
+
+                });
             },
+
+
+
+
+
+
             //观看
             view: function () {
                 var self = this;

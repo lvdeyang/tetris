@@ -165,8 +165,8 @@ public class MonitorOsdService {
 													.setColor(String.valueOf(Integer.parseInt(subtitleEntity.getColor(), 16)))
 													.setFont(subtitleEntity.getFont().getProtocol())
 													.setHeight(subtitleEntity.getHeight())
-													.setX(layerEntity.getX())
-													.setY(layerEntity.getY())
+													.setX(layerEntity.getX()*100)
+													.setY(layerEntity.getY()*100)
 													.setIndex(layerEntity.getLayerIndex())
 													.setShow(layerEntity.getIsShow()));
 						}
@@ -175,8 +175,8 @@ public class MonitorOsdService {
 						layerEntity.getType().equals(MonitorOsdLayerType.DATETIME) || 
 						layerEntity.getType().equals(MonitorOsdLayerType.DEVNAME)){
 					protocol.add(new OsdBO().setContent(layerEntity.getType().getProtocol())
-											.setX(layerEntity.getX())
-											.setY(layerEntity.getY())
+											.setX(layerEntity.getX()*100)
+											.setY(layerEntity.getY()*100)
 											.setIndex(layerEntity.getLayerIndex())
 											.setShow(layerEntity.getIsShow()));
 				}
