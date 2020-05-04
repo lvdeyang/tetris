@@ -237,7 +237,7 @@ define([
             handleSaveStyleTemplates:function(){
                 var self = this;
                 if(!self.message.style.name){
-                    self.qt.warning('消息提示', '请给模板起个名吧');
+                    self.qt.warning('请给模板起个名吧');
                     return;
                 }
                 if(self.message.style.id){
@@ -254,7 +254,7 @@ define([
                         rollingTime:self.message.style.rollingTime,
                         rollingTimeUnlimited: self.message.style.rollingTimeUnlimited
                     }, function(){
-                        self.qt.warning('消息提示', '修改成功');
+                        self.qt.warning('修改成功');
                     });
                 }else{
                     ajax.post('/command/message/style/templates/add', {
@@ -269,7 +269,7 @@ define([
                         rollingTime:self.message.style.rollingTime,
                         rollingTimeUnlimited: self.message.style.rollingTimeUnlimited
                     }, function(){
-                        self.qt.warning('消息提示', '添加成功');
+                        self.qt.warning('添加成功');
                     });
                 }
             },
