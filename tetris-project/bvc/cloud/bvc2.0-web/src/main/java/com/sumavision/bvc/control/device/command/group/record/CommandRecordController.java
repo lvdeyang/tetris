@@ -1,5 +1,6 @@
 package com.sumavision.bvc.control.device.command.group.record;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -7,11 +8,16 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
+import com.suma.venus.resource.base.bo.AccessNodeBO;
+import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
+import com.sumavision.bvc.command.group.dao.CommandGroupRecordFragmentDAO;
+import com.sumavision.bvc.command.group.record.CommandGroupRecordFragmentPO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.control.device.command.group.vo.record.GroupVO;
@@ -23,10 +29,15 @@ import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
 import com.sumavision.bvc.device.command.record.CommandVodRecordParser;
 import com.sumavision.bvc.device.command.secret.CommandSecretServiceImpl;
+import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeIpMissingException;
+import com.sumavision.bvc.device.monitor.playback.exception.AccessNodeNotExistException;
+import com.sumavision.bvc.device.monitor.playback.exception.AccessNodePortMissionException;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordPO;
 import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -38,6 +49,9 @@ public class CommandRecordController {
 
 	@Autowired
 	private CommandGroupRecordDAO commandGroupRecordDao;
+
+	@Autowired
+	private CommandGroupRecordFragmentDAO commandGroupRecordFragmentDao;
 	
 	@Autowired
 	CommandBasicServiceImpl commandBasicServiceImpl;
@@ -49,6 +63,10 @@ public class CommandRecordController {
 	
 	@Autowired
 	CommandSecretServiceImpl commandSecretServiceImpl;
+
+	
+	@Autowired
+	ResourceService resourceService;
 
 	
 	@Autowired
@@ -238,6 +256,59 @@ public class CommandRecordController {
 		}
 		return null;
 		
+	}
+	
+	/**
+	 * 获取片段的下载地址<br/>
+	 * <p>参考了MonitorRecordController.downloadUrl()和CommandRecordServiceImpl.playFragments()的抛错</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月5日 上午10:55:58
+	 * @param fragmentId
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/download/url/{fragmentId}")
+	public Object downloadUrl(
+			@PathVariable Long fragmentId,
+			HttpServletRequest request) throws Exception{
+		
+		CommandGroupRecordFragmentPO fragment = commandGroupRecordFragmentDao.findOne(fragmentId);
+		if(fragment == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "未找到该录制，id：" + fragmentId);
+		}
+		
+		List<AccessNodeBO> layers =resourceService.queryAccessNodeByNodeUids(new ArrayListWrapper<String>().add(fragment.getStoreLayerId()).getList());
+		if(layers==null || layers.size()<=0){
+			throw new AccessNodeNotExistException(fragment.getStoreLayerId());
+		}
+		AccessNodeBO targetLayer = layers.get(0);
+		if(targetLayer.getIp() == null){
+			throw new AccessNodeIpMissingException(fragment.getStoreLayerId());
+		}
+		if(targetLayer.getPort() == null){
+			throw new AccessNodePortMissionException(fragment.getStoreLayerId());
+		}
+		
+		StringBufferWrapper downloadUrl = new StringBufferWrapper();
+		downloadUrl.append("http://")
+				   .append(targetLayer.getIp())
+				   .append(":")
+				   .append(targetLayer.getDownloadPort())
+				   .append("/action/download?file=")
+				   .append(fragment.getPreviewUrl());
+		
+		Date startTime = fragment.getStartTime();
+		Date endTime = fragment.getEndTime()==null?new Date():fragment.getEndTime();
+		
+		long duration = (endTime.getTime()-startTime.getTime())/1000;
+		
+		return new HashMapWrapper<String, Object>().put("downloadUrl", downloadUrl.toString())
+											       .put("duration", duration)
+											       .getMap();
 	}
 	
 	/**

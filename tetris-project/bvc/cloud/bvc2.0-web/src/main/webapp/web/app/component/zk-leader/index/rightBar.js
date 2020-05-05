@@ -508,8 +508,10 @@ define([
                         self.contextMenu.recordRecord = false;
                         if (self.contextMenu.currentNode.level == 2) {
                             self.contextMenu.removeRecord = true;
+                            self.contextMenu.download = false;
                         } else {
                             self.contextMenu.removeRecord = false;
+                            self.contextMenu.download = true;
                         }
                     }
                     //区分下是不是当前用户建的指挥,目的是只有主席才能改名字
@@ -625,12 +627,25 @@ define([
 
                 });
             },
-
-
-
-
-
-
+            
+            //下载片段
+            downloadFragment: function () {
+                var self = this;
+                var userId = self.contextMenu.currentNode.id;
+                if (!self.contextMenu.download) {
+                    return;
+                }
+                var fragmentId = self.contextMenu.currentNode.id;
+                ajax.post('/command/record/download/url/' + fragmentId, null, function (data) {
+                    if(data){
+                        self.qt.success('开始下载');
+                        self.qt.linkedWebview('rightBar',{id:'downloadFile',param:data.downloadUrl});
+                    }else{
+                        self.qt.warning('无效地址，不能下载');
+                    }
+                })
+            },
+                        
             //观看
             view: function () {
                 var self = this;

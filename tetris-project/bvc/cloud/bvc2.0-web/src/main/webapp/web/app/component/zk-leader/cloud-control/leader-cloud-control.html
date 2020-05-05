@@ -111,10 +111,7 @@
                                 :class="point.__active?'active':''"
                                 style="position:relative; top:1px;"
                                 :key="point.id"
-                                v-for="point in points"
-                                closable
                                 :disable-transitions="false"
-                                @close="handlePointRemove(point)"
                                 @click.native="handlePointInvoke(point)">
                             {{point.name}}
                         </el-tag>
