@@ -1092,7 +1092,7 @@ public class ResourceService {
 			// 设置pass_by_str
 			JSONObject passby = new JSONObject();
 			LockBundleParamPO lockBundleParamPO = lockBundleParamDao.findByBundleId(bundleId);
-			if (null != lockBundleParamPO) {
+			if (null != lockBundleParamPO && null != lockBundleParamPO.getPassByStr()) {
 				passby = JSONObject.parseObject(lockBundleParamPO.getPassByStr());
 				//bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
 			}
@@ -1243,7 +1243,7 @@ public class ResourceService {
 				// 设置pass_by_str
 				JSONObject passby = new JSONObject();
 				LockBundleParamPO lockBundleParamPO = lockBundleParamPOMap.get(bundlePO.getBundleId());
-				if (null != lockBundleParamPO) {
+				if (null != lockBundleParamPO && null != lockBundleParamPO.getPassByStr()) {
 					passby = JSONObject.parseObject(lockBundleParamPO.getPassByStr());
 					//bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
 				}
