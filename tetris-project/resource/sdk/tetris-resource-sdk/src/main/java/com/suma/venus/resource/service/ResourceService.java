@@ -52,6 +52,7 @@ import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
+import com.suma.venus.resource.dao.LianwangPassbyDAO;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
@@ -70,6 +71,7 @@ import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
+import com.suma.venus.resource.pojo.LianwangPassbyPO;
 import com.suma.venus.resource.pojo.LockBundleParamPO;
 import com.suma.venus.resource.pojo.LockChannelParamPO;
 import com.suma.venus.resource.pojo.LockScreenParamPO;
@@ -171,6 +173,9 @@ public class ResourceService {
 	
 	@Autowired
 	private RolePrivilegeMapDAO rolePrivilegeMapDao;
+	
+	@Autowired
+	private LianwangPassbyDAO lianwangPassbyDao;
 
 	/** 通过userId查询具有权限的user */
 	public List<UserBO> queryUserresByUserId(Long userId, TerminalType terminalType) {
@@ -1085,10 +1090,20 @@ public class ResourceService {
 			bundleInfo.setScreens(createScreensOfBundleInfo(bundlePO.getBundleId()));
 
 			// 设置pass_by_str
+			JSONObject passby = new JSONObject();
 			LockBundleParamPO lockBundleParamPO = lockBundleParamDao.findByBundleId(bundleId);
 			if (null != lockBundleParamPO) {
-				bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
+				passby = JSONObject.parseObject(lockBundleParamPO.getPassByStr());
+				//bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
 			}
+			
+			List<LianwangPassbyPO> passbyPOs = lianwangPassbyDao.findUuid(bundleId);
+			if(passbyPOs != null && passbyPOs.size() > 0){
+				for(LianwangPassbyPO passbyPO: passbyPOs){
+					passby.put(passbyPO.getType(), passbyPO.getProtocol());
+				}
+			}
+			bundleInfo.setPass_by_str(passby.toJSONString());
 
 			// bundle_extra_info
 			List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleId(bundleId);
@@ -1164,6 +1179,7 @@ public class ResourceService {
 
 		try {
 			List<BundlePO> bundlePOList = bundleDao.findInBundleIds(bundleIdList);
+			List<LianwangPassbyPO> allPassby = lianwangPassbyDao.findByUuidIn(bundleIdList);
 
 			if (CollectionUtils.isEmpty(bundlePOList)) {
 				return null;
@@ -1225,10 +1241,20 @@ public class ResourceService {
 				bundleInfo.setScreens(screensOfBundleInfoMap.get(bundlePO.getBundleId()));
 
 				// 设置pass_by_str
+				JSONObject passby = new JSONObject();
 				LockBundleParamPO lockBundleParamPO = lockBundleParamPOMap.get(bundlePO.getBundleId());
 				if (null != lockBundleParamPO) {
-					bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
+					passby = JSONObject.parseObject(lockBundleParamPO.getPassByStr());
+					//bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
 				}
+				
+				List<LianwangPassbyPO> passbyPOs = queryByUuid(allPassby, bundlePO.getBundleId());
+				if(passbyPOs != null && passbyPOs.size() > 0){
+					for(LianwangPassbyPO passbyPO: passbyPOs){
+						passby.put(passbyPO.getType(), passbyPO.getProtocol());
+					}
+				}
+				bundleInfo.setPass_by_str(passby.toJSONString());
 
 				// bundle_extra_info
 				List<ExtraInfoPO> extraInfos = extraInfoListMap.get(bundlePO.getBundleId());
@@ -2192,6 +2218,29 @@ public class ResourceService {
 		channelBody.setBase_type(channelTemplate.getBaseType());
 		channelBody.setExtern_type(channelTemplate.getExternType());
 		return channelBody;
+	}
+	
+	/**
+	 * 根据uuid标识查询passby<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月6日 下午1:17:34
+	 * @param List<LianwangPassbyPO> all 所有passby
+	 * @param String uuid 业务标识
+	 * @return List<LianwangPassbyPO> 标识所属passby
+	 */
+	private List<LianwangPassbyPO> queryByUuid(List<LianwangPassbyPO> all, String uuid) throws Exception {
+		
+		List<LianwangPassbyPO> passbyPOs = new ArrayList<LianwangPassbyPO>();
+		if(all != null && all.size() > 0){
+			for(LianwangPassbyPO passby: all){
+				if(passby.getUuid().equals(uuid)){
+					passbyPOs.add(passby);
+				}
+			}
+		}
+		
+		return passbyPOs;
 	}
 	
 }

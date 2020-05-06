@@ -824,6 +824,7 @@
 
                     this.getResources(1);
                 }
+                this.confirmSyncToLdapVisible = false;
             });
 
             this.resourceTableLoading = false;
