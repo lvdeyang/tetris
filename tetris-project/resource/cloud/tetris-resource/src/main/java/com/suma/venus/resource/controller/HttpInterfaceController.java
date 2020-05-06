@@ -1844,8 +1844,8 @@ public class HttpInterfaceController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/add/lianwang/passby")
-	public Object addLianwangPassby(
+	@RequestMapping(value = "/add/passby")
+	public Object addPassby(
 			String uuid, 
 			String layerId, 
 			String type, 
@@ -1853,6 +1853,30 @@ public class HttpInterfaceController {
 			HttpServletRequest request) throws Exception{
 		
 		lianwangPassbyService.save(uuid, layerId, type, protocol);
+		return null;
+	}
+	
+	/**
+	 * 存联网passby<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 上午9:26:13
+	 * @param String uuid 业务uuid
+	 * @param String layerId 联网layerId
+	 * @param String type 业务类型
+	 * @param String protocol passby
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/cover/passby")
+	public Object addAndCoverPassby(
+			String uuid, 
+			String layerId, 
+			String type, 
+			String protocol,
+			HttpServletRequest request) throws Exception{
+		
+		lianwangPassbyService.saveAndCover(uuid, layerId, type, protocol);
 		return null;
 	}
 	
@@ -1865,8 +1889,8 @@ public class HttpInterfaceController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/remove/lianwang/passby")
-	public Object removeLianwangPassby(
+	@RequestMapping(value = "/remove/passby")
+	public Object removePassby(
 			String uuid, 
 			HttpServletRequest request) throws Exception{
 		

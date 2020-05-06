@@ -39,6 +39,34 @@ public class LianwangPassbyService {
 	}
 	
 	/**
+	 * 保存并覆盖passby<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月28日 下午4:08:40
+	 * @param String uuid 业务uuid
+	 * @param String layerId 联网layerId
+	 * @param String type 业务类型
+	 * @param String protocol passby
+	 */
+	public void saveAndCover(
+			String uuid, 
+			String layerId, 
+			String type, 
+			String protocol) throws Exception{
+		LianwangPassbyPO passby = lianwangPassbyDao.findByUuidAndType(uuid, type);
+		
+		if(passby == null){
+			passby = new LianwangPassbyPO();
+		}
+		
+		passby.setUuid(uuid);
+		passby.setLayerId(layerId);
+		passby.setType(type);
+		passby.setProtocol(protocol);
+		lianwangPassbyDao.save(passby);
+	}
+	
+	/**
 	 * 删除passby<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
