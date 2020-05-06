@@ -176,6 +176,10 @@ define([
                 this.differentiate = 1;
                 this.currentTab = '-1';
                 this.refreshCommand(null);
+                this.institution.select.splice(0, this.institution.select.length);
+                this.device.select.splice(0, this.device.select.length);
+                this.file.select.splice(0, this.file.select.length);
+                this.record.select.splice(0, this.record.select.length);
             },
             toggleMenu2: function () {
                 var self = this;
@@ -190,7 +194,10 @@ define([
                 self.refreshCommand('meeting',function () {
                     self.refreshEnteredGroups();
                 });
-
+                this.institution.select.splice(0, this.institution.select.length);
+                this.device.select.splice(0, this.device.select.length);
+                this.file.select.splice(0, this.file.select.length);
+                this.record.select.splice(0, this.record.select.length);
             },
             //从头部2个tab切到左侧的时候
             handleClick: function (tab) {
@@ -198,6 +205,22 @@ define([
                     this.switchStatus1 = false;
                     this.switchStatus2 = true;
                     this.switchStatus3 = false;
+                }
+                
+                if(tab.index != 0){
+                	this.institution.select.splice(0, this.institution.select.length);
+                }
+                
+                if(tab.index != 1){
+                	this.device.select.splice(0, this.device.select.length);
+                }
+                
+                if(tab.index != 2){
+                	this.file.select.splice(0, this.file.select.length);
+                }
+                
+                if(tab.index != 3){
+                	this.record.select.splice(0, this.record.select.length);
                 }
             },
             //树形组件自定义过滤方法, 触发页面显示配置的筛选
@@ -390,6 +413,7 @@ define([
             //获取录像回放的数据以及刷新对应按钮
             refreshRecord: function () {
                 var self = this;
+                self.record.data.splice(0, self.record.data.length);
                 ajax.post('/command/record/query', null, function (data) {
                     if (data.groups.length) {
                         // 转换数据格式：给最外层加type属性，给records加groupName（用开始时间）把records和fragments属性改成children，fragments里的info就是名称
@@ -1969,9 +1993,9 @@ define([
                 self.institution.select = [];
             },
             //发布字幕
-            publish: function () {
+            /*publish: function () {
                 this.qt.window('/router//zk/leader/subtitle/layer', null, {width: '85%', height: '93%'});
-            },
+            },*/
 
             //   ----------第三个tab相关的-----------------
             //删除会议

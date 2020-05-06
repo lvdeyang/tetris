@@ -20,6 +20,8 @@ define([
                 //表格相关的
                 fileDatas: [],//表格数据
                 currentPage: 1,
+                total:0,
+                pageSize:50,
                 //添加 对话框相关的
                 dialogVisible: false,
                 form: {
@@ -37,15 +39,13 @@ define([
             }
         },
         computed: {
-            //设备的分页
-            pageData: function () {
-                return this.fileDatas.slice((this.currentPage - 1) * 10, this.currentPage * 10);
-            }
+            
         },
         methods: {
             //当前页改变
-            CurrentChange: function (val) {
+            currentChange: function (val) {
                 this.currentPage = val;
+                this.getFileDatas();
             },
             search: function () {
                 this.dialogVisible = true;
@@ -104,7 +104,22 @@ define([
                 var self = this;
                 ajax.post('/monitor/external/static/resource/folder/remove/' + id, null, function (data) {
                     self.qt.info('删除成功');
-                    self.getFileDatas();
+                    for(var i=0; i<self.fileDatas.length; i++){
+                    	if(self.fileDatas[i].id == id){
+                    		self.fileDatas.splice(i, 1);
+                    		self.total -= 1;
+                    		break;
+                    	}
+                    }
+                    if(self.fileDatas.length <= 0){
+                    	if(self.currentPage > 1){
+                    		self.currentPage -= 1;
+                    		self.getFileDatas();
+                    	}else if(self.total > 0){
+                    		self.currentPage = 1;
+                    		self.getFileDatas();
+                    	}
+                    }
                 })
             },
 
@@ -124,15 +139,19 @@ define([
             //获取数据
             getFileDatas: function () {
                 var self = this;
-                self.fileDatas=[];
+                self.fileDatas.splice(0, self.fileDatas.length);
                 ajax.post('/monitor/external/static/resource/folder/load', {
                     currentPage: self.currentPage,
-                    pageSize: '10'
+                    pageSize: self.pageSize
                 }, function (data) {
-                    var commands = data.rows;
-                    for (var i = 0; i < commands.length; i++) {
-                        self.fileDatas.push(commands[i]);
-                    }
+                	var rows = data.rows;
+                	var total = data.total;
+                	if(rows && rows.length>0){
+                		for(var i=0; i<rows.length; i++){
+                			self.fileDatas.push(rows[i]);
+                		}
+                		self.total = total;
+                	}
                 });
             },
 

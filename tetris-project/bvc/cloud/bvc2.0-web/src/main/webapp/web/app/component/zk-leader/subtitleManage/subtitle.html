@@ -1,17 +1,17 @@
 <div class="subtitle">
     <div class="win-header">
-        <span class="win-header-title">字幕管理</span>
+        <span class="win-header-title">模板管理</span>
         <span class="win-header-close" @click="cancel"><span class="el-icon-close"></span></span>
     </div>
     <div class="win-body">
         <div style="width:100%; height:100%; position:relative;">
-            <div class="btn-add-subtitle" @click="dialogFormVisible=true">添加字幕模板</div>
+            <div class="btn-add-subtitle" @click="dialogFormVisible=true">添加模板</div>
             <!--内容-->
             <div style="position:absolute; top:40px; left:0; bottom:0; right:0;overflow: hidden">
                 <div style="width:100%; height:100%; position:relative;">
                     <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
                         <el-table
-                                :data="pageData"
+                                :data="data"
                                 style="width: 100%"
                                 height="100%">
                             <el-table-column
@@ -48,8 +48,8 @@
                     </div>
                     <div style="height:50px; position:absolute; left:0; bottom:0; right:0; padding-top:9px; box-sizing:border-box;">
                         <el-pagination background @current-change="currentChange" :current-page="currentPage"
-                                       :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
-                                       :total="data.length">
+                                       :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next"
+                                       :total="total">
                         </el-pagination>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
             <!--添加对话框-->
             <el-dialog title="字幕模板" :visible.sync="dialogFormVisible">
                 <el-form :model="form">
-                    <el-form-item label="字幕名称" :label-width="formLabelWidth">
+                    <el-form-item label="模板名称" :label-width="formLabelWidth">
                         <el-input v-model="form.name"></el-input>
                     </el-form-item>
                     <el-form-item label="字体" :label-width="formLabelWidth">

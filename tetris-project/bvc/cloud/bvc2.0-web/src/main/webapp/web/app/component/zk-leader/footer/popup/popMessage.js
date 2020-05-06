@@ -27,14 +27,14 @@ define([
             }
         },
         watch:{
-            currentTab:function(){
+            /*currentTab:function(){
                 var self = this;
                 if(self.currentTab){
                     self.load(1);
                 }else{
                     self.historyInstantMsg.splice(0, self.historyInstantMsg.length);
                 }
-            }
+            }*/
         },
         methods: {
             load:function(currentPage){
@@ -253,8 +253,8 @@ define([
             var self = this;
             self.qt = new QtContext('popMessage', function () {
                 self.qt.get(['currentGroupId'], function (variables) {
-                    console.log(variables)
                     self.currentGroupId = variables.currentGroupId;
+                    self.load(1);
                 });
 
                 // 初始化ajax
@@ -293,6 +293,7 @@ define([
                         }
                     }
                 });
+                
             })
         }
     });

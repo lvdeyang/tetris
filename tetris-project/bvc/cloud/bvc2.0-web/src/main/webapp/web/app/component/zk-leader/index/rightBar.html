@@ -182,9 +182,9 @@
                     <img v-if="!buttons.commandReminder"
                          :src="baseUrl+'images/zk-leader/disable/commandReminder.png'"/>
                 </div>
-                <div class="option-button" title="发布字幕" @click="publish">
+                <!-- <div class="option-button" title="发布字幕" @click="publish">
                     <img :src="baseUrl+'images/zk-leader/able/releaseSubtitle.png'"/>
-                </div>
+                </div> -->
                 <div class="option-button" @click="currentGroupChange(group.currentId)">
                     <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
@@ -376,13 +376,13 @@
                     <img v-else :src="baseUrl+'images/zk-leader/disable/batchIntercom.png'"/>
                 </div>
                 <!--添加指挥-->
-                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="添加指挥"
+                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="新建指挥"
                      @click="addCommand(1)">
                     <img v-if="buttons.addCommand" :src="baseUrl+'images/zk-leader/able/zhihui/addCommand.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/addCommand.png'"/>
                 </div>
                 <!--添加会议-->
-                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="添加会议" @click="addCommand(2)">
+                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="新建会议" @click="addCommand(2)">
                     <img :src="baseUrl+'images/zk-leader/able/huiyi/addCommand.png'"/>
                 </div>
                 <div class="customIcon" v-if="currentTab==3" @click="playRecordFile">
@@ -592,9 +592,9 @@
                          :src="baseUrl+'images/zk-leader/able/commandReminderPause.png'"/>
                     <img v-if="!buttons.commandReminder" :src="baseUrl+'images/zk-leader/disable/commandReminder.png'"/>
                 </div>
-                <div class="option-button" title="发布字幕" @click="publish">
+                <!-- <div class="option-button" title="发布字幕" @click="publish">
                     <img :src="baseUrl+'images/zk-leader/able/releaseSubtitle.png'"/>
-                </div>
+                </div> -->
                 <div :class="'option-button '+(buttons.isSpeaking?'':'disable')" title="停止发言" @click="stopSpeak">
                     <img v-if="buttons.isSpeaking" :src="baseUrl+'images/zk-leader/hangUp.png'"/>
                 </div>
