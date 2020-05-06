@@ -1103,7 +1103,9 @@ public class ResourceService {
 					passby.put(passbyPO.getType(), passbyPO.getProtocol());
 				}
 			}
-			bundleInfo.setPass_by_str(passby.toJSONString());
+			if(!passby.isEmpty()){
+				bundleInfo.setPass_by_str(passby.toJSONString());
+			}
 
 			// bundle_extra_info
 			List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleId(bundleId);
@@ -1254,7 +1256,10 @@ public class ResourceService {
 						passby.put(passbyPO.getType(), passbyPO.getProtocol());
 					}
 				}
-				bundleInfo.setPass_by_str(passby.toJSONString());
+				
+				if(!passby.isEmpty()){
+					bundleInfo.setPass_by_str(passby.toJSONString());
+				}
 
 				// bundle_extra_info
 				List<ExtraInfoPO> extraInfos = extraInfoListMap.get(bundlePO.getBundleId());
