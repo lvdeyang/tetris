@@ -17,9 +17,9 @@ public enum MonitorRecordType {
 	USER("用户"),
 	
 	LOCAL_DEVICE("录制本地设备"),
-	XT_DEVICE("录制xt设备"),
+	XT_DEVICE("录制跨系统设备"),
 	LOCAL_USER("录制本地用户"),
-	XT_USER("录制xt用户");
+	XT_USER("录制跨系统用户");
 	
 	private String name;
 	

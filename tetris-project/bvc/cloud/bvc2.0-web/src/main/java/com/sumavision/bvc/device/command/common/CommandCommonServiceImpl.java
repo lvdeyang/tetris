@@ -617,6 +617,16 @@ public class CommandCommonServiceImpl {
 		}
 	}
 	
+	/**
+	 * 比较层级路径的高低<br/>
+	 * <p>path1高则返回1，低则返回-1，平级则返回0</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月5日 上午11:20:34
+	 * @param path1
+	 * @param path2
+	 * @return
+	 */
 	private static int compareLevelByParentPath(String path1, String path2){
 		if(path1 == null && path2 == null){
 			return 0;
@@ -682,6 +692,13 @@ public class CommandCommonServiceImpl {
 		}
 
 		return compareLevelByParentPath(path1, path2);
+	}
+	
+	/** 比较2个成员的层级高低，主席的高，没有主席则平级 */
+	public int compareLevelByMemberIsChairman(CommandGroupMemberPO member1, CommandGroupMemberPO member2) {		
+		if(member1.isAdministrator()) return 1;
+		else if(member2.isAdministrator()) return -1;
+		else return 0;
 	}
 
 	/**

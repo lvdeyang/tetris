@@ -638,6 +638,10 @@
                 <i class="menuIcon icon-camera-retro"></i>
                 <span>录制</span>
             </div>
+            <div :class="'menu ' + (contextMenu.download?'':'disable')" @click="downloadFragment">
+                <i class="menuIcon icon-arrow-down"></i>
+                下载
+            </div>
             <div :class="'menu ' + (contextMenu.dedicatedCommand?'':'disable')" @click="secretCommand">
                 <i class="menuIcon  icon-user-md"></i>
                 专向指挥

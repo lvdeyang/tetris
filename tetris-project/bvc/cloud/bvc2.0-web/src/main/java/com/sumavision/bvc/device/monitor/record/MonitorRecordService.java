@@ -488,13 +488,13 @@ public class MonitorRecordService {
 		task.setEndTime(parsedEndTime);
 		task.setVideoType(MonitorRecordSourceType.DEVICE);
 		task.setVideoBundleId(bundleId);
-		task.setVideoBundleName("虚拟xt设备");
+		task.setVideoBundleName(user.getName() + "用户视频");
 		task.setVideoLayerId(networkLayerId);
 		task.setVideoChannelId(ChannelType.VIDEOENCODE1.getChannelId());
 		task.setVideoChannelName(ChannelType.VIDEOENCODE1.getName());
 		task.setAudioType(MonitorRecordSourceType.DEVICE);
 		task.setAudioBundleId(bundleId);
-		task.setAudioBundleName("虚拟xt设备");
+		task.setAudioBundleName(user.getName() + "用户音频");
 		task.setAudioLayerId(networkLayerId);
 		task.setAudioChannelId(ChannelType.AUDIOENCODE1.getChannelId());
 		task.setAudioChannelName(ChannelType.AUDIOENCODE1.getName());
