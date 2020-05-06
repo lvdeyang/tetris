@@ -21,6 +21,7 @@ import com.sumavision.bvc.device.group.bo.ConnectBO;
 import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.OsdWrapperBO;
+import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
@@ -114,44 +115,47 @@ public class CommandOsdServiceImpl {
 		if(PlayerBusinessType.NONE.equals(player.getPlayerBusinessType())) return;
 		
 		//获取源
-		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true);
+		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true, true);
 		
 		List<BundleDTO> bundles = packBundles(player);
 		
-		//获取参数模板
+//		//获取参数模板
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		
 		LogicBO logic = new LogicBO().setUserId("-1")
-			 			 			 .setConnectBundle(new ArrayList<ConnectBundleBO>());
+	 			 .setPass_by(new ArrayList<PassByBO>());
 		
-		//获取字幕协议
+		//清除字幕协议
 		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol(playerInfo.getSrcCode(), playerInfo.getSrcInfo());
-		OsdWrapperBO setOsd = monitorOsdService.protocol(osd, playerInfo.getSrcCode(), playerInfo.getSrcInfo());
-		
+		clearOsd.setResolution(codec.getVideo_param().getResolution());
 		for(BundleDTO bundle:bundles){
-			ConnectBundleBO connectDstVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-																		 .setLock_type("write")
-																	     .setBundleId(bundle.getBundleId())
-																	     .setLayerId(bundle.getLayerId())
-																	     .setBundle_type(bundle.getBundleType());
-			ConnectBO connectDstVideoChannel = new ConnectBO().setChannelId(bundle.getVideoChannelId())
-														      .setChannel_status("Open")
-														      .setBase_type(bundle.getVideoChannelBaseType())
-														      .setCodec_param(codec);
-			connectDstVideoChannel.setOsds(clearOsd);
-			connectDstVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectDstVideoChannel).getList());
-			logic.getConnectBundle().add(connectDstVideoBundle);
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(bundle.getBundleId())
+					.setLayer_id(bundle.getLayerId())
+					.setType("osds")
+					.setPass_by_content(clearOsd);
+			logic.getPass_by().add(passByBO);			
 		}
 		
 		//先发清除
-		executeBusiness.execute(logic, "指控系统：清除字幕");
+//		executeBusiness.execute(logic, "指控系统：清除播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + player.getBundleName());
 		
-		for(ConnectBundleBO connectDstVideoBundle:logic.getConnectBundle()){
-			connectDstVideoBundle.getChannels().get(0).setOsds(setOsd);
+		logic.getPass_by().clear();
+		
+		//设置字幕协议
+		OsdWrapperBO setOsd = monitorOsdService.protocol(osd, playerInfo.getSrcCode(), playerInfo.getSrcInfo());
+		setOsd.setResolution(codec.getVideo_param().getResolution());
+		for(BundleDTO bundle:bundles){
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(bundle.getBundleId())
+					.setLayer_id(bundle.getLayerId())
+					.setType("osds")
+					.setPass_by_content(setOsd);
+			logic.getPass_by().add(passByBO);			
 		}
 		
 		//后发设置
-		executeBusiness.execute(logic, "指控系统：重设字幕");
+		executeBusiness.execute(logic, "指控系统：重设播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + player.getBundleName());
 	}
 	
 	/**
@@ -175,36 +179,30 @@ public class CommandOsdServiceImpl {
 		if(PlayerBusinessType.NONE.equals(player.getPlayerBusinessType())) return;
 		
 		//获取源
-		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true);
+		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true, true);
 		
 		List<BundleDTO> bundles = packBundles(player);
 		
-		//获取参数模板
+//		//获取参数模板
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		
 		LogicBO logic = new LogicBO().setUserId("-1")
-			 			 			 .setConnectBundle(new ArrayList<ConnectBundleBO>());
+				.setPass_by(new ArrayList<PassByBO>());
 		
-		//获取字幕协议
+		//清除字幕协议
 		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol(playerInfo.getSrcCode(), playerInfo.getSrcInfo());
-		
+		clearOsd.setResolution(codec.getVideo_param().getResolution());
 		for(BundleDTO bundle:bundles){
-			ConnectBundleBO connectDstVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-																		 .setLock_type("write")
-																	     .setBundleId(bundle.getBundleId())
-																	     .setLayerId(bundle.getLayerId())
-																	     .setBundle_type(bundle.getBundleType());
-			ConnectBO connectDstVideoChannel = new ConnectBO().setChannelId(bundle.getVideoChannelId())
-														      .setChannel_status("Open")
-														      .setBase_type(bundle.getVideoChannelBaseType())
-														      .setCodec_param(codec);
-			connectDstVideoChannel.setOsds(clearOsd);
-			connectDstVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectDstVideoChannel).getList());
-			logic.getConnectBundle().add(connectDstVideoBundle);
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(bundle.getBundleId())
+					.setLayer_id(bundle.getLayerId())
+					.setType("osds")
+					.setPass_by_content(clearOsd);
+			logic.getPass_by().add(passByBO);			
 		}
 		
 		//先发清除
-		executeBusiness.execute(logic, "指控系统：清除字幕");
+		executeBusiness.execute(logic, "指控系统：清除播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + player.getBundleName());
 	}
 	
 }

@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.auth.token.TerminalType;
-import com.sumavision.tetris.p2p.event.WebsocketSessionClosedFeign;
 import com.sumavision.tetris.user.UserService;
 import com.sumavision.tetris.websocket.core.event.WebsocketSessionClosedEvent;
 

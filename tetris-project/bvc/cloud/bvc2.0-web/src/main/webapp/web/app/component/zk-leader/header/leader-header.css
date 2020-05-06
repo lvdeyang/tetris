@@ -23,14 +23,18 @@ html, body {
     position: relative;
     float: left;
     width: 260px;
-    height: 90px;
-    line-height: 90px;
+    height: 60px;
+    line-height: 60px;
     text-align: center;
-    background: url("../../../../../images/zk-leader/header_left.png") no-repeat center;
-    background-size: 100% 182%;
+    background: url("../../../../../images/zk-leader/header_left1.png") no-repeat center;
+    background-size: 100% 100%;
+}
+.leftTime2{
+    background: url("../../../../../images/zk-leader/header_left2.png") no-repeat center;
 }
 
 .leftTime p {
+    margin-left: 20px;
     width: 100%;
     line-height: 10px;
     text-align: center;
@@ -42,21 +46,11 @@ html, body {
     font-weight: bold;
 }
 
-.leftTime2 {
-    position: relative;
-    float: left;
-    width: 260px;
-    height: 90px;
-    line-height: 90px;
-    text-align: center;
-    background: url("../../../../../images/zk-leader/header_left.png") no-repeat center;
-    background-size: 100% 182%;
-}
-
 .center {
     float: left;
     width: 500px;
-    height: 90px;
+    height: 80px;
+    line-height: 80px;
     background: url("../../../../../images/zk-leader/header_center.png") no-repeat center;
     background-size: 100% 100%;
     font-size: 30px;font-weight:bold
@@ -66,25 +60,31 @@ html, body {
     position: relative;
     float: left;
     width: 260px;
-    height: 90px;
-    line-height: 90px;
+    height: 60px;
+    line-height: 60px;
     text-align: center;
     background: url("../../../../../images/zk-leader/header_right.png") no-repeat center;
-    background-size: 100% 182%;
+    background-size: 100% 100%;
     font-size: 20px;
     overflow: hidden;
 }
 
 .right p {
     margin: 0;
-    height: 35px;
-    line-height: 35px;
+    height: 30px;
+    line-height: 30px;
+}
+.images img{
+    margin: 0 20px;
+    display: inline-block;
+    width: 22px;
+    height: 22px;
 }
 
 .right .username {
-    font-size: 24px;
+    font-size: 22px;
     position: absolute;
-    left: 30px;
+    left: 5px;
     top: 0;
     height: 90px;
     line-height: 90px;

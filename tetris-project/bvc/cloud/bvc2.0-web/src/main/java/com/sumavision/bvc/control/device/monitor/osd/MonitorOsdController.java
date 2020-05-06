@@ -14,6 +14,8 @@ import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdQuery;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -115,7 +117,7 @@ public class MonitorOsdController {
 	public Object add(
 			String name,
 			HttpServletRequest request) throws Exception{
-		
+		if(name==null || "".equals(name)) throw new BaseException(StatusCode.FORBIDDEN, "名称不能为空！");
 		UserVO user = userUtils.getUserFromSession(request);
 		MonitorOsdPO osd = monitorOsdService.add(name, user.getId(), user.getName());
 		return new MonitorOsdVO().set(osd);
@@ -137,7 +139,7 @@ public class MonitorOsdController {
 			@PathVariable Long id,
 			String name,
 			HttpServletRequest request) throws Exception{
-		
+		if(name==null || "".equals(name)) throw new BaseException(StatusCode.FORBIDDEN, "名称不能为空！");
 		Long userId = userUtils.getUserIdFromSession(request);
 		MonitorOsdPO osd = monitorOsdService.edit(id, name, userId);
 		return new MonitorOsdVO().set(osd);

@@ -1,44 +1,148 @@
-.fileImport{
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background-color: #0F1537;
+body{
+    background-color:transparent;
 }
-.title{
-    height: 30px;
-    line-height: 30px;
-    font-size: 20px;
-    color: #fff;
-    text-align: center;
+.fileImport{
+    width:100%;
+    height:100%;
+    position:relative;
+    background-color: #0F1537;
+    border:1px solid #2c5282;
+    box-sizing:border-box;
+    border-radius:4px;
+}
 
+.fileImport .win-header{
+    height:40px;
+    background-color:#3668a9;
+    border-radius:4px 4px 0 0;
+}
+
+.fileImport .win-header .win-header-title{
+    float:left;
+    color:#fff;
+    line-height:40px;
+    padding:0 10px;
+}
+
+.fileImport .win-header .win-header-close{
+    float:right;
+    color:#fff;
+    line-height:40px;
+    padding:0 10px;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.fileImport .win-body{
+    position:absolute;
+    left:0;
+    top:40px;
+    padding:10px;
+    right:0;
+    bottom:0;
+    background-color:#0f2a4d;
+    border-radius:0 0 4px 4px;
+}
+
+.btn-add-osd,
+.btn-import-commit,
+.btn-select-folder,
+.btn-handle-search,
+.btn-dialog-cancel,
+.btn-dialog-submit,
+.btn-dialog-edit{
+    color:#fff;
+    background-color:#2562f7;
+    padding:5px 14px;
+    border-radius:13px;
+    cursor:pointer;
+    display:inline-block;
+    font-size:12px;
+}
+
+.btn-dialog-cancel,
+.btn-dialog-submit,
+.btn-dialog-edit{
+    padding:7px 18px;
+    float:right;
+}
+
+.btn-dialog-cancel{
+    margin-left:14px;
+    background-color:#204a6b;
+}
+
+.btn-import-commit{
+    z-index: 100;
+    position: relative;
 }
 
 .left,.right{
+    box-sizing: border-box;
     float: left;
     width: 59%;
     height: 100%;
     overflow: hidden;
 }
+.right{
+    padding-left:10px;
+}
 .left{
+    padding-right:10px;
     width: 40%;
-    border-right: 1px solid #d5d5d5;
+    border-right: 1px solid #11366b;
 }
 /*重置table的样式*/
-.el-table{
-    color: #e0e1e2;
+.el-table,
+.el-table__expanded-cell {
+    background-color: transparent;
+    color: #c2f9ff;
 }
-.el-table, .el-table__expanded-cell {
-    background-color: #0a0a0a38;
+
+.el-table thead {
+    color: #00e4fd;
 }
-.el-table th, .el-table tr {
-    background-color: #0000004d;
+
+.el-table th,
+.el-table tr {
+    background-color: transparent;
 }
-.el-table--enable-row-hover .el-table__body tr:hover>td{
-    background-color: #34675d;
-    color: #fff;
+
+.fileImport .el-table td,
+.fileImport .el-table th.is-leaf{
+    border-bottom: 1px solid #11366b;
 }
+
+.fileImport .el-table--border::after,
+.fileImport .el-table--group::after,
+.fileImport .el-table::before{
+    background-color: #11366b;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover td{
+    background-color:#061f3e;
+}
+
+.fileImport .el-table--enable-row-hover .el-table__body tr:hover {
+    border:1px solid #0595b9;
+}
+
+.fileImport .el-pagination.is-background .el-pager li:not(.disabled).active{
+    background-color: #2562f7;
+}
+
+.fileImport .el-pagination.is-background .btn-next,
+.fileImport .el-pagination.is-background .btn-prev,
+.fileImport .el-pagination.is-background .el-pager li{
+    background-color:#ffffff00;
+}
+
+.fileImport .el-button--text{
+    color:#72b7fb;
+}
+
 .el-table--striped .el-table__body tr.el-table__row--striped.current-row td, .el-table__body tr.current-row>td, .el-table__body tr.hover-row.current-row>td, .el-table__body tr.hover-row.el-table__row--striped.current-row>td, .el-table__body tr.hover-row.el-table__row--striped>td, .el-table__body tr.hover-row>td{
-    background-color: #34675d;
+    background-color: #061f3e;
 }
 
 /*重置分页样式*/
@@ -52,23 +156,25 @@
     overflow: hidden;
 }
 .el-dialog{
-    width: 70%;
-    background: linear-gradient(to right, #1B2751,#3a489a,#1D2A56);
+    width:800px;
+    background-color: #0F1537;
+    border:1px solid #2c5282;
+    box-sizing:border-box;
 }
 .el-dialog__title {
     color: #9c9c9c;
     font-weight: 600;
 }
 
-
 /*重置树形菜单*/
 .el-tree {
-    background: #06060663;
-    color: #c7c7c7;
+    background-color: transparent;
+    color: #fff;
 }
 .el-input__inner{
-    color: #c1c5ce;
-    background-color:#1f1d1d73;
+    background-color: #0b2d5a;
+    border:1px solid #17407e;
+    color: #fff;
 }
 .el-range-editor .el-range-input {
     background-color: #0d6079;

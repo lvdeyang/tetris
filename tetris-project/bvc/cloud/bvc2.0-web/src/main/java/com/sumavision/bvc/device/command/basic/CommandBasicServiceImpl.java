@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
@@ -234,6 +235,12 @@ public class CommandBasicServiceImpl {
 			String uuid
 			) throws Exception{
 		
+		CommandGroupPO group1 = commandGroupDao.findByUuid(uuid);
+		if(group1 != null){
+			log.warn("级联建会，uuid已经存在：" + uuid);
+			return group1;
+		}
+		
 		UserBO creatorUserBo = resourceService.queryUserById(creatorUserId, TerminalType.QT_ZK);
 		if(creatorUserBo == null){
 			throw new BaseException(StatusCode.FORBIDDEN, "当前用户已失效，请重新登录");
@@ -245,10 +252,18 @@ public class CommandBasicServiceImpl {
 		//确保成员中有创建者
 		if(!userIdList.contains(creatorUserId)){
 			userIdList.add(creatorUserId);
-		}
+		}		
 		
-		//本系统创建，则校验主席有编码器
+		//本系统创建，则鉴权，则校验主席有编码器
 		if(!OriginType.OUTER.equals(originType)){
+			
+			//鉴权，区分指挥与会议
+//			if(type.equals(GroupType.BASIC)){
+//				commandCommonServiceImpl.authorizeUsers(userIdList, chairmanUserId, BUSINESS_OPR_TYPE.ZK);
+//			}else if(type.equals(GroupType.MEETING)){
+//				commandCommonServiceImpl.authorizeUsers(userIdList, chairmanUserId, BUSINESS_OPR_TYPE.HY);
+//			}
+			
 			String creatorEncoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(creatorUserBo);
 			List<BundlePO> creatorBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(creatorEncoderId).getList());
 			if(creatorBundleEntities.size() == 0){
@@ -851,7 +866,7 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public void modifyName(Long userId, Long groupId, String name) throws Exception{
-		UserVO user = userQuery.current();
+		UserVO user = userQuery.current();		
 		if(name==null || name.equals("")){
 			throw new BaseException(StatusCode.FORBIDDEN, "请输入名称");
 		}
@@ -862,11 +877,28 @@ public class CommandBasicServiceImpl {
 		}
 		
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		if(!GroupStatus.STOP.equals(group.getStatus())){
+			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经开始，请停止后再删除。id: " + group.getId());
+		}
 		if(!group.getUserId().equals(userId)){
 			throw new BaseException(StatusCode.FORBIDDEN, "只有主席才能修改");
 		}
 		group.setName(name);
 		commandGroupDao.save(group);
+		
+		//级联 groupUpdate
+		if(!OriginType.OUTER.equals(group.getOriginType())){
+			GroupType groupType = group.getType();
+			if(GroupStatus.STOP.equals(group.getStatus())){
+				if(GroupType.BASIC.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.updateCommand(group);
+					commandCascadeService.update(groupBO);						
+				}else if(GroupType.MEETING.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.updateMeeting(group);
+					conferenceCascadeService.update(groupBO);			
+				}
+			}
+		}
 		operationLogService.send(user.getNickname(), "修改指挥名称", user.getNickname() + "修改指挥名称" + group.getId());
 	}
 	
@@ -883,6 +915,7 @@ public class CommandBasicServiceImpl {
 	 */
 	public void remove(Long userId, List<Long> groupIds) throws Exception{
 		UserVO user = userQuery.current();
+		groupIds.remove(null);
 		List<CommandGroupPO> groups = commandGroupDao.findAll(groupIds);
 		StringBuffer dis = new StringBuffer();
 		
@@ -946,14 +979,34 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public Object start(Long groupId, int locationIndex, boolean refresh, List<Long> enterUserIds, Date startTime, GroupStatus groupStatus) throws Exception{
+		
 		UserVO user = userQuery.current();
 		JSONObject result = new JSONObject();
 		JSONArray chairSplits = new JSONArray();
+		
+		if(groupId == null || "".equals(groupId)){
+			log.warn("开始会议，会议id有误");
+			return result;
+		}
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 					
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
 		GroupType groupType = group.getType();
+		List<Long> userIdList = new ArrayList<Long>();
+		List<CommandGroupMemberPO> members = group.getMembers();
+		for(CommandGroupMemberPO member : members){
+			userIdList.add(member.getUserId());
+		}
+		
+		//本系统创建的，则鉴权，区分指挥与会议
+//		if(!OriginType.OUTER.equals(group.getOriginType())){
+//			if(groupType.equals(GroupType.BASIC)){
+//				commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.ZK);
+//			}else if(groupType.equals(GroupType.MEETING)){
+//				commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.HY);
+//			}
+//		}
 		
 		//普通指挥、会议，刷新会议数据
 		if(!groupType.equals(GroupType.SECRET) && refresh){
@@ -973,17 +1026,14 @@ public class CommandBasicServiceImpl {
 			group.setStatus(GroupStatus.START);
 		}
 		if(startTime == null) startTime = new Date();
-		group.setStartTime(startTime);
-		List<CommandGroupMemberPO> members = group.getMembers();
+		group.setStartTime(startTime);		
 		
 		//处理主席
 		CommandGroupMemberPO chairman = commandCommonUtil.queryChairmanMember(members);
 		chairman.setMemberStatus(MemberStatus.CONNECT);
 		
-		//处理其它成员
-		List<Long> userIdList = new ArrayList<Long>();
+		//处理其它成员		
 		for(CommandGroupMemberPO member : members){
-			userIdList.add(member.getUserId());
 			
 			if(member.isAdministrator()){
 				continue;
@@ -1090,15 +1140,19 @@ public class CommandBasicServiceImpl {
 	 * @throws Exception
 	 */
 	public JSONArray stop(Long userId, Long groupId, int stopMode) throws Exception{
+		
 		UserVO user = userQuery.current();
-		if(groupId==null || groupId.equals("")){
-			throw new BaseException(StatusCode.FORBIDDEN, "停会操作，会议id有误");
-		}
 		
 		//通常返回主席的屏幕；在专向会议中，由对方成员停止或拒绝，返回对方成员的屏幕
 		JSONArray returnSplits = new JSONArray();
 		JSONArray chairSplits = new JSONArray();
 		JSONArray secretSplits = new JSONArray();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("停会操作，会议id有误");
+			return chairSplits;
+//			throw new BaseException(StatusCode.FORBIDDEN, "停会操作，会议id有误");
+		}
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 					
@@ -2095,6 +2149,15 @@ public class CommandBasicServiceImpl {
 			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> enterMembers = new ArrayList<CommandGroupMemberPO>();
 			
+			//本系统创建的，则鉴权，区分指挥与会议
+//			if(!OriginType.OUTER.equals(group.getOriginType())){
+//				if(groupType.equals(GroupType.BASIC)){
+//					commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.ZK);
+//				}else if(groupType.equals(GroupType.MEETING)){
+//					commandCommonServiceImpl.authorizeUsers(userIdList, group.getUserId(), BUSINESS_OPR_TYPE.HY);
+//				}
+//			}
+			
 			//记录加人之前的用户列表
 			List<MinfoBO> oldMemberInfos = commandCascadeUtil.generateMinfoBOList(members);
 			
@@ -2525,39 +2588,51 @@ public class CommandBasicServiceImpl {
 			//级联，必须在membersResponse之后，这样MemberStatus才是对的
 			if(!OriginType.OUTER.equals(group.getOriginType())){
 				
-				//开会中则 maddinc maddfull，停会则 groupUpdate
-				List<CommandGroupMemberPO> newAndEnterMembers = new ArrayList<CommandGroupMemberPO>();
-				newAndEnterMembers.addAll(newMembers);
-				newAndEnterMembers.addAll(enterMembers);
-				
-				//记录新加入的用户列表
-				List<MinfoBO> newMemberInfos = commandCascadeUtil.generateMinfoBOList(newAndEnterMembers, chairmanMember);
-				//得到位于新节点上的用户列表
-				List<MinfoBO> newNodeMemberInfos = commandCascadeUtil.filterAddedNodeMinfo(oldMemberInfos, newMemberInfos);
-				
-				if(GroupType.BASIC.equals(groupType)){
-					
-					GroupBO groupBO = commandCascadeUtil.joinCommand(group, oldMemberInfos, newAndEnterMembers);
-					commandCascadeService.join(groupBO);
-					
-					//TODO:如果有新节点，则要发maddfull
-					if(newNodeMemberInfos.size() > 0){
-						GroupBO maddfullBO = commandCascadeUtil.maddfullCommand(group, newNodeMemberInfos);
-						commandCascadeService.info(maddfullBO);
-						log.info(newNodeMemberInfos.size() + "个成员所在的节点新参与指挥，全量同步该指挥：" + group.getName());
+				//停会则 groupUpdate
+				if(GroupStatus.STOP.equals(group.getStatus())){
+					if(GroupType.BASIC.equals(groupType)){
+						GroupBO groupBO = commandCascadeUtil.updateCommand(group);
+						commandCascadeService.update(groupBO);						
+					}else if(GroupType.MEETING.equals(groupType)){
+						GroupBO groupBO = commandCascadeUtil.updateMeeting(group);
+						conferenceCascadeService.update(groupBO);			
 					}
+				}
+				//开会中则 maddinc maddfull
+				else{					
+					List<CommandGroupMemberPO> newAndEnterMembers = new ArrayList<CommandGroupMemberPO>();
+					newAndEnterMembers.addAll(newMembers);
+					newAndEnterMembers.addAll(enterMembers);
 					
-				}else if(GroupType.MEETING.equals(groupType)){
+					//记录新加入的用户列表
+					List<MinfoBO> newMemberInfos = commandCascadeUtil.generateMinfoBOList(newAndEnterMembers, chairmanMember);
+					//得到位于新节点上的用户列表
+					List<MinfoBO> newNodeMemberInfos = commandCascadeUtil.filterAddedNodeMinfo(oldMemberInfos, newMemberInfos);
 					
-					GroupBO groupBO = commandCascadeUtil.joinMeeting(group, oldMemberInfos, newAndEnterMembers);
-					conferenceCascadeService.join(groupBO);
-					
-					//TODO:如果有新节点，则要发maddfull
-					if(newNodeMemberInfos.size() > 0){
-						GroupBO maddfullBO = commandCascadeUtil.maddfullMeeting(group, newNodeMemberInfos);
-						conferenceCascadeService.info(maddfullBO);
-						log.info(newNodeMemberInfos.size() + "个成员所在的节点新参与会议，全量同步该会议：" + group.getName());
-					}					
+					if(GroupType.BASIC.equals(groupType)){
+						
+						GroupBO groupBO = commandCascadeUtil.joinCommand(group, oldMemberInfos, newAndEnterMembers);
+						commandCascadeService.join(groupBO);
+						
+						//如果有新节点，则要发maddfull
+						if(newNodeMemberInfos.size() > 0){
+							GroupBO maddfullBO = commandCascadeUtil.maddfullCommand(group, newNodeMemberInfos);
+							commandCascadeService.info(maddfullBO);
+							log.info(newNodeMemberInfos.size() + "个成员所在的节点新参与指挥，全量同步该指挥：" + group.getName());
+						}
+						
+					}else if(GroupType.MEETING.equals(groupType)){
+						
+						GroupBO groupBO = commandCascadeUtil.joinMeeting(group, oldMemberInfos, newAndEnterMembers);
+						conferenceCascadeService.join(groupBO);
+						
+						//如果有新节点，则要发maddfull
+						if(newNodeMemberInfos.size() > 0){
+							GroupBO maddfullBO = commandCascadeUtil.maddfullMeeting(group, newNodeMemberInfos);
+							conferenceCascadeService.info(maddfullBO);
+							log.info(newNodeMemberInfos.size() + "个成员所在的节点新参与会议，全量同步该会议：" + group.getName());
+						}					
+					}
 				}
 			}
 			
@@ -3254,8 +3329,9 @@ public class CommandBasicServiceImpl {
 							messageCaches.add(new MessageSendCacheBO(removeMember.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));								
 						}
 						
-						//如果操作人在本系统
-						if(!OriginType.OUTER.equals(chairmanMember.getOriginType())){
+						//如果业务进行中，且操作人在本系统
+						if(!OriginType.OUTER.equals(chairmanMember.getOriginType())
+								&& !GroupStatus.STOP.equals(group.getStatus())){
 							
 							//如果是申请退出被同意
 							if(mode == 0){							
@@ -3409,7 +3485,7 @@ public class CommandBasicServiceImpl {
 				commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());
 			}
 			
-			//级联：如果有老节点，则给它停会删会
+			//级联：如果有老节点，则给它停会删会；业务停止时给剩余成员的所有节点发update
 			if(!OriginType.OUTER.equals(group.getOriginType())){
 				
 				//最终的用户列表
@@ -3418,6 +3494,12 @@ public class CommandBasicServiceImpl {
 				List<MinfoBO> oldNodeMemberInfos = commandCascadeUtil.filterAddedNodeMinfo(finalMemberInfos, orgMemberInfos);
 				
 				if(GroupType.BASIC.equals(groupType)){
+					
+					//业务停止时给剩余成员的所有节点发update
+					if(group.getStatus().equals(GroupStatus.STOP)){
+						GroupBO groupBO = commandCascadeUtil.updateCommand(group);
+						commandCascadeService.update(groupBO);
+					}
 					
 					//如果有老节点，则给它停会删会
 					if(oldNodeMemberInfos.size() > 0){
@@ -3439,6 +3521,12 @@ public class CommandBasicServiceImpl {
 					}					
 				}else if(GroupType.MEETING.equals(groupType)){
 					
+					//业务停止时给剩余成员的所有节点发update
+					if(group.getStatus().equals(GroupStatus.STOP)){						
+						GroupBO groupBO = commandCascadeUtil.updateMeeting(group);
+						conferenceCascadeService.update(groupBO);
+					}
+			
 					//如果有老节点，则给它停会删会
 					if(oldNodeMemberInfos.size() > 0){
 						
@@ -4140,7 +4228,7 @@ public class CommandBasicServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月22日
 	 * @param membersForEncoder 成员列表，仅用于呼叫编码器。仅应该在成员进会的时候呼叫，否则会多计数
-	 * @param demandsForEncoderAndForward 转发点播列表，用于呼叫其中的编码器，以及生成编码器给解码器的转发forwardSet
+	 * @param demandsForEncoderAndForward 【仅当目的成员是INNER的时候才会处理】转发点播列表，生成2条协议：呼叫其中的编码器，以及生成编码器给解码器的转发forwardSet
 	 * @param players 播放器列表，方法中会判断播放器的业务属性，如果不是实时流业务则不生成logic协议
 	 * @param forwards 转发列表，生成forwardSet，在逻辑层被转换为connectBundle
 	 * @param delForwards 删除转发列表，生成forwardDel，在逻辑层被转换为connectBundle
@@ -4221,27 +4309,53 @@ public class CommandBasicServiceImpl {
 		if(null == demandsForEncoderAndForward) demandsForEncoderAndForward = new ArrayList<CommandGroupForwardDemandPO>();
 		for(CommandGroupForwardDemandPO demand : demandsForEncoderAndForward){
 			//只对设备转发处理；文件转发没有编码器
-			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)){
-				//呼叫转发点播中的源的编码器
-				ConnectBundleBO connectVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-						          .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-								  .setLock_type("write")
-								  .setBundleId(demand.getVideoBundleId())
-								  .setLayerId(demand.getVideoLayerId())
-								  .setBundle_type(demand.getVideoBundleType());
-				ConnectBO connectVideoChannel = new ConnectBO().setChannelId(demand.getVideoChannelId())
-					   .setChannel_status("Open")
-					   .setBase_type("VenusVideoIn")
-					   .setCodec_param(codec);
-				connectVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectVideoChannel).getList());
-				logic.getConnectBundle().add(connectVideoBundle);
+			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)
+					&& !OriginType.OUTER.equals(demand.getDstOriginType())){
 				
-				if(demand.getAudioChannelId()!=null && !demand.getAudioChannelId().equals("")){
-						ConnectBO connectAudioChannel = new ConnectBO().setChannelId(demand.getAudioChannelId())
-																	   .setChannel_status("Open")
-																	   .setBase_type("VenusAudioIn")
-																	   .setCodec_param(codec);
-						connectVideoBundle.getChannels().add(connectAudioChannel);
+				//呼叫转发点播中的源的编码器
+				if(!OriginType.OUTER.equals(demand.getSrcOriginType())){
+					ConnectBundleBO connectVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+							          .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+									  .setLock_type("write")
+									  .setBundleId(demand.getVideoBundleId())
+									  .setLayerId(demand.getVideoLayerId())
+									  .setBundle_type(demand.getVideoBundleType());
+					ConnectBO connectVideoChannel = new ConnectBO().setChannelId(demand.getVideoChannelId())
+						   .setChannel_status("Open")
+						   .setBase_type("VenusVideoIn")
+						   .setCodec_param(codec);
+					connectVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectVideoChannel).getList());
+					logic.getConnectBundle().add(connectVideoBundle);
+					
+					if(demand.getAudioChannelId()!=null && !demand.getAudioChannelId().equals("")){
+							ConnectBO connectAudioChannel = new ConnectBO().setChannelId(demand.getAudioChannelId())
+																		   .setChannel_status("Open")
+																		   .setBase_type("VenusAudioIn")
+																		   .setCodec_param(codec);
+							connectVideoBundle.getChannels().add(connectAudioChannel);
+					}
+				}else{
+					//passby呼叫跨系统的源设备
+					if(localLayerId == null){
+						localLayerId = resourceRemoteService.queryLocalLayerId();
+					}
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
+										 .setUuid(demand.getUuid())
+										 .setSrc_user(chairmanUserNum)//以主席的身份发起点播
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", demand.getVideoLayerId())
+												 											.put("bundleid", demand.getVideoBundleId())
+												 											.put("video_channelid", demand.getVideoChannelId())
+												 											.put("audio_channelid", demand.getAudioChannelId())
+												 											.getMap())
+										 .setDst_number(demand.getSrcCode())
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
 				}
 				
 				//转发
@@ -4258,38 +4372,36 @@ public class CommandBasicServiceImpl {
 		
 		//呼叫播放器
 		if(null == players) players = new ArrayList<CommandGroupUserPlayerPO>();
-//		for(CommandGroupMemberPO member : membersForEncoder){
-			for(CommandGroupUserPlayerPO player : players){
-				//播放文件和播放录像不需要呼叫
-				if(player.getPlayerBusinessType().equals(PlayerBusinessType.COMMAND_FORWARD_FILE)){
+		for(CommandGroupUserPlayerPO player : players){
+			//播放文件和播放录像不需要呼叫
+			if(player.getPlayerBusinessType().equals(PlayerBusinessType.COMMAND_FORWARD_FILE)){
 //						|| player.getPlayerBusinessType().equals(PlayerBusinessType.COMMAND_FORWARD_RECORD)){
-					continue;
-				}
-				ConnectBundleBO connectDstVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-//											 .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-										 .setLock_type("write")
-									     .setBundleId(player.getBundleId())
-									     .setLayerId(player.getLayerId())
-									     .setBundle_type(player.getBundleType());
-				ConnectBO connectDstVideoChannel = new ConnectBO().setChannelId(player.getVideoChannelId())
-						      .setChannel_status("Open")
-						      .setBase_type("VenusVideoOut")
-						      .setCodec_param(codec);
-				
-				//设置osd内容
-				
-				connectDstVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectDstVideoChannel).getList());
-				logic.getConnectBundle().add(connectDstVideoBundle);
-				
-				if(player.getAudioChannelId()!=null && player.getAudioChannelId()!=null){
-					ConnectBO connectDstAudioChannel = new ConnectBO().setChannelId(player.getAudioChannelId())
-																      .setChannel_status("Open")
-																      .setBase_type("VenusAudioOut")
-																      .setCodec_param(codec);					
-					connectDstVideoBundle.getChannels().add(connectDstAudioChannel);
-				}
+				continue;
 			}
-//		}
+			ConnectBundleBO connectDstVideoBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
+//											 .setOperateType(ConnectBundleBO.OPERATE_TYPE)
+									 .setLock_type("write")
+								     .setBundleId(player.getBundleId())
+								     .setLayerId(player.getLayerId())
+								     .setBundle_type(player.getBundleType());
+			ConnectBO connectDstVideoChannel = new ConnectBO().setChannelId(player.getVideoChannelId())
+					      .setChannel_status("Open")
+					      .setBase_type("VenusVideoOut")
+					      .setCodec_param(codec);
+			
+			//设置osd内容
+			
+			connectDstVideoBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectDstVideoChannel).getList());
+			logic.getConnectBundle().add(connectDstVideoBundle);
+			
+			if(player.getAudioChannelId()!=null && player.getAudioChannelId()!=null){
+				ConnectBO connectDstAudioChannel = new ConnectBO().setChannelId(player.getAudioChannelId())
+															      .setChannel_status("Open")
+															      .setBase_type("VenusAudioOut")
+															      .setCodec_param(codec);					
+				connectDstVideoBundle.getChannels().add(connectDstAudioChannel);
+			}
+		}
 		
 		//转发（对于目的在外部系统的转发，因为getDstVideoBundleId和getDstAudioBundleId都是null，所以不会生成转发协议）
 		if(null == forwards) forwards = new HashSet<CommandGroupForwardPO>();
@@ -4328,7 +4440,7 @@ public class CommandBasicServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月24日 上午11:14:28
 	 * @param membersForEncoder 成员列表，仅用于挂断编码器
-	 * @param demandsForEncoder 转发点播列表，仅用于挂断其中的编码器
+	 * @param demandsForEncoder 转发点播列表，仅用于挂断其中的编码器。仅当目的成员是INNER的时候才会处理
 	 * @param players 播放器列表，方法中会判断播放器的业务属性，如果不是实时流业务则不生成logic协议
 	 * @param codec
 	 * @param chairmanUserNum 主席的号码
@@ -4389,15 +4501,42 @@ public class CommandBasicServiceImpl {
 		//挂断转发点播中的源的编码器
 		if(null == demandsForEncoder) demandsForEncoder = new ArrayList<CommandGroupForwardDemandPO>();
 		for(CommandGroupForwardDemandPO demand : demandsForEncoder){
-			//只对设备转发处理；文件转发没有编码器
-			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)){
-				DisconnectBundleBO disconnectVideoBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-								       .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-									   .setBundleId(demand.getVideoBundleId())
-									   .setBundle_type(demand.getVideoBundleType())
-									   .setLayerId(demand.getVideoLayerId());
+			//只对设备转发处理，文件转发没有编码器；只对目的为INNER的处理；只对DONE的处理
+			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)
+					&& !OriginType.OUTER.equals(demand.getDstOriginType())
+					&& ForwardDemandStatus.DONE.equals(demand.getExecuteStatus())){
 				
-				logic.getDisconnectBundle().add(disconnectVideoBundle);
+				if(!OriginType.OUTER.equals(demand.getSrcOriginType())){
+					DisconnectBundleBO disconnectVideoBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+									       .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+										   .setBundleId(demand.getVideoBundleId())
+										   .setBundle_type(demand.getVideoBundleType())
+										   .setLayerId(demand.getVideoLayerId());
+					
+					logic.getDisconnectBundle().add(disconnectVideoBundle);
+				}else{
+					//passby停止跨系统的源设备
+					if(localLayerId == null){
+						localLayerId = resourceRemoteService.queryLocalLayerId();
+					}
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+										 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
+										 .setUuid(demand.getUuid())
+										 .setSrc_user(chairmanUserNum)//以主席的身份停止点播
+										 .setXt_encoder(new HashMapWrapper<String, String>().put("layerid", demand.getVideoLayerId())
+												 											.put("bundleid", demand.getVideoBundleId())
+												 											.put("video_channelid", demand.getVideoChannelId())
+												 											.put("audio_channelid", demand.getAudioChannelId())
+												 											.getMap())
+										 .setDst_number(demand.getSrcCode())
+										 .setVparam(codec);
+					
+					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
+					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setPass_by_content(passByContent);
+					
+					logic.getPass_by().add(passby);
+				}
 			}
 		}
 		

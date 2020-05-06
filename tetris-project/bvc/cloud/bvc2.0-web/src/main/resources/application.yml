@@ -1,12 +1,12 @@
 spring:
   application:
-    name: tetris-bvc-business-zsy
+    name: tetris-bvc-business-yxc
   cloud:
 #    config:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.18
+      ipAddress: 192.165.153.50
   profiles:
     active: pro
   datasource:
@@ -91,5 +91,10 @@ command:
   #指挥/会议文字切换
   commandString: 指挥
   #创建本地预览的模式，0关闭，1使用摄像头，2使用绑定的编码器
-  localPreviewMode: 1
+  localPreviewMode: 2
+  #2个ntp服务器
+  ntp1IP: 192.165.56.131
+  ntp1Port: 1234
+  ntp2IP: 192.165.56.132
+  ntp2Port: 5678
   

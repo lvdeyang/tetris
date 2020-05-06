@@ -583,10 +583,13 @@ public class CommandQueryController {
 		//过滤已经被绑定的设备
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
 		List<CommandGroupUserPlayerPO> players = userInfo.getPlayers();
-		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(players, serial);
+//		CommandGroupUserPlayerPO player = commandCommonUtil.queryPlayerByLocationIndex(players, serial);
 		Set<String> castedBundleIds = new HashSet<String>();
-		for(CommandGroupUserPlayerCastDevicePO device : player.getCastDevices()){
-			castedBundleIds.add(device.getDstBundleId());
+		for(CommandGroupUserPlayerPO player : players){
+			if(player.getCastDevices() == null) continue;
+			for(CommandGroupUserPlayerCastDevicePO device : player.getCastDevices()){
+				castedBundleIds.add(device.getDstBundleId());
+			}
 		}
 		
 		//过滤无通道设备

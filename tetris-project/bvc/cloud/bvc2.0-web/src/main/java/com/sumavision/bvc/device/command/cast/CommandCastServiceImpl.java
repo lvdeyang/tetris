@@ -3,7 +3,6 @@ package com.sumavision.bvc.device.command.cast;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
@@ -21,6 +19,7 @@ import com.sumavision.bvc.command.group.dao.CommandGroupForwardDemandDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.dao.CommandVodDAO;
 import com.sumavision.bvc.command.group.dao.UserLiveCallDAO;
+import com.sumavision.bvc.command.group.enumeration.CallStatus;
 import com.sumavision.bvc.command.group.enumeration.CallType;
 import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
@@ -36,7 +35,6 @@ import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlaye
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.vod.CommandVodPO;
 import com.sumavision.bvc.device.command.bo.PlayerInfoBO;
-import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
@@ -44,18 +42,18 @@ import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
 import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.ForwardDelBO;
 import com.sumavision.bvc.device.group.bo.ForwardSetBO;
-import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
+import com.sumavision.bvc.device.group.bo.OsdWrapperBO;
+import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
-import com.sumavision.bvc.device.group.po.DeviceGroupAvtplGearsPO;
-import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
+import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
+import com.sumavision.bvc.device.monitor.osd.MonitorOsdService;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
-import com.sumavision.bvc.system.po.AvtplGearsPO;
-import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 
@@ -65,7 +63,7 @@ import lombok.extern.slf4j.Slf4j;
  * 
 * @ClassName: CommandCastServiceImpl 
 * @Description: 播放器关联上屏业务<br>
-* mediaPushSet的uuid规则（没有空格）：PO的uuid @@ 上屏设备PO的id
+* mediaPushSet的uuid规则（没有空格）：上屏设备PO的uuid @@ 上屏设备PO的dstBundleId
 * @author zsy
 * @date 2019年11月22日 上午10:56:48 
 *
@@ -91,16 +89,19 @@ public class CommandCastServiceImpl {
 	private CommandGroupForwardDemandDAO commandGroupForwardDemandDao;
 	
 	@Autowired
+	private MonitorOsdDAO monitorOsdDao;
+	
+	@Autowired
 	private ResourceBundleDAO resourceBundleDao;
 	
 	@Autowired
 	private ResourceChannelDAO resourceChannelDao;
 	
 	@Autowired
-	private ResourceService resourceService;
+	private CommandCommonServiceImpl commandCommonServiceImpl;
 	
 	@Autowired
-	private CommandCommonServiceImpl commandCommonServiceImpl;
+	private MonitorOsdService monitorOsdService;
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
@@ -109,7 +110,7 @@ public class CommandCastServiceImpl {
 	private ExecuteBusinessProxy executeBusiness;
 	
 	/**
-	 * 全量设置播放器的上屏设备<br/>
+	 * 全量设置播放器的上屏设备（参数是id，主要供controller调用）<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -194,12 +195,12 @@ public class CommandCastServiceImpl {
 		}
 		
 		//持久化并下发logic协议
-		changeCastDevices2(player, addDevices, removeDevices, true, false);
+		changeCastDevices2(player, addDevices, removeDevices, true, true, false);
 		
 	}
 	
 	/**
-	 * 编辑播放器的上屏设备<br/>
+	 * 编辑播放器的上屏设备（参数是id，主要供controller调用）<br/>
 	 * <p>增加和删除</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -234,7 +235,7 @@ public class CommandCastServiceImpl {
 	 * @param removeDevices 必须来自player.getCastDevices()
 	 * @throws Exception
 	 */
-	@Deprecated
+	/**@Deprecated
 	private void changeCastDevices1(
 			CommandGroupUserPlayerPO player,
 			List<CommandGroupUserPlayerCastDevicePO> addDevices,
@@ -244,7 +245,7 @@ public class CommandCastServiceImpl {
 		if(null == addDevices) addDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
 		if(null == removeDevices) removeDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
 		
-		//TODO:判重
+		//考虑判重
 		
 		//保存获得id
 		for(CommandGroupUserPlayerCastDevicePO addDevice : addDevices){
@@ -279,7 +280,7 @@ public class CommandCastServiceImpl {
 			CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
 			
 			//给新增设备生成forwardSet
-			LogicBO logicVodStart = openBundleCastDeviceWithRestrict2(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(vod).getList(), null, codec, admin.getId(), addDevices);
+			LogicBO logicVodStart = openBundleCastDeviceWithRestrict2(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(vod).getList(), null, null, codec, admin.getId(), addDevices);
 			logic.merge(logicVodStart);
 			
 			//给删除设备生成disconnectBundle
@@ -287,7 +288,7 @@ public class CommandCastServiceImpl {
 			logic.merge(logicVodStop);
 		}
 		
-		//TODO:待测：查找给播放器的call，从呼叫方与被叫方各查一遍，最多只会有一个
+		//待测：查找给播放器的call，从呼叫方与被叫方各查一遍，最多只会有一个
 		UserLiveCallPO call = userLiveCallDao.findByCalledDecoderBundleId(player.getBundleId());
 		if(call == null){
 			call = userLiveCallDao.findByCallDecoderBundleId(player.getBundleId());
@@ -349,7 +350,7 @@ public class CommandCastServiceImpl {
 		}
 		
 		executeBusiness.execute(logic, "播放器修改上屏列表" + description);
-	}
+	}*/
 	
 	/**
 	 * 修改播放器的上屏设备<br/>
@@ -359,34 +360,46 @@ public class CommandCastServiceImpl {
 	 * <b>日期：</b>2019年11月26日 上午10:31:16
 	 * @param player
 	 * @param addDevices
-	 * @param removeDevices 必须来自player.getCastDevices()
+	 * @param _removeDevices player.getCastDevices()中需要解绑的设备
 	 * @param doLogic 是否下logic协议，只查询播放器源的时候用false
-	 * @param getPlayerSrcInfo 修改播放器的上屏设备时应使用false；true表示查找播放器源信息
+	 * @param doLogic 默认true，是否将解码设备挂断，当给解码器换源的时候，应使用false
+	 * @param getPlayerSrcInfo 修改播放器的上屏设备时应使用false；true表示查找播放器源信息，不会下发logic协议
 	 * @throws Exception
 	 */
 	public PlayerInfoBO changeCastDevices2(
 			CommandGroupUserPlayerPO player,
 			List<CommandGroupUserPlayerCastDevicePO> addDevices,
-			List<CommandGroupUserPlayerCastDevicePO> removeDevices,
+			List<CommandGroupUserPlayerCastDevicePO> _removeDevices,
 			boolean doLogic,
+			boolean closeCastDevice,
 			boolean getPlayerSrcInfo) throws Exception{
 		
+		PlayerInfoBO playerInfoBO = new PlayerInfoBO();
 		if(player.getCastDevices() == null) player.setCastDevices(new ArrayList<CommandGroupUserPlayerCastDevicePO>());
 		if(null == addDevices) addDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
-		if(null == removeDevices) removeDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
-		PlayerInfoBO playerInfoBO = new PlayerInfoBO();
+		
+		//因为player.getCastDevices().removeAll(removeDevices)可能把_removeDevices直接置为[]，所以将其复制到removeDevices
+		List<CommandGroupUserPlayerCastDevicePO> removeDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
+		if(_removeDevices != null){
+			for(CommandGroupUserPlayerCastDevicePO _removeDevice : _removeDevices){
+				removeDevices.add(_removeDevice);
+			}
+		}
 		
 		//TODO:判重
 		
 		//保存获得id
+		for(CommandGroupUserPlayerCastDevicePO removeDevice : removeDevices){
+			removeDevice.setPlayer(null);
+		}
 		for(CommandGroupUserPlayerCastDevicePO addDevice : addDevices){
 			addDevice.setPlayer(player);
 		}
 		player.getCastDevices().removeAll(removeDevices);
 		player.getCastDevices().addAll(addDevices);
 		commandGroupUserPlayerDao.save(player);
+//		commandGroupUserPlayerCastDeviceDao.deleteInBatch(removeDevices);
 		
-//		UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 		UserBO admin = new UserBO(); admin.setId(-1L);
 		
 		LogicBO logic = new LogicBO().setUserId(admin.getId().toString())
@@ -395,7 +408,17 @@ public class CommandCastServiceImpl {
 		 		 .setForwardDel(new ArrayList<ForwardDelBO>())
 		 		 .setMediaPushSet(new ArrayList<MediaPushSetBO>())
 		 		 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
-		 		 .setMediaPushDel(new ArrayList<MediaPushSetBO>());
+		 		 .setMediaPushDel(new ArrayList<MediaPushSetBO>())
+		 		 .setPass_by(new ArrayList<PassByBO>());
+		
+		LogicBO logicOsd = new LogicBO().setUserId(admin.getId().toString())
+		 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
+		 		 .setForwardSet(new ArrayList<ForwardSetBO>())
+		 		 .setForwardDel(new ArrayList<ForwardDelBO>())
+		 		 .setMediaPushSet(new ArrayList<MediaPushSetBO>())
+		 		 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
+		 		 .setMediaPushDel(new ArrayList<MediaPushSetBO>())
+		 		 .setPass_by(new ArrayList<PassByBO>());
 		
 		String description = "";
 		
@@ -403,19 +426,20 @@ public class CommandCastServiceImpl {
 		if(player.playingFile()){
 			
 			PlayerBusinessType businessType = player.getPlayerBusinessType();
-			description = "，有一个相关文件播放，类型：" + businessType + "playerUrl: " + player.getPlayUrl();
+			description = "，有一个相关文件播放，类型：" + businessType + " playerUrl: " + player.getPlayUrl();
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			
 			//给新增设备生成forwardSet
-			LogicBO logicPlayFileStart = openBundleCastDeviceWithRestrict2(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, codec, admin.getId(), addDevices);
+			LogicBO logicPlayFileStart = openBundleCastDeviceWithRestrict2(null, new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, null, null, codec, admin.getId(), addDevices);
 			logic.merge(logicPlayFileStart);
 			
 			//给删除设备生成disconnectBundle
-			LogicBO logicPlayFileStop = closeBundleCastDeviceWithRestrict2(new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, codec, admin.getId(), removeDevices);
+			LogicBO logicPlayFileStop = closeBundleCastDeviceWithRestrict2(new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, closeCastDevice, codec, admin.getId(), removeDevices);
 			logic.merge(logicPlayFileStop);
 			
+			playerInfoBO = new PlayerInfoBO(true, player.getBusinessName(), "");
 			if(getPlayerSrcInfo){
-				return new PlayerInfoBO(true, player.getBusinessName(), "");
+				return playerInfoBO;
 			}
 		}
 		
@@ -427,45 +451,58 @@ public class CommandCastServiceImpl {
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			
 			//给新增设备生成forwardSet
-			LogicBO logicVodStart = openBundleCastDeviceWithRestrict2(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(vod).getList(), null, codec, admin.getId(), addDevices);
+			LogicBO logicVodStart = openBundleCastDeviceWithRestrict2(null, null, null, null, new ArrayListWrapper<CommandVodPO>().add(vod).getList(), null, null, codec, admin.getId(), addDevices);
 			logic.merge(logicVodStart);
 			
 			//给删除设备生成disconnectBundle
-			LogicBO logicVodStop = closeBundleCastDeviceWithRestrict2(null, null, null, null, codec, admin.getId(), removeDevices);
+			LogicBO logicVodStop = closeBundleCastDeviceWithRestrict2(null, null, null, null, closeCastDevice, codec, admin.getId(), removeDevices);
 			logic.merge(logicVodStop);
 			
+			String srcInfo = vod.getSourceUserName()==null?vod.getSourceBundleName():vod.getSourceUserName();
+			playerInfoBO = new PlayerInfoBO(true, srcInfo, vod.getSourceNo());
 			if(getPlayerSrcInfo){
-				String srcInfo = vod.getSourceUserName()==null?vod.getSourceBundleName():vod.getSourceUserName();
-				return new PlayerInfoBO(true, srcInfo, vod.getSourceNo());
+				return playerInfoBO;
 			}
 		}
 		
-		//TODO:这里可能有问题，：查找给播放器的call，从呼叫方与被叫方各查一遍，最多只会有一个
-		UserLiveCallPO call = userLiveCallDao.findByCalledDecoderBundleId(player.getBundleId());
-		if(call == null){
-			call = userLiveCallDao.findByCallDecoderBundleId(player.getBundleId());
-		}else{
-			//这是被叫的播放器
-			if(getPlayerSrcInfo){
-				return new PlayerInfoBO(true, call.getCallUsername(), call.getCallUserno());
-			}
-		}
+		//查找给播放器的call，从呼叫方与被叫方各查一遍，最多只会有一个
+		UserLiveCallPO call = userLiveCallDao.findByCallDecoderBundleId(player.getBundleId());
+		UserLiveCallPO called = userLiveCallDao.findByCalledDecoderBundleId(player.getBundleId());
 		if(call != null){
 			
-			description = "，有一个相关呼叫call，id：" + call.getId();
+			description = "，作为主叫方，有一个相关呼叫call，id：" + call.getId();
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 			
 			//给新增设备生成forwardSet
-			LogicBO logicCallStart = openBundleCastDeviceWithRestrict2(null, null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), codec, admin.getId(), addDevices);
+			LogicBO logicCallStart = openBundleCastDeviceWithRestrict2(null, null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(call).getList(), null, codec, admin.getId(), addDevices);
 			logic.merge(logicCallStart);
 			
 			//给删除设备生成disconnectBundle
-			LogicBO logicCallStop = closeBundleCastDeviceWithRestrict2(null, null, null, null, codec, admin.getId(), removeDevices);
+			LogicBO logicCallStop = closeBundleCastDeviceWithRestrict2(null, null, null, null, closeCastDevice, codec, admin.getId(), removeDevices);
 			logic.merge(logicCallStop);
 			
 			//这是主叫的播放器
+			playerInfoBO = new PlayerInfoBO(true, call.getCalledUsername(), call.getCalledUserno());
 			if(getPlayerSrcInfo){
-				return new PlayerInfoBO(true, call.getCalledUsername(), call.getCalledUserno());
+				return playerInfoBO;
+			}
+		}else if(called != null){
+			
+			description = "，作为被叫方，有一个相关呼叫called，id：" + called.getId();
+			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+			
+			//给新增设备生成forwardSet
+			LogicBO logicCallStart = openBundleCastDeviceWithRestrict2(null, null, null, null, null, null, new ArrayListWrapper<UserLiveCallPO>().add(called).getList(), codec, admin.getId(), addDevices);
+			logic.merge(logicCallStart);
+			
+			//给删除设备生成disconnectBundle
+			LogicBO logicCallStop = closeBundleCastDeviceWithRestrict2(null, null, null, null, closeCastDevice, codec, admin.getId(), removeDevices);
+			logic.merge(logicCallStop);
+			
+			//这是被叫的播放器
+			playerInfoBO = new PlayerInfoBO(true, called.getCallUsername(), called.getCallUserno());
+			if(getPlayerSrcInfo){
+				return playerInfoBO;
 			}
 		}
 		
@@ -480,22 +517,22 @@ public class CommandCastServiceImpl {
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 			
 			//给新增设备生成forwardSet
-			LogicBO logic1 = openBundleCastDeviceWithRestrict2(null, null, new HashSetWrapper<CommandGroupForwardPO>().add(forward).getSet(), null, null, null, codec, admin.getId(), addDevices);
+			LogicBO logic1 = openBundleCastDeviceWithRestrict2(null, null, new HashSetWrapper<CommandGroupForwardPO>().add(forward).getSet(), null, null, null, null, codec, admin.getId(), addDevices);
 			logic.merge(logic1);
 			
 			//给删除设备生成disconnectBundle
-			LogicBO logic2 = closeBundleCastDeviceWithRestrict2(null, null, null, null, codec, admin.getId(), removeDevices);
+			LogicBO logic2 = closeBundleCastDeviceWithRestrict2(null, null, null, null, closeCastDevice, codec, admin.getId(), removeDevices);
 			logic.merge(logic2);
-			
+						
+			List<CommandGroupMemberPO> members = forward.getGroup().getMembers();
+			CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
+			if(srcMember == null){
+				log.warn("从转发关系查找源成员失败，源成员id: " + forward.getSrcMemberId());
+			}else{
+				playerInfoBO = new PlayerInfoBO(true, srcMember.getUserName(), srcMember.getUserNum());
+			}
 			if(getPlayerSrcInfo){
-				List<CommandGroupMemberPO> members = forward.getGroup().getMembers();
-				CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberById(members, forward.getSrcMemberId());
-				if(srcMember == null){
-					log.warn("从转发关系查找源成员失败，源成员id: " + forward.getSrcMemberId());
-					return playerInfoBO;
-				}else{
-					return new PlayerInfoBO(true, srcMember.getUserName(), srcMember.getUserNum());
-				}
+				return playerInfoBO;
 			}
 		}
 		
@@ -510,25 +547,71 @@ public class CommandCastServiceImpl {
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 
 			//给新增设备生成forwardSet和mediaPushSet
-			LogicBO logic3 = openBundleCastDeviceWithRestrict2(new ArrayListWrapper<CommandGroupForwardDemandPO>().add(demand).getList(), null, null, null, null, null, codec, admin.getId(), addDevices);
+			LogicBO logic3 = openBundleCastDeviceWithRestrict2(new ArrayListWrapper<CommandGroupForwardDemandPO>().add(demand).getList(), null, null, null, null, null, null, codec, admin.getId(), addDevices);
 			logic.merge(logic3);
 			
 			//给删除设备生成mediaPushDel和disconnectBundle
-			LogicBO logic4 = closeBundleCastDeviceWithRestrict2(null, null, null, null, codec, admin.getId(), removeDevices);
+			LogicBO logic4 = closeBundleCastDeviceWithRestrict2(null, null, null, null, closeCastDevice, codec, admin.getId(), removeDevices);
 			logic.merge(logic4);
 			
+			playerInfoBO = new PlayerInfoBO(true, demand.getVideoBundleName(), demand.getSrcCode());
 			if(getPlayerSrcInfo){
-				return new PlayerInfoBO(true, demand.getVideoBundleName(), demand.getSrcCode());
+				return playerInfoBO;
 			}
 		}
 		
-		if(doLogic) executeBusiness.execute(logic, "播放器修改上屏列表" + description);
+		//结束查询
+		if(getPlayerSrcInfo){
+			return playerInfoBO;
+		}
+		
+		//字幕			
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+//			PlayerInfoBO playerInfo = changeCastDevices2(player, null, null, false, true);//不用再查一遍了
+		PlayerInfoBO playerInfo = playerInfoBO;
+		
+		//清除字幕协议
+		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol(playerInfo.getSrcCode(), playerInfo.getSrcInfo());
+		clearOsd.setResolution(codec.getVideo_param().getResolution());
+		for(CommandGroupUserPlayerCastDevicePO removeDevice : removeDevices){
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(removeDevice.getDstBundleId())
+					.setLayer_id(removeDevice.getDstLayerId())
+					.setType("osds")
+					.setPass_by_content(clearOsd);
+			logicOsd.getPass_by().add(passByBO);
+		}
+		
+		//如果有字幕则下发字幕，如果没有则清除字幕
+		OsdWrapperBO setOsd = clearOsd;
+		if(player.getOsdId() != null){
+			MonitorOsdPO osd = monitorOsdDao.findOne(player.getOsdId());
+			if(osd != null){
+				setOsd = monitorOsdService.protocol(osd, playerInfo.getSrcCode(), playerInfo.getSrcInfo());
+				setOsd.setResolution(codec.getVideo_param().getResolution());
+			}
+		}
+		for(CommandGroupUserPlayerCastDevicePO addDevice : addDevices){
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(addDevice.getDstBundleId())
+					.setLayer_id(addDevice.getDstLayerId())
+					.setType("osds")
+					.setPass_by_content(setOsd);
+			logicOsd.getPass_by().add(passByBO);
+		}
+		
+		if(!playerInfoBO.isHasBusiness()){
+			log.info("播放器修改上屏列表，新增" + addDevices.size() + "个，去掉" + removeDevices.size() + "个，没有相关业务");
+		}else if(doLogic){
+			executeBusiness.execute(logic, "播放器修改上屏列表，新增" + addDevices.size() + "个，去掉" + removeDevices.size() + "个，" + description);
+			executeBusiness.execute(logicOsd, "播放器修改上屏列表，设置字幕" + description);
+		}
 		return playerInfoBO;
 	}
 
 	/**
 	 * 播放器关联上屏<br/>
-	 * <p>通常可以在openBundle方法后边使用</p>
+	 * <p>通常可以在openBundle方法后边使用，把新增的业务都传进来，生成logic协议</p>
 	 * <b>作者:</b>zsu<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月22日 下午3:22:49
@@ -536,6 +619,8 @@ public class CommandCastServiceImpl {
 	 * @param playFilePlayers 正在播放文件的播放器，用于生成mediaPush
 	 * @param forwards 转发，用于生成forwardSet
 	 * @param delForwards 删除转发，用于生成forwardDel
+	 * @param vods 点播
+	 * @param calls 呼叫
 	 * @param codec
 	 * @param userId 暂时无用，会被替换为Admin的userId
 	 * @return LogicBO
@@ -549,11 +634,12 @@ public class CommandCastServiceImpl {
 			List<UserLiveCallPO> calls,//已完成，待测
 			CodecParamBO codec,
 			Long userId){
-		return openBundleCastDeviceWithRestrict2(demandsForForward, playFilePlayers, forwards, delForwards, vods, calls, codec, userId, null);
+		return openBundleCastDeviceWithRestrict2(demandsForForward, playFilePlayers, forwards, delForwards, vods, calls, calls, codec, userId, null);
 	}
 	
 	/** restrictCastDevices 是指定的上屏设备，为null时按照播放器player.getCastDevices()正常查找；
 	 * 慎用：非null时，则强制使用restrictCastDevices作为上屏设备，即使它是不包含任何元素的空表 */
+	/*@Deprecated
 	private LogicBO openBundleCastDeviceWithRestrict1(
 			List<CommandGroupForwardDemandPO> demandsForForwardAndVod,
 			Set<CommandGroupForwardPO> forwards,
@@ -613,7 +699,7 @@ public class CommandCastServiceImpl {
 			List<CommandGroupUserPlayerCastDevicePO> castDevices = null;
 			if(restrictCastDevices == null){
 				if(call.getCalledEncoderBundleId() != null){
-					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCalledEncoderBundleId());
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCalledDecoderBundleId());
 					if(player != null){
 						castDevices = player.getCastDevices();
 					}
@@ -639,7 +725,7 @@ public class CommandCastServiceImpl {
 			List<CommandGroupUserPlayerCastDevicePO> castCalledDevices = null;
 			if(restrictCastDevices == null){
 				if(call.getCallEncoderBundleId() != null){
-					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCallEncoderBundleId());
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCallDecoderBundleId());
 					if(player != null){
 						castCalledDevices = player.getCastDevices();
 					}
@@ -768,10 +854,27 @@ public class CommandCastServiceImpl {
 		}
 		
 		return logic;		
-	}
+	}*/
 	
-	/** restrictCastDevices 是指定的上屏设备，为null时按照播放器player.getCastDevices()正常查找；
-		 * 慎用：非null时，则强制使用restrictCastDevices作为上屏设备，即使它是不包含任何元素的空表 */
+	/**
+	 * 该private方法主要用于修改播放器关联的解码器时，最后一个参数<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月28日 上午11:57:24
+	 * @param demandsForForward
+	 * @param playFilePlayers
+	 * @param forwards
+	 * @param delForwards
+	 * @param vods
+	 * @param calls 主叫播放器涉及到的呼叫
+	 * @param calleds 被叫播放器涉及到的呼叫
+	 * @param codec
+	 * @param userId
+	 * @param restrictCastDevices 指定的上屏设备，为null时按照播放器player.getCastDevices()正常查找；慎用：非null时，则强制使用restrictCastDevices作为上屏设备，即使它是不包含任何元素的空表，通常用于“给播放器添加了解码器”的时候
+	 * 
+	 * @return
+	 */
 	private LogicBO openBundleCastDeviceWithRestrict2(
 			List<CommandGroupForwardDemandPO> demandsForForward,
 			List<CommandGroupUserPlayerPO> playFilePlayers,
@@ -779,6 +882,7 @@ public class CommandCastServiceImpl {
 			Set<CommandGroupForwardPO> delForwards,
 			List<CommandVodPO> vods,
 			List<UserLiveCallPO> calls,//已完成，待测
+			List<UserLiveCallPO> calleds,//已完成，待测
 			CodecParamBO codec,
 			Long userId,
 			List<CommandGroupUserPlayerCastDevicePO> restrictCastDevices){
@@ -812,7 +916,7 @@ public class CommandCastServiceImpl {
 						for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
 							
 							//转发文件，使用mediaPush（vod模块负责运行）这个uuid要在关闭时一致
-							String mediaPushUuid = castDevice.getUuid() + "@@" + castDevice.getId();
+							String mediaPushUuid = castDevice.getUuid() + "@@" + castDevice.getDstBundleId();
 							
 							ForwardSetBO forwardVideo = new ForwardSetBO()
 									.setByMediapushAndDstCastDevice(mediaPushUuid, castDevice, codec, MediaType.VIDEO);
@@ -871,37 +975,15 @@ public class CommandCastServiceImpl {
 		if(null == calls) calls = new ArrayList<UserLiveCallPO>();
 		for(UserLiveCallPO call : calls){
 			
-			//呼叫方
-			List<CommandGroupUserPlayerCastDevicePO> castDevices = null;
-			if(restrictCastDevices == null){
-				if(call.getCalledEncoderBundleId() != null){
-					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCalledEncoderBundleId());
-					if(player != null){
-						castDevices = player.getCastDevices();
-					}
-				}
-			}else{
-				castDevices = restrictCastDevices;
-			}
-			if(castDevices != null){
-				for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
-					if(call.getCallType()==null
-							|| call.getCallType().equals(CallType.LOCAL_LOCAL)
-							|| call.getCallType().equals(CallType.LOCAL_OUTER)){
-						
-						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
-						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
-						logic.getForwardSet().add(forwardVideo);
-						logic.getForwardSet().add(forwardAudio);
-					}
-				}
+			if(!CallStatus.ONGOING.equals(call.getStatus())){
+				continue;
 			}
 			
-			//被呼叫方
+			//呼叫方的播放器，看被叫方的源
 			List<CommandGroupUserPlayerCastDevicePO> castCalledDevices = null;
 			if(restrictCastDevices == null){
 				if(call.getCallEncoderBundleId() != null){
-					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCallEncoderBundleId());
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(call.getCallDecoderBundleId());
 					if(player != null){
 						castCalledDevices = player.getCastDevices();
 					}
@@ -913,10 +995,45 @@ public class CommandCastServiceImpl {
 				for(CommandGroupUserPlayerCastDevicePO castDevice : castCalledDevices){
 					if(call.getCallType()==null
 							|| call.getCallType().equals(CallType.LOCAL_LOCAL)
-							|| call.getCallType().equals(CallType.OUTER_LOCAL)){
+							|| call.getCallType().equals(CallType.LOCAL_OUTER)){
 						
-						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCalledAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
-						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCalledAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
+						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.VIDEO);
+						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCallAndDstCastDevice(call, castDevice, codec, MediaType.AUDIO);
+						logic.getForwardSet().add(forwardVideo);
+						logic.getForwardSet().add(forwardAudio);
+					}
+				}
+			}
+		}
+		
+		//呼叫：restrictCastDevices 不为null时可能有问题
+		if(null == calleds) calleds = new ArrayList<UserLiveCallPO>();
+		for(UserLiveCallPO called : calleds){
+			
+			if(!CallStatus.ONGOING.equals(called.getStatus())){
+				continue;
+			}
+			
+			//被叫方的播放器，看呼叫方的源
+			List<CommandGroupUserPlayerCastDevicePO> castDevices = null;
+			if(restrictCastDevices == null){
+				if(called.getCalledEncoderBundleId() != null){
+					CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByBundleId(called.getCalledDecoderBundleId());
+					if(player != null){
+						castDevices = player.getCastDevices();
+					}
+				}
+			}else{
+				castDevices = restrictCastDevices;
+			}
+			if(castDevices != null){
+				for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
+					if(called.getCallType()==null
+							|| called.getCallType().equals(CallType.LOCAL_LOCAL)
+							|| called.getCallType().equals(CallType.OUTER_LOCAL)){
+						
+						ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcCalledAndDstCastDevice(called, castDevice, codec, MediaType.VIDEO);
+						ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcCalledAndDstCastDevice(called, castDevice, codec, MediaType.AUDIO);
 						logic.getForwardSet().add(forwardVideo);
 						logic.getForwardSet().add(forwardAudio);
 					}
@@ -1054,12 +1171,12 @@ public class CommandCastServiceImpl {
 			List<CommandGroupUserPlayerPO> players,
 			CodecParamBO codec,
 			Long userId){
-		return closeBundleCastDeviceWithRestrict2(playFilePlayers, vods, calls, players, codec, userId, null);
+		return closeBundleCastDeviceWithRestrict2(playFilePlayers, vods, calls, players, true, codec, userId, null);
 	}
 	
 	/** restrictCastDevices 是指定的上屏设备，为null时按照播放器player.getCastDevices()正常查找；
 	 * 慎用：非null时，则强制使用restrictCastDevices作为上屏设备，即使它是不包含任何元素的空表，此时players参数无效 */
-	private LogicBO closeBundleCastDeviceWithRestrict1(
+	/*private LogicBO closeBundleCastDeviceWithRestrict1(
 			List<CommandGroupForwardDemandPO> demandsForVod,//用于关闭文件转发的mediaPushSet
 			List<CommandVodPO> vodsForVod,//后续处理：用于关闭文件转发的mediaPushSet
 			List<UserLiveCallPO> calls,//后续处理
@@ -1127,7 +1244,7 @@ public class CommandCastServiceImpl {
 		}
 		
 		return logic;
-	}
+	}*/
 
 	/** restrictCastDevices 是指定的上屏设备，为null时按照播放器player.getCastDevices()正常查找；
 	 * 慎用：非null时，则强制使用restrictCastDevices作为上屏设备，即使它是不包含任何元素的空表，此时players参数无效 */
@@ -1136,6 +1253,7 @@ public class CommandCastServiceImpl {
 			List<CommandVodPO> vodsForVod,//后续处理：用于关闭文件转发的mediaPushSet
 			List<UserLiveCallPO> calls,//后续处理
 			List<CommandGroupUserPlayerPO> players,
+			boolean closeCastDevice,
 			CodecParamBO codec,
 			Long userId,
 			List<CommandGroupUserPlayerCastDevicePO> restrictCastDevices){
@@ -1157,34 +1275,36 @@ public class CommandCastServiceImpl {
 			if(castDevices != null){
 				for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
 					//转发文件，删除mediaPush（vod模块负责运行）这个uuid要与打开时一致
-					String mediaPushUuid = castDevice.getUuid() + "@@" + castDevice.getId();								
+					String mediaPushUuid = castDevice.getUuid() + "@@" + castDevice.getDstBundleId();								
 					logic.getMediaPushDel().add(new MediaPushSetBO().setUuid(mediaPushUuid));
 				}
 			}
 		}
 		
 		//挂断播放器关联的解码器
-		List<CommandGroupUserPlayerCastDevicePO> closeCastDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
-		if(restrictCastDevices == null){
-			if(null == players) players = new ArrayList<CommandGroupUserPlayerPO>();
-			for(CommandGroupUserPlayerPO player : players){
-				List<CommandGroupUserPlayerCastDevicePO> castDevices = player.getCastDevices();
-				if(castDevices != null){
-					closeCastDevices.addAll(castDevices);
+		if(closeCastDevice){
+			List<CommandGroupUserPlayerCastDevicePO> closeCastDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
+			if(restrictCastDevices == null){
+				if(null == players) players = new ArrayList<CommandGroupUserPlayerPO>();
+				for(CommandGroupUserPlayerPO player : players){
+					List<CommandGroupUserPlayerCastDevicePO> castDevices = player.getCastDevices();
+					if(castDevices != null){
+						closeCastDevices.addAll(castDevices);
+					}
 				}
+			}else{
+				closeCastDevices = restrictCastDevices;
 			}
-		}else{
-			closeCastDevices = restrictCastDevices;
-		}
-		if(closeCastDevices != null){
-			for(CommandGroupUserPlayerCastDevicePO castDevice : closeCastDevices){
-				DisconnectBundleBO disconnectDstBundle = new DisconnectBundleBO()
-						.setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-//								.setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-						.setBundleId(castDevice.getDstBundleId())
-						.setBundle_type(castDevice.getDstBundleType())
-						.setLayerId(castDevice.getDstLayerId());
-				logic.getDisconnectBundle().add(disconnectDstBundle);
+			if(closeCastDevices != null){
+				for(CommandGroupUserPlayerCastDevicePO castDevice : closeCastDevices){
+					DisconnectBundleBO disconnectDstBundle = new DisconnectBundleBO()
+							.setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+	//								.setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+							.setBundleId(castDevice.getDstBundleId())
+							.setBundle_type(castDevice.getDstBundleType())
+							.setLayerId(castDevice.getDstLayerId());
+					logic.getDisconnectBundle().add(disconnectDstBundle);
+				}
 			}
 		}
 		

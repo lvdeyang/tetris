@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.auth.login.exception.AppIdCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.DonotSupportRoamLoginException;
-import com.sumavision.tetris.auth.login.exception.QtZkLoginRepeatedlyException;
 import com.sumavision.tetris.auth.login.exception.SignCannotBeNullException;
 import com.sumavision.tetris.auth.login.exception.SignVerifyFailException;
 import com.sumavision.tetris.auth.login.exception.TimestampCannotBeNullException;
@@ -16,6 +15,7 @@ import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenDAO;
 import com.sumavision.tetris.auth.token.TokenPO;
 import com.sumavision.tetris.auth.token.TokenQuery;
+import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Base64;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
 import com.sumavision.tetris.user.BasicDevelopmentDAO;
 import com.sumavision.tetris.user.BasicDevelopmentPO;
@@ -30,6 +30,7 @@ import com.sumavision.tetris.user.exception.PasswordErrorException;
 import com.sumavision.tetris.user.exception.TokenTimeoutException;
 import com.sumavision.tetris.user.exception.UsernameCannotBeNullException;
 import com.sumavision.tetris.user.exception.UsernameNotExistException;
+import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
 @Service
 public class LoginService {
@@ -50,10 +51,16 @@ public class LoginService {
 	private Sha256Encoder sha256Encoder;
 	
 	@Autowired
+	private Base64 base64;
+	
+	@Autowired
 	private BasicDevelopmentQuery basicDevelopmentQuery;
 	
 	@Autowired
 	private BasicDevelopmentDAO basicDevelopmentDao;
+	
+	@Autowired
+	private WebsocketMessageService websocketMessageService;
 	
 	/**
 	 * 强制用户id登录<br/>
@@ -107,6 +114,9 @@ public class LoginService {
 		if(user.getErrorLoginTimes()!=null && user.getErrorLoginTimes().intValue()>=10){
 			throw new TooManyAbnormalLoginTimesException();
 		} 
+		for(int i=0; i<5; i++){
+			password = base64.decode(password);
+		}
 		password = sha256Encoder.encode(password);
 		if(!user.getPassword().equals(password)){
 			user.setErrorLoginTimes((user.getErrorLoginTimes()==null?1:(user.getErrorLoginTimes()+1)));
@@ -116,8 +126,9 @@ public class LoginService {
 		if(TerminalType.QT_ZK.equals(terminalType)){
 			//指控终端重复登录校验
 			TokenPO token = tokenDao.findByUserIdAndType(user.getId(), terminalType);
-			if(UserStatus.ONLINE.equals(token.getStatus())){
-				throw new QtZkLoginRepeatedlyException();
+			if(token!=null && UserStatus.ONLINE.equals(token.getStatus())){
+				//重复登录踢人下线
+				websocketMessageService.push(user.getId().toString(), "forceOffLine", null, user.getId().toString(), user.getNickname());
 			}
 		}
 		return doPasswordLoginTransactional(user, terminalType, ip);

@@ -1,94 +1,119 @@
 <div class="fileImport">
-    <!--左侧-->
-    <div class="left">
-        <p class="title">已导入文件</p>
-        <div style="height: 100%">
-            <el-scrollbar style="height: 100%">
-                <el-tree
-                        ref="treeForm"
-                        :data="treeDatas"
-                        show-checkbox
-                        node-key="id"
-                        check-strictly
-                        :props="defaultProps"
-                        @check-change="handleNodeClick">
-                    <span class="custom-tree-node" slot-scope="{ node, data }">
-                        <span style="display: inline-block;width: 200px">
-                           {{data.name}}
-                        </span>
-                        <span @click="remove(data.id)"><i class="el-icon-delete"></i></span>
-                    </span>
-                </el-tree>
-            </el-scrollbar>
-
-        </div>
+    <div class="win-header">
+        <span class="win-header-title">外部文件导入</span>
+        <span class="win-header-close" @click="cancel"><span class="el-icon-close"></span></span>
     </div>
-    <!--右侧-->
-    <div class="right">
-        <div>
-            <el-button type="primary" size="mini" @click="search">选择目录</el-button>
-            <el-input style="width: 300px" placeholder="请输入路径选择" v-model="filterInput"></el-input>
-            <el-button type="primary" size="mini" @click="filter">查找</el-button>
-        </div>
-        <div style="height: 600px;overflow: hidden">
-           <el-scrollbar style="height: 100%">
-               <el-table
-                       ref="multipleTable"
-                       :data="pageData"
-                       style="width: 100%"
-                       @select="handleSelect" @select-all="selectCurrentPage">
-                   <el-table-column
-                           type="selection"
-                           width="55">
-                   </el-table-column>
-                   <el-table-column
-                           prop="name"
-                           label="别名"
-                           width="150">
-                   </el-table-column>
-                   <el-table-column
-                           prop="fullPath"
-                           label="全路径">
-                   </el-table-column>
-                   <el-table-column
-                           label="操作"
-                           width="80">
-                       <template slot-scope="scope">
-                           <el-tooltip class="item" effect="dark" content="选择上传" placement="bottom">
-                               <el-button type="text" style="padding:0; font-size:20px;" @click="uploadRow(scope.row)">
-                                   <span class="el-icon-upload2"></span></el-button>
-                           </el-tooltip>
-                       </template>
-                   </el-table-column>
-               </el-table>
-               <div style="margin-top:10px;text-align: right">
-                   <el-button type="primary" size="medium" @click="confirmImport">确定导入</el-button>
-               </div>
-               <el-pagination background @current-change="CurrentChange" :current-page="currentPage"
-                              :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
-                              :total="fileDatas.length">
-               </el-pagination>
-           </el-scrollbar>
+    <div class="win-body">
+        <div style="width:100%; height:100%; position:relative;">
+            <!--左侧-->
+            <div class="left">
+                <el-scrollbar style="height: 100%">
+                    <el-tree
+                            ref="treeForm"
+                            :data="treeDatas"
+                            show-checkbox
+                            node-key="id"
+                            check-strictly
+                            :props="defaultProps"
+                            @check-change="handleNodeClick">
+                            <span class="custom-tree-node" slot-scope="{ node, data }">
+                                <span style="display: inline-block;width: 200px">
+                                   {{data.name}}
+                                </span>
+                                <span @click="remove(data.id)"><i class="el-icon-delete"></i></span>
+                            </span>
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+            <!--右侧-->
+            <div class="right">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div>
+                        <div class="btn-select-folder" @click="search">选择目录</div>
+                        <el-input size="small" style="width: 300px" placeholder="请输入路径选择" v-model="filterInput"></el-input>
+                        <div class="btn-handle-search" @click="filter">查找</div>
+                    </div>
+                    <div style="position:absolute; left:0; top:40px; right:0; bottom:0;">
+                        <div style="position:relative; width:100%; height:100%;">
+                            <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
+                                <div style="width:100%; height:100%; position:relative;">
+                                    <el-table
+                                            ref="multipleTable"
+                                            :data="pageData"
+                                            style="width: 100%"
+                                            height="100%"
+                                            @select="handleSelect"
+                                            @select-all="selectCurrentPage">
+                                        <el-table-column
+                                                type="selection"
+                                                width="55">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="name"
+                                                label="别名"
+                                                width="150">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="fullPath"
+                                                label="全路径">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="操作"
+                                                width="80">
+                                            <template slot-scope="scope">
+                                                <el-tooltip class="item" effect="dark" content="选择上传" placement="bottom">
+                                                    <el-button type="text" style="padding:0; font-size:20px;" @click="uploadRow(scope.row)">
+                                                        <span class="el-icon-upload2"></span></el-button>
+                                                </el-tooltip>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                    <div style="margin-top:10px;text-align: right">
+                                        <div class="btn-import-commit" @click="confirmImport">确定导入</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="height:50px; position:absolute; left:0; bottom:0; right:0; padding-top:9px; box-sizing:border-box;">
+                                <el-pagination background @current-change="CurrentChange" :current-page="currentPage"
+                                               :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
+                                               :total="fileDatas.length">
+                                </el-pagination>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <el-dialog title="选择外部文件夹" :visible.sync="dialogVisible">
-        <el-table ref="dialogTable"  :data="dialogPageData" highlight-current-row @current-change="clickRow">
-            <el-table-column property="name" label="别名" width="150"></el-table-column>
-            <el-table-column property="fullPath" label="全路径" width="200"></el-table-column>
-            <el-table-column property="createUsername" label="创建人"></el-table-column>
-        </el-table>
-        <el-pagination background @current-change="handleCurrentChange" :current-page="dialogCurrent"
-                       :page-size="5" :pager-count="5" layout="total, prev, pager, next, jumper"
-                       :total="gridData.length">
-        </el-pagination>
+        <div style="height:400px; width:100%; position:relative;">
+            <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <el-table
+                            ref="dialogTable"
+                            :data="dialogPageData"
+                            height="100%"
+                            style="width:100%;"
+                            highlight-current-row
+                            @current-change="clickRow">
+                        <el-table-column property="name" label="别名" width="150"></el-table-column>
+                        <el-table-column property="fullPath" label="全路径" width="200"></el-table-column>
+                        <el-table-column property="createUsername" label="创建人"></el-table-column>
+                    </el-table>
+                </div>
+            </div>
+            <div style="position:absolute; left:0; bottom:0; right:0; padding-top:9px; box-sizing:border-box;">
+                <el-pagination background @current-change="handleCurrentChange" :current-page="dialogCurrent"
+                               :page-size="5" :pager-count="5" layout="total, prev, pager, next, jumper"
+                               :total="gridData.length">
+                </el-pagination>
+            </div>
+        </div>
         <div slot="footer" class="dialog-footer">
-            <el-button @click="dialogVisible=false" size="small">关 闭</el-button>
-            <el-button type="primary" @click="addSubmit" size="small">确 定</el-button>
+            <div class="btn-dialog-cancel" @click="dialogVisible=false">取 消</div>
+            <div class="btn-dialog-submit" @click="addSubmit">确 定</div>
+            <br style="clear:both;"/>
         </div>
     </el-dialog>
-
-    <div style="position:absolute;bottom:0;width: 100%;height: 50px;line-height: 50px;text-align: right">
-        <el-button type="warning" size="small" @click="cancel">关闭页面</el-button>
-    </div>
 </div>

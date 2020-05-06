@@ -14,7 +14,7 @@ public enum ForwardDemandStatus {
 //	DOING("执行中"),
 //	ACCEPT("已同意"),//需要吗？
 	DENY("拒绝", "停止"),//指挥转发点播时
-	WAITING_FOR_RESPONSE("等待回复", "等待回复"),//指挥转发点播时
+	WAITING_FOR_RESPONSE("执行完成", "执行完成"),//指挥转发点播时
 //	STOP("停止", "停止"),//指挥转发点播时，主席或成员自己将点播停止
 //	PAUSE("暂停"),
 	NO_AVAILABLE_PLAYER("没有可用播放器", "停止"),//指挥转发点播时表示已同意但没有播放器可用

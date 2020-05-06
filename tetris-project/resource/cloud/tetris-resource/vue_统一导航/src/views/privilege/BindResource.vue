@@ -106,6 +106,12 @@
           </template>
         </el-table-column>
 
+        <el-table-column width="150" :render-header="renderCheckHYHeader">
+          <template slot-scope="scope">
+            <el-checkbox v-model="scope.row.hasHYPrivilege" @change="handleCheckHYChange(scope.row)"></el-checkbox>
+          </template>
+        </el-table-column>
+
       </el-table>
 
       <!--工具条-->
@@ -174,10 +180,12 @@
       prevWriteChecks: [], // 之前的点播权限
       prevHJChecks: [],
       prevZKChecks: [],
+      prevHYChecks: [],
       readChecks: [], // 新的录制权限
       writeChecks: [], // 新的点播权限
       HJchecks: [],
       ZKchecks:[],
+      HYchecks:[],
       detailDialogVisible: false,
       detailInfos: [],
       users: [],
@@ -187,7 +195,8 @@
       checkReadAll: false,
       checkWriteAll: false,
       checkHJAll: false,
-      checkZKAll: false
+      checkZKAll: false,
+      checkHYAll: false
     }
   },
   methods: {
@@ -262,6 +271,11 @@
   renderCheckZKHeader: function (h, data) { // 自定义特殊表格头单元
     return (
       <el-checkbox v-model={this.checkZKAll} onChange={this.handleCheckZKAllChange}>指挥</el-checkbox>
+  )
+  },
+  renderCheckHYHeader: function (h, data) { // 自定义特殊表格头单元
+    return (
+      <el-checkbox v-model={this.checkHYAll} onChange={this.handleCheckHYAllChange}>会议</el-checkbox>
   )
   },
   handleCheckReadAllChange: function (val) {
@@ -348,6 +362,21 @@
       }
     }
   },
+  handleCheckHYAllChange: function (val) {
+    if (this.userTableShow) { // 用户
+      if (val) {
+        for (let user of this.users) {
+          this.HYchecks.push(user.userNo)
+          user.hasHYPrivilege = true
+        }
+      } else {
+        this.HYchecks = []
+        for (let user of this.users) {
+          user.hasHYPrivilege = false
+        }
+      }
+    }
+  },
   handleCheckReadChange: function (row) {
     if (this.resourceTableShow) {
       if (row.hasReadPrivilege) {
@@ -421,7 +450,21 @@
         }
       } else {
         this.ZKchecks.splice(this.ZKchecks.indexOf(row.userNo), 1)
-        this.checkHJAll = false
+        this.checkZKAll = false
+      }
+    }
+  },
+  handleCheckHYChange: function (row) {
+    if (this.userTableShow) {
+      if (row.hasHYPrivilege) {
+        this.HYchecks.push(row.userNo)
+        // 全选判断
+        if (this.HYchecks.length === this.users.length) {
+          this.checkHYAll = true
+        }
+      } else {
+        this.HYchecks.splice(this.HYchecks.indexOf(row.userNo), 1)
+        this.checkHYAll = false
       }
     }
   },
@@ -486,9 +529,20 @@
     this.checkWriteAll = false
     this.checkHJAll = false
     this.checkZKAll = false
+    this.checkHYAll = false
     this.countPerPage = 20
     if (/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)) {
       this.countPerPage = parseInt(this.filters.countPerPage)
+    }
+
+    if(this.resourceTableShow){
+      if(this.countPerPage * (this.pageNum - 1) > this.total){
+        this.pageNum = Math.ceil(this.total / this.countPerPage);
+      }
+    }
+
+    if(this.filters.deviceModel != '' || this.filters.keyword != '' || this.folderTreeSelected.value != ''){
+      this.pageNum = 1;
     }
 
     let param = {
@@ -566,14 +620,28 @@
     this.writeChecks = []
     this.prevHJChecks = []
     this.prevZKChecks = []
+    this.prevHYChecks = []
     this.HJchecks = []
     this.ZKchecks = []
+    this.HYchecks = []
     this.checkReadAll = false
     this.checkWriteAll = false
     this.checkHJAll = false
+    this.checkZKAll = false
+    this.checkHYAll = false
     this.countPerPage = 20
     if (/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)) {
       this.countPerPage = parseInt(this.filters.countPerPage)
+    }
+
+    if(!this.resourceTableShow){
+      if(this.countPerPage * (this.pageNum - 1) > this.total){
+        this.pageNum = Math.ceil(this.total / this.countPerPage);
+      }
+    }
+
+    if(this.filters.keyword != '' || this.folderTreeSelected.value != ''){
+      this.pageNum = 1;
     }
 
     let param = {
@@ -610,6 +678,10 @@
           this.prevZKChecks.push(user.userNo)
           this.ZKchecks.push(user.userNo)
         }
+        if (user.hasHYPrivilege) {
+          this.prevHYChecks.push(user.userNo)
+          this.HYchecks.push(user.userNo)
+        }
       }
 
       // 全选判断
@@ -624,6 +696,9 @@
       }
       if (this.ZKchecks.length === this.users.length) {
         this.checkZKAll = true
+      }
+      if (this.HYchecks.length === this.users.length) {
+        this.checkHYAll = true
       }
     }
 
@@ -666,10 +741,12 @@
       prevWriteChecks: this.prevWriteChecks.join(','),
       prevHJChecks: this.prevHJChecks.join(','),
       prevZKChecks: this.prevZKChecks.join(','),
+      prevHYChecks: this.prevHYChecks.join(','),
       readChecks: this.readChecks.join(','),
       writeChecks: this.writeChecks.join(','),
       hjChecks: this.HJchecks.join(','),
-      zkChecks: this.ZKchecks.join(',')
+      zkChecks: this.ZKchecks.join(','),
+      hyChecks: this.HYchecks.join(',')
     }
     this.userTableLoading = true
     submitUserresPrivilege(param).then((res) => {
@@ -688,6 +765,7 @@
       this.prevWriteChecks = [].concat(this.writeChecks)
       this.prevHJChecks = [].concat(this.HJchecks)
       this.prevZKChecks = [].concat(this.ZKchecks)
+      this.prevHYChecks = [].concat(this.HYchecks)
     }
     this.userTableLoading = false
   })

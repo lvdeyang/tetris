@@ -386,11 +386,15 @@ public class UserService{
 		
 		if(username == null) throw new UsernameCannotBeNullException();
 		
+		if(userno == null) throw new UsernoCannotBeNullException(nickname);
+		
 		if(nickname == null) nickname = username;
 		
 		if(password == null) throw new PasswordCannotBeNullException();
 		
 		if(!password.equals(repeat)) throw new RepeatNotMatchPasswordException();
+		
+		userQuery.checkUserno(userno);
 		
 		userQuery.checkPassword(password);
 		
@@ -605,14 +609,14 @@ public class UserService{
 			user.setPassword(sha256Encoder.encode(newPassword));
 		}
 		
-		if(mobile != null){
+		if(mobile!=null && !"".equals(mobile)){
 			UserPO userExist = userDao.findByMobileWithExcept(mobile, user.getId());
 			if(userExist != null){
 				throw new MobileAlreadyExistException(mobile);
 			}
 		}
 		
-		if(mail != null){
+		if(mail!=null && !"".equals(mail)){
 			UserPO userExist = userDao.findByMailWithExcept(mail, user.getId());
 			if(userExist != null){
 				throw new MailAlreadyExistException(mail);
@@ -665,6 +669,33 @@ public class UserService{
 		userDao.save(user);
 		
 		return new UserVO().set(user);
+	}
+	
+	/**
+	 * 修改用户密码<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午8:01:48
+	 * @param Long userId 用户id
+	 * @param String oldPassword 旧密码
+	 * @param String newPassword 新密码
+	 * @return UserVO 修改后的用户
+	 */
+	public UserVO modifyPassword(
+			Long userId,
+			String oldPassword,
+			String newPassword) throws Exception{
+		
+		UserPO entity = userDao.findOne(userId);
+		
+		oldPassword = sha256Encoder.encode(oldPassword);
+		if(!entity.getPassword().equals(oldPassword)) throw new PasswordErrorException();
+		
+		userQuery.checkPassword(newPassword);
+		entity.setPassword(sha256Encoder.encode(newPassword));
+		userDao.save(entity);
+		
+		return new UserVO().set(entity);
 	}
 	
 	/** 用户导入事件发布管理 */
@@ -731,6 +762,7 @@ public class UserService{
 			Set<String> usernames = new HashSet<String>();
 			for(UserPO user:users){
 				if(user.getUserno() == null) throw new UsernoCannotBeNullException(user.getNickname());
+				userQuery.checkUserno(user.getUserno());
 				if(user.getUsername() == null) throw new UsernameCannotBeNullException();
 				for(String userno:usernos){
 					if(userno.equals(user.getUserno())){

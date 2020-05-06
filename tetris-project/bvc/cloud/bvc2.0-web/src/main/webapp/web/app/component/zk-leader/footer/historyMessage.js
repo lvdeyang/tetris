@@ -54,14 +54,14 @@ define([
                 var self = this;
                 self.qt.get(['currentGroupId'], function (variables) {
                     var currentGroupId = variables.currentGroupId;
-                    if(!currentGroupId){
+                    if (!currentGroupId) {
                         self.qt.error('未获取到当前会议id!');
-                    }else{
+                    } else {
                         ajax.post('/command/message/broadcast/instant/message', {
-                            id:currentGroupId,
+                            id: currentGroupId,
                             message: self.instantMessage
                         }, function () {
-                            self.pushMessage('我 '+new Date().format('yyyy-MM-dd hh:mm:ss')+'：' + self.instantMessage);
+                            self.pushMessage('我 ' + new Date().format('yyyy-MM-dd hh:mm:ss') + '：' + self.instantMessage);
                             self.instantMessage = '';
                             self.qt.success('发送成功!');
                         });
@@ -82,34 +82,35 @@ define([
                 self.qt.invoke('hideService');
             },
             //换一批人员
-            replace:function () {
-               this.qt.linkedWebview('rightBar',{id:'replacePeople'});
+            replace: function () {
+                this.qt.linkedWebview('rightBar', {id: 'replacePeople'});
             },
             //历史消息弹框
             showMessagePanel: function () {
                 var self = this;
                 // self.qt.get(['currentGroupId'], function (variables) {
+                //     console.log(variables)
                 //     var currentGroupId = variables.currentGroupId;
                 //     if(!currentGroupId){
                 //         self.qt.error('未获取到当前会议id!');
                 //     }else {
-                        self.qt.window('/router/zk/leader/footer/pop', null, {width:'100%', height:'100%'});
-                        // self.qt.window('/router/zk/leader/footer/pop', {currentGroupId: currentGroupId}, {width:'100%', height:'100%'});
+                self.qt.window('/router/zk/leader/footer/pop', null, {width: 1000, height: 600});
+                // self.qt.window('/router/zk/leader/footer/pop', {currentGroupId: currentGroupId}, {width:'100%', height:'100%'});
                 //     }
                 // });
             },
             //录制任务管理
-            recManage:function () {
+            recManage: function () {
                 var self = this;
-                self.qt.window('/router/zk/leader/rec', null, {width: '100%', height: '90%'});
+                self.qt.window('/router/zk/leader/rec', null, {width: '85%', height: '93%'});
             },
             //字幕管理
-            subtitleOpen:function () {
-                this.qt.window('/router/zk/leader/subtitle/manage',null,{width: '100%', height: '90%'});
+            subtitleOpen: function () {
+                this.qt.window('/router/zk/leader/subtitle/manage', null, {width: '85%', height: '93%'});
             },
             //下载任务
-            download:function () {
-              this.qt.invoke('slotOpenTransferDlg');
+            download: function () {
+                this.qt.invoke('slotOpenTransferDlg');
             },
             //分屏事件
             layoutChange: function (index) {
@@ -247,8 +248,8 @@ define([
                 //云台控制
                 self.qt.on('cloudControl', function (e) {
                     self.qt.window('/router/zk/leader/cloud/control', {serial: e.serial}, {
-                        width: 900,
-                        height: 600,
+                        width: 600,
+                        height: 598,
                         title: '第' + e.serial + '屏关联解码器'
                     });
                 });
@@ -288,19 +289,44 @@ define([
                         title: '第' + e.serial + '屏关联解码器'
                     });
                 });
+
                 //字幕
-                self.qt.on('osdSet',function (e) {
-                    console.log(e)
-                    self.qt.window('/router//zk/leader/publish/subtitle',{serial:e.serial},{
+                self.qt.on('osdSet', function (e) {
+                    self.qt.window('/router//zk/leader/publish/subtitle', {serial: e.serial}, {
                         width: 900,
                         height: 600,
                         title: '第' + e.serial + '屏关联解码器'
                     })
                 });
 
+                //点播转呼叫
+                self.qt.on('vodCvtCall', function (e) {
+                    ajax.post('/command/call/user/trans/vod/to/call', {
+                        businessId: e.businessId,
+                        serial: e.serial
+                    }, function (data) {
+                        self.qt.linkedWebview('hidden', {id: 'playCall', params: $.toJSON([data])});
+                    })
+                });
+
+                //一键录制
+                self.qt.on('startRecord', function (e) {
+                    self.qt.window('/router/zk/leader/addRecord',
+                        {
+                            serial: e.serial,
+                            paramType: null,
+                            callbackId:e.callbackId,
+                            callbackParam:e.callbackPassThroughParam
+                        }, {
+                            width: 900,
+                            height: 600,
+                            title: '第' + e.serial + '屏关联解码器'
+                        });
+                });
+
                 //从关联设备页面跳过来执行
-                self.qt.on('showBundleTitle',function (e) {
-                    self.qt.invoke('changeBindDevices',$.toJSON([e.params]));
+                self.qt.on('showBundleTitle', function (e) {
+                    self.qt.invoke('changeBindDevices', $.toJSON([e.params]));
                 });
                 //--------视频界面上的按钮操作弹框 end-------
 
@@ -399,10 +425,10 @@ define([
                 self.qt.on('cooperationAgree', function (e) {
                     var e = e.params;
                     self.qt.info(e.businessInfo);
-                        if (e.splits && e.splits.length > 0) {
+                    if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('cooperationGrant', e.splits);
                     }
-                    self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
+                    self.qt.linkedWebview('rightBar', {id: 'refreshCurrentGroupMembers'});
                 });
                 //成员拒绝协同指挥
                 self.qt.on('cooperationRefuse', function (e) {
@@ -416,7 +442,7 @@ define([
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('cooperationRevoke', e.splits);
                     }
-                    self.qt.linkedWebview('rightBar', {id:'refreshCurrentGroupMembers'});
+                    self.qt.linkedWebview('rightBar', {id: 'refreshCurrentGroupMembers'});
                 });
 
                 //websocket 开始指挥
@@ -458,14 +484,14 @@ define([
                 });
 
                 self.qt.on('commandMemberOnline', function (e) {
-                  e = e.params;
-                  self.qt.info(e.businessInfo);
-                  if (e.splits && e.splits.length > 0) {
-                      self.qt.invoke('groupMembers', $.toJSON(e.splits));
-                  }
-                  setTimeout(function(){
-                    self.qt.linkedWebview('rightBar', {id:'yanxiaochao', params:e});
-                  }, 2000);
+                    e = e.params;
+                    self.qt.info(e.businessInfo);
+                    if (e.splits && e.splits.length > 0) {
+                        self.qt.invoke('groupMembers', $.toJSON(e.splits));
+                    }
+                    setTimeout(function () {
+                        self.qt.linkedWebview('rightBar', {id: 'yanxiaochao', params: e});
+                    }, 2000);
                 });
 
                 self.qt.on('commandMemberOffline', function (e) {
@@ -474,8 +500,8 @@ define([
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('commandExit', e.splits);
                     }
-                    setTimeout(function(){
-                      self.qt.linkedWebview('rightBar', {id:'memberOffline', params:e});
+                    setTimeout(function () {
+                        self.qt.linkedWebview('rightBar', {id: 'memberOffline', params: e});
                     }, 2000);
                 });
 
@@ -491,13 +517,13 @@ define([
 
                 // 监听强退成员时
                 self.qt.on('commandMemberDelete', function (e) {
-                  self.qt.linkedWebview('rightBar',{id:'reduceMembers',params:e});
+                    self.qt.linkedWebview('rightBar', {id: 'reduceMembers', params: e});
                     e = e.params;
-                    self.qt.info(e.businessInfo);   
+                    self.qt.info(e.businessInfo);
                 });
 
                 self.qt.on('commandMemberDeleteProxy', function (e) {
-                  self.qt.invoke('commandMemberDelete', e.params);    
+                    self.qt.invoke('commandMemberDelete', e.params);
                 });
 
                 //指挥转发设备消息
@@ -541,7 +567,7 @@ define([
                 });
 
                 //指挥转发，不需要同意
-                self.qt.on('commandForward',function (e) {
+                self.qt.on('commandForward', function (e) {
                     self.qt.info(e.params.businessInfo);
                     self.qt.invoke('commandForward', $.toJSON(e.params.splits));
                 });
@@ -628,13 +654,13 @@ define([
 
                 self.qt.on('secretRefuse', function (e) {
                     e = e.params;
-                    self.qt.warning('业务提示：'+ e.businessInfo);
+                    self.qt.warning('业务提示：' + e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial: e.serial}]));
                 });
 
                 self.qt.on('secretStop', function (e) {
                     e = e.params;
-                    self.qt.warning('业务提示：'+ e.businessInfo);
+                    self.qt.warning('业务提示：' + e.businessInfo);
                     self.qt.invoke('secretStop', $.toJSON([{serial: e.serial}]));
                 });
 

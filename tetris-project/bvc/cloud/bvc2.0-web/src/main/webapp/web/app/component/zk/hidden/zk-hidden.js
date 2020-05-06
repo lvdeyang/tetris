@@ -136,7 +136,7 @@ define([
                     self.gatePort = variables.user ? $.parseJSON(variables.user).gatePort : '';
                 
                     //请求websocket连接地址
-                    ajax.editPsdPost('http://' + self.gateIp + ':' + self.gatePort + '/tetris-user/api/zk/websocket/server/addr',
+                    ajax.editPsdPost(window.location.protocol + '//' + self.gateIp + ':' + self.gatePort + '/tetris-user/api/zk/websocket/server/addr',
                             null,
                             function (addr, status) {
                         var onmessage = function(e){
@@ -328,35 +328,49 @@ define([
                                 //监听呼叫消息，消息状态要在底部滚动
                                 self.qt.linkedWebview('historyMessage', {id:'secretStop', params:e});
                             }
-                        //停止客户端的音/视频
-                        if (e.businessType === 'stopVideoSend') {
-                            self.qt.invoke('stopVideoSend', {});
-                            self.qt.warning('主席已将您的视频关闭');
-                        } else if (e.businessType === 'stopAudioSend') {
-                            self.qt.invoke('stopAudioSend', {});
-                            self.qt.warning('主席已将您的音频关闭');
-                        }
-
-                        //收到即时消息
-                        if(e.businessType === 'receiveInstantMessage'){
-                            self.qt.linkedWebview('historyMessage', {id: 'receiveInstantMessage', params: e});
-                        }
+	                        //停止客户端的音/视频
+	                        if (e.businessType === 'stopVideoSend') {
+	                            self.qt.invoke('stopVideoSend', {});
+	                            self.qt.warning('主席已将您的视频关闭');
+	                        } else if (e.businessType === 'stopAudioSend') {
+	                            self.qt.invoke('stopAudioSend', {});
+	                            self.qt.warning('主席已将您的音频关闭');
+	                        }
+	
+	                        //收到即时消息
+	                        if(e.businessType === 'receiveInstantMessage'){
+	                            self.qt.linkedWebview('historyMessage', {id: 'receiveInstantMessage', params: e});
+	                        }
+	                        
+	                        //重复登录踢人---这个地方就叫businessId不叫businessType
+	                        if(e.businessId === 'forceOffLine'){
+	                        	self.qt.invoke('forceOffLine');
+	                        }
                         };
                         var onopen = function(){
                             console.log('已成功连接websocket...');
                         };
                         var onerror = function(){
+                            console.log('websocket异常(error)断开，30秒后重连...');
+                            console.log(arguments);
+                            //setTimeout(createWebsocket, 5*1000);
+                        };
+                        var onclose = function(){
                             console.log('websocket异常断开，30秒后重连...');
-                            setTimeout(createWebsocket, 5*1000);
+                            setTimeout(createWebsocket, 30*1000);
                         };
                         var createWebsocket = function(){
+                        	if(window.location.protocol === 'https:'){
+                        		addr = addr.replace('ws:', 'wss:')
+                        				   .replace('8084', '8204');
+                        	}
                         	//把IP替换为虚拟IP
                         	var virtualAddr = addr.replace(/[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/,self.gateIp);
                             var webSocket = new WebSocket(virtualAddr + window.TOKEN);
                             webSocket.onopen = onopen;
                             webSocket.onmessage = onmessage;
                             webSocket.onerror = onerror;
-                            webSocket.onclose = onerror;
+                            webSocket.onclose = onclose;
                         };
                         createWebsocket();
 

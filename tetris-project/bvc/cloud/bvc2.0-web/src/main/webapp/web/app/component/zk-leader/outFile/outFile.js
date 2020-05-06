@@ -31,7 +31,7 @@ define([
                     username: '',
                     password: ''
                 },
-                formLabelWidth: '100px',
+                formLabelWidth: '80px',
                 editId: '', //修改项的id
                 editButton:false
             }

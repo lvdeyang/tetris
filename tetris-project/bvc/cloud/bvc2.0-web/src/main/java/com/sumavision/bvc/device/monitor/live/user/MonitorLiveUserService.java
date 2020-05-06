@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -40,6 +41,7 @@ import com.sumavision.bvc.device.monitor.live.exception.UserHasNoPermissionForBu
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskDAO;
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskPO;
 import com.sumavision.bvc.device.monitor.playback.MonitorRecordPlaybackTaskService;
+import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -100,6 +102,9 @@ public class MonitorLiveUserService {
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
 	
+	@Autowired
+	private ResourceServiceClient resourceServiceClient;
+	
 	/**
 	 * xt点播本地用户<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -123,7 +128,7 @@ public class MonitorLiveUserService {
 //		String encoderId = resourceQueryUtil.queryEncodeBundleIdByUserId(user.getId());
 		String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
 		if(encoderId == null) throw new UserEncoderCannotBeFoundException();
-		authorize(user.getId(), userId);
+//		authorize(user.getId(), userId);//TODO: 暂时注释
 		
 		//参数模板
 		Map<String, Object> result = commons.queryDefaultAvCodec();
@@ -182,7 +187,13 @@ public class MonitorLiveUserService {
 		
 		logic.getPass_by().add(passby);
 		
-		executeBusiness.execute(logic, "点播系统：xt点播本地用户");
+		resourceServiceClient.addLianwangPassby(
+				live.getUuid(), 
+				networkLayerId, 
+				XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_USER, 
+				JSON.toJSONString(passby));
+		
+		executeBusiness.execute(logic, "点播系统：xt点播本地用户 " + live.getSrcUsername());
 		
 		return live;
 	}
@@ -398,6 +409,12 @@ public class MonitorLiveUserService {
 		
 		logic.getPass_by().add(passby);
 		
+		resourceServiceClient.addLianwangPassby(
+				live.getUuid(), 
+				networkLayerId, 
+				XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER, 
+				JSON.toJSONString(passby));
+		
 		executeBusiness.execute(logic, "点播系统：本地点播xt用户");
 		
 		return live;
@@ -539,7 +556,9 @@ public class MonitorLiveUserService {
 		
 		monitorLiveUserDao.delete(live);
 		
-		executeBusiness.execute(logic, "点播系统：停止xt点播本地用户");
+		resourceServiceClient.removeLianwangPassby(live.getUuid());
+		
+		executeBusiness.execute(logic, "点播系统：停止xt点播本地用户 " + live.getSrcUsername());
 	}
 	
 	
@@ -602,6 +621,8 @@ public class MonitorLiveUserService {
 		logic.getPass_by().add(passby);
 		
 		monitorLiveUserDao.delete(live);
+		
+		resourceServiceClient.removeLianwangPassby(live.getUuid());
 		
 		executeBusiness.execute(logic, "点播系统：停止本地点播xt用户");
 	}

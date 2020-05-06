@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.suma.venus.resource.base.bo.PlayerBundleBO;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
@@ -40,6 +41,7 @@ import com.sumavision.bvc.device.group.po.DeviceGroupAvtplPO;
 import com.sumavision.bvc.device.group.service.util.MeetingUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.exception.AvtplNotFoundException;
+import com.sumavision.bvc.device.monitor.live.exception.UserHasNoPermissionForBusinessException;
 import com.sumavision.bvc.device.system.AvtplService;
 import com.sumavision.bvc.system.dao.AvtplDAO;
 import com.sumavision.bvc.system.enumeration.AvtplUsageType;
@@ -567,6 +569,64 @@ public class CommandCommonServiceImpl {
 		return true;
 	}
 	
+	/**
+	 * 用户对用户操作的权限校验<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午2:20:34
+	 * @param Long targetUserId 呼叫目标用户
+	 * @param Long userId 操作业务用户
+	 */
+	public void authorizeUser(Long targetUserId, Long userId, BUSINESS_OPR_TYPE type) throws Exception{
+		boolean authorized = resourceService.hasPrivilegeOfUser(userId, targetUserId, type);
+		if(!authorized){
+			throw new UserHasNoPermissionForBusinessException(type, 1);
+		}
+	}
+	
+	/**
+	 * 用户对多个用户操作的权限校验<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月1日 上午11:27:26
+	 * @param targetUserIds
+	 * @param userId
+	 * @param type
+	 * @throws Exception
+	 */
+	public void authorizeUsers(List<Long> targetUserIds, Long userId, BUSINESS_OPR_TYPE type) throws Exception{
+		UserBO noAuthUser = resourceService.hasNoPrivilegeOfUsers(userId, targetUserIds, type);
+		if(noAuthUser != null){
+			throw new UserHasNoPermissionForBusinessException(type, noAuthUser.getName(), 1);
+		}
+	}
+	
+	/**
+	 * 用户对设备的权限校验<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月27日 下午2:15:11
+	 * @param String bundleId 音频设备id
+	 * @param Long userId 业务用户id
+	 */
+	public void authorizeBundle(String bundleId, Long userId, BUSINESS_OPR_TYPE type) throws Exception{
+		boolean authorized = resourceService.hasPrivilegeOfBundle(userId, bundleId, type);
+		if(!authorized){
+			throw new UserHasNoPermissionForBusinessException(type, 0);
+		}
+	}
+	
+	/**
+	 * 比较层级路径的高低<br/>
+	 * <p>path1高则返回1，低则返回-1，平级则返回0</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月5日 上午11:20:34
+	 * @param path1
+	 * @param path2
+	 * @return
+	 */
 	private static int compareLevelByParentPath(String path1, String path2){
 		if(path1 == null && path2 == null){
 			return 0;
@@ -632,6 +692,13 @@ public class CommandCommonServiceImpl {
 		}
 
 		return compareLevelByParentPath(path1, path2);
+	}
+	
+	/** 比较2个成员的层级高低，主席的高，没有主席则平级 */
+	public int compareLevelByMemberIsChairman(CommandGroupMemberPO member1, CommandGroupMemberPO member2) {		
+		if(member1.isAdministrator()) return 1;
+		else if(member2.isAdministrator()) return -1;
+		else return 0;
 	}
 
 	/**

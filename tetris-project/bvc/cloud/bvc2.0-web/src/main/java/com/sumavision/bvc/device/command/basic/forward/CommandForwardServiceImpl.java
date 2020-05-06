@@ -11,7 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.service.ResourceRemoteService;
 import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplPO;
@@ -26,11 +29,15 @@ import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
+import com.sumavision.bvc.command.group.enumeration.MemberStatus;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
+import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
+import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
@@ -38,11 +45,15 @@ import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
+import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
+import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -80,6 +91,9 @@ public class CommandForwardServiceImpl {
 	private CommandGroupForwardDemandDAO commandGroupForwardDemandDao;
 	
 	@Autowired
+	private FolderUserMapDAO folderUserMapDao;
+	
+	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
 	
 	@Autowired
@@ -90,6 +104,9 @@ public class CommandForwardServiceImpl {
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private QueryUtil queryUtil;
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
@@ -105,6 +122,18 @@ public class CommandForwardServiceImpl {
 	
 	@Autowired
 	private ResourceService resourceService;
+	
+	@Autowired
+	private CommandCascadeUtil commandCascadeUtil;
+	
+	@Autowired
+	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private CommandCascadeService commandCascadeService;
+	
+	@Autowired
+	private ConferenceCascadeService conferenceCascadeService;
 
 	/**
 	 * 转发设备、用户，强制同意，不需要选择<br/>
@@ -113,10 +142,10 @@ public class CommandForwardServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月21日 上午8:45:57
 	 * @param groupId
-	 * @param srcUserIds 源用户【暂不支持，请传null】
+	 * @param srcUserIds 源用户【暂不支持，请传空数组或null】
 	 * @param bundleIds 源设备
 	 * @param userIds 目的
-	 * @return
+	 * @return 
 	 * @throws Exception
 	 */
 	public List<ForwardReturnBO> forward(Long groupId, List<Long> srcUserIds, List<String> bundleIds, List<Long> userIds) throws Exception{
@@ -131,17 +160,30 @@ public class CommandForwardServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
 			}
 			
-			List<ForwardReturnBO> result = new ArrayList<ForwardReturnBO>();
+			List<Long> consumeIds = new ArrayList<Long>();
+			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
+			String localLayerId = null;//联网id
 			
+			GroupType groupType = group.getType();
 			List<CommandGroupMemberPO> members = group.getMembers();
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			Long creatorUserId = chairmanMember.getUserId();
 			CommandGroupAvtplPO g_avtpl = group.getAvtpl();
 			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
+			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 			
+			//校验转发目的成员是否进会
 			List<CommandGroupMemberPO> dstMembers = commandCommonUtil.queryMembersByUserIds(members, userIds);
+			for(CommandGroupMemberPO dstMember : dstMembers){
+				if(!dstMember.getMemberStatus().equals(MemberStatus.CONNECT)){
+					throw new BaseException(StatusCode.FORBIDDEN, dstMember.getUserName() + " 还未进入");
+				}
+			}
+			
 			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
-			List<CommandGroupForwardDemandPO> newDemands = new ArrayList<CommandGroupForwardDemandPO>();
+			List<CommandGroupForwardDemandPO> newDemands = new ArrayList<CommandGroupForwardDemandPO>();//新增的
+			List<CommandGroupForwardDemandPO> needDemands = new ArrayList<CommandGroupForwardDemandPO>();//需要执行的
+			List<CommandGroupUserPlayerPO> needPlayers = new ArrayList<CommandGroupUserPlayerPO>();
 			if(demands == null){
 				group.setForwardDemands(new ArrayList<CommandGroupForwardDemandPO>());
 				demands = group.getForwardDemands();
@@ -149,46 +191,62 @@ public class CommandForwardServiceImpl {
 			
 			//从bundleId列表查询所有的bundlePO
 			List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(bundleIds);
+			if(srcBundleEntities == null) srcBundleEntities = new ArrayList<BundlePO>();
 			
 			//从bundleId列表查询所有的视频编码1通道
 			List<ChannelSchemeDTO> videoEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.VIDEOENCODE1.getChannelId());
+			if(videoEncode1Channels == null) videoEncode1Channels = new ArrayList<ChannelSchemeDTO>();
 			
 			//从bundleId列表查询所有的音频编码1通道
 			List<ChannelSchemeDTO> audioEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.AUDIOENCODE1.getChannelId());
+			if(audioEncode1Channels == null) audioEncode1Channels = new ArrayList<ChannelSchemeDTO>();
 			
-			
-			
+			//按目标成员循环，生成CommandGroupForwardDemandPO
 			for(CommandGroupMemberPO dstMember : dstMembers){
 				
-				//找播放器
-				int needPlayersCount = srcUserIds.size() + srcBundleEntities.size();
-				List<CommandGroupUserPlayerPO> players = commandCommonServiceImpl.userChoseUsefulPlayers(
-						dstMember.getUserId(), PlayerBusinessType.COMMAND_FORWARD_DEVICE, needPlayersCount, false);
-				int usefulPlayersCount = players.size();
-				log.info(new StringBufferWrapper().append("转发源数为 ").append(needPlayersCount)
-						.append("， ").append(dstMember.getUserName()).append(" 可用的播放器为 ").append(usefulPlayersCount).toString());
+				OriginType dstOriginType = dstMember.getOriginType()==null?OriginType.INNER:dstMember.getOriginType();
 								
 				for(BundlePO bundle : srcBundleEntities){
+					
 					String srcVideoChannelId = null;
 					String srcAudioChannelId = null;
-					//遍历视频通道
-					for(ChannelSchemeDTO videoChannel : videoEncode1Channels){
-						if(bundle.getBundleId().equals(videoChannel.getBundleId())){
-							srcVideoChannelId = videoChannel.getChannelId();
-							break;
+					String srcLayerId = null;
+					OriginType srcOriginType = null;
+					boolean bDeviceLdap =  queryUtil.isLdapBundle(bundle);
+					if(!bDeviceLdap){
+						srcOriginType = OriginType.INNER;
+						srcLayerId = bundle.getAccessNodeUid();
+						//遍历视频通道
+						for(ChannelSchemeDTO videoChannel : videoEncode1Channels){
+							if(bundle.getBundleId().equals(videoChannel.getBundleId())){
+								srcVideoChannelId = videoChannel.getChannelId();
+								break;
+							}
 						}
-					}					
-					//遍历音频通道
-					for(ChannelSchemeDTO audioChannel : audioEncode1Channels){
-						if(bundle.getBundleId().equals(audioChannel.getBundleId())){
-							srcAudioChannelId = audioChannel.getChannelId();
-							break;
+						//遍历音频通道
+						for(ChannelSchemeDTO audioChannel : audioEncode1Channels){
+							if(bundle.getBundleId().equals(audioChannel.getBundleId())){
+								srcAudioChannelId = audioChannel.getChannelId();
+								break;
+							}
 						}
+					}else{
+						//ldap设备，生成一套参数id
+						srcOriginType = OriginType.OUTER;
+						srcVideoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+						srcAudioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+						if(localLayerId == null){
+							localLayerId = resourceRemoteService.queryLocalLayerId();
+						}
+						srcLayerId = localLayerId;
 					}
-					//建立 CommandGroupForwardDemandPO ，发送消息
+					
+					//建立 CommandGroupForwardDemandPO
 					CommandGroupForwardDemandPO demand = new CommandGroupForwardDemandPO(
+							srcOriginType,
+							dstOriginType,
 							ForwardDemandBusinessType.FORWARD_DEVICE,
-							ForwardDemandStatus.WAITING_FOR_RESPONSE,
+							ForwardDemandStatus.UNDONE,
 							ForwardDstType.USER,
 							dstMember.getId(),
 							dstMember.getUserName(),
@@ -197,13 +255,13 @@ public class CommandForwardServiceImpl {
 							bundle.getBundleId(),
 							bundle.getBundleName(),
 							bundle.getBundleType(),
-							bundle.getAccessNodeUid(),
+							srcLayerId,
 							srcVideoChannelId,
 							"VenusVideoIn",//videoBaseType,
 							bundle.getBundleId(),
 							bundle.getBundleName(),
 							bundle.getBundleType(),
-							bundle.getAccessNodeUid(),
+							srcLayerId,
 							srcAudioChannelId,
 							"VenusAudioIn",//String audioBaseType,
 							null,//member.getDstBundleId(),
@@ -228,72 +286,114 @@ public class CommandForwardServiceImpl {
 							);
 					demand.setGroup(group);
 					newDemands.add(demand);
-					
-					//如果有播放器，则设置dst
-					if(usefulPlayersCount > 0){
-//						CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount);
-//						
-//						player.setBusinessId(group.getId().toString());//如果需要改成c2m_forward.getId()，那么需要先save获得id
-//						if(groupType.equals(GroupType.BASIC)){
-//							player.setBusinessName(group.getName() + "-" + speakMember.getUserName() + "协同会议");
-//						}if(groupType.equals(GroupType.MEETING)){
-//							player.setBusinessName(group.getName() + "-" + speakMember.getUserName() + "发言");
-//						}
-//						player.setPlayerBusinessType(PlayerBusinessType.SPEAK_MEETING);
-//						
-//						BusinessPlayerVO splitVO = new BusinessPlayerVO().set(player);
-//						splits.add(splitVO);
-//						
-//						//给转发设置目的
-//						c2m_forward.setDstPlayer(player);
-//						c2m_forward.setExecuteStatus(ExecuteStatus.UNDONE);//UNDONE不行就改成WAITING_FOR_RESPONSE
-//						player.setMember(member);
-//						usefulPlayersCount--;
-//					}else{
-//						demand.setExecuteStatus(ForwardDemandStatus.NO_AVAILABLE_PLAYER);
-					}
-				}
+				}				
 			}
 			//save获得id
+//			commandGroupUserPlayerDao.save(needPlayers);
 			demands.addAll(newDemands);
 			commandGroupForwardDemandDao.save(newDemands);
 			commandGroupDao.save(group);
 			
+			//再循环一次，找播放器
+			for(CommandGroupMemberPO dstMember : dstMembers){
+
+				List<CommandGroupForwardDemandPO> memberDemands = commandCommonUtil.queryForwardDemandsByDstmemberIds(newDemands, new ArrayListWrapper<Long>().add(dstMember.getId()).getList(), null, null);
+				
+				if(OriginType.OUTER.equals(dstMember.getOriginType())){
+					for(CommandGroupForwardDemandPO memberDemand : memberDemands){
+						memberDemand.setExecuteStatus(ForwardDemandStatus.DONE);
+					}
+					continue;
+				}
+				
+				List<BusinessPlayerVO> playerVOs = new ArrayList<BusinessPlayerVO>();
+				int needPlayersCount = memberDemands.size();
+				List<CommandGroupUserPlayerPO> players = commandCommonServiceImpl.userChoseUsefulPlayers(
+						dstMember.getUserId(), PlayerBusinessType.COMMAND_FORWARD_DEVICE, needPlayersCount, false);
+				int usefulPlayersCount = players.size();
+				log.info(new StringBufferWrapper().append("转发源数为 ").append(needPlayersCount)
+						.append("， ").append(dstMember.getUserName()).append(" 可用的播放器为 ").append(usefulPlayersCount).toString());
+								
+				for(CommandGroupForwardDemandPO demand : memberDemands){
+					
+					//如果有播放器，则设置dst
+					if(usefulPlayersCount > 0){
+						demand.setExecuteStatus(ForwardDemandStatus.DONE);
+						CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount);
+						player.setBusinessId(group.getId().toString() + "-" + demand.getId().toString());
+						if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)){
+							//转发设备
+							player.setBusinessName(group.getName() + "转发" + demand.getVideoBundleName() + "设备");
+							player.setPlayerBusinessType(PlayerBusinessType.COMMAND_FORWARD_DEVICE);
+							BusinessPlayerVO playerVO = new BusinessPlayerVO().set(player);
+							playerVOs.add(playerVO);
+						}else if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_USER)){
+							//TODO:转发用户
+							player.setBusinessName(group.getName() + "转发" + demand.getVideoBundleName() + "用户");
+							player.setPlayerBusinessType(PlayerBusinessType.COMMAND_FORWARD_USER);
+							BusinessPlayerVO playerVO = new BusinessPlayerVO().set(player);
+							playerVOs.add(playerVO);
+						}
+						
+						//给转发设置目的
+						demand.setDstPlayer(player);
+						player.setMember(dstMember);
+						usefulPlayersCount--;
+						
+						needDemands.add(demand);
+						needPlayers.add(player);
+					}else{
+						demand.setExecuteStatus(ForwardDemandStatus.NO_AVAILABLE_PLAYER);
+					}
+				}
+				dstMember.getPlayers().addAll(players);
+				
+				Map<String, Object> map = new HashMapWrapper<String, Object>()
+						.put("businessType", "commandForward")
+						.put("businessId", group.getId().toString())
+						.put("businessInfo", group.getName() + " 进行了媒体转发")
+						.put("splits", playerVOs)
+						.getMap();
+				messageCaches.add(new MessageSendCacheBO(dstMember.getUserId(), JSON.toJSONString(map), WebsocketMessageType.COMMAND));
+				
+			}
+			commandGroupUserPlayerDao.save(needPlayers);
+			commandGroupDao.save(group);
+			
+			//logic
+			LogicBO logic = commandBasicServiceImpl.openBundle(null, needDemands, needPlayers, null, null, codec, chairmanMember.getUserNum());
+			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(needDemands, null, null, null, null, null, codec, group.getUserId());
+			logic.merge(logicCastDevice);
+			executeBusiness.execute(logic, group.getName() + " 进行了媒体转发");
+			
+			//级联
+			if(!OriginType.OUTER.equals(group.getOriginType())){
+				if(GroupType.BASIC.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.startCommandDeviceForward(group, srcBundleEntities, dstMembers);
+					commandCascadeService.startDeviceForward(groupBO);
+				}else if(GroupType.MEETING.equals(groupType)){
+					GroupBO groupBO = commandCascadeUtil.startCommandDeviceForward(group, srcBundleEntities, dstMembers);
+					conferenceCascadeService.startDeviceForward(groupBO);
+				}
+			}
+			
+			//发消息
+			for(MessageSendCacheBO cache : messageCaches){
+				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
+			
+			List<ForwardReturnBO> result = new ArrayList<ForwardReturnBO>();
 			for(CommandGroupForwardDemandPO demand : newDemands){
 				result.add(new ForwardReturnBO().setByDevice(demand));
 			}
-			
-			//发消息（立即消费？）
-			List<Long> consumeIds = new ArrayList<Long>();
-			for(CommandGroupMemberPO dstMember : dstMembers){
-				List<Long> dstMemberIds = new ArrayListWrapper<Long>().add(dstMember.getId()).getList();
-				//查出该用户的新点播转发
-				List<CommandGroupForwardDemandPO> memberDemands = commandCommonUtil.queryForwardDemandsByDstmemberIds(newDemands, dstMemberIds, null, null);
-				JSONArray forwards = new JSONArray();
-				for(CommandGroupForwardDemandPO demand : memberDemands){
-					JSONObject forward = new JSONObject();
-					forward.put("id", demand.getId().toString());
-					forward.put("name", demand.getVideoBundleName());
-					forwards.add(forward);
-				}
-				Map<String, Object> map = new HashMapWrapper<String, Object>()
-						.put("businessType", PlayerBusinessType.COMMAND_FORWARD_DEVICE.getCode())
-						.put("businessId", group.getId().toString())
-						.put("forwards", forwards)
-						.put("businessInfo", group.getName() + "给你转发了直播视频")
-						.getMap();
-				
-				WebsocketMessageVO ws = websocketMessageService.send(dstMember.getUserId(), JSON.toJSONString(map), WebsocketMessageType.COMMAND, chairmanMember.getUserId(), chairmanMember.getUserName());
-				consumeIds.add(ws.getId());
-			}
-			websocketMessageService.consumeAll(consumeIds);//（立即消费？）
-			
 			return result;
 		}
 	}
 
 	/**
-	 * 会议转发设备<br/>
+	 * 会议转发设备，需要成员同意<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -304,6 +404,7 @@ public class CommandForwardServiceImpl {
 	 * @return
 	 * @throws Exception
 	 */
+	@Deprecated
 	public List<ForwardReturnBO> forwardDevice(Long groupId, List<String> bundleIds, List<Long> userIds) throws Exception{
 		
 		synchronized (new StringBuffer().append(lockPrefix).append(groupId).toString().intern()) {
@@ -358,6 +459,8 @@ public class CommandForwardServiceImpl {
 					}
 					//建立 CommandGroupForwardDemandPO ，发送消息
 					CommandGroupForwardDemandPO demand = new CommandGroupForwardDemandPO(
+							OriginType.INNER,
+							OriginType.INNER,
 							ForwardDemandBusinessType.FORWARD_DEVICE,
 							ForwardDemandStatus.WAITING_FOR_RESPONSE,
 							ForwardDstType.USER,
@@ -440,7 +543,7 @@ public class CommandForwardServiceImpl {
 	}
 	
 	/**
-	 * 会议转发文件<br/>
+	 * 会议转发文件，需要成员同意<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -451,7 +554,7 @@ public class CommandForwardServiceImpl {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<ForwardReturnBO> forwardFile(Long groupId, List<String> resourceIds, List<Long> userIds) throws Exception{
+	public List<ForwardReturnBO> forwardFile_old(Long groupId, List<String> resourceIds, List<Long> userIds) throws Exception{
 		
 		synchronized (new StringBuffer().append(lockPrefix).append(groupId).toString().intern()) {
 			
@@ -485,6 +588,11 @@ public class CommandForwardServiceImpl {
 			}
 			
 			for(CommandGroupMemberPO dstMember : dstMembers){
+				
+				if(OriginType.OUTER.equals(dstMember.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, dstMember.getUserName() + "是跨系统成员，无法转发文件");
+				}
+				
 				for(int i=0; i<files.size(); i++){
 					JSONObject file = files.getJSONObject(i);
 					String resourceId = file.getString("resourceId");
@@ -547,6 +655,177 @@ public class CommandForwardServiceImpl {
 				consumeIds.add(ws.getId());
 			}
 			websocketMessageService.consumeAll(consumeIds);//（立即消费？）
+			
+			return result;
+		}
+	}
+
+	/**
+	 * 会议转发文件，不需要成员同意<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月15日 下午2:03:20
+	 * @param groupId
+	 * @param resourceIds 源文件
+	 * @param userIds 目的
+	 * @return
+	 * @throws Exception
+	 */
+	public List<ForwardReturnBO> forwardFile(Long groupId, List<String> resourceIds, List<Long> userIds) throws Exception{
+		
+		synchronized (new StringBuffer().append(lockPrefix).append(groupId).toString().intern()) {
+			
+			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			if(group.getStatus().equals(GroupStatus.STOP)){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+			}
+			
+			List<Long> consumeIds = new ArrayList<Long>();
+			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
+			
+			//查找资源
+			JSONArray files = new JSONArray();
+			for(String resourceId : resourceIds){
+				JSONObject file = resourceService.queryOnDemandResourceById(resourceId);
+				if(file == null) throw new ResourceNotExistException(resourceId);
+				files.add(file);				
+			}
+			
+			List<ForwardReturnBO> result = new ArrayList<ForwardReturnBO>();
+			
+			List<CommandGroupMemberPO> members = group.getMembers();
+			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+			Long creatorUserId = chairmanMember.getUserId();
+			CommandGroupAvtplPO g_avtpl = group.getAvtpl();
+			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
+			
+			//校验转发目的成员是否进会
+			List<CommandGroupMemberPO> dstMembers = commandCommonUtil.queryMembersByUserIds(members, userIds);
+			for(CommandGroupMemberPO dstMember : dstMembers){
+				if(!dstMember.getMemberStatus().equals(MemberStatus.CONNECT)){
+					throw new BaseException(StatusCode.FORBIDDEN, dstMember.getUserName() + " 还未进入");
+				}
+			}
+			
+			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
+			List<CommandGroupForwardDemandPO> newDemands = new ArrayList<CommandGroupForwardDemandPO>();
+			List<CommandGroupUserPlayerPO> needPlayers = new ArrayList<CommandGroupUserPlayerPO>();//需要保存的
+			if(demands == null){
+				group.setForwardDemands(new ArrayList<CommandGroupForwardDemandPO>());
+				demands = group.getForwardDemands();
+			}
+			
+			for(CommandGroupMemberPO dstMember : dstMembers){
+				
+				if(OriginType.OUTER.equals(dstMember.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, dstMember.getUserName() + "是跨系统成员，无法转发文件");
+				}
+				
+				for(int i=0; i<files.size(); i++){
+					JSONObject file = files.getJSONObject(i);
+					String resourceId = file.getString("resourceId");
+					String resourceName = file.getString("name");
+					String previewUrl = file.getString("previewUrl");
+					
+					//建立 CommandGroupForwardDemandPO ，发送消息
+					CommandGroupForwardDemandPO demand = new CommandGroupForwardDemandPO(
+							ForwardDemandBusinessType.FORWARD_FILE,
+							ForwardDemandStatus.WAITING_FOR_RESPONSE,
+							ForwardDstType.USER,
+							dstMember.getId(),
+							dstMember.getUserName(),
+							dstMember.getUserNum(),
+							resourceId,
+							resourceName,
+							previewUrl,
+							creatorUserId,
+							g_avtpl.getId(),//Long avTplId,
+							currentGear.getId(),//Long gearId,
+							DstDeviceType.WEBSITE_PLAYER,
+							null,//LiveType type,
+							null,//Long osdId,
+							null//String osdUsername);
+							);
+					demand.setGroup(group);
+					newDemands.add(demand);
+				}
+			}
+			//save获得id
+			demands.addAll(newDemands);
+			commandGroupForwardDemandDao.save(newDemands);
+			commandGroupDao.save(group);
+			
+			//再循环一次，找播放器
+			for(CommandGroupMemberPO dstMember : dstMembers){
+
+				List<CommandGroupForwardDemandPO> memberDemands = commandCommonUtil.queryForwardDemandsByDstmemberIds(newDemands, new ArrayListWrapper<Long>().add(dstMember.getId()).getList(), null, null);
+				
+				if(OriginType.OUTER.equals(dstMember.getOriginType())){
+					for(CommandGroupForwardDemandPO memberDemand : memberDemands){
+						memberDemand.setExecuteStatus(ForwardDemandStatus.DONE);
+					}
+					continue;
+				}
+				
+				List<BusinessPlayerVO> playerVOs = new ArrayList<BusinessPlayerVO>();
+				int needPlayersCount = memberDemands.size();
+				List<CommandGroupUserPlayerPO> players = commandCommonServiceImpl.userChoseUsefulPlayers(
+						dstMember.getUserId(), PlayerBusinessType.COMMAND_FORWARD_DEVICE, needPlayersCount, false);
+				int usefulPlayersCount = players.size();
+				log.info(new StringBufferWrapper().append("转文件数为 ").append(needPlayersCount)
+						.append("， ").append(dstMember.getUserName()).append(" 可用的播放器为 ").append(usefulPlayersCount).toString());
+								
+				for(CommandGroupForwardDemandPO demand : memberDemands){
+					
+					//如果有播放器，则设置dst
+					if(usefulPlayersCount > 0){
+						demand.setExecuteStatus(ForwardDemandStatus.DONE);
+						CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount);
+						player.setBusinessId(group.getId().toString() + "-" + demand.getId().toString());
+						if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_FILE)){
+							//转发设备
+							player.setBusinessName(group.getName() + "转发" + demand.getResourceName() + "文件");
+							player.setPlayerBusinessType(PlayerBusinessType.COMMAND_FORWARD_FILE);
+							player.setPlayUrl(demand.getPlayUrl());
+							BusinessPlayerVO playerVO = new BusinessPlayerVO().set(player);
+							playerVOs.add(playerVO);
+						}
+						
+						//给转发设置目的
+						demand.setDstPlayer(player);
+						player.setMember(dstMember);
+						usefulPlayersCount--;
+						
+						needPlayers.add(player);
+					}else{
+						demand.setExecuteStatus(ForwardDemandStatus.NO_AVAILABLE_PLAYER);
+					}
+				}
+				dstMember.getPlayers().addAll(players);
+				
+				Map<String, Object> map = new HashMapWrapper<String, Object>()
+						.put("businessType", "commandForward")
+						.put("businessId", group.getId().toString())
+						.put("businessInfo", group.getName() + " 进行了媒体转发")
+						.put("splits", playerVOs)
+						.getMap();
+				messageCaches.add(new MessageSendCacheBO(dstMember.getUserId(), JSON.toJSONString(map), WebsocketMessageType.COMMAND));
+				
+			}
+			commandGroupUserPlayerDao.save(needPlayers);
+			commandGroupDao.save(group);
+			
+			for(CommandGroupForwardDemandPO demand : newDemands){
+				result.add(new ForwardReturnBO().setByFile(demand));
+			}
+			
+			//发消息
+			for(MessageSendCacheBO cache : messageCaches){
+				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
 			
 			return result;
 		}
@@ -672,18 +951,18 @@ public class CommandForwardServiceImpl {
 	}
 	
 	/**
-	 * 按标准协议，根据源号码和目的号码，停止转发调度<br/>
-	 * <p>相同[源-目的]的多个任务，应该调用2次来停止，1次的话会有问题</p>
+	 * 这是一个级联被调用的方法，不再向外发送协议。按标准协议，根据源号码和目的号码，停止转发调度<br/>
+	 * <p>相同[源-目的]的多个任务，1次只能停1个，需要调用2次来停止</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月4日 下午2:20:12
-	 * @param userId
+	 * @param userId 操作人，暂时没用
 	 * @param groupUuid
 	 * @param srcCodes
 	 * @param dstCodes
 	 * @throws Exception
 	 */
-	public void stopBySrcAndDstCodes(Long userId, String groupUuid, List<String> srcCodes, List<String> dstCodes) throws Exception{
+	public void stopBySrcAndDstCodes(Long userId1, String groupUuid, List<String> srcCodes, List<String> dstCodes) throws Exception{
 		
 		CommandGroupPO group1 = commandGroupDao.findByUuid(groupUuid);
 		
@@ -700,7 +979,25 @@ public class CommandForwardServiceImpl {
 					}
 				}
 			}
-			stopDemands(group, demands);
+			
+			//<userId, [{serial:屏幕序号}]>
+			HashMap<Long, JSONArray> result = stopDemands(group, demands, false);
+			
+			//发消息
+			List<Long> consumeIds = new ArrayList<Long>();
+			for(Map.Entry<Long, JSONArray> entry: result.entrySet()){
+				System.out.println("Key: "+ entry.getKey()+ " Value: "+entry.getValue());
+				Long thisUserId = entry.getKey();
+				JSONArray splits = entry.getValue();
+				JSONObject message = new JSONObject();
+				message.put("businessType", "commandForwardStop");
+				message.put("businessId", group.getId().toString());
+				message.put("businessInfo", group.getName() + " 停止了转发");
+				message.put("splits", splits);
+				WebsocketMessageVO ws = websocketMessageService.send(thisUserId, message.toJSONString(), WebsocketMessageType.COMMAND, group.getUserId(), group.getUserName());
+				consumeIds.add(ws.getId());
+			}
+			websocketMessageService.consumeAll(consumeIds);
 		}
 	}
 
@@ -722,7 +1019,7 @@ public class CommandForwardServiceImpl {
 			List<CommandGroupForwardDemandPO> stopDemands = commandCommonUtil.queryForwardDemandsByIds(group.getForwardDemands(), demandIds);
 			
 			//<userId, [{serial:屏幕序号}]>
-			HashMap<Long, JSONArray> result = stopDemands(group, stopDemands);
+			HashMap<Long, JSONArray> result = stopDemands(group, stopDemands, true);
 					
 			//发消息
 			List<Long> consumeIds = new ArrayList<Long>();
@@ -739,7 +1036,6 @@ public class CommandForwardServiceImpl {
 				consumeIds.add(ws.getId());
 			}
 			websocketMessageService.consumeAll(consumeIds);
-			
 		}
 	}
 
@@ -766,7 +1062,7 @@ public class CommandForwardServiceImpl {
 				//这里把demandIds全部传入，因为有groupId限制，所以demandIds传多了也没事
 				CommandGroupPO group = commandGroupDao.findOne(groupId);
 				List<CommandGroupForwardDemandPO> stopDemands = commandCommonUtil.queryForwardDemandsByIds(group.getForwardDemands(), demandIds);
-				HashMap<Long, JSONArray> result = stopDemands(group, stopDemands);
+				HashMap<Long, JSONArray> result = stopDemands(group, stopDemands, true);
 				JSONArray splist1 = result.get(userId);
 				if(splist1 != null){
 					splits.addAll(splist1);
@@ -781,80 +1077,119 @@ public class CommandForwardServiceImpl {
 	/**
 	 * 停止一个会议中的多个转发点播<br/>
 	 * <p>可能涉及多个成员用户，所以返回map</p>
+	 * <p>包含级联</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月15日 上午10:08:43
-	 * @param groupId
-	 * @param demandIds
+	 * @param group
+	 * @param stopDemands
+	 * @param cascade 是否给其它级联节点发送协议，主动操作的应使用true；被动响应的，例如被级联调用的应使用false
 	 * @return HashMap<Long, JSONArray> 格式为：<userId, [{serial:屏幕序号}]>
 	 * @throws Exception
 	 */
-	private HashMap<Long, JSONArray> stopDemands(CommandGroupPO group, List<CommandGroupForwardDemandPO> stopDemands) throws Exception{
+	private HashMap<Long, JSONArray> stopDemands(CommandGroupPO group, List<CommandGroupForwardDemandPO> stopDemands, boolean cascade) throws Exception{
 		
 //		synchronized (new StringBuffer().append(lockPrefix).append(groupId).toString().intern()) {
 			
 //			CommandGroupPO group = commandGroupDao.findOne(groupId);
-			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
-			}
-			
-			//<userId, [{serial:'屏幕序号'}]>
-			HashMap<Long, JSONArray> result = new HashMap<Long, JSONArray>();
-			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
-			List<CommandGroupMemberPO> members = group.getMembers();
-			
-			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
-			chairmanMember.getUserId();
-			group.getAvtpl();
-			
+		GroupType groupType = group.getType();
+		if(group.getStatus().equals(GroupStatus.STOP)){
+			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+		}
+		
+		//<userId, [{serial:'屏幕序号'}]>
+		HashMap<Long, JSONArray> result = new HashMap<Long, JSONArray>();
+		List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
+		List<CommandGroupMemberPO> members = group.getMembers();
+		
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		chairmanMember.getUserId();
+		group.getAvtpl();
+		List<GroupBO> groupBOs = new ArrayList<GroupBO>();
+		List<CommandGroupForwardDemandPO> needStopDemands = new ArrayList<CommandGroupForwardDemandPO>();
+		
 //			List<CommandGroupForwardDemandPO> stopDemands = commandCommonUtil.queryForwardDemandsByIds(demands, demandIds);
-			List<CommandGroupUserPlayerPO> allNeedClosePlayers = new ArrayList<CommandGroupUserPlayerPO>();
-			List<CommandGroupUserPlayerPO> playFilePlayers = new ArrayList<CommandGroupUserPlayerPO>();			
-			for(CommandGroupForwardDemandPO demand : stopDemands){
-				Long dstMemberId = demand.getDstMemberId();
-				CommandGroupMemberPO dstMember = commandCommonUtil.queryMemberById(members, dstMemberId);
-				List<CommandGroupUserPlayerPO> needFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
-				List<CommandGroupUserPlayerPO> players = dstMember.getPlayers();
-				for(CommandGroupUserPlayerPO player : players){
-					if(player.getBundleId().equals(demand.getDstVideoBundleId())){
-						if(player.playingFile()){
-							playFilePlayers.add(player);
-						}
-						player.setFree();
-						needFreePlayers.add(player);
-						JSONObject split = new JSONObject();
-						split.put("serial", player.getLocationIndex());
-						
-						JSONArray dstMemberSplits = result.get(dstMember.getUserId());
-						if(dstMemberSplits != null){
-							dstMemberSplits.add(split);
-						}else{
-							JSONArray splits = new JSONArray();
-							splits.add(split);
-							result.put(dstMember.getUserId(), splits);
-						}
-						
-						break;
+		List<CommandGroupUserPlayerPO> allNeedClosePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+		List<CommandGroupUserPlayerPO> playFilePlayers = new ArrayList<CommandGroupUserPlayerPO>();			
+		for(CommandGroupForwardDemandPO demand : stopDemands){
+
+			needStopDemands.add(demand);
+			Long dstMemberId = demand.getDstMemberId();
+			CommandGroupMemberPO dstMember = commandCommonUtil.queryMemberById(members, dstMemberId);
+			
+			//级联，这里仅生成groupBO
+			if(cascade){
+				List<CommandGroupMemberPO> dstMembers = new ArrayListWrapper<CommandGroupMemberPO>().add(dstMember).getList();
+				if(GroupType.BASIC.equals(groupType)){
+					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())){
+						GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
+						groupBOs.add(groupBO);
+					}
+				}else if(GroupType.MEETING.equals(groupType)){
+					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())){
+						GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
+						groupBOs.add(groupBO);
 					}
 				}
-				players.remove(needFreePlayers);
-				allNeedClosePlayers.addAll(needFreePlayers);
-				demand.clearDst();
-				demand.setExecuteStatus(ForwardDemandStatus.UNDONE);
 			}
 			
-			demands.removeAll(stopDemands);
-			commandGroupDao.save(group);
+			if(OriginType.OUTER.equals(dstMember.getOriginType())){
+				continue;
+			}
 			
-			//发协议
-			CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
-			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
-			LogicBO logic = commandBasicServiceImpl.closeBundle(null, stopDemands, allNeedClosePlayers, codec, chairmanMember.getUserNum());
-			LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(playFilePlayers, null, null, allNeedClosePlayers, codec, group.getUserId());
-			logic.merge(logicCastDevice);
-			executeBusiness.execute(logic, group.getName() + " 会议停止多个转发");
-			
-			return result;			
+			List<CommandGroupUserPlayerPO> needFreePlayers = new ArrayList<CommandGroupUserPlayerPO>();
+			List<CommandGroupUserPlayerPO> players = dstMember.getPlayers();
+			for(CommandGroupUserPlayerPO player : players){
+				if(player.getBundleId().equals(demand.getDstVideoBundleId())){
+					if(player.playingFile()){
+						playFilePlayers.add(player);
+					}
+					player.setFree();
+					needFreePlayers.add(player);
+					JSONObject split = new JSONObject();
+					split.put("serial", player.getLocationIndex());
+					
+					JSONArray dstMemberSplits = result.get(dstMember.getUserId());
+					if(dstMemberSplits != null){
+						dstMemberSplits.add(split);
+					}else{
+						JSONArray splits = new JSONArray();
+						splits.add(split);
+						result.put(dstMember.getUserId(), splits);
+					}
+					
+					break;
+				}
+			}
+			players.remove(needFreePlayers);
+			allNeedClosePlayers.addAll(needFreePlayers);
+//			demand.clearDst();
+//			demand.setExecuteStatus(ForwardDemandStatus.UNDONE);
+		}
+		
+		demands.removeAll(stopDemands);
+		commandGroupDao.save(group);
+		
+		//发协议
+		CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
+		CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
+		LogicBO logic = commandBasicServiceImpl.closeBundle(null, needStopDemands, allNeedClosePlayers, codec, chairmanMember.getUserNum());
+		LogicBO logicCastDevice = commandCastServiceImpl.closeBundleCastDevice(playFilePlayers, null, null, allNeedClosePlayers, codec, group.getUserId());
+		logic.merge(logicCastDevice);
+		executeBusiness.execute(logic, group.getName() + " 会议停止多个转发，个数：" + needStopDemands.size());
+		
+		//级联，循环groupBOs发多个协议
+		if(cascade){//TODO:
+			for(GroupBO groupBO : groupBOs){
+				if(GroupType.BASIC.equals(groupType)){
+					commandCascadeService.stopDeviceForward(groupBO);
+				}else if(GroupType.MEETING.equals(groupType)){
+					conferenceCascadeService.stopDeviceForward(groupBO);
+				}
+			}
+		}
+		
+		return result;			
 //		}
 	}
 }

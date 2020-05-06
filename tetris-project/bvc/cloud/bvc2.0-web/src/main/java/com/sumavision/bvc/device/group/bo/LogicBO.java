@@ -1162,6 +1162,15 @@ public class LogicBO {
 		if(this.getRecordDel() == null) this.setRecordDel(new ArrayList<RecordSetBO>());
 		if(from.getRecordDel()!=null && from.getRecordDel().size()>0) this.getRecordDel().addAll(from.getRecordDel());
 		
+		if(this.getMediaPushSet() == null) this.setMediaPushSet(new ArrayList<MediaPushSetBO>());
+		if(from.getMediaPushSet()!=null && from.getMediaPushSet().size()>0) this.getMediaPushSet().addAll(from.getMediaPushSet());
+		
+		if(this.getMediaPushDel() == null) this.setMediaPushDel(new ArrayList<MediaPushSetBO>());
+		if(from.getMediaPushDel()!=null && from.getMediaPushDel().size()>0) this.getMediaPushDel().addAll(from.getMediaPushDel());
+		
+		if(this.getPublishStreamSet() == null) this.setPublishStreamSet(new ArrayList<PublishStreamSetBO>());
+		if(from.getPublishStreamSet()!=null && from.getPublishStreamSet().size()>0) this.getPublishStreamSet().addAll(from.getPublishStreamSet());
+		
 		if(this.getIncoming_call_request() == null) this.setIncoming_call_request(new ArrayList<CallBO>());
 		if(from.getIncoming_call_request()!=null && from.getIncoming_call_request().size()>0) this.getIncoming_call_request().addAll(from.getIncoming_call_request());
 		

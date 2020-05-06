@@ -17,6 +17,8 @@ import com.sumavision.bvc.device.monitor.subtitle.MonitorSubtitleFont;
 import com.sumavision.bvc.device.monitor.subtitle.MonitorSubtitlePO;
 import com.sumavision.bvc.device.monitor.subtitle.MonitorSubtitleQuery;
 import com.sumavision.bvc.device.monitor.subtitle.MonitorSubtitleService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -147,6 +149,8 @@ public class MonitorSubtitleController {
 			String color,
 			HttpServletRequest request) throws Exception{
 		
+		if(name==null || "".equals(name)) throw new BaseException(StatusCode.FORBIDDEN, "名称不能为空！");
+		
 		UserVO user = userUtils.getUserFromSession(request);
 		
 		MonitorSubtitlePO subtitle = monitorSubtitleService.add(name, content, font, height, color, user.getId(), user.getName());
@@ -199,6 +203,8 @@ public class MonitorSubtitleController {
 			Integer height,
 			String color,
 			HttpServletRequest request) throws Exception{
+		
+		if(name==null || "".equals(name)) throw new BaseException(StatusCode.FORBIDDEN, "名称不能为空！");
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		

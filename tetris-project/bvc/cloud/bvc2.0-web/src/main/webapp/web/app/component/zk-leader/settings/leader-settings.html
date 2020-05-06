@@ -1,5 +1,8 @@
 <div class="zk-settings" style="width:100%; height:100%; position:relative;">
-    <div class="title">系统设置</div>
+    <div class="win-header">
+        <span class="win-header-title">系统设置</span>
+        <span class="win-header-close" @click="closeMask"><span class="el-icon-close"></span></span>
+    </div>
     <div class="content">
         <el-tabs tab-position="left" style="height:100%;">
             <el-tab-pane label="呼叫设置">
@@ -90,8 +93,5 @@
                 </div>
             </el-tab-pane>
         </el-tabs>
-    </div>
-    <div class="close" @click="closeMask">
-        <img src="../../../../../images/zk-leader/close.png" alt="">
     </div>
 </div>

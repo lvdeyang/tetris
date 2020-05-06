@@ -130,9 +130,7 @@
                 <!--修改指挥名称 只有主席才能修改名称，也就是指挥创建者和当前用户的Id一致时才能修改-->
                 <div :class="'option-button'+(buttons.addMember?'':' disable')" title="修改指挥名称"
                      @click="handleResetName('edit',1)">
-                    <span style="position: absolute;top: 40px;font-size: 8px;color: #fff;left: 4px;">修改指挥名称</span>
-                    <span class="icon-edit"
-                          style="position: absolute;left: 13px;font-size: 33px;color: #fff;top: 8px;"></span>
+                    <img :src="baseUrl+'images/zk-leader/able/commandModify.png'" alt="修改指挥名称"/>
                 </div>
                 <div :class="'option-button '+(buttons.cooperativeCommand?'':'disable')" title="协同指挥"
                      @click="cooperativeCommand('指挥')">
@@ -188,9 +186,7 @@
                     <img :src="baseUrl+'images/zk-leader/able/releaseSubtitle.png'"/>
                 </div>
                 <div class="option-button" @click="currentGroupChange(group.currentId)">
-                    <span style="position: absolute;top: 40px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
-                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"
-                               style="font-size: 36px;color: rgb(255, 255, 255);position: absolute;top: -5px;left: 10px;"></el-button>
+                    <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
             </div>
 
@@ -389,54 +385,39 @@
                 <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="添加会议" @click="addCommand(2)">
                     <img :src="baseUrl+'images/zk-leader/able/huiyi/addCommand.png'"/>
                 </div>
-                <!--修改指挥名称 只有主席才能修改名称，也就是指挥创建者和当前用户的Id一致时才能修改-->
-                <div :class="'customIcon'+(buttons.removeCommand?'':' disable')" title="修改指挥名称"
-                     @click="handleResetName('edit')">
-                    <span style="position: absolute;top: 15px;font-size: 8px;color: #fff;left: 7px;">修改指挥名称</span>
-                    <el-button type="text" class="button-refresh" icon=" icon-edit" size="small"
-                               style="position: absolute;left: 14px"></el-button>
-                </div>
-
                 <div class="customIcon" v-if="currentTab==3" @click="playRecordFile">
-                    <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 10px;">录制文件</span>
-                    <el-button type="text" class="button-refresh" size="small" icon="icon-camera"></el-button>
+                    <img :src="baseUrl+'images/zk-leader/able/recordingFile.png'" alt="录制文件"/>
                 </div>
 
                 <div class="customIcon" v-else-if="currentTab==0" @click="refreshInstitution">
-                    <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
-                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
+                    <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
 
                 <div v-else-if="currentTab==2">
                     <div class="customIcon" @click="openOutFile">
-                        <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 10px;">外部文件</span>
-                        <el-button type="text" size="small" icon="el-icon-printer"></el-button>
+                        <img :src="baseUrl+'images/zk-leader/able/externalFileManagement.png'"/>
                     </div>
 
                     <div class="customIcon" @click="fileImport">
-                        <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 10px;">文件导入</span>
-                        <el-button type="text" size="small" icon="el-icon-upload"></el-button>
+                        <img :src="baseUrl+'images/zk-leader/able/fileImport.png'"/>
                     </div>
 
                     <div class="customIcon" @click="refreshFile">
-                        <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
-                        <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
+                        <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                     </div>
                 </div>
 
                 <div class="customIcon" v-else="currentTab==1" @click="refreshDevice">
-                    <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
-                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
+                    <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
                 <div class="customIcon" v-else="currentTab==3" @click="refreshRecord">
-                    <span style="position: absolute;top: 15px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
-                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"></el-button>
+                    <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
             </div>
         </div>
 
         <!--第三部分的菜单-->
-        <div class="thirdMenu" v-if="switchStatus3">
+        <div class="thirdMenu" v-show="switchStatus3">
             <!--树形菜单-->
             <div class="meetList">
                 <div class="commandBtn" v-if="meet.currentId">
@@ -543,7 +524,7 @@
                 </div>
             </div>
 
-            <div class="btnContainer">
+            <div class="btnContainer" v-if="meet.currentId && currentTab=='-1' && differentiate==2">
                 <div :class="'option-button '+(buttons.addMember?'':'disable')" title="添加成员" @click="addCommandMember">
                     <img v-if="buttons.addMember" :src="baseUrl+'images/zk-leader/able/addMember.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/addMember.png'"/>
@@ -552,6 +533,11 @@
                      @click="removeCommandMember">
                     <img v-if="buttons.removeMember" :src="baseUrl+'images/zk-leader/able/removeMember.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/removeMember.png'"/>
+                </div>
+                <!--修改指挥名称 只有主席才能修改名称，也就是指挥创建者和当前用户的Id一致时才能修改-->
+                <div :class="'option-button'+(buttons.addCommand?'':' disable')" title="修改会议名称"
+                     @click="handleResetName('edit',2)">
+                    <img :src="baseUrl+'images/zk-leader/able/meetingModify.png'" alt="修改会议名称"/>
                 </div>
                 <div :class="'option-button '+(buttons.meetBtn?'':'disable')" title="指定发言" @click="assignSpeak">
                     <img v-if="buttons.meetBtn" :src="baseUrl+'images/zk-leader/appointSpeak.png'"/>
@@ -618,9 +604,7 @@
                 </div>
                 <div class="option-button" v-if="meet.current.creator==user.id" title="刷新"
                      @click="currentGroupChange(meet.currentId)">
-                    <span style="position: absolute;top: 40px;font-size: 10px;color: #fff;left: 20px;">刷新</span>
-                    <el-button type="text" class="button-refresh" size="small" icon="el-icon-refresh"
-                               style="font-size: 36px;color: rgb(255, 255, 255);position: absolute;top: -5px;left: 10px;"></el-button>
+                    <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
             </div>
         </div>
@@ -654,6 +638,10 @@
                 <i class="menuIcon icon-camera-retro"></i>
                 <span>录制</span>
             </div>
+            <div :class="'menu ' + (contextMenu.download?'':'disable')" @click="downloadFragment">
+                <i class="menuIcon icon-arrow-down"></i>
+                下载
+            </div>
             <div :class="'menu ' + (contextMenu.dedicatedCommand?'':'disable')" @click="secretCommand">
                 <i class="menuIcon  icon-user-md"></i>
                 专向指挥
@@ -683,9 +671,10 @@
             width="350px">
         <el-input v-model="dialog.resetName.name" placeholder="起个名吧" style="width:100%;"></el-input>
         <span slot="footer" class="dialog-footer">
-            <el-button size="medium" @click="resetNameClose">取消</el-button>
-            <el-button v-if="dialogTitle.indexOf('指挥')" size="medium" type="primary"
-                       @click="resetNameCommit">确定</el-button>
+            <div class="btn-dialog-cancel" @click="resetNameClose">取 消</div>
+            <div class="btn-dialog-submit" v-if="dialogTitle.indexOf('指挥')>-1" @click="resetNameCommit">确 定</div>
+            <div class="btn-dialog-submit" v-if="dialogTitle.indexOf('会议')>-1" @click="resetNameCommit">确 定</div>
+            <br style="clear:both;"/>
         </span>
     </el-dialog>
 

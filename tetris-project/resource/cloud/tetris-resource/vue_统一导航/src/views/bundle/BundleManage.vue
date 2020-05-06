@@ -109,19 +109,19 @@
             <el-table-column label="操作" width="250">
                 <template slot-scope="scope">
                     <el-button type="text" @click="handleDetail(scope.row)" size="small">详情</el-button>
-                    <el-button type="text" @click="handleModify(scope.row)" size="small">修改</el-button>
-                    <el-button type="text" @click="handleSetLayerId(scope.row)" size="small">设置接入</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleModify(scope.row)" size="small">修改</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleSetLayerId(scope.row)" size="small">设置接入</el-button>
                     <!--<el-button type="text" v-if="scope.row.onlineStatus=='ONLINE'" @click="handleLogout(scope.row)" size="small">踢出</el-button>-->
-                    <el-button type="text" @click="handleClear(scope.row)" size="small">重置</el-button>
-                    <el-button type="text" @click="handleDelete(scope.row)" size="small">删除</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleClear(scope.row)" size="small">重置</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="handleDelete(scope.row)" size="small">删除</el-button>
                 </template>
             </el-table-column>
 
             <el-table-column label="能力" width="150">
                 <template slot-scope="scope">
                     <!--<el-button type="text" v-if="scope.row.bundleType!='VenusTerminal'" @click="abilityConfig(scope.row)" size="small">配置</el-button>-->
-                    <el-button type="text" @click="abilityConfig(scope.row)" size="small">配置</el-button>
-                    <el-button type="text" @click="abilityDetail(scope.row)" size="small">通道信息</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="abilityConfig(scope.row)" size="small">配置</el-button>
+                    <el-button type="text" v-if="scope.row.sourceType!='EXTERNAL'" @click="abilityDetail(scope.row)" size="small">通道信息</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -129,7 +129,7 @@
         <!--工具条-->
         <el-col :span="24" class="toolbar">
           <el-input size="small" v-model="filters.countPerPage" style="float: right;margin-right: 30px;width:200px;" placeholder="单页显示数量,默认20" @change="pageChange"></el-input>
-          <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :page-size="countPerPage" :total="total" style="float:right;">
+          <el-pagination layout="prev, pager, next" @current-change="handleCurrentPageChange" :current-page="pageNum" :page-size="countPerPage" :total="total" style="float:right;">
             </el-pagination>
         </el-col>
 
@@ -318,6 +318,11 @@
             if (/^[1-9]+[0-9]*]*$/.test(this.filters.countPerPage)) {
               this.countPerPage = parseInt(this.filters.countPerPage)
             }
+
+            if(this.countPerPage * (pageNum - 1) > this.total){
+              pageNum = Math.ceil(this.total / this.countPerPage);
+            }
+
             let param = {
                 deviceModel: this.filters.deviceModel,
                 keyword: this.filters.keyword,
@@ -819,6 +824,7 @@
 
                     this.getResources(1);
                 }
+                this.confirmSyncToLdapVisible = false;
             });
 
             this.resourceTableLoading = false;

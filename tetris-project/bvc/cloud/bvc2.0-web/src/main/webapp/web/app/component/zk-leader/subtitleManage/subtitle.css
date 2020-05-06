@@ -1,14 +1,79 @@
+body{
+    background-color:#ffffff00;
+}
+
 .subtitle {
-     width: 100%;
-     height: 100%;
-     background-color: #206ec366;
-     overflow: hidden;
+    width:100%;
+    height:100%;
+    position:relative;
+    background-color: #0F1537;
+    border:1px solid #2c5282;
+    box-sizing:border-box;
+    border-radius:4px;
  }
+
+.subtitle .win-header{
+    height:40px;
+    background-color:#3668a9;
+    border-radius:4px 4px 0 0;
+}
+
+.subtitle .win-header .win-header-title{
+    float:left;
+    color:#fff;
+    line-height:40px;
+    padding:0 10px;
+}
+
+.subtitle .win-header .win-header-close{
+    float:right;
+    color:#fff;
+    line-height:40px;
+    padding:0 10px;
+    font-size:20px;
+    cursor:pointer;
+}
+
+.subtitle .win-body{
+    position:absolute;
+    left:0;
+    top:40px;
+    padding:10px;
+    right:0;
+    bottom:0;
+    background-color:#0f2a4d;
+    border-radius:0 0 4px 4px;
+}
+
+.btn-add-subtitle,
+.btn-dialog-cancel,
+.btn-dialog-submit,
+.btn-dialog-edit{
+    float:right;
+    color:#fff;
+    background-color:#2562f7;
+    padding:5px 14px;
+    border-radius:13px;
+    cursor:pointer;
+    display:inline-block;
+    font-size:12px;
+}
+
+.btn-dialog-cancel,
+.btn-dialog-submit,
+.btn-dialog-edit{
+    padding:7px 18px;
+}
+
+.btn-dialog-cancel{
+    margin-left:14px;
+    background-color:#204a6b;
+}
 
 /* 更改table表格的样式 */
 .el-table,
 .el-table__expanded-cell {
-    background-color: #234c4a87;
+    background-color: transparent;
     color: #c2f9ff;
 }
 
@@ -18,32 +83,77 @@
 
 .el-table th,
 .el-table tr {
-    background-color: #3c628836;
+    background-color: transparent;
 }
 
-.el-table--enable-row-hover .el-table__body tr:hover>td {
-    background-color: #34675d;
+.subtitle .el-table td,
+.subtitle .el-table th.is-leaf{
+    border-bottom: 1px solid #11366b;
 }
 
+.subtitle .el-table--border::after,
+.subtitle .el-table--group::after,
+.subtitle .el-table::before{
+    background-color: #11366b;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover td{
+    background-color:#061f3e;
+}
+
+.subtitle .el-table--enable-row-hover .el-table__body tr:hover {
+    border:1px solid #0595b9;
+}
+
+.subtitle .el-pagination.is-background .el-pager li:not(.disabled).active{
+    background-color: #2562f7;
+}
+
+.subtitle .el-pagination.is-background .btn-next,
+.subtitle .el-pagination.is-background .btn-prev,
+.subtitle .el-pagination.is-background .el-pager li{
+    background-color:#ffffff00;
+}
+
+.subtitle .el-button--text{
+    color:#72b7fb;
+}
 
 /* 更改输入框背景色 */
 .el-input__inner {
-    background-color: #00000073;
+    background-color: #0b2d5a;
+    border:1px solid #17407e;
     color: #fff;
 }
 
+.el-input-number__decrease{
+    border-right:1px solid #17407e;
+}
+
+.el-input-number__increase{
+    border-left: 1px solid #17407e;
+}
+
+.el-textarea__inner{
+    background-color: #0b2d5a;
+    border:1px solid #17407e;
+    color: #fff;
+}
 
 /*更改对话框样式*/
-.el-dialog{
-    background: linear-gradient(to right,#4ca6af,#0F9EBE,#1986B1,#155592);
+.subtitle .el-dialog{
+    width:500px;
+    background-color: #0F1537;
+    border:1px solid #2c5282;
+    box-sizing:border-box;
 }
 .el-form-item__label {
     font-size: 16px;
-    color: #2b3c5f;
+    color: #fff;
 }
 
 .el-dialog__title {
-    color: #384256;
+    color: #fff;
     font-weight: 600;
 }
 .el-textarea__inner,.el-input-number__decrease, .el-input-number__increase{

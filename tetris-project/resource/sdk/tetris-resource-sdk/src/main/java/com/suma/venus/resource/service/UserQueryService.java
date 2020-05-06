@@ -239,7 +239,8 @@ public class UserQueryService {
 	 */
 	public UserBO queryUserByUserId(Long id, TerminalType terminalType) throws Exception{
 		
-		String name = terminalType == null?null: terminalType.getName();
+		if(terminalType == null) terminalType = TerminalType.QT_ZK;
+		String name = terminalType.getName();
 		
 		UserVO user = userQuery.queryUserById(id, name);
 		BundlePO encoder = bundleDao.findByUserIdAndDeviceModel(user.getId(), "encoder");
@@ -270,7 +271,8 @@ public class UserQueryService {
 	 */
 	public List<UserBO> queryUsersByUserIds(List<Long> ids, TerminalType terminalType) throws Exception{
 		
-		String name = terminalType == null?null: terminalType.getName();
+		if(terminalType == null) terminalType = TerminalType.QT_ZK;
+		String name = terminalType.getName();
 		
 		List<UserVO> users = userQuery.findByIdInAndType(ids, name);
 		
@@ -572,6 +574,7 @@ public class UserQueryService {
 		toBindChecks.add(userno + "-w");
 		toBindChecks.add(userno + "-hj");
 		toBindChecks.add(userno + "-zk");
+		toBindChecks.add(userno + "-hy");
 		
 		for(String roleId: roleIds){
 			RoleAndResourceIdBO bo = new RoleAndResourceIdBO();

@@ -1,6 +1,7 @@
-html,body{
+html, body {
     background: transparent;
 }
+
 body, div, p {
     margin: 0;
     padding: 0;
@@ -11,48 +12,47 @@ body, div, p {
     height: 100%;
     background-color: #000;
 }
-.title {
-    position: absolute;
-    top: 12.5%;
-    left: 50%;
-    margin-left: -55px;
-    font-size: 18px;
-    font-weight: bold;
+
+.win-header {
+    height: 40px;
+    background-color: #3668a9;
+    border-radius: 4px 4px 0 0;
+}
+
+.win-header .win-header-title {
+    float: left;
     color: #fff;
-    text-align: center;
-    z-index: 1;
+    line-height: 40px;
+    padding: 0 10px;
+}
+
+.win-header .win-header-close {
+    float: right;
+    color: #fff;
+    line-height: 40px;
+    padding: 0 10px;
+    font-size: 20px;
+    cursor: pointer;
 }
 
 .pop {
     position: absolute;
-    /*padding-top: 110px;*/
-    /*top: 120px;*/
-    /*left: 339px;*/
-    /*width: 63.54%;*/
-    /*height: 641px;*/
-    height:700px;
-    padding-top: 80px;
-    top: 8.07%;
-    left: 17.66%;
-    width: 63.54%;
-    /*height: 59.35%;*/
-    background: url("../../../../../../images/zk-leader/popMsg.png") no-repeat center;
-    background-size: 100% 100%;
+    padding-top: 20px;
+    top: 40px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #0F2A4D;
     overflow: hidden;
-    padding-left: 80px;
-    padding-right: 85px;
     box-sizing: border-box;
 }
+
 /* 禁止横向滚动条 */
- .el-scrollbar__wrap{
+.el-scrollbar__wrap {
     overflow-x: hidden;
 }
 
-
 .msg {
-    /*margin: 15px 162px;*/
-    /*padding: 20px 30px;*/
-    /*margin: 0.79% 8.43%;*/
     margin: 0.79% 0;
     padding: 1.04% 1.56%;
     background-color: #1e2343;
@@ -110,22 +110,6 @@ body, div, p {
     }
 }
 
-.closeBtn{
-    position: absolute;
-    left: 47.92%;
-    top:86.11%;
-    /*bottom: 8.33%;*/
-    /*height: 5.56%;*/
-    /*width: 3.125%;*/
-    width: 60px;
-    height: 60px;
-}
-.closeBtn img{
-    display: block;
-    width: 100%;
-    height: 100%;
-}
-
 .el-tabs__item {
     padding: 5px 45px;
     height: 35px;
@@ -135,10 +119,12 @@ body, div, p {
     font-weight: bold;
     text-align: center;
 }
-.el-tabs__item.is-active{
+
+.el-tabs__item.is-active {
     color: #00e9ff;
 }
-.el-tabs__item:hover{
+
+.el-tabs__item:hover {
     color: #00e9ff;
 }
 
@@ -179,15 +165,4 @@ body, div, p {
 
 .el-tabs--card > .el-tabs__header .el-tabs__item.is-active, .el-tabs--card > .el-tabs__header {
     border-bottom: none;
-}
-
-.pop .el-pager li,
-.pop .btn-prev,
-.pop .btn-next{
-    background-color: rgba(0,0,0,0) !important;
-}
-
-.pop .el-pagination .btn-next .el-icon, .el-pagination .btn-prev .el-icon,
-.pop .el-pager li{
-    font-size:22px;
 }

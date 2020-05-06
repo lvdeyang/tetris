@@ -52,6 +52,7 @@ import com.suma.venus.resource.dao.ChannelTemplateDao;
 import com.suma.venus.resource.dao.ExtraInfoDao;
 import com.suma.venus.resource.dao.FolderDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
+import com.suma.venus.resource.dao.LianwangPassbyDAO;
 import com.suma.venus.resource.dao.LockBundleParamDao;
 import com.suma.venus.resource.dao.LockChannelParamDao;
 import com.suma.venus.resource.dao.LockScreenParamDao;
@@ -70,6 +71,7 @@ import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ExtraInfoPO;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
+import com.suma.venus.resource.pojo.LianwangPassbyPO;
 import com.suma.venus.resource.pojo.LockBundleParamPO;
 import com.suma.venus.resource.pojo.LockChannelParamPO;
 import com.suma.venus.resource.pojo.LockScreenParamPO;
@@ -171,6 +173,9 @@ public class ResourceService {
 	
 	@Autowired
 	private RolePrivilegeMapDAO rolePrivilegeMapDao;
+	
+	@Autowired
+	private LianwangPassbyDAO lianwangPassbyDao;
 
 	/** 通过userId查询具有权限的user */
 	public List<UserBO> queryUserresByUserId(Long userId, TerminalType terminalType) {
@@ -194,7 +199,7 @@ public class ResourceService {
 					// 绑定的用户资源的resouceCode格式:userNo-r(录制)/userNo-w(点播)/userNo-hj(呼叫)
 					if (code.endsWith("-r") || code.endsWith("-w")) {
 						userNoSet.add(code.substring(0, code.length() - 2));
-					} else if (code.endsWith("-hj") || code.endsWith("-zk")) {
+					} else if (code.endsWith("-hj") || code.endsWith("-zk") || code.endsWith("-hy")) {
 						userNoSet.add(code.substring(0, code.length() - 3));
 					} else {
 						userNoSet.add(code);
@@ -279,8 +284,9 @@ public class ResourceService {
 	/** 根据用户id，目标用户id和业务类型判断用户对目标用户是否有权限 **/
 	public boolean hasPrivilegeOfUser(Long userId, Long dstUserId, BUSINESS_OPR_TYPE businessType) {
 		try {
+			if(userId.equals(dstUserId)) return true;
 //			UserBO dstUserBO = userFeign.queryUserInfoById(dstUserId).get("user");
-			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId, null);
+			UserBO dstUserBO = userQueryService.queryUserByUserId(dstUserId, TerminalType.QT_ZK);
 			String code = null;// 权限码
 			switch (businessType) {
 			case DIANBO:// 点播
@@ -294,6 +300,9 @@ public class ResourceService {
 				break;
 			case ZK:// 指挥
 				code = dstUserBO.getUserNo() + "-zk";
+				break;
+			case HY:// 指挥
+				code = dstUserBO.getUserNo() + "-hy";
 				break;
 			default:
 				return false;
@@ -337,12 +346,18 @@ public class ResourceService {
 		case ZK:// 指挥
 			suffix = "-zk";
 			break;
+		case HY:// 会议
+			suffix = "-hy";
+			break;
 		default:
 			return false;
 		}
+		//所有需要校验的权限码
 		List<String> codes = new ArrayList<String>();
 		for(UserBO dstUser:dstUserBOs){
-			codes.add(new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString());
+			if(!dstUser.getId().equals(userId)){//如果是对自己，就不用add
+				codes.add(new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString());
+			}
 		}
 		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
 		for(String code:codes){
@@ -353,6 +368,43 @@ public class ResourceService {
 			if(!hasPrivilege) return false;
 		}
 		return true;
+	}
+	
+	public UserBO hasNoPrivilegeOfUsers(Long userId, List<Long> dstUserIds, BUSINESS_OPR_TYPE businessType) throws Exception{
+		List<UserBO> dstUserBOs = userQueryService.queryUsersByUserIds(dstUserIds, null);
+		if(dstUserBOs==null || dstUserBOs.size()<=0) return null;
+		String suffix = null;
+		switch (businessType) {
+		case DIANBO:// 点播
+			suffix = "-w";
+			break;
+		case RECORD:// 录制
+			suffix = "-r";
+			break;
+		case CALL:// 呼叫
+			suffix = "-hj";
+			break;
+		case ZK:// 指挥
+			suffix = "-zk";
+			break;
+		default:
+			return null;
+		}
+		ResourceIdListBO bo = userQueryService.queryUserPrivilege(userId);
+		for(UserBO dstUser:dstUserBOs){
+			if(dstUser.getId().equals(userId)){
+				continue;//如果是对自己，则不用校验
+			}
+			String code = new StringBufferWrapper().append(dstUser.getUserNo()).append(suffix).toString();
+			boolean hasPrivilege = false;
+			if (bo.getResourceCodes().contains(code)){
+				hasPrivilege = true;
+			}
+			if(!hasPrivilege){
+				return dstUser;
+			}
+		}
+		return null;
 	}
 
 	/** 通过userId查询bundles */
@@ -1038,10 +1090,20 @@ public class ResourceService {
 			bundleInfo.setScreens(createScreensOfBundleInfo(bundlePO.getBundleId()));
 
 			// 设置pass_by_str
+			JSONObject passby = new JSONObject();
 			LockBundleParamPO lockBundleParamPO = lockBundleParamDao.findByBundleId(bundleId);
 			if (null != lockBundleParamPO) {
-				bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
+				passby = JSONObject.parseObject(lockBundleParamPO.getPassByStr());
+				//bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
 			}
+			
+			List<LianwangPassbyPO> passbyPOs = lianwangPassbyDao.findUuid(bundleId);
+			if(passbyPOs != null && passbyPOs.size() > 0){
+				for(LianwangPassbyPO passbyPO: passbyPOs){
+					passby.put(passbyPO.getType(), passbyPO.getProtocol());
+				}
+			}
+			bundleInfo.setPass_by_str(passby.toJSONString());
 
 			// bundle_extra_info
 			List<ExtraInfoPO> extraInfos = extraInfoService.findByBundleId(bundleId);
@@ -1117,6 +1179,7 @@ public class ResourceService {
 
 		try {
 			List<BundlePO> bundlePOList = bundleDao.findInBundleIds(bundleIdList);
+			List<LianwangPassbyPO> allPassby = lianwangPassbyDao.findByUuidIn(bundleIdList);
 
 			if (CollectionUtils.isEmpty(bundlePOList)) {
 				return null;
@@ -1178,10 +1241,20 @@ public class ResourceService {
 				bundleInfo.setScreens(screensOfBundleInfoMap.get(bundlePO.getBundleId()));
 
 				// 设置pass_by_str
+				JSONObject passby = new JSONObject();
 				LockBundleParamPO lockBundleParamPO = lockBundleParamPOMap.get(bundlePO.getBundleId());
 				if (null != lockBundleParamPO) {
-					bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
+					passby = JSONObject.parseObject(lockBundleParamPO.getPassByStr());
+					//bundleInfo.setPass_by_str(lockBundleParamPO.getPassByStr());
 				}
+				
+				List<LianwangPassbyPO> passbyPOs = queryByUuid(allPassby, bundlePO.getBundleId());
+				if(passbyPOs != null && passbyPOs.size() > 0){
+					for(LianwangPassbyPO passbyPO: passbyPOs){
+						passby.put(passbyPO.getType(), passbyPO.getProtocol());
+					}
+				}
+				bundleInfo.setPass_by_str(passby.toJSONString());
 
 				// bundle_extra_info
 				List<ExtraInfoPO> extraInfos = extraInfoListMap.get(bundlePO.getBundleId());
@@ -2145,6 +2218,29 @@ public class ResourceService {
 		channelBody.setBase_type(channelTemplate.getBaseType());
 		channelBody.setExtern_type(channelTemplate.getExternType());
 		return channelBody;
+	}
+	
+	/**
+	 * 根据uuid标识查询passby<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月6日 下午1:17:34
+	 * @param List<LianwangPassbyPO> all 所有passby
+	 * @param String uuid 业务标识
+	 * @return List<LianwangPassbyPO> 标识所属passby
+	 */
+	private List<LianwangPassbyPO> queryByUuid(List<LianwangPassbyPO> all, String uuid) throws Exception {
+		
+		List<LianwangPassbyPO> passbyPOs = new ArrayList<LianwangPassbyPO>();
+		if(all != null && all.size() > 0){
+			for(LianwangPassbyPO passby: all){
+				if(passby.getUuid().equals(uuid)){
+					passbyPOs.add(passby);
+				}
+			}
+		}
+		
+		return passbyPOs;
 	}
 	
 }

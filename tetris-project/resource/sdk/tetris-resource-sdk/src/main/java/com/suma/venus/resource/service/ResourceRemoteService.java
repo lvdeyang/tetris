@@ -280,6 +280,9 @@ public class ResourceRemoteService {
 			if ("1".equals(userAuthXml.getAuth().subSequence(2, 3))) {
 				roleAndResourceIdBO.getResourceCodes().add(authUserNo + "-zk");
 			}
+			if ("1".equals(userAuthXml.getAuth().subSequence(3, 4))) {
+				roleAndResourceIdBO.getResourceCodes().add(authUserNo + "-hy");
+			}
 			if ("1".equals(userAuthXml.getAuth().subSequence(4, 5))) {
 				roleAndResourceIdBO.getResourceCodes().add(authUserNo + "-r");
 			}
@@ -319,6 +322,7 @@ public class ResourceRemoteService {
 			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(authUserNo + "-r", false));
 			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(authUserNo + "-hj", false));
 			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(authUserNo + "-zk", false));
+			unbindRolePrivilegeBO.getUnbindPrivilege().add(new UnbindResouceBO(authUserNo + "-hy", false));
 		}
 		userService.unbindRolePrivilege(unbindRolePrivilegeBO);
 	}

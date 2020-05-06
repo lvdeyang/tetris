@@ -32,6 +32,8 @@ import com.sumavision.bvc.device.monitor.record.MonitorRecordService;
 import com.sumavision.bvc.device.monitor.record.MonitorRecordStatus;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -312,11 +314,13 @@ public class MonitorRecordController {
 			audioChannelName = encodeAudio.getName();
 		}
 		
+		if(fileName==null || "".equals(fileName)) throw new BaseException(StatusCode.FORBIDDEN, "文件名不能为空！");
+		
 		MonitorRecordPO task = monitorRecordService.addLocalDevice(
 				mode, fileName, startTime, endTime, 
 				videoBundleId, videoBundleName, videoBundleType, videoLayerId, videoChannelId, videoBaseType, videoChannelName, 
 				audioBundleId, audioBundleName, audioBundleType, audioLayerId, audioChannelId, audioBaseType, audioChannelName, 
-				user.getId(), user.getUserno());
+				user.getId(), user.getUserno(), user.getName());
 		
 		return new MonitorRecordTaskVO().set(task);
 	}
@@ -351,7 +355,9 @@ public class MonitorRecordController {
 			throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 0);
 		}
 		
-		MonitorRecordPO task = monitorRecordService.addXtDevice(mode, fileName, startTime, endTime, bundleId, user.getId(), user.getUserno());
+		if(fileName==null || "".equals(fileName)) throw new BaseException(StatusCode.FORBIDDEN, "文件名不能为空！");
+		
+		MonitorRecordPO task = monitorRecordService.addXtDevice(mode, fileName, startTime, endTime, bundleId, user.getId(), user.getUserno(), user.getName());
 		
 		return new MonitorRecordTaskVO().set(task);
 	}
@@ -386,15 +392,17 @@ public class MonitorRecordController {
 			throw new UserHasNoPermissionForBusinessException(BusinessConstants.BUSINESS_OPR_TYPE.RECORD, 1);
 		}
 		
+		if(fileName==null || "".equals(fileName)) throw new BaseException(StatusCode.FORBIDDEN, "文件名不能为空！");
+		
 		UserBO targetUser = userUtils.queryUserById(targetUserId, TerminalType.PC_PLATFORM);
 		
 		MonitorRecordPO task = null;
 		if("ldap".equals(targetUser.getCreater())){
 			//录制xt用户
-			task = monitorRecordService.addXtUser(mode, fileName, startTime, endTime, targetUser, user.getId(), user.getUserno());
+			task = monitorRecordService.addXtUser(mode, fileName, startTime, endTime, targetUser, user.getId(), user.getUserno(), user.getName());
 		}else{
 			//录制本地用户
-			task = monitorRecordService.addLocalUser(mode, fileName, startTime, endTime, targetUser, user.getId(), user.getUserno());
+			task = monitorRecordService.addLocalUser(mode, fileName, startTime, endTime, targetUser, user.getId(), user.getUserno(), user.getName());
 		}
 		
 		return new MonitorRecordTaskVO().set(task);

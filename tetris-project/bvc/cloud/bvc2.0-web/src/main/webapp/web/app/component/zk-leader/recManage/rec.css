@@ -2,14 +2,52 @@
 html,
 body {
   overflow: hidden;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  background: #000
+  background-color:#ffffff00;
 }
 
-.leader-dialog-add-group .el-tabs__content {
-  position: static;
+.leader-dialog-add-group{
+  width:100%;
+  height:100%;
+  position:relative;
+  background-color: #0F1537;
+  border:1px solid #2c5282;
+  box-sizing:border-box;
+  border-radius:4px;
 }
+
+.leader-dialog-add-group .win-header{
+  height:40px;
+  background-color:#3668a9;
+  border-radius:4px 4px 0 0;
+}
+
+.leader-dialog-add-group .win-header .win-header-title{
+  float:left;
+  color:#fff;
+  line-height:40px;
+  padding:0 10px;
+}
+
+.leader-dialog-add-group .win-header .win-header-close{
+  float:right;
+  color:#fff;
+  line-height:40px;
+  padding:0 10px;
+  font-size:20px;
+  cursor:pointer;
+}
+
+.leader-dialog-add-group .win-body{
+  position:absolute;
+  left:0;
+  top:40px;
+  padding:10px;
+  right:0;
+  bottom:0;
+  background-color:#0f2a4d;
+  border-radius:0 0 4px 4px;
+}
+
 .search{
   height: 35px;
   line-height: 35px;
@@ -35,17 +73,47 @@ body {
 
 .el-table th,
 .el-table tr {
-  background-color: #3c628836;
+  background-color: #3c628800;
 }
 
-.el-table--enable-row-hover .el-table__body tr:hover>td {
-  background-color: #34675d;
+.leader-dialog-add-group .el-table td,
+.leader-dialog-add-group .el-table th.is-leaf{
+  border-bottom: 1px solid #11366b;
+}
+
+.leader-dialog-add-group .el-table--border::after,
+.leader-dialog-add-group .el-table--group::after,
+.leader-dialog-add-group .el-table::before{
+  background-color: #11366b;
+}
+
+.el-table--enable-row-hover .el-table__body tr:hover td{
+  background-color:#061f3e;
+}
+
+.leader-dialog-add-group  .el-table--enable-row-hover .el-table__body tr:hover {
+  border:1px solid #0595b9;
+}
+
+.leader-dialog-add-group .el-pagination.is-background .el-pager li:not(.disabled).active{
+  background-color: #2562f7;
+}
+
+.leader-dialog-add-group .el-pagination.is-background .btn-next,
+.leader-dialog-add-group .el-pagination.is-background .btn-prev,
+.leader-dialog-add-group .el-pagination.is-background .el-pager li{
+  background-color:#ffffff00;
+}
+
+.leader-dialog-add-group .el-button--text{
+  color:#72b7fb;
 }
 
 
 /* 更改输入框背景色 */
 .el-input__inner {
-  background-color: #00000073;
+  background-color: #0b2d5a;
+  border:1px solid #17407e;
   color: #fff;
 }
 

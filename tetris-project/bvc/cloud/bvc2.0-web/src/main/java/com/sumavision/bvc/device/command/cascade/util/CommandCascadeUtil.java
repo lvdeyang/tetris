@@ -18,6 +18,7 @@ import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
+import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
@@ -140,8 +141,26 @@ public class CommandCascadeUtil {
 		
 		return groupBO;
 	}
+	
+	/** 静态组信息同步 */
+	public GroupBO updateCommand(CommandGroupPO group){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setSubject(group.getSubject())
+				.setBizname(group.getName())
+				.setCreatorid(chairmanMember.getUserNum())
+				.setTopid(chairmanMember.getUserNum())
+				.setmAddList(mlist)//成员列表
+				.setMlist(mlist);//发送目标成员列表，与成员列表相同
+		
+		return groupBO;
+	}
 
-	//TODO:group.getMembers()需要包含新成员
+	/**全量信息同步。注意：group.getMembers()需要包含新成员 */
 	public GroupBO maddfullCommand(CommandGroupPO group, List<MinfoBO> newNodeMemberInfos){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
@@ -281,7 +300,7 @@ public class CommandCascadeUtil {
 		return groupBO;
 	}
 	
-	/** 还需要支持转发用户 */
+	/** 指挥/会议共用，转发设备，后续还需要支持转发用户 */
 	public GroupBO startCommandDeviceForward(CommandGroupPO group, List<BundlePO> bundlePOs, List<CommandGroupMemberPO> dstMembers) throws Exception{
 		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
@@ -323,6 +342,46 @@ public class CommandCascadeUtil {
 	 * @return
 	 * @throws Exception
 	 */
+	public GroupBO stopCommandDeviceForward(CommandGroupPO group, CommandGroupForwardDemandPO demand, List<CommandGroupMemberPO> dstMembers) throws Exception{
+		List<CommandGroupMemberPO> members = group.getMembers();
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		
+		//目的用户号码列表
+		List<String> mediaForwardMlist = new ArrayList<String>();
+		for(CommandGroupMemberPO dstMember : dstMembers){
+			mediaForwardMlist.add(dstMember.getUserNum());
+		}
+		
+		//源号码列表
+		List<String> medialist = new ArrayList<String>();
+		medialist.add(demand.getSrcCode());
+		
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setMediaForwardMlist(mediaForwardMlist)
+				.setMedialist(medialist)
+				.setMlist(mlist);
+		
+		return groupBO;
+	}
+	
+	/** 还需要支持转发用户，并支持通过号码来查询出转发任务进行删除 */
+	/** 按标准，这是批量接口，但是在bvc里目前只能单个调度 */
+	/**
+	 * 停止调度转发<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月4日 上午11:42:06
+	 * @param group
+	 * @param bundlePOs 这些源要在所有的目的上停止
+	 * @param dstMembers 总共有n*m个任务
+	 * @return
+	 * @throws Exception
+	 */
+	@Deprecated
 	public GroupBO stopCommandDeviceForward(CommandGroupPO group, List<BundlePO> bundlePOs, List<CommandGroupMemberPO> dstMembers) throws Exception{
 		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
@@ -349,7 +408,7 @@ public class CommandCascadeUtil {
 		
 		return groupBO;
 	}
-	
+
 	public GroupBO createMeeting(CommandGroupPO group){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
@@ -449,6 +508,24 @@ public class CommandCascadeUtil {
 				.setOp(chairmanMember.getUserNum())
 				.setMlist(oldMemberInfos)
 				.setmAddList(mAddList);
+		
+		return groupBO;
+	}
+	
+	/** 静态组信息同步。主席/讨论模式在哪里？ */
+	public GroupBO updateMeeting(CommandGroupPO group){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(chairmanMember.getUserNum())
+				.setSubject(group.getSubject())
+				.setBizname(group.getName())
+				.setCreatorid(chairmanMember.getUserNum())
+				.setTopid(chairmanMember.getUserNum())
+				.setmAddList(mlist)//成员列表
+				.setMlist(mlist);//发送目标成员列表，与成员列表相同
 		
 		return groupBO;
 	}
@@ -796,7 +873,8 @@ public class CommandCascadeUtil {
 				boolean finded = false;
 				if(oldUserMaps!=null && oldUserMaps.size()>0){
 					for(FolderUserMap oldMap:oldUserMaps){
-						if(oldMap.getUserNode().equals(newMap.getUserNode())){
+						if((oldMap.getUserNode()==null && newMap.getUserNode()==null)
+								|| (oldMap.getUserNode()!=null && oldMap.getUserNode().equals(newMap.getUserNode()))){
 							finded = true;
 							break;
 						}

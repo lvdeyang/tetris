@@ -36,6 +36,9 @@ public class RecordFileVO extends AbstractBaseVO<RecordFileVO, MonitorRecordPO>{
 	/** 当前文件是否可播放--主要根据是否有接入层id来判断 */
 	private boolean playable;
 	
+	/** 录制人昵称 */
+	private String nickname;
+	
 	public String getFileName() {
 		return fileName;
 	}
@@ -90,6 +93,15 @@ public class RecordFileVO extends AbstractBaseVO<RecordFileVO, MonitorRecordPO>{
 		return this;
 	}
 
+	public String getNickname() {
+		return nickname;
+	}
+
+	public RecordFileVO setNickname(String nickname) {
+		this.nickname = nickname;
+		return this;
+	}
+
 	@Override
 	public RecordFileVO set(MonitorRecordPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -98,7 +110,8 @@ public class RecordFileVO extends AbstractBaseVO<RecordFileVO, MonitorRecordPO>{
 			.setFileName(entity.getFileName())
 			.setPreviewUrl(entity.getPreviewUrl())
 			.setStartTime(DateUtil.format(entity.getStartTime(), DateUtil.dateTimePattern))
-			.setEndTime(entity.getEndTime()==null?DateUtil.format(new Date(), DateUtil.dateTimePattern):DateUtil.format(entity.getEndTime(), DateUtil.dateTimePattern));
+			.setEndTime(entity.getEndTime()==null?DateUtil.format(new Date(), DateUtil.dateTimePattern):DateUtil.format(entity.getEndTime(), DateUtil.dateTimePattern))
+			.setNickname(entity.getNickname());
 		return this;
 	}
 	
@@ -109,9 +122,10 @@ public class RecordFileVO extends AbstractBaseVO<RecordFileVO, MonitorRecordPO>{
 			.setFileName(entity.getFileName())
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(layer==null?"0.0.0.0":layer.getIp()).append(":").append(layer==null?"0":layer.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setStartTime(DateUtil.format(entity.getStartTime(), DateUtil.dateTimePattern))
-			.setEndTime(entity.getEndTime()==null?DateUtil.format(new Date(), DateUtil.dateTimePattern):DateUtil.format(entity.getEndTime(), DateUtil.dateTimePattern))
+			.setEndTime(entity.getEndTime()==null?"录制中...":DateUtil.format(entity.getEndTime(), DateUtil.dateTimePattern))
 			.setRemoveable(entity.getUserId().equals(userId)?(MonitorRecordStatus.STOP.equals(entity.getStatus())?true:false):false)
-			.setPlayable(layer==null?false:true);
+			.setPlayable(layer==null?false:true)
+			.setNickname(entity.getNickname());
 		return this;
 	}
 	
@@ -123,7 +137,8 @@ public class RecordFileVO extends AbstractBaseVO<RecordFileVO, MonitorRecordPO>{
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(layer==null?"0.0.0.0":layer.getIp()).append(":").append(layer==null?"0":layer.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setStartTime(DateUtil.format(entity.getStartTime(), DateUtil.dateTimePattern))
 			.setEndTime(entity.getEndTime()==null?DateUtil.format(new Date(), DateUtil.dateTimePattern):DateUtil.format(entity.getEndTime(), DateUtil.dateTimePattern))
-			.setRemoveable(entity.getUserId().equals(userId)?(MonitorRecordStatus.STOP.equals(entity.getStatus())?true:false):false);
+			.setRemoveable(entity.getUserId().equals(userId)?(MonitorRecordStatus.STOP.equals(entity.getStatus())?true:false):false)
+			.setNickname(entity.getNickname());
 		return this;
 	}
 	

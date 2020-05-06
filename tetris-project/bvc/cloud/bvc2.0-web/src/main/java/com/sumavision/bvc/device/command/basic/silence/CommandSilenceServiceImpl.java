@@ -109,12 +109,12 @@ public class CommandSilenceServiceImpl {
 				}
 				
 				CommandGroupMemberPO dstMember = commandCommonUtil.queryMemberById(members, forward.getDstMemberId());
-				int levelCompare = commandCommonServiceImpl.compareLevelByMember(operateMember, dstMember);
+				int levelCompare = commandCommonServiceImpl.compareLevelByMemberIsChairman(operateMember, dstMember);
 				if(silenceToHigher && levelCompare<0){
 					//对上静默
 					forward.setExecuteStatus(ExecuteStatus.UNDONE);
 					needDelForwards.add(forward);
-				}else if(silenceToLower && levelCompare>=0){
+				}else if(silenceToLower && levelCompare>0){
 					//对下静默
 					forward.setExecuteStatus(ExecuteStatus.UNDONE);
 					needDelForwards.add(forward);
@@ -209,12 +209,12 @@ public class CommandSilenceServiceImpl {
 		
 		//源和目的的上下级关系
 		CommandGroupMemberPO dstMember = commandGroupMemberDao.findOne(forward.getDstMemberId());
-		int levelCompare = commandCommonServiceImpl.compareLevelByMember(srcMember, dstMember);
+		int levelCompare = commandCommonServiceImpl.compareLevelByMemberIsChairman(srcMember, dstMember);
 		
 		if(srcMember.isSilenceToHigher() && levelCompare<0){
 			return true;
 		}
-		if(srcMember.isSilenceToLower() && levelCompare>=0){
+		if(srcMember.isSilenceToLower() && levelCompare>0){
 			return true;
 		}		
 		return false;

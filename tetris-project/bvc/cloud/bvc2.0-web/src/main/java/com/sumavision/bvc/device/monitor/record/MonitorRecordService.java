@@ -118,6 +118,7 @@ public class MonitorRecordService {
 	 * @param String audioChannelName 音频通道名称
 	 * @param Long userId 操作业务用户id
 	 * @param String userno 操作业务用户名称
+	 * @param String nickname 操作业务用户昵称
 	 * @return MonitorRecordPO 录制任务
 	 */
 	public MonitorRecordPO addLocalDevice(
@@ -140,7 +141,8 @@ public class MonitorRecordService {
 			String audioBaseType,
 			String audioChannelName,
 			Long userId,
-			String userno) throws Exception{
+			String userno,
+			String nickname) throws Exception{
 		
 		//参数模板
 		Map<String, Object> result = commons.queryDefaultAvCodec();
@@ -188,6 +190,7 @@ public class MonitorRecordService {
 		task.setType(MonitorRecordType.LOCAL_DEVICE);
 		task.setUserId(userId);
 		task.setUserno(userno);
+		task.setNickname(nickname);
 		task.setAvTplId(targetAvtpl.getId());
 		task.setGearId(targetGear.getId());
 		monitorRecordDao.save(task);
@@ -228,6 +231,7 @@ public class MonitorRecordService {
 	 * @param UserBO user 录制的用户
 	 * @param Long userId 操作业务用户id
 	 * @param String userno 操作业务用户名称
+	 * @param String nickname 录制人昵称
 	 * @return MonitorRecordPO 录制任务
 	 */
 	public MonitorRecordPO addXtDevice(
@@ -237,7 +241,8 @@ public class MonitorRecordService {
 			String endTime,
 			String bundleId,
 			Long userId,
-			String userno) throws Exception{
+			String userno,
+			String nickname) throws Exception{
 		
 		BundlePO bundle = bundleDao.findByBundleId(bundleId);
 		
@@ -291,6 +296,7 @@ public class MonitorRecordService {
 		task.setType(MonitorRecordType.XT_DEVICE);
 		task.setUserId(userId);
 		task.setUserno(userno);
+		task.setNickname(nickname);
 		task.setAvTplId(targetAvtpl.getId());
 		task.setGearId(targetGear.getId());
 		monitorRecordDao.save(task);
@@ -331,6 +337,7 @@ public class MonitorRecordService {
 	 * @param UserBO user 录制的本地用户
 	 * @param Long userId 操作业务的用户id
 	 * @param String userno 操作业务的用户号码
+	 * @param String nickname 操作业务的用户昵称
 	 * @return MonitorRecordPO 录制任务
 	 */
 	public MonitorRecordPO addLocalUser(
@@ -340,7 +347,8 @@ public class MonitorRecordService {
 			String endTime,
 			UserBO user,
 			Long userId,
-			String userno) throws Exception{
+			String userno,
+			String nickname) throws Exception{
 		
 		//用户绑定的编码器
 		List<BundlePO> srcBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user)).getList());
@@ -401,6 +409,7 @@ public class MonitorRecordService {
 		task.setRecordUserno(user.getUserNo());
 		task.setUserId(userId);
 		task.setUserno(userno);
+		task.setNickname(nickname);
 		task.setAvTplId(targetAvtpl.getId());
 		task.setGearId(targetGear.getId());
 		monitorRecordDao.save(task);
@@ -442,6 +451,7 @@ public class MonitorRecordService {
 	 * @param UserBO user xt用户
 	 * @param Long userId 操作业务用户id
 	 * @param String userno 操作业务用户号码
+	 * @param String nickname 操作业务用户昵称
 	 * @return MonitorRecordPO 录制任务
 	 */
 	public MonitorRecordPO addXtUser(
@@ -451,7 +461,8 @@ public class MonitorRecordService {
 			String endTime,
 			UserBO user,
 			Long userId,
-			String userno) throws Exception{
+			String userno,
+			String nickname) throws Exception{
 		
 		//联网id
 		String networkLayerId = commons.queryNetworkLayerId();
@@ -477,13 +488,13 @@ public class MonitorRecordService {
 		task.setEndTime(parsedEndTime);
 		task.setVideoType(MonitorRecordSourceType.DEVICE);
 		task.setVideoBundleId(bundleId);
-		task.setVideoBundleName("虚拟xt设备");
+		task.setVideoBundleName(user.getName() + "用户视频");
 		task.setVideoLayerId(networkLayerId);
 		task.setVideoChannelId(ChannelType.VIDEOENCODE1.getChannelId());
 		task.setVideoChannelName(ChannelType.VIDEOENCODE1.getName());
 		task.setAudioType(MonitorRecordSourceType.DEVICE);
 		task.setAudioBundleId(bundleId);
-		task.setAudioBundleName("虚拟xt设备");
+		task.setAudioBundleName(user.getName() + "用户音频");
 		task.setAudioLayerId(networkLayerId);
 		task.setAudioChannelId(ChannelType.AUDIOENCODE1.getChannelId());
 		task.setAudioChannelName(ChannelType.AUDIOENCODE1.getName());
@@ -504,6 +515,7 @@ public class MonitorRecordService {
 		task.setRecordUserno(user.getUserNo());
 		task.setUserId(userId);
 		task.setUserno(userno);
+		task.setNickname(nickname);
 		task.setAvTplId(targetAvtpl.getId());
 		task.setGearId(targetGear.getId());
 		monitorRecordDao.save(task);

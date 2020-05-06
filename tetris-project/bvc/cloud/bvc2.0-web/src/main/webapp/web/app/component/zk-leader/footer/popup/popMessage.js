@@ -20,7 +20,7 @@ define([
                 historyInstantMsg:[],
                 page:{
                     currentPage:0,
-                    pageSize:30,
+                    pageSize:10,
                     total:0
                 },
                 currentGroupId:''
@@ -40,22 +40,28 @@ define([
             load:function(currentPage){
                 var self = this;
                 self.historyInstantMsg.splice(0, self.historyInstantMsg.length);
+                if(!self.currentGroupId){
+                    self.qt.error('请先选择一个会议才能查看消息');
+                    return;
+                }
                 ajax.post('/command/message/query/history/instant/message', {
                     commandId:self.currentGroupId,
                     currentPage:currentPage,
                     pageSize:self.page.pageSize
                 }, function(data){
                     var data=data.data;
-                    var total = data.total;
-                    var rows = data.rows;
-                    if(rows && rows.length>0){
-                        for(var i=0; i<rows.length; i++){
-                            var message = $.parseJSON( rows[i].message).message;
-                            self.historyInstantMsg.push(message);
+                    if(data){
+                        var total = data.total;
+                        var rows = data.rows;
+                        if(rows && rows.length>0){
+                            for(var i=0; i<rows.length; i++){
+                                var message = $.parseJSON( rows[i].message).message;
+                                self.historyInstantMsg.push(message);
+                            }
                         }
+                        self.page.total = total;
+                        self.page.currentPage = currentPage;
                     }
-                    self.page.total = total;
-                    self.page.currentPage = currentPage;
                 });
             },
             handleCurrentChange:function(currentPage){
@@ -246,8 +252,10 @@ define([
         mounted: function () {
             var self = this;
             self.qt = new QtContext('popMessage', function () {
-                var params = self.qt.getWindowParams();
-                self.currentGroupId = params.currentGroupId;
+                self.qt.get(['currentGroupId'], function (variables) {
+                    console.log(variables)
+                    self.currentGroupId = variables.currentGroupId;
+                });
 
                 // 初始化ajax
                 ajax.init({

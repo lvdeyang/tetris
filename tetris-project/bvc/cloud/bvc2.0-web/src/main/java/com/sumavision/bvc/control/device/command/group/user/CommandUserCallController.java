@@ -153,6 +153,37 @@ public class CommandUserCallController {
 	}
 	
 	/**
+	 * 将点播用户转为呼叫用户<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月30日 下午4:29:10
+	 * @param businessId
+	 * @param serial
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/trans/vod/to/call")
+	public Object transVodToCall(
+			String businessId,
+			int serial,
+			HttpServletRequest request) throws Exception{
+		
+		Long callUserId = userUtils.getUserIdFromSession(request);
+		synchronized (new StringBuffer().append(lockStartPrefix).append(callUserId).toString().intern()) {
+			
+			CommandGroupUserPlayerPO player = commandUserServiceImpl.transVodToCall(Long.parseLong(businessId), serial);
+			
+			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+		
+			return _player;
+		}
+	}
+	
+	/**
 	 * 同意呼叫<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>

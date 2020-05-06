@@ -30,4 +30,21 @@ public class TokenService {
 		return token;
 	}
 	
+	/**
+	 * token上线<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月30日 下午3:38:59
+	 * @param String token token
+	 * @return TokenPO token数据
+	 */
+	public TokenPO online(String token) throws Exception{
+		TokenPO entity = tokenDao.findByToken(token);
+		if(entity != null){
+			entity.setStatus(UserStatus.ONLINE);
+			tokenDao.save(entity);
+		}
+		return entity;
+	}
+	
 }

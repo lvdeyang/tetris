@@ -20,6 +20,9 @@ public class UserLiveCallPO extends AbstractBasePO{
 	
 	private static final long serialVersionUID = 1L;
 	
+	/** 如果是从点播转呼叫而来，则记录点播CommandVodPO的id */
+	private Long formerVodId;
+	
 	/** 呼叫消息id */
 	private Long messageId;
 	
@@ -168,6 +171,15 @@ public class UserLiveCallPO extends AbstractBasePO{
 	/** 主叫用户绑定解码器音频通道类型 */
 	private String callDecoderAudioBaseType;
 	
+	@Column(name = "FORMER_VOD_ID")
+	public Long getFormerVodId() {
+		return formerVodId;
+	}
+
+	public void setFormerVodId(Long formerVodId) {
+		this.formerVodId = formerVodId;
+	}
+
 	@Column(name = "MESSAGE_ID")
 	public Long getMessageId() {
 		return messageId;

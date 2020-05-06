@@ -173,6 +173,7 @@ public interface BundleDao extends CommonDao<BundlePO> {
 	
 	public BundlePO findByDeviceModelAndUsername(String deviceModel, String username);
 	
-	@Query(value = "select bundleId from com.suma.venus.resource.pojo.BundlePO where bundleNum in ?1")
-	public List<String> findBundleIdByBundleNumIn(Collection<String> bundleNums);
+	/** 根据设备号码查询设备，设备号码字段为username */
+	@Query(value = "select bundleId from com.suma.venus.resource.pojo.BundlePO where username in ?1")
+	public List<String> findBundleIdByUsernameIn(Collection<String> usernames);
 }
