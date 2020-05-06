@@ -24,19 +24,20 @@ define([
                 deviceData: {
                     totalData: [],
                     filterData: []
-                }
+                },
+                tasks:[],
+                pageSize:50,
+                total:0
             }
         },
         computed: {
-            //设备的分页
-            pageData: function () {
-                return this.deviceData.totalData.slice((this.deviceCurrentPage - 1) * 10, this.deviceCurrentPage * 10);
-            }
+            
         },
         methods: {
             //当前页改变
             deviceCurrentChange: function (val) {
                 this.deviceCurrentPage = val;
+                this.search();
             },
             search: function () {
                 var mode = this.recordMode;
@@ -53,14 +54,28 @@ define([
                 var self = this;
                 ajax.post('/monitor/record/stop/' + id, null, function () {
                     self.qt.success('成功停止此条数据的录制');
-                    self.deviceData.totalData=self.deviceData.totalData.filter(function (value) {
-                       return value.id !=id;
-                    })
+                    for(var i=0; i<self.tasks.length; i++){
+                    	if(self.tasks[i].id == id){
+                    		self.tasks.splice(i, 1);
+                    		self.total -= 1;
+                    		break;
+                    	}
+                    }
+                    if(self.tasks.length <= 0){
+                    	if(self.deviceCurrentPage > 1){
+                    		self.deviceCurrentPage -= 1;
+                    		self.search();
+                    	}else if(self.total > 0){
+                    		self.deviceCurrentPage = 1;
+                    		self.search();
+                    	}
+                    }
                 })
             },
             //获取数据
             refreshRecord: function (text1, text2, text3, text4, text5) {
                 var self = this;
+                self.tasks.splice(0, self.tasks.length);
                 ajax.post('/monitor/record/load', {
                     mode: text1,
                     fileName: text2,
@@ -69,14 +84,16 @@ define([
                     startTime: text3,
                     endTime: text4,
                     currentPage: text5,
-                    pageSize: '10'
+                    pageSize: self.pageSize
                 }, function (data) {
-                    if (data.rows && data.rows.length > 0) {
-                        var commands = data.rows;
-                        for (var i = 0; i < commands.length; i++) {
-                            self.deviceData.totalData.push(commands[i]);
-                        }
-                    }
+                	var rows = data.rows;
+                	var total = data.total;
+                	if(rows && rows.length>0){
+                		for(var i=0; i<rows.length; i++){
+                			self.tasks.push(rows[i]);
+                		}
+                		self.total = total;
+                	}
                 });
             },
             cancel: function () {

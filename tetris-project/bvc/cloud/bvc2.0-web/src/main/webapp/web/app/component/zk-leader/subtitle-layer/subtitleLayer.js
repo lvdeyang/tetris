@@ -18,11 +18,14 @@ define([
             return {
                 baseUrl: window.BASEPATH,
                 leftCurrentPage: 1,
-                rightCurrentPage: 1,
                 dialogCurrentPage: 1,
                 leftData: [],
+                leftTotal:0,
+                leftPageSize:30,
                 rightData: [],
                 gridData: [],
+                gridTotal:0,
+                gridPageSize:10,
                 dialogLeftVisible: false,
                 dialogFormVisible: false,
                 dialogTableVisible: false,
@@ -49,29 +52,21 @@ define([
             }
         },
         computed: {
-            //左侧的分页
-            pageData: function () {
-                return this.leftData.slice((this.leftCurrentPage - 1) * 10, this.leftCurrentPage * 10);
-            },
-            //  右侧表格的分页
-            rightPageData: function () {
-                return this.rightData.slice((this.rightCurrentPage - 1) * 10, this.rightCurrentPage * 10);
-            },
-            // 弹出层表格的分页
-            dialogPageData: function () {
-                return this.gridData.slice((this.dialogCurrentPage - 1) * 10, this.dialogCurrentPage * 10);
-            }
+            
         },
         methods: {
+        	//字幕管理
+            subtitleOpen: function () {
+                this.qt.window('/router/zk/leader/subtitle/manage', null, {width: '85%', height: '93%'});
+            },
             //当前页改变
             leftCurrentChange: function (val) {
                 this.leftCurrentPage = val;
-            },
-            rightCurrentChange: function (val) {
-                this.rightCurrentPage = val;
+                this.refreshLeftData();
             },
             dialogCurrentChange: function (val) {
                 this.dialogCurrentPage = val;
+                this.refreshSubtitle();
             },
             //获取左侧表格数据
             refreshLeftData: function () {
@@ -79,14 +74,16 @@ define([
                 self.leftData.splice(0, self.leftData.length);
                 ajax.post('/monitor/osd/load', {
                     currentPage: self.leftCurrentPage,
-                    pageSize: '10'
+                    pageSize: self.leftPageSize
                 }, function (data) {
-                    if (data.rows && data.rows.length > 0) {
-                        var commands = data.rows;
-                        for (var i = 0; i < commands.length; i++) {
-                            self.leftData.push(commands[i]);
-                        }
-                    }
+                	var rows = data.rows;
+                	var total = data.total;
+                	if(rows && rows.length>0){
+                		for(var i=0; i<rows.length; i++){
+                			self.leftData.push(rows[i]);
+                		}
+                		self.leftTotal = total;
+                	}
                 });
             },
             //左侧添加提交
@@ -123,7 +120,26 @@ define([
                 var self = this;
                 ajax.post('/monitor/osd/remove/' + id, null, function (data) {
                     self.qt.success('删除成功');
-                    self.refreshLeftData();
+                    for(var i=0; i<self.leftData.length; i++){
+                    	if(self.leftData[i].id == id){
+                    		self.leftData.splice(i, 1);
+                    		self.leftTotal -= 1;
+                    		break;
+                    	}
+                    }
+                    if(self.leftData.length <= 0){
+                    	if(self.leftCurrentPage > 1){
+                    		self.leftCurrentPage -= 1;
+                    		self.refreshLeftData();
+                    	}else if(self.leftTotal > 0){
+                    		self.currentPage = 1;
+                    		self.refreshLeftData();
+                    	}
+                    }
+                    if(id == self.form.osdId){
+                    	 self.rightShow = false;
+                         self.form.osdId = '';
+                    }
                 })
             },
 
@@ -156,14 +172,16 @@ define([
                 self.gridData.splice(0, self.gridData.length);
                 ajax.post('/monitor/subtitle/load/all', {
                     currentPage: self.dialogCurrentPage,
-                    pageSize: '10'
+                    pageSize: self.gridPageSize
                 }, function (data) {
-                    if (data.rows && data.rows.length > 0) {
-                        var commands = data.rows;
-                        for (var i = 0; i < commands.length; i++) {
-                            self.gridData.push(commands[i]);
-                        }
-                    }
+                	var rows = data.rows;
+                	var total = data.total;
+                	if(rows && rows.length>0){
+                		for(var i=0; i<rows.length; i++){
+                			 self.gridData.push(rows[i]);
+                		}
+                		self.gridTotal = total;
+                	}
                 })
             },
             //对话框表格的选中行
@@ -237,7 +255,7 @@ define([
                 ajax.post('/monitor/osd/layer/edit/subtitle/layer/' + self.editRightId, {
                     x: self.form.x,
                     y: self.form.y,
-                    subtitleId: self.form.subtitleId,
+                    subtitleId: self.form.subtitle.id,
                     subtitleName: self.form.subtitleName
                 }, function (data) {
                     self.qt.success('修改图层成功');

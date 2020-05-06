@@ -26,11 +26,15 @@ define([
                 checkedId: '',
                 //表格数据
                 fileDatas: [],
+                total:0,
+                pageSize:10,
                 currentPage: 1,
                 filterInput: '',
                 //对话框相关的
                 dialogVisible: false,
                 gridData: [], //对话框的数据
+                gridTotal:0,
+                gridPageSize:10,
                 dialogCurrent: 1,
                 chooseRow: '',
                 checkBoxData: [] //选中的数据
@@ -51,22 +55,17 @@ define([
             }
         },
         computed: {
-            //大table分页
-            pageData: function () {
-                return this.fileDatas.slice((this.currentPage - 1) * 10, this.currentPage * 10);
-            },
-            //对话框的分页
-            dialogPageData: function () {
-                return this.gridData.slice((this.dialogCurrent - 1) * 5, this.dialogCurrent * 5);
-            }
+            
         },
         methods: {
             //当前页改变
-            CurrentChange: function (val) {
+            currentChange: function (val) {
                 this.currentPage = val;
+                this.addSubmit();
             },
             handleCurrentChange: function (val) {
                 this.dialogCurrent = val;
+                this.search();
             },
 
             //--------对话框表格----------
@@ -75,16 +74,27 @@ define([
                 this.chooseRow = val;
             },
             //对话框的确定
-            addSubmit: function () {
+            addSubmit: function (currentPage) {
                 var self = this;
+                if(currentPage){
+                	self.currentPage = currentPage;
+                }
                 var param = {
                     fullPath: self.chooseRow.fullPath,
                     currentPage: self.currentPage,
-                    pageSize: 10
+                    pageSize: self.pageSize
                 };
+                self.fileDatas.splice(0, self.fileDatas.length);
                 ajax.post('/monitor/external/static/resource/folder/scanning', param, function (data) {
                     self.dialogVisible = false;
-                    self.fileDatas = data.rows;
+                    var rows = data.rows;
+                    var total = data.total;
+                    if(rows && rows.length>=0){
+                    	for(var i=0; i<rows.length; i++){
+                    		self.fileDatas.push(rows[i]);
+                    		self.total = total;
+                    	}
+                    }
                 })
             },
 
@@ -119,12 +129,20 @@ define([
             search: function () {
                 var self = this;
                 this.dialogVisible = true;
+                self.gridData.splice(0, self.gridData.length);
                 ajax.post('/monitor/external/static/resource/folder/load/all', {
                     currentPage: self.dialogCurrent,
-                    pageSize: 5
+                    pageSize: self.gridPageSize
                 }, function (data) {
-                    self.gridData = data.rows;
-                })
+                	var rows = data.rows;
+                	var total = data.total;
+                	if(rows && rows.length>0){
+                		for(var i=0; i<rows.length; i++){
+                			self.gridData.push(rows[i]);
+                		}
+                		self.gridTotal = total;
+                	}
+                });
             },
 
             //筛选按钮
@@ -134,15 +152,27 @@ define([
                     self.qt.warning('您还没有输入要查找的路径');
                     return;
                 }
-                var param = {
+                self.currentPage = 1;
+                self.chooseRow = {fullPath:self.filterInput};
+                self.addSubmit();
+                
+                /*var param = {
                     fullPath: self.filterInput,
                     currentPage: self.currentPage,
                     pageSize: 10
                 };
+                self.fileDatas.splice(0, self.fileDatas.length);
                 ajax.post('/monitor/external/static/resource/folder/scanning', param, function (data) {
                     self.dialogVisible = false;
-                    self.fileDatas = data.rows;
-                })
+                    var rows = data.rows;
+                    var total = data.total;
+                    if(rows && rows.length>0){
+                    	for(var i=0; i<rows.length; i++){
+                    		self.fileDatas.push(rows[i]);
+                    		self.total = total;
+                    	}
+                    }
+                })*/
             },
 
             //点击单个上传按钮

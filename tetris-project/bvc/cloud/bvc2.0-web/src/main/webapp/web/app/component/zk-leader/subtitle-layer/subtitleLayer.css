@@ -163,7 +163,7 @@ body{
 
 /*更改对话框样式*/
 .el-dialog{
-    width:500px;
+   /*  width:500px; */
     background-color: #0F1537;
     border:1px solid #2c5282;
     box-sizing:border-box;

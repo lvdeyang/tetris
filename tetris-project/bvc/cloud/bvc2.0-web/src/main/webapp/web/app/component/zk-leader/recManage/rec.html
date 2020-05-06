@@ -28,7 +28,7 @@
                     <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
                         <div style="width:100%; height:100%; position:relative;">
                             <el-table
-                                    :data="pageData"
+                                    :data="tasks"
                                     style="width:100%"
                                     height="100%">
                                 <el-table-column
@@ -75,8 +75,8 @@
                     </div>
                     <div style="position:absolute; bottom:0; left:0; right:0; height:50px; padding-top:9px; box-sizing:border-box;">
                         <el-pagination background @current-change="deviceCurrentChange" :current-page="deviceCurrentPage"
-                                       :page-size="1" :pager-count="5" layout="total, prev, pager, next, jumper"
-                                       :total="deviceData.totalData.length">
+                                       :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next"
+                                       :total="total">
                         </el-pagination>
                     </div>
                 </div>
