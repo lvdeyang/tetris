@@ -376,13 +376,13 @@
                     <img v-else :src="baseUrl+'images/zk-leader/disable/batchIntercom.png'"/>
                 </div>
                 <!--添加指挥-->
-                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="新建指挥"
+                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="添加指挥"
                      @click="addCommand(1)">
                     <img v-if="buttons.addCommand" :src="baseUrl+'images/zk-leader/able/zhihui/addCommand.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/addCommand.png'"/>
                 </div>
                 <!--添加会议-->
-                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="新建会议" @click="addCommand(2)">
+                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="添加会议" @click="addCommand(2)">
                     <img :src="baseUrl+'images/zk-leader/able/huiyi/addCommand.png'"/>
                 </div>
                 <div class="customIcon" v-if="currentTab==3" @click="playRecordFile">
