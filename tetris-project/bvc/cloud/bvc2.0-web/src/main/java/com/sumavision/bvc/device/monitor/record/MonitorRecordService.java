@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -49,6 +50,7 @@ import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashSetWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -1389,15 +1391,33 @@ public class MonitorRecordService {
 	 * <b>日期：</b>2019年4月25日 上午10:09:38
 	 * @param Long id 文件id
 	 * @param Long userId 当前业务用户
+	 * @throws Exception 
 	 */
-	public void removeFile(Long id, Long userId){
+	public void removeFile(Long id, Long userId) throws Exception{
 		MonitorRecordPO file = monitorRecordDao.findOne(id);
 		if(file.getUserId().toString().equals(userId.toString()) && 
 				MonitorRecordStatus.STOP.equals(file.getStatus())){
 			
-			monitorRecordDao.delete(file);
-			
 			//发送删除文件命令
+			LogicBO logic = new LogicBO().setUserId("-1")
+					.setPass_by(new ArrayList<PassByBO>());
+			List<String> files = new ArrayList<String>();
+			String fileName = null;
+			if(file.getPreviewUrl() != null){
+				fileName = file.getPreviewUrl().split("/")[0];
+			}
+			if(fileName!=null && !fileName.equals("")){
+				files.add(fileName);
+				PassByBO passByBO = new PassByBO()
+							.setBundle_id("")
+							.setLayer_id(file.getStoreLayerId())
+							.setType("delete_record_file")
+							.setPass_by_content(new HashMapWrapper<String, Object>().put("files", files).getMap());
+				logic.getPass_by().add(passByBO);
+				executeBusiness.execute(logic, "点播系统：删除录制及文件：" + file.getFileName());
+			}
+			
+			monitorRecordDao.delete(file);
 		}
 	}
 	

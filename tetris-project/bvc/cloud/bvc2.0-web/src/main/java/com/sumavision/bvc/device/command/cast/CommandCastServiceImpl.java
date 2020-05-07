@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.command.group.basic.CommandGroupAvtplGearsPO;
@@ -51,6 +52,7 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdService;
+import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -108,6 +110,9 @@ public class CommandCastServiceImpl {
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
+	
+	@Autowired
+	private ResourceServiceClient resourceServiceClient;
 	
 	/**
 	 * 全量设置播放器的上屏设备（参数是id，主要供controller调用）<br/>
@@ -605,6 +610,14 @@ public class CommandCastServiceImpl {
 		}else if(doLogic){
 			executeBusiness.execute(logic, "播放器修改上屏列表，新增" + addDevices.size() + "个，去掉" + removeDevices.size() + "个，" + description);
 			executeBusiness.execute(logicOsd, "播放器修改上屏列表，设置字幕" + description);
+			
+			//存储到资源层
+			for(CommandGroupUserPlayerCastDevicePO removeDevice : removeDevices){				
+				resourceServiceClient.removeLianwangPassby(removeDevice.getDstBundleId());
+			}
+			for(CommandGroupUserPlayerCastDevicePO addDevice : addDevices){				
+				resourceServiceClient.coverLianwangPassby(addDevice.getDstBundleId(), addDevice.getDstLayerId(), "osds", JSON.toJSONString(setOsd));
+			}			
 		}
 		return playerInfoBO;
 	}
