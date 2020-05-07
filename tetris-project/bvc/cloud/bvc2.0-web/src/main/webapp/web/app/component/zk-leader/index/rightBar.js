@@ -1126,7 +1126,7 @@ define([
                     } else if (self.currentTab == 3) {
                         //点播录像
                         if (self.record.select.length <= 0) {
-                            self.qt.warning('消息提示', '您还没有选中文件');
+                            self.qt.warning('您还没有选中文件');
                             return;
                         }
                         var recordIds = [];
