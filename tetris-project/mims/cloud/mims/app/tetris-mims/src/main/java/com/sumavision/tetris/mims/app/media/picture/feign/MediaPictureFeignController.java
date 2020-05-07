@@ -1,5 +1,8 @@
 package com.sumavision.tetris.mims.app.media.picture.feign;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,14 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
-import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -117,21 +119,23 @@ public class MediaPictureFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/remove")
 	public Object remove(
-			Long id,
+			String ids,
 			HttpServletRequest request) throws Exception{
-		
-		MediaPicturePO media = mediaPictureDao.findOne(id);
-		
-		if(media == null){
-			throw new MediaPictureNotExistException(id);
-		}
 		
 		UserVO user = userQuery.current();
 		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), media.getFolderId())){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		if (ids == null || ids.isEmpty()) return null;
+		
+		List<Long> idList = JSONArray.parseArray(ids, Long.class);
+		List<MediaPicturePO> picturePOs = new ArrayList<MediaPicturePO>();
+		for (Long id : idList) {
+			MediaPicturePO media = mediaPictureDao.findOne(id);
+			if(!folderQuery.hasGroupPermission(user.getGroupId(), media.getFolderId())){
+				throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+			}
+			picturePOs.add(media);
 		}
 		
-		return mediaPictureService.remove(new ArrayListWrapper<MediaPicturePO>().add(media).getList());
+		return mediaPictureService.remove(picturePOs);
 	}
 }
