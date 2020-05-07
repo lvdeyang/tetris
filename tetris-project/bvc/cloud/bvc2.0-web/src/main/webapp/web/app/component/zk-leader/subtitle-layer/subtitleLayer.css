@@ -181,3 +181,5 @@ body{
     background: #0000003d;
     color: #e6eeff;
 }
+
+.el-input.is-disabled .el-input__inner{color:#444;}
