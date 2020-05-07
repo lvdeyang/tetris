@@ -35,9 +35,9 @@ html, body {
 
 .leftTime p {
     margin-left: 20px;
-    width: 100%;
+    width: 67%;
     line-height: 10px;
-    text-align: center;
+    text-align: right;
 }
 
 .date,.time {
