@@ -6,7 +6,7 @@
     <!--内容-->
     <div style="position: absolute;top: 65px;left: 30px;bottom: 50px;right: 30px;">
         <el-table
-                :data="pageData"
+                :data="leftData"
                 style="width: 100%"
                 height="95%"
                 highlight-current-row
@@ -21,8 +21,8 @@
             </el-table-column>
         </el-table>
         <el-pagination background @current-change="leftCurrentChange" :current-page="leftCurrentPage"
-                       :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
-                       :total="leftData.length">
+                       :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next"
+                       :total="total">
         </el-pagination>
     </div>
     <!--底部按钮-->

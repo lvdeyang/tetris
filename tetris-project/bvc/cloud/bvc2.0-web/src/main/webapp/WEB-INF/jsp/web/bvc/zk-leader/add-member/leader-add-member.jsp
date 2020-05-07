@@ -99,7 +99,7 @@
         <add-member ref="zkBusinessAddMember"></add-member>
     </div>
 </body>
-<script type="text/javascript" src="<%=basePath %>web/lib/frame/requireJS/require.js" defer async="true" data-main="<%=basePath %>web/app/zk-leader/add-member/main"></script>
 <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
 <script type="text/javascript" src="<%=basePath %>web/commons/qt/QtContext.js"></script>
+<script type="text/javascript" src="<%=basePath %>web/lib/frame/requireJS/require.js" defer async="true" data-main="<%=basePath %>web/app/zk-leader/add-member/main"></script>
 </html>
