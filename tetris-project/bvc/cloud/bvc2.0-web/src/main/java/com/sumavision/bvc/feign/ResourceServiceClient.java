@@ -98,13 +98,21 @@ public interface ResourceServiceClient {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月29日 上午9:26:13
-	 * @param String uuid 业务uuid
+	 * @param String uuid 唯一标识，业务uuid，或者bundleId
 	 * @param String layerId 联网layerId
 	 * @param String type 业务类型
 	 * @param String protocol passby
 	 */
-	@RequestMapping(value = "/api/add/lianwang/passby")
+	@RequestMapping(value = "/api/add/passby")
 	public Object addLianwangPassby(
+			@RequestParam("uuid") String uuid, 
+			@RequestParam("layerId") String layerId, 
+			@RequestParam("type") String type, 
+			@RequestParam("protocol") String protocol);
+	
+
+	@RequestMapping(value = "/api/add/cover/passby")
+	public Object coverLianwangPassby(
 			@RequestParam("uuid") String uuid, 
 			@RequestParam("layerId") String layerId, 
 			@RequestParam("type") String type, 
@@ -117,7 +125,7 @@ public interface ResourceServiceClient {
 	 * <b>日期：</b>2020年4月29日 上午9:48:59
 	 * @param String uuid 业务uuid
 	 */
-	@RequestMapping(value = "/api/remove/lianwang/passby")
+	@RequestMapping(value = "/api/remove/passby")
 	public Object removeLianwangPassby(@RequestParam("uuid") String uuid);
 	
 }

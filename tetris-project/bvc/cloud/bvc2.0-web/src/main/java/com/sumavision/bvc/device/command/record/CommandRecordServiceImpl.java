@@ -2,7 +2,9 @@ package com.sumavision.bvc.device.command.record;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,7 @@ import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
+import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.RecordSetBO;
 import com.sumavision.bvc.device.group.bo.RecordSourceBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
@@ -45,6 +48,7 @@ import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 import lombok.extern.slf4j.Slf4j;
@@ -429,14 +433,53 @@ public class CommandRecordServiceImpl {
 		return logic;
 	}
 	
-	public void remove(Long recordId) throws BaseException{
+	public void remove(Long recordId) throws Exception{
 		
 		CommandGroupRecordPO record = commandGroupRecordDao.findOne(recordId);
 		if(record.isRun()){
 			throw new BaseException(StatusCode.FORBIDDEN, "录制未停止，无法删除，录制id: " + record);
 		}
+		
+		//向cdn发送删除文件命令
+		LogicBO logic = new LogicBO().setUserId("-1")
+				.setPass_by(new ArrayList<PassByBO>());
+		List<CommandGroupRecordFragmentPO> fragments = record.getFragments();
+		if(fragments!=null && fragments.size()>0){
+			
+			//统计每个cdn接入下需要删除的文件目录
+			Map<String, List<String>> layerMap = new HashMap<String, List<String>>();
+			for(CommandGroupRecordFragmentPO fragment : fragments){
+				String fileName = null;
+				if(fragment.getPreviewUrl() != null){
+					fileName = fragment.getPreviewUrl().split("/")[0];
+				}
+				String layerId = fragment.getStoreLayerId();
+				if(fileName!=null && !fileName.equals("")
+						&& layerId!=null && !layerId.equals("")){
+					if(layerMap.get(layerId) == null){
+						layerMap.put(layerId, new ArrayList<String>());
+					}
+					List<String> files = layerMap.get(layerId);
+					files.add(fileName);
+				}
+			}
+			
+			//给每个cdn的layerId各生成一个passby命令
+			for(String layerId : layerMap.keySet()){
+				List<String> files = layerMap.get(layerId);
+				PassByBO passByBO = new PassByBO()
+						.setBundle_id("")
+						.setLayer_id(layerId)
+						.setType("delete_record_file")
+						.setPass_by_content(new HashMapWrapper<String, Object>().put("files", files).getMap());
+				logic.getPass_by().add(passByBO);
+			}
+			
+			//执行
+			executeBusiness.execute(logic, "指挥系统：删除录制及文件：" + record.getGroupName() + " " + DateUtil.format(record.getStartTime(), DateUtil.dateTimePattern));
+		}
+		
 		commandGroupRecordDao.delete(record);
-		//向cdn发送删除命令
 	}
 	
 	/**
