@@ -1,0 +1,39 @@
+<el-dialog
+        class="mi-package-picker"
+        title="添加绑定套餐"
+        :visible.sync="visible"
+        :loading="loading"
+        width="640px"
+        :before-close="handlePackageChooseClose">
+
+    <div class="content">
+        <div class="content-wrapper">
+            <div class="table-wrapper">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                            v-loading="tree.loading"
+                            ref="packageChooseTree"
+                            :data="tree.data"
+                            :default-checked-keys="tree.checked"
+                            node-key="id"
+                            show-checkbox
+                            default-expand-all
+                            highlight-current
+                            @check-change="handlePackageChooseChange">
+                    <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
+                        <span style="font-size:14px;">
+                            <span>{{data.name}}</span>
+                        </span>
+                    </span>
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+        </div>
+    </div>
+
+    <span slot="footer" class="dialog-footer" style="height: 32px;">
+        <div class="footer">
+            <el-button size="small" type="primary" @click="handlePackageChooseCommit" :loading="loading.confirm" style="float:right;">确 定</el-button>
+        </div>
+    </span>
+</el-dialog>

@@ -15,6 +15,7 @@ import com.sumavision.tetris.cs.area.exception.ChannelTerminalAreaAlreadyUseExce
 import com.sumavision.tetris.cs.area.exception.ChannelTerminalAreaAlreadyUseForbiddenException;
 import com.sumavision.tetris.cs.bak.AreaSendPO;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
+import com.sumavision.tetris.cs.channel.Adapter;
 import com.sumavision.tetris.cs.channel.ChannelBroadStatus;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
@@ -38,6 +39,9 @@ public class AreaQuery {
 
 	@Autowired
 	private DivisionDAO divisionDAO;
+	
+	@Autowired
+	private Adapter adapter;
 
 	/**
 	 * 获取地区根目录(当前以空地区id获取根)<br/>
@@ -64,7 +68,8 @@ public class AreaQuery {
 		} else {
 			allArea = getChildDivision(areaId);
 		}
-		List<AreaSendPO> abledArea = areaSendQuery.getArea(channelId);
+		List<AreaSendPO> abledArea = new ArrayList<AreaSendPO>();
+		if (channelId != null) abledArea = areaSendQuery.getArea(channelId);
 
 		List<AreaVO> areas;
 		if (!disabled) {
@@ -83,7 +88,7 @@ public class AreaQuery {
 
 		List<String> checkList = new ArrayList<String>();
 
-		if (allArea != null && allArea.size() > 0) {
+		if (channelId != null && allArea != null && allArea.size() > 0) {
 			for (AreaData item : allArea) {
 				if (areaDao.findByChannelIdAndAreaId(channelId, item.getId()) != null) {
 					checkList.add(item.getId());
@@ -118,7 +123,7 @@ public class AreaQuery {
 	public List<AreaData> getChildDivision(String areaId) throws Exception {
 		List<AreaData> returnList = new ArrayList<AreaData>();
 
-		JSONObject jsonObject = HttpRequestUtil.httpGet(BroadTerminalQueryType.QUERY_DIVISION_TREE.getUrl() + "?division=" + areaId);
+		JSONObject jsonObject = HttpRequestUtil.httpGet(adapter.getTerminalUrl(BroadTerminalQueryType.QUERY_DIVISION_TREE) + "?division=" + areaId);
 
 		if (jsonObject != null && jsonObject.containsKey("divisionTrees") && jsonObject.get("divisionTrees") != null) {
 			JSONArray jsonArray = jsonObject.getJSONArray("divisionTrees");
@@ -197,7 +202,7 @@ public class AreaQuery {
 					.append(";占用的频道为：")
 					.append(channelName)
 					.append(";");
-					if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+					if (ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus())) {
 						info.append("(频道正在播发);");
 						forbidden = true;
 					}

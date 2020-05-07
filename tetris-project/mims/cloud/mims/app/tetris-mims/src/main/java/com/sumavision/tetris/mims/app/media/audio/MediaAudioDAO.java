@@ -172,4 +172,14 @@ public interface MediaAudioDAO extends BaseDAO<MediaAudioPO>{
 	 * @return List<MediaAudioPO> 音频列表
 	 */
 	public List<MediaAudioPO> findByPreviewUrlIn(Collection<String> previewUrls);
+	
+	/**
+	 * 根据用户id查询上传媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月23日 下午5:15:59
+	 * @param List<String> authorIds 上传用户id数组
+	 * @return List<MediaAudioPO> 音频列表
+	 */
+	public List<MediaAudioPO> findByAuthorIdIn(List<String> authorIds);
 }

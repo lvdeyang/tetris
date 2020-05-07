@@ -24,6 +24,12 @@ public class ScreenPO extends AbstractBasePO {
 	/** 排单顺序 */
 	private Long screenIndex;
 	
+	/** 内容类型 */
+	private String contentType;
+	
+	/** 文本内容 */
+	private String textContent;
+	
 	/** 媒资在cs中的id */
 	private Long resourceId;
 	
@@ -54,6 +60,9 @@ public class ScreenPO extends AbstractBasePO {
 	/** 媒资时长 */
 	private String duration;
 	
+	/** 媒资大小 */
+	private String size;
+	
 	/** 媒资频点 */
 	private String freq;
 	
@@ -62,6 +71,12 @@ public class ScreenPO extends AbstractBasePO {
 	
 	/** 媒资视频pid */
 	private String videoPid;
+	
+	/** 媒资音频类型 */
+	private String audioType;
+	
+	/** 媒资视频类型 */
+	private String videoType;
 	
 	@Column(name="PROGRAM_ID")
 	public Long getProgramId() {
@@ -90,6 +105,24 @@ public class ScreenPO extends AbstractBasePO {
 		return screenIndex;
 	}
 	
+	@Column(name = "CONTENT_TYPE")
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	@Column(name = "TEXT_CONTENT")
+	public String getTextContent() {
+		return textContent;
+	}
+
+	public void setTextContent(String textContent) {
+		this.textContent = textContent;
+	}
+
 	@Column(name="RESOURCE_ID")
 	public Long getResourceId() {
 		return resourceId;
@@ -180,6 +213,15 @@ public class ScreenPO extends AbstractBasePO {
 		this.duration = duration;
 	}
 
+	@Column(name = "SIZE")
+	public String getSize() {
+		return size;
+	}
+
+	public void setSize(String size) {
+		this.size = size;
+	}
+
 	@Column(name = "FREQ")
 	public String getFreq() {
 		return freq;
@@ -205,5 +247,23 @@ public class ScreenPO extends AbstractBasePO {
 
 	public void setVideoPid(String videoPid) {
 		this.videoPid = videoPid;
+	}
+	
+	@Column(name = "AUDIO_TYPE")
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public void setAudioType(String audioType) {
+		this.audioType = audioType;
+	}
+
+	@Column(name = "VIDEO_TYPE")
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public void setVideoType(String videoType) {
+		this.videoType = videoType;
 	}
 }

@@ -10,14 +10,27 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.cs.channel.Adapter;
 import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
+import com.sumavision.tetris.cs.program.ScreenContentType;
+import com.sumavision.tetris.cs.program.ScreenVO;
+import com.sumavision.tetris.cs.program.TemplateScreenVO;
+import com.sumavision.tetris.cs.program.TemplateVO;
+import com.sumavision.tetris.cs.schedule.api.qt.response.ApiQtScheduleScreenProgramVO;
+import com.sumavision.tetris.cs.schedule.api.qt.response.ApiQtScheduleScreenVO;
+import com.sumavision.tetris.cs.schedule.api.qt.response.ApiQtScheduleVO;
 import com.sumavision.tetris.mims.app.media.encode.MediaEncodeQuery;
+import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Component
 public class ScheduleQuery {
@@ -35,6 +48,26 @@ public class ScheduleQuery {
 	
 	@Autowired
 	private MediaEncodeQuery mediaEncodeQuery;
+	
+	@Autowired
+	private Adapter adapter;
+	
+	@Autowired
+	private UserQuery userQuery;
+	
+	/**
+	 * 获取排期信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午11:06:57
+	 * @param Long scheduleId 排期id
+	 * @return ScheduleVO 排期信息
+	 */
+	public ScheduleVO getById(Long scheduleId) throws Exception {
+		SchedulePO schedulePO = scheduleDAO.findOne(scheduleId);
+		
+		return new ScheduleVO().set(schedulePO);
+	}
 	
 	/**
 	 * 获取排期列表<br/>
@@ -70,8 +103,11 @@ public class ScheduleQuery {
 	 */
 	public List<ScheduleVO> getByChannelId(Long channelId) throws Exception {
 		List<SchedulePO> schedulePOs = scheduleDAO.findByChannelId(channelId);
-		
-		return ScheduleVO.getConverter(ScheduleVO.class).convert(schedulePOs, ScheduleVO.class);
+		List<ScheduleVO> scheduleVOs = new ArrayList<ScheduleVO>();
+		for (SchedulePO schedulePO : schedulePOs) {
+			scheduleVOs.add(new ScheduleVO().set(schedulePO).setProgram(programQuery.getProgram(schedulePO.getId())));
+		}
+		return scheduleVOs;
 	}
 	
 	/**
@@ -115,5 +151,132 @@ public class ScheduleQuery {
 		}
 		
 		return scheduleVOs;
+	}
+	
+	/**
+	 * 根据频道id请求排期表信息<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月5日 上午9:50:10
+	 * @param Long 频道id
+	 * @param userIp 用户ip
+	 */
+	public List<ApiQtScheduleVO> questJSONSchedulesByChannelId(Long channelId, String userIp) throws Exception {
+		List<ScheduleVO> scheduleVOs = getByChannelId(channelId);
+		if (scheduleVOs == null || scheduleVOs.isEmpty()) return null;
+
+		List<BroadAbilityBroadInfoVO> broadAbilityBroadInfoVOs = broadAbilityBroadInfoService.queryFromChannelId(channelId);
+		
+		//获取用户ip
+		if (userIp == null || userIp.isEmpty()) {
+			UserVO user = userQuery.current();
+			List<UserVO> userVOs = userQuery.findByIdInAndType(new ArrayListWrapper<Long>().add(user.getId()).getList(), TerminalType.QT_MEDIA_EDITOR.getName());
+			if (userVOs != null && !userVOs.isEmpty()) {
+				userIp = userVOs.get(0).getIp();
+			}
+		}
+		if (userIp == null || userIp.isEmpty()) return null;
+		
+		//获取用户推流可用端口
+		String startPort = "9999";
+		String endPort = "";
+		for (BroadAbilityBroadInfoVO broadAbilityBroadInfoVO : broadAbilityBroadInfoVOs) {
+			if (broadAbilityBroadInfoVO.getUserId() != null) {
+				endPort = broadAbilityBroadInfoVO.getPreviewUrlEndPort();
+				String previewUrlPort = broadAbilityBroadInfoVO.getPreviewUrlPort();
+				if (previewUrlPort != null && !previewUrlPort.isEmpty()){
+					startPort = previewUrlPort;
+					break;
+				}
+			}
+		}
+		
+		List<ApiQtScheduleVO> returnApiQtScheduleVOs = new ArrayList<ApiQtScheduleVO>();
+		for (ScheduleVO scheduleVO : scheduleVOs) {
+			//获取分屏信息
+			TemplateVO template = programQuery.getScreen2Template(scheduleVO.getId(), adapter.getAllTemplate());
+			if (template == null) return null;
+			List<ApiQtScheduleScreenVO> qtScheduleScreenVOs = new ArrayList<ApiQtScheduleScreenVO>();
+			
+			//遍历分屏，获取各分屏信息和节目单数组
+			Integer outputIndex = 0;
+			List<TemplateScreenVO> templateScreenVOs = template.getScreen();
+			for (TemplateScreenVO templateVO : templateScreenVOs) {
+				//获取文件推流输出端口
+				String port = "";
+				String streamUrl = "";
+				if (outputIndex == 0) {
+					port = startPort;
+				} else if (endPort != null && !endPort.isEmpty()){
+					Integer sendStartPort = Integer.parseInt(startPort);
+					Integer sendEndPort = Integer.parseInt(endPort);
+					if (sendStartPort + outputIndex <= sendEndPort) {
+						port = "" + (sendStartPort + outputIndex);
+					}
+				}
+				if (userIp != null && !userIp.isEmpty() && !port.isEmpty()) {
+					streamUrl = new StringBufferWrapper().append("udp://@").append(userIp).append(":").append(port).toString();
+				}
+				
+				ApiQtScheduleScreenVO qtScheduleScreenVO = new ApiQtScheduleScreenVO();
+				List<ApiQtScheduleScreenProgramVO> qtScheduleScreenProgramVOs = new ArrayList<ApiQtScheduleScreenProgramVO>();
+				List<ScreenVO> screenVOs = templateVO.getData();
+				Integer index = 0;
+				if (templateScreenVOs.isEmpty()) continue;
+				//遍历节目单数组，获取源文件列表
+				for (ScreenVO screenVO : screenVOs) {
+					String mediaType = screenVO.getType();
+					String contentType = screenVO.getContentType();
+					ScreenContentType screenContentType = ScreenContentType.fromName(contentType);
+					switch (screenContentType) {
+					case PICTURE:
+					case TEXT:
+					case TIME:
+						index += 1;
+						qtScheduleScreenProgramVOs.add(new ApiQtScheduleScreenProgramVO()
+								.setFromScreenVO(screenVO)
+								.setIndex(index)
+								.setMediaType(screenContentType.getValue())
+								.setSource(""));
+						break;
+					default:
+						if (mediaType != null) {
+							switch (mediaType) {
+							case "AUDIO":
+							case "VIDEO":
+							case "AUDIO_STREAM":
+							case "VIDEO_STREAM":
+								if (streamUrl.isEmpty()) break;
+								index += 1;
+								qtScheduleScreenProgramVOs.add(new ApiQtScheduleScreenProgramVO().setFromScreenVO(screenVO)
+										.setIndex(index)
+										.setMediaType("fileToStream")
+										.setPreviewUrl(streamUrl));
+								break;
+							default:
+								break;
+							}
+						}
+						break;
+					}
+				}
+				if (!qtScheduleScreenProgramVOs.isEmpty()) {
+					qtScheduleScreenVO.setTop(templateVO.getTop())
+							.setLeft(templateVO.getLeft())
+							.setWidth(templateVO.getWidth())
+							.setHeight(templateVO.getHeight())
+							.setNo(templateVO.getNo())
+							.setProgram(qtScheduleScreenProgramVOs);
+					qtScheduleScreenVOs.add(qtScheduleScreenVO);
+					if ("fileToStream".equals(qtScheduleScreenProgramVOs.get(0).getMediaType())) outputIndex++;
+				}
+				
+				if (templateScreenVOs.indexOf(templateVO) == templateScreenVOs.size() - 1) outputIndex = 0;
+			}
+			
+			returnApiQtScheduleVOs.add(new ApiQtScheduleVO().setScreens(qtScheduleScreenVOs).setEffectTime(scheduleVO.getBroadDate()));
+		}
+		
+		return returnApiQtScheduleVOs;
 	}
 }

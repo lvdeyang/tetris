@@ -19,8 +19,10 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 	private Long channelId;
 	/** 预播发地址 */
 	private String previewUrlIp;
-	/** 预播发端口 */
+	/** 预播发可用起始端口 */
 	private String previewUrlPort;
+	/** 预播发可用终止端口 */
+	private String previewUrlEndPort;
 	/** 媒资id */
 	private Long mediaId;
 	/** 预播发用户id */
@@ -51,6 +53,15 @@ public class BroadAbilityBroadInfoPO extends AbstractBasePO{
 	
 	public void setPreviewUrlPort(String previewUrlPort) {
 		this.previewUrlPort = previewUrlPort;
+	}
+
+	@Column(name = "PREVIEW_URL_END_PORT")
+	public String getPreviewUrlEndPort() {
+		return previewUrlEndPort;
+	}
+
+	public void setPreviewUrlEndPort(String previewUrlEndPort) {
+		this.previewUrlEndPort = previewUrlEndPort;
 	}
 
 	@Column(name = "MEDIA_ID")

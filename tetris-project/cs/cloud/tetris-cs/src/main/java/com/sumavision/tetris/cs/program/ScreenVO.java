@@ -7,6 +7,9 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.cs.menu.CsResourceVO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorVO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
@@ -14,6 +17,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private Long programId;
 	private Long serialNum;
 	private Long index;
+	private String contentType;
+	private String textContent;
 	private String mimsUuid;
 	private Long resourceId;
 
@@ -26,9 +31,12 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 	private Integer hotWeight;
 	private Integer downloadCount;
 	private String duration;
+	private String size;
 	private String freq;
 	private String audioPid;
 	private String videoPid;
+	private String audioType;
+	private String videoType;
 
 	@Override
 	public ScreenVO set(ScreenPO entity) throws Exception {
@@ -38,6 +46,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setProgramId(entity.getProgramId())
 		.setSerialNum(entity.getSerialNum())
 		.setIndex(entity.getScreenIndex())
+		.setContentType(entity.getContentType())
+		.setTextContent(entity.getTextContent())
 		.setName(entity.getName())
 		.setType(entity.getType())
 		.setMimetype(entity.getMimetype())
@@ -47,38 +57,79 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		.setHotWeight(entity.getHotWeight())
 		.setDownloadCount(entity.getDownloadCount())
 		.setDuration(entity.getDuration())
+		.setSize(entity.getSize())
 		.setFreq(entity.getFreq())
 		.setAudioPid(entity.getAudioPid())
 		.setVideoPid(entity.getVideoPid())
+		.setAudioType(entity.getAudioType())
+		.setVideoType(entity.getVideoType())
 		.setMimsUuid(entity.getMimsUuid())
 		.setResourceId(entity.getResourceId());
 		return this;
 	}
 	
 	public ScreenVO getFromAVideoVO(MediaAVideoVO media) throws Exception {
+		this.setPreviewUrl(media.getPreviewUrl())
+		.setDuration(media.getDuration())
+		.setSize(media.getSize());
+		
+		MediaFileEditorVO editorVO = media.getEditorInfo();
+		if (editorVO != null) {
+			String previewUrl = editorVO.getPreviewUrl();
+			String duration = editorVO.getDuration();
+			Long size = editorVO.getSize();
+			if (previewUrl != null && !previewUrl.isEmpty()) this.setPreviewUrl(previewUrl);
+			if (duration != null && !duration.isEmpty()) this.setDuration(duration);
+			if (size != null) this.setSize(size.toString());
+		}
+		
 		return this.setMimsUuid(media.getUuid())
 		.setName(media.getName())
-		.setPreviewUrl(media.getPreviewUrl())
 		.setEncryption(media.getEncryption() != null && media.getEncryption() ? "true" : "false")
 		.setEncryptionUrl(media.getEncryptionUrl())
 		.setType(media.getType())
 		.setMimetype(media.getMimetype())
 		.setHotWeight(media.getHotWeight())
-		.setDownloadCount(media.getDownloadCount())
-		.setDuration(media.getDuration());
+		.setDownloadCount(media.getDownloadCount());
 	}
 	
-	public ScreenVO getFromAudioVO(MediaAudioVO media) throws Exception {
+	public ScreenVO getFromAudioStreamVO(MediaAudioStreamVO media) throws Exception {
 		return this.setMimsUuid(media.getUuid())
 				.setName(media.getName())
 				.setPreviewUrl(media.getPreviewUrl())
+				.setType(media.getType());
+	}
+	
+	public ScreenVO getFromVideoStreamVO(MediaVideoStreamVO media) throws Exception {
+		return this.setMimsUuid(media.getUuid())
+				.setName(media.getName())
+				.setPreviewUrl(media.getPreviewUrl() != null && !media.getPreviewUrl().isEmpty() ? media.getPreviewUrl().get(0) : "")
+				.setType(media.getType());
+	}
+	
+	public ScreenVO getFromAudioVO(MediaAudioVO media) throws Exception {
+		this.setPreviewUrl(media.getPreviewUrl())
+		.setDuration(media.getDuration())
+		.setSize(media.getSize());
+		
+		MediaFileEditorVO editorVO = media.getEditorInfo();
+		if (editorVO != null) {
+			String previewUrl = editorVO.getPreviewUrl();
+			String duration = editorVO.getDuration();
+			Long size = editorVO.getSize();
+			if (previewUrl != null && !previewUrl.isEmpty()) this.setPreviewUrl(previewUrl);
+			if (duration != null && !duration.isEmpty()) this.setDuration(duration);
+			if (size != null) this.setSize(size.toString());
+		}
+		
+		return this.setMimsUuid(media.getUuid())
+				.setName(media.getName())
 				.setEncryption(media.getEncryption() != null && media.getEncryption() ? "true" : "false")
 				.setEncryptionUrl(media.getEncryptionUrl())
 				.setType(media.getType())
 				.setMimetype(media.getMimetype())
 				.setHotWeight(media.getHotWeight())
-				.setDownloadCount(media.getDownloadCount())
-				.setDuration(media.getDuration());
+				.setDownloadCount(media.getDownloadCount());
 	}
 	
 	public ScreenVO getFromCsResourceVO(CsResourceVO resourceVO) throws Exception {
@@ -88,6 +139,7 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 				.setType(resourceVO.getType())
 				.setMimetype(resourceVO.getMimetype())
 				.setDuration(resourceVO.getDuration())
+				.setSize(resourceVO.getSize())
 				.setPreviewUrl(resourceVO.getPreviewUrl())
 				.setEncryption(resourceVO.getEncryption())
 				.setEncryptionUrl(resourceVO.getEncryptionUrl())
@@ -95,6 +147,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 				.setFreq(resourceVO.getFreq())
 				.setAudioPid(resourceVO.getAudioPid())
 				.setVideoPid(resourceVO.getVideoPid())
+				.setAudioType(resourceVO.getAudioType())
+				.setVideoType(resourceVO.getVideoType())
 				.setMimsUuid(resourceVO.getUuid())
 				.setUpdateTime(new Date());
 	}
@@ -106,6 +160,8 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		screenPO.setMimsUuid(vo.getMimsUuid());
 		screenPO.setResourceId(vo.getResourceId());
 		screenPO.setScreenIndex(vo.getIndex());
+		screenPO.setContentType(vo.getContentType());
+		screenPO.setTextContent(vo.getTextContent());
 		screenPO.setSerialNum(vo.getSerialNum());
 		screenPO.setName(vo.getName());
 		screenPO.setType(vo.getType());
@@ -115,9 +171,12 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		screenPO.setHotWeight(vo.getHotWeight());
 		screenPO.setDownloadCount(vo.getDownloadCount());
 		screenPO.setDuration(vo.getDuration());
+		screenPO.setSize(vo.getSize());
 		screenPO.setFreq(vo.getFreq());
 		screenPO.setAudioPid(vo.getAudioPid());
 		screenPO.setVideoPid(vo.getVideoPid());
+		screenPO.setAudioType(vo.getAudioType());
+		screenPO.setVideoType(vo.getVideoType());
 		screenPO.setUpdateTime(new Date());
 		return screenPO;
 	}
@@ -139,6 +198,24 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 
 	public ScreenVO setSerialNum(Long serialNum) {
 		this.serialNum = serialNum;
+		return this;
+	}
+	
+	public String getContentType() {
+		return contentType;
+	}
+
+	public ScreenVO setContentType(String contentType) {
+		this.contentType = contentType;
+		return this;
+	}
+
+	public String getTextContent() {
+		return textContent;
+	}
+
+	public ScreenVO setTextContent(String textContent) {
+		this.textContent = textContent;
 		return this;
 	}
 
@@ -252,6 +329,15 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 		return this;
 	}
 
+	public String getSize() {
+		return size;
+	}
+
+	public ScreenVO setSize(String size) {
+		this.size = size;
+		return this;
+	}
+
 	public String getFreq() {
 		return freq;
 	}
@@ -276,6 +362,24 @@ public class ScreenVO extends AbstractBaseVO<ScreenVO, ScreenPO> {
 
 	public ScreenVO setVideoPid(String videoPid) {
 		this.videoPid = videoPid;
+		return this;
+	}
+	
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public ScreenVO setAudioType(String audioType) {
+		this.audioType = audioType;
+		return this;
+	}
+
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public ScreenVO setVideoType(String videoType) {
+		this.videoType = videoType;
 		return this;
 	}
 

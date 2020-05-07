@@ -57,8 +57,14 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 	/** 标签，格式：,分割 */
 	private String tags;
 	
+	/** 封图地址 */
+	private String thumbnail;
+	
 	/** 文件夹id */
 	private Long folderId;
+	
+	/** 流类型 */
+	private String streamType;
 	
 	/** 关键字， 格式：,分割*/
 	private String keyWords;
@@ -148,6 +154,15 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 		this.tags = tags;
 	}
 	
+	@Column(name = "THUMBNAIL")
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+	
 	@Column(name = "IGMPV3_STATUS")
 	public String getIgmpv3Status() {
 		return igmpv3Status;
@@ -182,6 +197,15 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 
 	public void setFolderId(Long folderId) {
 		this.folderId = folderId;
+	}
+
+	@Column(name = "STREAM_TYPE")
+	public String getStreamType() {
+		return streamType;
+	}
+
+	public void setStreamType(String streamType) {
+		this.streamType = streamType;
 	}
 
 	@Column(name = "KEY_WORDS")
@@ -250,11 +274,13 @@ public class MediaVideoStreamPO extends AbstractBasePO{
 		copy_videoStream.setRemarks(this.getRemarks());
 		copy_videoStream.setTags(this.getTags());
 		copy_videoStream.setKeyWords(this.getKeyWords());
+		copy_videoStream.setThumbnail(this.getThumbnail());
 		copy_videoStream.setUploadStatus(this.getUploadStatus());
 		copy_videoStream.setIgmpv3Status(this.getIgmpv3Status());
 		copy_videoStream.setIgmpv3Mode(this.getIgmpv3Mode());
 		copy_videoStream.setIgmpv3Ips(this.getIgmpv3Ips());
 		copy_videoStream.setAddition(this.getAddition());
+		copy_videoStream.setStreamType(this.getStreamType());
 		return copy_videoStream;
 	}
 	

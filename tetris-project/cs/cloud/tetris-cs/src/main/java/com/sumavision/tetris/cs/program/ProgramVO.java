@@ -10,6 +10,7 @@ public class ProgramVO extends AbstractBaseVO<ProgramVO,ProgramPO>{
 	private Long scheduleId;
 	private Long screenId;
 	private Long screenNum;
+	private String orient;
 	private List<ScreenVO> screenInfo;
 
 	@Override
@@ -19,7 +20,8 @@ public class ProgramVO extends AbstractBaseVO<ProgramVO,ProgramPO>{
 		.setUpdateTime(entity.getUpdateTime() == null ? "": DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 		.setScheduleId(entity.getScheduleId())
 		.setScreenId(entity.getScreenId())
-		.setScreenNum(entity.getScreenNum());
+		.setScreenNum(entity.getScreenNum())
+		.setOrient(entity.getOrient());
 		
 		return this;
 	}
@@ -48,6 +50,15 @@ public class ProgramVO extends AbstractBaseVO<ProgramVO,ProgramPO>{
 
 	public ProgramVO setScreenNum(Long screenNum) {
 		this.screenNum = screenNum;
+		return this;
+	}
+
+	public String getOrient() {
+		return orient;
+	}
+
+	public ProgramVO setOrient(String orient) {
+		this.orient = orient;
 		return this;
 	}
 

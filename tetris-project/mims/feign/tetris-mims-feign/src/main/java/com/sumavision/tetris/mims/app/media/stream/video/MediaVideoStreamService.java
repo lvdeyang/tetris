@@ -21,11 +21,8 @@ public class MediaVideoStreamService {
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月29日 下午3:21:49
-	 * 
-	 * @param String
-	 *            name 媒资名称
-	 * @param String
-	 *            previewUrl 视频流地址
+	 * @param String name 媒资名称
+	 * @param String previewUrl 视频流地址
 	 * @return MediaVideoStreamPO 视频流媒资
 	 */
 	public MediaVideoStreamVO addVideoStreamTask(String previewUrl, String name) throws Exception {
@@ -37,9 +34,7 @@ public class MediaVideoStreamService {
 	 * 删除媒资 <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月29日 下午3:21:49
-	 * 
-	 * @param Long
-	 *            mediaId 媒资名称
+	 * @param Long mediaId 媒资名称
 	 */
 	public Object remove(List<Long> mediaIdList) throws Exception {
 		String mediaIds = JSONArray.toJSONString(mediaIdList);
@@ -50,13 +45,9 @@ public class MediaVideoStreamService {
 	 * 修改媒资 <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年11月29日 下午3:21:49
-	 * 
-	 * @param Long
-	 *            mediaId 媒资名称
-	 * @param String
-	 *            previewUrl 媒资地址
-	 * @param String
-	 *            name 媒资名称
+	 * @param Long mediaId 媒资名称
+	 * @param String previewUrl 媒资地址
+	 * @param String name 媒资名称
 	 * @return MediaVideoStreamVO
 	 */
 	public MediaVideoStreamVO edit(Long mediaId, String previewUrl, String name) throws Exception {

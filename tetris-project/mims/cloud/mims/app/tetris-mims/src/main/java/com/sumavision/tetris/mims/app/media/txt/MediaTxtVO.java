@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.txt;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 	
 	private List<String> keyWords;
 	
+	private String thumbnail;
+	
 	private String type;
 	
 	private String resourceType;
@@ -37,6 +40,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 	private String style;
 	
 	private String previewUrl;
+	
+	private String uploadTmpPath;
 	
 	private String reviewStatus;
 	
@@ -113,6 +118,15 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 		return this;
 	}
 	
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public MediaTxtVO setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+		return this;
+	}
+
 	public String getType() {
 		return type;
 	}
@@ -164,6 +178,15 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 
 	public MediaTxtVO setPreviewUrl(String previewUrl) {
 		this.previewUrl = previewUrl;
+		return this;
+	}
+	
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaTxtVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
 		return this;
 	}
 
@@ -230,8 +253,10 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setName(entity.getName())
 			.setAuthorName(entity.getAuthorName())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
+			.setThumbnail(entity.getThumbnail())
 			.setRemarks(entity.getRemarks())
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId())
 			.setSize(entity.getSize())
@@ -239,8 +264,8 @@ public class MediaTxtVO extends AbstractBaseVO<MediaTxtVO, MediaTxtPO>{
 			.setRemoveable(true)
 			.setIcon(MediaTxtItemType.TXT.getIcon())
 			.setStyle(MediaTxtItemType.TXT.getStyle()[0])
-			.setAddition(entity.getAddition());
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaTxtPO.SEPARATOR_TAG)));
+			.setAddition(entity.getAddition())
+			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaTxtPO.SEPARATOR_TAG)) : new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaTxtPO.SEPARATOR_KEYWORDS)));	 
 		return this;
 	}

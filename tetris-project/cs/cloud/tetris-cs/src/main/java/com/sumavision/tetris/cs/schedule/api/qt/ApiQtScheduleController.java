@@ -13,6 +13,7 @@ import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityQuery;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileService;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
+import com.sumavision.tetris.mvc.constant.HttpConstant;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -47,6 +48,7 @@ public class ApiQtScheduleController {
 	@ResponseBody
 	@RequestMapping(value = "/quest")
 	public Object questSchedules(Long channelId, HttpServletRequest request) throws Exception {
+		String userIp = request.getHeader(HttpConstant.HEADER_REAL_IP_FROM_ZUUL);
 		if (channelId == null) {
 			UserVO userVO = userQuery.current();
 			Long userId = userVO.getId();
@@ -58,8 +60,9 @@ public class ApiQtScheduleController {
 		if (channelId == null) return null;
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		if (channel.getBroadWay().equals(BroadWay.FILE_DOWNLOAD_BROAD.getName())) {
-			return broadFileService.getNewBroadJSON(channelId);
+			return broadFileService.getNewBroadJSON(channelId, false, false);
 		}
-		return scheduleQuery.questSchedulesByChannelId(channelId);
+//		return scheduleQuery.questSchedulesByChannelId(channelId);
+		return scheduleQuery.questJSONSchedulesByChannelId(channelId, userIp);
 	}
 }

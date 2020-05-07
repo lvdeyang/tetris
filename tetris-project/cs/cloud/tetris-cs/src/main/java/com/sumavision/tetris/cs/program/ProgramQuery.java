@@ -46,22 +46,23 @@ public class ProgramQuery {
 	 * @param Long scheduleId 
 	 * @param templates
 	 */
-	public void getScreen2Template(Long scheduleId, JSONArray templates) throws Exception {
+	public TemplateVO getScreen2Template(Long scheduleId, JSONArray templates) throws Exception {
 		ProgramVO programVO = getProgram(scheduleId);
-		if (programVO == null) return;
+		if (programVO == null) return null;
 		List<TemplateVO> templateVOs = JSON.parseArray(templates.toJSONString(), TemplateVO.class);
 		for (TemplateVO template : templateVOs) {
 			if (template.getId() == programVO.getScreenId() && template.getScreenNum() == programVO.getScreenNum()) {
 				for (TemplateScreenVO templateScreenVO : template.getScreen()) {
 					for (ScreenVO screenVO : programVO.getScreenInfo()) {
 						if (screenVO.getSerialNum() == templateScreenVO.getNo()) {
-							if (templateScreenVO.getData() == null) template.setScreen(new ArrayList<TemplateScreenVO>());
+							if (templateScreenVO.getData() == null) templateScreenVO.setData(new ArrayList<ScreenVO>());
 							templateScreenVO.getData().add(screenVO);
 						}
 					}
 				}
-				break;
+				return template;
 			}
 		}
+		return null;
 	}
 }

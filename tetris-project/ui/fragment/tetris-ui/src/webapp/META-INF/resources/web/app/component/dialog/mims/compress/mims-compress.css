@@ -1,0 +1,17 @@
+.mi-compress-dialog .icon-folder-close{color:#ffd659;font-size:16px; position:relative; top:1px; margin-right:7px;}
+.mi-compress-dialog .el-dialog__body{padding:0 20px;}
+.mi-compress-dialog .el-dialog{margin-top:50px!important;}
+
+.mi-compress-dialog .dialog-body{height:560px; position:relative;}
+.mi-compress-dialog .breadcrumb-container{margin-top:10px; margin-bottom:15px;}
+.mi-compress-dialog .compress-item{width:96px; height:96px; float:left; position:relative; box-sizing:border-box; margin-right:12px;}
+.mi-compress-dialog .compress-item.last{margin-right:0;}
+.mi-compress-dialog .compress-item:hover{border:2px solid #eaeaea;}
+.mi-compress-dialog .compress-item.select{border:2px solid #67c23a;}
+.mi-compress-dialog .folder-scope{height:80px; position:relative; top:3px; text-align:center;}
+.mi-compress-dialog .folder-scope>span:first-child{font-size:63px; margin-right:0px; color:#ffd659;}
+.mi-compress-dialog .folder-scope>span:last-child{display:inline-block; height:16px; width:80px; font-size:12px; overflow:visible; word-wrap:break-word;}
+.mi-compress-dialog .compress-scope{height:80px; position: relative; top:3px; text-align:center;}
+.mi-compress-dialog .compress-scope>span:first-child{font-size:63px; position:relative; left:3px; top:1px;}
+.mi-compress-dialog .compress-scope>span:last-child{display:inline-block; height:16px; width:80px; font-size:12px; position:relative; left:1px; word-wrap:break-word; text-align:center;}
+.mi-compress-dialog .success-icon{width:14px; height:14px; position:absolute; right:0; bottom:0; background-color:#67c23a; border:1px solid #67c23a;}

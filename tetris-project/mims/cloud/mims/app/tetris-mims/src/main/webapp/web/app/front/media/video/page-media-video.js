@@ -18,6 +18,8 @@ define([
     'mi-upload-dialog',
     'mi-lightbox',
     'mi-tag-dialog',
+    'mi-image-dialog',
+    'mi-addition-dialog',
     'css!' + window.APPPATH + 'front/media/video/page-media-video.css'
 ], function(tpl, config, context, commons, ajax, $, File, Uploader, Vue){
 
@@ -71,6 +73,8 @@ define([
                         mediaEdit:false,
                         mediaEditTemplate:'',
                         mediaEditTemplates:[],
+                        thumbnail: '',
+                        addition: {},
                         loading:false
                     },
                     editVideo:{
@@ -80,6 +84,8 @@ define([
                         remark:'',
                         tags:[],
                         keyWords:'',
+                        thumbnail: '',
+                        addition: {},
                         loading:false
                     },
                     upload:{
@@ -316,6 +322,8 @@ define([
                             self.dialog.editVideo.remark = row.remarks;
                             self.dialog.editVideo.tags = row.tags;
                             self.dialog.editVideo.keyWords = typeof row.keyWords==='string'||!row.keyWords?row.keyWords:row.keyWords.join(',');
+                            self.dialog.editVideo.thumbnail = row.thumbnail;
+                            if (row.addition) self.dialog.editVideo.addition = typeof row.addition==='string' ? JSON.parse(row.addition) : row.addition;
                             self.dialog.editVideo.visible = true;
                         }
                     }else if(command === '2'){
@@ -492,6 +500,8 @@ define([
                     self.dialog.addVideo.task = '';
                     self.dialog.addVideo.mediaEdit = false;
                     self.dialog.addVideo.mediaEditTemplate = '';
+                    self.dialog.addVideo.thumbnail = '';
+                    self.dialog.addVideo.addition = {};
                     self.dialog.addVideo.visible = false;
                     self.dialog.addVideo.loading = false;
                 },
@@ -502,26 +512,38 @@ define([
                     self.dialog.editVideo.remark = '';
                     self.dialog.editVideo.tags = [];
                     self.dialog.editVideo.keyWords = '';
+                    self.dialog.editVideo.thumbnail = '';
+                    self.dialog.editVideo.addition = {};
                     self.dialog.editVideo.visible = false;
                     self.dialog.editVideo.loading = false;
                 },
                 //开启转码按钮获取模板列表
                 handleMediaEditChange: function(ifOpen) {
+                    //var self = this;
+                    //if (ifOpen) {
+                    //    self.dialog.addVideo.mediaEditTemplates.splice(0, self.dialog.addVideo.mediaEditTemplates.length);
+                    //    ajax.post('/media/editor/feign/template/list', null , function (data, status) {
+                    //        if (status == 200) {
+                    //            if (data != null && data.length > 0) {
+                    //                for (var i = 0; i < data.length; i++) {
+                    //                    self.dialog.addVideo.mediaEditTemplates.push(data[i]);
+                    //                }
+                    //            }
+                    //        }
+                    //    })
+                    //} else {
+                    //    self.dialog.addVideo.mediaEditTemplate = '';
+                    //}
+                },
+                //编辑资源海报
+                handleSelectThumbnail: function(buff) {
                     var self = this;
-                    if (ifOpen) {
-                        self.dialog.addVideo.mediaEditTemplates.splice(0, self.dialog.addVideo.mediaEditTemplates.length);
-                        ajax.post('/media/editor/feign/template/list', null , function (data, status) {
-                            if (status == 200) {
-                                if (data != null && data.length > 0) {
-                                    for (var i = 0; i < data.length; i++) {
-                                        self.dialog.addVideo.mediaEditTemplates.push(data[i]);
-                                    }
-                                }
-                            }
-                        })
-                    } else {
-                        self.dialog.addVideo.mediaEditTemplate = '';
-                    }
+                    self.$refs.selectThumbnail.setBuffer(buff);
+                    self.$refs.selectThumbnail.open();
+                },
+                selectedThumbnail:function(url, buff, startLoading, endLoading, done){
+                    buff.thumbnail = url;
+                    done();
                 },
                 //添加视频媒资任务
                 addMediaVideoTask:function(){
@@ -548,7 +570,9 @@ define([
                         remark:self.dialog.addVideo.remark,
                         folderId:self.current.id,
                         mediaEdit: self.dialog.addVideo.mediaEdit,
-                        mediaEditTemplate: self.dialog.addVideo.mediaEditTemplate
+                        mediaEditTemplate: self.dialog.addVideo.mediaEditTemplate,
+                        thumbnail: self.dialog.addVideo.thumbnail,
+                        addition: JSON.stringify(self.dialog.addVideo.addition)
                     }, function(data, status){
                         self.dialog.addVideo.loading = false;
                         if(status !== 200) return;
@@ -584,7 +608,9 @@ define([
                         name:self.dialog.editVideo.name,
                         tags:(self.dialog.editVideo.tags.length > 0) ? self.dialog.editVideo.tags.join(",") : null,
                         keyWords:self.dialog.editVideo.keyWords,
-                        remark:self.dialog.editVideo.remark
+                        remark:self.dialog.editVideo.remark,
+                        thumbnail: self.dialog.editVideo.thumbnail,
+                        addition: JSON.stringify(self.dialog.editVideo.addition)
                     }, function(data, status){
                         self.dialog.editVideo.loading = false;
                         if(status !== 200) return;
@@ -709,6 +735,31 @@ define([
                             break;
                         }
                     }
+                },
+
+                //附加属性编辑
+                handleAdditionAdd: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.addVideo.addition);
+                },
+                handleAdditionEdit: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.editVideo.addition);
+                },
+                editAddition: function(_buff, addition, closeFunc) {
+                    var self = this;
+                    var keys = Object.keys(_buff);
+                    for (var i in keys) {
+                        if (_buff.hasOwnProperty(keys[i])) {
+                            delete _buff[keys[i]];
+                        }
+                    }
+                    for (var key in addition) {
+                        if (addition.hasOwnProperty(key)) {
+                            _buff[key] = addition[key];
+                        }
+                    }
+                    closeFunc();
                 }
             },
             created:function(){

@@ -6,7 +6,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.tag.exception.TagNotExistsException;
 import com.sumavision.tetris.user.UserVO;
 
@@ -15,6 +17,9 @@ public class TagQuery {
 	
 	@Autowired
 	private TagDAO tagDAO;
+	
+	@Autowired
+	private MediaAudioQuery mediaAudioQuery;
 	
 	/**
 	 * 获取标签树<br/>
@@ -159,5 +164,65 @@ public class TagQuery {
 	 */
 	public List<TagVO> queryByIds(List<Long> tagIds) throws Exception {
 		return TagVO.getConverter(TagVO.class).convert(tagDAO.findAll(tagIds), TagVO.class);
+	}
+	
+	/**
+	 * 获取标签或子标签分布量和下载量<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月13日 上午10:44:47
+	 * @param UserVO user 用户信息
+	 * @param Long parentId 父标签id
+	 * @return List<TagVO> 标签数组
+	 */
+	public List<TagVO> queryTagMediaAndDownloadCount(UserVO user, Long parentId) throws Exception {
+		List<TagVO> tag = new ArrayList<TagVO>();
+		if (parentId == null) {
+			tag = getTagTree(user);
+			for (TagVO tagVO : tag) {
+				List<TagVO> childrenTag = tagVO.getSubColumns();
+				if (childrenTag == null || childrenTag.isEmpty()) {
+					mediaAudioQuery.queryMediaCountAndDownloadByTags(user, tag);
+				} else {
+					mediaAudioQuery.queryMediaCountAndDownloadByTags(user, childrenTag);
+				}
+			}
+		} else {
+			tag = getTagTreeByParent(user, parentId);
+			TagVO parentTag = tag.get(0);
+			
+			List<TagVO> childrenTag = parentTag.getSubColumns();
+			if (childrenTag == null || childrenTag.isEmpty()) {
+				mediaAudioQuery.queryMediaCountAndDownloadByTags(user, tag);
+			} else {
+				mediaAudioQuery.queryMediaCountAndDownloadByTags(user, childrenTag);
+			}
+		}
+		return tag;
+	}
+	
+	/**
+	 * 获取标签和父标签的键值对<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月20日 下午2:26:41
+	 * @param UserVO user 用户信息
+	 * @param List<TagVO> tagVOs 标签树
+	 * @param JSONObject object 存放键值对，用于递归
+	 */
+	public JSONObject queryTagAndParent(UserVO user, List<TagVO> tagVOs, JSONObject object) throws Exception {
+		if (object == null) object = new JSONObject();
+		if (tagVOs == null || tagVOs.isEmpty()) {
+			tagVOs = getTagTree(user);
+		}
+		for (TagVO tagVO : tagVOs) {
+			List<TagVO> childrenTag = tagVO.getSubColumns();
+			if (childrenTag == null || childrenTag.isEmpty()) continue;
+			for (TagVO childTag : childrenTag) {
+				object.put(childTag.getName(), tagVO.getName());
+			}
+			queryTagAndParent(user, childrenTag, object);
+		}
+		return object;
 	}
 }

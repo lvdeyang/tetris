@@ -23,6 +23,16 @@ public interface MediaVideoStreamFeign {
 	public JSONObject load(@RequestParam("folderId") Long folderId) throws Exception;
 	
 	/**
+	 * 加载所有的视频流媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return List<MediaVideoStreamVO> 视频流媒资列表
+	 */
+	@RequestMapping(value = "/media/video/stream/feign/load/all")
+	public JSONObject loadAll() throws Exception;
+	
+	/**
 	 * 添加视频流媒资上传任务<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

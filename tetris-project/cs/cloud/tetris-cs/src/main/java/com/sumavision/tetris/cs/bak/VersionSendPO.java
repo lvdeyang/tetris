@@ -43,6 +43,12 @@ public class VersionSendPO extends AbstractBasePO {
 	
 	/** 分片下载地址 */
 	private String zoneDownloadPath;
+	
+	/** json文件本地位置 */
+	private String jsonStorePath;
+	
+	/** json文件http位置 */
+	private String jsonDownloadPath;
 
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -124,5 +130,23 @@ public class VersionSendPO extends AbstractBasePO {
 
 	public void setZoneDownloadPath(String zoneDownloadPath) {
 		this.zoneDownloadPath = zoneDownloadPath;
+	}
+
+	@Column(name = "JSON_STORE_PATH")
+	public String getJsonStorePath() {
+		return jsonStorePath;
+	}
+
+	public void setJsonStorePath(String jsonStorePath) {
+		this.jsonStorePath = jsonStorePath;
+	}
+
+	@Column(name = "JSON_DOWNLOAD_PATH")
+	public String getJsonDownloadPath() {
+		return jsonDownloadPath;
+	}
+
+	public void setJsonDownloadPath(String jsonDownloadPath) {
+		this.jsonDownloadPath = jsonDownloadPath;
 	}
 }

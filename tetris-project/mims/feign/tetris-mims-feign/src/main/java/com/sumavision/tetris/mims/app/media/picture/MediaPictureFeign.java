@@ -22,6 +22,16 @@ public interface MediaPictureFeign {
 	public JSONObject load(@RequestParam("folderId") Long folderId) throws Exception;
 	
 	/**
+	 * 加载所有的图片媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return List<MediaPictureVO> 视频媒资列表
+	 */
+	@RequestMapping(value = "/media/picture/feign/load/all")
+	public JSONObject loadAll() throws Exception;
+	
+	/**
 	 * 根据预览地址查询图片列表<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -32,4 +42,15 @@ public interface MediaPictureFeign {
 	@RequestMapping(value = "/media/picture/feign/find/by/preview/url/in")
 	public JSONObject findByPreviewUrlIn(@RequestParam("previewUrls") String previewUrls) throws Exception;
 	
+	/**
+	 * 删除图片媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 上午9:07:53
+	 * @param Long id 媒资id
+	 * @return deleted List<MediaPictureVO> 删除列表
+	 * @return processed List<MediaPictureVO> 待审核列表
+	 */
+	@RequestMapping(value = "/media/picture/feign/remove")
+	public JSONObject remove(@RequestParam("id") Long id) throws Exception;
 }

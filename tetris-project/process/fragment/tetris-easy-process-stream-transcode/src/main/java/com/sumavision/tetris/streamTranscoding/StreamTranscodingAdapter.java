@@ -191,13 +191,12 @@ public class StreamTranscodingAdapter {
 	 * <b>日期：</b>2019年9月18日 上午9:55:51
 	 * @return String ip 小工具ip
 	 * @return String port 小工具请求port
-	 * @return int updStartPort 小工具接收流端口
 	 */
-	public Map<String, Object> getToolInfo() throws Exception{
+	public Map<String, String> getToolInfo() throws Exception{
 		String json = readProfile();
 		JSONObject jsonObject = JSONObject.parseObject(json);
 		
-		return new HashMapWrapper<String, Object>().put("ip", jsonObject.getString("toolIp"))
+		return new HashMapWrapper<String, String>().put("ip", jsonObject.getString("toolIp"))
 				.put("port", jsonObject.getString("toolPort"))
 				.getMap();
 	}

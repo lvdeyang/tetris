@@ -2,6 +2,8 @@ package com.sumavision.tetris.cs.channel.broad.ability;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
@@ -23,6 +25,15 @@ public class BroadAbilityRemotePO extends AbstractBasePO{
 	
 	/** 回调url */
 	private String stopCallbackUrl;
+	
+	/** 转换服务ip */
+	private String deviceIp;
+	
+	/** 转码参数 */
+	private String transcodeInfo;
+	
+	/** 推流方式 */
+	private BroadStreamWay broadStreamWay;
 
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -49,5 +60,33 @@ public class BroadAbilityRemotePO extends AbstractBasePO{
 
 	public void setStopCallbackUrl(String stopCallbackUrl) {
 		this.stopCallbackUrl = stopCallbackUrl;
+	}
+
+	@Column(name = "DEVICE_IP")
+	public String getDeviceIp() {
+		return deviceIp;
+	}
+
+	public void setDeviceIp(String deviceIp) {
+		this.deviceIp = deviceIp;
+	}
+
+	@Column(name = "TRANCODE_INFO")
+	public String getTranscodeInfo() {
+		return transcodeInfo;
+	}
+
+	public void setTranscodeInfo(String transcodeInfo) {
+		this.transcodeInfo = transcodeInfo;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "BROAD_STREAM_WAY")
+	public BroadStreamWay getBroadStreamWay() {
+		return broadStreamWay;
+	}
+
+	public void setBroadStreamWay(BroadStreamWay broadStreamWay) {
+		this.broadStreamWay = broadStreamWay;
 	}
 }

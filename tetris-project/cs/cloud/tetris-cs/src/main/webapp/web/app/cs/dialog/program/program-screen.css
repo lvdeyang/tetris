@@ -3,6 +3,18 @@
 .program-scree .tree-wrapper{height:348px; margin-top: 20px; overflow: auto;}
 .program-scree .footer{height:32px;}
 
+/*移除表格底部的横条*/
+.el-table::before {
+    height: 0;
+}
+
+/*移除input加减按钮*/
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button{
+    -webkit-appearance: none !important;
+    margin: 0;
+}
+
 .screen{
     border: 1px solid #ebeef5;
     transition: .3s;

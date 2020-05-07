@@ -118,8 +118,8 @@ public class MediaAudioController {
             String remark,
 			Long folderId, 
 			boolean encryption,
-			Boolean mediaEdit,
-			String mediaEditTemplate,
+			String thumbnail,
+			String addition,
 			HttpServletRequest request) throws Exception{
 		
 		MediaAudioTaskVO taskParam = JSON.parseObject(task, MediaAudioTaskVO.class);
@@ -146,8 +146,8 @@ public class MediaAudioController {
 		}
 		
 		MediaAudioPO entity = mediaAudioService.addTask(user, name, tagList, keyWordList, remark, encryption, taskParam, folder);
-		entity.setMediaEdit(mediaEdit);
-		entity.setMediaEditTemplate(mediaEditTemplate);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if (addition != null) entity.setAddition(addition);
 		mediaAudioDao.save(entity);
 		
 		return new MediaAudioVO().set(entity);
@@ -177,9 +177,9 @@ public class MediaAudioController {
             String keyWords,
             String remark,
             boolean encryption,
-            Boolean mediaEdit,
-            String mediaEditTemplate,
 			Long folderId, 
+			String thumbnail,
+			String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -204,8 +204,8 @@ public class MediaAudioController {
 		}
 		
 		MediaAudioPO entity = mediaAudioService.addTaskFromTxt(user, name, tagList, keyWordList, remark, txtId, encryption, folder);
-		entity.setMediaEdit(mediaEdit);
-		entity.setMediaEditTemplate(mediaEditTemplate);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if (addition != null) entity.setAddition(addition);
 		mediaAudioDao.save(entity);
 		
 		return new MediaAudioVO().set(entity);
@@ -233,6 +233,8 @@ public class MediaAudioController {
             String tags,
             String keyWords,
             String remark,
+            String thumbnail,
+			String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -253,6 +255,9 @@ public class MediaAudioController {
 		}
 		
 		MediaAudioPO entity = mediaAudioService.editAudio(user, audio, name, tagList, keyWordList, remark);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if(addition != null) entity.setAddition(addition);
+		mediaAudioDao.save(entity);
 		
 		return new MediaAudioVO().set(entity);
 		
@@ -407,10 +412,11 @@ public class MediaAudioController {
 					fileEncodeService.encodeAudioFile(task);
 				}
 			}
-			
-			if (task.getMediaEdit() != null && task.getMediaEdit()) {
-				mediaAudioService.startMediaEdit(task);
-			}
+
+			mediaAudioService.checkMediaEdit(task);
+//			if (task.getMediaEdit() != null && task.getMediaEdit()) {
+//				mediaAudioService.startMediaEdit(task);
+//			}
 		}
 		
         return new MediaAudioVO().set(task);
@@ -551,11 +557,11 @@ public class MediaAudioController {
 	}
 	
 	/**
-	 * 移动图片媒资<br/>
+	 * 移动音频媒资<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月4日 上午11:33:56
-	 * @param Long mediaId 图片媒资id
+	 * @param Long mediaId 音频媒资id
 	 * @param Long targetId 目标文件夹id
 	 * @return boolean 是否移动
 	 */

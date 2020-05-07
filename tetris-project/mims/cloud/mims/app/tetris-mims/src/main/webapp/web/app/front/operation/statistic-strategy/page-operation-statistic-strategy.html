@@ -1,0 +1,27 @@
+<mi-frame ref="frame" id="page-operation-statistic-strategy-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">结算策略</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>结算策略</el-breadcrumb-item>
+    </template>
+
+    <template v-loading="loading">
+        <el-card class="box-card card" shadow="hover">
+            <el-button type="primary" size="small" @click="handleCommit"><span class="icon-plus icon-save"></span>&nbsp;保存</el-button>
+            <el-button type="warning" size="small" @click="handleReset"><span class="icon-plus icon-undo"></span>&nbsp;恢复</el-button>
+            <template>
+                <div class="block">
+                    <span style="color: #409EFF;">生产者&nbsp;&nbsp;(&nbsp;{{ value }}%&nbsp;)</span>
+                    <el-slider
+                            class="slider"
+                            v-model="value">
+                    </el-slider>
+                    <span style="color: #bf6100;">运营商&nbsp;&nbsp;(&nbsp;{{ 100 - value }}%&nbsp;)</span>
+                </div>
+            </template>
+        </el-card>
+    </template>
+
+</mi-frame>
