@@ -1,0 +1,33 @@
+<el-dialog
+        title="地区选择"
+        :visible.sync="visible"
+        width="500px"
+        :before-close="handleAreaPickerClose">
+
+    <el-tree
+            v-loading="loading"
+            ref="areaPickerTree"
+            :props="tree.props"
+            :data="tree.data"
+            :expand-on-click-node="true"
+            node-key="areaId"
+            :check-strictly=false
+            show-checkbox
+            @check="handleAreaPickerChange"
+            highlight-current
+            lazy
+            :load="manageDivision"
+            style="padding: 20px;max-height: 400px;overflow-y:auto">
+            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
+                  slot-scope="{node, data}">
+                    <span style="font-size:14px;">
+                         <span>{{data.name}}</span>
+                    </span>
+            </span>
+    </el-tree>
+
+    <span slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="handleAreaPickerClose">取 消</el-button>
+        <el-button size="medium" type="primary" @click="handleAreaPickerCommit">确 定</el-button>
+    </span>
+</el-dialog>

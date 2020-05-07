@@ -17,6 +17,8 @@ public class TagVO extends AbstractBaseVO<TagVO, TagPO>{
 	private List<TagVO> subColumns;
 	
 	private int subMediaNum;
+	
+	private Long downloadCount;
 
 	public String getName() {
 		return name;
@@ -72,6 +74,15 @@ public class TagVO extends AbstractBaseVO<TagVO, TagPO>{
 		return this;
 	}
 
+	public Long getDownloadCount() {
+		return downloadCount;
+	}
+
+	public TagVO setDownloadCount(Long downloadCount) {
+		this.downloadCount = downloadCount;
+		return this;
+	}
+
 	@Override
 	public TagVO set(TagPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -79,7 +90,9 @@ public class TagVO extends AbstractBaseVO<TagVO, TagPO>{
 		.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
 		.setName(entity.getName())
 		.setParentId(entity.getParentId())
-		.setRemark(entity.getRemark());
+		.setRemark(entity.getRemark())
+		.setSubMediaNum(0)
+		.setDownloadCount(0l);
 		return this;
 	}
 }

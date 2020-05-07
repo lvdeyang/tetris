@@ -24,17 +24,26 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 	/** 播发输出port */
 	private String broadUrlPort;
 	
+	/** 播发输出url */
+	private String broadUrl;
+	
 	/** 播发用户id */
 	private Long userId;
 	
 	/** 播发输出是否加密 */
 	private Boolean broadEncryption;
 	
-	/** 视频流媒资id */
+	/** 流媒资类型 */
+	private String mediaType;
+	
+	/** 流媒资id */
 	private Long mediaId;
 	
 	/** 预播发id */
 	private Long previewId;
+	
+	/** 任务id */
+	private String taskId;
 
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -81,6 +90,15 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 		this.broadUrlPort = broadUrlPort;
 	}
 
+	@Column(name = "BROAD_URL")
+	public String getBroadUrl() {
+		return broadUrl;
+	}
+
+	public void setBroadUrl(String broadUrl) {
+		this.broadUrl = broadUrl;
+	}
+
 	@Column(name = "BROAD_ENCRYPTION")
 	public Boolean getBroadEncryption() {
 		return broadEncryption;
@@ -90,6 +108,15 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 		this.broadEncryption = broadEncryption;
 	}
 
+	@Column(name = "MEDIA_TYPE")
+	public String getMediaType() {
+		return mediaType;
+	}
+
+	public void setMediaType(String mediaType) {
+		this.mediaType = mediaType;
+	}
+
 	@Column(name = "MEDIA_ID")
 	public Long getMediaId() {
 		return mediaId;
@@ -97,5 +124,14 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 
 	public void setMediaId(Long mediaId) {
 		this.mediaId = mediaId;
+	}
+
+	@Column(name = "TASK_ID")
+	public String getTaskId() {
+		return taskId;
+	}
+
+	public void setTaskId(String taskId) {
+		this.taskId = taskId;
 	}
 }

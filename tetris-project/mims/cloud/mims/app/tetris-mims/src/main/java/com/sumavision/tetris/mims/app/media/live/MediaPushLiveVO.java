@@ -37,6 +37,10 @@ public class MediaPushLiveVO extends AbstractBaseVO<MediaPushLiveVO, MediaPushLi
 	
 	private String videoPid;
 	
+	private String audioType;
+	
+	private String videoType;
+	
 	private String reviewStatus;
 	
 	private String processInstanceId;
@@ -169,6 +173,24 @@ public class MediaPushLiveVO extends AbstractBaseVO<MediaPushLiveVO, MediaPushLi
 		return this;
 	}
 
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public MediaPushLiveVO setAudioType(String audioType) {
+		this.audioType = audioType;
+		return this;
+	}
+
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public MediaPushLiveVO setVideoType(String videoType) {
+		this.videoType = videoType;
+		return this;
+	}
+
 	public String getReviewStatus() {
 		return reviewStatus;
 	}
@@ -208,6 +230,8 @@ public class MediaPushLiveVO extends AbstractBaseVO<MediaPushLiveVO, MediaPushLi
 			.setFreq(entity.getFreq())
 			.setAudioPid(entity.getAudioPid())
 			.setVideoPid(entity.getVideoPid())
+			.setAudioType(entity.getAudioType())
+			.setVideoType(entity.getVideoType())
 			.setType(MediaPushLiveItemType.PUSH_LIVE.toString())
 			.setRemoveable(true)
 			.setIcon(MediaPushLiveItemType.PUSH_LIVE.getIcon())

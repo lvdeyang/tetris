@@ -192,6 +192,7 @@ public class ApiServerMediaAudioController {
 			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
 			task.setDuration(multimediaInfo.getDuration());
 			mediaAudioDao.save(task);
+			mediaAudioService.checkMediaEdit(task);
 		}
 		
         return new MediaAudioVO().set(task);

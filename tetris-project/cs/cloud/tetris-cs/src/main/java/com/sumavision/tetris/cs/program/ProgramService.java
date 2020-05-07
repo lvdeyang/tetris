@@ -33,7 +33,7 @@ public class ProgramService {
 	 */
 	public ProgramVO setProgram(ProgramVO programVO) throws Exception {
 
-		ProgramPO programPO = this.setProgramScreenNum(programVO.getScheduleId(), programVO.getScreenNum(), programVO.getScreenId());
+		ProgramPO programPO = this.setProgramScreenNum(programVO.getScheduleId(), programVO.getScreenNum(), programVO.getScreenId(), programVO.getOrient());
 		
 		ProgramVO returnProgramVO = new ProgramVO().set(programPO);
 		
@@ -42,8 +42,8 @@ public class ProgramService {
 		return returnProgramVO;
 	}
 	
-	public ProgramVO setProgram(Long scheduleId, TemplateVO templateVO) throws Exception {
-		ProgramPO programPO = setProgramScreenNum(scheduleId, templateVO.getScreenNum(), templateVO.getId());
+	public ProgramVO setProgram(Long scheduleId, TemplateVO templateVO, String orient) throws Exception {
+		ProgramPO programPO = setProgramScreenNum(scheduleId, templateVO.getScreenNum(), templateVO.getId(), orient);
 		ProgramVO returnProgramVO = new ProgramVO().set(programPO);
 		
 		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
@@ -66,18 +66,16 @@ public class ProgramService {
 	 * @param screenNum 分屏数
 	 * @return ProgramPO 分屏信息
 	 */
-	private ProgramPO setProgramScreenNum(Long scheduleId, Long screenNum, Long screenId) {
+	private ProgramPO setProgramScreenNum(Long scheduleId, Long screenNum, Long screenId, String orient) {
 		ProgramPO program = programDao.findByScheduleId(scheduleId);
-		if (program != null) {
-			program.setScreenNum(screenNum);
-			program.setScreenId(screenId);
-		}else {
+		if (program == null) {
 			program = new ProgramPO();
-			program.setScheduleId(scheduleId);
-			program.setScreenNum(screenNum);
-			program.setScreenId(screenId);
 			program.setUpdateTime(new Date());
+			program.setScheduleId(scheduleId);
 		}
+		program.setScreenNum(screenNum);
+		program.setScreenId(screenId);
+		program.setOrient(orient);
 		programDao.save(program);
 		
 		return program;

@@ -22,11 +22,13 @@ import org.springframework.context.annotation.ComponentScan;
 import com.sumavision.tetris.spring.zuul.auth.filter.ApiFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.MultipartFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.android.ApiAndroidLoginFilter;
+import com.sumavision.tetris.spring.zuul.auth.filter.g01.web.ApiG01WebLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.process.ApiProcessLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtPollingLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtScheduleLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.qt.ApiQtZkLoginFilter;
+import com.sumavision.tetris.spring.zuul.auth.filter.screen.web.ApiScreenWebLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.server.ApiServerLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.terminal.ApiTerminalLoginFilter;
 import com.sumavision.tetris.spring.zuul.auth.filter.thirdpart.ApiThirdpartLoginFilter;
@@ -145,4 +147,13 @@ public class TetrisSpringZuulApplication extends SpringBootServletInitializer{
 		return new ApiFilter();
 	}
 	
+	@Bean
+	public ApiG01WebLoginFilter apiG01WebLoginFilter() {
+		return new ApiG01WebLoginFilter();
+	}
+	
+	@Bean
+	public ApiScreenWebLoginFilter apiScreenWebLoginFilter() {
+		return new ApiScreenWebLoginFilter();
+	}
 }

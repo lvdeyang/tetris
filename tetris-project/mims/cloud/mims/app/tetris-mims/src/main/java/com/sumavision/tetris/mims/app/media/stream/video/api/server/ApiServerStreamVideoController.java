@@ -69,6 +69,7 @@ public class ApiServerStreamVideoController {
             String tags,
             String keyWords,
             String remark,
+            String streamType,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -80,7 +81,7 @@ public class ApiServerStreamVideoController {
 		
 		List<String> previewUrls = JSON.parseArray(previewUrl,String.class);
 		
-		return  mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrls, folderPOs.get(0));
+		return  mediaVideoStreamService.addTask(user, name, null, null, remark, previewUrls, folderPOs.get(0), streamType);
 		
 	}
 	
@@ -103,6 +104,7 @@ public class ApiServerStreamVideoController {
 	public Object addTask(
 			String previewUrl, 
 			String name,
+			String streamType,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -112,7 +114,7 @@ public class ApiServerStreamVideoController {
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
 		}
 		
-		return  mediaVideoStreamService.addTask(user, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folderPOs.get(0));
+		return  mediaVideoStreamService.addTask(user, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folderPOs.get(0), streamType);
 		
 	}
 	

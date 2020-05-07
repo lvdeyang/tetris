@@ -12,22 +12,31 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.cs.bak.VersionSendPO;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
-import com.sumavision.tetris.cs.channel.ChannelDAO;
+import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
 import com.sumavision.tetris.cs.channel.ChannelVO;
+import com.sumavision.tetris.cs.channel.broad.ChannelServerType;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemoteDAO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemotePO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityService;
+import com.sumavision.tetris.cs.schedule.ScheduleService;
+import com.sumavision.tetris.easy.process.stream.transcode.StreamTranscodeProfileVO;
+import com.sumavision.tetris.easy.process.stream.transcode.StreamTranscodeQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
-import com.sumavision.tetris.user.UserQuery;
 
 @Controller
 @RequestMapping(value = "/api/server/cs/channel")
@@ -39,13 +48,22 @@ public class ApiServerChannelController {
 	private ChannelQuery channelQuery;
 	
 	@Autowired
-	private ChannelDAO channelDao;
+	private ScheduleService scheduleService;
 	
 	@Autowired
 	private VersionSendQuery VersionSendQuery;
 	
 	@Autowired
-	private UserQuery userQuery;
+	private BroadAbilityService broadAbilityService;
+	
+	@Autowired
+	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
+	
+	@Autowired
+	private BroadAbilityRemoteDAO broadAbilityRemoteDAO;
+	
+	@Autowired
+	private StreamTranscodeQuery streamTranscodeQuery;
 	
 	/**
 	 * 分页获取频道列表<br/>
@@ -59,10 +77,26 @@ public class ApiServerChannelController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/list")
+	@RequestMapping(value = "/list/page")
 	public Object channelList(Integer currentPage, Integer pageSize, HttpServletRequest request) throws Exception {
 
 		return channelQuery.findAll(currentPage, pageSize, ChannelType.REMOTE);
+	}
+	
+	/**
+	 * 获取频道列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @return List<ChannelVO> channels 频道列表
+	 * @return Long total 频道总数
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list")
+	public Object channelList(HttpServletRequest request) throws Exception {
+
+		return channelQuery.findAll(null, null, ChannelType.REMOTE);
 	}
 	
 	/**
@@ -96,19 +130,46 @@ public class ApiServerChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(String name, String date, String broadWay, String previewUrlIp, String previewUrlPort, String remark, Boolean encryption, HttpServletRequest request) throws Exception {
+	public Object add(String channelUrl, String date, String casts, HttpServletRequest request) throws Exception {
 		
-		if (date == null) date = DateUtil.now();
-		if (broadWay == null) broadWay = "轮播推流";
-		if (remark == null) remark = "";
+		String name = "yjgbBroad";
+		String dateNow = DateUtil.now();
+		String broadWay = BroadWay.ABILITY_BROAD.getName();
+		String remark = "";
+		Boolean encryption = false;
+		
+		StreamTranscodeProfileVO streamTranscodeProfileVO = streamTranscodeQuery.getProfile();
+		String ip = streamTranscodeProfileVO.getToolIp();
+		Long port = broadAbilityBroadInfoService.queryLocalPort(ip, Long.parseLong(streamTranscodeProfileVO.getUdpStartPort()));
 		
 		List<BroadAbilityBroadInfoVO> infoVOs = new ArrayListWrapper<BroadAbilityBroadInfoVO>()
-				.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(previewUrlIp).setPreviewUrlPort(previewUrlPort))
+				.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(ip).setPreviewUrlPort(port.toString()))
 				.getList();
 
-		ChannelPO channel = channelService.add(name, date, broadWay, remark, null, null, ChannelType.REMOTE, encryption, false, null, null, null, null, null, infoVOs);
-
-		return new ChannelVO().set(channel);
+		ChannelPO channel = channelService.addYjbgChannel(
+				name,
+				dateNow,
+				broadWay,
+				remark,
+				encryption,
+				false,
+				null,
+				null,
+				null,
+				null,
+				null,
+				infoVOs);
+		
+		BroadAbilityRemotePO remotePO = new BroadAbilityRemotePO();
+		remotePO.setChannelId(channel.getId());
+		remotePO.setTranscodeInfo(channelUrl);
+		broadAbilityRemoteDAO.save(remotePO);
+		
+		if (casts != null && !casts.isEmpty()) {
+			List<ApiServerScheduleCastVO> castVOs = JSONArray.parseArray(casts, ApiServerScheduleCastVO.class);
+			scheduleService.addSchedulesFromCast(channel.getId(), castVOs);
+		}
+		return new HashMapWrapper<String, Long>().put("channelID", channel.getId()).getMap();
 	}
 
 	/**
@@ -127,17 +188,13 @@ public class ApiServerChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/edit")
-	public Object rename(Long id, String name, String previewUrlIp, String previewUrlPort, String remark, Boolean encryption, HttpServletRequest request) throws Exception {
-		
-		if (remark == null) remark = "";
-
-		List<BroadAbilityBroadInfoVO> infoVOs = new ArrayListWrapper<BroadAbilityBroadInfoVO>()
-				.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(previewUrlIp).setPreviewUrlPort(previewUrlPort))
-				.getList();
-		
-		ChannelPO channel = channelService.edit(id, name, remark, null, null, encryption, false, null, null, null, null, null, infoVOs);
-
-		return new ChannelVO().set(channel);
+	public Object rename(Long channelID, String date, String casts, HttpServletRequest request) throws Exception {
+		scheduleService.removeByChannelId(channelID);
+		if (casts != null && !casts.isEmpty()) {
+			List<ApiServerScheduleCastVO> castVOs = JSONArray.parseArray(casts, ApiServerScheduleCastVO.class);
+			scheduleService.addSchedulesFromCast(channelID, castVOs);
+		}
+		return null;
 	}
 
 	/**
@@ -150,9 +207,9 @@ public class ApiServerChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/remove")
-	public Object remove(Long id, HttpServletRequest request) throws Exception {
+	public Object remove(Long channelID, HttpServletRequest request) throws Exception {
 
-		channelService.remove(id);
+		channelService.remove(channelID);
 
 		return "";
 	}
@@ -163,16 +220,21 @@ public class ApiServerChannelController {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
 	 * @param Long channelId 频道id
+	 * @param String deviceIp 转换服务IP
+	 * @param String task 转码参数
 	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/start")
-	public Object broadcastStart(Long id, HttpServletRequest request) throws Exception {
-
-		ChannelPO channelPO = channelDao.findOne(id);
-		if (channelPO == null) return null;
+	public Object broadcastStart(Long channelID, String deviceIp, String task, HttpServletRequest request) throws Exception {
+		BroadAbilityRemotePO remotePO = broadAbilityRemoteDAO.findByChannelId(channelID);
+		if (remotePO == null) remotePO = new BroadAbilityRemotePO();
+		remotePO.setChannelId(channelID);
+		remotePO.setTranscodeInfo(task);
+		remotePO.setDeviceIp(deviceIp);
+		broadAbilityRemoteDAO.save(remotePO);
 		
-		channelService.startBroadcast(id, null);
+		channelService.startBroadcast(channelID, null);
 		
 		return "";
 	}
@@ -187,12 +249,9 @@ public class ApiServerChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/stop")
-	public Object broadcastStop(Long id, HttpServletRequest request) throws Exception {
+	public Object broadcastStop(Long channelID, HttpServletRequest request) throws Exception {
 		
-		ChannelPO channelPO = channelDao.findOne(id);
-		if (channelPO == null) return null;
-		
-		channelService.stopBroadcast(id);
+		channelService.stopBroadcast(channelID);
 		
 		return "";
 	}
@@ -207,9 +266,56 @@ public class ApiServerChannelController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/broadcast/status")
-	public Object broadcastStatus(Long id, HttpServletRequest request) throws Exception {
+	public Object broadcastStatus(Long channelID, HttpServletRequest request) throws Exception {
 		
-		return channelQuery.getBroadstatus(id);
+		return channelQuery.getBroadstatus(channelID);
+	}
+	
+	/**
+	 * 添加输出<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月4日 下午3:16:46
+	 * @param Long channelID 频道id
+	 * @param String channelUrl 输出信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/output/add")
+	public Object addOutput(Long channelID, String channelUrl, HttpServletRequest request) throws Exception {
+		broadAbilityService.addOutputCallback(channelID, channelUrl);
+		return null;
+	}
+	
+	/**
+	 * 删除输出<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月4日 下午3:16:46
+	 * @param Long channelID 频道id
+	 * @param String channelUrl 输出信息
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/output/delete")
+	public Object deleteOutput(Long channelID, String channelUrl, HttpServletRequest request) throws Exception {
+		broadAbilityService.deleteOutputCallback(channelID, channelUrl);
+		return null;
+	}
+	
+	/**
+	 * 推流能力重启调用(例外)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月5日 上午10:40:15
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/alarm/reboot")
+	public Object alarmRebootRecieve(String serverIp, HttpServletRequest request) throws Exception {
+		System.out.println("推流能力重启");
+		channelService.rebootServer(ChannelServerType.ABILITY_STREAM, serverIp);
+		return null;
 	}
 	
 	/**

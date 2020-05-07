@@ -197,7 +197,7 @@ public class LoginService {
 		//签名校验
 		BasicDevelopmentPO basicDevelopment = basicDevelopmentDao.findByAppId(appId);
 		if(basicDevelopment==null) throw new UnknownAppIdException(appId);
-		String serverSign = basicDevelopmentQuery.sign(appId, timestamp, basicDevelopment.getAppSecret());
+		String serverSign = basicDevelopmentQuery.sign(appId, timestamp, basicDevelopment.decodeAppSecret());
 		if(!serverSign.equals(sign)) throw new SignVerifyFailException(appId, timestamp, sign);
 		
 		TokenPO token = tokenDao.findByUserIdAndType(basicDevelopment.getUserId(), TerminalType.API);

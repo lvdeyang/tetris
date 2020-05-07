@@ -9,12 +9,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -105,8 +108,8 @@ public class MediaVideoController {
             String keyWords,
             String remark,
 			Long folderId, 
-			Boolean mediaEdit,
-            String mediaEditTemplate,
+            String thumbnail,
+            String addition,
 			HttpServletRequest request) throws Exception{
 		
 		MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class);
@@ -123,13 +126,13 @@ public class MediaVideoController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if (!tags.isEmpty()) {
+		if (tags != null && !tags.isEmpty()) {
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
 		MediaVideoPO entity = mediaVideoService.addTask(user, name, tagList, null, remark, taskParam, folder);
-		entity.setMediaEdit(mediaEdit);
-		entity.setMediaEditTemplate(mediaEditTemplate);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if(addition != null) entity.setAddition(addition);
 		mediaVideoDao.save(entity);
 		
 		return new MediaVideoVO().set(entity);
@@ -157,6 +160,8 @@ public class MediaVideoController {
             String tags,
             String keyWords,
             String remark,
+            String thumbnail,
+            String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -167,7 +172,7 @@ public class MediaVideoController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if(tags != null){
+		if(tags != null && !tags.isEmpty()){
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
@@ -177,9 +182,11 @@ public class MediaVideoController {
 		}
 		
 		MediaVideoPO entity = mediaVideoService.editTask(user, video, name, tagList, keyWordList, remark);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if(addition != null) entity.setAddition(addition);
+		mediaVideoDao.save(entity);
 		
 		return new MediaVideoVO().set(entity);
-		
 	}
 	
 	/**
@@ -323,10 +330,7 @@ public class MediaVideoController {
 			}else{
 				mediaVideoDao.save(task);
 			}
-			
-			if (task.getMediaEdit() != null && task.getMediaEdit()) {
-				mediaVideoService.startMediaEdit(task);
-			}
+			mediaVideoService.checkMediaEdit(task);
 		}
 		
         return new MediaVideoVO().set(task);

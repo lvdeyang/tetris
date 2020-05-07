@@ -1,5 +1,8 @@
 package com.sumavision.tetris.cs.program;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +11,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.cs.channel.BroadWay;
+import com.sumavision.tetris.cs.channel.ChannelPO;
+import com.sumavision.tetris.cs.channel.ChannelQuery;
+import com.sumavision.tetris.cs.channel.ChannelService;
+import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -19,6 +27,15 @@ public class ProgramController {
 	
 	@Autowired
 	private ProgramService programService;
+	
+	@Autowired
+	private ChannelService channelService;
+	
+	@Autowired
+	private ChannelQuery channelQuery;
+	
+	@Autowired
+	private ScheduleQuery scheduleQuery;
 	
 	/**
 	 * 获取分屏信息(附带排单列表)<br/>
@@ -46,10 +63,47 @@ public class ProgramController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/set")
-	public Object programSet(Long scheduleId, String programInfo,HttpServletRequest request) throws Exception {
+	public Object programSet(Long scheduleId, String programInfo, String orient, HttpServletRequest request) throws Exception {
 		
 		TemplateVO templateVO = JSON.parseObject(programInfo, TemplateVO.class);
 		
-		return programService.setProgram(scheduleId, templateVO);
+		channelService.changeScheduleDeal(scheduleQuery.getById(scheduleId).getChannelId());
+		
+		return programService.setProgram(scheduleId, templateVO, orient);
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/content/type/get")
+	public Object getContentType(Long channelId, HttpServletRequest request) throws Exception {
+		List<ScreenContentTypeVO> screenContentTypes = new ArrayList<ScreenContentTypeVO>();
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+//		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.ABILITY_BROAD) {
+			for (ScreenContentType screenContentType : ScreenContentType.values()) {
+//				switch (screenContentType) {
+//				case AVIDEO:
+//				case TEXT:
+//				case TIME:
+					screenContentTypes.add(new ScreenContentTypeVO().set(screenContentType));
+//					break;
+//				default:
+//					break;
+//				}
+			}
+//		} else {
+//			for (ScreenContentType screenContentType : ScreenContentType.values()) {
+//				switch (screenContentType) {
+//				case ABILITY_AUDIO:
+//				case ABILITY_VIDEO:
+//				case TEXT:
+//				case TIME:
+//					screenContentTypes.add(new ScreenContentTypeVO().set(screenContentType));
+//					break;
+//				default:
+//					break;
+//				}
+//			}
+//		}
+		return screenContentTypes;
 	}
 }

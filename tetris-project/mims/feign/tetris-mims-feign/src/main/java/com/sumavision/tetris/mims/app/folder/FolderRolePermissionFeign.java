@@ -24,7 +24,7 @@ public interface FolderRolePermissionFeign {
 	 * <b>日期：</b>2019年6月25日 上午11:30:46
 	 * @param SubordinateRoleVO role 待解除授权的角色
 	 */
-	@RequestMapping(value = "/folder/feign/delete/by/role")
+	@RequestMapping(value = "/folder/role/permission/feign/delete/by/role")
 	public JSONObject deleteByRole(@RequestParam("roleId") String roleId)throws Exception;
 	
 	/**
@@ -34,6 +34,6 @@ public interface FolderRolePermissionFeign {
 	 * <b>日期：</b>2019年6月25日 上午11:30:46
 	 * @param Long folderId 文件夹id
 	 */
-	@RequestMapping(value = "/folder/feign/query")
+	@RequestMapping(value = "/folder/role/permission/feign/query")
 	public JSONObject getById(@RequestParam("folderId") Long folderId)throws Exception;
 }

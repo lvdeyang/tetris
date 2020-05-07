@@ -14,7 +14,7 @@ public class ChannelTerminalRequestErrorException extends BaseException{
 	private static final long serialVersionUID = 1L;
 
 	public ChannelTerminalRequestErrorException(String action, String msg) {
-		super(StatusCode.ERROR, "请求终端播发失败");
+		super(StatusCode.FORBIDDEN, "请求终端播发失败");
 		LOG.error(DateUtil.now());
 		LOG.error(new StringBufferWrapper().append("请求终端播发失败!")
 				.append("播发动作")

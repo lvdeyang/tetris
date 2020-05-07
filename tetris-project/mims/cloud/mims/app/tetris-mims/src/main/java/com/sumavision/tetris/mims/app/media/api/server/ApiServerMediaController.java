@@ -404,6 +404,7 @@ public class ApiServerMediaController {
 				MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
 				task.setDuration(multimediaInfo.getDuration());
 				mediaAudioDao.save(task);
+				mediaAudioService.checkMediaEdit(task);
 			}
 			
 	        return new MediaAudioVO().set(task);
@@ -456,6 +457,7 @@ public class ApiServerMediaController {
 				MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
 				task.setDuration(multimediaInfo.getDuration());
 				mediaVideoDao.save(task);
+				mediaVideoService.checkMediaEdit(task);
 			}
 			
 	        return new MediaVideoVO().set(task);
@@ -634,9 +636,9 @@ public class ApiServerMediaController {
 //		case "audio":
 //			return mediaAudioService.addTask(user, name, tag == null ? "" : tag.getName(), httpUrl, ftpUrl == null ? "" : ftpUrl);
 		case "videostream":
-			return mediaVideoStreamService.addVideoStreamTask(httpUrl, tag == null ? "" : tag.getName(), name, addition);
+			return mediaVideoStreamService.addVideoStreamTask(httpUrl, tag == null ? "" : tag.getName(), name, "", addition);
 		case "audiostream":
-			return mediaAudioStreamService.addAudioStreamTask(httpUrl, tag == null ? "" : tag.getName(), name, addition);
+			return mediaAudioStreamService.addAudioStreamTask(httpUrl, tag == null ? "" : tag.getName(), name, addition, "");
 		default:
 			return null;
 		}

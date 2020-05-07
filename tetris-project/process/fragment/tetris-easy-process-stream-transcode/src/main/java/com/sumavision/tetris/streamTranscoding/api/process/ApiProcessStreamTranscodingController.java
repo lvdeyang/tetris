@@ -25,7 +25,7 @@ public class ApiProcessStreamTranscodingController {
 	
 	@Autowired
 	private StreamTranscodingAddTaskService streamTranscodingAddTaskService;
-
+	
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/task")
@@ -50,5 +50,4 @@ public class ApiProcessStreamTranscodingController {
 		
 		return new HashMapWrapper<String, Object>().put("record_recordInfo", transcode_recordInfo).put("record_messageId", messageId).getMap();
 	}
-
 }

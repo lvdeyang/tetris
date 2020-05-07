@@ -1,8 +1,6 @@
 package com.sumavision.tetris.streamTranscoding.api.server;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -13,17 +11,16 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.streamTranscoding.StreamTranscodingAdapter;
-import com.sumavision.tetris.streamTranscoding.addOutput.AddOutputService;
-import com.sumavision.tetris.streamTranscoding.addTask.StreamTranscodingAddTaskService;
-import com.sumavision.tetris.streamTranscoding.deleteOutput.DeleteOutputService;
-import com.sumavision.tetris.streamTranscoding.deleteTask.DeleteTaskService;
+import com.sumavision.tetris.streamTranscodingProcessVO.FileVO;
 import com.sumavision.tetris.streamTranscodingProcessVO.StreamTranscodingProcessVO;
+import com.sumavision.tetris.streamTranscodingProcessVO.StreamTranscodingVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
@@ -35,22 +32,10 @@ public class ApiServerStreamTranscodingController {
 	private UserQuery userQuery;
 	
 	@Autowired
-	private StreamTranscodingAdapter streamTranscodingAdapter;
+	private ApiServerStreamTranscodingService apiServerStreamTranscodingService;
 	
 	@Autowired
-	private ApiServerStreamTranscodingService ApiServerStreamTranscodingService;
-	
-	@Autowired
-	private StreamTranscodingAddTaskService streamTranscodingAddTaskService;
-	
-	@Autowired
-	private DeleteTaskService deleteTaskService;
-	
-	@Autowired
-	private AddOutputService addOutputService;
-	
-	@Autowired
-	private DeleteOutputService deleteOutputService;
+	private StreamTranscodingAdapter adapter;
 	
 	@Autowired
 	private MediaAVideoQuery mediaAVideoQuery;
@@ -58,6 +43,21 @@ public class ApiServerStreamTranscodingController {
 	@Autowired
 	private ProcessService processService;
 	
+	/**
+	 * 添加文件转流转码任务<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 上午9:55:00
+	 * @param Long assetId 文件id
+	 * @param Boolean record 是否录制
+	 * @param Integer playTime 文件循环次数
+	 * @param String mediaType 文件媒资类型
+	 * @param String recordCallback 录制回调地址
+	 * @param Integer progNum 节目号
+	 * @param String task 输出参数
+	 * @param String stopCallback 转流停止回调
+	 * @param String inputParam 输入参数
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/task/file")
@@ -68,6 +68,7 @@ public class ApiServerStreamTranscodingController {
 			String mediaType,
 			String recordCallback,
 			Integer progNum,
+			String deviceIp,
 			String task,
 			String stopCallback,
 			String inputParam,
@@ -77,23 +78,31 @@ public class ApiServerStreamTranscodingController {
 		MediaAVideoVO media = mediaAVideoQuery.loadByIdAndType(assetId, mediaType);
 		if (media == null) return null;
 		
-		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.fileParamFormat(media, record, playTime, stopCallback, mediaType, recordCallback, progNum, task, inputParam);
+		StreamTranscodingProcessVO processVO = apiServerStreamTranscodingService.fileParamFormat(media, record, playTime, stopCallback, mediaType, recordCallback, progNum, deviceIp, task, inputParam);
 		JSONObject variables = new JSONObject();
+		
+		//判断是否文件转码
+		FileDealVO fileDeal = apiServerStreamTranscodingService.ifMediaEdit(media);
+		if (fileDeal.getIfFileStream()) {
+			variables.put("ifMediaEdit", false);
+			StreamTranscodingVO streamTranscodingVO = processVO.getStreamTranscodingVO();
+			streamTranscodingVO.setFiles(
+					new ArrayListWrapper<FileVO>()
+					.add(new FileVO().setUrl(adapter.changeHttpToFtp(fileDeal.getFileUrl())).setCount(playTime).setSeek(0l)).getList()
+					);
+		} else {
+			if (fileDeal.getIfMediaEdit()) {
+				variables.put("ifMediaEdit", true);
+				variables.put("_pa60_transcodeJob", fileDeal.getTranscodeJob());
+				variables.put("_pa60_param", fileDeal.getParam());
+				variables.put("_pa60_name", fileDeal.getName());
+				variables.put("_pa60_folderId", fileDeal.getFolderId());
+			}
+		}
+		
 		variables.put("_pa51_file_fileToStreamInfo", JSON.toJSONString(processVO.getFileToStreamVO()));
 		variables.put("_pa51_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
 		variables.put("_pa51_file_recordInfo", JSON.toJSONString(processVO.getRecordVO()));
-		
-		//判断是否文件转码
-		Map<String, String> map = ApiServerStreamTranscodingService.ifMediaEdit(media);
-		if (map != null) {
-			variables.put("ifMediaEdit", true);
-			variables.put("_pa60_transcodeJob", map.get("transcodeJob"));
-			variables.put("_pa60_param", map.get("param"));
-			variables.put("_pa60_name", map.get("name"));
-			variables.put("_pa60_folderId", map.get("folderId"));
-		} else {
-			variables.put("ifMediaEdit", false);
-		}
 		
 		String processInstanceId = processService.startByKey("_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
 		
@@ -101,6 +110,21 @@ public class ApiServerStreamTranscodingController {
 				.getMap();
 	}
 	
+	/**
+	 * 流转码<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 上午10:01:59
+	 * @param Long assetId 资源仓库中流id
+	 * @param Long assetPath 直接使用流url
+	 * @param Boolean record 是否录制
+	 * @param Integer bePCM 音频源pcm
+	 * @param String mediaType 资源仓库中流类型
+	 * @param String recordCallback 录制回调
+	 * @param Integer progNum 节目号
+	 * @param String task 输出信息
+	 * @param String inputParam 输入信息
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/task")
@@ -112,65 +136,34 @@ public class ApiServerStreamTranscodingController {
 			String mediaType,
 			String recordCallback,
 			Integer progNum,
+			String deviceIp,
 			String task,
 			String inputParam,
 			HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		StreamTranscodingProcessVO processVO = ApiServerStreamTranscodingService.streamParamFormat(assetId, assetPath, record, bePCM, mediaType, recordCallback, progNum, task, inputParam);
-		JSONObject variables = new JSONObject();
-		variables.put("_pa51_file_fileToStreamInfo", JSON.toJSONString(processVO.getFileToStreamVO()));
-		variables.put("_pa51_file_streamTranscodingInfo", JSON.toJSONString(processVO.getStreamTranscodingVO()));
-		variables.put("_pa51_file_recordInfo", JSON.toJSONString(processVO.getRecordVO()));
-		variables.put("ifMediaEdit", false);
-		
-		String processInstanceId = processService.startByKey("_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
+		String processInstanceId = apiServerStreamTranscodingService.addTask(assetId, assetPath, record, bePCM, mediaType, recordCallback, progNum, deviceIp, task, inputParam);
 		
 		return new HashMapWrapper<String, Object>().put("id", processInstanceId)
 				.getMap();
 	}
 	
+	/**
+	 * 删除转码任务<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月3日 上午10:08:19
+	 * @param Long id 任务id
+	 */
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/delete/task")
-	public Object deleteTask(Long id, HttpServletRequest request) throws Exception{
+	public Object deleteTask(String id, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		System.out.println("start:" + new Date());
-		
-		JSONObject variables = new JSONObject();
-		variables.put("_pa52_messageId", id);
-		variables.put("_pa54_messageId", id);
-		variables.put("_pa55_messageId", id);
-		
-		String processInstanceId = processService.startByKey("_delete_file_stream_transcoding_by_server", variables.toJSONString(), null, null);
+		String processInstanceId = apiServerStreamTranscodingService.deleteTask(id);
 		System.out.println("end:" + new Date());
 		return new HashMapWrapper<String, Object>().put("id", processInstanceId)
 				.getMap();
-	}
-	
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/add/output")
-	public Object addOutput(Long id, String outputParam, HttpServletRequest request) throws Exception{
-		UserVO user = userQuery.current();
-		
-		List<OutParamVO> outputParams = JSONObject.parseArray(outputParam, OutParamVO.class);
-		
-		addOutputService.addOutput(user, id, outputParams);
-		
-		return null;
-	}
-	
-	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "delete/output")
-	public Object deleteOutput(Long id, String outputParam, HttpServletRequest request) throws Exception {
-		UserVO user = userQuery.current();
-		
-		OutParamVO outParamVO = JSON.parseObject(outputParam, OutParamVO.class);
-		
-		deleteOutputService.delete(user, outParamVO);
-		
-		return null;
 	}
 }

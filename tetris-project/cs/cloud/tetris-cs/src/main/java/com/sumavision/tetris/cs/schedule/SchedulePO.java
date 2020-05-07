@@ -24,6 +24,9 @@ public class SchedulePO extends AbstractBasePO{
 	/** 播发时间 */
 	private String broadDate;
 	
+	/** 停止时间 */
+	private String endDate;
+	
 	/** 备注 */
 	private String remark;
 
@@ -52,6 +55,15 @@ public class SchedulePO extends AbstractBasePO{
 
 	public void setBroadDate(String broadDate) {
 		this.broadDate = broadDate;
+	}
+
+	@Column(name = "END_DATE")
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
 	}
 
 	@Column(name = "REMARK")

@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.stream.audio;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -21,6 +22,10 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 	private List<String> tags;
 	
 	private List<String> keyWords;
+	
+	private String thumbnail;
+	
+	private String streamType;
 	
 	private String igmpv3Status;
 	
@@ -109,6 +114,24 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 		return this;
 	}
 	
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public MediaAudioStreamVO setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+		return this;
+	}
+
+	public String getStreamType() {
+		return streamType;
+	}
+
+	public MediaAudioStreamVO setStreamType(String streamType) {
+		this.streamType = streamType;
+		return this;
+	}
+
 	public String getIgmpv3Status() {
 		return igmpv3Status;
 	}
@@ -227,6 +250,8 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 			.setAuthorName(entity.getAuthorName())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
 			.setRemarks(entity.getRemarks())
+			.setThumbnail(entity.getThumbnail())
+			.setStreamType(entity.getStreamType())
 			.setIgmpv3Status(entity.getIgmpv3Status()==null?"close":entity.getIgmpv3Status())
 			.setIgmpv3Mode(entity.getIgmpv3Mode())
 			.setType(MediaAudioStreamItemType.AUDIO_STREAM.toString())
@@ -235,8 +260,8 @@ public class MediaAudioStreamVO extends AbstractBaseVO<MediaAudioStreamVO, Media
 			.setStyle(MediaAudioStreamItemType.AUDIO_STREAM.getStyle()[0])
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId())
-			.setAddition(entity.getAddition());
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaAudioStreamPO.SEPARATOR_TAG)));
+			.setAddition(entity.getAddition())
+			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaAudioStreamPO.SEPARATOR_TAG)) : new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaAudioStreamPO.SEPARATOR_KEYWORDS)));
 		if(entity.getIgmpv3Ips() != null) this.setIgmpv3IpArray(Arrays.asList(entity.getIgmpv3Ips().split(MediaAudioStreamPO.SEPARATOR_IPS)));
 		return this;

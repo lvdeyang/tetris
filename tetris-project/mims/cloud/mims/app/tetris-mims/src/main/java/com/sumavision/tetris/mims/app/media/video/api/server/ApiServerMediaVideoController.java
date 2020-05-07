@@ -180,6 +180,7 @@ public class ApiServerMediaVideoController {
 			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
 			task.setDuration(multimediaInfo.getDuration());
 			mediaVideoDAO.save(task);
+			mediaVideoService.checkMediaEdit(task);
 		}
 		
         return new MediaVideoVO().set(task);

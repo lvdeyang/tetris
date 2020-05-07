@@ -39,6 +39,8 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	
 	private String outputUserPort;
 	
+	private String outputUserEndPort;
+	
 	private List<BroadAbilityBroadInfoVO> output;
 	
 	private List<UserVO> outputUsers; 
@@ -229,8 +231,18 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		return outputUserPort;
 	}
 
-	public void setOutputUserPort(String outputUserPort) {
+	public ChannelVO setOutputUserPort(String outputUserPort) {
 		this.outputUserPort = outputUserPort;
+		return this;
+	}
+
+	public String getOutputUserEndPort() {
+		return outputUserEndPort;
+	}
+
+	public ChannelVO setOutputUserEndPort(String outputUserEndPort) {
+		this.outputUserEndPort = outputUserEndPort;
+		return this;
 	}
 
 	public List<BroadAbilityBroadInfoVO> getOutput() {

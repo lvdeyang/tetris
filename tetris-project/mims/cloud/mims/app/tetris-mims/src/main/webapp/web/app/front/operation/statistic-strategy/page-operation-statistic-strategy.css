@@ -1,0 +1,15 @@
+#page-operation-statistic-strategy-wrapper .card{
+    width:100%; height:100%;
+}
+
+#page-operation-statistic-strategy-wrapper .slider{
+    width: 50%;
+    /*margin: auto;*/
+    display: inline-block;
+    vertical-align: middle;
+    margin: 50px 40px;
+}
+
+#page-operation-statistic-strategy-wrapper .el-slider__runway{
+    background-color: #bf6100;
+}

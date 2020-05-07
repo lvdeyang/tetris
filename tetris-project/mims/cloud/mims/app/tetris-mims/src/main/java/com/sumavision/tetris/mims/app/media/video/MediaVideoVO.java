@@ -8,7 +8,11 @@ import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.media.StoreType;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorDAO;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorPO;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorVO;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -38,6 +42,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	
 	private List<String> keyWords;
 	
+	private String thumbnail;
+	
 	private String type;
 	
 	private String resourceType;
@@ -63,6 +69,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	private String encryptionUrl;
 	
 	private String addition;
+	
+	private MediaFileEditorVO editorInfo;
 	
 	private List<MediaVideoVO> children;
 	
@@ -174,6 +182,15 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		return this;
 	}
 	
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public MediaVideoVO setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+		return this;
+	}
+
 	public String getType() {
 		return type;
 	}
@@ -246,6 +263,15 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		return this;
 	}
 
+	public MediaFileEditorVO getEditorInfo() {
+		return editorInfo;
+	}
+
+	public MediaVideoVO setEditorInfo(MediaFileEditorVO editorInfo) {
+		this.editorInfo = editorInfo;
+		return this;
+	}
+
 	public List<MediaVideoVO> getChildren() {
 		return children;
 	}
@@ -303,6 +329,8 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	@Override
 	public MediaVideoVO set(MediaVideoPO entity) throws Exception {
 		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
+		MediaFileEditorDAO mediaFileEditorDAO = SpringContext.getBean(MediaFileEditorDAO.class);
+		MediaFileEditorPO mediaEditorPO = mediaFileEditorDAO.findByMediaIdAndMediaType(entity.getId(), FolderType.COMPANY_AUDIO);
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
@@ -313,6 +341,7 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setDuration(entity.getDuration()==null?"-":entity.getDuration().toString())
 			.setVersion(entity.getVersion())
 			.setFolderId(entity.getFolderId())
+			.setThumbnail(entity.getThumbnail())
 			.setRemarks(entity.getRemarks())
 			.setType(MediaVideoItemType.VIDEO.toString())
 			.setRemoveable(true)
@@ -327,9 +356,10 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setEncryptionUrl(entity.getEncryptionUrl())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId())
-			.setAddition(entity.getAddition());
-		if(entity.getTags() != null && !entity.getTags().isEmpty()) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG))); else this.setTags(new ArrayList<String>());
-		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoPO.SEPARATOR_KEYWORDS)));	 
+			.setAddition(entity.getAddition())
+			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG)) : new ArrayList<String>());
+		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoPO.SEPARATOR_KEYWORDS)));
+		if(mediaEditorPO != null) this.setEditorInfo(new MediaFileEditorVO().set(mediaEditorPO));
 		return this;
 	}
 	

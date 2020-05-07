@@ -17,6 +17,8 @@ define([
     'mi-task-view',
     'mi-upload-dialog',
     'mi-lightbox',
+    'mi-tag-dialog',
+    'mi-addition-dialog',
     'css!' + window.APPPATH + 'front/media/picture/page-media-picture.css'
 ], function(tpl, config, context, commons, ajax, $, File, Uploader, Vue){
 
@@ -64,8 +66,9 @@ define([
                         visible:false,
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keyWords:'',
+                        addition: {},
                         loading:false,
                         task:''
                     },
@@ -74,8 +77,9 @@ define([
                         id:'',
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keyWords:'',
+                        addition: {},
                         loading:false
                     },
                     upload:{
@@ -310,8 +314,10 @@ define([
                             self.dialog.editPicture.id = row.id;
                             self.dialog.editPicture.name = row.name;
                             self.dialog.editPicture.remark = row.remarks;
-                            self.dialog.editPicture.tags = typeof row.tags==='string'||!row.tags?row.tags:row.tags.join(',');
+                            //self.dialog.editPicture.tags = typeof row.tags==='string'||!row.tags?row.tags:row.tags.join(',');
+                            self.dialog.editPicture.tags = row.tags;
                             self.dialog.editPicture.keyWords = typeof row.keyWords==='string'||!row.keyWords?row.keyWords:row.keyWords.join(',');
+                            if (row.addition) self.dialog.editPicture.addition = typeof row.addition==='string' ? JSON.parse(row.addition) : row.addition;
                             self.dialog.editPicture.visible = true;
                         }
                     }else if(command === '2'){
@@ -483,8 +489,9 @@ define([
                     var self = this;
                     self.dialog.addPicture.name = '';
                     self.dialog.addPicture.remark = '';
-                    self.dialog.addPicture.tags = '';
+                    self.dialog.addPicture.tags = [];
                     self.dialog.addPicture.keyWords = '';
+                    self.dialog.addPicture.addition = {};
                     self.dialog.addPicture.task = '';
                     self.dialog.addPicture.visible = false;
                     self.dialog.addPicture.loading = false;
@@ -495,8 +502,9 @@ define([
                     self.dialog.editPicture.id = '';
                     self.dialog.editPicture.name = '';
                     self.dialog.editPicture.remark = '';
-                    self.dialog.editPicture.tags = '';
+                    self.dialog.editPicture.tags = [];
                     self.dialog.editPicture.keyWords = '';
+                    self.dialog.editPicture.addition = {};
                     self.dialog.editPicture.visible = false;
                     self.dialog.editPicture.loading = false;
                 },
@@ -520,8 +528,9 @@ define([
                     ajax.post('/media/picture/task/add', {
                         task: $.toJSON(task),
                         name:self.dialog.addPicture.name,
-                        tags:self.dialog.addPicture.tags,
+                        tags:(self.dialog.addPicture.tags.length > 0) ? self.dialog.addPicture.tags.join(',') : null,
                         keyWords:self.dialog.addPicture.keyWords,
+                        addition: JSON.stringify(self.dialog.addPicture.addition),
                         remark:self.dialog.addPicture.remark,
                         folderId:self.current.id
                     }, function(data, status){
@@ -557,8 +566,9 @@ define([
                     self.dialog.editPicture.loading = true;
                     ajax.post('/media/picture/task/edit/' + self.dialog.editPicture.id, {
                         name:self.dialog.editPicture.name,
-                        tags:self.dialog.editPicture.tags,
+                        tags:(self.dialog.editPicture.tags.length > 0) ? self.dialog.editPicture.tags.join(',') : null,
                         keyWords:self.dialog.editPicture.keyWords,
+                        addition: JSON.stringify(self.dialog.editPicture.addition),
                         remark:self.dialog.editPicture.remark
                     }, function(data, status){
                         self.dialog.editPicture.loading = false;
@@ -658,6 +668,59 @@ define([
                     }, function(url){
                         window.open(url, '_blank', 'status=no,menubar=yes,toolbar=no,width=1366,height=580,left=100,top=100');
                     });
+                },
+
+                //标签处理
+                handleTagAdd: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.addPicture.tags);
+                },
+                handleTagEdit: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.editPicture.tags);
+                },
+                selectedTags: function (buff, tags, startLoading, endLoading, close) {
+                    var self = this;
+                    startLoading();
+                    buff.splice(0,buff.length);
+                    for(var i=0; i<tags.length; i++){
+                        buff.push(tags[i].name);
+                    }
+                    endLoading();
+                    close();
+                },
+                handleTagRemove:function(tag, value){
+                    for(var i=0; i<tag.length; i++){
+                        if(tag[i] === value){
+                            tag.splice(i, 1);
+                            break;
+                        }
+                    }
+                },
+
+                //附加属性编辑
+                handleAdditionAdd: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.addPicture.addition);
+                },
+                handleAdditionEdit: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.editPicture.addition);
+                },
+                editAddition: function(_buff, addition, closeFunc) {
+                    var self = this;
+                    var keys = Object.keys(_buff);
+                    for (var i in keys) {
+                        if (_buff.hasOwnProperty(keys[i])) {
+                            delete _buff[keys[i]];
+                        }
+                    }
+                    for (var key in addition) {
+                        if (addition.hasOwnProperty(key)) {
+                            _buff[key] = addition[key];
+                        }
+                    }
+                    closeFunc();
                 }
             },
             created:function(){

@@ -6,6 +6,7 @@ define([
     'restfull',
     'vue',
     'element-ui',
+    'mi-addition-dialog',
     'css!' + window.APPPATH + 'front/media/txt/txt-dialog.css',
 ], function(tpl, ajax, Vue){
 

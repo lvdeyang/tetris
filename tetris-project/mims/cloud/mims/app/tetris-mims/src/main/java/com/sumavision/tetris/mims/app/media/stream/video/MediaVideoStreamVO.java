@@ -1,11 +1,12 @@
 package com.sumavision.tetris.mims.app.media.stream.video;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
-import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
 public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, MediaVideoStreamPO>{
@@ -23,6 +24,10 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 	private List<String> tags;
 	
 	private List<String> keyWords;
+	
+	private String thumbnail;
+	
+	private String streamType;
 	
 	private String igmpv3Status;
 	
@@ -111,6 +116,24 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 		return this;
 	}
 	
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public MediaVideoStreamVO setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+		return this;
+	}
+
+	public String getStreamType() {
+		return streamType;
+	}
+
+	public MediaVideoStreamVO setStreamType(String streamType) {
+		this.streamType = streamType;
+		return this;
+	}
+
 	public String getIgmpv3Status() {
 		return igmpv3Status;
 	}
@@ -227,7 +250,9 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 			.setName(entity.getName())
 			.setAuthorName(entity.getAuthorName())
 			.setCreateTime(entity.getCreateTime()==null?"":DateUtil.format(entity.getCreateTime(), DateUtil.dateTimePattern))
+			.setThumbnail(entity.getThumbnail())
 			.setRemarks(entity.getRemarks())
+			.setStreamType(entity.getStreamType())
 			.setIgmpv3Status(entity.getIgmpv3Status()==null?"close":entity.getIgmpv3Status())
 			.setIgmpv3Mode(entity.getIgmpv3Mode())
 			.setType(MediaVideoStreamItemType.VIDEO_STREAM.toString())
@@ -236,11 +261,11 @@ public class MediaVideoStreamVO extends AbstractBaseVO<MediaVideoStreamVO, Media
 			.setStyle(MediaVideoStreamItemType.VIDEO_STREAM.getStyle()[0])
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId())
-			.setAddition(entity.getAddition());
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaVideoStreamPO.SEPARATOR_TAG)));
+			.setAddition(entity.getAddition())
+			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaVideoStreamPO.SEPARATOR_TAG)) : new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoStreamPO.SEPARATOR_KEYWORDS)));
 		if (entity.getPreviewUrl() != null) this.setPreviewUrl(new ArrayListWrapper<String>().add(entity.getPreviewUrl()).getList());
-		if(entity.getIgmpv3Ips() != null) this.setIgmpv3IpArray(Arrays.asList(entity.getIgmpv3Ips().split(MediaAudioStreamPO.SEPARATOR_IPS)));
+		if(entity.getIgmpv3Ips() != null) this.setIgmpv3IpArray(Arrays.asList(entity.getIgmpv3Ips().split(MediaVideoStreamPO.SEPARATOR_IPS)));
 		return this;
 	}
 	
