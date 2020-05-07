@@ -109,6 +109,16 @@ define([
             },
             editSubtitle:function () {
                 var self = this;
+                if(self.form.textarea){
+                	var length = new Blob([self.form.textarea],{type : 'text/plain'}).size;
+                	if(length > 64){
+                		self.qt.error('字幕内容过长，最多支持中文21个，数字英文64个');
+                		return;
+                	}
+                }else{
+                	self.qt.error('字幕内容不能为空');
+                	return;
+                }
                 ajax.post('/monitor/subtitle/edit/' + self.editId, {
                     name: self.form.name,
                     content: self.form.textarea,

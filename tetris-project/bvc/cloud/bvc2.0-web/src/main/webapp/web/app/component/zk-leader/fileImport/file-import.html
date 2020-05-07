@@ -8,19 +8,29 @@
             <!--左侧-->
             <div class="left">
                 <el-scrollbar style="height: 100%">
+                	<!-- show-checkbox -->
                     <el-tree
                             ref="treeForm"
                             :data="treeDatas"
-                            show-checkbox
                             node-key="id"
-                            check-strictly
+                            default-expand-all
+                            :expand-on-click-node="false"
                             :props="defaultProps"
                             @check-change="handleNodeClick">
-                            <span class="custom-tree-node" slot-scope="{ node, data }">
-                                <span style="display: inline-block;width: 200px">
-                                   {{data.name}}
-                                </span>
-                                <span @click="remove(data.id)"><i class="el-icon-delete"></i></span>
+                            <span slot-scope="scope">
+                            	<span v-if="scope.data.type==='FOLDER'">
+		                            <el-radio v-model="checkedId" :label="scope.data.id">
+		                            	<span :title="scope.data.name" class="tree-node-folder-name">
+		                                   {{scope.data.name}}
+		                                </span>
+		                            </el-radio>
+	                            </span>
+	                            <span v-else slot-scope="scope">
+	                            	<span @click="remove(scope.data.id)"><i class="el-icon-delete"></i></span>
+	                            	<span :title="scope.data.name" class="tree-node-file-name">
+	                                   {{scope.data.name}}
+	                                </span>
+	                            </span>
                             </span>
                     </el-tree>
                 </el-scrollbar>

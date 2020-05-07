@@ -84,6 +84,7 @@ define([
                     currentPage: self.currentPage,
                     pageSize: self.pageSize
                 };
+                self.checkBoxData.splice(0, self.checkBoxData.length);
                 self.fileDatas.splice(0, self.fileDatas.length);
                 ajax.post('/monitor/external/static/resource/folder/scanning', param, function (data) {
                     self.dialogVisible = false;
@@ -114,16 +115,21 @@ define([
             selectCurrentPage: function (val) {
                 var self = this;
                 if (val.length === 0) { //取消全选
-                    self.checkBoxData = self.checkBoxData.filter(function (item) {
+                	self.checkBoxData.splice(0, self.checkBoxData.length);
+                    /*self.checkBoxData = self.checkBoxData.filter(function (item) {
                         return self.pageData.indexOf(item) === -1;
-                    })
-                } else if (val.length === self.pageData.length) { //全选，有的话不管，没有的话添加
+                    })*/
+                }else{
+                	for(var i=0; i<val.length; i++){
+                		self.checkBoxData.push(val[i]);
+                	}
+                } /*else if (val.length === self.pageData.length) { //全选，有的话不管，没有的话添加
                     self.pageData.forEach(function (item) {
                         if (self.checkBoxData.indexOf(item) === -1) {
                             self.checkBoxData.push(item)
                         }
                     })
-                }
+                }*/
             },
             //点击右侧选择目录按钮
             search: function () {
@@ -194,6 +200,7 @@ define([
                 }, function (data) {
                     self.qt.info('上传成功');
                     self.getFileDatas();
+                    self.addSubmit();
                 })
             },
 
@@ -218,6 +225,7 @@ define([
                 }, function (data) {
                     self.qt.success('操作成功');
                     self.getFileDatas();
+                    self.addSubmit();
                 })
             },
 
@@ -229,6 +237,7 @@ define([
                 ajax.post('/monitor/vod/remove', {resourceIds: JSON.stringify(arr)}, function (data) {
                     self.qt.info('删除成功');
                     self.getFileDatas();
+                    self.addSubmit();
                 })
             },
 
