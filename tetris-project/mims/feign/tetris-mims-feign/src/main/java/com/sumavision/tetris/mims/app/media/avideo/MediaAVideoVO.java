@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.media.StoreType;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorVO;
 
 public class MediaAVideoVO {
 	private Long id;
@@ -27,6 +28,10 @@ public class MediaAVideoVO {
 	private String audioPid;
 	
 	private String videoPid;
+	
+	private String audioType;
+	
+	private String videoType;
 	
 	private StoreType storeType;
 	
@@ -59,6 +64,8 @@ public class MediaAVideoVO {
 	private Integer downloadCount;
 	
 	private String duration;
+	
+	private MediaFileEditorVO editorInfo;
 	
 	private List<MediaAVideoVO> children;
 	
@@ -158,6 +165,24 @@ public class MediaAVideoVO {
 
 	public MediaAVideoVO setVideoPid(String videoPid) {
 		this.videoPid = videoPid;
+		return this;
+	}
+	
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public MediaAVideoVO setAudioType(String audioType) {
+		this.audioType = audioType;
+		return this;
+	}
+
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public MediaAVideoVO setVideoType(String videoType) {
+		this.videoType = videoType;
 		return this;
 	}
 
@@ -302,6 +327,15 @@ public class MediaAVideoVO {
 
 	public MediaAVideoVO setDuration(String duration) {
 		this.duration = duration;
+		return this;
+	}
+
+	public MediaFileEditorVO getEditorInfo() {
+		return editorInfo;
+	}
+
+	public MediaAVideoVO setEditorInfo(MediaFileEditorVO editorInfo) {
+		this.editorInfo = editorInfo;
 		return this;
 	}
 

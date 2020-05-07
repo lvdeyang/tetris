@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -94,7 +95,8 @@ public class FolderQuery {
 	 * @return List<FolderPO> 子文件夹列表
 	 */
 	public List<FolderPO> findSubFolders(Long folderId){
-		return folderDao.findSubFolders(splicePathReg(folderId));
+		List<String> folderIdPathRegs = splicePathReg(folderId);
+		return folderDao.findSubFolders(folderIdPathRegs.get(0) , folderIdPathRegs.get(1));
 	}
 	
 	/**
@@ -107,7 +109,9 @@ public class FolderQuery {
 	 * @return List<FolderPO> 子文件夹列表
 	 */
 	public List<FolderPO> findSubFoldersWithExcept(Long folderId, Long except){
-		return folderDao.findSubFoldersWithExcept(splicePathReg(folderId), except, splicePathReg(except));
+		List<String> folderIdPathRegs = splicePathReg(folderId);
+		List<String> exceptPathRegs = splicePathReg(except);
+		return folderDao.findSubFoldersWithExcept(folderIdPathRegs.get(0), folderIdPathRegs.get(1), except, exceptPathRegs.get(0), exceptPathRegs.get(1));
 	}
 	
 	/**
@@ -162,7 +166,8 @@ public class FolderQuery {
 	 * @return List<FolderPO> 文件夹列表
 	 */
 	public List<FolderPO> findMaterialTreeByUserIdWithExcept(String userId, Long except){
-		return folderDao.findMaterialTreeByUserIdWithExcept(userId, except, splicePathReg(except));
+		List<String> exceptPathRegs = splicePathReg(except);
+		return folderDao.findMaterialTreeByUserIdWithExcept(userId, except, exceptPathRegs.get(0), exceptPathRegs.get(1));
 	}
 	
 	/**
@@ -176,7 +181,8 @@ public class FolderQuery {
 	 * @return List<FolderPO> 文件夹列表
 	 */
 	public List<FolderPO> findMaterialTreeByUserIdWithExceptAndDepth(String userId, Long except, Integer depth){
-		return folderDao.findMaterialTreeByUserIdWithExceptAndDepth(userId, except, splicePathReg(except), depth);
+		List<String> exceptPathRegs = splicePathReg(except);
+		return folderDao.findMaterialTreeByUserIdWithExceptAndDepth(userId, except, exceptPathRegs.get(0), exceptPathRegs.get(1), depth);
 	}
 	
 	/**
@@ -218,7 +224,8 @@ public class FolderQuery {
 																				  .append(user.getBusinessRoles())
 																				  .append("]")
 																				  .toString(), Long.class);
-			return folderDao.findPermissionCompanyTreeWithExcept(businessRoleIds, type, except, splicePathReg(except));
+			List<String> exceptPathRegs = splicePathReg(except);
+			return folderDao.findPermissionCompanyTreeWithExcept(businessRoleIds, type, except, exceptPathRegs.get(0), exceptPathRegs.get(1));
 		}
 	}
 	
@@ -387,11 +394,11 @@ public class FolderQuery {
 	 * @param Long folderId 文件夹id
 	 * @return String 查询规则
 	 */
-	private String splicePathReg(Long folderId){
-		return new StringBufferWrapper().append("%")
-								  	    .append(folderId)
-								  	    .append("%")
-								  	    .toString();
+	private List<String> splicePathReg(Long folderId){
+		return new ArrayListWrapper<String>()
+				.add(new StringBufferWrapper().append("%/").append(folderId).append("/%").toString())
+				.add(new StringBufferWrapper().append("%/").append(folderId).toString())
+				.getList();
 	}
 	
 	/**

@@ -83,6 +83,8 @@ public class MediaPushLiveController {
 			String freq,
 			String audioPid,
 			String videoPid,
+			String audioType,
+			String videoType,
 			String name,
             String tags,
             String keyWords,
@@ -111,7 +113,7 @@ public class MediaPushLiveController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		MediaPushLivePO entity = mediaPushLiveService.addTask(user, name, tagList, keyWordList, remark, freq, audioPid, videoPid, folder);
+		MediaPushLivePO entity = mediaPushLiveService.addTask(user, name, tagList, keyWordList, remark, freq, audioPid, videoPid, audioType, videoType, folder);
 		
 		return new MediaPushLiveVO().set(entity);
 		
@@ -138,6 +140,8 @@ public class MediaPushLiveController {
 			String freq,
 			String audioPid,
 			String videoPid,
+			String audioType,
+			String videoType,
 			String name,
             String tags,
             String keyWords,
@@ -161,7 +165,7 @@ public class MediaPushLiveController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		MediaPushLivePO entity = mediaPushLiveService.editTask(user, audioStream, name, tagList, keyWordList, remark, freq, audioPid, videoPid);
+		MediaPushLivePO entity = mediaPushLiveService.editTask(user, audioStream, name, tagList, keyWordList, remark, freq, audioPid, videoPid, audioType, videoType);
 		
 		return new MediaPushLiveVO().set(entity);
 		
@@ -194,5 +198,21 @@ public class MediaPushLiveController {
 		}
 		
 		return mediaPushLiveService.remove(new ArrayListWrapper<MediaPushLivePO>().add(media).getList());
+	}
+	
+	/**
+	 * 获取流类型数组<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月4日 上午11:51:57
+	 * @return List<String> 流类型
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/stream/type/{type}")
+	public Object getStreamType(@PathVariable String type, HttpServletRequest request) throws Exception {
+		if ("audio".equals(type)) return MediaPushLiveTypeAudio.queryAllType();
+		if ("video".equals(type)) return MediaPushLiveTypeVideo.queryAllType();
+		return new ArrayList<String>();
 	}
 }

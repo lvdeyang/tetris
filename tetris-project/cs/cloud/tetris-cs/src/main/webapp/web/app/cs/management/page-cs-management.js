@@ -15,6 +15,8 @@ define([
     'cs-user-dialog',
     'program-screen',
     'cs-media-picker',
+    'cs-area-picker',
+    'mi-compress-dialog',
     'css!' + window.APPPATH + 'cs/management/page-cs-management.css'
 ], function (tpl, config, $, ajax, context, commons, Vue) {
 
@@ -77,7 +79,8 @@ define([
                         broadWay: "",
                         outputQtUsers: [],
                         outputPushUsers: [],
-                        outputUserPort: "",
+                        outputUserPort: '',
+                        outputUserEndPort: '',
                         outputCount: 1,
                         output: [],
                         remark: "",
@@ -99,6 +102,7 @@ define([
                         outputQtUsers: [],
                         outputPushUsers: [],
                         outputUserPort: "",
+                        outputUserEndPort: '',
                         outputCount: 1,
                         output: [],
                         remark: "",
@@ -109,6 +113,26 @@ define([
                         autoBroadStart: "",
                         level: '',
                         hasFile: true
+                    },
+                    setAutoBroad: {
+                        visible: false,
+                        loading: false,
+                        data: {},
+                        autoBroadShuffle: false,
+                        autoBroadDuration: 1,
+                        autoBroadStart: ""
+                    },
+                    setOutput: {
+                        visible: false,
+                        loading: false,
+                        data: {},
+                        broadWay: '',
+                        outputQtUsers: [],
+                        outputPushUsers: [],
+                        outputUserPort: '',
+                        outputUserEndPort: '',
+                        outputCount: 1,
+                        output: []
                     },
                     editMenu: {
                         visible: false,
@@ -299,6 +323,26 @@ define([
                         name: "",
                         remark: "",
                         date: ""
+                    },
+                    chooseBroadMedia: {
+                        visible: false,
+                        loading: false,
+                        data: {}
+                    },
+                    upgrade: {
+                        visible: false,
+                        loading: false,
+                        version: '',
+                        way:'',
+                        tarCheck: {
+                            name: '',
+                            previewUrl: '',
+                            size: ''
+                        },
+                        areaCheck: [],
+                        wayOptions: [
+                            '4G','DTMB'
+                        ]
                     }
                 },
                 broadWayStream: '轮播推流',
@@ -328,76 +372,32 @@ define([
                     var self = this;
 
                     //if (self.channel.multipleSelection.length > 0) {
-                    //    var h = self.$createElement;
-                    //    self.$msgbox({
-                    //        title: '危险操作',
-                    //        message: h('div', null, [
-                    //            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
-                    //            h('div', {class: 'el-message-box__message'}, [
-                    //                h('p', null, ['此操作将永久删除频道，且不可恢复，是否继续?'])
-                    //            ])
-                    //        ]),
-                    //        type: 'wraning',
-                    //        showCancelButton: true,
-                    //        confirmButtonText: '确定',
-                    //        cancelButtonText: '取消',
-                    //        beforeClose: function (action, instance, done) {
-                    //            instance.confirmButtonLoading = true;
-                    //            if (action === 'confirm' && self.channel.multipleSelection) {
-                    //                var idList = [];
-                    //                for (var i = 0; i < self.channel.multipleSelection; i++) {
-                    //                    idList.push(self.channel.multipleSelection[i]);
-                    //                }
-                    //                var questData = {id: idList};
-                    //                ajax.post('/cs/channel/remove', questData, function (data, status) {
-                    //                    instance.confirmButtonLoading = false;
-                    //                    done();
-                    //                    self.channel.multipleSelection = [];
-                    //                    slef.getChannelList();
-                    //                }, null, ajax.NO_ERROR_CATCH_CODE);
-                    //            } else {
-                    //                instance.confirmButtonLoading = false;
-                    //                done();
-                    //            }
+                    //    self.showTip('', '此操作将永久删除频道，且不可恢复，是否继续?', function(callback) {
+                    //        var idList = [];
+                    //        for (var i = 0; i < self.channel.multipleSelection; i++) {
+                    //            idList.push(self.channel.multipleSelection[i]);
                     //        }
-                    //    }).catch(function () {
+                    //        var questData = {id: idList};
+                    //        ajax.post('/cs/channel/remove', questData, function (data, status) {
+                    //            callback();
+                    //            self.channel.multipleSelection = [];
+                    //            slef.getChannelList();
+                    //        }, null, ajax.NO_ERROR_CATCH_CODE);
                     //    });
                     //}
                 },
                 handleResetZoneUrl: function () {
                     var self = this;
-                    var h = self.$createElement;
-                    self.$msgbox({
-                        title: '危险操作',
-                        message: h('div', null, [
-                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
-                            h('div', {class: 'el-message-box__message'}, [
-                                h('p', null, ['此操作将重置所有终端补包地址，是否继续?'])
-                            ])
-                        ]),
-                        type: 'wraning',
-                        showCancelButton: true,
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        beforeClose: function (action, instance, done) {
-                            instance.confirmButtonLoading = true;
-                            if (action === 'confirm') {
-                                ajax.post('/cs/channel/reset/zone/url', null, function(data, status) {
-                                    if (status == 200) {
-                                        self.$message({
-                                            message: '重置成功',
-                                            type: 'success'
-                                        });
-                                    }
-                                    instance.confirmButtonLoading = false;
-                                    done();
-                                })
-                            } else {
-                                instance.confirmButtonLoading = false;
-                                done();
+                    self.showTip('', '此操作将重置所有终端补包地址，是否继续?', function(callback) {
+                        ajax.post('/cs/channel/reset/zone/url', null, function(data, status) {
+                            if (status == 200) {
+                                self.$message({
+                                    message: '重置成功',
+                                    type: 'success'
+                                });
                             }
-                        }
-                    }).catch(function () {
+                            callback();
+                        })
                     });
                 },
 
@@ -405,13 +405,14 @@ define([
                 handleAddProgram: function(){
                     var self = this;
                     self.dialog.addProgram.broadWay = self.broadWayStream;
-                    self.dialog.addProgram.level = "一般";
+                    self.dialog.addProgram.level = '一般';
                     self.dialog.addProgram.hasFile = true;
                     var t = new Date();
                     self.dialog.addProgram.date = t.getFullYear()+"-"+(t.getMonth()+1)+"-"+t.getDate()+" "+t.getHours()+":"+t.getMinutes()+":"+t.getSeconds();
                     var output = {
-                        "previewUrlIp" : "",
-                        "previewUrlPort" : ""
+                        previewUrlIp : '',
+                        previewUrlPort : '',
+                        previewUrlEndPort: ''
                     };
                     self.dialog.addProgram.outputCount = 1;
                     self.dialog.addProgram.output.push(output);
@@ -426,7 +427,8 @@ define([
                     self.dialog.addProgram.hasFile = true;
                     self.dialog.addProgram.outputQtUsers = [];
                     self.dialog.addProgram.outputPushUsers = [];
-                    self.dialog.addProgram.outputUserPort = "";
+                    self.dialog.addProgram.outputUserPort = '';
+                    self.dialog.addProgram.outputUserEndPort = '';
                     self.dialog.addProgram.outputCount = 1;
                     self.dialog.addProgram.output.splice(0, self.dialog.addProgram.output.length);
                     self.dialog.addProgram.remark = "";
@@ -443,45 +445,6 @@ define([
                     var self = this;
                     self.dialog.addProgram.level = data;
                 },
-                //添加流输出数的监听
-                handleAddProgramOutputCount: function (currentValue, oldValue) {
-                    var self = this;
-                    if (self.dialog.addProgram.output.length <= currentValue){
-                        for (var i = 0; i < currentValue - self.dialog.addProgram.output.length; i++) {
-                            var output = {
-                                "previewUrlIp" : "",
-                                "previewUrlPort" : ""
-                            };
-                            self.dialog.addProgram.output.push(output);
-                        }
-                    } else {
-                        self.dialog.addProgram.output.splice(currentValue, self.dialog.addProgram.output.length - currentValue);
-                    }
-                },
-                handleUserRemove:function(user, value){
-                    var index = user.indexOf(value);
-                    if(index != -1){
-                        user.splice(index, 1);
-                    }
-                },
-                handleAddProgramQtUserSet: function () {
-                    var self = this;
-                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.addProgram.outputQtUsers, self.qtEquipType);
-                },
-                handleAddProgramPushUserSet: function () {
-                    var self = this;
-                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.addProgram.outputPushUsers, "PUSH");
-                },
-                selectedUsers: function (buff, users, startLoading, endLoading, close) {
-                    var self = this;
-                    startLoading();
-                    buff.splice(0,buff.length);
-                    for(var i=0; i<users.length; i++){
-                        buff.push(users[i]);
-                    }
-                    endLoading();
-                    close();
-                },
                 handleAddProgramCommit: function () {
                     var self = this;
                     if (self.dialog.addProgram.autoBroad && !self.dialog.addProgram.autoBroadStart) {
@@ -491,10 +454,11 @@ define([
                         });
                         return;
                     }
-                    if (self.dialog.addProgram.broadWay == self.broadWayStream && self.dialog.addProgram.outputQtUsers.length <= 0) {
+                    if (self.dialog.addProgram.broadWay == self.broadWayStream && self.dialog.addProgram.outputQtUsers.length <= 0 && self.dialog.addProgram.outputPushUsers.length <= 0) {
                         var noOut = true;
                         for (var i = 0; i < self.dialog.addProgram.output.length; i++){
-                            if (self.dialog.addProgram.output[i].previewUrlIp.trim() != "" && self.dialog.addProgram.output[i].previewUrlPort.trim() != ""){
+                            if (self.dialog.addProgram.output[i].previewUrlIp.trim()
+                                && self.dialog.addProgram.output[i].previewUrlPort.trim()){
                                 noOut = false;
                                 break;
                             }
@@ -507,28 +471,22 @@ define([
                             return;
                         }
                     }
-                    if (self.dialog.addProgram.broadWay == self.broadWayFile && !self.dialog.addProgram.outputQtUsers.length && !self.dialog.addProgram.outputPushUsers.length){
-                        this.$message({
-                            message: '请选择至少一个播发用户',
-                            type: 'warning'
-                        });
-                        return;
-                    }
                     self.dialog.addProgram.loading = true;
                     var newData = {
                         name: self.dialog.addProgram.name,
                         date: self.dialog.addProgram.date,
                         broadWay: self.dialog.addProgram.broadWay,
                         outputUsers: JSON.stringify(self.dialog.addProgram.broadWay == self.broadWayStream ? self.dialog.addProgram.outputQtUsers : self.dialog.addProgram.outputQtUsers.concat(self.dialog.addProgram.outputPushUsers)),
-                        outputUserPort: self.dialog.addProgram.outputUserPort,
+                        outputUserPort: self.dialog.addProgram.outputUserPort || '9999',
+                        ouputUserEndPort: self.dialog.addProgram.outputUserEndPort,
                         output: JSON.stringify(self.dialog.addProgram.output),
                         encryption: self.dialog.addProgram.encryption,
-                        autoBroad: self.dialog.addProgram.autoBroad,
+                        autoBroad: self.dialog.addProgram.broadWay == self.broadWayStream ? self.dialog.addProgram.autoBroad : false,
                         autoBroadShuffle: self.dialog.addProgram.autoBroadShuffle,
                         autoBroadDuration: self.dialog.addProgram.autoBroadDuration,
                         autoBroadStart: self.dialog.addProgram.autoBroadStart,
                         remark: self.dialog.addProgram.remark,
-                        level: self.dialog.addProgram.level,
+                        level: self.dialog.addProgram.broadWay == self.broadWayTerminal ? self.dialog.addProgram.level : '',
                         hasFile: self.dialog.addProgram.hasFile
                     };
                     ajax.post('/cs/channel/add', newData, function (data, status) {
@@ -571,6 +529,7 @@ define([
                         }
                     }
                     self.dialog.editChannel.outputUserPort = row.outputUserPort;
+                    self.dialog.editChannel.outputUserEndPort = row.outputUserEndPort;
                     if (row.output) self.dialog.editChannel.outputCount = row.output.length;
                     self.dialog.editChannel.output = row.output;
                     self.dialog.editChannel.remark = row.remark;
@@ -583,20 +542,6 @@ define([
                     self.dialog.editChannel.autoBroadStart = row.autoBroadStart;
                     self.dialog.editChannel.visible = true;
                 },
-                handleEditChannelOutputCount: function (currentValue, oldValue) {
-                    var self = this;
-                    if (self.dialog.editChannel.output.length <= currentValue){
-                        for (var i = 0; i < currentValue - self.dialog.editChannel.output.length; i++) {
-                            var output = {
-                                "previewUrlIp" : "",
-                                "previewUrlPort" : ""
-                            };
-                            self.dialog.editChannel.output.push(output);
-                        }
-                    } else {
-                        self.dialog.editChannel.output.splice(currentValue, self.dialog.editChannel.output.length - currentValue);
-                    }
-                },
                 handleEditChannelClose: function () {
                     var self = this;
                     self.dialog.editChannel.visible = false;
@@ -605,7 +550,8 @@ define([
                     self.dialog.editChannel.broadWay = "";
                     self.dialog.editChannel.outputQtUsers = [];
                     self.dialog.editChannel.outputPushUsers = [];
-                    self.dialog.editChannel.outputUserPort = "";
+                    self.dialog.editChannel.outputUserPort = '';
+                    self.dialog.editChannel.outputUserEndPort = '';
                     self.dialog.editChannel.outputCount = 1;
                     self.dialog.editChannel.output = [];
                     self.dialog.editChannel.remark = "";
@@ -621,23 +567,20 @@ define([
                     var self = this;
                     self.dialog.editChannel.level = data;
                 },
-                handleEditChannelQtUserSet: function () {
-                    var self = this;
-                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', self.dialog.editChannel.outputQtUsers, self.qtEquipType);
-                },
                 handleEditChannelCommitSend: function (listener) {
                     var self = this;
                     self.dialog.editChannel.loading = true;
                     var newName = self.dialog.editChannel.name;
                     var newRemark = self.dialog.editChannel.remark;
-                    var level = self.dialog.editChannel.level;
+                    var level = self.dialog.editChannel.broadWay == self.broadWayTerminal ? self.dialog.editChannel.level : '';
                     var hasFile = self.dialog.editChannel.hasFile;
                     var outputQtUsers = self.dialog.editChannel.outputQtUsers;
                     var outputPushUsers = self.dialog.editChannel.outputPushUsers;
-                    var outputUserPort = self.dialog.editChannel.outputUserPort;
+                    var outputUserPort = self.dialog.editChannel.outputUserPort || '9999';
+                    var outputUserEndPort = self.dialog.editChannel.outputUserEndPort;
                     var output = self.dialog.editChannel.output;
                     var encryption = self.dialog.editChannel.encryption;
-                    var autoBroad = self.dialog.editChannel.autoBroad;
+                    var autoBroad = self.dialog.editChannel.broadWay == self.broadWayStream ? self.dialog.editChannel.autoBroad : false;
                     var autoBroadShuffle = self.dialog.editChannel.autoBroadShuffle;
                     var autoBroadDuration = self.dialog.editChannel.autoBroadDuration;
                     var autoBroadStart = self.dialog.editChannel.autoBroadStart;
@@ -646,6 +589,7 @@ define([
                         name: newName,
                         outputUsers: JSON.stringify(outputQtUsers.concat(outputPushUsers)),
                         outputUserPort: outputUserPort,
+                        outputUserEndPort: outputUserEndPort,
                         output: JSON.stringify(output),
                         encryption: encryption,
                         autoBroad: autoBroad,
@@ -658,7 +602,7 @@ define([
                     };
                     ajax.post('/cs/channel/edit', questData, function (data, status) {
                         self.dialog.editChannel.loading = false;
-                        listener();
+                        if (listener) listener();
                         if (status != 200) return;
                         self.$message({
                             message: '保存成功',
@@ -670,6 +614,8 @@ define([
                         self.dialog.editChannel.data.hasFile = hasFile;
                         self.dialog.editChannel.data.outputUsers = outputQtUsers.concat(outputPushUsers);
                         self.dialog.editChannel.data.output = output;
+                        self.dialog.editChannel.data.outputUserPort = outputUserPort;
+                        self.dialog.editChannel.data.outputUserEndPort = outputUserEndPort;
                         self.dialog.editChannel.data.encryption = encryption;
                         self.dialog.editChannel.data.autoBroad = autoBroad;
                         self.dialog.editChannel.data.autoBroadShuffle = autoBroadShuffle;
@@ -688,10 +634,11 @@ define([
                         });
                         return;
                     }
-                    if (self.dialog.editChannel.broadWay == self.broadWayStream && self.dialog.editChannel.outputQtUsers.length <= 0) {
+                    if (self.dialog.editChannel.broadWay == self.broadWayStream && self.dialog.editChannel.outputQtUsers.length <= 0 && self.dialog.editChannel.outputPushUsers.length <= 0) {
                         var noOut = true;
                         for (var i = 0; i < self.dialog.editChannel.output.length; i++){
-                            if (self.dialog.editChannel.output[i].previewUrlIp.trim() != "" && self.dialog.editChannel.output[i].previewUrlPort.trim() != ""){
+                            if (self.dialog.editChannel.output[i].previewUrlIp.trim()
+                                && self.dialog.editChannel.output[i].previewUrlPort.trim()){
                                 noOut = false;
                                 break;
                             }
@@ -704,13 +651,6 @@ define([
                             return;
                         }
                     }
-                    if (self.dialog.editChannel.broadWay == self.broadWayFile && !self.dialog.editChannel.outputQtUsers.length && !self.dialog.editChannel.outputPushUsers.length){
-                        this.$message({
-                            message: '请选择至少一个播发用户',
-                            type: 'warning'
-                        });
-                        return;
-                    }
                     if (self.dialog.editChannel.autoBroad) {
                         if ((!self.dialog.editChannel.autoBroadStart || !self.dialog.editChannel.autoBroadStart.trim())){
                             this.$message({
@@ -719,111 +659,186 @@ define([
                             });
                             return;
                         }
-                        var h = self.$createElement;
-                        self.$msgbox({
-                            title: '危险操作',
-                            message: h('div', null, [
-                                h('div', {class: 'el-message-box__status el-icon-warning'}, null),
-                                h('div', {class: 'el-message-box__message'}, [
-                                    h('p', null, ['此操作将替换该频道先前设置的所有自动播发节目单，是否继续?'])
-                                ])
-                            ]),
-                            type: 'wraning',
-                            showCancelButton: true,
-                            confirmButtonText: '确定',
-                            cancelButtonText: '取消',
-                            beforeClose: function (action, instance, done) {
-                                instance.confirmButtonLoading = true;
-                                if (action === 'confirm') {
-                                    self.handleEditChannelCommitSend(function () {
-                                        instance.confirmButtonLoading = false;
-                                        done();
-                                    });
-                                } else {
-                                    instance.confirmButtonLoading = false;
-                                    done();
-                                }
-                            }
-                        }).catch(function () {
+                        self.showTip('', '此操作将替换该频道先前设置的所有自动播发节目单，是否继续?', function(callback) {
+                            self.handleEditChannelCommitSend(callback);
                         });
                     } else {
                         self.handleEditChannelCommitSend(function () {});
                     }
                 },
+
+                //set autoBroad dialog event
+                handleSetAutoBroad: function(data) {
+                    var self = this;
+                    self.dialog.setAutoBroad.data = data;
+                    self.dialog.setAutoBroad.visible = true;
+                    self.dialog.setAutoBroad.loading = false;
+                    self.dialog.setAutoBroad.autoBroadShuffle = data.autoBroadShuffle;
+                    self.dialog.setAutoBroad.autoBroadStart = data.autoBroadStart;
+                    self.dialog.setAutoBroad.autoBroadDuration = data.autoBroadDuration;
+                },
+                handleSetAutoBroadClose: function() {
+                    var self = this;
+                    self.dialog.setAutoBroad.visible = false;
+                    self.dialog.setAutoBroad.loading = false;
+                    self.dialog.setAutoBroad.data = {};
+                    self.dialog.setAutoBroad.autoBroadShuffle = false;
+                    self.dialog.setAutoBroad.autoBroadStart = '';
+                    self.dialog.setAutoBroad.autoBroadDuration = 1;
+                },
+                handleSetAutoBroadCommit: function() {
+                    var self = this;
+                    self.dialog.setAutoBroad.data.autoBroadShuffle = self.dialog.setAutoBroad.autoBroadShuffle;
+                    self.dialog.setAutoBroad.data.autoBroadStart = self.dialog.setAutoBroad.autoBroadStart;
+                    self.dialog.setAutoBroad.data.autoBroadDuration = self.dialog.setAutoBroad.autoBroadDuration;
+                    self.handleSetAutoBroadClose();
+                },
+
+                //set output dialog event
+                handleSetOutput: function(data) {
+                    var self = this;
+                    self.dialog.setOutput.data = data;
+                    self.dialog.setOutput.visible = true;
+                    self.dialog.setOutput.loading = false;
+                    self.dialog.setOutput.broadWay = self.dialog.setOutput.data.broadWay;
+                    self.dialog.setOutput.outputQtUsers = [];
+                    self.dialog.setOutput.outputPushUsers = [];
+                    self.dialog.setOutput.outputUserPort = self.dialog.setOutput.data.outputUserPort;
+                    self.dialog.setOutput.outputUserEndPort = self.dialog.setOutput.data.outputUserEndPort;
+                    self.dialog.setOutput.outputCount = self.dialog.setOutput.data.outputCount;
+                    self.dialog.setOutput.output = [];
+
+                    var i = 0;
+                    if (self.dialog.setOutput.data.outputQtUsers) {
+                        for (i = 0; i < self.dialog.setOutput.data.outputQtUsers.length; i++) {
+                            self.dialog.setOutput.outputQtUsers.push(self.dialog.setOutput.data.outputQtUsers[i]);
+                        }
+                    }
+
+                    if (self.dialog.setOutput.data.outputPushUsers) {
+                        for (i = 0; i < self.dialog.setOutput.data.outputPushUsers.length; i++) {
+                            self.dialog.setOutput.outputPushUsers.push(self.dialog.setOutput.data.outputPushUsers[i]);
+                        }
+                    }
+
+                    if (self.dialog.setOutput.data.output) {
+                        for (i = 0; i < self.dialog.setOutput.data.output.length; i++) {
+                            self.dialog.setOutput.output.push(self.dialog.setOutput.data.output[i]);
+                        }
+                    }
+                },
+                handleSetOutputClose: function () {
+                    var self = this;
+                    self.dialog.setOutput.visible = false;
+                    self.dialog.setOutput.loading = false;
+                    self.dialog.setOutput.data = {};
+                    self.dialog.setOutput.broadWay = '';
+                    self.dialog.setOutput.outputQtUsers = [];
+                    self.dialog.setOutput.outputPushUsers = [];
+                    self.dialog.setOutput.outputUserPort = '';
+                    self.dialog.setOutput.outputUserEndPort = '';
+                    self.dialog.setOutput.outputCount = 1;
+                    self.dialog.setOutput.output = [];
+                },
+                //添加流输出数的监听
+                handleOutputCountChange: function(currentValue) {
+                    var self = this;
+                    if (self.dialog.setOutput.output.length <= currentValue){
+                        for (var i = 0; i < currentValue - self.dialog.setOutput.output.length; i++) {
+                            var output = {
+                                previewUrlIp : '',
+                                previewUrlPort : '',
+                                previewUrlEndPort: ''
+                            };
+                            self.dialog.setOutput.output.push(output);
+                        }
+                    } else {
+                        self.dialog.setOutput.output.splice(currentValue, self.dialog.setOutput.output.length - currentValue);
+                    }
+                },
+                handleUserRemove:function(user, value){
+                    var index = user.indexOf(value);
+                    if(index != -1){
+                        user.splice(index, 1);
+                    }
+                },
+                handleSetOutputUserSet: function(data, type) {
+                    var self = this;
+                    self.$refs.selectUserDialog.open('/cs/channel/quest/user/list', data, type);
+                },
+                selectedUsers: function (buff, users, startLoading, endLoading, close) {
+                    var self = this;
+                    startLoading();
+                    buff.splice(0,buff.length);
+                    for(var i=0; i<users.length; i++){
+                        buff.push(users[i]);
+                    }
+                    endLoading();
+                    close();
+                },
+                handleSetOutputCommit: function() {
+                    var self = this;
+                    self.dialog.setOutput.loading = true;
+                    var i = 0;
+
+                    if (self.dialog.setOutput.data.outputQtUsers) {
+                        self.dialog.setOutput.data.outputQtUsers.splice(0, self.dialog.setOutput.data.outputQtUsers.length);
+                        for (i = 0; i < self.dialog.setOutput.outputQtUsers.length; i++) {
+                            self.dialog.setOutput.data.outputQtUsers.push(self.dialog.setOutput.outputQtUsers[i]);
+                        }
+                    }
+
+                    if (self.dialog.setOutput.data.outputPushUsers) {
+                        self.dialog.setOutput.data.outputPushUsers.splice(0, self.dialog.setOutput.data.outputPushUsers.length);
+                        for (i = 0; i < self.dialog.setOutput.outputPushUsers.length; i++) {
+                            self.dialog.setOutput.data.outputPushUsers.push(self.dialog.setOutput.outputPushUsers[i]);
+                        }
+                    }
+
+                    if (self.dialog.setOutput.data.output) {
+                        self.dialog.setOutput.data.output.splice(0, self.dialog.setOutput.data.output.length);
+                        for (i = 0; i < self.dialog.setOutput.output.length; i++) {
+                            self.dialog.setOutput.data.output.push(self.dialog.setOutput.output[i]);
+                        }
+                    }
+
+                    self.dialog.setOutput.data.outputUserPort = self.dialog.setOutput.outputUserPort;
+                    self.dialog.setOutput.data.outputUserEndPort = self.dialog.setOutput.outputUserEndPort;
+                    self.dialog.setOutput.data.outputCount = self.dialog.setOutput.outputCount;
+
+                    self.handleSetOutputClose();
+                },
+
                 updateMenuToTerminal: function (scope) {
                     var self = this;
                     var row = scope.row;
-                    var h = self.$createElement;
-                    self.$msgbox({
-                        title: '危险操作',
-                        message: h('div', null, [
-                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
-                            h('div', {class: 'el-message-box__message'}, [
-                                h('p', null, ['此操作将对频道下的所有地区终端做资源同步，是否继续?'])
-                            ])
-                        ]),
-                        type: 'wraning',
-                        showCancelButton: true,
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        beforeClose: function (action, instance, done) {
-                            instance.confirmButtonLoading = true;
-                            if (action === 'confirm') {
-                                var questData = {
-                                    channelId: row.id
-                                };
-                                ajax.post('/cs/channel/update/to/terminal', questData, function (data, status) {
-                                    instance.confirmButtonLoading = false;
-                                    done();
-                                }, null, ajax.NO_ERROR_CATCH_CODE);
-                            } else {
-                                instance.confirmButtonLoading = false;
-                                done();
-                            }
-                        }
-                    }).catch(function () {
-                    });
+                    self.showTip('', '此操作将对频道下的所有地区终端做资源同步，是否继续?', function(callback) {
+                        var questData = {
+                            channelId: row.id
+                        };
+                        ajax.post('/cs/channel/update/to/terminal', questData, function (data, status) {
+                            callback();
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
+                    })
                 },
                 rowDelete: function (scope) {
                     var self = this;
                     var row = scope.row;
-                    var h = self.$createElement;
-                    self.$msgbox({
-                        title: '危险操作',
-                        message: h('div', null, [
-                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
-                            h('div', {class: 'el-message-box__message'}, [
-                                h('p', null, ['此操作将永久删除频道，且不可恢复，是否继续?'])
-                            ])
-                        ]),
-                        type: 'wraning',
-                        showCancelButton: true,
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        beforeClose: function (action, instance, done) {
-                            instance.confirmButtonLoading = true;
-                            if (action === 'confirm') {
-                                var questData = {
-                                    id: row.id
-                                };
-                                ajax.post('/cs/channel/remove', questData, function (data, status) {
-                                    instance.confirmButtonLoading = false;
-                                    done();
-                                    if (status != 200) return;
-                                    self.getChannelList();
-                                }, null, ajax.NO_ERROR_CATCH_CODE);
-                            } else {
-                                instance.confirmButtonLoading = false;
-                                done();
-                            }
-                        }
-                    }).catch(function () {
+                    self.showTip('', '此操作将永久删除频道，且不可恢复，是否继续?', function(callback) {
+                        var questData = {
+                            id: row.id
+                        };
+                        ajax.post('/cs/channel/remove', questData, function (data, status) {
+                            callback();
+                            if (status != 200) return;
+                            self.getChannelList();
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
                     });
                 },
                 toggleSelection: function (rows) {
                     if (rows) {
                         for (var i = 0; i < rows.length; i++) {
-                            this.$refs.multipleChannelTable.toggleRowSelection(row);
+                            this.$refs.multipleChannelTable.toggleRowSelection(rows[i]);
                         }
                     } else {
                         this.$refs.multipleChannelTable.clearSelection();
@@ -954,35 +969,13 @@ define([
                 },
                 treeNodeDelete: function (node, data) {
                     var self = this;
-                    var h = self.$createElement;
-                    self.$msgbox({
-                        title: '危险操作',
-                        message: h('div', null, [
-                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
-                            h('div', {class: 'el-message-box__message'}, [
-                                h('p', null, ['此操作将永久删除标签以及子标签，且不可恢复，是否继续?'])
-                            ])
-                        ]),
-                        type: 'wraning',
-                        showCancelButton: true,
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        beforeClose: function (action, instance, done) {
-                            instance.confirmButtonLoading = true;
-                            if (action === 'confirm') {
-                                var questData = {id: data.id};
-                                ajax.post('/cs/menu/remove', questData, function (data, status) {
-                                    instance.confirmButtonLoading = false;
-                                    done();
-                                    if (status != 200) return;
-                                    self.loadMenuTree();
-                                }, null, ajax.NO_ERROR_CATCH_CODE);
-                            } else {
-                                instance.confirmButtonLoading = false;
-                                done();
-                            }
-                        }
-                    }).catch(function () {
+                    self.showTip('', '此操作将永久删除标签以及子标签，且不可恢复，是否继续?', function(callback) {
+                        var questData = {id: data.id};
+                        ajax.post('/cs/menu/remove', questData, function (data, status) {
+                            callback();
+                            if (status != 200) return;
+                            self.loadMenuTree();
+                        }, null, ajax.NO_ERROR_CATCH_CODE);
                     });
                 },
                 handleEditNodeClose: function () {
@@ -1045,7 +1038,10 @@ define([
                     var self = this;
                     self.dialog.editMenu.dialog.chooseResource.visible = true;
                     self.dialog.editMenu.dialog.chooseResource.tree.data.splice(0, self.dialog.editMenu.dialog.chooseResource.tree.data.length);
-                    var questData = {id: self.dialog.editMenu.tree.current.id};
+                    var questData = {
+                        id: self.dialog.editMenu.tree.current.id,
+                        channelId: self.dialog.editMenu.data.id
+                    };
                     ajax.post('/cs/menu/resource/get/mims', questData, function (data, status) {
                         if (status != 200) return;
                         if (data && data.length > 0) {
@@ -1091,45 +1087,23 @@ define([
                 menuResourceDelete: function (scope) {
                     var self = this;
                     var row = scope.row;
-                    var h = self.$createElement;
-                    self.$msgbox({
-                        title: '危险操作',
-                        message: h('div', null, [
-                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
-                            h('div', {class: 'el-message-box__message'}, [
-                                h('p', null, ['删除资源操作，是否继续?'])
-                            ])
-                        ]),
-                        type: 'wraning',
-                        showCancelButton: true,
-                        confirmButtonText: '确定',
-                        cancelButtonText: '取消',
-                        beforeClose: function (action, instance, done) {
-                            instance.confirmButtonLoading = true;
-                            if (action === 'confirm') {
-                                var questData = {id: row.id};
-                                ajax.post('/cs/menu/resource/remove', questData, function (data, status) {
-                                    instance.confirmButtonLoading = false;
-                                    done();
-                                    if (status != 200) return;
-                                    self.$message({
-                                        message: '删除成功',
-                                        type: 'success'
-                                    });
-                                    for (var i = 0; i < self.dialog.editMenu.resource.data.length; i++) {
-                                        if (self.dialog.editMenu.resource.data[i].id == data.id) {
-                                            self.dialog.editMenu.resource.data.splice(i, 1);
-                                            break;
-                                        }
-                                    }
-                                    //self.loadingMenuResource();
-                                }, null, ajax.NO_ERROR_CATCH_CODE)
-                            } else {
-                                instance.confirmButtonLoading = false;
-                                done();
+                    self.showTip('', '删除资源操作，是否继续?', function(callback) {
+                        var questData = {id: row.id};
+                        ajax.post('/cs/menu/resource/remove', questData, function (data, status) {
+                            callback();
+                            if (status != 200) return;
+                            self.$message({
+                                message: '删除成功',
+                                type: 'success'
+                            });
+                            for (var i = 0; i < self.dialog.editMenu.resource.data.length; i++) {
+                                if (self.dialog.editMenu.resource.data[i].id == data.id) {
+                                    self.dialog.editMenu.resource.data.splice(i, 1);
+                                    break;
+                                }
                             }
-                        }
-                    }).catch(function () {
+                            //self.loadingMenuResource();
+                        }, null, ajax.NO_ERROR_CATCH_CODE)
                     });
                 },
 
@@ -1180,6 +1154,14 @@ define([
                 handleAddScheduleCommit: function() {
                     var self = this;
                     self.dialog.editSchedules.dialog.addSchedule.loading = true;
+                    if (self.dialog.editSchedules.data.broadWay == self.broadWayStream && !self.dialog.editSchedules.dialog.addSchedule.broadDate) {
+                        self.$message({
+                            message: '请选择播发时间',
+                            type: 'warning'
+                        });
+                        self.dialog.editSchedules.dialog.addSchedule.loading = false;
+                        return;
+                    }
                     var questData = {
                         channelId: self.dialog.editSchedules.data.id,
                         broadDate: self.dialog.editSchedules.dialog.addSchedule.broadDate,
@@ -1280,6 +1262,8 @@ define([
                         self.$refs.Lightbox.preview(row.previewUrl, 'audio');
                     }else if(row.type == "VIDEO"){
                         self.$refs.Lightbox.preview(row.previewUrl, 'video');
+                    }else if(row.type == 'PICTURE'){
+                        self.$refs.Lightbox.preview(row.previewUrl, 'image');
                     }
                 },
                 editProgram: function (scope) {
@@ -1351,7 +1335,6 @@ define([
                 },
                 handleManageBroadcastAreaCommit: function () {
                     var self = this;
-                    var h = self.$createElement;
                     self.dialog.manageBroadcastArea.loading = true;
                     var questData = {
                         channelId: self.dialog.manageBroadcastArea.data.id,
@@ -1366,43 +1349,22 @@ define([
                                 type: 'success'
                             });
                         } else if (status == 409) {
-                            self.$msgbox({
-                                title: '地区被占用',
-                                message: h('div', null, [
-                                    h('div', {class: 'el-message-box__status el-icon-warning'}, null),
-                                    h('div', {class: 'el-message-box__message'}, [
-                                        h('p', null, ['是否强制使用已被占用地区，确定则取消其他频道占用?'])
-                                    ])
-                                ]),
-                                type: 'wraning',
-                                showCancelButton: true,
-                                confirmButtonText: '确定',
-                                cancelButtonText: '取消',
-                                beforeClose: function (action, instance, done) {
-                                    instance.confirmButtonLoading = true;
-                                    if (action === 'confirm') {
-                                        var questData = {
-                                            channelId: self.dialog.manageBroadcastArea.data.id,
-                                            areaListStr: JSON.stringify(self.dialog.manageBroadcastArea.tree.current)
-                                        };
-                                        ajax.post('/cs/area/set/force', questData, function (data, status) {
-                                            instance.confirmButtonLoading = false;
-                                            done();
-                                            self.dialog.manageBroadcastArea.loading = false;
-                                            if (status == 200) {
-                                                self.handleManageBroadcastAreaClose();
-                                                self.$message({
-                                                    message: '保存成功',
-                                                    type: 'success'
-                                                });
-                                            }
-                                        }, null, ajax.NO_ERROR_CATCH_CODE);
-                                    } else {
-                                        instance.confirmButtonLoading = false;
-                                        done();
+                            self.showTip('地区被占用', '是否强制使用已被占用地区，确定则取消其他频道占用?', function(callback) {
+                                var questData = {
+                                    channelId: self.dialog.manageBroadcastArea.data.id,
+                                    areaListStr: JSON.stringify(self.dialog.manageBroadcastArea.tree.current)
+                                };
+                                ajax.post('/cs/area/set/force', questData, function (data, status) {
+                                    callback();
+                                    self.dialog.manageBroadcastArea.loading = false;
+                                    if (status == 200) {
+                                        self.handleManageBroadcastAreaClose();
+                                        self.$message({
+                                            message: '保存成功',
+                                            type: 'success'
+                                        });
                                     }
-                                }
-                            }).catch(function () {
+                                }, null, ajax.NO_ERROR_CATCH_CODE);
                             });
                         } else if (status == 403) {
                             this.$alert(message, '地区被占用', {
@@ -1416,34 +1378,127 @@ define([
                     self.dialog.manageBroadcastArea.tree.current = self.$refs.broadcastAreaTree.getCheckedNodes(false, false);
                 },
 
+                //upgrade dialog event
+                handleTerminalUpgrade: function() {
+                    var self = this;
+                    self.dialog.upgrade.visible = true;
+                },
+                handleCompressSelect: function(buff) {
+                    var self = this;
+                    self.$refs.selectCompress.setBuffer(buff);
+                    self.$refs.selectCompress.open();
+                },
+                selectedCompress: function(check, buff, startLoading, endLoading, done) {
+                    Vue.set(buff, 'name', check.name);
+                    //buff.name = check.name;
+                    buff.previewUrl = check.previewUrl;
+                    buff.size = check.size;
+                    done();
+                },
+                handleAreaSelect: function(channelData, check) {
+                    var self = this;
+                    self.$refs.areaPicker.open(check, channelData);
+                },
+                handleAreaPickerClose: function(check, channelData, choice, closeFunc) {
+                    var self = this;
+                    if (check) {
+                        check.splice(0, check.length);
+                        if (choice) {
+                            for(var i = 0; i < choice.length; i++) {
+                                check.push(choice[i])
+                            }
+                        }
+                    } else if (channelData) {
+
+                    }
+                    closeFunc();
+                },
+                handleUpgradeClose: function() {
+                    var self = this;
+                    self.dialog.upgrade.visible = false;
+                    self.dialog.upgrade.loading = false;
+                    self.dialog.upgrade.version = '';
+                    self.dialog.upgrade.way = '';
+                    self.dialog.upgrade.tarCheck = {};
+                    self.dialog.upgrade.areaCheck = [];
+                },
+                handleUpgradeCommit: function() {
+                    var self = this;
+                    self.dialog.upgrade.loding = true;
+                    if (!self.dialog.upgrade.version) {
+                        self.$message({
+                            message: '请输入版本号',
+                            type: 'warning'
+                        });
+                        return
+                    }
+                    if (!self.dialog.upgrade.way) {
+                        self.$message({
+                            message: '请选择播发方式',
+                            type: 'warning'
+                        });
+                        return
+                    }
+                    if (!self.dialog.upgrade.tarCheck.name || !self.dialog.upgrade.tarCheck.previewUrl) {
+                        self.$message({
+                            message: '请选择下发升级包',
+                            type: 'warning'
+                        });
+                        return
+                    }
+                    if (!self.dialog.upgrade.areaCheck || self.dialog.upgrade.areaCheck.length <= 0) {
+                        self.$message({
+                            message: '请选择至少一个地区升级',
+                            type: 'warning'
+                        });
+                        return
+                    }
+                    var questData = {
+                        version: self.dialog.upgrade.version,
+                        way: self.dialog.upgrade.way,
+                        compress: JSON.stringify(self.dialog.upgrade.tarCheck),
+                        areaList: JSON.stringify(self.dialog.upgrade.areaCheck)
+                    };
+                    ajax.post('/cs/upgrade/start', questData, function (data, status) {
+                        if (status == 200) {
+                            self.$message({
+                                message: '升级请求下发成功',
+                                type: 'success'
+                            });
+                            self.handleUpgradeClose();
+                        }
+                        self.dialog.upgrade.loading = false;
+                    })
+                },
+
                 //broad event
-                chooseBroadMedia: function (row) {
+                chooseBroadMedia: function () {
+                    var self = this;
+                    self.$refs.mediaPicker.open('/cs/menu/list/tree/with/resource', self.dialog.chooseBroadMedia.data, []);
+                },
+                chooseBroadMediaClose: function () {
+                    var self = this;
+                    self.dialog.chooseBroadMedia.visible = false;
+                    self.dialog.chooseBroadMedia.data = {};
+                },
+                chooseBroadMediaConfirm: function() {
                     var self = this;
                     var questData = {
-                        channelId: row.id
+                        channelId: self.dialog.chooseBroadMedia.data.id
                     };
-                    self.$confirm("请选择资源播发方式", "选项", {
-                        type: 'wraning',
-                        confirmButtonText: '全部播发',
-                        cancelButtonText: '选择播发'
-                    }).then(
-                        function () {
-                            self.loading = true;
-                            self.loadingText = "正在请求播发";
-                            ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
-                                self.loading = false;
-                                if (status == 200) {
-                                    self.$message({
-                                        message: '请求播发成功',
-                                        type: 'success'
-                                    });
-                                }
-                                self.getChannelList();
-                            }, null, ajax.NO_ERROR_CATCH_CODE)
+                    self.loading = true;
+                    self.loadingText = "正在请求播发";
+                    ajax.post('/cs/channel/broadcast/start', questData, function (data, status) {
+                        self.loading = false;
+                        if (status == 200) {
+                            self.$message({
+                                message: '请求播发成功',
+                                type: 'success'
+                            });
                         }
-                    ).catch(function () {
-                            self.$refs.mediaPicker.open('/cs/menu/list/tree/with/resource', row, []);
-                        });
+                        self.getChannelList();
+                        self.dialog.chooseBroadMedia.visible = false;
+                    }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
                 handleMediaPickerClose: function (channelData, buff, checked, startLoading, endLoading, close) {
                     var self = this;
@@ -1471,6 +1526,7 @@ define([
                             });
                         }
                         self.getChannelList();
+                        self.chooseBroadMediaClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
                 startBroadcast: function (scope) {
@@ -1518,7 +1574,9 @@ define([
                                         //).catch(function () {
                                         //        self.getChannelList();
                                         //    });
-                                        self.chooseBroadMedia(row);
+                                        //self.chooseBroadMedia(row);
+                                        self.dialog.chooseBroadMedia.visible = true;
+                                        self.dialog.chooseBroadMedia.data = row;
                                         break;
                                     }
                                     case "发送停止":
@@ -1645,6 +1703,36 @@ define([
                     ajax.post('/cs/channel/tarTest', null, function (data, status) {
 
                     }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+                showTip: function(title, text, confirmListener) {
+                    var self = this;
+                    var h = self.$createElement;
+                    self.$msgbox({
+                        title: title ? title : '危险操作',
+                        message: h('div', null, [
+                            h('div', {class: 'el-message-box__status el-icon-warning'}, null),
+                            h('div', {class: 'el-message-box__message'}, [
+                                h('p', null, [text])
+                            ])
+                        ]),
+                        type: 'wraning',
+                        showCancelButton: true,
+                        confirmButtonText: '确定',
+                        cancelButtonText: '取消',
+                        beforeClose: function (action, instance, done) {
+                            instance.confirmButtonLoading = true;
+                            if (action === 'confirm') {
+                                confirmListener(function() {
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                })
+                            } else {
+                                instance.confirmButtonLoading = false;
+                                done();
+                            }
+                        }
+                    }).catch(function () {
+                    });
                 }
             },
             created: function () {

@@ -48,7 +48,6 @@ import com.sumavision.tetris.user.UserVO;
 
 import it.sauronsoftware.jave.Encoder;
 import it.sauronsoftware.jave.MultimediaInfo;
-import javassist.expr.NewArray;
 
 @Controller
 @RequestMapping(value = "/api/android/media/video")
@@ -317,6 +316,7 @@ public class ApiAndroidMediaVideoController {
 			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
 			task.setDuration(multimediaInfo.getDuration());
 			mediaVideoDAO.save(task);
+			mediaVideoService.checkMediaEdit(task);
 		}
 		
         return new MediaVideoVO().set(task);

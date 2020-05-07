@@ -698,6 +698,42 @@ public class UserService{
 		return new UserVO().set(entity);
 	}
 	
+
+	/**
+	 * 根据用户id修改用户密码<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月16日 下午2:39:07
+	 * @param Long id 用户id
+	 * @param String oldPassword 旧密码
+	 * @param String newPassword 新密码
+	 * @param String repeat 确认密码
+	 * @return UserVO 用户信息
+	 */
+	public UserVO modifyPassword(
+			Long id,
+			String oldPassword,
+            String newPassword,
+            String repeat) throws Exception{
+		
+		UserPO user = userDao.findOne(id);
+		
+		if(user == null) throw new UserNotExistException(id);
+		
+		oldPassword = sha256Encoder.encode(oldPassword);
+		if(!user.getPassword().equals(oldPassword)) throw new PasswordErrorException();
+		
+		if(newPassword == null) throw new PasswordCannotBeNullException();
+		
+		if(!newPassword.equals(repeat)) throw new RepeatNotMatchPasswordException();
+		
+		user.setPassword(sha256Encoder.encode(newPassword));
+		
+		userDao.save(user);
+		
+		return new UserVO().set(user);
+	}
+	
 	/** 用户导入事件发布管理 */
 	private ConcurrentHashMap<String, UserImportEventPublisher> publishers = new ConcurrentHashMap<String, UserImportEventPublisher>();
 	

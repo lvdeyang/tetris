@@ -91,7 +91,7 @@ public class ApiTerminalChannelController {
 		channel.setRemark(remark);
 		channel.setDate(date);
 		channel.setBroadWay(channelBroadWay.getName());
-		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT);
+		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT.getName());
 		channel.setGroupId(user.getGroupId());
 		channel.setUpdateTime(new Date());
 		channel.setEncryption(encryption);
@@ -117,7 +117,7 @@ public class ApiTerminalChannelController {
 		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
 		Long channelId = requestWrapper.getLong("channelId");
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
+		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName());
 		channelDAO.save(channel);
 		return "";
 	}
@@ -136,7 +136,7 @@ public class ApiTerminalChannelController {
 		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
 		Long channelId = requestWrapper.getLong("channelId");
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED);
+		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED.getName());
 		channelDAO.save(channel);
 		return "";
 	}

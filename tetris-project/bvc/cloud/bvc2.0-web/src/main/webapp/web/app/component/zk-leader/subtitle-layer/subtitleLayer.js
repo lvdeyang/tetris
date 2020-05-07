@@ -21,7 +21,7 @@ define([
                 dialogCurrentPage: 1,
                 leftData: [],
                 leftTotal:0,
-                leftPageSize:30,
+                leftPageSize:12,
                 rightData: [],
                 gridData: [],
                 gridTotal:0,

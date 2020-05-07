@@ -1,7 +1,7 @@
 package com.sumavision.tetris.mims.app.media.audio.feign;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -12,12 +12,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioQuery;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
+import com.sumavision.tetris.mims.app.media.recommend.statistics.MediaRecommendStatisticsDAO;
+import com.sumavision.tetris.mims.app.media.recommend.statistics.MediaRecommendStatisticsPO;
 import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -42,6 +45,9 @@ public class MediaAudioFeignController {
 	
 	@Autowired
 	private TagQuery tagQuery;
+	
+	@Autowired
+	private MediaRecommendStatisticsDAO mediaRecommendStatisticsDAO;
 	
 	/**
 	 * 加载文件夹下的音频媒资<br/>
@@ -141,6 +147,23 @@ public class MediaAudioFeignController {
 		UserVO user = userQuery.current();
 		List<MediaAudioVO> audioVOs = mediaAudioQuery.loadRecommendWithWeight(user);
 		mediaAudioQuery.queryEncodeUrl(audioVOs);
+		
+		String date = DateUtil.format(new Date(), DateUtil.defaultDatePattern);
+		String groupId = user.getGroupId();
+		Long userId = user.getId();
+		MediaRecommendStatisticsPO recommendStatisticsPO = 
+				mediaRecommendStatisticsDAO.findByDateAndUserId(date, userId);
+		if (recommendStatisticsPO == null) {
+			recommendStatisticsPO = new MediaRecommendStatisticsPO();
+			recommendStatisticsPO.setDate(date);
+			recommendStatisticsPO.setUserId(userId);
+			recommendStatisticsPO.setGroupId(groupId);
+			recommendStatisticsPO.setCount(1l);
+		} else {
+			recommendStatisticsPO.setCount(recommendStatisticsPO.getCount() + 1);
+		}
+		mediaRecommendStatisticsDAO.save(recommendStatisticsPO);
+		
 		return audioVOs;
 	}
 	

@@ -78,7 +78,10 @@ public class BroadFileBroadInfoService {
 	 * @param infoVOs 下发设置列表
 	 */
 	public List<BroadFileBroadInfoPO> saveInfoList(Long channelId, List<BroadFileBroadInfoVO> infoVOs) throws Exception {
-		if (infoVOs == null || infoVOs.isEmpty()) return null;
+		if (infoVOs == null || infoVOs.isEmpty()) {
+			broadFileBroadInfoDAO.deleteByChannelId(channelId);
+			return new ArrayList<BroadFileBroadInfoPO>();
+		};
 		ChannelPO channelPO = channelDAO.findOne(channelId);
 		if (channelPO == null) return null; 
 

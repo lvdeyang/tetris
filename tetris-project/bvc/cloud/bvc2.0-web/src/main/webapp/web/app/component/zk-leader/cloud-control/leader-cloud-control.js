@@ -17,7 +17,10 @@ define([
         template: tpl,
         data: function () {
             return {
-                protocolSuccess: false,
+                protocolUp: false,
+                protocolDown: false,
+                protocolLeft: false,
+                protocolRight: false,
                 speed: 8,
                 direct: 0,
                 points: [],
@@ -39,18 +42,34 @@ define([
             //qt实现鼠标抬起事件
             qtFunction: function () {
                 var self = this;
+                console.log(self.protocolUp)
                 self.qt.on('mouseup', function (e) {
-                    if (self.protocolSuccess) {
+                    if(self.protocolUp || self.protocolDown || self.protocolLeft || self.protocolRight) {
                         self.stop();
                         self.direct = 0;
+                        self.protocolUp=false;
+                        self.protocolDown=false;
+                        self.protocolLeft= false;
+                        self.protocolRight=false;
                     }
                     self.qt.unbind('mouseup');
+
                 });
             },
             //垂直事件
             vertical: function (direction) {
                 var self = this;
-                self.protocolSuccess = true;
+                if(direction == 'UP'){
+                    self.protocolUp=true;
+                    self.protocolDown=false;
+                    self.protocolLeft= false;
+                    self.protocolRight=false;
+                }else{
+                    self.protocolUp=false;
+                    self.protocolDown = true;
+                    self.protocolLeft= false;
+                    self.protocolRight=false;
+                }
                 ajax.post('/zk/cloud/control/vertical', {
                     direction: direction,
                     serial: self.serial,
@@ -62,7 +81,17 @@ define([
             //水平事件
             horizontal: function (direction) {
                 var self = this;
-                self.protocolSuccess = true;
+                if(direction == 'LEFT'){
+                    self.protocolUp=false;
+                    self.protocolDown = false;
+                    self.protocolLeft=true;
+                    self.protocolRight=false;
+                }else{
+                    self.protocolUp=false;
+                    self.protocolDown = false;
+                    self.protocolLeft=false;
+                    self.protocolRight = true;
+                }
                 ajax.post('/zk/cloud/control/horizontal', {
                     direction: direction,
                     serial: self.serial,
@@ -74,7 +103,10 @@ define([
             //镜头变倍控制
             zoom: function (direction) {
                 var self = this;
-                self.protocolSuccess = true;
+                self.protocolUp=false;
+                self.protocolDown = false;
+                self.protocolLeft=false;
+                self.protocolRight = false;
                 if (direction == 'OUT') {
                     self.direct = 1;
                 } else if (direction == 'IN') {
@@ -91,7 +123,10 @@ define([
             // 焦距控制
             focus: function (direction) {
                 var self = this;
-                self.protocolSuccess = true;
+                self.protocolUp=false;
+                self.protocolDown = false;
+                self.protocolLeft=false;
+                self.protocolRight = false;
                 if (direction == 'NEAR') {
                     self.direct = 3;
                 } else if (direction == 'FAR') {
@@ -108,7 +143,10 @@ define([
             // 光圈控制
             aperture: function (direction) {
                 var self = this;
-                self.protocolSuccess = true;
+                self.protocolUp=false;
+                self.protocolDown = false;
+                self.protocolLeft=false;
+                self.protocolRight = false;
                 if (direction == 'MINUS') {
                     self.direct = 5;
                 } else if (direction == 'PLUS') {
@@ -128,7 +166,10 @@ define([
                 ajax.post('/zk/cloud/control/stop', {
                     serial: self.serial
                 }, function () {
-                    self.protocolSuccess = false;
+                    self.protocolUp=false;
+                    self.protocolDown = false;
+                    self.protocolLeft=false;
+                    self.protocolRight = false;
                     if (typeof fn === 'function') fn();
                 });
             },

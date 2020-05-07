@@ -19,6 +19,8 @@ define([
     'mi-lightbox',
     'mi-txt-dialog',
     'mi-tag-dialog',
+    'mi-image-dialog',
+    'mi-addition-dialog',
     'css!' + window.APPPATH + 'front/media/audio/page-media-audio.css'
 ], function(tpl, config, context, commons, ajax, $, File, Uploader, Vue){
 
@@ -73,6 +75,8 @@ define([
                         mediaEdit:false,
                         mediaEditTemplate:'',
                         mediaEditTemplates:[],
+                        thumbnail: '',
+                        addition: {},
                         txt:'',
                         txtTask:'',
                         task:'',
@@ -85,6 +89,8 @@ define([
                         remark:'',
                         tags:[],
                         keywords:'',
+                        thumbnail:'',
+                        addition: {},
                         loading:false
                     },
                     upload:{
@@ -359,7 +365,9 @@ define([
                             self.dialog.editAudio.name = row.name;
                             self.dialog.editAudio.remark = row.remarks;
                             self.dialog.editAudio.tags = row.tags;
-                            self.dialog.editAudio.keyWords = row.keyWords;
+                            self.dialog.editAudio.keyWords = typeof row.keyWords==='string'||!row.keyWords?row.keyWords:row.keyWords.join(',');
+                            self.dialog.editAudio.thumbnail = row.thumbnail;
+                            if (row.addition) self.dialog.editAudio.addition = typeof row.addition==='string' ? JSON.parse(row.addition) : row.addition;
                             self.dialog.editAudio.visible = true;
                         }
                     }else if(command === '2'){
@@ -537,6 +545,8 @@ define([
                     self.dialog.addAudio.encryption = false;
                     self.dialog.addAudio.mediaEdit = false;
                     self.dialog.addAudio.mediaEditTemplate = '';
+                    self.dialog.addAudio.thumbnail = '';
+                    self.dialog.addAudio.addition = {};
                     self.dialog.addAudio.txt = '';
                     self.dialog.addAudio.txtTask = '';
                     self.dialog.addAudio.task = '';
@@ -551,26 +561,38 @@ define([
                     self.dialog.editAudio.remark = '';
                     self.dialog.editAudio.tags = [];
                     self.dialog.editAudio.keyWords = '';
+                    self.dialog.editAudio.thumbnail = '';
+                    self.dialog.editAudio.addition = {};
                     self.dialog.editAudio.visible = false;
                     self.dialog.editAudio.loading = false;
                 },
                 //开启转码按钮获取模板列表
                 handleMediaEditChange: function(ifOpen) {
+                    //var self = this;
+                    //if (ifOpen) {
+                    //    self.dialog.addAudio.mediaEditTemplates.splice(0, self.dialog.addAudio.mediaEditTemplates.length);
+                    //    ajax.post('/media/editor/feign/template/list', null , function (data, status) {
+                    //        if (status == 200) {
+                    //            if (data != null && data.length > 0) {
+                    //                for (var i = 0; i < data.length; i++) {
+                    //                    self.dialog.addAudio.mediaEditTemplates.push(data[i]);
+                    //                }
+                    //            }
+                    //        }
+                    //    })
+                    //} else {
+                    //    self.dialog.addAudio.mediaEditTemplate = '';
+                    //}
+                },
+                //编辑资源海报
+                handleSelectThumbnail: function(buff) {
                     var self = this;
-                    if (ifOpen) {
-                        self.dialog.addAudio.mediaEditTemplates.splice(0, self.dialog.addAudio.mediaEditTemplates.length);
-                        ajax.post('/media/editor/feign/template/list', null , function (data, status) {
-                            if (status == 200) {
-                                if (data != null && data.length > 0) {
-                                    for (var i = 0; i < data.length; i++) {
-                                        self.dialog.addAudio.mediaEditTemplates.push(data[i]);
-                                    }
-                                }
-                            }
-                        })
-                    } else {
-                        self.dialog.addAudio.mediaEditTemplate = '';
-                    }
+                    self.$refs.selectThumbnail.setBuffer(buff);
+                    self.$refs.selectThumbnail.open();
+                },
+                selectedThumbnail:function(url, buff, startLoading, endLoading, done){
+                    buff.thumbnail = url;
+                    done();
                 },
                 //添加视频媒资任务
                 addMediaAudioTask:function(){
@@ -604,7 +626,9 @@ define([
                             folderId:self.current.id,
                             encryption: self.dialog.addAudio.encryption,
                             mediaEdit: self.dialog.addAudio.mediaEdit,
-                            mediaEditTemplate: self.dialog.addAudio.mediaEditTemplate
+                            mediaEditTemplate: self.dialog.addAudio.mediaEditTemplate,
+                            thumbnail: self.dialog.addAudio.thumbnail,
+                            addition: JSON.stringify(self.dialog.addAudio.addition)
                         }, function(data, status){
                             self.dialog.addAudio.loading = false;
                             if(status !== 200) return;
@@ -634,6 +658,8 @@ define([
                             encryption:self.dialog.addAudio.encryption,
                             mediaEdit:self.dialog.addAudio.mediaEdit,
                             mediaEditTemplate: self.dialog.addAudio.mediaEditTemplate,
+                            thumbnail: self.dialog.addAudio.thumbnail,
+                            addition: JSON.stringify(self.dialog.addAudio.addition),
                             txtId:self.dialog.addAudio.txt.id
                         };
                         ajax.post('/media/audio/task/add/from/txt', questData, function(data, status){
@@ -659,6 +685,8 @@ define([
                         name:self.dialog.editAudio.name,
                         tags:(self.dialog.editAudio.tags.length > 0) ? self.dialog.editAudio.tags.join(",") : null,
                         keyWords:self.dialog.editAudio.keyWords,
+                        thumbnail: self.dialog.editAudio.thumbnail,
+                        addition: JSON.stringify(self.dialog.editAudio.addition),
                         remark:self.dialog.editAudio.remark
                     }, function(data, status){
                         self.dialog.editAudio.loading = false;
@@ -812,6 +840,31 @@ define([
                             break;
                         }
                     }
+                },
+
+                //附加属性编辑
+                handleAdditionAdd: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.addAudio.addition);
+                },
+                handleAdditionEdit: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.editAudio.addition);
+                },
+                editAddition: function(_buff, addition, closeFunc) {
+                    var self = this;
+                    var keys = Object.keys(_buff);
+                    for (var i in keys) {
+                        if (_buff.hasOwnProperty(keys[i])) {
+                            delete _buff[keys[i]];
+                        }
+                    }
+                    for (var key in addition) {
+                        if (addition.hasOwnProperty(key)) {
+                            _buff[key] = addition[key];
+                        }
+                    }
+                    closeFunc();
                 }
             },
             created:function(){

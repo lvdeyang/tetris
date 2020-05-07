@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorVO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Entity
@@ -39,6 +40,9 @@ public class CsResourcePO extends AbstractBasePO {
 	/** 时长 */
 	private String duration;
 	
+	/** 文件大小 */
+	private String size;
+	
 	/** 媒资类型 */
 	private String type;
 	
@@ -62,6 +66,12 @@ public class CsResourcePO extends AbstractBasePO {
 	
 	/** 视频pid */
 	private String videoPid;
+	
+	/** 媒资音频类型 */
+	private String audioType;
+	
+	/** 媒资视频类型 */
+	private String videoType;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -79,6 +89,15 @@ public class CsResourcePO extends AbstractBasePO {
 
 	public void setDuration(String duration) {
 		this.duration = duration;
+	}
+
+	@Column(name = "SIZE")
+	public String getSize() {
+		return size;
+	}
+
+	public void setSize(String size) {
+		this.size = size;
 	}
 
 	@Column(name = "PARENT_ID")
@@ -198,6 +217,24 @@ public class CsResourcePO extends AbstractBasePO {
 		this.videoPid = videoPid;
 	}
 	
+	@Column(name = "AUDIO_TYPE")
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public void setAudioType(String audioType) {
+		this.audioType = audioType;
+	}
+
+	@Column(name = "VIDEO_TYPE")
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public void setVideoType(String videoType) {
+		this.videoType = videoType;
+	}
+
 	public CsResourcePO getFromAVideoVO(MediaAVideoVO media) {
 		if (media != null) {
 			this.setMimsUuid(media.getUuid());
@@ -205,13 +242,27 @@ public class CsResourcePO extends AbstractBasePO {
 			this.setType(media.getType());
 			this.setMimetype(media.getMimetype());
 			this.setDuration(media.getDuration());
+			this.setSize(media.getSize());
 			this.setPreviewUrl(media.getPreviewUrl());
+			
+			MediaFileEditorVO editorVO = media.getEditorInfo();
+			if (editorVO != null) {
+				String previewUrl = editorVO.getPreviewUrl();
+				String duration = editorVO.getDuration();
+				Long size = editorVO.getSize();
+				if (previewUrl != null && !previewUrl.isEmpty()) this.setPreviewUrl(previewUrl);
+				if (duration != null && !duration.isEmpty()) this.setDuration(duration);
+				if (size != null) this.setSize(size.toString());
+			}
+			
 			this.setEncryption(media.getEncryption() != null && media.getEncryption() ? "true" : "false");
 			this.setEncryptionUrl(media.getEncryptionUrl());
 			this.setDownloadCount(media.getDownloadCount());
 			this.setFreq(media.getFreq());
 			this.setAudioPid(media.getAudioPid());
 			this.setVideoPid(media.getVideoPid());
+			this.setAudioType(media.getAudioType());
+			this.setVideoType(media.getVideoType());
 			this.setMimsUuid(media.getUuid());
 			this.setUpdateTime(new Date());
 		}

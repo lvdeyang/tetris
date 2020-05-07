@@ -22,9 +22,6 @@ import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioItemType;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamItemType;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamPO;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.user.UserQuery;
@@ -150,10 +147,14 @@ public class MediaAudioStreamQuery {
 	 * <b>日期：</b>2019年12月11日 上午11:24:24
 	 * @return List<MediaAudioStreamVO> 音频流媒资列表
 	 */
-	public List<MediaAudioStreamVO> loadAll() throws Exception{
+	public List<MediaAudioStreamVO> loadAll(Long ... id) throws Exception{
 		
 		//TODO 权限校验		
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO_STREAM.toString());
+		if (id != null && id.length > 0) {
+			folderTree = folderQuery.findSubFolders(id[0]);
+			folderTree.add(folderDao.findOne(id[0]));
+		}
 		
 		if (folderTree.isEmpty()) return new ArrayList<MediaAudioStreamVO>();
 		
@@ -172,7 +173,7 @@ public class MediaAudioStreamQuery {
 		
 		packMediaAudioStreamTree(medias, folderTree, videos);
 		
-		return medias;
+		return id != null && id.length > 0 ? medias.get(0).getChildren() : medias;
 	}
 	
 	/**

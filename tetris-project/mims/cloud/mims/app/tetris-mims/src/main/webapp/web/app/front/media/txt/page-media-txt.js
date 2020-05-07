@@ -17,6 +17,8 @@ define([
     'mi-task-view',
     'mi-upload-dialog',
     'mi-lightbox',
+    'mi-tag-dialog',
+    'mi-image-dialog',
     'css!' + window.APPPATH + 'front/media/txt/page-media-txt.css'
 ], function(tpl, config, context, commons, ajax, $, File, Uploader, Vue){
 
@@ -64,8 +66,10 @@ define([
                         visible:false,
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keyWords:'',
+                        thumbnail: '',
+                        addition: {},
                         content:'',
                         loading:false
                     },
@@ -74,8 +78,10 @@ define([
                         id:'',
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keyWords:'',
+                        thumbnail: '',
+                        addition: {},
                         content:'',
                         loading:false
                     }
@@ -283,6 +289,8 @@ define([
                             self.dialog.editTxt.remark = row.remarks;
                             self.dialog.editTxt.tags = row.tags;
                             self.dialog.editTxt.keyWords = row.keyWords;
+                            self.dialog.editTxt.thumbnail = row.thumbnail;
+                            if (row.addition) self.dialog.editTxt.addition = typeof row.addition==='string' ? JSON.parse(row.addition) : row.addition;
                             self.dialog.editTxt.content = row.content;
                             self.dialog.editTxt.visible = true;
                         }
@@ -435,8 +443,10 @@ define([
                     var self = this;
                     self.dialog.addTxt.name = '';
                     self.dialog.addTxt.remark = '';
-                    self.dialog.addTxt.tags = '';
+                    self.dialog.addTxt.tags = [];
                     self.dialog.addTxt.keyWords = '';
+                    self.dialog.addTxt.thumbnail = '';
+                    self.dialog.addTxt.addition = {};
                     self.dialog.addTxt.content = '';
                     self.dialog.addTxt.visible = false;
                     self.dialog.addTxt.loading = false;
@@ -447,11 +457,23 @@ define([
                     self.dialog.editTxt.id = '';
                     self.dialog.editTxt.name = '';
                     self.dialog.editTxt.remark = '';
-                    self.dialog.editTxt.tags = '';
+                    self.dialog.editTxt.tags = [];
                     self.dialog.editTxt.keyWords = '';
+                    self.dialog.editTxt.thumbnail = '';
+                    self.dialog.editTxt.addition = {};
                     self.dialog.editTxt.content = '';
                     self.dialog.editTxt.visible = false;
                     self.dialog.editTxt.loading = false;
+                },
+                //编辑资源海报
+                handleSelectThumbnail: function(buff) {
+                    var self = this;
+                    self.$refs.selectThumbnail.setBuffer(buff);
+                    self.$refs.selectThumbnail.open();
+                },
+                selectedThumbnail:function(url, buff, startLoading, endLoading, done){
+                    buff.thumbnail = url;
+                    done();
                 },
                 //添加文本媒资任务
                 addMediaTxtTask:function(){
@@ -467,9 +489,11 @@ define([
                     ajax.post('/media/txt/task/add', {
                         content:self.dialog.addTxt.content,
                         name:self.dialog.addTxt.name,
-                        tags:self.dialog.addTxt.tags,
+                        tags:(self.dialog.addTxt.tags.length > 0) ? self.dialog.addTxt.tags.join(',') : null,
                         keyWords:self.dialog.addTxt.keyWords,
                         remark:self.dialog.addTxt.remark,
+                        thumbnail:self.dialog.addTxt.thumbnail,
+                        addition: JSON.stringify(self.dialog.addTxt.addition),
                         folderId:self.current.id
                     }, function(data, status){
                         self.dialog.addTxt.loading = false;
@@ -489,11 +513,14 @@ define([
                         return;
                     }
                     self.dialog.editTxt.loading = true;
+                    var tagString = (self.dialog.editTxt.tags.length > 0) ? self.dialog.editTxt.tags.join(',') : null;
                     ajax.post('/media/txt/task/edit/' + self.dialog.editTxt.id, {
                         content:self.dialog.editTxt.content,
                         name:self.dialog.editTxt.name,
-                        tags:self.dialog.editTxt.tags,
+                        tags:tagString,
                         keyWords:self.dialog.editTxt.keyWords,
+                        thumbnail: self.dialog.editTxt.thumbnail,
+                        addition: JSON.stringify(self.dialog.editTxt.addition),
                         remark:self.dialog.editTxt.remark
                     }, function(data, status){
                         self.dialog.editTxt.loading = false;
@@ -516,6 +543,59 @@ define([
                     }, function(url){
                         window.open(url, '_blank', 'status=no,menubar=yes,toolbar=no,width=1366,height=580,left=100,top=100');
                     });
+                },
+
+                //标签处理
+                handleTagAdd: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.addTxt.tags);
+                },
+                handleTagEdit: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.editTxt.tags);
+                },
+                selectedTags: function (buff, tags, startLoading, endLoading, close) {
+                    var self = this;
+                    startLoading();
+                    buff.splice(0,buff.length);
+                    for(var i=0; i<tags.length; i++){
+                        buff.push(tags[i].name);
+                    }
+                    endLoading();
+                    close();
+                },
+                handleTagRemove:function(tag, value){
+                    for(var i=0; i<tag.length; i++){
+                        if(tag[i] === value){
+                            tag.splice(i, 1);
+                            break;
+                        }
+                    }
+                },
+
+                //附加属性编辑
+                handleAdditionAdd: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.addTxt.addition);
+                },
+                handleAdditionEdit: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.editTxt.addition);
+                },
+                editAddition: function(_buff, addition, closeFunc) {
+                    var self = this;
+                    var keys = Object.keys(_buff);
+                    for (var i in keys) {
+                        if (_buff.hasOwnProperty(keys[i])) {
+                            delete _buff[keys[i]];
+                        }
+                    }
+                    for (var key in addition) {
+                        if (addition.hasOwnProperty(key)) {
+                            _buff[key] = addition[key];
+                        }
+                    }
+                    closeFunc();
                 }
             },
             created:function(){

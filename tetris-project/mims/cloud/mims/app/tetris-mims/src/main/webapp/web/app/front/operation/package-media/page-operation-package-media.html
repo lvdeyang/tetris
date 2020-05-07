@@ -1,0 +1,174 @@
+<mi-frame ref="frame" id="page-operation-package-media-wrapper" :menus="menus" :user="user" :groups="groups" :active-id="activeId">
+
+    <template slot="title">套餐详情</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-operation-package">套餐列表</a></el-breadcrumb-item>
+        <el-breadcrumb-item>套餐详情</el-breadcrumb-item>
+    </template>
+
+    <template>
+        <el-card class="box-card" v-loading="loading" shadow="hover" style="width:100%; height:100%;">
+            <div style="box-sizing:border-box; width:320px; position:absolute; left:0; top:0; bottom:0; padding:10px; border-right:2px solid #ebeef5;">
+                <div style="width:100%; height:100%; position:relative">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-loading="tree.package.loading"
+                                ref="packageTree"
+                                :props = "tree.package.props"
+                                :data = "tree.package.data"
+                                node-key="id"
+                                :current-node-key="tree.package.current"
+                                check-strictly
+                                :expand-on-click-node="false"
+                                default-expand-all
+                                highlight-current
+                                @current-change="currentTreeNodeChange">
+
+                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
+                                <span style="font-size:14px;">
+                                     <span>{{data.name}}</span>
+                                </span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </div>
+
+            <div style="box-sizing:border-box; position:absolute; left:320px; top:0; right:0; bottom:0; padding:10px;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="height:54px;padding: 0 20px;">
+                        <template>
+                            <el-tabs v-model="tabs.activeName" @tab-click="handleTabClick">
+                                <el-tab-pane label="资源绑定" name="first">
+                                    <el-tabs
+                                            v-model="tabs.media.current"
+                                            tab-position="left"
+                                            @tab-click="handleMediaTabClick">
+                                        <el-tab-pane label="图片资源" name="picture"></el-tab-pane>
+                                        <el-tab-pane label="视频资源" name="video"></el-tab-pane>
+                                        <el-tab-pane label="音频资源" name="audio"></el-tab-pane>
+                                        <el-tab-pane label="文本资源" name="txt"></el-tab-pane>
+                                    </el-tabs>
+                                    <div style="position:absolute; left:100px; top:0; right:0; bottom:0;">
+                                        <div style="width:100%; height:100%; position:relative;">
+                                            <div v-if="tabs.media.current" style="position:absolute; left:0; top:0; right:0; bottom:0;">
+                                                <div style="width:100%; height:100%; position:relative;">
+                                                    <el-scrollbar style="height:100%;">
+                                                        <el-tree
+                                                                v-loading="tree.media.loading"
+                                                                ref="mediaPermissionTree"
+                                                                :props="tree.media.props"
+                                                                :data="tree.media.data"
+                                                                :default-checked-keys="tree.media.checked[tabs.media.current].uuid"
+                                                                node-key="uuid"
+                                                                show-checkbox
+                                                                default-expand-all
+                                                                highlight-current
+                                                                @check-change="handleMediaCheckChange">
+                                                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
+                                                                <span style="font-size:14px;">
+                                                                    <span class="icon-folder-close" v-if="data.type=='FOLDER'" style="color:#ffd659; font-size:16px; position:relative; top:1px; margin-right:5px;"></span>
+                                                                    <span class="icon-file" v-else style="font-size:16px; position:relative; top:1px; margin-right:5px;"></span>
+                                                                    <span>{{data.name}}</span>
+                                                                </span>
+                                                            </span>
+                                                        </el-tree>
+                                                    </el-scrollbar>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </el-tab-pane>
+                                <!--<el-tab-pane label="资源数量设置" name="second">-->
+                                    <!--<el-tabs-->
+                                            <!--v-model="tabs.mediaNum.current"-->
+                                            <!--tab-position="left"-->
+                                            <!--@tab-click="handleMediaNumTabClick">-->
+                                        <!--<el-tab-pane label="图片资源" name="picture"></el-tab-pane>-->
+                                        <!--<el-tab-pane label="视频资源" name="video"></el-tab-pane>-->
+                                        <!--<el-tab-pane label="音频资源" name="audio"></el-tab-pane>-->
+                                        <!--<el-tab-pane label="文本资源" name="txt"></el-tab-pane>-->
+                                    <!--</el-tabs>-->
+                                    <!--<div style="position:absolute; left:100px; top:0; right:0; bottom:0;">-->
+                                        <!--<div style="width:100%; height:100%; position:relative;">-->
+                                            <!--<div v-if="tabs.mediaNum.current" style="position:absolute; left:20px; top:0; right:0; bottom:0;">-->
+                                                <!--<div style="width:100%; height:100%; position:relative;">-->
+                                                    <!--<el-scrollbar style="height:100%;">-->
+                                                        <!--<el-table-->
+                                                                <!--:data="tree.media.checked[tabs.mediaNum.current].data"-->
+                                                                <!--stripe-->
+                                                                <!--style="width: 100%">-->
+                                                            <!--<el-table-column-->
+                                                                    <!--prop="mimsName"-->
+                                                                    <!--label="名称"-->
+                                                                    <!--width="380">-->
+                                                            <!--</el-table-column>-->
+                                                            <!--<el-table-column-->
+                                                                    <!--label="数量"-->
+                                                                    <!--width="180">-->
+                                                                <!--<template slot-scope="scope">-->
+                                                                    <!--<el-input-number v-model="scope.row.num" :min="1" size="mini" type="number"></el-input-number>-->
+                                                                <!--</template>-->
+                                                            <!--</el-table-column>-->
+                                                        <!--</el-table>-->
+                                                    <!--</el-scrollbar>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
+                                        <!--</div>-->
+                                    <!--</div>-->
+                                <!--</el-tab-pane>-->
+                                <!--<el-tab-pane label="类型绑定" name="third">-->
+                                    <!--<template>-->
+                                        <!--<el-transfer-->
+                                                <!--style="display: inline-block"-->
+                                                <!--v-model="list.mediaTypeCurrent"-->
+                                                <!--target-order="push"-->
+                                                <!--:data="list.mediaType"-->
+                                                <!--:titles="['类型总览', '已添加']"-->
+                                                <!--:button-texts="['移除', '添加']"-->
+                                                <!--:props="list.mediaTypeProps"-->
+                                                <!--@change="handleMediaTypeChooseChanged">-->
+                                        <!--</el-transfer>-->
+
+                                        <!--<div class="el-transfer-panel" style="margin-left: 20px;width: 160px">-->
+                                            <!--<p class="el-transfer-panel__header">-->
+                                                <!--<label>-->
+                                                    <!--<span>数量</span>-->
+                                                <!--</label>-->
+                                            <!--</p>-->
+                                            <!--<div class="el-transfer-panel__body">-->
+                                                <!--<div role="group" class="el-transfer-panel__list" v-if="list.mediaTypeCheckData.length>0">-->
+                                                    <!--<label class="el-transfer-panel__item" v-for="item in list.mediaTypeCheckData.length">-->
+                                                        <!--<span>-->
+                                                            <!--<el-input-number v-model="list.mediaTypeCheckData[item-1].num" :min="1" size="mini" type="number"></el-input-number>-->
+                                                        <!--</span>-->
+                                                    <!--</label>-->
+                                                <!--</div>-->
+                                                <!--<p class="el-transfer-panel__empty" v-else>无数据</p>-->
+                                            <!--</div>-->
+                                        <!--</div>-->
+                                    <!--</template>-->
+                                <!--</el-tab-pane>-->
+                                <el-tab-pane label="流量设置" name="forth">
+                                    <el-form ref="streamForm" label-width="100px">
+                                        <el-form-item label="流量数：">
+                                            <el-input-number
+                                                    v-model="form.streamNum"
+                                                    :min="1">
+                                            </el-input-number><span style="margin-left: 20px">&nbsp;/MB</span>
+                                        </el-form-item>
+                                    </el-form>
+                                </el-tab-pane>
+                            </el-tabs>
+                        </template>
+                    </div>
+                    <div style="position:absolute; top:6px; left:550px">
+                        <el-button type="primary" size="small" @click="handleSave"><span class="icon-save sp_title"></span>&nbsp;保存</el-button>
+                    </div>
+                </div>
+            </div>
+        </el-card>
+    </template>
+</mi-frame>

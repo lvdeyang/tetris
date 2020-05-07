@@ -40,10 +40,15 @@ public class BasicDevelopmentPO extends AbstractBasePO{
 
 	@Column(name = "APP_SECRET")
 	public String getAppSecret() throws Exception{
+		return this.appSecret;
+	}
+	
+	public String decodeAppSecret() throws Exception{
 		try{
 			if(appSecret == null) return null;
 			if("".equals(appSecret)) return "";
 			AES aes = SpringContext.getBean(AES.class);
+			System.out.println("看看我是啥："+appSecret);
 			return aes.decode(APPSECTET_ENCODE_RULE, appSecret);
 		}catch(Exception e){
 			e.printStackTrace();
@@ -52,6 +57,10 @@ public class BasicDevelopmentPO extends AbstractBasePO{
 	}
 
 	public void setAppSecret(String appSecret) throws Exception{
+		this.appSecret = appSecret;
+	}
+	
+	public void encodeAppSecret(String appSecret) throws Exception{
 		try{
 			if(appSecret == null) this.appSecret = null;
 			else if("".equals(appSecret)) this.appSecret = "";
@@ -65,6 +74,7 @@ public class BasicDevelopmentPO extends AbstractBasePO{
 		}
 		
 	}
+	
 
 	@Column(name = "USER_ID")
 	public Long getUserId() {

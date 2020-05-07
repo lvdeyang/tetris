@@ -17,6 +17,9 @@ define([
     'mi-task-view',
     'mi-upload-dialog',
     'mi-lightbox',
+    'mi-tag-dialog',
+    'mi-image-dialog',
+    'mi-addition-dialog',
     'css!' + window.APPPATH + 'front/media/video-stream/page-media-video-stream.css'
 ], function (tpl, config, context, commons, ajax, $, File, Uploader, Vue) {
 
@@ -64,10 +67,13 @@ define([
                         visible: false,
                         name: '',
                         remark: '',
-                        tags: '',
+                        tags: [],
                         keyWords: '',
                         urlCount: 1,
                         previewUrl: [''],
+                        streamType: '',
+                        thumbnail: '',
+                        addition: {},
                         loading: false
                     },
                     editVideoStream: {
@@ -75,14 +81,18 @@ define([
                         id: '',
                         name: '',
                         remark: '',
-                        tags: '',
+                        tags: [],
                         keyWords: '',
                         urlCount: 1,
                         previewUrl: [''],
+                        streamType: '',
+                        thumbnail: '',
+                        addition: {},
                         loading: false
                     }
                 },
-                prepareUploadFileInfo: null
+                prepareUploadFileInfo: null,
+                streamTypeList:[]
             },
             methods: {
                 //鼠标移入
@@ -290,6 +300,9 @@ define([
                             var previewUrls = JSON.parse(JSON.stringify(row.previewUrl));
                             self.dialog.editVideoStream.previewUrl = previewUrls != null && previewUrls.length > 0 ? previewUrls : [""];
                             self.dialog.editVideoStream.urlCount = self.dialog.editVideoStream.previewUrl.length;
+                            self.dialog.editVideoStream.streamType = row.streamType;
+                            self.dialog.editVideoStream.thumbnail = row.thumbnail;
+                            if (row.addition) self.dialog.editVideoStream.addition = typeof row.addition==='string' ? JSON.parse(row.addition) : row.addition;
                             self.dialog.editVideoStream.visible = true;
                         }
                     } else if (command === '2') {
@@ -441,10 +454,13 @@ define([
                     var self = this;
                     self.dialog.addVideoStream.name = '';
                     self.dialog.addVideoStream.remark = '';
-                    self.dialog.addVideoStream.tags = '';
+                    self.dialog.addVideoStream.tags = [];
                     self.dialog.addVideoStream.keyWords = '';
                     self.dialog.addVideoStream.urlCount = 1;
                     self.dialog.addVideoStream.previewUrl = [''];
+                    self.dialog.addVideoStream.streamType = '';
+                    self.dialog.addVideoStream.thumbnail = '';
+                    self.dialog.addVideoStream.addition = {};
                     self.dialog.addVideoStream.visible = false;
                     self.dialog.addVideoStream.loading = false;
                 },
@@ -454,12 +470,25 @@ define([
                     self.dialog.editVideoStream.id = '';
                     self.dialog.editVideoStream.name = '';
                     self.dialog.editVideoStream.remark = '';
-                    self.dialog.editVideoStream.tags = '';
+                    self.dialog.editVideoStream.tags = [];
                     self.dialog.editVideoStream.keyWords = '';
                     self.dialog.editVideoStream.urlCount = 1;
                     self.dialog.editVideoStream.previewUrl = [''];
+                    self.dialog.editVideoStream.streamType = '';
+                    self.dialog.editVideoStream.thumbnail = '';
+                    self.dialog.editVideoStream.addition = {};
                     self.dialog.editVideoStream.visible = false;
                     self.dialog.editVideoStream.loading = false;
+                },
+                //编辑资源海报
+                handleSelectThumbnail: function(buff) {
+                    var self = this;
+                    self.$refs.selectThumbnail.setBuffer(buff);
+                    self.$refs.selectThumbnail.open();
+                },
+                selectedThumbnail:function(url, buff, startLoading, endLoading, done){
+                    buff.thumbnail = url;
+                    done();
                 },
                 //添加视频流媒资任务
                 addMediaVideoStreamTask: function () {
@@ -475,9 +504,12 @@ define([
                     ajax.post('/media/video/stream/task/add', {
                         previewUrl: JSON.stringify(self.dialog.addVideoStream.previewUrl),
                         name: self.dialog.addVideoStream.name,
-                        tags: self.dialog.addVideoStream.tags,
+                        tags: (self.dialog.addVideoStream.tags.length > 0) ? self.dialog.addVideoStream.tags.join(',') : null,
                         keyWords: self.dialog.addVideoStream.keyWords,
                         remark: self.dialog.addVideoStream.remark,
+                        streamType: self.dialog.addVideoStream.streamType,
+                        thumbnail: self.dialog.addVideoStream.thumbnail,
+                        addition: JSON.stringify(self.dialog.addVideoStream.addition),
                         folderId: self.current.id
                     }, function (data, status) {
                         self.dialog.addVideoStream.loading = false;
@@ -500,9 +532,12 @@ define([
                     ajax.post('/media/video/stream/task/edit/' + self.dialog.editVideoStream.id, {
                         previewUrl: JSON.stringify(self.dialog.editVideoStream.previewUrl),
                         name: self.dialog.editVideoStream.name,
-                        tags: self.dialog.editVideoStream.tags,
+                        tags: (self.dialog.editVideoStream.tags.length > 0) ? self.dialog.editVideoStream.tags.join(',') : null,
                         keyWords: self.dialog.editVideoStream.keyWords,
-                        remark: self.dialog.editVideoStream.remark
+                        remark: self.dialog.editVideoStream.remark,
+                        streamType: self.dialog.editVideoStream.streamType,
+                        thumbnail: self.dialog.editVideoStream.thumbnail,
+                        addition: JSON.stringify(self.dialog.editVideoStream.addition),
                     }, function (data, status) {
                         self.dialog.editVideoStream.loading = false;
                         if (status !== 200) return;
@@ -546,6 +581,59 @@ define([
                     }, function(url){
                         window.open(url, '_blank', 'status=no,menubar=yes,toolbar=no,width=1366,height=580,left=100,top=100');
                     });
+                },
+
+                //标签处理
+                handleTagAdd: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.addVideoStream.tags);
+                },
+                handleTagEdit: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.editVideoStream.tags);
+                },
+                selectedTags: function (buff, tags, startLoading, endLoading, close) {
+                    var self = this;
+                    startLoading();
+                    buff.splice(0,buff.length);
+                    for(var i=0; i<tags.length; i++){
+                        buff.push(tags[i].name);
+                    }
+                    endLoading();
+                    close();
+                },
+                handleTagRemove:function(tag, value){
+                    for(var i=0; i<tag.length; i++){
+                        if(tag[i] === value){
+                            tag.splice(i, 1);
+                            break;
+                        }
+                    }
+                },
+
+                //附加属性编辑
+                handleAdditionAdd: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.addVideoStream.addition);
+                },
+                handleAdditionEdit: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.editVideoStream.addition);
+                },
+                editAddition: function(_buff, addition, closeFunc) {
+                    var self = this;
+                    var keys = Object.keys(_buff);
+                    for (var i in keys) {
+                        if (_buff.hasOwnProperty(keys[i])) {
+                            delete _buff[keys[i]];
+                        }
+                    }
+                    for (var key in addition) {
+                        if (addition.hasOwnProperty(key)) {
+                            _buff[key] = addition[key];
+                        }
+                    }
+                    closeFunc();
                 }
             },
             created: function () {
@@ -573,6 +661,12 @@ define([
                     }
 
                     self.current = current;
+                });
+                ajax.post('/media/video/stream/list/stream/type', null, function(data) {
+                    if (data && data.length > 0) {
+                        self.streamTypeList.splice(0, self.streamTypeList.length);
+                        self.streamTypeList = self.streamTypeList.concat(data);
+                    }
                 });
             }
         });

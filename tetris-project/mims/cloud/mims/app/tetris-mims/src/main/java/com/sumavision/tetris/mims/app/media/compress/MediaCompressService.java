@@ -51,6 +51,7 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.compress.api.server.SecureServiceXmlUtils;
 import com.sumavision.tetris.mims.app.media.compress.api.server.XmlVO.SignatureVO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
@@ -115,6 +116,9 @@ public class MediaCompressService {
 	
 	@Autowired
 	private MediaAudioDAO mediaAudioDAO;
+	
+	@Autowired
+	private MediaPictureDAO mediaPictureDAO;
 	
 	@Autowired
 	private MediaSettingsQuery mediaSettingsQuery;
@@ -885,16 +889,23 @@ public class MediaCompressService {
 			}
 			
 			String uploadPath = ""; 
-			MediaVideoPO mediaVideoPO = mediaVideoDAO.findByUuid(item.getUuid());
 			String mediaName = "";
+			
+			MediaVideoPO mediaVideoPO = mediaVideoDAO.findByUuid(item.getUuid());
 			if (mediaVideoPO != null) {
 				uploadPath = mediaVideoPO.getUploadTmpPath();
 				mediaName = mediaVideoPO.getFileName();
-			}else {
+			} else {
 				MediaAudioPO mediaAudioPO = mediaAudioDAO.findByUuid(item.getUuid());
 				if (mediaAudioPO != null) {
 					uploadPath = mediaAudioPO.getUploadTmpPath();
 					mediaName = mediaAudioPO.getFileName();
+				} else {
+					MediaPicturePO mediaPicturePO = mediaPictureDAO.findByUuid(item.getUuid());
+					if (mediaPicturePO != null) {
+						uploadPath = mediaPicturePO.getUploadTmpPath();
+						mediaName = mediaPicturePO.getFileName();
+					}
 				}
 			}
 			

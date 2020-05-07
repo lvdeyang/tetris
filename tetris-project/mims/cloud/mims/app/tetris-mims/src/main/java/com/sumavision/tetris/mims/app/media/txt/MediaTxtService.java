@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.file.FileUtil;
+import com.sumavision.tetris.commons.util.file.GetFileSizeUtil;
+import com.sumavision.tetris.commons.util.json.CreateFileUtil;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.easy.process.core.ProcessQuery;
@@ -26,6 +28,7 @@ import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.FolderType;
+import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
@@ -674,4 +677,49 @@ public class MediaTxtService {
 		mediaTxtDao.delete(task);
 	}
 	
+	/**
+	 * 数据库添加json文件(push使用)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月26日 上午10:26:53
+	 * @param String jsonContent json内容
+	 * @param Long folderId 目录id
+	 * @param String name 文件名
+	 * @return MediaTxtVO
+	 */
+	public MediaTxtVO addPushJson(String jsonContent, Long folderId, String name) throws Exception{
+		UserVO user = userQuery.current();
+		if (name == null || name.isEmpty()) name = "metadata";
+		FolderPO folder;
+		if (folderId == null) {
+	    	List<FolderPO> folders = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_TXT.toString());
+			if(folders == null || folders.isEmpty()){
+				throw new FolderNotExistException(new StringBufferWrapper().append("企业")
+																		   .append(FolderType.COMPANY_TXT.getName())
+																		   .append("根文件夹不存在！")
+																		   .toString());
+			}
+			folder = folders.get(0);
+		} else {
+			folder = folderDao.findOne(folderId);
+			if(folder == null){
+				throw new FolderNotExistException(new StringBufferWrapper().append("文件夹")
+																		   .append(folderId)
+																		   .append("不存在！")
+																		   .toString());
+			}
+		}
+		String fileNameString = new StringBufferWrapper().append(name).append(".json").toString();
+		MediaTxtVO txtVO = addTask(user, new MediaTxtTaskVO().setName(fileNameString), name, null, null, "", folder);
+		String jsonDirPath = txtVO.getUploadTmpPath().replace(fileNameString, "");
+		CreateFileUtil.createJsonFile(jsonContent, jsonDirPath, name);
+		
+		MediaTxtPO txtPO = mediaTxtDao.findOne(txtVO.getId());
+		Long size = GetFileSizeUtil.getFileSize(new File(txtPO.getUploadTmpPath()));
+		txtPO.setSize(size);
+		txtPO.setContent(jsonContent);
+		txtPO.setUploadStatus(UploadStatus.COMPLETE);
+		mediaTxtDao.save(txtPO);
+		return new MediaTxtVO().set(txtPO);
+	}
 }

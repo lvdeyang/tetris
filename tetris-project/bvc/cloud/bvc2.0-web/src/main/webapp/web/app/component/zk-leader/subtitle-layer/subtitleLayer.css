@@ -132,7 +132,7 @@ body{
 
 /* 用来设置当前页面element全局table 选中某行时的背景色*/
 .el-table--striped .el-table__body tr.el-table__row--striped.current-row td, .el-table__body tr.current-row>td, .el-table__body tr.hover-row.current-row>td, .el-table__body tr.hover-row.el-table__row--striped.current-row>td, .el-table__body tr.hover-row.el-table__row--striped>td, .el-table__body tr.hover-row>td{
-    background-color: #374856 !important;
+    background-color: #061f3e !important;
 }
 
 /* 更改输入框背景色 */

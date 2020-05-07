@@ -9,6 +9,7 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 	private String type;
 	private String mimetype;
 	private String duration;
+	private String size;
 	private Long parentId;
 	private String parentPath;
 	private Long channelId;
@@ -21,6 +22,8 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 	private String freq;
 	private String audioPid;
 	private String videoPid;
+	private String audioType;
+	private String videoType;
 	private Boolean checked = true;
 	
 	@Override
@@ -32,6 +35,7 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 		.setType(entity.getType())
 		.setMimetype(entity.getMimetype())
 		.setDuration(entity.getDuration())
+		.setSize(entity.getSize())
 		.setMimsUuid(entity.getMimsUuid())
 		.setParentId(entity.getParentId())
 		.setParentPath(entity.getParentPath())
@@ -41,7 +45,9 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 		.setPreviewUrl(entity.getPreviewUrl())
 		.setFreq(entity.getFreq())
 		.setAudioPid(entity.getAudioPid())
-		.setVideoPid(entity.getVideoPid());
+		.setVideoPid(entity.getVideoPid())
+		.setAudioType(entity.getAudioType())
+		.setVideoType(entity.getVideoType());
 		
 		return this;
 	}
@@ -79,6 +85,15 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 
 	public CsResourceVO setDuration(String duration) {
 		this.duration = duration;
+		return this;
+	}
+
+	public String getSize() {
+		return size;
+	}
+
+	public CsResourceVO setSize(String size) {
+		this.size = size;
 		return this;
 	}
 
@@ -178,6 +193,24 @@ public class CsResourceVO extends AbstractBaseVO<CsResourceVO,CsResourcePO>{
 
 	public CsResourceVO setVideoPid(String videoPid) {
 		this.videoPid = videoPid;
+		return this;
+	}
+
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public CsResourceVO setAudioType(String audioType) {
+		this.audioType = audioType;
+		return this;
+	}
+
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public CsResourceVO setVideoType(String videoType) {
+		this.videoType = videoType;
 		return this;
 	}
 

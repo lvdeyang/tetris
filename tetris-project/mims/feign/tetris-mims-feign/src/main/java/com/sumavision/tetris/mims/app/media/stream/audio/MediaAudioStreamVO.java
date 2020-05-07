@@ -36,6 +36,8 @@ public class MediaAudioStreamVO {
 	
 	private String processInstanceId;
 	
+	private List<MediaAudioStreamVO> children;
+	
 	public Long getId() {
 		return id;
 	}
@@ -180,4 +182,12 @@ public class MediaAudioStreamVO {
 		return this;
 	}
 
+	public List<MediaAudioStreamVO> getChildren() {
+		return children;
+	}
+
+	public MediaAudioStreamVO setChildren(List<MediaAudioStreamVO> children) {
+		this.children = children;
+		return this;
+	}
 }

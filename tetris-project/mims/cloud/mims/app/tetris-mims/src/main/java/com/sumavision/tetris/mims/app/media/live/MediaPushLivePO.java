@@ -72,6 +72,12 @@ public class MediaPushLivePO extends AbstractBasePO{
 	/** 视频pid */
 	private String videoPid;
 	
+	/** 音频类型 */
+	private String VideoType;
+	
+	/** 视频类型 */
+	private String audioType;
+	
 	/** 审核状态 */
 	private ReviewStatus reviewStatus;
 	
@@ -177,6 +183,24 @@ public class MediaPushLivePO extends AbstractBasePO{
 	public void setVideoPid(String videoPid) {
 		this.videoPid = videoPid;
 	}
+	
+	@Column(name = "VIDEO_TYPE")
+	public String getVideoType() {
+		return VideoType;
+	}
+
+	public void setVideoType(String videoType) {
+		VideoType = videoType;
+	}
+
+	@Column(name = "AUDIO_TYPE")
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public void setAudioType(String audioType) {
+		this.audioType = audioType;
+	}
 
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "REVIEW_STATUS")
@@ -218,6 +242,8 @@ public class MediaPushLivePO extends AbstractBasePO{
 		copy_live.setFreq(this.getFreq());
 		copy_live.setAudioPid(this.getAudioPid());
 		copy_live.setVideoPid(this.getVideoPid());
+		copy_live.setAudioType(this.getAudioType());
+		copy_live.setVideoType(this.getVideoType());
 		return copy_live;
 	}
 }

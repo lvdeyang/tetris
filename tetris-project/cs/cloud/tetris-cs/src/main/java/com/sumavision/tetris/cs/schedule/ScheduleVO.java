@@ -12,6 +12,8 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 	
 	private String broadDate;
 	
+	private String endDate;
+	
 	private String remark;
 	
 	/** 下发webSocket时使用，标记下发类型：file;stream */
@@ -49,6 +51,15 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 
 	public ScheduleVO setBroadDate(String broadDate) {
 		this.broadDate = broadDate;
+		return this;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public ScheduleVO setEndDate(String endDate) {
+		this.endDate = endDate;
 		return this;
 	}
 
@@ -105,7 +116,9 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 		.setChannelId(entity.getChannelId())
 		.setProgramId(entity.getProgramId())
 		.setBroadDate(entity.getBroadDate())
-		.setRemark(entity.getRemark());
+		.setEndDate(entity.getEndDate())
+		.setRemark(entity.getRemark())
+		.setProgram(new ProgramVO());
 		return this;
 	}
 }

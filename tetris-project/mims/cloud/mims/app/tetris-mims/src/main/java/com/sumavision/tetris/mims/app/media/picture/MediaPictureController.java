@@ -44,6 +44,8 @@ import com.sumavision.tetris.mims.app.media.picture.exception.MediaPictureStatus
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
+import com.sumavision.tetris.mims.app.operation.accessRecord.OperationRecordService;
+import com.sumavision.tetris.mims.app.operation.accessRecord.OperationRecordVO;
 import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
@@ -83,6 +85,9 @@ public class MediaPictureController {
 	
 	@Autowired
 	private MimsServerPropsQuery serverPropsQuery; 
+	
+	@Autowired
+	private OperationRecordService operationRecordService;
 	
 	/**
 	 * 加载文件夹下的图片媒资<br/>
@@ -126,6 +131,7 @@ public class MediaPictureController {
             String keyWords,
             String remark,
 			Long folderId, 
+			String addition,
 			HttpServletRequest request) throws Exception{
 		
 		MediaPictureTaskVO taskParam = JSON.parseObject(task, MediaPictureTaskVO.class);
@@ -152,6 +158,8 @@ public class MediaPictureController {
 		}
 		
 		MediaPicturePO entity = mediaPictureService.addTask(user, name, tagList, keyWordList, remark, taskParam, folder);
+		if (addition != null) entity.setAddition(addition);
+		mediaPictureDao.save(entity);
 		
 		return new MediaPictureVO().set(entity);
 		
@@ -178,6 +186,7 @@ public class MediaPictureController {
             String tags,
             String keyWords,
             String remark,
+            String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -188,7 +197,7 @@ public class MediaPictureController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if(tags != null){
+		if(tags!=null && !tags.isEmpty()){
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
@@ -198,6 +207,8 @@ public class MediaPictureController {
 		}
 		
 		MediaPicturePO entity = mediaPictureService.editTask(user, picture, name, tagList, keyWordList, remark);
+		if (addition != null) entity.setAddition(addition);
+		mediaPictureDao.save(entity);
 		
 		return new MediaPictureVO().set(entity);
 		
@@ -614,6 +625,8 @@ public class MediaPictureController {
 		}
 		
 		UserVO user = userQuery.current();
+		
+//		operationRecordService.addRecord(user.getId(), OperationRecordVO.setFromPicture(new MediaPictureVO().set(media)), 1l);
 		
 		if(!folderQuery.hasGroupPermission(user.getGroupId(), media.getFolderId())){
 			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);

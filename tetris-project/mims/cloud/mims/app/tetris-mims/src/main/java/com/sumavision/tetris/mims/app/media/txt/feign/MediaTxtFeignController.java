@@ -1,12 +1,14 @@
 package com.sumavision.tetris.mims.app.media.txt.feign;
 
 import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
 import com.sumavision.tetris.mims.app.media.txt.MediaTxtQuery;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -15,6 +17,9 @@ public class MediaTxtFeignController {
 
 	@Autowired
 	private MediaTxtQuery mediaTxtQuery;
+	
+	@Autowired
+	private MediaTxtService mediaTxtService;
 	
 	/**
 	 * 加载文件夹下的文本媒资<br/>
@@ -53,4 +58,20 @@ public class MediaTxtFeignController {
 		return mediaTxtQuery.queryContent(id);
 	}
 	
+	/**
+	 * 数据库添加json文件<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年2月26日 上午10:26:53
+	 * @param String jsonContent json内容
+	 * @param Long folderId 目录id
+	 * @param String name 文件名
+	 * @return MediaTxtVO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/json")
+	public Object addJson(String json, Long folderId, String name, HttpServletRequest request) throws Exception {
+		return mediaTxtService.addPushJson(json, folderId, name);
+	}
 }

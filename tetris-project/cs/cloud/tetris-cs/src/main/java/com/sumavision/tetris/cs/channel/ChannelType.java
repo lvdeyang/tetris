@@ -4,7 +4,8 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum ChannelType {
 	REMOTE("远程频道"),
-	LOCAL("本地频道");
+	LOCAL("本地频道"),
+	YJGB("应急广播下发排期");
 	
 	private String name;
 	

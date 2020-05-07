@@ -147,29 +147,68 @@
 
         <!-- 添加音频流媒资对话框 -->
         <el-dialog
-                title="添加视频"
+                title="添加音频流"
                 :visible.sync="dialog.addAudioStream.visible"
                 width="500px"
                 :before-close="handleAddAudioStreamClose">
 
-            <div>
-                <el-form ref="form" label-width="80px">
-                    <el-form-item label="媒资名称">
-                        <el-input v-model="dialog.addAudioStream.name"></el-input>
-                    </el-form-item>
-                    <el-form-item label="流地址">
-                        <el-input v-model="dialog.addAudioStream.previewUrl"></el-input>
-                    </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.addAudioStream.tags"></el-input>
-                    </el-form-item>
-                    <el-form-item label="关键字">
-                        <el-input v-model="dialog.addAudioStream.keyWords"></el-input>
-                    </el-form-item>
-                    <el-form-item label="备注">
-                        <el-input type="textarea" v-model="dialog.addAudioStream.remark"></el-input>
-                    </el-form-item>
-                </el-form>
+            <div style="height: 500px">
+                <el-scrollbar style="height: 100%">
+                    <el-form ref="form" label-width="80px">
+                        <el-form-item label="媒资名称">
+                            <el-input v-model="dialog.addAudioStream.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="流地址">
+                            <el-input v-model="dialog.addAudioStream.previewUrl"></el-input>
+                        </el-form-item>
+                        <el-form-item label="流类型">
+                            <el-select
+                                    v-model="dialog.addAudioStream.streamType"
+                                    placeholder="请选择流类型">
+                                <el-option
+                                        v-for="item in streamTypeList"
+                                        :key="item"
+                                        :value="item">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="标签">
+                            <el-tag
+                                    :key="simple"
+                                    v-for="simple in dialog.addAudioStream.tags"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleTagRemove(dialog.addAudioStream.tags, simple)">
+                                {{simple}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagAdd" icon="el-icon-edit"> 贴标签</el-button>
+                        </el-form-item>
+                        <el-form-item label="关键字">
+                            <el-input v-model="dialog.addAudioStream.keyWords"></el-input>
+                        </el-form-item>
+                        <el-form-item label="资源封图">
+                            <table>
+                                <tr>
+                                    <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                        <img v-if="dialog.addAudioStream.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.addAudioStream.thumbnail" />
+                                    </td>
+                                    <td style="width:100px; vertical-align:middle;">
+                                        <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.addAudioStream)">
+                                            <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                        </el-button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </el-form-item>
+                        <el-form-item label="附加属性">
+                            <el-button @click="handleAdditionAdd" type="primary" size="small">编辑</el-button>
+                        </el-form-item>
+                        <el-form-item label="备注">
+                            <el-input type="textarea" v-model="dialog.addAudioStream.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
             </div>
 
             <span slot="footer" class="dialog-footer">
@@ -194,11 +233,48 @@
                     <el-form-item label="流地址">
                         <el-input v-model="dialog.editAudioStream.previewUrl"></el-input>
                     </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.editAudioStream.tags"></el-input>
+                    <el-form-item label="流类型">
+                        <el-select
+                                v-model="dialog.editAudioStream.streamType"
+                                placeholder="请选择流类型">
+                            <el-option
+                                    v-for="item in streamTypeList"
+                                    :key="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="标签">
+                        <el-tag
+                                :key="simple"
+                                v-for="simple in dialog.editAudioStream.tags"
+                                style="margin-right:10px;"
+                                closable
+                                :disable-transitions="false"
+                                @close="handleTagRemove(dialog.editAudioStream.tags, simple)">
+                            {{simple}}
+                        </el-tag>
+                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagEdit" icon="el-icon-edit"> 贴标签</el-button>
                     </el-form-item>
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.editAudioStream.keyWords"></el-input>
+                    </el-form-item>
+                    <el-form-item label="资源封图">
+                        <table>
+                            <tr>
+                                <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                    <img v-if="dialog.editAudioStream.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.editAudioStream.thumbnail" />
+                                </td>
+                                <td style="width:100px; vertical-align:middle;">
+                                    <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.editAudioStream)">
+                                        <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                    </el-button>
+                                </td>
+                            </tr>
+                        </table>
+                    </el-form-item>
+                    <el-form-item label="附加属性">
+                        <el-button @click="handleAdditionEdit" type="primary" size="small">编辑</el-button>
                     </el-form-item>
                     <el-form-item label="备注">
                         <el-input type="textarea" v-model="dialog.editAudioStream.remark"></el-input>
@@ -213,11 +289,20 @@
 
         </el-dialog>
 
+        <!-- 选择图片对话框 -->
+        <mi-image-dialog ref="selectThumbnail" @selected-image="selectedThumbnail"></mi-image-dialog>
+
+        <!-- 编辑附加属性 -->
+        <mi-addition-dialog ref="editAddition" @on-dialog-close="editAddition"></mi-addition-dialog>
+
         <!-- 移动文件 -->
         <mi-folder-dialog ref="moveMediaAudioStreamDialog" @selected-folder="moveMediaAudioStream"></mi-folder-dialog>
 
         <!-- 复制文件 -->
         <mi-folder-dialog ref="copyMediaAudioStreamDialog" @selected-folder="copyMediaAudioStream"></mi-folder-dialog>
+
+        <!-- 选择标签对话框 -->
+        <mi-tag-dialog ref="tagDialog" @on-tag-dialog-close="selectedTags"></mi-tag-dialog>
 
         <!-- 预览灯箱 -->
         <mi-lightbox ref="Lightbox" @on-txt-save="handleTxtSave"></mi-lightbox>

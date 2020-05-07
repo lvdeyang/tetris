@@ -62,6 +62,9 @@ public class MediaTxtPO extends AbstractBasePO{
 	/** 关键字， 格式：,分割*/
 	private String keyWords;
 	
+	/** 封图地址 */
+	private String thumbnail;
+	
 	/** 文件上传状态 */
 	private UploadStatus uploadStatus;
 	
@@ -173,6 +176,15 @@ public class MediaTxtPO extends AbstractBasePO{
 		this.keyWords = keyWords;
 	}
 	
+	@Column(name = "THUMBNAIL")
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+	
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "UPLOAD_STATUS")
 	public UploadStatus getUploadStatus() {
@@ -275,6 +287,7 @@ public class MediaTxtPO extends AbstractBasePO{
 		copy_txt.setRemarks(this.getRemarks());
 		copy_txt.setTags(this.getTags());
 		copy_txt.setKeyWords(this.getKeyWords());
+		copy_txt.setThumbnail(this.getThumbnail());
 		copy_txt.setUploadStatus(this.getUploadStatus());
 		copy_txt.setSize(this.getSize());
 		copy_txt.setAddition(this.getAddition());

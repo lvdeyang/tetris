@@ -19,7 +19,7 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
  * <b>鏃ユ湡锛�</b>2019骞�6鏈�25鏃� 涓婂崍10:54:34
  */
 @Controller
-@RequestMapping(value = "/folder/feign")
+@RequestMapping(value = "/folder/role/permission/feign")
 public class FolderRolePermissionFeignController {
 	@Autowired
 	private FolderRolePermissionDAO folderRolePermissionDAO;

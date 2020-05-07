@@ -284,8 +284,9 @@ public class MediaAudioStreamService {
 			String remark, 
 			String previewUrl,
 			FolderPO folder,
+			String streamType,
 			String addition) throws Exception{
-		MediaAudioStreamPO mediaAudioStreamPO = addTask(user, name, tags, keyWords, remark, previewUrl, folder);
+		MediaAudioStreamPO mediaAudioStreamPO = addTask(user, name, tags, keyWords, remark, previewUrl, folder, streamType);
 		if (addition != null) {
 			mediaAudioStreamPO.setAddition(addition);
 			mediaAudioStreamDao.save(mediaAudioStreamPO);
@@ -314,7 +315,8 @@ public class MediaAudioStreamService {
 			List<String> keyWords, 
 			String remark, 
 			String previewUrl,
-			FolderPO folder) throws Exception{
+			FolderPO folder,
+			String streamType) throws Exception{
 		
 		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_AUDIO_STREAM);
 		String transTags = (tags == null || tags.isEmpty()) ? "" : StringUtils.join(tags.toArray(), MediaPicturePO.SEPARATOR_TAG);
@@ -333,6 +335,7 @@ public class MediaAudioStreamService {
 		entity.setPreviewUrl(previewUrl);
 		entity.setUpdateTime(date);
 		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
+		entity.setStreamType(streamType);
 		mediaAudioStreamDao.save(entity);
 		
 		//开启审核流程
@@ -380,7 +383,8 @@ public class MediaAudioStreamService {
 			List<String> tags, 
 			List<String> keyWords, 
 			String remark, 
-			String previewUrl) throws Exception{
+			String previewUrl,
+			String streamType) throws Exception{
 		
 		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_EDIT_AUDIO_STREAM);
 		String transTags = tags==null?"":StringUtils.join(tags.toArray(), MediaPicturePO.SEPARATOR_TAG);
@@ -426,6 +430,7 @@ public class MediaAudioStreamService {
 			audioStream.setKeyWords(transKeyWords);
 			audioStream.setRemarks(remark);
 			audioStream.setPreviewUrl(previewUrl);
+			audioStream.setStreamType(streamType);
 		}
 		mediaAudioStreamDao.save(audioStream);
 		
@@ -475,15 +480,16 @@ public class MediaAudioStreamService {
 			String previewUrl, 
 			String tag,
 			String name,
-			String addition) throws Exception{
+			String addition,
+			String streamType) throws Exception{
 		
-		if (addition == null) return addAudioStreamTask(previewUrl, tag, name);
+		if (addition == null) return addAudioStreamTask(previewUrl, tag, name, streamType);
 		
 		UserVO user = userQuery.current();
 		
 		FolderPO folder = folderDAO.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_AUDIO_STREAM.toString());
 		
-		MediaAudioStreamPO mediaAudioStreamPO = addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", previewUrl, folder);
+		MediaAudioStreamPO mediaAudioStreamPO = addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", previewUrl, folder, streamType);
 		
 		mediaAudioStreamPO.setAddition(addition);
 		mediaAudioStreamDao.save(mediaAudioStreamPO);
@@ -504,13 +510,14 @@ public class MediaAudioStreamService {
 	public MediaAudioStreamVO addAudioStreamTask(
 			String previewUrl, 
 			String tag,
-			String name) throws Exception{
+			String name,
+			String streamType) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		FolderPO folder = folderDAO.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_AUDIO_STREAM.toString());
 		
-		return new MediaAudioStreamVO().set(addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", previewUrl, folder));
+		return new MediaAudioStreamVO().set(addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", previewUrl, folder, streamType));
 	}
 	
 }

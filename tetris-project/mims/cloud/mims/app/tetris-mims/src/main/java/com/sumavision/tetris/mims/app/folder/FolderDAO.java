@@ -65,8 +65,13 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	 * @param String exceptReg 例外文件夹的子文件夹匹配规则
 	 * @return List<FolderPO> 文件夹列表
 	 */
-	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name FROM mims_folder folder LEFT JOIN mims_folder_user_permission permission ON folder.id=permission.folder_id WHERE permission.user_id=?1 AND folder.id<>?2 AND (folder.parent_path IS NULL OR folder.parent_path NOT LIKE ?3)", nativeQuery = true)
-	public List<FolderPO> findMaterialTreeByUserIdWithExcept(String userId, Long except, String exceptReg);
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "
+			+ "FROM mims_folder folder "
+			+ "LEFT JOIN mims_folder_user_permission permission ON folder.id=permission.folder_id "
+			+ "WHERE permission.user_id=?1 "
+			+ "AND folder.id<>?2 "
+			+ "AND (folder.parent_path IS NULL OR (folder.parent_path NOT LIKE ?3 AND folder.parent_path NOT LIKE ?4))", nativeQuery = true)
+	public List<FolderPO> findMaterialTreeByUserIdWithExcept(String userId, Long except, String exceptReg0, String exceptReg1);
 	
 	/**
 	 * 查询素材库文件夹树（带例外，带深度）<br/>
@@ -79,8 +84,14 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	 * @param Integer depth 查询深度
 	 * @return List<FolderPO> 文件夹列表
 	 */
-	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name FROM mims_folder folder LEFT JOIN mims_folder_user_permission permission ON folder.id=permission.folder_id WHERE permission.user_id=?1 AND folder.id<>?2 AND (folder.parent_path IS NULL OR folder.parent_path NOT LIKE ?3) AND folder.depth<=?4", nativeQuery = true)
-	public List<FolderPO> findMaterialTreeByUserIdWithExceptAndDepth(String userId, Long except, String exceptReg, Integer depth);
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "
+			+ "FROM mims_folder folder "
+			+ "LEFT JOIN mims_folder_user_permission permission ON folder.id=permission.folder_id "
+			+ "WHERE permission.user_id=?1 "
+			+ "AND folder.id<>?2 "
+			+ "AND (folder.parent_path IS NULL OR (folder.parent_path NOT LIKE ?3 AND folder.parent_path NOT LIKE ?4)) "
+			+ "AND folder.depth<=?5", nativeQuery = true)
+	public List<FolderPO> findMaterialTreeByUserIdWithExceptAndDepth(String userId, Long except, String exceptReg0, String exceptReg1, Integer depth);
 	
 	/**
 	 * 获取文件夹下所有的子文件夹<br/>
@@ -112,8 +123,8 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	 * @param String parentPathReg 文件夹查询规则
 	 * @return List<FolderPO> 子文件夹列表
 	 */
-	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name FROM mims_folder folder WHERE folder.parent_path LIKE ?1", nativeQuery = true)
-	public List<FolderPO> findSubFolders(String parentPathReg);
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name FROM mims_folder folder WHERE folder.parent_path LIKE ?1 OR folder.parent_path LIKE ?2", nativeQuery = true)
+	public List<FolderPO> findSubFolders(String parentPathReg0, String parentPathReg1);
 	
 	/**
 	 * 获取文件夹下的所有子文件夹（带例外文件夹）<br/>
@@ -125,8 +136,12 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 	 * @param String exceptReg 例外文件夹子文件夹规则
 	 * @return List<FolderPO> 子文件夹
 	 */
-	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name  FROM mims_folder folder WHERE folder.parent_path LIKE ?1 AND folder.id<>?2 AND (folder.parent_path IS NULL OR folder.parent_path NOT LIKE ?3)", nativeQuery = true)
-	public List<FolderPO> findSubFoldersWithExcept(String parentPathReg, Long except, String exceptReg);
+	@Query(value = "SELECT folder.id, folder.uuid, folder.update_time, folder.name, folder.parent_id, folder.parent_path, folder.type, folder.depth, folder.author_id, folder.author_name "
+			+ "FROM mims_folder folder "
+			+ "WHERE (folder.parent_path LIKE ?1 OR folder.parent_path LIKE ?2) "
+			+ "AND folder.id<>?3 "
+			+ "AND (folder.parent_path IS NULL OR (folder.parent_path NOT LIKE ?4 AND folder.parent_path NOT LIKE ?5))", nativeQuery = true)
+	public List<FolderPO> findSubFoldersWithExcept(String parentPathReg0, String parentPathReg1, Long except, String exceptReg0, String exceptReg1);
 	
 	/**
 	 * 获取企业文件夹树<br/>
@@ -181,8 +196,8 @@ public interface FolderDAO extends BaseDAO<FolderPO>{
 				   "WHERE permission0.role_id IN ?1 "+
 				   "AND folder.type=?2 "+
 				   "AND folder.id<>?3 "+
-				   "AND (folder.parent_path IS NULL OR folder.parent_path NOT LIKE ?4)", nativeQuery = true)
-	public List<FolderPO> findPermissionCompanyTreeWithExcept(Collection<Long> roleId, String type, Long except, String exceptReg);
+				   "AND (folder.parent_path IS NULL OR (folder.parent_path NOT LIKE ?4 AND folder.parent_path NOT LIKE ?5))", nativeQuery = true)
+	public List<FolderPO> findPermissionCompanyTreeWithExcept(Collection<Long> roleId, String type, Long except, String exceptReg0, String exceptReg1);
 	
 	/**
 	 * 获取企业文件夹下的有权限的子文件夹<br/>

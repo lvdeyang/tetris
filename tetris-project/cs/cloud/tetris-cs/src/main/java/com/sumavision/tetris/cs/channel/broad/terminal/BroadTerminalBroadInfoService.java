@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.cs.channel.SetTerminalBroadBO;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 
 @Service
@@ -18,8 +19,10 @@ public class BroadTerminalBroadInfoService {
 	@Autowired
 	private ScheduleService scheduleService;
 	
-	public BroadTerminalBroadInfoVO saveInfo(Long channelId, String level, Boolean hasFile) throws Exception {
-		if (channelId == null) return null;
+	public BroadTerminalBroadInfoVO saveInfo(Long channelId, SetTerminalBroadBO terminalBroadBO) throws Exception {
+		if (channelId == null || terminalBroadBO == null) return null;
+		String level = terminalBroadBO.getLevel();
+		Boolean hasFile = terminalBroadBO.getHasFile();
 		if (level == null) level = BroadTerminalLevelType.NORMAL.toString();
 		BroadTerminalBroadInfoPO broadTerminalBroadInfoPO = broadTerminalBroadInfoQuery.findByChannelId(channelId);
 		if (broadTerminalBroadInfoPO == null) broadTerminalBroadInfoPO = new BroadTerminalBroadInfoPO();
