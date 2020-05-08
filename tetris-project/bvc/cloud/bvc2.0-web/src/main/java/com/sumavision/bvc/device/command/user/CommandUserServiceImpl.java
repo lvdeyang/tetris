@@ -1,6 +1,7 @@
 package com.sumavision.bvc.device.command.user;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -59,6 +60,7 @@ import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserDAO;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserPO;
+import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -135,6 +137,9 @@ public class CommandUserServiceImpl {
 	private ResourceRemoteService resourceRemoteService;
 	
 	@Autowired
+	private ResourceServiceClient resourceServiceClient;
+	
+	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
 	
 	/**
@@ -197,10 +202,43 @@ public class CommandUserServiceImpl {
 		//从资源层获取播放器
 		List<PlayerBundleBO> allPlayers = resourceQueryUtil.queryPlayerBundlesByUserId(userInfo.getUserId());
 		
+		//异常情况下数据库中播放器数量少于16个，需要新建补充
+		List<CommandGroupUserPlayerPO> newPlayers = new ArrayList<CommandGroupUserPlayerPO>();
+		
 		for(PlayerBundleBO playerBO : allPlayers){
 			CommandGroupUserPlayerPO userPlayer = commandCommonUtil.queryPlayerByCode(userPlayers, playerBO.getBundleNum());
 			if(userPlayer != null){
 				userPlayer.set(playerBO);
+			}else if(userPlayers.size() < 16){
+				CommandGroupUserPlayerPO newPlayer = new CommandGroupUserPlayerPO().set(playerBO);
+				newPlayers.add(newPlayer);
+			}
+		}
+		
+		if(newPlayers.size() > 0){
+			log.warn(userInfo.getUserName() + " 用户的播放器个数只有" + userPlayers.size() + "个，补充新建个数：" + newPlayers.size());
+			Collections.sort(userPlayers, new CommandGroupUserPlayerPO.PlayerComparatorFromIndex());
+			List<Integer> indexes = new ArrayList<Integer>();
+			int i = 0;
+			for(CommandGroupUserPlayerPO userPlayer : userPlayers){
+				for(; ;){
+					if(userPlayer.getLocationIndex() != i){
+						indexes.add(i);
+						i++;
+					}else{
+						i++;
+						break;
+					}
+				}
+			}
+			for(; i < 16; i++){
+				indexes.add(i);
+			}
+			i=0;
+			for(CommandGroupUserPlayerPO newPlayer : newPlayers){
+				newPlayer.setLocationIndex(indexes.get(i++));
+				newPlayer.setUserInfo(userInfo);
+				userPlayers.add(newPlayer);
 			}
 		}
 		
@@ -1172,9 +1210,7 @@ public class CommandUserServiceImpl {
 				|| CallType.OUTER_LOCAL.equals(callType)){
 			CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
 			calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_CALL, businessId.toString());
-			calledPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
-			calledPlayer.setBusinessId(null);
-			calledPlayer.setBusinessName(null);
+			calledPlayer.setFree();
 			commandGroupUserPlayerDao.save(calledPlayer);
 			
 			//如果用户是被呼叫方，返回callPlayer
@@ -1204,9 +1240,7 @@ public class CommandUserServiceImpl {
 				|| CallType.LOCAL_OUTER.equals(callType)){
 			CommandGroupUserInfoPO callUserInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
 			callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(callUserInfo, PlayerBusinessType.USER_CALL, businessId.toString());
-			callPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
-			callPlayer.setBusinessId(null);
-			callPlayer.setBusinessName(null);
+			callPlayer.setFree();
 			commandGroupUserPlayerDao.save(callPlayer);
 			
 			//如果用户是呼叫方，应返回callPlayer
@@ -1319,17 +1353,13 @@ public class CommandUserServiceImpl {
 		//被呼叫方
 		CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
 		CommandGroupUserPlayerPO calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_VOICE, businessId.toString());
-		calledPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
-		calledPlayer.setBusinessId(null);
-		calledPlayer.setBusinessName(null);
+		calledPlayer.setFree();
 		commandGroupUserPlayerDao.save(calledPlayer);
 		
 		//呼叫方
 		CommandGroupUserInfoPO callUserInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
 		CommandGroupUserPlayerPO callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(callUserInfo, PlayerBusinessType.USER_VOICE, businessId.toString());
-		callPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
-		callPlayer.setBusinessId(null);
-		callPlayer.setBusinessName(null);
+		callPlayer.setFree();
 		commandGroupUserPlayerDao.save(callPlayer);
 		
 		userLiveCallDao.delete(call);
@@ -1371,17 +1401,13 @@ public class CommandUserServiceImpl {
 		//被呼叫方
 		CommandGroupUserInfoPO calledUserInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
 		CommandGroupUserPlayerPO calledPlayer = commandCommonServiceImpl.queryPlayerByBusiness(calledUserInfo, PlayerBusinessType.USER_VOICE, businessId.toString());
-		calledPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
-		calledPlayer.setBusinessId(null);
-		calledPlayer.setBusinessName(null);
+		calledPlayer.setFree();
 		commandGroupUserPlayerDao.save(calledPlayer);
 		
 		//呼叫方
 		CommandGroupUserInfoPO callUserInfo = commandGroupUserInfoDao.findByUserId(call.getCallUserId());
 		CommandGroupUserPlayerPO callPlayer = commandCommonServiceImpl.queryPlayerByBusiness(callUserInfo, PlayerBusinessType.USER_VOICE, businessId.toString());
-		callPlayer.setPlayerBusinessType(PlayerBusinessType.NONE);
-		callPlayer.setBusinessId(null);
-		callPlayer.setBusinessName(null);
+		callPlayer.setFree();
 		commandGroupUserPlayerDao.save(callPlayer);
 		
 		userLiveCallDao.delete(call);
@@ -1584,7 +1610,6 @@ public class CommandUserServiceImpl {
 																	        .setSource_param(calledDecoderAudioForwardSet);
 				calledDecodeConnectBOs.add(connectCalledDecoderAudioChannel);
 			}
-
 			
 			connectCalledDecoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().addAll(calledDecodeConnectBOs).getList());
 			logic.getConnectBundle().add(connectCalledDecoderBundle);
@@ -1752,6 +1777,9 @@ public class CommandUserServiceImpl {
 				
 				
 				logic.getDisconnectBundle().add(disconnectCalledDecoderBundle);
+				
+				//清除资源层上的字幕
+				resourceServiceClient.removeLianwangPassby(call.getCalledDecoderBundleId());
 			}
 		}else{
 			//LOCAL_OUTER，生成passby
@@ -1800,6 +1828,9 @@ public class CommandUserServiceImpl {
 																					     .setBundle_type(call.getCallDecoderBundleType())
 																					     .setLayerId(call.getCallDecoderLayerId());
 				logic.getDisconnectBundle().add(disconnectCallDecoderBundle);
+				
+				//清除资源层上的字幕
+				resourceServiceClient.removeLianwangPassby(call.getCallDecoderBundleId());
 			}
 		}else{
 			//OUTER_LOCAL，生成passby
