@@ -367,7 +367,7 @@ public class CommandCastServiceImpl {
 	 * @param addDevices
 	 * @param _removeDevices player.getCastDevices()中需要解绑的设备
 	 * @param doLogic 是否下logic协议，只查询播放器源的时候用false
-	 * @param doLogic 默认true，是否将解码设备挂断，当给解码器换源的时候，应使用false
+	 * @param closeCastDevice 默认true，是否将解码设备挂断，当给解码器换源的时候，应使用false
 	 * @param getPlayerSrcInfo 修改播放器的上屏设备时应使用false；true表示查找播放器源信息，不会下发logic协议
 	 * @throws Exception
 	 */
@@ -617,7 +617,7 @@ public class CommandCastServiceImpl {
 			}
 			for(CommandGroupUserPlayerCastDevicePO addDevice : addDevices){				
 				resourceServiceClient.coverLianwangPassby(addDevice.getDstBundleId(), addDevice.getDstLayerId(), "osds", JSON.toJSONString(setOsd));
-			}			
+			}
 		}
 		return playerInfoBO;
 	}
@@ -1170,7 +1170,7 @@ public class CommandCastServiceImpl {
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月22日 下午3:25:59
-	 * @param playFilePlayers 用于关闭mediaPush【确认正在播放文件的播放器由于该参数此时已被setFree，所以无法再判断是否还在播放文件，必须在输入前确认】
+	 * @param playFilePlayers 用于关闭mediaPush【播放器的参数此时已被setFree，所以无法再判断是否还在播放文件，必须在输入前确认该播放器是用于播放文件的】
 	 * @param players 播放器列表
 	 * @param codec
 	 * @param userId 暂时无用，会被替换为Admin的userId
@@ -1266,13 +1266,14 @@ public class CommandCastServiceImpl {
 			List<CommandVodPO> vodsForVod,//后续处理：用于关闭文件转发的mediaPushSet
 			List<UserLiveCallPO> calls,//后续处理
 			List<CommandGroupUserPlayerPO> players,
-			boolean closeCastDevice,
+			boolean bCloseCastDevice,
 			CodecParamBO codec,
 			Long userId,
 			List<CommandGroupUserPlayerCastDevicePO> restrictCastDevices){
 		
-		UserBO admin = new UserBO(); admin.setId(-1L);
-		
+		//需要清除字幕的解码器bundleId
+		List<String> clearOsdBundleIds = new ArrayList<String>();
+		UserBO admin = new UserBO(); admin.setId(-1L);		
 		LogicBO logic = new LogicBO().setUserId(admin.getId().toString())
 		 		 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
 		 		 .setMediaPushDel(new ArrayList<MediaPushSetBO>());
@@ -1295,32 +1296,40 @@ public class CommandCastServiceImpl {
 		}
 		
 		//挂断播放器关联的解码器
-		if(closeCastDevice){
-			List<CommandGroupUserPlayerCastDevicePO> closeCastDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
-			if(restrictCastDevices == null){
-				if(null == players) players = new ArrayList<CommandGroupUserPlayerPO>();
-				for(CommandGroupUserPlayerPO player : players){
-					List<CommandGroupUserPlayerCastDevicePO> castDevices = player.getCastDevices();
-					if(castDevices != null){
-						closeCastDevices.addAll(castDevices);
-					}
+		List<CommandGroupUserPlayerCastDevicePO> closeCastDevices = new ArrayList<CommandGroupUserPlayerCastDevicePO>();
+		if(restrictCastDevices == null){
+			if(null == players) players = new ArrayList<CommandGroupUserPlayerPO>();
+			for(CommandGroupUserPlayerPO player : players){
+				List<CommandGroupUserPlayerCastDevicePO> castDevices = player.getCastDevices();
+				if(castDevices != null){
+					closeCastDevices.addAll(castDevices);
 				}
-			}else{
-				closeCastDevices = restrictCastDevices;
 			}
-			if(closeCastDevices != null){
-				for(CommandGroupUserPlayerCastDevicePO castDevice : closeCastDevices){
-					DisconnectBundleBO disconnectDstBundle = new DisconnectBundleBO()
-							.setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-	//								.setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-							.setBundleId(castDevice.getDstBundleId())
-							.setBundle_type(castDevice.getDstBundleType())
-							.setLayerId(castDevice.getDstLayerId());
-					logic.getDisconnectBundle().add(disconnectDstBundle);
-				}
+		}else{
+			closeCastDevices = restrictCastDevices;
+		}
+		
+		if(closeCastDevices != null){
+			for(CommandGroupUserPlayerCastDevicePO closeCastDevice : closeCastDevices){
+				clearOsdBundleIds.add(closeCastDevice.getDstBundleId());
+			}
+		}
+		if(closeCastDevices != null && bCloseCastDevice){
+			for(CommandGroupUserPlayerCastDevicePO castDevice : closeCastDevices){
+				DisconnectBundleBO disconnectDstBundle = new DisconnectBundleBO()
+						.setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
+//								.setOperateType(DisconnectBundleBO.OPERATE_TYPE)
+						.setBundleId(castDevice.getDstBundleId())
+						.setBundle_type(castDevice.getDstBundleType())
+						.setLayerId(castDevice.getDstLayerId());
+				logic.getDisconnectBundle().add(disconnectDstBundle);
 			}
 		}
 		
+		//清除资源层上的字幕
+		for(String clearOsdBundleId : clearOsdBundleIds){
+			resourceServiceClient.removeLianwangPassby(clearOsdBundleId);
+		}
 		return logic;
 	}
 }

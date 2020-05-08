@@ -45,6 +45,7 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
+import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -101,6 +102,9 @@ public class CommandVodService {
 	
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
+	
+	@Autowired
+	private ResourceServiceClient resourceServiceClient;
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
@@ -404,9 +408,7 @@ public class CommandVodService {
 		}else if(vod.getVodType().equals(VodType.USER_ONESELF)){
 			player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.PLAY_USER_ONESELF, businessId.toString());
 		}
-		player.setPlayerBusinessType(PlayerBusinessType.NONE);
-		player.setBusinessId(null);
-		player.setBusinessName(null);
+		player.setFree();
 		commandGroupUserPlayerDao.save(player);
 		
 		commandVodDao.delete(vod);
@@ -629,9 +631,7 @@ public class CommandVodService {
 		
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(vod.getDstUserId());
 		CommandGroupUserPlayerPO player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.PLAY_DEVICE, businessId.toString());
-		player.setPlayerBusinessType(PlayerBusinessType.NONE);
-		player.setBusinessId(null);
-		player.setBusinessName(null);
+		player.setFree();
 		commandGroupUserPlayerDao.save(player);
 		
 		commandVodDao.delete(vod);		
@@ -650,21 +650,42 @@ public class CommandVodService {
 	 * 用户看自己的编码器<br/>
 	 * <p>与“点播用户”userStart()方法基本相同，区别是选用最后一个可用的播放器</p>
 	 * <p>VodType为USER_ONESELF，PlayerBusinessType为PLAY_USER_ONESELF，都是为了查询</p>
-	 * <p>会先校验该用户是否有播放器已经在观看本地视频，如果有则抛错</p>
+	 * <p>会先校验该用户是否有播放器已经在观看本地视频，再校验用户的编码器是否改变，如果改变，则停止原来的，再正常建一个新的</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月29日 上午9:10:26
 	 * @param user
 	 * @param admin
+	 * @param exceptionIfExist 已经存在观看自己，且编码器不变的情况下，true会抛错，false则直接返回
 	 * @return
-	 * @throws Exception 如果已经存在“观看本地视频”的业务，则会抛错
+	 * @throws Exception
 	 */
-	public CommandGroupUserPlayerPO seeOneselfUserStart(UserBO user, UserBO admin) throws Exception{
+	public CommandGroupUserPlayerPO seeOneselfUserStart(UserBO user, UserBO admin, boolean exceptionIfExist) throws Exception{
 		
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		CommandGroupUserPlayerPO selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
 		if(selfPlayer != null){
-			throw new BaseException(StatusCode.FORBIDDEN, "已经在观看本地视频");
+			//检测用户绑定的编码器是否更新
+			CommandVodPO vod = commandVodDao.findOne(Long.parseLong(selfPlayer.getBusinessId()));			
+			if(vod == null){
+				throw new BaseException(StatusCode.FORBIDDEN, "用户点播不存在！");//正常不会出现
+			}
+			String vodEncoderBundleId = vod.getSourceBundleId();			
+			String encoderBundleId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
+			if(encoderBundleId == null){
+				throw new BaseException(StatusCode.FORBIDDEN, "用户没有绑定编码器！");
+			}
+			if(vodEncoderBundleId.equals(encoderBundleId)){
+				//编码器不变，直接返回播放器
+				if(exceptionIfExist){
+					throw new BaseException(StatusCode.FORBIDDEN, "已经在观看本地视频");					
+				}else{
+					return selfPlayer;
+				}
+			}else{
+				//编码器修改，执行停止
+				userStop(user, vod.getId(), admin);
+			}
 		}
 		
 		//参数模板
@@ -730,7 +751,7 @@ public class CommandVodService {
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		CommandGroupUserPlayerPO selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
 		if(selfPlayer != null){
-			throw new BaseException(StatusCode.FORBIDDEN, "已经存在本地");
+			throw new BaseException(StatusCode.FORBIDDEN, "已经存在本地预览");
 		}
 		
 		//选最后一个播放器，选不到则抛错
@@ -986,6 +1007,10 @@ public class CommandVodService {
 		}
 		
 		if(closePlayer){
+			
+			//清除资源层上的字幕
+			resourceServiceClient.removeLianwangPassby(vod.getDstBundleId());
+			
 			//解码端一定是本地播放器
 			DisconnectBundleBO disconnectDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 	//																           	 .setOperateType(DisconnectBundleBO.OPERATE_TYPE)

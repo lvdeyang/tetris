@@ -163,6 +163,36 @@ public class CommandVodController {
 	}
 	
 	/**
+	 * 点播用户自己<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月7日 上午9:29:16
+	 * @param userId
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/see/oneself/user/start")
+	public Object seeOneselfUserStart(
+			HttpServletRequest request) throws Exception{		
+		
+		Long id = userUtils.getUserIdFromSession(request);
+		
+		synchronized (new StringBuffer().append(lockStartPrefix).append(id).toString().intern()) {
+		
+			UserBO user = userUtils.queryUserById(id);
+			UserBO admin = new UserBO(); admin.setId(-1L);
+			
+			CommandGroupUserPlayerPO player = commandVodService.seeOneselfUserStart(user, admin, true);
+			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			
+			return _player;
+		}
+	}
+	
+	/**
 	 * 点播用户<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -192,7 +222,7 @@ public class CommandVodController {
 			CommandGroupUserPlayerPO player = commandVodService.userStart_Cascade(user, vodUser, admin, -1);
 			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 			
-			return _player;		
+			return _player;
 		}
 	}
 

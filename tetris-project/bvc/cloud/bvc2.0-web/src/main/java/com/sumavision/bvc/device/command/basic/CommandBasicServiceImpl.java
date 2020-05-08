@@ -72,6 +72,7 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
+import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
@@ -149,6 +150,9 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private CommandVodService commandVodService;
+	
+	@Autowired
+	private ResourceServiceClient resourceServiceClient;
 	
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
@@ -922,7 +926,9 @@ public class CommandBasicServiceImpl {
 		//校验
 		for(CommandGroupPO group : groups){
 			if(!userId.equals(group.getUserId()) && !group.getType().equals(GroupType.SECRET)){
-				throw new BaseException(StatusCode.FORBIDDEN, "只有创建者能删除 " + group.getName());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, "只有创建者能删除 " + group.getName());
+				}
 			}
 			if(!GroupStatus.STOP.equals(group.getStatus())){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经开始，请停止后再删除。id: " + group.getId());
@@ -3943,13 +3949,13 @@ public class CommandBasicServiceImpl {
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			CommandGroupMemberPO srcMember = commandCommonUtil.queryMemberByUserId(members, memberUserId);
 			if(srcMember.getMemberStatus().equals(MemberStatus.DISCONNECT)){
-				throw new BaseException(StatusCode.FORBIDDEN, srcMember.getUserName() + " 已退出");
+				throw new BaseException(StatusCode.FORBIDDEN, srcMember.getUserName() + " 未进入");
 			}
 			//如果点播自己，则创建一个看自己的编码器的“本地视频”点播用户业务
 			if(memberUserId.equals(userId)){
 //				throw new BaseException(StatusCode.FORBIDDEN, "请观看其它成员");
 				UserBO admin = new UserBO();admin.setId(-1L);
-				return commandVodService.seeOneselfUserStart(userBO, admin);
+				return commandVodService.seeOneselfUserStart(userBO, admin, true);
 			}
 			
 			//找到转发，如果已经执行则抛错			
@@ -4544,6 +4550,10 @@ public class CommandBasicServiceImpl {
 		if(null == players) players = new ArrayList<CommandGroupUserPlayerPO>();
 //		for(CommandGroupMemberPO member : membersForEncoder){
 			for(CommandGroupUserPlayerPO player : players){
+				
+				//清除资源层上的字幕
+				resourceServiceClient.removeLianwangPassby(player.getBundleId());
+				
 				//播放文件和播放录像不需要挂断
 				if(player.getPlayerBusinessType().equals(PlayerBusinessType.PLAY_FILE)
 						|| player.getPlayerBusinessType().equals(PlayerBusinessType.PLAY_RECORD)
