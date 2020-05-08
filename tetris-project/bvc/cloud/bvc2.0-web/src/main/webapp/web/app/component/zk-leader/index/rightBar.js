@@ -125,7 +125,8 @@ define([
                     intercom: true,
                     dedicatedCommand: true,
                     enterCommand: true,
-                    recordRecord: true
+                    recordRecord: true,
+                    download:true
                 },
                 //指挥组
                 group: {
@@ -459,7 +460,9 @@ define([
                     if (data && data.length > 0) {
                         var commands = data[0].children;
                         if (commands && commands.length > 0) {
-                            self.command.data = commands;
+                        	for(var i=0; i<commands.length; i++){
+                        		self.command.data.push(commands[i]);
+                        	}
                             if (typeof callback == 'function') {
                                 callback();
                             }
@@ -500,6 +503,7 @@ define([
                         self.contextMenu.enterCommand = false;
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.recordRecord = true;
+                        self.contextMenu.download = false;
                     } else if (data.type === 'BUNDLE') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = true;
@@ -508,6 +512,7 @@ define([
                         self.contextMenu.enterCommand = false;
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.recordRecord = true;
+                        self.contextMenu.download = false;
                     } else if (data.type === 'VOD_RESOURCE') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = true;
@@ -516,6 +521,7 @@ define([
                         self.contextMenu.enterCommand = false;
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.recordRecord = false;
+                        self.contextMenu.download = true;
                     } else if (data.type === 'COMMAND') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = false;
@@ -523,6 +529,7 @@ define([
                         self.contextMenu.dedicatedCommand = false;
                         self.contextMenu.enterCommand = true;
                         self.contextMenu.removeRecord = false;
+                        self.contextMenu.download = false;
                     } else if (data.type === 'RECORD_PLAYBACK') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = true;
@@ -854,7 +861,7 @@ define([
                             //类型一样，渲染的时候才会显示文字，而不是id
                             self.meet.currentId = data.id.toString();
                             self.meet.current = data;
-                            self.currentGroupChange(self.meet.currentId);
+                            self.currentGroupChange(self.meet.currentId, true);
                         }
                     } else {
                         for (var j = 0; j < self.group.entered.length; j++) {
@@ -873,9 +880,9 @@ define([
                         }
                         //进会时 调返回的数据，为了不影响指挥的代码
                         if (!self.group.current) {
-                            self.group.currentId = data.id;
+                            self.group.currentId = data.id.toString();
                             self.group.current = data;
-                            self.currentGroupChange(self.group.currentId);
+                            self.currentGroupChange(self.group.currentId, true);
                         }
                     }
                     if (data.splits && data.splits.length > 0) {
@@ -1406,7 +1413,7 @@ define([
             //----------第一个树形菜单底部的按钮图标 end----------
 
             //指挥工作台中的 下拉菜单
-            currentGroupChange: function (v) {
+            currentGroupChange: function (v, donotRefreshCommand) {
             	var self = this;
             	var groupId = typeof v==='object'?v.id:v;
             	self.qt.set('currentGroupId', groupId);
@@ -1420,8 +1427,8 @@ define([
                     if (self.differentiate === 2) {
                         param = 'meeting';
                     }
-                    //点击指挥\会议列表下拉框时，默认进行查询操作，实时显示已开启、停止的指挥\会议
-                    self.refreshCommand(param, function () {
+                    
+                    var _fn = function () {
                         for (var i = 0; i < self.command.data.length; i++) {
                             if (self.command.data[i].id == v) {
                                 currentGroup = {
@@ -1515,7 +1522,14 @@ define([
                                 }
                             }, null, [403, 404, 409, 500, 408]);
                         }
-                    })
+                    };
+                    
+                    if(donotRefreshCommand === true){
+                    	_fn();
+                    }else{
+                    	//点击指挥\会议列表下拉框时，默认进行查询操作，实时显示已开启、停止的指挥\会议
+                        self.refreshCommand(param, _fn);
+                    }
                 }
             },
             //指挥工作台树形菜单的复选框
@@ -2638,7 +2652,12 @@ define([
                 //下载录制文件
                 self.qt.on('downloadFile', function (e) {
                     self.qt.invoke('slotDownload', e.param);
-                })
+                });
+                
+                //本地预览
+                self.qt.on('vodUserLocal', function(e){
+                	self.qt.invoke('vodUserLocal', $.toJSON([e.params]));
+                });
             });
         }
     });

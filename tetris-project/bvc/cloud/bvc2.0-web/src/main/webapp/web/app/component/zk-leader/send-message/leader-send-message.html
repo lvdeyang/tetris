@@ -171,42 +171,46 @@
     <template>
         <el-dialog
                 title="通知列表"
+                width="1000px"
                 :visible.sync="dialog.messageList.visible"
                 :before-close="handleMessageListClose">
-            <div class="dialog-body">
-                <el-table
-                        :data="dialog.messageList.data">
-                    <el-table-column
-                            prop="date"
-                            label="日期"
-                            width="180">
-                    </el-table-column>
-                    <el-table-column
-                        prop="content"
-                        label="通知内容">
-                    </el-table-column>
-                    <el-table-column
-                        prop="members"
-                        label="接收用户">
-                    </el-table-column>
-                    <el-table-column
-                            prop="status"
-                            label="当前状态">
-                    </el-table-column>
-                    <el-table-column
-                            fixed="right"
-                            label="操作"
-                            width="80">
-                        <template slot-scope="scope">
-                            <el-button v-if="scope.row.status==='正在通知'" type="text" icon="el-icon-error" title="停止通知" style="padding:0; font-size:18px;" @click="stopMessage(scope)"></el-button>
-                            <el-button v-if="scope.row.status==='通知结束'" type="text" icon="el-icon-bell" title="再次通知" style="padding:0; font-size:18px;" @click="messageAgain(scope)"></el-button>
-                            <el-button type="text" icon="el-icon-delete" title="删除通知" style="padding:0; font-size:18px;" @click="deleteMessage(scope)"></el-button>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </div>
-            <span slot="footer" class="dialog-footer">
-                <div style="position:absolute;bottom:85px;left:500px;">
+            <div style="width:100%; height:400px; position:relative;">
+            	<div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
+            		<div style="width:100%; height:100%; position:relative;">
+		                <el-table
+		                		height="100%"
+		                        :data="dialog.messageList.data">
+		                    <el-table-column
+		                            prop="date"
+		                            label="日期"
+		                            width="180">
+		                    </el-table-column>
+		                    <el-table-column
+		                        prop="content"
+		                        label="通知内容">
+		                    </el-table-column>
+		                    <el-table-column
+		                        prop="members"
+		                        label="接收用户">
+		                    </el-table-column>
+		                    <el-table-column
+		                            prop="status"
+		                            label="当前状态">
+		                    </el-table-column>
+		                    <el-table-column
+		                            fixed="right"
+		                            label="操作"
+		                            width="80">
+		                        <template slot-scope="scope">
+		                            <el-button v-if="scope.row.status==='正在通知'" type="text" icon="el-icon-error" title="停止通知" style="padding:0; font-size:18px;" @click="stopMessage(scope)"></el-button>
+		                            <el-button v-if="scope.row.status==='通知结束'" type="text" icon="el-icon-bell" title="再次通知" style="padding:0; font-size:18px;" @click="messageAgain(scope)"></el-button>
+		                            <el-button type="text" icon="el-icon-delete" title="删除通知" style="padding:0; font-size:18px;" @click="deleteMessage(scope)"></el-button>
+		                        </template>
+		                    </el-table-column>
+		                </el-table>
+	                </div>
+                </div>
+                <div style="height:50px; position:absolute; bottom:0; left:0; padding-top:9px;">
                     <el-pagination
                             background
                             layout="total, prev, pager, next"
@@ -217,10 +221,10 @@
                             :total="dialog.messageList.page.total">
                     </el-pagination>
                 </div>
-                <div style="position: absolute;bottom: 20px;width: 100%;text-align: center">
-                    <el-button size="medium" @click="handleMessageListClose">取消/关闭</el-button>
-                    <el-button size="medium" type="danger" @click="stopAllMessage">全部停止</el-button>
-                </div>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleMessageListClose">取消/关闭</el-button>
+                <el-button size="medium" type="danger" @click="stopAllMessage">全部停止</el-button>
             </span>
         </el-dialog>
     </template>
@@ -228,80 +232,84 @@
     <!--模板-->
     <template>
         <el-dialog
+        		width="1000px"
                 title="样式模板"
                 :visible.sync="dialog.styleTemplates.visible"
                 :before-close="handleStyleTemplatesClose">
-            <div class="dialog-body">
-                <el-table
-                        :data="dialog.styleTemplates.data"
-                        highlight-current-row
-                        :row-key="styleTemplateRowKey"
-                        @current-change="handleCurrentStyleTemplateChange">
-                    <el-table-column
-                            prop="name"
-                            label="模板名称">
-                    </el-table-column>
-                    <el-table-column
-                            prop="fontFamily"
-                            label="字体">
-                    </el-table-column>
-                    <el-table-column
-                            prop="fontSize"
-                            label="字号">
-                    </el-table-column>
-                    <el-table-column
-                            prop="textDecoration"
-                            label="字型">
-                    </el-table-column>
-                    <el-table-column
-                            prop="color"
-                            label="字体颜色">
-                    </el-table-column>
-                    <el-table-column
-                            prop="rollingSpeed"
-                            label="滚动速度">
-                    </el-table-column>
-                    <el-table-column
-                            prop="rollingMode"
-                            label="滚动方向">
-                    </el-table-column>
-                    <el-table-column
-                            prop="rollingLocation"
-                            label="对齐方式">
-                    </el-table-column>
-                    <el-table-column
-                            label="滚动时间">
-                        <template slot-scope="scope">
-                            <span v-if="scope.row.rollingTimeUnlimited">无限制</span>
-                            <span v-else>{{scope.row.rollingTime}}分钟</span>
-                        </template>
-                    </el-table-column>
-                    <el-table-column
-                            fixed="right"
-                            label="操作"
-                            width="50">
-                        <template slot-scope="scope">
-                            <el-button type="text" icon="el-icon-delete" title="删除模板" style="padding:0; font-size:18px;" @click="removeStyleTemplate(scope)"></el-button>
-                        </template>
-                    </el-table-column>
-                </el-table>
-            </div>
-            <span slot="footer" class="dialog-footer">
-                <div style="position:absolute;bottom:85px;left:500px;">
-                    <el-pagination
-                            background
-                            layout="total, prev, pager, next"
-                            @current-change="handleStyleTemplatesCurrentChange"
-                            :page-size="dialog.styleTemplates.page.pageSize"
-                            :pager-count="5"
-                            :current-page.sync="dialog.styleTemplates.page.currentPage"
-                            :total="dialog.styleTemplates.page.total">
+            <div style="width:100%; height:400px; position:relative;">
+            	<div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
+            		<div style="width:100%; height:100%; position:relative;">
+            			<el-table
+            					height="100%"
+		                        :data="dialog.styleTemplates.data"
+		                        highlight-current-row
+		                        :row-key="styleTemplateRowKey"
+		                        @current-change="handleCurrentStyleTemplateChange">
+		                    <el-table-column
+		                            prop="name"
+		                            label="模板名称">
+		                    </el-table-column>
+		                    <el-table-column
+		                            prop="fontFamily"
+		                            label="字体">
+		                    </el-table-column>
+		                    <el-table-column
+		                            prop="fontSize"
+		                            label="字号">
+		                    </el-table-column>
+		                    <el-table-column
+		                            prop="textDecoration"
+		                            label="字型">
+		                    </el-table-column>
+		                    <el-table-column
+		                            prop="color"
+		                            label="字体颜色">
+		                    </el-table-column>
+		                    <el-table-column
+		                            prop="rollingSpeed"
+		                            label="滚动速度">
+		                    </el-table-column>
+		                    <el-table-column
+		                            prop="rollingMode"
+		                            label="滚动方向">
+		                    </el-table-column>
+		                    <el-table-column
+		                            prop="rollingLocation"
+		                            label="对齐方式">
+		                    </el-table-column>
+		                    <el-table-column
+		                            label="滚动时间">
+		                        <template slot-scope="scope">
+		                            <span v-if="scope.row.rollingTimeUnlimited">无限制</span>
+		                            <span v-else>{{scope.row.rollingTime}}分钟</span>
+		                        </template>
+		                    </el-table-column>
+		                    <el-table-column
+		                            fixed="right"
+		                            label="操作"
+		                            width="50">
+		                        <template slot-scope="scope">
+		                            <el-button type="text" icon="el-icon-delete" title="删除模板" style="padding:0; font-size:18px;" @click="removeStyleTemplate(scope)"></el-button>
+		                        </template>
+		                    </el-table-column>
+		                </el-table>
+            		</div>
+           		</div>   
+           		<div style="height:50px; position:absolute; bottom:0; left:0; padding-top:9px;">
+           			<el-pagination
+                        background
+                        layout="total, prev, pager, next"
+                        @current-change="handleStyleTemplatesCurrentChange"
+                        :page-size="dialog.styleTemplates.page.pageSize"
+                        :pager-count="5"
+                        :current-page.sync="dialog.styleTemplates.page.currentPage"
+                        :total="dialog.styleTemplates.page.total">
                     </el-pagination>
-                </div>
-                <div style="position: absolute;bottom: 20px;width: 100%;text-align: center">
-                    <el-button size="medium" @click="handleStyleTemplatesClose">取消</el-button>
-                    <el-button size="medium" type="danger" @click="handleStyleTemplatesChange">确定</el-button>
-                </div>
+           		</div> 
+            </div>    
+            <span slot="footer" class="dialog-footer">
+            	<el-button size="medium" @click="handleStyleTemplatesClose">取消</el-button>
+                <el-button size="medium" type="danger" @click="handleStyleTemplatesChange">确定</el-button>
             </span>
         </el-dialog>
     </template>

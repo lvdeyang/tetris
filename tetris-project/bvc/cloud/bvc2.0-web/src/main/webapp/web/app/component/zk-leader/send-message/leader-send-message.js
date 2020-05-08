@@ -49,7 +49,7 @@ define([
                     messageList:{
                         visible:false,
                         page:{
-                            pageSize:50,
+                            pageSize:10,
                             total:0,
                             currentPage:0
                         },
@@ -63,7 +63,7 @@ define([
                     styleTemplates:{
                         visible:false,
                         page:{
-                            pageSize:50,
+                            pageSize:10,
                             total:0,
                             currentPage:0
                         },
