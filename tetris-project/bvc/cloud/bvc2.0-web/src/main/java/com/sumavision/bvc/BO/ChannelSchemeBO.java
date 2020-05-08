@@ -202,7 +202,8 @@ public class ChannelSchemeBO {
 		this.setTaskId(StringUtils.isEmpty(layoutBO.getTaskId())?UUID.randomUUID().toString():layoutBO.getTaskId());
 		this.setUuid(layoutBO.getUuid());
 		JSONObject channelParam = new JSONObject();
-		channelParam.put("base_param", new JSONObject());
+//		channelParam.put("base_param", new JSONObject());
+		channelParam.put("base_param", layoutBO.getCodec_param());
 		channelParam.getJSONObject("base_param").put("file_source", layoutBO.getFile_source());
 		this.setChannelParam(channelParam);
 		this.setLock_type(CommonConstant.WRITE_LOCK);

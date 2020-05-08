@@ -117,17 +117,17 @@ public class CommandUserInfoController {
 		CommandGroupUserPlayerPO selfPlayer = null;
 		try{
 			selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
-			if(selfPlayer == null){
-				UserBO userBO = userUtils.queryUserById(user.getId());
-//				UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
+			UserBO userBO = userUtils.queryUserById(user.getId());
 
-				if(serverProps.getLocalPreviewMode() == 1){
+			if(serverProps.getLocalPreviewMode() == 1){
+				if(selfPlayer == null){
 					commandVodService.seeOneselfLocalStart(userBO);
-				}else if(serverProps.getLocalPreviewMode() == 2){
-					UserBO admin = new UserBO();
-					admin.setId(-1L);
-					commandVodService.seeOneselfUserStart(userBO, admin);
 				}
+			}else if(serverProps.getLocalPreviewMode() == 2){
+				//总是执行一遍seeOneselfUserStart，如果没有则会新建，如果已经存在则会检测编码器是否改变
+				UserBO admin = new UserBO();
+				admin.setId(-1L);
+				commandVodService.seeOneselfUserStart(userBO, admin, false);
 			}
 		}catch(Exception e){
 			log.info(user.getName() + " 用户添加本地视频预览失败");
