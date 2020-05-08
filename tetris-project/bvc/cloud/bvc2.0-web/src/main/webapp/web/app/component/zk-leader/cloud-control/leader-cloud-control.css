@@ -161,11 +161,6 @@
     margin-bottom: 10px;
 }
 
-.el-button:focus, .el-button:hover {
-    background-color: transparent;
-    border-color: transparent;
-}
-
 button.define {
     background-color: #043554e3;
     border: 1px solid #043554e3;
@@ -259,7 +254,12 @@ button.define {
     color: #fff;
 }
 
-.el-button--default:focus, .el-button--default:hover {
+.el-button--text:focus, .el-button--text:hover {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+}
+.el-button--default:focus,.el-button--default:hover{
     background-color: #204A6B;
     border: none;
     color: #fff;

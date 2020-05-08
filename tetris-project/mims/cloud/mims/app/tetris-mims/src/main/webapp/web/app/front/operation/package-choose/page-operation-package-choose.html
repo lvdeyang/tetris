@@ -1,0 +1,85 @@
+<mi-frame ref="frame" id="page-operation-package-choose-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">用户套餐管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>用户套餐管理</el-breadcrumb-item>
+    </template>
+
+    <template v-loading="loading">
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <div style="box-sizing:border-box; width:420px; position:absolute; left:0; top:0; bottom:0; padding:10px; border-right:1px solid #ebeef5;">
+                <div style="width:100%; height:100%; position:relative">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-loading="tree.loading"
+                                ref="userTree"
+                                :data = "tree.data"
+                                node-key="uuid"
+                                :current-node-key="tree.current"
+                                :expand-on-click-node="false"
+                                default-expand-all
+                                highlight-current
+                                @current-change="currentTreeNodeChange">
+                            <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;" slot-scope="{node, data}">
+                                <span style="font-size:14px;max-width: 200px">
+                                     <span>{{data.nickname}}</span>
+                                </span>
+                            </span>
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+            </div>
+
+            <div v-if="tree.current && tree.current.id && tree.current.id != -1" style="box-sizing:border-box; position:absolute; left:420px; top:0; right:0; bottom:0; padding:10px;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="height:54px;">
+                        <el-button size="small" type="primary" @click="handleBindPackage"><span class="icon-plus" style="margin-right:5px;"></span>添加套餐</el-button>
+                    </div>
+                    <div style="position:absolute; top:54px; left:0; right:0; bottom:0;">
+                        <el-table
+                                :data="table.data"
+                                style="width:100%">
+                            <el-table-column
+                                    type="selection"
+                                    width="55">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="packageInfo.name"
+                                    label="套餐名称">
+                            </el-table-column>
+                            <el-table-column
+                                    prop="packageInfo.price"
+                                    label="套餐价格">
+                            </el-table-column>
+                            <el-table-column
+                                    align="center"
+                                    prop="packageInfo.status"
+                                    label="套餐状态">
+                            </el-table-column>
+                            <el-table-column
+                                    label="操作"
+                                    width="280">
+                                <template slot-scope="scope">
+                                    <el-tooltip class="item" effect="dark" content="查看详情" placement="bottom">
+                                        <el-button type="text" icon="icon-list-ul" style="margin:0; font-size:18px; padding:0; margin-right:15px;" @click="handleDetailPackage(scope)"></el-button>
+                                    </el-tooltip>
+                                    <el-tooltip class="item" effect="dark" content="移除绑定" placement="bottom">
+                                        <el-button type="text" icon="el-icon-delete" style="margin:0; font-size:18px; padding:0; margin-right:15px;" @click="handleRemoveBindPackage(scope)"></el-button>
+                                    </el-tooltip>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </div>
+            </div>
+        </el-card>
+    </template>
+
+    <!--套餐选择-->
+    <mi-package-picker ref="packagePicker" @on-dialog-close="handlePackagePickerCommit"></mi-package-picker>
+
+    <!--套餐详情-->
+    <mi-package-detail ref="packageDetail"></mi-package-detail>
+</mi-frame>

@@ -12,6 +12,7 @@ import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
+import com.sumavision.tetris.mims.app.media.txt.MediaTxtVO;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -47,7 +48,8 @@ public class VersionSendQuery {
 			String filePath,
 			VersionSendType type,
 			String zoneStorePath,
-			String zoneDownloadPath) {
+			String zoneDownloadPath,
+			MediaTxtVO json) {
 		VersionSendPO versionPO = new VersionSendPO();
 		versionPO.setChannelId(channelId);
 		versionPO.setVersion(version);
@@ -60,6 +62,10 @@ public class VersionSendQuery {
 		versionPO.setFileType(type);
 		versionPO.setZoneStorePath(zoneStorePath);
 		versionPO.setZoneDownloadPath(zoneDownloadPath);
+		if (json != null) {
+			versionPO.setJsonDownloadPath(json.getPreviewUrl());
+			versionPO.setJsonStorePath(json.getUploadTmpPath());
+		}
 
 		versionSendDao.save(versionPO);
 	}

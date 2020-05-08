@@ -17,13 +17,18 @@ import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
+import com.sumavision.tetris.cs.channel.SetAutoBroadBO;
+import com.sumavision.tetris.cs.channel.SetOutputBO;
+import com.sumavision.tetris.cs.channel.SetTerminalBroadBO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemoteDAO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemotePO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadStreamWay;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.ScheduleService;
 import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
@@ -37,6 +42,9 @@ import com.sumavision.tetris.user.UserVO;
 public class ApiProcessChannelController {
 	@Autowired
 	private ChannelService channelService;
+
+	@Autowired
+	private ChannelDAO channelDAO;
 	
 	@Autowired
 	private ScheduleService scheduleService;
@@ -83,7 +91,16 @@ public class ApiProcessChannelController {
 						.add(new BroadAbilityBroadInfoVO().setPreviewUrlIp(ip).setPreviewUrlPort(port.toString()))
 						.getList();
 				
-				ChannelPO channel = channelService.add("remote_udp", DateUtil.now(), "轮播推流", "", null, null, ChannelType.REMOTE, encryption == null ? false : encryption, false, null, null, null, null, null, infoVOs);
+				ChannelPO channel = channelService.add(
+						"remote_udp",
+						DateUtil.now(),
+						"轮播推流",
+						"",
+						new SetTerminalBroadBO(),
+						ChannelType.REMOTE,
+						encryption == null ? false : encryption,
+						new SetAutoBroadBO().setAutoBroad(false),
+						new SetOutputBO().setOutput(infoVOs));
 				
 				if (channel != null) {
 					//保存流程信息和回调地址
@@ -91,6 +108,7 @@ public class ApiProcessChannelController {
 					remotePO.setChannelId(channel.getId());
 					remotePO.setProcessInstanceId(__processInstanceId__);
 					remotePO.setStopCallbackUrl(vo.getStopCallback());
+					remotePO.setBroadStreamWay(BroadStreamWay.ABILITY_FILE_STREAM_TRANSCODE);
 					broadAbilityRemoteDAO.save(remotePO);
 					
 					ApiServerScheduleVO scheduleVO = new ApiServerScheduleVO();
@@ -135,7 +153,10 @@ public class ApiProcessChannelController {
 	public Object stop(String messageId, HttpServletRequest request) throws Exception {
 		BroadAbilityRemotePO remotePO = broadAbilityRemoteDAO.findByProcessInstanceId(messageId);
 		if (remotePO != null) {
-			channelService.stopBroadcast(remotePO.getChannelId());
+			ChannelPO channel = channelDAO.findOne(remotePO.getChannelId());
+			if (ChannelType.REMOTE.toString().equals(channel.getType())) {
+				channelService.stopBroadcast(remotePO.getChannelId());
+			}
 		}
 		return null;
 	}
@@ -159,6 +180,13 @@ public class ApiProcessChannelController {
 		List<JSONObject> contents = JSONArray.parseArray(content, JSONObject.class);
 		List<String> regions = JSONArray.parseArray(region, String.class);
 		channelService.generateWithInternalTemplate(name, author, publishTime, remark, keywords, contents, regions, user);
+		return null;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/transcode/check/callback")
+	public Object transcodeCheckCallback(HttpServletRequest request) throws Exception {
 		return null;
 	}
 }

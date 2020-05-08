@@ -69,7 +69,7 @@ public class ApiProcessMediaController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/by/transcoding")
-	public Object addByTranscoding(String urlList, Long parentFolderId,String mediaTags, HttpServletRequest request) throws Exception {
+	public Object addByTranscoding(String urlList, Long parentFolderId,String mediaTags, String __processInstanceId__, HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
 		
 		List<String> urls = Arrays.asList(urlList.split(","));
@@ -80,11 +80,11 @@ public class ApiProcessMediaController {
 		
 		HashMapWrapper<String, String> map = new HashMapWrapper<String, String>();
 		if(folder.getType() == FolderType.COMPANY_VIDEO){
-			List<MediaVideoPO> videos = mediaVideoService.addList(user, urls, parentFolderId, mediaTags);
+			List<MediaVideoPO> videos = mediaVideoService.addList(user, urls, parentFolderId, mediaTags, __processInstanceId__);
 			map.put("type", "video")
 			.put("medias", videos == null || videos.isEmpty() ? null : JSONArray.toJSONString(MediaVideoVO.getConverter(MediaVideoVO.class).convert(videos, MediaVideoVO.class)));
 		}else if (folder.getType() == FolderType.COMPANY_AUDIO) {
-			List<MediaAudioPO> audios = mediaAudioService.addList(user, urls, parentFolderId, mediaTags);
+			List<MediaAudioPO> audios = mediaAudioService.addList(user, urls, parentFolderId, mediaTags, __processInstanceId__);
 			map.put("type", "audio")
 			.put("medias", audios == null || audios.isEmpty() ? null : JSONArray.toJSONString(MediaAudioVO.getConverter(MediaAudioVO.class).convert(audios, MediaAudioVO.class)));
 		}

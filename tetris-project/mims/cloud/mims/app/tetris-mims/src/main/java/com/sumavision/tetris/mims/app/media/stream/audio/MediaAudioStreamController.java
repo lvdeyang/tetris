@@ -17,6 +17,7 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
+import com.sumavision.tetris.mims.app.media.stream.MediaStreamType;
 import com.sumavision.tetris.mims.app.media.stream.audio.exception.MediaAudioStreamNotExistException;
 import com.sumavision.tetris.mims.app.media.stream.video.exception.MediaVideoStreamNotExistException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
@@ -87,7 +88,10 @@ public class MediaAudioStreamController {
             String tags,
             String keyWords,
             String remark,
-			Long folderId, 
+			Long folderId,
+			String streamType,
+			String thumbnail,
+			String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -102,7 +106,7 @@ public class MediaAudioStreamController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if(tags != null){
+		if(tags!=null && !tags.isEmpty()){
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
@@ -111,7 +115,10 @@ public class MediaAudioStreamController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		MediaAudioStreamPO entity = mediaAudioStreamService.addTask(user, name, tagList, keyWordList, remark, previewUrl, folder);
+		MediaAudioStreamPO entity = mediaAudioStreamService.addTask(user, name, tagList, keyWordList, remark, previewUrl, folder, streamType);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if (addition != null) entity.setAddition(addition);
+		mediaAudioStreamDao.save(entity);
 		
 		return new MediaAudioStreamVO().set(entity);
 		
@@ -140,6 +147,9 @@ public class MediaAudioStreamController {
             String tags,
             String keyWords,
             String remark,
+            String streamType,
+            String thumbnail,
+            String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -150,7 +160,7 @@ public class MediaAudioStreamController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if(tags != null){
+		if(tags!=null && !tags.isEmpty()){
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
@@ -159,7 +169,10 @@ public class MediaAudioStreamController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		MediaAudioStreamPO entity = mediaAudioStreamService.editTask(user, audioStream, name, tagList, keyWordList, remark, previewUrl);
+		MediaAudioStreamPO entity = mediaAudioStreamService.editTask(user, audioStream, name, tagList, keyWordList, remark, previewUrl, streamType);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if (addition != null) entity.setAddition(addition);
+		mediaAudioStreamDao.save(entity);
 		
 		return new MediaAudioStreamVO().set(entity);
 		
@@ -292,4 +305,17 @@ public class MediaAudioStreamController {
 		return result;
 	}
 	
+	/**
+	 * 获取流类型数组<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月4日 上午11:51:57
+	 * @return List<String> 流类型
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/stream/type")
+	public Object getStreamType(HttpServletRequest request) throws Exception {
+		return MediaStreamType.queryAllType();
+	}
 }

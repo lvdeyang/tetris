@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mims.app.media.compress.FileCompressVO;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressDAO;
+import com.sumavision.tetris.mims.app.media.compress.MediaCompressQuery;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressService;
 import com.sumavision.tetris.mims.app.media.compress.MediaCompressVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -20,6 +21,9 @@ public class MediaCompressFeignController {
 	
 	@Autowired
 	private MediaCompressService mediaCompressService;
+	
+	@Autowired
+	private MediaCompressQuery mediaCompressQuery;
 	
 	@Autowired
 	private MediaCompressDAO mediaCompressDao;
@@ -38,6 +42,22 @@ public class MediaCompressFeignController {
 	public Object query(Long id) throws Exception{
 		
 		return new MediaCompressVO().set(mediaCompressDao.findOne(id));
+	}
+	
+	/**
+	 * 加载文件夹下的播发媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 下午5:03:13
+	 * @param folderId 文件夹id
+	 * @return rows List<MediaCompressVO> 播发媒资列表
+	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load")
+	public Object load(Long folderId) throws Exception {
+		return mediaCompressQuery.load(folderId);
 	}
 	
 	/**

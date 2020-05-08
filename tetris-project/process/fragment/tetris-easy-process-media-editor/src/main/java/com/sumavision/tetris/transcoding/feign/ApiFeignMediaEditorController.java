@@ -67,8 +67,6 @@ public class ApiFeignMediaEditorController {
 		
 		MediaEditorTaskVO task = mediaEditorTaskQuery.getByProcessId(processInstanceId);
 		
-		return new HashMapWrapper<String, Object>().put("processId", processInstanceId)
-				.put("mediaTask", task)
-				.getMap();
+		return processInstanceId;
 	}
 }

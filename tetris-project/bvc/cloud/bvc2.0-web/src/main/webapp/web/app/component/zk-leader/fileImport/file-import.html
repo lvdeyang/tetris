@@ -8,19 +8,29 @@
             <!--左侧-->
             <div class="left">
                 <el-scrollbar style="height: 100%">
+                	<!-- show-checkbox -->
                     <el-tree
                             ref="treeForm"
                             :data="treeDatas"
-                            show-checkbox
                             node-key="id"
-                            check-strictly
+                            default-expand-all
+                            :expand-on-click-node="false"
                             :props="defaultProps"
                             @check-change="handleNodeClick">
-                            <span class="custom-tree-node" slot-scope="{ node, data }">
-                                <span style="display: inline-block;width: 200px">
-                                   {{data.name}}
-                                </span>
-                                <span @click="remove(data.id)"><i class="el-icon-delete"></i></span>
+                            <span slot-scope="scope">
+                            	<span v-if="scope.data.type==='FOLDER'">
+		                            <el-radio v-model="checkedId" :label="scope.data.id">
+		                            	<span :title="scope.data.name" class="tree-node-folder-name">
+		                                   {{scope.data.name}}
+		                                </span>
+		                            </el-radio>
+	                            </span>
+	                            <span v-else slot-scope="scope">
+	                            	<span @click="remove(scope.data.id)"><i class="el-icon-delete"></i></span>
+	                            	<span :title="scope.data.name" class="tree-node-file-name">
+	                                   {{scope.data.name}}
+	                                </span>
+	                            </span>
                             </span>
                     </el-tree>
                 </el-scrollbar>
@@ -39,7 +49,7 @@
                                 <div style="width:100%; height:100%; position:relative;">
                                     <el-table
                                             ref="multipleTable"
-                                            :data="pageData"
+                                            :data="fileDatas"
                                             style="width: 100%"
                                             height="100%"
                                             @select="handleSelect"
@@ -74,9 +84,9 @@
                                 </div>
                             </div>
                             <div style="height:50px; position:absolute; left:0; bottom:0; right:0; padding-top:9px; box-sizing:border-box;">
-                                <el-pagination background @current-change="CurrentChange" :current-page="currentPage"
-                                               :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
-                                               :total="fileDatas.length">
+                                <el-pagination background @current-change="currentChange" :current-page="currentPage"
+                                               :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next"
+                                               :total="total">
                                 </el-pagination>
                             </div>
                         </div>
@@ -92,7 +102,7 @@
                 <div style="width:100%; height:100%; position:relative;">
                     <el-table
                             ref="dialogTable"
-                            :data="dialogPageData"
+                            :data="gridData"
                             height="100%"
                             style="width:100%;"
                             highlight-current-row
@@ -105,14 +115,14 @@
             </div>
             <div style="position:absolute; left:0; bottom:0; right:0; padding-top:9px; box-sizing:border-box;">
                 <el-pagination background @current-change="handleCurrentChange" :current-page="dialogCurrent"
-                               :page-size="5" :pager-count="5" layout="total, prev, pager, next, jumper"
-                               :total="gridData.length">
+                               :page-size="gridPageSize" :pager-count="5" layout="total, prev, pager, next"
+                               :total="gridTotal">
                 </el-pagination>
             </div>
         </div>
         <div slot="footer" class="dialog-footer">
             <div class="btn-dialog-cancel" @click="dialogVisible=false">取 消</div>
-            <div class="btn-dialog-submit" @click="addSubmit">确 定</div>
+            <div class="btn-dialog-submit" @click="addSubmit(1)">确 定</div>
             <br style="clear:both;"/>
         </div>
     </el-dialog>

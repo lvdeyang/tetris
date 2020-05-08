@@ -306,8 +306,9 @@ public class MediaVideoStreamService {
 			String remark, 
 			List<String> previewUrl,
 			FolderPO folder,
+			String streamType,
 			String addition) throws Exception{
-		MediaVideoStreamPO mediaVideoStreamPO = addTask(user, name, tags, keyWords, remark, previewUrl, folder);
+		MediaVideoStreamPO mediaVideoStreamPO = addTask(user, name, tags, keyWords, remark, previewUrl, folder, streamType);
 		if (addition != null) {
 			mediaVideoStreamPO.setAddition(addition);
 			mediaVideoStreamDao.save(mediaVideoStreamPO);
@@ -336,7 +337,8 @@ public class MediaVideoStreamService {
 			List<String> keyWords, 
 			String remark, 
 			List<String> previewUrl,
-			FolderPO folder) throws Exception{
+			FolderPO folder,
+			String streamType) throws Exception{
 		
 		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_VIDEO_STREAM);
 		String transTags = (tags == null || tags.isEmpty()) ? "" : StringUtils.join(tags.toArray(), MediaPicturePO.SEPARATOR_TAG);
@@ -354,6 +356,7 @@ public class MediaVideoStreamService {
 		entity.setUploadStatus(UploadStatus.COMPLETE);
 		entity.setUpdateTime(date);
 		entity.setReviewStatus(needProcess?ReviewStatus.REVIEW_UPLOAD_WAITING:null);
+		entity.setStreamType(streamType);
 		mediaVideoStreamDao.save(entity);
 		mediaVideoStreamUrlRelationService.add(previewUrl, entity.getId());
 		
@@ -402,7 +405,10 @@ public class MediaVideoStreamService {
 			List<String> tags, 
 			List<String> keyWords, 
 			String remark, 
-			List<String> previewUrl) throws Exception{
+			List<String> previewUrl,
+			String streamType,
+			String thumbnail,
+			String addition) throws Exception{
 		
 		MediaVideoStreamPO videoStream = mediaVideoStreamDao.findOne(id);
 		if(videoStream == null){
@@ -455,6 +461,9 @@ public class MediaVideoStreamService {
 			videoStream.setTags(transTags);
 			videoStream.setKeyWords(transKeyWords);
 			videoStream.setRemarks(remark);
+			videoStream.setStreamType(streamType);
+			if (thumbnail != null) videoStream.setThumbnail(thumbnail);
+			if (addition != null) videoStream.setAddition(addition);
 			mediaVideoStreamDao.save(videoStream);
 			mediaVideoStreamUrlRelationService.update(previewUrl, videoStream.getId());
 		}
@@ -529,21 +538,24 @@ public class MediaVideoStreamService {
 	 * @param String name 媒资名称
 	 * @param String previewUrl 视频流地址
 	 * @param String tag 标签名称
+	 * @param String streamType 流类型
+	 * @param String addition 外加字段
 	 * @return MediaVideoStreamVO 视频流媒资
 	 */
 	public MediaVideoStreamVO addVideoStreamTask(
 			String previewUrl, 
 			String tag,
 			String name,
+			String streamType,
 			String addition) throws Exception{
 		
-		if (addition == null) return addVideoStreamTask(previewUrl, tag, name);
+		if (addition == null) return addVideoStreamTask(previewUrl, tag, name, streamType);
 		
 		UserVO user = userQuery.current();
 		
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO_STREAM.toString());
 		
-		MediaVideoStreamPO mediaVideoStreamPO = addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folder);
+		MediaVideoStreamPO mediaVideoStreamPO = addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folder, streamType);
 		
 		mediaVideoStreamPO.setAddition(addition);
 		mediaVideoStreamDao.save(mediaVideoStreamPO);
@@ -559,18 +571,20 @@ public class MediaVideoStreamService {
 	 * @param String name 媒资名称
 	 * @param String previewUrl 视频流地址
 	 * @param String tag 标签名称
+	 * @param String streamType 流类型
 	 * @return MediaVideoStreamVO 视频流媒资
 	 */
 	public MediaVideoStreamVO addVideoStreamTask(
 			String previewUrl, 
 			String tag,
-			String name) throws Exception{
+			String name,
+			String streamType) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		FolderPO folder = folderDao.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_VIDEO_STREAM.toString());
 		
-		MediaVideoStreamPO mediaVideoStreamPO = addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folder);
+		MediaVideoStreamPO mediaVideoStreamPO = addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), folder, streamType);
 		
 		return new MediaVideoStreamVO().set(mediaVideoStreamPO).setPreviewUrl(new ArrayListWrapper<String>().add(previewUrl).getList());
 	}
@@ -585,8 +599,8 @@ public class MediaVideoStreamService {
 	 * @param String name 媒资名称
 	 * @return MediaVideoStreamVO
 	 */
-	public MediaVideoStreamVO edit(Long mediaId, String previewUrl, String name) throws Exception{
+	public MediaVideoStreamVO edit(Long mediaId, String previewUrl, String name, String streamType) throws Exception{
 		UserVO user = userQuery.current();
-		return editTask(user, mediaId, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList());
+		return editTask(user, mediaId, name, null, null, "", new ArrayListWrapper<String>().add(previewUrl).getList(), streamType, null, null);
 	}
 }

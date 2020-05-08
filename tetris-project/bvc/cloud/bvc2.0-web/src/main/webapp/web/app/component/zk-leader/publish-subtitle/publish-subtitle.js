@@ -19,20 +19,20 @@ define([
                 baseUrl: window.BASEPATH,
                 leftCurrentPage: 1,
                 leftData: [],
+                total:0,
+                pageSize:10,
                 osdId: '',  //要传的
                 serial: ''
             }
         },
         computed: {
-            //左侧的分页
-            pageData: function () {
-                return this.leftData.slice((this.leftCurrentPage - 1) * 10, this.leftCurrentPage * 10);
-            }
+           
         },
         methods: {
             //当前页改变
             leftCurrentChange: function (val) {
                 this.leftCurrentPage = val;
+                this.refreshLeftData();
             },
             //获取表格数据
             refreshLeftData: function () {
@@ -40,14 +40,16 @@ define([
                 self.leftData.splice(0, self.leftData.length);
                 ajax.post('/monitor/osd/load/all', {
                     currentPage: self.leftCurrentPage,
-                    pageSize: '10'
+                    pageSize: self.pageSize
                 }, function (data) {
-                    if (data.rows && data.rows.length > 0) {
-                        var commands = data.rows;
-                        for (var i = 0; i < commands.length; i++) {
-                            self.leftData.push(commands[i]);
-                        }
-                    }
+                	var rows = data.rows;
+                	var total = data.total;
+                	if(rows && rows.length>0){
+                		for(var i=0; i<rows.length; i++){
+                			self.leftData.push(rows[i]);
+                		}
+                		self.total = total;
+                	}
                 });
             },
             //添加提交

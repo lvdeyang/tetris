@@ -820,6 +820,11 @@ public class CommandForwardServiceImpl {
 				result.add(new ForwardReturnBO().setByFile(demand));
 			}
 			
+			//生成logic下发协议
+			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
+			LogicBO logicCastDevice = commandCastServiceImpl.openBundleCastDevice(null, needPlayers, null, null, null, null, codec, group.getUserId());
+			executeBusiness.execute(logicCastDevice, group.getName() + " 进行了文件转发");
+			
 			//发消息
 			for(MessageSendCacheBO cache : messageCaches){
 				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());

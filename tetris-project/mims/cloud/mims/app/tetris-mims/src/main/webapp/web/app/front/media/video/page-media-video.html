@@ -174,49 +174,68 @@
                 width="500px"
                 :before-close="handleAddVideoClose">
 
-            <div>
-                <el-form ref="form" label-width="80px">
-                    <el-form-item label="媒资名称">
-                        <el-input v-model="dialog.addVideo.name"></el-input>
-                    </el-form-item>
-                    <el-form-item label="标签">
-                        <!--<el-input v-model="dialog.addVideo.tags"></el-input>-->
-                        <el-tag
-                                :key="simple"
-                                v-for="simple in dialog.addVideo.tags"
-                                style="margin-right:10px;"
-                                closable
-                                :disable-transitions="false"
-                                @close="handleTagRemove(dialog.addVideo.tags, simple)">
-                            {{simple}}
-                        </el-tag>
-                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagAdd" icon="el-icon-edit"> 贴标签</el-button>
-                    </el-form-item>
-                    <el-form-item label="关键字">
-                        <el-input v-model="dialog.addVideo.keyWords"></el-input>
-                    </el-form-item>
-                    <el-form-item label="是否转码" prop="delivery">
-                        <el-switch v-model="dialog.addVideo.mediaEdit" @change="handleMediaEditChange"></el-switch>
-                    </el-form-item>
-                    <el-form-item label="转码模板"  v-if="dialog.addVideo.mediaEdit">
-                        <el-select
-                                v-model="dialog.addVideo.mediaEditTemplate"
-                                placeholder="请选择转码模板">
-                            <el-option
-                                    v-for="item in dialog.addVideo.mediaEditTemplates"
-                                    :key="item"
-                                    :value="item">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item>
-                        <el-button size="small" type="primary" @click="handleUpload"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
-                        <div v-if="dialog.addVideo.task">{{dialog.addVideo.task.name}}</div>
-                    </el-form-item>
-                    <el-form-item label="备注">
-                        <el-input type="textarea" v-model="dialog.addVideo.remark"></el-input>
-                    </el-form-item>
-                </el-form>
+            <div style="height: 500px">
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="80px">
+                        <el-form-item label="媒资名称">
+                            <el-input v-model="dialog.addVideo.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="标签">
+                            <!--<el-input v-model="dialog.addVideo.tags"></el-input>-->
+                            <el-tag
+                                    :key="simple"
+                                    v-for="simple in dialog.addVideo.tags"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleTagRemove(dialog.addVideo.tags, simple)">
+                                {{simple}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagAdd" icon="el-icon-edit"> 贴标签</el-button>
+                        </el-form-item>
+                        <el-form-item label="关键字">
+                            <el-input v-model="dialog.addVideo.keyWords"></el-input>
+                        </el-form-item>
+                        <!--<el-form-item label="是否转码" prop="delivery">-->
+                            <!--<el-switch v-model="dialog.addVideo.mediaEdit" @change="handleMediaEditChange"></el-switch>-->
+                        <!--</el-form-item>-->
+                        <!--<el-form-item label="转码模板"  v-if="dialog.addVideo.mediaEdit">-->
+                            <!--<el-select-->
+                                    <!--v-model="dialog.addVideo.mediaEditTemplate"-->
+                                    <!--placeholder="请选择转码模板">-->
+                                <!--<el-option-->
+                                        <!--v-for="item in dialog.addVideo.mediaEditTemplates"-->
+                                        <!--:key="item"-->
+                                        <!--:value="item">-->
+                                <!--</el-option>-->
+                            <!--</el-select>-->
+                        <!--</el-form-item>-->
+                        <el-form-item>
+                            <el-button size="small" type="primary" @click="handleUpload"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
+                            <div v-if="dialog.addVideo.task">{{dialog.addVideo.task.name}}</div>
+                        </el-form-item>
+                        <el-form-item label="资源封图">
+                            <table>
+                                <tr>
+                                    <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                        <img v-if="dialog.addVideo.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.addVideo.thumbnail" />
+                                    </td>
+                                    <td style="width:100px; vertical-align:middle;">
+                                        <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.addVideo)">
+                                            <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                        </el-button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </el-form-item>
+                        <el-form-item label="附加属性">
+                            <el-button @click="handleAdditionAdd" type="primary" size="small">编辑</el-button>
+                        </el-form-item>
+                        <el-form-item label="备注">
+                            <el-input type="textarea" v-model="dialog.addVideo.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
             </div>
 
             <span slot="footer" class="dialog-footer">
@@ -254,6 +273,23 @@
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.editVideo.keyWords"></el-input>
                     </el-form-item>
+                    <el-form-item label="资源封图">
+                        <table>
+                            <tr>
+                                <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                    <img v-if="dialog.editVideo.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.editVideo.thumbnail" />
+                                </td>
+                                <td style="width:100px; vertical-align:middle;">
+                                    <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.editVideo)">
+                                        <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                    </el-button>
+                                </td>
+                            </tr>
+                        </table>
+                    </el-form-item>
+                    <el-form-item label="附加属性">
+                        <el-button @click="handleAdditionEdit" type="primary" size="small">编辑</el-button>
+                    </el-form-item>
                     <el-form-item label="备注">
                         <el-input type="textarea" v-model="dialog.editVideo.remark"></el-input>
                     </el-form-item>
@@ -266,6 +302,12 @@
             </span>
 
         </el-dialog>
+
+        <!-- 选择图片对话框 -->
+        <mi-image-dialog ref="selectThumbnail" @selected-image="selectedThumbnail"></mi-image-dialog>
+
+        <!-- 编辑附加属性 -->
+        <mi-addition-dialog ref="editAddition" @on-dialog-close="editAddition"></mi-addition-dialog>
 
         <!-- 移动文件 -->
         <mi-folder-dialog ref="moveMediaVideoDialog" @selected-folder="moveMediaVideo"></mi-folder-dialog>

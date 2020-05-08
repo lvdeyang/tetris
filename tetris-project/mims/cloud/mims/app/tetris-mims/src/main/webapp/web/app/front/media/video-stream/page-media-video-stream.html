@@ -162,29 +162,68 @@
                 width="500px"
                 :before-close="handleAddVideoStreamClose">
 
-            <div>
-                <el-form ref="form" label-width="80px">
-                    <el-form-item label="媒资名称">
-                        <el-input v-model="dialog.addVideoStream.name"></el-input>
-                    </el-form-item>
-                    <el-form-item label="流地址">
-                        <el-input v-for="i in dialog.addVideoStream.urlCount" v-model="dialog.addVideoStream.previewUrl[i-1]"  :style="(i==1?'margin-top:0':'margin-top:10px')">
-                            <template slot="append">
-                                <el-button class="icon-plus" circle @click="handleAddVideoStreamAddUrl" v-if="i==1"></el-button>
-                                <el-button class="icon-minus" circle @click="handleAddVideoStreamMinusUrl(i)" v-else></el-button>
-                            </template>
-                        </el-input>
-                    </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.addVideoStream.tags"></el-input>
-                    </el-form-item>
-                    <el-form-item label="关键字">
-                        <el-input v-model="dialog.addVideoStream.keyWords"></el-input>
-                    </el-form-item>
-                    <el-form-item label="备注">
-                        <el-input type="textarea" v-model="dialog.addVideoStream.remark"></el-input>
-                    </el-form-item>
-                </el-form>
+            <div style="height: 500px">
+                <el-scrollbar style="height: 100%">
+                    <el-form ref="form" label-width="80px">
+                        <el-form-item label="媒资名称">
+                            <el-input v-model="dialog.addVideoStream.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="流地址">
+                            <el-input v-for="i in dialog.addVideoStream.urlCount" v-model="dialog.addVideoStream.previewUrl[i-1]"  :style="(i==1?'margin-top:0':'margin-top:10px')">
+                                <template slot="append">
+                                    <el-button class="icon-plus" circle @click="handleAddVideoStreamAddUrl" v-if="i==1"></el-button>
+                                    <el-button class="icon-minus" circle @click="handleAddVideoStreamMinusUrl(i)" v-else></el-button>
+                                </template>
+                            </el-input>
+                        </el-form-item>
+                        <el-form-item label="流类型">
+                            <el-select
+                                    v-model="dialog.addVideoStream.streamType"
+                                    placeholder="请选择流类型">
+                                <el-option
+                                        v-for="item in streamTypeList"
+                                        :key="item"
+                                        :value="item">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="标签">
+                            <el-tag
+                                    :key="simple"
+                                    v-for="simple in dialog.addVideoStream.tags"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleTagRemove(dialog.addVideoStream.tags, simple)">
+                                {{simple}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagAdd" icon="el-icon-edit"> 贴标签</el-button>
+                        </el-form-item>
+                        <el-form-item label="关键字">
+                            <el-input v-model="dialog.addVideoStream.keyWords"></el-input>
+                        </el-form-item>
+                        <el-form-item label="资源封图">
+                            <table>
+                                <tr>
+                                    <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                        <img v-if="dialog.addVideoStream.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.addVideoStream.thumbnail" />
+                                    </td>
+                                    <td style="width:100px; vertical-align:middle;">
+                                        <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.addVideoStream)">
+                                            <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                        </el-button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </el-form-item>
+                        <el-form-item label="附加属性">
+                            <el-button @click="handleAdditionAdd" type="primary" size="small">编辑</el-button>
+                        </el-form-item>
+                        <el-form-item label="备注">
+                            <el-input type="textarea" v-model="dialog.addVideoStream.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
             </div>
 
             <span slot="footer" class="dialog-footer">
@@ -214,11 +253,48 @@
                             </template>
                         </el-input>
                     </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.editVideoStream.tags"></el-input>
+                    <el-form-item label="流类型">
+                        <el-select
+                                v-model="dialog.editVideoStream.streamType"
+                                placeholder="请选择流类型">
+                            <el-option
+                                    v-for="item in streamTypeList"
+                                    :key="item"
+                                    :value="item">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="标签">
+                        <el-tag
+                                :key="simple"
+                                v-for="simple in dialog.editVideoStream.tags"
+                                style="margin-right:10px;"
+                                closable
+                                :disable-transitions="false"
+                                @close="handleTagRemove(dialog.editVideoStream.tags, simple)">
+                            {{simple}}
+                        </el-tag>
+                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagEdit" icon="el-icon-edit"> 贴标签</el-button>
                     </el-form-item>
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.editVideoStream.keyWords"></el-input>
+                    </el-form-item>
+                    <el-form-item label="资源封图">
+                        <table>
+                            <tr>
+                                <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                    <img v-if="dialog.editVideoStream.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.editVideoStream.thumbnail" />
+                                </td>
+                                <td style="width:100px; vertical-align:middle;">
+                                    <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.editVideoStream)">
+                                        <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                    </el-button>
+                                </td>
+                            </tr>
+                        </table>
+                    </el-form-item>
+                    <el-form-item label="附加属性">
+                        <el-button @click="handleAdditionEdit" type="primary" size="small">编辑</el-button>
                     </el-form-item>
                     <el-form-item label="备注">
                         <el-input type="textarea" v-model="dialog.editVideoStream.remark"></el-input>
@@ -233,11 +309,20 @@
 
         </el-dialog>
 
+        <!-- 选择图片对话框 -->
+        <mi-image-dialog ref="selectThumbnail" @selected-image="selectedThumbnail"></mi-image-dialog>
+
+        <!-- 编辑附加属性 -->
+        <mi-addition-dialog ref="editAddition" @on-dialog-close="editAddition"></mi-addition-dialog>
+
         <!-- 移动文件 -->
         <mi-folder-dialog ref="moveMediaVideoStreamDialog" @selected-folder="moveMediaVideoStream"></mi-folder-dialog>
 
         <!-- 复制文件 -->
         <mi-folder-dialog ref="copyMediaVideoStreamDialog" @selected-folder="copyMediaVideoStream"></mi-folder-dialog>
+
+        <!-- 选择标签对话框 -->
+        <mi-tag-dialog ref="tagDialog" @on-tag-dialog-close="selectedTags"></mi-tag-dialog>
 
         <!-- 预览灯箱 -->
         <mi-lightbox ref="Lightbox" @on-txt-save="handleTxtSave"></mi-lightbox>

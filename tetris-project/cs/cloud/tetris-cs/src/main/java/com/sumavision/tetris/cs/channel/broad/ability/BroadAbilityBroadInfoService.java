@@ -11,11 +11,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sumavision.tetris.cs.channel.Adapter;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
+import com.sumavision.tetris.cs.channel.SetOutputBO;
 import com.sumavision.tetris.cs.channel.exception.ChannelUdpIpAndPortAlreadyExistException;
 import com.sumavision.tetris.cs.channel.exception.ChannelUdpUserIdAlreadyExistException;
 import com.sumavision.tetris.cs.config.ServerProps;
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
-import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.user.UserVO;
 
 @Service
@@ -45,14 +45,18 @@ public class BroadAbilityBroadInfoService {
 	 * @param String port 播发端口
 	 * @return
 	 */
-	public List<BroadAbilityBroadInfoVO> changeVO(List<UserVO> users, String port) throws Exception {
+	public List<BroadAbilityBroadInfoVO> changeVO(SetOutputBO outputBO) throws Exception {
 		List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs = new ArrayList<BroadAbilityBroadInfoVO>();
+		List<UserVO> users = outputBO.getOutputUsers();
+		String port = outputBO.getOutputUserPort();
+		String endPort = outputBO.getOutputUserEndPort();
 		if (users != null){
 			for (UserVO user : users) {
 				abilityBroadInfoVOs.add(new BroadAbilityBroadInfoVO()
 						.setUserId(user.getId())
 						.setPreviewUrlIp(user.getIp())
-						.setPreviewUrlPort(port != null && !port.isEmpty() ? port : "9999"));
+						.setPreviewUrlPort(port != null && !port.isEmpty() ? port : "9999")
+						.setPreviewUrlEndPort(endPort));
 			}
 		}
 		return abilityBroadInfoVOs;
@@ -83,10 +87,10 @@ public class BroadAbilityBroadInfoService {
 				}
 			}
 			broadAbilityBroadInfoDAO.deleteInBatch(removePos);
-			/** 从视频流媒资中删除 */
-			List<Long> mediaIds = removePos.stream().map(BroadAbilityBroadInfoPO::getMediaId).collect(Collectors.toList());
-			if (mediaIds != null && !mediaIds.isEmpty()) while (mediaIds.remove(null));
-			if (mediaIds != null && !mediaIds.isEmpty()) mediaVideoStreamService.remove(mediaIds);
+//			/** 从视频流媒资中删除 */
+//			List<Long> mediaIds = removePos.stream().map(BroadAbilityBroadInfoPO::getMediaId).collect(Collectors.toList());
+//			if (mediaIds != null && !mediaIds.isEmpty()) while (mediaIds.remove(null));
+//			if (mediaIds != null && !mediaIds.isEmpty()) mediaVideoStreamService.remove(mediaIds);
 			
 			/** 获取需保存的ip和端口对 */
 			List<BroadAbilityBroadInfoVO> aliveInfoVOs = BroadAbilityBroadInfoVO.getConverter(BroadAbilityBroadInfoVO.class)
@@ -105,14 +109,15 @@ public class BroadAbilityBroadInfoService {
 			BroadAbilityBroadInfoPO infoPO = new BroadAbilityBroadInfoPO();
 			infoPO.setChannelId(channelId);
 			infoPO.setUserId(broadAbilityBroadInfoVO.getUserId());
+			infoPO.setPreviewUrlEndPort(broadAbilityBroadInfoVO.getPreviewUrlEndPort());
 			String previewIp = broadAbilityBroadInfoVO.getPreviewUrlIp();
 			String previewPort = broadAbilityBroadInfoVO.getPreviewUrlPort();
 			if (previewIp != null && previewPort != null) {
 				if (previewIp.isEmpty() || previewPort.isEmpty()) continue;
 				infoPO.setPreviewUrlIp(previewIp);
 				infoPO.setPreviewUrlPort(previewPort);
-				MediaVideoStreamVO mediaVideoStream = mediaVideoStreamService.addVideoStreamTask(adapter.getUdpUrlFromIpAndPort(previewIp, previewPort), channelPO.getName());
-				infoPO.setMediaId(mediaVideoStream.getId());
+//				MediaVideoStreamVO mediaVideoStream = mediaVideoStreamService.addVideoStreamTask(adapter.getUdpUrlFromIpAndPort(previewIp, previewPort), channelPO.getName());
+//				infoPO.setMediaId(mediaVideoStream.getId());
 			} else {
 				infoPO.setPreviewUrlPort(previewPort != null && !previewPort.isEmpty() ? previewPort : "9999");
 			}

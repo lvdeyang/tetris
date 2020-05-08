@@ -181,67 +181,86 @@
                 width="500px"
                 :before-close="handleAddAudioClose">
 
-            <div>
-                <el-form ref="form" label-width="80px">
-                    <el-form-item label="媒资名称">
-                        <el-input v-model="dialog.addAudio.name"></el-input>
-                    </el-form-item>
-                    <el-form-item label="标签">
-                        <!--<el-input v-model="dialog.addAudio.tags"></el-input>-->
-                        <el-tag
-                                :key="simple"
-                                v-for="simple in dialog.addAudio.tags"
-                                style="margin-right:10px;"
-                                closable
-                                :disable-transitions="false"
-                                @close="handleTagRemove(dialog.addAudio.tags, simple)">
-                            {{simple}}
-                        </el-tag>
-                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagAdd" icon="el-icon-edit"> 贴标签</el-button>
-                    </el-form-item>
-                    <el-form-item label="关键字">
-                        <el-input v-model="dialog.addAudio.keyWords"></el-input>
-                    </el-form-item>
-                    <el-form-item label="添加方式">
-                        <template>
-                            <el-radio v-model="dialog.addAudio.way" label="0">本地音频</el-radio>
-                            <el-radio v-model="dialog.addAudio.way" label="1">本地文本转换</el-radio>
-                            <el-radio v-model="dialog.addAudio.way" label="2">文本仓库转换</el-radio>
-                        </template>
-                    </el-form-item>
-                    <el-form-item label="是否加密" prop="delivery">
-                        <el-switch v-model="dialog.addAudio.encryption"></el-switch>
-                    </el-form-item>
-                    <el-form-item label="是否转码" prop="delivery">
-                        <el-switch v-model="dialog.addAudio.mediaEdit" @change="handleMediaEditChange"></el-switch>
-                    </el-form-item>
-                    <el-form-item label="转码模板"  v-if="dialog.addAudio.mediaEdit">
-                        <el-select
-                                v-model="dialog.addAudio.mediaEditTemplate"
-                                placeholder="请选择转码模板">
-                            <el-option
-                                    v-for="item in dialog.addAudio.mediaEditTemplates"
-                                    :key="item"
-                                    :value="item">
-                            </el-option>
-                        </el-select>
-                    </el-form-item>
-                    <el-form-item v-show="dialog.addAudio.way==0">
-                        <el-button size="small" type="primary" @click="handleUpload"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
-                        <div v-if="dialog.addAudio.task">{{dialog.addAudio.task.name}}</div>
-                    </el-form-item>
-                    <el-form-item v-show="dialog.addAudio.way==1">
-                        <el-button size="small" type="primary" @click="handleUploadExchange"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
-                        <div v-if="dialog.addAudio.txtTask">{{dialog.addAudio.txtTask.name}}</div>
-                    </el-form-item>
-                    <el-form-item v-show="dialog.addAudio.way==2">
-                        <el-button size="small" type="primary" @click="handleExchange"><span class="icon-film" style="margin-right:5px;"></span>选择文本</el-button>
-                        <div v-if="dialog.addAudio.txt">{{dialog.addAudio.txt.name}}</div>
-                    </el-form-item>
-                    <el-form-item label="备注">
-                        <el-input type="textarea" v-model="dialog.addAudio.remark"></el-input>
-                    </el-form-item>
-                </el-form>
+            <div style="height: 500px">
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="80px">
+                        <el-form-item label="媒资名称">
+                            <el-input v-model="dialog.addAudio.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="标签">
+                            <!--<el-input v-model="dialog.addAudio.tags"></el-input>-->
+                            <el-tag
+                                    :key="simple"
+                                    v-for="simple in dialog.addAudio.tags"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleTagRemove(dialog.addAudio.tags, simple)">
+                                {{simple}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagAdd" icon="el-icon-edit"> 贴标签</el-button>
+                        </el-form-item>
+                        <el-form-item label="关键字">
+                            <el-input v-model="dialog.addAudio.keyWords"></el-input>
+                        </el-form-item>
+                        <el-form-item label="添加方式">
+                            <template>
+                                <el-radio v-model="dialog.addAudio.way" label="0">本地音频</el-radio>
+                                <el-radio v-model="dialog.addAudio.way" label="1">本地文本转换</el-radio>
+                                <el-radio v-model="dialog.addAudio.way" label="2">文本仓库转换</el-radio>
+                            </template>
+                        </el-form-item>
+                        <!--<el-form-item label="是否转码" prop="delivery">-->
+                            <!--<el-switch v-model="dialog.addAudio.mediaEdit" @change="handleMediaEditChange"></el-switch>-->
+                        <!--</el-form-item>-->
+                        <!--<el-form-item label="转码模板"  v-if="dialog.addAudio.mediaEdit">-->
+                            <!--<el-select-->
+                                    <!--v-model="dialog.addAudio.mediaEditTemplate"-->
+                                    <!--placeholder="请选择转码模板">-->
+                                <!--<el-option-->
+                                        <!--v-for="item in dialog.addAudio.mediaEditTemplates"-->
+                                        <!--:key="item"-->
+                                        <!--:value="item">-->
+                                <!--</el-option>-->
+                            <!--</el-select>-->
+                        <!--</el-form-item>-->
+                        <el-form-item v-show="dialog.addAudio.way==0">
+                            <el-button size="small" type="primary" @click="handleUpload"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
+                            <div v-if="dialog.addAudio.task">{{dialog.addAudio.task.name}}</div>
+                        </el-form-item>
+                        <el-form-item v-show="dialog.addAudio.way==1">
+                            <el-button size="small" type="primary" @click="handleUploadExchange"><span class="icon-film" style="margin-right:5px;"></span>选择文件</el-button>
+                            <div v-if="dialog.addAudio.txtTask">{{dialog.addAudio.txtTask.name}}</div>
+                        </el-form-item>
+                        <el-form-item v-show="dialog.addAudio.way==2">
+                            <el-button size="small" type="primary" @click="handleExchange"><span class="icon-film" style="margin-right:5px;"></span>选择文本</el-button>
+                            <div v-if="dialog.addAudio.txt">{{dialog.addAudio.txt.name}}</div>
+                        </el-form-item>
+                        <el-form-item label="资源封图">
+                            <table>
+                                <tr>
+                                    <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                        <img v-if="dialog.addAudio.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.addAudio.thumbnail" />
+                                    </td>
+                                    <td style="width:100px; vertical-align:middle;">
+                                        <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.addAudio)">
+                                            <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                        </el-button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </el-form-item>
+                        <el-form-item label="附加属性">
+                            <el-button @click="handleAdditionAdd" type="primary" size="small">编辑</el-button>
+                        </el-form-item>
+                        <el-form-item label="是否加密" prop="delivery">
+                            <el-switch v-model="dialog.addAudio.encryption"></el-switch>
+                        </el-form-item>
+                        <el-form-item label="备注">
+                            <el-input type="textarea" v-model="dialog.addAudio.remark"></el-input>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
             </div>
 
             <span slot="footer" class="dialog-footer">
@@ -279,6 +298,23 @@
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.editAudio.keyWords"></el-input>
                     </el-form-item>
+                    <el-form-item label="资源封图">
+                        <table>
+                            <tr>
+                                <td style="width:100px; vertical-align:middle; border:1px solid #eaeaea;">
+                                    <img v-if="dialog.editAudio.thumbnail" style="width:100px; height:100px; float:left;" :src="dialog.editAudio.thumbnail" />
+                                </td>
+                                <td style="width:100px; vertical-align:middle;">
+                                    <el-button type="primary" style="padding:0; margin:0; width:100px; height:100px; line-height:100px; border-radius:0;" @click="handleSelectThumbnail(dialog.editAudio)">
+                                        <span class="el-icon-edit" style="font-size:40px; position:relative; top:7px;"></span>
+                                    </el-button>
+                                </td>
+                            </tr>
+                        </table>
+                    </el-form-item>
+                    <el-form-item label="附加属性">
+                        <el-button @click="handleAdditionEdit" type="primary" size="small">编辑</el-button>
+                    </el-form-item>
                     <el-form-item label="备注">
                         <el-input type="textarea" v-model="dialog.editAudio.remark"></el-input>
                     </el-form-item>
@@ -291,6 +327,12 @@
             </span>
 
         </el-dialog>
+
+        <!-- 选择图片对话框 -->
+        <mi-image-dialog ref="selectThumbnail" @selected-image="selectedThumbnail"></mi-image-dialog>
+
+        <!-- 编辑附加属性 -->
+        <mi-addition-dialog ref="editAddition" @on-dialog-close="editAddition"></mi-addition-dialog>
 
         <!-- 移动文件 -->
         <mi-folder-dialog ref="moveMediaAudioDialog" @selected-folder="moveMediaAudio"></mi-folder-dialog>

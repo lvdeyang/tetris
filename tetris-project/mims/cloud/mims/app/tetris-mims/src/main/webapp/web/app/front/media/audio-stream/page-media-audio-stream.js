@@ -17,6 +17,9 @@ define([
     'mi-task-view',
     'mi-upload-dialog',
     'mi-lightbox',
+    'mi-tag-dialog',
+    'mi-image-dialog',
+    'mi-addition-dialog',
     'css!' + window.APPPATH + 'front/media/audio-stream/page-media-audio-stream.css'
 ], function(tpl, config, context, commons, ajax, $, File, Uploader, Vue){
 
@@ -64,9 +67,12 @@ define([
                         visible:false,
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keyWords:'',
                         previewUrl:'',
+                        streamType: '',
+                        thumbnail: '',
+                        addition: {},
                         loading:false
                     },
                     editAudioStream:{
@@ -74,13 +80,17 @@ define([
                         id:'',
                         name:'',
                         remark:'',
-                        tags:'',
+                        tags:[],
                         keyWords:'',
                         previewUrl:'',
+                        streamType: '',
+                        thumbnail: '',
+                        addition: {},
                         loading:false
                     }
                 },
-                prepareUploadFileInfo:null
+                prepareUploadFileInfo:null,
+                streamTypeList:[]
             },
             methods:{
                 //鼠标移入
@@ -286,6 +296,9 @@ define([
                             self.dialog.editAudioStream.tags = row.tags;
                             self.dialog.editAudioStream.keyWords = row.keyWords;
                             self.dialog.editAudioStream.previewUrl = row.previewUrl;
+                            self.dialog.editAudioStream.streamType = row.streamType;
+                            self.dialog.editAudioStream.thumbnail = row.thumbnail;
+                            if (row.addition) self.dialog.editAudioStream.addition = typeof row.addition==='string' ? JSON.parse(row.addition) : row.addition;
                             self.dialog.editAudioStream.visible = true;
                         }
                     }else if(command === '2'){
@@ -437,9 +450,12 @@ define([
                     var self = this;
                     self.dialog.addAudioStream.name = '';
                     self.dialog.addAudioStream.remark = '';
-                    self.dialog.addAudioStream.tags = '';
+                    self.dialog.addAudioStream.tags = [];
                     self.dialog.addAudioStream.keyWords = '';
                     self.dialog.addAudioStream.previewUrl = '';
+                    self.dialog.addAudioStream.streamType = '';
+                    self.dialog.addAudioStream.thumbnail = '';
+                    self.dialog.addAudioStream.addition = {};
                     self.dialog.addAudioStream.visible = false;
                     self.dialog.addAudioStream.loading = false;
                 },
@@ -449,11 +465,24 @@ define([
                     self.dialog.editAudioStream.id = '';
                     self.dialog.editAudioStream.name = '';
                     self.dialog.editAudioStream.remark = '';
-                    self.dialog.editAudioStream.tags = '';
+                    self.dialog.editAudioStream.tags = [];
                     self.dialog.editAudioStream.keyWords = '';
                     self.dialog.editAudioStream.previewUrl = '';
+                    self.dialog.editAudioStream.streamType = '';
+                    self.dialog.editAudioStream.thumbnail = '';
+                    self.dialog.editAudioStream.addition = {};
                     self.dialog.editAudioStream.visible = false;
                     self.dialog.editAudioStream.loading = false;
+                },
+                //编辑资源海报
+                handleSelectThumbnail: function(buff) {
+                    var self = this;
+                    self.$refs.selectThumbnail.setBuffer(buff);
+                    self.$refs.selectThumbnail.open();
+                },
+                selectedThumbnail:function(url, buff, startLoading, endLoading, done){
+                    buff.thumbnail = url;
+                    done();
                 },
                 //添加音频流媒资任务
                 addMediaAudioStreamTask:function(){
@@ -469,9 +498,12 @@ define([
                     ajax.post('/media/audio/stream/task/add', {
                         previewUrl:self.dialog.addAudioStream.previewUrl,
                         name:self.dialog.addAudioStream.name,
-                        tags:self.dialog.addAudioStream.tags,
+                        tags:(self.dialog.addAudioStream.tags.length > 0) ? self.dialog.addAudioStream.tags.join(',') : null,
                         keyWords:self.dialog.addAudioStream.keyWords,
                         remark:self.dialog.addAudioStream.remark,
+                        streamType:self.dialog.addAudioStream.streamType,
+                        thumbnail: self.dialog.addAudioStream.thumbnail,
+                        addition: JSON.stringify(self.dialog.addAudioStream.addition),
                         folderId:self.current.id
                     }, function(data, status){
                         self.dialog.addAudioStream.loading = false;
@@ -494,9 +526,12 @@ define([
                     ajax.post('/media/audio/stream/task/edit/' + self.dialog.editAudioStream.id, {
                         previewUrl:self.dialog.editAudioStream.previewUrl,
                         name:self.dialog.editAudioStream.name,
-                        tags:self.dialog.editAudioStream.tags,
+                        tags:(self.dialog.editAudioStream.tags.length > 0) ? self.dialog.editAudioStream.tags.join(',') : null,
                         keyWords:self.dialog.editAudioStream.keyWords,
                         remark:self.dialog.editAudioStream.remark,
+                        streamType:self.dialog.editAudioStream.streamType,
+                        thumbnail: self.dialog.editAudioStream.thumbnail,
+                        addition: JSON.stringify(self.dialog.editAudioStream.addition)
                     }, function(data, status){
                         self.dialog.addAudioStream.loading = false;
                         if(status !== 200) return;
@@ -518,6 +553,59 @@ define([
                     }, function(url){
                         window.open(url, '_blank', 'status=no,menubar=yes,toolbar=no,width=1366,height=580,left=100,top=100');
                     });
+                },
+
+                //标签处理
+                handleTagAdd: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.addAudioStream.tags);
+                },
+                handleTagEdit: function () {
+                    var self = this;
+                    self.$refs.tagDialog.open('/media/tag/list/get', self.dialog.editAudioStream.tags);
+                },
+                selectedTags: function (buff, tags, startLoading, endLoading, close) {
+                    var self = this;
+                    startLoading();
+                    buff.splice(0,buff.length);
+                    for(var i=0; i<tags.length; i++){
+                        buff.push(tags[i].name);
+                    }
+                    endLoading();
+                    close();
+                },
+                handleTagRemove:function(tag, value){
+                    for(var i=0; i<tag.length; i++){
+                        if(tag[i] === value){
+                            tag.splice(i, 1);
+                            break;
+                        }
+                    }
+                },
+
+                //附加属性编辑
+                handleAdditionAdd: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.addAudioStream.addition);
+                },
+                handleAdditionEdit: function() {
+                    var self = this;
+                    self.$refs.editAddition.open(self.dialog.editAudioStream.addition);
+                },
+                editAddition: function(_buff, addition, closeFunc) {
+                    var self = this;
+                    var keys = Object.keys(_buff);
+                    for (var i in keys) {
+                        if (_buff.hasOwnProperty(keys[i])) {
+                            delete _buff[keys[i]];
+                        }
+                    }
+                    for (var key in addition) {
+                        if (addition.hasOwnProperty(key)) {
+                            _buff[key] = addition[key];
+                        }
+                    }
+                    closeFunc();
                 }
             },
             created:function(){
@@ -545,6 +633,12 @@ define([
                     }
 
                     self.current = current;
+                });
+                ajax.post('/media/audio/stream/list/stream/type', null, function(data) {
+                    if (data && data.length > 0) {
+                        self.streamTypeList.splice(0, self.streamTypeList.length);
+                        self.streamTypeList = self.streamTypeList.concat(data);
+                    }
                 });
             }
         });

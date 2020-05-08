@@ -104,9 +104,9 @@ define([
                 var self = this;
                 self.qt.window('/router/zk/leader/rec', null, {width: '85%', height: '93%'});
             },
-            //字幕管理
-            subtitleOpen: function () {
-                this.qt.window('/router/zk/leader/subtitle/manage', null, {width: '85%', height: '93%'});
+            //发布字幕
+            publish: function () {
+                this.qt.window('/router//zk/leader/subtitle/layer', null, {width: '85%', height: '93%'});
             },
             //下载任务
             download: function () {

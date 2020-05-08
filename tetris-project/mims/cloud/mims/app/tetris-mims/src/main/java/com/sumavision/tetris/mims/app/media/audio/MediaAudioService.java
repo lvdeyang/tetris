@@ -4,7 +4,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +31,8 @@ import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.easy.process.media.editor.MediaEditorService;
 import com.sumavision.tetris.easy.process.media.editor.TranscodeMediaVO;
+import com.sumavision.tetris.easy.process.stream.transcode.FileDealVO;
+import com.sumavision.tetris.easy.process.stream.transcode.StreamTranscodeQuery;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -41,6 +42,8 @@ import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioErrorWhenChangeFromTxtException;
 import com.sumavision.tetris.mims.app.media.audio.exception.MediaAudioNotExistException;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorDAO;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorPO;
 import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodeDAO;
 import com.sumavision.tetris.mims.app.media.encode.AudioFileEncodePO;
 import com.sumavision.tetris.mims.app.media.encode.FileEncodeService;
@@ -133,6 +136,13 @@ public class MediaAudioService {
 	
 	@Autowired
 	private MediaEditorService mediaEditorService;
+	
+	@Autowired
+	private MediaFileEditorDAO mediaFileEditorDAO;
+	
+	@Autowired
+	private StreamTranscodeQuery streamTranscodeQuery;
+	
 	/**
 	 * 音频媒资上传审核通过<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -267,6 +277,20 @@ public class MediaAudioService {
 					}
 				}
 			}
+			
+			//删除转码文件
+			List<MediaFileEditorPO> editorPOs = mediaFileEditorDAO.findByMediaIdInAndMediaType(needRemoveAudioIds, FolderType.COMPANY_AUDIO);
+			for (MediaFileEditorPO mediaFileEditorPO : editorPOs) {
+				if (mediaFileEditorPO.getUploadTempPath() == null || mediaFileEditorPO.getUploadTempPath().isEmpty()) continue;
+				File file = new File(new File(mediaFileEditorPO.getUploadTempPath()).getParent());
+				File[] children = file.listFiles();
+				if(children != null){
+					for(File sub: children){
+						if(sub.exists()) sub.delete();
+					}
+				}
+			}
+			mediaFileEditorDAO.deleteInBatch(editorPOs);
 		}
 	}
 	
@@ -426,6 +450,20 @@ public class MediaAudioService {
 					}
 				}
 			}
+			
+			//删除转码文件
+			List<MediaFileEditorPO> editorPOs = mediaFileEditorDAO.findByMediaIdInAndMediaType(needRemoveAudioIds, FolderType.COMPANY_AUDIO);
+			for (MediaFileEditorPO mediaFileEditorPO : editorPOs) {
+				if (mediaFileEditorPO.getUploadTempPath() == null || mediaFileEditorPO.getUploadTempPath().isEmpty()) continue;
+				File file = new File(new File(mediaFileEditorPO.getUploadTempPath()).getParent());
+				File[] children = file.listFiles();
+				if(children != null){
+					for(File sub: children){
+						if(sub.exists()) sub.delete();
+					}
+				}
+			}
+			mediaFileEditorDAO.deleteInBatch(editorPOs);
 		}
 		return new HashMapWrapper<String, Object>().put("deleted", MediaAudioVO.getConverter(MediaAudioVO.class).convert(audiosCanBeDeleted, MediaAudioVO.class))
 												   .put("processed", MediaAudioVO.getConverter(MediaAudioVO.class).convert(audiosNeedProcess, MediaAudioVO.class))
@@ -883,14 +921,16 @@ public class MediaAudioService {
 	 * @param folderId 音频媒资存放路径
 	 * @return List<MediaAudioVO> 音频媒资列表
 	 */
-	public List<MediaAudioPO> addList(UserVO user, List<String> urlList, Long folderId, String tags) throws Exception{
+	public List<MediaAudioPO> addList(UserVO user, List<String> urlList, Long folderId, String tags, String processInstanceId) throws Exception{
 		
 		if (urlList == null || urlList.size() <= 0) return null;
 		
 		String folderType = "audio";
 		
 		List<MediaAudioPO> audios = new ArrayList<MediaAudioPO>();
-		for (String url : urlList) {
+//		for (String url : urlList) {
+		if (urlList != null && !urlList.isEmpty()){
+			String url = urlList.get(0);
 			File file = new File(url);
 			String folderPath = new StringBufferWrapper().append(path.webappPath()).append("upload").append(file.getPath().split("upload")[1]).toString();
 			File localFile = new File(folderPath);
@@ -905,8 +945,22 @@ public class MediaAudioService {
 					String uploadTempPath = childFile.getPath();
 					String mimeType = new MimetypesFileTypeMap().getContentType(childFile);
 					
-					MediaAudioPO audio = this.add(user, localFile.getParentFile().getName(), fileName, size, folderType, mimeType,uploadTempPath, tags, folderId);
-					audios.add(audio);
+					MediaFileEditorPO editorPO = mediaFileEditorDAO.findByProcessInstanceId(processInstanceId);
+					if (editorPO != null) {
+						editorPO.setFileName(fileName);
+						editorPO.setSize(size);
+						MultimediaInfo multimediaInfo = new Encoder().getInfo(childFile);
+						editorPO.setDuration(new StringBufferWrapper().append(multimediaInfo.getDuration()).toString());
+						editorPO.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
+						editorPO.setUploadTempPath(uploadTempPath);
+						editorPO.setUpdateTime(new Date());
+						mediaFileEditorDAO.save(editorPO);
+						audios.add(mediaAudioDao.findOne(editorPO.getMediaId()));
+					} else {
+						MediaAudioPO audio = this.add(user, localFile.getParentFile().getName(), fileName, size, folderType, mimeType,uploadTempPath, tags, folderId);
+						audios.add(audio);
+					}
+					break;
 				}
 			}	
 		}
@@ -1009,17 +1063,28 @@ public class MediaAudioService {
 	 * @param String param 模板名称
 	 * @return 参数键值对
 	 */
-	public void startMediaEdit(MediaAudioPO media) throws Exception {
-		String template = media.getMediaEditTemplate();
-		if (!media.getMediaEdit() || template == null || template.isEmpty()) return;
-		TranscodeMediaVO transcodeMediaVO = new TranscodeMediaVO();
-		transcodeMediaVO.setUuid(media.getUuid());
-		transcodeMediaVO.setStartTime(0l);
-		transcodeMediaVO.setEndTime(media.getDuration());
-		String transcodeJob = JSONArray.toJSONString(new ArrayListWrapper<TranscodeMediaVO>().add(transcodeMediaVO).getList());
-		String name = media.getName();
-		Long folderId = media.getFolderId();
-		
-		mediaEditorService.start(transcodeJob, template, name, folderId, "");
+	public void checkMediaEdit(MediaAudioPO media) throws Exception {
+		System.out.println("检测资源是否需要转码：" + media.getId());
+		FileDealVO checkEdit = streamTranscodeQuery.checkEdit(media.getId(), "audio");
+		if (checkEdit != null){
+			String param = checkEdit.getParam();
+			if (param != null && !param.isEmpty()) {
+				TranscodeMediaVO transcodeMediaVO = new TranscodeMediaVO();
+				transcodeMediaVO.setUuid(media.getUuid());
+				transcodeMediaVO.setStartTime(0l);
+				transcodeMediaVO.setEndTime(media.getDuration());
+				String transcodeJob = JSONArray.toJSONString(new ArrayListWrapper<TranscodeMediaVO>().add(transcodeMediaVO).getList());
+				String name = media.getName();
+				Long folderId = media.getFolderId();
+				
+				String processInstansId = mediaEditorService.start(transcodeJob, param, name, folderId, "");
+				
+				MediaFileEditorPO mediaFileEditorPO = new MediaFileEditorPO();
+				mediaFileEditorPO.setMediaId(media.getId());
+				mediaFileEditorPO.setProcessInstanceId(processInstansId);
+				mediaFileEditorPO.setMediaType(FolderType.COMPANY_AUDIO);
+				mediaFileEditorDAO.save(mediaFileEditorPO);
+			}
+		};
 	}
 }

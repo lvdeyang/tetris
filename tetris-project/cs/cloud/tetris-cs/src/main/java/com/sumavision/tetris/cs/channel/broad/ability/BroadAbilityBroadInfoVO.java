@@ -8,8 +8,10 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 	private Long channelId;
 	/** 预播发地址 */
 	private String previewUrlIp;
-	/** 预播发端口 */
+	/** 预播发可用起始端口 */
 	private String previewUrlPort;
+	/** 预播发可用终止端口 */
+	private String previewUrlEndPort;
 	/** 媒资id */
 	private Long mediaId;
 	/** 预播发用户id */
@@ -42,6 +44,15 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 		return this;
 	}
 	
+	public String getPreviewUrlEndPort() {
+		return previewUrlEndPort;
+	}
+
+	public BroadAbilityBroadInfoVO setPreviewUrlEndPort(String previewUrlEndPort) {
+		this.previewUrlEndPort = previewUrlEndPort;
+		return this;
+	}
+
 	public Long getMediaId() {
 		return mediaId;
 	}
@@ -69,6 +80,7 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 		.setMediaId(entity.getMediaId())
 		.setPreviewUrlIp(entity.getPreviewUrlIp())
 		.setPreviewUrlPort(entity.getPreviewUrlPort())
+		.setPreviewUrlEndPort(entity.getPreviewUrlEndPort())
 		.setUserId(entity.getUserId());
 		return this;
 	}
@@ -80,6 +92,8 @@ public class BroadAbilityBroadInfoVO extends AbstractBaseVO<BroadAbilityBroadInf
 				&& this.getPreviewUrlIp() != null
 				&& this.getPreviewUrlIp().equals(infoVO.getPreviewUrlIp())
 				&& this.getPreviewUrlPort() != null
-				&& this.getPreviewUrlPort().equals(infoVO.getPreviewUrlPort());
+				&& this.getPreviewUrlPort().equals(infoVO.getPreviewUrlPort())
+				&& this.getPreviewUrlEndPort() != null
+				&& this.getPreviewUrlEndPort().equals(infoVO.getPreviewUrlEndPort());
 	}
 }

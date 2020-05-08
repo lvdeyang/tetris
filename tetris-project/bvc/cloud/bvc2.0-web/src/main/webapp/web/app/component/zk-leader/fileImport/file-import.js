@@ -26,11 +26,15 @@ define([
                 checkedId: '',
                 //表格数据
                 fileDatas: [],
+                total:0,
+                pageSize:10,
                 currentPage: 1,
                 filterInput: '',
                 //对话框相关的
                 dialogVisible: false,
                 gridData: [], //对话框的数据
+                gridTotal:0,
+                gridPageSize:10,
                 dialogCurrent: 1,
                 chooseRow: '',
                 checkBoxData: [] //选中的数据
@@ -51,22 +55,17 @@ define([
             }
         },
         computed: {
-            //大table分页
-            pageData: function () {
-                return this.fileDatas.slice((this.currentPage - 1) * 10, this.currentPage * 10);
-            },
-            //对话框的分页
-            dialogPageData: function () {
-                return this.gridData.slice((this.dialogCurrent - 1) * 5, this.dialogCurrent * 5);
-            }
+            
         },
         methods: {
             //当前页改变
-            CurrentChange: function (val) {
+            currentChange: function (val) {
                 this.currentPage = val;
+                this.addSubmit();
             },
             handleCurrentChange: function (val) {
                 this.dialogCurrent = val;
+                this.search();
             },
 
             //--------对话框表格----------
@@ -75,16 +74,28 @@ define([
                 this.chooseRow = val;
             },
             //对话框的确定
-            addSubmit: function () {
+            addSubmit: function (currentPage) {
                 var self = this;
+                if(currentPage){
+                	self.currentPage = currentPage;
+                }
                 var param = {
                     fullPath: self.chooseRow.fullPath,
                     currentPage: self.currentPage,
-                    pageSize: 10
+                    pageSize: self.pageSize
                 };
+                self.checkBoxData.splice(0, self.checkBoxData.length);
+                self.fileDatas.splice(0, self.fileDatas.length);
                 ajax.post('/monitor/external/static/resource/folder/scanning', param, function (data) {
                     self.dialogVisible = false;
-                    self.fileDatas = data.rows;
+                    var rows = data.rows;
+                    var total = data.total;
+                    if(rows && rows.length>=0){
+                    	for(var i=0; i<rows.length; i++){
+                    		self.fileDatas.push(rows[i]);
+                    		self.total = total;
+                    	}
+                    }
                 })
             },
 
@@ -104,27 +115,40 @@ define([
             selectCurrentPage: function (val) {
                 var self = this;
                 if (val.length === 0) { //取消全选
-                    self.checkBoxData = self.checkBoxData.filter(function (item) {
+                	self.checkBoxData.splice(0, self.checkBoxData.length);
+                    /*self.checkBoxData = self.checkBoxData.filter(function (item) {
                         return self.pageData.indexOf(item) === -1;
-                    })
-                } else if (val.length === self.pageData.length) { //全选，有的话不管，没有的话添加
+                    })*/
+                }else{
+                	for(var i=0; i<val.length; i++){
+                		self.checkBoxData.push(val[i]);
+                	}
+                } /*else if (val.length === self.pageData.length) { //全选，有的话不管，没有的话添加
                     self.pageData.forEach(function (item) {
                         if (self.checkBoxData.indexOf(item) === -1) {
                             self.checkBoxData.push(item)
                         }
                     })
-                }
+                }*/
             },
             //点击右侧选择目录按钮
             search: function () {
                 var self = this;
                 this.dialogVisible = true;
+                self.gridData.splice(0, self.gridData.length);
                 ajax.post('/monitor/external/static/resource/folder/load/all', {
                     currentPage: self.dialogCurrent,
-                    pageSize: 5
+                    pageSize: self.gridPageSize
                 }, function (data) {
-                    self.gridData = data.rows;
-                })
+                	var rows = data.rows;
+                	var total = data.total;
+                	if(rows && rows.length>0){
+                		for(var i=0; i<rows.length; i++){
+                			self.gridData.push(rows[i]);
+                		}
+                		self.gridTotal = total;
+                	}
+                });
             },
 
             //筛选按钮
@@ -134,15 +158,27 @@ define([
                     self.qt.warning('您还没有输入要查找的路径');
                     return;
                 }
-                var param = {
+                self.currentPage = 1;
+                self.chooseRow = {fullPath:self.filterInput};
+                self.addSubmit();
+                
+                /*var param = {
                     fullPath: self.filterInput,
                     currentPage: self.currentPage,
                     pageSize: 10
                 };
+                self.fileDatas.splice(0, self.fileDatas.length);
                 ajax.post('/monitor/external/static/resource/folder/scanning', param, function (data) {
                     self.dialogVisible = false;
-                    self.fileDatas = data.rows;
-                })
+                    var rows = data.rows;
+                    var total = data.total;
+                    if(rows && rows.length>0){
+                    	for(var i=0; i<rows.length; i++){
+                    		self.fileDatas.push(rows[i]);
+                    		self.total = total;
+                    	}
+                    }
+                })*/
             },
 
             //点击单个上传按钮
@@ -164,6 +200,7 @@ define([
                 }, function (data) {
                     self.qt.info('上传成功');
                     self.getFileDatas();
+                    self.addSubmit();
                 })
             },
 
@@ -188,6 +225,7 @@ define([
                 }, function (data) {
                     self.qt.success('操作成功');
                     self.getFileDatas();
+                    self.addSubmit();
                 })
             },
 
@@ -199,6 +237,7 @@ define([
                 ajax.post('/monitor/vod/remove', {resourceIds: JSON.stringify(arr)}, function (data) {
                     self.qt.info('删除成功');
                     self.getFileDatas();
+                    self.addSubmit();
                 })
             },
 

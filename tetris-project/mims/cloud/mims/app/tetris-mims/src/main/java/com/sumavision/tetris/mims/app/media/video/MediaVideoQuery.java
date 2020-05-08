@@ -153,10 +153,14 @@ public class MediaVideoQuery {
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
 	 * @return List<MediaVideoVO> 视频媒资列表
 	 */
-	public List<MediaVideoVO> loadAll() throws Exception{
+	public List<MediaVideoVO> loadAll(Long ... id) throws Exception{
 		
 		//TODO 权限校验		
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
+		if (id != null && id.length > 0) {
+			folderTree = folderQuery.findSubFolders(id[0]);
+			folderTree.add(folderDao.findOne(id[0]));
+		}
 		
 		if (folderTree.isEmpty()) return new ArrayList<MediaVideoVO>();
 		
@@ -175,7 +179,7 @@ public class MediaVideoQuery {
 		
 		packMediaVideoTree(medias, folderTree, videos);
 		
-		return medias;
+		return id != null && id.length > 0 ? medias.get(0).getChildren() : medias;
 	}
 	
 	/**

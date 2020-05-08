@@ -18,22 +18,22 @@
                 <div style="width:100%; height:100%; position:relative;">
                     <div style="width:200px; height:200px;">
                         <div style="width:100%; height:100%; position:relative;left:50px;">
-                            <div :class="protocolSuccess?'upActive':'up'">
-                                <el-button class="directBtn" @mousedown.native="vertical('UP')"></el-button>
+                            <div :class="protocolUp?'upActive':'up'">
+                                <el-button type="text" class="directBtn" @mousedown.native="vertical('UP')"></el-button>
                             </div>
 
-                            <div :class="protocolSuccess?'leftActive':'left'">
-                                <el-button class="horizBtn" @mousedown.native="horizontal('LEFT')"></el-button>
+                            <div :class="protocolLeft?'leftActive':'left'">
+                                <el-button type="text" class="horizBtn" @mousedown.native="horizontal('LEFT')"></el-button>
                             </div>
 
                             <div style="width:150px; height:100px; position:absolute; left:50px; top:50px;"></div>
 
-                            <div :class="protocolSuccess?'rightActive':'right'">
-                                <el-button class="horizBtn" @mousedown.native="horizontal('RIGHT')"></el-button>
+                            <div :class="protocolRight?'rightActive':'right'">
+                                <el-button type="text" class="horizBtn" @mousedown.native="horizontal('RIGHT')"></el-button>
                             </div>
 
-                            <div :class="protocolSuccess?'downActive':'down'">
-                                <el-button class="directBtn" @mousedown.native="vertical('DOWN')"></el-button>
+                            <div :class="protocolDown?'downActive':'down'">
+                                <el-button type="text" class="directBtn" @mousedown.native="vertical('DOWN')"></el-button>
                             </div>
                         </div>
                     </div>

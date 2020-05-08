@@ -182,9 +182,9 @@
                     <img v-if="!buttons.commandReminder"
                          :src="baseUrl+'images/zk-leader/disable/commandReminder.png'"/>
                 </div>
-                <div class="option-button" title="发布字幕" @click="publish">
+                <!-- <div class="option-button" title="发布字幕" @click="publish">
                     <img :src="baseUrl+'images/zk-leader/able/releaseSubtitle.png'"/>
-                </div>
+                </div> -->
                 <div class="option-button" @click="currentGroupChange(group.currentId)">
                     <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
@@ -592,9 +592,9 @@
                          :src="baseUrl+'images/zk-leader/able/commandReminderPause.png'"/>
                     <img v-if="!buttons.commandReminder" :src="baseUrl+'images/zk-leader/disable/commandReminder.png'"/>
                 </div>
-                <div class="option-button" title="发布字幕" @click="publish">
+                <!-- <div class="option-button" title="发布字幕" @click="publish">
                     <img :src="baseUrl+'images/zk-leader/able/releaseSubtitle.png'"/>
-                </div>
+                </div> -->
                 <div :class="'option-button '+(buttons.isSpeaking?'':'disable')" title="停止发言" @click="stopSpeak">
                     <img v-if="buttons.isSpeaking" :src="baseUrl+'images/zk-leader/hangUp.png'"/>
                 </div>

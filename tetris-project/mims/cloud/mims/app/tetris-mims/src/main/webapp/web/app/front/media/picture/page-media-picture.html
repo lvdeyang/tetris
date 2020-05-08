@@ -179,8 +179,17 @@
                     <el-form-item label="媒资名称">
                         <el-input v-model="dialog.addPicture.name"></el-input>
                     </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.addPicture.tags"></el-input>
+                    <el-form-item label="标签">
+                        <el-tag
+                                :key="simple"
+                                v-for="simple in dialog.addPicture.tags"
+                                style="margin-right:10px;"
+                                closable
+                                :disable-transitions="false"
+                                @close="handleTagRemove(dialog.addPicture.tags, simple)">
+                            {{simple}}
+                        </el-tag>
+                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagAdd" icon="el-icon-edit"> 贴标签</el-button>
                     </el-form-item>
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.addPicture.keyWords"></el-input>
@@ -188,6 +197,9 @@
                     <el-form-item>
                         <el-button size="small" type="primary" @click="handleUpload"><span class="icon-picture" style="margin-right:5px;"></span>选择文件</el-button>
                         <div v-if="dialog.addPicture.task">{{dialog.addPicture.task.name}}</div>
+                    </el-form-item>
+                    <el-form-item label="附加属性">
+                        <el-button @click="handleAdditionAdd" type="primary" size="small">编辑</el-button>
                     </el-form-item>
                     <el-form-item label="备注">
                         <el-input type="textarea" v-model="dialog.addPicture.remark"></el-input>
@@ -214,11 +226,23 @@
                     <el-form-item label="媒资名称">
                         <el-input v-model="dialog.editPicture.name"></el-input>
                     </el-form-item>
-                    <el-form-item label="贴标签">
-                        <el-input v-model="dialog.editPicture.tags"></el-input>
+                    <el-form-item label="标签">
+                        <el-tag
+                                :key="simple"
+                                v-for="simple in dialog.editPicture.tags"
+                                style="margin-right:10px;"
+                                closable
+                                :disable-transitions="false"
+                                @close="handleTagRemove(dialog.editPicture.tags, simple)">
+                            {{simple}}
+                        </el-tag>
+                        <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleTagEdit" icon="el-icon-edit"> 贴标签</el-button>
                     </el-form-item>
                     <el-form-item label="关键字">
                         <el-input v-model="dialog.editPicture.keyWords"></el-input>
+                    </el-form-item>
+                    <el-form-item label="附加属性">
+                        <el-button @click="handleAdditionEdit" type="primary" size="small">编辑</el-button>
                     </el-form-item>
                     <el-form-item label="备注">
                         <el-input type="textarea" v-model="dialog.editPicture.remark"></el-input>
@@ -236,8 +260,14 @@
         <!-- 移动文件 -->
         <mi-folder-dialog ref="moveMediaPictureDialog" @selected-folder="moveMediaPicture"></mi-folder-dialog>
 
+        <!-- 编辑附加属性 -->
+        <mi-addition-dialog ref="editAddition" @on-dialog-close="editAddition"></mi-addition-dialog>
+
         <!-- 复制文件 -->
         <mi-folder-dialog ref="copyMediaPictureDialog" @selected-folder="copyMediaPicture"></mi-folder-dialog>
+
+        <!-- 选择标签对话框 -->
+        <mi-tag-dialog ref="tagDialog" @on-tag-dialog-close="selectedTags"></mi-tag-dialog>
 
         <!-- 预览灯箱 -->
         <mi-lightbox ref="Lightbox" @on-txt-save="handleTxtSave"></mi-lightbox>

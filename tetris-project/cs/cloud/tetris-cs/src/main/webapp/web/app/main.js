@@ -42,11 +42,13 @@ require.config({
         'mi-lightbox':window.APPPATH + 'component/lightbox/lightbox',
         'mi-user-dialog':window.APPPATH + 'component/dialog/user/user-dialog',
         'mi-system-role-dialog':window.APPPATH + 'component/dialog/system-role/system-role-dialog',
+        'mi-compress-dialog':window.APPPATH + 'component/dialog/mims/compress/mims-compress',
 
         /* dialogs */
         'cs-user-dialog':window.APPPATH + 'cs/dialog/user/user-dialog',
         'program-screen':window.APPPATH + 'cs/dialog/program/program-screen',
         'cs-media-picker':window.APPPATH + 'cs/dialog/mediaPicker/media-picker-dialog',
+        'cs-area-picker':window.APPPATH + 'cs/dialog/areaPicker/area-picker-dialog',
 
         /* pages */
         'page-cs-management':window.APPPATH + 'cs/management/page-cs-management'

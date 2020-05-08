@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Component
@@ -26,6 +27,17 @@ public class MediaAudioStreamQuery {
 	 */
 	public Map<String, Object> load(Long folderId) throws Exception{
 		return JsonBodyResponseParser.parseObject(mediaAudioStreamFeign.load(folderId), Map.class);
+	}
+	
+	/**
+	 * 加载所有的音频流媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return List<MediaAudioStreamVO> 音频流媒资列表
+	 */
+	public List<MediaAudioStreamVO> loadAll() throws Exception{
+		return JsonBodyResponseParser.parseArray(mediaAudioStreamFeign.loadAll(), MediaAudioStreamVO.class);
 	}
 	
 	/**

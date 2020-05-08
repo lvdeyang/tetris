@@ -84,6 +84,9 @@ public class MediaVideoPO extends AbstractBasePO{
 	/** 标签，格式：,分割 */
 	private String tags;
 	
+	/** 封图地址 */
+	private String thumbnail;
+	
 	/** 文件夹id */
 	private Long folderId;
 	
@@ -104,12 +107,6 @@ public class MediaVideoPO extends AbstractBasePO{
 	
 	/** 加密文件地址 */
 	private String encryptionUrl;
-	
-	/** 是否转码 */
-	private Boolean mediaEdit;
-	
-	/** 转码模板 */
-	private String mediaEditTemplate;
 	
 	/** 附加字段 */
 	private String addition;
@@ -286,6 +283,15 @@ public class MediaVideoPO extends AbstractBasePO{
 		this.keyWords = keyWords;
 	}
 	
+	@Column(name = "THUMBNAIL")
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+	
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "UPLOAD_STATUS")
 	public UploadStatus getUploadStatus() {
@@ -333,24 +339,6 @@ public class MediaVideoPO extends AbstractBasePO{
 		this.encryptionUrl = encryptionUrl;
 	}
 	
-	@Column(name = "MEDIA_EDIT")
-	public Boolean getMediaEdit() {
-		return mediaEdit;
-	}
-
-	public void setMediaEdit(Boolean mediaEdit) {
-		this.mediaEdit = mediaEdit;
-	}
-
-	@Column(name = "MEDIA_EDIT_TEMPLATE")
-	public String getMediaEditTemplate() {
-		return mediaEditTemplate;
-	}
-
-	public void setMediaEditTemplate(String mediaEditTemplate) {
-		this.mediaEditTemplate = mediaEditTemplate;
-	}
-
 	@Column(name = "ADDITION")
 	public String getAddition() {
 		return addition;
@@ -421,6 +409,7 @@ public class MediaVideoPO extends AbstractBasePO{
 		copy_video.setRemarks(this.getRemarks());
 		copy_video.setTags(this.getTags());
 		copy_video.setKeyWords(this.getKeyWords());
+		copy_video.setThumbnail(this.getThumbnail());
 		copy_video.setUploadStatus(this.getUploadStatus());
 		copy_video.setEncryption(this.getEncryption());
 		copy_video.setEncryptionUrl(this.getEncryptionUrl());

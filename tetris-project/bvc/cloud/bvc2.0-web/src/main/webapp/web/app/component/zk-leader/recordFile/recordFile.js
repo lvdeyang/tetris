@@ -104,7 +104,22 @@ define([
                 var self = this;
                 ajax.post('/monitor/record/remove/file/' + id, null, function (data) {
                     self.qt.success('删除成功');
-                    self.confirm();
+                    for(var i=0; i<self.files.length; i++){
+                    	if(self.files[i].id == id){
+                    		self.files.splice(i, 1);
+                    		self.total -= 1;
+                    		break;
+                    	}
+                    }
+                    if(self.files.length <= 0){
+                    	if(self.currentPage > 1){
+                    		self.currentPage -= 1;
+                    		self.confirm();
+                    	}else if(self.total > 0){
+                    		self.currentPage = 1;
+                    		self.confirm();
+                    	}
+                    }
                 })
             },
             //下载

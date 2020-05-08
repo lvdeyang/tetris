@@ -175,6 +175,9 @@ public class MonitorOsdService {
 						layerEntity.getType().equals(MonitorOsdLayerType.DATETIME) || 
 						layerEntity.getType().equals(MonitorOsdLayerType.DEVNAME)){
 					protocol.add(new OsdBO().setContent(layerEntity.getType().getProtocol())
+											.setColor(String.valueOf(Integer.parseInt(layerEntity.getColor(), 16)))
+											.setFont(layerEntity.getFont().getProtocol())
+											.setHeight(layerEntity.getHeight())
 											.setX(layerEntity.getX()*100)
 											.setY(layerEntity.getY()*100)
 											.setIndex(layerEntity.getLayerIndex())

@@ -72,6 +72,7 @@ public class ChannelController {
 			String broadWay,
 			String outputUsers,
 			String outputUserPort,
+			String outputUserEndPort,
 			String output,
 			String remark,
 			String level,
@@ -88,12 +89,45 @@ public class ChannelController {
 		
 		List<UserVO> outputUserList = new ArrayList<UserVO>();
 		if (outputUsers != null) outputUserList = JSONArray.parseArray(outputUsers, UserVO.class);
+		
+		SetOutputBO outputBO = new SetOutputBO()
+				.setOutput(abilityBroadInfoVOs)
+				.setOutputUserPort(outputUserPort)
+				.setOutputUserEndPort(outputUserEndPort)
+				.setOutputUsers(outputUserList);
+		
+		SetAutoBroadBO autoBroadBO = new SetAutoBroadBO()
+				.setAutoBroad(autoBroad)
+				.setAutoBroadShuffle(autoBroadShuffle)
+				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadStart(autoBroadStart);
+		
+		SetTerminalBroadBO terminalBroadBO = new SetTerminalBroadBO()
+				.setHasFile(hasFile)
+				.setLevel(level);
 
-		ChannelPO channel = channelService.add(name, date, broadWay, remark, level, hasFile, ChannelType.LOCAL, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
+		ChannelPO channel = channelService.add(
+				name,
+				date,
+				broadWay,
+				remark,
+				terminalBroadBO,
+				ChannelType.LOCAL,
+				encryption,
+				autoBroadBO,
+				outputBO);
 		
 		if (!BroadWay.fromName(broadWay).equals(BroadWay.TERMINAL_BROAD) && autoBroad) channelService.autoAddSchedulesAndBroad(channel.getId());
 
-		return new ChannelVO().set(channel).setOutput(abilityBroadInfoVOs).setOutputUsers(outputUserList).setAutoBroadDuration(autoBroadDuration).setAutoBroadStart(autoBroadStart).setLevel(level).setHasFile(hasFile);
+		return new ChannelVO().set(channel)
+				.setOutput(abilityBroadInfoVOs)
+				.setOutputUsers(outputUserList)
+				.setOutputUserPort(outputUserPort)
+				.setOutputUserEndPort(outputUserEndPort)
+				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadStart(autoBroadStart)
+				.setLevel(level)
+				.setHasFile(hasFile);
 	}
 
 	/**
@@ -117,6 +151,7 @@ public class ChannelController {
 			String name,
 			String outputUsers,
 			String outputUserPort,
+			String outputUserEndPort,
 			String output,
 			String remark,
 			String level,
@@ -134,14 +169,45 @@ public class ChannelController {
 		if (outputUsers != null) {
 			outputUserList = JSONArray.parseArray(outputUsers, UserVO.class);
 		}
+		
+		SetOutputBO outputBO = new SetOutputBO()
+				.setOutput(abilityBroadInfoVOs)
+				.setOutputUserPort(outputUserPort)
+				.setOutputUserEndPort(outputUserEndPort)
+				.setOutputUsers(outputUserList);
+		
+		SetAutoBroadBO autoBroadBO = new SetAutoBroadBO()
+				.setAutoBroad(autoBroad)
+				.setAutoBroadShuffle(autoBroadShuffle)
+				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadStart(autoBroadStart);
+		
+		SetTerminalBroadBO terminalBroadBO = new SetTerminalBroadBO()
+				.setHasFile(hasFile)
+				.setLevel(level);
 
-		ChannelPO channel = channelService.edit(id, name, remark, level, hasFile, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
+		ChannelPO channel = channelService.edit(
+				id,
+				name,
+				remark,
+				terminalBroadBO,
+				encryption,
+				autoBroadBO,
+				outputBO);
 		
 		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.TERMINAL_BROAD && autoBroad) {
 			channelService.autoAddSchedulesAndBroad(channel.getId());
 		}
 
-		return new ChannelVO().set(channel);
+		return new ChannelVO().set(channel)
+				.setOutput(abilityBroadInfoVOs)
+				.setOutputUsers(outputUserList)
+				.setOutputUserPort(outputUserPort)
+				.setOutputUserEndPort(outputUserEndPort)
+				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadStart(autoBroadStart)
+				.setLevel(level)
+				.setHasFile(hasFile);
 	}
 
 	/**

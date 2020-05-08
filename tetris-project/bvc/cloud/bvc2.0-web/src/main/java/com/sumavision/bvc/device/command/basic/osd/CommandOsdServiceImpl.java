@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
@@ -27,6 +28,7 @@ import com.sumavision.bvc.device.monitor.osd.MonitorOsdDAO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdPO;
 import com.sumavision.bvc.device.monitor.osd.MonitorOsdService;
 import com.sumavision.bvc.device.monitor.osd.exception.MonitorOsdNotExistException;
+import com.sumavision.bvc.feign.ResourceServiceClient;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -57,6 +59,9 @@ public class CommandOsdServiceImpl {
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
+	
+	@Autowired
+	private ResourceServiceClient resourceServiceClient;
 	
 	/**
 	 * 获取设备信息<br/>
@@ -156,6 +161,11 @@ public class CommandOsdServiceImpl {
 		
 		//后发设置
 		executeBusiness.execute(logic, "指控系统：重设播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + player.getBundleName());
+		
+		//存储到资源层
+		for(BundleDTO bundle:bundles){
+			resourceServiceClient.coverLianwangPassby(bundle.getBundleId(), bundle.getLayerId(), "osds", JSON.toJSONString(setOsd));
+		}
 	}
 	
 	/**
@@ -203,6 +213,11 @@ public class CommandOsdServiceImpl {
 		
 		//先发清除
 		executeBusiness.execute(logic, "指控系统：清除播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + player.getBundleName());
+		
+		//存储到资源层
+		for(BundleDTO bundle:bundles){
+			resourceServiceClient.removeLianwangPassby(bundle.getBundleId());
+		}
 	}
 	
 }

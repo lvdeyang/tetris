@@ -32,7 +32,7 @@ public class BasicDevelopmentService {
 		basicDevelopment.setAppId(UUID.randomUUID().toString().replaceAll("-", "0"));
 		basicDevelopment.setUpdateTime(new Date());
 		basicDevelopment.setUserId(Long.valueOf(user.getUuid()));
-		basicDevelopment.setAppSecret("");
+		basicDevelopment.encodeAppSecret("");
 		basicDevelopmentDao.save(basicDevelopment);
 		return basicDevelopment;
 	}
@@ -48,7 +48,7 @@ public class BasicDevelopmentService {
 	 */
 	public BasicDevelopmentPO update(UserVO user, String appSecret) throws Exception{
 		BasicDevelopmentPO basicDevelopment = basicDevelopmentDao.findByUserId(Long.valueOf(user.getUuid()));
-		basicDevelopment.setAppSecret(appSecret);
+		basicDevelopment.encodeAppSecret(appSecret);
 		basicDevelopment.setUpdateTime(new Date());
 		basicDevelopmentDao.save(basicDevelopment);
 		return basicDevelopment;

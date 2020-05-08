@@ -1,6 +1,5 @@
 package com.sumavision.tetris.cs.menu;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +13,9 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.mims.app.media.live.MediaPushLiveVO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -188,12 +190,22 @@ public class CsMenuController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/resource/get/mims")
-	public Object getMIMSResource(Long id,HttpServletRequest request) throws Exception {
+	public Object getMIMSResource(Long id, Long channelId, HttpServletRequest request) throws Exception {
 
 		List<MediaAVideoVO> resources = resourceQuery.getMIMSResources(id);
-		List<MediaPushLiveVO> lives = resourceQuery.getMIMSLiveResources();
+		List<MediaPushLiveVO> lives = resourceQuery.getMIMSLiveResources(channelId);
+		List<MediaPictureVO> pictures = resourceQuery.getMIMSPictureResources(channelId);
+		
+		List<MediaVideoStreamVO> videoStreams = resourceQuery.getMIMSVideoStreamResources(channelId);
+		List<MediaAudioStreamVO> audioStreams = resourceQuery.getMIMSAudioStreamResources(channelId);
 
-		return new ArrayListWrapper<Object>().addAll(resources).addAll(lives).getList();
+		return new ArrayListWrapper<Object>()
+				.addAll(resources)
+				.addAll(lives)
+				.addAll(pictures)
+				.addAll(videoStreams)
+				.addAll(audioStreams)
+				.getList();
 	}
 	
 	/**

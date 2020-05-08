@@ -27,6 +27,10 @@
                                 <span class="icon-refresh" style="margin-right:5px;"></span>
                                 重置补包地址
                             </el-button>
+                            <el-button size="small" type="success" @click="handleTerminalUpgrade()">
+                                <span class="icon-upload-alt" style="margin-right:5px;"></span>
+                                push终端升级
+                            </el-button>
                         </div>
                         <div style="position:absolute; left:0; right:0; top:48px; bottom:48px;overflow-y: auto">
                             <el-table
@@ -68,7 +72,7 @@
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="播发地区管理" placement="bottom"
-                                                    v-if="scope.row.broadWay=='终端播发'">
+                                                    v-if="scope.row.broadWay!=broadWayStream">
                                             <el-button type="text" icon="feather-icon-globe"
                                                        class="channelManage"
                                                        @click="manageBroadcastArea(scope)">
@@ -96,7 +100,7 @@
                                             </el-button>
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="数据同步" placement="bottom"
-                                                    v-if="scope.row.broadWay=='终端播发'">
+                                                    v-if="scope.row.broadWay==broadWayTerminal">
                                             <el-button type="text" icon="el-icon-printer"
                                                        class="channelManage"
                                                        @click="updateMenuToTerminal(scope)"></el-button>
@@ -139,11 +143,61 @@
         <!-- 资源选择 -->
         <cs-media-picker-dialog ref="mediaPicker" @on-media-picker-close="handleMediaPickerClose"></cs-media-picker-dialog>
 
+        <!--地区选择-->
+        <cs-area-picker-dialog ref="areaPicker" @on-area-picker-close="handleAreaPickerClose"></cs-area-picker-dialog>
+
+        <!-- 选择图片对话框 -->
+        <mi-compress-dialog ref="selectCompress" @selected-compress="selectedCompress"></mi-compress-dialog>
+
+        <el-dialog
+                title="终端升级"
+                :visible.sync="dialog.upgrade.visible"
+                width="650px"
+                :before-close="handleUpgradeClose">
+            <div style="height:350px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="120px" style="padding-right: 20px">
+                        <el-form-item label="版本号">
+                            <el-input v-model="dialog.upgrade.version"></el-input>
+                        </el-form-item>
+                        <el-form-item label="播发方式">
+                            <el-select
+                                    v-model="dialog.upgrade.way"
+                                    placeholder="请选择播发方式"
+                                    style="width: 180px">
+                                <el-option
+                                        v-for="item in dialog.upgrade.wayOptions"
+                                        :value="item">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="升级包">
+                            <el-button @click="handleCompressSelect(dialog.upgrade.tarCheck)" type="primary" size="small">选择播发媒资</el-button>
+                        </el-form-item>
+                        <el-form-item v-if="dialog.upgrade.tarCheck.name" label="升级包名">
+                            <span>{{ dialog.upgrade.tarCheck.name }}</span>
+                        </el-form-item>
+                        <el-form-item label="升级区域">
+                            <el-button @click="handleAreaSelect(null, dialog.upgrade.areaCheck)" type="primary" size="small">选择区域</el-button>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleUpgradeClose">取 消</el-button>
+                <el-button size="medium" type="primary" @click="handleUpgradeCommit"
+                           :loading="dialog.upgrade.loading">确 定
+                </el-button>
+            </span>
+        </el-dialog>
+
         <el-dialog
                 title="添加频道"
                 :visible.sync="dialog.addProgram.visible"
                 width="650px"
                 :before-close="handleAddProgramClose">
+
             <div style="height:500px;">
                 <el-scrollbar style="height:100%;">
                     <el-form ref="form" label-width="120px" style="padding-right: 20px">
@@ -163,12 +217,12 @@
                         </el-form-item>
                         <el-form-item label="播发方式">
                             <template>
-                                <el-radio v-model="dialog.addProgram.broadWay" label="轮播推流">轮播推流</el-radio>
-                                <el-radio v-model="dialog.addProgram.broadWay" label="终端播发">终端播发</el-radio>
-                                <el-radio v-model="dialog.addProgram.broadWay" label="下载文件">下载文件</el-radio>
+                                <el-radio v-model="dialog.addProgram.broadWay" label="轮播推流">{{ broadWayStream }}</el-radio>
+                                <el-radio v-model="dialog.addProgram.broadWay" label="终端播发">{{ broadWayTerminal }}</el-radio>
+                                <el-radio v-model="dialog.addProgram.broadWay" label="下载文件">{{ broadWayFile }}</el-radio>
                             </template>
                         </el-form-item>
-                        <el-form-item label="优先级" v-if="dialog.addProgram.broadWay == '终端播发'">
+                        <el-form-item label="优先级" v-if="dialog.addProgram.broadWay == broadWayTerminal">
                             <el-select
                                     v-model="dialog.addProgram.level"
                                     placeholder="请选择播发优先级"
@@ -180,79 +234,21 @@
                                 </el-option>
                             </el-select>
                         </el-form-item>
-                        <el-form-item label="携带文件" v-if="dialog.addProgram.broadWay == '终端播发'">
+                        <el-form-item label="携带文件" v-if="dialog.addProgram.broadWay == broadWayTerminal">
                             <el-switch v-model="dialog.addProgram.hasFile"></el-switch>
                         </el-form-item>
-                        <el-form-item label="输出加密" v-if="dialog.addProgram.broadWay == '轮播推流'">
+                        <el-form-item label="输出加密" v-if="dialog.addProgram.broadWay == broadWayStream">
                             <el-switch v-model="dialog.addProgram.encryption"></el-switch>
                         </el-form-item>
-                        <template v-if="dialog.addProgram.broadWay == '轮播推流' || dialog.addProgram.broadWay == '下载文件'">
+                        <template v-if="dialog.addProgram.broadWay == broadWayStream">
                             <el-form-item label="智能播发">
                                 <el-switch v-model="dialog.addProgram.autoBroad"></el-switch>
-                            </el-form-item>
-                            <el-form-item label="列表乱序" v-if="dialog.addProgram.autoBroad">
-                                <el-switch v-model="dialog.addProgram.autoBroadShuffle">
-                                </el-switch>
-                            </el-form-item>
-                            <el-form-item v-if="dialog.addProgram.autoBroad" label="起始时间">
-                                <el-time-picker
-                                        style="width: 100%"
-                                        v-model="dialog.addProgram.autoBroadStart"
-                                        type="time"
-                                        placeholder="选择播发起始时间"
-                                        :picker-options="dialog.addProgram.autoBroadStart"
-                                        value-format="HH:mm:ss">
-                                </el-time-picker>
-                            </el-form-item>
-                            <el-form-item v-if="dialog.addProgram.autoBroad" label="生效天数">
-                                <el-input-number
-                                        v-model="dialog.addProgram.autoBroadDuration"
-                                        :min="1"
-                                        :max="10">
-                                </el-input-number>
+                                <el-button v-if="dialog.addProgram.autoBroad" @click="handleSetAutoBroad(dialog.addProgram)" type="primary" size="small" style="margin-left: 20px">设置播发参数</el-button>
                             </el-form-item>
                         </template>
-                        <el-form-item v-if="dialog.addProgram.broadWay == '轮播推流' || dialog.addProgram.broadWay == '下载文件'" label="PC播发用户">
-                            <el-tag
-                                    :key="simple.id"
-                                    v-for="simple in dialog.addProgram.outputQtUsers"
-                                    style="margin-right:10px;"
-                                    closable
-                                    :disable-transitions="false"
-                                    @close="handleUserRemove(dialog.addProgram.outputQtUsers, simple)">
-                                {{simple.nickname}}
-                            </el-tag>
-                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleAddProgramQtUserSet" icon="el-icon-edit"> 选择PC终端用户</el-button>
-                            <el-input v-model="dialog.addProgram.outputUserPort" placeholder="用户播发端口" v-if="dialog.addProgram.broadWay == '轮播推流'"></el-input>
+                        <el-form-item label="输出设置" v-if="dialog.addProgram.broadWay == broadWayStream || dialog.addProgram.broadWay == broadWayFile">
+                            <el-button @click="handleSetOutput(dialog.addProgram)" type="primary" size="small">设置输出</el-button>
                         </el-form-item>
-                        <el-form-item v-if="dialog.addProgram.broadWay == '下载文件'" label="PUSH播发用户">
-                            <el-tag
-                                    :key="simple.id"
-                                    v-for="simple in dialog.addProgram.outputPushUsers"
-                                    style="margin-right:10px;"
-                                    closable
-                                    :disable-transitions="false"
-                                    @close="handleUserRemove(dialog.addProgram.outputPushUsers, simple)">
-                                {{simple.nickname}}
-                            </el-tag>
-                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleAddProgramPushUserSet" icon="el-icon-edit"> 选择PUSH终端用户</el-button>
-                        </el-form-item>
-                        <el-form-item v-if="dialog.addProgram.broadWay == '轮播推流'" label="流输出数">
-                            <el-input-number
-                                    v-model="dialog.addProgram.outputCount"
-                                    :min="1"
-                                    :max="10"
-                                    @change="handleAddProgramOutputCount">
-                            </el-input-number>
-                        </el-form-item>
-                        <template v-for="i in dialog.addProgram.outputCount" v-if="dialog.addProgram.broadWay=='轮播推流'">
-                            <el-form-item :label="'流输出地址 ' + i">
-                                <el-input v-model="dialog.addProgram.output[i-1].previewUrlIp"></el-input>
-                            </el-form-item>
-                            <el-form-item :label="'流输出端口 ' + i">
-                                <el-input v-model="dialog.addProgram.output[i-1].previewUrlPort"></el-input>
-                            </el-form-item>
-                        </template>
                         <el-form-item label="备注">
                             <el-input v-model="dialog.addProgram.remark"></el-input>
                         </el-form-item>
@@ -281,12 +277,12 @@
                 </el-form-item>
                 <el-form-item label="播发方式">
                     <template>
-                        <el-radio v-model="dialog.editChannel.broadWay" label="轮播推流" disabled>轮播推流</el-radio>
-                        <el-radio v-model="dialog.editChannel.broadWay" label="终端播发" disabled>终端播发</el-radio>
-                        <el-radio v-model="dialog.editChannel.broadWay" label="下载文件" disabled>下载文件</el-radio>
+                        <el-radio v-model="dialog.editChannel.broadWay" label="轮播推流" disabled>{{ broadWayStream }}</el-radio>
+                        <el-radio v-model="dialog.editChannel.broadWay" label="终端播发" disabled>{{ broadWayTerminal }}</el-radio>
+                        <el-radio v-model="dialog.editChannel.broadWay" label="下载文件" disabled>{{ broadWayFile }}</el-radio>
                     </template>
                 </el-form-item>
-                <el-form-item label="优先级" v-if="dialog.editChannel.broadWay == '终端播发'">
+                <el-form-item label="优先级" v-if="dialog.editChannel.broadWay == broadWayTerminal">
                     <el-select
                             v-model="dialog.editChannel.level"
                             placeholder="请选择播发优先级"
@@ -298,77 +294,21 @@
                         </el-option>
                     </el-select>
                 </el-form-item>
-                <el-form-item label="携带文件" v-if="dialog.editChannel.broadWay == '终端播发'">
+                <el-form-item label="携带文件" v-if="dialog.editChannel.broadWay == broadWayTerminal">
                     <el-switch v-model="dialog.editChannel.hasFile"></el-switch>
                 </el-form-item>
-                <el-form-item label="输出加密" v-if="dialog.editChannel.broadWay == '轮播推流'">
+                <el-form-item label="输出加密" v-if="dialog.editChannel.broadWay == broadWayStream">
                     <el-switch v-model="dialog.editChannel.encryption"></el-switch>
                 </el-form-item>
-                <template v-if="dialog.editChannel.broadWay == '轮播推流' || dialog.editChannel.broadWay == '下载文件'">
+                <template v-if="dialog.editChannel.broadWay == broadWayStream">
                     <el-form-item label="智能播发">
                         <el-switch v-model="dialog.editChannel.autoBroad"></el-switch>
-                    </el-form-item>
-                    <el-form-item label="列表乱序" v-if="dialog.editChannel.autoBroad">
-                        <el-switch v-model="dialog.editChannel.autoBroadShuffle"></el-switch>
-                    </el-form-item>
-                    <el-form-item v-if="dialog.editChannel.autoBroad" label="起始时间">
-                        <el-time-picker
-                                style="width: 100%"
-                                v-model="dialog.editChannel.autoBroadStart"
-                                type="time"
-                                placeholder="选择播发起始时间"
-                                :picker-options="dialog.editChannel.autoBroadStart"
-                                value-format="HH:mm:ss">
-                        </el-time-picker>
-                    </el-form-item>
-                    <el-form-item v-if="dialog.editChannel.autoBroad" label="生效天数">
-                        <el-input-number
-                                v-model="dialog.editChannel.autoBroadDuration"
-                                :min="1"
-                                :max="10">
-                        </el-input-number>
+                        <el-button v-if="dialog.editChannel.autoBroad" @click="handleSetAutoBroad(dialog.editChannel)" type="primary" size="small" style="margin-left: 20px">设置播发参数</el-button>
                     </el-form-item>
                 </template>
-                <el-form-item v-if="dialog.editChannel.broadWay == '轮播推流' || dialog.editChannel.broadWay == '下载文件'" label="PC播发用户">
-                    <el-tag
-                            :key="simple.id"
-                            v-for="simple in dialog.editChannel.outputQtUsers"
-                            style="margin-right:10px;"
-                            closable
-                            :disable-transitions="false"
-                            @close="handleUserRemove(dialog.editChannel.outputQtUsers, simple)">
-                        {{simple.nickname}}
-                    </el-tag>
-                    <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleEditChannelQtUserSet" icon="el-icon-edit"> 选择PC终端用户</el-button>
-                    <el-input v-model="dialog.editChannel.outputUserPort" placeholder="用户播发端口" v-if="dialog.editChannel.broadWay == '轮播推流'"></el-input>
+                <el-form-item label="输出设置" v-if="dialog.editChannel.broadWay == broadWayStream || dialog.editChannel.broadWay == broadWayFile">
+                    <el-button @click="handleSetOutput(dialog.editChannel)" type="primary" size="small">设置输出</el-button>
                 </el-form-item>
-                <el-form-item v-if="dialog.editChannel.broadWay == '下载文件' && dialog.editChannel.outputPushUsers.length > 0" label="PUSH播发用户">
-                    <el-tag
-                            :key="simple.id"
-                            v-for="simple in dialog.editChannel.outputPushUsers"
-                            style="margin-right:10px;"
-                            :closable="false"
-                            :disable-transitions="false"
-                            @close="handleUserRemove(dialog.editChannel.outputPushUsers, simple)">
-                        {{simple.nickname}}
-                    </el-tag>
-                </el-form-item>
-                <el-form-item v-if="dialog.editChannel.broadWay == '轮播推流'" label="流输出数">
-                    <el-input-number
-                            v-model="dialog.editChannel.outputCount"
-                            :min="1"
-                            :max="10"
-                            @change="handleEditChannelOutputCount">
-                    </el-input-number>
-                </el-form-item>
-                <template v-for="i in dialog.editChannel.outputCount" v-if="dialog.editChannel.broadWay=='轮播推流'">
-                    <el-form-item :label="'输出地址 ' + i">
-                        <el-input v-model="dialog.editChannel.output[i-1].previewUrlIp"></el-input>
-                    </el-form-item>
-                    <el-form-item :label="'输出端口 ' + i">
-                        <el-input v-model="dialog.editChannel.output[i-1].previewUrlPort"></el-input>
-                    </el-form-item>
-                </template>
                 <el-form-item label="备注">
                     <el-input v-model="dialog.editChannel.remark"></el-input>
                 </el-form-item>
@@ -379,6 +319,121 @@
                 <el-button size="medium" @click="handleEditChannelClose">取 消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditChannelCommit"
                            :loading="dialog.editChannel.loading">确 定
+                </el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="智能播发设置"
+                :visible.sync="dialog.setAutoBroad.visible"
+                width="550px"
+                append-to-body
+                :before-close="handleSetAutoBroadClose">
+
+            <div style="height: 500px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="120px" style="padding-right: 20px">
+                        <el-form-item label="列表乱序">
+                            <el-switch v-model="dialog.setAutoBroad.autoBroadShuffle"></el-switch>
+                        </el-form-item>
+                        <el-form-item label="起始时间">
+                            <el-time-picker
+                                    style="width: 100%"
+                                    v-model="dialog.setAutoBroad.autoBroadStart"
+                                    type="time"
+                                    placeholder="选择播发起始时间"
+                                    :picker-options="dialog.setAutoBroad.autoBroadStart"
+                                    value-format="HH:mm:ss">
+                            </el-time-picker>
+                        </el-form-item>
+                        <el-form-item label="生效天数">
+                            <el-input-number
+                                    v-model="dialog.setAutoBroad.autoBroadDuration"
+                                    :min="1"
+                                    :max="10">
+                            </el-input-number>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSetAutoBroadClose">取 消</el-button>
+                <el-button size="medium" type="primary" @click="handleSetAutoBroadCommit"
+                           :loading="dialog.setAutoBroad.loading">确 定
+                </el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="输出设置"
+                :visible.sync="dialog.setOutput.visible"
+                width="550px"
+                append-to-body
+                :before-close="handleSetOutputClose">
+
+            <div style="height: 500px;">
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="120px" style="padding-right: 20px">
+                        <el-form-item label="PC播发用户">
+                            <el-tag
+                                    :key="simple.id"
+                                    v-for="simple in dialog.setOutput.outputQtUsers"
+                                    style="margin-right:10px;"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleUserRemove(dialog.setOutput.outputQtUsers, simple)">
+                                {{simple.nickname}}
+                            </el-tag>
+                            <el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small"
+                                       @click="handleSetOutputUserSet(dialog.setOutput.outputQtUsers, qtEquipType)"
+                                       icon="el-icon-edit"> 选择PC终端用户</el-button>
+                        </el-form-item>
+                        <template v-if="dialog.setOutput.broadWay == broadWayStream">
+                            <!--<el-form-item v-if="dialog.setOutput.broadWay == broadWayFile" label="PUSH播发用户">-->
+                                <!--<el-tag-->
+                                        <!--:key="simple.id"-->
+                                        <!--v-for="simple in dialog.setOutput.outputPushUsers"-->
+                                        <!--style="margin-right:10px;"-->
+                                        <!--closable-->
+                                        <!--:disable-transitions="false"-->
+                                        <!--@close="handleUserRemove(dialog.setOutput.outputPushUsers, simple)">-->
+                                    <!--{{simple.nickname}}-->
+                                <!--</el-tag>-->
+                                <!--<el-button style="height:32px; line-height:30px; padding-top:0; padding-bottom:0; position:relative; bottom:1px;" size="small" @click="handleSetOutputUserSet(dialog.setOutput.outputPushUsers, pushEquipType)" icon="el-icon-edit"> 选择PUSH终端用户</el-button>-->
+                            <!--</el-form-item>-->
+                            <el-form-item label="可用起始端口">
+                                <el-input v-model="dialog.setOutput.outputUserPort" placeholder="可用起始端口" v-if="dialog.setOutput.broadWay == broadWayStream"></el-input>
+                            </el-form-item>
+                            <el-form-item label="可用终止端口">
+                                <el-input v-model="dialog.setOutput.outputUserEndPort" placeholder="可用终止端口" v-if="dialog.setOutput.broadWay == broadWayStream"></el-input>
+                            </el-form-item>
+                            <el-form-item label="流输出数">
+                                <el-input-number
+                                        v-model="dialog.setOutput.outputCount"
+                                        :min="1"
+                                        :max="10"
+                                        @change="handleOutputCountChange">
+                                </el-input-number>
+                            </el-form-item>
+                            <template v-for="i in dialog.setOutput.outputCount">
+                                <el-form-item :label="'流输出地址 ' + i">
+                                    <el-input v-model="dialog.setOutput.output[i-1].previewUrlIp"></el-input>
+                                </el-form-item>
+                                <el-form-item :label="'可用初始端口 ' + i">
+                                    <el-input v-model="dialog.setOutput.output[i-1].previewUrlPort"></el-input>
+                                </el-form-item>
+                                <el-form-item :label="'可用终止端口 ' + i">
+                                    <el-input v-model="dialog.setOutput.output[i-1].previewUrlEndPort"></el-input>
+                                </el-form-item>
+                            </template>
+                        </template>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSetOutputClose">取 消</el-button>
+                <el-button size="medium" type="primary" @click="handleSetOutputCommit"
+                           :loading="dialog.setOutput.loading">确 定
                 </el-button>
             </span>
         </el-dialog>
@@ -640,7 +695,7 @@
             <div style="width:100%; height:650px; position:relative;">
                 <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
                     <el-button size="small" type="primary" @click="handleAddSchedule()"
-                               :disabled="dialog.editSchedules.data.autoBroad || (dialog.editSchedules.data.broadWay=='终端播发' && dialog.editSchedules.table.data.length >= 1)">
+                               :disabled="dialog.editSchedules.data.autoBroad || (dialog.editSchedules.data.broadWay!=broadWayStream && dialog.editSchedules.table.data.length >= 1)">
                         <span class="icon-plus" style="margin-right:5px;"></span>
                         添加
                     </el-button>
@@ -834,6 +889,17 @@
                            :loading="dialog.seekBroadcast.loading">确 定
                 </el-button>
             </span>
+        </el-dialog>
+
+        <el-dialog
+                title="请选择资源播发方式"
+                :visible.sync="dialog.chooseBroadMedia.visible"
+                :before-close="chooseBroadMediaClose"
+                width = 500px>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="chooseBroadMedia">选择播发</el-button>
+                <el-button type="primary" @click="chooseBroadMediaConfirm">全部播发</el-button>
+            </div>
         </el-dialog>
 
     </template>

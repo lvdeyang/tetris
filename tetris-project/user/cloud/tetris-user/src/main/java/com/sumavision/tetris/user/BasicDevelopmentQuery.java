@@ -31,7 +31,7 @@ public class BasicDevelopmentQuery {
 	public BasicDevelopmentVO findByAppId(String appId) throws Exception{
 		BasicDevelopmentPO entity = basicDevelopmentDao.findByAppId(appId);
 		BasicDevelopmentVO basicDevelopment = new BasicDevelopmentVO().set(entity);
-		basicDevelopment.setAppSecret(entity.getAppSecret())
+		basicDevelopment.setAppSecret(entity.decodeAppSecret())
 					    .setUserId(entity.getUserId());
 		return basicDevelopment;
 	}

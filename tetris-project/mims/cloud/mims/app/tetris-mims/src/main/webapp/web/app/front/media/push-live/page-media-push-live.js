@@ -41,6 +41,10 @@ define([
                 activeId:window.BASEPATH + 'index/media/pushLive/' + window.TOKEN,
                 current:'',
                 breadCrumb:[],
+                typeList:{
+                    audio: [],
+                    video: []
+                },
                 table:{
                     tooltip:false,
                     rows:[],
@@ -69,6 +73,8 @@ define([
                         freq:'',
                         audioPid:'',
                         videoPid:'',
+                        audioType:'',
+                        videoType:'',
                         loading:false
                     },
                     editPushLive:{
@@ -81,6 +87,8 @@ define([
                         freq:'',
                         audioPid:'',
                         videoPid:'',
+                        audioType:'',
+                        videoType:'',
                         loading:false
                     }
                 },
@@ -289,11 +297,13 @@ define([
                             self.dialog.editPushLive.id = row.id;
                             self.dialog.editPushLive.name = row.name;
                             self.dialog.editPushLive.remark = row.remarks;
-                            self.dialog.editPushLive.tags = row.tags;
-                            self.dialog.editPushLive.keyWords = row.keyWords;
+                            self.dialog.editPushLive.tags = row.tags.join('');
+                            self.dialog.editPushLive.keyWords = row.keyWords.join('');
                             self.dialog.editPushLive.freq = row.freq;
                             self.dialog.editPushLive.audioPid = row.audioPid;
                             self.dialog.editPushLive.videoPid = row.videoPid;
+                            self.dialog.editPushLive.audioType = row.audioType;
+                            self.dialog.editPushLive.videoType = row.videoType;
                             self.dialog.editPushLive.visible = true;
                         }
                     }else if(command === '2'){
@@ -450,6 +460,8 @@ define([
                     self.dialog.addPushLive.freq = '';
                     self.dialog.addPushLive.audioPid = '';
                     self.dialog.addPushLive.videoPid = '';
+                    self.dialog.addPushLive.audioType = '';
+                    self.dialog.addPushLive.videoType = '';
                     self.dialog.addPushLive.visible = false;
                     self.dialog.addPushLive.loading = false;
                 },
@@ -464,6 +476,8 @@ define([
                     self.dialog.editPushLive.freq = '';
                     self.dialog.editPushLive.audioPid = '';
                     self.dialog.editPushLive.videoPid = '';
+                    self.dialog.editPushLive.audioType = '';
+                    self.dialog.editPushLive.videoType = '';
                     self.dialog.editPushLive.visible = false;
                     self.dialog.editPushLive.loading = false;
                 },
@@ -482,6 +496,8 @@ define([
                         freq:self.dialog.addPushLive.freq,
                         audioPid:self.dialog.addPushLive.audioPid,
                         videoPid:self.dialog.addPushLive.videoPid,
+                        audioType:self.dialog.addPushLive.audioType,
+                        videoType:self.dialog.addPushLive.videoType,
                         name:self.dialog.addPushLive.name,
                         tags:self.dialog.addPushLive.tags,
                         keyWords:self.dialog.addPushLive.keyWords,
@@ -509,10 +525,12 @@ define([
                         freq:self.dialog.editPushLive.freq,
                         audioPid:self.dialog.editPushLive.audioPid,
                         videoPid:self.dialog.editPushLive.videoPid,
+                        audioType:self.dialog.editPushLive.audioType,
+                        videoType:self.dialog.editPushLive.videoType,
                         name:self.dialog.editPushLive.name,
                         tags:self.dialog.editPushLive.tags,
                         keyWords:self.dialog.editPushLive.keyWords,
-                        remark:self.dialog.editPushLive.remark,
+                        remark:self.dialog.editPushLive.remark
                     }, function(data, status){
                         self.dialog.addPushLive.loading = false;
                         if(status !== 200) return;
@@ -561,6 +579,18 @@ define([
                     }
 
                     self.current = current;
+                });
+                ajax.post('/media/push/live/list/stream/type/audio', null, function(data) {
+                    if (data && data.length > 0) {
+                        self.typeList.audio.splice(0, self.typeList.audio.length);
+                        self.typeList.audio = self.typeList.audio.concat(data);
+                    }
+                });
+                ajax.post('/media/push/live/list/stream/type/video', null, function(data) {
+                    if (data && data.length > 0) {
+                        self.typeList.video.splice(0, self.typeList.video.length);
+                        self.typeList.video = self.typeList.video.concat(data);
+                    }
                 });
             }
         });

@@ -1,12 +1,12 @@
 <div class="layer">
     <div class="win-header">
-        <span class="win-header-title">字幕组合管理</span>
+        <span class="win-header-title">字幕管理</span>
         <span class="win-header-close" @click="cancel"><span class="el-icon-close"></span></span>
     </div>
     <div class="win-body">
         <div style="width:100%; height:100%; position:relative;">
             <div class="left">
-                <div class="btn-add-osd" @click="dialogLeftVisible=true">添加字幕组合</div>
+                <div class="btn-add-osd" @click="addOsd">添加字幕</div>
                 <!--<el-button type="primary" @click="dialogLeftVisible=true">添加字幕组合</el-button>-->
                 <!--内容-->
                 <div style="position:absolute; top:40px; left:0; bottom:0; width:30%;overflow: hidden">
@@ -14,7 +14,7 @@
                         <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
                             <div style="width:100%; height:100%; position:relative;">
                                 <el-table
-                                        :data="pageData"
+                                        :data="leftData"
                                         style="width: 100%"
                                         height="100%"
                                         highlight-current-row
@@ -28,9 +28,9 @@
                                             width="150">
                                         <template slot-scope="scope">
                                             <el-button type="warning" size="mini" icon="el-icon-edit"
-                                                       @click="editRow(scope.row)"></el-button>
+                                                       @click.stop="editRow(scope.row)"></el-button>
                                             <el-button type="danger" size="mini" icon="el-icon-delete"
-                                                       @click="deleteRow(scope.row.id)"></el-button>
+                                                       @click.stop="deleteRow(scope.row.id)"></el-button>
                                             </el-button>
                                         </template>
                                     </el-table-column>
@@ -39,8 +39,8 @@
                         </div>
                         <div style="position:absolute; bottom:0; left:0; right:0; height:50px; box-sizing: border-box; padding-top:9px;">
                             <el-pagination background @current-change="leftCurrentChange" :current-page="leftCurrentPage"
-                                           :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
-                                           :total="leftData.length">
+                                           :page-size="leftPageSize" :pager-count="5" layout="total, prev, pager, next"
+                                           :total="leftTotal">
                             </el-pagination>
                         </div>
                     </div>
@@ -49,6 +49,7 @@
 
             <div class="right" v-show="rightShow">
                 <div class="btn-add-subtitle-layer" @click="dialogFormVisible=true;rightBtnShow=false;">添加图层</div>
+                <div class="btn-add-subtitle-layer" style="margin-left:10px;" @click="subtitleOpen">模板管理</div>
                 <!--<el-button type="primary" @click="dialogFormVisible=true;rightBtnShow=false;">添加图层</el-button>-->
                 <!--内容-->
                 <div style="position:absolute; top:40px; left:30%; bottom:0; right:0;overflow: hidden">
@@ -56,7 +57,7 @@
                         <div style="position:absolute; left:0; top:0; right:0; bottom:50px;">
                             <div style="width:100%; height:100%; position:relative;">
                                 <el-table
-                                        :data="rightPageData"
+                                        :data="rightData"
                                         style="width: 100%"
                                         height="100%">
                                     <el-table-column
@@ -77,6 +78,18 @@
                                             label="纵坐标百分比">
                                     </el-table-column>
                                     <el-table-column
+                                            prop="font"
+                                            label="字体">
+                                    </el-table-column>
+                                    <el-table-column
+                                            prop="height"
+                                            label="字号">
+                                    </el-table-column>
+                                    <el-table-column
+                                            label="颜色">
+                                        <template slot-scope="scope">{{scope.row.color.replace('#', '')}}</template>
+                                    </el-table-column>
+                                    <el-table-column
                                             prop="layerIndex"
                                             label="图层顺序">
                                     </el-table-column>
@@ -84,8 +97,8 @@
                                             label="操作"
                                             width="250">
                                         <template slot-scope="scope">
+                                        	<!-- :disabled="scope.row.type !== 'SUBTITLE'" -->
                                             <el-button type="warning" size="mini" icon="el-icon-edit"
-                                                       :disabled="scope.row.type !== 'SUBTITLE'"
                                                        @click="editRightRow(scope.row)"></el-button>
                                             <el-button type="danger" size="mini" icon="el-icon-delete"
                                                        @click="deleteRightRow(scope.row.id)"></el-button>
@@ -99,10 +112,10 @@
                             </div>
                         </div>
                         <div style="position:absolute; bottom:0; left:0; right:0; height:50px; box-sizing: border-box; padding-top:9px;">
-                            <el-pagination background @current-change="rightCurrentChange" :current-page="rightCurrentPage"
+                            <!-- <el-pagination background @current-change="rightCurrentChange" :current-page="rightCurrentPage"
                                            :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
                                            :total="rightData.length">
-                            </el-pagination>
+                            </el-pagination> -->
                         </div>
                     </div>
                 </div>
@@ -117,7 +130,7 @@
 
     <!--左侧按钮对应的对话框-->
     <el-dialog
-            title="添加osd"
+            :title="!btnShow?'添加字幕':'修改字幕'"
             :visible.sync="dialogLeftVisible"
             width="30%">
         <el-input v-model="name" placeholder="请输入名字"></el-input>
@@ -133,10 +146,14 @@
     </el-dialog>
 
     <!--右侧按钮对应的对话框-->
-    <el-dialog title="添加图层" :visible.sync="dialogFormVisible">
+    <el-dialog 
+	    :title="!rightBtnShow?'添加图层':'修改图层'" 
+	    width="500px" 
+	    :visible.sync="dialogFormVisible">
         <el-form :model="form">
-            <el-form-item v-if="!rightBtnShow" label="图层类型" :label-width="formLabelWidth">
-                <el-select v-model="form.layerType" placeholder="请选择">
+        	<!-- v-if="!rightBtnShow" -->
+            <el-form-item label="图层类型" :label-width="formLabelWidth">
+                <el-select v-model="form.layerType" placeholder="请选择" :disabled="rightBtnShow">
                     <el-option v-for="(item,index) in layerType" :label="item" :value="item" :key="index"></el-option>
                 </el-select>
             </el-form-item>
@@ -151,6 +168,17 @@
             <el-form-item label="纵坐标百分比" :label-width="formLabelWidth">
                 <el-input-number size="medium" :min="0" :max="100" v-model="form.y"></el-input-number>
             </el-form-item>
+            <el-form-item v-if="form.layerType!=='字幕'" label="字体" :label-width="formLabelWidth">
+                <el-select v-model="form.font" placeholder="请选择字体">
+                    <el-option v-for="(item,index) in fontData" :label="item" :key="index" :value="item"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item v-if="form.layerType!=='字幕'" label="字号" :label-width="formLabelWidth">
+                <el-input-number v-model="form.fontsize" :min="1" :max="9"></el-input-number>
+            </el-form-item>
+            <el-form-item v-if="form.layerType!=='字幕'" label="字体颜色" :label-width="formLabelWidth">
+                <el-color-picker v-model="form.color"></el-color-picker>
+            </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
             <div class="btn-dialog-cancel" @click="dialogFormVisible = false">取 消</div>
@@ -164,16 +192,21 @@
     </el-dialog>
 
     <!--选择字幕弹框-->
-    <el-dialog title="选择字幕" :visible.sync="dialogTableVisible">
-        <el-table :data="gridData" highlight-current-row @row-click="chooseRow">
-            <el-table-column property="name" label="名称" width="150"></el-table-column>
-            <el-table-column property="username" label="创建人" width="200"></el-table-column>
-            <el-table-column property="content" label="内容"></el-table-column>
-        </el-table>
+    <el-dialog 
+	    title="选择模板" 
+	    width="800px" 
+	    :visible.sync="dialogTableVisible">
+    	<div style="width:100%; height:250px;">
+	    	<el-table :data="gridData" highlight-current-row @row-click="chooseRow" height="100%">
+	            <el-table-column property="name" label="名称" width="150"></el-table-column>
+	            <el-table-column property="username" label="创建人" width="150"></el-table-column>
+	            <el-table-column property="content" label="内容"></el-table-column>
+	        </el-table>
+    	</div>
         <div style="height:41px; padding-top:9px; box-sizing:border-box;">
             <el-pagination background @current-change="dialogCurrentChange" :current-page="dialogCurrentPage"
-                           :page-size="10" :pager-count="5" layout="total, prev, pager, next, jumper"
-                           :total="gridData.length">
+                           :page-size="gridPageSize" :pager-count="5" layout="total, prev, pager, next"
+                           :total="gridTotal">
             </el-pagination>
         </div>
         <div slot="footer" class="dialog-footer">

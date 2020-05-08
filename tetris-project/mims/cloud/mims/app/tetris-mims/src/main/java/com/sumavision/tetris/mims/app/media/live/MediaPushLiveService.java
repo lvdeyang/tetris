@@ -100,6 +100,8 @@ public class MediaPushLiveService {
 	 * @param String freq push直播频点
 	 * @param String audioPid 音频pid
 	 * @param String videoPid 视频pid
+	 * @param String audioType 音频类型
+	 * @param String videoType 视频类型
 	 */
 	public void editReviewPassed(
 			Long id,
@@ -109,7 +111,9 @@ public class MediaPushLiveService {
 			String remark, 
 			String freq,
 			String audioPid,
-			String videoPid) throws Exception{
+			String videoPid,
+			String audioType,
+			String videoType) throws Exception{
 		MediaPushLivePO media = mediaPushLiveDAO.findOne(id);
 		if(media == null){
 			throw new MediaPushLiveNotExistException(id);
@@ -122,6 +126,8 @@ public class MediaPushLiveService {
 		media.setFreq(freq);
 		media.setAudioPid(audioPid);
 		media.setVideoPid(videoPid);
+		media.setAudioType(audioType);
+		media.setVideoType(videoType);
 		mediaPushLiveDAO.save(media);
 	}
 	
@@ -268,6 +274,8 @@ public class MediaPushLiveService {
 	 * @param String freq push直播频点
 	 * @param String audioPid 音频pid
 	 * @param String videoPid 视频pid
+	 * @param String audioType 音频类型
+	 * @param String videoType 视频类型
 	 * @param FolderPO folder 文件夹
 	 * @return MediaPushLivePO push直播媒资
 	 */
@@ -280,9 +288,11 @@ public class MediaPushLiveService {
 			String freq,
 			String audioPid,
 			String videoPid,
+			String audioType,
+			String videoType,
 			FolderPO folder,
 			String addition) throws Exception{
-		MediaPushLivePO MediaPushLivePO = addTask(user, name, tags, keyWords, remark, freq, audioPid, videoPid, folder);
+		MediaPushLivePO MediaPushLivePO = addTask(user, name, tags, keyWords, remark, freq, audioPid, videoPid, audioType, videoType, folder);
 		if (addition != null) {
 			mediaPushLiveDAO.save(MediaPushLivePO);
 		}
@@ -302,6 +312,8 @@ public class MediaPushLiveService {
 	 * @param String freq push直播频点
 	 * @param String audioPid 音频pid
 	 * @param String videoPid 视频pid
+	 * @param String audioType 音频类型
+	 * @param String videoType 视频类型
 	 * @param FolderPO folder 文件夹
 	 * @return MediaPushLivePO push直播媒资
 	 */
@@ -314,6 +326,8 @@ public class MediaPushLiveService {
 			String freq,
 			String audioPid,
 			String videoPid,
+			String audioType,
+			String videoType,
 			FolderPO folder) throws Exception{
 		
 		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_UPLOAD_PUSH_LIVE);
@@ -329,6 +343,8 @@ public class MediaPushLiveService {
 		entity.setFreq(freq);
 		entity.setAudioPid(audioPid);
 		entity.setVideoPid(videoPid);
+		entity.setAudioType(audioType);
+		entity.setVideoType(videoType);
 		entity.setAuthorId(user.getUuid());
 		entity.setAuthorName(user.getNickname());
 		entity.setFolderId(folder.getId());
@@ -373,6 +389,8 @@ public class MediaPushLiveService {
 	 * @param String freq push直播频点
 	 * @param String audioPid 音频pid
 	 * @param String videoPid 视频pid
+	 * @param String audioType 音频类型
+	 * @param String videoType 视频类型
 	 * @return MediaPushLivePO push直播媒资
 	 */
 	public MediaPushLivePO editTask(
@@ -384,7 +402,9 @@ public class MediaPushLiveService {
 			String remark,
 			String freq,
 			String audioPid,
-			String videoPid) throws Exception{
+			String videoPid,
+			String audioType,
+			String videoType) throws Exception{
 		
 		boolean needProcess = mediaSettingsQuery.needProcess(MediaSettingsType.PROCESS_EDIT_PUSH_LIVE);
 		String transTags = tags==null?"":StringUtils.join(tags.toArray(), MediaPushLivePO.SEPARATOR_TAG);
@@ -430,6 +450,8 @@ public class MediaPushLiveService {
 			pushLive.setFreq(freq);
 			pushLive.setAudioPid(audioPid);
 			pushLive.setVideoPid(videoPid);
+			pushLive.setAudioType(audioType);
+			pushLive.setVideoType(videoType);
 		}
 		mediaPushLiveDAO.save(pushLive);
 		
@@ -474,6 +496,8 @@ public class MediaPushLiveService {
 	 * @param String freq push直播频点
 	 * @param String audioPid 音频pid
 	 * @param String videoPid 视频pid
+	 * @param String audioType 音频类型
+	 * @param String videoType 视频类型
 	 * @param String tag 标签名称
 	 * @return MediaPushLiveVO push直播媒资
 	 */
@@ -481,6 +505,8 @@ public class MediaPushLiveService {
 			String freq,
 			String audioPid,
 			String videoPid,
+			String audioType,
+			String videoType,
 			String tag,
 			String name) throws Exception{
 		
@@ -488,6 +514,6 @@ public class MediaPushLiveService {
 		
 		FolderPO folder = folderDAO.findCompanyRootFolderByType(user.getGroupId(), FolderType.COMPANY_PUSH_LIVE.toString());
 		
-		return new MediaPushLiveVO().set(addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", freq, audioPid, videoPid, folder));
+		return new MediaPushLiveVO().set(addTask(user, name, new ArrayListWrapper<String>().add(tag).getList(), null, "", freq, audioPid, videoPid, audioType, videoType, folder));
 	}
 }

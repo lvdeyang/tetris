@@ -1,4 +1,4 @@
-package com.sumavision.tetris.streamTranscoding.editor;
+package com.sumavision.tetris.streamTranscoding.extension.deal.editor;
 
 public class TranscodeMediaVO {
 	private String uuid;

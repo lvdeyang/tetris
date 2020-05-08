@@ -19,6 +19,8 @@ define([
                 baseUrl: window.BASEPATH,
                 currentPage: 1,
                 data: [],
+                total:0,
+                pageSize:50,
                 fontData: [],
                 dialogFormVisible: false,
                 form: {
@@ -34,15 +36,13 @@ define([
             }
         },
         computed: {
-            //设备的分页
-            pageData: function () {
-                return this.data.slice((this.currentPage - 1) * 10, this.currentPage * 10);
-            }
+            
         },
         methods: {
             //当前页改变
             currentChange: function (val) {
                 this.currentPage = val;
+                this.refreshData();
             },
             //获取数据
             refreshData: function () {
@@ -50,14 +50,16 @@ define([
                 self.data.splice(0,self.data.length);
                 ajax.post('/monitor/subtitle/load', {
                     currentPage: self.currentPage,
-                    pageSize: '10'
+                    pageSize: self.pageSize
                 }, function (data) {
-                    if (data.rows && data.rows.length > 0) {
-                        var commands = data.rows;
-                        for (var i = 0; i < commands.length; i++) {
-                            self.data.push(commands[i]);
-                        }
-                    }
+                	var rows = data.rows;
+                	var total = data.total;
+                	if(rows && rows.length>0){
+                		for(var i=0; i<rows.length; i++){
+                			self.data.push(rows[i]);
+                		}
+                		self.total = total;
+                	}
                 });
             },
             //获取字体数据
@@ -70,6 +72,17 @@ define([
             //添加提交
             addSubtitle: function () {
                 var self = this;
+                if(self.form.textarea){
+                	var length = new Blob([self.form.textarea],{type : 'text/plain'}).size;
+                	if(length > 64){
+                		self.qt.error('字幕内容过长，最多支持中文21个，数字英文64个');
+                		return;
+                	}
+                }else{
+                	self.qt.error('字幕内容不能为空');
+                	return;
+                }
+                
                 ajax.post('/monitor/subtitle/add', {
                     name: self.form.name,
                     content: self.form.textarea,
@@ -96,6 +109,16 @@ define([
             },
             editSubtitle:function () {
                 var self = this;
+                if(self.form.textarea){
+                	var length = new Blob([self.form.textarea],{type : 'text/plain'}).size;
+                	if(length > 64){
+                		self.qt.error('字幕内容过长，最多支持中文21个，数字英文64个');
+                		return;
+                	}
+                }else{
+                	self.qt.error('字幕内容不能为空');
+                	return;
+                }
                 ajax.post('/monitor/subtitle/edit/' + self.editId, {
                     name: self.form.name,
                     content: self.form.textarea,
@@ -113,7 +136,22 @@ define([
                 var self=this;
                 ajax.post('/monitor/subtitle/remove/'+id,null,function (data) {
                     self.qt.success('删除成功');
-                    self.refreshData();
+                    for(var i=0; i<self.data.length; i++){
+                    	if(self.data[i].id == id){
+                    		self.data.splice(i, 1);
+                    		self.total -= 1;
+                    		break;
+                    	}
+                    }
+                    if(self.data.length <= 0){
+                    	if(self.currentPage > 1){
+                    		self.currentPage -= 1;
+                    		self.refreshData();
+                    	}else if(self.total > 0){
+                    		self.currentPage = 1;
+                    		self.refreshData();
+                    	}
+                    }
                 })
             },
             cancel: function () {

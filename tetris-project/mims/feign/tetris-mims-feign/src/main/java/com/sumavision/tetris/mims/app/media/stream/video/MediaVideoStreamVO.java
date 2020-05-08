@@ -3,8 +3,13 @@ package com.sumavision.tetris.mims.app.media.stream.video;
 import java.util.List;
 
 public class MediaVideoStreamVO {
-private List<String> previewUrl;
 	private Long id;
+	
+	private String uuid;
+	
+	private String updateTime;
+	
+	private List<String> previewUrl;
 
 	private String name;
 	
@@ -24,12 +29,33 @@ private List<String> previewUrl;
 	
 	private String style;
 	
+	private List<MediaVideoStreamVO> children;
+	
 	public Long getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public MediaVideoStreamVO setId(Long id) {
 		this.id = id;
+		return this;
+	}
+	
+	public String getUuid() {
+		return uuid;
+	}
+
+	public MediaVideoStreamVO setUuid(String uuid) {
+		this.uuid = uuid;
+		return this;
+	}
+
+	public String getUpdateTime() {
+		return updateTime;
+	}
+
+	public MediaVideoStreamVO setUpdateTime(String updateTime) {
+		this.updateTime = updateTime;
+		return this;
 	}
 
 	public List<String> getPreviewUrl() {
@@ -119,6 +145,15 @@ private List<String> previewUrl;
 
 	public MediaVideoStreamVO setStyle(String style) {
 		this.style = style;
+		return this;
+	}
+
+	public List<MediaVideoStreamVO> getChildren() {
+		return children;
+	}
+
+	public MediaVideoStreamVO setChildren(List<MediaVideoStreamVO> children) {
+		this.children = children;
 		return this;
 	}
 }

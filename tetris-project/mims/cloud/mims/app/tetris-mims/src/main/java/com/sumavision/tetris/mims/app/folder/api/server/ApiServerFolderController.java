@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.folder.api.server;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -57,37 +58,79 @@ public class ApiServerFolderController {
 	@Autowired
 	private UserQuery userQuery;
 	
-	@SuppressWarnings("unchecked")
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/get")
 	public Object getChildren(Long id, HttpServletRequest request) throws Exception {
 		
-		Map<String, Object> audios = null;
-		Map<String, Object> videos = null;
-		
 		if (id == null || id == 0) {
-			audios = mediaAudioQuery.load(0l);
-			videos = mediaVideoQuery.load(0l);
+			List<MediaVideoVO> videoVOs = mediaVideoQuery.loadAll();
+			List<MediaAudioVO> audioVOs = mediaAudioQuery.loadAll();
+			List<MediaPictureVO> pictureVOs = mediaPictureQuery.loadAll();
+			List<MediaTxtVO> txtVOs = mediaTxtQuery.loadAll();
+			List<MediaVideoStreamVO> videoStreamVOs = mediaVideoStreamQuery.loadAll();
+			List<MediaAudioStreamVO> audioStreamVOs = mediaAudioStreamQuery.loadAll();
+			return new ArrayListWrapper<Object>().addAll(videoVOs).addAll(audioVOs).addAll(pictureVOs).addAll(txtVOs).addAll(videoStreamVOs).addAll(audioStreamVOs).getList();
 		} else {
 			FolderPO folderPO = folderDAO.findOne(id);
 			if (folderPO != null) {
-				if (folderPO.getType() == FolderType.COMPANY_VIDEO) {
-					videos = mediaVideoQuery.load(id);
-				} else if (folderPO.getType() == FolderType.COMPANY_AUDIO) {
-					audios = mediaAudioQuery.load(id);
+				switch (folderPO.getType()) {
+				case COMPANY_VIDEO:
+					return mediaVideoQuery.loadAll(id);
+				case COMPANY_AUDIO:
+					return mediaAudioQuery.loadAll(id);
+				case COMPANY_PICTURE:
+					return mediaPictureQuery.loadAll(id);
+				case COMPANY_TXT:
+					return mediaTxtQuery.loadAll(id);
+				case COMPANY_VIDEO_STREAM:
+					return mediaVideoStreamQuery.loadAll(id);
+				case COMPANY_AUDIO_STREAM:
+					return mediaAudioStreamQuery.loadAll(id);
+				default:
+					return new ArrayList<Object>();
 				}
 			} else {
 				throw new FolderNotExistException(id);
 			}
 		}
 		
-		ArrayListWrapper<Object> returnList = new ArrayListWrapper<Object>();
+//		Map<String, Object> audios = null;
+//		Map<String, Object> videos = null;
+//		
+//		if (id == null || id == 0) {
+//			audios = mediaAudioQuery.load(0l);
+//			videos = mediaVideoQuery.load(0l);
+//		} else {
+//			FolderPO folderPO = folderDAO.findOne(id);
+//			if (folderPO != null) {
+//				switch (folderPO.getType()) {
+//				case COMPANY_VIDEO:
+//					videos = mediaVideoQuery.load(id);
+//					break;
+//				case COMPANY_AUDIO:
+//					
+//				default:
+//					break;
+//				}
+//				if (folderPO.getType() == FolderType.COMPANY_VIDEO) {
+//					videos = mediaVideoQuery.load(id);
+//				} else if (folderPO.getType() == FolderType.COMPANY_AUDIO) {
+//					audios = mediaAudioQuery.load(id);
+//				} else if (folderPO.get) {
+//					
+//				}
+//			} else {
+//				throw new FolderNotExistException(id);
+//			}
+//		}
+//		
+//		ArrayListWrapper<Object> returnList = new ArrayListWrapper<Object>();
+//		
+//		if (videos != null) returnList.getList().addAll((List<Object>)videos.get("rows"));
+//		if (audios != null) returnList.getList().addAll((List<Object>)audios.get("rows"));
 		
-		if (videos != null) returnList.getList().addAll((List<Object>)videos.get("rows"));
-		if (audios != null) returnList.getList().addAll((List<Object>)audios.get("rows"));
-		
-		return returnList.getList();
+//		return returnList.getList();
 		
 //		return new HashMapWrapper<String, Object>().put("videos", videos == null ? videos : videos.get("rows"))
 //				   .put("audios", audios == null ? audios : audios.get("rows"))

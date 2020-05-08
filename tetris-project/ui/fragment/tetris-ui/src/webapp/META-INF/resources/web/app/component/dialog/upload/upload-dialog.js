@@ -243,6 +243,7 @@ define([
                         self.requires.push(new Type('.ts', 'ts', MATERIAL_TYPE_VIDEO));
                     }else if(self.requireType[i] === MATERIAL_TYPE_TXT){
                         self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
+                        self.requires.push(new Type('application/json', 'json', MATERIAL_TYPE_TXT));
                     }else if(self.requireType[i] === MATERIAL_TYPE_COMPRESS){
                         self.requires.push(new Type('application/x-zip-compressed', 'zip', MATERIAL_TYPE_COMPRESS));
                         self.requires.push(new Type('application/zip', 'zip', MATERIAL_TYPE_COMPRESS));
@@ -263,6 +264,7 @@ define([
                 //self.requires.push(new Type('video/vnd.dlna.mpeg-tts', 'ts', MATERIAL_TYPE_VIDEO));
                 self.requires.push(new Type('.ts', 'ts', MATERIAL_TYPE_VIDEO));
                 self.requires.push(new Type('text/plain', 'txt', MATERIAL_TYPE_TXT));
+                self.requires.push(new Type('application/json', 'json', MATERIAL_TYPE_TXT));
                 self.requires.push(new Type('application/x-zip-compressed', 'zip', MATERIAL_TYPE_COMPRESS));
                 self.requires.push(new Type('application/x-tar', 'tar', MATERIAL_TYPE_COMPRESS));
             }

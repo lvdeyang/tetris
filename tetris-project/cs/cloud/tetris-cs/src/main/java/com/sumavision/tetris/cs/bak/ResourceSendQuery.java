@@ -60,6 +60,8 @@ public class ResourceSendQuery {
 				sourceSend.setFreq(item.getFreq());
 				sourceSend.setAudioPid(item.getAudioPid());
 				sourceSend.setVideoPid(item.getVideoPid());
+				sourceSend.setAudioType(item.getAudioType());
+				sourceSend.setVideoType(item.getVideoType());
 				saveResource.add(sourceSend);
 
 				if (previewResource != null && previewResource.size() > 0) {

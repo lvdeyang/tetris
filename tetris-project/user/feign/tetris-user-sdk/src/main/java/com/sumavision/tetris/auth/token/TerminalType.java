@@ -22,7 +22,8 @@ public enum TerminalType {
 	API("api调用", "/api/server", 0),
 	G01_WEB("g01web端", "/api/g01/web", 4*60*60),
 	ZOOM_ANDROID("安卓会议端", "/api/zoom/android", 4*60*60),
-	ZOOM_QT("qt会议端", "/api/zoom/qt", 4*60*60);
+	ZOOM_QT("qt会议端", "/api/zoom/qt", 4*60*60),
+	SCREEN_WEB("大屏", "/api/screen/web", 4*60*60);
 	
 	/** 终端类型名称 */
 	private String name;
