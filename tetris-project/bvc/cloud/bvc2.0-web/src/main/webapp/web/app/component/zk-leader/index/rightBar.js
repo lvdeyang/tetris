@@ -2643,7 +2643,7 @@ define([
                     $('.triggerLi2').addClass('focusLight');
                     $('.highLight').css('left', '167px');
                     //加参数是为了区分进会时 ，不影响指挥的代码
-                    self.refreshCommand('meet', function () {
+                    self.refreshCommand('meeting', function () {
                         self.autoEnterCommand(e.params, 'meet');
                     });
                     self.qt.success(e.params.businessInfo);
