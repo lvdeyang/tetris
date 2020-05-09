@@ -178,6 +178,7 @@ public class CommandSystemServiceImpl {
 		}
 		
 		//额外查询
+		extraBundleIds.remove(null);
 		List<BundlePO> extraBundles = resourceBundleDao.findByBundleIds(extraBundleIds);
 		if(extraBundles != null) usefulBundlesSet.addAll(extraBundles);
 		

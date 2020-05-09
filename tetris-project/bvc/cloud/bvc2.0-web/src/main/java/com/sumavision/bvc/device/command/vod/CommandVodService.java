@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
@@ -1024,5 +1025,36 @@ public class CommandVodService {
 		
 		return logic;
 	
+	}
+	
+	/** 把联网的passby存储或从资源层删除。该方法暂时没有使用 */
+	public void saveOrRemoveLianwangPassbyToResource(LogicBO logic){
+		List<PassByBO> passbys = logic.getPass_by();
+		if(passbys == null) return;
+		for(PassByBO passby : passbys){
+			String type = passby.getType();
+			if(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_USER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_LOCAL_CALL_XT_USER.equals(type)
+					|| XtBusinessPassByContentBO.CMD_XT_CALL_LOCAL_USER.equals(type)){
+				try{
+					String uuid = ((XtBusinessPassByContentBO)passby.getPass_by_content()).getUuid();
+					String operate = ((XtBusinessPassByContentBO)passby.getPass_by_content()).getOperate();
+					if(XtBusinessPassByContentBO.OPERATE_START.equals(operate)){
+						resourceServiceClient.coverLianwangPassby(
+								uuid, 
+								passby.getLayer_id(), 
+								type, 
+								JSON.toJSONString(passby));
+					}else if(XtBusinessPassByContentBO.OPERATE_STOP.equals(operate)){
+						resourceServiceClient.removeLianwangPassby(uuid);
+					}
+				}catch(Exception e){
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }

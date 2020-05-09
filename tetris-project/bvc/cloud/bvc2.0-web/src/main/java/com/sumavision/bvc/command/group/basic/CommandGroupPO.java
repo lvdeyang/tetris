@@ -61,6 +61,9 @@ public class CommandGroupPO extends AbstractBasePO {
 	/** 组类型 */
 	private GroupType type;
 	
+	/** 会议中的模式，主席模式/讨论模式 */
+	private Boolean discussMode = false;
+	
 	/** 发言类型 */
 	private GroupSpeakType speakType = GroupSpeakType.CHAIRMAN;
 	
@@ -170,6 +173,14 @@ public class CommandGroupPO extends AbstractBasePO {
 
 	public void setType(GroupType type) {
 		this.type = type;
+	}
+
+	public Boolean getDiscussMode() {
+		return discussMode;
+	}
+
+	public void setDiscussMode(Boolean discussMode) {
+		this.discussMode = discussMode;
 	}
 
 	@Enumerated(value = EnumType.STRING)
