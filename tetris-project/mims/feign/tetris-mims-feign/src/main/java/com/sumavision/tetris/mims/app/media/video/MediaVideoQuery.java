@@ -41,6 +41,18 @@ public class MediaVideoQuery {
 	}
 	
 	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return MediaVideoVO
+	 */
+	public MediaVideoVO loadCollection(Long folderId) throws Exception {
+		return JsonBodyResponseParser.parseObject(mediaVideoFeign.loadCollection(folderId), MediaVideoVO.class);
+	}
+	
+	/**
 	 * 生成文件存储预览路径(云转码使用)<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

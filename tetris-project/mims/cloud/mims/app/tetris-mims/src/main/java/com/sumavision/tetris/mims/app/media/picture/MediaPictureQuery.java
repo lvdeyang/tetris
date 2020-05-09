@@ -224,8 +224,10 @@ public class MediaPictureQuery {
 		if (folderId != null) {
 			List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_PICTURE.toString());
 			for (FolderPO folderPO : folderTree) {
-				if (folderPO.getId() == folderId) pictureFolder = new MediaPictureVO().set(folderPO);
-				break;
+				if (folderPO.getId() == folderId) {
+					pictureFolder = new MediaPictureVO().set(folderPO);
+					break;
+				}
 			}
 			if (pictureFolder != null) {
 				Map<String, Object> map = load(folderId);

@@ -40,6 +40,17 @@ public interface MediaVideoFeign {
 	public JSONObject loadAll() throws Exception;
 	
 	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return JSONObject
+	 */
+	@RequestMapping(value = "/media/video/feign/load/collection")
+	public JSONObject loadCollection(@RequestParam("folderId") Long folderId) throws Exception;
+	
+	/**
 	 * 根据uuid获取媒资信息<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
