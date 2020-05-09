@@ -79,9 +79,9 @@ public class MonitorOsdLayerService {
 		layer.setY(y);
 		layer.setLayerIndex(layerIndex);
 		layer.setType(type);
-		layer.setFont(font==null?MonitorSubtitleFont.HEITI:MonitorSubtitleFont.fromName(font));
-		layer.setHeight(height==null?20:height);
-		layer.setColor(color==null?"ffffff":color.toLowerCase());
+		layer.setFont(type.equals(MonitorOsdLayerType.SUBTITLE)?null:(font==null?MonitorSubtitleFont.HEITI:MonitorSubtitleFont.fromName(font)));
+		layer.setHeight(type.equals(MonitorOsdLayerType.SUBTITLE)?null:(height==null?5:height));
+		layer.setColor(type.equals(MonitorOsdLayerType.SUBTITLE)?null:(color==null?"ffffff":color.toLowerCase()));
 		layer.setContentId(contentId);
 		layer.setContentName(contentName);
 		layer.setContentUsername(contentUsername);
