@@ -521,7 +521,7 @@ define([
                         self.contextMenu.enterCommand = false;
                         self.contextMenu.removeRecord = false;
                         self.contextMenu.recordRecord = false;
-                        self.contextMenu.download = true;
+                        self.contextMenu.download = false;
                     } else if (data.type === 'COMMAND') {
                         self.contextMenu.call = false;
                         self.contextMenu.vod = false;

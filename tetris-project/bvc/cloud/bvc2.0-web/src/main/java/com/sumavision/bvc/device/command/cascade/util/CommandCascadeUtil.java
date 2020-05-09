@@ -535,7 +535,7 @@ public class CommandCascadeUtil {
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		String stime = DateUtil.format(group.getStartTime(), DateUtil.dateTimePattern);//如果getStartTime为空，会得到空字符串
-		String mode = "0";//0表示主席模式、1表示讨论模式，后续支持
+		String mode = group.getDiscussMode()?"1":"0";//0表示主席模式、1表示讨论模式，后续支持
 		String status = group.getStatus().equals(GroupStatus.PAUSE)?"1":"0";//0表示正常业务、1表示暂停业务
 		List<String> spkidlist = new ArrayList<String>();
 		for(CommandGroupMemberPO member : members){

@@ -632,6 +632,7 @@ public class CommandBasicServiceImpl {
 		group.setAvtpl(g_avtpl);
 		g_avtpl.setGroup(group);
 		group.setCurrentGearLevel(currentGear.getLevel());
+		group.setDiscussMode(false);
 		
 		//保存以获得id
 //		commandGroupDao.save(group);
@@ -1179,6 +1180,7 @@ public class CommandBasicServiceImpl {
 		}
 		
 		group.setStatus(GroupStatus.STOP);
+		group.setDiscussMode(false);
 		group.setStartTime(null);
 		Date endTime = new Date();
 		group.setEndTime(endTime);
@@ -1433,6 +1435,11 @@ public class CommandBasicServiceImpl {
 		
 		for(Long groupId : groupIds){
 			
+			if(groupId==null || groupId.equals("")){
+				log.info("进会操作，会议id有误，groupIds: " + groupIds.toString());
+				continue;
+			}
+			
 			synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 				//判断是否进入其它会议，建议在commandGroupDao写一个新方法，不查自己建的会
@@ -1573,11 +1580,21 @@ public class CommandBasicServiceImpl {
 	
 	public JSONArray pause(Long groupId) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("暂停会议，会议id有误");
+			return new JSONArray();
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+				}else{
+					return new JSONArray();
+				}
 			}
 			String commandString = commandCommonUtil.generateCommandString(group.getType());
 			if(group.getStatus().equals(GroupStatus.REMIND)){
@@ -1663,11 +1680,21 @@ public class CommandBasicServiceImpl {
 	
 	public JSONArray pauseRecover(Long groupId) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("会议从暂停中恢复，会议id有误");
+			return new JSONArray();
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+				}else{
+					return new JSONArray();
+				}
 			}
 			group.setStatus(GroupStatus.START);
 			commandGroupDao.save(group);//需要吗？
@@ -2147,6 +2174,11 @@ public class CommandBasicServiceImpl {
 	public Object addOrEnterMembers(Long groupId, List<Long> userIdList) throws Exception{
 		UserVO self = userQuery.current();
 		JSONArray chairSplits = new JSONArray();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("会议加人或进入，会议id有误");
+			return chairSplits;
+		}
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 					
@@ -3211,7 +3243,9 @@ public class CommandBasicServiceImpl {
 		//“重复退出会再次挂断编码器”已改好
 		
 		if(groupId==null || groupId.equals("")){
-			throw new BaseException(StatusCode.FORBIDDEN, "退出操作，会议id有误");
+//			throw new BaseException(StatusCode.FORBIDDEN, "退出操作，会议id有误");
+			log.info("退出或删人，会议id有误");
+			return new JSONArray();
 		}
 		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
@@ -3570,13 +3604,22 @@ public class CommandBasicServiceImpl {
 	public void exitApply(Long userId, Long groupId) throws Exception{
 		
 		UserVO user = userQuery.current();
+		if(groupId==null || groupId.equals("")){
+			log.info("申请退出，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			GroupType groupType = group.getType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止");
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止");
+				}else{
+					return;
+				}
 			}
 			
 			if(group.getUserId().equals(userId)){
@@ -3626,6 +3669,12 @@ public class CommandBasicServiceImpl {
 	
 	public void exitApplyDisagree(Long userId, Long groupId, List<Long> userIds) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("拒绝成员退出，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
