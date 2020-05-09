@@ -131,9 +131,9 @@ public class MonitorOsdLayerVO extends AbstractBaseVO<MonitorOsdLayerVO, Monitor
 			.setSubtitleName(entity.getType().equals(MonitorOsdLayerType.SUBTITLE)?entity.getContentName():entity.getType().getName())
 			.setSubtitleUsername(entity.getType().equals(MonitorOsdLayerType.SUBTITLE)?entity.getContentUsername():"-")
 			.setType(entity.getType().toString())
-			.setFont(entity.getFont().getName())
-			.setHeight(entity.getHeight().toString())
-			.setColor(entity.getColor());
+			.setFont(entity.getFont()==null?"-":entity.getFont().getName())
+			.setHeight(entity.getHeight()==null?"-":entity.getHeight().toString())
+			.setColor(entity.getColor()==null?"-":entity.getColor());
 		return this;
 	}
 	
