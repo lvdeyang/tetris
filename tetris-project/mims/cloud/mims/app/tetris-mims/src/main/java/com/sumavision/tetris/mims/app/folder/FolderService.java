@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -12,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.role.BusinessRolePermissionQuery;
 import com.sumavision.tetris.business.role.BusinessRoleQuery;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -47,6 +51,7 @@ import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
 import com.sumavision.tetris.system.role.SystemRoleVO;
+import com.sumavision.tetris.system.role.UserSystemRolePermissionVO;
 //import com.sumavision.tetris.mims.app.role.RoleDAO;
 //import com.sumavision.tetris.mims.app.role.RolePO;
 //import com.sumavision.tetris.mims.app.role.RoleUserPermissionDAO;
@@ -146,6 +151,9 @@ public class FolderService {
 	@Autowired
 	private BusinessRoleQuery businessRoleQuery;
 	
+	@Autowired
+	private BusinessRolePermissionQuery businessRolePermissionQuery;
+	
 	/**
 	 * 新增私人文件夹<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -220,6 +228,68 @@ public class FolderService {
 		adminPermission.setRoleName(roleAdmin.getName());
 		adminPermission.setUpdateTime(new Date());
 		folderRolePermissionDao.save(adminPermission);
+		
+		return folder;
+	}
+	
+	/**
+	 * 新增媒资文件夹绑定用户角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年1月28日 下午1:32:48
+	 * @param String companyId 公司id
+	 * @param Long parentFolderId 父文件夹id
+	 * @param String folderName 文件夹名称
+	 * @param FolderType type 媒资文件夹类型
+	 * @return FolderPO 新建的文件夹
+	 */
+	public FolderPO addMediaFolderBindRole(Long userId, String companyId, Long parentFolderId, String folderName, FolderType type) throws Exception{
+		FolderPO parentFolder = folderDao.findOne(parentFolderId);
+		if(parentFolder == null) throw new FolderNotExistException(parentFolderId);
+		String basePath = parentFolder.getParentPath()==null?"":parentFolder.getParentPath();
+		
+		FolderPO folder = new FolderPO();
+		folder.setName(folderName);
+		folder.setParentId(parentFolderId);
+		folder.setParentPath(new StringBufferWrapper().append(basePath).append("/").append(parentFolderId).toString());
+		folder.setDepth();
+		folder.setType(type);
+		folder.setUpdateTime(new Date());
+		folderDao.save(folder);
+		
+		FolderGroupPermissionPO groupPermission = new FolderGroupPermissionPO();
+		groupPermission.setFolderId(folder.getId());
+		groupPermission.setGroupId(companyId);
+		groupPermission.setUpdateTime(new Date());
+		folderGroupPermissionDao.save(groupPermission);
+		
+		SystemRoleVO roleAdmin = businessRoleQuery.findCompanyAdminRole();
+		
+		FolderRolePermissionPO adminPermission = new FolderRolePermissionPO();
+		adminPermission.setFolderId(folder.getId());
+		adminPermission.setRoleId(Long.valueOf(roleAdmin.getId()));
+		adminPermission.setRoleName(roleAdmin.getName());
+		adminPermission.setUpdateTime(new Date());
+		folderRolePermissionDao.save(adminPermission);
+		
+		if (userId != null) {
+			Map<String, Object> permission = businessRolePermissionQuery.listByUserId(userId, 1, 10);
+			if (permission != null && permission.containsKey("rows")) {
+				Object obj = permission.get("rows");
+				if (permission != null) {
+					List<UserSystemRolePermissionVO> permissionVOs = JSONArray.parseArray(JSONObject.toJSONString(obj), UserSystemRolePermissionVO.class);
+					if (!permissionVOs.isEmpty()) {
+						UserSystemRolePermissionVO userRole = permissionVOs.get(0);
+						FolderRolePermissionPO userPermission = new FolderRolePermissionPO();
+						userPermission.setFolderId(folder.getId());
+						userPermission.setRoleId(Long.valueOf(userRole.getRoleId()));
+						userPermission.setRoleName(userRole.getRoleName());
+						userPermission.setUpdateTime(new Date());
+						folderRolePermissionDao.save(userPermission);
+					}
+				}
+			}
+		}
 		
 		return folder;
 	}
