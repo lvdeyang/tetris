@@ -82,6 +82,16 @@ public interface CapacityFeign {
 	public JSONObject analysisInput(@RequestParam("analysisInput") String analysisInput) throws Exception;
 	
 	/**
+	 * 同步转换模块<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月8日 下午5:28:51
+	 * @param String deviceIp 转换模块ip
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/sync")
+	public JSONObject sync(@RequestParam("deviceIp") String deviceIp) throws Exception;
+	
+	/**
 	 * 设置告警地址<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
