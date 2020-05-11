@@ -65,6 +65,13 @@ define([
                 m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
                 s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
                 return Y + M + D + h + m + s;
+            },
+            refreshPreview:function(){
+            	var self = this;
+            	ajax.post('/command/vod/see/oneself/user/start', null, function(data){
+            		self.qt.linkedWebview('rightBar', $.toJSON({id:'vodUserLocal', params:data}));
+            		self.qt.success('操作成功！');
+            	});
             }
         },
         mounted: function () {

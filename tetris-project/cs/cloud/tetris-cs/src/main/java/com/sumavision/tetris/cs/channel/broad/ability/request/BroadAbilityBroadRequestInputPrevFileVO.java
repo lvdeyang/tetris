@@ -12,6 +12,9 @@ public class BroadAbilityBroadRequestInputPrevFileVO {
 	
 	/** 文件播放时长 */
 	private Long duration;
+	
+	/** 播发开始的绝对时间 */
+	private String startTime;
 
 	public String getUrl() {
 		return url;
@@ -46,6 +49,15 @@ public class BroadAbilityBroadRequestInputPrevFileVO {
 
 	public BroadAbilityBroadRequestInputPrevFileVO setDuration(Long duration) {
 		this.duration = duration;
+		return this;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public BroadAbilityBroadRequestInputPrevFileVO setStartTime(String startTime) {
+		this.startTime = startTime;
 		return this;
 	}
 }

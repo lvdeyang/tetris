@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -33,6 +35,9 @@ public class ChannelController {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private AlarmFeignClientService alarmFeignClientService;
 
 	/**
 	 * 分页获取频道列表<br/>
@@ -381,5 +386,18 @@ public class ChannelController {
 	@RequestMapping(value = "/template")
 	public Object questTemplate(Long channelId, Long scheduleId, HttpServletRequest request) throws Exception {
 		return channelQuery.getTemplate(channelId, scheduleId);
+	}
+	
+	/**
+	 * 获取系统时间<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月9日 上午10:08:40
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/time")
+	public Object getTime(HttpServletRequest request) throws Exception {
+		return DateUtil.now();
 	}
 }

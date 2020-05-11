@@ -41,6 +41,7 @@ define([
                 groups: context.getProp('groups'),
                 loading: false,
                 loadingText: "",
+                time: "1970-01-01 00:00:00",
                 channel: {
                     page: {
                         currentPage: 1,
@@ -1704,6 +1705,34 @@ define([
 
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
+                getServerTime: function() {
+                    var self = this;
+                    ajax.post('/cs/channel/time', null, function(data, status) {
+                        self.time = data;
+                        setInterval(function () {
+                            var date = new Date(self.time);
+                            var longDate = date.getTime() + 1000;
+                            var newDate = new Date(longDate);
+                            var year=newDate.getFullYear();
+                            var month=self.dateCheck(newDate.getMonth() + 1);
+                            var day=self.dateCheck(newDate.getDate());
+
+                            //获取时分秒
+                            var h=newDate.getHours();
+                            var m=newDate.getMinutes();
+                            var s=newDate.getSeconds();
+
+                            //检查是否小于10
+                            h=self.dateCheck(h);
+                            m=self.dateCheck(m);
+                            s=self.dateCheck(s);
+                            self.time = year + '-' + month + '-' + day + ' ' + h + ':' + m + ':' + s;
+                        }, 1000)
+                    })
+                },
+                dateCheck: function(data) {
+                    return data < 10 ? '0' + data : data
+                },
                 showTip: function(title, text, confirmListener) {
                     var self = this;
                     var h = self.$createElement;
@@ -1737,6 +1766,7 @@ define([
             },
             created: function () {
                 var self = this;
+                self.getServerTime();
                 self.getChannelList();
             },
             mounted: function () {

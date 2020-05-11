@@ -13,7 +13,7 @@ public enum MonitorOsdLayerType {
 	SUBTITLE("字幕"),
 	DATE("日期", "OSD_DATE"),
 	DATETIME("时间", "OSD_DATETIME"),
-	DEVNAME("设备名称", " OSD_NAME");
+	DEVNAME("设备名称", "OSD_NAME");
 	
 	private String name;
 	

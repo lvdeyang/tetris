@@ -120,13 +120,23 @@ public class CommandMeetingSpeakServiceImpl {
 	 */
 	public void speakAppoint(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("指定发言，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			GroupType groupType = group.getType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+				}else{
+					return;
+				}
 			}
 			
 			if(!groupType.equals(GroupType.MEETING)){
@@ -207,12 +217,22 @@ public class CommandMeetingSpeakServiceImpl {
 	 */
 	public void speakApply(Long userId, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("申请发言，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+				}else{
+					return;
+				}
 			}
 			
 			if(!group.getType().equals(GroupType.MEETING)){
@@ -270,12 +290,22 @@ public class CommandMeetingSpeakServiceImpl {
 	 */
 	public void speakApplyAgree(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("同意申请发言，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+				}else{
+					return;
+				}
 			}
 			
 			if(!group.getType().equals(GroupType.MEETING)){
@@ -364,6 +394,12 @@ public class CommandMeetingSpeakServiceImpl {
 	 */
 	public void speakApplyDisagree(Long userId, Long groupId, List<Long> userIds) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("拒绝申请发言，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -425,6 +461,12 @@ public class CommandMeetingSpeakServiceImpl {
 	 */
 	public void speakStopByMember(Long userId, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("成员停止发言，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -479,6 +521,12 @@ public class CommandMeetingSpeakServiceImpl {
 	 */
 	public void speakStopByChairman(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("主席停止成员发言，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -544,15 +592,26 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @throws Exception
 	 */
 	public void discussStart(Long userId, Long groupId) throws Exception{
-		UserVO user = userQuery.current();		
+		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("开始讨论，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			group.setSpeakType(GroupSpeakType.DISCUSS);
+			group.setDiscussMode(true);
 			GroupType groupType = group.getType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 会议已停止，无法操作，id: " + group.getId());
+				}else{
+					return;
+				}
 			}
 			if(!groupType.equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行讨论");
@@ -599,10 +658,17 @@ public class CommandMeetingSpeakServiceImpl {
 	 */
 	public void discussStop(Long userId, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("停止讨论，会议id有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			group.setSpeakType(GroupSpeakType.CHAIRMAN);
+			group.setDiscussMode(false);
 			GroupType groupType = group.getType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){

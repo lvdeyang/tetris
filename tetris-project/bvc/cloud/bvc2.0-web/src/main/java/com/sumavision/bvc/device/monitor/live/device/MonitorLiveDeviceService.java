@@ -209,7 +209,7 @@ public class MonitorLiveDeviceService {
 		
 		logic.getPass_by().add(passby);
 		
-		resourceServiceClient.addLianwangPassby(
+		resourceServiceClient.coverLianwangPassby(
 				live.getUuid(), 
 				networkLayerId, 
 				XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_ENCODER, 
@@ -488,7 +488,7 @@ public class MonitorLiveDeviceService {
 		
 		logic.getPass_by().add(passby);
 		
-		resourceServiceClient.addLianwangPassby(
+		resourceServiceClient.coverLianwangPassby(
 				live.getUuid(), 
 				networkLayerId, 
 				XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER, 
