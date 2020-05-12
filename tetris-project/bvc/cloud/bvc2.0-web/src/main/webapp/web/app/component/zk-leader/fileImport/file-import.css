@@ -190,3 +190,16 @@ body{
 .el-scrollbar__wrap{
     overflow-x: hidden;
 }
+
+
+/*重置表格滚动条的样式*/
+  ::-webkit-scrollbar {
+      width: 4px;
+      height: 10px;
+  }
+
+/*//滚动条的滑块*/
+  ::-webkit-scrollbar-thumb {
+      background-color: #4F5F73;
+      border-radius: 3px;
+  }

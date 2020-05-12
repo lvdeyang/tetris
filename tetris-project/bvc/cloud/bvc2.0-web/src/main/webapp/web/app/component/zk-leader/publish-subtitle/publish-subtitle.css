@@ -103,3 +103,14 @@
     background-color: #204A6B;
     border: none;
 }
+
+/*分页*/
+.el-pagination{
+    position: absolute;
+    bottom: 0;
+    height: 50px;
+    white-space: nowrap;
+    padding: 2px 5px;
+    color: #303133;
+    font-weight: 700;
+}

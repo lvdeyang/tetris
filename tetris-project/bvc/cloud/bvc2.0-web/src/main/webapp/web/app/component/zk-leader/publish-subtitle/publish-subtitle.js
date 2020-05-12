@@ -26,7 +26,7 @@ define([
         computed: {
             //左侧的分页
             pageData: function () {
-                return this.leftData.slice((this.leftCurrentPage - 1) * 10, this.leftCurrentPage * 10);
+                return this.leftData.slice((this.leftCurrentPage - 1) * 8, this.leftCurrentPage * 8);
             }
         },
         methods: {

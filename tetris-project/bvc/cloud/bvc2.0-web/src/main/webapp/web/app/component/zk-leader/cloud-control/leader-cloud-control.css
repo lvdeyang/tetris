@@ -243,11 +243,13 @@ button.define {
 }
 
 .el-input__inner {
+    color: #6b9fd0;
     background-color: #0B2D5A;
     border: 1px solid #123e80;
 }
 
 .el-button--default {
+    padding: 8px 20px;
     background-color: #204A6B;
     border: none;
     border-radius: 33px;
@@ -266,6 +268,7 @@ button.define {
 }
 
 .el-button--primary {
+    padding: 8px 20px;
     background-color: #2562F7;
     border: none;
     border-radius: 33px;
