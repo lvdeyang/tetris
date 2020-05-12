@@ -7,6 +7,8 @@ public class InputFileObjectBO {
 	private Integer loop_count;
 	
 	private Integer start_ms = 0;
+	
+	private Integer duration;
 
 	public String getUrl() {
 		return url;
@@ -32,6 +34,15 @@ public class InputFileObjectBO {
 
 	public InputFileObjectBO setStart_ms(Integer start_ms) {
 		this.start_ms = start_ms;
+		return this;
+	}
+
+	public Integer getDuration() {
+		return duration;
+	}
+
+	public InputFileObjectBO setDuration(Integer duration) {
+		this.duration = duration;
 		return this;
 	}
 	

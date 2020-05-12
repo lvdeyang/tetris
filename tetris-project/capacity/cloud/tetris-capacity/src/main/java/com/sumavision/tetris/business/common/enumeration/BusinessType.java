@@ -9,6 +9,7 @@ public enum BusinessType {
 	BVC,
 	DIRECTOR,
 	COVER,
+	PUSH,
 	TEST;
 	
 }

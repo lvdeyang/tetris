@@ -3,6 +3,8 @@ package com.sumavision.tetris.business.yjgb.vo;
 import java.util.List;
 
 public class StreamTranscodingVO {
+	/** 转码模块ip */
+	private String deviceIp;
 	/** 是否转码 */
 	private boolean isTranscoding;
 	/** 是否添加收录输出 */
@@ -15,7 +17,7 @@ public class StreamTranscodingVO {
 	private String mediaType;
 	/** 节目号 */
 	private Integer progNum;
-	/** 音频源pcm 0-udp_ts;1-udp_pcm;3-rtp_es */
+	/** 音频源pcm 0-udp_ts;1-udp_pcm;3-rtp_es;4-rtsp */
 	private Integer bePCM;
 	/** 任务信息 */
 	private TaskVO taskVO;
@@ -92,5 +94,13 @@ public class StreamTranscodingVO {
 
 	public void setInputParam(InputParamVO inputParam) {
 		this.inputParam = inputParam;
+	}
+
+	public String getDeviceIp() {
+		return deviceIp;
+	}
+
+	public void setDeviceIp(String deviceIp) {
+		this.deviceIp = deviceIp;
 	}
 }
