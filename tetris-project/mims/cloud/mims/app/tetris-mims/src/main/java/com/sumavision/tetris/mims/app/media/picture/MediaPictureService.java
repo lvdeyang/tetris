@@ -34,7 +34,7 @@ import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
-import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamPO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionService;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.storage.StoreQuery;
@@ -82,6 +82,9 @@ public class MediaPictureService {
 	
 	@Autowired
 	private ProcessService processService;
+	
+	@Autowired
+	private MediaFileEquipmentPermissionService mediaFileEquipmentPermissionService;
 	
 	@Autowired
 	private MimsServerPropsQuery serverPropsQuery;
@@ -304,6 +307,9 @@ public class MediaPictureService {
 			for(MediaPicturePO picture:picturesCanBeDeleted){
 				pictureIds.add(picture.getId());
 			}
+			
+			//删除同步到设备的资源和数据
+			mediaFileEquipmentPermissionService.removePermission(new ArrayList<Long>(pictureIds), "picture", null);
 			
 			//删除临时文件
 			for(MediaPicturePO picture:picturesCanBeDeleted){

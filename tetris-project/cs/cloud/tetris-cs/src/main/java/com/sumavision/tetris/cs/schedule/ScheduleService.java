@@ -58,8 +58,8 @@ public class ScheduleService {
 	 * @param remark 备注
 	 * @return ScheduleVO 排期信息
 	 */
-	public ScheduleVO add(Long channelId, String broadDate, String remark) throws Exception{
-		SchedulePO schedulePO = addToPO(channelId, broadDate, remark);
+	public ScheduleVO add(Long channelId, String broadDate, String endDate, String remark) throws Exception{
+		SchedulePO schedulePO = addToPO(channelId, broadDate, endDate, remark);
 		
 		return new ScheduleVO().set(schedulePO);
 	}
@@ -74,11 +74,12 @@ public class ScheduleService {
 	 * @param remark 备注
 	 * @return SchedulePO 排期信息
 	 */
-	public SchedulePO addToPO(Long channelId, String broadDate, String remark) throws Exception {
+	public SchedulePO addToPO(Long channelId, String broadDate, String endDate, String remark) throws Exception {
 		SchedulePO schedulePO = new SchedulePO();
 		schedulePO.setChannelId(channelId);
 		schedulePO.setUpdateTime(new Date());
 		schedulePO.setBroadDate(broadDate);
+		schedulePO.setEndDate(endDate);
 		schedulePO.setRemark(remark);
 		scheduleDAO.save(schedulePO);
 		
@@ -160,13 +161,14 @@ public class ScheduleService {
 	 * @param remark 备注
 	 * @return ScheduleVO 排期信息
 	 */
-	public ScheduleVO edit(Long scheduleId, String broadDate, String remark) throws Exception{
+	public ScheduleVO edit(Long scheduleId, String broadDate, String endDate, String remark) throws Exception{
 		SchedulePO schedule = scheduleDAO.findOne(scheduleId);
 		
 		if (schedule == null) throw new ScheduleNotExistsException(scheduleId);
 		
 		schedule.setBroadDate(broadDate);
 		schedule.setRemark(remark);
+		schedule.setEndDate(endDate);
 		
 		channelService.changeScheduleDeal(schedule.getChannelId());
 		
@@ -203,7 +205,7 @@ public class ScheduleService {
 	 * @return
 	 */
 	public SchedulePO addScheduleToPO(Long channelId, String broadDate, List<ScreenVO> screens) throws Exception {
-		SchedulePO schedule = addToPO(channelId, broadDate, "");
+		SchedulePO schedule = addToPO(channelId, broadDate, null, "");
 		
 		if (screens == null || screens.isEmpty()) return null;
 			
@@ -251,7 +253,7 @@ public class ScheduleService {
 	 * @return
 	 */
 	public ScheduleVO addSchedule(Long channelId, String broadDate, List<ScreenVO> screens) throws Exception {
-		ScheduleVO schedule = add(channelId, broadDate, "");
+		ScheduleVO schedule = add(channelId, broadDate, null, "");
 		
 		if (screens == null || screens.isEmpty()) return null;
 			
@@ -303,7 +305,7 @@ public class ScheduleService {
 		List<ScheduleVO> scheduleVOs = new ArrayList<ScheduleVO>();
 		
 		for (ApiServerScheduleVO apiServerScheduleVO : scheduleList) {
-			ScheduleVO schedule = add(channelId, apiServerScheduleVO.getBroadDate(), "");
+			ScheduleVO schedule = add(channelId, apiServerScheduleVO.getBroadDate(), null, "");
 			
 			Date date = new Date();
 			List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();

@@ -71,7 +71,10 @@ define([
                             chooses: []
                         }
                     }
-                }
+                },
+                broadWayStream: '轮播推流',
+                broadWayFile: '下载文件',
+                broadWayTerminal: '终端播发',
             }
         },
         methods: {
@@ -106,7 +109,11 @@ define([
                                             if (!data[i].screen[k].data) data[i].screen[k].data = [];
                                             data[i].screen[k].data.push(self.scheduleData.program.screenInfo[j]);
                                             if (!data[i].screen[k].contentType) {
-                                                data[i].screen[k].contentType = self.scheduleData.program.screenInfo[j].contentType || '视频资源';
+                                                if (self.channelData.broadWay == self.broadWayStream) {
+                                                    data[i].screen[k].contentType = self.scheduleData.program.screenInfo[j].contentType || '视频资源';
+                                                } else {
+                                                    data[i].screen[k].contentType = self.scheduleData.program.screenInfo[j].contentType || '仓库资源';
+                                                }
                                             }
                                             break;
                                         }
@@ -114,7 +121,7 @@ define([
                                 }
                             }
                             for (var k = 0; k < data[i].screen.length; k++) {
-                                if (!data[i].screen[k].contentType) data[i].screen[k].contentType = '视频资源';
+                                if (!data[i].screen[k].contentType) data[i].screen[k].contentType = self.channelData.broadWay == self.broadWayStream ? '视频资源' : '仓库资源';
                             }
                             self.options.list.push(data[i]);
                         }
@@ -152,7 +159,7 @@ define([
                 var self = this;
                 self.handleScreenChoose(item);
                 self.options.currentScreen.data.splice(0, self.options.currentScreen.data.length);
-                if (name != '图片资源' && name != '音频资源' && name != '视频资源') {
+                if (name != '图片资源' && name != '音频资源' && name != '视频资源' && name != '仓库资源') {
                     self.options.currentScreen.data.push({
                         serialNum: self.options.currentScreen.no,
                         index: 1,
@@ -303,7 +310,7 @@ define([
                             //    if ((self.options.currentScreen.data.length > 0 && last.type != 'AUDIO' && last.type != 'VIDEO') || (data[i].type != 'PUSH_LIVE' && self.channelData.hasFile === false))
                             //        data[i].disabled = true;
                             //} else {
-                                if (self.channelData.hasFile === false) data[i].disabled = true;
+                                if (self.channelData.hasFile === false && data[i].type != 'PUSH_LIVE') data[i].disabled = true;
                             //}
 
                             if ((self.options.currentScreen.contentType == '图片资源' && data[i].type != 'PICTURE')
@@ -337,6 +344,13 @@ define([
                 var chooseResources = self.dialog.chooseResource.resources.chooses;
                 //var hasLive = false;
 
+				if (self.channelData.hasFile === false && self.options.currentScreen.data.length > 0) {
+					self.$message({
+						message: '不携带文件仅可播发单个直播',
+						type: 'warning'
+					})
+					return;
+				}
                 ////排查被选中的资源是否有两个以上非音视频文件
                 //var index = -1;
                 //for (var i = 0; i < chooseResources.length; i++) {

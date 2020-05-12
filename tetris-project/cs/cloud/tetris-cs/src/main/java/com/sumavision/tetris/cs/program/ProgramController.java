@@ -78,32 +78,33 @@ public class ProgramController {
 	public Object getContentType(Long channelId, HttpServletRequest request) throws Exception {
 		List<ScreenContentTypeVO> screenContentTypes = new ArrayList<ScreenContentTypeVO>();
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-//		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.ABILITY_BROAD) {
+		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.ABILITY_BROAD) {
 			for (ScreenContentType screenContentType : ScreenContentType.values()) {
-//				switch (screenContentType) {
-//				case AVIDEO:
-//				case TEXT:
-//				case TIME:
+				switch (screenContentType) {
+				case TERMINAL_MIMS:
+				case TEXT:
+				case TIME:
 					screenContentTypes.add(new ScreenContentTypeVO().set(screenContentType));
-//					break;
-//				default:
-//					break;
-//				}
+					break;
+				default:
+					break;
+				}
 			}
-//		} else {
-//			for (ScreenContentType screenContentType : ScreenContentType.values()) {
-//				switch (screenContentType) {
-//				case ABILITY_AUDIO:
-//				case ABILITY_VIDEO:
-//				case TEXT:
-//				case TIME:
-//					screenContentTypes.add(new ScreenContentTypeVO().set(screenContentType));
-//					break;
-//				default:
-//					break;
-//				}
-//			}
-//		}
+		} else {
+			for (ScreenContentType screenContentType : ScreenContentType.values()) {
+				switch (screenContentType) {
+				case ABILITY_AUDIO:
+				case ABILITY_VIDEO:
+				case ABILITY_PICTURE:
+				case TEXT:
+				case TIME:
+					screenContentTypes.add(new ScreenContentTypeVO().set(screenContentType));
+					break;
+				default:
+					break;
+				}
+			}
+		}
 		return screenContentTypes;
 	}
 }

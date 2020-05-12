@@ -13,6 +13,7 @@ import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorDAO;
 import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorPO;
 import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorVO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionPO;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -71,6 +72,10 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 	private String addition;
 	
 	private MediaFileEditorVO editorInfo;
+	
+	private String fileName;
+	
+	private List<MediaFileEquipmentPermissionPO> deviceUpload;
 	
 	private List<MediaVideoVO> children;
 	
@@ -326,6 +331,24 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 		return this;
 	}
 
+	public String getFileName() {
+		return fileName;
+	}
+
+	public MediaVideoVO setFileName(String fileName) {
+		this.fileName = fileName;
+		return this;
+	}
+
+	public List<MediaFileEquipmentPermissionPO> getDeviceUpload() {
+		return deviceUpload;
+	}
+
+	public MediaVideoVO setDeviceUpload(List<MediaFileEquipmentPermissionPO> deviceUpload) {
+		this.deviceUpload = deviceUpload;
+		return this;
+	}
+
 	@Override
 	public MediaVideoVO set(MediaVideoPO entity) throws Exception {
 		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
@@ -357,6 +380,7 @@ public class MediaVideoVO extends AbstractBaseVO<MediaVideoVO, MediaVideoPO>{
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId())
 			.setAddition(entity.getAddition())
+			.setFileName(entity.getFileName())
 			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaVideoPO.SEPARATOR_TAG)) : new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaVideoPO.SEPARATOR_KEYWORDS)));
 		if(mediaEditorPO != null) this.setEditorInfo(new MediaFileEditorVO().set(mediaEditorPO));

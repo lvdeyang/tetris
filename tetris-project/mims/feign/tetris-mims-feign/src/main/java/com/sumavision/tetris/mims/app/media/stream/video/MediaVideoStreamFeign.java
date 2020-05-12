@@ -1,11 +1,15 @@
 package com.sumavision.tetris.mims.app.media.stream.video;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
+import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @FeignClient(name = "tetris-mims", configuration = FeignConfiguration.class)
 public interface MediaVideoStreamFeign {
@@ -31,6 +35,17 @@ public interface MediaVideoStreamFeign {
 	 */
 	@RequestMapping(value = "/media/video/stream/feign/load/all")
 	public JSONObject loadAll() throws Exception;
+	
+	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return MediaVideoStreamVO
+	 */
+	@RequestMapping(value = "/media/video/stream/feign/load/collection")
+	public JSONObject loadCollection(@RequestParam("folderId") Long folderId) throws Exception;
 	
 	/**
 	 * 添加视频流媒资上传任务<br/>

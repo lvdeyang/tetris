@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -190,6 +192,43 @@ public class MediaVideoStreamQuery {
 		packMediaVideoStreamTree(medias, folderTree, videos);
 		
 		return id != null && id.length > 0 ? medias.get(0).getChildren() : medias;
+	}
+	
+	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return MediaVideoStreamVO
+	 */
+	public MediaVideoStreamVO loadCollection(Long folderId) throws Exception {
+		MediaVideoStreamVO folder = null;
+		if (folderId != null) {
+			List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO_STREAM.toString());
+			for (FolderPO folderPO : folderTree) {
+				if (folderPO.getId() == folderId) {
+					folder = new MediaVideoStreamVO().set(folderPO);
+					break;
+				}
+			}
+			if (folder != null) {
+				Map<String, Object> map = load(folderId);
+				List<MediaVideoStreamVO> medias = new ArrayList<MediaVideoStreamVO>();
+				if (map.containsKey("rows")) {
+					medias = JSONArray.parseArray(JSONObject.toJSONString(map.get("rows")), MediaVideoStreamVO.class);
+				}
+				folder.setChildren(medias);
+			}
+		} else {
+			List<MediaVideoStreamVO> medias = loadAll();
+			if (medias != null && !medias.isEmpty()) folder = medias.get(0);
+			List<MediaVideoStreamVO> children = folder.getChildren();
+			for (MediaVideoStreamVO media : children) {
+				media.setChildren(null);
+			}
+		}
+		return folder;
 	}
 	
 	/**

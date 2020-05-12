@@ -317,7 +317,7 @@ public class BroadFileService {
 					}
 				}
 				if (!returnItem.containsKey("contentType")) {
-					returnItem.put("contentType", ScreenContentType.VIDEO.getType());
+					returnItem.put("contentType", ScreenContentType.TERMINAL_MIMS.getType());
 				}
 				returnItem.put("program", scheduleList);
 				returnList.add(returnItem);

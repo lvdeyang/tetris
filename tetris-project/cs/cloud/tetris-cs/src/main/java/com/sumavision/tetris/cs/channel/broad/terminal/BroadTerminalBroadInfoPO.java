@@ -23,6 +23,9 @@ public class BroadTerminalBroadInfoPO extends AbstractBasePO{
 	
 	/** 播发是否携带文件 */
 	private Boolean hasFile;
+	
+	/** 排期单整体停止时间 */
+	private String endDate;
 
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -49,5 +52,14 @@ public class BroadTerminalBroadInfoPO extends AbstractBasePO{
 
 	public void setHasFile(Boolean hasFile) {
 		this.hasFile = hasFile;
+	}
+
+	@Column(name = "END_DATE")
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(String endDate) {
+		this.endDate = endDate;
 	}
 }

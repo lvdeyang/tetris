@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.cs.channel.BroadWay;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
@@ -63,6 +64,8 @@ public class ApiQtScheduleController {
 			return broadFileService.getNewBroadJSON(channelId, false, false);
 		}
 //		return scheduleQuery.questSchedulesByChannelId(channelId);
-		return scheduleQuery.questJSONSchedulesByChannelId(channelId, userIp);
+		JSONObject jsonObject = new JSONObject();
+		jsonObject.put("schedules", scheduleQuery.questJSONSchedulesByChannelId(channelId, userIp));
+		return jsonObject;
 	}
 }

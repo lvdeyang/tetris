@@ -229,7 +229,7 @@ public class ScheduleQuery {
 					String contentType = screenVO.getContentType();
 					ScreenContentType screenContentType = ScreenContentType.fromName(contentType);
 					switch (screenContentType) {
-					case PICTURE:
+					case ABILITY_PICTURE:
 					case TEXT:
 					case TIME:
 						index += 1;
@@ -260,14 +260,15 @@ public class ScheduleQuery {
 						break;
 					}
 				}
+				
+				qtScheduleScreenVO.setTop(templateVO.getTop())
+						.setLeft(templateVO.getLeft())
+						.setWidth(templateVO.getWidth())
+						.setHeight(templateVO.getHeight())
+						.setNo(templateVO.getNo())
+						.setProgram(qtScheduleScreenProgramVOs);
+				qtScheduleScreenVOs.add(qtScheduleScreenVO);
 				if (!qtScheduleScreenProgramVOs.isEmpty()) {
-					qtScheduleScreenVO.setTop(templateVO.getTop())
-							.setLeft(templateVO.getLeft())
-							.setWidth(templateVO.getWidth())
-							.setHeight(templateVO.getHeight())
-							.setNo(templateVO.getNo())
-							.setProgram(qtScheduleScreenProgramVOs);
-					qtScheduleScreenVOs.add(qtScheduleScreenVO);
 					if ("fileToStream".equals(qtScheduleScreenProgramVOs.get(0).getMediaType())) outputIndex++;
 				}
 				

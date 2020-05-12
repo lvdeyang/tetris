@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mvc.ext.response.parser.JsonBodyResponseParser;
 
 @Component
@@ -38,6 +39,18 @@ public class MediaVideoStreamQuery {
 	 */
 	public List<MediaVideoStreamVO> loadAll() throws Exception{
 		return JsonBodyResponseParser.parseArray(mediaVideoStreamFeign.loadAll(), MediaVideoStreamVO.class);
+	}
+	
+	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return MediaVideoStreamVO
+	 */
+	public MediaVideoStreamVO loadCollection(Long folderId) throws Exception {
+		return JsonBodyResponseParser.parseObject(mediaVideoStreamFeign.loadCollection(folderId), MediaVideoStreamVO.class);
 	}
 	
 	/**
