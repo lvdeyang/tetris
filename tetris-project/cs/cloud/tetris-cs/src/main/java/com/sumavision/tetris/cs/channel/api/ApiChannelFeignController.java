@@ -20,9 +20,9 @@ public class ApiChannelFeignController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/alarm/reboot")
-	public Object alarmRebootRecieve(HttpServletRequest request) throws Exception {
+	public Object alarmRebootRecieve(String ip,HttpServletRequest request) throws Exception {
 		System.out.println("推流能力重启");
-		channelService.rebootServer(ChannelServerType.ABILITY_STREAM, null);
+		channelService.rebootServer(ChannelServerType.ABILITY_STREAM, ip);
 		return null;
 	}
 }

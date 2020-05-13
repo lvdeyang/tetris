@@ -44,6 +44,9 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 	
 	/** 任务id */
 	private String taskId;
+	
+	/** 转换能力ip */
+	private String abilityIp;
 
 	@Column(name = "CHANNEL_ID")
 	public Long getChannelId() {
@@ -133,5 +136,14 @@ public class AbilityInfoSendPO extends AbstractBasePO{
 
 	public void setTaskId(String taskId) {
 		this.taskId = taskId;
+	}
+
+	@Column(name = "ABILITY_IP")
+	public String getAbilityIp() {
+		return abilityIp;
+	}
+
+	public void setAbilityIp(String abilityIp) {
+		this.abilityIp = abilityIp;
 	}
 }

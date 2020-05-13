@@ -24,4 +24,19 @@ public interface FolderFeign {
 	 */
 	@RequestMapping(value = "/folder/feign/media/remove")
 	public JSONObject delete(@RequestParam("folderId") Long folderId)throws Exception;
+	
+	/**
+	 * 创建资源库文件夹并绑定权限<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月9日 下午3:13:03
+	 * @param String folderType 资源类型
+	 * @param Long parentFolderId 父目录id
+	 * @param String folderName 目录名称
+	 */
+	@RequestMapping(value = "/folder/feign/add/by/folderType")
+	public JSONObject addByFolderType(
+			@RequestParam("folderType") String folderType,
+			@RequestParam("parentFolderId") Long parentFolderId,
+			@RequestParam("folderName") String folderName) throws Exception;
 }

@@ -3,6 +3,7 @@ package com.sumavision.tetris.business.common.dao;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.annotations.Cache;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
@@ -17,6 +18,11 @@ public interface TaskInputDAO extends BaseDAO<TaskInputPO>{
 	public TaskInputPO findByTaskUuidAndType(String taskUuid, BusinessType type);
 	
 	public TaskInputPO findByUniq(String uniq);
+	
+	public TaskInputPO findTopByUniq(String uniq);
+	
+//	@Query(value = "select * from TETRIS_CAPACITY_TASK_INPUT where uniq=?1", nativeQuery=true)
+//	public List<TaskInputPO> findTopByUniq(String uniq);
 	
 	//悲观
 	@Query(value = "SELECT input.* FROM TETRIS_CAPACITY_TASK_INPUT input WHERE input.uniq = ?1 for update", nativeQuery = true)

@@ -353,9 +353,9 @@ public class BvcService {
 										   .setVideo_array(new ArrayList<ProgramVideoBO>())
 										   .setAudio_array(new ArrayList<ProgramAudioBO>());
 
-		ProgramVideoBO video = new ProgramVideoBO().setPid(2)
+		ProgramVideoBO video = new ProgramVideoBO().setPid(513)
 								   				   .setDecode_mode("cpu");
-		ProgramAudioBO audio = new ProgramAudioBO().setPid(1)
+		ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
 											       .setDecode_mode("cpu");
 		
 		program.getVideo_array().add(video);

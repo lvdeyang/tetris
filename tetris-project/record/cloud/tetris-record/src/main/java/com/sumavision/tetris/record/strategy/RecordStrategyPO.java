@@ -1,7 +1,5 @@
 package com.sumavision.tetris.record.strategy;
 
-import java.util.Date;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -88,53 +86,13 @@ public class RecordStrategyPO extends AbstractBasePO {
 	@Column(name = "capacityTaskId")
 	private String capacityTaskId;
 
-	@Deprecated
-	@Column(name = "startTime")
-	private Date startTime;
-
-	@Deprecated
-	@Column(name = "loopPeriod")
-	private Long loopPeriod;
-
-	@Deprecated
-	@Column(name = "loopCnt")
-	private int loopCnt;
-
-	@Deprecated
-	public Date getStartTime() {
-		return startTime;
-	}
-
-	@Deprecated
-	public void setStartTime(Date startTime) {
-		this.startTime = startTime;
-	}
-
-	@Deprecated
-	public Long getLoopPeriod() {
-		return loopPeriod;
-	}
-
-	@Deprecated
-	public void setLoopPeriod(Long loopPeriod) {
-		this.loopPeriod = loopPeriod;
-	}
-
-	@Deprecated
-	public int getLoopCnt() {
-		return loopCnt;
-	}
-
-	@Deprecated
-	public void setLoopCnt(int loopCnt) {
-		this.loopCnt = loopCnt;
-	}
-
 	/**
 	 * 策略删除的状态：0为正常，1标识策略假删除，假删除与真删除的区别就是是否特殊情况下可显示，用于删策略不删文件。yzx add on 20190409
 	 */
 	@Column(name = "delStatus")
 	private Integer delStatus = 0;
+
+	private EAutoInject autoInjectSel;
 
 	public enum EStrategyStatus {
 		NEW("新建"), RUNNING("执行中"), STOP("停止"), ERROR("流异常"), SUCCESS("已完成");// 添加异常状态，异常是运行态，但未录制，yzx add on 20190402
@@ -213,6 +171,20 @@ public class RecordStrategyPO extends AbstractBasePO {
 			} else {
 				throw new Exception("错误的状态类型：" + s);
 			}
+		}
+	}
+
+	public enum EAutoInject {
+		MANUAL("手动注入"), AUTO_INJECT_MIMS("自动注入媒资系统");
+
+		private String name;
+
+		private EAutoInject(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
 		}
 	}
 
@@ -354,6 +326,14 @@ public class RecordStrategyPO extends AbstractBasePO {
 
 	public void setSourceName(String sourceName) {
 		this.sourceName = sourceName;
+	}
+
+	public EAutoInject getAutoInjectSel() {
+		return autoInjectSel;
+	}
+
+	public void setAutoInjectSel(EAutoInject autoInjectSel) {
+		this.autoInjectSel = autoInjectSel;
 	}
 
 }

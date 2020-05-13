@@ -18,4 +18,6 @@ public interface TaskOutputDAO extends BaseDAO<TaskOutputPO>{
 	
 	public List<TaskOutputPO> findByInputId(Long id);
 	
+	public List<TaskOutputPO> findByCapacityIp(String capacityIp);
+	
 }

@@ -49,9 +49,9 @@ public class HttpUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
         JSONObject jsonResult = null;
         HttpPost method = new HttpPost(url);
-        method.setConfig(RequestConfig.custom().setConnectTimeout(3000)
-        		                               .setConnectionRequestTimeout(1000)
-        		                               .setSocketTimeout(5000)
+        method.setConfig(RequestConfig.custom().setConnectTimeout(10000)
+        		                               .setConnectionRequestTimeout(10000)
+        		                               .setSocketTimeout(30000)
         		                               .build());
         try {
             if (null != jsonParam) {
@@ -96,9 +96,9 @@ public class HttpUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
         JSONObject jsonResult = null;
         HttpPut method = new HttpPut(url);
-        method.setConfig(RequestConfig.custom().setConnectTimeout(5000)
-              .setConnectionRequestTimeout(1000)
-              .setSocketTimeout(5000)
+        method.setConfig(RequestConfig.custom().setConnectTimeout(10000)
+              .setConnectionRequestTimeout(10000)
+              .setSocketTimeout(30000)
               .build());
         try {
             if (null != jsonParam) {
@@ -184,9 +184,9 @@ public class HttpUtil {
         HttpClient httpClient = HttpClientBuilder.create().build();
         JSONObject jsonResult = null;
         HttpDeleteWithBody method = new HttpDeleteWithBody(url);
-        method.setConfig(RequestConfig.custom().setConnectTimeout(5000)
-              .setConnectionRequestTimeout(1000)
-              .setSocketTimeout(5000)
+        method.setConfig(RequestConfig.custom().setConnectTimeout(10000)
+              .setConnectionRequestTimeout(10000)
+              .setSocketTimeout(30000)
               .build());
         try {
             if (null != jsonParam) {

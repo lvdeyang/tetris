@@ -10,6 +10,9 @@ public class SourceUrlBO {
 
 	/** 原地址 */
 	private String url;
+	
+	/** 传输协议类型 */
+	private String type;
 
 	public String getUrl() {
 		return url;
@@ -17,6 +20,15 @@ public class SourceUrlBO {
 
 	public SourceUrlBO setUrl(String url) {
 		this.url = url;
+		return this;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public SourceUrlBO setType(String type) {
+		this.type = type;
 		return this;
 	}
 	

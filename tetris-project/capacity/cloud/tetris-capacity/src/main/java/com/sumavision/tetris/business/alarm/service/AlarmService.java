@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 import com.sumavision.tetris.business.api.vo.AlarmVO;
+import com.sumavision.tetris.business.common.service.SyncService;
 import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.config.ServerProps;
@@ -31,6 +32,9 @@ public class AlarmService {
 	private ServerProps serverProps;
 	
 	@Autowired
+	private SyncService syncService;
+	
+	@Autowired
 	private AlarmFeignClientService alarmFeignClientService;
 
 	/**
@@ -42,13 +46,15 @@ public class AlarmService {
 	 */
 	public void setAlarmUrl(String ip) throws Exception{
 		
-		String alarmUrl = new StringBufferWrapper().append("http://")
-												   .append(capacityProps.getZuulIp())
-												   .append(":")
-												   .append(capacityProps.getZuulPort())
-												   .append("/tetris-capacity/api/thirdpart/capacity/alarm/notify")
-												   .toString();
+		String eurake = serverProps.getDefaultZone().split("http://")[1].split(":")[0];
 		
+		String alarmUrl = new StringBufferWrapper().append("http://")
+												   .append(eurake)
+												   .append(":")
+												   .append(8082)
+												   .append("/tetris-capacity/api/thirdpart/capacity/alarm/notify?bundle_ip=")
+												   .append(ip)
+												   .toString();
 		ResultCodeResponse response = capacityService.putAlarmUrl(ip, capacityProps.getPort(), alarmUrl);
 		if(response.getResult_code().equals("1")){
 			throw new BaseException(StatusCode.ERROR, "url格式错误");
@@ -66,6 +72,11 @@ public class AlarmService {
 	public void alarmNotify(String capacityIp, AlarmVO alarm) throws Exception{
 		
 		String alarmCode = alarm.getCodec();
+		
+		if("11070001".equals(alarmCode)){
+			syncService.sync(capacityIp);
+		}
+		
 		String alarmObj = null;
 		if(alarm.getInput_trigger() != null){
 			alarmObj = JSONObject.toJSONString(alarm.getInput_trigger());
@@ -80,14 +91,18 @@ public class AlarmService {
 			alarmObj = JSONObject.toJSONString(alarm.getLicense_trigger());
 		}
 		
-		if(alarm.getStatus().equals("on")){
-			alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj, null, false, new Date());
-		}
-		if(alarm.getStatus().equals("off")){
-			alarmFeignClientService.recoverAlarm(alarmCode, capacityIp, alarmObj, null, new Date());
-		}
-		if(alarm.getStatus().equals("once")){
-			alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj, null, true, new Date());
+		try{
+			if(alarm.getStatus().equals("on")){
+				alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj, null, false, new Date());
+			}
+			if(alarm.getStatus().equals("off")){
+				alarmFeignClientService.recoverAlarm(alarmCode, capacityIp, alarmObj, null, new Date());
+			}
+			if(alarm.getStatus().equals("once")){
+				alarmFeignClientService.triggerAlarm(alarmCode, capacityIp, alarmObj, null, true, new Date());
+			}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		
 	}

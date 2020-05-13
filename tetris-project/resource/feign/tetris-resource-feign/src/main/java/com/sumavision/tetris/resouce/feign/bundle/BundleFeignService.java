@@ -17,31 +17,47 @@ public class BundleFeignService {
 	@Autowired
 	private BundleFeign bundleFeign;
 
+	/**
+	 *  添加转码设备
+	 * 
+	 * @param name
+	 * @param ip
+	 * @param port
+	 * @return bundle_id 为空则是添加失败
+	 * @throws Exception
+	 */
+	public String addTransCodeDevice(String name, String ip, Integer port) throws Exception {
+		return JSON.parseObject(bundleFeign.addTranscodeDevice(name, ip, port), String.class);
+
+	}
+
 	public List<BundleFeignVO> queryTranscodeDevice() throws Exception {
 
 		return JSON.parseArray(bundleFeign.queryTranscodeDevice(), BundleFeignVO.class);
 
 	}
-	
-	public BundleFeignVO queryDeviceByBundleId(String bundleId) throws Exception{
+
+	public BundleFeignVO queryDeviceByBundleId(String bundleId) throws Exception {
 		return JSON.parseObject(bundleFeign.queryDeviceByBundleId(bundleId), BundleFeignVO.class);
 	}
 
 	public JSONObject queryAuth(String bundle_id) throws Exception {
 		return bundleFeign.queryAuth(bundle_id);
 	}
-	
+
 	/**
 	 * 查询经纬度范围内的设备<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月6日 下午5:18:41
+	 * 
 	 * @param Long longitude 经度
 	 * @param Long latitude 纬度
 	 * @param Long raidus 半径范围
 	 */
-	public List<BundleVO> queryVisibleBundle(String longitude, String latitude, Long raidus) throws Exception{
-		return JsonBodyResponseParser.parseArray(bundleFeign.queryVisibleBundle(longitude, latitude, raidus), BundleVO.class);
+	public List<BundleVO> queryVisibleBundle(String longitude, String latitude, Long raidus) throws Exception {
+		return JsonBodyResponseParser.parseArray(bundleFeign.queryVisibleBundle(longitude, latitude, raidus),
+				BundleVO.class);
 	}
 
 }

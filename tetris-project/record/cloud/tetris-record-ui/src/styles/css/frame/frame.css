@@ -82,3 +82,9 @@
 .frame-footer .el-button.multiple:hover .layer{border-color:#c6e2ff; background-color:#ecf5ff; color:#409EFF;}
 .frame-footer .el-button.multiple:active .layer{color:#3a8ee6; border-color:#3a8ee6;}
 .frame-footer .el-breadcrumb__separator{margin:0 2px; display:inline-block;}
+
+.sub-title{height:25px; margin-bottom:15px; position:relative;}
+.sub-title>h3{margin:0; padding:0;}
+.sub-title>.breadcrumb{height:25px; position:absolute; top:0; right:0; padding-top:8px;}
+.sub-title>.breadcrumb a{transition:color .1s ease-in;}
+.sub-title>.breadcrumb a:hover{color:#409eff!important;}

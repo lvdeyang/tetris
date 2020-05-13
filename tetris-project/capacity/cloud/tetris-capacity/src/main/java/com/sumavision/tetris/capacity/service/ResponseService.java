@@ -196,7 +196,7 @@ public class ResponseService {
 			}
 
 			//抛异常
-			throw new OutputResponseErrorException(OutputResponseEnum.fromCode(responses.get(0).getResult_code()).getMessage());
+			throw new OutputResponseErrorException(responses.get(0).getResult_msg());
 		}
 		
 		return ids;

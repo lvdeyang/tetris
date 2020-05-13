@@ -44,7 +44,7 @@ public class RecordCapacityService {
 
 		JSONObject outputParamJson = new JSONObject();
 
-		String filePath = recordTimerBO.getRecordStrategyName() + "/" + recordTimerBO.getOperateTime().getTime();
+		String filePath = "/" + recordTimerBO.getRecordStrategyName() + "/" + recordTimerBO.getOperateTime().getTime();
 
 		// 录制的绝对路径
 		String absolutePath = recordTimerBO.getRecordBasePath() + filePath;
