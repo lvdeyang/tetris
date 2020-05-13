@@ -1,7 +1,11 @@
 package com.sumavision.tetris.config.feign;
 
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +24,8 @@ public class FeignConfiguration implements RequestInterceptor{
 	
 	@Override
 	public void apply(RequestTemplate template) {
+		Map<String, Collection<String>> hs = template.headers();
+		
 		ServletRequestAttributes attributes = (ServletRequestAttributes)RequestContextHolder.getRequestAttributes();
 		//内部feign调用id识别
     	template.header(HttpConstant.HEADER_FEIGN_CLIENT, HttpConstant.HEADER_FEIGN_CLIENT_KEY);
@@ -30,8 +36,10 @@ public class FeignConfiguration implements RequestInterceptor{
 	        if (headerNames != null) {
 	            while (headerNames.hasMoreElements()) {
 	                String name = headerNames.nextElement();
-	                String values = request.getHeader(name);
-	                template.header(name, values);
+	                if(hs!=null && !hs.containsKey(name)){
+	                	String values = request.getHeader(name);
+		                template.header(name, values);
+	                }
 	            }
 	            //LOG.info("feign interceptor header:{}",template);
 	        }

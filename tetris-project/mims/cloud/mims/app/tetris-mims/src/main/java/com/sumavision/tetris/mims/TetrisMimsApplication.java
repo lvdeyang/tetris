@@ -14,8 +14,12 @@ import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 
-@ComponentScan(basePackages = {"com.sumavision.tetris"})
+import com.sumavision.tetris.config.feign.FeignConfiguration;
+
+@ComponentScan(excludeFilters = {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes=FeignConfiguration.class)},
+			   basePackages = {"com.sumavision.tetris"})
 @ServletComponentScan(basePackages = {"com.sumavision.tetris"})
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
 @EnableCaching

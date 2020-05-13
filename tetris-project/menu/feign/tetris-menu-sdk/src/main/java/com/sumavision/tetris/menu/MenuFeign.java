@@ -26,7 +26,7 @@ public interface MenuFeign {
 	 * @return List<MenuVO> 菜单列表
 	 */
 	@RequestMapping(value = "/menu/feign/permission/menus")
-	public JSONObject permissionMenus(UserVO user) throws Exception;
+	public JSONObject permissionMenus() throws Exception;
 	
 	/**
 	 * 查询系统角色配置的首页<br/>
