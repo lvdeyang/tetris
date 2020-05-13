@@ -11,12 +11,15 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 
 import com.sumavision.tetris.commons.context.SpringContext;
+import com.sumavision.tetris.config.feign.FeignConfiguration;
 
 @Import(SpringContext.class)
-@ComponentScan(basePackages = {"com.sumavision.bvc", "com.sumavision.tetris", "com.suma.venus.resource", "com.suma.venus.message"})
+@ComponentScan(excludeFilters = {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes=FeignConfiguration.class)},
+			   basePackages = {"com.sumavision.bvc", "com.sumavision.tetris", "com.suma.venus.resource", "com.suma.venus.message"})
 @ServletComponentScan(basePackages = {"com.sumavision.bvc.listener", "com.sumavision.bvc.control.device.monitor.record"})
 @EnableAutoConfiguration(exclude = {MultipartAutoConfiguration.class})
 @EnableCaching

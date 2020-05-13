@@ -27,7 +27,7 @@ public class MenuQuery {
 	 * @return List<MenuVO> 菜单列表
 	 */
 	public List<MenuVO> permissionMenus(UserVO user) throws Exception{
-		return JsonBodyResponseParser.parseArray(menuFeign.permissionMenus(user), MenuVO.class);
+		return JsonBodyResponseParser.parseArray(menuFeign.permissionMenus(), MenuVO.class);
 	}
 	
 	/**
