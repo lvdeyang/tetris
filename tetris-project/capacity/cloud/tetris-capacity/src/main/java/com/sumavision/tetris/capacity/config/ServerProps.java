@@ -16,6 +16,9 @@ public class ServerProps {
 	
 	@Value("${server.port}")
 	private String port;
+	
+	@Value("${eureka.client.serviceUrl.defaultZone}")
+	private String defaultZone;
 
 	public String getId() {
 		return id;
@@ -39,6 +42,14 @@ public class ServerProps {
 
 	public void setPort(String port) {
 		this.port = port;
+	}
+
+	public String getDefaultZone() {
+		return defaultZone;
+	}
+
+	public void setDefaultZone(String defaultZone) {
+		this.defaultZone = defaultZone;
 	}
 	
 }

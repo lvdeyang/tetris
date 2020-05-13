@@ -23,6 +23,9 @@ public class UrlConstant {
 	/** 节目 */
 	public static final String URL_INPUT_PROGRAM = "/programs";
 	
+	/** 排期 */
+	public static final String URL_INPUT_SCHEDULE = "/schedule";
+	
 	public static final String URL_INPUT_PROGRAM_ElEMENTS = "/elements";
 	
 	/** 修改指定节目解码配置 */

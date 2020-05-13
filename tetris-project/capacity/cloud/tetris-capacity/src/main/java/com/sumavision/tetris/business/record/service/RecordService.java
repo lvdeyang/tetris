@@ -411,8 +411,8 @@ public class RecordService {
 										   .setVideo_array(new ArrayList<ProgramVideoBO>())
 										   .setAudio_array(new ArrayList<ProgramAudioBO>());
 		
-		ProgramVideoBO video = new ProgramVideoBO().setPid(2);
-		ProgramAudioBO audio = new ProgramAudioBO().setPid(1);
+		ProgramVideoBO video = new ProgramVideoBO().setPid(513);
+		ProgramAudioBO audio = new ProgramAudioBO().setPid(514);
 		
 		program.getVideo_array().add(video);
 		program.getAudio_array().add(audio);
