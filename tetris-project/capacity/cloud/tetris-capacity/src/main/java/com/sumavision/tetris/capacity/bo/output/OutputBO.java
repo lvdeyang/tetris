@@ -39,6 +39,8 @@ public class OutputBO {
 	private OutputRtmpBO http_flv;
 	
 	private OutputHlsRecordBO hls_record;
+	
+	private OutputZiXiBO zixi;
 
 	public String getId() {
 		return id;
@@ -181,6 +183,15 @@ public class OutputBO {
 
 	public OutputBO setHls_record(OutputHlsRecordBO hls_record) {
 		this.hls_record = hls_record;
+		return this;
+	}
+
+	public OutputZiXiBO getZixi() {
+		return zixi;
+	}
+
+	public OutputBO setZixi(OutputZiXiBO zixi) {
+		this.zixi = zixi;
 		return this;
 	}
 	

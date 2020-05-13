@@ -55,12 +55,30 @@ public class RecordFilePO extends AbstractBasePO {
 	@Column(name = "status")
 	private ERecordFileStatus status;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "injectStatus")
+	private EInjectStatus injectStatus;
+
 	public enum ERecordFileStatus {
 		RECORD_WAIT("未录制"), RECORD_RUN("正在录制"), RECORD_SUC("录制完成");
 
 		private String name;
 
 		private ERecordFileStatus(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return this.name;
+		}
+	}
+
+	public enum EInjectStatus {
+		INJECT_WAIT("待注入"), INJECT_SUC("已注入"), INJECT_ERROR("注入失败");
+
+		private String name;
+
+		private EInjectStatus(String name) {
 			this.name = name;
 		}
 
@@ -131,6 +149,14 @@ public class RecordFilePO extends AbstractBasePO {
 
 	public void setStorageId(Long storageId) {
 		this.storageId = storageId;
+	}
+
+	public EInjectStatus getInjectStatus() {
+		return injectStatus;
+	}
+
+	public void setInjectStatus(EInjectStatus injectStatus) {
+		this.injectStatus = injectStatus;
 	}
 
 }

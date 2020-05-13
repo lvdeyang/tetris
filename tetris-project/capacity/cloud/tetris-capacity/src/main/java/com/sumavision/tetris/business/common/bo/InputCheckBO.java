@@ -1,4 +1,4 @@
-package com.sumavision.tetris.business.director.bo;
+package com.sumavision.tetris.business.common.bo;
 
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 

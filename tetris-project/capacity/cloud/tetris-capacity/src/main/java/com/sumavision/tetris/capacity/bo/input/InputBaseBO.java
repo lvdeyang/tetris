@@ -50,6 +50,10 @@ public class InputBaseBO <V extends InputBaseBO>{
 	
 	private UdpPcmBO udp_pcm;
 	
+	private InputZiXiBO zixi;
+	
+	private InputScheduleBO schedule;
+	
 	private List<ProgramBO> program_array;
 	
 	/** 不做节目映射，由集群指定节目参数 */
@@ -253,6 +257,24 @@ public class InputBaseBO <V extends InputBaseBO>{
 
 	public V setMedia_type_once_map(JSONObject media_type_once_map) {
 		this.media_type_once_map = media_type_once_map;
+		return (V)this;
+	}
+
+	public InputZiXiBO getZixi() {
+		return zixi;
+	}
+
+	public V setZixi(InputZiXiBO zixi) {
+		this.zixi = zixi;
+		return (V)this;
+	}
+
+	public InputScheduleBO getSchedule() {
+		return schedule;
+	}
+
+	public V setSchedule(InputScheduleBO schedule) {
+		this.schedule = schedule;
 		return (V)this;
 	}
 	

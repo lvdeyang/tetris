@@ -35,6 +35,7 @@ import com.sumavision.tetris.capacity.bo.input.ProgramAudioBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramBO;
 import com.sumavision.tetris.capacity.bo.input.ProgramVideoBO;
 import com.sumavision.tetris.capacity.bo.input.RtpEsBO;
+import com.sumavision.tetris.capacity.bo.input.SourceUrlBO;
 import com.sumavision.tetris.capacity.bo.input.UdpPcmBO;
 import com.sumavision.tetris.capacity.bo.output.BaseMediaBO;
 import com.sumavision.tetris.capacity.bo.output.CommonTsOutputBO;
@@ -139,6 +140,10 @@ public class TransformService {
 			
 			uniq = uuid;
 			
+		}else if(streamTranscodingVO.getBePCM().equals(4)){
+
+			uniq = streamTranscodingVO.getAssetUrl();
+			
 		}else{
 			
 			String sourceUrl = streamTranscodingVO.getAssetUrl();
@@ -158,7 +163,7 @@ public class TransformService {
 		
 		String recordName = new StringBufferWrapper().append("/home/hls/").append(uuid).toString();
 			
-		save(uuid, uniq, BusinessType.YJGB, isRecord, recordName, record == null? null: record.getRecordCallback(), streamTranscodingVO);
+		save(streamTranscodingVO.getDeviceIp(), uuid, uniq, BusinessType.YJGB, isRecord, recordName, record == null? null: record.getRecordCallback(), streamTranscodingVO);
 		
 		return uuid;
 		
@@ -181,6 +186,7 @@ public class TransformService {
 	 * @param streamVO
 	 */
 	public void save(
+			String capacityIp,
 			String taskUuid, 
 			String uniq, 
 			BusinessType businessType,
@@ -226,6 +232,7 @@ public class TransformService {
 				output.setTaskUuid(taskUuid);
 				output.setType(businessType);
 				output.setRecordCallbackUrl(recordCallBackUrl);
+				output.setCapacityIp(capacityIp);
 				output.setUpdateTime(new Date());
 				
 				taskOutputDao.save(output);
@@ -234,7 +241,7 @@ public class TransformService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 			
@@ -243,11 +250,11 @@ public class TransformService {
 				//数据已存在（ip，port校验）
 				System.out.println("校验输入已存在");
 				Thread.sleep(300);
-				save(taskUuid, uniq, businessType, isRecord, recordAddress, recordCallBackUrl, streamVO);
+				save(capacityIp, taskUuid, uniq, businessType, isRecord, recordAddress, recordCallBackUrl, streamVO);
 			
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
 				throw e;
 				
 			} catch (Exception e) {
@@ -298,6 +305,7 @@ public class TransformService {
 				output.setTaskUuid(taskUuid);
 				output.setType(businessType);
 				output.setRecordCallbackUrl(recordCallBackUrl);
+				output.setCapacityIp(capacityIp);
 				output.setUpdateTime(new Date());
 				
 				taskOutputDao.save(output);
@@ -311,7 +319,7 @@ public class TransformService {
 				allRequest.setTask_array(new ArrayListWrapper<TaskBO>().addAll(taskBOs).getList());
 				allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 				
-				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				AllResponse allResponse = capacityService.createAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
 				
 				responseService.allResponseProcess(allResponse);
 							
@@ -320,11 +328,11 @@ public class TransformService {
 				// 版本不对，version校验
 				System.out.println("save校验version版本不对");
 				Thread.sleep(300);
-				save(taskUuid, uniq, businessType, isRecord, recordAddress, recordCallBackUrl, streamVO);
+				save(capacityIp, taskUuid, uniq, businessType, isRecord, recordAddress, recordCallBackUrl, streamVO);
 				
 			} catch (BaseException e){
 				
-				capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+				capacityService.deleteAllAddMsgId(allRequest, capacityIp, capacityProps.getPort());
 				throw e;
 				
 			} catch (Exception e) {
@@ -355,7 +363,7 @@ public class TransformService {
 			if(output.isRecord()){
 				
 				String recordPre = new StringBufferWrapper().append("http://")
-															.append(capacityProps.getIp())
+															.append(output.getCapacityIp())
 															.append(":6690")
 															.append("/")
 															.append(taskUuid)
@@ -433,7 +441,7 @@ public class TransformService {
 						allRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputs).getList());
 					}
 				
-					capacityService.deleteAllAddMsgId(allRequest, capacityProps.getIp(), capacityProps.getPort());
+					capacityService.deleteAllAddMsgId(allRequest, output.getCapacityIp(), capacityProps.getPort());
 					
 					output.setOutput(null);
 					output.setTask(null);
@@ -476,15 +484,15 @@ public class TransformService {
 		
 		List<OutputBO> outputs = JSONObject.parseArray(output.getOutput(), OutputBO.class);
 		
-		List<OutputBO> outputBOs = transformVo2OutputBO(uuid, tasks, outputParams);
+		List<OutputBO> outputBOs = transformVo2OutputBO(uuid, tasks, outputParams, output.getCapacityIp());
 		
 		CreateOutputsRequest outputsRequest = new CreateOutputsRequest();
 		outputsRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputBOs).getList());
 		//创建输出
-		CreateOutputsResponse outputResponse = capacityService.createOutputsAddMsgId(outputsRequest, capacityProps.getIp());
+		CreateOutputsResponse outputResponse = capacityService.createOutputsAddMsgId(outputsRequest, output.getCapacityIp());
 		
 		//创建输出返回处理 -- 回滚
-		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, capacityProps.getIp());
+		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, output.getCapacityIp());
 		
 		outputs.addAll(outputBOs);
 		
@@ -513,13 +521,15 @@ public class TransformService {
 		List<OutputBO> outputs = JSONObject.parseArray(taskPO.getOutput(), OutputBO.class);
 		
 		List<OutputBO> needDeleteOutputs = new ArrayList<OutputBO>();
-		for(OutputBO outputBO: outputs){
-			for(OutParamVO outParamVO: outputParams){
-				String ip = outParamVO.getOutputUrl().split(":")[0];
-				String port = outParamVO.getOutputUrl().split(":")[1];
-				if(outputBO.getUdp_ts() == null) continue;
-				if(outputBO.getUdp_ts().getIp().equals(ip) && outputBO.getUdp_ts().getPort().toString().equals(port)){
-					needDeleteOutputs.add(outputBO);		
+		if(outputs != null && outputs.size() > 0){
+			for(OutputBO outputBO: outputs){
+				for(OutParamVO outParamVO: outputParams){
+					String ip = outParamVO.getOutputUrl().split(":")[0];
+					String port = outParamVO.getOutputUrl().split(":")[1];
+					if(outputBO.getUdp_ts() == null) continue;
+					if(outputBO.getUdp_ts().getIp().equals(ip) && outputBO.getUdp_ts().getPort().toString().equals(port)){
+						needDeleteOutputs.add(outputBO);		
+					}
 				}
 			}
 		}
@@ -534,7 +544,7 @@ public class TransformService {
 				delete.getOutput_array().add(idRequest);
 			}
 
-			capacityService.deleteOutputsAddMsgId(delete, capacityProps.getIp());
+			capacityService.deleteOutputsAddMsgId(delete, taskPO.getCapacityIp());
 			
 			taskPO.setOutput(JSON.toJSONString(outputs));
 			taskOutputDao.save(taskPO);
@@ -566,7 +576,7 @@ public class TransformService {
 			delete.getOutput_array().add(idRequest);
 		}
 
-		capacityService.deleteOutputsAddMsgId(delete, capacityProps.getIp());
+		capacityService.deleteOutputsAddMsgId(delete, taskPO.getCapacityIp());
 		
 		taskPO.setOutput(null);
 		taskOutputDao.save(taskPO);
@@ -708,6 +718,14 @@ public class TransformService {
 				
 				inputBO.setId(inputId)
 					   .setRtp_es(rtp_es);
+				
+			}else if(bePcm.equals(4)){
+				
+				//rtsp
+				SourceUrlBO source = new SourceUrlBO().setUrl(sourceUrl);
+				
+				inputBO.setId(inputId)
+					   .setRtsp(source);
 			}
 		}
 		
@@ -723,9 +741,9 @@ public class TransformService {
 												   .setVideo_array(new ArrayList<ProgramVideoBO>())
 												   .setAudio_array(new ArrayList<ProgramAudioBO>());
 				
-				ProgramVideoBO video = new ProgramVideoBO().setPid(2)
+				ProgramVideoBO video = new ProgramVideoBO().setPid(513)
 														   .setDecode_mode("cpu");
-				ProgramAudioBO audio = new ProgramAudioBO().setPid(1)
+				ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
 						   								   .setDecode_mode("cpu");
 				
 				program.getVideo_array().add(video);
@@ -739,7 +757,7 @@ public class TransformService {
 				ProgramBO program = new ProgramBO().setProgram_number(1)
 												   .setAudio_array(new ArrayList<ProgramAudioBO>());
 				
-				ProgramAudioBO audio = new ProgramAudioBO().setPid(1)
+				ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
 						   								   .setDecode_mode("cpu");
 				
 				program.getAudio_array().add(audio);
@@ -867,8 +885,8 @@ public class TransformService {
 			EncodeBO videoEncode = new EncodeBO().setEncode_id(encodeVideoId)
 												 .setProcess_array(new ArrayList<PreProcessingBO>());
 			
-			int width = (codecParam.getVresolution() == null || codecParam.getVresolution().equals("")) ?  1920 : Integer.valueOf(codecParam.getVresolution().split("x")[0]).intValue();
-			int height = (codecParam.getVresolution() == null || codecParam.getVresolution().equals("")) ? 1080 : Integer.valueOf(codecParam.getVresolution().split("x")[1]).intValue();
+			int width = (codecParam.getVresolution() == null || codecParam.getVresolution().equals("")) ? 720 : Integer.valueOf(codecParam.getVresolution().split("x")[0]).intValue();
+			int height = (codecParam.getVresolution() == null || codecParam.getVresolution().equals("")) ? 576 : Integer.valueOf(codecParam.getVresolution().split("x")[1]).intValue();
 			
 			ScaleBO scale = new ScaleBO().setWidth(width)
 										 .setHeight(height);
@@ -878,8 +896,8 @@ public class TransformService {
 			//mpeg2
 			if(codecParam.getVcodec().equals("0")){
 				
-				Mpeg2BO mpeg2 = new Mpeg2BO().setBitrate(codecParam.getVbitrate() == null? 1500000: codecParam.getVbitrate().intValue())
-											 .setMax_bitrate(maxBitrate == null? 1500000: maxBitrate.intValue())
+				Mpeg2BO mpeg2 = new Mpeg2BO().setBitrate(codecParam.getVbitrate() == null? 4000000: codecParam.getVbitrate().intValue())
+											 .setMax_bitrate(maxBitrate == null? 4000000: maxBitrate.intValue())
 		              						 .setRatio(codecParam.getVratio() == null? "16:9": codecParam.getVratio())
 											 .setWidth(width)
 											 .setHeight(height);
@@ -888,8 +906,8 @@ public class TransformService {
 			//h264
 			}else if(codecParam.getVcodec().equals("1")){
 				
-				H264BO h264 = new H264BO().setBitrate(codecParam.getVbitrate() == null? 1500000: codecParam.getVbitrate().intValue())
-										  .setMax_bitrate(maxBitrate == null? 1500000: maxBitrate.intValue())
+				H264BO h264 = new H264BO().setBitrate(codecParam.getVbitrate() == null? 2000000: codecParam.getVbitrate().intValue())
+										  .setMax_bitrate(maxBitrate == null? 2000000: maxBitrate.intValue())
 										  .setRatio(codecParam.getVratio() == null? "16:9": codecParam.getVratio())
 										  .setWidth(width)
 										  .setHeight(height)
@@ -963,7 +981,7 @@ public class TransformService {
 							OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
 																	 .setType(taskBO.getType())
 																	 .setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
-																	 .setPid(outParam.getVid1pid() == null?1: outParam.getVid1pid());
+																	 .setPid(outParam.getVid1pid() == null?513: outParam.getVid1pid());
 							medias.add(media);
 						}
 						
@@ -971,7 +989,7 @@ public class TransformService {
 							OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
 																	 .setType(taskBO.getType())
 																	 .setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
-																	 .setPid(outParam.getAud1pid() == null?2: outParam.getAud1pid());
+																	 .setPid(outParam.getAud1pid() == null?514: outParam.getAud1pid());
 							medias.add(media);
 						}
 						
@@ -980,7 +998,7 @@ public class TransformService {
 					CommonTsOutputBO udp_ts = new CommonTsOutputBO().setUdp_ts()
 																	.setIp(outputIp)
 																	.setPort(outputPort)
-																	.setLocal_ip(outParam.getLocalIp() == null?capacityProps.getIp(): outParam.getLocalIp())
+																	.setLocal_ip(outParam.getLocalIp() == null?streamTranscodingVO.getDeviceIp(): outParam.getLocalIp())
 																	.setBitrate(outputBitrate == null?8000000: outputBitrate.intValue())
 																	.setProgram_array(new ArrayList<OutputProgramBO>());
 					
@@ -1037,7 +1055,7 @@ public class TransformService {
 							
 							OutputRtpEsBO rtp_es = new OutputRtpEsBO().setDst_ip(outputIp)
 																	  .setDst_port(outputPort)
-																	  .setLocal_ip(outParam.getLocalIp() == null?capacityProps.getIp(): outParam.getLocalIp())
+																	  .setLocal_ip(outParam.getLocalIp() == null?streamTranscodingVO.getDeviceIp(): outParam.getLocalIp())
 																	  .setMedia(media);
 							
 							output.setRtp_es(rtp_es);
@@ -1132,7 +1150,8 @@ public class TransformService {
 	public List<OutputBO> transformVo2OutputBO(
 			String id, 
 			List<TaskBO> tasks, 
-			List<OutParamVO> outputParams) throws Exception{
+			List<OutParamVO> outputParams,
+			String localIp) throws Exception{
 		
 		List<OutputBO> outputs = new ArrayList<OutputBO>();
 		
@@ -1161,7 +1180,7 @@ public class TransformService {
 					OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
 															 .setType(taskBO.getType())
 															 .setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
-															 .setPid(outParam.getVid1pid() == null?1: outParam.getVid1pid());
+															 .setPid(outParam.getVid1pid() == null?513: outParam.getVid1pid());
 					medias.add(media);
 				}
 				
@@ -1169,7 +1188,7 @@ public class TransformService {
 					OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
 															 .setType(taskBO.getType())
 															 .setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
-															 .setPid(outParam.getAud1pid() == null?2: outParam.getAud1pid());
+															 .setPid(outParam.getAud1pid() == null?514: outParam.getAud1pid());
 					medias.add(media);
 				}
 				
@@ -1178,7 +1197,7 @@ public class TransformService {
 			CommonTsOutputBO udp_ts = new CommonTsOutputBO().setUdp_ts()
 															.setIp(outputIp)
 															.setPort(outputPort)
-															.setLocal_ip(outParam.getLocalIp() == null?capacityProps.getIp(): outParam.getLocalIp())
+															.setLocal_ip(outParam.getLocalIp() == null?localIp: outParam.getLocalIp())
 															.setProgram_array(new ArrayList<OutputProgramBO>());
 			
 			OutputProgramBO program = new OutputProgramBO().setProgram_number(outParam.getProgNum() == null?301: outParam.getProgNum())
@@ -1196,5 +1215,4 @@ public class TransformService {
 		return outputs;
 		
 	}
-	
 }

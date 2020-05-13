@@ -1099,6 +1099,7 @@ public class CommandBasicServiceImpl {
 			acceptMembers = new ArrayListWrapper<CommandGroupMemberPO>().add(chairman).getList();
 			for(CommandGroupMemberPO member : members){
 				if(member.isAdministrator()) continue;
+//				if(OriginType.OUTER.equals(member.getOriginType())){member.setMemberStatus(MemberStatus.DISCONNECT);continue;}
 				UserBO commandUserBo = queryUtil.queryUserById(commandUserBos, member.getUserId());
 				if(commandUserBo.isLogined()){
 					acceptMembers.add(member);
@@ -1125,6 +1126,16 @@ public class CommandBasicServiceImpl {
 				conferenceCascadeService.start(groupBO);
 			}
 		}
+		
+		/*if(GroupType.BASIC.equals(groupType)){
+			Thread.sleep(300);//延时确保其它节点开会已完成
+			GroupBO groupBO = commandCascadeUtil.joinCommand(group, null, acceptMembers);//需要把主席去掉吗？
+			commandCascadeService.join(groupBO);
+		}else if(GroupType.MEETING.equals(groupType)){
+			Thread.sleep(300);//延时确保其它节点开会已完成
+			GroupBO groupBO = commandCascadeUtil.joinMeeting(group, null, acceptMembers);//需要把主席去掉吗？
+			conferenceCascadeService.join(groupBO);
+		}*/
 		
 		result.put("splits", chairSplits);
 		operationLogService.send(user.getNickname(), "开启指挥", user.getNickname() + "开启指挥groupId:" + groupId);

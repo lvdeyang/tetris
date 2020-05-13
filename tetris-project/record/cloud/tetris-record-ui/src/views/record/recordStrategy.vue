@@ -110,13 +110,20 @@
           </el-form-item>
         </el-form>
 
-        <el-form-item label="现在启动录制" prop="manualStrategyStart"  size="mini" v-if="addStrategyForm.type=='MANUAL'" label-width="100px">
+        <el-form :inline="true" >
+          <el-form-item label="录制文件自动注入媒资" prop="autoInjectToMims"  size="mini" label-width="160px">
+            <el-switch
+              v-model="addStrategyForm.autoInjectToMims"
+              active-color="#13ce66"
+              inactive-color="#ff4949"></el-switch>
+          </el-form-item>
+          <el-form-item label="现在启动录制" prop="manualStrategyStart"  size="mini" v-if="addStrategyForm.type=='MANUAL'" label-width="100px" style="margin-left: 30px">
             <el-switch
               v-model="addStrategyForm.manualStrategyStart"
               active-color="#13ce66"
-              inactive-color="#ff4949">
-            </el-switch>
+              inactive-color="#ff4949"></el-switch>
           </el-form-item>
+        </el-form>
 
         <!--循环定时策略相关-->
         <el-form-item label="策略起止日期" prop="cyclesDateRange" v-if="addStrategyForm.type=='CYCLE_SCHEDULE'" size="mini" label-width="100px">
@@ -264,6 +271,7 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <!-- <el-button size="small" @click="handleEdit()" v-if="editBtnVisible">修改</el-button>-->
+        <el-button size="small" @click="handleQuerySourceFromMims()" v-if="addBtnVisible">查询源测试</el-button>
         <el-button size="small" @click="handleAddRecordStrategy()" v-if="addBtnVisible">确认</el-button>
         <el-button size="small" @click.native="addStrategyFormVisible = false">关闭</el-button>
       </div>
@@ -277,7 +285,7 @@ import globalRouter from '../../router/util/globalRouter'
 // import globalVar from '../../components/Global.vue'
 // import NProgress from 'nprogress'
 import {
-  queryRecordStrategy, addRecordStrategy, queryStrategyItems, startRecord, stopRecord, delRecordStrategy
+  queryRecordStrategy, addRecordStrategy, queryStrategyItems, startRecord, stopRecord, delRecordStrategy, querySourceFromMims
 } from '../../api/api'
 
 export default {
@@ -396,6 +404,7 @@ export default {
 
       addStrategyForm: {
         manualStrategyStart: true,
+        autoInjectToMims: true,
         loopCycles: []
       },
 
@@ -425,6 +434,27 @@ export default {
         } else {
           this.total = res.totalNum
           this.recordStrategyVOs = res.recordStrategyVOs
+        }
+
+        this.listLoading = false
+        // NProgress.done();
+      })
+    },
+
+    handleQuerySourceFromMims: function () {
+      console.log('handleQuerySourceFromMims')
+
+      let para = {}
+
+      querySourceFromMims(para).then(res => {
+        if (res.errMsg !== null && res.errMsg !== '') {
+          this.$message({
+            message: res.errMsg,
+            type: 'error',
+            duration: 3000
+          })
+        } else {
+          console.log(JSON.stringify(res))
         }
 
         this.listLoading = false
@@ -463,6 +493,7 @@ export default {
         taskListJson: JSON.stringify(this.customItemVOs),
         status: 'NEW',
         manualStrategyStart: this.addStrategyForm.manualStrategyStart,
+        autoInjectToMims: this.addStrategyForm.autoInjectToMims,
         loopPeriod: 0,
         loopCnt: 1
       }
