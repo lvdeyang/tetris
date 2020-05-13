@@ -19,6 +19,8 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	
 	private Boolean hasFile;
 	
+	private String endDate;
+	
 	private String broadWay;
 	
 	private String broadcastStatus;
@@ -134,6 +136,15 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
 	public ChannelVO setHasFile(Boolean hasFile) {
 		this.hasFile = hasFile;
+		return this;
+	}
+
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public ChannelVO setEndDate(String endDate) {
+		this.endDate = endDate;
 		return this;
 	}
 

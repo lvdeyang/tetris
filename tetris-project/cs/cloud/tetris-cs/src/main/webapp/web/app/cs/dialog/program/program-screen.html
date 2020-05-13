@@ -120,7 +120,7 @@
                                 :value="item.name">
                         </el-option>
                     </el-select>
-                    <el-button v-show="item.contentType=='视频资源' || item.contentType=='音频资源' || item.contentType=='图片资源'"
+                    <el-button v-show="item.contentType=='视频资源' || item.contentType=='音频资源' || item.contentType=='图片资源' || item.contentType=='仓库资源'"
                                class="chooseFile"
                                size="small"
                                type="primary"
@@ -173,7 +173,10 @@
             <!--</el-table>-->
 
             <el-table
-                    v-if="options.currentScreen.contentType=='视频资源' || options.currentScreen.contentType=='音频资源' || options.currentScreen.contentType=='图片资源'"
+                    v-if="options.currentScreen.contentType=='视频资源'
+                     || options.currentScreen.contentType=='音频资源'
+                      || options.currentScreen.contentType=='图片资源'
+                       || options.currentScreen.contentType=='仓库资源'"
                     ref="programTable"
                     tooltip-effect="dark"
                     :data="options.currentScreen.data"
@@ -186,7 +189,7 @@
                     <el-table-column :key="Math.random()" label="综合分值" width="90" prop="hotWeight"></el-table-column>
                     <el-table-column :key="Math.random()" label="下载量" width="70" prop="downloadCount"></el-table-column>
                 </template>
-                <el-table-column label="时长/秒" width="110">
+                <el-table-column label="时长/秒" width="110" v-if="channelData.hasFile != false">
                     <template slot-scope="scope">
                         <span v-if="scope.row.type=='VIDEO' || scope.row.type=='AUDIO'">{{ scope.row.duration / 1000 }}</span>
                         <el-input

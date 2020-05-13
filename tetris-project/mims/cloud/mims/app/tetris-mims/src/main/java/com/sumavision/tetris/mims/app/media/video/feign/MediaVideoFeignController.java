@@ -13,6 +13,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionBO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
@@ -38,6 +40,9 @@ public class MediaVideoFeignController {
 	
 	@Autowired
 	private TagQuery tagQuery;
+	
+	@Autowired
+	private MediaFileEquipmentPermissionQuery mediaFileEquipmentPermissionQuery;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -89,7 +94,16 @@ public class MediaVideoFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/load/collection")
 	public Object loadCollection(Long folderId, HttpServletRequest request) throws Exception{
-		return mediaVideoQuery.loadCollection(folderId);
+		MediaVideoVO folder = mediaVideoQuery.loadCollection(folderId);
+		if (folder != null) {
+			List<MediaVideoVO> children = folder.getChildren();
+			if (children != null) {
+				for (MediaVideoVO media : children) {
+					media.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setFromVideoVO(media)));
+				}
+			}
+		}
+		return folder;
 	}
 	
 	/**

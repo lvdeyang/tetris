@@ -123,6 +123,7 @@ public class ChannelQuery {
 				if (broadTerminalBroadInfoPO != null) {
 					channelVO.setLevel(broadTerminalBroadInfoPO.getLevel());
 					channelVO.setHasFile(broadTerminalBroadInfoPO.getHasFile());
+					channelVO.setEndDate(broadTerminalBroadInfoPO.getEndDate());
 				}
 			}
 		}

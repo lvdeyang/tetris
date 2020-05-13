@@ -18,6 +18,10 @@ import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionBO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionQuery;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -36,6 +40,9 @@ public class MediaPictureFeignController {
 	
 	@Autowired
 	private FolderQuery folderQuery;
+	
+	@Autowired
+	private MediaFileEquipmentPermissionQuery mediaFileEquipmentPermissionQuery;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -86,7 +93,16 @@ public class MediaPictureFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/load/collection")
 	public Object loadCollection(Long folderId, HttpServletRequest request) throws Exception{
-		return mediaPictureQuery.loadPictureCollection(folderId);
+		MediaPictureVO folder = mediaPictureQuery.loadPictureCollection(folderId);
+		if (folder != null) {
+			List<MediaPictureVO> children = folder.getChildren();
+			if (children != null) {
+				for (MediaPictureVO media : children) {
+					media.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setFromPictureVO(media)));
+				}
+			}
+		}
+		return folder;
 	}
 	
 	/**

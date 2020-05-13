@@ -158,7 +158,7 @@ public class MediaVideoQuery {
 		
 		//TODO 权限校验		
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
-		if (id != null && id.length > 0) {
+		if (id != null && id.length > 0 && id[0] != null) {
 			folderTree = folderQuery.findSubFolders(id[0]);
 			folderTree.add(folderDao.findOne(id[0]));
 		}

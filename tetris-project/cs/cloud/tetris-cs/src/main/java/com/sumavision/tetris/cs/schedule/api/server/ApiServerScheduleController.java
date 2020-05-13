@@ -97,7 +97,7 @@ public class ApiServerScheduleController {
 
 		ApiServerScheduleVO apiServerScheduleVO = JSON.parseObject(schedule, ApiServerScheduleVO.class);
 		
-		ScheduleVO scheduleVO = scheduleService.edit(id, apiServerScheduleVO.getBroadDate(), remark);
+		ScheduleVO scheduleVO = scheduleService.edit(id, apiServerScheduleVO.getBroadDate(), null, remark);
 		
 		Date date = new Date();
 		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();

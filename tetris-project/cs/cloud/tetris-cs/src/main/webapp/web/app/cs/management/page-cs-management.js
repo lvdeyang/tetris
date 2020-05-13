@@ -196,6 +196,7 @@ define([
                                 visible: false,
                                 loading: false,
                                 broadDate: "",
+                                endDate: '',
                                 remark: ""
                             },
                             editSchedule: {
@@ -203,8 +204,14 @@ define([
                                 loading: false,
                                 data: {},
                                 broadDate: "",
+                                endDate: '',
                                 remark: ""
                             },
+							cycle: {
+								visible: false,
+								loading: false,
+								endDate: ''
+							},
                             editProgram: {
 
                             }
@@ -848,12 +855,12 @@ define([
                 handleSelectionChange: function (val) {
                     this.channel.multipleSelection = val;
                 },
-                handlePageCurrentChange: function (val) {
+                handleChannelPageCurrentChange: function (val) {
                     var self = this;
                     self.channel.page.currentPage = val;
                     self.getChannelList();
                 },
-                handleSizeChange: function (val) {
+                handleChannelSizeChange: function (val) {
                     var self = this;
                     self.channel.page.size = val;
                     self.getChannelList();
@@ -1142,6 +1149,35 @@ define([
                         self.dialog.editSchedules.table.loading = false;
                     }, null, ajax.NO_ERROR_CATCH_CODE)
                 },
+				handleSetCycle: function() {
+					var self = this;
+					self.dialog.editSchedules.dialog.cycle.visible = true;
+					self.dialog.editSchedules.dialog.cycle.endDate = self.dialog.editSchedules.data.endDate;
+				},
+				handleSetCycleClose: function() {
+					var self = this;
+					self.dialog.editSchedules.dialog.cycle.visible = false;
+					self.dialog.editSchedules.dialog.cycle.endDate = '';
+				},
+				handleSetCycleCommit: function() {
+					var self = this;
+					self.dialog.editSchedules.dialog.cycle.loading = true;
+					var questData = {
+						channelId: self.dialog.editSchedules.data.id,
+						endDate: self.dialog.editSchedules.dialog.cycle.endDate
+					}
+					ajax.post('/cs/schedule/set/total/endTime', questData, function(data, status) {
+						if (status == 200) {
+							self.dialog.editSchedules.data.endDate = self.dialog.editSchedules.dialog.cycle.endDate;
+							self.$message({
+								message: '设置成功',
+								type: 'success'
+							});
+						}
+						self.dialog.editSchedules.dialog.cycle.loading = false;
+						self.handleSetCycleClose();
+					})
+				},
                 handleAddSchedule: function() {
                     var self = this;
                     self.dialog.editSchedules.dialog.addSchedule.visible = true;
@@ -1149,23 +1185,28 @@ define([
                 handleAddScheduleClose: function(){
                     var self = this;
                     self.dialog.editSchedules.dialog.addSchedule.visible = false;
-                    self.dialog.editSchedules.dialog.addSchedule.broadDate = "";
-                    self.dialog.editSchedules.dialog.addSchedule.remark = "";
+                    self.dialog.editSchedules.dialog.addSchedule.broadDate = '';
+					self.dialog.editSchedules.dialog.addSchedule.endDate = '';
+                    self.dialog.editSchedules.dialog.addSchedule.remark = '';
                 },
                 handleAddScheduleCommit: function() {
                     var self = this;
                     self.dialog.editSchedules.dialog.addSchedule.loading = true;
-                    if (self.dialog.editSchedules.data.broadWay == self.broadWayStream && !self.dialog.editSchedules.dialog.addSchedule.broadDate) {
-                        self.$message({
-                            message: '请选择播发时间',
-                            type: 'warning'
-                        });
-                        self.dialog.editSchedules.dialog.addSchedule.loading = false;
-                        return;
-                    }
+                    if (self.dialog.editSchedules.data.hasFile != false) {
+						var check = self.checkScheduleTime(self.dialog.editSchedules.data.broadWay, self.dialog.editSchedules.dialog.addSchedule.broadDate, self.dialog.editSchedules.dialog.addSchedule.endDate);
+						if (check) {
+							self.$message({
+								message: check,
+								type: 'warning'
+							});
+							self.dialog.editSchedules.dialog.addSchedule.loading = false;
+							return;
+						}
+					}
                     var questData = {
                         channelId: self.dialog.editSchedules.data.id,
                         broadDate: self.dialog.editSchedules.dialog.addSchedule.broadDate,
+                        endDate: self.dialog.editSchedules.dialog.addSchedule.endDate,
                         remark: self.dialog.editSchedules.dialog.addSchedule.remark
                     };
                     ajax.post('/cs/schedule/add', questData, function(data, status){
@@ -1179,31 +1220,74 @@ define([
                         self.handleAddScheduleClose();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
                 },
+                checkScheduleTime: function(broadWay, startTime, endTime) {
+                    var self = this;
+                    if (!startTime) {
+                        return  '请选择开始时间';
+                    }
+                    if (broadWay == self.broadWayTerminal) {
+                        if (!endTime) {
+                            return '请选择停止时间';
+                        } else {
+                            var startDate = new Date(startTime);
+                            var endDate = new Date(endTime);
+                            if (endDate.getTime() < startDate.getTime()) {
+                                return '停止时间较开始时间早，无效';
+                            }
+							if (self.dialog.editSchedules.table.data && self.dialog.editSchedules.table.data.length > 0) {
+								for (var i = 0; i < self.dialog.editSchedules.table.data.length; i++) {
+									if (i != self.dialog.editSchedules.table.data.indexOf(self.dialog.editSchedules.dialog.editSchedule.data)){
+										var schedule = self.dialog.editSchedules.table.data[i];
+										var itemStartDate = new Date(schedule.broadDate);
+										var itemEndDate = new Date(schedule.endDate);
+										if ((itemStartDate < startDate && itemEndDate > startDate) || (itemStartDate < endDate && itemEndDate > endDate))
+										return '与排期单起始时间为：' + schedule.broadDate + ' 的排期冲突！';
+									}
+								}
+							}
+                        }
+                    }
+                    return '';
+                },
                 scheduleEdit: function (scope) {
                     var self = this;
-                    self.dialog.editSchedules.dialog.editSchedule.data = scope.row;
-                    self.dialog.editSchedules.dialog.editSchedule.broadDate = scope.row.broadDate;
-                    self.dialog.editSchedules.dialog.editSchedule.remark = scope.row.remark;
+					var row = scope.row;
+                    self.dialog.editSchedules.dialog.editSchedule.data = row;
+                    self.dialog.editSchedules.dialog.editSchedule.broadDate = row.broadDate;
+					self.dialog.editSchedules.dialog.editSchedule.endDate = row.endDate;
+                    self.dialog.editSchedules.dialog.editSchedule.remark = row.remark;
                     self.dialog.editSchedules.dialog.editSchedule.visible = true;
                 },
                 handleEditScheduleClose: function(){
                     var self = this;
                     self.dialog.editSchedules.dialog.editSchedule.visible = false;
                     self.dialog.editSchedules.dialog.editSchedule.data = {};
-                    self.dialog.editSchedules.dialog.editSchedule.broadDate = "";
-                    self.dialog.editSchedules.dialog.editSchedule.remark = "";
+                    self.dialog.editSchedules.dialog.editSchedule.broadDate = '';
+					self.dialog.editSchedules.dialog.editSchedule.endDate = '';
+                    self.dialog.editSchedules.dialog.editSchedule.remark = '';
                 },
                 handleEditScheduleCommit: function(){
                     var self = this;
                     self.dialog.editSchedules.dialog.editSchedule.loading = true;
+					var check = self.checkScheduleTime(self.dialog.editSchedules.data.broadWay, self.dialog.editSchedules.dialog.editSchedule.broadDate, self.dialog.editSchedules.dialog.editSchedule.endDate)
+                    if (check) {
+						self.$message({
+                            message: check,
+                            type: 'warning'
+                        });
+                        self.dialog.editSchedules.dialog.editSchedule.loading = false;
+                        return;
+					}
                     var questData = {
                         id: self.dialog.editSchedules.dialog.editSchedule.data.id,
                         broadDate: self.dialog.editSchedules.dialog.editSchedule.broadDate,
+                        endDate: self.dialog.editSchedules.dialog.editSchedule.endDate,
                         remark: self.dialog.editSchedules.dialog.editSchedule.remark
                     };
                     ajax.post('/cs/schedule/edit', questData, function(data, status){
                         if (status == 200){
                             self.dialog.editSchedules.dialog.editSchedule.data.broadDate = data.broadDate;
+							self.dialog.editSchedules.dialog.editSchedule.data.endDate = data.endDate;
                             self.dialog.editSchedules.dialog.editSchedule.data.remark = data.remark;
                         }
                         self.handleEditScheduleClose();
@@ -1229,6 +1313,16 @@ define([
                         }
                         self.dialog.editSchedules.table.loading = false;
                     }, null, ajax.NO_ERROR_CATCH_CODE)
+                },
+				handleSchedulePageCurrentChange: function (val) {
+                    var self = this;
+                    self.dialog.editSchedules.table.page.currentPage = val;
+                    self.loadSchedule();
+                },
+                handleScheduleSizeChange: function (val) {
+                    var self = this;
+                    self.dialog.editSchedules.table.page.size = val;
+                    self.loadSchedule();
                 },
 
                 seekBroadcast: function (scope) {
