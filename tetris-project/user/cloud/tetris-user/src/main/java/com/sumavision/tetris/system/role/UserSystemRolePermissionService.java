@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.system.role.exception.SystemRoleNotExistException;
+import com.sumavision.tetris.system.role.exception.UserBindMoreThanOnneSystemRoleException;
 import com.sumavision.tetris.user.UserDAO;
 import com.sumavision.tetris.user.UserPO;
 import com.sumavision.tetris.user.exception.UserNotExistException;
@@ -47,6 +48,11 @@ public class UserSystemRolePermissionService {
 		UserPO user = userDao.findOne(userId);
 		if(user == null){
 			throw new UserNotExistException(userId);
+		}
+		
+		List<UserSystemRolePermissionPO> checkPermissions = userSystemRolePermissionDao.findByUserIdAndRoleType(userId, SystemRoleType.SYSTEM);
+		if(checkPermissions!=null && checkPermissions.size()>0){
+			throw new UserBindMoreThanOnneSystemRoleException();
 		}
 		
 		List<SystemRolePO> roles = systemRoleDao.findAll(roleIds);
@@ -105,6 +111,11 @@ public class UserSystemRolePermissionService {
 		SystemRolePO role = systemRoleDao.findOne(roleId);
 		if(role == null){
 			throw new SystemRoleNotExistException(roleId);
+		}
+		
+		List<UserSystemRolePermissionPO> deletePermissions = userSystemRolePermissionDao.findByUserIdInAndRoleType(userIds, SystemRoleType.SYSTEM);
+		if(deletePermissions!=null && deletePermissions.size()>0){
+			userSystemRolePermissionDao.deleteInBatch(deletePermissions);
 		}
 		
 		List<UserPO> users = userDao.findAll(userIds);

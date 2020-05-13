@@ -82,4 +82,9 @@ hystrix:
         isolation:
           thread: 
             timeoutInMilliseconds: 5000
-          strategy: SEMAPHORE  
+          strategy: SEMAPHORE 
+log:
+  home: /usr/sbin/sumavision/log/tomcat_venus_resource
+  maxFileSize: 30MB
+  maxHistory: 10
+  totalSizeCap: 3GB            

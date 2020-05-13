@@ -2,6 +2,8 @@ package com.sumavision.tetris.menu;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -25,6 +27,9 @@ public class SystemRoleMenuPermissionPO extends AbstractBasePO{
 	
 	/** 是否自动生成 */
 	private boolean autoGeneration;
+	
+	/** 特殊标记 */
+	private SystemRoleMenuPermissionFlag flag;
 	
 	@Column(name = "MENU_ID")
 	public Long getMenuId() {
@@ -51,6 +56,16 @@ public class SystemRoleMenuPermissionPO extends AbstractBasePO{
 
 	public void setAutoGeneration(boolean autoGeneration) {
 		this.autoGeneration = autoGeneration;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "FLAG")
+	public SystemRoleMenuPermissionFlag getFlag() {
+		return flag;
+	}
+
+	public void setFlag(SystemRoleMenuPermissionFlag flag) {
+		this.flag = flag;
 	}
 	
 }

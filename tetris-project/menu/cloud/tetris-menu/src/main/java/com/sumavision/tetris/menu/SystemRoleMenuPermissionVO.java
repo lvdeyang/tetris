@@ -16,6 +16,8 @@ public class SystemRoleMenuPermissionVO extends AbstractBaseVO<SystemRoleMenuPer
 	
 	private boolean autoGeneration;
 	
+	private String flag;
+	
 	public String getRoleId() {
 		return roleId;
 	}
@@ -52,9 +54,18 @@ public class SystemRoleMenuPermissionVO extends AbstractBaseVO<SystemRoleMenuPer
 		return this;
 	}
 
+	public String getFlag() {
+		return flag;
+	}
+
+	public SystemRoleMenuPermissionVO setFlag(String flag) {
+		this.flag = flag;
+		return this;
+	}
+
 	@Override
 	public SystemRoleMenuPermissionVO set(Object entity) throws Exception {
-		return null;
+		return this;
 	}
 	
 	public SystemRoleMenuPermissionVO set(SystemRoleMenuPermissionPO permission, SystemRoleVO role){
@@ -64,7 +75,8 @@ public class SystemRoleMenuPermissionVO extends AbstractBaseVO<SystemRoleMenuPer
 			.setMenuId(permission.getMenuId())
 			.setAutoGeneration(permission.isAutoGeneration())
 			.setRoleId(role.getId())
-			.setRoleName(role.getName());
+			.setRoleName(role.getName())
+			.setFlag(permission.getFlag()==null?null:permission.getFlag().toString());
 		return this;
 	}
 	

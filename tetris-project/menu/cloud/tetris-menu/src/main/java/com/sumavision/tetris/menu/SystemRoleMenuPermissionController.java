@@ -161,4 +161,23 @@ public class SystemRoleMenuPermissionController {
 		return null;
 	}
 	
+	/**
+	 * 给系统角色设置首页<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月12日 下午2:01:22
+	 * @param @PathVariable Long id 权限id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/set/home/page/{id}")
+	public Object setHomePage(
+			@PathVariable Long id,
+			HttpServletRequest request) throws Exception{
+		
+		SystemRoleMenuPermissionVO permission = systemRoleMenuPermissionService.setHomePage(id);
+		
+		return permission;
+	}
+	
 }

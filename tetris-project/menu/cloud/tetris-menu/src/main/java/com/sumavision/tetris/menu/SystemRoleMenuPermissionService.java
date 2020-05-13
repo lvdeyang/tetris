@@ -11,7 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.menu.SystemRoleMenuPermissionVO.SystemRoleMenuPermissionComparator;
 import com.sumavision.tetris.menu.exception.MenuNotExistException;
+import com.sumavision.tetris.menu.exception.SystemRoleMenuPermissionNotFoundException;
+import com.sumavision.tetris.system.role.SystemRoleQuery;
 import com.sumavision.tetris.system.role.SystemRoleVO;
+import com.sumavision.tetris.system.role.exception.SystemRoleNotExistException;
 
 /**
  * 菜单权限操作（主增删改）<br/>
@@ -31,6 +34,9 @@ public class SystemRoleMenuPermissionService {
 	
 	@Autowired
 	private SystemRoleMenuPermissionComparator systemRoleMenuPermissionComparator;
+	
+	@Autowired
+	private SystemRoleQuery systemRoleQuery;
 	
 	/**
 	 * 菜单绑定系统角色权限<br/>
@@ -92,6 +98,40 @@ public class SystemRoleMenuPermissionService {
 		Collections.sort(view_permissions, systemRoleMenuPermissionComparator);
 		
 		return view_permissions;
+	}
+	
+	/**
+	 * 设置首页<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月12日 下午2:16:39
+	 * @param Long id 权限id
+	 * @return SystemRoleMenuPermissionVO 权限信息
+	 */
+	public SystemRoleMenuPermissionVO setHomePage(Long id) throws Exception{
+		SystemRoleMenuPermissionPO permission = systemRoleMenuPermissionDao.findOne(id);
+		if(permission == null){
+			throw new SystemRoleMenuPermissionNotFoundException(id);
+		}
+		List<SystemRoleVO> roles = systemRoleQuery.listByIds(new ArrayListWrapper<String>().add(permission.getRoleId()).getList());
+		if(roles==null || roles.size()<=0){
+			throw new SystemRoleNotExistException(Long.valueOf(permission.getRoleId()));
+		}
+		Long systemRoleId = Long.valueOf(permission.getRoleId());
+		List<SystemRoleMenuPermissionPO> permissions = systemRoleMenuPermissionDao.findByRoleIdAndIdNotIn(systemRoleId.toString(), new ArrayListWrapper<Long>().add(id).getList());
+		if(permissions!=null && permissions.size()>0){
+			List<SystemRoleMenuPermissionPO> needSave = new ArrayList<SystemRoleMenuPermissionPO>();
+			for(SystemRoleMenuPermissionPO p:permissions){
+				if(SystemRoleMenuPermissionFlag.HOME_PAGE.equals(p.getFlag())){
+					p.setFlag(null);
+					needSave.add(p);
+				}
+			}
+			systemRoleMenuPermissionDao.save(needSave);
+		}
+		permission.setFlag(SystemRoleMenuPermissionFlag.HOME_PAGE);
+		systemRoleMenuPermissionDao.save(permission);
+		return new SystemRoleMenuPermissionVO().set(permission, roles.get(0));
 	}
 	
 }
