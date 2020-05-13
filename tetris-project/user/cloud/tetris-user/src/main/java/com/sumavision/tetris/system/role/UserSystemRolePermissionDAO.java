@@ -44,6 +44,17 @@ public interface UserSystemRolePermissionDAO extends BaseDAO<UserSystemRolePermi
 	public Page<UserSystemRolePermissionPO> findByUserId(Long userId, Pageable page);
 	
 	/**
+	 * 根据用户和角色类型查询授权情况<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月12日 下午3:49:34
+	 * @param Long userId 用户id
+	 * @param SystemRoleType roleType 角色类型
+	 * @return List<UserSystemRolePermissionPO> 权限列表
+	 */
+	public List<UserSystemRolePermissionPO> findByUserIdAndRoleType(Long userId, SystemRoleType roleType);
+	
+	/**
 	 * 根据用户和角色类型分页查询授权情况
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

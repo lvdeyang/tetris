@@ -10,17 +10,23 @@
             <el-tree
                     ref="roleTree"
                     :props = "tree.props"
-                    :data = "tree.data"
-                    show-checkbox
-                    :render-content = "render"
-                    :expand-on-click-node="false"
-                    @check-change="checkChange">
+                    :data = "tree.data">
+                <div slot-scope="scope">
+                	<span v-if="scope.data.isGroup">
+                		<span :class="scope.data.icon"></span>
+	                	<span>{{scope.data.name}}</span>
+                	</span>
+                	<el-radio v-if="!scope.data.isGroup" v-model="tree.current" :label="nodeLabel(scope)">
+	                	<span :class="scope.data.icon"></span>
+	                	<span>{{scope.data.name}}</span>
+                	</el-radio>
+                </div>        
             </el-tree>
         </el-scrollbar>
     </div>
 
     <span slot="footer" class="dialog.footer">
-        <el-button size="medium" @click="dialog.visible = false">{{i18n.handleCancelButton}}</el-button>
+        <el-button size="medium" @click="closed">{{i18n.handleCancelButton}}</el-button>
         <el-button size="medium" type="primary" :loading="dialog.loading" @click="handleOkButton">{{i18n.handleOkButton}}</el-button>
     </span>
 

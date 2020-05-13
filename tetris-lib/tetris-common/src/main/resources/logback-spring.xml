@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+    <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径，引用application.yml属性-->
+    <springProperty scope="context" name="LOG_HOME" source="log.home" defaultValue="./logs"/>
+    <springProperty scope="context" name="MAX_FILE_SIZE" source="log.maxFileSize" defaultValue="30MB"/>
+    <springProperty scope="context" name="MAX_HISTORY" source="log.maxHistory" defaultValue="30"/>
+    <springProperty scope="context" name="TOTAL_SIZE_CAP" source="log.totalSizeCap" defaultValue="1GB"/>
+    <springProperty scope="context" name="APPLICATION_NAME" source="spring.application.name" defaultValue="tetris"/>
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg  %n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+    <!-- 按照每天生成日志文件 -->
+    <appender name="FILE"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+    	<file>${LOG_HOME}/${APPLICATION_NAME}.out</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <FileNamePattern>${LOG_HOME}/${APPLICATION_NAME}.%d{yyyy-MM-dd}.%i.log</FileNamePattern>
+            <maxFileSize>${MAX_FILE_SIZE}</maxFileSize>
+            <!--日志文件保留天数-->
+            <MaxHistory>${MAX_HISTORY}</MaxHistory>
+            <totalSizeCap>${TOTAL_SIZE_CAP}</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        <!--日志文件最大的大小
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>10MB</MaxFileSize>
+        </triggeringPolicy>-->
+    </appender>
+
+	<!-- 日志输出级别 -->
+	<springProfile name="dev">
+	    <!-- 开发环境时激活 -->
+	    <root level="INFO">
+	        <appender-ref ref="STDOUT" />
+	    </root>
+	</springProfile>
+	
+	<springProfile name="prod">
+	    <!-- 生产环境时激活 -->
+	    <root level="INFO">
+	        <appender-ref ref="FILE" />
+	    </root>
+	</springProfile>
+
+</configuration>

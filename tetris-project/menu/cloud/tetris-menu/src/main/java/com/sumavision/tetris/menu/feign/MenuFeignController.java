@@ -47,4 +47,22 @@ public class MenuFeignController {
 		return menus;
 	}
 	
+	/**
+	 * 查询系统角色配置的首页<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月12日 下午3:32:25
+	 * @param Long roleId 系统角色id
+	 * @return MenuVO 菜单
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/home/page")
+	public Object queryHomePage(
+			Long roleId, 
+			HttpServletRequest request) throws Exception{
+		
+		return menuQuery.queryHomePage(roleId);
+	}
+	
 }

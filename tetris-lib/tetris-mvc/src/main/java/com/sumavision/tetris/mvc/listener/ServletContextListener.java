@@ -10,6 +10,7 @@ import javax.servlet.annotation.WebListener;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
 
+import com.sumavision.tetris.commons.log.StdOutErrRedirect;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
 /**
@@ -26,6 +27,7 @@ public class ServletContextListener implements javax.servlet.ServletContextListe
 	@Override
 	public void contextInitialized(ServletContextEvent sce) {
 		servletContext = sce.getServletContext();
+		StdOutErrRedirect.redirectSystemOutAndErrToLog();
 	}
 
 	@Override

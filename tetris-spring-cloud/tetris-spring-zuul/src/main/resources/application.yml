@@ -96,4 +96,9 @@ hystrix:
           strategy: SEMAPHORE
 ribbon:
   ConnectTimeout: 3000
-  ReadTimeout: 60000          
+  ReadTimeout: 60000
+log: 
+  home: /usr/sbin/sumavision/tetris/tetris-spring-cloud/zuul/apache-tomcat-7.0.93/logs  
+  maxFileSize: 30MB
+  maxHistory: 1
+  totalSizeCap: 300MB               

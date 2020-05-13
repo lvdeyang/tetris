@@ -68,7 +68,7 @@ server:
   port: 8083
   jsp-servlet: 
     init-parameters: 
-      development: true
+      development: false
 logging:
   pattern:
     console: "%d - %msg%n" 
@@ -113,4 +113,9 @@ hystrix:
         isolation:
           thread: 
             timeoutInMilliseconds: 5000
-          strategy: SEMAPHORE    
+          strategy: SEMAPHORE
+log:
+  home: /usr/sbin/sumavision/tetris/tetris-project/menu/apache-tomcat-7.0.93/logs
+  maxFileSize: 30MB
+  maxHistory: 1
+  totalSizeCap: 300MB                   

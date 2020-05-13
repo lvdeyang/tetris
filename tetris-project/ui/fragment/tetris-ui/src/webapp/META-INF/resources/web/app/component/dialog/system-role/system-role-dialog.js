@@ -33,9 +33,8 @@ define([
                         children: 'roles',
                         isLeaf: 'leaf'
                     },
-                    expandOnClickNode:false,
                     data:[],
-                    checked:[]
+                    current:''
                 }
             }
         },
@@ -43,7 +42,10 @@ define([
             closed:function(){
                 var self = this;
                 self.tree.data.splice(0, self.tree.data.length);
-                self.cache = null;
+                self.tree.current = '';
+                self.dialog.visible = false;
+                self.dialog.loading = false;
+                self.__buffer = null;
             },
             loadNode:function(node, resolve){
 
@@ -80,14 +82,13 @@ define([
             },
             handleOkButton:function(){
                 var self = this;
-                var currentNodes = self.tree.checked;
-                if(!currentNodes){
-                    self.$message({
+                if(!self.tree.current){
+                	self.$message({
                         message: self.i18n.messageWarning,
                         type: 'warning'
                     });
                 }
-                self.$emit('selected-roles', currentNodes, self.__buffer, function(){
+                self.$emit('selected-roles', [$.parseJSON(self.tree.current)], self.__buffer, function(){
                     self.dialog.loading = true;
                 }, function(){
                     self.dialog.loading = false;
@@ -95,26 +96,9 @@ define([
                     self.dialog.visible = false;
                 });
             },
-            checkChange:function(node, checked){
-                var self = this;
-                if(node.isGroup) return;
-                if(checked){
-                    var finded = false;
-                    for(var i=0; i<self.tree.checked.length; i++){
-                        if(self.tree.checked[i].id === node.id){
-                            finded = true;
-                            break;
-                        }
-                    }
-                    if(!finded) self.tree.checked.push(node);
-                }else{
-                    for(var i=0; i<self.tree.checked.length; i++){
-                        if(self.tree.checked[i].id === node.id){
-                            self.tree.checked.splice(i, 1);
-                            return;
-                        }
-                    }
-                }
+            nodeLabel:function(scope){
+            	var data = scope.data;
+            	return $.toJSON(data);
             }
         }
     });
