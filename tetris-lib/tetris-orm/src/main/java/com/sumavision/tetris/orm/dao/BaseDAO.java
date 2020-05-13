@@ -28,5 +28,6 @@ public interface BaseDAO <T extends AbstractBasePO>{
 	public boolean exists(Long id);	
 	public Page<T> findAll(Pageable pageable);
 	public List<T> findAll(Specification<T> spec);
+	public Page<T> findAll( Specification<T> spec, Pageable pageable);
 	public void flush();
 }

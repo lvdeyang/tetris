@@ -66,8 +66,7 @@ export const queryStrategyItems = params => { return axiosInstance.post(`${baseP
 export const startRecord = params => { return axiosInstance.post(`${basePath}/record/strategy/startRecord`, qs.stringify(params)).then(res => res.data) }
 export const stopRecord = params => { return axiosInstance.post(`${basePath}/record/strategy/stopRecord`, qs.stringify(params)).then(res => res.data) }
 export const delRecordStrategy = params => { return axiosInstance.post(`${basePath}/record/strategy/delRecordStrategy`, qs.stringify(params)).then(res => res.data) }
-
-
+export const querySourceFromMims = params => { return axiosInstance.post(`${basePath}/record/strategy/querySourceFromMims`, qs.stringify(params)).then(res => res.data) }
 
 // 设备
 export const queryRecordDevice = params => { return axiosInstance.post(`${basePath}/record/device/query`, qs.stringify(params)).then(res => res.data) }
@@ -79,17 +78,3 @@ export const delDevice = params => { return axiosInstance.post(`${basePath}/reco
 export const queryRecordFile = params => { return axiosInstance.post(`${basePath}/record/file/query`, qs.stringify(params)).then(res => res.data) }
 export const delRecordFile = params => { return axiosInstance.post(`${basePath}/record/file/del`, qs.stringify(params)).then(res => res.data) }
 export const previewRecordFile = params => { return axiosInstance.post(`${basePath}/record/file/preview`, qs.stringify(params)).then(res => res.data) }
-
-// 设备
-export const queryAlarmBaseInfoListPage = params => { return axiosInstance.post(`${basePath}/alarmInfo/queryPage`, qs.stringify(params)).then(res => res.data) }
-export const addAlarmBaseInfo = params => { return axiosInstance.post(`${basePath}/alarmInfo/add`, qs.stringify(params)).then(res => res.data) }
-export const editAlarmBaseInfo = params => { return axiosInstance.post(`${basePath}/alarmInfo/edit`, qs.stringify(params)).then(res => res.data) }
-export const delAlarmBaseInfo = params => { return axiosInstance.post(`${basePath}/alarmInfo/del`, qs.stringify(params)).then(res => res.data) }
-export const checkAlarmCode = params => { return axiosInstance.post(`${basePath}/alarmInfo/checkCode`, qs.stringify(params)).then(res => res.data) }
-
-// 告警订阅
-export const querySubscribeListPage = params => { return axiosInstance.post(`${basePath}/subscribe/queryByKeyword`, qs.stringify(params)).then(res => res.data) }
-export const delSubscribe = params => { return axiosInstance.post(`${basePath}/subscribe/del`, qs.stringify(params)).then(res => res.data) }
-
-// 操作日志
-export const queryOprlogListPage = params => { return axiosInstance.post(`${basePath}/oprlog/queryPage`, qs.stringify(params)).then(res => res.data) }

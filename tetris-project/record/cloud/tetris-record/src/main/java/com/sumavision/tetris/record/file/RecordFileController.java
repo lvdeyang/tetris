@@ -1,19 +1,26 @@
 package com.sumavision.tetris.record.file;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.record.file.RecordFilePO.ERecordFileStatus;
 import com.sumavision.tetris.record.storage.StorageDAO;
 import com.sumavision.tetris.record.storage.StoragePO;
@@ -32,6 +39,9 @@ public class RecordFileController {
 
 	@Autowired
 	StorageDAO storageDAO;
+
+	@Autowired
+	RestTemplate restTemplate;
 
 	@ResponseBody
 	@RequestMapping(value = "/query")
@@ -84,23 +94,48 @@ public class RecordFileController {
 				return data;
 			}
 
+			StoragePO storagePO = storageDAO.findOne(recordFilePO.getStorageId());
+			String previewUrl = null;
+
 			if (recordFilePO.getStatus().equals(ERecordFileStatus.RECORD_SUC)) {
 
 				// TODO
-				StoragePO storagePO = storageDAO.findOne(recordFilePO.getStorageId());
+				String vodPath = null;
+				try {
+					String recordXmlUrl = storagePO.getHttpBasePath() + recordFilePO.getFilePath() + "/record.xml";
 
-				String previewUrl = storagePO.getHttpBasePath() + recordFilePO.getFilePath() + recordFilePO.getVodPath()
-						+ "/vod.m3u8";
+					String t = restTemplate.getForObject(recordXmlUrl, String.class);
 
-				data.put("previewUrl", previewUrl);
+					Document doc = DocumentHelper.parseText(t);
+					Element root = doc.getRootElement();
+
+					@SuppressWarnings("unchecked")
+					List<Element> folderElements = root.elements("folder");
+					if (CollectionUtils.isEmpty(folderElements)) {
+						data.put("errMsg", "http服务错误");
+						return data;
+					}
+
+					vodPath = "/" + folderElements.get(folderElements.size() - 1).getText();
+
+				} catch (Exception e) {
+					data.put("errMsg", "http服务错误");
+					e.printStackTrace();
+				}
+
+				previewUrl = storagePO.getHttpBasePath() + recordFilePO.getFilePath() + vodPath + "/vod.m3u8";
+
 			} else {
 
+				previewUrl = storagePO.getHttpBasePath() + recordFilePO.getFilePath() + "/stream.m3u8";
 			}
-			
+
+			data.put("previewUrl", previewUrl);
 			data.put("errMsg", "");
-			
+
 		} catch (Exception e) {
 			// TODO: handle exception
+			e.printStackTrace();
 		}
 
 		return data;
