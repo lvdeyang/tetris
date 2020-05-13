@@ -3,11 +3,11 @@ package com.sumavision.tetris.cs.program;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum ScreenContentType {
-//	TERMINAL_MIMS("仓库资源", "mims", "mims"),
+	TERMINAL_MIMS("仓库资源", "file", "file"),
 //	AVIDEO("音视频资源", "avideo", "mims"),
-	AUDIO("音频资源", "audio", "mims"),
-	VIDEO("视频资源", "video", "mims"),
-	PICTURE("图片资源", "picture", "mims"),
+	ABILITY_AUDIO("音频资源", "audio", "file"),
+	ABILITY_VIDEO("视频资源", "video", "file"),
+	ABILITY_PICTURE("图片资源", "picture", "mims"),
 	TEXT("自定义文字", "text", "text"),
 	TIME("时间", "time", "time");
 	

@@ -49,6 +49,7 @@ import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionService;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.storage.StoreQuery;
@@ -114,6 +115,9 @@ public class MediaVideoService {
 	
 	@Autowired
 	private StreamTranscodeQuery streamTranscodeQuery;
+	
+	@Autowired
+	private MediaFileEquipmentPermissionService mediaFileEquipmentPermissionService;
 	
 	/**
 	 * 视频媒资上传审核通过<br/>
@@ -371,6 +375,9 @@ public class MediaVideoService {
 			for(MediaVideoPO video:videosCanBeDeleted){
 				videoIds.add(video.getId());
 			}
+			
+			//删除同步到设备的资源和数据
+			mediaFileEquipmentPermissionService.removePermission(new ArrayList<Long>(videoIds), "video", null);
 			
 			//删除临时文件
 			for(MediaVideoPO video:videosCanBeDeleted){

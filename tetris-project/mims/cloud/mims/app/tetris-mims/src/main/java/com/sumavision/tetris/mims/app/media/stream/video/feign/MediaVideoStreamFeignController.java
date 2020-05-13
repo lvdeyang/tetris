@@ -60,6 +60,21 @@ public class MediaVideoStreamFeignController {
 	}
 	
 	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return MediaVideoStreamVO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/collection")
+	public Object loadCollection(Long folderId, HttpServletRequest request) throws Exception{
+		return mediaVideoStreamQuery.loadCollection(folderId);
+	}
+	
+	/**
 	 * 添加上传视频流媒资任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

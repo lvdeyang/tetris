@@ -2,6 +2,8 @@ package com.sumavision.tetris.mims.app.media.picture;
 
 import java.util.List;
 
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionPO;
+
 public class MediaPictureVO{
 
 	private Long id;
@@ -45,6 +47,8 @@ public class MediaPictureVO{
 	private String reviewStatus;
 	
 	private String processInstanceId;
+	
+	private List<MediaFileEquipmentPermissionPO> deviceUpload;
 	
 	private List<MediaPictureVO> children;
 	
@@ -243,6 +247,15 @@ public class MediaPictureVO{
 
 	public MediaPictureVO setProcessInstanceId(String processInstanceId) {
 		this.processInstanceId = processInstanceId;
+		return this;
+	}
+
+	public List<MediaFileEquipmentPermissionPO> getDeviceUpload() {
+		return deviceUpload;
+	}
+
+	public MediaPictureVO setDeviceUpload(List<MediaFileEquipmentPermissionPO> deviceUpload) {
+		this.deviceUpload = deviceUpload;
 		return this;
 	}
 	

@@ -118,8 +118,8 @@
                         <div style="height:48px; width:100%; text-align:right; padding-top:16px; position:absolute; left:0; bottom:0; box-sizing:border-box;">
                             <el-pagination
                                     background
-                                    @size-change="handleSizeChange"
-                                    @current-change="handlePageCurrentChange"
+                                    @size-change="handleChannelSizeChange"
+                                    @current-change="handleChannelPageCurrentChange"
                                     :current-page="channel.page.currentPage"
                                     :page-sizes="channel.page.sizes"
                                     :page-size="channel.page.size"
@@ -620,16 +620,47 @@
                 width="1100px"
                 :before-close="handleEditSchedulesClose">
 
+			<el-dialog
+                    title="周期结束时间："
+                    :visible.sync="dialog.editSchedules.dialog.cycle.visible"
+                    width="550px"
+                    append-to-body
+                    :before-close="handleSetCycleClose">
+                <div style="height:150px;">
+					<el-form ref="form" label-width="100px">
+						<el-form-item label="周期结束时间">
+							<el-date-picker
+									style="width:100%;"
+									v-model="dialog.editSchedules.dialog.cycle.endDate"
+									type="datetime"
+									placeholder="选择日期时间"
+									align="right"
+									:picker-options="dialog.editSchedules.dialog.cycle.endDate"
+									value-format="yyyy-MM-dd HH:mm:ss">
+							</el-date-picker>
+						</el-form-item>
+					</el-form>
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="handleSetCycleClose">取 消
+                    </el-button>
+                    <el-button size="medium" type="primary" @click="handleSetCycleCommit"
+                               :loading="dialog.editSchedules.dialog.cycle.loading">确 定
+                    </el-button>
+                </span>
+            </el-dialog>
+				
             <el-dialog
                     title="添加"
                     :visible.sync="dialog.editSchedules.dialog.addSchedule.visible"
                     width="550px"
                     append-to-body
                     :before-close="handleAddScheduleClose">
-                <div style="height:150px;">
+                <div style="height:250px;">
                     <el-scrollbar style="height:100%;">
                         <el-form ref="form" label-width="80px">
-                            <el-form-item label="播发时间">
+                            <el-form-item label="开始时间">
                                 <el-date-picker
                                         style="width:100%;"
                                         v-model="dialog.editSchedules.dialog.addSchedule.broadDate"
@@ -637,6 +668,18 @@
                                         placeholder="选择日期时间"
                                         align="right"
                                         :picker-options="dialog.editSchedules.dialog.addSchedule.broadDate"
+                                        value-format="yyyy-MM-dd HH:mm:ss"
+                                        :default-value="time">
+                                </el-date-picker>
+                            </el-form-item>
+                            <el-form-item v-if="dialog.editSchedules.data.broadWay==broadWayTerminal && dialog.editSchedules.data.hasFile != false" label="停止时间">
+                                <el-date-picker
+                                        style="width:100%;"
+                                        v-model="dialog.editSchedules.dialog.addSchedule.endDate"
+                                        type="datetime"
+                                        placeholder="选择日期时间"
+                                        align="right"
+                                        :picker-options="dialog.editSchedules.dialog.addSchedule.endDate"
                                         value-format="yyyy-MM-dd HH:mm:ss">
                                 </el-date-picker>
                             </el-form-item>
@@ -662,10 +705,10 @@
                     width="550px"
                     append-to-body
                     :before-close="handleEditScheduleClose">
-                <div style="height:150px;">
+                <div style="height:250px;">
                     <el-scrollbar style="height:100%;">
                         <el-form ref="form" label-width="80px">
-                            <el-form-item label="播发时间">
+                            <el-form-item label="开始时间">
                                 <el-date-picker
                                         style="width:100%;"
                                         v-model="dialog.editSchedules.dialog.editSchedule.broadDate"
@@ -673,6 +716,18 @@
                                         placeholder="选择日期时间"
                                         align="right"
                                         :picker-options="dialog.editSchedules.dialog.editSchedule.broadDate"
+                                        value-format="yyyy-MM-dd HH:mm:ss"
+                                        :default-value="time">
+                                </el-date-picker>
+                            </el-form-item>
+                            <el-form-item v-if="dialog.editSchedules.data.broadWay == broadWayTerminal && dialog.editSchedules.data.hasFile != false" label="停止时间">
+                                <el-date-picker
+                                        style="width:100%;"
+                                        v-model="dialog.editSchedules.dialog.editSchedule.endDate"
+                                        type="datetime"
+                                        placeholder="选择日期时间"
+                                        align="right"
+                                        :picker-options="dialog.editSchedules.dialog.editSchedule.endDate"
                                         value-format="yyyy-MM-dd HH:mm:ss">
                                 </el-date-picker>
                             </el-form-item>
@@ -696,14 +751,23 @@
             <div style="width:100%; height:650px; position:relative;">
                 <div style="height:48px; position:absolute; left:0; top:0; width:100%;">
                     <el-button size="small" type="primary" @click="handleAddSchedule()"
-                               :disabled="dialog.editSchedules.data.autoBroad || (dialog.editSchedules.data.broadWay!=broadWayStream && dialog.editSchedules.table.data.length >= 1)">
+                               :disabled="dialog.editSchedules.data.autoBroad || dialog.editSchedules.data.broadWay == broadWayTerminal && dialog.editSchedules.data.hasFile == false && dialog.editSchedules.table.data.length > 0">
                         <span class="icon-plus" style="margin-right:5px;"></span>
                         添加
                     </el-button>
-                    <el-button size="small" type="warning" @click="" :disabled="dialog.editSchedules.data.autoBroad">
+                    <el-button v-if="false" size="small" type="warning" @click="" :disabled="dialog.editSchedules.data.autoBroad">
                         <span class="icon-trash" style="margin-right:5px;"></span>
                         删除
                     </el-button>
+					<div v-if="dialog.editSchedules.data.broadWay == broadWayTerminal && dialog.editSchedules.data.hasFile != false" style="position: absolute; right: 60px; top: 50%">
+						<span style="font-size: 16px; font-weight: bold">周期结束时间：{{ dialog.editSchedules.data.endDate || '未设定' }}</span>
+						<el-tooltip class="item" effect="dark" content="修改" placement="bottom">
+							<el-button type="text" icon="feather-icon-edit"
+									   class="channelManage"
+									   @click="handleSetCycle">
+							</el-button>
+						</el-tooltip>
+					</div>
                 </div>
                 <div style="position:absolute; left:0; right:0; top:48px; bottom:48px;overflow-y: auto; height: 500px">
                     <el-table
@@ -713,7 +777,8 @@
                             tooltip-effect="dark"
                             style="width: 100%;">
                         <el-table-column type="selection" width="55"></el-table-column>
-                        <el-table-column label="播发时间" width="220" prop="broadDate"></el-table-column>
+                        <el-table-column label="开始时间" width="220" prop="broadDate"></el-table-column>
+						<el-table-column v-if="dialog.editSchedules.data.broadWay == broadWayTerminal && dialog.editSchedules.data.hasFile != false" label="停止时间" width="220" prop="endDate"></el-table-column>
                         <el-table-column label="备注" width="220" prop="remark"></el-table-column>
                         <el-table-column label="操作">
                             <template slot-scope="scope">
@@ -742,8 +807,8 @@
                 <div style="height:48px; width:100%; text-align:right; padding-top:16px; position:absolute; left:0; bottom:0; box-sizing:border-box;">
                     <el-pagination
                             background
-                            @size-change=""
-                            @current-change=""
+                            @size-change="handleScheduleSizeChange"
+                            @current-change="handleSchedulePageCurrentChange"
                             :current-page="dialog.editSchedules.table.page.currentPage"
                             :page-sizes="dialog.editSchedules.table.page.sizes"
                             :page-size="dialog.editSchedules.table.page.size"
