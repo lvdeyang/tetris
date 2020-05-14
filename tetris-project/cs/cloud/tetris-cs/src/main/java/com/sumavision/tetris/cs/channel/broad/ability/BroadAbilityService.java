@@ -76,6 +76,8 @@ import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamService
 import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamService;
 import com.sumavision.tetris.mvc.wrapper.CopyHeaderHttpServletRequestWrapper;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
+import com.sumavision.tetris.resouce.feign.bundle.BundleFeignService;
+import com.sumavision.tetris.resouce.feign.bundle.BundleFeignVO;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
@@ -146,6 +148,9 @@ public class BroadAbilityService {
 	
 	@Autowired
 	private StreamTranscodeQuery streamTranscodeQuery;
+	
+	@Autowired
+	private BundleFeignService bundleFeignService;
 	
 	private Map<Long, List<ScheduledFuture<?>>> channelScheduleMap = new HashMapWrapper<Long, List<ScheduledFuture<?>>>().getMap();
 	
@@ -339,6 +344,9 @@ public class BroadAbilityService {
 		//从流转码feign获取能力ip
 		StreamTranscodeProfileVO streamTranscodeProfileVO = streamTranscodeQuery.getProfile();
 		String abilityIp = streamTranscodeProfileVO.getToolIp();
+//		从资源微服务feign获取能力ip
+//		List<BundleFeignVO> abilityList = bundleFeignService.queryTranscodeDevice();
+//		if (abilityList != null && !abilityList.isEmpty()) abilityIp = abilityList.get(0).getDeviceIp();
 		
 		Boolean broad = false;
 		//遍历排期单

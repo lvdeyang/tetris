@@ -1,9 +1,15 @@
 package com.sumavision.tetris.mims.app.media.video.feign;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.fileupload.FileItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,6 +17,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.commons.util.binary.ByteUtil;
+import com.sumavision.tetris.mims.app.folder.FolderDAO;
+import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderQuery;
+import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
+import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
+import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
+import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionBO;
@@ -19,11 +33,19 @@ import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoTaskVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoCannotMatchException;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoErrorBeginOffsetException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
+import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadingException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+
+import it.sauronsoftware.jave.Encoder;
+import it.sauronsoftware.jave.MultimediaInfo;
 
 @Controller
 @RequestMapping(value = "/media/video/feign")
@@ -40,6 +62,12 @@ public class MediaVideoFeignController {
 	
 	@Autowired
 	private TagQuery tagQuery;
+	
+	@Autowired
+	private FolderDAO folderDao;
+	
+	@Autowired
+	private FolderQuery folderQuery;
 	
 	@Autowired
 	private MediaFileEquipmentPermissionQuery mediaFileEquipmentPermissionQuery;
@@ -209,5 +237,163 @@ public class MediaVideoFeignController {
 		List<Long> idList = JSONArray.parseArray(ids, Long.class);
 		
 		mediaVideoService.remove(idList);
+	}
+	
+	/**
+	 * 添加上传视频媒资任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午1:44:06
+	 * @param JSONString task{name:文件名称, size:文件大小, mimetype:文件mime类型, lastModified:最后更新时间}
+	 * @param String name 媒资名称
+	 * @param JSONString tags 标签数组
+	 * @param JSONString keyWords 关键字数组
+	 * @param String remark 备注
+	 * @param Long folerId 文件夹id		
+	 * @return List<MaterialFileTaskVO> 任务列表 
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/task/add")
+	public Object addTask(
+			String task, 
+			String name,
+            String tags,
+            String keyWords,
+            String remark,
+			Long folderId, 
+            String thumbnail,
+            String addition,
+			HttpServletRequest request) throws Exception{
+		
+		MediaVideoTaskVO taskParam = JSON.parseObject(task, MediaVideoTaskVO.class);
+		
+		UserVO user = userQuery.current();
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		FolderPO folder = folderDao.findOne(folderId);
+		if(folder == null){
+			throw new FolderNotExistException(folderId);
+		}
+		
+		List<String> tagList = new ArrayList<String>();
+		if (tags != null && !tags.isEmpty()) {
+			tagList = Arrays.asList(tags.split(","));
+		}
+		
+		MediaVideoPO entity = mediaVideoService.addTask(user, name, tagList, null, remark, taskParam, folder);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if(addition != null) entity.setAddition(addition);
+		mediaVideoDAO.save(entity);
+		
+		return new MediaVideoVO().set(entity);
+		
+	}
+	
+	/**
+	 * 视频媒资上传<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月2日 下午3:32:40
+	 * @param String uuid 任务uuid
+	 * @param String name 文件名称
+	 * @param long lastModified 最后修改日期
+	 * @param long beginOffset 文件分片的起始位置
+	 * @param long  endOffset 文件分片的结束位置
+	 * @param long blockSize 文件分片大小
+	 * @param long size 文件大小
+	 * @param String type 文件的mimetype
+	 * @param blob block 文件分片数据
+	 * @return MediaVideoVO 视频媒资
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/upload")
+	public Object upload(
+			String uuid,
+			String name,
+			Long blockSize,
+			Long lastModified,
+			Long size,
+			String type,
+			Long beginOffset,
+			Long endOffset,
+			HttpServletRequest request) throws Exception{
+		
+		MultipartHttpServletRequestWrapper multipartRequest = new MultipartHttpServletRequestWrapper(request);
+		FileItem fileItem = multipartRequest.getFileItem("file");
+		
+		//参数错误
+		if((beginOffset + blockSize) != endOffset){
+			throw new OffsetCannotMatchSizeException(beginOffset, endOffset, blockSize);
+		}
+		
+		MediaVideoPO task = mediaVideoDAO.findByUuid(uuid);
+		
+		if(task == null){
+			throw new MediaVideoNotExistException(uuid);
+		}
+		
+		UserVO user = userQuery.current();
+		
+		if(!folderQuery.hasGroupPermission(user.getGroupId(), task.getFolderId())){
+			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		}
+		
+		//状态错误
+		if(!UploadStatus.UPLOADING.equals(task.getUploadStatus())){
+			throw new MediaVideoStatusErrorWhenUploadingException(uuid, task.getUploadStatus());
+		}
+		
+		//文件不是一个
+		if(!name.equals(task.getFileName()) 
+				|| lastModified!=task.getLastModified().longValue() 
+				|| size!=task.getSize() 
+				|| !type.equals(task.getMimetype())){
+			throw new MediaVideoCannotMatchException(uuid, name, lastModified, size, type, task.getFileName(), 
+											   task.getLastModified(), task.getSize(), task.getMimetype());
+		}
+		
+		//文件起始位置错误
+		File file = new File(task.getUploadTmpPath());
+		if((!file.exists() && beginOffset!=0l) 
+				|| (file.length() != beginOffset)){
+			throw new MediaVideoErrorBeginOffsetException(uuid, beginOffset, file.length());
+		}
+		
+		//分块
+		InputStream block = null;
+		FileOutputStream out = null;
+		try{
+			if(!file.exists()) file.createNewFile();
+			block = fileItem.getInputStream();
+			byte[] blockBytes = ByteUtil.inputStreamToBytes(block);
+			out = new FileOutputStream(file, true);
+			out.write(blockBytes);
+		}finally{
+			if(block != null) block.close();
+			if(out != null) out.close();
+		}
+		
+		if(endOffset == size){
+			//上传完成
+			task.setUploadStatus(UploadStatus.COMPLETE);
+			
+			MultimediaInfo multimediaInfo = new Encoder().getInfo(file);
+			task.setDuration(multimediaInfo.getDuration());
+			
+			if(task.getReviewStatus() != null){
+				//开启审核流程--这里会保存媒资
+				mediaVideoService.startUploadProcess(task);
+			}else{
+				mediaVideoDAO.save(task);
+			}
+			mediaVideoService.checkMediaEdit(task);
+		}
+		
+        return new MediaVideoVO().set(task);
 	}
 }

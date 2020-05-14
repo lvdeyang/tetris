@@ -14,7 +14,7 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.71
+      ipAddress: 192.165.56.85
 #  profiles:
 #    active: pro
   datasource:
@@ -80,7 +80,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.71:8081/eureka/
+      defaultZone: http://192.165.56.85:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
@@ -110,3 +110,8 @@ hystrix:
           thread: 
             timeoutInMilliseconds: 5000
           strategy: SEMAPHORE          
+log:
+  home: /usr/sbin/sumavision/tetris/tetris-project/cms/apache-tomcat-7.0.93/logs
+  maxFileSize: 30MB
+  maxHistory: 10
+  totalSizeCap: 1GB               
