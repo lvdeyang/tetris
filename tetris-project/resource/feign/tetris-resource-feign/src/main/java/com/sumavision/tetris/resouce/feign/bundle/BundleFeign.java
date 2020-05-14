@@ -15,6 +15,9 @@ public interface BundleFeign {
 	public String addTranscodeDevice(@RequestParam(value = "name") String name, @RequestParam(value = "ip") String ip,
 			@RequestParam(value = "port") Integer port) throws Exception;
 
+	@RequestMapping(value = "/feign/bundle/delTranscodeDevice", method = RequestMethod.POST)
+	public String delTranscodeDevice(@RequestParam(value = "bundleId") String bundleId) throws Exception;
+
 	/**
 	 * 查询转码设备<br/>
 	 */
