@@ -81,7 +81,7 @@
     </div>-->
 
     <!--对话框-->
-    <el-dialog title="添加外部文件夹" :visible.sync="dialogVisible">
+    <el-dialog :title="!editButton?'添加外部文件夹':'修改外部文件夹'" :visible.sync="dialogVisible">
         <el-form :model="form">
             <el-form-item label="别名" :label-width="formLabelWidth">
                 <el-input v-model="form.alias"></el-input>

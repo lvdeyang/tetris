@@ -92,7 +92,7 @@ body{
     width: 40%;
     border-right: 1px solid #11366b;
 }
-/*重置table的样式*/
+/*閲嶇疆table鐨勬牱寮�*/
 .el-table,
 .el-table__expanded-cell {
     background-color: transparent;
@@ -145,12 +145,12 @@ body{
     background-color: #061f3e;
 }
 
-/*重置分页样式*/
+/*閲嶇疆鍒嗛〉鏍峰紡*/
 .el-pagination__total,.el-pagination__jump {
     color: #c0c1c3;
 }
 
-/*重置对话框样式*/
+/*閲嶇疆瀵硅瘽妗嗘牱寮�*/
 .el-dialog__wrapper{
     top:-80px;
     overflow: hidden;
@@ -166,7 +166,7 @@ body{
     font-weight: 600;
 }
 
-/*重置树形菜单*/
+/*閲嶇疆鏍戝舰鑿滃崟*/
 .el-tree {
     background-color: transparent;
     color: #fff;
@@ -191,7 +191,6 @@ body{
     overflow-x: hidden;
 }
 
-
 /*重置表格滚动条的样式*/
   ::-webkit-scrollbar {
       width: 4px;
@@ -203,3 +202,7 @@ body{
       background-color: #4F5F73;
       border-radius: 3px;
   }
+
+.tree-node-folder-name{color:#fff; display:inline-block; max-width:250px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; position:relative; top:3px;}
+.tree-node-file-name{color:#fff; display:inline-block; max-width:250px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; position:relative; top:5px;}
+

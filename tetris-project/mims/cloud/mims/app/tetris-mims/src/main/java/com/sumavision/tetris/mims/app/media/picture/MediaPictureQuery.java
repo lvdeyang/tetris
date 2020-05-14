@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -148,10 +150,14 @@ public class MediaPictureQuery {
 	 * @return List<MediaPictureVO>
 	 * @throws Exception
 	 */
-	public List<MediaPictureVO> loadAll() throws Exception{
+	public List<MediaPictureVO> loadAll(Long ... id) throws Exception{
 		
 		//TODO 权限校验		
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_PICTURE.toString());
+		if (id != null && id.length > 0 && id[0] != null) {
+			folderTree = folderQuery.findSubFolders(id[0]);
+			folderTree.add(folderDao.findOne(id[0]));
+		}
 		
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){
@@ -168,7 +174,7 @@ public class MediaPictureQuery {
 		
 		packMediaVideoTree(medias, folderTree, pictures);
 		
-		return medias;
+		return id != null && id.length > 0 ? medias.get(0).getChildren() : medias;
 	}
 	
 	/**
@@ -203,6 +209,43 @@ public class MediaPictureQuery {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return MediaPictureVO
+	 */
+	public MediaPictureVO loadPictureCollection(Long folderId) throws Exception {
+		MediaPictureVO pictureFolder = null;
+		if (folderId != null) {
+			List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_PICTURE.toString());
+			for (FolderPO folderPO : folderTree) {
+				if (folderPO.getId() == folderId) {
+					pictureFolder = new MediaPictureVO().set(folderPO);
+					break;
+				}
+			}
+			if (pictureFolder != null) {
+				Map<String, Object> map = load(folderId);
+				List<MediaPictureVO> pictureVOs = new ArrayList<MediaPictureVO>();
+				if (map.containsKey("rows")) {
+					pictureVOs = JSONArray.parseArray(JSONObject.toJSONString(map.get("rows")), MediaPictureVO.class);
+				}
+				pictureFolder.setChildren(pictureVOs);
+			}
+		} else {
+			List<MediaPictureVO> medias = loadAll();
+			if (medias != null && !medias.isEmpty()) pictureFolder = medias.get(0);
+			List<MediaPictureVO> children = pictureFolder.getChildren();
+			for (MediaPictureVO mediaPictureVO : children) {
+				mediaPictureVO.setChildren(null);
+			}
+		}
+		return pictureFolder;
 	}
 	
 	/**

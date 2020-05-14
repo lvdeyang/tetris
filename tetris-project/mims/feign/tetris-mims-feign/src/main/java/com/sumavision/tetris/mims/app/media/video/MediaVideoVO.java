@@ -3,6 +3,8 @@ package com.sumavision.tetris.mims.app.media.video;
 import java.util.List;
 
 import com.sumavision.tetris.mims.app.media.StoreType;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorVO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionPO;
 
 public class MediaVideoVO{
 	private Long id;
@@ -46,6 +48,10 @@ public class MediaVideoVO{
 	private Boolean encryption;
 	
 	private String encryptionUrl;
+	
+	private MediaFileEditorVO editorInfo;
+	
+	private List<MediaFileEquipmentPermissionPO> deviceUpload;
 	
 	private List<MediaVideoVO> children;
 	
@@ -235,6 +241,24 @@ public class MediaVideoVO{
 
 	public MediaVideoVO setEncryptionUrl(String encryptionUrl) {
 		this.encryptionUrl = encryptionUrl;
+		return this;
+	}
+
+	public MediaFileEditorVO getEditorInfo() {
+		return editorInfo;
+	}
+
+	public MediaVideoVO setEditorInfo(MediaFileEditorVO editorInfo) {
+		this.editorInfo = editorInfo;
+		return this;
+	}
+
+	public List<MediaFileEquipmentPermissionPO> getDeviceUpload() {
+		return deviceUpload;
+	}
+
+	public MediaVideoVO setDeviceUpload(List<MediaFileEquipmentPermissionPO> deviceUpload) {
+		this.deviceUpload = deviceUpload;
 		return this;
 	}
 

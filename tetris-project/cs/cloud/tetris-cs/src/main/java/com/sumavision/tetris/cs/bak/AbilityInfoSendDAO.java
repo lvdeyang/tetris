@@ -14,6 +14,10 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 public interface AbilityInfoSendDAO extends BaseDAO<AbilityInfoSendPO>{
 	public List<AbilityInfoSendPO> findByChannelId(Long channelId);
 	
+	public List<AbilityInfoSendPO> findByPreviewId(Long previewId);
+	
+	public List<AbilityInfoSendPO> findByChannelIdAndAbilityIp(Long channelId, String abilityIp);
+	
 	@Modifying
 	@Query(value = "DELETE FROM TETRIS_CS_SEND_ABILITY_INFO WHERE channel_id = ?1", nativeQuery = true)
 	public void deleteByChannelId(Long channelId);

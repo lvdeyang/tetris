@@ -7,8 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;

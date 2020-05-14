@@ -32,6 +32,9 @@ public class MenuQuery {
 	@Autowired
 	private MenuComparator menuComparator;
 	
+	@Autowired
+	private SystemRoleMenuPermissionDAO systemRoleMenuPermissionDao;
+	
 	/**
 	 * 获取有权限的菜单<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -154,6 +157,25 @@ public class MenuQuery {
 															    .append(id)
 															    .append("/%")
 															    .toString());
+	}
+	
+	/**
+	 * 查询系统角色配置的首页<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月12日 下午3:32:25
+	 * @param Long roleId 系统角色id
+	 * @return MenuVO 菜单
+	 */
+	public MenuVO queryHomePage(Long roleId) throws Exception{
+		List<SystemRoleMenuPermissionPO> permissions = systemRoleMenuPermissionDao.findByRoleIdAndFlag(roleId.toString(), SystemRoleMenuPermissionFlag.HOME_PAGE);
+		if(permissions==null || permissions.size()<=0){
+			return null;
+		}
+		SystemRoleMenuPermissionPO permission = permissions.get(0);
+		MenuPO menu = menuDao.findOne(permission.getMenuId());
+		if(menu == null) return null;
+		return new MenuVO().set(menu);
 	}
 	
 }

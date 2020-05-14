@@ -62,6 +62,12 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 	/** 关键字， 格式：,分割*/
 	private String keyWords;
 	
+	/** 封图地址 */
+	private String thumbnail;
+	
+	/** 流类型 */
+	private String streamType;
+	
 	/** igmpv3状态 */
 	private String igmpv3Status;
 	
@@ -156,6 +162,15 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 		this.folderId = folderId;
 	}
 
+	@Column(name = "STREAM_TYPE")
+	public String getStreamType() {
+		return streamType;
+	}
+
+	public void setStreamType(String streamType) {
+		this.streamType = streamType;
+	}
+
 	@Column(name = "IGMPV3_STATUS")
 	public String getIgmpv3Status() {
 		return igmpv3Status;
@@ -192,6 +207,15 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 		this.keyWords = keyWords;
 	}
 	
+	@Column(name = "THUMBNAIL")
+	public String getThumbnail() {
+		return thumbnail;
+	}
+
+	public void setThumbnail(String thumbnail) {
+		this.thumbnail = thumbnail;
+	}
+
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "UPLOAD_STATUS")
 	public UploadStatus getUploadStatus() {
@@ -249,11 +273,13 @@ public class MediaAudioStreamPO extends AbstractBasePO{
 		copy_audioStream.setRemarks(this.getRemarks());
 		copy_audioStream.setTags(this.getTags());
 		copy_audioStream.setKeyWords(this.getKeyWords());
+		copy_audioStream.setThumbnail(this.getThumbnail());
 		copy_audioStream.setUploadStatus(this.getUploadStatus());
 		copy_audioStream.setIgmpv3Status(this.getIgmpv3Ips());
 		copy_audioStream.setIgmpv3Mode(this.getIgmpv3Mode());
 		copy_audioStream.setIgmpv3Ips(this.getIgmpv3Ips());
 		copy_audioStream.setAddition(this.getAddition());
+		copy_audioStream.setStreamType(this.getStreamType());
 		return copy_audioStream;
 	}
 	

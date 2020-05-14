@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -23,6 +24,9 @@ public class ScheduleController {
 	@Autowired
 	private ScheduleService scheduleService;
 	
+	@Autowired
+	private BroadTerminalBroadInfoService broadTerminalBroadInfoService;
+	
 	/**
 	 * 添加排期<br/>
 	 * <b>作者:</b>lzp<br/>
@@ -36,10 +40,10 @@ public class ScheduleController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(Long channelId, String broadDate, String remark, HttpServletRequest request) throws Exception{
+	public Object add(Long channelId, String broadDate, String endDate, String remark, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		return scheduleService.add(channelId, broadDate, remark);
+		return scheduleService.add(channelId, broadDate, endDate, remark);
 	}
 	
 	/**
@@ -71,10 +75,10 @@ public class ScheduleController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/edit")
-	public Object edit(Long id, String broadDate, String remark, HttpServletRequest request) throws Exception{
+	public Object edit(Long id, String broadDate, String endDate, String remark, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		
-		return scheduleService.edit(id, broadDate, remark);
+		return scheduleService.edit(id, broadDate, endDate, remark);
 	}
 	
 	/**
@@ -95,5 +99,22 @@ public class ScheduleController {
 		UserVO user = userQuery.current();
 		
 		return scheduleQuery.getByChannelId(channelId, currentPage, pageSize);
+	}
+	
+	/**
+	 * 设置排期单总停止时间(目前仅终端播发使用，用于周期播放)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月11日 上午10:25:28
+	 * @param Long channelId 频道id
+	 * @param String endDate 停止时间
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/set/total/endTime")
+	public Object setTotalEndTime(Long channelId, String endDate, HttpServletRequest request) throws Exception {
+		UserVO user = userQuery.current();
+		
+		return broadTerminalBroadInfoService.setEndDate(channelId, endDate);
 	}
 }

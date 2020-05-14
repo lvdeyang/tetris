@@ -19,6 +19,8 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	
 	private Boolean hasFile;
 	
+	private String endDate;
+	
 	private String broadWay;
 	
 	private String broadcastStatus;
@@ -38,6 +40,8 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	private String autoBroadStart;
 	
 	private String outputUserPort;
+	
+	private String outputUserEndPort;
 	
 	private List<BroadAbilityBroadInfoVO> output;
 	
@@ -135,6 +139,15 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		return this;
 	}
 
+	public String getEndDate() {
+		return endDate;
+	}
+
+	public ChannelVO setEndDate(String endDate) {
+		this.endDate = endDate;
+		return this;
+	}
+
 	public String getDate() {
 		return date;
 	}
@@ -229,8 +242,18 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		return outputUserPort;
 	}
 
-	public void setOutputUserPort(String outputUserPort) {
+	public ChannelVO setOutputUserPort(String outputUserPort) {
 		this.outputUserPort = outputUserPort;
+		return this;
+	}
+
+	public String getOutputUserEndPort() {
+		return outputUserEndPort;
+	}
+
+	public ChannelVO setOutputUserEndPort(String outputUserEndPort) {
+		this.outputUserEndPort = outputUserEndPort;
+		return this;
 	}
 
 	public List<BroadAbilityBroadInfoVO> getOutput() {

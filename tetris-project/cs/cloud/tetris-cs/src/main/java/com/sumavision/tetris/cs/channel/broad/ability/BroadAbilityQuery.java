@@ -1,5 +1,6 @@
 package com.sumavision.tetris.cs.channel.broad.ability;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +11,15 @@ import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.cs.bak.AbilityInfoSendPO;
 import com.sumavision.tetris.cs.bak.AbilityInfoSendQuery;
+import com.sumavision.tetris.cs.channel.Adapter;
 import com.sumavision.tetris.cs.channel.BroadWay;
-import com.sumavision.tetris.cs.channel.ChannelBroadStatus;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
+import com.sumavision.tetris.cs.channel.broad.ability.transcode.BroadTranscodeOutputDAO;
+import com.sumavision.tetris.cs.channel.broad.ability.transcode.BroadTranscodeOutputPO;
 import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
+import com.sumavision.tetris.easy.process.stream.transcode.OutParamVO;
+import com.sumavision.tetris.easy.process.stream.transcode.TaskVO;
 
 @Component
 public class BroadAbilityQuery {
@@ -25,7 +30,16 @@ public class BroadAbilityQuery {
 	private BroadAbilityBroadInfoService broadAbilityBroadInfoService;
 	
 	@Autowired
+	private BroadTranscodeOutputDAO broadTranscodeOutputDAO;
+	
+	@Autowired
+	private BroadAbilityRemoteDAO broadAbilityRemoteDAO;
+	
+	@Autowired
 	private ChannelDAO channelDao;
+	
+	@Autowired
+	private Adapter adapter;
 
 	/**
 	 * 根据用户id获取播发信息<br/>
@@ -166,11 +180,50 @@ public class BroadAbilityQuery {
 			request.put("duration", duration);
 		}
 		System.out.println(request.toJSONString());
-		JSONObject response = HttpRequestUtil.httpPost("http://" + ChannelBroadStatus.getBroadcastIPAndPort(BroadWay.ABILITY_BROAD), request);
-		if (response != null && response.containsKey("stat") && response.getString("stat").equals("success")) {
+		JSONObject response = HttpRequestUtil.httpPost("http://" + adapter.getServerUrl(BroadWay.ABILITY_BROAD), request);
+//		if (response != null && response.containsKey("stat") && response.getString("stat").equals("success")) {
 			return true;
-		}else {
-			throw new ChannelAbilityRequestErrorException(type.getRemark());
+//		}else {
+//			throw new ChannelAbilityRequestErrorException(type.getRemark());
+//		}
+	}
+	
+	/**
+	 * 根据频道id获取流转码参数<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月9日 下午5:19:54
+	 * @param Long channelId 频道id
+	 */
+	public TaskVO queryTaskFromChannelId(Long channelId) throws Exception {
+		//获取流转码参数
+		BroadAbilityRemotePO abilityRemotePO = broadAbilityRemoteDAO.findByChannelId(channelId);
+		if (abilityRemotePO == null) return null;
+		String streamTranscodeInfo = abilityRemotePO.getTranscodeInfo();
+		TaskVO taskVO = JSONObject.parseObject(streamTranscodeInfo, TaskVO.class);
+		List<OutParamVO> outParamVOs = taskVO.getOutParam() == null ? new ArrayList<OutParamVO>() : taskVO.getOutParam();
+		outParamVOs.addAll(queryNewOutPutFromChannelId(channelId));
+		taskVO.setOutParam(outParamVOs);
+		return taskVO;
+	}
+	
+	/**
+	 * 根据频道id获取后添加的输出<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月9日 下午5:16:36
+	 * @param Long channelId 频道id
+	 * @return List<OutParamVO> 输出数组
+	 */
+	public List<OutParamVO> queryNewOutPutFromChannelId(Long channelId) throws Exception {
+		List<BroadTranscodeOutputPO> outputPOs = broadTranscodeOutputDAO.findByChannelId(channelId);
+		List<OutParamVO> outParamVOs = new ArrayList<OutParamVO>();
+		for (BroadTranscodeOutputPO outputPO : outputPOs) {
+			OutParamVO outParamVO = new OutParamVO();
+			outParamVO.setLocalIp(outputPO.getLocalIp())
+			.setOutputUrl(outputPO.getOutputUrl());
+			outParamVOs.add(outParamVO);
 		}
+		return outParamVOs;
 	}
 }

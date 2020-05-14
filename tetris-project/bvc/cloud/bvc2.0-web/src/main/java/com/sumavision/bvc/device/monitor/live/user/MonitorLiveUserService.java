@@ -187,7 +187,7 @@ public class MonitorLiveUserService {
 		
 		logic.getPass_by().add(passby);
 		
-		resourceServiceClient.addLianwangPassby(
+		resourceServiceClient.coverLianwangPassby(
 				live.getUuid(), 
 				networkLayerId, 
 				XtBusinessPassByContentBO.CMD_XT_SEE_LOCAL_USER, 
@@ -409,7 +409,7 @@ public class MonitorLiveUserService {
 		
 		logic.getPass_by().add(passby);
 		
-		resourceServiceClient.addLianwangPassby(
+		resourceServiceClient.coverLianwangPassby(
 				live.getUuid(), 
 				networkLayerId, 
 				XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER, 

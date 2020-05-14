@@ -30,8 +30,12 @@ define([
                 dialogFormVisible: false,
                 dialogTableVisible: false,
                 name: '',
+                fontData: [],
                 form: {
                     layerType: '字幕',
+                    font: '',
+                    fontsize: 0,
+                    color: '',
                     x: 0,
                     y: 0,
                     subtitleName: '',
@@ -52,9 +56,35 @@ define([
             }
         },
         computed: {
-            
+            formLayerType:function(){
+            	return this.form.layerType;
+            }
+        },
+        watch:{
+        	formLayerType:function(val){
+        		if(val === '字幕'){
+        			this.form.font = '';
+        			this.form.fontsize = 0;
+        			this.form.color = '';
+        		}else{
+        			this.form.font = '黑体';
+        			this.form.fontsize = 5;
+        			this.form.color = '#409EFF';
+        		}
+        	}
         },
         methods: {
+        	//获取字体数据
+            getFontData: function () {
+                var self = this;
+                ajax.post('/monitor/subtitle/query/fonts', null, function (data) {
+                	if(data && data.length>0){
+                		for(var i=0; i<data.length; i++){
+                			self.fontData.push(data[i]);
+                		}
+                	}
+                });
+            },
         	//字幕管理
             subtitleOpen: function () {
                 this.qt.window('/router/zk/leader/subtitle/manage', null, {width: 1200, height: 700});
@@ -85,6 +115,13 @@ define([
                 		self.leftTotal = total;
                 	}
                 });
+            },
+            //添加字幕
+            addOsd:function(){
+            	this.dialogLeftVisible = true;
+            	this.name = '';
+            	this.btnShow = false;
+                this.editId = '';
             },
             //左侧添加提交
             leftConfirm: function () {
@@ -227,7 +264,10 @@ define([
                     osdId: self.form.osdId,
                     x: parseInt(self.form.x),
                     y: parseInt(self.form.y),
-                    layerIndex: self.rightData.length
+                    layerIndex: self.rightData.length,
+                    font: self.form.font,
+        			height: self.form.fontsize,
+        			color: self.form.color.split('#')[1]
                 }, function () {
                     self.qt.success('添加图层成功');
                     self.dialogFormVisible = false;
@@ -238,32 +278,70 @@ define([
             },
             editRightRow: function (row) {
                 this.dialogFormVisible = true;
-                this.form = {
-                    layerType: '字幕',
-                    x: row.x,
-                    y: row.y,
-                    subtitleName: row.subtitleName,
-                    subtitleId: row.subtitleId,
-                    osdId: this.form.osdId //添加的时候要传的Id
-                };
+                if(row.type === 'SUBTITLE'){
+                	this.form = {
+                        layerType: '字幕',
+                        x: row.x,
+                        y: row.y,
+                        subtitleName: row.subtitleName,
+                        subtitle:{
+                        	id:row.subtitleId,
+                        	name:row.subtitleName,
+                        	username:row.subtitleUsername
+                        },
+                        font: '',
+                        fontsize: 0,
+                        color: '',
+                        osdId: this.form.osdId //添加的时候要传的Id
+                    };
+                }else{
+                	this.form = {
+                        layerType: row.type==='DATE'?'日期':row.type==='DATETIME'?'时间':'设备名称',
+                        x: row.x,
+                        y: row.y,
+                        font: row.font,
+                        fontsize: row.height,
+                        color: '#'+row.color,
+                        osdId: this.form.osdId //添加的时候要传的Id
+                    };
+                }
                 this.rightBtnShow = true;
                 this.editRightId = row.id;
             },
             //修改图层
             rightEditConfirm: function () {
                 var self = this;
-                ajax.post('/monitor/osd/layer/edit/subtitle/layer/' + self.editRightId, {
-                    x: self.form.x,
-                    y: self.form.y,
-                    subtitleId: self.form.subtitle.id,
-                    subtitleName: self.form.subtitleName
-                }, function (data) {
-                    self.qt.success('修改图层成功');
-                    self.dialogFormVisible = false;
-                    ajax.post('/monitor/osd/layer/load', {osdId: self.form.osdId}, function (data) {
-                        self.rightData = data;
-                    })
-                })
+                var param = {
+            		x: self.form.x,
+                    y: self.form.y
+                };
+                if(self.form.layerType !== '字幕'){
+                	param.type = self.form.layerType;
+                	param.font = self.form.font;
+                	param.height = self.form.fontsize;
+                	param.color = self.form.color.split('#')[1];
+                }else{
+                	 param.subtitleId = self.form.subtitle.id;
+                     param.subtitleName = self.form.subtitle.name;
+                     param.subtitleUsername = self.form.subtitle.username;
+                }
+                if(self.form.layerType === '字幕'){
+                	ajax.post('/monitor/osd/layer/edit/subtitle/layer/' + self.editRightId, param, function (data) {
+                        self.qt.success('修改图层成功');
+                        self.dialogFormVisible = false;
+                        ajax.post('/monitor/osd/layer/load', {osdId: self.form.osdId}, function (data) {
+                            self.rightData = data;
+                        });
+                    });
+                }else{
+                	ajax.post('/monitor/osd/layer/edit/enum/layer/' + self.editRightId, param, function (data) {
+                		 self.qt.success('修改图层成功');
+                         self.dialogFormVisible = false;
+                         ajax.post('/monitor/osd/layer/load', {osdId: self.form.osdId}, function (data) {
+                             self.rightData = data;
+                         });
+                	});
+                }
             },
             //删除图层
             deleteRightRow: function (id) {
@@ -361,6 +439,7 @@ define([
 
                 });
 
+                self.getFontData();
                 self.refreshLeftData();
                 self.getLayerType();
 

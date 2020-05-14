@@ -6,21 +6,42 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.sumavision.tetris.cs.channel.BroadWay;
+import com.sumavision.tetris.cs.channel.ChannelPO;
+import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
 import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
 import com.sumavision.tetris.mims.app.media.live.MediaPushLiveQuery;
 import com.sumavision.tetris.mims.app.media.live.MediaPushLiveVO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
 
 @Component
 public class CsResourceQuery {
 	@Autowired
-	CsResourceDAO csSourceDao;
+	private CsResourceDAO csSourceDao;
 
 	@Autowired
-	MediaAVideoQuery mediaAVideoQuery;
+	private ChannelQuery channelQuery;
 	
 	@Autowired
-	MediaPushLiveQuery mediaPushLiveQuery;
+	private MediaAVideoQuery mediaAVideoQuery;
+	
+	@Autowired
+	private MediaPushLiveQuery mediaPushLiveQuery;
+	
+	@Autowired
+	private MediaPictureQuery mediaPictureQuery;
+	
+	@Autowired
+	private MediaVideoStreamQuery mediaVideoStreamQuery;
+	
+	@Autowired
+	private MediaAudioStreamQuery mediaAudioStreamQuery;
 
 	/**
 	 * 根据cs目录id获取媒资列表<br/>
@@ -90,15 +111,35 @@ public class CsResourceQuery {
 	 * @return List<MediaAVideoVO> mims媒资列表
 	 */
 	public List<MediaAVideoVO> getMIMSResources(Long id) throws Exception {
-
 		List<MediaAVideoVO> mimsVideoList = mediaAVideoQuery.loadAll();
-		
 		return mimsVideoList;
 	}
 	
-	public List<MediaPushLiveVO> getMIMSLiveResources() throws Exception {
+	public List<MediaPushLiveVO> getMIMSLiveResources(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD) return new ArrayList<MediaPushLiveVO>();
 		List<MediaPushLiveVO> mimsLiveList = mediaPushLiveQuery.loadAll();
-		
 		return mimsLiveList;
+	}
+	
+	public List<MediaPictureVO> getMIMSPictureResources(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+//		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.ABILITY_BROAD) return new ArrayList<MediaPictureVO>();
+		List<MediaPictureVO> mimsPictureList = mediaPictureQuery.loadAll();
+		return mimsPictureList;
+	}
+	
+	public List<MediaVideoStreamVO> getMIMSVideoStreamResources(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.ABILITY_BROAD) return new ArrayList<MediaVideoStreamVO>();
+		List<MediaVideoStreamVO> mimsVideoStreamList = mediaVideoStreamQuery.loadAll();
+		return mimsVideoStreamList;
+	}
+	
+	public List<MediaAudioStreamVO> getMIMSAudioStreamResources(Long channelId) throws Exception {
+		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.ABILITY_BROAD) return new ArrayList<MediaAudioStreamVO>();
+		List<MediaAudioStreamVO> mimsAudioStreamList = mediaAudioStreamQuery.loadAll();
+		return mimsAudioStreamList;
 	}
 }

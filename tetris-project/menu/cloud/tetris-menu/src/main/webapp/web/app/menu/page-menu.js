@@ -256,6 +256,22 @@ define([
                         }
                         done();
                     }, null, ajax.NO_ERROR_CATCH_CODE);
+                },
+                setHomePage:function(scope){
+                	var self = this;
+                	var row = scope.row;
+                	ajax.post('/system/role/menu/permission/set/home/page/' + row.id, null, function(data){
+                		for(var i=0; i<self.table.data.length; i++){
+                			if(self.table.data[i].id === data.id){
+                				self.table.data.splice(i, 1, data);
+                				break;
+                			}
+                		}
+                		self.$message({
+                			type:'success',
+                			message:'设置成功'
+                		});
+                	});
                 }
             },
             created:function(){

@@ -99,7 +99,7 @@
        <fight-time></fight-time>
     </div>
 </body>
-<script type="text/javascript" src="<%=basePath %>web/lib/frame/requireJS/require.js" defer async="true" data-main="<%=basePath %>web/app/zk-leader/set-fightTime/main"></script>
 <script type="text/javascript" src="qrc:///qtwebchannel/qwebchannel.js"></script>
 <script type="text/javascript" src="<%=basePath %>web/commons/qt/QtContext.js"></script>
+<script type="text/javascript" src="<%=basePath %>web/lib/frame/requireJS/require.js" defer async="true" data-main="<%=basePath %>web/app/zk-leader/set-fightTime/main"></script>
 </html>

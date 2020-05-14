@@ -150,4 +150,15 @@ public class CapacityService {
 		JsonBodyResponseParser.parseObject(capacityFeign.deleteCover(taskId), null);
 	}
 	
+	/**
+	 * 同步转换模块<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月8日 下午5:31:15
+	 * @param String deviceIp 转换模块ip
+	 */
+	public void sync(String deviceIp) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.sync(deviceIp), null);
+	}
+	
 }

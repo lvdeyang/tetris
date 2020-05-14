@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +24,7 @@ import com.sumavision.tetris.spring.eureka.application.EurekaFeign.MemoryQuery;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+
 @Controller
 @RequestMapping(value = "")
 public class WelcomeController {
@@ -34,6 +37,8 @@ public class WelcomeController {
 	
 	@Autowired
 	private MemoryQuery memoryQuery;
+	
+	private final static Logger logger = LoggerFactory.getLogger(WelcomeController.class);
 	
 	/**
 	 * 需要登录后访问<br/>

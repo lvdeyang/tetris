@@ -15,14 +15,14 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 192.165.56.84
+      ipAddress: 192.165.56.71
 #  profiles:
 #    active: pro
   datasource:
     base:
       url: jdbc:mysql://localhost:3306/user?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
-      username: sumadb
-      password: Sumavision@300079
+      username: root
+      password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver
       initial-size : 10
       min-idle : 20
@@ -81,7 +81,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.84:8081/eureka/
+      defaultZone: http://192.165.56.71:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
@@ -111,4 +111,9 @@ hystrix:
         isolation:
           thread: 
             timeoutInMilliseconds: 5000
-          strategy: SEMAPHORE   
+          strategy: SEMAPHORE  
+log:
+  home: /usr/sbin/sumavision/tetris/tetris-project/user/apache-tomcat-7.0.93/logs
+  maxFileSize: 30MB
+  maxHistory: 10
+  totalSizeCap: 1GB          

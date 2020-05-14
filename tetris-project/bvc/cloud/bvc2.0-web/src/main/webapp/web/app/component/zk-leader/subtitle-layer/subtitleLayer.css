@@ -182,7 +182,6 @@ body{
     color: #e6eeff;
 }
 
-
 /*重置表格滚动条的样式*/
 ::-webkit-scrollbar {
     width: 4px;
@@ -206,3 +205,5 @@ body{
 .el-select-dropdown__item{
     color: #b3b3b3;
 }
+
+.el-input.is-disabled .el-input__inner{color:#444;}

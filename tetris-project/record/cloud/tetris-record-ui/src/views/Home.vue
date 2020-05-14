@@ -3,7 +3,8 @@
     <el-container style="width:100%; height:100%">
       <el-aside width="auto; height:100%;">
         <el-scrollbar style="height:100%;">
-          <el-menu :default-active="active" class="aside-menu" :collapse="isCollapsed">
+          <!--<el-menu :default-active="active" class="aside-menu" :collapse="isCollapsed">-->
+          <el-menu :default-active="$route.path" class="aside-menu" :collapse="isCollapsed">
             <div class="platform-logo-wrapper">
               <div class="platform-logo">
                 <img :src="logo.logoUrl" :style="logo.logoStyle" />
@@ -106,23 +107,17 @@
 
         <div class="frame-body">
           <div class="frame-body-wrapper">
-            <!--<mi-sub-title>
-                        <template slot="title"><slot name="title"></slot></template>
-                        <template slot="links">
-                            <slot name="links"></slot>
-                        </template>
-            </mi-sub-title>-->
-            <div class="sub-title">
-              <template slot="title">
-                <slot name="title"></slot>
-              </template>
-              <!--
-                      <div class="breadcrumb">
-                          <el-breadcrumb>
-                              <slot name="links"></slot>
-                          </el-breadcrumb>
-              </div>-->
-            </div>
+            <template>
+              <div class="sub-title">
+                  <h3>{{titleName}}</h3>
+                  <div class="breadcrumb">
+                  <el-breadcrumb separator="/">
+                    <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+                    <el-breadcrumb-item>{{titleName}}</el-breadcrumb-item>
+                  </el-breadcrumb>
+                </div>
+              </div>
+            </template>
 
             <div class="content-wrapper">
               <div class="content">
@@ -212,6 +207,11 @@ import router from '../router'
 import { logoutAction } from '../api/api'
 
 export default {
+  watch: {
+    // 如果路由有变化，会再次执行该方法
+    '$route': 'handleRouterChange'
+  },
+
   computed: {
     menus () {
       return global.antRouter
@@ -252,6 +252,7 @@ export default {
       userGroupShow: false,
       active: '0',
       thismenu: '',
+      titleName: '',
       footer: {
         company: {
           // name:'数码视讯科技股份有限公司',
@@ -548,6 +549,10 @@ export default {
           }
         }
       }
+    },
+
+    handleRouterChange: function () {
+      this.titleName = this.$route.meta.title
     }
   },
 
@@ -583,12 +588,12 @@ export default {
   },
 
   mounted () {
-    // console.log('mounted!')
-    // console.log('home, menus= ' + global.antRouter)
+    this.titleName = this.$route.meta.title
   }
 }
 </script>
 
 <style>
 @import "../styles/css/frame/frame.css";
+
 </style>

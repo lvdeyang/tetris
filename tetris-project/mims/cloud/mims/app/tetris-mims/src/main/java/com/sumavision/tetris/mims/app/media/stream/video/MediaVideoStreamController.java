@@ -21,6 +21,7 @@ import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
+import com.sumavision.tetris.mims.app.media.stream.MediaStreamType;
 import com.sumavision.tetris.mims.app.media.stream.video.exception.MediaVideoStreamNotExistException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -90,7 +91,10 @@ public class MediaVideoStreamController {
             String tags,
             String keyWords,
             String remark,
-			Long folderId, 
+			Long folderId,
+			String streamType,
+			String thumbnail,
+			String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -105,7 +109,7 @@ public class MediaVideoStreamController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if(tags != null){
+		if(tags!=null && !tags.isEmpty()){
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
@@ -115,8 +119,11 @@ public class MediaVideoStreamController {
 		}
 		
 		List<String> previewUrls = JSON.parseArray(previewUrl, String.class);
-		MediaVideoStreamPO mediaVideoStreamPO = mediaVideoStreamService.addTask(user, name, tagList, keyWordList, remark, previewUrls, folder);
-		return new MediaVideoStreamVO().set(mediaVideoStreamPO).setPreviewUrl(previewUrls);
+		MediaVideoStreamPO entity = mediaVideoStreamService.addTask(user, name, tagList, keyWordList, remark, previewUrls, folder, streamType);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if (addition != null) entity.setAddition(addition);
+		mediaVideoStreamDao.save(entity);
+		return new MediaVideoStreamVO().set(entity).setPreviewUrl(previewUrls);
 	}
 	
 	/**
@@ -142,6 +149,9 @@ public class MediaVideoStreamController {
             String tags,
             String keyWords,
             String remark,
+            String streamType,
+            String thumbnail,
+            String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -156,8 +166,17 @@ public class MediaVideoStreamController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		return mediaVideoStreamService.editTask(user, id, name, tagList, keyWordList, remark, JSON.parseArray(previewUrl, String.class));
-		
+		return mediaVideoStreamService.editTask(
+				user,
+				id,
+				name,
+				tagList,
+				keyWordList,
+				remark,
+				JSON.parseArray(previewUrl, String.class),
+				streamType,
+				thumbnail,
+				addition);
 	}
 	
 	/**
@@ -285,6 +304,20 @@ public class MediaVideoStreamController {
 																		 .put("copied", copiedMedia)
 																		 .getMap();
 		return result;
+	}
+	
+	/**
+	 * 获取流类型数组<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月4日 上午11:51:57
+	 * @return List<String> 流类型
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/list/stream/type")
+	public Object getStreamType(HttpServletRequest request) throws Exception {
+		return MediaStreamType.queryAllType();
 	}
 	
 }

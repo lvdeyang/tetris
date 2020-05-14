@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.picture;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -7,6 +8,8 @@ import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.media.StoreType;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionPO;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -24,6 +27,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	
 	private String remarks;
 	
+	private StoreType storeType;
+	
 	private List<String> tags;
 	
 	private List<String> keyWords;
@@ -31,6 +36,10 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	private String type;
 	
 	private String resourceType;
+	
+	private String uploadTmpPath;
+	
+	private String fileName;
 	
 	private boolean removeable;
 	
@@ -49,6 +58,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	private String processInstanceId;
 	
 	private String addition;
+	
+	private List<MediaFileEquipmentPermissionPO> deviceUpload;
 	
 	private List<MediaPictureVO> children;
 	
@@ -106,6 +117,15 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return this;
 	}
 
+	public StoreType getStoreType() {
+		return storeType;
+	}
+
+	public MediaPictureVO setStoreType(StoreType storeType) {
+		this.storeType = storeType;
+		return this;
+	}
+
 	public List<String> getTags() {
 		return tags;
 	}
@@ -139,6 +159,24 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 
 	public MediaPictureVO setResourceType(String resourceType) {
 		this.resourceType = resourceType;
+		return this;
+	}
+
+	public String getUploadTmpPath() {
+		return uploadTmpPath;
+	}
+
+	public MediaPictureVO setUploadTmpPath(String uploadTmpPath) {
+		this.uploadTmpPath = uploadTmpPath;
+		return this;
+	}
+
+	public String getFileName() {
+		return fileName;
+	}
+
+	public MediaPictureVO setFileName(String fileName) {
+		this.fileName = fileName;
 		return this;
 	}
 
@@ -232,6 +270,15 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return this;
 	}
 
+	public List<MediaFileEquipmentPermissionPO> getDeviceUpload() {
+		return deviceUpload;
+	}
+
+	public MediaPictureVO setDeviceUpload(List<MediaFileEquipmentPermissionPO> deviceUpload) {
+		this.deviceUpload = deviceUpload;
+		return this;
+	}
+
 	@Override
 	public MediaPictureVO set(MediaPicturePO entity) throws Exception {
 		ServerProps props = SpringContext.getBean(ServerProps.class);
@@ -249,12 +296,15 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setIcon(MediaPictureItemType.PICTURE.getIcon())
 			.setStyle(MediaPictureItemType.PICTURE.getStyle()[0])
 			.setMimetype(entity.getMimetype())
+			.setStoreType(entity.getStoreType())
 			.setProgress(0)
 			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId())
-			.setAddition(entity.getAddition());
-		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaPicturePO.SEPARATOR_TAG)));
+			.setUploadTmpPath(entity.getUploadTmpPath())
+			.setFileName(entity.getFileName())
+			.setAddition(entity.getAddition())
+			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaPicturePO.SEPARATOR_TAG)) : new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaPicturePO.SEPARATOR_KEYWORDS)));	 
 		return this;
 	}

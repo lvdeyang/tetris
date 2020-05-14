@@ -24,6 +24,9 @@ public class ProgramPO extends AbstractBasePO {
 	/** 分屏数 */
 	private Long screenNum;
 	
+	/** 屏幕方向 */
+	private String orient;
+	
 	@Column(name="SCHEDULE_ID")
 	public Long getScheduleId() {
 		return scheduleId;
@@ -49,6 +52,15 @@ public class ProgramPO extends AbstractBasePO {
 
 	public void setScreenNum(Long screenNum) {
 		this.screenNum = screenNum;
+	}
+
+	@Column(name = "ORIENT")
+	public String getOrient() {
+		return orient;
+	}
+
+	public void setOrient(String orient) {
+		this.orient = orient;
 	}
 
 }

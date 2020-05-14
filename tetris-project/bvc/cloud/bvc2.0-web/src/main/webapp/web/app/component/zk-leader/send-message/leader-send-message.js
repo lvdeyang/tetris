@@ -49,7 +49,7 @@ define([
                     messageList:{
                         visible:false,
                         page:{
-                            pageSize:50,
+                            pageSize:10,
                             total:0,
                             currentPage:0
                         },
@@ -63,7 +63,7 @@ define([
                     styleTemplates:{
                         visible:false,
                         page:{
-                            pageSize:50,
+                            pageSize:10,
                             total:0,
                             currentPage:0
                         },
@@ -105,11 +105,11 @@ define([
             handleSendMessage:function(){
                 var self = this;
                 if(self.tree.select.length <= 0){
-                    self.qt.error('消息提示', '您还没有选择发送对象');
+                    self.qt.error('您还没有选择发送对象');
                     return;
                 }
                 if(!self.message.content){
-                    self.qt.warning('消息提示', '您还没有输入通知内容');
+                    self.qt.warning('您还没有输入通知内容');
                     return;
                 }
                 var members = [];

@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.alarm.clientservice.http.AlarmFeignClientService;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -33,6 +35,9 @@ public class ChannelController {
 	
 	@Autowired
 	private UserQuery userQuery;
+	
+	@Autowired
+	private AlarmFeignClientService alarmFeignClientService;
 
 	/**
 	 * 分页获取频道列表<br/>
@@ -72,6 +77,7 @@ public class ChannelController {
 			String broadWay,
 			String outputUsers,
 			String outputUserPort,
+			String outputUserEndPort,
 			String output,
 			String remark,
 			String level,
@@ -88,12 +94,45 @@ public class ChannelController {
 		
 		List<UserVO> outputUserList = new ArrayList<UserVO>();
 		if (outputUsers != null) outputUserList = JSONArray.parseArray(outputUsers, UserVO.class);
+		
+		SetOutputBO outputBO = new SetOutputBO()
+				.setOutput(abilityBroadInfoVOs)
+				.setOutputUserPort(outputUserPort)
+				.setOutputUserEndPort(outputUserEndPort)
+				.setOutputUsers(outputUserList);
+		
+		SetAutoBroadBO autoBroadBO = new SetAutoBroadBO()
+				.setAutoBroad(autoBroad)
+				.setAutoBroadShuffle(autoBroadShuffle)
+				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadStart(autoBroadStart);
+		
+		SetTerminalBroadBO terminalBroadBO = new SetTerminalBroadBO()
+				.setHasFile(hasFile)
+				.setLevel(level);
 
-		ChannelPO channel = channelService.add(name, date, broadWay, remark, level, hasFile, ChannelType.LOCAL, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
+		ChannelPO channel = channelService.add(
+				name,
+				date,
+				broadWay,
+				remark,
+				terminalBroadBO,
+				ChannelType.LOCAL,
+				encryption,
+				autoBroadBO,
+				outputBO);
 		
 		if (!BroadWay.fromName(broadWay).equals(BroadWay.TERMINAL_BROAD) && autoBroad) channelService.autoAddSchedulesAndBroad(channel.getId());
 
-		return new ChannelVO().set(channel).setOutput(abilityBroadInfoVOs).setOutputUsers(outputUserList).setAutoBroadDuration(autoBroadDuration).setAutoBroadStart(autoBroadStart).setLevel(level).setHasFile(hasFile);
+		return new ChannelVO().set(channel)
+				.setOutput(abilityBroadInfoVOs)
+				.setOutputUsers(outputUserList)
+				.setOutputUserPort(outputUserPort)
+				.setOutputUserEndPort(outputUserEndPort)
+				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadStart(autoBroadStart)
+				.setLevel(level)
+				.setHasFile(hasFile);
 	}
 
 	/**
@@ -117,6 +156,7 @@ public class ChannelController {
 			String name,
 			String outputUsers,
 			String outputUserPort,
+			String outputUserEndPort,
 			String output,
 			String remark,
 			String level,
@@ -134,14 +174,45 @@ public class ChannelController {
 		if (outputUsers != null) {
 			outputUserList = JSONArray.parseArray(outputUsers, UserVO.class);
 		}
+		
+		SetOutputBO outputBO = new SetOutputBO()
+				.setOutput(abilityBroadInfoVOs)
+				.setOutputUserPort(outputUserPort)
+				.setOutputUserEndPort(outputUserEndPort)
+				.setOutputUsers(outputUserList);
+		
+		SetAutoBroadBO autoBroadBO = new SetAutoBroadBO()
+				.setAutoBroad(autoBroad)
+				.setAutoBroadShuffle(autoBroadShuffle)
+				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadStart(autoBroadStart);
+		
+		SetTerminalBroadBO terminalBroadBO = new SetTerminalBroadBO()
+				.setHasFile(hasFile)
+				.setLevel(level);
 
-		ChannelPO channel = channelService.edit(id, name, remark, level, hasFile, encryption, autoBroad, autoBroadShuffle, autoBroadDuration, autoBroadStart, outputUserPort, outputUserList, abilityBroadInfoVOs);
+		ChannelPO channel = channelService.edit(
+				id,
+				name,
+				remark,
+				terminalBroadBO,
+				encryption,
+				autoBroadBO,
+				outputBO);
 		
 		if (BroadWay.fromName(channel.getBroadWay()) != BroadWay.TERMINAL_BROAD && autoBroad) {
 			channelService.autoAddSchedulesAndBroad(channel.getId());
 		}
 
-		return new ChannelVO().set(channel);
+		return new ChannelVO().set(channel)
+				.setOutput(abilityBroadInfoVOs)
+				.setOutputUsers(outputUserList)
+				.setOutputUserPort(outputUserPort)
+				.setOutputUserEndPort(outputUserEndPort)
+				.setAutoBroadDuration(autoBroadDuration)
+				.setAutoBroadStart(autoBroadStart)
+				.setLevel(level)
+				.setHasFile(hasFile);
 	}
 
 	/**
@@ -315,5 +386,18 @@ public class ChannelController {
 	@RequestMapping(value = "/template")
 	public Object questTemplate(Long channelId, Long scheduleId, HttpServletRequest request) throws Exception {
 		return channelQuery.getTemplate(channelId, scheduleId);
+	}
+	
+	/**
+	 * 获取系统时间<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月9日 上午10:08:40
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/time")
+	public Object getTime(HttpServletRequest request) throws Exception {
+		return DateUtil.now();
 	}
 }

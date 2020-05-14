@@ -30,6 +30,14 @@ import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
+import com.sumavision.tetris.cs.channel.SetTerminalBroadBO;
+import com.sumavision.tetris.cs.channel.broad.terminal.requestBO.RequestServerBO;
+import com.sumavision.tetris.cs.channel.broad.terminal.requestBO.RequestTerminalBO;
+import com.sumavision.tetris.cs.channel.broad.terminal.requestBO.RequestTerminalDirBO;
+import com.sumavision.tetris.cs.channel.broad.terminal.requestBO.RequestTerminalScheduleBO;
+import com.sumavision.tetris.cs.channel.broad.terminal.requestBO.RequestTerminalScheduleScreenBO;
+import com.sumavision.tetris.cs.channel.broad.terminal.requestBO.RequestTerminalScheduleScreenProgramBO;
+import com.sumavision.tetris.cs.channel.exception.ChannelAlreadyBroadException;
 import com.sumavision.tetris.cs.channel.exception.ChannelAlreadyStopException;
 import com.sumavision.tetris.cs.channel.exception.ChannelTerminalNoneAreaException;
 import com.sumavision.tetris.cs.channel.exception.ChannelTerminalRequestErrorException;
@@ -39,6 +47,7 @@ import com.sumavision.tetris.cs.menu.CsResourceQuery;
 import com.sumavision.tetris.cs.menu.CsResourceVO;
 import com.sumavision.tetris.cs.program.ProgramQuery;
 import com.sumavision.tetris.cs.program.ProgramVO;
+import com.sumavision.tetris.cs.program.ScreenContentType;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.ScheduleQuery;
 import com.sumavision.tetris.cs.schedule.ScheduleVO;
@@ -129,8 +138,7 @@ public class BroadTerminalService {
 			String name,
 			String date,
 			String remark,
-			String level,
-			Boolean hasFile,
+			SetTerminalBroadBO terminalBroadBO,
 			ChannelType type,
 			Boolean encryption,
 			Boolean autoBroad) throws Exception {
@@ -139,7 +147,7 @@ public class BroadTerminalService {
 		channel.setRemark(remark);
 		channel.setDate(date);
 		channel.setBroadWay(BroadWay.TERMINAL_BROAD.getName());
-		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT);
+		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT.getName());
 		channel.setGroupId(user.getGroupId());
 		channel.setUpdateTime(new Date());
 		channel.setEncryption(encryption);
@@ -148,7 +156,7 @@ public class BroadTerminalService {
 
 		channelDAO.save(channel);
 		
-		broadTerminalBroadInfoService.saveInfo(channel.getId(), level, hasFile);
+		broadTerminalBroadInfoService.saveInfo(channel.getId(), terminalBroadBO);
 		
 		return channel;
 	}
@@ -163,6 +171,7 @@ public class BroadTerminalService {
 	 */
 	public JSONObject startTerminalBroadcast(Long channelId, String resourceIds) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus())) throw new ChannelAlreadyBroadException(channel.getName());
 		
 		//是否携带文件播发
 		BroadTerminalBroadInfoPO broadInfoVO = broadTerminalBroadInfoQuery.findByChannelId(channelId);
@@ -176,20 +185,26 @@ public class BroadTerminalService {
 		if (areaVOs == null || areaVOs.size() <= 0) throw new ChannelTerminalNoneAreaException();
 		
 		//初始化播发协议
-		JSONObject broadJsonObject = new JSONObject();
-//		String broadIdString = channelId.toString() + newVersion.split("v")[1];
 		String broadIdString = new StringBufferWrapper().append(channelId)
 				.append(DateUtil.format(new Date(), DateUtil.currentDateTimePattern))
 				.toString();
-		broadJsonObject.put("hasfile", hasFile ? 1 : 0);
-		broadJsonObject.put("level", BroadTerminalLevelType.fromName(broadInfoVO.getLevel()).getLevel());
-		broadJsonObject.put("id", broadIdString);
-		broadJsonObject.put("regionList", areaVOs);
+		RequestServerBO requestServerBO = new RequestServerBO()
+				.setHasFile(hasFile ? 1 : 0)
+				.setLevel(BroadTerminalLevelType.fromName(broadInfoVO.getLevel()).getLevel())
+				.setId(broadIdString)
+				.setRegionList(areaVOs)
+				.setFileType("0");
+		
+//		JSONObject broadJsonObject = new JSONObject();
+//		broadJsonObject.put("hasfile", hasFile ? 1 : 0);
+//		broadJsonObject.put("level", BroadTerminalLevelType.fromName(broadInfoVO.getLevel()).getLevel());
+//		broadJsonObject.put("id", broadIdString);
+//		broadJsonObject.put("regionList", areaVOs);
+//		broadJsonObject.put("fileType", "0");
 		
 		//获取排期单
 		List<ScheduleVO> schedules = scheduleQuery.getByChannelId(channelId);
 		if (schedules == null || schedules.isEmpty()) throw new ScheduleNoneToBroadException(channel.getName());
-		Long scheduleId = schedules.get(0).getId();
 		
 		MediaCompressVO mediaCompressVO = null;
 		String filePath = "";
@@ -214,21 +229,41 @@ public class BroadTerminalService {
 //				resourceMap.put(previewUrl[previewUrl.length - 1], item);
 //			}
 			// 生成json字符串
-			JSONObject textJson = new JSONObject();
-			String effectTime = "null";
+//			JSONObject textJson = new JSONObject();
+//			String effectTime = "null";
 
-			textJson.put("fileSize", "");
-			textJson.put("version", newVersion);
-			textJson.put("effectTime", effectTime);
-			textJson.put("dir", this.getMenuAndResourcePath(channelId));
-//			textJson.put("files", this.getFilesPath(addResourceList));
-			textJson.put("screens", this.programText(programQuery.getProgram(scheduleId)));
-
+//			textJson.put("fileSize", "");
+//			textJson.put("version", newVersion);
+//			textJson.put("dir", this.getMenuAndResourcePath(channelId));
+////			textJson.put("files", this.getFilesPath(addResourceList));
+//			Long scheduleId = schedules.get(0).getId();
+//			ProgramVO programVO = programQuery.getProgram(scheduleId);
+//			textJson.put("screens", this.programText(programVO));
+//			textJson.put("screensOrient", programVO.getOrient() == null || programVO.getOrient().isEmpty() ? "horizontal" : programVO.getOrient());
+			RequestTerminalBO terminalScheduleBO = new RequestTerminalBO()
+					.setFileSize("")
+					.setVersion(newVersion)
+					.setDir(this.getMenuAndResourcePathToBO(channelId));
+			List<RequestTerminalScheduleBO> scheduleBOs = new ArrayList<RequestTerminalScheduleBO>();
+			for (ScheduleVO schedule : schedules) {
+				RequestTerminalScheduleBO scheduleBO = new RequestTerminalScheduleBO()
+						.setEffectTime(schedule.getBroadDate())
+						.setEndTime(schedule.getEndDate());
+				Long scheduleId = schedule.getId();
+				ProgramVO programVO = programQuery.getProgram(scheduleId);
+				if (programVO == null) continue;
+				scheduleBO.setScreensOrient(programVO.getOrient() == null || programVO.getOrient().isEmpty() ? "horizontal" : programVO.getOrient());
+				scheduleBO.setScreens(programTextToBO(programVO));
+				scheduleBOs.add(scheduleBO);
+			}
+			terminalScheduleBO.setSchedules(scheduleBOs);
+					
 			// 打包
 			Date currentTime = new Date();
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
 			String dateString = formatter.format(currentTime);
-			textJson.put("file", dateString + ".tar");
+//			textJson.put("file", dateString + ".tar");
+			terminalScheduleBO.setFile(dateString + ".tar");
 
 			List<String> mimsUuidList = new ArrayList<String>();
 			for (CsResourceVO item : addResourceList) {
@@ -242,10 +277,11 @@ public class BroadTerminalService {
 				}
 			}
 			
-			mediaCompressVO = mediaCompressService.packageTar(textJson.toString(), fileCompressVOs);
+//			mediaCompressVO = mediaCompressService.packageTar(textJson.toString(), fileCompressVOs);
+			mediaCompressVO = mediaCompressService.packageTar(JSONObject.toJSONString(terminalScheduleBO), fileCompressVOs);
 			
 			filePath = "";
-			if (ChannelBroadStatus.getBroadcastIfLocal()) {
+			if (adapter.getBroadcastIfLocal()) {
 				filePath = mediaCompressVO.getUploadTmpPath();
 			}else {
 				String previewUrl = mediaCompressVO.getPreviewUrl();
@@ -261,73 +297,48 @@ public class BroadTerminalService {
 				}
 				filePath = newPreviewUrl.toString();
 			}
-			
-			broadJsonObject.put("filePath", filePath);
-			broadJsonObject.put("fileSize", mediaCompressVO.getSize());
+			requestServerBO.setFilePath(filePath).setFileSize(mediaCompressVO.getSize());
+//			broadJsonObject.put("filePath", filePath);
+//			broadJsonObject.put("fileSize", mediaCompressVO.getSize());
 			
 //			Map<String, String> zonePath = versionSendQuery.getZonePath(channel);
 //			zoneStorePath = zonePath.get("zoneStorePath");
 //			zoneDownloadPath = zonePath.get("zoneDownloadUrl");
 		} else {
-			broadJsonObject.put("filePath", "");
-			broadJsonObject.put("fileSize", "");
+			Long scheduleId = schedules.get(0).getId();
+//			broadJsonObject.put("filePath", "");
+//			broadJsonObject.put("fileSize", "");
 			ScreenVO screen = liveScreen(programQuery.getProgram(scheduleId));
-			broadJsonObject.put("freq", screen.getFreq());
-			broadJsonObject.put("audioPid", screen.getAudioPid());
-			broadJsonObject.put("videoPid", screen.getVideoPid());
+//			broadJsonObject.put("freq", screen.getFreq());
+//			broadJsonObject.put("audioPid", screen.getAudioPid());
+//			broadJsonObject.put("videoPid", screen.getVideoPid());
+			requestServerBO.setFilePath("")
+			.setFileSize("")
+			.setFreq(screen.getFreq())
+			.setAudioPid(screen.getAudioPid())
+			.setVideoPid(screen.getVideoPid());
 		}
 
-		JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.START_SEND_FILE.getUrl(), broadJsonObject);
-
-		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
-			// 播发成功处理
-			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING);
-			channelDAO.save(channel);
-
-			// 备份播发媒资全量
-			resourceSendQuery.getAddResource(channelId, true);
-
-			// 备份播发地区
-			areaSendQuery.saveArea(channelId);
-
-			// 保存播发版本
-			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath, hasFile ? VersionSendType.BROAD_FILE : VersionSendType.BROAD_LIVE, zoneStorePath, zoneDownloadPath);
+//		JSONObject response = HttpRequestUtil.httpJsonPost(adapter.getTerminalUrl(BroadTerminalQueryType.START_SEND_FILE), JSONObject.toJSONString(requestServerBO));
+//
+//		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+//			// 播发成功处理
+//			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName());
+//			channelDAO.save(channel);
+//
+//			// 备份播发媒资全量
+//			resourceSendQuery.getAddResource(channelId, true);
+//
+//			// 备份播发地区
+//			areaSendQuery.saveArea(channelId);
+//
+//			// 保存播发版本
+//			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath, hasFile ? VersionSendType.BROAD_FILE : VersionSendType.BROAD_LIVE, zoneStorePath, zoneDownloadPath, null);
 
 			return getReturnJSON(true, "");
-		} else {
-			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.START_SEND_FILE.getAction(), response.getString("message"));
-		}
-	}
-	
-	public JSONObject getNewBroadJSON(Long channelId) throws Exception {
-		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		JSONObject textJson = new JSONObject();
-		String newVersion = versionSendQuery.getNewVersion(versionSendQuery.getLastVersion(channelId));
-		String effectTime = "null";
-
-		textJson.put("file", "");
-		textJson.put("fileSize", "");
-		textJson.put("version", newVersion);
-		textJson.put("effectTime", effectTime);
-		textJson.put("dir", this.getMenuAndResourcePath(channelId));
-		
-		List<ScheduleVO> schedules = scheduleQuery.getByChannelId(channelId);
-		if (schedules == null || schedules.isEmpty()) throw new ScheduleNoneToBroadException(channel.getName());
-		Long scheduleId = schedules.get(0).getId();
-		textJson.put("screens", this.programText(programQuery.getProgram(scheduleId)));
-		
-		return textJson;
-	}
-	
-	public void saveBroadInfo(Long channelId, String newVersion) throws Exception {
-		// 备份播发媒资全量
-		resourceSendQuery.getAddResource(channelId, true);
-
-		// 备份播发地区
-		areaSendQuery.saveArea(channelId);
-
-		// 保存播发版本
-		versionSendQuery.addVersion(channelId, newVersion, channelId.toString() + newVersion.split("v")[1], null, null, VersionSendType.BROAD_FILE, "", "s");
+//		} else {
+//			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.START_SEND_FILE.getAction(), response != null ? response.getString("message") : "");
+//		}
 	}
 	
 	/**
@@ -348,11 +359,11 @@ public class BroadTerminalService {
 		broadJsonObject.put("fileSize", versionSendPO.getFileSize());
 		broadJsonObject.put("regionList", areaSendQuery.getAreaIdList(channelId));
 
-		JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.RESTART_SEND_FILE.getUrl(), broadJsonObject);
+		JSONObject response = HttpRequestUtil.httpPost(adapter.getTerminalUrl(BroadTerminalQueryType.RESTART_SEND_FILE), broadJsonObject);
 		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
 			return getReturnJSON(true, "");
 		} else {
-			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.RESTART_SEND_FILE.getAction(), response.getString("message"));
+			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.RESTART_SEND_FILE.getAction(), response != null ? response.getString("message") : "");
 		}
 	}
 	
@@ -404,7 +415,7 @@ public class BroadTerminalService {
 
 		broadJsonObject.put("id", broadIdString);
 		String filePath = "";
-		if (ChannelBroadStatus.getBroadcastIfLocal()) {
+		if (adapter.getBroadcastIfLocal()) {
 			filePath = mediaCompressVO.getUploadTmpPath();
 		}else {
 			filePath = mediaCompressVO.getPreviewUrl();
@@ -413,13 +424,13 @@ public class BroadTerminalService {
 		broadJsonObject.put("fileSize", mediaCompressVO.getSize());
 		broadJsonObject.put("regionList", areaVOs);
 
-		JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.START_SEND_FILE.getUrl(), broadJsonObject);
+		JSONObject response = HttpRequestUtil.httpPost(adapter.getTerminalUrl(BroadTerminalQueryType.START_SEND_FILE), broadJsonObject);
 
 		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
 			// 保存播发版本
 			versionSendQuery.addUpdateVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath);
 		} else {
-			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.START_SEND_FILE.getAction(), response.getString("message"));
+			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.START_SEND_FILE.getAction(), response != null ? response.getString("message") : "");
 		}
 	}
 	
@@ -439,17 +450,17 @@ public class BroadTerminalService {
 		}
 		String versionSendNum = versionSendQuery.getLastBroadId(channelId);
 		if (!versionSendNum.isEmpty()
-				&& broadTerminalQuery.getChannelBroadstatus(channelId).equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+				&& broadTerminalQuery.getChannelBroadstatus(channelId).equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName())) {
 			JSONObject jsonParam = new JSONObject();
 			List<String> ids = new ArrayList<String>();
 			ids.add(versionSendNum);
 			jsonParam.put("ids", ids);
 			jsonParam.put("stopFlag", false);
-			JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.STOP_SEND_FILE.getUrl(), jsonParam);
+			JSONObject response = HttpRequestUtil.httpPost(adapter.getTerminalUrl(BroadTerminalQueryType.STOP_SEND_FILE), jsonParam);
 			if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
 				return getReturnJSON(true, "");
 			} else {
-				throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.STOP_SEND_FILE.getAction(), response.getString("message"));
+				throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.STOP_SEND_FILE.getAction(), response != null ? response.getString("message") : "");
 			}
 		} else {
 			throw new ChannelAlreadyStopException(channelQuery.findByChannelId(channelId).getName());
@@ -470,7 +481,7 @@ public class BroadTerminalService {
 		jsonParam.put("port", port);
 //		JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.RESET_ZONE_URL.getUrl(), jsonParam);
 //		if (response == null || !response.containsKey("result") || !response.getString("result").equals("1")) {
-//			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.RESET_ZONE_URL.getAction(), response.getString("message"));
+//			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.RESET_ZONE_URL.getAction(), response != null ? response.getString("message") : "");
 //		}
 	}
 	
@@ -482,7 +493,7 @@ public class BroadTerminalService {
 	}
 	
 	/**
-	 * 播发时媒资排表字段内容(终端文件播发)<br/>
+	 * 播发时媒资排表字段内容(终端文件播发，单个排期的节目列表)<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月25日 上午11:06:57
@@ -491,28 +502,52 @@ public class BroadTerminalService {
 	private List<JSONObject> programText(ProgramVO program) throws Exception {
 		List<JSONObject> returnList = new ArrayList<JSONObject>();
 		if (program != null) {
-			JSONObject useTemplate = adapter.screenTemplate(program.getScreenNum());
+			//获取分屏模板信息
+			JSONObject useTemplate = adapter.screenTemplate(program.getScreenId());
 			if (useTemplate == null) return null;
+			
+			//遍历每一个分屏(i直接标识分屏序号)
 			for (int i = 1; i <= program.getScreenNum(); i++) {
 				JSONObject returnItem = adapter.serial(useTemplate, i);
 				List<JSONObject> scheduleList = new ArrayList<JSONObject>();
 				if (program.getScreenInfo() != null && program.getScreenInfo().size() > 0) {
+					
+					//遍历所有分屏节目列表把节目对应到分屏下
 					for (ScreenVO item : program.getScreenInfo()) {
 						if (item.getSerialNum() != i)
 							continue;
 						JSONObject schedule = new JSONObject();
-						CsResourceVO resource = csResourceQuery.queryResourceById(item.getResourceId());
-						if (resource.getType().equals("PUSH_LIVE")) {
-							schedule.put("freq", resource.getFreq());
-							schedule.put("audioPid", resource.getAudioPid());
-							schedule.put("videoPid", resource.getVideoPid());
-						} else {
-							String[] previewUrlSplit = resource.getPreviewUrl().split("/");
-							schedule.put("fileName", resource.getParentPath() + "/" + previewUrlSplit[previewUrlSplit.length - 1]);
+						
+						//区分节目内容类型
+						String contentType = item.getContentType();
+						if (contentType == null
+								|| contentType.isEmpty()
+								|| ScreenContentType.fromName(contentType).getType().equals("mims")) {
+							CsResourceVO resource = csResourceQuery.queryResourceById(item.getResourceId());
+							if (resource.getType().equals("PUSH_LIVE")) {
+								schedule.put("freq", resource.getFreq());
+								schedule.put("audioPid", resource.getAudioPid());
+								schedule.put("videoPid", resource.getVideoPid());
+								schedule.put("audioType", resource.getAudioType());
+								schedule.put("videoType", resource.getVideoType());
+							} else {
+								String[] previewUrlSplit = resource.getPreviewUrl().split("/");
+								schedule.put("fileName", resource.getParentPath() + "/" + previewUrlSplit[previewUrlSplit.length - 1]);
+							}
+							schedule.put("index", item.getIndex());
+							scheduleList.add(schedule);
+						} else if (ScreenContentType.fromName(contentType) == ScreenContentType.TEXT){
+							schedule.put("index", item.getIndex());
+							schedule.put("textContent", item.getTextContent());
+							scheduleList.add(schedule);
 						}
-						schedule.put("index", item.getIndex());
-						scheduleList.add(schedule);
+						if (!returnItem.containsKey("contentType") && contentType != null && !contentType.isEmpty()) {
+							returnItem.put("contentType", ScreenContentType.fromName(contentType).getType());
+						}
 					}
+				}
+				if (!returnItem.containsKey("contentType")) {
+					returnItem.put("contentType", ScreenContentType.TERMINAL_MIMS.getType());
 				}
 				returnItem.put("schedule", scheduleList);
 				returnList.add(returnItem);
@@ -600,6 +635,119 @@ public class BroadTerminalService {
 				String[] previewUrl = item.getPreviewUrl().split("/");
 				resource.put("path", item.getParentPath() + "/" + previewUrl[previewUrl.length - 1]);
 				resource.put("type", "file");
+				returnObject.add(resource);
+			}
+		}
+		return returnObject;
+	}
+	
+	/**
+	 * 播发时媒资排表字段内容(终端文件播发，单个排期的节目列表)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param ProgramVO program 分屏信息
+	 */
+	private List<RequestTerminalScheduleScreenBO> programTextToBO(ProgramVO program) throws Exception {
+		List<RequestTerminalScheduleScreenBO> returnList = new ArrayList<RequestTerminalScheduleScreenBO>();
+		if (program != null) {
+			//获取分屏模板信息
+			JSONObject useTemplate = adapter.screenTemplate(program.getScreenId());
+			if (useTemplate == null) return null;
+			
+			//遍历每一个分屏(i直接标识分屏序号)
+			for (int i = 1; i <= program.getScreenNum(); i++) {
+				JSONObject programItem = adapter.serial(useTemplate, i);
+				RequestTerminalScheduleScreenBO returnItem = new RequestTerminalScheduleScreenBO().setFromJson(programItem);
+				List<RequestTerminalScheduleScreenProgramBO> programBOs = new ArrayList<RequestTerminalScheduleScreenProgramBO>();
+				if (program.getScreenInfo() != null && program.getScreenInfo().size() > 0) {
+					
+					//遍历所有分屏节目列表把节目对应到分屏下
+					for (ScreenVO item : program.getScreenInfo()) {
+						if (item.getSerialNum() != i)
+							continue;
+						RequestTerminalScheduleScreenProgramBO programBO = new RequestTerminalScheduleScreenProgramBO();
+						
+						//区分节目内容类型
+						String contentType = item.getContentType();
+						if (contentType == null
+								|| contentType.isEmpty()
+								|| ScreenContentType.fromName(contentType).getType().equals("file")) {
+							CsResourceVO resource = csResourceQuery.queryResourceById(item.getResourceId());
+							programBO.setFromResource(resource).setIndex(item.getIndex());
+							String duration = item.getDuration();
+							if (duration != null && !duration.isEmpty() && !duration.equals("-")) programBO.setDuration(Long.parseLong(duration));
+						} else if (ScreenContentType.fromName(contentType) == ScreenContentType.TEXT){
+							programBO.setIndex(item.getIndex()).setTextContent(item.getTextContent()).setMediaType(ScreenContentType.TEXT.getType());
+						} else {
+							programBO.setIndex(item.getIndex()).setMediaType(ScreenContentType.fromName(contentType).getType());
+						}
+						programBOs.add(programBO);
+					}
+				}
+				returnItem.setProgram(programBOs);
+				returnList.add(returnItem);
+			}
+		}
+		return returnList;
+	}
+	
+	/**
+	 * 播发时cs媒资目录树字段内容(终端播发)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long channelId 频道id
+	 */
+	private List<RequestTerminalDirBO> getMenuAndResourcePathToBO(Long channelId) throws Exception {
+		List<CsMenuVO> menuTree = csMenuQuery.queryMenuTree(channelId);
+		List<RequestTerminalDirBO> dirList = new ArrayList<RequestTerminalDirBO>();
+		if (menuTree != null && menuTree.size() > 0) {
+			dirList = getDirListToBO(menuTree);
+		}
+		return dirList;
+	}
+	
+	/**
+	 * 递归获取目录树(终端播发)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param List<CsMenuVO> parentSubs 目录列表
+	 */
+	private List<RequestTerminalDirBO> getDirListToBO(List<CsMenuVO> parentSubs) throws Exception {
+		List<RequestTerminalDirBO> returnObject = new ArrayList<RequestTerminalDirBO>();
+		if (parentSubs != null && parentSubs.size() > 0) {
+			for (CsMenuVO item : parentSubs) {
+				RequestTerminalDirBO sub = new RequestTerminalDirBO();
+				List<RequestTerminalDirBO> subs = new ArrayList<RequestTerminalDirBO>();
+				subs.addAll(this.getDirListToBO(item.getSubColumns()));
+				subs.addAll(this.getFileListToBO(item.getId()));
+				sub.setPath(item.getParentPath() + "/" + item.getName())
+				.setType("folder")
+				.setSubs(subs);
+				returnObject.add(sub);
+			}
+		}
+		return returnObject;
+	}
+	
+	/**
+	 * 根据目录id获取cs媒资(终端播发)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param Long menuId 目录id
+	 */
+	private List<RequestTerminalDirBO> getFileListToBO(Long menuId) throws Exception {
+		List<RequestTerminalDirBO> returnObject = new ArrayList<RequestTerminalDirBO>();
+		List<CsResourceVO> resourceList = csResourceQuery.queryMenuResources(menuId);
+		if (resourceList != null && resourceList.size() > 0) {
+			for (CsResourceVO item : resourceList) {
+				if (item.getType().equals("PUSH_LIVE")) continue;
+				RequestTerminalDirBO resource = new RequestTerminalDirBO();
+				String[] previewUrl = item.getPreviewUrl().split("/");
+				resource.setPath(item.getParentPath() + "/" + previewUrl[previewUrl.length - 1]).setType("file");
 				returnObject.add(resource);
 			}
 		}

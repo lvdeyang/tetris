@@ -6,7 +6,7 @@
     <!--内容-->
     <div style="position: absolute;top: 60px;left: 30px;bottom: 50px;right: 30px;">
         <el-table
-                :data="pageData"
+                :data="leftData"
                 height="95%"
                 highlight-current-row
                 @row-click="clickRow">
@@ -20,10 +20,10 @@
             </el-table-column>
         </el-table>
     </div>
-    <el-pagination background @current-change="leftCurrentChange" :current-page="leftCurrentPage"
-                   :page-size="8" :pager-count="5" layout="total, prev, pager, next, jumper"
-                   :total="leftData.length">
-    </el-pagination>
+   <el-pagination background @current-change="leftCurrentChange" :current-page="leftCurrentPage"
+                       :page-size="pageSize" :pager-count="5" layout="total, prev, pager, next"
+                       :total="total">
+        </el-pagination>
     <!--底部按钮-->
     <div style="height:50px;position:absolute; right:60px; bottom:0;">
         <el-button size="small" @click="leftConfirm" type="primary">确定选择</el-button>

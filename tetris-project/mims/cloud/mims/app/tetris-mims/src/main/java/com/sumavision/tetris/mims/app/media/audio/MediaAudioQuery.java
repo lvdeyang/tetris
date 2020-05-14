@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -35,6 +37,7 @@ import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagDownloadPermissionPO;
 import com.sumavision.tetris.mims.app.media.tag.TagPO;
+import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
@@ -73,6 +76,9 @@ public class MediaAudioQuery {
 	
 	@Autowired
 	private TagDAO tagDAO;
+	
+	@Autowired
+	private TagQuery tagQuery;
 	
 	@Autowired
 	private ServerProps serverProps;
@@ -199,10 +205,14 @@ public class MediaAudioQuery {
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
 	 * @return List<MediaAudioVO> 视频媒资列表
 	 */
-	public List<MediaAudioVO> loadAll() throws Exception{
+	public List<MediaAudioVO> loadAll(Long ... id) throws Exception{
 		
 		//TODO 权限校验
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
+		if (id != null && id.length > 0) {
+			folderTree = folderQuery.findSubFolders(id[0]);
+			folderTree.add(folderDao.findOne(id[0]));
+		}
 		
 		if (folderTree.isEmpty()) return new ArrayList<MediaAudioVO>();
 		
@@ -223,7 +233,7 @@ public class MediaAudioQuery {
 		
 		packMediaAudioTree(medias, folderTree, audios);
 		
-		return medias;
+		return id != null && id.length > 0 ? medias.get(0).getChildren() : medias;
 	}
 	
 	/**
@@ -298,19 +308,40 @@ public class MediaAudioQuery {
 	}
 	
 	public List<MediaAudioVO> loadRecommendWithWeight(UserVO user) throws Exception{
+		JSONObject tagAndParent = tagQuery.queryTagAndParent(user, null, null);
+		
 		List<MediaAudioVO> recommends = new ArrayList<MediaAudioVO>();
 
 		//根据用户标签获取媒资列表(每个标签权重为100)
 		Map<String, List<MediaAudioVO>> fromUserTags = loadAllByTags(user, user.getTags());
 		if (fromUserTags != null) {
-			List<MediaAudioVO> audios = fromUserTags.get("list");
-			for (MediaAudioVO mediaAudioVO : audios) {
-				if (recommends.contains(mediaAudioVO)) {
-					MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
-					audio.setHotWeight(audio.getHotWeight() + 100);
-				} else {
-					mediaAudioVO.setHotWeight(100l);
-					recommends.add(mediaAudioVO);
+//			List<MediaAudioVO> audios = fromUserTags.get("list");
+			List<MediaAudioVO> audios = fromUserTags.get("tree");
+			Long weight = 100l;
+			for (MediaAudioVO tagMediaList : audios) {
+				List<MediaAudioVO> children = tagMediaList.getChildren();
+				String tagName = tagMediaList.getName();
+				if (tagAndParent.containsKey(tagName)) tagName = tagAndParent.getString(tagName);
+				if (children != null && !children.isEmpty()) {
+					for (MediaAudioVO mediaAudioVO : children) {
+						if (recommends.contains(mediaAudioVO)) {
+							MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
+							audio.setHotWeight(audio.getHotWeight() + weight);
+							JSONObject tagToHotWeight = audio.getTagToHotWeight();
+							if (tagToHotWeight == null) tagToHotWeight = new JSONObject();
+							Long hotWeight = tagToHotWeight.containsKey(tagName) ? tagToHotWeight.getLong(tagName) + weight : weight;
+							tagToHotWeight.put(tagName, hotWeight);
+							tagToHotWeight.put("user", tagToHotWeight.containsKey("user") ? tagToHotWeight.getLong("user") + weight : weight);
+							audio.setTagToHotWeight(tagToHotWeight);
+						} else {
+							mediaAudioVO.setHotWeight(weight);
+							JSONObject tagToHotWeight = new JSONObject();
+							tagToHotWeight.put(tagName, weight);
+							tagToHotWeight.put("user", weight);
+							mediaAudioVO.setTagToHotWeight(tagToHotWeight);
+							recommends.add(mediaAudioVO);
+						}
+					}
 				}
 			}
 		}
@@ -333,13 +364,31 @@ public class MediaAudioQuery {
 		
 		//遍历所有同组织用户，有下载且A/B用户均没有的标签(该标签所有媒资加50)
 		List<MediaAudioVO> otherAudios = loadRecommendFromOtherUser(user);
-		for (MediaAudioVO mediaAudioVO : otherAudios) {
-			if (recommends.contains(mediaAudioVO)) {
-				MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
-				audio.setHotWeight(audio.getHotWeight() + 50);
-			} else {
-				mediaAudioVO.setHotWeight(50l);
-				recommends.add(mediaAudioVO);
+		if (otherAudios != null && !otherAudios.isEmpty()) {
+			Long weight = 50l;
+			for (MediaAudioVO tagMediaList : otherAudios) {
+				List<MediaAudioVO> children = tagMediaList.getChildren();
+				String tagName = tagMediaList.getName();
+				if (tagAndParent.containsKey(tagName)) tagName = tagAndParent.getString(tagName);
+				if (children != null && !children.isEmpty()) {
+					for (MediaAudioVO mediaAudioVO : children) {
+						if (recommends.contains(mediaAudioVO)) {
+							MediaAudioVO audio = recommends.get(recommends.indexOf(mediaAudioVO));
+							audio.setHotWeight(audio.getHotWeight() + weight);
+							JSONObject tagToHotWeight = audio.getTagToHotWeight();
+							if (tagToHotWeight == null) tagToHotWeight = new JSONObject();
+							Long hotWeight = tagToHotWeight.containsKey(tagName) ? tagToHotWeight.getLong(tagName) + weight : weight;
+							tagToHotWeight.put(tagName, hotWeight);
+							audio.setTagToHotWeight(tagToHotWeight);
+						} else {
+							mediaAudioVO.setHotWeight(weight);
+							JSONObject tagToHotWeight = new JSONObject();
+							tagToHotWeight.put(tagName, weight);
+							mediaAudioVO.setTagToHotWeight(tagToHotWeight);
+							recommends.add(mediaAudioVO);
+						}
+					}
+				}
 			}
 		}
 		
@@ -418,6 +467,35 @@ public class MediaAudioQuery {
 			if (childAudios == null || childAudios.isEmpty()) continue;
 			int num = tag.getSubMediaNum();
 			tag.setSubMediaNum(num + childAudios.size());
+		}
+	}
+	
+	/**
+	 * 获取标签的音频媒资数和总下载量<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月19日 下午4:03:27
+	 */
+	public void queryMediaCountAndDownloadByTags(UserVO user, List<TagVO> tags) throws Exception{
+		if (tags == null || tags.isEmpty()) return;
+		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_AUDIO.toString());
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		for (TagVO tag : tags) {
+			List<MediaAudioPO> childAudios = mediaAudioDao.findByFolderIdInAndTagByDownloadCountOrderDesc(folderIds, tag.getName(), new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
+			if (childAudios == null || childAudios.isEmpty()) continue;
+			int num = tag.getSubMediaNum();
+			Long download = tag.getDownloadCount();
+			tag.setSubMediaNum(num + childAudios.size());
+			for (MediaAudioPO mediaAudioPO : childAudios) {
+				download += mediaAudioPO.getDownloadCount();
+			}
+			tag.setDownloadCount(download);
 		}
 	}
 	
@@ -504,7 +582,8 @@ public class MediaAudioQuery {
 			
 			Map<String, List<MediaAudioVO>> map = loadAllByTags(user, tags);
 			if (map != null) {
-				List<MediaAudioVO> audios = map.get("list");
+//				List<MediaAudioVO> audios = map.get("list");
+				List<MediaAudioVO> audios = map.get("tree");
 				returnAudioVOs.addAll(audios);
 			}
 		}
@@ -674,6 +753,13 @@ public class MediaAudioQuery {
 		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(audios, MediaAudioVO.class);
 	}
 	
+	/**
+	 * 获取文件加密地址<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月23日 下午5:12:15
+	 * @param List<MediaAudioVO> audioVOs 文件数组
+	 */
 	public void queryEncodeUrl(List<MediaAudioVO> audioVOs) throws Exception {
 		//从音频数组中获取id列表
 		List<Long> mediaIds = audioVOs.stream().map(MediaAudioVO::getId).collect(Collectors.toList());
@@ -736,5 +822,44 @@ public class MediaAudioQuery {
 		}
 		List<MediaAudioPO> entities = mediaAudioDao.findByPreviewUrlIn(searchPreivewList);
 		return MediaAudioVO.getConverter(MediaAudioVO.class).convert(entities, MediaAudioVO.class);
+	}
+	
+	/**
+	 * 获取资源上传者的资源上传量<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月23日 下午5:10:15
+	 */
+	public JSONObject loadAuthorPermission() throws Exception {
+		UserVO user = userQuery.current();
+		List<UserVO> userVOs = userQuery.listByCompanyIdWithExceptAndClassify(Long.parseLong(user.getGroupId()), null, UserClassify.COMPANY);
+		if (userVOs == null || userVOs.isEmpty()) return null;
+		List<String> userIds = new ArrayList<String>();
+		for (UserVO userVO : userVOs) {
+			userIds.add(userVO.getId().toString());
+		}
+		List<MediaAudioPO> statisticsPOs = mediaAudioDao.findByAuthorIdIn(userIds);
+		if (statisticsPOs == null || statisticsPOs.isEmpty()) return null; 
+		Map<String, Long> map = new HashMap<String, Long>();
+		for (MediaAudioPO media : statisticsPOs) {
+			String userId = media.getAuthorId();
+			map.put(userId, map.containsKey(userId) ? map.get(userId) + 1 : 1);
+		}
+		JSONObject tagAndParent = tagQuery.queryTagAndParent(user, null, null);
+		JSONObject returnObject = new JSONObject();
+		for (UserVO userVO : userVOs) {
+			String userId = userVO.getId().toString();
+			if (!map.containsKey(userId)) continue;
+			Long count = map.get(userId);
+			List<String> tags = userVO.getTags();
+			if (tags == null || tags.isEmpty()) continue;
+			for (String tag : tags) {
+				if (tagAndParent.containsKey(tag) && tagAndParent.getString(tag).equals("行政区域")) {
+					returnObject.put(tag, returnObject.containsKey(tag) ? returnObject.getLong(tag) + count : count);
+					break;
+				}
+			}
+		}
+		return returnObject;
 	}
 }

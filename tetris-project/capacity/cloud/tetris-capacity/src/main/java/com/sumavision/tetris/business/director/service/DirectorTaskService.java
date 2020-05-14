@@ -18,14 +18,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.common.bo.InputCheckBO;
+import com.sumavision.tetris.business.common.bo.InputMapBO;
 import com.sumavision.tetris.business.common.dao.TaskInputDAO;
 import com.sumavision.tetris.business.common.dao.TaskOutputDAO;
 import com.sumavision.tetris.business.common.enumeration.BusinessType;
 import com.sumavision.tetris.business.common.po.TaskInputPO;
 import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.director.bo.DirectorRequestBO;
-import com.sumavision.tetris.business.director.bo.InputCheckBO;
-import com.sumavision.tetris.business.director.bo.InputMapBO;
 import com.sumavision.tetris.business.director.vo.OutputsVO;
 import com.sumavision.tetris.business.director.vo.DestinationVO;
 import com.sumavision.tetris.business.director.vo.DirectorTaskVO;
@@ -405,9 +405,9 @@ public class DirectorTaskService {
 			
 			String inputId = source.getId();
 
-			ProgramElementBO velementBO = new ProgramElementBO().setType("video").setPid(2).setProgram_switch_array(
+			ProgramElementBO velementBO = new ProgramElementBO().setType("video").setPid(513).setProgram_switch_array(
 					new ArrayListWrapper<PidIndexBO>().addAll(generatePidIndex(elementCount, 0)).getList());
-			ProgramElementBO aelementBO = new ProgramElementBO().setType("audio").setPid(1).setProgram_switch_array(
+			ProgramElementBO aelementBO = new ProgramElementBO().setType("audio").setPid(514).setProgram_switch_array(
 					new ArrayListWrapper<PidIndexBO>().addAll(generatePidIndex(elementCount, 1)).getList());
 			//字幕先预留
 //			ProgramElementBO selementBO = new ProgramElementBO().setType("subtitle").setPid(3).setProgram_switch_array(
@@ -432,8 +432,8 @@ public class DirectorTaskService {
 		ProgramBO program = new ProgramBO().setProgram_number(1).setVideo_array(new ArrayList<ProgramVideoBO>())
 				.setAudio_array(new ArrayList<ProgramAudioBO>());
 
-		ProgramVideoBO video = new ProgramVideoBO().setPid(2);
-		ProgramAudioBO audio = new ProgramAudioBO().setPid(1);
+		ProgramVideoBO video = new ProgramVideoBO().setPid(513);
+		ProgramAudioBO audio = new ProgramAudioBO().setPid(514);
 
 		program.getVideo_array().add(video);
 		program.getAudio_array().add(audio);
@@ -594,9 +594,9 @@ public class DirectorTaskService {
 //	    ProgramSubtitleBO subtitle = new ProgramSubtitleBO().setPid(3)
 //	    													.setDecode_mode("cpu");
 		
-		ProgramVideoBO video = new ProgramVideoBO().setPid(2)
+		ProgramVideoBO video = new ProgramVideoBO().setPid(513)
 								   				   .setDecode_mode("cpu");
-		ProgramAudioBO audio = new ProgramAudioBO().setPid(1)
+		ProgramAudioBO audio = new ProgramAudioBO().setPid(514)
 											       .setDecode_mode("cpu");
 		
 		program.getVideo_array().add(video);
@@ -1001,7 +1001,7 @@ public class DirectorTaskService {
 						OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
 																 .setType("video")
 																 .setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
-																 .setPid(1);
+																 .setPid(513);
 						medias.add(media);
 					}
 					//音频
@@ -1009,7 +1009,7 @@ public class DirectorTaskService {
 						OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
 																 .setType("audio")
 																 .setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
-																 .setPid(2);
+																 .setPid(514);
 						medias.add(media);
 					}
 					//字幕
@@ -1017,7 +1017,7 @@ public class DirectorTaskService {
 						OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
 																 .setType("subtitle")
 																 .setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
-																 .setPid(3);
+																 .setPid(515);
 						medias.add(media);
 					}
 

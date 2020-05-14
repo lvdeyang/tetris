@@ -26,7 +26,7 @@ ul, li, div {
     overflow: hidden;
 }
 
-/* 右侧tab和菜单 start */
+/* 鍙充晶tab鍜岃彍鍗� start */
 .tabBar {
     position: absolute;
     right: 0;
@@ -35,7 +35,7 @@ ul, li, div {
     width: 370px;
 }
 
-/*顶部切换标题*/
+/*椤堕儴鍒囨崲鏍囬*/
 .switch {
     position: absolute;
     left: 50px;
@@ -61,7 +61,7 @@ ul, li, div {
     cursor: pointer;
 }
 
-/*顶部标题具有高亮的样式*/
+/*椤堕儴鏍囬鍏锋湁楂樹寒鐨勬牱寮�*/
 .highLight {
     position: absolute;
     top: 0;
@@ -78,27 +78,27 @@ li.focusLight {
     background: #0c446f;
 }
 
-/*左侧的导航选项标题*/
+/*宸︿晶鐨勫鑸�夐」鏍囬*/
 .el-tabs__nav {
     top: 50px;
 }
 
-/*给这5个标题加滚动条*/
+/*缁欒繖5涓爣棰樺姞婊氬姩鏉�*/
 .el-tabs__nav-scroll {
     overflow: auto;
 }
 
-/*给滚动条修改默认样式*/
+/*缁欐粴鍔ㄦ潯淇敼榛樿鏍峰紡*/
 .el-tabs__nav-scroll::-webkit-scrollbar {
     width: 5px;
 }
 
-/*tab右侧自动加载的滚动条的整体容器，默认是灰色*/
+/*tab鍙充晶鑷姩鍔犺浇鐨勬粴鍔ㄦ潯鐨勬暣浣撳鍣紝榛樿鏄伆鑹�*/
 .el-tabs__nav-wrap::after {
     background-color: #204a6b;
 }
 
-/* 禁止横向滚动条 */
+/* 绂佹妯悜婊氬姩鏉� */
 .secondMenu .el-scrollbar__wrap,
 .commandTable .el-scrollbar__wrap {
     overflow-x: hidden;
@@ -118,7 +118,7 @@ li.focusLight {
     z-index: 9;
 }
 
-/*指挥上面的按钮*/
+/*鎸囨尌涓婇潰鐨勬寜閽�*/
 .commandBtn{
     height: 30px;
     line-height: 30px;
@@ -149,7 +149,7 @@ li.focusLight {
     overflow: hidden;
 }
 
-/*左侧tab对应的右侧的容器的宽度*/
+/*宸︿晶tab瀵瑰簲鐨勫彸渚х殑瀹瑰櫒鐨勫搴�*/
 .el-tabs__content {
     position: absolute;
     top: 0;
@@ -175,7 +175,7 @@ li.focusLight {
     width: 100%;
     height: 100%;
 }
-/*禁止图片拖拽*/
+/*绂佹鍥剧墖鎷栨嫿*/
 img {
     -webkit-user-drag: none;
 }
@@ -185,19 +185,19 @@ img {
     background-color:#2562f7;
 }
 
-/* 树形组件开始 */
+/* 鏍戝舰缁勪欢寮�濮� */
 .el-tree {
     width: 320px;
     min-height: 50px;
     background-color: transparent;
 }
 
-/* 菜单最外层级 */
+/* 鑿滃崟鏈�澶栧眰绾� */
 .el-tree-node {
     margin: 1px 0 0;
 }
 
-/* 树形组件的标题文字,自定义 span*/
+/* 鏍戝舰缁勪欢鐨勬爣棰樻枃瀛�,鑷畾涔� span*/
 .headline {
     width: 100%;
     color: #cfdae6;
@@ -219,7 +219,7 @@ img {
     vertical-align: top;
 }
 
-/*录像回放的长度不一样*/
+/*褰曞儚鍥炴斁鐨勯暱搴︿笉涓�鏍�*/
 .sheadFont {
     display: inline-block;
     color: #cfdae6;
@@ -231,7 +231,7 @@ img {
     vertical-align: top;
 }
 
-/*指挥工作台的属性的用户名*/
+/*鎸囨尌宸ヤ綔鍙扮殑灞炴�х殑鐢ㄦ埛鍚�*/
 .headFonts {
     display: inline-block;
     color: #cfdae6;
@@ -243,14 +243,14 @@ img {
     vertical-align: top;
 }
 
-/*复选框的样式*/
+/*澶嶉�夋鐨勬牱寮�*/
 .el-checkbox__inner {
     margin-left: -3px;
     border: 1px solid #7590A3;
     background-color: transparent;
 }
 
-/*名称和复选框之间的距离*/
+/*鍚嶇О鍜屽閫夋涔嬮棿鐨勮窛绂�*/
 .el-checkbox__label {
     margin-left: -3px;
 }
@@ -270,23 +270,23 @@ img {
     background-color: #173D5C;
 }
 
-/* 点击的那个层级，颜色较暗，能看出来按下的效果 */
+/* 鐐瑰嚮鐨勯偅涓眰绾э紝棰滆壊杈冩殫锛岃兘鐪嬪嚭鏉ユ寜涓嬬殑鏁堟灉 */
 .el-tree-node:focus > .el-tree-node__content {
     background-color: #133549;
     box-shadow: 0 0 54px #6a65a2 inset;
 }
 
-/* 展开层级结构，的每一级的样式 */
+/* 灞曞紑灞傜骇缁撴瀯锛岀殑姣忎竴绾х殑鏍峰紡 */
 .el-tree-node:focus > .el-tree-node__children .el-tree-node__content {
     background-color: transparent;
 }
 
-/*展开的层级的背景色*/
+/*灞曞紑鐨勫眰绾х殑鑳屾櫙鑹�*/
 .is-expanded .el-tree-node__children {
     background-color: transparent;
 }
 
-/*折叠的按钮*/
+/*鎶樺彔鐨勬寜閽�*/
 .el-radio-button__inner {
     padding: 12px 17px;
     background-color: #204a6b;
@@ -312,9 +312,9 @@ img {
     bottom:0;
     overflow: hidden;
 }
-/* 控制点击后的图标和内容的显示 end */
+/* 鎺у埗鐐瑰嚮鍚庣殑鍥炬爣鍜屽唴瀹圭殑鏄剧ず end */
 
-/* 底部图标 */
+/* 搴曢儴鍥炬爣 */
 .footer {
     position: absolute;
     left: 50px;
@@ -335,6 +335,11 @@ img {
     text-align: center;
     border-radius: 12px;
     background: linear-gradient(to bottom, #55d4f4, #55d3f4, #4eb5f2, #4aa3f0, #458bee, #4487ee);
+    cursor:pointer;
+}
+
+.customIcon img:active{
+	opacity:.8;
 }
 
 .el-button--text {
@@ -348,7 +353,7 @@ img {
     font-size: 18px;
 }
 
-/*禁用的按钮都不显示*/
+/*绂佺敤鐨勬寜閽兘涓嶆樉绀�*/
 .disable {
     background: gray;
     display: none;
@@ -404,7 +409,7 @@ img {
     color: #c0c4cc;
 }
 
-/*第二部分 指挥工作台*/
+/*绗簩閮ㄥ垎 鎸囨尌宸ヤ綔鍙�*/
 .secondMenu {
     position: absolute;
     top: 51px;
@@ -444,7 +449,7 @@ img {
     color: #e36264;
 }
 
-/*下拉框样式修改*/
+/*涓嬫媺妗嗘牱寮忎慨鏀�*/
 .el-input__inner {
     background-color: #0b2d5a;
     height: 40px;
@@ -457,7 +462,7 @@ img {
     border: 1px solid #17407e;
 }
 
-/*箭头的样式*/
+/*绠ご鐨勬牱寮�*/
 .el-select .el-input .el-select__caret {
     margin-right: 10px;
     font-size: 28px;
@@ -465,7 +470,7 @@ img {
     font-weight: bold;
 }
 
-/*下拉列表展开的面板*/
+/*涓嬫媺鍒楄〃灞曞紑鐨勯潰鏉�*/
 div.el-select-dropdown {
     background-color: #204a6b;
     border: none;
@@ -477,16 +482,16 @@ div.el-select-dropdown {
     color: #fff;
 }
 
-/*加出下拉菜单的横向滚动条*/
+/*鍔犲嚭涓嬫媺鑿滃崟鐨勬í鍚戞粴鍔ㄦ潯*/
 .el-select-dropdown__item {
     width: 600px;
     font-size: 18px;
     color: #409EFF;
-    /*去掉省略号*/
+    /*鍘绘帀鐪佺暐鍙�*/
     text-overflow: inherit;
 }
 
-/*选中的样式的字体颜色*/
+/*閫変腑鐨勬牱寮忕殑瀛椾綋棰滆壊*/
 .el-select-dropdown__item.selected {
     color: #00e9ff;
 }
@@ -524,14 +529,19 @@ div.el-select-dropdown {
     display: block;
     width: 100%;
     height: 100%;
+    cursor:pointer;
 }
 
-/*指挥工作台的树的横向滚动条*/
+.option-button img:active {
+    opacity: .8;
+}
+
+/*鎸囨尌宸ヤ綔鍙扮殑鏍戠殑妯悜婊氬姩鏉�*/
 .el-scrollbar__bar.is-horizontal {
     display: none;
 }
 
-/*popover弹出框的样式*/
+/*popover寮瑰嚭妗嗙殑鏍峰紡*/
 .el-popover {
     background: #3d475a;
     border: 1px solid #076792;
@@ -548,7 +558,7 @@ div.el-select-dropdown {
     font-weight: 600;
 }
 
-/*第三部分菜单*/
+/*绗笁閮ㄥ垎鑿滃崟*/
 .thirdMenu {
     position: absolute;
     top: 50px;

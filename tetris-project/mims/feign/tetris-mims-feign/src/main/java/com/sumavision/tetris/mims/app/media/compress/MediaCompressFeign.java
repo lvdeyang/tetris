@@ -22,6 +22,18 @@ public interface MediaCompressFeign {
 	public JSONObject query(@RequestParam("id") Long id) throws Exception;
 	
 	/**
+	 * 加载文件夹下的播发媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 下午5:03:13
+	 * @param folderId 文件夹id
+	 * @return rows List<MediaCompressVO> 播发媒资列表
+	 * @return breadCrumb FolderBreadCrumbVO 面包屑数据
+	 */
+	@RequestMapping(value = "/media/compress/feign/load")
+	public JSONObject load(@RequestParam("folderId") Long folderId) throws Exception;
+	
+	/**
 	 * 压缩播发媒资<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>

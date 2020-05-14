@@ -13,6 +13,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionBO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
@@ -38,6 +40,9 @@ public class MediaVideoFeignController {
 	
 	@Autowired
 	private TagQuery tagQuery;
+	
+	@Autowired
+	private MediaFileEquipmentPermissionQuery mediaFileEquipmentPermissionQuery;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -75,6 +80,30 @@ public class MediaVideoFeignController {
 			HttpServletRequest request) throws Exception{
 		
 		return mediaVideoQuery.loadAll();
+	}
+	
+	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return MediaVideoVO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/collection")
+	public Object loadCollection(Long folderId, HttpServletRequest request) throws Exception{
+		MediaVideoVO folder = mediaVideoQuery.loadCollection(folderId);
+		if (folder != null) {
+			List<MediaVideoVO> children = folder.getChildren();
+			if (children != null) {
+				for (MediaVideoVO media : children) {
+					media.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setFromVideoVO(media)));
+				}
+			}
+		}
+		return folder;
 	}
 	
 	/**

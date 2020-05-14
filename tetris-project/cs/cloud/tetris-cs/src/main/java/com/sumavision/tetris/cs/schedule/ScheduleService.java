@@ -10,11 +10,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.cs.channel.ChannelService;
+import com.sumavision.tetris.cs.channel.api.ApiServerScheduleCastVO;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
 import com.sumavision.tetris.cs.schedule.api.server.ApiServerScheduleVO;
 import com.sumavision.tetris.cs.schedule.exception.ScheduleNotExistsException;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoQuery;
+import com.sumavision.tetris.mims.app.media.avideo.MediaAVideoVO;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.audio.MediaAudioStreamVO;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamQuery;
+import com.sumavision.tetris.mims.app.media.stream.video.MediaVideoStreamVO;
+import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -31,6 +39,15 @@ public class ScheduleService {
 	@Autowired
 	private ProgramService programService;
 	
+	@Autowired
+	private MediaAVideoQuery mediaAVideoQuery;
+	
+	@Autowired
+	private MediaAudioStreamQuery mediaAudioStreamQuery;
+	
+	@Autowired
+	private MediaVideoStreamQuery mediaVideoStreamQuery;
+	
 	/**
 	 * 添加排期<br/>
 	 * <b>作者:</b>lzp<br/>
@@ -41,17 +58,32 @@ public class ScheduleService {
 	 * @param remark 备注
 	 * @return ScheduleVO 排期信息
 	 */
-	public ScheduleVO add(Long channelId, String broadDate, String remark) throws Exception{
+	public ScheduleVO add(Long channelId, String broadDate, String endDate, String remark) throws Exception{
+		SchedulePO schedulePO = addToPO(channelId, broadDate, endDate, remark);
+		
+		return new ScheduleVO().set(schedulePO);
+	}
+	
+	/**
+	 * 添加排期<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年8月1日 上午11:06:57
+	 * @param channelId 频道id
+	 * @param broadDate 播发日期
+	 * @param remark 备注
+	 * @return SchedulePO 排期信息
+	 */
+	public SchedulePO addToPO(Long channelId, String broadDate, String endDate, String remark) throws Exception {
 		SchedulePO schedulePO = new SchedulePO();
 		schedulePO.setChannelId(channelId);
 		schedulePO.setUpdateTime(new Date());
 		schedulePO.setBroadDate(broadDate);
+		schedulePO.setEndDate(endDate);
 		schedulePO.setRemark(remark);
 		scheduleDAO.save(schedulePO);
 		
-		channelService.addScheduleDeal(channelId);
-		
-		return new ScheduleVO().set(schedulePO);
+		return schedulePO;
 	}
 	
 	/**
@@ -129,13 +161,16 @@ public class ScheduleService {
 	 * @param remark 备注
 	 * @return ScheduleVO 排期信息
 	 */
-	public ScheduleVO edit(Long scheduleId, String broadDate, String remark) throws Exception{
+	public ScheduleVO edit(Long scheduleId, String broadDate, String endDate, String remark) throws Exception{
 		SchedulePO schedule = scheduleDAO.findOne(scheduleId);
 		
 		if (schedule == null) throw new ScheduleNotExistsException(scheduleId);
 		
 		schedule.setBroadDate(broadDate);
 		schedule.setRemark(remark);
+		schedule.setEndDate(endDate);
+		
+		channelService.changeScheduleDeal(schedule.getChannelId());
 		
 		return new ScheduleVO().set(schedule);
 	}
@@ -169,8 +204,56 @@ public class ScheduleService {
 	 * @param screens 排期节目
 	 * @return
 	 */
+	public SchedulePO addScheduleToPO(Long channelId, String broadDate, List<ScreenVO> screens) throws Exception {
+		SchedulePO schedule = addToPO(channelId, broadDate, null, "");
+		
+		if (screens == null || screens.isEmpty()) return null;
+			
+		Date date = new Date();
+		List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
+		for (int i = 0; i < screens.size(); i++) {
+			ScreenVO screen = new ScreenVO();
+			ScreenVO item = screens.get(i);
+			screen.setUpdateTime(date);
+			screen.setSerialNum(1l);
+			screen.setIndex((long)(i+1));
+			screen.setMimsUuid(item.getMimsUuid());
+			screen.setName(item.getName());
+			screen.setType(item.getType());
+			screen.setMimetype(item.getMimetype());
+			screen.setPreviewUrl(item.getPreviewUrl());
+			screen.setHotWeight(item.getHotWeight());
+			screen.setDownloadCount(item.getDownloadCount());
+			screen.setDuration(item.getDuration());
+			screen.setEncryption(item.getEncryption());
+			screen.setEncryptionUrl(item.getEncryptionUrl());
+			screen.setResourceId(item.getResourceId());
+			screenVOs.add(screen);
+		}
+		ProgramVO program = new ProgramVO();
+		program.setScheduleId(schedule.getId());
+		program.setScreenNum(1l);
+		program.setUpdateTime(date);
+		program.setScreenInfo(screenVOs);
+		programService.setProgram(program);
+		
+		channelService.changeScheduleDeal(channelId);
+			
+		return schedule;
+	}
+	
+	/**
+	 * 根据频道id添加排期(自动生成排期节目)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年10月14日 下午3:45:26
+	 * @param channelId 频道id
+	 * @param broadDate 排期时间
+	 * @param screens 排期节目
+	 * @return
+	 */
 	public ScheduleVO addSchedule(Long channelId, String broadDate, List<ScreenVO> screens) throws Exception {
-		ScheduleVO schedule = add(channelId, broadDate, "");
+		ScheduleVO schedule = add(channelId, broadDate, null, "");
 		
 		if (screens == null || screens.isEmpty()) return null;
 			
@@ -202,6 +285,8 @@ public class ScheduleService {
 		program.setScreenInfo(screenVOs);
 			
 		schedule.setProgram(programService.setProgram(program));
+		
+		channelService.changeScheduleDeal(channelId);
 			
 		return schedule;
 	}
@@ -220,7 +305,7 @@ public class ScheduleService {
 		List<ScheduleVO> scheduleVOs = new ArrayList<ScheduleVO>();
 		
 		for (ApiServerScheduleVO apiServerScheduleVO : scheduleList) {
-			ScheduleVO schedule = add(channelId, apiServerScheduleVO.getBroadDate(), "");
+			ScheduleVO schedule = add(channelId, apiServerScheduleVO.getBroadDate(), null, "");
 			
 			Date date = new Date();
 			List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
@@ -243,6 +328,65 @@ public class ScheduleService {
 			schedule.setProgram(programService.setProgram(program));
 			
 			scheduleVOs.add(schedule);
+		}
+		
+		channelService.changeScheduleDeal(channelId);
+		
+		return scheduleVOs;
+	}
+	
+	/**
+	 * 根据频道id批量添加排期<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年9月18日 上午11:01:05
+	 * @param Long channelId 频道id
+	 * @param List<ApiServerScheduleCastVO> scheduleList 排期单
+	 */
+	public List<ScheduleVO> addSchedulesFromCast(Long channelId, List<ApiServerScheduleCastVO> scheduleList) throws Exception {
+		List<ScheduleVO> scheduleVOs = new ArrayList<ScheduleVO>();
+		
+		if (scheduleList != null && !scheduleList.isEmpty()) {
+			for (ApiServerScheduleCastVO cast : scheduleList) {
+				List<ScreenVO> screenVOs = new ArrayList<ScreenVO>();
+				SchedulePO schedulePO = null;
+				switch (cast.getAssetType().toLowerCase()) {
+				case "audio":
+				case "video":
+					MediaAVideoVO media = mediaAVideoQuery.loadByIdAndType(cast.getAssetId(), cast.getAssetType());
+					if (media != null) {
+						ScreenVO screen = new ScreenVO();
+						screen.getFromAVideoVO(media);
+						for (int i = 0; i < cast.getPlayTime(); i++) {
+							screenVOs.add(screen);
+						}
+						schedulePO = addScheduleToPO(channelId, cast.getStartTime(), screenVOs);
+					}
+					break;
+				case "audiostream":
+					MediaAudioStreamVO audioStream = mediaAudioStreamQuery.findById(cast.getAssetId());
+					if (audioStream != null) {
+						ScreenVO screen = new ScreenVO();
+						screenVOs.add(screen.getFromAudioStreamVO(audioStream));
+						schedulePO = addScheduleToPO(channelId, cast.getStartTime(), screenVOs);
+					}
+					break;
+				case "videostream":
+					MediaVideoStreamVO videoStreamVO = mediaVideoStreamQuery.findById(cast.getAssetId());
+					if (videoStreamVO != null) {
+						ScreenVO screen = new ScreenVO();
+						screenVOs.add(screen.getFromVideoStreamVO(videoStreamVO));
+						schedulePO = addScheduleToPO(channelId, cast.getStartTime(), screenVOs);
+					}
+				default:
+					throw new ErrorTypeException("type", cast.getAssetType());
+				}
+				if (schedulePO != null) {
+					schedulePO.setEndDate(cast.getEndTime());
+					scheduleDAO.save(schedulePO);
+					scheduleVOs.add(new ScheduleVO().set(schedulePO));
+				}
+			}
 		}
 		
 		return scheduleVOs;

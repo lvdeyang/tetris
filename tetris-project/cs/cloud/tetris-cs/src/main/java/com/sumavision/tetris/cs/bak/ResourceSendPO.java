@@ -41,6 +41,12 @@ public class ResourceSendPO extends AbstractBasePO{
 	
 	/** 媒资视频pid */
 	private String videoPid;
+	
+	/** 媒资音频类型 */
+	private String audioType;
+	
+	/** 媒资视频类型 */
+	private String videoType;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -121,5 +127,23 @@ public class ResourceSendPO extends AbstractBasePO{
 
 	public void setVideoPid(String videoPid) {
 		this.videoPid = videoPid;
+	}
+	
+	@Column(name = "AUDIO_TYPE")
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public void setAudioType(String audioType) {
+		this.audioType = audioType;
+	}
+
+	@Column(name = "VIDEO_TYPE")
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public void setVideoType(String videoType) {
+		this.videoType = videoType;
 	}
 }

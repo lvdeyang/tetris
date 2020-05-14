@@ -43,7 +43,7 @@
                            style="width: 300px;left:8px;" :popper-append-to-body="false">
                     <el-option
                             v-for="(group,index) in command.data"
-                            :key="index"
+                            :key="'command-'+index"
                             :label="group.name"
                             :value="group.id"
                             :style="group.bundleStatus==='bundle-online'?'color: #00ff14;':'color: #e36264;'">
@@ -376,13 +376,13 @@
                     <img v-else :src="baseUrl+'images/zk-leader/disable/batchIntercom.png'"/>
                 </div>
                 <!--添加指挥-->
-                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="新建指挥"
+                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="添加指挥"
                      @click="addCommand(1)">
                     <img v-if="buttons.addCommand" :src="baseUrl+'images/zk-leader/able/zhihui/addCommand.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/addCommand.png'"/>
                 </div>
                 <!--添加会议-->
-                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="新建会议" @click="addCommand(2)">
+                <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="添加会议" @click="addCommand(2)">
                     <img :src="baseUrl+'images/zk-leader/able/huiyi/addCommand.png'"/>
                 </div>
                 <div class="customIcon" v-if="currentTab==3" @click="playRecordFile">
@@ -453,7 +453,7 @@
                                style="width: 300px;left:8px;" :popper-append-to-body="false">
                         <el-option
                                 v-for="meet in command.data"
-                                :key="meet.id"
+                                :key="'meeting-'+meet.id"
                                 :label="meet.name"
                                 :value="meet.id"
                                 :style="meet.bundleStatus==='bundle-online'?'color: #00ff14;':'color: #e36264;'">
@@ -534,8 +534,8 @@
                     <img v-if="buttons.removeMember" :src="baseUrl+'images/zk-leader/able/removeMember.png'"/>
                     <img v-else :src="baseUrl+'images/zk-leader/disable/removeMember.png'"/>
                 </div>
-                <!--修改指挥名称 只有主席才能修改名称，也就是指挥创建者和当前用户的Id一致时才能修改-->
-                <div :class="'option-button'+(buttons.addCommand?'':' disable')" title="修改会议名称"
+                <!--修改指挥名称 只有主席才能修改名称，也就是指挥创建者和当前用户的Id一致时才能修改buttons.addCommand-->
+                <div :class="'option-button'+(buttons.meetBtn?'':' disable')" title="修改会议名称"
                      @click="handleResetName('edit',2)">
                     <img :src="baseUrl+'images/zk-leader/able/meetingModify.png'" alt="修改会议名称"/>
                 </div>

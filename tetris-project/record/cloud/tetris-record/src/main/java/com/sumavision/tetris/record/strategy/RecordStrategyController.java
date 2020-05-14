@@ -182,9 +182,7 @@ public class RecordStrategyController {
 	@RequestMapping("/addRecordStrategy")
 	@ResponseBody
 	public Object addRecordStrategy(@RequestParam(value = "id", required = false) Long stgId,
-			@RequestParam(value = "name") String name, @RequestParam(value = "loopPeriod") Long lpPeriod,
-			@RequestParam(value = "loopCnt") Integer loopCnt,
-			// @RequestParam(value = "startTime") String stTime,
+			@RequestParam(value = "name") String name,  
 			@RequestParam(value = "status", required = false) String statusStr,
 			@RequestParam(value = "type") String typeStr,
 			@RequestParam(value = "startDate", required = false) String startDate,
@@ -198,7 +196,8 @@ public class RecordStrategyController {
 			@RequestParam(value = "sourceUrl") String sourceUrl, @RequestParam(value = "sourceType") String sourceType,
 			@RequestParam(value = "deviceId", required = false) Long deviceId,
 			@RequestParam(value = "storageId", required = false) Long storageId,
-			@RequestParam(value = "manualStrategyStart", required = false) boolean manualStgStart) {
+			@RequestParam(value = "manualStrategyStart", required = false) boolean manualStgStart,
+			@RequestParam(value = "autoInjectToMims", required = false) boolean autoInjectToMims) {
 
 		Map<String, Object> data = new HashMap<String, Object>();
 		if (name == "") {
@@ -215,8 +214,6 @@ public class RecordStrategyController {
 			// 新增/修改策略，保存数据库
 			if (stgId == null) {
 				stgPo = new RecordStrategyPO();
-				stgPo.setLoopCnt(loopCnt);
-				stgPo.setLoopPeriod(lpPeriod);
 				stgPo.setName(name);
 				stgPo.setSourceId(sourceId);
 				stgPo.setSourceUrl(sourceUrl);

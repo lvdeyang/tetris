@@ -21,7 +21,6 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
 import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.txt.exception.MediaTxtNotExistException;
@@ -145,11 +144,15 @@ public class MediaTxtQuery {
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
 	 * @return List<MediaTxtVO> 文本媒资列表
 	 */
-	public List<MediaTxtVO> loadAll() throws Exception{
+	public List<MediaTxtVO> loadAll(Long ... id) throws Exception{
 		
 		UserVO user = userQuery.current();
 		
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_TXT.toString());
+		if (id != null && id.length > 0) {
+			folderTree = folderQuery.findSubFolders(id[0]);
+			folderTree.add(folderDao.findOne(id[0]));
+		}
 			
 		List<Long> folderIds = new ArrayList<Long>();
 		for(FolderPO folderPO: folderTree){
@@ -168,7 +171,7 @@ public class MediaTxtQuery {
 			
 		packMediaTxtTree(medias, folderTree, txts);
 			
-		return medias;
+		return id != null && id.length > 0 ? medias.get(0).getChildren() : medias;
 	}
 	
 	/**

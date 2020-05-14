@@ -1,0 +1,98 @@
+<mi-frame ref="frame" id="page-operation-package-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">套餐管理</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>套餐列表</el-breadcrumb-item>
+    </template>
+
+    <template v-loading="loading">
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus sp_title"></span>&nbsp;添加套餐</el-button>
+            <!--<el-button type="warning" size="small" @click="multiDeal=true" v-if="!multiDeal"><span class="icon-check sp_title"></span>&nbsp;批量处理</el-button>-->
+            <!--<el-button type="warning" size="small" @click="multiDeal=false" v-else><span class="icon-check-empty sp_title"></span>&nbsp;取消批量</el-button>-->
+            <!--<el-button type="danger" size="small" @click="handleMultiDelete" v-if="multiDeal"><span class="icon-trash sp_title"></span>&nbsp;批量删除</el-button>-->
+
+            <div class="div_package_list">
+                <el-scrollbar style="height:100%;padding-bottom: 20px">
+                    <el-card class="box-card inside-box-card" v-for="item in table.rows">
+                        <div slot="header" class="clearfix">
+                            <span>{{ item.name }}</span>
+                            <el-tooltip class="item" effect="dark" content="删除套餐" placement="bottom-end" style="float: right; padding: 3px 3px; margin-left: 10px">
+                                <el-button type="text" icon="el-icon-delete" class="bt_list_handle bt_list_center_handle" @click="handleRowDelete(item)"></el-button>
+                            </el-tooltip>
+                            <el-tooltip class="item" effect="dark" content="套餐详情" placement="bottom-end" style="float: right; padding: 3px 3px">
+                                <el-button type="text" icon="icon-th-list" class="bt_list_handle bt_list_center_handle" @click="handleRowDetail(item)"></el-button>
+                            </el-tooltip>
+                            <el-tooltip class="item" effect="dark" content="信息编辑" placement="bottom-end" style="float: right; padding: 3px 3px">
+                                <el-button type="text" icon="icon-pencil" class="bt_list_handle bt_list_center_handle" @click="handleRowEdit(item)"></el-button>
+                            </el-tooltip>
+                        </div>
+                        <div class="text item">{{ "价格 ： " + item.price }}</div>
+                        <div class="text item">{{ "备注 ： " + item.remark }}</div>
+                    </el-card>
+                </el-scrollbar>
+            </div>
+        </el-card>
+    </template>
+
+    <el-dialog
+            title="新建套餐"
+            :visible.sync="dialog.createPackage.visible"
+            width="500px"
+            :before-close="handleCreatePackageClose">
+
+        <div class="div_create">
+            <el-scrollbar style="height:100%;">
+                <el-form label-width="80px">
+                    <el-form-item label="名称:">
+                        <el-input v-model="dialog.createPackage.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="价格:">
+                        <el-input v-model="dialog.createPackage.price" type="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="备注:">
+                        <el-input v-model="dialog.createPackage.remark"></el-input>
+                    </el-form-item>
+                </el-form>
+            </el-scrollbar>
+        </div>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="handleCreatePackageClose">取消</el-button>
+            <el-button size="medium" type="primary" @click="handleCreatePackageSubmit" :loading="dialog.createPackage.loading">确定</el-button>
+        </span>
+
+    </el-dialog>
+
+    <el-dialog
+            title="编辑套餐"
+            :visible.sync="dialog.editPackage.visible"
+            width="500px"
+            :before-close="handleEditPackageClose">
+
+        <div class="div_create">
+            <el-scrollbar style="height:100%;">
+                <el-form label-width="80px">
+                    <el-form-item label="名称:">
+                        <el-input v-model="dialog.editPackage.name"></el-input>
+                    </el-form-item>
+                    <el-form-item label="价格:">
+                        <el-input v-model="dialog.editPackage.price" type="number"></el-input>
+                    </el-form-item>
+                    <el-form-item label="备注:">
+                        <el-input v-model="dialog.editPackage.remark"></el-input>
+                    </el-form-item>
+                </el-form>
+            </el-scrollbar>
+        </div>
+
+        <span slot="footer" class="dialog-footer">
+            <el-button size="medium" @click="handleEditPackageClose">取消</el-button>
+            <el-button size="medium" type="primary" @click="handleEditPackageSubmit" :loading="dialog.editPackage.loading">确定</el-button>
+        </span>
+
+    </el-dialog>
+
+</mi-frame>

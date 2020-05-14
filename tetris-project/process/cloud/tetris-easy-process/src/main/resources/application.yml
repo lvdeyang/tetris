@@ -109,4 +109,9 @@ hystrix:
         isolation:
           thread: 
             timeoutInMilliseconds: 5000
-          strategy: SEMAPHORE      
+          strategy: SEMAPHORE  
+log:
+  home: /usr/sbin/sumavision/tetris/tetris-project/easy-process/apache-tomcat-7.0.93/logs
+  maxFileSize: 30MB
+  maxHistory: 10
+  totalSizeCap: 1GB               

@@ -19,7 +19,7 @@ public class RedisLock {
             // 对应setnx命令，可以成功设置,也就是key不存在
             return true;
         }
-
+        
         // 判断锁超时 - 防止原来的操作异常，没有运行解锁操作  防止死锁
         String currentLock = stringRedisTemplate.opsForValue().get(targetId);
         // 如果锁过期 currentLock不为空且小于当前时间

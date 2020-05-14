@@ -3,6 +3,7 @@ package com.sumavision.tetris.mims.app.media.audio;
 import java.util.List;
 
 import com.sumavision.tetris.mims.app.media.StoreType;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorVO;
 
 public class MediaAudioVO {
 
@@ -55,6 +56,8 @@ public class MediaAudioVO {
 	private String encryptionUrl;
 	
 	private String duration;
+	
+	private MediaFileEditorVO editorInfo;
 	
 	private List<MediaAudioVO> children;
 	
@@ -279,6 +282,15 @@ public class MediaAudioVO {
 
 	public MediaAudioVO setDuration(String duration) {
 		this.duration = duration;
+		return this;
+	}
+
+	public MediaFileEditorVO getEditorInfo() {
+		return editorInfo;
+	}
+
+	public MediaAudioVO setEditorInfo(MediaFileEditorVO editorInfo) {
+		this.editorInfo = editorInfo;
 		return this;
 	}
 

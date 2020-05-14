@@ -14,6 +14,7 @@ import com.sumavision.bvc.device.monitor.osd.exception.MonitorOsdLayerMoreThanMa
 import com.sumavision.bvc.device.monitor.osd.exception.MonitorOsdLayerNotExistException;
 import com.sumavision.bvc.device.monitor.osd.exception.MonitorOsdNotExistException;
 import com.sumavision.bvc.device.monitor.osd.exception.UserHasNoPermissionForOsdException;
+import com.sumavision.bvc.device.monitor.subtitle.MonitorSubtitleFont;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 
 @Service
@@ -36,6 +37,9 @@ public class MonitorOsdLayerService {
 	 * @param int y 万分比坐标
 	 * @param int layerIndex 图层顺序
 	 * @param MonitorOsdLayerType type 图层内容类型
+	 * @param String font 字体
+	 * @param Integer height 字号
+	 * @param String color 颜色
 	 * @param Long contentId 图层内容资源id
 	 * @param String contentName 图层内容资源名称
 	 * @param String contentUsername 图层内容创建用户
@@ -48,6 +52,9 @@ public class MonitorOsdLayerService {
 			int y,
 			int layerIndex,
 			MonitorOsdLayerType type,
+			String font,
+			Integer height,
+			String color,
 			Long contentId,
 			String contentName,
 			String contentUsername,
@@ -72,6 +79,9 @@ public class MonitorOsdLayerService {
 		layer.setY(y);
 		layer.setLayerIndex(layerIndex);
 		layer.setType(type);
+		layer.setFont(type.equals(MonitorOsdLayerType.SUBTITLE)?null:(font==null?MonitorSubtitleFont.HEITI:MonitorSubtitleFont.fromName(font)));
+		layer.setHeight(type.equals(MonitorOsdLayerType.SUBTITLE)?null:(height==null?5:height));
+		layer.setColor(type.equals(MonitorOsdLayerType.SUBTITLE)?null:(color==null?"ffffff":color.toLowerCase()));
 		layer.setContentId(contentId);
 		layer.setContentName(contentName);
 		layer.setContentUsername(contentUsername);
@@ -92,6 +102,9 @@ public class MonitorOsdLayerService {
 	 * @param int y 万分比坐标
 	 * @param int layerIndex 图层顺序
 	 * @param MonitorOsdLayerType type 图层内容类型
+	 * @param String font 字体
+	 * @param Integer height 字号
+	 * @param String color 颜色
 	 * @param Long contentId 图层内容资源id
 	 * @param String contentName 图层内容资源名称
 	 * @param long userId 用户id 
@@ -102,6 +115,9 @@ public class MonitorOsdLayerService {
 			int x,
 			int y,
 			MonitorOsdLayerType type,
+			String font,
+			Integer height,
+			String color,
 			Long contentId,
 			String contentName,
 			String subtitleUsername,
@@ -124,9 +140,17 @@ public class MonitorOsdLayerService {
 		layer.setX(x);
 		layer.setY(y);
 		layer.setType(type);
-		layer.setContentId(contentId);
-		layer.setContentName(contentName);
-		layer.setContentUsername(subtitleUsername);
+		
+		if(type.equals(MonitorOsdLayerType.SUBTITLE)){
+			layer.setContentId(contentId);
+			layer.setContentName(contentName);
+			layer.setContentUsername(subtitleUsername);
+		}else{
+			layer.setFont(font==null?MonitorSubtitleFont.HEITI:MonitorSubtitleFont.fromName(font));
+			layer.setHeight(height==null?20:height);
+			layer.setColor(color==null?"ffffff":color.toLowerCase());
+		}
+		
 		monitorOsdLayerDao.save(layer);
 		
 		return layer;

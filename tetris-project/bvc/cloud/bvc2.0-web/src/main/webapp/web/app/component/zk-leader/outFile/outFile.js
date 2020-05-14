@@ -49,6 +49,7 @@ define([
             },
             search: function () {
                 this.dialogVisible = true;
+                this.editButton = false;
             },
             //添加
             addSubmit: function () {

@@ -332,6 +332,11 @@ public class CommandCooperateServiceImpl {
 		UserVO user = userQuery.current();
 		JSONArray chairSplits = new JSONArray();
 		
+		if(groupId==null || groupId.equals("")){
+			log.info("开始协同指挥，会议id有误");
+			return chairSplits;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 					
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
@@ -343,7 +348,11 @@ public class CommandCooperateServiceImpl {
 //		List<CommandGroupUserPlayerPO> needSavePlayers = new ArrayList<CommandGroupUserPlayerPO>();
 		
 		if(group.getStatus().equals(GroupStatus.STOP)){
-			throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+			if(!OriginType.OUTER.equals(group.getOriginType())){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+			}else{
+				return chairSplits;
+			}
 		}
 		
 		if(userIdArray.contains(group.getUserId())){
@@ -856,13 +865,23 @@ public class CommandCooperateServiceImpl {
 	 */
 	public JSONArray revokeBatch(List<Long> userIds, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("停止协同指挥，会议id有误");
+			return new JSONArray();
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 		
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
 			
 			if(GroupStatus.STOP.equals(group.getStatus())){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经停止。id: " + group.getId());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经停止。id: " + group.getId());
+				}else{
+					return new JSONArray();
+				}
 			}
 			if(group.getType().equals(GroupType.MEETING)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "会议中不能进行协同");

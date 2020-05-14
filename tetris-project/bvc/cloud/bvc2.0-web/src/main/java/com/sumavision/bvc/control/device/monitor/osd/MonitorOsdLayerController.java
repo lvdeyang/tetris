@@ -109,7 +109,7 @@ public class MonitorOsdLayerController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		MonitorOsdLayerPO layer = monitorOsdLayerService.add(osdId, x, y, layerIndex, MonitorOsdLayerType.SUBTITLE, subtitleId, subtitleName, subtitleUsername, userId);
+		MonitorOsdLayerPO layer = monitorOsdLayerService.add(osdId, x, y, layerIndex, MonitorOsdLayerType.SUBTITLE, null, null, null, subtitleId, subtitleName, subtitleUsername, userId);
 		
 		return new MonitorOsdLayerVO().set(layer);
 	}
@@ -123,6 +123,9 @@ public class MonitorOsdLayerController {
 	 * @param int x 横坐标百分比
 	 * @param int y 纵坐标百分比
 	 * @param int layerIndex 图层索引
+	 * @param String font 字体
+	 * @param Integer height 字号
+	 * @param String color 颜色
 	 * @return MonitorOsdLayerVO 图层
 	 */
 	@JsonBody
@@ -133,11 +136,14 @@ public class MonitorOsdLayerController {
 			int x,
 			int y,
 			int layerIndex,
+			String font,
+			Integer height,
+			String color,
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		MonitorOsdLayerPO layer = monitorOsdLayerService.add(osdId, x, y, layerIndex, MonitorOsdLayerType.DATE, null, null, null, userId);
+		MonitorOsdLayerPO layer = monitorOsdLayerService.add(osdId, x, y, layerIndex, MonitorOsdLayerType.DATE, font, height, color, null, null, null, userId);
 		
 		return new MonitorOsdLayerVO().set(layer);
 	}
@@ -151,6 +157,9 @@ public class MonitorOsdLayerController {
 	 * @param int x 横坐标百分比
 	 * @param int y 纵坐标百分比
 	 * @param int layerIndex 图层索引
+	 * @param String font 字体
+	 * @param Integer height 字号
+	 * @param String color 颜色
 	 * @return MonitorOsdLayerVO 图层
 	 */
 	@JsonBody
@@ -161,11 +170,14 @@ public class MonitorOsdLayerController {
 			int x,
 			int y,
 			int layerIndex,
+			String font,
+			Integer height,
+			String color,
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		MonitorOsdLayerPO layer = monitorOsdLayerService.add(osdId, x, y, layerIndex, MonitorOsdLayerType.DATETIME, null, null, null, userId);
+		MonitorOsdLayerPO layer = monitorOsdLayerService.add(osdId, x, y, layerIndex, MonitorOsdLayerType.DATETIME, font, height, color, null, null, null, userId);
 		
 		return new MonitorOsdLayerVO().set(layer);
 	}
@@ -179,6 +191,9 @@ public class MonitorOsdLayerController {
 	 * @param int x 横坐标百分比
 	 * @param int y 纵坐标百分比
 	 * @param int layerIndex 图层索引
+	 * @param String font 字体
+	 * @param Integer height 字号
+	 * @param String color 颜色
 	 * @return MonitorOsdLayerVO 图层
 	 */
 	@JsonBody
@@ -189,11 +204,14 @@ public class MonitorOsdLayerController {
 			int x,
 			int y,
 			int layerIndex,
+			String font,
+			Integer height,
+			String color,
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		MonitorOsdLayerPO layer = monitorOsdLayerService.add(osdId, x, y, layerIndex, MonitorOsdLayerType.DEVNAME, null, null, null, userId);
+		MonitorOsdLayerPO layer = monitorOsdLayerService.add(osdId, x, y, layerIndex, MonitorOsdLayerType.DEVNAME, font, height, color, null, null, null, userId);
 		
 		return new MonitorOsdLayerVO().set(layer);
 	}
@@ -228,6 +246,7 @@ public class MonitorOsdLayerController {
 	 * @param int y 万分比坐标
 	 * @param Long subtitleId 字幕id
 	 * @param String subtitleName 字幕名称
+	 * @param String subtitleUsername 字幕创建用户
 	 * @return MonitorOsdLayerVO 图层
 	 */
 	@JsonBody
@@ -244,9 +263,44 @@ public class MonitorOsdLayerController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		MonitorOsdLayerPO layer = monitorOsdLayerService.edit(id, x, y, MonitorOsdLayerType.SUBTITLE, subtitleId, subtitleName, subtitleUsername, userId);
+		MonitorOsdLayerPO layer = monitorOsdLayerService.edit(id, x, y, MonitorOsdLayerType.SUBTITLE, null, null, null, subtitleId, subtitleName, subtitleUsername, userId);
 		
 		return new MonitorOsdLayerVO().set(layer);
+	}
+	
+	/**
+	 * 修改内置图层<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年5月7日 上午11:01:37
+	 * @param Long id 图层id
+	 * @param int x 万分比坐标
+	 * @param int y 万分比坐标
+	 * @param String type 图层类型
+	 * @param String font 字体
+	 * @param Integer height 字号
+	 * @param String color 颜色
+	 * @return MonitorOsdLayerVO 图层
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/edit/enum/layer/{id}")
+	public Object editEnumLayer(
+			@PathVariable Long id,
+			int x,
+			int y,
+			String type,
+			String font,
+			Integer height,
+			String color,
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		MonitorOsdLayerPO layer = monitorOsdLayerService.edit(id, x, y, MonitorOsdLayerType.fromName(type), font, height, color, null, null, null, userId);
+		
+		return new MonitorOsdLayerVO().set(layer);
+		
 	}
 	
 	/**

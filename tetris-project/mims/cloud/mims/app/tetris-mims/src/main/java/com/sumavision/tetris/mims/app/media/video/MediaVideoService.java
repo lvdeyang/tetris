@@ -33,6 +33,8 @@ import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.easy.process.media.editor.MediaEditorService;
 import com.sumavision.tetris.easy.process.media.editor.TranscodeMediaVO;
+import com.sumavision.tetris.easy.process.stream.transcode.FileDealVO;
+import com.sumavision.tetris.easy.process.stream.transcode.StreamTranscodeQuery;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -41,10 +43,13 @@ import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorDAO;
+import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsDAO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsPO;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsQuery;
 import com.sumavision.tetris.mims.app.media.settings.MediaSettingsType;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionService;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.storage.StoreQuery;
@@ -104,6 +109,15 @@ public class MediaVideoService {
 	
 	@Autowired
 	private MediaEditorService mediaEditorService;
+	
+	@Autowired
+	private MediaFileEditorDAO mediaFileEditorDAO;
+	
+	@Autowired
+	private StreamTranscodeQuery streamTranscodeQuery;
+	
+	@Autowired
+	private MediaFileEquipmentPermissionService mediaFileEquipmentPermissionService;
 	
 	/**
 	 * 视频媒资上传审核通过<br/>
@@ -197,6 +211,12 @@ public class MediaVideoService {
 			//将待删除存储文件数据押入存储文件删除队列
 			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
 			
+			//需要删除的音频媒资的idList
+			List<Long> needRemoveVideoIds = new ArrayList<Long>();
+			for(MediaVideoPO needRemoveVideo: videosCanBeDeleted){
+				needRemoveVideoIds.add(needRemoveVideo.getId());
+			}
+			
 			Set<Long> videoIds = new HashSet<Long>();
 			for(MediaVideoPO video:videosCanBeDeleted){
 				videoIds.add(video.getId());
@@ -216,6 +236,20 @@ public class MediaVideoService {
 					if(file.exists()) file.delete();
 				}
 			}
+			
+			//删除转码文件
+			List<MediaFileEditorPO> editorPOs = mediaFileEditorDAO.findByMediaIdInAndMediaType(needRemoveVideoIds, FolderType.COMPANY_AUDIO);
+			for (MediaFileEditorPO mediaFileEditorPO : editorPOs) {
+				if (mediaFileEditorPO.getUploadTempPath() == null || mediaFileEditorPO.getUploadTempPath().isEmpty()) continue;
+				File file = new File(new File(mediaFileEditorPO.getUploadTempPath()).getParent());
+				File[] children = file.listFiles();
+				if(children != null){
+					for(File sub: children){
+						if(sub.exists()) sub.delete();
+					}
+				}
+			}
+			mediaFileEditorDAO.deleteInBatch(editorPOs);
 		}
 	}
 	
@@ -331,10 +365,19 @@ public class MediaVideoService {
 			//将待删除存储文件数据押入存储文件删除队列
 			storeTool.pushPreRemoveFileToQueue(preRemoveFiles);
 			
+			//需要删除的音频媒资的idList
+			List<Long> needRemoveVideoIds = new ArrayList<Long>();
+			for(MediaVideoPO needRemoveVideo: videosCanBeDeleted){
+				needRemoveVideoIds.add(needRemoveVideo.getId());
+			}
+			
 			Set<Long> videoIds = new HashSet<Long>();
 			for(MediaVideoPO video:videosCanBeDeleted){
 				videoIds.add(video.getId());
 			}
+			
+			//删除同步到设备的资源和数据
+			mediaFileEquipmentPermissionService.removePermission(new ArrayList<Long>(videoIds), "video", null);
 			
 			//删除临时文件
 			for(MediaVideoPO video:videosCanBeDeleted){
@@ -350,6 +393,20 @@ public class MediaVideoService {
 					if(file.exists()) file.delete();
 				}
 			}
+			
+			//删除转码文件
+			List<MediaFileEditorPO> editorPOs = mediaFileEditorDAO.findByMediaIdInAndMediaType(needRemoveVideoIds, FolderType.COMPANY_AUDIO);
+			for (MediaFileEditorPO mediaFileEditorPO : editorPOs) {
+				if (mediaFileEditorPO.getUploadTempPath() == null || mediaFileEditorPO.getUploadTempPath().isEmpty()) continue;
+				File file = new File(new File(mediaFileEditorPO.getUploadTempPath()).getParent());
+				File[] children = file.listFiles();
+				if(children != null){
+					for(File sub: children){
+						if(sub.exists()) sub.delete();
+					}
+				}
+			}
+			mediaFileEditorDAO.deleteInBatch(editorPOs);
 		}
 		return new HashMapWrapper<String, Object>().put("deleted", MediaVideoVO.getConverter(MediaVideoVO.class).convert(videosCanBeDeleted, MediaVideoVO.class))
 												   .put("processed", MediaVideoVO.getConverter(MediaVideoVO.class).convert(videosNeedProcess, MediaVideoVO.class))
@@ -396,7 +453,7 @@ public class MediaVideoService {
 		mediaVideoPO.setStoreType(StoreType.REMOTE);
 		if (previewUrl.endsWith(".m3u8")){
 			Long duration = getHlsDuration(previewUrl, null);
-			if (duration != 0l) mediaVideoPO.setDuration(duration);
+			mediaVideoPO.setDuration(duration);
 		}
 		mediaVideoDao.save(mediaVideoPO);
 		
@@ -765,14 +822,16 @@ public class MediaVideoService {
 	 * @param folderId 视频媒资存放路径
 	 * @return List<MediaVideoPO> 视频媒资列表
 	 */
-	public List<MediaVideoPO> addList(UserVO user, List<String> urlList, Long folderId, String tags) throws Exception{
+	public List<MediaVideoPO> addList(UserVO user, List<String> urlList, Long folderId, String tags, String processInstanceId) throws Exception{
 		
 		if (urlList == null || urlList.size() <= 0) return null;
 		
 		String folderType = "video";
 		
 		List<MediaVideoPO> videos = new ArrayList<MediaVideoPO>();
-		for (String url : urlList) {
+//		for (String url : urlList) {
+		if (urlList != null && !urlList.isEmpty()){
+			String url = urlList.get(0);
 			File file = new File(url);
 			String folderPath = new StringBufferWrapper().append(path.webappPath()).append("upload").append(file.getPath().split("upload")[1]).toString();
 			File localFile = new File(folderPath);
@@ -787,8 +846,22 @@ public class MediaVideoService {
 					String uploadTempPath = childFile.getPath();
 					String mimeType = new MimetypesFileTypeMap().getContentType(childFile);
 					
-					MediaVideoPO video = this.add(user, localFile.getParentFile().getName(), fileName, size, folderType, mimeType, uploadTempPath, tags, folderId);
-					videos.add(video);
+					MediaFileEditorPO editorPO = mediaFileEditorDAO.findByProcessInstanceId(processInstanceId);
+					if (editorPO != null) {
+						editorPO.setFileName(fileName);
+						editorPO.setSize(size);
+						MultimediaInfo multimediaInfo = new Encoder().getInfo(childFile);
+						editorPO.setDuration(new StringBufferWrapper().append(multimediaInfo.getDuration()).toString());
+						editorPO.setPreviewUrl(new StringBufferWrapper().append("upload").append(uploadTempPath.split("upload")[1]).toString().replace("\\", "/"));
+						editorPO.setUploadTempPath(uploadTempPath);
+						editorPO.setUpdateTime(new Date());
+						mediaFileEditorDAO.save(editorPO);
+						videos.add(mediaVideoDao.findOne(editorPO.getMediaId()));
+					} else {
+						MediaVideoPO video = this.add(user, localFile.getParentFile().getName(), fileName, size, folderType, mimeType, uploadTempPath, tags, folderId);
+						videos.add(video);
+					}
+					break;
 				}
 			}	
 		}
@@ -861,17 +934,28 @@ public class MediaVideoService {
 	 * @param String param 模板名称
 	 * @return 参数键值对
 	 */
-	public void startMediaEdit(MediaVideoPO media) throws Exception {
-		String template = media.getMediaEditTemplate();
-		if (!media.getMediaEdit() || template == null || template.isEmpty()) return;
-		TranscodeMediaVO transcodeMediaVO = new TranscodeMediaVO();
-		transcodeMediaVO.setUuid(media.getUuid());
-		transcodeMediaVO.setStartTime(0l);
-		transcodeMediaVO.setEndTime(media.getDuration());
-		String transcodeJob = JSONArray.toJSONString(new ArrayListWrapper<TranscodeMediaVO>().add(transcodeMediaVO).getList());
-		String name = media.getName();
-		Long folderId = media.getFolderId();
-		
-		mediaEditorService.start(transcodeJob, template, name, folderId, "");
+	public void checkMediaEdit(MediaVideoPO media) throws Exception {
+		System.out.println("检测资源是否需要转码：" + media.getId());
+		FileDealVO checkEdit = streamTranscodeQuery.checkEdit(media.getId(), "video");
+		if (checkEdit != null){
+			String param = checkEdit.getParam();
+			if (param != null && !param.isEmpty()) {
+				TranscodeMediaVO transcodeMediaVO = new TranscodeMediaVO();
+				transcodeMediaVO.setUuid(media.getUuid());
+				transcodeMediaVO.setStartTime(0l);
+				transcodeMediaVO.setEndTime(media.getDuration());
+				String transcodeJob = JSONArray.toJSONString(new ArrayListWrapper<TranscodeMediaVO>().add(transcodeMediaVO).getList());
+				String name = media.getName();
+				Long folderId = media.getFolderId();
+				
+				String processInstansId = mediaEditorService.start(transcodeJob, param, name, folderId, "");
+				
+				MediaFileEditorPO mediaFileEditorPO = new MediaFileEditorPO();
+				mediaFileEditorPO.setMediaId(media.getId());
+				mediaFileEditorPO.setProcessInstanceId(processInstansId);
+				mediaFileEditorPO.setMediaType(FolderType.COMPANY_VIDEO);
+				mediaFileEditorDAO.save(mediaFileEditorPO);
+			}
+		};
 	}
 }

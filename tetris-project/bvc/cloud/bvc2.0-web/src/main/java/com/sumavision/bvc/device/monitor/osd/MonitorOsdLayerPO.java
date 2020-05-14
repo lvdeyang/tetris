@@ -10,6 +10,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.sumavision.bvc.device.monitor.subtitle.MonitorSubtitleFont;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -39,6 +40,15 @@ public class MonitorOsdLayerPO extends AbstractBasePO{
 	
 	/** 图层内容类型 */
 	private MonitorOsdLayerType type;
+	
+	/** 字体默认是黑体 */
+	private MonitorSubtitleFont font;
+	
+	/** 字体高度，单位：像素，取值0-100 */
+	private Integer height = 20;
+	
+	/** 16进制颜色 没有# */
+	private String color = "ffffff";
 
 	/** 图层内容对应的资源id */
 	private Long contentId;
@@ -96,6 +106,34 @@ public class MonitorOsdLayerPO extends AbstractBasePO{
 
 	public void setType(MonitorOsdLayerType type) {
 		this.type = type;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "FONT")
+	public MonitorSubtitleFont getFont() {
+		return font;
+	}
+
+	public void setFont(MonitorSubtitleFont font) {
+		this.font = font;
+	}
+
+	@Column(name = "HEIGHT")
+	public Integer getHeight() {
+		return height;
+	}
+
+	public void setHeight(Integer height) {
+		this.height = height;
+	}
+
+	@Column(name = "COLOR")
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
 	}
 
 	@Column(name = "CONTENT_ID")

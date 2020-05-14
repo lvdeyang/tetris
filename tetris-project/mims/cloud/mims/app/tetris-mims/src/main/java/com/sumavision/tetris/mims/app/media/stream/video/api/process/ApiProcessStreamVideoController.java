@@ -66,6 +66,7 @@ public class ApiProcessStreamVideoController {
             String tags,
             String keyWords,
             String remark,
+            String streamType,
 			HttpServletRequest request) throws Exception {
 		UserVO user = userQuery.current();
 		
@@ -77,7 +78,7 @@ public class ApiProcessStreamVideoController {
 		List<String> previewUrlList = new ArrayList<String>();
 		if (previewUrls != null) previewUrlList = JSONArray.parseArray(previewUrls, String.class);
 		
-		mediaVideoStreamService.addTask(user, mimsName, null, null, remark, previewUrlList, folderPOs.get(0));
+		mediaVideoStreamService.addTask(user, mimsName, null, null, remark, previewUrlList, folderPOs.get(0), streamType);
 		
 		String separator = File.separator;
 		String webappPath = path.webappPath();

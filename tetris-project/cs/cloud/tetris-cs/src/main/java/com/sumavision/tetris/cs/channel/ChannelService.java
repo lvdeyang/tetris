@@ -23,19 +23,20 @@ import com.sumavision.tetris.cs.area.AreaVO;
 import com.sumavision.tetris.cs.bak.SendBakService;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoDAO;
 import com.sumavision.tetris.cs.channel.autoBroad.ChannelAutoBroadInfoPO;
+import com.sumavision.tetris.cs.channel.broad.ChannelServerType;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoVO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityQuery;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityQueryType;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemoteDAO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityRemotePO;
 import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityService;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadStreamWay;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.file.BroadFileService;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoService;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalLevelType;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalService;
-import com.sumavision.tetris.cs.channel.exception.ChannelAbilityRequestErrorException;
-import com.sumavision.tetris.cs.channel.exception.ChannelAlreadyBroadException;
 import com.sumavision.tetris.cs.channel.exception.ChannelStatusErrorException;
 import com.sumavision.tetris.cs.menu.CsMenuPO;
 import com.sumavision.tetris.cs.menu.CsMenuService;
@@ -145,9 +146,94 @@ public class ChannelService {
 			String date,
 			String broadWay,
 			String remark,
-			String level,
-			Boolean hasFile,
+			SetTerminalBroadBO terminalBroadBO,
 			ChannelType type,
+			Boolean encryption,
+			SetAutoBroadBO autoBroadBO,
+			SetOutputBO outputBO) throws Exception {
+		UserVO user = userQuery.current();
+		
+		BroadWay channelBroadWay = BroadWay.fromName(broadWay);
+		ChannelPO channel = new ChannelPO();
+		channel.setName(name);
+		channel.setRemark(remark);
+		channel.setDate(date);
+		channel.setBroadWay(channelBroadWay.getName());
+		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT.getName());
+		channel.setGroupId(user.getGroupId());
+		channel.setUpdateTime(new Date());
+		channel.setEncryption(encryption);
+		channel.setAutoBroad(autoBroadBO.getAutoBroad());
+		channel.setType(type.toString());
+		
+		//校验用户是否被占用
+		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
+			broadAbilityBroadInfoService.checkUserUse(null, outputBO.getOutputUsers());
+			broadFileBroadInfoService.checkUserUse(null, outputBO.getOutputUsers());
+		}
+		
+		//校验ip和端口对是否被占用，设置轮播推流id
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
+			broadAbilityBroadInfoService.checkIpAndPortExists(null, outputBO.getOutput());
+			channel.setAbilityBroadId(adapter.getNewId(channelDao.getAllAbilityId()));
+		}
+
+		channelDao.save(channel);
+		
+		//保存播发输出信息
+		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
+			List<BroadAbilityBroadInfoVO> saveinInfoVOs = new ArrayList<BroadAbilityBroadInfoVO>();
+			if (outputBO.getOutput() != null && !outputBO.getOutput().isEmpty()) saveinInfoVOs.addAll(outputBO.getOutput());
+			saveinInfoVOs.addAll(broadAbilityBroadInfoService.changeVO(outputBO));
+			broadAbilityBroadInfoService.saveInfoList(channel.getId(), saveinInfoVOs);
+		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
+			broadFileBroadInfoService.saveInfoList(channel.getId(), broadFileBroadInfoService.changeVO(outputBO.getOutputUsers()));
+		} else {
+			broadTerminalBroadInfoService.saveInfo(channel.getId(), terminalBroadBO);
+		}
+		
+		//保存智能播发信息
+		if (autoBroadBO.getAutoBroad() != null && autoBroadBO.getAutoBroad()) {
+			ChannelAutoBroadInfoPO autoBroadInfoPO = new ChannelAutoBroadInfoPO();
+			autoBroadInfoPO.setUpdateTime(new Date());
+			autoBroadInfoPO.setChannelId(channel.getId());
+			autoBroadInfoPO.setShuffle(autoBroadBO.getAutoBroadShuffle());
+			autoBroadInfoPO.setDuration(autoBroadBO.getAutoBroadDuration());
+			autoBroadInfoPO.setStartTime(autoBroadBO.getAutoBroadStart());
+			autoBroadInfoPO.setStartDate(DateUtil.getYearmonthDay(new Date()));
+			channelAutoBroadInfoDAO.save(autoBroadInfoPO);
+		}
+
+		return channel;
+	}
+	
+	/**
+	 * 添加频道<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年6月25日 上午11:06:57
+	 * @param String name 频道名称
+	 * @param String date 日期
+	 * @param String broadWay 播发方式(参考BroadWay枚举)
+	 * @param String level 播发优先级(仅限终端播发)
+	 * @param Boolean hasFile 是否携带文件播发(仅限终端播发)
+	 * @param ChannelTyep type 平台添加还是其他服务添加
+	 * @param Boolean encryption 是否加密播发(仅限轮播推流)
+	 * @param Boolean autoBroad 是否智能播发
+	 * @param Boolean autoBroadShuffle 是否乱序(仅限智能播发)
+	 * @param Integer autoBroadDuration 生效时长(仅限智能播发，单位：天)
+	 * @param String autoBroadStart 智能播发生效时间(仅限智能播发)
+	 * @param String outputUserPort 能力的输出地址port(仅限轮播推流)
+	 * @param List<UserVO> outputUserList 预播发的用户列表
+	 * List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs 预播发的ip和port对(仅限轮播推流)
+	 * @param String remark 备注
+	 * @return ChannelPO 频道
+	 */
+	public ChannelPO addYjbgChannel(
+			String name,
+			String date,
+			String broadWay,
+			String remark,
 			Boolean encryption,
 			Boolean autoBroad,
 			Boolean autoBroadShuffle,
@@ -157,59 +243,26 @@ public class ChannelService {
 			List<UserVO> outputUserList,
 			List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs) throws Exception {
 		UserVO user = userQuery.current();
-		
 		BroadWay channelBroadWay = BroadWay.fromName(broadWay);
-		ChannelPO channel = new ChannelPO();
-		channel.setName(name);
-		channel.setRemark(remark);
-		channel.setDate(date);
-		channel.setBroadWay(channelBroadWay.getName());
-		channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT);
-		channel.setGroupId(user.getGroupId());
-		channel.setUpdateTime(new Date());
-		channel.setEncryption(encryption);
-		channel.setAutoBroad(autoBroad);
-		channel.setType(type.toString());
-		
-		//校验用户是否被占用
-		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
-			broadAbilityBroadInfoService.checkUserUse(null, outputUserList);
-			broadFileBroadInfoService.checkUserUse(null, outputUserList);
-		}
-		
-		//校验ip和端口对是否被占用，设置轮播推流id
 		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
-			broadAbilityBroadInfoService.checkIpAndPortExists(null, abilityBroadInfoVOs);
-			channel.setAbilityBroadId(adapter.getNewId(channelDao.getAllAbilityId()));
+			ChannelPO channel = broadAbilityService.add(
+					user,
+					name,
+					date,
+					broadWay,
+					remark,
+					ChannelType.YJGB,
+					encryption,
+					autoBroad,
+					autoBroadShuffle,
+					autoBroadDuration,
+					autoBroadStart,
+					outputUserPort,
+					outputUserList,
+					abilityBroadInfoVOs);
+			return channel;
 		}
-
-		channelDao.save(channel);
-		
-		//保存播发输出信息
-		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
-			List<BroadAbilityBroadInfoVO> saveinInfoVOs = new ArrayList<BroadAbilityBroadInfoVO>();
-			if (abilityBroadInfoVOs != null && !abilityBroadInfoVOs.isEmpty()) saveinInfoVOs.addAll(abilityBroadInfoVOs);
-			saveinInfoVOs.addAll(broadAbilityBroadInfoService.changeVO(outputUserList, outputUserPort));
-			broadAbilityBroadInfoService.saveInfoList(channel.getId(), saveinInfoVOs);
-		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
-			broadFileBroadInfoService.saveInfoList(channel.getId(), broadFileBroadInfoService.changeVO(outputUserList));
-		} else {
-			broadTerminalBroadInfoService.saveInfo(channel.getId(), level, hasFile);
-		}
-		
-		//保存智能播发信息
-		if (autoBroad) {
-			ChannelAutoBroadInfoPO autoBroadInfoPO = new ChannelAutoBroadInfoPO();
-			autoBroadInfoPO.setUpdateTime(new Date());
-			autoBroadInfoPO.setChannelId(channel.getId());
-			autoBroadInfoPO.setShuffle(autoBroadShuffle);
-			autoBroadInfoPO.setDuration(autoBroadDuration);
-			autoBroadInfoPO.setStartTime(autoBroadStart);
-			autoBroadInfoPO.setStartDate(DateUtil.getYearmonthDay(new Date()));
-			channelAutoBroadInfoDAO.save(autoBroadInfoPO);
-		}
-
-		return channel;
+		return null;
 	}
 
 	/**
@@ -222,11 +275,16 @@ public class ChannelService {
 	public void remove(Long channelId) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		broadAbilityBroadInfoService.remove(channelId);
-		broadAbilityRemoteDAO.deleteByChannelId(channelId);
 		broadFileBroadInfoService.remove(channelId);
-		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) stopBroadcast(channelId);
-		if (channel.getBroadWay().equals(BroadWay.ABILITY_BROAD.getName()) && !channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT)) {
-			if (!broadAbilityQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null)) throw new ChannelAbilityRequestErrorException(BroadAbilityQueryType.DELETE.getRemark());
+		if (ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus())) stopBroadcast(channelId);
+		if (BroadWay.ABILITY_BROAD.getName().equals(channel.getBroadWay()) && !ChannelBroadStatus.CHANNEL_BROAD_STATUS_INIT.getName().equals(channel.getBroadcastStatus())) {
+			Boolean sendStop = true;
+			BroadAbilityRemotePO broadAbilityRemotePO = broadAbilityRemoteDAO.findByChannelId(channelId);
+			if (broadAbilityRemotePO != null && broadAbilityRemotePO.getBroadStreamWay() != BroadStreamWay.ABILITY_STREAM) sendStop = false;
+			broadAbilityRemoteDAO.deleteByChannelId(channelId);
+			if (sendStop) broadAbilityQuery.sendAbilityRequest(BroadAbilityQueryType.DELETE, channel, null, null);
+		} else if (channel.getBroadWay().equals(BroadWay.FILE_DOWNLOAD_BROAD.getName())) {
+			broadFileService.stopFileBroadcast(channelId);
 		}
 		channelDao.delete(channel);
 		ChannelAutoBroadInfoPO channelAutoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelId);
@@ -254,58 +312,55 @@ public class ChannelService {
 			Long id,
 			String name,
 			String remark,
-			String level,
-			Boolean hasFile,
+			SetTerminalBroadBO terminalBroadBO,
 			Boolean encryption,
-			Boolean autoBroad,
-			Boolean autoBroadShuffle,
-			Integer autoBroadDuration,
-			String autoBroadStart,
-			String outputUserPort,
-			List<UserVO> outputUserList,
-			List<BroadAbilityBroadInfoVO> abilityBroadInfoVOs) throws Exception {
+			SetAutoBroadBO autoBroadBO,
+			SetOutputBO outputBO) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(id);
 		
-		if (channel.getAutoBroad() && !autoBroad && channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) {
+		if (channel.getAutoBroad()
+				&& autoBroadBO.getAutoBroad() != null
+				&& !autoBroadBO.getAutoBroad()
+				&& ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus())) {
 			timerMap.get(id).cancel();
 			stopBroadcast(id);
 		}
 		
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
 		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
-			broadAbilityBroadInfoService.checkUserUse(id, outputUserList);
-			broadFileBroadInfoService.checkUserUse(id, outputUserList);
+			broadAbilityBroadInfoService.checkUserUse(id, outputBO.getOutputUsers());
+			broadFileBroadInfoService.checkUserUse(id, outputBO.getOutputUsers());
 		}
 		
 		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
-			broadAbilityBroadInfoService.checkIpAndPortExists(id, abilityBroadInfoVOs);
+			broadAbilityBroadInfoService.checkIpAndPortExists(id, outputBO.getOutput());
 			List<BroadAbilityBroadInfoVO> saveInfoVOs = new ArrayList<BroadAbilityBroadInfoVO>();
-			if (abilityBroadInfoVOs != null) saveInfoVOs.addAll(abilityBroadInfoVOs);
-			saveInfoVOs.addAll(broadAbilityBroadInfoService.changeVO(outputUserList, outputUserPort));
+			if (outputBO.getOutput() != null) saveInfoVOs.addAll(outputBO.getOutput());
+			saveInfoVOs.addAll(broadAbilityBroadInfoService.changeVO(outputBO));
 			broadAbilityBroadInfoService.saveInfoList(id, saveInfoVOs);
 		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
-			broadFileBroadInfoService.saveInfoList(channel.getId(), broadFileBroadInfoService.changeVO(outputUserList));
+			broadFileBroadInfoService.saveInfoList(channel.getId(), broadFileBroadInfoService.changeVO(outputBO.getOutputUsers()));
 		} else {
-			broadTerminalBroadInfoService.saveInfo(channel.getId(), level, hasFile);
+			broadTerminalBroadInfoService.saveInfo(channel.getId(), terminalBroadBO);
 			areaQuery.checkAreaUsed(channel.getId(), false);
 		}
 		channel.setName(name);
 		channel.setRemark(remark);
 		channel.setUpdateTime(new Date());
-		channel.setAutoBroad(autoBroad);
+		channel.setAutoBroad(autoBroadBO.getAutoBroad());
 		if (encryption != null) channel.setEncryption(encryption);
 		channelDao.save(channel);
 		
 		ChannelAutoBroadInfoPO autoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(id);
-		if (autoBroad) {
+		if (autoBroadBO.getAutoBroad()) {
 			if (autoBroadInfoPO == null) {
 				autoBroadInfoPO = new ChannelAutoBroadInfoPO();
 				autoBroadInfoPO.setUpdateTime(new Date());
 				autoBroadInfoPO.setChannelId(id);
 			}
-			autoBroadInfoPO.setShuffle(autoBroadShuffle);
-			autoBroadInfoPO.setDuration(autoBroadDuration);
-			autoBroadInfoPO.setStartTime(autoBroadStart);
+			autoBroadInfoPO.setShuffle(autoBroadBO.getAutoBroadShuffle());
+			autoBroadInfoPO.setDuration(autoBroadBO.getAutoBroadDuration());
+			autoBroadInfoPO.setStartTime(autoBroadBO.getAutoBroadStart());
 			autoBroadInfoPO.setStartDate(DateUtil.getYearmonthDay(new Date()));
 			channelAutoBroadInfoDAO.save(autoBroadInfoPO);
 		} else {
@@ -325,11 +380,14 @@ public class ChannelService {
 	 */
 	public void startBroadcast(Long channelId, String resourceIds) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) throw new ChannelAlreadyBroadException(channel.getName());
 		
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
 		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
-			broadAbilityService.startAbilityBroadcast(channelId);
+			if (ChannelType.YJGB.toString().equals(channel.getType())) {
+				broadAbilityService.startAbilityYjgbBroad(channelId);
+			} else {
+				broadAbilityService.startAbilityBroadcast(channelId);
+			}
 		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD){
 			broadFileService.startFileBroadcast(channelId);
 		} else {
@@ -346,7 +404,7 @@ public class ChannelService {
 	 */
 	public void restartBroadcast(Long channelId) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_STOPPED))
+		if (!ChannelBroadStatus.CHANNEL_BROAD_STATUS_STOPPED.getName().equals(channel.getBroadcastStatus()))
 			throw new ChannelStatusErrorException(channel.getBroadcastStatus(), "重新播发");
 		
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
@@ -390,13 +448,17 @@ public class ChannelService {
 	 */
 	public void stopBroadcast(Long channelId) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) 
+		if (!ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus())) 
 //			throw new ChannelAlreadyStopException(channel.getName());
 			return;
 		
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
 		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
-			broadAbilityService.stopAbilityBroadcast(channelId);
+			if (ChannelType.YJGB.toString().equals(channel.getType())) {
+				broadAbilityService.stopAbilityYjgbBroadcast(channelId);
+			} else {
+				broadAbilityService.stopAbilityBroadcast(channelId);
+			}
 		} else if (channelBroadWay == BroadWay.FILE_DOWNLOAD_BROAD) {
 			broadFileService.stopFileBroadcast(channelId);
 		} else {
@@ -406,7 +468,7 @@ public class ChannelService {
 	
 	public void seekBroadcast(Long channelId, Long duration) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (!channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING))
+		if (!ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus()))
 			throw new ChannelStatusErrorException(channel.getBroadcastStatus(), "跳转");
 		
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
@@ -417,7 +479,7 @@ public class ChannelService {
 	
 	public void autoAddSchedulesAndBroad(Long channelId) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
-		if (channel.getBroadcastStatus().equals(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING)) stopBroadcast(channelId);
+		if (ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus())) stopBroadcast(channelId);
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
 		if (channelBroadWay != BroadWay.TERMINAL_BROAD) {
 			autoSetSchedule(channelId);
@@ -466,8 +528,16 @@ public class ChannelService {
 		}
 	}
 	
-	public void addScheduleDeal(Long channelId) throws Exception {
+	/**
+	 * 设置排期表和排期表内容时调用<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月5日 下午1:39:25
+	 * @param Long channelId 频道id
+	 */
+	public void changeScheduleDeal(Long channelId) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
+		if (!ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName().equals(channel.getBroadcastStatus())) return;
 		BroadWay channelBroadWay = BroadWay.fromName(channel.getBroadWay());
 		if (channelBroadWay == BroadWay.ABILITY_BROAD) {
 			broadAbilityService.addScheduleDeal(channelId);
@@ -475,6 +545,28 @@ public class ChannelService {
 			
 		} else {
 			
+		}
+	}
+	
+	/**
+	 * 服务器重启调用<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月5日 下午1:40:38
+	 */
+	public void rebootServer(ChannelServerType serverType, String serverIp) throws Exception {
+		switch (serverType) {
+		case CS_LOCAL_SERVER:
+			broadAbilityService.abilityReboot(null);
+			break;
+		case ABILITY_STREAM:
+			broadAbilityService.abilityReboot(serverIp);
+			break;
+		case PUSH_TERMINAL:
+			
+			break;
+		default:
+			break;
 		}
 	}
 	
@@ -502,7 +594,7 @@ public class ChannelService {
 			List<String> regions,
 			UserVO user) throws Exception {
 		//创建频道
-		ChannelPO channel = broadTerminalService.add(user, name, publishTime, remark, BroadTerminalLevelType.ESPECIALLY.getName(), true, ChannelType.LOCAL, false, false);
+		ChannelPO channel = broadTerminalService.add(user, name, publishTime, remark, new SetTerminalBroadBO().setHasFile(true).setLevel(BroadTerminalLevelType.ESPECIALLY.getName()), ChannelType.LOCAL, false, false);
 		Long channelId = channel.getId();
 		
 		//创建目录结构

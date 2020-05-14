@@ -32,15 +32,16 @@ public class BundleFeignController {
 
 	@Autowired
 	private BundleService bundleService;
-	
+
 	@Autowired
 	private BundleDao bundleDao;
-	
+
 	/**
 	 * 查询经纬度范围内的ipc设备<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月6日 下午2:21:21
+	 * 
 	 * @param Long longitude 经度°
 	 * @param Long latitude 纬度°
 	 * @param Long raidus 半径范m
@@ -49,19 +50,16 @@ public class BundleFeignController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/query/visible/bundle")
-	public Object queryVisibleBundle(
-			String longitude,
-			String latitude,
-			Long raidus,
-			HttpServletRequest request) throws Exception{
-		
+	public Object queryVisibleBundle(String longitude, String latitude, Long raidus, HttpServletRequest request)
+			throws Exception {
+
 		List<String> deviceModels = new ArrayList<String>();
 		deviceModels.add("ipc");
 		deviceModels.add("speaker");
 		List<BundlePO> bundles = bundleDao.findByRaidus(longitude, latitude, raidus, deviceModels);
-		
+
 		List<YjgbVO> vos = new YjgbVO().getConverter(YjgbVO.class).convert(bundles, YjgbVO.class);
-		
+
 		return vos;
 	}
 
@@ -96,9 +94,9 @@ public class BundleFeignController {
 			BundlePO bundlePO = bundleService.findByBundleId(bundle_id);
 
 			if (bundlePO != null) {
-				
+
 				return getBundleFeignVoFromPO(bundlePO);
-				
+
 			}
 		} catch (Exception e) {
 			LOGGER.error("Fail to query queryTranscodeDevice, ", e);
@@ -110,6 +108,8 @@ public class BundleFeignController {
 	@RequestMapping(method = RequestMethod.POST, value = "/queryAuth", produces = { "application/json;charset=UTF-8" })
 	@ResponseBody
 	public Object queryAuth(@RequestParam(value = "bundle_id") String bundle_id) {
+
+		LOGGER.info("queryAuth in, bundle_id=" + bundle_id);
 
 		BundlePO bundlePO = bundleService.findByBundleId(bundle_id);
 

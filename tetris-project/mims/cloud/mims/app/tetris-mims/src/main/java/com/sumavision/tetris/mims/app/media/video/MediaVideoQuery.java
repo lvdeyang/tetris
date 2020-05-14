@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -23,7 +25,6 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.media.ReviewStatus;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
-import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
 import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
@@ -153,10 +154,14 @@ public class MediaVideoQuery {
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
 	 * @return List<MediaVideoVO> 视频媒资列表
 	 */
-	public List<MediaVideoVO> loadAll() throws Exception{
+	public List<MediaVideoVO> loadAll(Long ... id) throws Exception{
 		
 		//TODO 权限校验		
 		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
+		if (id != null && id.length > 0 && id[0] != null) {
+			folderTree = folderQuery.findSubFolders(id[0]);
+			folderTree.add(folderDao.findOne(id[0]));
+		}
 		
 		if (folderTree.isEmpty()) return new ArrayList<MediaVideoVO>();
 		
@@ -175,7 +180,44 @@ public class MediaVideoQuery {
 		
 		packMediaVideoTree(medias, folderTree, videos);
 		
-		return medias;
+		return id != null && id.length > 0 ? medias.get(0).getChildren() : medias;
+	}
+	
+	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return MediaVideoVO
+	 */
+	public MediaVideoVO loadCollection(Long folderId) throws Exception {
+		MediaVideoVO videoFolder = null;
+		if (folderId != null) {
+			List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
+			for (FolderPO folderPO : folderTree) {
+				if (folderPO.getId() == folderId) {
+					videoFolder = new MediaVideoVO().set(folderPO);
+					break;
+				}
+			}
+			if (videoFolder != null) {
+				Map<String, Object> map = load(folderId);
+				List<MediaVideoVO> videoVOs = new ArrayList<MediaVideoVO>();
+				if (map.containsKey("rows")) {
+					videoVOs = JSONArray.parseArray(JSONObject.toJSONString(map.get("rows")), MediaVideoVO.class);
+				}
+				videoFolder.setChildren(videoVOs);
+			}
+		} else {
+			List<MediaVideoVO> medias = loadAll();
+			if (medias != null && !medias.isEmpty()) videoFolder = medias.get(0);
+			List<MediaVideoVO> children = videoFolder.getChildren();
+			for (MediaVideoVO mediaVideoVO : children) {
+				mediaVideoVO.setChildren(null);
+			}
+		}
+		return videoFolder;
 	}
 	
 	/**

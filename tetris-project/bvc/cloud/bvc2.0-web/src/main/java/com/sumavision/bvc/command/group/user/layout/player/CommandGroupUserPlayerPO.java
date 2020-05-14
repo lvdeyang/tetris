@@ -370,6 +370,8 @@ public class CommandGroupUserPlayerPO extends AbstractBasePO {
 		this.setBusinessId(null);
 		this.setBusinessName(null);
 		this.setPlayUrl(null);
+		this.setOsdId(null);
+		this.setOsdName(null);
 		this.setMember(null);
 		return this;
 	}

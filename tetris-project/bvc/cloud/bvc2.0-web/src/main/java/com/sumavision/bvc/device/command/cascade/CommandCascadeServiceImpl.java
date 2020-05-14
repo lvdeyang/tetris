@@ -213,6 +213,7 @@ public class CommandCascadeServiceImpl {
 			}
 		}else if(GroupType.MEETING.equals(type)){
 			//获取发言列表。后续改成只能1人发言
+			//TODO:讨论
 			String spkid = groupBO.getSpkid();
 			if(spkid!=null && !"".equals(spkid)){
 				String[] s = spkid.split(",");

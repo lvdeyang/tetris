@@ -1,7 +1,7 @@
 <el-dialog
         class="program-scree"
         title="节目编辑"
-        width="1240px"
+        :width="orientOptions.current.value=='horizontal'?'1240px':'1140px'"
         :visible.sync="visible"
         :before-close="handleClose">
 
@@ -14,25 +14,27 @@
 
         <el-container>
             <el-aside style="border-right: 1px solid #eee;width: 550px">
-                <el-tree
-                        :loading="dialog.chooseResource.tree.loading"
-                        ref="resourceTree"
-                        :props="dialog.chooseResource.tree.props"
-                        :data="dialog.chooseResource.tree.data"
-                        node-key="id"
-                        :expand-on-click-node="false"
-                        :current-node-key="dialog.chooseResource.tree.current"
-                        default-expand-all
-                        @current-change="currentResourceTreeNodeChange"
-                        highlight-current
-                        style="padding: 20px;height: 500px;overflow-y:auto">
+                <el-scrollbar style="height: 100%">
+                    <el-tree
+                            :loading="dialog.chooseResource.tree.loading"
+                            ref="resourceTree"
+                            :props="dialog.chooseResource.tree.props"
+                            :data="dialog.chooseResource.tree.data"
+                            node-key="id"
+                            :expand-on-click-node="false"
+                            :current-node-key="dialog.chooseResource.tree.current"
+                            default-expand-all
+                            @current-change="currentResourceTreeNodeChange"
+                            highlight-current
+                            style="padding: 20px;">
                             <span style="flex:1; display:flex; align-items:center; justify-content:space-between; padding-right:8px;"
                                   slot-scope="{node, data}">
                                 <span style="font-size:14px;">
                                     <span>{{data.name}}</span>
                                 </span>
                             </span>
-                </el-tree>
+                    </el-tree>
+                </el-scrollbar>
             </el-aside>
             <el-container style="margin-left: 20px">
                 <el-table
@@ -46,7 +48,8 @@
                     <el-table-column label="媒资名称" width="280" prop="name"></el-table-column>
                     <el-table-column label="媒资类型" width="80">
                         <template slot-scope="scope">
-                            <span>{{ scope.row.type=='PUSH_LIVE'?'直播':'文件' }}</span>
+                            <!--<span>{{ scope.row.type=='PUSH_LIVE'?'直播':'文件' }}</span>-->
+                            <span>{{ scope.row | resourceType }}</span>
                         </template>
                     </el-table-column>
                     <!--<el-table-column label="时长(毫秒)" width="110" prop="duration"></el-table-column>-->
@@ -75,6 +78,18 @@
                         :value="item.name">
                 </el-option>
             </el-select>
+            <el-select
+                    v-model="orientOptions.currentName"
+                    placeholder="请选择屏幕方向"
+                    @change="handleOrientOptionChange"
+                    :disabled="channelData.autoBroad"
+                    style="width: 180px">
+                <el-option
+                        v-for="item in orientOptions.list"
+                        :key="item.value"
+                        :value="item.name">
+                </el-option>
+            </el-select>
             <el-button size="small" type="primary" @click="handleCommit"
                        :loading="loading" style="margin-left: 20px"
                        :disabled="channelData.autoBroad">
@@ -85,20 +100,83 @@
             </el-button>
         </el-header>
         <el-main>
-            <div style="position: relative; padding: 230px 300px; display: inline-block;">
+            <div style="position: relative; display: inline-block;" :style="orientOptions.current.value=='horizontal'?'padding: 230px 300px':'padding: 230px 200px'">
                 <div class="screen"
                      v-if="options.current && options.current.screen"
                      v-for="item in options.current.screen"
                      :style="item"
                      :class="{choosed : options.currentScreen == item}"
                      @click="handleScreenChoose(item,$event)">
-                    <el-button class="chooseFile" size="small" type="primary" @click="chooseResources(item)">
-                        选择文件
+                    <el-select
+                            v-if=""
+                            v-model="item.contentType"
+                            placeholder="请选择资源类型"
+                            @change="handleContentOptionChange(item, $event)"
+                            :disabled="channelData.autoBroad"
+                            style="width: 120px; margin: 20px 0 0 20px">
+                        <el-option
+                                v-for="item in contentOptions.list"
+                                :key="item.value"
+                                :value="item.name">
+                        </el-option>
+                    </el-select>
+                    <el-button v-show="item.contentType=='视频资源' || item.contentType=='音频资源' || item.contentType=='图片资源' || item.contentType=='仓库资源'"
+                               class="chooseFile"
+                               size="small"
+                               type="primary"
+                               @click="chooseResources(item)">
+                        选择资源
                     </el-button>
                 </div>
             </div>
 
+            <el-input
+                    v-if="options.currentScreen.contentType=='自定义文字'"
+                    type="textarea"
+                    placeholder="请输入内容"
+                    v-model="options.currentScreen.data[0].textContent"
+                    :rows="20"
+                    style="width: 490px;height: 450px;overflow: auto;display: inline-block;">
+            </el-input>
+
+            <!--<el-table-->
+                    <!--v-if="options.currentScreen.contentType=='自定义文字'"-->
+                    <!--ref="textTable"-->
+                    <!--tooltip-effect="dark"-->
+                    <!--:data="options.currentScreen.data"-->
+                    <!--:default-sort="{prop:'index',order:'ascending'}"-->
+                    <!--style="width: 490px;height: 450px;overflow: auto;display: inline-block;">-->
+                <!--<el-table-column width="30"></el-table-column>-->
+                <!--<el-table-column label="排序" width="60" prop="index"></el-table-column>-->
+                <!--<el-table-column label="操作">-->
+                    <!--<template slot-scope="scope" v-if="!channelData.autoBroad">-->
+                        <!--<el-tooltip class="item" effect="dark" content="向上移动"-->
+                                    <!--placement="bottom">-->
+                            <!--<el-button type="text" icon="feather-icon-chevron-up"-->
+                                       <!--style="margin:0 5px 0 0; font-size:18px; padding:0;"-->
+                                       <!--@click="programResourceUp(scope)"></el-button>-->
+                        <!--</el-tooltip>-->
+                        <!--<el-tooltip class="item" effect="dark" content="向下移动"-->
+                                    <!--placement="bottom">-->
+                            <!--<el-button type="text" icon="feather-icon-chevron-down"-->
+                                       <!--style="margin:0 5px; font-size:18px; padding:0;"-->
+                                       <!--@click="programResourceDown(scope)"></el-button>-->
+                        <!--</el-tooltip>-->
+                        <!--<el-tooltip class="item" effect="dark" content="删除"-->
+                                    <!--placement="bottom">-->
+                            <!--<el-button type="text" icon="el-icon-delete"-->
+                                       <!--style="margin:0 5px; font-size:18px; padding:0;"-->
+                                       <!--@click="programResourceDelete(scope)"></el-button>-->
+                        <!--</el-tooltip>-->
+                    <!--</template>-->
+                <!--</el-table-column>-->
+            <!--</el-table>-->
+
             <el-table
+                    v-if="options.currentScreen.contentType=='视频资源'
+                     || options.currentScreen.contentType=='音频资源'
+                      || options.currentScreen.contentType=='图片资源'
+                       || options.currentScreen.contentType=='仓库资源'"
                     ref="programTable"
                     tooltip-effect="dark"
                     :data="options.currentScreen.data"
@@ -111,19 +189,33 @@
                     <el-table-column :key="Math.random()" label="综合分值" width="90" prop="hotWeight"></el-table-column>
                     <el-table-column :key="Math.random()" label="下载量" width="70" prop="downloadCount"></el-table-column>
                 </template>
+                <el-table-column label="时长/秒" width="110" v-if="channelData.hasFile != false">
+                    <template slot-scope="scope">
+                        <span v-if="scope.row.type=='VIDEO' || scope.row.type=='AUDIO'">{{ scope.row.duration / 1000 }}</span>
+                        <el-input
+                                v-else
+                                size="mini"
+                                wdith="20px"
+                                placeholder="持续时长"
+                                type="number"
+                                @change="handleDurationChange(scope.row, $event)"
+                                v-model="scope.row.duration / 1000">
+                        </el-input>
+                    </template>
+                </el-table-column>
                 <el-table-column label="操作">
                     <template slot-scope="scope">
-                        <template v-if="scope.row.type!='PUSH_LIVE'" >
+                        <template>
                             <el-tooltip class="item" effect="dark" content="预览"
                                         placement="bottom">
                                 <el-button type="text" class="icon-eye-open"
-                                           style="margin:0 5px; font-size:18px; padding:0;"
+                                           style="margin:0 5px; font-size:18px; padding:0;" :disabled="scope.row.type != 'AUDIO' && scope.row.type != 'VIDEO' && scope.row.type != 'PICTURE'"
                                            @click="handlePreview(scope)">
                                 </el-button>
                             </el-tooltip>
                         </template>
                         <template v-if="!channelData.autoBroad">
-                            <el-tooltip v-if="scope.row.type!='PUSH_LIVE'" class="item" effect="dark" content="向上移动"
+                            <el-tooltip class="item" effect="dark" content="向上移动"
                                         placement="bottom">
                                 <el-button type="text" icon="feather-icon-chevron-up"
                                            style="margin:0 5px 0 0; font-size:18px; padding:0;"

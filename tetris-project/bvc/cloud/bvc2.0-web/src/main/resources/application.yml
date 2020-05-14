@@ -1,12 +1,12 @@
 spring:
   application:
-    name: tetris-bvc-business-yxc
+    name: tetris-bvc-business-ldy
   cloud:
 #    config:
 #      uri: http://localhost:8769
 #      fail-fast: true
     client:
-      ipAddress: 192.165.153.50
+      ipAddress: 192.165.56.71
   profiles:
     active: pro
   datasource:
@@ -14,7 +14,7 @@ spring:
 #      url: jdbc:mysql://localhost:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
 #      username: root
 #      password: sumavisionrd
-      url: jdbc:mysql://192.165.56.18:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      url: jdbc:mysql://192.165.56.15:3306/bvc_business?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: sumadb
       password: Sumavision@300079
       driver-class-name: com.mysql.jdbc.Driver
@@ -30,7 +30,7 @@ spring:
 #      url: jdbc:mysql://localhost:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
 #      username: root
 #      password: sumavisionrd
-      url: jdbc:mysql://192.165.56.18:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
+      url: jdbc:mysql://192.165.56.15:3306/resource?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: sumadb
       password: Sumavision@300079
       driver-class-name: com.mysql.jdbc.Driver
@@ -45,7 +45,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     database: MYSQL
-    show-sql: false
+    show-sql: true
     hibernate:
       ddl-auto: update
   thymeleaf:
@@ -67,7 +67,7 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://192.165.56.18:8081/eureka/
+      defaultZone: http://192.165.56.15:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
@@ -97,4 +97,9 @@ command:
   ntp1Port: 1234
   ntp2IP: 192.165.56.132
   ntp2Port: 5678
+log:
+  home: /usr/sbin/sumavision/log/tomcat_venus_business
+  maxFileSize: 30MB
+  maxHistory: 10
+  totalSizeCap: 3GB    
   

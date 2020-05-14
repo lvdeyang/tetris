@@ -43,6 +43,10 @@ require.config({
         'mi-process-dialog':window.APPPATH + 'component/dialog/process/process-dialog',
         'mi-tag-dialog':window.APPPATH + 'component/dialog/mims/tag/mims-tag',
         'mi-txt-dialog':window.APPPATH + 'front/media/txt/txt-dialog',
+        'mi-image-dialog':window.APPPATH + 'component/dialog/mims/image/mims-image',
+        'mi-addition-dialog':window.APPPATH + 'front/media/dialog/addition/media-dialog-addition',
+        'mi-package-picker':window.APPPATH + 'front/operation/dialog/package-picker/operation-dialog-package-picker',
+        'mi-package-detail':window.APPPATH + 'front/operation/dialog/package-detail/operation-dialog-package-detail',
 
         /* pages */
 
@@ -89,7 +93,9 @@ require.config({
 
         /* operation-pages */
         'page-operation-package':window.APPPATH + 'front/operation/package/page-operation-package',
-        'page-operation-package-media':window.APPPATH + 'front/operation/package-media/page-operation-package-media'
+        'page-operation-package-media':window.APPPATH + 'front/operation/package-media/page-operation-package-media',
+        'page-operation-statistic-strategy':window.APPPATH + 'front/operation/statistic-strategy/page-operation-statistic-strategy',
+        'page-operation-package-choose':window.APPPATH + 'front/operation/package-choose/page-operation-package-choose'
     },
     shim:{
         'vue':{

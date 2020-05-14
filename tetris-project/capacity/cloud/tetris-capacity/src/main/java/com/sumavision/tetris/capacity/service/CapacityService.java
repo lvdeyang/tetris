@@ -26,6 +26,7 @@ import com.sumavision.tetris.capacity.bo.request.PatchDecodeRequest;
 import com.sumavision.tetris.capacity.bo.request.PutInputsRequest;
 import com.sumavision.tetris.capacity.bo.request.PutOutputRequest;
 import com.sumavision.tetris.capacity.bo.request.PutRealIndexRequest;
+import com.sumavision.tetris.capacity.bo.request.PutScheduleRequest;
 import com.sumavision.tetris.capacity.bo.request.PutTaskDecodeProcessRequest;
 import com.sumavision.tetris.capacity.bo.request.PutTaskEncodeRequest;
 import com.sumavision.tetris.capacity.bo.request.PutTaskSourceRequest;
@@ -1181,11 +1182,11 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月12日 上午9:02:11
 	 * @return GetEntiretiesResponse
 	 */
-	public GetEntiretiesResponse getEntireties() throws Exception{
+	public GetEntiretiesResponse getEntireties(String capacityIp) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		
-		return getEntireties(msg_id);
+		return getEntireties(msg_id, capacityIp);
 		
 	}
 	
@@ -1197,10 +1198,10 @@ public class CapacityService {
 	 * @param String msg_id 消息id
 	 * @return GetEntiretiesResponse 返回
 	 */
-	private GetEntiretiesResponse getEntireties(String msg_id) throws Exception{
+	private GetEntiretiesResponse getEntireties(String msg_id, String capacityIp) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-											  .append(capacityProps.getIp())
+											  .append(capacityIp)
 											  .append(":")
 											  .append(capacityProps.getPort())
 											  .append(UrlConstant.URL_ENTIRETY)
@@ -1386,6 +1387,42 @@ public class CapacityService {
 		
 		return response;
 											  
+	}
+	
+	/**
+	 * 追加排期请求<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月28日 下午1:27:17
+	 * @param String ip 转换模块ip
+	 * @param Long port 转换模块端口
+	 * @param String inputId schedule输入id
+	 * @param PutScheduleRequest scheduleRequest 追加排期参数
+	 * @return ResultCodeResponse
+	 */
+	public ResultCodeResponse putSchedule(String ip, Long port, String inputId, PutScheduleRequest scheduleRequest) throws Exception{
+		
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+		scheduleRequest.setMsg_id(msg_id);
+		
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+											  .append(ip)
+											  .append(":")
+											  .append(port)
+											  .append(UrlConstant.URL_INPUT)
+											  .append("/")
+											  .append(inputId)
+											  .append(UrlConstant.URL_INPUT_SCHEDULE)
+											  .toString();
+
+		JSONObject request = JSONObject.parseObject(JSON.toJSONString(scheduleRequest));
+		
+		JSONObject res = HttpUtil.httpPut(url, request);
+		
+		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
+		
+		return response;
+		
 	}
 	
 }

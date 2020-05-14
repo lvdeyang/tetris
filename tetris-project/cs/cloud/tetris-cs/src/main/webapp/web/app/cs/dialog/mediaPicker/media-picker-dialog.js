@@ -105,12 +105,12 @@ define([
                     for (var i = 0; i < checkedNodes.length; i++) {
                         selected.push(checkedNodes[i]);
                     }
-                } else {
-                    self.$message({
-                        message: '您没有选择任何资源',
-                        type: 'warning'
-                    });
-                    return;
+                //} else {
+                //    self.$message({
+                //        message: '您没有选择任何资源',
+                //        type: 'warning'
+                //    });
+                //    return;
                 }
 
                 var startLoading = function () {

@@ -44,6 +44,37 @@ public class MediaVideoStreamFeignController {
 	}
 	
 	/**
+	 * 加载所有视频流媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return List<MediaVideoStreamVO> 视频流媒资列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/all")
+	public Object loadAll(
+			HttpServletRequest request) throws Exception{
+		
+		return mediaVideoStreamQuery.loadAll();
+	}
+	
+	/**
+	 * 根据目录id获取目录及文件(一级)<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月29日 下午4:09:41
+	 * @param folderId 目录id
+	 * @return MediaVideoStreamVO
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/collection")
+	public Object loadCollection(Long folderId, HttpServletRequest request) throws Exception{
+		return mediaVideoStreamQuery.loadCollection(folderId);
+	}
+	
+	/**
 	 * 添加上传视频流媒资任务<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -58,9 +89,10 @@ public class MediaVideoStreamFeignController {
 	public Object addTask(
 			String previewUrl, 
 			String name,
+			String streamType,
 			HttpServletRequest request) throws Exception{
 		
-		return  mediaVideoStreamService.addVideoStreamTask(previewUrl, "", name);
+		return  mediaVideoStreamService.addVideoStreamTask(previewUrl, "", name, streamType);
 	}
 	
 	/**
@@ -98,8 +130,9 @@ public class MediaVideoStreamFeignController {
 			Long mediaId, 
 			String previewUrl,
 			String name,
+			String streamType,
 			HttpServletRequest request) throws Exception{
-		return mediaVideoStreamService.edit(mediaId, previewUrl, name);
+		return mediaVideoStreamService.edit(mediaId, previewUrl, name, streamType);
 	}
 	
 	/**

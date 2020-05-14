@@ -63,16 +63,22 @@ public class ChannelQuery {
 	 * @param Integer pageSize 分页大小
 	 * @return Page<ChannelPO> channels 频道列表
 	 */
-	public Map<String, Object> findAll(int currentPage, int pageSize, ChannelType type) throws Exception {
+	public Map<String, Object> findAll(Integer currentPage, Integer pageSize, ChannelType type) throws Exception {
 		UserVO user = userQuery.current();
 		
-		Pageable page = new PageRequest(currentPage - 1, pageSize);
-		Page<ChannelPO> channels = channelDao.PagefindAllByGroupIdAndType(user.getGroupId(), type.toString(), page);
-		freshBroadStatus(channels.getContent());
-		
-		Page<ChannelPO> newChannels = channelDao.PagefindAllByGroupIdAndType(user.getGroupId(), type.toString(), page);
-		
-		List<ChannelVO> channelVOs = ChannelVO.getConverter(ChannelVO.class).convert(newChannels.getContent(), ChannelVO.class);
+		List<ChannelPO> channels;
+		Page<ChannelPO> newPageChannels = null;
+		if (currentPage == null || pageSize == null) {
+			freshBroadStatus(channelDao.findAllByGroupIAndType(user.getGroupId(), type.toString()));
+			channels = channelDao.findAllByGroupIAndType(user.getGroupId(), type.toString());
+		} else {
+			Pageable page = new PageRequest(currentPage - 1, pageSize);
+			Page<ChannelPO> pageChannels = channelDao.PagefindAllByGroupIdAndType(user.getGroupId(), type.toString(), page);
+			freshBroadStatus(pageChannels.getContent());
+			newPageChannels = channelDao.PagefindAllByGroupIdAndType(user.getGroupId(), type.toString(), page);
+			channels = newPageChannels.getContent();
+		}
+		List<ChannelVO> channelVOs = ChannelVO.getConverter(ChannelVO.class).convert(channels, ChannelVO.class);
 		for (ChannelVO channelVO : channelVOs) {
 			if (channelVO.getAutoBroad() != null && channelVO.getAutoBroad()) {
 				ChannelAutoBroadInfoPO channelAutoBroadInfoPO = channelAutoBroadInfoDAO.findByChannelId(channelVO.getId());
@@ -95,6 +101,7 @@ public class ChannelQuery {
 					if (userId != null) {
 						outputUsers.add(userQuery.findByIdIn(new ArrayListWrapper<Long>().add(userId).getList()).get(0).setEquipType(TerminalType.QT_MEDIA_EDITOR.toString()));
 						if (channelVO.getOutputUserPort() == null || channelVO.getOutputUserPort().isEmpty()) channelVO.setOutputUserPort(broadAbilityBroadInfoPO.getPreviewUrlPort());
+						if (channelVO.getOutputUserEndPort() == null || channelVO.getOutputUserEndPort().isEmpty()) channelVO.setOutputUserEndPort(broadAbilityBroadInfoPO.getPreviewUrlEndPort());
 					} else {
 						if (previewIp != null && previewPort != null) {
 							broadAbilityBroadInfoVOs.add(new BroadAbilityBroadInfoVO().set(broadAbilityBroadInfoPO));
@@ -116,13 +123,27 @@ public class ChannelQuery {
 				if (broadTerminalBroadInfoPO != null) {
 					channelVO.setLevel(broadTerminalBroadInfoPO.getLevel());
 					channelVO.setHasFile(broadTerminalBroadInfoPO.getHasFile());
+					channelVO.setEndDate(broadTerminalBroadInfoPO.getEndDate());
 				}
 			}
 		}
 		
 		return new HashMapWrapper<String, Object>().put("rows", channelVOs)
-				.put("total", newChannels.getTotalElements())
+				.put("total", newPageChannels == null ? channelVOs.size() : newPageChannels.getTotalElements())
 				.getMap();
+	}
+	
+	/**
+	 * 根据播发方式和状态查询频道列表<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年3月5日 上午9:43:20
+	 * @param BroadWay broadWay 播发方式
+	 * @param ChannelBroadStatus broadStatus 播发状态
+	 */
+	public List<ChannelVO> queryByBroadWayAndStatus(BroadWay broadWay, ChannelBroadStatus broadStatus) throws Exception {
+		List<ChannelPO> channelPOs = channelDao.findByBroadWayAndBroadcastStatus(broadWay.getName(), broadStatus.getName());
+		return ChannelVO.getConverter(ChannelVO.class).convert(channelPOs, ChannelVO.class);
 	}
 
 	/**
@@ -171,10 +192,10 @@ public class ChannelQuery {
 		if (BroadWay.fromName(channel.getBroadWay()) == BroadWay.TERMINAL_BROAD) {
 			BroadTerminalBroadInfoPO broadInfoPO = broadTerminalBroadInfoQuery.findByChannelId(channelId);
 			if (broadInfoPO != null && broadInfoPO.getHasFile() != null && !broadInfoPO.getHasFile()){
-				return adapter.getAllTemplate(BroadWay.ABILITY_BROAD);
+				return adapter.getOneTemplate();
 			}
 		}
-		return adapter.getAllTemplate(BroadWay.fromName(channel.getBroadWay()));
+		return adapter.getAllTemplate();
 	}
 
 	/**
@@ -194,23 +215,5 @@ public class ChannelQuery {
 		}
 		if (terminalChannels == null || terminalChannels.isEmpty()) return;
 		broadTerminalQuery.refreshChannelBroadstatus(terminalChannels);
-	}
-	
-	public String getStatusFromNum(String statusNum) {
-		String returnString = "";
-		switch (statusNum) {
-		case "0":
-			returnString = ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING;
-			break;
-		case "1":
-			returnString = ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADED;
-			break;
-		case "2":
-			returnString = ChannelBroadStatus.CHANNEL_BROAD_STATUS_STOPPED;
-			break;
-		default:
-			break;
-		}
-		return returnString;
 	}
 }

@@ -35,6 +35,10 @@ public class MediaPushLiveVO {
 	
 	private String videoPid;
 	
+	private String audioType;
+	
+	private String videoType;
+	
 	private List<MediaPushLiveVO> children;
 
 	public Long getId() {
@@ -178,6 +182,24 @@ public class MediaPushLiveVO {
 
 	public MediaPushLiveVO setVideoPid(String videoPid) {
 		this.videoPid = videoPid;
+		return this;
+	}
+
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public MediaPushLiveVO setAudioType(String audioType) {
+		this.audioType = audioType;
+		return this;
+	}
+
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public MediaPushLiveVO setVideoType(String videoType) {
+		this.videoType = videoType;
 		return this;
 	}
 

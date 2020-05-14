@@ -106,7 +106,9 @@ public class MediaTxtController {
             String tags,
             String keyWords,
             String remark,
-			Long folderId, 
+			Long folderId,
+			String thumbnail,
+			String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -121,7 +123,7 @@ public class MediaTxtController {
 		}
 		
 		List<String> tagList = new ArrayList<String>();
-		if(tags != null){
+		if(tags != null && !tags.isEmpty()){
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
@@ -130,7 +132,12 @@ public class MediaTxtController {
 			keyWordList = Arrays.asList(keyWords.split(","));
 		}
 		
-		return mediaTxtService.addTask(user, name, tagList, keyWordList, remark, content, folder, true);
+		MediaTxtPO entity = mediaTxtService.addTask(user, name, tagList, keyWordList, remark, content, folder, true);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if (addition != null) entity.setAddition(addition);
+		mediaTxtDao.save(entity);
+		
+		return new MediaTxtVO().set(entity);
 	}
 	
 	/**
@@ -156,6 +163,8 @@ public class MediaTxtController {
             String tags,
             String keyWords,
             String remark,
+            String thumbnail,
+			String addition,
 			HttpServletRequest request) throws Exception{
 		
 		UserVO user = userQuery.current();
@@ -163,7 +172,7 @@ public class MediaTxtController {
 		MediaTxtPO txt = mediaTxtDao.findOne(id);
 		
 		List<String> tagList = new ArrayList<String>();
-		if(tags != null){
+		if(tags!=null && !tags.isEmpty()){
 			tagList = Arrays.asList(tags.split(","));
 		}
 		
@@ -173,6 +182,9 @@ public class MediaTxtController {
 		}
 		
 		MediaTxtPO entity = mediaTxtService.editTask(user, txt, name, tagList, keyWordList, remark, content, true);
+		if (thumbnail != null) entity.setThumbnail(thumbnail);
+		if (addition != null) entity.setAddition(addition);
+		mediaTxtDao.save(entity);
 		
 		return new MediaTxtVO().set(entity);
 	}

@@ -48,6 +48,18 @@ public class TaskOutputPO extends AbstractBasePO{
 	/** 录制完成回调地址 */
 	private String recordCallbackUrl;
 	
+	/** **************
+	 *    编单使用          *
+	 ** ************ */
+	/** 编单中起始源的id */
+	private Long prevId;
+	
+	/** 编单中下一个源的id */
+	private Long nextId;
+	
+	/** 排期源id */
+	private Long scheduleId;
+	
 	public String getTaskUuid() {
 		return taskUuid;
 	}
@@ -145,6 +157,30 @@ public class TaskOutputPO extends AbstractBasePO{
 
 	public void setCoverId(Long coverId) {
 		this.coverId = coverId;
+	}
+
+	public Long getPrevId() {
+		return prevId;
+	}
+
+	public void setPrevId(Long prevId) {
+		this.prevId = prevId;
+	}
+
+	public Long getNextId() {
+		return nextId;
+	}
+
+	public void setNextId(Long nextId) {
+		this.nextId = nextId;
+	}
+
+	public Long getScheduleId() {
+		return scheduleId;
+	}
+
+	public void setScheduleId(Long scheduleId) {
+		this.scheduleId = scheduleId;
 	}
 	
 }

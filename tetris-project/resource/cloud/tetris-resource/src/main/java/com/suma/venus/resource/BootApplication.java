@@ -10,10 +10,14 @@ import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.cloud.netflix.feign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+import com.sumavision.tetris.config.feign.FeignConfiguration;
+
 @SpringBootApplication
-@ComponentScan(basePackages={"com.suma.venus", "com.sumavision.tetris"})
+@ComponentScan(excludeFilters = {@ComponentScan.Filter(type=FilterType.ASSIGNABLE_TYPE, classes=FeignConfiguration.class)},
+			   basePackages={"com.suma.venus", "com.sumavision.tetris"})
 @ServletComponentScan(basePackages={"com.suma.venus.resource.listener", "com.suma.venus", "com.sumavision.tetris"})
 @EnableFeignClients(basePackages={"com.suma.venus", "com.sumavision.tetris"})
 @EnableEurekaClient

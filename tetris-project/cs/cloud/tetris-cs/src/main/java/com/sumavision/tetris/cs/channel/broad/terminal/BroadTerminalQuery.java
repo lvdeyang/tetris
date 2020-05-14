@@ -10,6 +10,8 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
 import com.sumavision.tetris.cs.bak.VersionSendQuery;
+import com.sumavision.tetris.cs.channel.Adapter;
+import com.sumavision.tetris.cs.channel.ChannelBroadStatus;
 import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelQuery;
@@ -24,6 +26,9 @@ public class BroadTerminalQuery {
 	
 	@Autowired
 	private VersionSendQuery versionSendQuery;
+	
+	@Autowired
+	private Adapter adapter;
 
 	/**
 	 * 查询播发状态(终端播发状态)<br/>
@@ -41,16 +46,16 @@ public class BroadTerminalQuery {
 			ids.add(versionSendNum);
 			JSONObject jsonObject = new JSONObject();
 			jsonObject.put("ids", ids);
-			JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.QUERY_SEND_FILE.getUrl(), jsonObject);
+			JSONObject response = HttpRequestUtil.httpPost(adapter.getTerminalUrl(BroadTerminalQueryType.QUERY_SEND_FILE), jsonObject);
 			if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
 				JSONArray statusArray = (JSONArray) response.get("data");
 				if (statusArray != null && statusArray.size() > 0) {
 					JSONObject item = (JSONObject) statusArray.get(0);
 					status = (item.containsKey("status") && item.get("status") != null)
-							? channelQuery.getStatusFromNum(item.getString("status")) : "";
+							? ChannelBroadStatus.fromStatusNum(item.getString("status")) : "";
 				}
 //			} else {
-//				throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.QUERY_SEND_FILE.getAction(), response.getString("message"));
+//				throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.QUERY_SEND_FILE.getAction(), response != null ? response.getString("message") : "");
 			}
 		}
 
@@ -78,7 +83,7 @@ public class BroadTerminalQuery {
 			JSONObject statusRequestJsonObject = new JSONObject();
 			statusRequestJsonObject.put("ids", broadId);
 			
-			JSONObject response = HttpRequestUtil.httpPost(BroadTerminalQueryType.QUERY_SEND_FILE.getUrl(),statusRequestJsonObject);
+			JSONObject response = HttpRequestUtil.httpPost(adapter.getTerminalUrl(BroadTerminalQueryType.QUERY_SEND_FILE),statusRequestJsonObject);
 			if (response != null && response.get("result").toString().equals("1") && response.get("data") != null) {
 				JSONArray statusArray = (JSONArray) response.get("data");
 				if (statusArray != null && statusArray.size() > 0) {
@@ -90,7 +95,7 @@ public class BroadTerminalQuery {
 							if (channelId != null) {
 								ChannelPO channelPO = channelDao.findOne(channelId);
 								if (channelPO != null && item.containsKey("status") && item.get("status") != null) {
-									String status = channelQuery.getStatusFromNum(item.getString("status"));
+									String status = ChannelBroadStatus.fromStatusNum(item.getString("status"));
 									if (!status.isEmpty()) {
 										channelPO.setBroadcastStatus(status);
 									}
@@ -101,7 +106,7 @@ public class BroadTerminalQuery {
 					}
 				}
 //			} else {
-//				throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.QUERY_SEND_FILE.getAction(), response.getString("message"));
+//				throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.QUERY_SEND_FILE.getAction(), response != null ? response.getString("message") : "");
 			}
 		}
 	}

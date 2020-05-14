@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.business.common.service.SyncService;
 import com.sumavision.tetris.business.transcode.service.ExternalTaskService;
 import com.sumavision.tetris.business.transcode.service.TranscodeTaskService;
 import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
@@ -25,6 +26,9 @@ public class TranscodeTaskFeignController {
 	
 	@Autowired
 	private ExternalTaskService externalTaskService;
+	
+	@Autowired
+	private SyncService syncService;
 
 	/**
 	 * 添加流转码任务<br/>
@@ -210,6 +214,24 @@ public class TranscodeTaskFeignController {
 			return externalTaskService.stopExternalTask(taskVO);
 		}
 		
+		return null;
+	}
+	
+	/**
+	 * 同步转换模块<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月8日 下午4:43:31
+	 * @param String deviceIp 转换模块ip
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/sync")
+	public Object sync(
+			String deviceIp,
+			HttpServletRequest request) throws Exception{
+		
+		syncService.sync(deviceIp);
 		return null;
 	}
 }

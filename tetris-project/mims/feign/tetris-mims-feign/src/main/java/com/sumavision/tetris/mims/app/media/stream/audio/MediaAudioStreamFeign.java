@@ -23,6 +23,16 @@ public interface MediaAudioStreamFeign {
 	public JSONObject load(@RequestParam("folderId") Long folderId) throws Exception;
 	
 	/**
+	 * 加载所有的音频流媒资<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return List<FolderBreadCrumbVO> 音频流媒资列表
+	 */
+	@RequestMapping(value = "/media/audio/stream/feign/load/all")
+	public JSONObject loadAll() throws Exception;
+	
+	/**
 	 * 根据预览地址查询音频流<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -43,4 +53,31 @@ public interface MediaAudioStreamFeign {
 	 */
 	@RequestMapping(value = "/media/audio/stream/feign/find/by/id")
 	public JSONObject findById(@RequestParam("id") Long id) throws Exception;
+	
+	/**
+	 * 添加音频流媒资上传任务<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午3:21:49
+	 * @param UserVO user 用户
+	 * @param String name 媒资名称
+	 * @param List<String> tags 标签列表
+	 * @param List<String> keyWords 关键字列表
+	 * @param String remark 备注
+	 * @param String previewUrl 视频流地址
+	 * @param FolderPO folder 文件夹
+	 * @return MediaAudioStreamVO 音频流媒资
+	 */
+	@RequestMapping(value = "/media/audio/stream/feign/task/add")
+	public JSONObject addAudioStreamTask(@RequestParam("previewUrl") String previewUrl,@RequestParam("name") String name) throws Exception;
+	
+	/**
+	 * 音频流媒资删除<br/>
+	 * <b>作者:</b>lzp<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年7月17日 下午3:43:03
+	 * @param MediaAudioStreamVO audios 音频流媒资列表
+	 */
+	@RequestMapping(value = "/media/audio/stream/feign/remove")
+	public JSONObject remove(@RequestParam("mediaIds") String mediaIds) throws Exception;
 }

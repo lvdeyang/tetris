@@ -23,6 +23,12 @@ public class MonitorOsdLayerVO extends AbstractBaseVO<MonitorOsdLayerVO, Monitor
 	
 	private String type;
 	
+	private String font;
+	
+	private String height;
+	
+	private String color;
+	
 	public Integer getX() {
 		return x;
 	}
@@ -86,6 +92,33 @@ public class MonitorOsdLayerVO extends AbstractBaseVO<MonitorOsdLayerVO, Monitor
 		return this;
 	}
 
+	public String getFont() {
+		return font;
+	}
+
+	public MonitorOsdLayerVO setFont(String font) {
+		this.font = font;
+		return this;
+	}
+
+	public String getHeight() {
+		return height;
+	}
+
+	public MonitorOsdLayerVO setHeight(String height) {
+		this.height = height;
+		return this;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public MonitorOsdLayerVO setColor(String color) {
+		this.color = color;
+		return this;
+	}
+
 	@Override
 	public MonitorOsdLayerVO set(MonitorOsdLayerPO entity) throws Exception {
 		this.setId(entity.getId())
@@ -97,7 +130,10 @@ public class MonitorOsdLayerVO extends AbstractBaseVO<MonitorOsdLayerVO, Monitor
 			.setSubtitleId(entity.getContentId())
 			.setSubtitleName(entity.getType().equals(MonitorOsdLayerType.SUBTITLE)?entity.getContentName():entity.getType().getName())
 			.setSubtitleUsername(entity.getType().equals(MonitorOsdLayerType.SUBTITLE)?entity.getContentUsername():"-")
-			.setType(entity.getType().toString());
+			.setType(entity.getType().toString())
+			.setFont(entity.getFont()==null?"-":entity.getFont().getName())
+			.setHeight(entity.getHeight()==null?"-":entity.getHeight().toString())
+			.setColor(entity.getColor()==null?"-":entity.getColor());
 		return this;
 	}
 	

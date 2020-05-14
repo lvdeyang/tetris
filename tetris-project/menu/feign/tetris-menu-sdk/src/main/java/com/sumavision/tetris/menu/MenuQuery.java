@@ -27,7 +27,19 @@ public class MenuQuery {
 	 * @return List<MenuVO> 菜单列表
 	 */
 	public List<MenuVO> permissionMenus(UserVO user) throws Exception{
-		return JsonBodyResponseParser.parseArray(menuFeign.permissionMenus(user), MenuVO.class);
+		return JsonBodyResponseParser.parseArray(menuFeign.permissionMenus(), MenuVO.class);
+	}
+	
+	/**
+	 * 查询系统角色配置的首页<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月12日 下午3:32:25
+	 * @param Long roleId 系统角色id
+	 * @return MenuVO 菜单
+	 */
+	public MenuVO queryHomePage(Long roleId) throws Exception{
+		return JsonBodyResponseParser.parseObject(menuFeign.queryHomePage(roleId), MenuVO.class);
 	}
 	
 }
