@@ -7,6 +7,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,8 @@ import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class MediaFileEquipmentPermissionService {
+	private static final Logger logger = LoggerFactory.getLogger(MediaFileEquipmentPermissionService.class);
+	
 	@Autowired
 	private MediaFileEquipmentPermissionDAO mediaFileEquipmentPermissionDAO;
 	
@@ -175,6 +179,7 @@ public class MediaFileEquipmentPermissionService {
 							.append(permissionPO.getEquipmentHttpUrl())
 							.toString());
 				} catch (Exception e) {
+					logger.error(e.getMessage());
 				}
 			}
 			mediaFileEquipmentPermissionDAO.deleteInBatch(permissionPOs);

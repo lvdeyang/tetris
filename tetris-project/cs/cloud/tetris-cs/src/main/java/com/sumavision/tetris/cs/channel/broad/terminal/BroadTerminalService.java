@@ -243,9 +243,11 @@ public class BroadTerminalService {
 			RequestTerminalBO terminalScheduleBO = new RequestTerminalBO()
 					.setFileSize("")
 					.setVersion(newVersion)
-					.setDir(this.getMenuAndResourcePathToBO(channelId));
+					.setDir(this.getMenuAndResourcePathToBO(channelId))
+					.setEndTime(broadInfoVO.getEndDate());;
 			List<RequestTerminalScheduleBO> scheduleBOs = new ArrayList<RequestTerminalScheduleBO>();
 			for (ScheduleVO schedule : schedules) {
+				if (schedules.indexOf(schedule) == 0) terminalScheduleBO.setEffectTime(schedule.getBroadDate());
 				RequestTerminalScheduleBO scheduleBO = new RequestTerminalScheduleBO()
 						.setEffectTime(schedule.getBroadDate())
 						.setEndTime(schedule.getEndDate());
@@ -319,26 +321,26 @@ public class BroadTerminalService {
 			.setVideoPid(screen.getVideoPid());
 		}
 
-//		JSONObject response = HttpRequestUtil.httpJsonPost(adapter.getTerminalUrl(BroadTerminalQueryType.START_SEND_FILE), JSONObject.toJSONString(requestServerBO));
-//
-//		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
-//			// 播发成功处理
-//			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName());
-//			channelDAO.save(channel);
-//
-//			// 备份播发媒资全量
-//			resourceSendQuery.getAddResource(channelId, true);
-//
-//			// 备份播发地区
-//			areaSendQuery.saveArea(channelId);
-//
-//			// 保存播发版本
-//			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath, hasFile ? VersionSendType.BROAD_FILE : VersionSendType.BROAD_LIVE, zoneStorePath, zoneDownloadPath, null);
+		JSONObject response = HttpRequestUtil.httpJsonPost(adapter.getTerminalUrl(BroadTerminalQueryType.START_SEND_FILE), JSONObject.toJSONString(requestServerBO));
+
+		if (response != null && response.containsKey("result") && response.getString("result").equals("1")) {
+			// 播发成功处理
+			channel.setBroadcastStatus(ChannelBroadStatus.CHANNEL_BROAD_STATUS_BROADING.getName());
+			channelDAO.save(channel);
+
+			// 备份播发媒资全量
+			resourceSendQuery.getAddResource(channelId, true);
+
+			// 备份播发地区
+			areaSendQuery.saveArea(channelId);
+
+			// 保存播发版本
+			versionSendQuery.addVersion(channelId, newVersion, broadIdString, mediaCompressVO, filePath, hasFile ? VersionSendType.BROAD_FILE : VersionSendType.BROAD_LIVE, zoneStorePath, zoneDownloadPath, null);
 
 			return getReturnJSON(true, "");
-//		} else {
-//			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.START_SEND_FILE.getAction(), response != null ? response.getString("message") : "");
-//		}
+		} else {
+			throw new ChannelTerminalRequestErrorException(BroadTerminalQueryType.START_SEND_FILE.getAction(), response != null ? response.getString("message") : "");
+		}
 	}
 	
 	/**

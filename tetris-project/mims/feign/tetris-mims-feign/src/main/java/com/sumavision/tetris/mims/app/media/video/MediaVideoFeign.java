@@ -1,20 +1,18 @@
 package com.sumavision.tetris.mims.app.media.video;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
-import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.config.feign.MultipartSupportConfig;
 
-@FeignClient(name = "tetris-mims", configuration = FeignConfiguration.class)
+@FeignClient(name = "tetris-mims", configuration = {FeignConfiguration.class, MultipartSupportConfig.class})
 public interface MediaVideoFeign {
 
 	/**
@@ -119,4 +117,57 @@ public interface MediaVideoFeign {
 	 */
 	@RequestMapping(value = "/media/video/feign/remove")
 	public JSONObject remove(@RequestParam("ids") String ids) throws Exception;
+	
+	/**
+	 * 添加上传视频媒资任务<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年11月29日 下午1:44:06
+	 * @param MediaVideoTaskVO task{name:文件名称, size:文件大小, mimetype:文件mime类型, lastModified:最后更新时间}
+	 * @param String name 媒资名称
+	 * @param JSONString tags 标签数组
+	 * @param JSONString keyWords 关键字数组
+	 * @param String remark 备注
+	 * @param Long folerId 文件夹id		
+	 * @return MediaVideoVO 视频媒资 
+	 */
+	@RequestMapping(value = "/media/video/feign/task/add")
+	public JSONObject addTask(
+			@RequestParam("task") String task, 
+			@RequestParam("name") String name,
+			@RequestParam("tags") String tags,
+			@RequestParam("keyWords") String keyWords,
+			@RequestParam("remark") String remark,
+			@RequestParam("folderId") Long folderId, 
+			@RequestParam("thumbnail") String thumbnail,
+			@RequestParam("addition") String addition) throws Exception;
+	
+	/**
+	 * 视频媒资上传<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月2日 下午3:32:40
+	 * @param MultipartFile file 文件描述
+	 * @param String uuid 任务uuid
+	 * @param String name 文件名称
+	 * @param long lastModified 最后修改日期
+	 * @param long beginOffset 文件分片的起始位置
+	 * @param long  endOffset 文件分片的结束位置
+	 * @param long blockSize 文件分片大小
+	 * @param long size 文件大小
+	 * @param String type 文件的mimetype
+	 * @param blob block 文件分片数据
+	 * @return MediaVideoVO 视频媒资
+	 */
+	@RequestMapping(value = "/media/video/feign/upload", method=RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public JSONObject upload(
+			@RequestPart("file") MultipartFile file,
+			@RequestParam("uuid") String uuid,
+			@RequestParam("name") String name,
+			@RequestParam("blockSize") Long blockSize,
+			@RequestParam("lastModified") Long lastModified,
+			@RequestParam("size") Long size,
+			@RequestParam("type") String type,
+			@RequestParam("beginOffset") Long beginOffset,
+			@RequestParam("endOffset") Long endOffset) throws Exception;
 }

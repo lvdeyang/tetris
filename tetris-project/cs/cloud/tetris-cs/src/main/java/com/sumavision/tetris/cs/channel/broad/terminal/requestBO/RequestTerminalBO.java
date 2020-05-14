@@ -15,6 +15,12 @@ public class RequestTerminalBO {
 	/** 整体目录描述 */
 	private List<RequestTerminalDirBO> dir;
 	
+	/** 排期总开始时间 */
+	private String effectTime;
+	
+	/** 排期总结束时间 */
+	private String endTime;
+	
 	/** 排期单描述 */
 	private List<RequestTerminalScheduleBO> schedules;
 
@@ -51,6 +57,24 @@ public class RequestTerminalBO {
 
 	public RequestTerminalBO setDir(List<RequestTerminalDirBO> dir) {
 		this.dir = dir;
+		return this;
+	}
+	
+	public String getEffectTime() {
+		return effectTime;
+	}
+
+	public RequestTerminalBO setEffectTime(String effectTime) {
+		this.effectTime = effectTime;
+		return this;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public RequestTerminalBO setEndTime(String endTime) {
+		this.endTime = endTime;
 		return this;
 	}
 

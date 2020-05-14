@@ -65,7 +65,7 @@ spring:
 server:
 #  context-path: /menu 
 #  address: 192.165.56.71
-  port: 8088
+  port: 8079
 logging:
   pattern:
     console: "%d - %msg%n" 
@@ -108,5 +108,10 @@ hystrix:
           enabled: false
         isolation:
           thread: 
-            timeoutInMilliseconds: 5000
+            timeoutInMilliseconds: 10000
           strategy: SEMAPHORE   
+log:
+  home: /usr/sbin/sumavision/tetris/tetris-project/cs/apache-tomcat-7.0.93/logs
+  maxFileSize: 30MB
+  maxHistory: 10
+  totalSizeCap: 1GB               

@@ -98,6 +98,23 @@
             <el-button size="small" @click="handleClose">
                 关 闭
             </el-button>
+
+            <el-select
+                    v-if=""
+                    v-model="options.currentScreen.contentType"
+                    placeholder="请选择资源类型"
+                    @change="handleContentOptionChange(options.currentScreen, $event)"
+                    :disabled="channelData.autoBroad"
+                    style="margin-left: 60px; display: inline-block;">
+                <el-option
+                        v-for="item in contentOptions.list"
+                        :key="item.value"
+                        :value="item.name">
+                </el-option>
+            </el-select>
+            <el-button v-show="options.currentScreen.contentType=='仓库资源'" class="chooseFile" size="small" type="primary" @click="chooseResources(options.currentScreen)">
+                选择资源
+            </el-button>
         </el-header>
         <el-main>
             <div style="position: relative; display: inline-block;" :style="orientOptions.current.value=='horizontal'?'padding: 230px 300px':'padding: 230px 200px'">
@@ -107,26 +124,26 @@
                      :style="item"
                      :class="{choosed : options.currentScreen == item}"
                      @click="handleScreenChoose(item,$event)">
-                    <el-select
-                            v-if=""
-                            v-model="item.contentType"
-                            placeholder="请选择资源类型"
-                            @change="handleContentOptionChange(item, $event)"
-                            :disabled="channelData.autoBroad"
-                            style="width: 120px; margin: 20px 0 0 20px">
-                        <el-option
-                                v-for="item in contentOptions.list"
-                                :key="item.value"
-                                :value="item.name">
-                        </el-option>
-                    </el-select>
-                    <el-button v-show="item.contentType=='视频资源' || item.contentType=='音频资源' || item.contentType=='图片资源' || item.contentType=='仓库资源'"
-                               class="chooseFile"
-                               size="small"
-                               type="primary"
-                               @click="chooseResources(item)">
-                        选择资源
-                    </el-button>
+                    <!--<el-select-->
+                            <!--v-if=""-->
+                            <!--v-model="item.contentType"-->
+                            <!--placeholder="请选择资源类型"-->
+                            <!--@change="handleContentOptionChange(item, $event)"-->
+                            <!--:disabled="channelData.autoBroad"-->
+                            <!--style="width: 120px; margin: 20px 0 0 20px">-->
+                        <!--<el-option-->
+                                <!--v-for="item in contentOptions.list"-->
+                                <!--:key="item.value"-->
+                                <!--:value="item.name">-->
+                        <!--</el-option>-->
+                    <!--</el-select>-->
+                    <!--<el-button v-show="item.contentType=='视频资源' || item.contentType=='音频资源' || item.contentType=='图片资源' || item.contentType=='仓库资源'"-->
+                               <!--class="chooseFile"-->
+                               <!--size="small"-->
+                               <!--type="primary"-->
+                               <!--@click="chooseResources(item)">-->
+                        <!--选择资源-->
+                    <!--</el-button>-->
                 </div>
             </div>
 
