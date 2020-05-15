@@ -17,6 +17,7 @@ import com.suma.application.ldap.ser.LdapSerInfoPo;
 import com.suma.application.ldap.util.Base64Util;
 import com.suma.venus.resource.pojo.SerInfoPO;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.util.exception.ServerInfoNodeCannotBeNullException;
 import com.suma.venus.resource.dao.SerInfoDao;
 import com.suma.venus.resource.dao.SerNodeDao;
 import com.suma.venus.resource.ldap.LdapNodeInfoUtil;
@@ -207,11 +208,14 @@ public class SerInfoAndNodeSyncLdapUtils {
 		return successCnt;
 	}
 
-	public int handleSyncSerNodeToLdap() {
+	public int handleSyncSerNodeToLdap() throws Exception{
 		List<SerNodePO> serNodePOs = serNodeDao.findSerNodeSyncToLdap();
 		List<SerNodePO> successSerNodePOs = new ArrayList<SerNodePO>();
 
 		for (SerNodePO serNodePO : serNodePOs) {
+			if(serNodePO.getNodeFactInfo() == null){
+				throw new ServerInfoNodeCannotBeNullException();
+			}
 			try {
 
 				// 如果本地serNode没有设置父节点，则设置
