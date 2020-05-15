@@ -89,6 +89,29 @@ public class LdapEquipDao extends LdapBaseDao {
 			}
 		});
 	}
+	
+	// 根据服务节点node获取设备
+	@SuppressWarnings("unchecked")
+	public List<LdapEquipPo> getEquipByNode(String equipNode) {
+		AndFilter filter = new AndFilter();
+		filter.and(new EqualsFilter("objectclass", "equipInfo"));
+		filter.and(new EqualsFilter("equipNode", equipNode));
+		return ldapTemplate.search(getBaseDN("ou", "equipInfo"), filter.encode(), new ContextMapper() {
+			@Override
+			public Object mapFromContext(Object ctx) {
+				DirContextAdapter context = (DirContextAdapter) ctx;
+				LdapEquipPo equipPo = getLdapEquipPO(context);
+				return equipPo;
+			}
+		});
+	}
+	
+	// 批量删除设备
+	public void removeAll(List<LdapEquipPo> equips) {
+		for(LdapEquipPo equip: equips){
+			remove(equip);
+		}
+	}
 
 	// 删除一个设备
 	public LdapEquipPo remove(LdapEquipPo equip) {
