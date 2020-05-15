@@ -16,7 +16,10 @@ public interface BundleFeign {
 			@RequestParam(value = "port") Integer port) throws Exception;
 
 	@RequestMapping(value = "/feign/bundle/delTranscodeDevice", method = RequestMethod.POST)
-	public String delTranscodeDevice(@RequestParam(value = "bundleId") String bundleId) throws Exception;
+	public String delTranscodeDevice(@RequestParam(value = "bundle_id") String bundle_id) throws Exception;
+
+	@RequestMapping(value = "/feign/bundle/resetHeartBeatAndAlarm", method = RequestMethod.POST)
+	public String resetHeartBeatAndAlarm(@RequestParam(value = "bundle_id") String bundle_id) throws Exception;
 
 	/**
 	 * 查询转码设备<br/>
