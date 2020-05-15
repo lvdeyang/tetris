@@ -85,7 +85,8 @@ public class WorkNodePO extends CommonPO<WorkNodePO> {
 		ACCESS_WEBRTC("webrtc接入"),
 		ACCESS_LIANWANG("联网接入"),
 		ACCESS_LDAP("LDAP目录资源服务设备"),
-		ACCESS_OMMS("综合运维服务设备");
+		ACCESS_OMMS("综合运维服务设备"),
+		ACCESS_WS("ws接入");
 		
         private String name;
         

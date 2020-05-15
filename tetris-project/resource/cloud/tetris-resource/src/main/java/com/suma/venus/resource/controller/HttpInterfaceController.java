@@ -109,7 +109,9 @@ import com.suma.venus.resource.service.UserQueryService;
 import com.suma.venus.resource.service.WorkNodeService;
 import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.util.XMLBeanUtils;
+import com.suma.venus.resource.vo.WsVO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
+import com.sumavision.tetris.mvc.wrapper.JSONHttpServletRequestWrapper;
 
 /**
  * Http对外接口
@@ -737,7 +739,7 @@ public class HttpInterfaceController {
 				bundleIds.add(bundlePO.getBundleId());
 
 				// 配置两路解码通道(音频解码和视频解码各一路)
-				channelSchemePOs.addAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
+				channelSchemePOs.addAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO));
 
 				// 把第17个播放器的bundleId返回用户
 				if (i == 17) {
@@ -1633,7 +1635,7 @@ public class HttpInterfaceController {
 			bundle.setSyncStatus(SYNC_STATUS.SYNC);
 			// 配置编码通道
 			// 配置两路编码通道(音频编码和视频编码各一路)
-			channelSchemeDao.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundle.getBundleId()));
+			channelSchemeDao.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundle));
 			bundleDao.save(bundle);
 
 			// 给管理员默认角色绑定该设备权限
@@ -1689,7 +1691,7 @@ public class HttpInterfaceController {
 			bundle.setSyncStatus(SYNC_STATUS.SYNC);
 			// 配置解码通道
 			// 配置两路解码通道(音频解码和视频解码各一路)
-			channelSchemeDao.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundle.getBundleId()));
+			channelSchemeDao.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundle));
 			bundleDao.save(bundle);
 
 			// 给管理员默认角色绑定该设备权限
@@ -1779,7 +1781,7 @@ public class HttpInterfaceController {
 				bundleIds.add(bundlePO.getBundleId());
 
 				// 配置两路解码通道(音频解码和视频解码各一路)
-				channelSchemePOs.addAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
+				channelSchemePOs.addAll(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO));
 
 				// 把第17个播放器的bundleId返回用户
 				if (i == 17) {
@@ -1896,6 +1898,42 @@ public class HttpInterfaceController {
 		
 		lianwangPassbyService.delete(uuid);
 		return null;
+	}
+	
+	/**
+	 * 查询接入层下的ws设备<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月12日 上午9:10:42
+	 * @param String layerId 接入层id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/thirdpart/query/ws/bundles")
+	public Object queryWsBundles(HttpServletRequest request) throws Exception{
+		
+		JSONHttpServletRequestWrapper requestWrapper = new JSONHttpServletRequestWrapper(request);
+		String layerId = requestWrapper.getString("layerId");
+		
+		List<BundlePO> bundles = bundleDao.findByDeviceModelAndAccessNodeUid("ws", layerId);
+		List<WsVO> wsVOs = new ArrayList<WsVO>();
+		for(BundlePO bundle: bundles){
+			
+			//1.软终端 2.编码设备 3.解码设备
+			Integer codecType = channelSchemeService.getCoderDeviceType(bundle.getBundleId());
+			WsVO ws = new WsVO();
+			ws.setDeviceIp(bundle.getDeviceIp());
+			if(codecType == 1){
+				ws.setType("zhihui");
+			}else if(codecType == 2){
+				ws.setType("4U");
+			}else if(codecType == 3){
+				ws.setType("4U");
+			}
+			wsVOs.add(ws);
+		}
+		
+		return wsVOs;
 	}
 	
 }

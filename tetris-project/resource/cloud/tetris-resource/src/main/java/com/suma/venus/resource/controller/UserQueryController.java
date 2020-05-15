@@ -43,7 +43,7 @@ public class UserQueryController extends ControllerBase{
 			users = userQueryService.queryAllUserBaseInfo(null);
 			data.put("users", users);
 		} catch (Exception e) {
-			LOGGER.error(e.toString());
+			e.printStackTrace();
 			data.put(ERRMSG, "查询用户错误");
 		}
 		

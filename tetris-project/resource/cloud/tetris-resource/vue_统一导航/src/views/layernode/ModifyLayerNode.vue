@@ -155,6 +155,10 @@
           {
             label : "综合运维服务设备",
             value : "ACCESS_OMMS"
+          },
+          {
+            label : "ws接入",
+            value : "ACCESS_WS"
           }
         ],
         id : this.$route.query.id,

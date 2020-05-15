@@ -240,6 +240,7 @@ public class DepartSyncLdapUtils {
 	 */
 	public void handleFolderUserSyncToLdap() throws Exception {
 		
+		//本系统下
 		List<FolderUserMap> maps = folderUserMapDao.findLocalLdapMap();
 		List<Long> userIds = new ArrayList<Long>();
 		for(FolderUserMap map: maps){
@@ -249,6 +250,10 @@ public class DepartSyncLdapUtils {
 		
 		List<UserBO> users = userService.queryUsersByUserIds(userIds, TerminalType.PC_PORTAL);
 		SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+		
+		//ldap上本系统的数据
+		List<LdapUserPo> allLdapUsers = ldapUserDao.getUserByFactInfo(self.getNodeFactInfo());
+		
 		for(UserBO user: users){
 			List<LdapUserPo> ldapUserPoList = ldapUserDao.getUserByUuid(user.getUser().getUuid());
 			
@@ -256,10 +261,18 @@ public class DepartSyncLdapUtils {
 				// TODO
 				LdapUserPo ldapUser = ldapUserInfoUtil.pojoToLdap(user, self);
 				ldapUserDao.update(ldapUser);
+				
+				allLdapUsers.removeAll(ldapUserPoList);
+				
 			} else {
 				LdapUserPo ldapUser = ldapUserInfoUtil.pojoToLdap(user, self);
 				ldapUserDao.save(ldapUser);
 			}
+		}
+		
+		//删除多余的用户
+		if(allLdapUsers.size() > 0){
+			ldapUserDao.removeAll(allLdapUsers);
 		}
 		
 		folderUserMapDao.save(maps);
