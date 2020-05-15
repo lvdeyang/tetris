@@ -107,6 +107,9 @@ export default{
             },{
                 label : "综合运维服务设备",
                 value : "ACCESS_OMMS"
+            },{
+              label : "ws接入",
+              value : "ACCESS_WS"
             }],
             filters:{
                 type:'',

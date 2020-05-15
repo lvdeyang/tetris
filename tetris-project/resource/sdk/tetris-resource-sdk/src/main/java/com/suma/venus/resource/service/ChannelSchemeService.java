@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.suma.venus.resource.dao.ChannelSchemeDao;
 import com.suma.venus.resource.dao.ChannelTemplateDao;
+import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO;
 import com.suma.venus.resource.pojo.ChannelTemplatePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
@@ -59,7 +60,7 @@ public class ChannelSchemeService extends CommonService<ChannelSchemePO> {
 		List<ChannelSchemePO> decodeChannels = channelSchemeDao.findDecodeChannelByBundleId(bundleId);
 		if (!encodeChannels.isEmpty() && !decodeChannels.isEmpty()) {
 			// 有编码通道和解码通道，为编解码一体设备
-			return 11;
+			return 1;
 		} else if (!encodeChannels.isEmpty()) {
 			// 只有编码通道，为编码设备
 			return 2;
@@ -81,26 +82,26 @@ public class ChannelSchemeService extends CommonService<ChannelSchemePO> {
 		return channelSchemePO;
 	}
 
-	// 生成两路jv210编码通道(音频和视频)
-	public List<ChannelSchemePO> createAudioAndVideoEncodeChannel(String bundleId) {
-		ChannelTemplatePO audioEncodeChannelTemplate = channelTemplateDao.findByDeviceModelAndChannelName("jv210", "VenusAudioIn");
-		ChannelTemplatePO videoEncodeChannelTemplate = channelTemplateDao.findByDeviceModelAndChannelName("jv210", "VenusVideoIn");
+	// 生成设备类型编码通道(音频和视频)
+	public List<ChannelSchemePO> createAudioAndVideoEncodeChannel(BundlePO bundle) {
+		ChannelTemplatePO audioEncodeChannelTemplate = channelTemplateDao.findByDeviceModelAndChannelName(bundle.getDeviceModel(), "VenusAudioIn");
+		ChannelTemplatePO videoEncodeChannelTemplate = channelTemplateDao.findByDeviceModelAndChannelName(bundle.getDeviceModel(), "VenusVideoIn");
 		List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
 		if (null != audioEncodeChannelTemplate && null != videoEncodeChannelTemplate) {
-			channelSchemePOs.add(getChannelSchemePO(bundleId, audioEncodeChannelTemplate));
-			channelSchemePOs.add(getChannelSchemePO(bundleId, videoEncodeChannelTemplate));
+			channelSchemePOs.add(getChannelSchemePO(bundle.getBundleId(), audioEncodeChannelTemplate));
+			channelSchemePOs.add(getChannelSchemePO(bundle.getBundleId(), videoEncodeChannelTemplate));
 		}
 		return channelSchemePOs;
 	}
 
-	// 生成两路jv210解码通道(音频和视频)
-	public List<ChannelSchemePO> createAudioAndVideoDecodeChannel(String bundleId) {
+	// 生成设备类型解码通道(音频和视频)
+	public List<ChannelSchemePO> createAudioAndVideoDecodeChannel(BundlePO bundle) {
 		List<ChannelSchemePO> channelSchemePOs = new ArrayList<ChannelSchemePO>();
-		ChannelTemplatePO audioDecodeChannelTemplate = channelTemplateDao.findByDeviceModelAndChannelName("jv210", "VenusAudioOut");
-		ChannelTemplatePO videoDecodeChannelTemplate = channelTemplateDao.findByDeviceModelAndChannelName("jv210", "VenusVideoOut");
+		ChannelTemplatePO audioDecodeChannelTemplate = channelTemplateDao.findByDeviceModelAndChannelName(bundle.getDeviceModel(), "VenusAudioOut");
+		ChannelTemplatePO videoDecodeChannelTemplate = channelTemplateDao.findByDeviceModelAndChannelName(bundle.getDeviceModel(), "VenusVideoOut");
 		if (null != audioDecodeChannelTemplate && null != videoDecodeChannelTemplate) {
-			channelSchemePOs.add(getChannelSchemePO(bundleId, audioDecodeChannelTemplate));
-			channelSchemePOs.add(getChannelSchemePO(bundleId, videoDecodeChannelTemplate));
+			channelSchemePOs.add(getChannelSchemePO(bundle.getBundleId(), audioDecodeChannelTemplate));
+			channelSchemePOs.add(getChannelSchemePO(bundle.getBundleId(), videoDecodeChannelTemplate));
 		}
 		return channelSchemePOs;
 	}
