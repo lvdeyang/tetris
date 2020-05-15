@@ -18,7 +18,7 @@ public class BundleFeignService {
 	private BundleFeign bundleFeign;
 
 	/**
-	 *  添加转码设备
+	 * 添加转码设备
 	 * 
 	 * @param name
 	 * @param ip
@@ -29,6 +29,17 @@ public class BundleFeignService {
 	public String addTransCodeDevice(String name, String ip, Integer port) throws Exception {
 		return JSON.parseObject(bundleFeign.addTranscodeDevice(name, ip, port), String.class);
 
+	}
+
+	/**
+	 * 删除转码设备
+	 * 
+	 * @param name
+	 * @return bundleId 为空则是添加失败
+	 * @throws Exception
+	 */
+	public String delTransCodeDevice(String bundleId) throws Exception {
+		return JSON.parseObject(bundleFeign.delTranscodeDevice(bundleId), String.class);
 	}
 
 	public List<BundleFeignVO> queryTranscodeDevice() throws Exception {
