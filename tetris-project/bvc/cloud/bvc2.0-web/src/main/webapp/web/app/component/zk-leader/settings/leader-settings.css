@@ -11,6 +11,7 @@ html, body {
 .zk-settings {
     background-color: #0F2A4D;
     color: white;
+    border:1px solid #123e80;
 }
 .win-header {
     height: 40px;
@@ -39,6 +40,14 @@ html, body {
     left: 55px;
     height: 485px;
     width: 870px;
+}
+.el-tabs__content {
+    overflow: hidden;
+    position: relative;
+    background: #001B3D;
+    bottom: 50px;
+    top: 0;
+    height: 100%;
 }
 
 .zk-settings .el-scrollbar__wrap {
@@ -90,9 +99,7 @@ html, body {
 .el-table, .el-table__expanded-cell,.el-table th, .el-table tr{
     background-color: transparent;
 }
-.el-table th, .el-table tr, .el-table__empty-block {
-    background: #1E2343;
-}
+
 .el-table {
     border-radius: 13px 13px 0 0;
 }
@@ -102,7 +109,7 @@ html, body {
     color: #6dc3ff;
 }
 .el-table--enable-row-hover .el-table__body tr:hover>td{
-    background-color: #0A2F66;
+    background-color: #061f3e;
 }
 .el-table td{
     color: #fff;
@@ -113,6 +120,7 @@ html, body {
     border: none;
     border-radius: 33px;
     color: #fff;
+    padding: 9px 20px;
 }
 
 .el-button--primary:focus, .el-button--primary:hover {
@@ -124,6 +132,7 @@ html, body {
     border: none;
     border-radius: 33px;
     color: #fff;
+    padding: 9px 20px;
 }
 .el-button--default:focus, .el-button--default:hover {
     background-color: #204A6B;

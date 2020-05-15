@@ -118,15 +118,15 @@
         <span class="win-header-title" v-else-if="page==='会议'">会议转发</span>
         <span class="win-header-close" @click="handleClose"><span class="el-icon-close"></span></span>
     </div>
-    <div style="height:50px; width:100%; position:absolute; left:0; bottom:40px;text-align: center">
-        <el-pagination
-                background
-                :pager-count="11"
-                :page-size="table.pageSize"
-                @current-change="currentChange"
-                layout="prev, pager, next"
-                :total="table.total">
-        </el-pagination>
+    <el-pagination
+            background
+            :pager-count="11"
+            :page-size="table.pageSize"
+            @current-change="currentChange"
+            layout="prev, pager, next"
+            :total="table.total">
+    </el-pagination>
+    <div style="height:50px; position:absolute; right:60px; bottom:0;">
         <el-button size="medium" type="primary" @click="handleForward">转发</el-button>
     </div>
 </div>

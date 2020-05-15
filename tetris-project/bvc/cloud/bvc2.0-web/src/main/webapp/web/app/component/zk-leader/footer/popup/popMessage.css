@@ -43,6 +43,7 @@ body, div, p {
     right: 0;
     bottom: 0;
     background-color: #0F2A4D;
+    border:1px solid #123e80;
     overflow: hidden;
     box-sizing: border-box;
 }

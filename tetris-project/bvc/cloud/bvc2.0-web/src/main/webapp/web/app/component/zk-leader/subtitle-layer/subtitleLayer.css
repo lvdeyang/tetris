@@ -182,4 +182,28 @@ body{
     color: #e6eeff;
 }
 
+/*重置表格滚动条的样式*/
+::-webkit-scrollbar {
+    width: 4px;
+    height: 10px;
+}
+
+/*//滚动条的滑块*/
+::-webkit-scrollbar-thumb {
+    background-color: #4F5F73;
+    border-radius: 3px;
+}
+/*更改下拉框的样式*/
+.el-select-dropdown{
+    background-color: #0F2A4D;
+    border:1px solid #123e80;
+}
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover{
+    background-color:#061f3e;
+}
+.el-select-dropdown__item{
+    color: #b3b3b3;
+}
+
 .el-input.is-disabled .el-input__inner{color:#444;}

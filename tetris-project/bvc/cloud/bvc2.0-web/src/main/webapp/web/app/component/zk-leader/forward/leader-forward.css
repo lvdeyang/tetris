@@ -13,6 +13,7 @@ html, body {
     height: 100%;
     position: relative;
     background-color: #0F2A4D;
+    border:1px solid #123e80;
 }
 
 .zk-business-forward .el-scrollbar__wrap {
@@ -145,4 +146,15 @@ html, body {
 .el-button--primary:focus, .el-button--primary:hover {
     background-color: #2562F7;
     border: none;
+}
+
+.el-pagination {
+    white-space: nowrap;
+    padding: 2px 5px;
+    color: #303133;
+    font-weight: 700;
+    position: absolute;
+    left: 60px;
+    bottom: 0;
+    height: 50px;
 }

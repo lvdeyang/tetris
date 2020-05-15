@@ -1400,7 +1400,7 @@ define([
             },
             //点播录制文件
             playRecordFile: function () {
-                this.qt.window('/router/zk/leader/record/file', null, {width: 1366, height: 700})
+                this.qt.window('/router/zk/leader/record/file', null, {width: 1100, height: 700})
             },
             //外部文件管理
             openOutFile: function () {

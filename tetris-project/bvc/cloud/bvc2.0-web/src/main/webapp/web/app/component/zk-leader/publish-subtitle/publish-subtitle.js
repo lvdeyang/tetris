@@ -20,13 +20,13 @@ define([
                 leftCurrentPage: 1,
                 leftData: [],
                 total:0,
-                pageSize:10,
+                pageSize:8,
                 osdId: '',  //要传的
                 serial: ''
             }
         },
         computed: {
-           
+
         },
         methods: {
             //当前页改变

@@ -111,7 +111,7 @@ body {
 
 
 /* 更改输入框背景色 */
-.el-input__inner {
+.el-input__inner,.el-input.is-disabled .el-input__inner {
   background-color: #0b2d5a;
   border:1px solid #17407e;
   color: #fff;
@@ -131,4 +131,29 @@ body {
 
 .el-date-editor .el-range-separator,.el-date-editor .el-range-input{
   color: #dadada;
+}
+
+
+/*更改下拉框的样式*/
+.el-select-dropdown,.el-picker-panel,.el-picker-panel__footer{
+  background-color: #0F2A4D;
+  border:1px solid #123e80;
+}
+
+.el-select-dropdown__item.hover, .el-select-dropdown__item:hover{
+  background-color:#061f3e;
+}
+.el-select-dropdown__item,.el-picker-panel,.el-date-table th{
+  color: #b3b3b3;
+}
+
+.el-button--default,.el-button.is-disabled.is-plain, .el-button.is-disabled.is-plain:focus, .el-button.is-disabled.is-plain:hover{
+  background-color: #2562F7;
+  border: none;
+  border-radius: 33px;
+  color: #fff;
+}
+
+.el-date-table td.in-range div, .el-date-table td.in-range div:hover, .el-date-table.is-week-mode .el-date-table__row.current div, .el-date-table.is-week-mode .el-date-table__row:hover div{
+  background-color: #0b3471;
 }

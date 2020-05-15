@@ -87,7 +87,7 @@ define([
             },
         	//字幕管理
             subtitleOpen: function () {
-                this.qt.window('/router/zk/leader/subtitle/manage', null, {width: '85%', height: '93%'});
+                this.qt.window('/router/zk/leader/subtitle/manage', null, {width: 1200, height: 700});
             },
             //当前页改变
             leftCurrentChange: function (val) {

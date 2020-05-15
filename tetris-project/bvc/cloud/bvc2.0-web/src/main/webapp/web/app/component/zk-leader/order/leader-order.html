@@ -4,7 +4,7 @@
         <span class="win-header-close" @click="handleClose"><span class="el-icon-close"></span></span>
     </div>
 
-    <div style="position:absolute;top:75px;left:75px;right:75px;bottom:75px;background-color: #1E2343;border-radius: 13px">
+    <div style="position:absolute;top:60px;left:40px;right:40px;bottom:50px;border:1px solid #384d6b;border-radius: 1px">
         <el-tabs v-model="currentTab" type="card">
             <el-tab-pane label="文件资源" name="0">
                 <div style="position:absolute; left:32px; top:45px; right:0; bottom:0;">
@@ -108,7 +108,7 @@
         </el-tabs>
     </div>
 
-    <div style="height:50px; width:100%; position:absolute; left:0; bottom:0;text-align: center">
+    <div style="height:50px;line-height: 50px; width:100%; position:absolute; left:0; bottom:0;text-align: center">
         <el-button size="medium" type="primary" @click="handleOrder">确定</el-button>
     </div>
 </div>
