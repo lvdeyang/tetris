@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration debug="false">
     <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径，引用application.yml属性-->
-    <springProperty scope="context" name="LOG_HOME" source="log.home" defaultValue="./logs"/>
+    <springProperty scope="context" name="LOG_HOME" source="log.home" defaultValue="/var/logs"/>
     <springProperty scope="context" name="MAX_FILE_SIZE" source="log.maxFileSize" defaultValue="30MB"/>
     <springProperty scope="context" name="MAX_HISTORY" source="log.maxHistory" defaultValue="30"/>
     <springProperty scope="context" name="TOTAL_SIZE_CAP" source="log.totalSizeCap" defaultValue="1GB"/>
