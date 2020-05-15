@@ -346,6 +346,20 @@ public class RouterController {
 	}
 	
 	/**
+	 * 上屏方案关联设备弹框<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月14日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/cast/decoder/devices")
+	public ModelAndView zkLeaderCastDecoderDevices(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/cast-decoder-devices/leader-cast-decoder-devices");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 页脚发布字幕弹框<br/>
 	 * <b>作者:</b>yxc<br/>
 	 * <b>版本：</b>1.0<br/>

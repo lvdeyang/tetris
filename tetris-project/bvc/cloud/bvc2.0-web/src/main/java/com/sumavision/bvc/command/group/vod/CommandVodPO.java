@@ -1,9 +1,12 @@
 package com.sumavision.bvc.command.group.vod;
 
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
 import com.sumavision.bvc.command.group.enumeration.VodType;
+import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Entity
@@ -15,6 +18,9 @@ public class CommandVodPO extends AbstractBasePO{
 	/** 点播类型，区分点播用户还是点播设备 */
 	private VodType vodType;
 	
+	/** 目的设备类型 */
+	private DstDeviceType dstDeviceType;
+	
 	/************
 	 *源--被点播方*
 	 ************/
@@ -24,6 +30,7 @@ public class CommandVodPO extends AbstractBasePO{
 	/** 被点播用户/设备号码 */
 	private String sourceNo;
 	
+	/** 点播文件时，记录文件名 */
 	private String sourceUserName;
 	
 	private String sourceBundleId;
@@ -41,6 +48,9 @@ public class CommandVodPO extends AbstractBasePO{
 	private String sourceAudioChannelId;
 	
 	private String sourceAudioBaseType;
+	
+	/** 点播文件时，记录播放地址 */
+	private String playUrl;
 	
 	/************
 	 *目的--播放器*
@@ -75,6 +85,15 @@ public class CommandVodPO extends AbstractBasePO{
 
 	public void setVodType(VodType vodType) {
 		this.vodType = vodType;
+	}
+
+	@Enumerated(value = EnumType.STRING)
+	public DstDeviceType getDstDeviceType() {
+		return dstDeviceType;
+	}
+
+	public void setDstDeviceType(DstDeviceType dstDeviceType) {
+		this.dstDeviceType = dstDeviceType;
 	}
 
 	public Long getSourceUserId() {
@@ -155,6 +174,14 @@ public class CommandVodPO extends AbstractBasePO{
 
 	public void setSourceAudioBaseType(String sourceAudioBaseType) {
 		this.sourceAudioBaseType = sourceAudioBaseType;
+	}
+
+	public String getPlayUrl() {
+		return playUrl;
+	}
+
+	public void setPlayUrl(String playUrl) {
+		this.playUrl = playUrl;
 	}
 
 	public Long getDstUserId() {
