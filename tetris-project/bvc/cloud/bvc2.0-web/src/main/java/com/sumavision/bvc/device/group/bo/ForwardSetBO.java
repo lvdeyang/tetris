@@ -3,6 +3,7 @@ package com.sumavision.bvc.device.group.bo;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.command.group.enumeration.MediaType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
@@ -367,6 +368,38 @@ public class ForwardSetBO {
 			   .setBundleId(castDevice.getDstBundleId())
 			   .setChannelId(castDevice.getDstAudioChannelId())
 			   .setBundle_type(castDevice.getDstVenusBundleType())
+			   .setCodec_param(codec);
+		}
+		
+		//空源src要发null
+		this.setSrc(src);
+		this.setDst(dst);
+		
+		return this;
+	}
+
+	public ForwardSetBO setByMediapushAndDstBundle(String mediaPushUuid, BundlePO bundle, CodecParamBO codec, MediaType mediaType){
+		ForwardSetSrcBO src = new ForwardSetSrcBO();
+		ForwardSetDstBO dst = new ForwardSetDstBO();
+		if(MediaType.VIDEO.equals(mediaType)){
+			//视频转发
+			src.setType("mediaPush")
+			   .setUuid(mediaPushUuid);
+			dst.setBase_type("VenusVideoOut")
+			   .setLayerId(bundle.getAccessNodeUid())
+			   .setBundleId(bundle.getBundleId())
+			   .setChannelId(ChannelType.VIDEODECODE1.getChannelId())
+			   .setBundle_type(bundle.getBundleType())
+			   .setCodec_param(codec);
+		}else if(MediaType.AUDIO.equals(mediaType)){
+			//音频转发
+			src.setType("mediaPush")
+			   .setUuid(mediaPushUuid);
+			dst.setBase_type("VenusAudioOut")
+			   .setLayerId(bundle.getAccessNodeUid())
+			   .setBundleId(bundle.getBundleId())
+			   .setChannelId(ChannelType.AUDIODECODE1.getChannelId())
+			   .setBundle_type(bundle.getBundleType())
 			   .setCodec_param(codec);
 		}
 		

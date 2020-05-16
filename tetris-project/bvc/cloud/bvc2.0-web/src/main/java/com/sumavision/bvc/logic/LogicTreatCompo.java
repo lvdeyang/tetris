@@ -532,6 +532,7 @@ public class LogicTreatCompo{
 						removeResourcesInTask(uuid2ChannelSelMap);
 						removeResourcesInTask(audio_uuid2ChannelSelMap);
 						removeResourcesInTask(mediaMux_taskIdChannelSelMap);
+						removeResourcesInTask(mediaPush_taskId2ChannelSelMap);
 						
 						log.error("--------------" + errMsg);
 						JSONObject jsonObj = new JSONObject();
@@ -586,6 +587,7 @@ public class LogicTreatCompo{
 						removeResourcesInTask(uuid2ChannelSelMap);
 						removeResourcesInTask(audio_uuid2ChannelSelMap);
 						removeResourcesInTask(mediaMux_taskIdChannelSelMap);
+						removeResourcesInTask(mediaPush_taskId2ChannelSelMap);
 						log.error("--------------" + errMsg);
 						JSONObject jsonObj = new JSONObject();
 						jsonObj.put("errMsg", errMsg);
@@ -679,6 +681,7 @@ public class LogicTreatCompo{
 						removeResourcesInTask(uuid2ChannelSelMap);
 						removeResourcesInTask(audio_uuid2ChannelSelMap);
 						removeResourcesInTask(mediaMux_taskIdChannelSelMap);
+						removeResourcesInTask(mediaPush_taskId2ChannelSelMap);
 						errMsg = "组装大屏视频能力通道出错";
 						log.error("--------------" + errMsg);
 						JSONObject jsonObj = new JSONObject();
@@ -727,6 +730,7 @@ public class LogicTreatCompo{
 						removeResourcesInTask(uuid2ChannelSelMap);
 						removeResourcesInTask(audio_uuid2ChannelSelMap);
 						removeResourcesInTask(mediaMux_taskIdChannelSelMap);
+						removeResourcesInTask(mediaPush_taskId2ChannelSelMap);
 						errMsg = "组装大屏音频能力通道出错";
 						log.error("--------------" + errMsg);
 						JSONObject jsonObj = new JSONObject();
@@ -823,6 +827,7 @@ public class LogicTreatCompo{
 						removeResourcesInTask(uuid2ChannelSelMap);
 						removeResourcesInTask(audio_uuid2ChannelSelMap);
 						removeResourcesInTask(mediaMux_taskIdChannelSelMap);
+						removeResourcesInTask(mediaPush_taskId2ChannelSelMap);
 						errMsg = "组装呼叫能力通道出错";
 						log.error("--------------" + errMsg);
 						JSONObject jsonObj = new JSONObject();
@@ -938,6 +943,7 @@ public class LogicTreatCompo{
 						removeResourcesInTask(uuid2ChannelSelMap);
 						removeResourcesInTask(audio_uuid2ChannelSelMap);
 						removeResourcesInTask(mediaMux_taskIdChannelSelMap);
+						removeResourcesInTask(mediaPush_taskId2ChannelSelMap);
 						errMsg = "组装转发能力通道出错";
 						log.error("--------------" + errMsg);
 						JSONObject jsonObj = new JSONObject();
@@ -1044,6 +1050,7 @@ public class LogicTreatCompo{
 								removeResourcesInTask(uuid2ChannelSelMap);
 								removeResourcesInTask(audio_uuid2ChannelSelMap);
 								removeResourcesInTask(mediaMux_taskIdChannelSelMap);
+								removeResourcesInTask(mediaPush_taskId2ChannelSelMap);
 								errMsg = "组装bundle呼叫能力通道出错";
 								log.error("--------------" + errMsg);
 								JSONObject jsonObj = new JSONObject();
@@ -1078,6 +1085,7 @@ public class LogicTreatCompo{
 					removeResourcesInTask(uuid2ChannelSelMap);
 					removeResourcesInTask(audio_uuid2ChannelSelMap);
 					removeResourcesInTask(mediaMux_taskIdChannelSelMap);
+					removeResourcesInTask(mediaPush_taskId2ChannelSelMap);
 					Boolean lockResult = null;
 					if(lockMap != null){						
 						lockResult = (Boolean)lockMap.get("lockResult");

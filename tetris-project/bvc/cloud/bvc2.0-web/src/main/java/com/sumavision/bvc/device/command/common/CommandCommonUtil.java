@@ -30,6 +30,7 @@ import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordFragmentPO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
+import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderScreenPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
@@ -305,6 +306,17 @@ public class CommandCommonUtil {
 		for(CommandGroupUserPlayerPO player : players){
 			if(player.getLocationIndex() == locationIndex){
 				return player;
+			}
+		}
+		return null;
+	}
+	
+	/** 根据id查找上屏方案中的分屏 */
+	public CommandGroupDecoderScreenPO queryScreenById(List<CommandGroupDecoderScreenPO> screens, Long id) {
+		if(screens == null) return null;
+		for(CommandGroupDecoderScreenPO screen : screens){
+			if(screen.getId().equals(id)){
+				return screen;
 			}
 		}
 		return null;
