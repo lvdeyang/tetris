@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
@@ -19,9 +20,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.BundleService;
+import com.suma.venus.resource.service.ChannelSchemeService;
+import com.suma.venus.resource.service.ChannelTemplateService;
+import com.suma.venus.resource.task.BundleHeartBeatService;
 import com.suma.venus.resource.vo.BundleFeignVO;
+import com.sumavision.tetris.capacity.server.CapacityService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -35,6 +41,140 @@ public class BundleFeignController {
 
 	@Autowired
 	private BundleDao bundleDao;
+
+	@Autowired
+	private ChannelTemplateService channelTemplateService;
+
+	@Autowired
+	private ChannelSchemeService channelSchemeService;
+
+	@Autowired
+	private CapacityService capacityService;
+
+	@Autowired
+	private BundleHeartBeatService bundleHeartBeatService;
+
+	@Autowired
+	private ScreenSchemeDao screenSchemeDao;
+
+	@Value("${spring.cloud.client.ipAddress}")
+	private String clientIP;
+
+	@Value("${server.port}")
+	private String port;
+
+	/**
+	 * 添加转码设备
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/addTranscodeDevice")
+	public Object addTranscodeDevice(String name, String ip, Integer port) throws Exception {
+
+		BundlePO bundlePO = new BundlePO();
+		bundlePO.setBundleName(name);
+		bundlePO.setBundleAlias(ip);
+		bundlePO.setUsername(ip);
+		bundlePO.setOnlinePassword(ip);
+		bundlePO.setDeviceIp(ip);
+		bundlePO.setDevicePort(port);
+		bundlePO.setDeviceModel("transcode");
+
+		bundlePO.setBundleType(
+				channelTemplateService.findByDeviceModel(bundlePO.getDeviceModel()).get(0).getBundleType());
+
+		bundlePO.setBundleId(BundlePO.createBundleId());
+
+		bundleService.save(bundlePO);
+
+		bundleService.configDefaultAbility(bundlePO);
+
+		LOGGER.info("add new transcode device, set heartbeaturl=" + "http://" + clientIP + ":" + port
+				+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+
+		capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(), "http://" + clientIP + ":" + port
+				+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+
+		capacityService.setAlarmUrl(bundlePO.getDeviceIp());
+
+		return bundlePO.getBundleId();
+
+	}
+
+	/**
+	 * 重新设置能力发送心跳和告警的url
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/resetHeartBeatAndAlarm")
+	public Object resetHeartBeatAndAlarm(String bundle_id) throws Exception {
+
+		try {
+
+			BundlePO bundlePO = bundleService.findByBundleId(bundle_id);
+
+			if (bundlePO == null) {
+				return "";
+			}
+
+			LOGGER.info("set heartbeaturl=" + "http://" + clientIP + ":" + port
+					+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+
+			capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(), "http://" + clientIP + ":" + port
+					+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+
+			capacityService.setAlarmUrl(bundlePO.getDeviceIp());
+
+			return "success";
+
+		} catch (Exception e) {
+			return "";
+		}
+
+	}
+
+	/**
+	 * 添加转码设备
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delTranscodeDevice")
+	public Object delTranscodeDevice(String bundle_id) throws Exception {
+
+		try {
+
+			BundlePO bundle = bundleService.findByBundleId(bundle_id);
+
+			if (bundle == null) {
+				return "";
+			}
+
+			if (bundle.getDeviceIp() != null) {
+				bundleHeartBeatService.removeBundleStatus(bundle.getDeviceIp());
+			}
+
+			bundleService.delete(bundle);
+
+			// 删除配置能力
+			channelSchemeService.deleteByBundleId(bundle_id);
+			// lockChannelParamDao.deleteByBundleId(bundleId);
+
+			// 删除屏配置信息
+			screenSchemeDao.deleteByBundleId(bundle_id);
+			// lockScreenParamDao.deleteByBundleId(bundleId);
+
+			// 删除设备上的锁定参数（如果有）
+			// lockBundleParamDao.deleteByBundleId(bundleId);
+
+			return "success";
+
+		} catch (Exception e) {
+
+			return "";
+
+		}
+
+	}
 
 	/**
 	 * 查询经纬度范围内的ipc设备<br/>
