@@ -2,7 +2,9 @@ package com.suma.venus.resource.controller.feign;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
+import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -60,8 +63,8 @@ public class BundleFeignController {
 	@Value("${spring.cloud.client.ipAddress}")
 	private String clientIP;
 
-	@Value("${server.port}")
-	private String port;
+	@Value("${zuulPort}")
+	private String zuulPort;
 
 	/**
 	 * 添加转码设备
@@ -71,33 +74,60 @@ public class BundleFeignController {
 	@RequestMapping(value = "/addTranscodeDevice")
 	public Object addTranscodeDevice(String name, String ip, Integer port) throws Exception {
 
+		LOGGER.info("addTranscodeDevice feign api, params= " + name + "," + ip + ":" + port);
+		Map<String, String> data = new HashMap<>();
+
 		BundlePO bundlePO = new BundlePO();
-		bundlePO.setBundleName(name);
-		bundlePO.setBundleAlias(ip);
-		bundlePO.setUsername(ip);
-		bundlePO.setOnlinePassword(ip);
-		bundlePO.setDeviceIp(ip);
-		bundlePO.setDevicePort(port);
-		bundlePO.setDeviceModel("transcode");
 
-		bundlePO.setBundleType(
-				channelTemplateService.findByDeviceModel(bundlePO.getDeviceModel()).get(0).getBundleType());
+		try {
 
-		bundlePO.setBundleId(BundlePO.createBundleId());
+			bundlePO.setBundleName(name);
+			bundlePO.setBundleAlias(ip);
+			bundlePO.setUsername(ip);
+			bundlePO.setOnlinePassword(ip);
+			bundlePO.setDeviceIp(ip);
+			bundlePO.setDevicePort(port);
+			bundlePO.setDeviceModel("transcode");
 
-		bundleService.save(bundlePO);
+			bundlePO.setBundleType(
+					channelTemplateService.findByDeviceModel(bundlePO.getDeviceModel()).get(0).getBundleType());
 
-		bundleService.configDefaultAbility(bundlePO);
+			bundlePO.setBundleId(BundlePO.createBundleId());
 
-		LOGGER.info("add new transcode device, set heartbeaturl=" + "http://" + clientIP + ":" + port
-				+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+			bundleService.save(bundlePO);
 
-		capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(), "http://" + clientIP + ":" + port
-				+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+			bundleService.configDefaultAbility(bundlePO);
+		} catch (Exception e) {
+			e.printStackTrace();
 
-		capacityService.setAlarmUrl(bundlePO.getDeviceIp());
+			data.put("bundle_id", "");
+			return data;
+		}
 
-		return bundlePO.getBundleId();
+		data.put("bundle_id", bundlePO.getBundleId());
+		
+		/*
+		try {
+			LOGGER.info("add new transcode device, set heartbeaturl=" + "http://" + clientIP + ":" + zuulPort
+					+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+
+			capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(), "http://" + clientIP + ":" + zuulPort
+					+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+
+			capacityService.setAlarmUrl(bundlePO.getDeviceIp());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			data.put("bundle_set", "");
+		}
+		*/
+		
+		
+		data.put("bundle_set", "success");
+
+		LOGGER.info("addTranscodeDevice feign api, return = " + JSON.toJSONString(data));
+
+		return data;
 
 	}
 
@@ -109,6 +139,8 @@ public class BundleFeignController {
 	@RequestMapping(value = "/resetHeartBeatAndAlarm")
 	public Object resetHeartBeatAndAlarm(String bundle_id) throws Exception {
 
+		LOGGER.info("resetHeartBeatAndAlarm feign api, bundle_id= " + bundle_id);
+
 		try {
 
 			BundlePO bundlePO = bundleService.findByBundleId(bundle_id);
@@ -117,10 +149,10 @@ public class BundleFeignController {
 				return "";
 			}
 
-			LOGGER.info("set heartbeaturl=" + "http://" + clientIP + ":" + port
+			LOGGER.info("add new transcode device, set heartbeaturl=" + "http://" + clientIP + ":" + zuulPort
 					+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
 
-			capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(), "http://" + clientIP + ":" + port
+			capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(), "http://" + clientIP + ":" + zuulPort
 					+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
 
 			capacityService.setAlarmUrl(bundlePO.getDeviceIp());
@@ -140,6 +172,8 @@ public class BundleFeignController {
 	@ResponseBody
 	@RequestMapping(value = "/delTranscodeDevice")
 	public Object delTranscodeDevice(String bundle_id) throws Exception {
+
+		LOGGER.info("delTranscodeDevice feign api, bundle_id= " + bundle_id);
 
 		try {
 

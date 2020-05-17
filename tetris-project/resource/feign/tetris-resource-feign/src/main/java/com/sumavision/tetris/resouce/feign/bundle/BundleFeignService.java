@@ -1,6 +1,7 @@
 package com.sumavision.tetris.resouce.feign.bundle;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,8 +27,11 @@ public class BundleFeignService {
 	 * @return bundle_id 为空则是添加失败
 	 * @throws Exception
 	 */
-	public String addTransCodeDevice(String name, String ip, Integer port) throws Exception {
-		return JSON.parseObject(bundleFeign.addTranscodeDevice(name, ip, port), String.class);
+	@SuppressWarnings("unchecked")
+	public Map<String, String> addTransCodeDevice(String name, String ip, Integer port) throws Exception {
+
+		return (Map<String, String>) JSON.parseObject(bundleFeign.addTranscodeDevice(name, ip, port), Map.class)
+				.get("data");
 
 	}
 
@@ -35,7 +39,7 @@ public class BundleFeignService {
 	 * 删除转码设备
 	 * 
 	 * @param name
-	 * @return 
+	 * @return
 	 * @throws Exception
 	 */
 	public String delTransCodeDevice(String bundle_id) throws Exception {
@@ -46,7 +50,7 @@ public class BundleFeignService {
 	 * 重设设备的心跳和告警Url
 	 * 
 	 * @param name
-	 * @return bundle_id 
+	 * @return bundle_id
 	 * @throws Exception
 	 */
 	public String resetDeviceHeartBeatAndAlarmUrl(String bundle_id) throws Exception {
