@@ -411,7 +411,7 @@ public class SerInfoAndNodeController extends ControllerBase {
 
 	@RequestMapping("syncSerNodeToLdap")
 	@ResponseBody
-	public Map<String, Object> syncSerNodeToLdap() {
+	public Map<String, Object> syncSerNodeToLdap() throws Exception{
 
 		Map<String, Object> data = new HashMap<String, Object>();
 

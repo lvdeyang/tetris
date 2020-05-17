@@ -20,6 +20,13 @@
         </el-select>
       </el-form-item>
 
+      <el-form-item size="small" v-show="bundleForm.deviceModel=='ws'" label="编解码类型" prop="coderType">
+        <el-select v-model="bundleForm.coderType" style="width: 200px;">
+          <el-option v-for="item in wsTypeOptions" :key="item.value" :label="item.label" :value="item.value">
+          </el-option>
+        </el-select>
+      </el-form-item>
+
       <!--<el-form-item label="设备类型" prop="bundleType">-->
         <!--<el-select v-model="bundleForm.bundleType" style="width: 200px;">-->
           <!--<el-option v-for="item in bundleTypeOptions" :key="item.value" :label="item.label" :value="item.value">-->
@@ -52,7 +59,7 @@
       </el-form-item>
 
       <!-- TODO -->
-      <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210'" label="接入层UID" prop="accessNodeUid">
+      <el-form-item size="small" v-show="bundleForm.deviceModel=='jv210' || bundleForm.deviceModel=='ws'" label="接入层UID" prop="accessNodeUid">
         <el-input v-model="bundleForm.accessNodeUid" style="width: 200px;" readOnly @click.native="handleSelectLayerNode"></el-input>
       </el-form-item>
 
@@ -271,6 +278,20 @@
           },
           {
             label : "默认",
+            value : "DEFAULT"
+          },
+        ],
+        wsTypeOptions : [
+          {
+            label : "编码器",
+            value : "ENCODER"
+          },
+          {
+            label : "解码器",
+            value : "DECODER"
+          },
+          {
+            label : "软终端",
             value : "DEFAULT"
           },
         ],

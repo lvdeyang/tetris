@@ -219,13 +219,13 @@ public class BundleManageController extends ControllerBase {
 			}
 
 			// 按照模板最大通道数自动生成能力配置
-			if ("jv210".equals(bundlePO.getDeviceModel())) {
+			if ("jv210".equals(bundlePO.getDeviceModel()) || "ws".equals(bundlePO.getDeviceModel())) {
 				if (CoderType.ENCODER.equals(bundleVO.getCoderType())) {
 					channelSchemeDao
-							.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO.getBundleId()));
+							.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO));
 				} else if (CoderType.DECODER.equals(bundleVO.getCoderType())) {
 					channelSchemeDao
-							.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
+							.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO));
 				} else {
 					bundleService.configDefaultAbility(bundlePO);
 				}
@@ -830,11 +830,11 @@ public class BundleManageController extends ControllerBase {
 					if (null != encoderCell && "是".equals(encoderCell.getStringCellValue())) {
 						// 编码器
 						channelSchemeDao
-								.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO.getBundleId()));
+								.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundlePO));
 					} else if (null != decoderCell && "是".equals(decoderCell.getStringCellValue())) {
 						// 解码器
 						channelSchemeDao
-								.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO.getBundleId()));
+								.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundlePO));
 					} else {
 						// 按照jv210模板自动生成能力配置
 						bundleService.configDefaultAbility(bundlePO);

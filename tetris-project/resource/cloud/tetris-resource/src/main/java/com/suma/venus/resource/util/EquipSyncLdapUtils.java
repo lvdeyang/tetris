@@ -108,11 +108,11 @@ public class EquipSyncLdapUtils {
 						if (ldapEquip.getEquipType() == 2) {
 							// 编码设备
 							// 配置两路编码通道(音频编码和视频编码各一路)
-							channelSchemeDao.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundle.getBundleId()));
+							channelSchemeDao.save(channelSchemeService.createAudioAndVideoEncodeChannel(bundle));
 						} else if (ldapEquip.getEquipType() == 3) {
 							// 解码设备
 							// 配置两路解码通道(音频解码和视频解码各一路)
-							channelSchemeDao.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundle.getBundleId()));
+							channelSchemeDao.save(channelSchemeService.createAudioAndVideoDecodeChannel(bundle));
 						} else {
 							// 按照模板最大通道数自动生成能力配置
 							bundleService.configDefaultAbility(bundle);
@@ -144,8 +144,12 @@ public class EquipSyncLdapUtils {
 			System.out.println("handleSyncToLdap syncAll==false, bundlesToLdap.size=" + bundlesToLdap.size());
 
 		}
-
+		
 		SerNodePO self = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+		
+		//本系统在ldap上的设备信息
+		List<LdapEquipPo> allLdapEquips = ldapEquipDao.getEquipByNode(self.getNodeUuid());
+		
 		List<BundlePO> successBundles = new ArrayList<BundlePO>();
 		for (BundlePO bundleToLdap : bundlesToLdap) {
 			try {
@@ -156,6 +160,11 @@ public class EquipSyncLdapUtils {
 						continue;
 					}
 					ldapEquipDao.update(ldapEquip);
+					
+					if(syncAll.equals("true")){
+						allLdapEquips.removeAll(oldLdapEquips);
+					}
+					
 				} else {
 					// 新建
 					LdapEquipPo ldapEquip = ldapEquipInfoUtil.pojoToLdap(bundleToLdap, self);
@@ -171,6 +180,11 @@ public class EquipSyncLdapUtils {
 				LOGGER.error("", e);
 			}
 		}
+		
+		if(syncAll.equals("true") && allLdapEquips.size() > 0){
+			ldapEquipDao.removeAll(allLdapEquips);
+		}
+		
 		if (!successBundles.isEmpty()) {
 			bundleDao.save(successBundles);
 		}

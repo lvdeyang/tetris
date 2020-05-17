@@ -6,6 +6,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderScreenPO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -81,6 +82,9 @@ public class CommandGroupUserPlayerCastDevicePO extends AbstractBasePO {
 	
 	/** 关联播放器 */
 	private CommandGroupUserPlayerPO player;
+	
+	/** 关联上屏方案中的分屏 */
+	private CommandGroupDecoderScreenPO screen;
 
 	@Column(name = "USER_ID")
 	public Long getUserId() {
@@ -243,6 +247,16 @@ public class CommandGroupUserPlayerCastDevicePO extends AbstractBasePO {
 
 	public void setPlayer(CommandGroupUserPlayerPO player) {
 		this.player = player;
+	}
+
+	@ManyToOne
+	@JoinColumn(name = "SCREEN_ID")
+	public CommandGroupDecoderScreenPO getScreen() {
+		return screen;
+	}
+
+	public void setScreen(CommandGroupDecoderScreenPO screen) {
+		this.screen = screen;
 	}
 	
 }

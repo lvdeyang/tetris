@@ -284,7 +284,7 @@ public class CommandCommonServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月22日
 	 * @param Long userId 用户id
-	 * @param PlayerBusinessType businessType 业务类型
+	 * @param SchemeBusinessType businessType 业务类型
 	 * @param int count 需要的播放器数量
 	 * @param boolean mustAll 是否必须查询到count个播放器，如果没有这么多可用，则返回空列表
 	 * @return List<CommandGroupUserPlayerPO> 播放器列表
@@ -420,7 +420,7 @@ public class CommandCommonServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月18日 上午11:14:11
 	 * @param CommandGroupUserLayoutShemePO scheme 用户方案
-	 * @param PlayerBusinessType businessType 业务类型
+	 * @param SchemeBusinessType businessType 业务类型
 	 * @param Long businessId 业务id
 	 * @return CommandGroupUserPlayerPO 播放器信息
 	 */
@@ -441,7 +441,7 @@ public class CommandCommonServiceImpl {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月17日 上午11:11:00
 	 * @param CommandGroupUserInfoPO userInfo 用户信息
-	 * @param PlayerBusinessType businessType 业务类型
+	 * @param SchemeBusinessType businessType 业务类型
 	 * @param Long businessId 业务id
 	 * @return CommandGroupUserPlayerPO 播放器信息
 	 */
