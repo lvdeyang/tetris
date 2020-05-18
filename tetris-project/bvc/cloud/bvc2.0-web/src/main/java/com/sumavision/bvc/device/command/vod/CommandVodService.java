@@ -37,6 +37,7 @@ import com.sumavision.bvc.device.group.bo.ConnectBundleBO;
 import com.sumavision.bvc.device.group.bo.DisconnectBundleBO;
 import com.sumavision.bvc.device.group.bo.ForwardSetSrcBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
+import com.sumavision.bvc.device.group.bo.MediaPushSetBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.bo.XtBusinessPassByContentBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
@@ -666,6 +667,9 @@ public class CommandVodService {
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		CommandGroupUserPlayerPO selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
 		if(selfPlayer != null){
+//			if(selfPlayer.getBusinessId().equals("0")){
+//				seeOneselfLocalStop(user);
+//			}
 			//检测用户绑定的编码器是否更新
 			CommandVodPO vod = commandVodDao.findOne(Long.parseLong(selfPlayer.getBusinessId()));			
 			if(vod == null){
@@ -830,7 +834,7 @@ public class CommandVodService {
 	 * @param Long userId 用户id
 	 * @return LogicBO 协议
 	 */
-	private LogicBO connectBundle(
+	public LogicBO connectBundle(
 			CommandVodPO vod,
 			CodecParamBO codec,
 			Long userId) throws Exception{		
@@ -943,24 +947,25 @@ public class CommandVodService {
 	 * @param vod 点播信息
 	 * @param codec 点播信息
 	 * @param userId adminId
-	 * @param closePlayer 是否关闭播放器，通常true，在换源业务时使用false
+	 * @param closeDecoder 是否关闭播放器/解码器，通常true，在换源业务时使用false
 	 * @return LogicBO 协议
 	 */
-	private LogicBO closeBundle(
+	public LogicBO closeBundle(
 			CommandVodPO vod,
 			CodecParamBO codec,
 			Long userId,
-			boolean closePlayer) throws Exception{
+			boolean closeDecoder) throws Exception{
 	
 		LogicBO logic = new LogicBO().setUserId(userId.toString())
 									 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
+									 .setMediaPushDel(new ArrayList<MediaPushSetBO>())
 									 .setPass_by(new ArrayList<PassByBO>());
 		
 		VodType vodType = vod.getVodType();
 		if(vodType == null || vodType.equals(VodType.DEVICE)
 				|| vodType.equals(VodType.USER)
 				|| vodType.equals(VodType.USER_ONESELF)){
-			//关闭被叫用户设备
+			//关闭被点播用户或设备
 			DisconnectBundleBO disconnectEncoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
 																	             .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
 																	             .setBundleId(vod.getSourceBundleId())
@@ -1007,7 +1012,7 @@ public class CommandVodService {
 			logic.getPass_by().add(passby);
 		}
 		
-		if(closePlayer){
+		if(closeDecoder){
 			
 			//清除资源层上的字幕
 			resourceServiceClient.removeLianwangPassby(vod.getDstBundleId());

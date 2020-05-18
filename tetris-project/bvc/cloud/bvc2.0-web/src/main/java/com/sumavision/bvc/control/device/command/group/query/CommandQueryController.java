@@ -33,6 +33,7 @@ import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
+import com.sumavision.bvc.command.group.dao.CommandGroupDecoderScreenDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupForwardDemandDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
@@ -44,6 +45,8 @@ import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
+import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderSchemePO;
+import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderScreenPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.config.ServerProps;
@@ -63,6 +66,8 @@ import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -107,6 +112,9 @@ public class CommandQueryController {
 	
 	@Autowired
 	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
+	
+	@Autowired
+	private CommandGroupDecoderScreenDAO commandGroupDecoderScreenDao;
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
@@ -622,6 +630,128 @@ public class CommandQueryController {
 		
 	}
 	
+	/**
+	 * 查找可用于关联某一播放器的解码器<br/>
+	 * <p>查询结果排除了该用户已经关联到其它播放器的解码器</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月27日 下午1:12:11
+	 * @param serial
+	 * @param withChannel
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/institution/tree/bundle/for/screen")
+	public Object findInstitutionTreeBundleForScreen(
+			String screenId,
+			boolean withChannel,
+			HttpServletRequest request) throws Exception{
+		
+		CommandGroupDecoderScreenPO screen = commandGroupDecoderScreenDao.findOne(Long.parseLong(screenId));
+		if(screen == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有找到分屏，id: " + screenId);
+		}
+		
+		//获取userId
+		long userId = userUtils.getUserIdFromSession(request);
+		
+		List<FolderBO> folders = new ArrayList<FolderBO>();
+		List<BundleBO> bundles = new ArrayList<BundleBO>();
+		List<ChannelBO> channels = new ArrayList<ChannelBO>();	
+		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
+		
+		//查询所有非点播的文件夹
+		List<FolderPO> totalFolders = resourceService.queryAllFolders();
+		for(FolderPO folder:totalFolders){
+			if(!FolderType.ON_DEMAND.equals(folder.getFolderType())){
+				folders.add(new FolderBO().set(folder));
+			}
+		}
+		
+		//查询有权限的设备
+		List<BundlePO> queryBundles = resourceQueryUtil.queryUseableBundles(userId);
+		
+		if(queryBundles==null || queryBundles.size()<=0) return _roots;
+		List<String> bundleIds = new ArrayList<String>();
+		for(BundlePO bundleBody:queryBundles){
+			if(!"jv230".equals(bundleBody.getDeviceModel()) && bundleBody.getFolderId() != null){
+				BundleBO bundle = new BundleBO().setId(bundleBody.getBundleId())										
+						.setName(bundleBody.getBundleName())
+						.setFolderId(bundleBody.getFolderId())
+						.setBundleId(bundleBody.getBundleId())
+						.setModel(bundleBody.getDeviceModel())
+						.setNodeUid(bundleBody.getAccessNodeUid())
+						.setOnlineStatus(bundleBody.getOnlineStatus().toString())
+						.setLockStatus(bundleBody.getLockStatus())
+						.setType(bundleBody.getBundleType())
+						.setRealType(SOURCE_TYPE.EXTERNAL.equals(bundleBody.getSourceType())?BundleBO.BundleRealType.XT.toString():BundleBO.BundleRealType.BVC.toString());
+
+				bundles.add(bundle);
+				
+				bundleIds.add(bundleBody.getBundleId());
+			}		
+		}
+		
+		//根据bundleIds从资源层查询channels
+		List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(bundleIds, 1);
+		if(queryChannels != null){
+			for(ChannelSchemeDTO channel:queryChannels){
+				ChannelBO channelBO = new ChannelBO().setChannelId(channel.getChannelId())
+													 //起别名
+												     .setName(ChannelType.transChannelName(channel.getChannelId()))
+													 .setBundleId(channel.getBundleId())
+													 .setChannelName(channel.getChannelName())
+													 .setChannelType(channel.getBaseType());
+	
+				channels.add(channelBO);
+			}
+		}
+		
+		//过滤已经被该方案绑定的设备
+		Set<String> castedBundleIds = new HashSet<String>();
+		CommandGroupDecoderSchemePO scheme = screen.getScheme();
+		List<CommandGroupDecoderScreenPO> screens = scheme.getScreens();
+		for(CommandGroupDecoderScreenPO screen1 : screens){
+			if(screen1.getCastDevices() != null){
+				for(CommandGroupUserPlayerCastDevicePO device : screen1.getCastDevices()){
+					castedBundleIds.add(device.getDstBundleId());
+				}
+			}
+		}		
+		
+		//过滤无通道设备
+		Set<String> filteredBundleIds = new HashSet<String>();
+		for(ChannelBO channel:channels){
+			filteredBundleIds.add(channel.getBundleId());
+		}
+		List<BundleBO> filteredBundles = new ArrayList<BundleBO>();
+		for(BundleBO bundle:bundles){
+			if(filteredBundleIds.contains(bundle.getBundleId())
+					&& !castedBundleIds.contains(bundle.getBundleId())){
+				filteredBundles.add(bundle);
+			}
+		}
+		
+		//找所有的根
+		List<FolderBO> roots = findRoots(folders);
+		for(FolderBO root:roots){
+			TreeNodeVO _root = new TreeNodeVO().set(root)
+											   .setChildren(new ArrayList<TreeNodeVO>());
+			_roots.add(_root);
+			if(withChannel){
+				recursionFolder(_root, folders, filteredBundles, channels, null);
+			}else{
+				recursionFolder(_root, folders, filteredBundles, null, null);
+			}
+		}
+		
+		return _roots;
+		
+	}
+
 	/**
 	 * 查询用户所在的会议列表<br/>
 	 * <b>作者:</b>wjw<br/>

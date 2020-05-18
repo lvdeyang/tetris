@@ -20,6 +20,7 @@ import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.pojo.SerNodePO;
+import com.suma.venus.resource.service.exception.SystemNodeNotFoundException;
 
 @Service
 public class FolderService extends CommonService<FolderPO> implements InitializingBean {
@@ -128,8 +129,11 @@ public class FolderService extends CommonService<FolderPO> implements Initializi
 	 * @param List<UserBO> users
 	 * @param Long maxIndex
 	 */
-	public void setFolderToUsers(FolderPO folder, List<UserBO> users, Long maxIndex) {
+	public void setFolderToUsers(FolderPO folder, List<UserBO> users, Long maxIndex) throws Exception{
 		SerNodePO sysnode = serNodeDao.findTopBySourceType(SOURCE_TYPE.SYSTEM);
+		if(sysnode == null){
+			throw new SystemNodeNotFoundException("未创建本地服务节点，无法将用户加入到分组");
+		}
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user: users){
 			userIds.add(user.getId());

@@ -3,7 +3,7 @@ server:
 
 eureka:
   instance:
-    hostname: 192.165.56.71
+    hostname: 192.165.56.85
   # 关闭自我保护机制，保证不可用服务及时踢出
   server:
     enableSelfPreservation: false
@@ -19,7 +19,7 @@ spring:
     name: tetris-spring-eureka
   datasource:
     base:
-      url: jdbc:mysql://localhost:3306/eureka?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+      url: jdbc:mysql://localhost:3306/eureka?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: root
       password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver

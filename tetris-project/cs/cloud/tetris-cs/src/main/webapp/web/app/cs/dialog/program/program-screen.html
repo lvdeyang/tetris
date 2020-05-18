@@ -112,7 +112,10 @@
                         :value="item.name">
                 </el-option>
             </el-select>
-            <el-button v-show="options.currentScreen.contentType=='仓库资源'" class="chooseFile" size="small" type="primary" @click="chooseResources(options.currentScreen)">
+            <el-button v-show="options.currentScreen.contentType=='仓库资源'
+             || options.currentScreen.contentType=='视频资源'
+             || options.currentScreen.contentType=='音频资源'
+             || options.currentScreen.contentType=='图片资源'" class="chooseFile" size="small" type="primary" @click="chooseResources(options.currentScreen)">
                 选择资源
             </el-button>
         </el-header>

@@ -121,11 +121,11 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @param Page<UserPO> page 分页信息
 	 * @return Page<UserPO> 用户列表
 	 */
-	@Query(value = "SELECT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
+	@Query(value = "SELECT DISTINCT user.* from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
 					+"AND IF(?2 IS NULL OR ?2='', TRUE, NICKNAME like ?2) "
 					+"AND IF(?3 IS NULL OR ?3='', TRUE, USERNO like ?3) "
 					+ "\n#pageable\n",
-			countQuery = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
+			countQuery = "SELECT count(DISTINCT user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
 					+"AND IF(?2 IS NULL OR ?2='', TRUE, NICKNAME like ?2) "
 					+"AND IF(?3 IS NULL OR ?3='', TRUE, USERNO like ?3) ",
 			nativeQuery = true)
@@ -141,7 +141,7 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * @param String userno 用户号码
 	 * @return int 用户数量
 	 */
-	@Query(value = "SELECT count(user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
+	@Query(value = "SELECT count(DISTINCT user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
 					+"AND IF(?2 IS NULL OR ?2='', TRUE, NICKNAME like ?2) "
 					+"AND IF(?3 IS NULL OR ?3='', TRUE, USERNO like ?3) ",
 			nativeQuery = true)

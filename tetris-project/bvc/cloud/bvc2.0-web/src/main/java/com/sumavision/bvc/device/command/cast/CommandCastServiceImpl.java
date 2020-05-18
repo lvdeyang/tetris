@@ -26,6 +26,7 @@ import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
 import com.sumavision.bvc.command.group.enumeration.MediaType;
+import com.sumavision.bvc.command.group.enumeration.SrcType;
 import com.sumavision.bvc.command.group.enumeration.VodType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
@@ -442,7 +443,7 @@ public class CommandCastServiceImpl {
 			LogicBO logicPlayFileStop = closeBundleCastDeviceWithRestrict2(new ArrayListWrapper<CommandGroupUserPlayerPO>().add(player).getList(), null, null, null, closeCastDevice, codec, admin.getId(), removeDevices);
 			logic.merge(logicPlayFileStop);
 			
-			playerInfoBO = new PlayerInfoBO(true, player.getBusinessName(), "");
+			playerInfoBO = new PlayerInfoBO(true, player.getBusinessName(), "", SrcType.FILE, player.getPlayUrl(), player.getOsdId(), player.getOsdName());
 			if(getPlayerSrcInfo){
 				return playerInfoBO;
 			}
@@ -464,7 +465,14 @@ public class CommandCastServiceImpl {
 			logic.merge(logicVodStop);
 			
 			String srcInfo = vod.getSourceUserName()==null?vod.getSourceBundleName():vod.getSourceUserName();
-			playerInfoBO = new PlayerInfoBO(true, srcInfo, vod.getSourceNo());
+			VodType vodType = vod.getVodType();
+			SrcType srcType = null;
+			if(VodType.DEVICE.equals(vodType) || VodType.LOCAL_SEE_OUTER_DEVICE.equals(vodType)){
+				srcType = SrcType.DEVICE;
+			}else{
+				srcType = SrcType.USER;
+			}
+			playerInfoBO = new PlayerInfoBO(true, srcInfo, vod.getSourceNo(), srcType, null, player.getOsdId(), player.getOsdName());
 			if(getPlayerSrcInfo){
 				return playerInfoBO;
 			}
@@ -487,7 +495,7 @@ public class CommandCastServiceImpl {
 			logic.merge(logicCallStop);
 			
 			//这是主叫的播放器
-			playerInfoBO = new PlayerInfoBO(true, call.getCalledUsername(), call.getCalledUserno());
+			playerInfoBO = new PlayerInfoBO(true, call.getCalledUsername(), call.getCalledUserno(), SrcType.USER, null, player.getOsdId(), player.getOsdName());
 			if(getPlayerSrcInfo){
 				return playerInfoBO;
 			}
@@ -505,7 +513,7 @@ public class CommandCastServiceImpl {
 			logic.merge(logicCallStop);
 			
 			//这是被叫的播放器
-			playerInfoBO = new PlayerInfoBO(true, called.getCallUsername(), called.getCallUserno());
+			playerInfoBO = new PlayerInfoBO(true, called.getCallUsername(), called.getCallUserno(), SrcType.USER, null, player.getOsdId(), player.getOsdName());
 			if(getPlayerSrcInfo){
 				return playerInfoBO;
 			}
@@ -534,7 +542,7 @@ public class CommandCastServiceImpl {
 			if(srcMember == null){
 				log.warn("从转发关系查找源成员失败，源成员id: " + forward.getSrcMemberId());
 			}else{
-				playerInfoBO = new PlayerInfoBO(true, srcMember.getUserName(), srcMember.getUserNum());
+				playerInfoBO = new PlayerInfoBO(true, srcMember.getUserName(), srcMember.getUserNum(), SrcType.USER, null, player.getOsdId(), player.getOsdName());
 			}
 			if(getPlayerSrcInfo){
 				return playerInfoBO;
@@ -559,7 +567,16 @@ public class CommandCastServiceImpl {
 			LogicBO logic4 = closeBundleCastDeviceWithRestrict2(null, null, null, null, closeCastDevice, codec, admin.getId(), removeDevices);
 			logic.merge(logic4);
 			
-			playerInfoBO = new PlayerInfoBO(true, demand.getVideoBundleName(), demand.getSrcCode());
+			SrcType srcType = null;
+			ForwardDemandBusinessType demandType = demand.getDemandType();
+			if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demandType)){
+				srcType = SrcType.DEVICE;
+			}else if(ForwardDemandBusinessType.FORWARD_USER.equals(demandType)){
+				srcType = SrcType.USER;
+			}else if(ForwardDemandBusinessType.FORWARD_FILE.equals(demandType)){
+				srcType = SrcType.FILE;
+			}			
+			playerInfoBO = new PlayerInfoBO(true, demand.getVideoBundleName(), demand.getSrcCode(), srcType, demand.getPlayUrl(), player.getOsdId(), player.getOsdName());
 			if(getPlayerSrcInfo){
 				return playerInfoBO;
 			}
