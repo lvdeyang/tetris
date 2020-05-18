@@ -1767,6 +1767,7 @@ public class FolderManageController extends ControllerBase {
 					}
 					
 					folderPO.setParentId(-1l);
+					folderPO.setBeBvcRoot(true);
 					folderPO.setParentPath(null);
 					
 					parentFolder = new FolderPO();
