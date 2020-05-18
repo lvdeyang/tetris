@@ -140,15 +140,15 @@ public class BundleManageController extends ControllerBase {
 
 	@Autowired
 	private CapacityService capacityService;
-	
+
 	@Autowired
 	private EncoderDecoderUserMapDAO encoderDecoderUserMapDao;
 
 	@Value("${spring.cloud.client.ipAddress}")
 	private String clientIP;
 
-	@Value("${server.port}")
-	private String port;
+	@Value("${zuulPort}")
+	private String zuulPort;
 
 	private final int EXTRAINFO_START_COLUMN = 11;
 
@@ -235,9 +235,11 @@ public class BundleManageController extends ControllerBase {
 
 			if ("transcode".equals(bundlePO.getDeviceModel())) {
 
-				capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(),
-						"http://10.10.40.207:8082/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip="
-								+ bundlePO.getDeviceIp());
+				LOGGER.info("add new transcode device, set heartbeaturl=" + "http://" + clientIP + ":" + zuulPort
+						+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
+
+				capacityService.setHeartbeatUrl(bundlePO.getDeviceIp(), "http://" + clientIP + ":" + zuulPort
+						+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
 
 				capacityService.setAlarmUrl(bundlePO.getDeviceIp());
 
@@ -265,15 +267,16 @@ public class BundleManageController extends ControllerBase {
 		try {
 			List<BundlePO> bundlePOs1 = bundleService.queryByUserIdAndDevcieModelAndKeyword(userId, deviceModel,
 					sourceType, keyword);
-			
-			List<BundlePO> bundlePOs2 = bundleDao.findAll(BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, userId));
+
+			List<BundlePO> bundlePOs2 = bundleDao.findAll(
+					BundleSpecificationBuilder.getBundleSpecification(deviceModel, sourceType, keyword, userId));
 
 			// 过滤掉devicemodel为空的数据 ??
 			List<BundlePO> bundlePOs = bundlePOs1.stream().filter(b -> (null != b.getDeviceModel()))
 					.collect(Collectors.toList());
-			
-			for(BundlePO bundle: bundlePOs2){
-				if(!bundlePOs.contains(bundle)){
+
+			for (BundlePO bundle : bundlePOs2) {
+				if (!bundlePOs.contains(bundle)) {
 					bundlePOs.add(bundle);
 				}
 			}
@@ -362,7 +365,7 @@ public class BundleManageController extends ControllerBase {
 //			}
 //		}
 
-		if(bundle.getDeviceIp() != null){
+		if (bundle.getDeviceIp() != null) {
 			bundleHeartBeatService.removeBundleStatus(bundle.getDeviceIp());
 		}
 
@@ -381,33 +384,34 @@ public class BundleManageController extends ControllerBase {
 
 		// 删除设备上的锁定参数（如果有）
 		lockBundleParamDao.deleteByBundleId(bundleId);
-		
-		//删除用户绑定编解码器关系
-		List<EncoderDecoderUserMap> maps = encoderDecoderUserMapDao.findByEncodeBundleIdOrDecodeBundleId(bundleId, bundleId);
-		for(EncoderDecoderUserMap map: maps){
-			if(map.getEncodeBundleId() != null && map.getEncodeBundleId().equals(bundleId)){
+
+		// 删除用户绑定编解码器关系
+		List<EncoderDecoderUserMap> maps = encoderDecoderUserMapDao.findByEncodeBundleIdOrDecodeBundleId(bundleId,
+				bundleId);
+		for (EncoderDecoderUserMap map : maps) {
+			if (map.getEncodeBundleId() != null && map.getEncodeBundleId().equals(bundleId)) {
 				map.setEncodeBundleId(null);
 				map.setEncodeBundleName(null);
 				map.setEncodeDeviceModel(null);
 				map.setEncodeId(null);
 			}
-			if(map.getDecodeBundleId() != null && map.getDecodeBundleId().equals(bundleId)){
+			if (map.getDecodeBundleId() != null && map.getDecodeBundleId().equals(bundleId)) {
 				map.setDecodeBundleId(null);
 				map.setDecodeBundleName(null);
 				map.setDecodeDeviceModel(null);
 				map.setDecodeId(null);
 			}
 		}
-		
+
 		encoderDecoderUserMapDao.save(maps);
-		
+
 		// 删除设备账号对应的黑名单数据
 //			bundleLoginBlackListDao.deleteByLoginId(bundle.getCurrentLoginId());
 
 		// 通过消息队列通知接入层
 //			interfaceFromResource.delBundleRequest(bundle);
 
-		//为了删除ldap上面的设备
+		// 为了删除ldap上面的设备
 		if (!SOURCE_TYPE.EXTERNAL.equals(bundle.getSourceType())) {
 			// 从ldap删除
 			try {
@@ -1036,7 +1040,7 @@ public class BundleManageController extends ControllerBase {
 		return JSONObject.parseObject(resultEntity.getBody());
 
 	}
-	
+
 	/**
 	 * 同步用户<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -1048,9 +1052,9 @@ public class BundleManageController extends ControllerBase {
 	public Map<String, Object> syncUser() {
 		Map<String, Object> data = makeAjaxData();
 		try {
-			
+
 			bundleService.syncUser();
-			
+
 		} catch (Exception e) {
 			LOGGER.error(e.toString());
 			e.printStackTrace();
@@ -1059,5 +1063,5 @@ public class BundleManageController extends ControllerBase {
 
 		return data;
 	}
-	
+
 }
