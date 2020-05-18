@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.video;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +76,7 @@ public class MediaVideoService {
 			Long folderId, 
             String thumbnail,
             String addition) throws Exception {
+		if(tags == null) tags = new ArrayList<String>();
 		return JsonBodyResponseParser.parseObject(mediaVideoFeign.addTask(JSONObject.toJSONString(task), name, String.join(",", tags), keyWords, remark, folderId, thumbnail, addition), MediaVideoVO.class);
 	}
 	
