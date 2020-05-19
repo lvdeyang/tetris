@@ -248,6 +248,16 @@ define([
                     self.settings.responseMode = data.responseMode;
                     self.settings.sendAnswerMode = data.sendAnswerMode;
                 });
+                
+                //--------上屏方案的按钮操作弹框 start-------
+                //关联设备
+                self.qt.on('castDecoderDevices', function (e) {
+                    self.qt.window('/router/zk/leader/cast/decoder/devices', {serial: e.screenId}, {
+                        width: 1024,
+                        height: 600,
+                        title: '上屏方案关联解码器'
+                    });
+                });
 
                 //--------视频界面上的按钮操作弹框 start-------
                 //关联设备
@@ -336,6 +346,11 @@ define([
                             height: 600,
                             title: '第' + e.serial + '屏关联解码器'
                         });
+                });
+
+                //从上屏方案页面跳过来执行
+                self.qt.on('showDecoderTitle', function (e) {
+                    self.qt.invoke('changeBindDecoderDevices', $.toJSON([e.params]));
                 });
 
                 //从关联设备页面跳过来执行

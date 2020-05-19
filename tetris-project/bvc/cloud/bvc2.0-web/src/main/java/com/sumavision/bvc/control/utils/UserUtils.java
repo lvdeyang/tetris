@@ -140,6 +140,7 @@ public class UserUtils {
 			//if(resultMap==null || resultMap.size()<=0 || resultMap.get("user")==null) return null;
 			//return resultMap.get("user");
 		}catch(Exception e){
+			e.printStackTrace();
 			return null;
 		}
 	}

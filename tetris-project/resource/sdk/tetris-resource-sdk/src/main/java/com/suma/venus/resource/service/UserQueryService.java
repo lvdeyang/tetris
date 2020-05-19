@@ -209,6 +209,8 @@ public class UserQueryService {
 		
 		UserVO user = userQuery.queryUserByNo(userNo);
 		
+		if(user == null) return null;
+		
 		if(UserClassify.LDAP.toString().equals(user.getClassify())){
 			FolderUserMap userStatus = folderUserMapDao.findByUserId(user.getId());
 			user.setStatus(userStatus==null?UserStatus.OFFLINE.toString():(userStatus.isUserStatus()?UserStatus.ONLINE.toString():UserStatus.OFFLINE.toString()));

@@ -69,6 +69,7 @@ businessMode: vod
 
 checkBundleHeartBeatFreq: 5000
 checkBundleHeartBeatTimeout: 15000
+zuulPort: 8082
 
 feign: 
   hystrix: 

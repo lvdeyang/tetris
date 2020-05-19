@@ -8,9 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.sumavision.bvc.command.group.dao.CommandGroupDecoderScreenDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserPlayerDAO;
+import com.sumavision.bvc.command.group.enumeration.SrcType;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
+import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderScreenPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
@@ -35,6 +38,9 @@ import com.sumavision.tetris.user.UserVO;
 
 @Service
 public class CommandOsdServiceImpl {
+
+	@Autowired
+	private CommandGroupDecoderScreenDAO commandGroupDecoderScreenDao;
 
 	@Autowired
 	private MonitorOsdDAO monitorOsdDao;
@@ -68,7 +74,7 @@ public class CommandOsdServiceImpl {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月26日 下午3:58:19
-	 * @param CommandGroupUserPlayerPO player 播放器
+	 * @param CommandGroupDecoderSchemePO player 播放器
 	 * @return List<BundleDTO> 设备信息
 	 */
 	private List<BundleDTO> packBundles(CommandGroupUserPlayerPO player){
@@ -213,6 +219,148 @@ public class CommandOsdServiceImpl {
 		
 		//先发清除
 		executeBusiness.execute(logic, "指控系统：清除播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + player.getBundleName());
+		
+		//存储到资源层
+		for(BundleDTO bundle:bundles){
+			resourceServiceClient.removeLianwangPassby(bundle.getBundleId());
+		}
+	}
+
+	/**
+	 * 获取设备信息<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 下午3:58:19
+	 * @param CommandGroupDecoderSchemePO player 播放器
+	 * @return List<BundleDTO> 设备信息
+	 */
+	private List<BundleDTO> packBundles(List<CommandGroupUserPlayerCastDevicePO> castDevices){
+		List<BundleDTO> bunldes = new ArrayList<BundleDTO>();
+//		List<CommandGroupUserPlayerCastDevicePO> castDevices = screen.getCastDevices();
+		if(castDevices!=null && castDevices.size()>0){
+			for(CommandGroupUserPlayerCastDevicePO castDevice:castDevices){
+				bunldes.add(new BundleDTO().setBundleId(castDevice.getDstBundleId())
+										   .setBundleType(castDevice.getDstBundleType())
+										   .setLayerId(castDevice.getDstLayerId())
+										   .setVideoChannelId(castDevice.getDstVideoChannelId())
+										   .setVideoChannelBaseType("VenusVideoOut"));
+			}
+		}
+		return bunldes;
+	}
+
+	/**
+	 * 设置/修改osd<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 下午1:56:00
+	 * @param Integer serial 屏幕布局序号
+	 * @param Long osdId 字幕id
+	 */
+	public void setOsd(
+			List<CommandGroupUserPlayerCastDevicePO> castDevices,
+			String srcCode,
+			String srcInfo,
+			Long osdId) throws Exception{
+		
+		MonitorOsdPO osd = monitorOsdDao.findOne(osdId);
+		if(osd == null){
+			throw new MonitorOsdNotExistException(osdId);
+		}
+		
+		UserVO user = userQuery.current();
+		
+		List<BundleDTO> bundles = packBundles(castDevices);
+		
+//		//获取参数模板
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		
+		LogicBO logic = new LogicBO().setUserId("-1")
+	 			 .setPass_by(new ArrayList<PassByBO>());
+		
+		//清除字幕协议
+		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol(srcCode, srcInfo);
+		clearOsd.setResolution(codec.getVideo_param().getResolution());
+		for(BundleDTO bundle:bundles){
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(bundle.getBundleId())
+					.setLayer_id(bundle.getLayerId())
+					.setType("osds")
+					.setPass_by_content(clearOsd);
+			logic.getPass_by().add(passByBO);
+		}
+		
+		//先发清除
+//		executeBusiness.execute(logic, "指控系统：清除播放器及其" + (bundles.size()-1) + "个解码器的字幕：" + player.getBundleName());
+		
+		logic.getPass_by().clear();
+		
+		//设置字幕协议
+		OsdWrapperBO setOsd = monitorOsdService.protocol(osd, srcCode, srcInfo);
+		setOsd.setResolution(codec.getVideo_param().getResolution());
+		for(BundleDTO bundle:bundles){
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(bundle.getBundleId())
+					.setLayer_id(bundle.getLayerId())
+					.setType("osds")
+					.setPass_by_content(setOsd);
+			logic.getPass_by().add(passByBO);			
+		}
+		
+		//后发设置
+		executeBusiness.execute(logic, "指控系统：给上屏方案中的" + bundles.size() + "个解码器设置字幕");
+		
+		//存储到资源层
+		for(BundleDTO bundle:bundles){
+			resourceServiceClient.coverLianwangPassby(bundle.getBundleId(), bundle.getLayerId(), "osds", JSON.toJSONString(setOsd));
+		}
+	}
+
+	/**
+	 * 清除osd<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月26日 下午2:48:39
+	 * @param Integer serial 布局序号
+	 */
+	public void clearOsd(
+			List<CommandGroupUserPlayerCastDevicePO> castDevices) throws Exception{
+		
+		UserVO user = userQuery.current();
+//		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
+//		
+//		CommandGroupUserPlayerPO player = commandGroupUserPlayerDao.findByLocationIndexAndUserInfoId(serial, userInfo.getId());
+//		screen.setOsdId(null);
+//		screen.setOsdName(null);
+//		commandGroupDecoderScreenDao.save(screen);
+//		
+//		if(SrcType.NONE.equals(screen.getBusinessType())) return;
+		
+		//获取源
+//		PlayerInfoBO playerInfo = ccommandCastServiceImpl.changeCastDevices2(player, null, null, false, true, true);
+		
+		List<BundleDTO> bundles = packBundles(castDevices);
+		
+//		//获取参数模板
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		
+		LogicBO logic = new LogicBO().setUserId("-1")
+				.setPass_by(new ArrayList<PassByBO>());
+		
+		//清除字幕协议
+		OsdWrapperBO clearOsd = monitorOsdService.clearProtocol("", "");
+		clearOsd.setResolution(codec.getVideo_param().getResolution());
+		for(BundleDTO bundle:bundles){
+			PassByBO passByBO = new PassByBO()
+					.setBundle_id(bundle.getBundleId())
+					.setLayer_id(bundle.getLayerId())
+					.setType("osds")
+					.setPass_by_content(clearOsd);
+			logic.getPass_by().add(passByBO);			
+		}
+		
+		//先发清除
+		executeBusiness.execute(logic, "指控系统：给上屏方案中的" + bundles.size() + "个解码器清除字幕");
 		
 		//存储到资源层
 		for(BundleDTO bundle:bundles){

@@ -14,12 +14,12 @@ spring:
 #      uri: http://192.165.56.71:8081
 #      fail-fast: true
     client:
-      ipAddress: 10.10.40.207
+      ipAddress: 192.165.56.84
 #  profiles:
 #    active: pro
   datasource:
     base:
-      url: jdbc:mysql://localhost:3306/capacity?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=true
+      url: jdbc:mysql://localhost:3306/capacity?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&allowMultiQueries=true&&useSSL=false
       username: root
       password: sumavisionrd
       driver-class-name: com.mysql.jdbc.Driver
@@ -99,11 +99,11 @@ ribbon:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://10.10.40.207:8081/eureka/
+      defaultZone: http://192.165.56.84:8081/eureka/
   instance:
     instance-id: ${spring.cloud.client.ipAddress}:${spring.application.name}:${server.port}
     prefer-ip-address: true
-    ip-address: 10.10.40.207
+    ip-address: 192.165.56.84
     # 心跳检测检测与续约时间
     # 测试时将值设置设置小些，保证服务关闭后注册中心能及时踢出服务
     #lease-renewal-interval-in-seconds: 1
@@ -129,4 +129,9 @@ hystrix:
         isolation:
           thread: 
             timeoutInMilliseconds: 5000
-          strategy: SEMAPHORE   
+          strategy: SEMAPHORE  
+log:
+  home: /usr/sbin/sumavision/tetris/tetris-project/capacity/apache-tomcat-7.0.93/logs
+  maxFileSize: 30MB
+  maxHistory: 10
+  totalSizeCap: 1GB
