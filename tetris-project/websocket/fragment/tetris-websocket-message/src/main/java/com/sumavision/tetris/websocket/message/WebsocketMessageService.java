@@ -445,11 +445,6 @@ public class WebsocketMessageService {
 			Long fromUserId,
 			String fromUsername) throws Exception{
 		
-		message = new StringBufferWrapper().append(fromUsername).append(" ").append(DateUtil.format(new Date(), DateUtil.dateTimePattern)).append("：").append(message).toString();
-		
-		message = JSON.toJSONString(new HashMapWrapper<String, Object>().put("businessType", "receiveInstantMessage")
-																	    .put("message", message)
-																	    .getMap());
 		//广播消息
 		WebsocketMessagePO messageEntity = new WebsocketMessagePO();
 		messageEntity.setUserId(commandId);
@@ -469,6 +464,12 @@ public class WebsocketMessageService {
 				if(userId.equals(fromUserId)) continue;
 				Session session = queue.get(userId);
 				if(session != null){
+					message = new StringBufferWrapper().append(fromUsername).append("（").append(DateUtil.format(new Date(), DateUtil.dateTimePattern)).append("）：").append(message).toString();
+					
+					message = JSON.toJSONString(new HashMapWrapper<String, Object>().put("businessType", "receiveInstantMessage")
+																				    .put("message", message)
+																				    .put("commandId", commandId)
+																				    .getMap());
 					session.getBasicRemote().sendText(message);
 				}
 			}

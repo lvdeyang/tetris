@@ -7,6 +7,7 @@
         <div style="width:100%; height:100%; position:relative;">
             <div class="left">
                 <div class="btn-add-osd" @click="addOsd">添加字幕</div>
+                <div class="btn-add-subtitle-layer" style="margin-left:10px;" @click="subtitleOpen">模板管理</div>
                 <!--<el-button type="primary" @click="dialogLeftVisible=true">添加字幕组合</el-button>-->
                 <!--内容-->
                 <div style="position:absolute; top:40px; left:0; bottom:0; width:30%;overflow: hidden">
@@ -49,7 +50,6 @@
 
             <div class="right" v-show="rightShow">
                 <div class="btn-add-subtitle-layer" @click="dialogFormVisible=true;rightBtnShow=false;">添加图层</div>
-                <div class="btn-add-subtitle-layer" style="margin-left:10px;" @click="subtitleOpen">模板管理</div>
                 <!--<el-button type="primary" @click="dialogFormVisible=true;rightBtnShow=false;">添加图层</el-button>-->
                 <!--内容-->
                 <div style="position:absolute; top:40px; left:30%; bottom:0; right:0;overflow: hidden">

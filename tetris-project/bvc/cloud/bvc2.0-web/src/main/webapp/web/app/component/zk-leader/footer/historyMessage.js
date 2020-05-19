@@ -34,7 +34,12 @@ define([
                     nine: false,
                     sixteen: false
                 },
-                instantMessage: ''
+                instantMessage: '',
+                history:{
+                	open:false,
+                	currentGroupId:''
+                },
+                newMessage:[]
             }
         },
         methods: {
@@ -94,11 +99,31 @@ define([
                 //     if(!currentGroupId){
                 //         self.qt.error('未获取到当前会议id!');
                 //     }else {
-                self.qt.window('/router/zk/leader/footer/pop', null, {width: 1000, height: 600});
+                self.qt.get(['currentGroupId'], function(variables){
+                	var currentGroupId = variables.currentGroupId;
+                	if(currentGroupId){
+                		self.qt.window('/router/zk/leader/footer/dialog', null, {width: 600, height: 700});
+                		self.history.open = true;
+                		self.history.currentGroupId = currentGroupId;
+                	}else{
+                		self.qt.warning('请先在右侧选择一个指挥或会议！');
+                	}
+                });
                 // self.qt.window('/router/zk/leader/footer/pop', {currentGroupId: currentGroupId}, {width:'100%', height:'100%'});
                 //     }
                 // });
             },
+            openHistoryMessage:function(message){
+            	var self = this;
+            	for(var i=0; i<self.newMessage.length; i++){
+            		if(self.newMessage[i] === message){
+            			self.newMessage.splice(i, 1);
+            			break;
+            		}
+            	}
+            	self.qt.window('/router/zk/leader/footer/dialog', {currentGroupId:message.groupId}, {width: 600, height: 700});
+            },
+            
             //录制任务管理
             recManage: function () {
                 var self = this;
@@ -681,8 +706,32 @@ define([
 
                 //收到即时消息
                 self.qt.on('receiveInstantMessage', function (e) {
-                    e = e.params;
-                    self.pushMessage(e.message);
+                    /*e = e.params;
+                    self.pushMessage(e.message);*/
+                	var commandId = e.params.commandId;
+                	if(self.history.open && self.history.currentGroupId==commandId){
+                		self.qt.linkedWebview('dialogMessage', e);
+                	}else{
+                		var newMessage = self.newMessage;
+                    	var targetMessage = null;
+                    	for(var i=0; i<newMessage.length; i++){
+                    		if(newMessage[i].groupId == commandId){
+                    			targetMessage = newMessage[i];
+                    		}
+                    	}
+                    	if(!targetMessage){
+                    		targetMessage = {
+                    			groupId:commandId,
+                    			groupName:'',
+                    			count:0
+                    		}
+                    		ajax.post('/command/basic/query/group', {id:commandId}, function(data){
+                    			targetMessage.groupName = data.name;
+                            });
+                    		self.newMessage.push(targetMessage);
+                    	}
+                    	targetMessage.count += 1;
+                	}
                 });
 
                 /***************
@@ -706,6 +755,9 @@ define([
 
                 self.qt.on('secretStartProxy', function (e) {
                     self.qt.invoke('secretStart', e.params);
+                });
+                self.qt.on('onHistoryDialogClose', function(){
+                	self.history.open = false;
                 });
             });
         }

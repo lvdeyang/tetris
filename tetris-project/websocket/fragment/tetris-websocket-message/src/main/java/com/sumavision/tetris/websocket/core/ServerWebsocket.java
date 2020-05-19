@@ -15,12 +15,13 @@ import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.websocket.core.config.ApplicationConfig;
+import com.sumavision.tetris.websocket.core.config.CustomPropertiesConfigurator;
 import com.sumavision.tetris.websocket.core.exception.IllegalTokenException;
 import com.sumavision.tetris.websocket.core.load.balance.SessionMetadataService;
 import com.sumavision.tetris.websocket.message.WebsocketMessageService;
 
 @Component
-@ServerEndpoint("/server/websocket/{token}")
+@ServerEndpoint(value = "/server/websocket/{token}", configurator = CustomPropertiesConfigurator.class)
 public class ServerWebsocket {
 
 	private ApplicationConfig applicationConfig;
@@ -41,10 +42,11 @@ public class ServerWebsocket {
     @OnOpen
     public void onOpen(Session session, @PathParam("token") String token) throws Exception{
     	initBean();
+    	String clientIp = (String) session.getUserProperties().get(CustomProperties.CLIENT_IP.toString());
     	UserVO user = userQuery.findByToken(token);
     	if(user == null){
     		session.close();
-    		throw new IllegalTokenException(token);
+    		throw new IllegalTokenException(token, clientIp);
     	}
     	//这个地方很奇怪，反射能调到，直接调不到
     	//Class userClass = user.getClass();
@@ -53,7 +55,7 @@ public class ServerWebsocket {
     	//user.setUuid(user.getId().toString());
 		sessionMetadataService.add(user, session);
 		//messageService.offlineMessage(user.getId());
-		System.out.println(new StringBufferWrapper().append("用户：").append(user.getNickname()).append("连上来啦...").toString());
+		System.out.println(new StringBufferWrapper().append("用户：").append(user.getNickname()).append("，ip：").append(clientIp).append("连上来啦...").toString());
 		eventPublisher.publishWebsocketSessionOpenEvent(user.getId(), token);
     }
 

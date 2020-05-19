@@ -8,8 +8,12 @@ public class IllegalTokenException extends BaseException{
 
 	private static final long serialVersionUID = 1L;
 
-	public IllegalTokenException(String token) {
-		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("无效的token：").append(token).toString());
+	public IllegalTokenException(String token, String ip) {
+		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("无效的token：")
+															 .append(token)
+															 .append("，ip：")
+															 .append(ip)
+															 .toString());
 	}
 
 }
