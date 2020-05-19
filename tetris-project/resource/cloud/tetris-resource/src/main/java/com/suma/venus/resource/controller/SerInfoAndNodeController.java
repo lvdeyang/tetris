@@ -414,9 +414,17 @@ public class SerInfoAndNodeController extends ControllerBase {
 	public Map<String, Object> syncSerNodeToLdap() throws Exception{
 
 		Map<String, Object> data = new HashMap<String, Object>();
-
-		data.put("successCnt", serInfoAndNodeSyncLdapUtils.handleSyncSerNodeToLdap());
-		data.put(ERRMSG, "");
+		
+		try{
+			int successCnt = serInfoAndNodeSyncLdapUtils.handleSyncSerNodeToLdap();
+			data.put("successCnt", successCnt);
+			data.put(ERRMSG, "");
+		}catch(Exception e){
+			data.put(ERRMSG, e.getMessage());
+			LOGGER.error(e.getMessage(), e);
+			
+		}
+		
 		return data;
 
 	}

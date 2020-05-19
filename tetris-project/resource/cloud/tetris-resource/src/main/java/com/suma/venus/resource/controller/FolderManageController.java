@@ -293,8 +293,8 @@ public class FolderManageController extends ControllerBase {
 
 			data.put("userNodes", userNodes);
 		} catch (Exception e) {
-			LOGGER.error("Fail to set folder : ", e);
-			data.put(ERRMSG, "内部错误");
+			LOGGER.error(e.getMessage(), e);
+			data.put(ERRMSG, e.getMessage());
 		}
 
 		return data;

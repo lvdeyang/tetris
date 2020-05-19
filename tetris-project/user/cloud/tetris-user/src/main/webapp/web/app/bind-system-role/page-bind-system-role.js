@@ -109,7 +109,7 @@ define([
                             done();
                         }, null, ajax.NO_ERROR_CATCH_CODE);
                     }else if(type === 'business'){
-                        ajax.post('/user/business/role/permission/bind/system/role', {
+                        ajax.post('/user/business/role/permission/bind/business/role', {
                             userId:userId,
                             roleIds: $.toJSON(roleIds)
                         }, function(data, status){

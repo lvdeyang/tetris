@@ -6,3 +6,5 @@
 .factorypath
 .project
 /.idea/
+/logs/
+/LOG_HOME_IS_UNDEFINED/
