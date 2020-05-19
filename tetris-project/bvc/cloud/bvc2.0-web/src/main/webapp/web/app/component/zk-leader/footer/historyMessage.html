@@ -38,16 +38,19 @@
 
         <div class="btn">
             <!--查看历史消息-->
-            <div v-if="newMessage.length<=00" class="tagMessage" @click="showMessagePanel">
+            <div v-if="newMessage.length<=0" class="tagMessage" @click="showMessagePanel">
                 <img src="../../../../../images/zk-leader/historyMsg.png" alt="历史消息">
             </div>
             
             <el-popover 
             	v-else
-			  	placement="right"
-			  	width="400"
+			  	placement="top-start"
 			  	trigger="hover">
-			  	111111
+			  	<div class="popover-line" v-for="message in newMessage">
+			  		<el-badge :value="message.count>99?'99+':message.count">
+			  			<span class="grounp-link" @click="openHistoryMessage(message)">{{message.groupName}}</span>
+			  		</el-badge>
+			  	</div>
 			  	<div slot="reference" class="tagMessage" @click="showMessagePanel">
 	                <img src="../../../../../images/zk-leader/historyMsg.png" alt="历史消息">
 	            </div>

@@ -36,9 +36,13 @@ define([
             
         },
         methods: {
-        	pushMessage:function(message, isNew){
+        	pushMessage:function(message, isNew, isPush){
         		var self = this;
-        		self.historyInstantMsg.push(message);
+        		if(isPush){
+        			self.historyInstantMsg.push(message);
+        		}else{
+        			self.historyInstantMsg.splice(0, 0, message);
+        		}
         		var scrollTop = self.$messageScope.scrollTop;
         		var wholeHeight = self.$messageScope.scrollHeight;
               	var pHeight = self.$messageScope.clientHeight;
@@ -76,7 +80,7 @@ define([
 	                        var total = data.total;
 	                        var rows = data.rows;
 	                        if(rows && rows.length>0){
-	                            for(var i=rows.length-1; i>=0; i--){
+	                            for(var i=0; i<rows.length; i++){
 	                            	var message = rows[i];
 	                            	var fromUsername = message.fromUsername + '（';
 	                                if(message.fromUserId == self.user.id){
@@ -128,7 +132,7 @@ define([
                     id: currentGroupId,
                     message: self.instantMessage
                 }, function () {
-                	self.pushMessage('我 （' + new Date().format('yyyy-MM-dd hh:mm:ss') + '）：' + self.instantMessage);
+                	self.pushMessage('我 （' + new Date().format('yyyy-MM-dd hh:mm:ss') + '）：' + self.instantMessage, null, true);
                 	self.page.total += 1;
                     self.instantMessage = '';
                     self.qt.success('发送成功!');
@@ -138,21 +142,34 @@ define([
         mounted: function () {
             var self = this;
             self.qt = new QtContext('dialogMessage', function () {
-                self.qt.get(['user', 'currentGroupId'], function (variables) {
-                	self.user = variables.user ? $.parseJSON(variables.user) : {};
-                    self.currentGroupId = variables.currentGroupId;
-                    if(!self.currentGroupId){
-                    	self.qt.warning('请先选择一个会议或指挥才能查看消息');
-                    	return;
-                    }
-                    ajax.post('/command/basic/query/group', {id:self.currentGroupId}, function(data){
-                    	self.currentGroupName = data.name;
+            	
+            	var params = self.qt.getWindowParams();
+            	if(params.currentGroupId){
+            		self.currentGroupId = params.currentGroupId;
+            		 self.qt.get(['user'], function (variables) {
+            			 self.user = variables.user ? $.parseJSON(variables.user) : {};
+            			 ajax.post('/command/basic/query/group', {id:self.currentGroupId}, function(data){
+                         	self.currentGroupName = data.name;
+                         });
+                         self.append(1);
+            		 });
+            	}else{
+            		self.qt.get(['user', 'currentGroupId'], function (variables) {
+                    	self.user = variables.user ? $.parseJSON(variables.user) : {};
+                        self.currentGroupId = variables.currentGroupId;
+                        if(!self.currentGroupId){
+                        	self.qt.warning('请先选择一个会议或指挥才能查看消息');
+                        	return;
+                        }
+                        ajax.post('/command/basic/query/group', {id:self.currentGroupId}, function(data){
+                        	self.currentGroupName = data.name;
+                        });
+                        self.append(1);
                     });
-                    self.append(1);
-                });
+            	}
                 
                 self.qt.on('receiveInstantMessage', function (e) {
-                	self.pushMessage(e.params.message, true);
+                	self.pushMessage(e.params.message, true, true);
                 	self.page.total += 1;
                 });
 

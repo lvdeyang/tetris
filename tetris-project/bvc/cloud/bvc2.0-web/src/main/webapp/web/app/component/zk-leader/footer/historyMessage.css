@@ -120,7 +120,7 @@ div.change{
     height: 22px;
     cursor: pointer;
 }
-.el-button {
+.el-button:not(.el-button--text) {
     position: absolute;
     padding: 13px;
     top: 5px;
@@ -131,6 +131,34 @@ div.change{
     font-weight: bold;
     font-size: 14px;
     color: #00e9ff;
+}
+
+.popover-line{
+	padding-bottom:5px;
+}
+
+.grounp-link{
+	color:#fff;
+	cursor:pointer;
+}
+
+.grounp-link:hover{
+	text-decoration:underline;
+}
+
+.el-popover{
+	background-color:#0F1537;
+	border-color:#2c5282;
+	padding: 10px 12px;
+	min-width: 0;
+}
+
+.el-popper[x-placement^=top] .popper__arrow{
+	border-top-color: #2c5282;
+}
+
+.el-popper[x-placement^=top] .popper__arrow::after{
+	border-top-color: #0F1537;
 }
 
 .el-button:active, .el-button:hover, .el-button:focus {

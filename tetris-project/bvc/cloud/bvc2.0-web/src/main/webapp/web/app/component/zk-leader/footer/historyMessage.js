@@ -113,6 +113,17 @@ define([
                 //     }
                 // });
             },
+            openHistoryMessage:function(message){
+            	var self = this;
+            	for(var i=0; i<self.newMessage.length; i++){
+            		if(self.newMessage[i] === message){
+            			self.newMessage.splice(i, 1);
+            			break;
+            		}
+            	}
+            	self.qt.window('/router/zk/leader/footer/dialog', {currentGroupId:message.groupId}, {width: 600, height: 700});
+            },
+            
             //录制任务管理
             recManage: function () {
                 var self = this;
