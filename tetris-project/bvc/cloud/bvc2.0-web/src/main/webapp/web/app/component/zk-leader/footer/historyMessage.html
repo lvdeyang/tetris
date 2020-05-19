@@ -31,16 +31,28 @@
                 <img src="../../../../../images/zk-leader/change.png" alt="换一批">
             </div>
         </div>
-        <!--历史消息-->
+        <!--历史消息
         <div class="msgBg">
             <img src="../../../../../images/zk-leader/msg.png" alt="">
-        </div>
+        </div>-->
 
         <div class="btn">
             <!--查看历史消息-->
-            <div class="tagMessage" @click="showMessagePanel">
+            <div v-if="newMessage.length<=00" class="tagMessage" @click="showMessagePanel">
                 <img src="../../../../../images/zk-leader/historyMsg.png" alt="历史消息">
             </div>
+            
+            <el-popover 
+            	v-else
+			  	placement="right"
+			  	width="400"
+			  	trigger="hover">
+			  	111111
+			  	<div slot="reference" class="tagMessage" @click="showMessagePanel">
+	                <img src="../../../../../images/zk-leader/historyMsg.png" alt="历史消息">
+	            </div>
+			</el-popover>
+            
             <!--录制任务管理-->
             <div class="record" @click="recManage">
                 <img src="../../../../../images/zk-leader/recordManage.png" alt="录制任务">
@@ -56,7 +68,7 @@
                 </div>
         </div>
 
-        <!--滚动消息-->
+        <!--滚动消息
         <div class="msgContent" ref="msgContent">
             <div id="message-container"
                  style="position:absolute;bottom:0;width:100%;height:100%;background-color: rgba(0,0,0,0); cursor:pointer;font-size:inherit;overflow-y:auto">
@@ -70,8 +82,9 @@
                 </div>
                 <button class="sendMsgBtn" @click="sendInstantMessage">发送</button>
             </div>
-        </div>
+        </div>-->
     </div>
-    <!--底部折叠按钮-->
+    <!--底部折叠按钮
     <el-button size="small" @click="showOrHide">》折叠列表</el-button>
+    -->
 </div>

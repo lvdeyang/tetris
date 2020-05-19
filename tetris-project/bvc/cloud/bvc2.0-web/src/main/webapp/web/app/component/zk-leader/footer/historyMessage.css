@@ -12,10 +12,12 @@ html, body {
 
 .screenCtrl {
     position: absolute;
-    padding-left: 15px;
+    padding-left: 21px;
+    padding-top:10px;
+    padding-bottom:10px;
+    padding-right:10px;
     top: 0;
     left: 0;
-    width: 25%;
     text-align: center;
     color: #fff;
     font-size: 20px;
@@ -84,7 +86,6 @@ html, body {
     position: absolute;
     top: 54%;
     left: 0;
-    width: 30%;
     height: 32px;
 }
 

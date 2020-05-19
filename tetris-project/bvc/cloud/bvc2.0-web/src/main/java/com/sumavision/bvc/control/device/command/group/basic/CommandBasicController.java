@@ -3,6 +3,8 @@ package com.sumavision.bvc.control.device.command.group.basic;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +45,7 @@ import com.sumavision.bvc.device.command.basic.silence.CommandSilenceLocalServic
 import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
+import com.sumavision.bvc.device.command.exception.UserHasNoFolderException;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
@@ -1120,6 +1123,32 @@ public class CommandBasicController {
 		
 		commandOsdServiceImpl.clearOsd(serial);
 		return null;
+	}
+	
+	/**
+	 * 查询会议或指挥名称<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月18日 下午4:45:57
+	 * @param Long id 会议或指挥id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/query/group")
+	public Object queryGroup(
+			String id,
+			HttpServletRequest request) throws Exception{
+		
+		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
+		if(group == null){
+			throw new UserHasNoFolderException("没有找到指挥或会议，id: " + id);
+		}
+		
+		Map<String, Object> map = new HashMapWrapper<String, Object>()
+				.put("name", group.getName())
+				.getMap();
+		
+		return map;
 	}
 	
 }
