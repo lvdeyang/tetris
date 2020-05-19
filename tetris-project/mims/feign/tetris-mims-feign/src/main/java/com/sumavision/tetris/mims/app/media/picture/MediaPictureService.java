@@ -1,5 +1,6 @@
 package com.sumavision.tetris.mims.app.media.picture;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +52,7 @@ public class MediaPictureService {
             String remark,
 			Long folderId, 
             String addition) throws Exception {
+		if(tags == null) tags = new ArrayList<String>();
 		return JsonBodyResponseParser.parseObject(mediaPictureFeign.addTask(JSONObject.toJSONString(task), name, String.join(",", tags), keyWords, remark, folderId, addition), MediaPictureVO.class);
 	}
 	
