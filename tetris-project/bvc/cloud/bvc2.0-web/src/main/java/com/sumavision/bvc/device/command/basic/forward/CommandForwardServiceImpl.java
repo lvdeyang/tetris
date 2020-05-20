@@ -1251,12 +1251,14 @@ public class CommandForwardServiceImpl {
 			if(cascade){
 				List<CommandGroupMemberPO> dstMembers = new ArrayListWrapper<CommandGroupMemberPO>().add(dstMember).getList();
 				if(GroupType.BASIC.equals(groupType)){
-					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())){
+					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())
+							|| ForwardDemandBusinessType.FORWARD_USER.equals(demand.getDemandType())){
 						GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
 						groupBOs.add(groupBO);
 					}
 				}else if(GroupType.MEETING.equals(groupType)){
-					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())){
+					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())
+							|| ForwardDemandBusinessType.FORWARD_USER.equals(demand.getDemandType())){
 						GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
 						groupBOs.add(groupBO);
 					}
