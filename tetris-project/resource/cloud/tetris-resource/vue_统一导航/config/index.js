@@ -12,14 +12,14 @@ module.exports = {
     assetsSubDirectory: 'static',
     //如果是开发环境取值'/',如果是生产环境取值'./'
     assetsPublicPath: isPro ? /* '/res_/' */ "./": "/",
-    proxyTable: {
-      '/suma-venus-resource': {
-        target: 'http://10.10.40.27:8887/suma-venus-resource',
+    proxyTable: isPro?{}:{
+      '/':{
+        target: 'http://192.165.56.131:8093',
         changeOrigin : true,
         pathRewrite:{
-          '^/suma-venus-resource':'/'
+          '^/':'/'
         }
-      },
+      }
     },
 
     // Various Dev Server settings
