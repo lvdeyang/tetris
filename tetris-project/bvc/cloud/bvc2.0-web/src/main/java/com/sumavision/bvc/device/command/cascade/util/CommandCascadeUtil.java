@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
@@ -301,7 +302,7 @@ public class CommandCascadeUtil {
 	}
 	
 	/** 指挥/会议共用，转发设备，后续还需要支持转发用户 */
-	public GroupBO startCommandDeviceForward(CommandGroupPO group, List<BundlePO> bundlePOs, List<CommandGroupMemberPO> dstMembers) throws Exception{
+	public GroupBO startCommandDeviceForward(CommandGroupPO group, List<BundlePO> bundlePOs, List<UserBO> srcUserBos, List<CommandGroupMemberPO> dstMembers) throws Exception{
 		List<CommandGroupMemberPO> members = group.getMembers();
 		List<MinfoBO> mlist = generateMinfoBOList(members);
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
@@ -316,6 +317,9 @@ public class CommandCascadeUtil {
 		List<String> medialist = new ArrayList<String>();
 		for(BundlePO bundlePO : bundlePOs){
 			medialist.add(bundlePO.getUsername());
+		}
+		for(UserBO user : srcUserBos){
+			medialist.add(user.getUserNo());
 		}
 		
 		GroupBO groupBO = new GroupBO()
@@ -535,7 +539,7 @@ public class CommandCascadeUtil {
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 		String stime = DateUtil.format(group.getStartTime(), DateUtil.dateTimePattern);//如果getStartTime为空，会得到空字符串
-		String mode = group.getDiscussMode()?"1":"0";//0表示主席模式、1表示讨论模式，后续支持
+		String mode = group.getSpeakType().getProtocalId();//0表示主席模式、1表示讨论模式
 		String status = group.getStatus().equals(GroupStatus.PAUSE)?"1":"0";//0表示正常业务、1表示暂停业务
 		List<String> spkidlist = new ArrayList<String>();
 		for(CommandGroupMemberPO member : members){

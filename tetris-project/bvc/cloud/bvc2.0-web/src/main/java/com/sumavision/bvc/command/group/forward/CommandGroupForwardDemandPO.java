@@ -66,7 +66,7 @@ public class CommandGroupForwardDemandPO extends AbstractBasePO{
 	/** 文件、录像的id */
 	private String resourceId;
 	
-	/** 文件、录像的名称 */
+	/** 文件、录像的名称；转发用户时用来存储源用户名 */
 	private String resourceName;
 	
 	/** 文件、录像的播放地址 */
