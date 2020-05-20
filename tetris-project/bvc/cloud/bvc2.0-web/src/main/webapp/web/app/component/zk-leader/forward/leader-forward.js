@@ -30,6 +30,10 @@ define([
                         data:[],
                         select:[]
                     },
+                    user:{
+                        data:[],
+                        select:[]
+                    },
                     device:{
                         data:[],
                         select:[]
@@ -85,6 +89,12 @@ define([
                     }
                     self.onBundleUnCheckAll();
                 }else if(self.currentTab == 2){
+                    //设备资源
+                    if(self.tree.user.data.length === 0){
+                        self.refreshUser();
+                    }
+                    self.onBundleUnCheckAll();
+                }else if(self.currentTab == 12345){
                     //录像资源
                     if(self.tree.record.data.length === 0){
                         self.refreshRecord();
@@ -161,6 +171,25 @@ define([
                 }
                 self.tree.members.select.splice(0, self.tree.members.select.length);
             },
+            //用户资源的复选框事件
+            onSrcUserCheckChange:function(data){
+                var self = this;
+                for(var i=0; i<self.tree.user.select.length; i++){
+                    if(self.tree.user.select[i] === data){
+                        self.tree.user.select.splice(i, 1);
+                        return;
+                    }
+                }
+                self.tree.user.select.push(data);
+            },
+            //用户资源的全选事件
+            onSrcUserUnCheckAll:function(){
+                var self = this;
+                for(var i=0; i<self.tree.device.select.length; i++){
+                    self.tree.device.select[i].checked = false;
+                }
+                self.tree.device.select.splice(0, self.tree.device.select.length);
+            },
             //设备资源的复选框事件
             onBundleCheckChange:function(data){
                 var self = this;
@@ -207,6 +236,18 @@ define([
                     if(data && data.length>0){
                         for(var i=0; i<data.length; i++){
                             self.tree.device.data.push(data[i]);
+                        }
+                    }
+                });
+            },
+            //获取用户数据
+            refreshUser:function(){
+                var self = this;
+                self.tree.user.data.splice(0, self.tree.user.data.length);
+                ajax.post('/command/query/find/institution/tree/user/filter/0', null, function(data){
+                    if(data && data.length>0){
+                        for(var i=0; i<data.length; i++){
+                            self.tree.user.data.push(data[i]);
                         }
                     }
                 });
@@ -328,6 +369,25 @@ define([
                         self.table.total += rows.length;
                     });
                 }else if(self.currentTab == 2){
+                    if(self.tree.user.select.length <= 0){
+                        self.qt.warning('您还没有选择用户资源');
+                        return;
+                    }
+                    var src = [];
+                    for(var i=0; i<self.tree.user.select.length; i++){
+                        src.push(self.tree.user.select[i].id);
+                    }
+                    ajax.post('/command/basic/forward/user', {
+                        id:self.group.id,
+                        src: $.toJSON(src),
+                        dst: $.toJSON(dst)
+                    }, function(rows){
+                        for(var i=0; i<rows.length; i++){
+                            self.table.data.push(rows[i]);
+                        }
+                        self.table.total += rows.length;
+                    });
+                }else if(self.currentTab == 12345){
                     if(self.tree.record.select.length <= 0){
                         self.qt.warning('您还没有选择录像资源');
                         return;

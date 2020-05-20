@@ -32,6 +32,17 @@ public class ForwardReturnBO {
 	
 	private String status = "";
 	
+	public ForwardReturnBO setByUser(CommandGroupForwardDemandPO demand){
+		this.id = demand.getId().toString();
+		this.time = DateUtil.format(demand.getUpdateTime(), DateUtil.dateTimePattern);
+		this.srcType = demand.getDemandType().getCode();
+		this.srcInfo = demand.getResourceName();
+		this.dstInstitutionInfo = "";
+		this.dstUserInfo = demand.getDstUserName();
+		this.status = demand.getExecuteStatus().getCode();
+		return this;
+	}
+	
 	public ForwardReturnBO setByDevice(CommandGroupForwardDemandPO demand){
 		this.id = demand.getId().toString();
 		this.time = DateUtil.format(demand.getUpdateTime(), DateUtil.dateTimePattern);

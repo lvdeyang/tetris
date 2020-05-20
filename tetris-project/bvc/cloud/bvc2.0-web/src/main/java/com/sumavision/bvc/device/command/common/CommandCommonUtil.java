@@ -525,6 +525,40 @@ public class CommandCommonUtil {
 		}
 		return target;
 	}
+
+	/**
+	 * 根据成员状态以及协同状态查询成员列表<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月19日 上午11:47:08
+	 * @param members 是否进入，null则忽略
+	 * @param memberStatus 是否在协同/发言，null则忽略
+	 * @param cooperateStatus
+	 * @return
+	 */
+	public List<CommandGroupMemberPO> queryMembersByMemberStatusAndCooperateStatus(
+			Collection<CommandGroupMemberPO> members,
+			MemberStatus memberStatus,
+			MemberStatus cooperateStatus){
+		List<CommandGroupMemberPO> target = new ArrayList<CommandGroupMemberPO>();
+		for(CommandGroupMemberPO member : members){
+			if(memberStatus == null){
+				if(cooperateStatus == null){
+					target.add(member);
+				}else if(cooperateStatus.equals(member.getCooperateStatus())){
+					target.add(member);
+				}
+			}else if(memberStatus.equals(member.getMemberStatus())){
+				if(cooperateStatus == null){
+					target.add(member);
+				}else if(cooperateStatus.equals(member.getCooperateStatus())){
+					target.add(member);
+				}
+			}
+		}
+		return target;
+	}
 	
 	/**
 	 * 从指挥中查找主席<br/>

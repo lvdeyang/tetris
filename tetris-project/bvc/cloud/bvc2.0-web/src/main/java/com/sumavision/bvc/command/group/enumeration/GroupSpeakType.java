@@ -10,19 +10,16 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
  */
 public enum GroupSpeakType {
 
-	CHAIRMAN("主席模式", "1", true),
-	DISCUSS("讨论模式", "2", true);
+	CHAIRMAN("主席模式", "0"),
+	DISCUSS("讨论模式", "1");
 	
 	private String name;
 	
-	private String protocalId;
+	private String protocalId;//按标准，0表示主席模式、1表示讨论模式
 	
-	private boolean show;
-	
-	private GroupSpeakType(String name, String protocalId, boolean show){
+	private GroupSpeakType(String name, String protocalId){
 		this.name = name;
 		this.protocalId = protocalId;
-		this.show = show;
 	}
 	
 	public String getName(){
@@ -31,10 +28,6 @@ public enum GroupSpeakType {
 	
 	public String getProtocalId(){
 		return this.protocalId;
-	}
-	
-	public boolean getShow(){
-		return this.show;
 	}
 	
 	/**

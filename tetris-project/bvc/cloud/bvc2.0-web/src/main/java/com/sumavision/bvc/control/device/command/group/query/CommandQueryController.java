@@ -918,6 +918,9 @@ public class CommandQueryController {
 			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)){
 				ForwardReturnBO row = new ForwardReturnBO().setByDevice(demand);
 				rows.add(row);
+			}else if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_USER)){
+				ForwardReturnBO row = new ForwardReturnBO().setByUser(demand);
+				rows.add(row);
 			}else if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_FILE)){
 				ForwardReturnBO row = new ForwardReturnBO().setByFile(demand);
 				rows.add(row);

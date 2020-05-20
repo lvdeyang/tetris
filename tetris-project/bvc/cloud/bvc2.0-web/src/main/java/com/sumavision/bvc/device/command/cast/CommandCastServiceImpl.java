@@ -1087,7 +1087,8 @@ public class CommandCastServiceImpl {
 				}
 				if(castDevices != null){
 					for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
-						if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)){
+						if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)
+								|| demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_USER)){
 							//转发设备
 							ForwardSetBO forwardVideo = new ForwardSetBO().setBySrcDemandAndDstCastDevice(demand, castDevice, codec, MediaType.VIDEO);
 							ForwardSetBO forwardAudio = new ForwardSetBO().setBySrcDemandAndDstCastDevice(demand, castDevice, codec, MediaType.AUDIO);
