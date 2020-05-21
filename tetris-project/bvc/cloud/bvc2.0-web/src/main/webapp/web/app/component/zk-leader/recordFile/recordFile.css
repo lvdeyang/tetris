@@ -211,3 +211,7 @@ body{
     background-color: #0b3471;
 }
 
+/*日期插件的左右箭头*/
+.el-picker-panel__icon-btn,.el-date-editor .el-range-separator{
+    color: #cecece;
+}

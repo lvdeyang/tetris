@@ -13,7 +13,7 @@
             <div class="commandBtn" v-if="group.currentId">
                 <el-tooltip class="item" effect="dark" :content="!buttons.isPause?'开始指挥':'恢复指挥'" placement="top-start"
                             v-if="group.current.creator==user.id">
-                    <el-button type="text" :disabled="group.current.status =='start'" class="icon-play" @click="startCommand"></el-button>
+                    <el-button type="text" :disabled="group.current.status =='start' || group.current.status =='remind'" class="icon-play" @click="startCommand"></el-button>
                 </el-tooltip>
                 <el-tooltip class="item" effect="dark" content="暂停" placement="top-start"
                             v-if="group.current.creator==user.id">
@@ -201,7 +201,7 @@
                       <img class="fontPic" src="../../../../../images/zk-leader/organization.png" draggable="false">
                     </span>
                     <div class="scrollTab" v-if="switchStatus2">
-                        <el-input placeholder="输入关键字进行过滤" v-model="filterText" style="left: 3px;width: 300px">
+                        <el-input placeholder="输入关键字进行过滤" v-model="filterText" style="left: 7px;width: 300px">
                         </el-input>
                         <el-scrollbar style="height:90%">
                             <el-tree :data="institution.data"  ref="tree" node-key="id" :props="props"  :filter-node-method="filterNode">
@@ -423,7 +423,7 @@
                 <div class="commandBtn" v-if="meet.currentId">
                     <el-tooltip class="item" effect="dark" :content="!buttons.isPause?'开始会议':'恢复会议'" placement="top-start"
                                 v-if="meet.current.creator==user.id">
-                        <el-button type="text" :disabled="meet.current.status =='start'" class="icon-play" @click="startCommand"></el-button>
+                        <el-button type="text" :disabled="meet.current.status =='start' || group.current.status =='remind'" class="icon-play" @click="startCommand"></el-button>
                     </el-tooltip>
                     <el-tooltip class="item" effect="dark" content="暂停" placement="top-start"
                                 v-if="meet.current.creator==user.id">
