@@ -107,7 +107,12 @@ public class WebsocketMessageService {
 			message.put("content", content);
 			message.put("fromId", fromId);
 			message.put("fromName", fromName);
-			session.getBasicRemote().sendText(message.toJSONString());
+			try{
+				session.getBasicRemote().sendText(message.toJSONString());
+			} catch(Exception e) {
+				System.out.println(new StringBufferWrapper().append("当前用户websocket链接异常，userId:").append(targetId).toString());
+				e.printStackTrace();
+			}
 		}else{
 			SessionMetadataPO metadata = sessionMetadataDao.findByUserId(targetId);
 			if(metadata != null){
