@@ -157,3 +157,8 @@ body {
 .el-date-table td.in-range div, .el-date-table td.in-range div:hover, .el-date-table.is-week-mode .el-date-table__row.current div, .el-date-table.is-week-mode .el-date-table__row:hover div{
   background-color: #0b3471;
 }
+
+/*日期插件的左右箭头*/
+.el-picker-panel__icon-btn{
+  color: #cecece;
+}
