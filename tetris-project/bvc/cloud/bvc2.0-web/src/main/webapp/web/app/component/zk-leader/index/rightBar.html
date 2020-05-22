@@ -185,7 +185,7 @@
                 <!-- <div class="option-button" title="发布字幕" @click="publish">
                     <img :src="baseUrl+'images/zk-leader/able/releaseSubtitle.png'"/>
                 </div> -->
-                <div class="option-button" @click="currentGroupChange(group.currentId)">
+                <div class="option-button" @click="currentGroupChange(group.currentId)" title="刷新">
                     <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
             </div>
@@ -385,32 +385,32 @@
                 <div :class="'customIcon'+(buttons.addCommand?'':' disable')" title="添加会议" @click="addCommand(2)">
                     <img :src="baseUrl+'images/zk-leader/able/huiyi/addCommand.png'"/>
                 </div>
-                <div class="customIcon" v-if="currentTab==3" @click="playRecordFile">
+                <div class="customIcon" v-if="currentTab==3" @click="playRecordFile" title="查看录制文件">
                     <img :src="baseUrl+'images/zk-leader/able/recordingFile.png'" alt="录制文件"/>
                 </div>
 
-                <div class="customIcon" v-else-if="currentTab==0" @click="refreshInstitution">
+                <div class="customIcon" v-else-if="currentTab==0" @click="refreshInstitution" title="刷新">
                     <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
 
                 <div v-else-if="currentTab==2">
-                    <div class="customIcon" @click="openOutFile">
+                    <div class="customIcon" @click="openOutFile" title="外部文件管理">
                         <img :src="baseUrl+'images/zk-leader/able/externalFileManagement.png'"/>
                     </div>
 
-                    <div class="customIcon" @click="fileImport">
+                    <div class="customIcon" @click="fileImport" title="文件导入">
                         <img :src="baseUrl+'images/zk-leader/able/fileImport.png'"/>
                     </div>
 
-                    <div class="customIcon" @click="refreshFile">
+                    <div class="customIcon" @click="refreshFile" title="刷新">
                         <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                     </div>
                 </div>
 
-                <div class="customIcon" v-else="currentTab==1" @click="refreshDevice">
+                <div class="customIcon" v-else="currentTab==1" @click="refreshDevice" title="刷新">
                     <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
-                <div class="customIcon" v-else="currentTab==3" @click="refreshRecord">
+                <div class="customIcon" v-else="currentTab==3" @click="refreshRecord" title="刷新">
                     <img :src="baseUrl+'images/zk-leader/able/refresh.png'" alt="刷新"/>
                 </div>
             </div>
@@ -599,7 +599,7 @@
                     <img v-if="buttons.isSpeaking" :src="baseUrl+'images/zk-leader/hangUp.png'"/>
                 </div>
                 <!--悬浮按钮-->
-                <div class="option-button" v-if="buttons.speak">
+                <div class="option-button" v-if="buttons.speak" title="申请发言">
                     <img :src="baseUrl+'images/zk-leader/speak.png'" title="申请发言" @click="applySpeak">
                 </div>
                 <div class="option-button" v-if="meet.current.creator==user.id" title="刷新"
@@ -642,9 +642,13 @@
                 <i class="menuIcon icon-arrow-down"></i>
                 下载
             </div>
-            <div :class="'menu ' + (contextMenu.dedicatedCommand?'':'disable')" @click="secretCommand">
+            <div :class="'menu ' + (contextMenu.dedicatedCommand?'':'disable')" @click="secretCommand" v-if="differentiate === 1">
                 <i class="menuIcon  icon-user-md"></i>
                 专向指挥
+            </div>
+            <div :class="'menu ' + (contextMenu.dedicatedCommand?'':'disable')" @click="secretCommand" v-else>
+                <i class="menuIcon  icon-user-md"></i>
+                专向会议
             </div>
             <div :class="'menu ' + (contextMenu.enterCommand?'':'disable')" @click="handleEnterCommand">
                 <i class="menuIcon icon-signin"></i>
