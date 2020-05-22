@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
-import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderPO;
@@ -36,6 +35,7 @@ import com.sumavision.bvc.command.group.enumeration.ForwardBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandStatus;
 import com.sumavision.bvc.command.group.enumeration.ForwardDstType;
+import com.sumavision.bvc.command.group.enumeration.GroupSpeakType;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MediaType;
@@ -55,6 +55,7 @@ import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExiste
 import com.sumavision.bvc.device.command.exception.HasNotUsefulPlayerException;
 import com.sumavision.bvc.device.command.exception.UserHasNoAvailableEncoderException;
 import com.sumavision.bvc.device.command.exception.UserHasNoFolderException;
+import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
 import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
 import com.sumavision.bvc.device.command.time.CommandFightTimeServiceImpl;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
@@ -147,6 +148,9 @@ public class CommandBasicServiceImpl {
 	
 	@Autowired
 	private CommandFightTimeServiceImpl commandFightTimeServiceImpl;
+	
+	@Autowired
+	private CommandMeetingSpeakServiceImpl commandMeetingSpeakServiceImpl;
 	
 	@Autowired
 	private CommandVodService commandVodService;
@@ -632,7 +636,7 @@ public class CommandBasicServiceImpl {
 		group.setAvtpl(g_avtpl);
 		g_avtpl.setGroup(group);
 		group.setCurrentGearLevel(currentGear.getLevel());
-		group.setDiscussMode(false);
+		group.setSpeakType(GroupSpeakType.CHAIRMAN);
 		
 		//保存以获得id
 //		commandGroupDao.save(group);
@@ -1191,7 +1195,7 @@ public class CommandBasicServiceImpl {
 		}
 		
 		group.setStatus(GroupStatus.STOP);
-		group.setDiscussMode(false);
+		group.setSpeakType(GroupSpeakType.CHAIRMAN);
 		group.setStartTime(null);
 		Date endTime = new Date();
 		group.setEndTime(endTime);
@@ -2459,9 +2463,20 @@ public class CommandBasicServiceImpl {
 			
 			//协同或发言人
 			Set<CommandGroupMemberPO> cooperateMembers = new HashSet<CommandGroupMemberPO>();
-			for(CommandGroupMemberPO member : members){
-				if(member.getCooperateStatus().equals(MemberStatus.CONNECT) || member.getCooperateStatus().equals(MemberStatus.CONNECTING)){
-					cooperateMembers.add(member);
+			GroupSpeakType speakType = group.getSpeakType();
+			if(GroupSpeakType.DISCUSS.equals(speakType)){
+				//讨论模式下，除了主席，所有进会成员都是“发言人”
+				for(CommandGroupMemberPO member : members){
+					if(member.isAdministrator()) continue;
+					if(member.getMemberStatus().equals(MemberStatus.CONNECT)){
+						cooperateMembers.add(member);
+					}
+				}
+			}else{
+				for(CommandGroupMemberPO member : members){
+					if(member.getCooperateStatus().equals(MemberStatus.CONNECT) || member.getCooperateStatus().equals(MemberStatus.CONNECTING)){
+						cooperateMembers.add(member);
+					}
 				}
 			}
 			
@@ -2591,6 +2606,9 @@ public class CommandBasicServiceImpl {
 				
 	//			chairSplits = chosePlayersForMembers(group, newMembers);//后选播放器:去掉
 				
+				//新的在线的成员自动上线，还有“进入”的成员
+				List<CommandGroupMemberPO> loginNewAndEnterMembers = new ArrayList<CommandGroupMemberPO>();
+				
 				//发消息给新成员（这里不用考虑专向指挥）
 				if(!autoEnter){
 					for(CommandGroupMemberPO member : newMembers){
@@ -2616,8 +2634,7 @@ public class CommandBasicServiceImpl {
 						messageCaches.add(new MessageSendCacheBO(member.getUserId(), message.toJSONString(), WebsocketMessageType.COMMAND));
 					}
 				}else{
-					//自动接听，给新的在线的成员自动上线，还有“进入”的成员
-					List<CommandGroupMemberPO> loginNewAndEnterMembers = new ArrayList<CommandGroupMemberPO>();
+					//自动接听
 					for(CommandGroupMemberPO newMember : newMembers){
 						if(newMember.isAdministrator()) continue;
 						UserBO commandUserBo = queryUtil.queryUserById(commandUserBos, newMember.getUserId());
@@ -2631,6 +2648,11 @@ public class CommandBasicServiceImpl {
 					
 					loginNewAndEnterMembers.addAll(enterMembers);				
 					membersResponse(group, loginNewAndEnterMembers, null);
+				}
+				
+				//把新成员/进入的成员加入讨论
+				if(GroupSpeakType.DISCUSS.equals(speakType)){
+					commandMeetingSpeakServiceImpl.speakStart(group, loginNewAndEnterMembers, 2);
 				}
 			}
 			
@@ -2680,7 +2702,7 @@ public class CommandBasicServiceImpl {
 							GroupBO maddfullBO = commandCascadeUtil.maddfullMeeting(group, newNodeMemberInfos);
 							conferenceCascadeService.info(maddfullBO);
 							log.info(newNodeMemberInfos.size() + "个成员所在的节点新参与会议，全量同步该会议：" + group.getName());
-						}					
+						}
 					}
 				}
 			}
@@ -2689,7 +2711,7 @@ public class CommandBasicServiceImpl {
 //				return chairSplits;
 //			}
 			
-			//发消息
+			//发消息，主要是“邀请”消息，自动接听则没有
 			for(MessageSendCacheBO cache : messageCaches){
 				WebsocketMessageVO ws = websocketMessageService.send(cache.getUserId(), cache.getMessage(), cache.getType(), cache.getFromUserId(), cache.getFromUsername());
 				consumeIds.add(ws.getId());
@@ -4374,8 +4396,10 @@ public class CommandBasicServiceImpl {
 		//呼叫转发点播编码器，生成转发
 		if(null == demandsForEncoderAndForward) demandsForEncoderAndForward = new ArrayList<CommandGroupForwardDemandPO>();
 		for(CommandGroupForwardDemandPO demand : demandsForEncoderAndForward){
-			//只对设备转发处理；文件转发没有编码器
-			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)
+			//只对设备、用户转发处理；文件转发不用呼叫编解码器
+			ForwardDemandBusinessType demandType = demand.getDemandType();
+			if((demandType.equals(ForwardDemandBusinessType.FORWARD_DEVICE)
+					|| demandType.equals(ForwardDemandBusinessType.FORWARD_USER))
 					&& !OriginType.OUTER.equals(demand.getDstOriginType())){
 				
 				//呼叫转发点播中的源的编码器
@@ -4405,7 +4429,13 @@ public class CommandBasicServiceImpl {
 					if(localLayerId == null){
 						localLayerId = resourceRemoteService.queryLocalLayerId();
 					}
-					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					String cmd = null;
+					if(demandType.equals(ForwardDemandBusinessType.FORWARD_DEVICE)){
+						cmd = XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER;
+					}else{
+						cmd = XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER;
+					}
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(cmd)
 										 .setOperate(XtBusinessPassByContentBO.OPERATE_START)
 										 .setUuid(demand.getUuid())
 										 .setSrc_user(chairmanUserNum)//以主席的身份发起点播
@@ -4418,7 +4448,7 @@ public class CommandBasicServiceImpl {
 										 .setVparam(codec);
 					
 					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
-					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setType(cmd)
 					.setPass_by_content(passByContent);
 					
 					logic.getPass_by().add(passby);
@@ -4567,8 +4597,10 @@ public class CommandBasicServiceImpl {
 		//挂断转发点播中的源的编码器
 		if(null == demandsForEncoder) demandsForEncoder = new ArrayList<CommandGroupForwardDemandPO>();
 		for(CommandGroupForwardDemandPO demand : demandsForEncoder){
-			//只对设备转发处理，文件转发没有编码器；只对目的为INNER的处理；只对DONE的处理
-			if(demand.getDemandType().equals(ForwardDemandBusinessType.FORWARD_DEVICE)
+			//只对设备、用户转发处理，文件转发不用呼叫编解码器；只对目的为INNER的处理；只对DONE的处理
+			ForwardDemandBusinessType demandType = demand.getDemandType();
+			if((demandType.equals(ForwardDemandBusinessType.FORWARD_DEVICE)
+					|| demandType.equals(ForwardDemandBusinessType.FORWARD_USER))
 					&& !OriginType.OUTER.equals(demand.getDstOriginType())
 					&& ForwardDemandStatus.DONE.equals(demand.getExecuteStatus())){
 				
@@ -4585,7 +4617,13 @@ public class CommandBasicServiceImpl {
 					if(localLayerId == null){
 						localLayerId = resourceRemoteService.queryLocalLayerId();
 					}
-					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					String cmd = null;
+					if(demandType.equals(ForwardDemandBusinessType.FORWARD_DEVICE)){
+						cmd = XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER;
+					}else{
+						cmd = XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_USER;
+					}
+					XtBusinessPassByContentBO passByContent = new XtBusinessPassByContentBO().setCmd(cmd)
 										 .setOperate(XtBusinessPassByContentBO.OPERATE_STOP)
 										 .setUuid(demand.getUuid())
 										 .setSrc_user(chairmanUserNum)//以主席的身份停止点播
@@ -4598,7 +4636,7 @@ public class CommandBasicServiceImpl {
 										 .setVparam(codec);
 					
 					PassByBO passby = new PassByBO().setLayer_id(localLayerId)
-					.setType(XtBusinessPassByContentBO.CMD_LOCAL_SEE_XT_ENCODER)
+					.setType(cmd)
 					.setPass_by_content(passByContent);
 					
 					logic.getPass_by().add(passby);

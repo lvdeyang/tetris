@@ -48,6 +48,8 @@ public class MediaPictureVO{
 	
 	private String processInstanceId;
 	
+	private Long folderId;
+	
 	private List<MediaFileEquipmentPermissionPO> deviceUpload;
 	
 	private List<MediaPictureVO> children;
@@ -258,5 +260,14 @@ public class MediaPictureVO{
 		this.deviceUpload = deviceUpload;
 		return this;
 	}
-	
+
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public MediaPictureVO setFolderId(Long folderId) {
+		this.folderId = folderId;
+		return this;
+	}
+
 }

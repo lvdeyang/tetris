@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
@@ -41,16 +45,19 @@ import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.command.exception.UserHasNoAvailableEncoderException;
 import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
+import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
@@ -104,6 +111,9 @@ public class CommandForwardServiceImpl {
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private CommonQueryUtil commonQueryUtil;
 	
 	@Autowired
 	private QueryUtil queryUtil;
@@ -201,6 +211,12 @@ public class CommandForwardServiceImpl {
 			List<ChannelSchemeDTO> audioEncode1Channels = resourceChannelDao.findByBundleIdsAndChannelId(bundleIds, ChannelType.AUDIOENCODE1.getChannelId());
 			if(audioEncode1Channels == null) audioEncode1Channels = new ArrayList<ChannelSchemeDTO>();
 			
+			//查询被转发的用户
+			String userIdListStr = StringUtils.join(srcUserIds.toArray(), ",");
+			List<UserBO> srcUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
+			if(srcUserBos == null) srcUserBos = new ArrayList<UserBO>();
+			List<FolderUserMap> folderUserMaps = folderUserMapDao.findByUserIdIn(srcUserIds);
+			
 			//按目标成员循环，生成CommandGroupForwardDemandPO
 			for(CommandGroupMemberPO dstMember : dstMembers){
 				
@@ -286,7 +302,116 @@ public class CommandForwardServiceImpl {
 							);
 					demand.setGroup(group);
 					newDemands.add(demand);
-				}				
+				}
+				
+				for(UserBO srcUserBo : srcUserBos){
+					
+					boolean bVodUserLdap = queryUtil.isLdapUser(srcUserBo, folderUserMaps);
+					
+					String srcBundleId = null;
+					String srcVideoChannelId = null;
+					String srcAudioChannelId = null;
+					String srcLayerId = null;
+					String bundleName = null;
+					String bundleType = null;
+					OriginType srcOriginType = null;
+//					boolean bDeviceLdap =  queryUtil.isLdapBundle(bundle);
+					if(!bVodUserLdap){
+						srcOriginType = OriginType.INNER;
+						
+						List<BundlePO> encoderBundleEntities = resourceBundleDao.findByBundleIds(new ArrayListWrapper<String>().add(commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(srcUserBo)).getList());
+						if(encoderBundleEntities.size() == 0) throw new UserHasNoAvailableEncoderException(srcUserBo.getName());
+						BundlePO encoderBundleEntity = encoderBundleEntities.get(0);
+						srcBundleId = encoderBundleEntity.getBundleId();
+						srcLayerId = encoderBundleEntity.getAccessNodeUid();
+						bundleName = encoderBundleEntity.getBundleName();
+						bundleType = encoderBundleEntity.getBundleType();
+						
+						List<ChannelSchemeDTO> encoderVideoChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(encoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_VIDEO);
+						if(encoderVideoChannels.size() == 0) throw new UserHasNoAvailableEncoderException(srcUserBo.getName());
+						ChannelSchemeDTO encoderVideoChannel = encoderVideoChannels.get(0);
+						srcVideoChannelId = encoderVideoChannel.getChannelId();
+						
+						List<ChannelSchemeDTO> encoderAudioChannels = resourceChannelDao.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(encoderBundleEntity.getBundleId()).getList(), ResourceChannelDAO.ENCODE_AUDIO);
+						if(encoderAudioChannels.size() == 0) throw new UserHasNoAvailableEncoderException(srcUserBo.getName());
+						ChannelSchemeDTO encoderAudioChannel = encoderAudioChannels.get(0);
+						srcAudioChannelId = encoderAudioChannel.getChannelId();
+						
+//						//遍历视频通道
+//						for(ChannelSchemeDTO videoChannel : videoEncode1Channels){
+//							if(bundle.getBundleId().equals(videoChannel.getBundleId())){
+//								srcVideoChannelId = videoChannel.getChannelId();
+//								break;
+//							}
+//						}
+//						//遍历音频通道
+//						for(ChannelSchemeDTO audioChannel : audioEncode1Channels){
+//							if(bundle.getBundleId().equals(audioChannel.getBundleId())){
+//								srcAudioChannelId = audioChannel.getChannelId();
+//								break;
+//							}
+//						}
+					}else{
+						//ldap设备，生成一套参数id
+						srcOriginType = OriginType.OUTER;
+						srcVideoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+						srcAudioChannelId = ChannelType.AUDIOENCODE1.getChannelId();
+						if(localLayerId == null){
+							localLayerId = resourceRemoteService.queryLocalLayerId();
+						}
+						srcBundleId = UUID.randomUUID().toString().replace("-", "");
+						srcLayerId = localLayerId;
+						bundleName = srcUserBo.getName()+"用户源";
+						bundleType = "outer_no_bundle_type";
+					}
+					
+					//建立 CommandGroupForwardDemandPO
+					CommandGroupForwardDemandPO demand = new CommandGroupForwardDemandPO(
+							srcOriginType,
+							dstOriginType,
+							ForwardDemandBusinessType.FORWARD_USER,
+							ForwardDemandStatus.UNDONE,
+							ForwardDstType.USER,
+							dstMember.getId(),
+							dstMember.getUserName(),
+							dstMember.getUserNum(),
+							srcUserBo.getUserNo(),
+							srcBundleId,
+							bundleName,
+							bundleType,
+							srcLayerId,
+							srcVideoChannelId,
+							"VenusVideoIn",//videoBaseType,
+							srcBundleId,
+							bundleName,
+							bundleType,
+							srcLayerId,
+							srcAudioChannelId,
+							"VenusAudioIn",//String audioBaseType,
+							null,//member.getDstBundleId(),
+							null,//member.getDstBundleName(),
+							null,//member.getDstBundleType(),
+							null,//member.getDstLayerId(),
+							null,//member.getDstVideoChannelId(),
+							"VenusVideoOut",//String dstVideoBaseType,
+							null,//member.getDstAudioChannelId(),
+							null,//member.getDstBundleName(),
+							null,//member.getDstBundleType(),
+							null,//member.getDstLayerId(),
+							null,//member.getDstAudioChannelId(),
+							"VenusAudioOut",//String dstAudioBaseType,
+							creatorUserId,
+							g_avtpl.getId(),//Long avTplId,
+							currentGear.getId(),//Long gearId,
+							DstDeviceType.WEBSITE_PLAYER,
+							null,//LiveType type,
+							null,//Long osdId,
+							null//String osdUsername);
+							);
+					demand.setResourceName(srcUserBo.getName());
+					demand.setGroup(group);
+					newDemands.add(demand);
+				}
 			}
 			//save获得id
 //			commandGroupUserPlayerDao.save(needPlayers);
@@ -369,10 +494,10 @@ public class CommandForwardServiceImpl {
 			//级联
 			if(!OriginType.OUTER.equals(group.getOriginType())){
 				if(GroupType.BASIC.equals(groupType)){
-					GroupBO groupBO = commandCascadeUtil.startCommandDeviceForward(group, srcBundleEntities, dstMembers);
+					GroupBO groupBO = commandCascadeUtil.startCommandDeviceForward(group, srcBundleEntities, srcUserBos, dstMembers);
 					commandCascadeService.startDeviceForward(groupBO);
 				}else if(GroupType.MEETING.equals(groupType)){
-					GroupBO groupBO = commandCascadeUtil.startCommandDeviceForward(group, srcBundleEntities, dstMembers);
+					GroupBO groupBO = commandCascadeUtil.startCommandDeviceForward(group, srcBundleEntities, srcUserBos, dstMembers);
 					conferenceCascadeService.startDeviceForward(groupBO);
 				}
 			}
@@ -1126,12 +1251,14 @@ public class CommandForwardServiceImpl {
 			if(cascade){
 				List<CommandGroupMemberPO> dstMembers = new ArrayListWrapper<CommandGroupMemberPO>().add(dstMember).getList();
 				if(GroupType.BASIC.equals(groupType)){
-					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())){
+					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())
+							|| ForwardDemandBusinessType.FORWARD_USER.equals(demand.getDemandType())){
 						GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
 						groupBOs.add(groupBO);
 					}
 				}else if(GroupType.MEETING.equals(groupType)){
-					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())){
+					if(ForwardDemandBusinessType.FORWARD_DEVICE.equals(demand.getDemandType())
+							|| ForwardDemandBusinessType.FORWARD_USER.equals(demand.getDemandType())){
 						GroupBO groupBO = commandCascadeUtil.stopCommandDeviceForward(group, demand, dstMembers);
 						groupBOs.add(groupBO);
 					}

@@ -1930,6 +1930,8 @@ public class HttpInterfaceController {
 			}else if(codecType == 3){
 				ws.setType("4U");
 			}
+			ws.setUsername(bundle.getUsername());
+			ws.setPassword(bundle.getOnlinePassword());
 			wsVOs.add(ws);
 		}
 		

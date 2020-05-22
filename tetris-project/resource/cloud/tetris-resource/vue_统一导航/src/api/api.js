@@ -105,6 +105,7 @@ export const resetFolderOfUsers = params => { return axiosInstance.post(`${baseP
 export const queryRootOptions = params => { return axiosInstance.post(`${basePath}/folder/queryRootOptions`, qs.stringify(params)).then(res => res.data) }
 export const setRoot = params => { return axiosInstance.post(`${basePath}/folder/setRoot`, qs.stringify(params)).then(res => res.data) }
 export const resetRootNode = params => { return axiosInstance.post(`${basePath}/folder/resetRootNode`, qs.stringify(params)).then(res => res.data) }
+export const releaseRoot=params=>{return axiosInstance.post(`${basePath}/folder/releaseRootNode`, qs.stringify(params)).then(res => res.data)}
 export const changeNodePosition = params => { return axiosInstance.post(`${basePath}/folder/changeNodePosition`, qs.stringify(params)).then(res => res.data) }
 
 export const logoutBundle = params => { return axiosInstance.post(`${basePath}/bundle/logout`, qs.stringify(params)).then(res => res.data) }

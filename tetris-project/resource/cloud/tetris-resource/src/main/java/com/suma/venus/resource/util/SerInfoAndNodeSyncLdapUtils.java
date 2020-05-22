@@ -213,7 +213,7 @@ public class SerInfoAndNodeSyncLdapUtils {
 		List<SerNodePO> successSerNodePOs = new ArrayList<SerNodePO>();
 
 		for (SerNodePO serNodePO : serNodePOs) {
-			if(serNodePO.getNodeFactInfo() == null){
+			if(serNodePO.getNodeFactInfo()==null || "".equals(serNodePO.getNodeFactInfo())){
 				throw new ServerInfoNodeCannotBeNullException();
 			}
 			try {

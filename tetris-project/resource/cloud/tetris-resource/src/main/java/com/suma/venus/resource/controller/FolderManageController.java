@@ -161,7 +161,8 @@ public class FolderManageController extends ControllerBase {
 		Map<String, Object> data = makeAjaxData();
 		try {
 			FolderPO folder = folderService.get(id);
-			if (null == folder.getParentPath()) {
+			Long removeableRoot = 0l;
+			if (!removeableRoot.equals(folder.getParentId()) && null == folder.getParentPath()) {
 				// 根节点不能删除
 				data.put(ERRMSG, "根节点不能删除");
 				return data;
@@ -171,7 +172,7 @@ public class FolderManageController extends ControllerBase {
 			if(folder.getFolderIndex() != null){
 				int oldIndex = folder.getFolderIndex();
 				FolderPO parentFolder = folderDao.findOne(folder.getParentId());
-				handleOldParentFolderIndexChange(parentFolder, oldIndex);
+				if(parentFolder != null)handleOldParentFolderIndexChange(parentFolder, oldIndex);
 			}
 
 			folderService.delete(folder);
@@ -293,8 +294,8 @@ public class FolderManageController extends ControllerBase {
 
 			data.put("userNodes", userNodes);
 		} catch (Exception e) {
-			LOGGER.error("Fail to set folder : ", e);
-			data.put(ERRMSG, "内部错误");
+			LOGGER.error(e.getMessage(), e);
+			data.put(ERRMSG, e.getMessage());
 		}
 
 		return data;
@@ -587,6 +588,29 @@ public class FolderManageController extends ControllerBase {
 				recurseUpdateParentPath(bvcRootFolder);
 			}
 
+		} catch (Exception e) {
+			LOGGER.error("reset root node error", e);
+			data.put(ERRMSG, "内部错误");
+		}
+		return data;
+	}
+	
+	// 解除根目录
+	@RequestMapping(value = "/releaseRootNode", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> releaseRootNode(Long folderId){
+		Map<String, Object> data = makeAjaxData();
+		try {
+			
+			FolderPO folder = folderDao.findOne(folderId);
+			if(folder == null){
+				data.put(ERRMSG, "未获取到文件夹，id："+folderId);
+				return data;
+			}
+			folder.setBeBvcRoot(false);
+			folder.setParentId(0l);
+			folder.setParentPath(null);
+			folderDao.save(folder);
 		} catch (Exception e) {
 			LOGGER.error("reset root node error", e);
 			data.put(ERRMSG, "内部错误");
@@ -1767,6 +1791,7 @@ public class FolderManageController extends ControllerBase {
 					}
 					
 					folderPO.setParentId(-1l);
+					folderPO.setBeBvcRoot(true);
 					folderPO.setParentPath(null);
 					
 					parentFolder = new FolderPO();

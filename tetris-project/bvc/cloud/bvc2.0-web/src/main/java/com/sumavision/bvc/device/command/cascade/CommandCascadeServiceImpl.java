@@ -213,16 +213,22 @@ public class CommandCascadeServiceImpl {
 			}
 		}else if(GroupType.MEETING.equals(type)){
 			//获取发言列表。后续改成只能1人发言
-			//TODO:讨论
-			String spkid = groupBO.getSpkid();
-			if(spkid!=null && !"".equals(spkid)){
-				String[] s = spkid.split(",");
-				List<String> spkidList = Arrays.asList(s);
-				List<Long> userIdArray = commandCascadeUtil.fromUserNosToIds(spkidList);
-				if(userIdArray.size() > 0){
-					//开始发言
-					commandMeetingSpeakServiceImpl.speakAppoint(group.getUserId(), group.getId(), userIdArray);
-					log.info("全量同步，开始发言，发言人数：" + userIdArray.size());
+			//TODO:讨论，0表示主席模式、1表示讨论模式
+			String mode = groupBO.getMode();
+			if("1".equals(mode)){
+				commandMeetingSpeakServiceImpl.discussStart(group.getUserId(), group.getId());
+				log.info("全量同步，开始全员讨论");
+			}else{
+				String spkid = groupBO.getSpkid();
+				if(spkid!=null && !"".equals(spkid)){
+					String[] s = spkid.split(",");//这里早期写成逗号分隔的多个成员，实际在业务加了限制，最多只会有一个
+					List<String> spkidList = Arrays.asList(s);
+					List<Long> userIdArray = commandCascadeUtil.fromUserNosToIds(spkidList);
+					if(userIdArray.size() > 0){
+						//开始发言
+						commandMeetingSpeakServiceImpl.speakAppoint(group.getUserId(), group.getId(), userIdArray);
+						log.info("全量同步，开始发言，发言人数：" + userIdArray.size());
+					}
 				}
 			}
 		}

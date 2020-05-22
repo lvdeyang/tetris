@@ -30,6 +30,7 @@ import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordFragmentPO;
 import com.sumavision.bvc.command.group.record.CommandGroupRecordPO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
+import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderScreenPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
@@ -309,6 +310,17 @@ public class CommandCommonUtil {
 		}
 		return null;
 	}
+	
+	/** 根据id查找上屏方案中的分屏 */
+	public CommandGroupDecoderScreenPO queryScreenById(List<CommandGroupDecoderScreenPO> screens, Long id) {
+		if(screens == null) return null;
+		for(CommandGroupDecoderScreenPO screen : screens){
+			if(screen.getId().equals(id)){
+				return screen;
+			}
+		}
+		return null;
+	}
 
 	/**
 	 * 根据业务类型查找播放器<br/>
@@ -509,6 +521,40 @@ public class CommandCommonUtil {
 		for(CommandGroupMemberPO member : members){
 			if(userIds.contains(member.getUserId())){
 				target.add(member);
+			}
+		}
+		return target;
+	}
+
+	/**
+	 * 根据成员状态以及协同状态查询成员列表<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月19日 上午11:47:08
+	 * @param members 是否进入，null则忽略
+	 * @param memberStatus 是否在协同/发言，null则忽略
+	 * @param cooperateStatus
+	 * @return
+	 */
+	public List<CommandGroupMemberPO> queryMembersByMemberStatusAndCooperateStatus(
+			Collection<CommandGroupMemberPO> members,
+			MemberStatus memberStatus,
+			MemberStatus cooperateStatus){
+		List<CommandGroupMemberPO> target = new ArrayList<CommandGroupMemberPO>();
+		for(CommandGroupMemberPO member : members){
+			if(memberStatus == null){
+				if(cooperateStatus == null){
+					target.add(member);
+				}else if(cooperateStatus.equals(member.getCooperateStatus())){
+					target.add(member);
+				}
+			}else if(memberStatus.equals(member.getMemberStatus())){
+				if(cooperateStatus == null){
+					target.add(member);
+				}else if(cooperateStatus.equals(member.getCooperateStatus())){
+					target.add(member);
+				}
 			}
 		}
 		return target;

@@ -247,6 +247,20 @@ public class RouterController {
 	}
 	
 	/**
+	 * 首长终端  消息<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月9日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/footer/dialog")
+	public ModelAndView zkLeaderFooterDialog(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/footer/dialog/dialog-message");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 首长终端 头部 <br/>
 	 * <b>作者:</b>yanxiaochao<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -341,6 +355,20 @@ public class RouterController {
 	@RequestMapping(value = "/zk/leader/cast/devices")
 	public ModelAndView zkLeaderCastDevices(String token){
 		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/cast-devices/leader-cast-devices");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 上屏方案关联设备弹框<br/>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月14日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/cast/decoder/devices")
+	public ModelAndView zkLeaderCastDecoderDevices(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/cast-decoder-devices/leader-cast-decoder-devices");
 		mv.addObject("token", token);
 		return mv;
 	}

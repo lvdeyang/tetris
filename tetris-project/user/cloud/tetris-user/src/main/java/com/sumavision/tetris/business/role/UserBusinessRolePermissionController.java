@@ -14,9 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.system.role.SystemRoleType;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionQuery;
-import com.sumavision.tetris.system.role.UserSystemRolePermissionService;
 import com.sumavision.tetris.system.role.UserSystemRolePermissionVO;
-import com.sumavision.tetris.user.UserVO;
 
 @Controller
 @RequestMapping(value = "/user/business/role/permission")
@@ -26,7 +24,7 @@ public class UserBusinessRolePermissionController {
 	private UserSystemRolePermissionQuery userSystemRolePermissionQuery;
 	
 	@Autowired
-	private UserSystemRolePermissionService userSystemRolePermissionService;
+	private UserBusinessRolePermissionService userBusinessRolePermissionService;
 	
 	/**
 	 * 分页查询用户绑定的业务角色<br/>
@@ -84,15 +82,15 @@ public class UserBusinessRolePermissionController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/bind/system/role")
-	public Object bindSystemRole(
+	@RequestMapping(value = "/bind/business/role")
+	public Object bindBusinessRole(
 			Long userId,
 			String roleIds,
 			HttpServletRequest request) throws Exception{
 		
 		if(roleIds==null || "".equals(roleIds)) return null;
 		
-		List<UserSystemRolePermissionVO> permissions = userSystemRolePermissionService.bindSystemRole(userId, JSON.parseArray(roleIds, Long.class));
+		List<UserSystemRolePermissionVO> permissions = userBusinessRolePermissionService.bindBusinessRole(userId, JSON.parseArray(roleIds, Long.class));
 		
 		return permissions;
 	}
@@ -110,7 +108,7 @@ public class UserBusinessRolePermissionController {
 	public Object unbind(
 			@PathVariable Long id,
 			HttpServletRequest request) throws Exception{
-		userSystemRolePermissionService.unbind(id);
+		userBusinessRolePermissionService.unbind(id);
 		return null;
 	}
 	
@@ -133,7 +131,7 @@ public class UserBusinessRolePermissionController {
 		
 		if(userIds == null) return null;
 		
-		List<UserSystemRolePermissionVO> permissions = userSystemRolePermissionService.bindUser(roleId, JSON.parseArray(userIds, Long.class));
+		List<UserSystemRolePermissionVO> permissions = userBusinessRolePermissionService.bindUser(roleId, JSON.parseArray(userIds, Long.class));
 		
 		return permissions;
 	}

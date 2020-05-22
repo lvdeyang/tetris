@@ -156,7 +156,7 @@ li.focusLight {
     left: 50px;
     bottom: 140px;
     width: 100%;
-    background: #52cffb21;
+    /*background: #52cffb21;*/
     border-radius: 0 0 12px 12px;
     overflow: hidden;
 }
@@ -205,14 +205,14 @@ img {
     font-size: 20px;
     height: 30px;
     line-height: 30px;
-    background-color: #2d4e6899;
+    background-color: #2d4e68e6;
 }
 
 .headFont {
     display: inline-block;
     color: #cfdae6;
     font-size: 18px;
-    width: 148px;
+    width: 111px;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;

@@ -11,6 +11,10 @@ public class WsVO {
 	private String deviceIp;
 	
 	private String type;
+	
+	private String username;
+	
+	private String password;
 
 	public String getDeviceIp() {
 		return deviceIp;
@@ -27,6 +31,24 @@ public class WsVO {
 
 	public WsVO setType(String type) {
 		this.type = type;
+		return this;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public WsVO setUsername(String username) {
+		this.username = username;
+		return this;
+	}
+
+	public String getPassword() {
+		return password;
+	}
+
+	public WsVO setPassword(String password) {
+		this.password = password;
 		return this;
 	}
 	

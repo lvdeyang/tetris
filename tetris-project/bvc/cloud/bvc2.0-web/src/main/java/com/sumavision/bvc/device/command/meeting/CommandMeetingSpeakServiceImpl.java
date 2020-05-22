@@ -58,13 +58,12 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 
 * @ClassName: CommandMeetingServiceImpl 
-* @Description: 指挥系统中的会议业务
+* @Description: 指挥系统中的会议业务。各个方法根据需要加事物，公用方法不加事物
 * @author zsy
 * @date 2020年1月3日 上午10:56:48 
 *
  */
 @Slf4j
-@Transactional(rollbackFor = Exception.class)
 @Service
 public class CommandMeetingSpeakServiceImpl {
 	
@@ -118,6 +117,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @param userIdArray
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void speakAppoint(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
 		UserVO user = userQuery.current();
 		
@@ -130,6 +130,7 @@ public class CommandMeetingSpeakServiceImpl {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
 			GroupType groupType = group.getType();
+			GroupSpeakType speakType = group.getSpeakType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				if(!OriginType.OUTER.equals(group.getOriginType())){
@@ -143,15 +144,28 @@ public class CommandMeetingSpeakServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行发言");
 			}
 			
+			if(GroupSpeakType.DISCUSS.equals(speakType)){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "当前正在进行讨论");
+			}
+			
 			if(userIdArray.contains(group.getUserId())){
 				throw new BaseException(StatusCode.FORBIDDEN, "不能指定主席发言");
+			}
+			
+			if(userIdArray.size() > 1){
+				throw new BaseException(StatusCode.FORBIDDEN, "只能指定1人进行发言");
+			}
+
+			List<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> speakMembers0 = commandCommonUtil.queryMembersByMemberStatusAndCooperateStatus(members, MemberStatus.CONNECT, MemberStatus.CONNECT);
+			if(speakMembers0.size() > 0){
+				throw new BaseException(StatusCode.FORBIDDEN, speakMembers0.get(0).getUserName() + "正在发言");
 			}
 			
 			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
 			List<Long> consumeIds = new ArrayList<Long>();
 						
 			//发言人，校验是否已经在发言
-			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
 				if(userIdArray.contains(member.getUserId())){
@@ -215,6 +229,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @param groupId
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void speakApply(Long userId, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
 		
@@ -226,6 +241,7 @@ public class CommandMeetingSpeakServiceImpl {
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			GroupSpeakType speakType = group.getSpeakType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				if(!OriginType.OUTER.equals(group.getOriginType())){
@@ -248,6 +264,15 @@ public class CommandMeetingSpeakServiceImpl {
 			CommandGroupMemberPO speakMember = commandCommonUtil.queryMemberByUserId(members, userId);
 			if(speakMember.getCooperateStatus().equals(MemberStatus.CONNECT)){
 				throw new BaseException(StatusCode.FORBIDDEN, "您正在发言");
+			}
+			
+			if(GroupSpeakType.DISCUSS.equals(speakType)){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "当前正在进行讨论");
+			}
+			
+			List<CommandGroupMemberPO> speakMembers = commandCommonUtil.queryMembersByMemberStatusAndCooperateStatus(members, MemberStatus.CONNECT, MemberStatus.CONNECT);
+			if(speakMembers.size() > 0){
+				throw new BaseException(StatusCode.FORBIDDEN, speakMembers.get(0).getUserName() + "正在发言");
 			}
 			
 			//如果主席和申请人都不在该系统，则不需要处理（正常不会出现）
@@ -288,6 +313,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @param userIdArray 被同意的用户
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void speakApplyAgree(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
 		UserVO user = userQuery.current();
 		
@@ -299,6 +325,7 @@ public class CommandMeetingSpeakServiceImpl {
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			GroupSpeakType speakType = group.getSpeakType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				if(!OriginType.OUTER.equals(group.getOriginType())){
@@ -317,6 +344,20 @@ public class CommandMeetingSpeakServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, "主席不需要发言");
 			}
 			
+			if(GroupSpeakType.DISCUSS.equals(speakType)){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "当前正在进行讨论");
+			}
+			
+			if(userIdArray.size() > 1){
+				throw new BaseException(StatusCode.FORBIDDEN, "只能同意1人进行发言");
+			}
+			
+			List<CommandGroupMemberPO> members = group.getMembers();
+			List<CommandGroupMemberPO> speakMembers0 = commandCommonUtil.queryMembersByMemberStatusAndCooperateStatus(members, MemberStatus.CONNECT, MemberStatus.CONNECT);
+			if(speakMembers0.size() > 0){
+				throw new BaseException(StatusCode.FORBIDDEN, speakMembers0.get(0).getUserName() + "已经在发言止");
+			}
+			
 			List<MessageSendCacheBO> messageCaches = new ArrayList<MessageSendCacheBO>();
 			List<Long> consumeIds = new ArrayList<Long>();
 			
@@ -325,7 +366,6 @@ public class CommandMeetingSpeakServiceImpl {
 			message.put("businessType", "speakApplyAgree");
 			message.put("businessInfo", group.getName() + "主席同意发言，您已开始发言");
 			message.put("businessId", group.getId());
-			List<CommandGroupMemberPO> members = group.getMembers();
 			CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
@@ -334,7 +374,7 @@ public class CommandMeetingSpeakServiceImpl {
 					//校验是否已经进会，防止此时有成员退出
 					if(!member.getMemberStatus().equals(MemberStatus.CONNECT)){
 						throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经退出");
-					}					
+					}
 					
 					if(member.getCooperateStatus().equals(MemberStatus.DISCONNECT)){
 						member.setCooperateStatus(MemberStatus.CONNECT);
@@ -392,6 +432,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @param userIds 被拒绝的用户
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void speakApplyDisagree(Long userId, Long groupId, List<Long> userIds) throws Exception{
 		UserVO user = userQuery.current();
 		
@@ -459,6 +500,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @param groupId
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void speakStopByMember(Long userId, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
 		
@@ -519,6 +561,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @param userIdArray
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void speakStopByChairman(Long userId, Long groupId, List<Long> userIdArray) throws Exception{
 		UserVO user = userQuery.current();
 		
@@ -554,11 +597,7 @@ public class CommandMeetingSpeakServiceImpl {
 						member.setCooperateStatus(MemberStatus.DISCONNECT);
 						speakMembers.add(member);
 					}else{
-//						if(groupType.equals(GroupType.BASIC)){
-//							throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 已经被授权协同会议");
-//						}else if(groupType.equals(GroupType.MEETING)){
-//							throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 正在发言");
-//						}
+						//该成员没有发言，不处理
 					}
 				}
 			}
@@ -591,6 +630,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @param groupId
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void discussStart(Long userId, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
 		
@@ -602,8 +642,11 @@ public class CommandMeetingSpeakServiceImpl {
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			if(GroupSpeakType.DISCUSS.equals(group.getSpeakType())){
+				log.info(group.getName() + " 会议已经在讨论模式，本次“开始讨论”操作不处理，操作直接返回");
+				return;
+			}
 			group.setSpeakType(GroupSpeakType.DISCUSS);
-			group.setDiscussMode(true);
 			GroupType groupType = group.getType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
@@ -617,7 +660,7 @@ public class CommandMeetingSpeakServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行讨论");
 			}
 						
-			//发言人，入会的，且没在发言的都进行发言
+			//发言人：入会的，且没在发言的都进行发言
 			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
@@ -629,6 +672,10 @@ public class CommandMeetingSpeakServiceImpl {
 						&& member.getCooperateStatus().equals(MemberStatus.DISCONNECT)){
 					member.setCooperateStatus(MemberStatus.CONNECT);
 					speakMembers.add(member);
+				}
+				//讨论则把成员的发言状态都置为DISCONNECT
+				if(member.getCooperateStatus().equals(MemberStatus.CONNECT)){
+					member.setCooperateStatus(MemberStatus.DISCONNECT);
 				}
 			}
 			
@@ -656,6 +703,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * @param groupId
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void discussStop(Long userId, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
 		
@@ -667,8 +715,11 @@ public class CommandMeetingSpeakServiceImpl {
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			if(!GroupSpeakType.DISCUSS.equals(group.getSpeakType())){
+				log.info(group.getName() + " 会议已经在主席模式，本次“停止讨论”操作不处理，操作直接返回");
+				return;
+			}
 			group.setSpeakType(GroupSpeakType.CHAIRMAN);
-			group.setDiscussMode(false);
 			GroupType groupType = group.getType();
 			
 			if(group.getStatus().equals(GroupStatus.STOP)){
@@ -679,12 +730,14 @@ public class CommandMeetingSpeakServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行讨论");
 			}
 						
-			//发言人，在发言的都停止
+			//发言人：除主席外，所有进会的成员都是发言人
 			List<CommandGroupMemberPO> members = group.getMembers();
 			List<CommandGroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			for(CommandGroupMemberPO member : members){
-				if(member.getCooperateStatus().equals(MemberStatus.CONNECT)){
-					member.setCooperateStatus(MemberStatus.DISCONNECT);
+				if(member.isAdministrator()) continue;
+				if(member.getMemberStatus().equals(MemberStatus.CONNECT)){
+//				if(member.getCooperateStatus().equals(MemberStatus.CONNECT)){
+//					member.setCooperateStatus(MemberStatus.DISCONNECT);
 					speakMembers.add(member);
 				}
 			}
@@ -712,11 +765,11 @@ public class CommandMeetingSpeakServiceImpl {
 	 * <b>日期：</b>2020年3月26日 下午6:01:15
 	 * @param group
 	 * @param speakMembers 发言人列表，必须是已经进会、且新增的发言人，不能已经在发言
-	 * @param mode 0发言，1全员讨论
+	 * @param mode 目前仅用于显示信息：0发言，1全员讨论；2加入讨论，在新成员或者新进入成员使用
 	 * @return
 	 * @throws Exception
 	 */
-	private void speakStart(CommandGroupPO group, List<CommandGroupMemberPO> speakMembers, int mode) throws Exception{
+	public void speakStart(CommandGroupPO group, List<CommandGroupMemberPO> speakMembers, int mode) throws Exception{
 		//需要呼叫的播放器
 		List<CommandGroupUserPlayerPO> needPlayers = new ArrayList<CommandGroupUserPlayerPO>();
 		//需要下发的转发
@@ -747,6 +800,8 @@ public class CommandMeetingSpeakServiceImpl {
 			businessInfo = StringUtils.join(speakNameList.toArray(), "，") + " 开始发言";
 		}else if(mode == 1){
 			businessInfo = "开始全员讨论";
+		}else if(mode == 2){			
+			businessInfo = StringUtils.join(speakNameList.toArray(), "，") + " 加入讨论";
 		}
 		
 		CommandGroupAvtplGearsPO currentGear = commandCommonUtil.queryCurrentGear(group);
@@ -756,7 +811,7 @@ public class CommandMeetingSpeakServiceImpl {
 		for(CommandGroupMemberPO member : members){
 			
 			if(OriginType.OUTER.equals(member.getOriginType())){
-				continue;
+				continue;//TODO:不给OUTER成员建立转发，不太好
 			}
 			
 			if(member.isAdministrator()){
@@ -895,7 +950,7 @@ public class CommandMeetingSpeakServiceImpl {
 	 * <b>日期：</b>2020年3月27日 上午9:11:41
 	 * @param group
 	 * @param speakMembers 停止发言人列表，必须是已经在发言的人
-	 * @param mode 0发言，1全员讨论
+	 * @param mode 目前仅用于显示信息：0发言；1全员讨论
 	 * @throws Exception
 	 */
 	private void speakStop(CommandGroupPO group, List<CommandGroupMemberPO> speakMembers, int mode) throws Exception{
