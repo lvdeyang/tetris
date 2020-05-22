@@ -14,6 +14,10 @@
             <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleCreate}}</el-button>
             <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;{{i18n.handleDelete}}</el-button>
 
+			<div class="condition-item"><el-input v-model="table.condition.nickname" :placeholder="i18n.placeholderConditionNickname" clearable size="small"></el-input></div>
+			<div class="condition-item"><el-input v-model="table.condition.userno" :placeholder="i18n.placeholderConditionUserno" clearable size="small"></el-input></div>
+			<el-button type="primary" size="small" style="margin-left:10px;" @click="load(1)">{{i18n.load}}</el-button>
+
             <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
                 <el-scrollbar style="height:100%;">
                     <el-table
@@ -29,8 +33,12 @@
                                 prop="nickname">
                         </el-table-column>
                         <el-table-column
-                                :label="i18n.columnStatus"
-                                prop="status">
+                                :label="i18n.columnUsername"
+                                prop="username">
+                        </el-table-column>
+                        <el-table-column
+                                :label="i18n.columnUserno"
+                                prop="userno">
                         </el-table-column>
                         <el-table-column
                                 :label="i18n.columnMobile"
