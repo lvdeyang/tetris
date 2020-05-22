@@ -81,6 +81,31 @@ public class CapacityService {
 	}
 	
 	/**
+	 * 添加流转码输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午12:00:06
+	 * @param Long task_id 任务id
+	 * @param Integer system_type 系统类型
+	 * @param String output_array 输出数组
+	 */
+	public void addTranscodeOutput(Long task_id, Integer system_type, String output_array) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.addTranscodeOutput(task_id, system_type, output_array), null);
+	}
+	
+	/**
+	 * 删除流转码输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午1:39:04
+	 * @param Long task_id 任务id
+	 * @param Long output_id 输出id
+	 */
+	public void deleteTranscodeOutput(Long task_id, Long output_id) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.deleteTranscodeOutput(task_id, output_id), null);
+	}
+	
+	/**
 	 * 刷源<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>

@@ -52,6 +52,33 @@ public interface CapacityFeign {
 	public JSONObject deleteTranscode(@RequestParam("task") String task) throws Exception;
 	
 	/**
+	 * 添加流转码输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 上午11:53:32
+	 * @param Long task_id 任务id
+	 * @param Integer system_type 系统类型
+	 * @param String output_array 输出数组
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/add/output")
+	public JSONObject addTranscodeOutput(@RequestParam("taskId") Long taskId,
+										 @RequestParam("systemType") Integer systemType,
+										 @RequestParam("output") String output) throws Exception;
+	
+	/**
+	 * 删除流转码任务输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午1:36:46
+	 * @param Long taskId 任务id
+	 * @param Long outputId 输出id
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/delete/output")
+	public JSONObject deleteTranscodeOutput(@RequestParam("taskId") Long taskId,
+											@RequestParam("outputId") Long outputId) throws Exception;
+
+	
+	/**
 	 * 重启流转码<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
