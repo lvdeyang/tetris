@@ -1,3 +1,6 @@
 .el-button.el-button--text.danger{color:#f56c6c;}
 .el-button.el-button--text.danger:hover{color:#f78989;}
 .el-button.el-button--text.danger:active{color:#dd6161;}
+
+#page-user-wrapper .condition-item{display:inline-block; width:190px; margin-left:10px;}
+#page-user-wrapper .condition-item input{height:33px; line-height:33px;}
