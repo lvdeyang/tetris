@@ -130,6 +130,7 @@ define([
                 },
                 //指挥组
                 group: {
+                	tree:[],
                     currentId: '',
                     current: '',
                     isChairman: '',
@@ -138,6 +139,7 @@ define([
                 },
                 //会议组
                 meet: {
+                	tree:[],
                     currentId: '', //当前会议的id
                     current: '',
                     entered: [],
@@ -457,6 +459,7 @@ define([
                 var self = this;
                 self.command.data.splice(0, self.command.data.length);
                 ajax.post('/command/query/list', {type: type}, function (data) {
+                	self.command.data.splice(0, self.command.data.length);
                     if (data && data.length > 0) {
                         var commands = data[0].children;
                         if (commands && commands.length > 0) {
@@ -1461,10 +1464,20 @@ define([
                                 });
                                 //去掉根目录那层
                                 if (self.differentiate === 1) {
-                                    self.group.tree = tree;
+                                    //self.group.tree = tree;
+                                	self.group.tree.splice(0, self.group.tree.length);
+                                    for(var i=0; i<tree.length; i++){
+                                    	tree[i].checked = false;
+                                    	self.group.tree.push(tree[i]);
+                                    }
                                     self.group.current = data;
                                 } else {
-                                    self.meet.tree = tree;
+                                    //self.meet.tree = tree;
+                                	self.meet.tree.splice(0, self.meet.tree.length);
+                                    for(var i=0; i<tree.length; i++){
+                                    	tree[i].checked = false;
+                                    	self.meet.tree.push(tree[i]);
+                                    }
                                     self.meet.current = data;
                                 }
                                 if (self.user.id == data.creator) {

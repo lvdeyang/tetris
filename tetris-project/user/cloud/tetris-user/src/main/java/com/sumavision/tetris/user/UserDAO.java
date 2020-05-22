@@ -65,6 +65,41 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	public int countWithExcept(Collection<Long> except);
 	
 	/**
+	 * 根据及条件分页查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午10:54:40
+	 * @param String nicknameExpression 昵称表达式
+	 * @param String usernoExpression 用户号码表达式
+	 * @param Page<UserPO> page 分页信息
+	 * @return Page<UserPO> 用户列表
+	 */
+	@Query(value = "SELECT user.* from tetris_user user WHERE 1 "
+					+"AND IF(?1 IS NULL OR ?1='', TRUE, NICKNAME like ?1) "
+					+"AND IF(?2 IS NULL OR ?2='', TRUE, USERNO like ?2) "
+					+ "\n#pageable\n",
+			countQuery = "SELECT count(user.id) from tetris_user user WHERE 1 "
+					+"AND IF(?1 IS NULL OR ?1='', TRUE, NICKNAME like ?1) "
+					+"AND IF(?2 IS NULL OR ?2='', TRUE, USERNO like ?2) ",
+			nativeQuery = true)
+	public Page<UserPO> findByCondition(String nicknameExpression, String usernoExpression, Pageable page);
+	
+	/**
+	 * 根据条件统计用户数量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午10:57:51
+	 * @param String nicknameExpression 昵称表达式
+	 * @param String usernoExpression 用户号码表达式
+	 * @return int 用户数量
+	 */
+	@Query(value = "SELECT count(user.id) from tetris_user user WHERE 1 "
+					+"AND IF(?1 IS NULL OR ?1='', TRUE, NICKNAME like ?1) "
+					+"AND IF(?2 IS NULL OR ?2='', TRUE, USERNO like ?2) ",
+			nativeQuery = true)
+	public int countByCondition(String nicknameExpression, String usernoExpression);
+	
+	/**
 	 * 获取公司内的用户（带例外）<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -116,8 +151,8 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月13日 上午10:54:40
 	 * @param Long companyId 公司id
-	 * @param String nickname 昵称
-	 * @param String userno 用户号码
+	 * @param String nicknameExpression 昵称表达式
+	 * @param String usernoExpression 用户号码表达式
 	 * @param Page<UserPO> page 分页信息
 	 * @return Page<UserPO> 用户列表
 	 */
@@ -137,8 +172,8 @@ public interface UserDAO extends BaseDAO<UserPO>{
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年4月13日 上午10:57:51
 	 * @param Long companyId 公司id
-	 * @param String nickname 昵称
-	 * @param String userno 用户号码
+	 * @param String nicknameExpression 昵称表达式
+	 * @param String usernoExpression 用户号码表达式
 	 * @return int 用户数量
 	 */
 	@Query(value = "SELECT count(DISTINCT user.id) from tetris_user user LEFT JOIN tetris_company_user_permission permission ON user.id=permission.user_id WHERE permission.company_id=?1 "
