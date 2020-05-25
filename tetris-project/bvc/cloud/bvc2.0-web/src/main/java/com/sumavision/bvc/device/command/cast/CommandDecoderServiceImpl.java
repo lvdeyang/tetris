@@ -454,6 +454,9 @@ public class CommandDecoderServiceImpl {
 		
 		//对bundleIds做去空、去重处理
 		
+		//这里不需要鉴权，因为上屏表示已经有权限观看，而且上屏的内容本身并不一定是点播
+//		commandCommonServiceImpl.authorizeUser(vodUser.getId(), user.getId(), BUSINESS_OPR_TYPE.DIANBO);
+		
 		FolderUserMap vodUserfolderUserMap = folderUserMapDao.findByUserId(vodUser.getId());
 		boolean bVodUserLdap = queryUtil.isLdapUser(user, vodUserfolderUserMap);
 		
@@ -567,6 +570,7 @@ public class CommandDecoderServiceImpl {
 	 */
 	public List<CommandVodPO> deviceStart(UserBO user, List<String> bundleIds, String bundleId) throws Exception{
 		
+		//这里不需要鉴权，因为上屏表示已经有权限观看，而且上屏的内容本身并不一定是点播
 //		commandCommonServiceImpl.authorizeBundle(bundleId, user.getId(), BUSINESS_OPR_TYPE.DIANBO);
 		
 		//参数模板

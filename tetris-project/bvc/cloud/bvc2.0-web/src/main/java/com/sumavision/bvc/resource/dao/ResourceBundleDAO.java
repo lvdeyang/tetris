@@ -22,11 +22,14 @@ import com.suma.venus.resource.pojo.WorkNodePO.NodeType;
 import com.sumavision.bvc.resource.dto.BundleOnlineStatusDTO;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @ClassName: 资源层bundle查询对象<br/> 
  * @author lvdeyang
  * @date 2018年8月25日 下午6:15:37 
  */
+@Slf4j
 @Repository
 public class ResourceBundleDAO{
 
@@ -45,7 +48,7 @@ public class ResourceBundleDAO{
 	public List<BundlePO> findAll(Collection<Long> ids){
 		if(ids==null || ids.size()<=0) return null;
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		List<BundlePO> bundles = gainResultList("from BundlePO where id in ?1", BundlePO.class, ids, null, null, null);
 		return bundles;
 	}
@@ -58,7 +61,7 @@ public class ResourceBundleDAO{
 	public List<BundlePO> findByBundleIds(Collection<String> bundleIds){
 		if(bundleIds==null || bundleIds.size()<=0) return null;
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		List<BundlePO> bundles = gainResultList("from BundlePO where bundleId in ?1", BundlePO.class, bundleIds, null, null, null);
 		return bundles;
 	}
@@ -71,7 +74,7 @@ public class ResourceBundleDAO{
 	public List<BundlePO> findByUserId(Long userId){
 		if(userId == null) return null;
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		List<BundlePO> bundles = gainResultList("from BundlePO where userId = ?1", BundlePO.class, userId, null, null, null);
 		return bundles;
 	}
@@ -85,7 +88,7 @@ public class ResourceBundleDAO{
 	public List<BundlePO> findByUserIdAndDeviceModel(Long userId, String deviceModel){
 		if(userId == null) return null;
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		List<BundlePO> bundles = gainResultList("from BundlePO where userId = ?1 and deviceModel = ?2", BundlePO.class, userId, deviceModel, null, null);
 		return bundles;
 	}
@@ -100,7 +103,7 @@ public class ResourceBundleDAO{
 	 */
 	public BundlePO findByUsername(String username){
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		List<BundlePO> bundles = gainResultList("from BundlePO where username = ?1", BundlePO.class, username, null, null, null);
 		if(bundles==null || bundles.size()<=0) return null;
 		return bundles.get(0);
@@ -114,7 +117,7 @@ public class ResourceBundleDAO{
 	public List<BundlePO> findByBundleIdsAndFolderId(Collection<String> bundleIds, Long folderId){
 		if(bundleIds==null || bundleIds.size()<=0) return null;
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		List<BundlePO> bundles = gainResultList("from BundlePO where bundleId in ?1 and folderId=?2", BundlePO.class, bundleIds, folderId, null, null);
 		return bundles;
 	}
@@ -127,7 +130,7 @@ public class ResourceBundleDAO{
 	public List<BundlePO> findJv230ByBundelIds(Collection<String> bundleIds){
 		if(bundleIds==null || bundleIds.size()<=0) return null;
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		List<BundlePO> bundles = gainResultList("from BundlePO where bundleId in ?1 and deviceModel='jv230'", BundlePO.class, bundleIds, null, null, null);
 		return bundles;
 	}
@@ -141,7 +144,7 @@ public class ResourceBundleDAO{
 	public List<BundlePO> findFolderBundles(Long folderId) {
 		if(folderId==0) return null;
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		String sqlString = "select bundle from BundlePO bundle where bundle.folderId=?1 and (bundle.bundleType='tvos' or bundle.bundleType='mobile' or bundle.bundleType='ipc')";
 		List<BundlePO> bundles = gainResultList(sqlString, BundlePO.class, folderId, null, null, null);
 		return bundles;
@@ -154,7 +157,7 @@ public class ResourceBundleDAO{
 	public List<BundleOnlineStatusDTO> findBundleOnlineStatusByBundleIds_old(Collection<String> bundleIds){
 		if(bundleIds==null || bundleIds.size()<=0) return null;
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		
 		StringBufferWrapper sqlBuffer = new StringBufferWrapper().append("select new com.sumavision.bvc.resource.dto.BundleOnlineStatusDTO(")
 																 .append("bundle.bundleId, ")
@@ -173,7 +176,7 @@ public class ResourceBundleDAO{
 	public List<BundleOnlineStatusDTO> findBundleOnlineStatusByBundleIds(Collection<String> bundleIds){
 		if(bundleIds==null || bundleIds.size()<=0) return null;
 		//TODO：清空hibernate一级缓存，暂时先这样写
-		resourceEntityManager.clear();
+		clearResourceEntityManager();
 		
 		//把bundleid拼接成(aaa,bbb)的字符串
 		StringBufferWrapper bundleidBuffer = new StringBufferWrapper().append("(");
@@ -258,6 +261,8 @@ public class ResourceBundleDAO{
 		try{
 			resultList = (List<T>) query.getResultList();
 		}catch (Exception e){
+			e.printStackTrace();
+			log.warn("query.getResultList()抛错，重设resourceEntityManager");
 			resultList = regainResultList(qlString, resultClass, param1, param2, param3, param4);
 		}
 		return resultList;
@@ -278,5 +283,15 @@ public class ResourceBundleDAO{
 		if(param4 != null) query.setParameter(4, param4);
 		List<T> resultList = (List<T>) query.getResultList();
 		return resultList;
+	}
+	
+	private void clearResourceEntityManager(){
+		try{
+			resourceEntityManager.clear();
+		}catch (Exception e){
+			e.printStackTrace();
+			log.warn("resourceEntityManager.clear()抛错，重设resourceEntityManager");
+			resourceEntityManager = emf.createEntityManager();
+		}
 	}
 }

@@ -1131,14 +1131,23 @@ public class CommandBasicServiceImpl {
 			}
 		}
 		
-		/*if(GroupType.BASIC.equals(groupType)){
-			Thread.sleep(300);//延时确保其它节点开会已完成
-			GroupBO groupBO = commandCascadeUtil.joinCommand(group, null, acceptMembers);//需要把主席去掉吗？
-			commandCascadeService.join(groupBO);
-		}else if(GroupType.MEETING.equals(groupType)){
-			Thread.sleep(300);//延时确保其它节点开会已完成
-			GroupBO groupBO = commandCascadeUtil.joinMeeting(group, null, acceptMembers);//需要把主席去掉吗？
-			conferenceCascadeService.join(groupBO);
+		/*boolean hasOuterMember = false;
+		for(CommandGroupMemberPO member : members){
+			if(OriginType.OUTER.equals(member.getOriginType())){
+				hasOuterMember = true;
+				break;
+			}
+		}
+		if(hasOuterMember){
+			if(GroupType.BASIC.equals(groupType)){
+				Thread.sleep(300);//延时确保其它节点开会已完成
+				GroupBO groupBO = commandCascadeUtil.joinCommand(group, null, acceptMembers);//需要把主席去掉吗？
+				commandCascadeService.join(groupBO);
+			}else if(GroupType.MEETING.equals(groupType)){
+				Thread.sleep(300);//延时确保其它节点开会已完成
+				GroupBO groupBO = commandCascadeUtil.joinMeeting(group, null, acceptMembers);//需要把主席去掉吗？
+				conferenceCascadeService.join(groupBO);
+			}
 		}*/
 		
 		result.put("splits", chairSplits);
