@@ -162,3 +162,20 @@ body {
 .el-picker-panel__icon-btn{
   color: #cecece;
 }
+
+/*时间面板 样式*/
+.el-time-panel{
+  background-color: #123869;
+}
+
+.el-time-spinner__item{
+  color: #b6c8ec;
+}
+
+.el-time-spinner__item.active:not(.disabled){
+  color: #fff;
+}
+
+.el-time-panel__btn{
+  color: #b4b9c1;
+}

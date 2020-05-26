@@ -25,13 +25,23 @@ define([
                 trueType: '',
                 serial: '', //播放器上的录制的屏幕序号
                 callbackId: '',  //录制成功后 qt要执行的方法
-                callbackParam: '' //录制成功后，qt执行方法要传的参数
+                callbackParam: '', //录制成功后，qt执行方法要传的参数
+                pickerBeginDateBefore: {
+                    disabledDate: function (time) {
+                        //如果当天可选，就不用减8.64e7
+                        return time.getTime() < Date.now() - 8.64e7;
+                    }
+                }
             }
         },
         methods: {
             //提交
             submit: function () {
                 var self = this;
+                if(!self.inputName){
+                    self.qt.warning('名称不能为空！');
+                    return;
+                }
                 if (self.category === 'USER') {
                     ajax.post('/monitor/record/add/record/user/task', {
                         targetUserId: self.recordId,
@@ -40,6 +50,10 @@ define([
                         startTime: self.format(this.date[0]),
                         endTime: self.format(this.date[1])
                     }, function () {
+                        if(self.format(self.date[0]) < new Date(Date.now())){
+                            self.qt.warning('不能选当前时间之前的时间，请重新选择！');
+                            return;
+                        }
                         self.qt.success('添加录制任务成功!');
                         self.qt.destroy();
                     })
@@ -52,6 +66,10 @@ define([
                             endTime: self.format(this.date[1]),
                             bundleId: self.recordId
                         }, function () {
+                            if(self.format(self.date[0]) < new Date(Date.now())){
+                                self.qt.warning('不能选当前时间之前的时间，请重新选择！');
+                                return;
+                            }
                             self.qt.success('添加录制任务成功!!');
                             self.qt.destroy();
                         })
@@ -63,6 +81,10 @@ define([
                             endTime: self.format(this.date[1]),
                             bundleId: self.recordId
                         }, function () {
+                            if(self.format(self.date[0]) < new Date(Date.now())){
+                                self.qt.warning('不能选当前时间之前的时间，请重新选择！');
+                                return;
+                            }
                             self.qt.success('添加录制任务成功!!!');
                             self.qt.destroy();
                         })
@@ -77,6 +99,10 @@ define([
                     }, function (data, status) {
                         if (status != 200) {
                             self.qt.invoke(self.callbackId, self.callbackParam, false);
+                            return;
+                        }
+                        if(self.format(self.date[0]) < new Date(Date.now())){
+                            self.qt.warning('不能选当前时间之前的时间，请重新选择！');
                             return;
                         }
                         self.qt.invoke(self.callbackId, self.callbackParam, true);
@@ -111,7 +137,6 @@ define([
             var self = this;
             self.qt = new QtContext('addRecord', function () {
                 var params = self.qt.getWindowParams();
-                console.log(params)
                 self.recordId = params.paramId;
                 self.category = params.paramType;
                 self.trueType = params.realType;
