@@ -70,5 +70,14 @@ public class BackUpEsAndRawBO {
 		this.file = file;
 		return this;
 	}
+
+	public TriggerListBO getTrigger_list() {
+		return trigger_list;
+	}
+
+	public BackUpEsAndRawBO setTrigger_list(TriggerListBO trigger_list) {
+		this.trigger_list = trigger_list;
+		return this;
+	}
 	
 }
