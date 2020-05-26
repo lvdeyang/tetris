@@ -44,10 +44,11 @@ public class ApiServerCompressController {
 	@RequestMapping(value = "/parse")
 	public Object parse(
 			Long id,
+			String param,
 			HttpServletRequest request) throws Exception{
 		
 		MediaCompressPO mediaCompress = mediaCompressDao.findOne(id);
 		
-		return mediaCompressService.parse(mediaCompress.getUploadTmpPath());
+		return mediaCompressService.parse(mediaCompress.getUploadTmpPath(), param);
 	}
 }

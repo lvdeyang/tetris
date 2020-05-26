@@ -116,7 +116,8 @@ public class MultipartHttpServletRequestWrapper extends HttpServletRequestWrappe
         factory.setSizeThreshold(this.bufferSize); 
         factory.setRepository(repositroy);
         ServletFileUpload upload = new ServletFileUpload(factory);
-        upload.setSizeMax(this.maxSize); 
+        //upload.setSizeMax(this.maxSize); 
+        upload.setFileSizeMax(this.maxSize);
         
         //解析http请求
         List<FileItem> items = upload.parseRequest(this.nativeRequest);

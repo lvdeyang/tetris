@@ -143,7 +143,7 @@ public class MediaPictureQuery {
 	}
 	
 	/**
-	 * 加载所有的图片媒资<br/>
+	 * 加载所有的图片媒资--树形<br/>
 	 * <b>作者:</b>lzp<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年9月27日 上午9:48:20
@@ -160,6 +160,7 @@ public class MediaPictureQuery {
 		}
 		
 		List<Long> folderIds = new ArrayList<Long>();
+		folderIds.add(-1l);
 		for(FolderPO folderPO: folderTree){
 			folderIds.add(folderPO.getId());
 		}
@@ -175,6 +176,39 @@ public class MediaPictureQuery {
 		packMediaVideoTree(medias, folderTree, pictures);
 		
 		return id != null && id.length > 0 ? medias.get(0).getChildren() : medias;
+	}
+	
+	/**
+	 * 加载所有的图片媒资--表行<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月25日 下午6:22:10
+	 * @param id
+	 * @return List<MediaPictureVO> 
+	 */
+	public List<MediaPictureVO> loadAllList(Long ... id) throws Exception{
+		
+		//TODO 权限校验		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_PICTURE.toString());
+		if (id != null && id.length > 0 && id[0] != null) {
+			folderTree = folderQuery.findSubFolders(id[0]);
+			folderTree.add(folderDao.findOne(id[0]));
+		}
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		folderIds.add(-1l);
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		List<MediaPicturePO> pictures = mediaPictureDao.findByFolderIdIn(folderIds, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
+		
+		List<MediaPictureVO> vos = new ArrayList<MediaPictureVO>();
+		for(MediaPicturePO picture: pictures){
+			vos.add(new MediaPictureVO().set(picture));
+		}
+		
+		return vos;
 	}
 	
 	/**
