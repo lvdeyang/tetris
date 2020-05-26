@@ -1,5 +1,8 @@
 package com.sumavision.tetris.capacity.bo.task;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.annotation.JSONField;
+
 /**
  * 预处理参数<br/>
  * <b>作者:</b>wjw<br/>
@@ -30,6 +33,7 @@ public class PreProcessingBO {
 	private FuzzyBO fuzzy;
 	
 	/** HDR */
+	@JSONField(name = "SDRHDRConvert")
 	private HdrBO SDRHDRConvert;
 	
 	/** 图像增强 */

@@ -16,6 +16,9 @@ public class BackUpEsAndRawBO {
 	/** 选中索引 */
 	private String select_index;
 	
+	/** 触发列表 */
+	private TriggerListBO trigger_list;
+	
 	/** 备份节目数组 */
 	private List<BackUpProgramBO> program_array;
 	

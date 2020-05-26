@@ -264,6 +264,10 @@ public class HttpUtil {
         	HttpClient client = HttpClientBuilder.create().build();
             //发送get请求
             HttpGet request = new HttpGet(url);
+            request.setConfig(RequestConfig.custom().setConnectTimeout(10000)
+								                    .setConnectionRequestTimeout(10000)
+								                    .setSocketTimeout(30000)
+								                    .build());
             HttpResponse response = client.execute(request);
  
             /**请求发送成功，并得到响应**/
