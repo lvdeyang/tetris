@@ -13,7 +13,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 public class BroadAbilityRemotePO extends AbstractBasePO{
 
 	/**
-	 * 
+	 * 能力播发信息（channel频道--yjgb发布轮播推流补充信息）
 	 */
 	private static final long serialVersionUID = 1L;
 

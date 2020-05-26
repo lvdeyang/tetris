@@ -50,7 +50,9 @@ define([
                         total: 0
                     },
                     data: [],
-                    multipleSelection: []
+                    multipleSelection: [],
+                    videoSelection: [],
+                    audioSelection: []
                 },
                 options: {
                     level: [
@@ -114,6 +116,15 @@ define([
                         autoBroadStart: "",
                         level: '',
                         hasFile: true
+                    },
+                    defaultSchedule:{
+                        visible: false,
+                        loading: false,
+                        videoPid: "",
+                        audioPid: "",
+                        videoType: "",
+                        audioType: "",
+                        freq:""
                     },
                     setAutoBroad: {
                         visible: false,
@@ -195,6 +206,7 @@ define([
                             addSchedule: {
                                 visible: false,
                                 loading: false,
+                                mono: false,
                                 broadDate: "",
                                 endDate: '',
                                 remark: ""
@@ -203,6 +215,7 @@ define([
                                 visible: false,
                                 loading: false,
                                 data: {},
+                                mono: false,
                                 broadDate: "",
                                 endDate: '',
                                 remark: ""
@@ -570,6 +583,80 @@ define([
                     self.dialog.editChannel.autoBroadShuffle = false;
                     self.dialog.editChannel.autoBroadDuration = 1;
                     self.dialog.editChannel.autoBroadStart = "";
+                },
+                handleDefaultSchedule: function () {
+                    var self = this;
+
+                    ajax.get('/cs/channel/query/code', null, function(data){
+
+                        var videoOptions = [];
+                        var videoArr = data.videoType;
+                        if(videoArr && videoArr.length>0){
+                            for(var i=0; i<videoArr.length; i++){
+                                videoOptions.push({
+                                    label:videoArr[i],
+                                    value:videoArr[i]
+                                });
+                            }
+                        }
+
+                        var audioOptions = [];
+                        var audioArr = data.audioType;
+                        if(audioArr && audioArr.length>0){
+                            for(var i=0; i<audioArr.length; i++){
+                                audioOptions.push({
+                                    label:audioArr[i],
+                                    value:audioArr[i]
+                                });
+                            }
+                        }
+
+                        self.channel.videoSelection = videoOptions;
+                        self.channel.audioSelection = audioOptions;
+
+                    });
+
+                    self.dialog.defaultSchedule.visible = true;
+                },
+                handleDefaultScheduleCommit: function () {
+
+                    var self = this;
+
+                    var questData = {
+                        channelId: self.dialog.editSchedules.data.id,
+                        freq: self.dialog.defaultSchedule.freq,
+                        videoPid: self.dialog.defaultSchedule.videoPid,
+                        videoType: self.dialog.defaultSchedule.videoType,
+                        audioPid: self.dialog.defaultSchedule.audioPid,
+                        audioType: self.dialog.defaultSchedule.audioType
+                    };
+
+                    ajax.post('/cs/schedule/add/default', questData, function (data, status) {
+                        if (status != 200) return;
+                        self.$message({
+                            message: '保存成功',
+                            type: 'success'
+                        });
+
+                        self.dialog.editSchedules.data.freq = self.dialog.defaultSchedule.freq;
+                        self.dialog.editSchedules.data.videoPid = self.dialog.defaultSchedule.videoPid;
+                        self.dialog.editSchedules.data.videoType = self.dialog.defaultSchedule.videoType;
+                        self.dialog.editSchedules.data.audioPid = self.dialog.defaultSchedule.audioPid;
+                        self.dialog.editSchedules.data.audioType = self.dialog.defaultSchedule.audioType;
+
+                        self.handleEditChannelClose();
+                    }, null, ajax.NO_ERROR_CATCH_CODE);
+
+                    self.dialog.defaultSchedule.visible = false;
+                },
+                handleDefaultScheduleClose: function () {
+                    var self = this;
+                    self.dialog.defaultSchedule.visible = false;
+                    self.dialog.defaultSchedule.videoPid = "";
+                    self.dialog.defaultSchedule.videoType = "";
+                    self.dialog.defaultSchedule.audioPid = "";
+                    self.dialog.defaultSchedule.audioType = "";
+                    self.dialog.defaultSchedule.freq = "";
                 },
                 handleEditChannelLevelOptionsChange: function (data) {
                     var self = this;
@@ -1188,26 +1275,31 @@ define([
                     self.dialog.editSchedules.dialog.addSchedule.broadDate = '';
 					self.dialog.editSchedules.dialog.addSchedule.endDate = '';
                     self.dialog.editSchedules.dialog.addSchedule.remark = '';
+                    self.dialog.editSchedules.dialog.addSchedule.mono = false;
                 },
                 handleAddScheduleCommit: function() {
                     var self = this;
                     self.dialog.editSchedules.dialog.addSchedule.loading = true;
-                    if (self.dialog.editSchedules.data.hasFile != false) {
-						var check = self.checkScheduleTime(self.dialog.editSchedules.data.broadWay, self.dialog.editSchedules.dialog.addSchedule.broadDate, self.dialog.editSchedules.dialog.addSchedule.endDate);
-						if (check) {
-							self.$message({
-								message: check,
-								type: 'warning'
-							});
-							self.dialog.editSchedules.dialog.addSchedule.loading = false;
-							return;
-						}
-					}
+                    if (self.dialog.editSchedules.dialog.addSchedule.mono == false) {
+                        if (self.dialog.editSchedules.data.hasFile != false ) {
+                            var check = self.checkScheduleTime(self.dialog.editSchedules.data.broadWay, self.dialog.editSchedules.dialog.addSchedule.broadDate, self.dialog.editSchedules.dialog.addSchedule.endDate);
+                            if (check) {
+                                self.$message({
+                                    message: check,
+                                    type: 'warning'
+                                });
+                                self.dialog.editSchedules.dialog.addSchedule.loading = false;
+                                return;
+                            }
+                        }
+                    }
+
                     var questData = {
                         channelId: self.dialog.editSchedules.data.id,
                         broadDate: self.dialog.editSchedules.dialog.addSchedule.broadDate,
                         endDate: self.dialog.editSchedules.dialog.addSchedule.endDate,
-                        remark: self.dialog.editSchedules.dialog.addSchedule.remark
+                        remark: self.dialog.editSchedules.dialog.addSchedule.remark,
+                        mono: self.dialog.editSchedules.dialog.addSchedule.mono
                     };
                     ajax.post('/cs/schedule/add', questData, function(data, status){
                         if (status == 200){
@@ -1256,6 +1348,7 @@ define([
                     self.dialog.editSchedules.dialog.editSchedule.broadDate = row.broadDate;
 					self.dialog.editSchedules.dialog.editSchedule.endDate = row.endDate;
                     self.dialog.editSchedules.dialog.editSchedule.remark = row.remark;
+                    self.dialog.editSchedules.dialog.editSchedule.mono = row.default;
                     self.dialog.editSchedules.dialog.editSchedule.visible = true;
                 },
                 handleEditScheduleClose: function(){
@@ -1282,7 +1375,8 @@ define([
                         id: self.dialog.editSchedules.dialog.editSchedule.data.id,
                         broadDate: self.dialog.editSchedules.dialog.editSchedule.broadDate,
                         endDate: self.dialog.editSchedules.dialog.editSchedule.endDate,
-                        remark: self.dialog.editSchedules.dialog.editSchedule.remark
+                        remark: self.dialog.editSchedules.dialog.editSchedule.remark,
+                        mono: self.dialog.editSchedules.dialog.editSchedule.mono
                     };
                     ajax.post('/cs/schedule/edit', questData, function(data, status){
                         if (status == 200){

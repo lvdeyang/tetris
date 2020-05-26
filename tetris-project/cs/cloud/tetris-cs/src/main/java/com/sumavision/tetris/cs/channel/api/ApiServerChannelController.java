@@ -363,4 +363,21 @@ public class ApiServerChannelController {
 		
         return null;
 	}
+	
+	/**
+	 * 停止播发任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月14日 下午2:42:17
+	 * @param String uuid 播发任务uuid
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/broadcast/push/stop")
+	public Object broadcastStop(String uuid, HttpServletRequest request) throws Exception {
+		
+		channelService.stopBroadcastByUuid(uuid);
+		
+		return null;
+	}
 }

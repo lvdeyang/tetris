@@ -81,7 +81,12 @@
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="开始播发" placement="bottom"
                                                     v-if="!scope.row.autoBroad && scope.row.broadcastStatus=='未播发'||scope.row.broadcastStatus=='发送完成' || scope.row.broadcastStatus=='发送停止'">
-                                            <el-button type="text" icon="feather-icon-play-circle"
+                                            <el-button v-if="scope.row.channelUuid" type="text" icon="feather-icon-play-circle"
+                                                       disabled
+                                                       class="channelManage"
+                                                       @click="startBroadcast(scope)">
+                                            </el-button>
+                                            <el-button v-else type="text" icon="feather-icon-play-circle"
                                                        class="channelManage"
                                                        @click="startBroadcast(scope)">
                                             </el-button>
@@ -102,7 +107,12 @@
                                         </el-tooltip>
                                         <el-tooltip class="item" effect="dark" content="数据同步" placement="bottom"
                                                     v-if="scope.row.broadWay==broadWayTerminal">
-                                            <el-button type="text" icon="el-icon-printer"
+                                            <el-button v-if="scope.row.channelUuid" type="text" icon="el-icon-printer"
+                                                       disabled
+                                                       class="channelManage"
+                                                       @click="updateMenuToTerminal(scope)"></el-button>
+                                                       
+                                            <el-button v-else type="text" icon="el-icon-printer"
                                                        class="channelManage"
                                                        @click="updateMenuToTerminal(scope)"></el-button>
                                         </el-tooltip>
@@ -320,6 +330,55 @@
                 <el-button size="medium" @click="handleEditChannelClose">取 消</el-button>
                 <el-button size="medium" type="primary" @click="handleEditChannelCommit"
                            :loading="dialog.editChannel.loading">确 定
+                </el-button>
+            </span>
+        </el-dialog>
+
+        <el-dialog
+                title="默认排期"
+                :visible.sync="dialog.defaultSchedule.visible"
+                width="450px"
+                :before-close="handleDefaultScheduleClose">
+            <div style="height: 320px">
+
+                <el-scrollbar style="height:100%;">
+                    <el-form ref="form" label-width="120px" style="padding-right: 20px">
+                        <el-form-item label="频点">
+                            <el-input v-model="dialog.defaultSchedule.freq"></el-input>
+                        </el-form-item>
+                        <el-form-item label="视频pid">
+                            <el-input v-model="dialog.defaultSchedule.videoPid"></el-input>
+                        </el-form-item>
+                        <el-form-item label="视频类型">
+                            <el-select v-model="dialog.defaultSchedule.videoType" placeholder="请选择">
+                                <el-option
+                                        v-for="item in channel.videoSelection"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="音频pid">
+                            <el-input v-model="dialog.defaultSchedule.audioPid"></el-input>
+                        </el-form-item>
+                        <el-form-item label="音频类型">
+                            <el-select v-model="dialog.defaultSchedule.audioType" placeholder="请选择">
+                                <el-option
+                                        v-for="item in channel.audioSelection"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                    </el-form>
+                </el-scrollbar>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleDefaultScheduleClose">取 消</el-button>
+                <el-button size="medium" type="primary" @click="handleDefaultScheduleCommit"
+                           :loading="dialog.defaultSchedule.loading">确 定
                 </el-button>
             </span>
         </el-dialog>
@@ -660,6 +719,10 @@
                 <div style="height:250px;">
                     <el-scrollbar style="height:100%;">
                         <el-form ref="form" label-width="80px">
+
+                            <el-form-item label="默认排期" v-if="dialog.editSchedules.data.broadWay==broadWayTerminal">
+                                <el-switch v-model="dialog.editSchedules.dialog.addSchedule.mono"></el-switch>
+                            </el-form-item>
                             <el-form-item label="开始时间">
                                 <el-date-picker
                                         style="width:100%;"
@@ -669,7 +732,8 @@
                                         align="right"
                                         :picker-options="dialog.editSchedules.dialog.addSchedule.broadDate"
                                         value-format="yyyy-MM-dd HH:mm:ss"
-                                        :default-value="time">
+                                        :default-value="time"
+                                        :disabled = "dialog.editSchedules.dialog.addSchedule.mono">
                                 </el-date-picker>
                             </el-form-item>
                             <el-form-item v-if="dialog.editSchedules.data.broadWay==broadWayTerminal && dialog.editSchedules.data.hasFile != false" label="停止时间">
@@ -680,7 +744,8 @@
                                         placeholder="选择日期时间"
                                         align="right"
                                         :picker-options="dialog.editSchedules.dialog.addSchedule.endDate"
-                                        value-format="yyyy-MM-dd HH:mm:ss">
+                                        value-format="yyyy-MM-dd HH:mm:ss"
+                                        :disabled = "dialog.editSchedules.dialog.addSchedule.mono">
                                 </el-date-picker>
                             </el-form-item>
                             <el-form-item label="备注">
@@ -708,6 +773,9 @@
                 <div style="height:250px;">
                     <el-scrollbar style="height:100%;">
                         <el-form ref="form" label-width="80px">
+                            <el-form-item label="默认排期" v-if="dialog.editSchedules.data.broadWay==broadWayTerminal">
+                                <el-switch v-model="dialog.editSchedules.dialog.editSchedule.mono"></el-switch>
+                            </el-form-item>
                             <el-form-item label="开始时间">
                                 <el-date-picker
                                         style="width:100%;"
@@ -717,7 +785,8 @@
                                         align="right"
                                         :picker-options="dialog.editSchedules.dialog.editSchedule.broadDate"
                                         value-format="yyyy-MM-dd HH:mm:ss"
-                                        :default-value="time">
+                                        :default-value="time"
+                                        :disabled="dialog.editSchedules.dialog.editSchedule.mono">
                                 </el-date-picker>
                             </el-form-item>
                             <el-form-item v-if="dialog.editSchedules.data.broadWay == broadWayTerminal && dialog.editSchedules.data.hasFile != false" label="停止时间">
@@ -728,7 +797,8 @@
                                         placeholder="选择日期时间"
                                         align="right"
                                         :picker-options="dialog.editSchedules.dialog.editSchedule.endDate"
-                                        value-format="yyyy-MM-dd HH:mm:ss">
+                                        value-format="yyyy-MM-dd HH:mm:ss"
+                                        :disabled="dialog.editSchedules.dialog.editSchedule.mono">
                                 </el-date-picker>
                             </el-form-item>
                             <el-form-item label="备注">
@@ -754,6 +824,10 @@
                                :disabled="dialog.editSchedules.data.autoBroad || dialog.editSchedules.data.broadWay == broadWayTerminal && dialog.editSchedules.data.hasFile == false && dialog.editSchedules.table.data.length > 0">
                         <span class="icon-plus" style="margin-right:5px;"></span>
                         添加
+                    </el-button>
+                    <el-button v-if="false" size="small" type="primary" @click="handleDefaultSchedule()">
+                        <span class="icon-plus" style="margin-right:5px;"></span>
+                        添加默认排期
                     </el-button>
                     <el-button v-if="false" size="small" type="warning" @click="" :disabled="dialog.editSchedules.data.autoBroad">
                         <span class="icon-trash" style="margin-right:5px;"></span>

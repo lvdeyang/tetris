@@ -402,6 +402,7 @@ public class ChannelService {
 	 * <b>日期：</b>2019年11月27日 下午4:30:47
 	 * @param Long channelId 频道id
 	 */
+	@Deprecated
 	public void restartBroadcast(Long channelId) throws Exception {
 		ChannelPO channel = channelQuery.findByChannelId(channelId);
 		if (!ChannelBroadStatus.CHANNEL_BROAD_STATUS_STOPPED.getName().equals(channel.getBroadcastStatus()))
@@ -436,6 +437,21 @@ public class ChannelService {
 		if (channelBroadWay == BroadWay.TERMINAL_BROAD) {
 			broadTerminalService.updateToTerminal(channelId);
 		}
+	}
+	
+	/**
+	 * 根据channelUuid停止终端播发<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月14日 下午2:49:14
+	 * @param String uuid 终端播发channelUuid
+	 */
+	public void stopBroadcastByUuid(String uuid) throws Exception{
+		
+		ChannelPO channel = channelDao.findByChannelUuid(uuid);
+		if(channel == null) throw new Exception("该终端播发不存在！");
+		broadTerminalService.stopTerminalBroadcast(channel.getId());
+		
 	}
 	
 	/**
@@ -592,9 +608,23 @@ public class ChannelService {
 			String keywords,
 			List<JSONObject> contents,
 			List<String> regions,
+			PushVO push,
+			String channelUuid,
 			UserVO user) throws Exception {
+		
+		boolean hasFlie = true;
+		
+		if(push != null && push.getApid() != null && push.getVpid() != null && push.getFreq() != null){
+			hasFlie = false;
+		}
+		
 		//创建频道
-		ChannelPO channel = broadTerminalService.add(user, name, publishTime, remark, new SetTerminalBroadBO().setHasFile(true).setLevel(BroadTerminalLevelType.ESPECIALLY.getName()), ChannelType.LOCAL, false, false);
+		ChannelPO channel = broadTerminalService.add(user, name, publishTime, remark, new SetTerminalBroadBO().setHasFile(hasFlie).setLevel(BroadTerminalLevelType.fromLevel(Integer.valueOf(push.getSeverity())).getName()), ChannelType.LOCAL, false, false);
+		
+		// 临时save,不影响原处理流程
+		channel.setChannelUuid(channelUuid);
+		channelDao.save(channel);
+		
 		Long channelId = channel.getId();
 		
 		//创建目录结构
@@ -609,8 +639,26 @@ public class ChannelService {
 				audioUrlList.add(content.getString("value"));
 			}
 		}
-		if (!videoUrlList.isEmpty()) resourceList.addAll(mediaAVideoQuery.findByPreviewUrlIn(videoUrlList, "video"));
-		if (!audioUrlList.isEmpty()) resourceList.addAll(mediaAVideoQuery.findByPreviewUrlIn(audioUrlList, "audio"));
+		if (!videoUrlList.isEmpty()) {
+			List<MediaAVideoVO> videoList = mediaAVideoQuery.findByPreviewUrlIn(videoUrlList, "video");
+			if(videoList != null && videoList.size() > 0){
+				resourceList.add(videoList.get(0));
+			}
+		}
+		if (!audioUrlList.isEmpty()) {
+			List<MediaAVideoVO> audioList = mediaAVideoQuery.findByPreviewUrlIn(audioUrlList, "audio");
+			if(audioList != null && audioList.size() > 0){
+				resourceList.add(audioList.get(0));
+			}
+		}
+		if(push.getApid() != null && push.getVpid() != null && push.getFreq() != null){
+			MediaAVideoVO pushLive = new MediaAVideoVO().setName("yjgbPush")
+														.setFreq(push.getFreq())
+														.setVideoPid(push.getVpid())
+														.setAudioPid(push.getApid())
+														.setType("PUSH_LIVE");
+			resourceList.add(pushLive);
+		}
 		List<CsResourceVO> resourceVOs = csResourceService.addResources(resourceList, menu.getId(), channelId);
 		
 		//添加排期
@@ -635,7 +683,8 @@ public class ChannelService {
 		startBroadcast(channelId, null);
 		
 		//定时停止播发，3s预留给终端开始播发时下载tar包
-		if (duration != 3000l) {
+		//20200513共识--手动停止播发
+		/*if (duration != 3000l) {
 			if (timerMap.containsKey(channelId)) {
 				Timer timer = timerMap.get(channelId);
 				if (timer != null) {
@@ -654,7 +703,7 @@ public class ChannelService {
 					}
 				}
 			}, duration);
-		}
+		}*/
 	}
 	
 //	/**

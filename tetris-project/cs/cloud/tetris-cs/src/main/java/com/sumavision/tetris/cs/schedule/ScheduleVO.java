@@ -26,6 +26,8 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 	private String encryptKey;
 	
 	private ProgramVO program;
+	
+	private boolean isDefault;
 
 	public Long getChannelId() {
 		return channelId;
@@ -107,6 +109,15 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 		this.program = program;
 		return this;
 	}
+	
+	public boolean isDefault() {
+		return isDefault;
+	}
+
+	public ScheduleVO setDefault(boolean isDefault) {
+		this.isDefault = isDefault;
+		return this;
+	}
 
 	@Override
 	public ScheduleVO set(SchedulePO entity) throws Exception {
@@ -117,6 +128,7 @@ public class ScheduleVO extends AbstractBaseVO<ScheduleVO, SchedulePO>{
 		.setProgramId(entity.getProgramId())
 		.setBroadDate(entity.getBroadDate())
 		.setEndDate(entity.getEndDate())
+		.setDefault((entity.getBroadDate() != null && entity.getBroadDate().equals("default"))? true: false)
 		.setRemark(entity.getRemark())
 		.setProgram(new ProgramVO());
 		return this;
