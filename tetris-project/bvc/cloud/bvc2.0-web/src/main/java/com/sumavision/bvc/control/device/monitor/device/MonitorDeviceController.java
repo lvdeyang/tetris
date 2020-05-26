@@ -31,6 +31,7 @@ import com.sumavision.bvc.device.group.bo.ChannelBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
+import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -42,6 +43,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @Controller
 @RequestMapping(value = "/monitor/device")
 public class MonitorDeviceController {
+
+	@Autowired
+	private QueryUtil queryUtil;
 
 	@Autowired
 	private CommonQueryUtil commonQueryUtil;
@@ -121,9 +125,9 @@ public class MonitorDeviceController {
 			for(UserBO user:users){
 				if(user.getId().equals(userId)) continue;
 				String encoderId = commonQueryUtil.queryExternalOrLocalEncoderIdFromUserBO(user);
-				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
-				if(("ldap".equals(user.getCreater()) && userMap!=null && userMap.getDecodeBundleId()!=null) ||
-				   (!"ldap".equals(user.getCreater()) && userMap!=null && encoderId!=null && userMap.getDecodeBundleId()!=null)){
+//				EncoderDecoderUserMap userMap = commonQueryUtil.queryUserMapById(userMaps, user.getId());
+				if("ldap".equals(user.getCreater()) ||
+				   (!"ldap".equals(user.getCreater()) && encoderId!=null)){
 					filteredUsers.add(user);
 				}
 			}
@@ -200,7 +204,7 @@ public class MonitorDeviceController {
 	}
 	
 	/**
-	 * 查询用户绑定的播放器<br/>
+	 * 查询用户绑定的第17个播放器<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月4日 下午4:21:40
@@ -272,7 +276,7 @@ public class MonitorDeviceController {
 	
 	
 	/**
-	 * 查询用户播放器<br/>
+	 * 查询用户的16个播放器<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年4月27日 下午4:42:34

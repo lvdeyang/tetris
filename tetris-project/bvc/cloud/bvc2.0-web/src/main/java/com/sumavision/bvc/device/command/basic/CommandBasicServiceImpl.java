@@ -958,10 +958,6 @@ public class CommandBasicServiceImpl {
 		operationLogService.send(user.getNickname(), "删除指挥", user.getNickname() + "删除指挥groupIds:" + groupIds.toString());
 	}
 	
-	public Object start(Long groupId, int locationIndex) throws Exception{
-		return start(groupId, locationIndex, true, null, null, null);
-	}
-	
 	/**
 	 * 
 	 * 开启会议<br/>
@@ -973,7 +969,11 @@ public class CommandBasicServiceImpl {
 	 * @param locationIndex 指定播放器序号，序号从0起始；-1为自动选择。仅在专向会议中可以指定序号；普通会议中必须为-1。
 	 * @return result 主席的播放器信息
 	 * @throws Exception
-	 */
+	 */	
+	public Object start(Long groupId, int locationIndex) throws Exception{
+		return start(groupId, locationIndex, true, null, null, null);
+	}
+	
 	/**
 	 * 开启指挥/会议<br/>
 	 * <p>详细描述</p>
@@ -4118,9 +4118,9 @@ public class CommandBasicServiceImpl {
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
 			}
-			if(!group.getUserId().equals(userId)){
-				throw new BaseException(StatusCode.FORBIDDEN, "只有主席才能关闭成员");
-			}
+//			if(!group.getUserId().equals(userId)){
+//				throw new BaseException(StatusCode.FORBIDDEN, "只有主席才能关闭成员");
+//			}
 			
 			//找到转发，释放和关闭播放器
 			List<CommandGroupUserPlayerPO> needClosePlayers = new ArrayList<CommandGroupUserPlayerPO>();
@@ -4152,7 +4152,7 @@ public class CommandBasicServiceImpl {
 				return needClosePlayers.get(0);
 			}
 			
-			operationLogService.send(user.getNickname(), "主席停止观看成员", user.getNickname() + "主席停止观看成员groupId:" + groupId + ",userId:" + memberUserId);
+			operationLogService.send(user.getNickname(), dstMember.getUserName() + "停止观看", dstMember.getUserName() + "停止观看成员groupId:" + groupId + ",userId:" + memberUserId);
 			return null;
 		}
 	}

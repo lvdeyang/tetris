@@ -88,4 +88,27 @@ public class CommandSplitController {
 		
 		return null;
 	}
+	
+	/**
+	 * 清空所有的播放器及其业务<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月25日 上午11:49:44
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/clear/all/players")
+	public Object clearAllPlayers(
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		commandSplitServiceImpl.clearAllPlayers(userId);
+		
+		return null;
+	}
 }

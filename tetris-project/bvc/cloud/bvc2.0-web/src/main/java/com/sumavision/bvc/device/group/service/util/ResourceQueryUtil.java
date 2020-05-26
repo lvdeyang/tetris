@@ -348,23 +348,25 @@ public class ResourceQueryUtil {
 			return null;
 		}
 		for (BundlePO bundlePO : playerBundlePOs) {
-			// 过滤出第17个播放器
+			//过滤出第17个播放器
 			if (bundlePO.getUsername().endsWith("_17")) {
 				PlayerBundleBO playerBundle = generateByBundlePO(bundlePO);
-//				playerBundle.setBundleId(bundlePO.getBundleId());
-//				playerBundle.setBundleNum(bundlePO.getBundleNum());
-//				playerBundle.setBundleName(bundlePO.getBundleName());
-//				playerBundle.setUsername(bundlePO.getUsername());
-//				playerBundle.setPassword(bundlePO.getOnlinePassword());
-//				playerBundle.setBundleType(bundlePO.getBundleType());
-//				playerBundle.setChannelIds(channelSchemeDao.findChannelIdsByBundleId(bundlePO.getBundleId()));
-//				playerBundle.setAccessLayerId(bundlePO.getAccessNodeUid());
-//				WorkNodePO accessLayer = workNodeDao.findByNodeUid(bundlePO.getAccessNodeUid());
-//				if (null != accessLayer) {
-//					playerBundle.setAccessLayerIp(accessLayer.getIp());
-//					playerBundle.setAccessLayerPort(accessLayer.getPort());
-//				}
 				return playerBundle;
+			}
+		}
+		return null;
+	}
+	
+	/** 根据userId查询第17个播放器PO **/
+	public BundlePO querySpecifiedPlayerBundlePO(Long userId) {
+		List<BundlePO> playerBundlePOs = bundleDao.findByUserIdAndDeviceModel(userId, "player");
+		if (playerBundlePOs == null) {
+			return null;
+		}
+		for (BundlePO bundlePO : playerBundlePOs) {
+			//过滤出第17个播放器
+			if (bundlePO.getUsername().endsWith("_17")) {
+				return bundlePO;
 			}
 		}
 		return null;

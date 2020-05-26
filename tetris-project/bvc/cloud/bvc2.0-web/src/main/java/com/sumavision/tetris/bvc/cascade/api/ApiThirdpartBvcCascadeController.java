@@ -14,6 +14,7 @@ import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.service.ResourceRemoteService;
 import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.bvc.device.command.exception.UserDoesNotLoginException;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
 import com.sumavision.bvc.device.monitor.live.MonitorLiveCommons;
@@ -22,6 +23,7 @@ import com.sumavision.bvc.device.monitor.live.device.MonitorLiveDeviceService;
 import com.sumavision.bvc.device.monitor.live.user.MonitorLiveUserService;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.cascade.ProtocolParser;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -287,12 +289,42 @@ public class ApiThirdpartBvcCascadeController {
 						//开始xt点播本地用户
 						monitorLiveUserService.startXtSeeLocal(uuid, dstUser, srcUser.getId(), srcUser.getName(), srcUser.getUserNo());
 					}else if("call".equals(type)){
-						//开始xt用户呼叫本地用户
+						
+						//开始xt用户呼叫本地用户，根据登录的不同平台，调用不同的方法
+						/*if(dstUser.isLogined()){
+							//这个登录状态是qt客户端的
+							commandUserServiceImpl.userCallUser_Cascade(srcUser, dstUser, -1, uuid);
+						}else{
+							//检查网页是否登录
+							UserBO dstWebUser = userUtils.queryUserById(dstUser.getId(), TerminalType.PC_PLATFORM);
+							if(dstWebUser.isLogined()){
+								monitorLiveCallService.startXtCallLocal(uuid, dstUser, srcUser);
+							}else{
+								//拒绝
+								throw new UserDoesNotLoginException(calledUser.getName());
+							}
+						}*/
 //						monitorLiveCallService.startXtCallLocal(uuid, dstUser, srcUser);
 						commandUserServiceImpl.userCallUser_Cascade(srcUser, dstUser, -1, uuid);
+						
 					}else if("play-call".equals(type)){
-						//开始xt点播本地用户转xt呼叫本地用户
+						
+						//开始xt点播本地用户转xt呼叫本地用户，根据登录的不同平台，调用不同的方法
+						/*if(dstUser.isLogined()){
+							//这个登录状态是qt客户端的
+							commandUserServiceImpl.transOuterVodInnerToCall(uuid, dstUser, srcUser);
+						}else{
+							//检查网页是否登录
+							UserBO dstWebUser = userUtils.queryUserById(dstUser.getId(), TerminalType.PC_PLATFORM);
+							if(dstWebUser.isLogined()){
+								monitorLiveCallService.transXtCallLocal(uuid, dstUser, srcUser);
+							}else{
+								//拒绝
+								throw new UserDoesNotLoginException(calledUser.getName());
+							}
+						}*/
 						commandUserServiceImpl.transOuterVodInnerToCall(uuid, dstUser, srcUser);
+						
 					}
 				}else{
 					//开始点播设备

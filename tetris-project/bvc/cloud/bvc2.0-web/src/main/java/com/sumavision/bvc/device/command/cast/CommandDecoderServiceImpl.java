@@ -9,12 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.FolderUserMap;
 import com.suma.venus.resource.service.ResourceRemoteService;
+import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.dao.CommandGroupDecoderScreenDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.dao.CommandVodDAO;
@@ -45,6 +47,7 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.group.service.util.CommonQueryUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
+import com.sumavision.bvc.device.monitor.playback.exception.ResourceNotExistException;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.bvc.resource.dao.ResourceChannelDAO;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
@@ -100,6 +103,9 @@ public class CommandDecoderServiceImpl {
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
+	
+	@Autowired
+	private ResourceService resourceService;
 	
 	@Autowired
 	private ResourceRemoteService resourceRemoteService;
@@ -265,8 +271,96 @@ public class CommandDecoderServiceImpl {
 //		return null;
 		//下发字幕放在上层调用中了
 
-	}
+	}	
 	
+	/**
+	 * 拖拽树中的资源给解码器上屏<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月26日 上午10:28:24
+	 * @param userId 操作人
+	 * @param type 取值为 file/user/device
+	 * @param resourceId 资源id，可能是文件、设备、用户的id
+	 * @param bundleIds 解码器id列表
+	 * @return
+	 * @throws Exception
+	 */
+	public CommandGroupDecoderScreenPO fromResourceToScreen(Long userId, String type, String resourceId, Long screenId) throws Exception{
+		
+		CommandGroupDecoderScreenPO screen = commandGroupDecoderScreenDao.findOne(screenId);
+		if(screen == null){
+			throw new BaseException(StatusCode.FORBIDDEN, "没有找到分屏，id: " + screenId);
+		}
+		List<CommandGroupUserPlayerCastDevicePO> castDevices = screen.getCastDevices();
+		if(castDevices==null || castDevices.size()==0){
+			screen.setCastDevices(new ArrayList<CommandGroupUserPlayerCastDevicePO>());
+			castDevices = screen.getCastDevices();
+			throw new BaseException(StatusCode.FORBIDDEN, "该分屏没有绑定解码设备");
+		}
+		
+		List<String> bundleIds = new ArrayList<String>();
+		for(CommandGroupUserPlayerCastDevicePO castDevice : castDevices){
+			bundleIds.add(castDevice.getDstBundleId());
+		}
+		
+		log.info(type + "类型的资源被拖动上屏，id: " + resourceId + "，解码器bundleId个数：" + bundleIds.size());
+		
+		UserBO userBO = userUtils.queryUserById(userId);
+				
+		//各种已有任务都停止，但不挂断解码器.（编码器也不会被close，因为播放器在播放，计数大于1）
+		List<CommandVodPO> vods1 = commandVodDao.findByDstBundleIdIn(bundleIds);
+		stopVods(userBO, vods1, false);
+		
+		//文件上屏
+		if("file".equals(type)){
+			JSONObject file = resourceService.queryOnDemandResourceById(resourceId);
+			if(file == null) throw new ResourceNotExistException(resourceId);
+			
+			String resourceName = file.getString("name");
+			String previewUrl = file.getString("previewUrl");
+			
+			resourceVodStart(userBO, bundleIds, previewUrl, resourceName);
+			
+			screen.setSrcCode("");
+			screen.setSrcInfo(resourceName);
+			screen.setBusinessInfo(resourceName);
+			screen.setBusinessType(SrcType.FILE);
+			screen.setOsdId(null);
+			screen.setOsdName(null);
+			screen.setPlayUrl(previewUrl);
+		}
+		else if("user".equals(type)){
+			UserBO srcUser = userUtils.queryUserById(Long.parseLong(resourceId));
+			userStart(userBO, bundleIds, srcUser);
+			
+			screen.setSrcCode(srcUser.getUserNo());
+			screen.setSrcInfo(srcUser.getName());
+			screen.setBusinessInfo(srcUser.getName());
+			screen.setBusinessType(SrcType.USER);
+			screen.setOsdId(null);
+			screen.setOsdName(null);
+			screen.setPlayUrl(null);
+		}
+		else if("device".equals(type)){
+			deviceStart(userBO, bundleIds, resourceId);
+			
+			BundlePO bundle = bundleDao.findByBundleId(resourceId);
+			screen.setSrcCode(bundle.getUsername());
+			screen.setSrcInfo(bundle.getBundleName());
+			screen.setBusinessInfo(bundle.getBundleName());
+			screen.setBusinessType(SrcType.DEVICE);
+			screen.setOsdId(null);
+			screen.setOsdName(null);
+			screen.setPlayUrl(null);
+		}
+		
+		commandGroupDecoderScreenDao.save(screen);
+		return screen;
+		
+		//后续可能增加下发字幕
+	}
+
 	/**
 	 * 停止一个分屏的全部上屏<br/>
 	 * <p>详细描述</p>
