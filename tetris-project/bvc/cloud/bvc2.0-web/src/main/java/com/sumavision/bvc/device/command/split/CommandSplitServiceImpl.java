@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.suma.venus.resource.base.bo.UserBO;
+import com.sumavision.bvc.command.group.basic.CommandGroupPO;
+import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
@@ -14,12 +17,19 @@ import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlaye
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
 import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
+import com.sumavision.bvc.control.utils.UserUtils;
+import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
+import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl;
 import com.sumavision.bvc.device.command.bo.PlayerInfoBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.bvc.device.command.record.CommandRecordServiceImpl;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
+import com.sumavision.bvc.device.command.vod.CommandVodService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -31,21 +41,38 @@ import lombok.extern.slf4j.Slf4j;
 *
  */
 @Slf4j
-@Transactional(rollbackFor = Exception.class)
 @Service
 public class CommandSplitServiceImpl {
+	
+	@Autowired
+	private CommandGroupDAO commandGroupDao;
 	
 	@Autowired
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
 	
 	@Autowired
+	private CommandVodService commandVodService;
+	
+	@Autowired
 	private CommandUserServiceImpl commandUserServiceImpl;
+	
+	@Autowired
+	private CommandRecordServiceImpl commandRecordServiceImpl;
+	
+	@Autowired
+	private CommandBasicServiceImpl commandBasicServiceImpl;
+	
+	@Autowired
+	private CommandForwardServiceImpl commandForwardServiceImpl;
 	
 	@Autowired
 	private CommandCastServiceImpl commandCastServiceImpl;
 
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+
+	@Autowired
+	private UserUtils userUtils;
 	
 	/**
 	 * 切换分屏方案<br/>
@@ -58,6 +85,7 @@ public class CommandSplitServiceImpl {
 	 * @return
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public CommandGroupUserInfoPO changeLayoutScheme(Long userId, int split) throws Exception{
 		
 		synchronized (userId) {
@@ -145,6 +173,7 @@ public class CommandSplitServiceImpl {
 	 * @param newIndex
 	 * @throws Exception
 	 */
+	@Transactional(rollbackFor = Exception.class)
 	public void exchangeTwoSplit(Long userId, int oldIndex, int newIndex) throws Exception{
 
 		synchronized (userId) {
@@ -198,6 +227,76 @@ public class CommandSplitServiceImpl {
 			
 			commandGroupUserInfoDao.save(userInfo);
 			
+		}
+	}
+	
+	/**
+	 * 清空所有的播放器及其业务<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月25日 上午11:50:36
+	 * @param userId
+	 * @throws Exception
+	 */
+	public void clearAllPlayers(Long userId) throws Exception{
+		UserBO user = userUtils.queryUserById(userId);
+		UserBO admin = new UserBO(); admin.setId(-1L);
+		log.info(user + "一键清屏");
+		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+		//当前方案的所有播放器
+		List<CommandGroupUserPlayerPO> players = userInfo.obtainUsingSchemePlayers();
+		for(CommandGroupUserPlayerPO player : players){
+			String businessId = player.getBusinessId();
+			
+			switch(player.getPlayerBusinessType()){
+			case PLAY_COMMAND_RECORD:
+				commandRecordServiceImpl.stopPlayFragments(userId, new ArrayListWrapper<String>().add(businessId).getList());
+				break;
+			case PLAY_FILE:
+				commandVodService.resourceVodStop(user, businessId);
+				break;
+			case PLAY_USER:
+			case PLAY_USER_ONESELF:
+				commandVodService.userStop(user, Long.parseLong(businessId), admin);
+				break;
+			case PLAY_DEVICE:
+				commandVodService.deviceStop(user, Long.parseLong(businessId), admin);
+				break;
+			case PLAY_RECORD:
+				commandVodService.recordVodStop(user, player.getLocationIndex());
+				break;
+			case USER_CALL:
+				commandUserServiceImpl.stopCall_Cascade(user, Long.parseLong(businessId), null);
+				break;
+			case USER_VOICE:
+				commandUserServiceImpl.stopVoice(user, Long.parseLong(businessId), admin);
+				break;
+			case BASIC_COMMAND:
+				Long groupId = Long.parseLong(businessId);
+				CommandGroupPO group = commandGroupDao.findOne(groupId);
+				Long memberUserId = group.getUserId();//得到主席的userId
+				commandBasicServiceImpl.vodMemberStop(userId, groupId, memberUserId);
+				break;
+			case CHAIRMAN_BASIC_COMMAND:
+			case COOPERATE_COMMAND:
+			case SPEAK_MEETING:
+				Long groupId2 = Long.parseLong(businessId.split("-")[0]);
+				Long memberUserId2 = Long.parseLong(businessId.split("-")[1]);
+				commandBasicServiceImpl.vodMemberStop(userId, groupId2, memberUserId2);
+				break;
+			case SECRET_COMMAND:
+				commandBasicServiceImpl.stop(userId, Long.parseLong(businessId), 0);
+				break;
+			case COMMAND_FORWARD_DEVICE:
+			case COMMAND_FORWARD_FILE:
+			case COMMAND_FORWARD_USER:
+				Long demandId = Long.parseLong(businessId.split("-")[1]);
+				commandForwardServiceImpl.stopByMember(userId, new ArrayListWrapper<Long>().add(demandId).getList());
+				break;
+			default:
+				break;
+			}
 		}
 	}
 }

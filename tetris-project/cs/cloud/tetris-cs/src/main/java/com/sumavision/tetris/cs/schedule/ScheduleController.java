@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
@@ -27,6 +29,9 @@ public class ScheduleController {
 	@Autowired
 	private BroadTerminalBroadInfoService broadTerminalBroadInfoService;
 	
+	@Autowired
+	private ScheduleDAO scheduleDao;
+	
 	/**
 	 * 添加排期<br/>
 	 * <b>作者:</b>lzp<br/>
@@ -40,8 +45,16 @@ public class ScheduleController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add")
-	public Object add(Long channelId, String broadDate, String endDate, String remark, HttpServletRequest request) throws Exception{
+	public Object add(Long channelId, String broadDate, String endDate, String remark, boolean mono, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(mono){
+			broadDate = "default";
+			SchedulePO schedule = scheduleDao.findByBroadDate(broadDate);
+			if(schedule != null){
+				throw new BaseException(StatusCode.FORBIDDEN, "已存在默认排期");
+			}
+		}
 		
 		return scheduleService.add(channelId, broadDate, endDate, remark);
 	}
@@ -75,8 +88,17 @@ public class ScheduleController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/edit")
-	public Object edit(Long id, String broadDate, String endDate, String remark, HttpServletRequest request) throws Exception{
+	public Object edit(Long id, String broadDate, String endDate, String remark, boolean mono, HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
+		
+		if(mono){
+			broadDate = "default";
+			endDate = "";
+			SchedulePO schedule = scheduleDao.findByBroadDateAndIdNot(broadDate, id);
+			if(schedule != null){
+				throw new BaseException(StatusCode.FORBIDDEN, "已存在默认排期");
+			}
+		}
 		
 		return scheduleService.edit(id, broadDate, endDate, remark);
 	}

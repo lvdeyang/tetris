@@ -10,11 +10,13 @@ import java.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.httprequest.HttpRequestUtil;
+import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.cs.area.AreaQuery;
 import com.sumavision.tetris.cs.bak.AreaSendQuery;
@@ -258,6 +260,7 @@ public class BroadTerminalService {
 				scheduleBO.setScreens(programTextToBO(programVO));
 				scheduleBOs.add(scheduleBO);
 			}
+			
 			terminalScheduleBO.setSchedules(scheduleBOs);
 					
 			// 打包

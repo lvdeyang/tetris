@@ -48,6 +48,7 @@ import com.sumavision.tetris.capacity.bo.response.TaskEncodeResultResponse;
 import com.sumavision.tetris.capacity.bo.response.TaskRealIndexResponse;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.constant.UrlConstant;
+import com.sumavision.tetris.capacity.exception.HttpTimeoutException;
 import com.sumavision.tetris.capacity.util.http.HttpUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 
@@ -91,6 +92,8 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject res = HttpUtil.httpGet(url);
+		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		GetInputsResponse response = JSONObject.parseObject(res.toJSONString(), GetInputsResponse.class);
 		
@@ -139,9 +142,11 @@ public class CapacityService {
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(all, SerializerFeature.DisableCircularReferenceDetect));
 		
-		JSONObject resp = HttpUtil.httpPost(url, request);
+		JSONObject res = HttpUtil.httpPost(url, request);
 		
-		AllResponse response = JSONObject.parseObject(resp.toJSONString(), AllResponse.class);
+		if(res == null) throw new HttpTimeoutException(ip);
+		
+		AllResponse response = JSONObject.parseObject(res.toJSONString(), AllResponse.class);
 		
 		return response;
 		
@@ -228,9 +233,11 @@ public class CapacityService {
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input, SerializerFeature.DisableCircularReferenceDetect));
 		
-		JSONObject resp = HttpUtil.httpPost(url, request);
+		JSONObject res = HttpUtil.httpPost(url, request);
 		
-		CreateInputsResponse response = JSONObject.parseObject(resp.toJSONString(), CreateInputsResponse.class);
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		
+		CreateInputsResponse response = JSONObject.parseObject(res.toJSONString(), CreateInputsResponse.class);
 		
 		return response;
 		
@@ -317,6 +324,8 @@ public class CapacityService {
 		
 		JSONObject res = HttpUtil.httpPut(url, request);
 		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		
 		PutInputResponse response = JSONObject.parseObject(res.toJSONString(), PutInputResponse.class);
 		
 		return response;
@@ -365,6 +374,8 @@ public class CapacityService {
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(program, SerializerFeature.DisableCircularReferenceDetect));
 		
 		JSONObject res = HttpUtil.httpPost(url, request);
+		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		CreateProgramResponse response = JSONObject.parseObject(res.toJSONString(), CreateProgramResponse.class);
 		
@@ -474,9 +485,11 @@ public class CapacityService {
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(decode));
 		
-		JSONObject resp = HttpUtil.httpPatch(url, request);
+		JSONObject res = HttpUtil.httpPatch(url, request);
 		
-		PutInputResponse response = JSONObject.parseObject(resp.toJSONString(), PutInputResponse.class);
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		
+		PutInputResponse response = JSONObject.parseObject(res.toJSONString(), PutInputResponse.class);
 		
 		return response;
 		
@@ -522,6 +535,8 @@ public class CapacityService {
 
 		JSONObject res = HttpUtil.httpGet(url);
 		
+		if(res == null) throw new HttpTimeoutException(ip);
+		
 		AnalysisResponse response = JSONObject.parseObject(res.toJSONString(), AnalysisResponse.class);
 		
 		return response;
@@ -562,6 +577,8 @@ public class CapacityService {
 										      .toString();
 	
 		JSONObject res = HttpUtil.httpGet(url);
+		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		GetTaskResponse response = JSONObject.parseObject(res.toJSONString(), GetTaskResponse.class);
 		
@@ -607,6 +624,8 @@ public class CapacityService {
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(task, SerializerFeature.DisableCircularReferenceDetect));
 		
 		JSONObject res = HttpUtil.httpPost(url, request);
+		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		CreateTaskResponse response = JSONObject.parseObject(res.toJSONString(), CreateTaskResponse.class);
 		
@@ -692,6 +711,8 @@ public class CapacityService {
 		
 		JSONObject res = HttpUtil.httpPost(url, request);
 		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		
 		TaskEncodeResponse response = JSONObject.parseObject(res.toJSONString(), TaskEncodeResponse.class);
 		
 		return response;
@@ -738,6 +759,8 @@ public class CapacityService {
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(encode));
 		
 		JSONObject res = HttpUtil.httpDelete(url, request);
+		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		TaskEncodeResponse response = JSONObject.parseObject(res.toJSONString(), TaskEncodeResponse.class);
 		
@@ -791,6 +814,8 @@ public class CapacityService {
 		
 		JSONObject res = HttpUtil.httpPut(url, request);
 		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		
 		TaskEncodeResultResponse response = JSONObject.parseObject(res.toJSONString(), TaskEncodeResultResponse.class);
 		
 		return response;
@@ -840,6 +865,8 @@ public class CapacityService {
 		
 		JSONObject res = HttpUtil.httpPut(url, request);
 		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		
 		TaskBaseResponse response = JSONObject.parseObject(res.toJSONString(), TaskBaseResponse.class);
 		
 		return response;
@@ -888,6 +915,8 @@ public class CapacityService {
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(source));
 		
 		JSONObject res = HttpUtil.httpPut(url, request);
+		
+		if(res == null) throw new HttpTimeoutException(capacityIp);
 
 		TaskBaseResponse response = JSONObject.parseObject(res.toJSONString(), TaskBaseResponse.class);
 		
@@ -938,6 +967,8 @@ public class CapacityService {
 		
 		JSONObject res = HttpUtil.httpPut(url, request);
 		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		
 		TaskRealIndexResponse response = JSONObject.parseObject(res.toJSONString(), TaskRealIndexResponse.class);
 		
 		return response;
@@ -980,6 +1011,8 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject res = HttpUtil.httpGet(url);
+		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		GetOutputsResponse response = JSONObject.parseObject(res.toJSONString(), GetOutputsResponse.class);
 		
@@ -1029,6 +1062,8 @@ public class CapacityService {
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(output, SerializerFeature.DisableCircularReferenceDetect));
 
 		JSONObject res = HttpUtil.httpPost(url, request);
+		
+		if(res == null) throw new HttpTimeoutException(capacityIp);
 		
 		CreateOutputsResponse response = JSONObject.parseObject(res.toJSONString(), CreateOutputsResponse.class);
 		
@@ -1120,6 +1155,8 @@ public class CapacityService {
 		
 		JSONObject res = HttpUtil.httpGet(url);
 		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		
 		GetOutputResponse response = JSONObject.parseObject(res.toJSONString(), GetOutputResponse.class);
 		
 		return response;
@@ -1169,6 +1206,8 @@ public class CapacityService {
 		
 		JSONObject res = HttpUtil.httpPut(url, request);
 		
+		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
 		
 		return response;
@@ -1210,6 +1249,8 @@ public class CapacityService {
 											  .toString();
 		
 		JSONObject res = HttpUtil.httpGet(url);
+		
+		if(res == null) throw new HttpTimeoutException(capacityIp);
 		
 		GetEntiretiesResponse response = JSONObject.parseObject(res.toJSONString(), GetEntiretiesResponse.class);
 		
@@ -1316,6 +1357,8 @@ public class CapacityService {
 		
 		JSONObject res = HttpUtil.httpPost(url, post);
 		
+		if(res == null) throw new HttpTimeoutException(ip);
+		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
 		
 		return response;
@@ -1348,6 +1391,8 @@ public class CapacityService {
 		put.put("max_count", 100);
 		
 		JSONObject res = HttpUtil.httpPut(url, put);
+		
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
 		
@@ -1382,6 +1427,8 @@ public class CapacityService {
 		put.put("span_second", 10);
 		
 		JSONObject res = HttpUtil.httpPut(url, put);
+		
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
 		
@@ -1418,6 +1465,8 @@ public class CapacityService {
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(scheduleRequest));
 		
 		JSONObject res = HttpUtil.httpPut(url, request);
+		
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
 		

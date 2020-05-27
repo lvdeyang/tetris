@@ -39,6 +39,50 @@ public class CommandVodController {
 	private CommandVodService commandVodService;
 	
 	/**
+	 * 通用方法，指定播放器，播放各种类型的资源<br/>
+	 * <p>通常用于从资源树中拖拽到播放器进行点播</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月26日 上午9:35:20
+	 * @param type 取值为 file/user/device
+	 * @param id 资源id，可能是文件、设备、用户的id
+	 * @param serial 播放器序号
+	 * @param request
+	 * @return BusinessPlayerVO 播放器业务信息
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/start/from/player")
+	public Object startFromPlayer(
+			String type,
+			String id,
+			int serial,
+			HttpServletRequest request) throws Exception{
+			
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		synchronized (new StringBuffer().append(lockStartPrefix).append(userId).toString().intern()) {
+			UserBO user = userUtils.queryUserById(userId);
+			UserBO admin = new UserBO(); admin.setId(-1L);
+			CommandGroupUserPlayerPO player = null;
+			if("file".equals(type)){
+				player = commandVodService.resourceVodStart(user, id, serial);
+			}else if("user".equals(type)){
+				UserBO vodUser = userUtils.queryUserById(Long.parseLong(id));
+				player = commandVodService.userStart_Cascade(user, vodUser, admin, serial);
+			}else if("device".equals(type)){
+				player = commandVodService.deviceStart_Cascade(user, id, admin, serial);
+			}
+			
+			if(player == null) return null;
+			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			
+			return _player;
+		}
+	}
+
+	/**
 	 * 点播文件资源<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>

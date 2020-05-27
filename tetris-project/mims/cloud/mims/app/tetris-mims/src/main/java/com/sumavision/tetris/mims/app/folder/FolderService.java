@@ -280,12 +280,15 @@ public class FolderService {
 					List<UserSystemRolePermissionVO> permissionVOs = JSONArray.parseArray(JSONObject.toJSONString(obj), UserSystemRolePermissionVO.class);
 					if (!permissionVOs.isEmpty()) {
 						UserSystemRolePermissionVO userRole = permissionVOs.get(0);
-						FolderRolePermissionPO userPermission = new FolderRolePermissionPO();
-						userPermission.setFolderId(folder.getId());
-						userPermission.setRoleId(Long.valueOf(userRole.getRoleId()));
-						userPermission.setRoleName(userRole.getRoleName());
-						userPermission.setUpdateTime(new Date());
-						folderRolePermissionDao.save(userPermission);
+						//防止重复绑定
+						if(!userRole.getId().toString().equals(roleAdmin.getId())){
+							FolderRolePermissionPO userPermission = new FolderRolePermissionPO();
+							userPermission.setFolderId(folder.getId());
+							userPermission.setRoleId(Long.valueOf(userRole.getRoleId()));
+							userPermission.setRoleName(userRole.getRoleName());
+							userPermission.setUpdateTime(new Date());
+							folderRolePermissionDao.save(userPermission);
+						}
 					}
 				}
 			}

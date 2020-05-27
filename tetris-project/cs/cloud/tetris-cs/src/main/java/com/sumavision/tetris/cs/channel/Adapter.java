@@ -116,7 +116,7 @@ public class Adapter {
 				break;
 			}
 		}
-		if ((useTemplate == null && screenId == 1) || screenId == null) return oneScreen();
+		if (screenId == null || (useTemplate == null && screenId == 1)) return oneScreen();
 		return useTemplate;
 	}
 	

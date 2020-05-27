@@ -21,6 +21,7 @@ import com.sumavision.tetris.cs.channel.ChannelDAO;
 import com.sumavision.tetris.cs.channel.ChannelPO;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.ChannelType;
+import com.sumavision.tetris.cs.channel.PushVO;
 import com.sumavision.tetris.cs.channel.SetAutoBroadBO;
 import com.sumavision.tetris.cs.channel.SetOutputBO;
 import com.sumavision.tetris.cs.channel.SetTerminalBroadBO;
@@ -175,11 +176,14 @@ public class ApiProcessChannelController {
 			String keywords,
 			String content,
 			String region,
+			String push,	
+			String __processInstanceId__,
 			HttpServletRequest request) throws Exception{
 		UserVO user = userQuery.current();
 		List<JSONObject> contents = JSONArray.parseArray(content, JSONObject.class);
 		List<String> regions = JSONArray.parseArray(region, String.class);
-		channelService.generateWithInternalTemplate(name, author, publishTime, remark, keywords, contents, regions, user);
+		PushVO pushVO = JSONObject.parseObject(push, PushVO.class);
+		channelService.generateWithInternalTemplate(name, author, publishTime, remark, keywords, contents, regions, pushVO, __processInstanceId__, user);
 		return null;
 	}
 	

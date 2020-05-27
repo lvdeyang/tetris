@@ -62,4 +62,5 @@ public class BroadTerminalBroadInfoPO extends AbstractBasePO{
 	public void setEndDate(String endDate) {
 		this.endDate = endDate;
 	}
+
 }

@@ -13,6 +13,8 @@ public class MediaFileEquipmentPermissionBO {
 	private String storeUrl;
 	
 	private String fileName;
+	
+	private Long folderId;
 
 	public Long getMediaId() {
 		return mediaId;
@@ -50,31 +52,44 @@ public class MediaFileEquipmentPermissionBO {
 		return this;
 	}
 	
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public MediaFileEquipmentPermissionBO setFolderId(Long folderId) {
+		this.folderId = folderId;
+		return this;
+	}
+
 	public MediaFileEquipmentPermissionBO setFromVideoPO(MediaVideoPO media) throws Exception {
 		return this.setMediaId(media.getId())
 				.setMediaType("video")
 				.setStoreUrl(media.getUploadTmpPath())
-				.setFileName(media.getFileName());
+				.setFileName(media.getFileName())
+				.setFolderId(media.getFolderId());
 	}
 	
 	public MediaFileEquipmentPermissionBO setFromVideoVO(MediaVideoVO media) throws Exception {
 		return this.setMediaId(media.getId())
 				.setMediaType("video")
 				.setStoreUrl(media.getUploadTmpPath())
-				.setFileName(media.getFileName());
+				.setFileName(media.getFileName())
+				.setFolderId(media.getFolderId());
 	}
 	
 	public MediaFileEquipmentPermissionBO setFromPicturePO(MediaPicturePO media) throws Exception {
 		return this.setMediaId(media.getId())
-				.setMediaType("video")
+				.setMediaType("picture")
 				.setStoreUrl(media.getUploadTmpPath())
-				.setFileName(media.getFileName());
+				.setFileName(media.getFileName())
+				.setFolderId(media.getFolderId());
 	}
 	
 	public MediaFileEquipmentPermissionBO setFromPictureVO(MediaPictureVO media) throws Exception {
 		return this.setMediaId(media.getId())
-				.setMediaType("video")
+				.setMediaType("picture")
 				.setStoreUrl(media.getUploadTmpPath())
-				.setFileName(media.getFileName());
+				.setFileName(media.getFileName())
+				.setFolderId(media.getFolderId());
 	}
 }

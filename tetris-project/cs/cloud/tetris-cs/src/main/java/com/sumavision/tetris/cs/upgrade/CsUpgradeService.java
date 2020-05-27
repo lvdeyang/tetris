@@ -49,7 +49,7 @@ public class CsUpgradeService {
 				}
 				break;
 			case BROAD_DTMB:
-				requestJson.put("hasfile", 1);
+				requestJson.put("hasFile", 1);
 				requestJson.put("level", BroadTerminalLevelType.NORMAL.getLevel());
 				requestJson.put("id", DateUtil.format(new Date(), DateUtil.currentDateTimePattern));
 				requestJson.put("filePath", compress.getPreviewUrl());

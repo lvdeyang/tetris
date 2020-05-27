@@ -16,6 +16,9 @@ public class BackUpEsAndRawBO {
 	/** 选中索引 */
 	private String select_index;
 	
+	/** 触发列表 */
+	private TriggerListBO trigger_list;
+	
 	/** 备份节目数组 */
 	private List<BackUpProgramBO> program_array;
 	
@@ -65,6 +68,15 @@ public class BackUpEsAndRawBO {
 
 	public BackUpEsAndRawBO setFile(BackUpFileBO file) {
 		this.file = file;
+		return this;
+	}
+
+	public TriggerListBO getTrigger_list() {
+		return trigger_list;
+	}
+
+	public BackUpEsAndRawBO setTrigger_list(TriggerListBO trigger_list) {
+		this.trigger_list = trigger_list;
 		return this;
 	}
 	

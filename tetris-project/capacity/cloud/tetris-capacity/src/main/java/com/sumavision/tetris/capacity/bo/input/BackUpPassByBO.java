@@ -13,6 +13,9 @@ public class BackUpPassByBO {
 	/** 输入id */
 	private String input_id;
 	
+	/** 触发列表 */
+	private TriggerListBO trigger_list;
+	
 	/** 备份节目数组 */
 	private List<BackUpProgramBO> program_array;
 
@@ -40,6 +43,15 @@ public class BackUpPassByBO {
 
 	public BackUpPassByBO setInput_id(String input_id) {
 		this.input_id = input_id;
+		return this;
+	}
+
+	public TriggerListBO getTrigger_list() {
+		return trigger_list;
+	}
+
+	public BackUpPassByBO setTrigger_list(TriggerListBO trigger_list) {
+		this.trigger_list = trigger_list;
 		return this;
 	}
 

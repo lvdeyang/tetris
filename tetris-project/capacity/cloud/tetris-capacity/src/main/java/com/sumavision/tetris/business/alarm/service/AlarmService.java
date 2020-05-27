@@ -73,8 +73,12 @@ public class AlarmService {
 		
 		String alarmCode = alarm.getCodec();
 		
-		if("11070001".equals(alarmCode)){
-			syncService.sync(capacityIp);
+		try {
+			if("11070001".equals(alarmCode)){
+				syncService.sync(capacityIp);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		
 		String alarmObj = null;

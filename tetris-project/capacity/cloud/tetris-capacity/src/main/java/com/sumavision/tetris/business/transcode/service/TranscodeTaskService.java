@@ -22,18 +22,24 @@ import com.sumavision.tetris.business.common.po.TaskOutputPO;
 import com.sumavision.tetris.business.transcode.bo.CheckInputBO;
 import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
+import com.sumavision.tetris.business.yjgb.vo.OutParamVO;
 import com.sumavision.tetris.capacity.bo.input.BackUpProgramBO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.request.AllRequest;
+import com.sumavision.tetris.capacity.bo.request.CreateOutputsRequest;
+import com.sumavision.tetris.capacity.bo.request.DeleteOutputsRequest;
+import com.sumavision.tetris.capacity.bo.request.IdRequest;
 import com.sumavision.tetris.capacity.bo.request.PutTaskSourceRequest;
 import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
 import com.sumavision.tetris.capacity.bo.response.AnalysisResponse;
+import com.sumavision.tetris.capacity.bo.response.CreateOutputsResponse;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.enumeration.InputResponseEnum;
+import com.sumavision.tetris.capacity.management.CapacityType;
 import com.sumavision.tetris.capacity.service.CapacityService;
 import com.sumavision.tetris.capacity.service.ResponseService;
 import com.sumavision.tetris.capacity.util.http.HttpUtil;
@@ -1028,6 +1034,84 @@ public class TranscodeTaskService {
 					output = delete(taskId);
 				}
 			}
+			
+		}
+		
+	}
+	
+	/**
+	 * 添加输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 上午11:37:24
+	 * @param Long taskId 转码任务id
+	 * @param List<OutputBO> outputs 需要添加的输出
+	 */
+	public void addOutput(Long taskId, List<OutputBO> outputs) throws Exception{
+		
+		TaskOutputPO task = taskOutputDao.findByTaskUuidAndType(taskId.toString(), BusinessType.TRANSCODE);
+		
+		if(task == null){
+			throw new BaseException(StatusCode.ERROR, "任务不存在在！");
+		}
+		
+		CreateOutputsRequest outputsRequest = new CreateOutputsRequest();
+		outputsRequest.setOutput_array(new ArrayListWrapper<OutputBO>().addAll(outputs).getList());
+		//创建输出
+		CreateOutputsResponse outputResponse = capacityService.createOutputsAddMsgId(outputsRequest, task.getCapacityIp());
+		
+		//创建输出返回处理 -- 回滚
+		List<String> outputIds = responseService.outputResponseProcess(outputResponse, null, null, task.getCapacityIp());
+		
+		outputs.addAll(outputs);
+		
+		task.setOutput(JSON.toJSONString(outputs));
+		
+		taskOutputDao.save(task);
+		
+	}
+	
+	/**
+	 * 删除流转码输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午1:19:54
+	 * @param Long taskId 任务id
+	 * @param Long outputId 输出id
+	 */
+	public void deleteOutput(Long taskId, Long outputId) throws Exception{
+		
+		TaskOutputPO taskPO = taskOutputDao.findByTaskUuidAndType(taskId.toString(), BusinessType.TRANSCODE);
+		
+		if(taskPO == null){
+			throw new BaseException(StatusCode.ERROR, "任务不存在在！");
+		}
+		
+		List<OutputBO> outputs = JSONObject.parseArray(taskPO.getOutput(), OutputBO.class);
+		
+		List<OutputBO> needDeleteOutputs = new ArrayList<OutputBO>();
+		if(outputs != null && outputs.size() > 0){
+			for(OutputBO outputBO: outputs){
+				if(outputBO.getId().equals(outputId.toString())){
+					needDeleteOutputs.add(outputBO);
+				}
+			}
+		}
+		
+		if(needDeleteOutputs.size() > 0){
+			
+			outputs.removeAll(needDeleteOutputs);
+			
+			DeleteOutputsRequest delete = new DeleteOutputsRequest().setOutput_array(new ArrayList<IdRequest>());
+			for(OutputBO outputBO: needDeleteOutputs){
+				IdRequest idRequest = new IdRequest().setId(outputBO.getId());
+				delete.getOutput_array().add(idRequest);
+			}
+
+			capacityService.deleteOutputsAddMsgId(delete, taskPO.getCapacityIp());
+			
+			taskPO.setOutput(JSON.toJSONString(outputs));
+			taskOutputDao.save(taskPO);
 			
 		}
 		

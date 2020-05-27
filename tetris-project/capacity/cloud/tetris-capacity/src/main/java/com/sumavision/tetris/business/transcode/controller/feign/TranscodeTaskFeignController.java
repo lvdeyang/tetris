@@ -1,5 +1,7 @@
 package com.sumavision.tetris.business.transcode.controller.feign;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.business.common.service.SyncService;
 import com.sumavision.tetris.business.transcode.service.ExternalTaskService;
@@ -15,6 +18,7 @@ import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
 import com.sumavision.tetris.business.transcode.vo.TaskVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
+import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
@@ -213,6 +217,55 @@ public class TranscodeTaskFeignController {
 		}else if(taskVO.getSystem_type().equals(1)){
 			return externalTaskService.stopExternalTask(taskVO);
 		}
+		
+		return null;
+	}
+	
+	/**
+	 * 转码添加输出br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 上午11:42:33
+	 * @param Long taskId 任务id
+	 * @param Integer systemType 系统类型
+	 * @param String output 添加输出(数组)
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/add/output")
+	public Object addOutput(
+			Long taskId,
+			Integer systemType,
+			String output,
+			HttpServletRequest request) throws Exception{
+		
+		if(systemType == 0){
+			List<OutputBO> outputs = JSONArray.parseArray(output, OutputBO.class);
+			transcodeTaskService.addOutput(taskId, outputs);
+		}else{
+			//TODO
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * 删除流转码输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午1:34:04
+	 * @param Long taskId 任务id
+	 * @param Long outputId 输出id
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/delete/output")
+	public Object deleteOutput(
+			Long taskId,
+			Long outputId,
+			HttpServletRequest request) throws Exception{
+		
+		transcodeTaskService.deleteOutput(taskId, outputId);
 		
 		return null;
 	}

@@ -21,15 +21,18 @@ import com.sumavision.tetris.commons.util.binary.ByteUtil;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
+import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureItemType;
 import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionBO;
 import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
+import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoQuery;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoService;
@@ -123,11 +126,16 @@ public class MediaVideoFeignController {
 	@RequestMapping(value = "/load/collection")
 	public Object loadCollection(Long folderId, HttpServletRequest request) throws Exception{
 		MediaVideoVO folder = mediaVideoQuery.loadCollection(folderId);
+		folder.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setMediaId(folder.getId()).setMediaType("folder")));
 		if (folder != null) {
 			List<MediaVideoVO> children = folder.getChildren();
 			if (children != null) {
 				for (MediaVideoVO media : children) {
-					media.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setFromVideoVO(media)));
+					if(media.getType().equals(MediaVideoItemType.VIDEO.toString())){
+						media.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setFromVideoVO(media)));
+					}else if(media.getType().equals(MediaVideoItemType.FOLDER.toString())){
+						media.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setMediaId(media.getId()).setMediaType("folder")));
+					}
 				}
 			}
 		}
@@ -270,11 +278,22 @@ public class MediaVideoFeignController {
 		
 		UserVO user = userQuery.current();
 		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+		FolderPO folder = null;
+		
+		if(folderId == null){
+			List<FolderPO> folders = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
+			List<FolderPO> roots = folderQuery.findRoots(folders);
+			if(roots != null && roots.size() > 0){
+				folder = roots.get(0);
+			}
+		}else{
+			if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
+				throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+			}
+			
+			folder = folderDao.findOne(folderId);
 		}
 		
-		FolderPO folder = folderDao.findOne(folderId);
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -323,7 +342,7 @@ public class MediaVideoFeignController {
 			Long endOffset,
 			HttpServletRequest request) throws Exception{
 		
-		MultipartHttpServletRequestWrapper multipartRequest = new MultipartHttpServletRequestWrapper(request);
+		MultipartHttpServletRequestWrapper multipartRequest = new MultipartHttpServletRequestWrapper(request, size.longValue());
 		FileItem fileItem = multipartRequest.getFileItem("file");
 		
 		//参数错误
@@ -350,8 +369,7 @@ public class MediaVideoFeignController {
 		
 		//文件不是一个
 		if(!name.equals(task.getFileName()) 
-				|| lastModified!=task.getLastModified().longValue() 
-				|| size!=task.getSize() 
+				|| !lastModified.equals(task.getLastModified()) 
 				|| !type.equals(task.getMimetype())){
 			throw new MediaVideoCannotMatchException(uuid, name, lastModified, size, type, task.getFileName(), 
 											   task.getLastModified(), task.getSize(), task.getMimetype());
@@ -378,7 +396,7 @@ public class MediaVideoFeignController {
 			if(out != null) out.close();
 		}
 		
-		if(endOffset == size){
+		if(endOffset.equals(size)){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
 			
@@ -391,7 +409,6 @@ public class MediaVideoFeignController {
 			}else{
 				mediaVideoDAO.save(task);
 			}
-			mediaVideoService.checkMediaEdit(task);
 		}
 		
         return new MediaVideoVO().set(task);

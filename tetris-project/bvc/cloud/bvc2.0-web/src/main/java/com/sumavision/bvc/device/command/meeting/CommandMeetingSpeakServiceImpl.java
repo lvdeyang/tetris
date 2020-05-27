@@ -885,7 +885,7 @@ public class CommandMeetingSpeakServiceImpl {
 				if(usefulPlayersCount > 0){
 					CommandGroupUserPlayerPO player = players.get(players.size() - usefulPlayersCount);
 					
-					player.setBusinessId(group.getId().toString());//如果需要改成c2m_forward.getId()，那么需要先save获得id
+					player.setBusinessId(group.getId().toString() + "-" + speakMember.getUserId());//如果需要改成c2m_forward.getId()，那么需要先save获得id
 					if(groupType.equals(GroupType.BASIC)){
 						player.setBusinessName(group.getName() + "-" + speakMember.getUserName() + "协同会议");
 					}if(groupType.equals(GroupType.MEETING)){

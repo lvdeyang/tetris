@@ -141,6 +141,41 @@ public class CommandCascadeService {
 	}
 	
 	/**
+	 * 【私有协议】发送即时消息<br/>
+	 * <p>指挥和会议都用这个</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午2:11:46
+	 * @param String gid 组id
+	 * @param String op 操作用户号码
+	 * @param String subject 发送的消息内容
+	 * @param List<MinfoBO> mlist 成员列表
+	 */
+	public void sendInstantMessage(GroupBO group) throws Exception{
+		String fullName = generateFullName("sendMessage.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
+	
+	/**
+	 * 【私有协议】静默<br/>
+	 * <p>指挥、会议的对上对下、开始停止都用这个</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午2:46:04
+	 * @param String gid 组id
+	 * @param String op 操作用户号码
+	 * @param String biztype 指挥/会议 bizcmd/bizcnf
+	 * @param String code 开始对上/停止对上/开始对下/停止对下 silencehigherstart/silencehigherstop/silencelowerstart/silencelowerstop
+	 * @param List<MinfoBO> mlist 成员列表
+	 */
+	public void becomeSilence(GroupBO group) throws Exception{
+		String fullName = generateFullName("becomeSilence.xml");
+		Template template = templateLoader.load(fullName);
+		sendPassBy(group, NO_TYPE_APP, template);
+	}
+
+	/**
 	 * 创建指挥<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
