@@ -113,7 +113,7 @@ public class HttpRequestUtil {
         //post请求返回结果
 //		DefaultHttpClient httpClient = new DefaultHttpClient();
         HttpClient httpClient = HttpClientBuilder.create().build();
-        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(10000).setConnectTimeout(10000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(60000*10).setConnectTimeout(10000).build();
         JSONObject jsonResult = null;
         HttpPost method = new HttpPost(url);
         method.setConfig(requestConfig);

@@ -11,7 +11,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
 public class ChannelAutoBroadInfoPO extends AbstractBasePO{
 
 	/**
-	 * 
+	 * 轮播推流--智能播发参数
 	 */
 	private static final long serialVersionUID = 1L;
 	

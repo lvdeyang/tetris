@@ -148,7 +148,7 @@ public class MediaVideoQuery {
 	}
 	
 	/**
-	 * 加载所有的视频媒资<br/>
+	 * 加载所有的视频媒资--树形<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2018年12月6日 下午4:03:27
@@ -181,6 +181,39 @@ public class MediaVideoQuery {
 		packMediaVideoTree(medias, folderTree, videos);
 		
 		return id != null && id.length > 0 ? medias.get(0).getChildren() : medias;
+	}
+	
+	/**
+	 * 加载所有的视频媒资--表行<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年12月6日 下午4:03:27
+	 * @return List<MediaVideoVO> 视频媒资列表
+	 */
+	public List<MediaVideoVO> loadAllList(Long ... id) throws Exception{
+		
+		//TODO 权限校验		
+		List<FolderPO> folderTree = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_VIDEO.toString());
+		if (id != null && id.length > 0 && id[0] != null) {
+			folderTree = folderQuery.findSubFolders(id[0]);
+			folderTree.add(folderDao.findOne(id[0]));
+		}
+		
+		if (folderTree.isEmpty()) return new ArrayList<MediaVideoVO>();
+		
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folderPO: folderTree){
+			folderIds.add(folderPO.getId());
+		}
+		
+		List<MediaVideoPO> videos = mediaVideoDao.findByFolderIdIn(folderIds, new ArrayListWrapper<String>().add(ReviewStatus.REVIEW_UPLOAD_WAITING.toString()).add(ReviewStatus.REVIEW_UPLOAD_REFUSE.toString()).getList());
+
+		List<MediaVideoVO> vos = new ArrayList<MediaVideoVO>();
+		for(MediaVideoPO video: videos){
+			vos.add(new MediaVideoVO().set(video));
+		}
+		
+		return vos;
 	}
 	
 	/**

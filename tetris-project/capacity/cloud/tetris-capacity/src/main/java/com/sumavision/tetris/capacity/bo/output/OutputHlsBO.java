@@ -18,6 +18,8 @@ public class OutputHlsBO {
 	
 	private Integer max_seg_duration;
 	
+	private boolean i_frames_only; 
+	
 	private List<OutputMediaGroupBO> media_group_array;
 	
 	private OutputStorageBO storage;
@@ -84,6 +86,15 @@ public class OutputHlsBO {
 
 	public OutputHlsBO setEncrypt(OutputEncryptBO encrypt) {
 		this.encrypt = encrypt;
+		return this;
+	}
+
+	public boolean isI_frames_only() {
+		return i_frames_only;
+	}
+
+	public OutputHlsBO setI_frames_only(boolean i_frames_only) {
+		this.i_frames_only = i_frames_only;
 		return this;
 	}
 	

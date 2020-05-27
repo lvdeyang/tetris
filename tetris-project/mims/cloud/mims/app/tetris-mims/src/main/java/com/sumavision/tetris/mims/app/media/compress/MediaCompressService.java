@@ -49,8 +49,13 @@ import com.sumavision.tetris.mims.app.media.audio.MediaAudioDAO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioPO;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioService;
 import com.sumavision.tetris.mims.app.media.audio.MediaAudioVO;
+import com.sumavision.tetris.mims.app.media.compress.api.server.ParamVO;
 import com.sumavision.tetris.mims.app.media.compress.api.server.SecureServiceXmlUtils;
 import com.sumavision.tetris.mims.app.media.compress.api.server.XmlVO.SignatureVO;
+import com.sumavision.tetris.mims.app.media.live.MediaPushLivePO;
+import com.sumavision.tetris.mims.app.media.live.MediaPushLiveService;
+import com.sumavision.tetris.mims.app.media.live.MediaPushLiveTypeAudio;
+import com.sumavision.tetris.mims.app.media.live.MediaPushLiveTypeVideo;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
@@ -134,6 +139,9 @@ public class MediaCompressService {
 	
 	@Autowired
 	private FolderQuery folderQuery;
+	
+	@Autowired
+	private MediaPushLiveService mediaPushLiveService;
 	
 	/**
 	 * 播发媒资上传审核通过<br/>
@@ -565,9 +573,11 @@ public class MediaCompressService {
 	 * @return String region 地区
 	 * @return String content 媒体内容
 	 */
-	public Map<String, String> parse(String path) throws Exception {
+	public Map<String, String> parse(String path, String push) throws Exception {
 
 		UserVO user = userQuery.current();
+		
+		ParamVO pushVO = JSONObject.parseObject(push, ParamVO.class);
 
 		File file = new File(path);
 		String parentFilePath = new File(file.getParent()).getParent();
@@ -592,6 +602,9 @@ public class MediaCompressService {
 		// tar包内容
 		String content = "";
 		String templateId = "";
+		
+		// 严重级别
+		String severity = ""; 
 
 		File parseFile = new File(
 				new StringBufferWrapper().append(parentFilePath).append(separator).append("compress").toString());
@@ -724,6 +737,9 @@ public class MediaCompressService {
 				publishTime = reader.readString("EBD.EBM.MsgBasicInfo.SendTime");
 				articleName = reader.readString("EBD.EBM.MsgContent.MsgTitle");
 				remark = reader.readString("EBD.EBM.MsgContent.MsgDesc");
+				
+				// 严重级别
+				severity = reader.readString("EBD.EBM.MsgBasicInfo.Severity");
 
 				// 文本媒资
 				if (remark != null) {
@@ -739,6 +755,15 @@ public class MediaCompressService {
 				// 转换地区
 				String areaCode = reader.readString("EBD.EBM.MsgContent.AreaCode");
 				region = JSON.toJSONString(new ArrayListWrapper<String>().add(areaCode).getList());
+				
+
+				//创建push直播
+				if(pushVO != null){
+					
+					mediaPushLiveService.addPushLiveTask(pushVO.getFreq(), pushVO.getApid(), pushVO.getVpid(),
+							MediaPushLiveTypeAudio.AAC.getName(), MediaPushLiveTypeVideo.H_264.getName(), "", name);
+
+				}
 			}
 		}
 
@@ -764,11 +789,19 @@ public class MediaCompressService {
 			mediaTemplate.put("value", content);
 			contents.add(mediaTemplate);
 		}
+		
+		if(pushVO == null){
+			pushVO = new ParamVO();
+			pushVO.setSeverity(severity);
+		}else{
+			pushVO.setSeverity(severity);
+		}
 
 		return new HashMapWrapper<String, String>().put("type", type).put("name", articleName)
 				.put("publishTime", publishTime).put("remark", articleName).put("author", author)
 				.put("keywords", keywords).put("column", column).put("region", region)
-				.put("content", contents.toJSONString()).getMap();
+				.put("content", contents.toJSONString()).put("push", JSONObject.toJSONString(pushVO))
+				.getMap();
 	}
 
 	/**

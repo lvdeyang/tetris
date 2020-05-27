@@ -59,6 +59,8 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 	
 	private String addition;
 	
+	private Long folderId;
+	
 	private List<MediaFileEquipmentPermissionPO> deviceUpload;
 	
 	private List<MediaPictureVO> children;
@@ -261,6 +263,15 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 		return this;
 	}
 
+	public Long getFolderId() {
+		return folderId;
+	}
+
+	public MediaPictureVO setFolderId(Long folderId) {
+		this.folderId = folderId;
+		return this;
+	}
+
 	public String getAddition() {
 		return addition;
 	}
@@ -303,6 +314,7 @@ public class MediaPictureVO extends AbstractBaseVO<MediaPictureVO, MediaPictureP
 			.setProcessInstanceId(entity.getProcessInstanceId())
 			.setUploadTmpPath(entity.getUploadTmpPath())
 			.setFileName(entity.getFileName())
+			.setFolderId(entity.getFolderId())
 			.setAddition(entity.getAddition())
 			.setTags(entity.getTags() != null && !entity.getTags().isEmpty() ? Arrays.asList(entity.getTags().split(MediaPicturePO.SEPARATOR_TAG)) : new ArrayList<String>());
 		if(entity.getKeyWords() != null) this.setKeyWords(Arrays.asList(entity.getKeyWords().split(MediaPicturePO.SEPARATOR_KEYWORDS)));	 

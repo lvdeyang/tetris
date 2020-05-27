@@ -7,15 +7,20 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSONArray;
+import com.sumavision.tetris.mims.app.folder.FolderDAO;
+import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.app.folder.FolderQuery;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
 import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionBO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionPO;
 import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionService;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoDAO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
@@ -40,6 +45,12 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 	
 	@Autowired
 	private MediaFileEquipmentPermissionService permissionService;
+	
+	@Autowired
+	private FolderDAO folderDao;
+	
+	@Autowired
+	private FolderQuery folderQuery;
 	
 	/**
 	 * 批量同步文件<br/>
@@ -71,6 +82,16 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 				permissionBOs.add(new MediaFileEquipmentPermissionBO().setFromVideoPO(mediaVideoPO));
 			}
 			break;
+		case "folder":
+			//写这样是为了加文件夹folder
+			List<FolderPO> folders = folderDao.findByIdIn(idList);
+			
+			List<MediaFileEquipmentPermissionPO> permissions = new ArrayList<MediaFileEquipmentPermissionPO>(); 
+			for(FolderPO folder: folders){
+				permissions.add(permissionService.addPermissionSend(folder, equipmentIp));
+			}
+			
+			return permissions;
 		default:
 			break;
 		}
@@ -92,6 +113,23 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 	@RequestMapping(value = "/upload/folder")
 	public Object uploadFolder(Long folderId, String mediaType, String equipmentIp, HttpServletRequest request) throws Exception {
 		if (mediaType == null || equipmentIp == null) return null;
+		
+		//添加文件夹
+		if(folderId != null){
+			FolderPO folder = folderDao.findOne(folderId);
+			if(folder != null){
+				permissionService.addPermissionSend(folder, equipmentIp);
+			}
+		}
+		
+		//TODO：同步所有，暂时不需要
+		/*List<FolderPO> folders = folderQuery.findSubFolders(folderId);
+		if(!CollectionUtils.isEmpty(folders)){
+			for(FolderPO subFolder: folders){
+				permissionService.addPermissionSend(subFolder, equipmentIp);
+			}
+		}*/
+
 		List<MediaFileEquipmentPermissionBO> permissionBOs = new ArrayList<MediaFileEquipmentPermissionBO>();
 		switch (mediaType) {
 		case "picture":
@@ -131,6 +169,7 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 	public Object deleteMedia(String ids, String mediaType, String equipmentIp, HttpServletRequest request) throws Exception {
 		if (ids == null || mediaType == null) return null;
 		List<Long> idList = JSONArray.parseArray(ids, Long.class);
+		//视频、图片
 		return permissionService.removePermission(idList, mediaType, equipmentIp);
 	}
 	
@@ -151,7 +190,7 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 		List<Long> idList = new ArrayList<Long>();
 		switch (mediaType) {
 		case "picture":
-			List<MediaPictureVO> mediaPictureVOs = mediaPictureQuery.loadAll(folderId);
+			List<MediaPictureVO> mediaPictureVOs = mediaPictureQuery.loadAllList(folderId);
 			for (MediaPictureVO mediaPictureVO : mediaPictureVOs) {
 				if ("PICTURE".equals(mediaPictureVO.getType())) {
 					idList.add(mediaPictureVO.getId());
@@ -159,7 +198,7 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 			}
 			break;
 		case "video":
-			List<MediaVideoVO> mediaVideoVOs = mediaVideoQuery.loadAll(folderId);
+			List<MediaVideoVO> mediaVideoVOs = mediaVideoQuery.loadAllList(folderId);
 			for (MediaVideoVO mediaVideoVO : mediaVideoVOs) {
 				if ("VIDEO".equals(mediaVideoVO.getType())) {
 					idList.add(mediaVideoVO.getId());
@@ -169,6 +208,14 @@ public class MediaFileEquipmentPermissionFeignCotroller {
 		default:
 			break;
 		}
-		return permissionService.removePermission(idList, mediaType, equipmentIp);
+		
+		List<FolderPO> folders = folderQuery.findSubFolders(folderId);
+		List<Long> folderIds = new ArrayList<Long>();
+		for(FolderPO folder: folders){
+			folderIds.add(folder.getId());
+		}
+		
+		return permissionService.removePermission(folderId, folderIds, idList, mediaType, equipmentIp);
 	}
+
 }

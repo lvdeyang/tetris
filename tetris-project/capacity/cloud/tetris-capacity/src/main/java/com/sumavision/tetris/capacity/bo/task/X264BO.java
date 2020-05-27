@@ -26,7 +26,7 @@ public class X264BO {
 	/** 运动搜索范围 16-256 */
 	private Integer me_range;
 	
-	private boolean low_latency;
+	private String tune_mode ;
 
 	public Integer getKeyint_min() {
 		return keyint_min;
@@ -91,12 +91,12 @@ public class X264BO {
 		return this;
 	}
 
-	public boolean isLow_latency() {
-		return low_latency;
+	public String getTune_mode() {
+		return tune_mode;
 	}
 
-	public X264BO setLow_latency(boolean low_latency) {
-		this.low_latency = low_latency;
+	public X264BO setTune_mode(String tune_mode) {
+		this.tune_mode = tune_mode;
 		return this;
 	}
 	

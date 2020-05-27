@@ -4,7 +4,7 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum BroadTranscodeType {
 	MEDIA_EDITO("云转码"),
-	FILE_STREAM_TRANSCODE("文件转流转码"),
+	FILE_STREAM_TRANSCODE("文件转流转码"),//*
 	STREAM_TRANSCODE("流转码");
 	
 	private String name;

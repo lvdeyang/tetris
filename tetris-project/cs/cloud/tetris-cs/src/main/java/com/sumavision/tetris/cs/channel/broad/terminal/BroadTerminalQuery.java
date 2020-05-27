@@ -101,6 +101,8 @@ public class BroadTerminalQuery {
 									}
 									channelDao.save(channelPO);
 								}
+								//TODO:response里面只有push平台有的id，平台没有的话业务不更新状态
+								
 							}
 						}
 					}

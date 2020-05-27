@@ -40,7 +40,9 @@ public class OutputBO {
 	
 	private OutputHlsRecordBO hls_record;
 	
-	private OutputZiXiBO zixi;
+	private OutputZiXiBO zixi_ts;
+	
+	private OutputZiXiBO zixi_passby;
 
 	public String getId() {
 		return id;
@@ -186,12 +188,21 @@ public class OutputBO {
 		return this;
 	}
 
-	public OutputZiXiBO getZixi() {
-		return zixi;
+	public OutputZiXiBO getZixi_ts() {
+		return zixi_ts;
 	}
 
-	public OutputBO setZixi(OutputZiXiBO zixi) {
-		this.zixi = zixi;
+	public OutputBO setZixi_ts(OutputZiXiBO zixi_ts) {
+		this.zixi_ts = zixi_ts;
+		return this;
+	}
+
+	public OutputZiXiBO getZixi_passby() {
+		return zixi_passby;
+	}
+
+	public OutputBO setZixi_passby(OutputZiXiBO zixi_passby) {
+		this.zixi_passby = zixi_passby;
 		return this;
 	}
 	
