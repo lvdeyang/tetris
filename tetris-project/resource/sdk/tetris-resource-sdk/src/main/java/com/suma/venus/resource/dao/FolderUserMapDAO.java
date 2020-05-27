@@ -17,6 +17,8 @@ public interface FolderUserMapDAO extends CommonDao<FolderUserMap>{
 	
 	public List<FolderUserMap> findByFolderUuid(String folderUuid);
 	
+	public List<FolderUserMap> findByFolderUuidOrderByFolderIndex(String folderUuid);
+	
 	public List<FolderUserMap> findByFolderIdAndUserIdIn(Long folderId, Collection<Long> userIds);
 	
 	public List<FolderUserMap> findByFolderIdInAndUserIdIn(Collection<Long> folderIds, Collection<Long> userIds);
@@ -32,5 +34,7 @@ public interface FolderUserMapDAO extends CommonDao<FolderUserMap>{
 	public FolderUserMap findByUserNo(String userNo);
 	
 	public List<FolderUserMap> findByUserIdNotIn(Collection<Long> userIds);
+	
+	public List<FolderUserMap> findByFolderId(Long folderId);
 	
 }

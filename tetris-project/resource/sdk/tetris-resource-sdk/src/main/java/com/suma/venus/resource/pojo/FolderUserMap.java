@@ -1,5 +1,7 @@
 package com.suma.venus.resource.pojo;
 
+import java.util.Comparator;
+
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
@@ -126,6 +128,15 @@ public class FolderUserMap extends CommonPO<FolderUserMap>{
 
 	public void setUserNo(String userNo) {
 		this.userNo = userNo;
+	}
+	
+	public static class FolderUserComparator implements Comparator<FolderUserMap>{
+
+		@Override
+		public int compare(FolderUserMap o1, FolderUserMap o2) {
+			return Integer.parseInt(o1.getFolderIndex().toString())-Integer.parseInt(o2.getFolderIndex().toString());
+		}
+		
 	}
 	
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
+import com.sumavision.tetris.user.UserStatus;
 
 @RepositoryDefinition(domainClass = TokenPO.class, idClass = Long.class)
 public interface TokenDAO extends BaseDAO<TokenPO>{
@@ -72,5 +73,16 @@ public interface TokenDAO extends BaseDAO<TokenPO>{
 	 * @return TokenPO token对象
 	 */
 	public TokenPO findByToken(String token);
+	
+	/**
+	 * 根据终端类型和状态查询token<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月27日 上午9:07:13
+	 * @param List<TerminalType> types 终端类型列表
+	 * @param UserStatus status 用户状态
+	 * @return List<TokenPO> token列表
+	 */
+	public List<TokenPO> findByTypeInAndStatus(List<TerminalType> types, UserStatus status);
 	
 }

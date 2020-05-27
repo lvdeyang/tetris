@@ -431,7 +431,12 @@ require([
             });
 
         window.onbeforeunload = function(e){
-            ajax.post('/monitor/live/remove/all/webplayer/live', null, null, null, null, null, null, false);
+        	//这个地方要用同步请求
+        	$.ajax({
+                url:window.HOST + window.SCHEMA + '/monitor/live/remove/all/webplayer/live',
+                async: false
+            });
+            //ajax.post('/monitor/live/remove/all/webplayer/live', null, null, null, null, null, null, false);
             app.unRegisterPlayer(app.$players);
             console.log('sip插件销毁');
             app.$sipPlugin[0].I_UnInit();
