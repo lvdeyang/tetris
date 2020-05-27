@@ -160,12 +160,21 @@ public class CommandForwardServiceImpl {
 	 */
 	public List<ForwardReturnBO> forward(Long groupId, List<Long> srcUserIds, List<String> bundleIds, List<Long> userIds) throws Exception{
 		
+		if(groupId == null || "".equals(groupId)){
+			log.warn("媒体转发，会议id有误");
+			return new ArrayList<ForwardReturnBO>();
+		}
+		
 		synchronized (new StringBuffer().append(lockPrefix).append(groupId).toString().intern()) {
 			
 			if(srcUserIds == null) srcUserIds = new ArrayList<Long>();
 			if(bundleIds == null) bundleIds = new ArrayList<String>();
 			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			if(group == null){
+				log.info("进行媒体转发的会议不存在，id：" + groupId);
+				return new ArrayList<ForwardReturnBO>();
+			}
 			if(group.getStatus().equals(GroupStatus.STOP)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
 			}
@@ -183,10 +192,15 @@ public class CommandForwardServiceImpl {
 			CodecParamBO codec = new CodecParamBO().set(group.getAvtpl(), currentGear);
 			
 			//校验转发目的成员是否进会
-			List<CommandGroupMemberPO> dstMembers = commandCommonUtil.queryMembersByUserIds(members, userIds);
-			for(CommandGroupMemberPO dstMember : dstMembers){
+			List<CommandGroupMemberPO> dstMembers = new ArrayList<CommandGroupMemberPO>();
+			List<CommandGroupMemberPO> _dstMembers = commandCommonUtil.queryMembersByUserIds(members, userIds);
+			for(CommandGroupMemberPO dstMember : _dstMembers){
 				if(!dstMember.getMemberStatus().equals(MemberStatus.CONNECT)){
-					throw new BaseException(StatusCode.FORBIDDEN, dstMember.getUserName() + " 还未进入");
+					if(!OriginType.OUTER.equals(group.getOriginType())){
+						throw new BaseException(StatusCode.FORBIDDEN, dstMember.getUserName() + " 还未进入");
+					}
+				}else{
+					dstMembers.add(dstMember);
 				}
 			}
 			
@@ -1095,6 +1109,10 @@ public class CommandForwardServiceImpl {
 	public void stopBySrcAndDstCodes(Long userId1, String groupUuid, List<String> srcCodes, List<String> dstCodes) throws Exception{
 		
 		CommandGroupPO group1 = commandGroupDao.findByUuid(groupUuid);
+		if(group1 == null){
+			log.info("停止媒体转发的会议不存在，uuid：" + groupUuid);
+			return;
+		}
 		
 		synchronized (new StringBuffer().append(lockPrefix).append(group1.getId()).toString().intern()) {
 			

@@ -304,8 +304,8 @@ require([
                                 continue;
                             }
                             self.$players.push(players[i]);
-//                            self.$sipPlugin[0].I_Register(players[i].code, players[i].username, players[i].password);
-                            self.$sipPlugin[0].I_Register(players[i].code, players[i].username, players[i].code);
+                            self.$sipPlugin[0].I_Register(players[i].code, players[i].username, players[i].password);
+//                            self.$sipPlugin[0].I_Register(players[i].code, players[i].username, players[i].code);
                         }
                     }
                 },

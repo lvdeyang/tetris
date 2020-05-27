@@ -325,6 +325,34 @@ public class CommandUserDecoderController {
 	}
 	
 	/**
+	 * 从各类型的资源给分屏上屏<br/>
+	 * <p>拖动一个资源到分屏区域</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月26日 上午10:46:38
+	 * @param type 取值为 file/user/device
+	 * @param id 资源id，可能是文件、设备、用户的id
+	 * @param screenId
+	 * @param request
+	 * @return
+	 * @throws Exception
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/from/resource/to/screen")
+	public Object fromResourceToScreen(
+			String type,
+			String id,
+			String screenId,
+			HttpServletRequest request) throws Exception{
+		
+		UserVO user = userUtils.getUserFromSession(request);		
+		CommandGroupDecoderScreenPO screen = commandDecoderServiceImpl.fromResourceToScreen(user.getId(), type, id, Long.parseLong(screenId));
+		
+		return new DecoderScreenVO().set(screen);
+	}
+	
+	/**
 	 * 停止一个分屏的全部上屏<br/>
 	 * <p>详细描述</p>
 	 * <b>作者:</b>zsy<br/>
