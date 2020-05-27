@@ -219,7 +219,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { addFolder,modifyFolder,deleteFolder,setFolderOfBundles,resetFolderOfBundles,initFolderTree,getDeviceModels,
+import { addFolder,modifyFolder,deleteFolder,setFolderOfBundles,resetFolderOfBundles,initFolderTree,changeFolderIndex,getDeviceModels,
         queryBundlesWithoutFolder,queryUsersWithoutFolder,setFolderToUsers,resetFolderOfUsers,queryRootOptions,setRoot,syncFolderToLdap,
         syncFolderFromLdap,cleanupFolderLdap,changeNodePosition,resetRootNode,releaseRoot,exportFolder,exportUser} from '../../api/api';
 
@@ -770,7 +770,29 @@ export default {
         },
 
         handleNodeDragEnd: function (draggingNode, dropNode, dropType, ev) {
+            ev.stopPropagation();
             if (dropType === 'none') {
+                return;
+            }
+
+            if(draggingNode.data.nodeType==='USER' && dropNode.data.nodeType==='USER'){
+                if(dropType === 'inner') return false;
+                console.log('交换两个用户的排序');
+                console.log(dropType);
+                changeFolderIndex({
+                    draggingId:draggingNode.data.id,
+                    dropId:dropNode.data.id,
+                    folderId:draggingNode.data.parentId,
+                    type:dropType
+                }).then(res => {
+                    if (res.errMsg) {
+                        this.$message({
+                            message: res.errMsg,
+                            type: 'error'
+                        });
+                    }
+                    this.initTree(true);
+                });
                 return;
             }
 
@@ -820,6 +842,17 @@ export default {
         },
 
         allowDrop(draggingNode, dropNode, type) {
+
+            if(draggingNode.data.nodeType==='USER' && dropNode.data.nodeType!=='USER'){
+                return false;
+            }else{
+                if(draggingNode.data.parentId !== dropNode.data.parentId){
+                    return false;
+                }else{
+                    if(type === 'inner') return false;
+                }
+            }
+
             if (draggingNode.id === dropNode.id) {
                 return false;
             }
@@ -856,8 +889,7 @@ export default {
 
         allowDrag(draggingNode) {
 
-
-            if (draggingNode.data.nodeType !== 'FOLDER') {
+            if (draggingNode.data.nodeType!=='FOLDER' && draggingNode.data.nodeType!=='USER') {
                 return false;
             }
 
