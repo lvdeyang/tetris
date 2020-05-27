@@ -14,7 +14,7 @@ module.exports = {
     assetsPublicPath: isPro ? /* '/res_/' */ "./": "/",
     proxyTable: isPro?{}:{
       '/':{
-        target: 'http://192.165.56.131:8093',
+        target: 'http://192.165.56.132:8093',
         changeOrigin : true,
         pathRewrite:{
           '^/':'/'
