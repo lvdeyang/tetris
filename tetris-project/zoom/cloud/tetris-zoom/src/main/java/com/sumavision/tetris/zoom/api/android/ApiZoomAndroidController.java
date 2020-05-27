@@ -344,6 +344,8 @@ public class ApiZoomAndroidController {
 	 * @param Long myZoomMemberId 会议成员id
 	 * @return ZoomMemberVO 会议成员
 	 */
+	@JsonBody
+	@ResponseBody
 	@RequestMapping(value = "/close/audio")
 	public Object closeAudio(Long myZoomMemberId) throws Exception{
 		

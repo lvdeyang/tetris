@@ -6,20 +6,21 @@
     <div class="treeContent">
         <el-scrollbar style="height:100%;">
             <el-tree
-                    :data="dialog.decodeBind.tree.data"
-                    :props="dialog.decodeBind.tree.props">
-                                <span class="custom-tree-node" slot-scope="{node, data}">
-                                     <el-radio v-if="data.type === 'BUNDLE'"
-                                               v-model="dialog.decodeBind.tree.currentBundle" :label="data.param">
-                                         <span :class="data.icon"
-                                               :style="data.style+' position:relative; top:1px;'"></span>
-                                         <span style="position:relative; top:2px;font-size: 18px">{{node.label}}</span>
-                                     </el-radio>
-                                    <span v-else>
-                                        <span :class="data.icon" :style="data.style"></span>
-                                        <span>{{node.label}}</span>
-                                    </span>
-                                </span>
+            	default-expand-all
+                :data="dialog.decodeBind.tree.data"
+                :props="dialog.decodeBind.tree.props">
+                <span class="custom-tree-node" slot-scope="{node, data}">
+                     <el-radio v-if="data.type === 'BUNDLE'"
+                               v-model="dialog.decodeBind.tree.currentBundle" :label="data.param">
+                         <span :class="data.icon"
+                               :style="data.style+' position:relative; top:1px;'"></span>
+                         <span style="position:relative; top:2px;font-size: 18px">{{node.label}}</span>
+                     </el-radio>
+                    <span v-else>
+                        <span :class="data.icon" :style="data.style"></span>
+                        <span>{{node.label}}</span>
+                    </span>
+                </span>
             </el-tree>
         </el-scrollbar>
     </div>

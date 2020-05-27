@@ -56,6 +56,7 @@ import com.suma.venus.resource.pojo.BundlePO.SYNC_STATUS;
 import com.suma.venus.resource.pojo.FolderPO;
 import com.suma.venus.resource.pojo.FolderPO.FolderType;
 import com.suma.venus.resource.pojo.FolderUserMap;
+import com.suma.venus.resource.pojo.FolderUserMap.FolderUserComparator;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.FolderService;
 import com.suma.venus.resource.service.UserQueryService;
@@ -404,6 +405,53 @@ public class FolderManageController extends ControllerBase {
 				tree.add(rootTreeVO);
 			}
 			data.put("tree", tree);
+		} catch (Exception e) {
+			LOGGER.error("Fail to init folder tree", e);
+			data.put(ERRMSG, "内部错误");
+		}
+
+		return data;
+	}
+	
+	@RequestMapping(value = "/changeFolderIndex", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> changeFolderIndex(
+			Long draggingId,
+			Long dropId,
+			Long folderId,
+			String type){
+		Map<String, Object> data = makeAjaxData();
+		try {
+			FolderUserComparator comparator = new FolderUserMap.FolderUserComparator();
+			List<FolderUserMap> users = folderUserMapDao.findByFolderId(folderId);
+			List<FolderUserMap> sortUsers = new ArrayList<FolderUserMap>();
+			Collections.sort(users, comparator);
+			FolderUserMap draggingNode = null;
+			FolderUserMap dropNode = null;
+			for(FolderUserMap user:users){
+				if(user.getUserId().equals(draggingId)) draggingNode = user;
+				if(user.getUserId().equals(dropId)) dropNode = user;
+			}
+			for(int i=0; i<users.size(); i++){
+				FolderUserMap user = users.get(i);
+				if(!user.getUserId().equals(draggingId) && !user.getUserId().equals(dropId)){
+					sortUsers.add(user);
+				}else{
+					if(user.getUserId().equals(dropId)){
+						if("before".equals(type)){
+							sortUsers.add(draggingNode);
+							sortUsers.add(dropNode);
+						}else if("after".equals(type)){
+							sortUsers.add(dropNode);
+							sortUsers.add(draggingNode);
+						}
+					}
+				}
+			}
+			for(int i=0; i<sortUsers.size(); i++){
+				sortUsers.get(i).setFolderIndex(Long.parseLong(String.valueOf(i+1)));
+			}
+			folderUserMapDao.save(sortUsers);
 		} catch (Exception e) {
 			LOGGER.error("Fail to init folder tree", e);
 			data.put(ERRMSG, "内部错误");
@@ -1230,7 +1278,7 @@ public class FolderManageController extends ControllerBase {
 				for (UserBO userBO : usersMap.get("users")) {
 					children.add(createUserNode(parentId, userBO));
 				}*/
-				List<FolderUserMap> userBOs = folderUserMapDao.findByFolderUuid(folderPO.getUuid());
+				List<FolderUserMap> userBOs = folderUserMapDao.findByFolderUuidOrderByFolderIndex(folderPO.getUuid());
 				for (FolderUserMap userBO : userBOs) {
 					children.add(createUserNode(parentId, userBO));
 				}

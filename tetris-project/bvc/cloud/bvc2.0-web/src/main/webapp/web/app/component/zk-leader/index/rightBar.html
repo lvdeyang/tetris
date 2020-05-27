@@ -210,18 +210,19 @@
                                           style="font-size: 20px;margin: 5px;color: #00ceff"
                                           @click="handleContextMenuShow($event, data)"></span>
                                     <!--v-model绑定选中状态，在进行底部按钮操作后，保持树的展开状态，并去掉勾选-->
-                                     <el-checkbox v-if="data.type==='USER'" v-model="data.checked" :value="data.id"
+                                    <el-checkbox v-if="data.type==='USER'" v-model="data.checked" :value="data.id"
                                                   @change="onUserCheckChange(data)">
-                                        <span :class="data.icon"
-                                              :style="data.style+' position:relative; top:1px;'"></span>
-                                        <span class="headFont">{{data.name}}</span>
-                                         <el-popover
+                                        <span draggable="true" @dragstart="userDragStart($event, data)">          
+	                                        <span :class="data.icon"
+	                                              :style="data.style+' position:relative; top:1px;'"></span>
+	                                        <span class="headFont">{{data.name}}</span>
+                                        </span>
+                                        <el-popover
                                                  placement="top"
                                                  width="200"
                                                  trigger="click"
                                                  :content="data.name">
-                                              <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff"
-                                                    slot="reference"></span>
+                                            <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
                                         </el-popover>
                                     </el-checkbox>
                                     <span v-else>
@@ -235,33 +236,35 @@
                 </el-tab-pane>
                 <!--设备资源-->
                 <el-tab-pane class="tabPage">
-                <span slot="label" class="myTitle">
-                <img class="fontPic" src="../../../../../images/zk-leader/equipment.png" draggable="false">
-                </span>
+	                <span slot="label" class="myTitle">
+	                	<img class="fontPic" src="../../../../../images/zk-leader/equipment.png" draggable="false">
+	                </span>
                     <div class="scrollTab" v-if="switchStatus2">
                         <el-scrollbar style="height:90%">
                             <el-tree :data="device.data" node-key="id" :props="props">
-                <span class="headline" slot-scope="{node,data}">
-                <span :class="data.type==='BUNDLE'?'handDown el-icon-tickets':''"
-                      style="font-size: 20px;margin: 5px;color: #00ceff"
-                      @click="handleContextMenuShow($event, data)"></span>
-                <el-checkbox v-if="data.type==='BUNDLE'" v-model="data.checked" @change="onDviceCheckChange(data)">
-                <span :class="data.icon"
-                      :style="data.style+' position:relative; top:1px;'"></span>
-                <span class="headFont">{{data.name}}</span>
-                <el-popover
-                        placement="top"
-                        width="200"
-                        trigger="click"
-                        :content="data.name">
-                <span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
-                </el-popover>
-                </el-checkbox>
-                <span v-else>
-                <span :class="data.icon" :style="data.style"></span>
-                <span class="sheadFont">{{data.name}}</span>
-                </span>
-                </span>
+				                <span class="headline" slot-scope="{node,data}">
+					                <span :class="data.type==='BUNDLE'?'handDown el-icon-tickets':''"
+					                      style="font-size: 20px;margin: 5px;color: #00ceff"
+					                      @click="handleContextMenuShow($event, data)"></span>
+					                <el-checkbox v-if="data.type==='BUNDLE'" v-model="data.checked" @change="onDviceCheckChange(data)">
+					                	<span draggable="true" @dragstart="deviceDragStart($event, data)">
+							                <span :class="data.icon"
+							                      :style="data.style+' position:relative; top:1px;'"></span>
+							                <span class="headFont">{{data.name}}</span>
+						                </span>
+						                <el-popover
+						                        placement="top"
+						                        width="200"
+						                        trigger="click"
+						                        :content="data.name">
+						                	<span class="el-icon-caret-bottom" style="font-size: 14px;color: #00ceff" slot="reference"></span>
+						                </el-popover>
+					                </el-checkbox>
+					                <span v-else>
+						                <span :class="data.icon" :style="data.style"></span>
+						                <span class="sheadFont">{{data.name}}</span>
+					                </span>
+				                </span>
                             </el-tree>
                         </el-scrollbar>
                     </div>
@@ -278,11 +281,13 @@
                                     <span :class="data.type==='VOD_RESOURCE'?'handDown el-icon-tickets':''"
                                           style="font-size: 20px;margin: 5px;color: #00ceff"
                                           @click="handleContextMenuShow($event, data)"></span>
-                                <el-checkbox v-if="data.type==='VOD_RESOURCE'" v-model="data.checked"
+                                	<el-checkbox v-if="data.type==='VOD_RESOURCE'" v-model="data.checked"
                                              @change="onFileCheckChange(data)">
-                                        <span class="icon-file-alt"
-                                              style="font-size:15px; position:relative; top:1px;"></span>
-                                        <span class="headFont">{{data.name}}</span>
+                                        <span draggable="true" @dragstart="fileDragStart($event, data)">     
+	                                        <span class="icon-file-alt"
+	                                              style="font-size:15px; position:relative; top:1px;"></span>
+	                                        <span class="headFont">{{data.name}}</span>
+                                        </span>
                                     <el-popover
                                             placement="top"
                                             width="200"

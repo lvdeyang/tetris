@@ -168,6 +168,43 @@ define([
             }
         },
         methods: {
+        	//用户拖拽
+        	userDragStart:function(e, data){
+        		var text = {
+        			id:data.id,
+        			name:data.name,
+        			type:data.type,
+        			origin:'rightBar'
+        		};
+        		e.dataTransfer.setData("Text", $.toJSON(text));
+        		console.log('user拖拽');
+        		console.log(text);
+        	},
+        	//设备拖拽
+        	deviceDragStart:function(e, data){
+        		var text = {
+        			id:data.id,
+        			name:data.name,
+        			type:data.type,
+        			origin:'rightBar'
+        		};
+        		e.dataTransfer.setData("Text", $.toJSON(text));
+        		console.log('device拖拽');
+        		console.log(text);
+        	},
+        	//文件拖拽
+        	fileDragStart:function(e, data){
+        		var text = {
+            			id:data.id,
+            			name:data.name,
+            			url:data.param,
+            			type:data.type,
+            			origin:'rightBar'
+            		};
+            		e.dataTransfer.setData("Text", $.toJSON(text));
+            		console.log('file拖拽');
+            		console.log(text);
+        	},
             //顶部切换标题点击事件
             toggleMenu1: function () {
                 $('.triggerLi1').addClass('focusLight');
