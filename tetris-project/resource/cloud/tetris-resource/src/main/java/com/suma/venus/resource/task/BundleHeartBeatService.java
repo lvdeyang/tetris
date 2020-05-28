@@ -72,8 +72,6 @@ public class BundleHeartBeatService {
 
 	public void addBundleStatus(String bundle_ip, Long currentTime) {
 
-		LOGGER.info("add=" + bundle_ip + ",time=" + currentTime);
-
 		boolean threadFlag = false;
 
 		if (bunldeStatusMap.size() == 0) {
@@ -102,6 +100,7 @@ public class BundleHeartBeatService {
 				e.printStackTrace();
 			}
 
+			LOGGER.info("add=" + bundle_ip + ",time=" + currentTime);
 		}
 
 		bunldeStatusMap.put(bundle_ip, currentTime);
