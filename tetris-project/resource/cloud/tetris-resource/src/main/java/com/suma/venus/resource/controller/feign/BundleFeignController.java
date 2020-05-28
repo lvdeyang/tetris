@@ -25,6 +25,7 @@ import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.ScreenSchemeDao;
 import com.suma.venus.resource.pojo.BundlePO;
+import com.suma.venus.resource.pojo.BundlePO.ONLINE_STATUS;
 import com.suma.venus.resource.service.BundleService;
 import com.suma.venus.resource.service.ChannelSchemeService;
 import com.suma.venus.resource.service.ChannelTemplateService;
@@ -94,6 +95,8 @@ public class BundleFeignController {
 
 			bundlePO.setBundleId(BundlePO.createBundleId());
 
+			bundlePO.setOnlineStatus(ONLINE_STATUS.ONLINE);
+
 			bundleService.save(bundlePO);
 
 			bundleService.configDefaultAbility(bundlePO);
@@ -105,8 +108,7 @@ public class BundleFeignController {
 		}
 
 		data.put("bundle_id", bundlePO.getBundleId());
-		
-		/*
+
 		try {
 			LOGGER.info("add new transcode device, set heartbeaturl=" + "http://" + clientIP + ":" + zuulPort
 					+ "/tetris-resource/api/thirdpart/bundleHeartBeat?bundle_ip=" + bundlePO.getDeviceIp());
@@ -119,12 +121,11 @@ public class BundleFeignController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			data.put("bundle_set", "");
+			return data;
 		}
-		*/
-		
-		
-		data.put("bundle_set", "success");
 
+		data.put("bundle_set", "success");
+		bundleHeartBeatService.addBundleStatus(ip, System.currentTimeMillis());
 		LOGGER.info("addTranscodeDevice feign api, return = " + JSON.toJSONString(data));
 
 		return data;
@@ -160,6 +161,7 @@ public class BundleFeignController {
 			return "success";
 
 		} catch (Exception e) {
+			
 			return "";
 		}
 
@@ -199,6 +201,8 @@ public class BundleFeignController {
 
 			// 删除设备上的锁定参数（如果有）
 			// lockBundleParamDao.deleteByBundleId(bundleId);
+
+			bundleHeartBeatService.removeBundleStatus(bundle.getDeviceIp());
 
 			return "success";
 
