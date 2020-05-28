@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.auth.token.TokenService;
 import com.sumavision.tetris.commons.context.SystemInitialization;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.encoder.MessageEncoder.Sha256Encoder;
@@ -42,6 +44,9 @@ public class UserInitialization implements SystemInitialization{
 	
 	@Autowired
 	private Sha256Encoder sha256Encoder;
+	
+	@Autowired
+	private TokenService tokenService;
 	
 	@Override
 	public int index() {
@@ -106,6 +111,25 @@ public class UserInitialization implements SystemInitialization{
 				userSystemRolePermissionDao.save(permission);
 			}
 		}
+		
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (true){
+					try{
+						Thread.sleep(5*60*1000);
+					}catch(Exception e){
+						LOG.error("作废token线程被打断！", e);
+					}
+					try{
+						tokenService.invalid(TerminalType.PC_PLATFORM);
+					}catch(Exception e){
+						LOG.error("作废token执行异常！", e);
+					}
+				}
+			}
+		}).start();
+		LOG.info("作废token线程启动！");
 	}
 
 }

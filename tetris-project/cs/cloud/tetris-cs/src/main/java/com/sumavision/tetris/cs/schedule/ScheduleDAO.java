@@ -18,4 +18,8 @@ public interface ScheduleDAO extends BaseDAO<SchedulePO>{
 	
 	@Query(value = "SELECT * FROM TETRIS_CS_SCHEDULE WHERE channel_id = ?1 ORDER BY broad_date", nativeQuery = true)
 	public List<SchedulePO> findByChannelId(Long channelId);
+	
+	public SchedulePO findByBroadDate(String broadDate);
+	
+	public SchedulePO findByBroadDateAndIdNot(String broadDate, Long id);
 }

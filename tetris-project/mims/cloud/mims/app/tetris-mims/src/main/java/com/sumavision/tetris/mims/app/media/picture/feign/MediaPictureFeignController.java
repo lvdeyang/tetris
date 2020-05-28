@@ -26,11 +26,13 @@ import com.sumavision.tetris.easy.process.core.ProcessVO;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
+import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.material.exception.OffsetCannotMatchSizeException;
 import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureDAO;
+import com.sumavision.tetris.mims.app.media.picture.MediaPictureItemType;
 import com.sumavision.tetris.mims.app.media.picture.MediaPicturePO;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureQuery;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureService;
@@ -134,11 +136,16 @@ public class MediaPictureFeignController {
 	@RequestMapping(value = "/load/collection")
 	public Object loadCollection(Long folderId, HttpServletRequest request) throws Exception{
 		MediaPictureVO folder = mediaPictureQuery.loadPictureCollection(folderId);
+		folder.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setMediaId(folder.getId()).setMediaType("folder")));
 		if (folder != null) {
 			List<MediaPictureVO> children = folder.getChildren();
 			if (children != null) {
 				for (MediaPictureVO media : children) {
-					media.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setFromPictureVO(media)));
+					if(media.getType().equals(MediaPictureItemType.PICTURE.toString())){
+						media.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setFromPictureVO(media)));
+					}else if(media.getType().equals(MediaPictureItemType.FOLDER.toString())){
+						media.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setMediaId(media.getId()).setMediaType("folder")));
+					}
 				}
 			}
 		}
@@ -225,11 +232,22 @@ public class MediaPictureFeignController {
 		
 		UserVO user = userQuery.current();
 		
-		if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
-			throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
-		}
+		FolderPO folder = null;
 		
-		FolderPO folder = folderDao.findOne(folderId);
+		if(folderId == null){
+			List<FolderPO> folders = folderQuery.findPermissionCompanyTree(FolderType.COMPANY_PICTURE.toString());
+			List<FolderPO> roots = folderQuery.findRoots(folders);
+			if(roots != null && roots.size() > 0){
+				folder = roots.get(0);
+			}
+		}else{
+			if(!folderQuery.hasGroupPermission(user.getGroupId(), folderId)){
+				throw new UserHasNoPermissionForFolderException(UserHasNoPermissionForFolderException.CURRENT);
+			}
+			
+			folder = folderDao.findOne(folderId);
+		}
+
 		if(folder == null){
 			throw new FolderNotExistException(folderId);
 		}
@@ -309,8 +327,8 @@ public class MediaPictureFeignController {
 		
 		//文件不是一个
 		if(!name.equals(task.getFileName()) 
-				|| lastModified!=task.getLastModified() 
-				|| size!=task.getSize() 
+				|| !lastModified.equals(task.getLastModified()) 
+				|| !size.equals(task.getSize()) 
 				|| !type.equals(task.getMimetype())){
 			throw new MediaPictureCannotMatchException(uuid, name, lastModified, size, type, task.getFileName(), 
 											   task.getLastModified(), task.getSize(), task.getMimetype());
@@ -337,7 +355,7 @@ public class MediaPictureFeignController {
 			if(out != null) out.close();
 		}
 		
-		if(endOffset == size){
+		if(endOffset.equals(size)){
 			//上传完成
 			task.setUploadStatus(UploadStatus.COMPLETE);
 			if(task.getReviewStatus() != null){

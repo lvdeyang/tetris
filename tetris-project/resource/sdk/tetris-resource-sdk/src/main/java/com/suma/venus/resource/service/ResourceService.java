@@ -370,6 +370,18 @@ public class ResourceService {
 		return true;
 	}
 	
+	/**
+	 * 批量查询用户对哪个用户没有权限，全都有权限则返回null<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月20日 上午9:43:44
+	 * @param userId 被查询用户id
+	 * @param dstUserIds 被检测用户id列表
+	 * @param businessType 业务类型
+	 * @return
+	 * @throws Exception
+	 */
 	public UserBO hasNoPrivilegeOfUsers(Long userId, List<Long> dstUserIds, BUSINESS_OPR_TYPE businessType) throws Exception{
 		List<UserBO> dstUserBOs = userQueryService.queryUsersByUserIds(dstUserIds, null);
 		if(dstUserBOs==null || dstUserBOs.size()<=0) return null;

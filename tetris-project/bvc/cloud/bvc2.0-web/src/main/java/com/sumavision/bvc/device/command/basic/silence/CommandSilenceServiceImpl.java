@@ -15,8 +15,10 @@ import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.enumeration.ExecuteStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
+import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
@@ -25,6 +27,8 @@ import com.sumavision.bvc.device.group.bo.CodecParamBO;
 import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
+import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
+import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -66,6 +70,12 @@ public class CommandSilenceServiceImpl {
 	private CommandCommonUtil commandCommonUtil;
 	
 	@Autowired
+	private CommandCascadeUtil commandCascadeUtil;
+	
+	@Autowired
+	private CommandCascadeService commandCascadeService;
+	
+	@Autowired
 	private ExecuteBusinessProxy executeBusiness;	
 	
 	/** 会议中的一个成员开启静默<br/>
@@ -75,17 +85,31 @@ public class CommandSilenceServiceImpl {
 	 * <b>日期：</b>2019年11月6日 上午11:01:33
 	 * @param groupId
 	 * @param userId 操作成员的userId
-	 * @param silenceToHigher 开启对上静默
+	 * @param silenceToHigher 开启对上静默，false表示保持原状，不表示关闭
 	 * @param silenceToLower 开启对下静默
 	 * @throws Exception
 	 */
 	public void startSilence(Long groupId, Long userId, boolean silenceToHigher, boolean silenceToLower) throws Exception{
 		
+		if(groupId == null){
+			log.warn("开启静默，groupId有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
 					
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			if(group == null){
+				log.warn("开启静默，没有查到group，groupId：" + groupId);
+				return;
+			}
+			
 			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+				}else{
+					return;
+				}
 			}
 			
 			List<CommandGroupMemberPO> members = group.getMembers();
@@ -141,9 +165,20 @@ public class CommandSilenceServiceImpl {
 			if(silenceToLower) description.append("对下静默 ");
 			ExecuteBusinessReturnBO returnBO = executeBusiness.execute(logic, description.toString());
 			commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());
-
+			
+			//级联
+			if(!OriginType.OUTER.equals(operateMember.getOriginType())){
+				if(silenceToHigher){
+					GroupBO groupBO = commandCascadeUtil.becomeSilence(group, operateMember, "silencehigherstart");
+					commandCascadeService.becomeSilence(groupBO);
+				}
+				if(silenceToLower){
+					GroupBO groupBO = commandCascadeUtil.becomeSilence(group, operateMember, "silencelowerstart");
+					commandCascadeService.becomeSilence(groupBO);
+				}
+			}
 		}
-	}	
+	}
 	
 	/**
 	 * 会议中的一个成员停止静默<br/>
@@ -153,17 +188,31 @@ public class CommandSilenceServiceImpl {
 	 * <b>日期：</b>2019年11月6日 上午11:02:00
 	 * @param groupId
 	 * @param userId 操作成员的userId
-	 * @param stopSilenceToHigher 停止对上静默
+	 * @param stopSilenceToHigher 停止对上静默，false表示保持原状，不表示关闭
 	 * @param stopSilenceToLower 停止对下静默
 	 * @throws Exception
 	 */
 	public void stopSilence(Long groupId, Long userId, boolean stopSilenceToHigher, boolean stopSilenceToLower) throws Exception{
 		
+		if(groupId == null){
+			log.warn("停止静默，groupId有误");
+			return;
+		}
+		
 		synchronized (new StringBuffer().append("command-group-").append(groupId).toString().intern()) {
-					
+			
 			CommandGroupPO group = commandGroupDao.findOne(groupId);
+			if(group == null){
+				log.warn("停止静默，没有查到group，groupId：" + groupId);
+				return;
+			}
+			
 			if(group.getStatus().equals(GroupStatus.STOP)){
-				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+				if(!OriginType.OUTER.equals(group.getOriginType())){
+					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已停止，无法操作，id: " + group.getId());
+				}else{
+					return;
+				}
 			}
 			
 			List<CommandGroupMemberPO> members = group.getMembers();
@@ -182,7 +231,18 @@ public class CommandSilenceServiceImpl {
 			if(stopSilenceToLower) description.append("取消对下静默 ");
 			
 			log.info(description.toString());
-
+			
+			//级联
+			if(!OriginType.OUTER.equals(operateMember.getOriginType())){
+				if(stopSilenceToHigher){
+					GroupBO groupBO = commandCascadeUtil.becomeSilence(group, operateMember, "silencehigherstop");
+					commandCascadeService.becomeSilence(groupBO);
+				}
+				if(stopSilenceToLower){
+					GroupBO groupBO = commandCascadeUtil.becomeSilence(group, operateMember, "silencelowerstop");
+					commandCascadeService.becomeSilence(groupBO);
+				}
+			}
 		}
 	}
 	

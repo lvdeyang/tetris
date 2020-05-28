@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.suma.venus.resource.base.bo.UserBO;
+import com.suma.venus.resource.constant.BusinessConstants.BUSINESS_OPR_TYPE;
 import com.suma.venus.resource.dao.BundleDao;
 import com.suma.venus.resource.dao.FolderUserMapDAO;
 import com.suma.venus.resource.pojo.BundlePO;
@@ -16,6 +17,7 @@ import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.control.welcome.UserVO;
 import com.sumavision.bvc.device.command.bo.PlayerInfoBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
+import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
@@ -61,6 +63,9 @@ public class CommandVodRecordParser {
 	private QueryUtil queryUtil;
 	
 	@Autowired
+	private CommandCommonServiceImpl commandCommonServiceImpl;
+	
+	@Autowired
 	private CommandCastServiceImpl commandCastServiceImpl;
 	
 	@Autowired
@@ -87,6 +92,7 @@ public class CommandVodRecordParser {
 		UserBO srcUser = userUtils.queryUserByUserno(code);
 		if(srcUser != null){
 			//录制用户
+			commandCommonServiceImpl.authorizeUser(srcUser.getId(), user.getId(), BUSINESS_OPR_TYPE.RECORD);
 			FolderUserMap srcUserMap = folderUserMapDao.findByUserId(srcUser.getId());
 			boolean bSrcUserLdap = queryUtil.isLdapUser(srcUser, srcUserMap);
 			if(!bSrcUserLdap){
@@ -101,6 +107,7 @@ public class CommandVodRecordParser {
 		}else{
 			BundlePO bundle = bundleDao.findByUsername(code);
 			String bundleId = bundle.getBundleId();
+			commandCommonServiceImpl.authorizeBundle(bundleId, user.getId(), BUSINESS_OPR_TYPE.RECORD);
 			//录制设备 TODO:鉴权
 			if(!queryUtil.isLdapBundle(bundle)){
 				List<ChannelSchemeDTO> queryChannels = resourceQueryUtil.findByBundleIdsAndChannelType(new ArrayListWrapper<String>().add(bundleId).getList(), 0);

@@ -43,6 +43,9 @@ public class ChannelPO extends AbstractBasePO {
 	
 	/** 是否自动播发 */
 	private Boolean autoBroad;
+	
+	/** 频道uuid标识--流程里面使用 */
+	private String channelUuid;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -132,5 +135,14 @@ public class ChannelPO extends AbstractBasePO {
 
 	public void setAutoBroad(Boolean autoBroad) {
 		this.autoBroad = autoBroad;
+	}
+
+	@Column(name = "CHANNEL_UUID")
+	public String getChannelUuid() {
+		return channelUuid;
+	}
+
+	public void setChannelUuid(String channelUuid) {
+		this.channelUuid = channelUuid;
 	}
 }

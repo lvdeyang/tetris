@@ -64,4 +64,6 @@ public interface ChannelDAO extends BaseDAO<ChannelPO>{
 	public List<Integer> getAllAbilityId();
 	
 	public List<ChannelPO> findByBroadWayAndBroadcastStatus(String broadWay, String broadStatus);
+	
+	public ChannelPO findByChannelUuid(String channelUuid);
 }

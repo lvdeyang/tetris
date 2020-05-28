@@ -11,6 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.cs.channel.ChannelService;
 import com.sumavision.tetris.cs.channel.api.ApiServerScheduleCastVO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoDAO;
+import com.sumavision.tetris.cs.channel.broad.ability.BroadAbilityBroadInfoPO;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoDAO;
+import com.sumavision.tetris.cs.channel.broad.terminal.BroadTerminalBroadInfoPO;
 import com.sumavision.tetris.cs.program.ProgramService;
 import com.sumavision.tetris.cs.program.ProgramVO;
 import com.sumavision.tetris.cs.program.ScreenVO;
@@ -47,6 +51,9 @@ public class ScheduleService {
 	
 	@Autowired
 	private MediaVideoStreamQuery mediaVideoStreamQuery;
+	
+	@Autowired
+	private BroadTerminalBroadInfoDAO broadTerminalBroadInfoDao;
 	
 	/**
 	 * 添加排期<br/>
@@ -276,6 +283,9 @@ public class ScheduleService {
 			screen.setEncryption(item.getEncryption());
 			screen.setEncryptionUrl(item.getEncryptionUrl());
 			screen.setResourceId(item.getResourceId());
+			screen.setAudioPid(item.getAudioPid());
+			screen.setVideoPid(item.getVideoPid());
+			screen.setFreq(item.getFreq());
 			screenVOs.add(screen);
 		}
 		ProgramVO program = new ProgramVO();

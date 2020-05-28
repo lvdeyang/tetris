@@ -30,6 +30,12 @@ public class ProgramVideoBO {
 	private Integer nv_card_idx;
 	
 	private String deinterlace_mode;
+	
+	private String backup_mode;
+	
+	private Integer cutoff_time;
+	
+	private String pattern_path;
 
 	public Integer getPid() {
 		return pid;
@@ -111,5 +117,31 @@ public class ProgramVideoBO {
 		this.deinterlace_mode = deinterlace_mode;
 		return this;
 	}
-	
+
+	public String getBackup_mode() {
+		return backup_mode;
+	}
+
+	public ProgramVideoBO setBackup_mode(String backup_mode) {
+		this.backup_mode = backup_mode;
+		return this;
+	}
+
+	public Integer getCutoff_time() {
+		return cutoff_time;
+	}
+
+	public ProgramVideoBO setCutoff_time(Integer cutoff_time) {
+		this.cutoff_time = cutoff_time;
+		return this;
+	}
+
+	public String getPattern_path() {
+		return pattern_path;
+	}
+
+	public ProgramVideoBO setPattern_path(String pattern_path) {
+		this.pattern_path = pattern_path;
+		return this;
+	}
 }

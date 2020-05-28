@@ -74,4 +74,5 @@ public class SchedulePO extends AbstractBasePO{
 	public void setRemark(String remark) {
 		this.remark = remark;
 	}
+
 }

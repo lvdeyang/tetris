@@ -52,6 +52,18 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 	private String protoType;
 	
 	private String gasketPath;
+	
+	private String channelUuid;
+	
+	private String freq;
+	
+	private String videoPid;
+	
+	private String videoType;
+	
+	private String audioPid;
+	
+	private String audioType;
 
 	@Override
 	public ChannelVO set(ChannelPO entity) throws Exception {
@@ -69,7 +81,8 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 		.setGroupId(entity.getGroupId())
 		.setType(entity.getType())
 		.setEncryption(entity.getEncryption())
-		.setAutoBroad(entity.getAutoBroad());
+		.setAutoBroad(entity.getAutoBroad())
+		.setChannelUuid(entity.getChannelUuid());
 
 		return this;
 	}
@@ -271,6 +284,60 @@ public class ChannelVO extends AbstractBaseVO<ChannelVO, ChannelPO> {
 
 	public ChannelVO setOutputUsers(List<UserVO> outputUsers) {
 		this.outputUsers = outputUsers;
+		return this;
+	}
+
+	public String getChannelUuid() {
+		return channelUuid;
+	}
+
+	public ChannelVO setChannelUuid(String channelUuid) {
+		this.channelUuid = channelUuid;
+		return this;
+	}
+
+	public String getFreq() {
+		return freq;
+	}
+
+	public ChannelVO setFreq(String freq) {
+		this.freq = freq;
+		return this;
+	}
+
+	public String getVideoPid() {
+		return videoPid;
+	}
+
+	public ChannelVO setVideoPid(String videoPid) {
+		this.videoPid = videoPid;
+		return this;
+	}
+
+	public String getVideoType() {
+		return videoType;
+	}
+
+	public ChannelVO setVideoType(String videoType) {
+		this.videoType = videoType;
+		return this;
+	}
+
+	public String getAudioPid() {
+		return audioPid;
+	}
+
+	public ChannelVO setAudioPid(String audioPid) {
+		this.audioPid = audioPid;
+		return this;
+	}
+
+	public String getAudioType() {
+		return audioType;
+	}
+
+	public ChannelVO setAudioType(String audioType) {
+		this.audioType = audioType;
 		return this;
 	}
 }

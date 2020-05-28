@@ -4,9 +4,9 @@ public class SvtBO {
 
 	private String pixel_format;
 	
-	private String enc_mode;
+	private Integer enc_mode;
 	
-	private Integer encoding_type;
+	private String encoding_type;
 	
 	private String bframe_reference;
 
@@ -19,20 +19,20 @@ public class SvtBO {
 		return this;
 	}
 
-	public String getEnc_mode() {
+	public Integer getEnc_mode() {
 		return enc_mode;
 	}
 
-	public SvtBO setEnc_mode(String enc_mode) {
+	public SvtBO setEnc_mode(Integer enc_mode) {
 		this.enc_mode = enc_mode;
 		return this;
 	}
 
-	public Integer getEncoding_type() {
+	public String getEncoding_type() {
 		return encoding_type;
 	}
 
-	public SvtBO setEncoding_type(Integer encoding_type) {
+	public SvtBO setEncoding_type(String encoding_type) {
 		this.encoding_type = encoding_type;
 		return this;
 	}

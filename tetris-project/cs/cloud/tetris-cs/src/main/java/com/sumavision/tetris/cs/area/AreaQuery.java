@@ -110,7 +110,7 @@ public class AreaQuery {
 	}
 
 	public List<AreaData> getRootDivision() throws Exception {
-		return getChildDivision("3204000000");
+		return getChildDivision("3205000000");
 	}
 
 	/**

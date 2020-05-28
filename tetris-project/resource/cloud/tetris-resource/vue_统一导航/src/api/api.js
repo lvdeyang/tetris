@@ -31,9 +31,11 @@ let axiosInstance = axios.create({
 
 // 请求拦截器
 axiosInstance.interceptors.request.use(function (config) {
-  config.headers['tetris-001'] = sessionStorage.getItem('token');
+  var resourceToken = sessionStorage.getItem('token');
+  var bvcToken = localStorage.getItem('tetris-001');
+  config.headers['tetris-001'] = resourceToken?resourceToken:bvcToken;
   //config.headers['tetris-002'] = '';
-  config.headers.Authorization = sessionStorage.getItem('token');
+  config.headers.Authorization = resourceToken?resourceToken:bvcToken;
   return config
 }, function (err) {
   return Promise.reject(err)
@@ -93,6 +95,7 @@ export const queryFolderTree = params => {return axiosInstance.post(`${basePath}
 export const addFolder = params => { return axiosInstance.post(`${basePath}/folder/add`, qs.stringify(params)).then(res => res.data) }
 export const deleteFolder = params => { return axiosInstance.post(`${basePath}/folder/delete`, qs.stringify(params)).then(res => res.data) }
 export const initFolderTree = params => { return axiosInstance.post(`${basePath}/folder/initTree`, qs.stringify(params)).then(res => res.data) }
+export const changeFolderIndex = params => { return axiosInstance.post(`${basePath}/folder/changeFolderIndex`, qs.stringify(params)).then(res => res.data) }
 export const queryTreeChildren = params => { return axiosInstance.post(`${basePath}/folder/queryTreeChildrenByParentId`, qs.stringify(params)).then(res => res.data) }
 export const initFolderTreeWithOutMember = params => { return axiosInstance.post(`${basePath}/folder/initTreeWithOutMember`, qs.stringify(params)).then(res => res.data) }
 export const modifyFolder = params => { return axiosInstance.post(`${basePath}/folder/modify`, qs.stringify(params)).then(res => res.data) }

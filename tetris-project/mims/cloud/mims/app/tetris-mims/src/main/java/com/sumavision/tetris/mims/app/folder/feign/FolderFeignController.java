@@ -17,6 +17,7 @@ import com.sumavision.tetris.mims.app.folder.FolderType;
 import com.sumavision.tetris.mims.app.folder.exception.FolderNotExistException;
 import com.sumavision.tetris.mims.app.folder.exception.UserHasNoPermissionForFolderException;
 import com.sumavision.tetris.mims.app.media.picture.MediaPictureVO;
+import com.sumavision.tetris.mims.app.media.upload.MediaFileEquipmentPermissionService;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
@@ -69,7 +70,7 @@ public class FolderFeignController {
 	@JsonBody
 	@ResponseBody
 	@RequestMapping(value = "/add/by/folderType")
-	public Object test(
+	public Object add(
 			String folderType,
 			Long parentFolderId,
 			String folderName,

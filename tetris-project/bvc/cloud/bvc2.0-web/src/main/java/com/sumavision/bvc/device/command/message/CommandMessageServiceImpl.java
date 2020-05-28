@@ -16,7 +16,12 @@ import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupMessageDAO;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.enumeration.MessageStatus;
+import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.command.group.message.CommandGroupMessagePO;
+import com.sumavision.bvc.device.command.cascade.util.CommandCascadeUtil;
+import com.sumavision.bvc.device.command.common.CommandCommonUtil;
+import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
+import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -47,6 +52,15 @@ public class CommandMessageServiceImpl {
 	
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
+	
+	@Autowired
+	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private CommandCascadeUtil commandCascadeUtil;
+	
+	@Autowired
+	private CommandCascadeService commandCascadeService;
 	
 	/**
 	 * 新建通知并发送<br/>
@@ -237,15 +251,34 @@ public class CommandMessageServiceImpl {
 	 * @throws Exception
 	 */
 	public void broadcastInstantMessage(Long userId, String name, Long groupId, String message) throws Exception{
+		
+		if(groupId == null){
+			log.warn("发送实时消息，groupId有误");
+			return;
+		}
 		CommandGroupPO group = commandGroupDao.findOne(groupId);
+		if(group == null){
+			log.warn("发送实时消息，没有查到group，groupId：" + groupId);
+			return;
+		}
+		
 		List<CommandGroupMemberPO> members = group.getMembers();
 		List<Long> userIds = new ArrayList<Long>();
 		for(CommandGroupMemberPO member : members){
 			if(member.getMemberStatus().equals(MemberStatus.CONNECT) && !member.getUserId().equals(userId)){
-				userIds.add(member.getUserId());
+				if(!OriginType.OUTER.equals(member.getOriginType())){
+					userIds.add(member.getUserId());
+				}
 			}
 		}
 		websocketMessageService.broadcastMeetingMessage(groupId, userIds, message, userId, name);
+		
+		//级联
+		CommandGroupMemberPO sender = commandCommonUtil.queryMemberByUserId(members, userId);
+		if(!OriginType.OUTER.equals(sender.getOriginType())){			
+			GroupBO groupBO = commandCascadeUtil.sendInstantMessage(group, sender, message);
+			commandCascadeService.sendInstantMessage(groupBO);
+		}
 		
 	}
 }

@@ -2,9 +2,7 @@ package com.sumavision.bvc.device.command.cascade.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
@@ -18,6 +16,7 @@ import com.suma.venus.resource.pojo.FolderUserMap;
 import com.sumavision.bvc.command.group.basic.CommandGroupMemberPO;
 import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
+import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
@@ -28,6 +27,13 @@ import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
 
+/**
+ * 级联util类，主要用来生成groupBO<br/>
+ * <p>详细描述</p>
+ * <b>作者:</b>zsy<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年5月22日 下午2:12:52
+ */
 @Service
 public class CommandCascadeUtil {
 	
@@ -40,6 +46,51 @@ public class CommandCascadeUtil {
 	@Autowired
 	private UserQuery userQuery;
 	
+	/**
+	 * 发送即时消息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午2:17:23
+	 * @param group
+	 * @param sender 发起人，发消息的人
+	 * @param message 消息内容
+	 * @return
+	 */
+	public GroupBO sendInstantMessage(CommandGroupPO group, CommandGroupMemberPO sender, String message){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(sender.getUserNum())
+				.setSubject(message)
+				.setMlist(mlist);
+		return groupBO;
+	}
+	
+	/**
+	 * 静默<br/>
+	 * <p>包含指挥/会议的对上对下、开始停止</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午2:36:11
+	 * @param group
+	 * @param member
+	 * @param operation 开始对上/停止对上/开始对下/停止对下 silencehigherstart/silencehigherstop/silencelowerstart/silencelowerstop
+	 * @return
+	 */
+	public GroupBO becomeSilence(CommandGroupPO group, CommandGroupMemberPO member, String operation){
+		List<CommandGroupMemberPO> members = group.getMembers();
+		List<MinfoBO> mlist = generateMinfoBOList(members);
+		GroupBO groupBO = new GroupBO()
+				.setGid(group.getUuid())
+				.setOp(member.getUserNum())
+				.setMlist(mlist);
+		groupBO.setBiztype(group.getType().equals(GroupType.MEETING)?"bizcnf":"bizcmd");
+		groupBO.setCode(operation);
+		return groupBO;
+	}
+
 	public GroupBO createCommand(CommandGroupPO group){
 		List<CommandGroupMemberPO> members = group.getMembers();
 		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);

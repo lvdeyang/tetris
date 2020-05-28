@@ -20,9 +20,11 @@ import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.OriginType;
 import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.basic.forward.CommandForwardServiceImpl;
+import com.sumavision.bvc.device.command.basic.silence.CommandSilenceServiceImpl;
 import com.sumavision.bvc.device.command.cascade.CommandCascadeServiceImpl;
 import com.sumavision.bvc.device.command.cooperate.CommandCooperateServiceImpl;
 import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
+import com.sumavision.bvc.device.command.message.CommandMessageServiceImpl;
 import com.sumavision.tetris.auth.login.LoginService;
 import com.sumavision.tetris.bvc.cascade.bo.AuthCommandBO;
 import com.sumavision.tetris.bvc.cascade.bo.CrossCommandBO;
@@ -55,6 +57,12 @@ public class ProtocolParser {
 	
 	@Autowired
 	private CommandMeetingSpeakServiceImpl commandMeetingSpeakServiceImpl;
+
+	@Autowired
+	private CommandMessageServiceImpl commandMessageServiceImpl;
+
+	@Autowired
+	private CommandSilenceServiceImpl commandSilenceServiceImpl;
 	
 	@Autowired
 	private UserQuery userQuery;
@@ -144,7 +152,10 @@ public class ProtocolParser {
 			resourceRemoteService.notifyXml(commandname, xml);
 		}else{
 			String operation = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".operation").toString());
-			if("group".equals(commandname) && "create".equals(operation)){
+			if("insmsg".equals(commandname) && "send".equals(operation)){
+				//私有协议
+				sendInstantMessage(reader, rootNodeName);
+			}else if("group".equals(commandname) && "create".equals(operation)){
 				String biztype = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".bizinfo.biztype").toString());
 				if("cmd".equals(biztype)){
 					createCommand(reader, rootNodeName, srcNo);
@@ -160,6 +171,14 @@ public class ProtocolParser {
 				}
 			}else if("group".equals(commandname) && "destroy".equals(operation)){
 				deleteCommand(reader, rootNodeName, srcNo);
+			}else if("bizcmd".equals(commandname) && "silencehigherstart".equals(operation)){
+				becomeSilence(reader, rootNodeName);
+			}else if("bizcmd".equals(commandname) && "silencehigherstop".equals(operation)){
+				becomeSilence(reader, rootNodeName);
+			}else if("bizcmd".equals(commandname) && "silencelowerstart".equals(operation)){
+				becomeSilence(reader, rootNodeName);
+			}else if("bizcmd".equals(commandname) && "silencelowerstop".equals(operation)){
+				becomeSilence(reader, rootNodeName);
 			}else if("bizcmd".equals(commandname) && "start".equals(operation)){
 				startCommand(reader, rootNodeName, srcNo);
 			}else if("bizcmd".equals(commandname) && "maddfull".equals(operation)){
@@ -240,10 +259,59 @@ public class ProtocolParser {
 		
 	}
 	
+	/**
+	 * 发送实时消息<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午2:06:03
+	 * @param reader
+	 * @param rootNodeName
+	 * @throws Exception
+	 */
+	public void sendInstantMessage(XMLReader reader, String rootNodeName) throws Exception{
+		String gid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString());
+		Long groupId = commandGroupDao.findIdByUuid(gid);
+		String content = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".content").toString());
+		String op = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString());
+		UserVO user = userQuery.findByUserno(op);
+		
+		commandMessageServiceImpl.broadcastInstantMessage(user.getId(), user.getUsername(), groupId, content);
+	}
+	
 	/**************
 	 ****指挥相关****
 	 **************/
-	
+		
+	/**
+	 * 静默<br/>
+	 * <p>包含指挥/会议的对上对下、开始停止</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月22日 下午3:10:15
+	 * @param reader
+	 * @param rootNodeName
+	 * @throws Exception
+	 */
+	public void becomeSilence(XMLReader reader, String rootNodeName) throws Exception{
+		String gid = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".gid").toString());
+		Long groupId = commandGroupDao.findIdByUuid(gid);
+		String operation = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".operation").toString());
+		String op = reader.readString(new StringBufferWrapper().append(rootNodeName).append(".op").toString());
+		UserVO user = userQuery.findByUserno(op);
+		
+		if("silencehigherstart".equals(operation)){
+			commandSilenceServiceImpl.startSilence(groupId, user.getId(), true, false);
+		}else if("silencehigherstop".equals(operation)){
+			commandSilenceServiceImpl.stopSilence(groupId, user.getId(), true, false);
+		}else if("silencelowerstart".equals(operation)){
+			commandSilenceServiceImpl.startSilence(groupId, user.getId(), false, true);
+		}else if("silencelowerstop".equals(operation)){
+			commandSilenceServiceImpl.stopSilence(groupId, user.getId(), false, true);
+		}
+		
+	}
+
 	/**
 	 * 创建指挥<br/>
 	 * <b>作者:</b>lvdeyang<br/>
