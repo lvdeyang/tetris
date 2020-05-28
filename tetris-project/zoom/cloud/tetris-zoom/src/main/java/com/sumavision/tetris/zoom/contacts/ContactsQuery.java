@@ -74,7 +74,7 @@ public class ContactsQuery {
 				List<String> onlineTerminalTypes = new ArrayList<String>();
 				if(tokens!=null && tokens.size()>0){
 					for(TokenVO token:tokens){
-						if(contacts.getUserId().equals(token.getId().toString())){
+						if(contacts.getUserId().equals(token.getUserId().toString())){
 							if(UserStatus.ONLINE.toString().equals(token.getStatus())){
 								status = UserStatus.ONLINE.toString();
 								onlineTerminalTypes.add(token.getType());
@@ -100,7 +100,7 @@ public class ContactsQuery {
 						List<String> onlineTerminalTypes = new ArrayList<String>();
 						if(tokens!=null && tokens.size()>0){
 							for(TokenVO token:tokens){
-								if(contacts.getUserId().equals(token.getId().toString())){
+								if(contacts.getUserId().equals(token.getUserId().toString())){
 									if(UserStatus.ONLINE.toString().equals(token.getStatus())){
 										status = UserStatus.ONLINE.toString();
 										onlineTerminalTypes.add(token.getType());
@@ -157,7 +157,7 @@ public class ContactsQuery {
 				List<String> onlineTerminalTypes = new ArrayList<String>();
 				if(tokens!=null && tokens.size()>0){
 					for(TokenVO token:tokens){
-						if(contacts.getUserId().equals(token.getId().toString())){
+						if(contacts.getUserId().equals(token.getUserId().toString())){
 							if(UserStatus.ONLINE.toString().equals(token.getStatus())){
 								status = UserStatus.ONLINE.toString();
 								onlineTerminalTypes.add(token.getType());
@@ -186,7 +186,7 @@ public class ContactsQuery {
 							TokenVO theToken = null;
 							if(tokens!=null && tokens.size()>0){
 								for(TokenVO token:tokens){
-									if(groupedEntity.getContactsUserId().equals(token.getId().toString())){
+									if(groupedEntity.getContactsUserId().equals(token.getUserId().toString())){
 										theToken = token;
 										break;
 									}
@@ -243,7 +243,7 @@ public class ContactsQuery {
 				List<String> onlineTerminalTypes = new ArrayList<String>();
 				if(tokens!=null && tokens.size()>0){
 					for(TokenVO token:tokens){
-						if(contact.getUserId().equals(token.getId().toString())){
+						if(contact.getUserId().equals(token.getUserId().toString())){
 							if(UserStatus.ONLINE.toString().equals(token.getStatus())){
 								status = UserStatus.ONLINE.toString();
 								onlineTerminalTypes.add(token.getType());

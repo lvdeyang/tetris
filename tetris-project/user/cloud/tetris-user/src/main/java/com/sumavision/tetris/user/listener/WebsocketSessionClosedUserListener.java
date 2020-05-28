@@ -27,6 +27,8 @@ public class WebsocketSessionClosedUserListener implements ApplicationListener<W
 		
 		try {
 			userService.userOffline(event.getUserId(), TerminalType.QT_ZK);
+			userService.userOffline(event.getUserId(), TerminalType.ZOOM_ANDROID);
+			userService.userOffline(event.getUserId(), TerminalType.ZOOM_QT);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

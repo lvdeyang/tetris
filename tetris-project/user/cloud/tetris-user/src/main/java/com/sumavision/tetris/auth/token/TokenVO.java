@@ -10,6 +10,8 @@ public class TokenVO extends AbstractBaseVO<TokenVO, TokenPO>{
 	
 	private String status;
 	
+	private Long userId;
+	
 	public String getType() {
 		return type;
 	}
@@ -37,12 +39,22 @@ public class TokenVO extends AbstractBaseVO<TokenVO, TokenPO>{
 		return this;
 	}
 
+	public Long getUserId() {
+		return userId;
+	}
+
+	public TokenVO setUserId(Long userId) {
+		this.userId = userId;
+		return this;
+	}
+
 	@Override
 	public TokenVO set(TokenPO entity) throws Exception {
 		this.setId(entity.getId())
 			.setIp(entity.getIp())
 			.setType(entity.getType().getName())
-			.setStatus(entity.getStatus().toString());
+			.setStatus(entity.getStatus().toString())
+			.setUserId(entity.getUserId());
 		return this;
 	}
 

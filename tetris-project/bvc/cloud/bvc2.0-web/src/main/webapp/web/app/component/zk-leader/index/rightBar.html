@@ -52,8 +52,9 @@
                         </el-tooltip>
                         <span v-if="JSON.parse(group.param).creator == user.id" class="icon-user"
                               style="font-size: 14px">[主席]</span>
-                        <span v-else-if="JSON.parse(group.param).entered" style="font-size: 14px">[已进入]</span>
-                        <span v-else style="font-size: 14px">[未进入]</span>
+                        <span v-else-if="group.bundleStatus==='bundle-offline'" style="font-size: 14px">[停止]</span>      
+                        <span v-else-if="group.bundleStatus==='bundle-online' && JSON.parse(group.param).entered" style="font-size: 14px">[已进入]</span>
+                        <span v-else-if="group.bundleStatus==='bundle-online' && !JSON.parse(group.param).entered" style="font-size: 14px">[未进入]</span>
                     </el-option>
                 </el-select>
             </div>

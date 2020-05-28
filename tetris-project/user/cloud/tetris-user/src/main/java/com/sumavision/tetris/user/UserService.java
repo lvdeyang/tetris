@@ -976,6 +976,8 @@ public class UserService{
 		
 		TokenPO token = tokenDao.findByUserIdAndType(userId, type);
 		if(token != null){
+			token.setLastModifyTime(null);
+			token.setToken(null);
 			token.setStatus(UserStatus.OFFLINE);
 			tokenDao.save(token);
 		}

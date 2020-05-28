@@ -10,13 +10,17 @@ import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.auth.token.TokenQuery;
 import com.sumavision.tetris.auth.token.TokenVO;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
+import com.sumavision.tetris.user.UserClassify;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserStatus;
 import com.sumavision.tetris.user.UserVO;
 import com.sumavision.tetris.zoom.SourceGroupDAO;
 import com.sumavision.tetris.zoom.SourceGroupPO;
 import com.sumavision.tetris.zoom.contacts.exception.ContactsNotFoundException;
+import com.sumavision.tetris.zoom.contacts.exception.IllegalContactsException;
+import com.sumavision.tetris.zoom.contacts.exception.RepeatContactsException;
 import com.sumavision.tetris.zoom.exception.SourceGroupNotFoundException;
+import com.sumavision.tetris.zoom.exception.UserNotFoundException;
 
 @Service
 public class ContactsService {
@@ -60,8 +64,22 @@ public class ContactsService {
 		
 		List<UserVO> contactsUsers = userQuery.findByIdIn(new ArrayListWrapper<Long>().add(userId).getList());
 		
+		if(contactsUsers==null || contactsUsers.size()<=0){
+			throw new UserNotFoundException(userId);
+		}
+		
 		if(contactsUsers!=null && contactsUsers.size()>0){
 			UserVO contactsUser = contactsUsers.get(0);
+			if(contactsUser.getId().equals(user.getId())){
+				throw new IllegalContactsException("不能将自己建为联系人！");
+			}
+			if(contactsUser.getClassify().equals(UserClassify.TOURIST.toString())){
+				throw new IllegalContactsException("不能将游客建为联系人！");
+			}
+			ContactsPO existContacts = contactsDao.findByUserIdAndContactsUserId(user.getId().toString(), userId.toString());
+			if(existContacts != null){
+				throw new RepeatContactsException();
+			}
 			ContactsPO contacts = new ContactsPO();
 			contacts.setUserId(user.getId().toString());
 			contacts.setContactsUserId(contactsUser.getId().toString());
@@ -146,7 +164,7 @@ public class ContactsService {
 	public void remove(Long id) throws Exception{
 		ContactsPO entity = contactsDao.findOne(id);
 		if(entity != null){
-			contactsDao.save(entity);
+			contactsDao.delete(entity);
 		}
 	}
 	

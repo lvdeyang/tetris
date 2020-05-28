@@ -66,7 +66,7 @@ public class ContactsMessageService {
 		//消息发送者在消息目标的联系人
 		ContactsPO contacts1 = contactsDao.findByUserIdAndContactsUserId(message.getToUserId(), message.getFromUserId());
 		content.setFromUsername(contacts1==null?message.getFromUserNickname():(contacts1.getRename()==null?contacts1.getContactsUserNickname():contacts1.getRename()));
-		content.setFromContactsId(contacts1.getId());
+		content.setFromContactsId(contacts1==null?user.getId():contacts1.getId());
 		content.setFromSourceGroupId(contacts1!=null?contacts1.getSourceGroupId():null);
 		
 		websocketMessageService.push(message.getToUserId(), "contactsTextMessage", JSON.parseObject(JSON.toJSONString(content)), message.getFromUserId(), message.getFromUserNickname());

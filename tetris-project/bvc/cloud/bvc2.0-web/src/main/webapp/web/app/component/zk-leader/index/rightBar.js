@@ -901,7 +901,7 @@ define([
                             //类型一样，渲染的时候才会显示文字，而不是id
                             self.meet.currentId = data.id.toString();
                             self.meet.current = data;
-                            self.currentGroupChange(self.meet.currentId, true);
+                            self.currentGroupChange(self.meet.currentId, false);
                         }
                     } else {
                         for (var j = 0; j < self.group.entered.length; j++) {
@@ -922,7 +922,7 @@ define([
                         if (!self.group.current) {
                             self.group.currentId = data.id.toString();
                             self.group.current = data;
-                            self.currentGroupChange(self.group.currentId, true);
+                            self.currentGroupChange(self.group.currentId, false);
                         }
                     }
                     if (data.splits && data.splits.length > 0) {
@@ -1486,6 +1486,14 @@ define([
                                     } else {
                                         self.buttons.exitMeet = true;
                                         self.buttons.enterMeet = false;
+                                    }
+                                }else{
+                                	if (self.differentiate === 1) {
+                                        self.buttons.exitCommand = false;
+                                        self.buttons.enterCommand = true;
+                                    } else {
+                                        self.buttons.exitMeet = false;
+                                        self.buttons.enterMeet = true;
                                     }
                                 }
                                 break;
@@ -2565,37 +2573,41 @@ define([
                     if (e.splits && e.splits.length > 0) {
                         self.qt.invoke('commandExit', e.splits);
                         if (self.agreeExitCommand === 1) {
-                            self.buttons.exitCommand = false;
-                            self.buttons.enterCommand = true;
-                            self.group.entered = self.group.entered.filter(function (value) {
-                                return value.id != self.group.current.id;
-                            });
-                            if (self.group.entered.length > 0) {
-                                self.group.currentId = self.group.entered[0].id;
-                                self.group.current = self.group.entered[0];
-                                self.currentGroupChange(self.group.currentId);
-                            } else {
-                                self.group.currentId = '';
-                                self.group.current = '';
-                            }
-                        } else {
-                            self.buttons.exitMeet = false;
-                            self.buttons.enterMeet = true;
-                            for (var i = 0; i < self.meet.entered.length; i++) {
-                                self.meet.entered = self.meet.entered.filter(function (value) {
-                                    return value.id != self.meet.current.id;
+                            self.refreshCommand(null, function(){
+                            	self.buttons.exitCommand = false;
+                                self.buttons.enterCommand = true;
+                                self.group.entered = self.group.entered.filter(function (value) {
+                                    return value.id != self.group.current.id;
                                 });
-                                if (self.meet.entered.length > 0) {
-                                    self.meet.currentId = self.meet.entered[0].id;
-                                    self.meet.current = self.meet.entered[0];
-                                    setTimeout(function () {
-                                        self.currentGroupChange(self.meet.currentId);
-                                    }, 500)
+                                if (self.group.entered.length > 0) {
+                                    self.group.currentId = self.group.entered[0].id;
+                                    self.group.current = self.group.entered[0];
+                                    self.currentGroupChange(self.group.currentId);
                                 } else {
-                                    self.meet.currentId = '';
-                                    self.meet.current = '';
+                                    self.group.currentId = '';
+                                    self.group.current = '';
                                 }
-                            }
+                            });
+                        } else {
+                            self.refreshCommand('meeting', function(){
+                            	self.buttons.exitMeet = false;
+                                self.buttons.enterMeet = true;
+                                for (var i = 0; i < self.meet.entered.length; i++) {
+                                    self.meet.entered = self.meet.entered.filter(function (value) {
+                                        return value.id != self.meet.current.id;
+                                    });
+                                    if (self.meet.entered.length > 0) {
+                                        self.meet.currentId = self.meet.entered[0].id;
+                                        self.meet.current = self.meet.entered[0];
+                                        setTimeout(function () {
+                                            self.currentGroupChange(self.meet.currentId);
+                                        }, 500)
+                                    } else {
+                                        self.meet.currentId = '';
+                                        self.meet.current = '';
+                                    }
+                                }
+                            });
                         }
                     }
                 });
@@ -2679,6 +2691,8 @@ define([
                     $('.highLight').css('left', '7px');
                     self.refreshCommand(null, function () {
                         self.autoEnterCommand(e.params);
+                        self.buttons.exitCommand = true;
+                        self.buttons.enterCommand = false;
                     });
                     self.qt.success(e.params.businessInfo);
                 });
@@ -2695,6 +2709,8 @@ define([
                     //加参数是为了区分进会时 ，不影响指挥的代码
                     self.refreshCommand('meeting', function () {
                         self.autoEnterCommand(e.params, 'meet');
+                        self.buttons.exitMeet = true;
+                        self.buttons.enterMeet = false;
                     });
                     self.qt.success(e.params.businessInfo);
                 });

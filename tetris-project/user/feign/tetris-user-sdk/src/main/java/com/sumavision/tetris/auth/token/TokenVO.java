@@ -14,6 +14,8 @@ public class TokenVO{
 	
 	private String status;
 	
+	private Long userId;
+	
 	public Long getId() {
 		return id;
 	}
@@ -65,6 +67,15 @@ public class TokenVO{
 
 	public TokenVO setStatus(String status) {
 		this.status = status;
+		return this;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public TokenVO setUserId(Long userId) {
+		this.userId = userId;
 		return this;
 	}
 
