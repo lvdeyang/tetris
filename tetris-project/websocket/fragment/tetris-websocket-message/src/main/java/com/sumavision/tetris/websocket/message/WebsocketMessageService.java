@@ -87,14 +87,14 @@ public class WebsocketMessageService {
 	 * <b>日期：</b>2020年3月3日 上午8:56:13
 	 * @param String targetId 目标id
 	 * @param String businessId 业务id
-	 * @param JSONObject content 业务内容
+	 * @param JSON content 业务内容
 	 * @param String fromId 消息发布者id
 	 * @param String fromName 消息发布者名称
 	 */
 	public void push(
 			String targetId,
 			String businessId,
-			JSONObject content,
+			JSON content,
 			String fromId,
 			String fromName) throws Exception{
 		

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.agent.service.TerminalAgentService;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -691,7 +692,7 @@ public class ZoomService {
 		List<ZoomMemberVO> members = ZoomMemberVO.getConverter(ZoomMemberVO.class).convert(others, ZoomMemberVO.class);
 		members.addAll(spokesmen);
 		zoomQuery.queryBundleInfo(members, webRtc);
-		JSONObject content = JSON.parseObject(JSON.toJSONString(spokesmen));
+		JSONArray content = JSON.parseArray(JSON.toJSONString(spokesmen));
 		String businessId = "zoomAddSpokesman";
 		String fromUserId = null;
 		String fromUserRename = null;
@@ -756,7 +757,7 @@ public class ZoomService {
 		List<ZoomMemberVO> members = ZoomMemberVO.getConverter(ZoomMemberVO.class).convert(others, ZoomMemberVO.class);
 		members.addAll(removedSpokesmen);
 		zoomQuery.queryBundleInfo(members, webRtc);
-		JSONObject content = JSON.parseObject(JSON.toJSONString(removedSpokesmen));
+		JSONArray content = JSON.parseArray(JSON.toJSONString(removedSpokesmen));
 		String businessId = "zoomRemoveSpokesman";
 		String fromUserId = null;
 		String fromUserRename = null;
@@ -882,7 +883,7 @@ public class ZoomService {
 		List<ZoomMemberVO> members = ZoomMemberVO.getConverter(ZoomMemberVO.class).convert(others, ZoomMemberVO.class);
 		members.addAll(kickOutMembers);
 		zoomQuery.queryBundleInfo(members, webRtc);
-		JSONObject content = JSON.parseObject(JSON.toJSONString(kickOutMembers));
+		JSONArray content = JSON.parseArray(JSON.toJSONString(kickOutMembers));
 		String fromUserId = null;
 		String fromUserRename = null;
 		if(others!=null && others.size()>0){
@@ -1021,6 +1022,7 @@ public class ZoomService {
 	 * @return ZoomMemberVO 会议成员
 	 */
 	public ZoomMemberVO openVideo(Long myZoomMemberId) throws Exception{
+		UserVO user = userQuery.current();
 		ZoomMemberPO selfMember = zoomMemberDao.findOne(myZoomMemberId);
 		if(selfMember == null){
 			throw new ZoomMemberNotFoundException(myZoomMemberId);
@@ -1048,7 +1050,8 @@ public class ZoomService {
 		
 		for(ZoomMemberVO m:members){
 			if(!m.getJoin()) continue;
-			if(m.getId().equals(openVideoMember.getId())) continue;
+			if(user.getId().toString().equals(openVideoMember.getUserId()) && m.getId().equals(openVideoMember.getId())) continue;
+			if(!user.getId().toString().equals(openVideoMember.getUserId()) && m.getChairman()) continue;
 			if(ZoomMemberType.TERMINl.toString().equals(m.getType())){
 				websocketMessageService.push(m.getUserId(), businessId, content, selfMember.getUserId(), selfMember.getRename());
 			}else if(ZoomMemberType.JV220.toString().equals(m.getType())){
@@ -1071,6 +1074,7 @@ public class ZoomService {
 	 * @return ZoomMemberVO 会议成员
 	 */
 	public ZoomMemberVO closeVideo(Long myZoomMemberId) throws Exception{
+		UserVO user = userQuery.current();
 		ZoomMemberPO selfMember = zoomMemberDao.findOne(myZoomMemberId);
 		if(selfMember == null){
 			throw new ZoomMemberNotFoundException(myZoomMemberId);
@@ -1098,7 +1102,8 @@ public class ZoomService {
 		
 		for(ZoomMemberVO m:members){
 			if(!m.getJoin()) continue;
-			if(m.getId().equals(closeVideoMember.getId())) continue;
+			if(user.getId().toString().equals(closeVideoMember.getUserId()) && m.getId().equals(closeVideoMember.getId())) continue;
+			if(!user.getId().toString().equals(closeVideoMember.getUserId()) && m.getChairman()) continue;
 			if(ZoomMemberType.TERMINl.toString().equals(m.getType())){
 				websocketMessageService.push(m.getUserId(), businessId, content, selfMember.getUserId(), selfMember.getRename());
 			}else if(ZoomMemberType.JV220.toString().equals(m.getType())){
@@ -1121,6 +1126,7 @@ public class ZoomService {
 	 * @return ZoomMemberVO 会议成员
 	 */
 	public ZoomMemberVO openAudio(Long myZoomMemberId) throws Exception{
+		UserVO user = userQuery.current();
 		ZoomMemberPO selfMember = zoomMemberDao.findOne(myZoomMemberId);
 		if(selfMember == null){
 			throw new ZoomMemberNotFoundException(myZoomMemberId);
@@ -1148,7 +1154,8 @@ public class ZoomService {
 		
 		for(ZoomMemberVO m:members){
 			if(!m.getJoin()) continue;
-			if(m.getId().equals(openAudioMember.getId())) continue;
+			if(user.getId().toString().equals(openAudioMember.getUserId()) && m.getId().equals(openAudioMember.getId())) continue;
+			if(!user.getId().toString().equals(openAudioMember.getUserId()) && m.getChairman()) continue;
 			if(ZoomMemberType.TERMINl.toString().equals(m.getType())){
 				websocketMessageService.push(m.getUserId(), businessId, content, selfMember.getUserId(), selfMember.getRename());
 			}else if(ZoomMemberType.JV220.toString().equals(m.getType())){
@@ -1171,6 +1178,7 @@ public class ZoomService {
 	 * @return ZoomMemberVO 会议成员
 	 */
 	public ZoomMemberVO closeAudio(Long myZoomMemberId) throws Exception{
+		UserVO user = userQuery.current();
 		ZoomMemberPO selfMember = zoomMemberDao.findOne(myZoomMemberId);
 		if(selfMember == null){
 			throw new ZoomMemberNotFoundException(myZoomMemberId);
@@ -1198,7 +1206,8 @@ public class ZoomService {
 		
 		for(ZoomMemberVO m:members){
 			if(!m.getJoin()) continue;
-			if(m.getId().equals(closeAudioMember.getId())) continue;
+			if(user.getId().toString().equals(closeAudioMember.getUserId()) && m.getId().equals(closeAudioMember.getId())) continue;
+			if(!user.getId().toString().equals(closeAudioMember.getUserId()) && m.getChairman()) continue;
 			if(ZoomMemberType.TERMINl.toString().equals(m.getType())){
 				websocketMessageService.push(m.getUserId(), businessId, content, selfMember.getUserId(), selfMember.getRename());
 			}else if(ZoomMemberType.JV220.toString().equals(m.getType())){

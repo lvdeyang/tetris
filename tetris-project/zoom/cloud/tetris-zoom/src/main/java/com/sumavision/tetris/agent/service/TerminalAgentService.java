@@ -277,11 +277,11 @@ public class TerminalAgentService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月16日 上午10:26:10
 	 * @param String code 会议号码
-	 * @param JSONObject jsonObject 消息体
+	 * @param JSON jsonObject 消息体
 	 * @param List<ZoomMemberVO> targets 接收消息方
 	 * @param String businessId 业务id
 	 */
-	public void push(String code, JSONObject jsonObject, List<ZoomMemberVO> targets, String businessId) throws Exception{
+	public void push(String code, JSON jsonObject, List<ZoomMemberVO> targets, String businessId) throws Exception{
 		
 		List<PassByBO> passBys = new ArrayList<PassByBO>();
 		DispatchBO dispatch = new DispatchBO();
@@ -343,9 +343,9 @@ public class TerminalAgentService {
 			dispatch = generateStopUserDispatch(code, changeMember, targets, false, false, true);
 			
 		}else if(businessId.equals("zoomChangeChairman")){
-			
-			ZoomMemberVO oldMember = JSONObject.parseObject(jsonObject.getString("old"), ZoomMemberVO.class);
-			ZoomMemberVO newMember = JSONObject.parseObject(jsonObject.getString("new"), ZoomMemberVO.class);
+			JSONObject content = JSONObject.parseObject(JSON.toJSONString(jsonObject));
+			ZoomMemberVO oldMember = JSONObject.parseObject(content.getString("old"), ZoomMemberVO.class);
+			ZoomMemberVO newMember = JSONObject.parseObject(content.getString("new"), ZoomMemberVO.class);
 			
 			operate = "business_stop_220_channel";
 			passBys.addAll(stopUser(code, oldMember, targets));

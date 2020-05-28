@@ -54,7 +54,12 @@ public class WebsocketMessageController {
 			String fromName,
 			HttpServletRequest request) throws Exception{
 		
-		websocketMessageService.push(targetId, businessId, JSON.parseObject(content), fromId, fromName);
+		if(content.startsWith("[")){
+			websocketMessageService.push(targetId, businessId, JSON.parseArray(content), fromId, fromName);
+		}else{
+			websocketMessageService.push(targetId, businessId, JSON.parseObject(content), fromId, fromName);
+		}
+		
 		return null;
 	} 
 	
