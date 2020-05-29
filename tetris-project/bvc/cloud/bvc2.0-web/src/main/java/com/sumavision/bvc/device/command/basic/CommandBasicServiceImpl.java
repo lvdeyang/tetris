@@ -731,7 +731,7 @@ public class CommandBasicServiceImpl {
 				throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 的编码器异常！");
 			}
 			//校验编码器是否有layerId
-			if(bundle.getAccessNodeUid() == null){
+			if(bundle.getAccessNodeUid() == null || "".equals(bundle.getAccessNodeUid())){
 				throw new BaseException(StatusCode.FORBIDDEN, member.getUserName() + " 的编码器未上线！");
 			}
 			if(member.getSrcBundleId().equals(encoderId)){

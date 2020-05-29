@@ -1,6 +1,7 @@
 package com.sumavision.bvc.control.device.command.group.query;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -144,6 +145,7 @@ public class CommandQueryController {
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
+		Collections.sort(users, new UserBO.UserComparatorFromFolderIndex());
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user : users){
 			userIds.add(user.getId());
@@ -365,6 +367,7 @@ public class CommandQueryController {
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.QT_ZK);
+		Collections.sort(users, new UserBO.UserComparatorFromFolderIndex());
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user : users){
 			userIds.add(user.getId());

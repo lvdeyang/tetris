@@ -487,7 +487,7 @@ public class UserQueryService {
 		userBO.setPhone(userVO.getMobile());
 		userBO.setEmail(userVO.getMail());
 		userBO.setCreateTime(userVO.getUpdateTime());
-		userBO.setCreater(userVO.getClassify().toString());
+		userBO.setCreater(userVO.getClassify().toString().toLowerCase());
 		userBO.setLogined((userVO.getStatus() == null || "OFFLINE".equals(userVO.getStatus()))? false: true);
 		userBO.setUserNo(userVO.getUserno());
 		userBO.setLocal_encoder(local_encoder);
