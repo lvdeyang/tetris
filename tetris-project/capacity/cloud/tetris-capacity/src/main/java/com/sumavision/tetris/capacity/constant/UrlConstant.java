@@ -64,4 +64,7 @@ public class UrlConstant {
 	/** 心跳 */
 	public static final String URL_HEARTBEAT = "/v0.0/heartbeaturl";
 	
+	/** 告警列表 */
+	public static final String URL_ALARMLIST = "/v0.0/alarmlist";
+	
 }

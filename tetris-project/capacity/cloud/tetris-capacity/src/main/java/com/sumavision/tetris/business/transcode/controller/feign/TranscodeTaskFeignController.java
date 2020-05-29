@@ -287,4 +287,24 @@ public class TranscodeTaskFeignController {
 		syncService.sync(deviceIp);
 		return null;
 	}
+	
+	/**
+	 * 设置告警地址<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月29日 下午3:34:09
+	 * @param String ip 转换模块ip
+	 * @param String alarmlist 告警列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/put/alarmlist")
+	public Object putAlarmlist(
+			String ip,
+			String alarmlist,
+			HttpServletRequest request) throws Exception{
+		
+		transcodeTaskService.putAlarmList(ip, alarmlist);
+		return null;
+	}
 }

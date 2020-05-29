@@ -186,4 +186,16 @@ public class CapacityService {
 		JsonBodyResponseParser.parseObject(capacityFeign.sync(deviceIp), null);
 	}
 	
+	/**
+	 * 设置告警列表<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月29日 下午3:40:36
+	 * @param String deviceIp 转换模块ip
+	 * @param String alarmlist 告警列表
+	 */
+	public void putAlarmlist(String deviceIp, String alarmlist) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.putAlarmlist(deviceIp, alarmlist), null);
+	}
+	
 }
