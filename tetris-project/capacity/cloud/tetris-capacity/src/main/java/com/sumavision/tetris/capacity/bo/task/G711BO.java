@@ -8,30 +8,8 @@ package com.sumavision.tetris.capacity.bo.task;
  */
 public class G711BO extends BaseAudioEncodeBO<G711BO>{
 	
-	private Integer channels;
-
-	private String ch_layout;
-	
 	/** 10-50 */
-	private Integer ptime;
-
-	public Integer getChannels() {
-		return channels;
-	}
-
-	public G711BO setChannels(Integer channels) {
-		this.channels = channels;
-		return this;
-	}
-
-	public String getCh_layout() {
-		return ch_layout;
-	}
-
-	public G711BO setCh_layout(String ch_layout) {
-		this.ch_layout = ch_layout;
-		return this;
-	}
+	private Integer ptime = 20;
 
 	public Integer getPtime() {
 		return ptime;

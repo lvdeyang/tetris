@@ -8,28 +8,18 @@ package com.sumavision.tetris.capacity.bo.task;
  */
 public class DolbyBO extends BaseAudioEncodeBO<DolbyBO>{
 
-	private Integer channels = 2;
-	
-	private String ch_layout = "stereo";
+	private String sample_fmt;
 	
 	/** ac3/eac3 */
 	private String type = "ac3";	
 
-	public Integer getChannels() {
-		return channels;
+	public String getSample_fmt() {
+		return sample_fmt;
 	}
 
-	public DolbyBO setChannels(Integer channels) {
-		this.channels = channels;
+	public DolbyBO setSample_fmt(String sample_fmt) {
+		this.sample_fmt = sample_fmt;
 		return this;
-	}
-
-	public String getCh_layout() {
-		return ch_layout;
-	}
-
-	public void setCh_layout(String ch_layout) {
-		this.ch_layout = ch_layout;
 	}
 
 	public String getType() {

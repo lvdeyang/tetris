@@ -1474,4 +1474,37 @@ public class CapacityService {
 		
 	}
 	
+	/**
+	 * 设置告警列表<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月29日 下午3:27:19
+	 * @param String ip 转换模块ip
+	 * @param Long port 转换模块端口
+	 * @param String alarmList 告警列表信息
+	 * @return ResultCodeResponse
+	 */
+	public ResultCodeResponse putAlarmList(String ip, Long port, String alarmList) throws Exception{
+		
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+		
+		JSONObject request = JSONObject.parseObject(alarmList);
+		request.put("msg_id", msg_id);
+		
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+											  .append(ip)
+											  .append(":")
+											  .append(port)
+											  .append(UrlConstant.URL_ALARMLIST)
+											  .toString();
+		
+		JSONObject res = HttpUtil.httpPut(url, request);
+		
+		if(res == null) throw new HttpTimeoutException(ip);
+		
+		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
+		
+		return response;
+	}
+	
 }
