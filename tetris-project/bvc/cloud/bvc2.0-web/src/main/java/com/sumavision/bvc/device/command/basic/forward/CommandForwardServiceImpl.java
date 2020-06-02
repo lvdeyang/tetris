@@ -1117,6 +1117,8 @@ public class CommandForwardServiceImpl {
 		synchronized (new StringBuffer().append(lockPrefix).append(group1.getId()).toString().intern()) {
 			
 			CommandGroupPO group = commandGroupDao.findByUuid(groupUuid);
+			log.info(group.getName() + " 停止转发，源号码：" + srcCodes + "，目的号码" + dstCodes);
+			
 			List<CommandGroupForwardDemandPO> demands = group.getForwardDemands();
 			List<CommandGroupForwardDemandPO> stopDdemands = new ArrayList<CommandGroupForwardDemandPO>();
 			for(String srcCode : srcCodes){
@@ -1129,7 +1131,7 @@ public class CommandForwardServiceImpl {
 			}
 			
 			//<userId, [{serial:屏幕序号}]>
-			HashMap<Long, JSONArray> result = stopDemands(group, demands, false);
+			HashMap<Long, JSONArray> result = stopDemands(group, stopDdemands, false);
 			
 			//发消息
 			List<Long> consumeIds = new ArrayList<Long>();

@@ -14,6 +14,8 @@ public class BaseAudioEncodeBO <V extends BaseAudioEncodeBO>{
 	
 	private Integer sample_byte = 2;
 	
+	private String channel_layout = "stereo";
+	
 	public Integer getBitrate() {
 		return bitrate;
 	}
@@ -38,6 +40,15 @@ public class BaseAudioEncodeBO <V extends BaseAudioEncodeBO>{
 
 	public V setSample_byte(Integer sample_byte) {
 		this.sample_byte = sample_byte;
+		return (V)this;
+	}
+
+	public String getChannel_layout() {
+		return channel_layout;
+	}
+
+	public V setChannel_layout(String channel_layout) {
+		this.channel_layout = channel_layout;
 		return (V)this;
 	}
 	

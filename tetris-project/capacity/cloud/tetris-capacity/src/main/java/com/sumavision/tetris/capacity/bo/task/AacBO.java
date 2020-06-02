@@ -7,9 +7,6 @@ package com.sumavision.tetris.capacity.bo.task;
  * <b>日期：</b>2019年11月1日 上午9:12:45
  */
 public class AacBO extends BaseAudioEncodeBO<AacBO>{
-	
-	/** 协议中该字段去了，这里留着看映射关系 */
-	private Integer channels = 1;
 
 	/** 声道布局，stereo等 */
 	private String channel_layout = "mono";
@@ -19,15 +16,6 @@ public class AacBO extends BaseAudioEncodeBO<AacBO>{
 	private String type = "mpeg2-aac-lc";
 	
 	private String sample_fmt;
-
-	public Integer getChannels() {
-		return channels;
-	}
-
-	public AacBO setChannels(Integer channels) {
-		this.channels = channels;
-		return this;
-	}
 
 	public String getChannel_layout() {
 		return channel_layout;
@@ -60,7 +48,6 @@ public class AacBO extends BaseAudioEncodeBO<AacBO>{
 		this.setBitrate(192000)
 			.setSample_rate(44100)
 			.setSample_fmt("s16")
-			.setChannels(1)
 			.setChannel_layout("mono")
 			.setType("mpeg-aac-lc");
 		return this;

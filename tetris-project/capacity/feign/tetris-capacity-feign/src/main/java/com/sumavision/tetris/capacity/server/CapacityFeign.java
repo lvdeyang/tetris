@@ -295,4 +295,15 @@ public interface CapacityFeign {
 	@RequestMapping(value = "/push/task/feign/batch/delete/task")
 	public JSONObject batchDeletePushTask(@RequestParam("taskIds") String taskIds) throws Exception;
 	
+	/**
+	 * 设置告警列表<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月29日 下午3:36:45
+	 * @param String ip 转换模块ip
+	 * @param String alarmlist 告警列表
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/put/alarmlist")
+	public JSONObject putAlarmlist(@RequestParam("ip") String ip,
+									@RequestParam("alarmlist") String alarmlist) throws Exception;
 }

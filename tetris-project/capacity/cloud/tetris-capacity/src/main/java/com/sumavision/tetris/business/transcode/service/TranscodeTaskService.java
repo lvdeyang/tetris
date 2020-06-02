@@ -1117,4 +1117,16 @@ public class TranscodeTaskService {
 		
 	}
 	
+	/**
+	 * 设置告警列表<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年5月29日 下午3:32:23
+	 * @param String ip 转换模块ip
+	 * @param String alarmlist 告警列表
+	 */
+	public void putAlarmList(String ip, String alarmlist) throws Exception{
+		capacityService.putAlarmList(ip, capacityProps.getPort(), alarmlist);
+	}
+	
 }
