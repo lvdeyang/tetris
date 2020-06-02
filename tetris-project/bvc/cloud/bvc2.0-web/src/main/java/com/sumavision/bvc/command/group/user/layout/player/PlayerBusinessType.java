@@ -47,6 +47,21 @@ public enum PlayerBusinessType {
 	public String getCode() {
 		return code;
 	}
+	
+	public boolean isCommandOrMeeting(){
+		switch(this){
+		case BASIC_COMMAND:
+		case CHAIRMAN_BASIC_COMMAND:
+		case COOPERATE_COMMAND:
+		case SPEAK_MEETING:
+		case COMMAND_FORWARD_DEVICE:
+		case COMMAND_FORWARD_FILE:
+		case COMMAND_FORWARD_USER:
+			return true;
+		default:
+			return false;
+		}
+	}
 
 	/**
 	 * @Title: 根据名称获取转发目的类型 

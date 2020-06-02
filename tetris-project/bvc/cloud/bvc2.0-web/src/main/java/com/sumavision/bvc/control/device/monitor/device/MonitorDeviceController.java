@@ -1,6 +1,7 @@
 package com.sumavision.bvc.control.device.monitor.device;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -116,6 +117,7 @@ public class MonitorDeviceController {
 		
 		//查询有权限的用户
 		List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.PC_PLATFORM);
+		Collections.sort(users, new UserBO.UserComparatorFromFolderIndex());
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user : users){
 			userIds.add(user.getId());
@@ -188,6 +190,7 @@ public class MonitorDeviceController {
 		
 		//查询有权限的用户
 		List<UserBO> userEntities = resourceService.queryUserresByUserId(userId, TerminalType.PC_PLATFORM);
+		Collections.sort(userEntities, new UserBO.UserComparatorFromFolderIndex());
 		List<Long> userIds = new ArrayList<Long>();
 		for(UserBO user : userEntities){
 			userIds.add(user.getId());
@@ -463,6 +466,7 @@ public class MonitorDeviceController {
 		List<UserBO> filteredUsers = new ArrayList<UserBO>();
 		if(type==0 || type==2){
 			List<UserBO> users = resourceService.queryUserresByUserId(userId, TerminalType.PC_PLATFORM);
+			Collections.sort(users, new UserBO.UserComparatorFromFolderIndex());
 			List<Long> userIds = new ArrayList<Long>();
 			for(UserBO user : users){
 				userIds.add(user.getId());

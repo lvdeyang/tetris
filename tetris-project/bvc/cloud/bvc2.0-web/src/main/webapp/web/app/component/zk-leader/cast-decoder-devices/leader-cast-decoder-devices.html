@@ -6,6 +6,7 @@
     <div class="treeContent">
         <el-scrollbar style="height:100%;">
             <el-tree
+            		default-expand-all
                     :data="dialog.decodeBind.tree.data"
                     :props="dialog.decodeBind.tree.props">
                                 <span class="custom-tree-node" slot-scope="{node, data}">

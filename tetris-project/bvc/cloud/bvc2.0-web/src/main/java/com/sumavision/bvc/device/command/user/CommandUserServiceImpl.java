@@ -926,6 +926,7 @@ public class CommandUserServiceImpl {
 			call = userLiveCallDao.findOne(businessId);
 		}else{
 			call = userLiveCallDao.findByUuid(uuid);
+			if(call == null) return null;
 			businessId = call.getId();
 		}
 		
@@ -1173,6 +1174,10 @@ public class CommandUserServiceImpl {
 			call = userLiveCallDao.findOne(businessId);
 		}else{
 			call = userLiveCallDao.findByUuid(uuid);
+			if(call == null){
+//				log.info("根据uuid：" + uuid + "没有找到呼叫");
+				return null;
+			}
 			businessId = call.getId();
 		}
 		

@@ -1,7 +1,6 @@
 package com.suma.venus.resource.base.bo;
 
-import java.util.List;
-
+import java.util.Comparator;
 import com.sumavision.tetris.user.UserVO;
 
 public class UserBO {
@@ -186,6 +185,24 @@ public class UserBO {
 
 	public void setExternal_encoder(EncoderBO external_encoder) {
 		this.external_encoder = external_encoder;
+	}
+	
+	public static final class UserComparatorFromFolderIndex implements Comparator<UserBO>{
+		@Override
+		public int compare(UserBO o1, UserBO o2) {
+			
+			Integer id1 = o1.getFolderIndex();
+			Integer id2 = o2.getFolderIndex();
+			
+			if(id1 == null){
+				if(id2 == null) return 0;
+				return -1;
+			}else if(id2 == null){
+				return 1;
+			}
+			
+			return id1 - id2;
+		}
 	}
 	
 }

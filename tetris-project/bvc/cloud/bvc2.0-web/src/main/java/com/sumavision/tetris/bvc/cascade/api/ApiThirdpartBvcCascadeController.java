@@ -301,7 +301,7 @@ public class ApiThirdpartBvcCascadeController {
 								monitorLiveCallService.startXtCallLocal(uuid, dstUser, srcUser);
 							}else{
 								//拒绝
-								throw new UserDoesNotLoginException(calledUser.getName());
+								throw new UserDoesNotLoginException(dstUser.getName());
 							}
 						}*/
 //						monitorLiveCallService.startXtCallLocal(uuid, dstUser, srcUser);
@@ -320,7 +320,7 @@ public class ApiThirdpartBvcCascadeController {
 								monitorLiveCallService.transXtCallLocal(uuid, dstUser, srcUser);
 							}else{
 								//拒绝
-								throw new UserDoesNotLoginException(calledUser.getName());
+								throw new UserDoesNotLoginException(dstUser.getName());
 							}
 						}*/
 						commandUserServiceImpl.transOuterVodInnerToCall(uuid, dstUser, srcUser);
@@ -353,8 +353,8 @@ public class ApiThirdpartBvcCascadeController {
 						//停止xt点播本地用户
 						monitorLiveUserService.stop(uuid, srcUser.getId(), srcUser.getUserNo());
 					}else if("call".equals(type)){
-						//停止xt用户呼叫本地用户
-						//monitorLiveCallService.stop(uuid, srcUser.getId());
+						//停止xt用户呼叫本地用户（两个方法各调一次）
+						monitorLiveCallService.stop(uuid, srcUser.getId());
 						commandUserServiceImpl.stopCall_Cascade(UserClassify.LDAP.toString().equals(srcUser.getCreater())?srcUser:dstUser, null, uuid);
 					}else if("paly-call".equals(type)){
 						//停止xt点播本地用户转xt呼叫本地用户
