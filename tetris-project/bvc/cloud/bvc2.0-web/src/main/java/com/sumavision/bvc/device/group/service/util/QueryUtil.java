@@ -1322,7 +1322,7 @@ public class QueryUtil {
 	 * <b>日期：</b>2019年6月18日 上午8:56:22
 	 * @param DeviceGroupPO group 设备组
 	 * @param Long roleId 角色id
-	 * @param ChannelType type 视频解码通道类型
+	 * @param TerminalBundleChannelType type 视频解码通道类型
 	 * @return ChannelForwardPO 转发
 	 */
 	public ChannelForwardPO queryVirtualRoleChannelForward(DeviceGroupPO group, Long roleId, ChannelType type) throws Exception{

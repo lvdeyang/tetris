@@ -470,7 +470,7 @@ public class LogicBO {
 	 * <b>作者:</b>sm<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年6月12日 上午9:23:25
-	 * @param BundlePO bundleInfo 虚拟设备信息
+	 * @param TerminalBundlePO bundleInfo 虚拟设备信息
 	 * @param List<ChannelSchemeDTO> channelInfos 虚拟设备通道信息
 	 * @return LogicBO
 	 */
