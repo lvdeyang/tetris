@@ -353,6 +353,23 @@ public class ApiZoomAndroidController {
 	}
 	
 	/**
+	 * 会议成员重命名<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月3日 上午10:29:07
+	 * @param Long myZoomMemberId 会议成员id
+	 * @param String rename 重命名
+	 * @return ZoomMemberVO 重命名后的成员
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/rename")
+	public Object rename(Long myZoomMemberId, String rename) throws Exception{
+		
+		return zoomService.rename(myZoomMemberId, rename);
+	}
+	
+	/**
 	 * 删除会议<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
