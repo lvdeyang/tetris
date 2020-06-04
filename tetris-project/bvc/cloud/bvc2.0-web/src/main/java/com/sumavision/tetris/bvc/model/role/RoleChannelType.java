@@ -5,7 +5,9 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 public enum RoleChannelType {
 
 	VIDEO_ENCODE("视频编码"),
-	AUDIO_ENCODE("音频编码");
+	AUDIO_ENCODE("音频编码"),
+	VIDEO_DECODE("视频解码"),
+	AUDIO_DECODE("音频解码");
 	
 	private String name;
 	

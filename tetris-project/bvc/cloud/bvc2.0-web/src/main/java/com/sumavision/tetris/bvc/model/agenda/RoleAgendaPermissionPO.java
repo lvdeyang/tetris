@@ -6,6 +6,12 @@ import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
+/**
+ * 议程角色关联<br/>
+ * <b>作者:</b>lvdeyang<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年6月4日 下午3:26:43
+ */
 @Entity
 @Table(name = "TETRIS_BVC_MODEL_ROLE_AGENDA_PERMISSION")
 public class RoleAgendaPermissionPO extends AbstractBasePO{

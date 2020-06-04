@@ -6,6 +6,12 @@ import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
+/**
+ * 用户按照终端类型绑定真实设备<br/>
+ * <b>作者:</b>lvdeyang<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年6月4日 下午3:33:45
+ */
 @Entity
 @Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_BUNDLE_USER_PERMISSION")
 public class TerminalBundleUserPermissionPO extends AbstractBasePO{

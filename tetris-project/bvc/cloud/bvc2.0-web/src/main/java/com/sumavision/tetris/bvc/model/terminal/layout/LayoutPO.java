@@ -1,30 +1,28 @@
-package com.sumavision.tetris.bvc.model.agenda.combine;
+package com.sumavision.tetris.bvc.model.terminal.layout;
 
+import javax.persistence.Table;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Table;
+
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
- * 议程合屏<br/>
+ * 布局定义<br/>
  * <b>作者:</b>lvdeyang<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年6月4日 下午3:32:07
+ * <b>日期：</b>2020年6月4日 下午3:15:01
  */
 @Entity
-@Table(name = "TETRIS_BVC_MODEL_AGENDA_COMBINE_VIDEO")
-public class CombineVideoPO extends AbstractBasePO{
+@Table(name = "TETRIS_BVC_MODEL_TERMINAL_LAYOUT")
+public class LayoutPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
-
-	/** 名称 */
+	
+	/** 名称 ,内置屏幕：单屏、1左2右、1大2小、1小2大、四屏、六屏、九屏、十六屏*/
 	private String name;
 	
-	/** 前端生成布局的json字符串格式：{basic:{column:4, row:4}, cellspan:[{x,y,r,b}]} */
+	/** web端布局 */
 	private String websiteDraw;
-	
-	/** 隶属业务id */
-	private Long businessId;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -42,15 +40,6 @@ public class CombineVideoPO extends AbstractBasePO{
 
 	public void setWebsiteDraw(String websiteDraw) {
 		this.websiteDraw = websiteDraw;
-	}
-
-	@Column(name = "BUSINESS_ID")
-	public Long getBusinessId() {
-		return businessId;
-	}
-
-	public void setBusinessId(Long businessId) {
-		this.businessId = businessId;
 	}
 	
 }

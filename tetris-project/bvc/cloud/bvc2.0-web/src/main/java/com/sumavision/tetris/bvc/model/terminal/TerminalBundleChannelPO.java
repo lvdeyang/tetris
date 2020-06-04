@@ -8,6 +8,15 @@ import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
+/**
+ * 记录终端设备真实的通道id<br/>
+ * <p>
+ * 	通道id根据现有规则自动生成<br/>
+ * </p>
+ * <b>作者:</b>lvdeyang<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年6月4日 下午3:08:17
+ */
 @Entity
 @Table(name = "TETRIS_BVC_MODEL_TERMINAL_BUNDLE_CHANNEL")
 public class TerminalBundleChannelPO extends AbstractBasePO{

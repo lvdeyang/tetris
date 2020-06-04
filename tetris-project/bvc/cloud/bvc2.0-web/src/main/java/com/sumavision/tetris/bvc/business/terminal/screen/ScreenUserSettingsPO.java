@@ -1,28 +1,25 @@
-package com.sumavision.tetris.bvc.model.role;
+package com.sumavision.tetris.bvc.business.terminal.screen;
 
-import javax.persistence.Column;
+import javax.jdo.annotations.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
- * 角色通道与终端通道关联<br/>
+ * 用户自定义终端屏幕与终端通道的绑定关系<br/>
  * <b>作者:</b>lvdeyang<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年6月4日 下午3:24:45
+ * <b>日期：</b>2020年6月4日 下午3:34:14
  */
 @Entity
-@Table(name = "TETRIS_BVC_MODEL_ROLE_CHANNEL_TERMINAL_BUNDLE_CHANNEL")
-public class RoleChannelTerminalBundleChannelPermissionPO extends AbstractBasePO{
+@Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_SCREEN_USER_SETTINGS")
+public class ScreenUserSettingsPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
-	
-	/** 业务角色id */
-	private Long roleId;
-	
-	/** 业务角色通道id */
-	private Long roleChannelId;
+
+	/** 屏幕id */
+	private Long screenId;
 	
 	/** 终端id */
 	private Long terminalId;
@@ -32,23 +29,17 @@ public class RoleChannelTerminalBundleChannelPermissionPO extends AbstractBasePO
 	
 	/** 终端设备通道id */
 	private Long terminalBundleChannelId;
+	
+	/** 用户id */
+	private String userId;
 
-	@Column(name = "ROLE_ID")
-	public Long getRoleId() {
-		return roleId;
+	@Column(name = "SCREEN_ID")
+	public Long getScreenId() {
+		return screenId;
 	}
 
-	public void setRoleId(Long roleId) {
-		this.roleId = roleId;
-	}
-
-	@Column(name = "ROLE_CHANNEL_ID")
-	public Long getRoleChannelId() {
-		return roleChannelId;
-	}
-
-	public void setRoleChannelId(Long roleChannelId) {
-		this.roleChannelId = roleChannelId;
+	public void setScreenId(Long screenId) {
+		this.screenId = screenId;
 	}
 
 	@Column(name = "TERMINAL_ID")
@@ -76,6 +67,15 @@ public class RoleChannelTerminalBundleChannelPermissionPO extends AbstractBasePO
 
 	public void setTerminalBundleChannelId(Long terminalBundleChannelId) {
 		this.terminalBundleChannelId = terminalBundleChannelId;
+	}
+
+	@Column(name = "USER_ID")
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 	
 }

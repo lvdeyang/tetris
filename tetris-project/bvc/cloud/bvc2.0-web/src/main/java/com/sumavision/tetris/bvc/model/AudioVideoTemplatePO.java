@@ -9,6 +9,16 @@ import javax.persistence.Table;
 import com.sumavision.bvc.system.enumeration.Resolution;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
+/**
+ * 流调参数表<br/>
+ * <p>
+ * 	1.isTemplate==true：参数模板，区分业务，创建业务时从参数模板复制成业务参数<br/>
+ *  2.isTemplate==false：业务参数，与具体业务绑定
+ * </p>
+ * <b>作者:</b>lvdeyang<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年6月4日 下午3:00:21
+ */
 @Entity
 @Table(name = "TETRIS_BVC_MODEL_AUDIO_VIDEO_TEMPLATE")
 public class AudioVideoTemplatePO extends AbstractBasePO{
@@ -50,6 +60,9 @@ public class AudioVideoTemplatePO extends AbstractBasePO{
 	
 	/** 用于标注模板用途 */
 	private UsageType usageType;
+	
+	/** 是否是模板 */
+	private Boolean isTemplate;
 	
 	@Column(name = "NAME")
 	public String getName() {
@@ -165,4 +178,13 @@ public class AudioVideoTemplatePO extends AbstractBasePO{
 		this.usageType = usageType;
 	}
 
+	@Column(name = "IS_TEMPLATE")
+	public Boolean getIsTemplate() {
+		return isTemplate;
+	}
+
+	public void setIsTemplate(Boolean isTemplate) {
+		this.isTemplate = isTemplate;
+	}
+	
 }

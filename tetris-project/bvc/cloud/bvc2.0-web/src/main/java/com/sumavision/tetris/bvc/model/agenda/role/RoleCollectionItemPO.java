@@ -6,6 +6,12 @@ import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
+/**
+ * 角色集合项，如果存角色和通道则代表配置到角色通道，如果只存角色代表配置到角色（模糊转发）<br/>
+ * <b>作者:</b>lvdeyang<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年6月4日 下午3:29:28
+ */
 @Entity
 @Table(name = "TETRIS_BVC_MODEL_AGENDA_ROLE_COLLECTION_ITEM")
 public class RoleCollectionItemPO extends AbstractBasePO{

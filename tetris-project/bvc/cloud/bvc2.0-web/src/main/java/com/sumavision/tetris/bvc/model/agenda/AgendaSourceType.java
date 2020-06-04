@@ -4,6 +4,8 @@ import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum AgendaSourceType {
 
+	ROLE("业务角色"),
+	ROLE_CHANNEL("业务角色通道"),
 	ROLE_COLLECTION("业务角色通道集合"),
 	COMBINE_VIDEO("合屏"),
 	COMBINE_AUDIO("混音"),

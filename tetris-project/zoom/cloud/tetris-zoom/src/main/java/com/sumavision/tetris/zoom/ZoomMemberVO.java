@@ -274,6 +274,7 @@ public class ZoomMemberVO extends AbstractBaseVO<ZoomMemberVO, ZoomMemberPO>{
 			.setMyVideo(entity.getMyVideo())
 			.setTheirAudio(entity.getTheirAudio())
 			.setTheirVideo(entity.getTheirVideo())
+			.setShareScreen(entity.getShareScreen())
 			.setType(entity.getType().toString());
 		return this;
 	}

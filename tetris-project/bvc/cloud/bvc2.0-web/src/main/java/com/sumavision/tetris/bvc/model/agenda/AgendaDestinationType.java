@@ -3,7 +3,9 @@ package com.sumavision.tetris.bvc.model.agenda;
 import com.sumavision.tetris.orm.exception.ErrorTypeException;
 
 public enum AgendaDestinationType {
-
+	
+	ROLE("业务角色"),
+	ROLE_CHANNEL("业务角色"),
 	ROLE_COLLECTION("业务角色通道集合"),
 	CHANNEL("设备通道");
 	

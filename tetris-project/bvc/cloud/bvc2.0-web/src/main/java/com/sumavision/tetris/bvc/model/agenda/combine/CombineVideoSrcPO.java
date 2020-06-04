@@ -8,6 +8,12 @@ import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
+/**
+ * 议程合屏源<br/>
+ * <b>作者:</b>lvdeyang<br/>
+ * <b>版本：</b>1.0<br/>
+ * <b>日期：</b>2020年6月4日 下午3:32:39
+ */
 @Entity
 @Table(name = "TETRIS_BVC_MODEL_AGENDA_COMBINE_VIDEO_SRC")
 public class CombineVideoSrcPO extends AbstractBasePO{
@@ -15,7 +21,7 @@ public class CombineVideoSrcPO extends AbstractBasePO{
 	private static final long serialVersionUID = 1L;
 
 	/** 源id */
-	private Long srcId;
+	private String srcId;
 	
 	/** 源类型 */
 	private CombineVideoSrcType combineVideoSrcType;
@@ -30,11 +36,11 @@ public class CombineVideoSrcPO extends AbstractBasePO{
 	private Boolean visible;
 
 	@Column(name = "SRC_ID")
-	public Long getSrcId() {
+	public String getSrcId() {
 		return srcId;
 	}
 
-	public void setSrcId(Long srcId) {
+	public void setSrcId(String srcId) {
 		this.srcId = srcId;
 	}
 

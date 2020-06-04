@@ -1,28 +1,25 @@
-package com.sumavision.tetris.bvc.model.role;
+package com.sumavision.tetris.bvc.model.terminal.screen;
 
-import javax.persistence.Column;
+import javax.jdo.annotations.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
- * 角色通道与终端通道关联<br/>
+ * 终端屏幕，终端从屏幕主键中选择生成终端屏幕<br/>
  * <b>作者:</b>lvdeyang<br/>
  * <b>版本：</b>1.0<br/>
- * <b>日期：</b>2020年6月4日 下午3:24:45
+ * <b>日期：</b>2020年6月4日 下午3:13:24
  */
 @Entity
-@Table(name = "TETRIS_BVC_MODEL_ROLE_CHANNEL_TERMINAL_BUNDLE_CHANNEL")
-public class RoleChannelTerminalBundleChannelPermissionPO extends AbstractBasePO{
+@Table(name = "TETRIS_BVC_MODEL_TERMINAL_SCREEN")
+public class TerminalScreenPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
-	
-	/** 业务角色id */
-	private Long roleId;
-	
-	/** 业务角色通道id */
-	private Long roleChannelId;
+
+	/** 屏幕primaryKey */
+	private String screenPrimaryKey;
 	
 	/** 终端id */
 	private Long terminalId;
@@ -33,22 +30,13 @@ public class RoleChannelTerminalBundleChannelPermissionPO extends AbstractBasePO
 	/** 终端设备通道id */
 	private Long terminalBundleChannelId;
 
-	@Column(name = "ROLE_ID")
-	public Long getRoleId() {
-		return roleId;
+	@Column(name = "SCREEN_PRIMARY_KEY")
+	public String getScreenPrimaryKey() {
+		return screenPrimaryKey;
 	}
 
-	public void setRoleId(Long roleId) {
-		this.roleId = roleId;
-	}
-
-	@Column(name = "ROLE_CHANNEL_ID")
-	public Long getRoleChannelId() {
-		return roleChannelId;
-	}
-
-	public void setRoleChannelId(Long roleChannelId) {
-		this.roleChannelId = roleChannelId;
+	public void setScreenPrimaryKey(String screenPrimaryKey) {
+		this.screenPrimaryKey = screenPrimaryKey;
 	}
 
 	@Column(name = "TERMINAL_ID")
