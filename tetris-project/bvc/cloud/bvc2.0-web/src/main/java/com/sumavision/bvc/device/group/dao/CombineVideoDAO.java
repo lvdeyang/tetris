@@ -17,7 +17,7 @@ public interface CombineVideoDAO extends MetBaseDAO<CombineVideoPO> {
 	 * @return List<Long> 合屏ids
 	 * @throws
 	 */
-	@Query(value = "select cvideo.id from CombineVideoPO cvideo left join cvideo.positions position left join position.srcs src where cvideo.group.id=?1 group by cvideo.id having count(position.id)>1", nativeQuery = false)
+	@Query(value = "select cvideo.id from com.sumavision.bvc.device.group.po.CombineVideoPO cvideo left join cvideo.positions position left join position.srcs src where cvideo.group.id=?1 group by cvideo.id having count(position.id)>1", nativeQuery = false)
 	public Page<Long> findByGroupId(Long groupId, Pageable page);
 	
 	/**
@@ -26,6 +26,6 @@ public interface CombineVideoDAO extends MetBaseDAO<CombineVideoPO> {
 	 * @return CombineVideoPO 
 	 * @throws
 	 */
-	@Query("select cvideo from CombineVideoPO cvideo where cvideo.uuid=?1")	
+	@Query("select cvideo from com.sumavision.bvc.device.group.po.CombineVideoPO cvideo where cvideo.uuid=?1")	
 	public CombineVideoPO findByUuid(String uuid);
 }

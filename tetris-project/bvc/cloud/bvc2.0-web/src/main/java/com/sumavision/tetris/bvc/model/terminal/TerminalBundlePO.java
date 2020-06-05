@@ -42,7 +42,6 @@ public class TerminalBundlePO extends AbstractBasePO{
 	}
 
 	@Column(name = "BUNDLE_TYPE")
-	@Enumerated(value = EnumType.STRING)
 	public String getBundleType() {
 		return bundleType;
 	}

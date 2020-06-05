@@ -158,7 +158,7 @@ public class GroupMemberPO extends AbstractBasePO{
 		this.myVideo = myVideo;
 	}
 
-	@Column(name = "JOIN")
+	@Column(name = "JO_IN")
 	public Boolean getJoin() {
 		return join;
 	}

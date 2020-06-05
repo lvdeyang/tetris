@@ -17,7 +17,7 @@ public interface CombineAudioDAO extends MetBaseDAO<CombineAudioPO> {
 	 * @return List<CombineAudioPO> 混音
 	 * @throws
 	 */
-	@Query("select combineAudio from CombineAudioPO combineAudio left join combineAudio.srcs src where combineAudio.group.id=?1 group by combineAudio.id having count(src.id)>1")
+	@Query("select combineAudio from com.sumavision.bvc.device.group.po.CombineAudioPO combineAudio left join combineAudio.srcs src where combineAudio.group.id=?1 group by combineAudio.id having count(src.id)>1")
 	public Page<CombineAudioPO> findByGroupId(Long groupId, Pageable page);
 	
 	/**
@@ -26,6 +26,6 @@ public interface CombineAudioDAO extends MetBaseDAO<CombineAudioPO> {
 	 * @return CombineAudioPO 混音
 	 * @throws
 	 */
-	@Query("select combineAudio from CombineAudioPO combineAudio where combineAudio.uuid=?1")
+	@Query("select combineAudio from com.sumavision.bvc.device.group.po.CombineAudioPO combineAudio where combineAudio.uuid=?1")
 	public CombineAudioPO findByCombineUuid(String combineUuid);
 }

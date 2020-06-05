@@ -19,7 +19,7 @@ public interface CombineVideoSrcDAO extends MetBaseDAO<CombineVideoSrcPO>{
 	 * @return List<CombineVideoSrcPO> 合屏源
 	 * @throws
 	 */
-	@Query("select src from CombineVideoSrcPO src where src.position.combineVideo.group.id=?1")
+	@Query("select src from com.sumavision.bvc.device.group.po.CombineVideoSrcPO src where src.position.combineVideo.group.id=?1")
 	public List<CombineVideoSrcPO> findByGroupId(Long groupId);
 	
 	/**
@@ -28,7 +28,7 @@ public interface CombineVideoSrcDAO extends MetBaseDAO<CombineVideoSrcPO>{
 	 * @return List<CombineVideoSrcPO> 合屏源
 	 * @throws
 	 */
-	@Query("select src from CombineVideoSrcPO src where src.position.combineVideo.id in ?1")
+	@Query("select src from com.sumavision.bvc.device.group.po.CombineVideoSrcPO src where src.position.combineVideo.id in ?1")
 	public List<CombineVideoSrcPO> findByGroupId(List<Long> videoIds);
 	
 	/**
@@ -37,7 +37,7 @@ public interface CombineVideoSrcDAO extends MetBaseDAO<CombineVideoSrcPO>{
 	 * @return List<Long> 合屏ids
 	 * @throws
 	 */
-	@Query(value = "select cvideo.id from CombineVideoSrcPO src right join src.position position right join position.combineVideo cvideo where cvideo.group.id=?1 group by cvideo.id having count(position.id)>1", nativeQuery = false)
+	@Query(value = "select cvideo.id from com.sumavision.bvc.device.group.po.CombineVideoSrcPO src right join src.position position right join position.combineVideo cvideo where cvideo.group.id=?1 group by cvideo.id having count(position.id)>1", nativeQuery = false)
 	public Page<Long> findByGroupId(Long groupId, Pageable page);
 	
 	/**
@@ -46,6 +46,6 @@ public interface CombineVideoSrcDAO extends MetBaseDAO<CombineVideoSrcPO>{
 	 * @return List<CombineVideoSrcPO> 合屏源
 	 * @throws
 	 */
-	@Query("select src from CombineVideoSrcPO src where src.position.combineVideo.uuid=?1")
+	@Query("select src from com.sumavision.bvc.device.group.po.CombineVideoSrcPO src where src.position.combineVideo.uuid=?1")
 	public List<CombineVideoSrcPO> findByCombineUuid(String uuid);
 }

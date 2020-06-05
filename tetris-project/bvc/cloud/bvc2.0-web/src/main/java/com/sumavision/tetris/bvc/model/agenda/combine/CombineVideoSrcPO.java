@@ -30,7 +30,7 @@ public class CombineVideoSrcPO extends AbstractBasePO{
 	private Long combineVideoId;
 	
 	/** 轮询时进行源排序 */
-	private Integer index;
+	private Integer serial;
 	
 	/** 轮询时是否展示该源 */
 	private Boolean visible;
@@ -63,13 +63,13 @@ public class CombineVideoSrcPO extends AbstractBasePO{
 		this.combineVideoId = combineVideoId;
 	}
 
-	@Column(name = "INDEX")
-	public Integer getIndex() {
-		return index;
+	@Column(name = "SERIAL")
+	public Integer getSerial() {
+		return serial;
 	}
 
-	public void setIndex(Integer index) {
-		this.index = index;
+	public void setSerial(Integer serial) {
+		this.serial = serial;
 	}
 
 	@Column(name = "VISIBLE")
