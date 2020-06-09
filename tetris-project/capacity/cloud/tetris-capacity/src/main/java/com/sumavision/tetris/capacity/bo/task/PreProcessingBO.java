@@ -11,12 +11,6 @@ import com.alibaba.fastjson.annotation.JSONField;
  */
 public class PreProcessingBO {
 
-	/** 去交错 */
-	private DeinterlaceBO deinterlace;
-	
-	/** 缩放 */
-	private ScaleBO scale;
-	
 	/** 裁剪 */
 	private CutBO cut;
 	
@@ -47,15 +41,9 @@ public class PreProcessingBO {
 	
 	/** 帧率变换 */
 	private FpsConvertBO fps_convert;
-
-	public DeinterlaceBO getDeinterlace() {
-		return deinterlace;
-	}
-
-	public PreProcessingBO setDeinterlace(DeinterlaceBO deinterlace) {
-		this.deinterlace = deinterlace;
-		return this;
-	}
+	
+	/** 缩放 */
+	private ScaleBO scale;
 
 	public ScaleBO getScale() {
 		return scale;
