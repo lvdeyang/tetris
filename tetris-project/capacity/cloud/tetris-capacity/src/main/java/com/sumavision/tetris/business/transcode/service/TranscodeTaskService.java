@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
@@ -27,6 +28,7 @@ import com.sumavision.tetris.business.transcode.vo.AnalysisInputVO;
 import com.sumavision.tetris.business.transcode.vo.TranscodeTaskVO;
 import com.sumavision.tetris.business.yjgb.vo.OutParamVO;
 import com.sumavision.tetris.capacity.bo.input.BackUpProgramBO;
+import com.sumavision.tetris.capacity.bo.input.CoverFileBO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.request.AllRequest;
@@ -901,7 +903,7 @@ public class TranscodeTaskService {
 															.toString();
 				
 				InputBO exsitInputBO = JSONObject.parseObject(taskInput.getInput(), InputBO.class);
-				
+
 				input.getCover().getProgram_array().iterator().next().setInput_id(exsitInputBO.getId());
 				
 				CheckInputBO check = transferNormalInput(input, coverUuid, taskId);
