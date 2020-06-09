@@ -1263,10 +1263,10 @@ public class CapacityService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年11月12日 上午9:03:40
 	 */
-	public void removeAll() throws Exception{
+	public void removeAll(String ip) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
-		removeAll(msg_id);
+		removeAll(msg_id, ip);
 		
 	}
 	
@@ -1277,10 +1277,12 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月6日 下午2:19:02
 	 * @param String msg_id 消息id
 	 */
-	private void removeAll(String msg_id) throws Exception{
+	private void removeAll(String msg_id, String ip) throws Exception{
+		
+		System.out.println("removeAll");
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-											  .append(capacityProps.getIp())
+											  .append(ip)
 											  .append(":")
 											  .append(capacityProps.getPort())
 											  .append(UrlConstant.URL_ENTIRETY)

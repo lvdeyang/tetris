@@ -2,7 +2,9 @@ package com.sumavision.tetris.business.transcode.service;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.hibernate.exception.ConstraintViolationException;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -163,7 +166,7 @@ public class TranscodeTaskService {
 		}
 		
 		TaskInputPO inputPO = taskInputDao.findByUniq(uniq);
-		if(inputPO == null){
+		if(inputPO == null || inputPO.getCount().equals(0)){
 			
 			AllRequest allRequest = new AllRequest();
 			allRequest.setInput_array(new ArrayListWrapper<InputBO>().add(inputBO).getList());
@@ -1127,6 +1130,58 @@ public class TranscodeTaskService {
 	 */
 	public void putAlarmList(String ip, String alarmlist) throws Exception{
 		capacityService.putAlarmList(ip, capacityProps.getPort(), alarmlist);
+	}
+	
+	/**
+	 * 清空转换模块上所有任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月5日 下午2:41:38
+	 * @param String ip 转换模块ip
+	 */
+	public void removeAll(String ip) throws Exception{
+		
+		List<TaskOutputPO> outputs = taskOutputDao.findByCapacityIp(ip);
+		
+		if(outputs != null && outputs.size() > 0){
+			Set<Long> inputIds = new HashSet<Long>();
+			for(TaskOutputPO outputPO: outputs){
+				
+				if(!StringUtils.isEmpty(outputPO.getInputId())){
+					//单源
+					inputIds.add(outputPO.getInputId());
+				}else if(!StringUtils.isEmpty(outputPO.getInputList())){
+					//备份源
+					inputIds.addAll(JSONArray.parseArray(outputPO.getInputList(), Long.class));
+				}else if(!StringUtils.isEmpty(outputPO.getCoverId())){
+					//盖播
+					inputIds.add(outputPO.getCoverId());
+				}else if(!StringUtils.isEmpty(outputPO.getScheduleId())){
+					//排期
+					inputIds.add(outputPO.getScheduleId());
+				}else if(!StringUtils.isEmpty(outputPO.getPrevId())){
+					//追加排期prev
+					inputIds.add(outputPO.getPrevId());
+				}else if(!StringUtils.isEmpty(outputPO.getNextId())){
+					//追加排期next
+					inputIds.add(outputPO.getNextId());
+				}
+			}
+			
+			List<TaskInputPO> inputPOs = taskInputDao.findByIdIn(inputIds);	
+			if(inputPOs != null && inputPOs.size() > 0){
+				for(TaskInputPO inputPO: inputPOs){
+					inputPO.setCount(0);
+				}
+			}
+			
+			taskInputDao.save(inputPOs);
+			taskOutputDao.deleteInBatch(outputs);
+			
+		}
+		
+		//清空转换模块上面所有任务
+		capacityService.removeAll(ip);
 	}
 	
 }

@@ -45,6 +45,7 @@ import com.sumavision.tetris.capacity.bo.output.OutputMediaBO;
 import com.sumavision.tetris.capacity.bo.output.OutputProgramBO;
 import com.sumavision.tetris.capacity.bo.output.OutputRtpEsBO;
 import com.sumavision.tetris.capacity.bo.output.OutputRtpesMediaBO;
+import com.sumavision.tetris.capacity.bo.output.OutputRtspBO;
 import com.sumavision.tetris.capacity.bo.request.AllRequest;
 import com.sumavision.tetris.capacity.bo.request.CreateOutputsRequest;
 import com.sumavision.tetris.capacity.bo.request.DeleteOutputsRequest;
@@ -143,6 +144,22 @@ public class TransformService {
 		}else if(streamTranscodingVO.getBePCM().equals(4)){
 
 			uniq = streamTranscodingVO.getAssetUrl();
+			
+		}else if(streamTranscodingVO.getBePCM().equals(3) || streamTranscodingVO.getBePCM().equals(5)){
+			
+			String sourceUrl = streamTranscodingVO.getAssetUrl();
+			if(!sourceUrl.startsWith("rtp")){
+				throw new BaseException(StatusCode.FORBIDDEN, "源地址不是rtp！");
+			}
+			
+			String sourceIp = sourceUrl.split("rtp://")[1].split(":")[0];
+			
+			Long sourcePort = Long.valueOf(sourceUrl.split("rtp://")[1].split(":")[1]);
+			
+			uniq = new StringBufferWrapper().append(sourceIp)
+										    .append("@")
+										    .append(sourcePort)
+										    .toString();
 			
 		}else{
 			
@@ -617,7 +634,7 @@ public class TransformService {
 			
 			taskOutputDao.delete(task);
 		}else{
-			throw new BaseException(StatusCode.ERROR, "任务不存在！");
+			//throw new BaseException(StatusCode.ERROR, "任务不存在！");
 		}
 	}
 	
@@ -703,12 +720,12 @@ public class TransformService {
 			}else if(bePcm.equals(2)){
 				
 				//TODO：暂时不管
-			}else if(bePcm.equals(3)){
+			}else if(bePcm.equals(3) || bePcm.equals(5)){
 				
 				//rtp_es
-				String sourceIp = sourceUrl.split("@")[1].split(":")[0];
+				String sourceIp = sourceUrl.split("rtp://")[1].split(":")[0];
 				
-				int sourcePort = Integer.valueOf(sourceUrl.split("@")[1].split(":")[1]).intValue();
+				int sourcePort = Integer.valueOf(sourceUrl.split("rtp://")[1].split(":")[1]).intValue();
 				
 				String type = streamTranscodingVO.getMediaType();
 				
@@ -957,12 +974,12 @@ public class TransformService {
 				
 				OutParamVO outParam = outputParams.get(i);
 				
-				String outputIp = outParam.getOutputUrl().split(":")[0];
-				
-				int outputPort = Integer.valueOf(outParam.getOutputUrl().split(":")[1]).intValue();
-				
 				//udp-ts
 				if(task.getEsType().equals(0)){
+					
+					String outputIp = outParam.getOutputUrl().split(":")[0];
+					
+					int outputPort = Integer.valueOf(outParam.getOutputUrl().split(":")[1]).intValue();
 					
 					String outputId = new StringBufferWrapper().append(OUTPUT_PREFIX)
 															   .append(i+1)
@@ -1025,6 +1042,10 @@ public class TransformService {
 				//rtp-es(视频需要分两路输出) -- 只用考虑音频
 				}else if(task.getEsType().equals(3)){
 					
+					String outputIp = outParam.getOutputUrl().split("rtp://")[1].split(":")[0];
+					
+					int outputPort = Integer.valueOf(outParam.getOutputUrl().split("rtp://")[1].split(":")[1]).intValue();
+					
 					//TODO：参数不明确
 					for(TaskBO taskBO: tasks){
 						if(taskBO.getType().equals("video")){
@@ -1053,8 +1074,8 @@ public class TransformService {
 							OutputBO output = new OutputBO();			
 							output.setId(outputId);
 							
-							OutputRtpEsBO rtp_es = new OutputRtpEsBO().setDst_ip(outputIp)
-																	  .setDst_port(outputPort)
+							OutputRtpEsBO rtp_es = new OutputRtpEsBO().setIp(outputIp)
+																	  .setPort(outputPort)
 																	  .setLocal_ip(outParam.getLocalIp() == null?streamTranscodingVO.getDeviceIp(): outParam.getLocalIp())
 																	  .setMedia(media);
 							
@@ -1091,9 +1112,9 @@ public class TransformService {
 							OutputBO output = new OutputBO();			
 							output.setId(outputId);
 							
-							OutputRtpEsBO rtp_es = new OutputRtpEsBO().setDst_ip(outputIp)
-																	  .setDst_port(outputPort)
-																	  .setLocal_ip(outParam.getLocalIp())
+							OutputRtpEsBO rtp_es = new OutputRtpEsBO().setIp(outputIp)
+																	  .setPort(outputPort)
+																	  .setLocal_ip(outParam.getLocalIp() == null?streamTranscodingVO.getDeviceIp(): outParam.getLocalIp())
 																	  .setMedia(media);
 							
 							output.setRtp_es(rtp_es);
@@ -1101,6 +1122,55 @@ public class TransformService {
 							outputs.add(output);
 						}
 					}
+				//rtsp
+				}else if(task.getEsType().equals(4)){
+					
+					String rtspOutputUrl = outParam.getOutputUrl();
+					
+					String rtspIp = rtspOutputUrl.split("rtsp://")[1].split("/")[0].split(":")[0];
+					Integer rtspPort = Integer.valueOf(rtspOutputUrl.split("rtsp://")[1].split("/")[0].split(":")[1]);
+					String sdpName = rtspOutputUrl.split("rtsp://")[1].split("/")[1].split(".sdp")[0];
+					
+					String outputId = new StringBufferWrapper().append(OUTPUT_PREFIX)
+															   .append(i+1)
+															   .append("-")
+															   .append(id)
+															   .toString();
+
+					OutputBO output = new OutputBO();			
+					output.setId(outputId);
+					
+					//拼媒体
+					List<OutputMediaBO> medias = new ArrayList<OutputMediaBO>();
+					for(TaskBO taskBO: tasks){
+					
+						if(taskBO.getType().equals("video")){
+							OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
+																	 .setType(taskBO.getType())
+																	 .setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
+																	 .setPid(outParam.getVid1pid() == null?513: outParam.getVid1pid());
+							medias.add(media);
+						}
+						
+						if(taskBO.getType().equals("audio")){
+							OutputMediaBO media = new OutputMediaBO().setTask_id(taskBO.getId())
+																	 .setType(taskBO.getType())
+																	 .setEncode_id(taskBO.getEncode_array().iterator().next().getEncode_id())
+																	 .setPid(outParam.getAud1pid() == null?514: outParam.getAud1pid());
+							medias.add(media);
+						}
+					
+					}
+
+					OutputRtspBO rtsp = new OutputRtspBO().setSdp_name(sdpName)
+														  .setIp(rtspIp)
+														  .setPort(rtspPort)
+														  .setLocal_ip(outParam.getLocalIp() == null?streamTranscodingVO.getDeviceIp(): outParam.getLocalIp())
+														  .setMedia_array(new ArrayListWrapper<OutputMediaBO>().addAll(medias).getList());
+					
+					output.setRtsp(rtsp);
+					
+					outputs.add(output);
 				}
 			}
 		}
