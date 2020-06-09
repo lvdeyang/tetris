@@ -24,6 +24,10 @@ import com.sumavision.tetris.zoom.exception.UserNotFoundException;
 import com.sumavision.tetris.zoom.exception.ZoomMemberNotFoundException;
 import com.sumavision.tetris.zoom.exception.ZoomNotFoundException;
 import com.sumavision.tetris.zoom.exception.ZoomStopedException;
+import com.sumavision.tetris.zoom.history.HistoryDAO;
+import com.sumavision.tetris.zoom.history.HistoryPO;
+import com.sumavision.tetris.zoom.history.HistoryService;
+import com.sumavision.tetris.zoom.history.HistoryType;
 import com.sumavision.tetris.zoom.jv220.Jv220UserAllocationQuery;
 import com.sumavision.tetris.zoom.webrtc.WebRtcRoomInfoQuery;
 import com.sumavision.tetris.zoom.webrtc.WebRtcRoomInfoService;
@@ -60,14 +64,17 @@ public class ZoomService {
 	@Autowired
 	private WebsocketMessageService websocketMessageService;
 	
-	//@Autowired
-	//private HistoryService historyService;
+	@Autowired
+	private HistoryService historyService;
 	
 	@Autowired
 	private TerminalAgentService terminalAgentService;
 	
 	@Autowired
 	private Jv220UserAllocationQuery jv220UserAllocationQuery;
+	
+	@Autowired
+	private HistoryDAO historyDao;
 	
 	/**
 	 * 邀人建会<br/>
@@ -304,10 +311,9 @@ public class ZoomService {
 		}
 		
 		//添加历史
-		/*if(!tourist){
-			String remark = new StringBufferWrapper().append("会议名称：").append(zoom.getName()).append("@@").append("创建者：").append(zoom.getCreatorUserRename()).toString();
-			historyService.addZoomHistory(zoom.getCode(), self.getId().toString(), remark);
-		}*/
+		if(!tourist){
+			historyService.addZoomHistory(zoom.getCode(), self.getId().toString(), zoom.getName());
+		}
 		
 		//数据转换
 		List<ZoomMemberPO> members = zoomMemberDao.findByZoomId(zoom.getId());
@@ -490,7 +496,7 @@ public class ZoomService {
 			}else{
 				logined.add(m);
 			}
-			if(m.getJoin()) continue;
+			if(!m.getJoin()) continue;
 			if(m.getChairman()) continue;
 			if(ZoomMemberType.JV220.equals(m.getType()) && m.getJoin()){
 				jv220s.add(m);
@@ -950,7 +956,7 @@ public class ZoomService {
 		for(ZoomMemberVO m:members){
 			if(!m.getJoin()) continue;
 			if(m.getId().equals(openShareScreenMember.getId())) continue;
-			if(ZoomMemberType.TERMINl.toString().equals(m)){
+			if(ZoomMemberType.TERMINl.toString().equals(m.getType())){
 				websocketMessageService.push(m.getUserId(), businessId, content, selfMember.getUserId(), selfMember.getRename());
 			}else if(ZoomMemberType.JV220.toString().equals(m)){
 				jv220s.add(m);
@@ -1298,6 +1304,11 @@ public class ZoomService {
 		List<ZoomMessagePO> messages = zoomMessageDao.findByZoomId(zoom.getId());
 		if(messages!=null && messages.size()>0){
 			zoomMessageDao.deleteInBatch(messages);
+		}
+		
+		List<HistoryPO> histories = historyDao.findByHistoryIdAndType(code, HistoryType.ZOOM_CODE);
+		if(histories!=null && histories.size()>0){
+			historyDao.deleteInBatch(histories);
 		}
 		
 		zoomDao.delete(zoom);

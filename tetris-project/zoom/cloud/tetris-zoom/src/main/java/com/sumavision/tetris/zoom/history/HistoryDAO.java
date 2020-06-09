@@ -45,4 +45,15 @@ public interface HistoryDAO extends BaseDAO<HistoryPO>{
 	 */
 	public List<HistoryPO> findByUserIdAndTypeOrderByUpdateTimeDesc(String userId, HistoryType type);
 	
+	/**
+	 * 查询资源的历史存储情况<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月9日 上午10:18:36
+	 * @param String historyId 资源id
+	 * @param HistoryType type 历史类型
+	 * @return List<HistoryPO> 历史记录列表
+	 */
+	public List<HistoryPO> findByHistoryIdAndType(String historyId, HistoryType type);
+	
 }
