@@ -17,7 +17,7 @@ public interface TagDAO extends BaseDAO<TagPO>{
 			+ "AND permission.group_id = ?2", nativeQuery = true)
 	public TagPO findByIdAndGroupId(Long id, String groupId);
 	
-	@Query(value = "SELECT tag.* FROM TETRIS_TAG tag "
+	@Query(value = "SELECT DISTINCT tag.* FROM TETRIS_TAG tag "
 			+ "LEFT JOIN TETRIS_TAG_GROUP_PERMISSION permission "
 			+ "ON tag.id = permission.tag_id "
 			+ "WHERE tag.parent_id = ?1 "
@@ -31,7 +31,7 @@ public interface TagDAO extends BaseDAO<TagPO>{
 			+ "AND permission.group_id = ?2", nativeQuery = true)
 	public List<Long> findIdsByParentIdAndGroupId(Long parentId, String groupId);
 	
-	@Query(value = "SELECT tag.* FROM TETRIS_TAG tag "
+	@Query(value = "SELECT DISTINCT tag.* FROM TETRIS_TAG tag "
 			+ "LEFT JOIN TETRIS_TAG_GROUP_PERMISSION permission "
 			+ "ON tag.id = permission.tag_id "
 			+ "WHERE tag.parent_id is null "
