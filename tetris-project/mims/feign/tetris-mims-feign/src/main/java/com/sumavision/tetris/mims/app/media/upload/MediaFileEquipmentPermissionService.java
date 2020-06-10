@@ -21,7 +21,7 @@ public class MediaFileEquipmentPermissionService {
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年5月12日 上午10:11:59
 	 * @param String ids 资源id数组
-	 * @param String mediaType 资源类型(video/picture)
+	 * @param String mediaType 资源类型(video/picture/folder)
 	 * @param String equipmentIp 设备ip
 	 * @return List<MediaFileEquipmentPermissionPO> 资源关联关系
 	 */

@@ -245,9 +245,11 @@ public class MediaVideoQuery {
 		} else {
 			List<MediaVideoVO> medias = loadAll();
 			if (medias != null && !medias.isEmpty()) videoFolder = medias.get(0);
-			List<MediaVideoVO> children = videoFolder.getChildren();
-			for (MediaVideoVO mediaVideoVO : children) {
-				mediaVideoVO.setChildren(null);
+			if(videoFolder != null){
+				List<MediaVideoVO> children = videoFolder.getChildren();
+				for (MediaVideoVO mediaVideoVO : children) {
+					mediaVideoVO.setChildren(null);
+				}
 			}
 		}
 		return videoFolder;
