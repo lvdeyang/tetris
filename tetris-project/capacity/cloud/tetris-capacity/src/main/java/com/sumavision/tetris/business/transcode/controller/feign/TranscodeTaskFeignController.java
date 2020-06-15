@@ -307,4 +307,22 @@ public class TranscodeTaskFeignController {
 		transcodeTaskService.putAlarmList(ip, alarmlist);
 		return null;
 	}
+	
+	/**
+	 * 重置转换模块<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月5日 下午4:42:32
+	 * @param String ip 转换模块ip
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/remove/all")
+	public Object removeAll(
+			String ip,
+			HttpServletRequest request) throws Exception{
+		
+		transcodeTaskService.removeAll(ip);
+		return null;
+	}
 }

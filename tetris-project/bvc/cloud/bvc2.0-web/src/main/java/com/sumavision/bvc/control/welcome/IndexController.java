@@ -63,6 +63,26 @@ public class IndexController {
 		return mv;
 	}
 	
+	@RequestMapping(value = "/tetris/index/{token}")
+	public ModelAndView tetrisIndex(
+			@PathVariable String token,
+			HttpServletRequest request, 
+			HttpServletResponse response) throws Exception{
+		ModelAndView mv = null;
+		String scope = request.getParameter("scope");
+		//初始化一个session
+		HttpSession session = request.getSession(false);
+		if(session == null){
+			session = request.getSession();
+			session.setMaxInactiveInterval(HttpConstant.SESSION_TIMEOUT);
+		}
+		mv = new ModelAndView("web/tetris/index");
+		mv.addObject(HttpConstant.MODEL_TOKEN, token);
+		mv.addObject(HttpConstant.MODEL_SESSION_ID, session.getId());
+		mv.addObject("scope", scope);
+		return mv;
+	}
+	
 	@ResponseBody
 	@JsonBody
 	@RequestMapping("/prepare/app")

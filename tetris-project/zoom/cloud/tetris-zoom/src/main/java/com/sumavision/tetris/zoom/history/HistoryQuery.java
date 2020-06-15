@@ -1,5 +1,6 @@
 package com.sumavision.tetris.zoom.history;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,8 @@ import org.springframework.stereotype.Component;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+import com.sumavision.tetris.zoom.ZoomDAO;
+import com.sumavision.tetris.zoom.ZoomPO;
 
 @Component
 public class HistoryQuery {
@@ -21,6 +24,9 @@ public class HistoryQuery {
 	
 	@Autowired
 	private HistoryDAO historyDao;
+	
+	@Autowired
+	private ZoomDAO zoomDao;
 	
 	/**
 	 * 分页查询用户历史记录<br/>
@@ -54,15 +60,44 @@ public class HistoryQuery {
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年3月4日 下午5:58:34
-	 * @return List<HistoryVO> 历史记录列表
+	 * @return create List<HistoryZoomVO> 用户创建的会议
+	 * @return history List<HistoryZoomVO> 用户加入的会议
 	 */
-	public List<HistoryVO> zoomListAll() throws Exception{
+	public Map<String, Object> zoomListAll() throws Exception{
 		
 		UserVO user = userQuery.current();
 		
-		List<HistoryPO> entities = historyDao.findByUserIdAndTypeOrderByUpdateTimeDesc(user.getId().toString(), HistoryType.ZOOM_CODE);
+		List<ZoomPO> zoomEntities = zoomDao.findByCreatorUserId(user.getId());
+		List<HistoryZoomVO> createZooms = new ArrayList<HistoryZoomVO>();
+		if(zoomEntities!=null && zoomEntities.size()>0){
+			for(ZoomPO entity:zoomEntities){
+				createZooms.add(new HistoryZoomVO().set(entity));
+			}
+		}
 		
-		return HistoryVO.getConverter(HistoryVO.class).convert(entities, HistoryVO.class);
+		List<HistoryPO> historyEntities = historyDao.findByUserIdAndTypeOrderByUpdateTimeDesc(user.getId().toString(), HistoryType.ZOOM_CODE);
+		List<HistoryZoomVO> historyZooms = new ArrayList<HistoryZoomVO>();
+		if(historyEntities!=null && historyEntities.size()>0){
+			List<String> codes = new ArrayList<String>();
+			for(HistoryPO entity:historyEntities){
+				codes.add(entity.getHistoryId());
+			}
+			List<ZoomPO> joinZooms = zoomDao.findByCodeIn(codes);
+			if(joinZooms!=null && joinZooms.size()>0){
+				for(ZoomPO zoom:joinZooms){
+					for(HistoryPO history:historyEntities){
+						if(history.getHistoryId().equals(zoom.getCode())){
+							historyZooms.add(new HistoryZoomVO().set(zoom, history));
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		return new HashMapWrapper<String, Object>().put("create", createZooms)
+												   .put("history", historyZooms)
+												   .getMap();
 	}
 	
 	/**

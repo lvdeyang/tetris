@@ -289,7 +289,8 @@ public class BroadFileService {
 						String contentType = item.getContentType();
 						if (contentType == null
 								|| contentType.isEmpty()
-								|| ScreenContentType.fromName(contentType).getType().equals("mims")) {
+								|| ScreenContentType.fromName(contentType).getType().equals("mims")
+								|| ScreenContentType.fromName(contentType).equals(ScreenContentType.TERMINAL_MIMS)) {
 							CsResourceVO resource = csResourceQuery.queryResourceById(item.getResourceId());
 							if (resource.getType().equals("PUSH_LIVE")) {
 								schedule.put("freq", resource.getFreq());

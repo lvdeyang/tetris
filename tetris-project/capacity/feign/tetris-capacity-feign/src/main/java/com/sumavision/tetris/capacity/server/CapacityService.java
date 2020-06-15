@@ -198,4 +198,15 @@ public class CapacityService {
 		JsonBodyResponseParser.parseObject(capacityFeign.putAlarmlist(deviceIp, alarmlist), null);
 	}
 	
+	/**
+	 * 重置转换模块<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月5日 下午6:36:47
+	 * @param String deviceIp 转换模块ip
+	 */
+	public void removeAll(String deviceIp) throws Exception{
+		JsonBodyResponseParser.parseObject(capacityFeign.removeAll(deviceIp), null);
+	}
+	
 }

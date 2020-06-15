@@ -306,4 +306,14 @@ public interface CapacityFeign {
 	@RequestMapping(value = "/capacity/transcode/feign/put/alarmlist")
 	public JSONObject putAlarmlist(@RequestParam("ip") String ip,
 									@RequestParam("alarmlist") String alarmlist) throws Exception;
+	
+	/**
+	 * 重置转换模块<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月5日 下午5:26:18
+	 * @param ip
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/remove/all")
+	public JSONObject removeAll(@RequestParam("ip") String ip) throws Exception;
 }

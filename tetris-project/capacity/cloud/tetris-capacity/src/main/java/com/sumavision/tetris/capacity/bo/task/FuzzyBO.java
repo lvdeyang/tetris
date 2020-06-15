@@ -12,8 +12,9 @@ public class FuzzyBO {
 
 	private List<FuzzyObjectBO> fuzzys;
 	
-	/** 范围 */
-	private Integer mosaic_radius;
+	private String plat;
+	
+	private Integer nv_card_idx;
 
 	public List<FuzzyObjectBO> getFuzzys() {
 		return fuzzys;
@@ -24,12 +25,21 @@ public class FuzzyBO {
 		return this;
 	}
 
-	public Integer getMosaic_radius() {
-		return mosaic_radius;
+	public String getPlat() {
+		return plat;
 	}
 
-	public FuzzyBO setMosaic_radius(Integer mosaic_radius) {
-		this.mosaic_radius = mosaic_radius;
+	public FuzzyBO setPlat(String plat) {
+		this.plat = plat;
+		return this;
+	}
+
+	public Integer getNv_card_idx() {
+		return nv_card_idx;
+	}
+
+	public FuzzyBO setNv_card_idx(Integer nv_card_idx) {
+		this.nv_card_idx = nv_card_idx;
 		return this;
 	}
 	
