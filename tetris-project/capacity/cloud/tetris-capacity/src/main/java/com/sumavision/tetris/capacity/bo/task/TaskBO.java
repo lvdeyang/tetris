@@ -26,7 +26,7 @@ public class TaskBO {
 	
 	private AudioMixSourceBO audio_mix_source;
 	
-	private List<PreProcessingBO> decode_process_array;
+	private List<DecodePreProcessingBO> decode_process_array;
 	
 	private List<EncodeBO> encode_array;
 
@@ -93,11 +93,11 @@ public class TaskBO {
 		return this;
 	}
 
-	public List<PreProcessingBO> getDecode_process_array() {
+	public List<DecodePreProcessingBO> getDecode_process_array() {
 		return decode_process_array;
 	}
 
-	public TaskBO setDecode_process_array(List<PreProcessingBO> decode_process_array) {
+	public TaskBO setDecode_process_array(List<DecodePreProcessingBO> decode_process_array) {
 		this.decode_process_array = decode_process_array;
 		return this;
 	}

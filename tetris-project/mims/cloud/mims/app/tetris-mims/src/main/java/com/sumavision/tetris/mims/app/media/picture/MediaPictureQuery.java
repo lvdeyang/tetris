@@ -274,9 +274,11 @@ public class MediaPictureQuery {
 		} else {
 			List<MediaPictureVO> medias = loadAll();
 			if (medias != null && !medias.isEmpty()) pictureFolder = medias.get(0);
-			List<MediaPictureVO> children = pictureFolder.getChildren();
-			for (MediaPictureVO mediaPictureVO : children) {
-				mediaPictureVO.setChildren(null);
+			if(pictureFolder != null){
+				List<MediaPictureVO> children = pictureFolder.getChildren();
+				for (MediaPictureVO mediaPictureVO : children) {
+					mediaPictureVO.setChildren(null);
+				}
 			}
 		}
 		return pictureFolder;

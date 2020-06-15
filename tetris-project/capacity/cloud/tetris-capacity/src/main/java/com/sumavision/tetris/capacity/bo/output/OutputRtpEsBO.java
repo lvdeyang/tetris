@@ -8,9 +8,9 @@ package com.sumavision.tetris.capacity.bo.output;
  */
 public class OutputRtpEsBO {
 
-	private String dst_ip;
+	private String ip;
 	
-	private Integer dst_port;
+	private Integer port;
 	
 	private String local_ip;
 	
@@ -22,21 +22,21 @@ public class OutputRtpEsBO {
 	
 	private OutputRtpesMediaBO media;
 
-	public String getDst_ip() {
-		return dst_ip;
+	public String getIp() {
+		return ip;
 	}
 
-	public OutputRtpEsBO setDst_ip(String dst_ip) {
-		this.dst_ip = dst_ip;
+	public OutputRtpEsBO setIp(String ip) {
+		this.ip = ip;
 		return this;
 	}
 
-	public Integer getDst_port() {
-		return dst_port;
+	public Integer getPort() {
+		return port;
 	}
 
-	public OutputRtpEsBO setDst_port(Integer dst_port) {
-		this.dst_port = dst_port;
+	public OutputRtpEsBO setPort(Integer port) {
+		this.port = port;
 		return this;
 	}
 

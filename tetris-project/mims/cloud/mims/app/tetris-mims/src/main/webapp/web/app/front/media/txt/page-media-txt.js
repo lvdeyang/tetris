@@ -142,6 +142,9 @@ define([
                 handleDownload:function(scope){
                     var row = scope.row;
                     ajax.post('/media/txt/query/content/' + row.id, null, function(data){
+                    	if(typeof data === 'object'){
+                    		data = $.toJSON(data);
+                    	}
                         var name = row.name + '.txt';
                         var a = document.createElement('a');
                         var event = new MouseEvent('click');
