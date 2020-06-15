@@ -80,6 +80,7 @@ define([
                         if(status !== 200) return;
                         self.table.rows.push(data);
                         self.table.total += 1;
+                        self.handleCreateTerminalClose();
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
                 handleDelete:function(){
@@ -113,10 +114,15 @@ define([
                                 self.table.rows.splice(i, 1, data);
                             }
                         }
+                        self.handleEditTerminalClose();
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
                 handleEditBundle:function(scope){
                     var self = this;
+                    var row = scope.row;
+                    self.editTerminal.id = row.id;
+                    self.editTerminal.name = row.name;
+                    self.editTerminal.visible = true;
                 },
                 handleRowDelete:function(scope){
                     var self = this;
@@ -137,7 +143,22 @@ define([
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
-
+                                ajax.post('/tetris/bvc/model/terminal/delete', {
+                                    id:row.id
+                                }, function(data, status){
+                                    instance.confirmButtonLoading = false;
+                                    done();
+                                    if(status !== 200) return;
+                                    for(var i=0; i<self.table.rows.length; i++){
+                                        if(self.table.rows[i].id == row.id){
+                                            self.table.rows.splice(i, 1);
+                                        }
+                                    }
+                                    self.table.total -= 1;
+                                    if(self.table.rows.length==0 && self.table.total>0){
+                                        self.load(self.table.currentPage-1);
+                                    }
+                                }, null, ajax.TOTAL_CATCH_CODE);
                             }else{
                                 instance.confirmButtonLoading = false;
                                 done();

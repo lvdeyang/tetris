@@ -24,11 +24,9 @@ public class TerminalScreenPO extends AbstractBasePO{
 	/** 终端id */
 	private Long terminalId;
 	
-	/** 终端设备id */
-	private Long terminalBundleId;
+	/** 与终端通道一一对应 */
+	private Long terminalChannelId;
 	
-	/** 终端设备通道id */
-	private Long terminalBundleChannelId;
 
 	@Column(name = "SCREEN_PRIMARY_KEY")
 	public String getScreenPrimaryKey() {
@@ -48,22 +46,13 @@ public class TerminalScreenPO extends AbstractBasePO{
 		this.terminalId = terminalId;
 	}
 
-	@Column(name = "TERMINAL_BUNDLE_ID")
-	public Long getTerminalBundleId() {
-		return terminalBundleId;
+	@Column(name = "TERMINAL_CHANNEL_ID")
+	public Long getTerminalChannelId() {
+		return terminalChannelId;
 	}
 
-	public void setTerminalBundleId(Long terminalBundleId) {
-		this.terminalBundleId = terminalBundleId;
-	}
-
-	@Column(name = "TERMINAL_BUNDLE_CHANNEL_ID")
-	public Long getTerminalBundleChannelId() {
-		return terminalBundleChannelId;
-	}
-
-	public void setTerminalBundleChannelId(Long terminalBundleChannelId) {
-		this.terminalBundleChannelId = terminalBundleChannelId;
+	public void setTerminalChannelId(Long terminalChannelId) {
+		this.terminalChannelId = terminalChannelId;
 	}
 	
 }

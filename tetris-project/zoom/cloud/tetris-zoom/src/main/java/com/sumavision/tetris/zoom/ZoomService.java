@@ -881,7 +881,7 @@ public class ZoomService {
 			zoomMemberDao.deleteInBatch(tourists);
 		}
 		if(joins.size() > 0){
-			zoomMemberDao.save(joins);
+			zoomMemberDao.deleteInBatch(joins);
 		}
 		
 		//通知成员

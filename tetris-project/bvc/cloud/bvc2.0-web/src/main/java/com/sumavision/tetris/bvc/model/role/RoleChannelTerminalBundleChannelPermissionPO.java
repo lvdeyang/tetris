@@ -27,12 +27,9 @@ public class RoleChannelTerminalBundleChannelPermissionPO extends AbstractBasePO
 	/** 终端id */
 	private Long terminalId;
 	
-	/** 终端设备id */
-	private Long terminalBundleId;
+	/** 终端通道id */
+	private Long terminalChannelId;
 	
-	/** 终端设备通道id */
-	private Long terminalBundleChannelId;
-
 	@Column(name = "ROLE_ID")
 	public Long getRoleId() {
 		return roleId;
@@ -60,22 +57,13 @@ public class RoleChannelTerminalBundleChannelPermissionPO extends AbstractBasePO
 		this.terminalId = terminalId;
 	}
 
-	@Column(name = "TERMINAL_BUNDLE_ID")
-	public Long getTerminalBundleId() {
-		return terminalBundleId;
+	@Column(name = "TERMINAL_CHANNEL_ID")
+	public Long getTerminalChannelId() {
+		return terminalChannelId;
 	}
 
-	public void setTerminalBundleId(Long terminalBundleId) {
-		this.terminalBundleId = terminalBundleId;
-	}
-
-	@Column(name = "TERMINAL_BUNDLE_CHANNEL_ID")
-	public Long getTerminalBundleChannelId() {
-		return terminalBundleChannelId;
-	}
-
-	public void setTerminalBundleChannelId(Long terminalBundleChannelId) {
-		this.terminalBundleChannelId = terminalBundleChannelId;
+	public void setTerminalChannelId(Long terminalChannelId) {
+		this.terminalChannelId = terminalChannelId;
 	}
 	
 }
