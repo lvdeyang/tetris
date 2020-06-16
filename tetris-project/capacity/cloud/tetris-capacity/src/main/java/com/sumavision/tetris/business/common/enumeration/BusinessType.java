@@ -10,6 +10,7 @@ public enum BusinessType {
 	DIRECTOR,
 	COVER,
 	PUSH,
+	PACKAGE,
 	TEST;
 	
 }
