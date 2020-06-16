@@ -26,17 +26,14 @@ public class CapacityPermissionPortPO extends AbstractBasePO{
 	/** 设备ip */
 	private String bundleIp;
 	
-	/** srt服务ip */
-	private String srtIp;
-	
-	/** 设备给srt服务发流端口 */
-	private Long srtPort;
-	
 	/** 转码能力ip */
 	private String capacityIp;
 	
 	/** 转码能力端口 */
 	private Long capacityPort;
+	
+	/** 该源的转码任务id */
+	private String taskId;
 
 	public String getBundleId() {
 		return bundleId;
@@ -62,22 +59,6 @@ public class CapacityPermissionPortPO extends AbstractBasePO{
 		this.bundleIp = bundleIp;
 	}
 
-	public String getSrtIp() {
-		return srtIp;
-	}
-
-	public void setSrtIp(String srtIp) {
-		this.srtIp = srtIp;
-	}
-
-	public Long getSrtPort() {
-		return srtPort;
-	}
-
-	public void setSrtPort(Long srtPort) {
-		this.srtPort = srtPort;
-	}
-
 	public String getCapacityIp() {
 		return capacityIp;
 	}
@@ -92,6 +73,14 @@ public class CapacityPermissionPortPO extends AbstractBasePO{
 
 	public void setCapacityPort(Long capacityPort) {
 		this.capacityPort = capacityPort;
+	}
+
+	public String getTaskId() {
+		return taskId;
+	}
+
+	public void setTaskId(String taskId) {
+		this.taskId = taskId;
 	}
 
 }

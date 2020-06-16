@@ -12,6 +12,8 @@ public interface CapacityPermissionPortDAO extends BaseDAO<CapacityPermissionPor
 
 	public CapacityPermissionPortPO findByBundleId(String bundleId);
 	
-	public List<CapacityPermissionPortPO> findBySrtIp(String ip);
+	public List<CapacityPermissionPortPO> findByCapacityIp(String capacityIp);
+	
+	public CapacityPermissionPortPO findByBundleIdAndChannleId(String bundleId, String channleId);
 	
 }

@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 @PropertySource("classpath:properties/capacity.properties")
 public class CapacityProps {
 
-	@Value("$(srt.ip)")
-	private String srtIp;
+	@Value("$(capacity.ip)")
+	private String capacityIp;
 	
-	@Value("$(srt.port)")
-	private String srtPort;
+	@Value("$(capacity.port)")
+	private String capacityPort;
 	
 	@Value("$(capacity.ip)")
 	private String transcodeIp;
@@ -34,12 +34,12 @@ public class CapacityProps {
 	@Value("$(netIp)")
 	private String netIp;
 
-	public String getSrtIp() {
-		return srtIp;
+	public String getCapacityIp() {
+		return capacityIp;
 	}
 
-	public String getSrtPort() {
-		return srtPort;
+	public String getCapacityPort() {
+		return capacityPort;
 	}
 
 	public String getTranscodeIp() {
