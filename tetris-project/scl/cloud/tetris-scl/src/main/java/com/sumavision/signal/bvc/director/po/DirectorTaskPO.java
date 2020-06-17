@@ -45,6 +45,7 @@ public class DirectorTaskPO extends AbstractBasePO{
 		this.transcodeParam = transcodeParam;
 	}
 
+	@Column
 	public String getSelect_index() {
 		return select_index;
 	}

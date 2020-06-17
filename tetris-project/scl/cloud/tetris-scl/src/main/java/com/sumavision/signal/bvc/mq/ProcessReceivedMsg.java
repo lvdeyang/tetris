@@ -18,6 +18,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -71,6 +72,7 @@ import com.sumavision.signal.bvc.service.TerminalMappingService;
 import com.sumavision.signal.bvc.terminal.JV220Param;
 import com.sumavision.signal.bvc.terminal.OneOneFiveMTerminal;
 import com.sumavision.signal.bvc.terminal.TerminalParam;
+import com.sumavision.tetris.capacity.server.PackageService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.binary.ByteUtil;
@@ -133,6 +135,9 @@ public class ProcessReceivedMsg {
 	
 	@Autowired
 	private NetworkService networkService;
+	
+	@Autowired
+	private PackageService packageService;
     
     /*
      * 根据接口协议的数据类型解析msg中的方法名，根据相应方法名注入上层解析接口进行处理
@@ -153,7 +158,7 @@ public class ProcessReceivedMsg {
             	processPassByMsg(responseBo);
             	break;
             case "pullData":
-            	processPullDataMsg(responseBo);
+            	processAllPullDataMsg(responseBo);
             	break;
             case "cancelData":
             	processCancelDataMsg(responseBo);
@@ -261,6 +266,82 @@ public class ProcessReceivedMsg {
 		default:
 			break;
 		}
+    }
+    
+    private void processAllPullDataMsg(ResponseBO responseBo) throws Exception{
+    	
+    	//区分5G背包
+    	VenusMessageHead head = responseBo.getMessage().getMessage_header();
+    	JSONObject messageBody = responseBo.getMessage().getMessage_body();
+    	//接收pulldata方的bundleId
+    	String localBundleId = messageBody.getString("localBundleId");
+    	
+    	BundlePO bundlePO = resourceBundleDao.findByBundleId(localBundleId);
+    	if(bundlePO.getDeviceModel().equals("5G")){
+    		processPullData5GMsg(responseBo);
+    	}else{
+    		processPullDataMsg(responseBo);
+    	}
+    	
+    }
+    
+    /**处理pullData信息--5G背包的信息
+     * @throws Exception */
+    private void processPullData5GMsg(ResponseBO responseBo) throws Exception{
+    	
+    	synchronized (this) {
+    		VenusMessageHead head = responseBo.getMessage().getMessage_header();
+        	JSONObject messageBody = responseBo.getMessage().getMessage_body();
+        	
+        	System.out.println("5G背包接入收到pulldata:" + JSON.toJSONString(messageBody));
+    		
+        	String seq = messageBody.getString("seq");
+        	
+        	//接入层有共享流机制，得到的bundleId和channelId可能不认识
+    		//发pulldata方的bundleId
+        	String peerBundleId = messageBody.getString("peerBundleId");
+        	//发pulldata方的channelId
+        	String peerChannelId = messageBody.getString("peerChannelId");
+        	//接收pulldata方的bundleId
+        	String localBundleId = messageBody.getString("localBundleId");
+        	//接收pulldata方的channelId
+        	String localChannelID = messageBody.getString("localChannelID");
+        	//发pulldata方的ip:port
+        	String peerEndpoint = messageBody.getString("peerEndpoint");
+        	//发pulldata方的ip:port--用这个
+        	String peerReflectEndpoint = messageBody.getString("peerReflectEndpoint");
+        	
+        	String[] address = peerReflectEndpoint.split(":");
+        	String ip = "0.0.0.0";
+        	String port = "60000";
+        	
+        	if(address.length > 1){
+        		ip = address[0];
+        		port = address[1];
+        	}else{
+        		return;
+        	}
+        	
+        	CapacityPermissionPortPO permission = capacityPermissionPortDao.findByBundleIdAndChannleId(localBundleId, localChannelID);
+        	if(permission == null){
+        		System.out.println("源端口暂未协商成功！");
+        		return;
+        	}
+        	
+        	String srcIp = permission.getCapacityIp();
+        	Long srcPort = permission.getCapacityPort();
+        	String dstIp = ip;
+        	String dstPort = port;
+        	
+        	String taskId = packageService.addTask(srcIp, srcPort.toString(), dstIp, dstPort);
+        	permission.setTaskId(taskId);
+        	
+        	capacityPermissionPortDao.save(permission);
+        	
+        	//pulldata response
+        	mqSendService.pullDataResponseMessage(head.getSource_id(), head.getDestination_id(), localBundleId, localChannelID, peerBundleId, peerChannelId, peerEndpoint, peerReflectEndpoint, "0.0.0.0:" + "60000", permission.getCapacityIp() + ":60000", seq);
+        	
+    	}
     }
     
     /**处理pullData信息信息
@@ -1124,7 +1205,7 @@ public class ProcessReceivedMsg {
     	
     }
     
-    /**处理open_bundle信息的jv220类型信息
+    /**处理open_bundle信息的5G背包类型信息
      * @throws Exception */
     private void processOpenBundle5GMsg(BundleBO bundle) throws Exception{
     
@@ -1228,21 +1309,21 @@ public class ProcessReceivedMsg {
     			//协商端口
     			permission = new CapacityPermissionPortPO();
     			
-    			String srtIp = capacityProps.getSrtIp();
+    			String capacityIp = capacityProps.getCapacityIp();
         		String transcodeIp = capacityProps.getTranscodeIp();
         		
         		List<Long> ports = new ArrayList<Long>();
-        		List<CapacityPermissionPortPO> capacityPermissionPorts = new ArrayList<CapacityPermissionPortPO>();
+        		List<CapacityPermissionPortPO> capacityPermissionPorts = capacityPermissionPortDao.findByCapacityIp(capacityIp);
         		for(CapacityPermissionPortPO capacityPermissionPort: capacityPermissionPorts){
-        			ports.add(capacityPermissionPort.getSrtPort());
+        			ports.add(capacityPermissionPort.getCapacityPort());
         		}
         		
         		Long newport = terminalMappingService.generatePort(ports);
         		
         		permission.setBundleId(bundleId);
         		permission.setBundleIp(bundlePO.getDeviceIp());
-        		permission.setSrtIp(srtIp);
-        		permission.setSrtPort(newport);
+        		permission.setCapacityIp(capacityIp);
+        		permission.setCapacityPort(newport);
         		
         		capacityPermissionPortDao.save(permission);
     		}
@@ -1252,8 +1333,8 @@ public class ProcessReceivedMsg {
     		JSONArray portCfg = new JSONArray();
     		JSONObject port = new JSONObject();
     		port.put("portIdx", 1);
-    		port.put("dstIP", permission.getSrtIp());
-    		port.put("dstUDP", permission.getSrtPort());
+    		port.put("dstIP", permission.getCapacityIp());
+    		port.put("dstUDP", permission.getCapacityPort());
     		port.put("switch", 1);
     		portCfg.add(port);
     		gbeNet0PortCfg.put("gbeNet0PortCfg", gbeNet0PortCfg);
@@ -1301,27 +1382,27 @@ public class ProcessReceivedMsg {
     	    			//协商端口
     	    			permission = new CapacityPermissionPortPO();
     	    			
-    	    			String srtIp = capacityProps.getSrtIp();
+    	    			String capacityIp = capacityProps.getCapacityIp();
     	        		String transcodeIp = capacityProps.getTranscodeIp();
     	        		
     	        		List<Long> ports = new ArrayList<Long>();
-    	        		List<CapacityPermissionPortPO> capacityPermissionPorts = new ArrayList<CapacityPermissionPortPO>();
+    	        		List<CapacityPermissionPortPO> capacityPermissionPorts = capacityPermissionPortDao.findByCapacityIp(capacityIp);
     	        		for(CapacityPermissionPortPO capacityPermissionPort: capacityPermissionPorts){
-    	        			ports.add(capacityPermissionPort.getSrtPort());
+    	        			ports.add(capacityPermissionPort.getCapacityPort());
     	        		}
     	        		
     	        		Long newport = terminalMappingService.generatePort(ports);
     	        		
     	        		permission.setBundleId(bundleId);
     	        		permission.setBundleIp(bundlePO.getDeviceIp());
-    	        		permission.setSrtIp(srtIp);
-    	        		permission.setSrtPort(newport);
+    	        		permission.setCapacityIp(capacityIp);
+    	        		permission.setCapacityPort(newport);
     	        		
     	        		capacityPermissionPortDao.save(permission);
     	    		}
     	    		
-    	    		TranscodeVO transcode = new TranscodeVO().setIp(permission.getSrtIp())
-    	    												 .setPort(permission.getSrtPort())
+    	    		TranscodeVO transcode = new TranscodeVO().setIp(permission.getCapacityIp())
+    	    												 .setPort(permission.getCapacityPort())
     	    												 .setUdp(udpUrl)
     	    												 .setBundleId(bundleId)
     	    												 .setVideo(player.getVideo_param())
@@ -1779,6 +1860,11 @@ public class ProcessReceivedMsg {
     		HttpAsyncClient.getInstance().httpAsyncPost("http://" + deviceIp + TerminalParam.FIVEG_URL_SUFFIX, oneOneFiveMTerminal.gbePortCfg(gbeNet0PortCfg).toJSONString(), null, null);
 	    	
     		//TODO:解码参数--设备暂时不支持
+    		
+    		//停止转码任务
+    		if(!StringUtils.isEmpty(permission.getTaskId())){
+    			packageService.deleteTask(permission.getTaskId());
+    		}
     		
     		capacityPermissionPortDao.delete(permission);
     	}

@@ -52,8 +52,9 @@ public class DirectorSourcePO extends AbstractBasePO{
 	private String passBy;
 	
 	/** 源索引 */
-	private String index;
+	private String source_index;
 
+	@Column
 	public String getTaskId() {
 		return taskId;
 	}
@@ -62,6 +63,7 @@ public class DirectorSourcePO extends AbstractBasePO{
 		this.taskId = taskId;
 	}
 
+	@Column
 	public String getCapacityId() {
 		return capacityId;
 	}
@@ -70,6 +72,7 @@ public class DirectorSourcePO extends AbstractBasePO{
 		this.capacityId = capacityId;
 	}
 
+	@Column
 	public String getCapacityIp() {
 		return capacityIp;
 	}
@@ -78,6 +81,7 @@ public class DirectorSourcePO extends AbstractBasePO{
 		this.capacityIp = capacityIp;
 	}
 
+	@Column
 	public Long getCapacityPort() {
 		return capacityPort;
 	}
@@ -86,6 +90,7 @@ public class DirectorSourcePO extends AbstractBasePO{
 		this.capacityPort = capacityPort;
 	}
 
+	@Column
 	public String getBundleId() {
 		return bundleId;
 	}
@@ -94,6 +99,7 @@ public class DirectorSourcePO extends AbstractBasePO{
 		this.bundleId = bundleId;
 	}
 
+	@Column
 	public String getChannelId() {
 		return channelId;
 	}
@@ -102,6 +108,7 @@ public class DirectorSourcePO extends AbstractBasePO{
 		this.channelId = channelId;
 	}
 
+	@Column
 	public String getDeviceModel() {
 		return deviceModel;
 	}
@@ -110,6 +117,7 @@ public class DirectorSourcePO extends AbstractBasePO{
 		this.deviceModel = deviceModel;
 	}
 
+	@Column
 	public String getDeviceIp() {
 		return deviceIp;
 	}
@@ -127,7 +135,7 @@ public class DirectorSourcePO extends AbstractBasePO{
 		this.codeParam = codeParam;
 	}
 
-	@Column(name = "CODE_PARAM", columnDefinition = "longtext")
+	@Column(name = "PASS_BY", columnDefinition = "longtext")
 	public String getPassBy() {
 		return passBy;
 	}
@@ -136,12 +144,13 @@ public class DirectorSourcePO extends AbstractBasePO{
 		this.passBy = passBy;
 	}
 
-	public String getIndex() {
-		return index;
+	@Column
+	public String getSource_index() {
+		return source_index;
 	}
 
-	public void setIndex(String index) {
-		this.index = index;
+	public void setSource_index(String source_index) {
+		this.source_index = source_index;
 	}
 	
 }
