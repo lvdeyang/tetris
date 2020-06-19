@@ -34,6 +34,7 @@ public class ImageFilterBO {
 		return this;
 	}
 
+	
 	public String getDenoise() {
 		return denoise;
 	}
