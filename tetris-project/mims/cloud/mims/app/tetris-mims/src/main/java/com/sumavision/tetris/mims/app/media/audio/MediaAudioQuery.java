@@ -41,6 +41,7 @@ import com.sumavision.tetris.mims.app.media.tag.TagQuery;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoItemType;
 import com.sumavision.tetris.mims.app.media.video.MediaVideoPO;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserClassify;
@@ -82,6 +83,9 @@ public class MediaAudioQuery {
 	
 	@Autowired
 	private ServerProps serverProps;
+	
+	@Autowired
+	private MimsServerPropsQuery serverPropsQuery;
 	
 	@Autowired
 	private Path path;
@@ -775,7 +779,7 @@ public class MediaAudioQuery {
 								? audioFileEncodePO.getPreviewUrl() 
 										: new StringBufferWrapper()
 										.append("http://")
-										.append(serverProps.getIp())
+										.append(serverPropsQuery.queryProps().getFtpIp())
 										.append(":")
 										.append(serverProps.getPort())
 										.append("/")
@@ -802,13 +806,13 @@ public class MediaAudioQuery {
 		if (previewUrls == null || previewUrls.isEmpty()) return new ArrayList<MediaAudioVO>();
 		String localUrl = new StringBufferWrapper()
 				.append("http://")
-				.append(serverProps.getFtpIp())
+				.append(serverPropsQuery.queryProps().getFtpIp())
 				.append(":")
 				.append(serverProps.getPort())
 				.append("/").toString();
 		String netUrl = new StringBufferWrapper()
 				.append("http://")
-				.append(serverProps.getIp())
+				.append(serverPropsQuery.queryProps().getFtpIp())
 				.append(":")
 				.append(serverProps.getPort())
 				.append("/")

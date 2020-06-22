@@ -206,11 +206,7 @@
 		</dependency>
 		
 		<!-- redis -->
-		<dependency>
-			<groupId>com.sumavision.tetris</groupId>
-		  	<artifactId>tetris-redis</artifactId>
-		 	<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		
 		
 	</dependencies>
 	<build>
