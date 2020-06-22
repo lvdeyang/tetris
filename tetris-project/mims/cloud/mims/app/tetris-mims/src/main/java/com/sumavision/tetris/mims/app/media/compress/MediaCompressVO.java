@@ -7,6 +7,7 @@ import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -213,6 +214,7 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 	@Override
 	public MediaCompressVO set(MediaCompressPO entity) throws Exception {
 		ServerProps props = SpringContext.getBean(ServerProps.class);
+        MimsServerPropsQuery serverPropsQuery = SpringContext.getBean(MimsServerPropsQuery.class);
 		this.setId(entity.getId())
 			.setUuid(entity.getUuid())
 			.setUpdateTime(entity.getUpdateTime()==null?"":DateUtil.format(entity.getUpdateTime(), DateUtil.dateTimePattern))
@@ -229,7 +231,7 @@ public class MediaCompressVO extends AbstractBaseVO<MediaCompressVO, MediaCompre
 			.setMimetype(entity.getMimetype())
 			.setProgress(0)
 			.setUploadTmpPath(entity.getUploadTmpPath())
-			.setPreviewUrl(new StringBufferWrapper().append("http://").append(props.getIp()).append(":").append(props.getPort()).append(entity.getPreviewUrl()).toString())
+			.setPreviewUrl(new StringBufferWrapper().append("http://").append(serverPropsQuery.queryProps().getFtpIp()).append(":").append(props.getPort()).append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId());
 		if(entity.getTags() != null) this.setTags(Arrays.asList(entity.getTags().split(MediaCompressPO.SEPARATOR_TAG)));
