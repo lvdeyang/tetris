@@ -72,6 +72,9 @@ define([
                     self.video.src = url;
                     self.video.ready = true;
                 }else if(type === TXT){
+                	if(typeof url === 'object'){
+                		url = $.toJSON(url);
+                	}
                     self.txt.src = url;
                     self.txt.ready = true;
                     self.txt.buffer = buffer;

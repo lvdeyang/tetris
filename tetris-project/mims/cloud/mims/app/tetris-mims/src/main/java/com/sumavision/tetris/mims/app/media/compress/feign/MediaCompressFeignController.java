@@ -4,7 +4,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
@@ -71,8 +73,8 @@ public class MediaCompressFeignController {
 	 */
 	@JsonBody
 	@ResponseBody
-	@RequestMapping(value = "/package/tar")
-	public Object packageTar(String jsonString, String mimsUuidList, HttpServletRequest httpServletRequest) throws Exception{
+	@RequestMapping(value = "/package/tar", method = RequestMethod.POST)
+	public Object packageTar(@RequestBody String jsonString, String mimsUuidList, HttpServletRequest httpServletRequest) throws Exception{
 		
 		return mediaCompressService.packageTar(jsonString, JSON.parseArray(mimsUuidList, FileCompressVO.class));
 	}

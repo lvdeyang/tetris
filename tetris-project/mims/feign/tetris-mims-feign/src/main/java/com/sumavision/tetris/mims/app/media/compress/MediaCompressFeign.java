@@ -1,7 +1,9 @@
 package com.sumavision.tetris.mims.app.media.compress;
 
 import org.springframework.cloud.netflix.feign.FeignClient;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.alibaba.fastjson.JSONObject;
@@ -42,6 +44,11 @@ public interface MediaCompressFeign {
 	 * @param JSONArray mimsUuidList 打包媒资Uuid列表
 	 * @return MediaCompressVO 生成的播发媒资
 	 */
-	@RequestMapping(value = "/media/compress/feign/package/tar")
-	public JSONObject packageTar(@RequestParam("jsonString") String jsonString, @RequestParam("mimsUuidList") String mimsUuidList);
+	//@RequestMapping(value = "/media/compress/feign/package/tar", method = RequestMethod.POST)
+	//public JSONObject packageTar(@RequestParam("jsonString") String jsonString, @RequestParam("mimsUuidList") String mimsUuidList);
+
+	@RequestMapping(value = "/media/compress/feign/package/tar", method = RequestMethod.POST)
+	public JSONObject packageTar(@RequestBody String jsonString, @RequestParam("mimsUuidList") String mimsUuidList);
+
+	
 }

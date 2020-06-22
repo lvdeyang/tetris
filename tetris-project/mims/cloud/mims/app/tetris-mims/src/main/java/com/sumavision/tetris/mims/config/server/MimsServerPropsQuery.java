@@ -46,9 +46,10 @@ public class MimsServerPropsQuery {
 	 * <b>日期：</b>2019年7月22日 下午5:42:19
 	 * @param String primeryPath 资源路径
 	 * @return String 资源访问http地址
+	 * @throws Exception 
 	 */
-	public String generateHttpPreviewUrl(String primeryPath){
-		return new StringBufferWrapper().append("http://").append(serverProps.getIp())
+	public String generateHttpPreviewUrl(String primeryPath) throws Exception{
+		return new StringBufferWrapper().append("http://").append(queryProps().getFtpIp())
 														  .append(":")
 														  .append(serverProps.getPort())
 														  .append("/")

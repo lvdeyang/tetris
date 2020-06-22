@@ -74,12 +74,13 @@ public class MQListener implements ServletContextListener {
 //				}
 //			});
 //		}
+		
 		ApplicationContext ctx = WebApplicationContextUtils.getWebApplicationContext(sce
                 .getServletContext());
 		MessageService messageService = ctx.getBean(MessageService.class);
 		MQCallBackService callBackService = ctx.getBean(MQCallBackService.class);
 		//默认就把node的名称写入到消息服务的配置里然后只要重启就重新注册
-		//messageService.recoveryMessageService(callBackService);
+		messageService.recoveryMessageService(callBackService);
 		log.info("==============initListener resource finish=================");
 		
 		HeartBeatService heartBeatService = ctx.getBean(HeartBeatService.class);

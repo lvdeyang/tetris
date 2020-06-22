@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
@@ -28,6 +29,7 @@ import com.sumavision.tetris.mims.app.media.UploadStatus;
 import com.sumavision.tetris.mims.app.media.tag.TagDAO;
 import com.sumavision.tetris.mims.app.media.tag.TagPO;
 import com.sumavision.tetris.mims.app.media.tag.TagVO;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
@@ -62,6 +64,10 @@ public class MediaVideoQuery {
 	
 	@Autowired
 	private ServerProps serverProps;
+	
+	@Autowired
+    MimsServerPropsQuery serverPropsQuery;
+
 	
 	/**
 	 * 加载文件夹下的视频媒资<br/>
@@ -506,13 +512,13 @@ public class MediaVideoQuery {
 		if (previewUrls == null || previewUrls.isEmpty()) return new ArrayList<MediaVideoVO>();
 		String localUrl = new StringBufferWrapper()
 				.append("http://")
-				.append(serverProps.getFtpIp())
+				.append(serverPropsQuery.queryProps().getFtpIp())
 				.append(":")
 				.append(serverProps.getPort())
 				.append("/").toString();
 		String netUrl = new StringBufferWrapper()
 				.append("http://")
-				.append(serverProps.getIp())
+				.append(serverPropsQuery.queryProps().getFtpIp())
 				.append(":")
 				.append(serverProps.getPort())
 				.append("/")

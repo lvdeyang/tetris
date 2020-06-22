@@ -16,8 +16,10 @@ public class TaskOutputPO extends AbstractBasePO{
 	
 	private static final long serialVersionUID = 1L;
 
+	/** 任务唯一标识 */
 	private String taskUuid;
 	
+	/** 单源 */
 	private Long inputId;
 	
 	/** 多源的时候用 */
