@@ -13,7 +13,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>日期：</b>2020年6月4日 下午3:35:49
  */
 @Entity
-@Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_USER_LAYOUT_POSITION_USER_SETTINGS")
+@Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_LAYOUT_POSITION_USER_SETTINGS")
 public class LayoutPositionUserSettingsPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;

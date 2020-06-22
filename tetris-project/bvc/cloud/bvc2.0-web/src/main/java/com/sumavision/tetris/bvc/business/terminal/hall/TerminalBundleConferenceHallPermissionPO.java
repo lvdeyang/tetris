@@ -7,7 +7,7 @@ import javax.persistence.Table;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 @Entity
-@Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_HALL_TERMINAL_BUNDLE_CONFERENCE_HALL_PERMISSION")
+@Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_BUNDLE_CONFERENCE_HALL_PERMISSION")
 public class TerminalBundleConferenceHallPermissionPO extends AbstractBasePO{
 
 	/** 这是一个常量的说明 */

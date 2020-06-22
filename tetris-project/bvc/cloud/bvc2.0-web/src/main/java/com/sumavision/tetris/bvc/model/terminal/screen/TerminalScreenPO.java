@@ -18,6 +18,9 @@ public class TerminalScreenPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 
+	/** 屏幕名称 */
+	private String name;
+	
 	/** 屏幕primaryKey */
 	private String screenPrimaryKey;
 	
@@ -27,6 +30,14 @@ public class TerminalScreenPO extends AbstractBasePO{
 	/** 与终端通道一一对应 */
 	private Long terminalChannelId;
 	
+	@Column(name = "NAME")
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	@Column(name = "SCREEN_PRIMARY_KEY")
 	public String getScreenPrimaryKey() {

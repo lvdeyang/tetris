@@ -28,7 +28,13 @@ require.config({
         'mi-sub-title':window.APPPATH + 'component/sub-title/sub-title',
 
         /* page */
-        'page-terminal':window.APPPATH + 'tetris/model/terminal/page-terminal'
+        'page-terminal':window.APPPATH + 'tetris/model/terminal/page-terminal',
+        'page-terminal-bundle':window.APPPATH + 'tetris/model/terminal/page-terminal-bundle',
+        'page-terminal-bundle-channel':window.APPPATH + 'tetris/model/terminal/page-terminal-bundle-channel',
+        'page-terminal-channel':window.APPPATH + 'tetris/model/terminal/channel/page-terminal-channel',
+        'page-screen-primary-key':window.APPPATH + 'tetris/model/terminal/screen/page-screen-primary-key',
+        'page-terminal-screen':window.APPPATH + 'tetris/model/terminal/screen/page-terminal-screen',
+        'page-terminal-layout':window.APPPATH + 'tetris/model/terminal/layout/page-terminal-layout'
 
     },
     shim:{

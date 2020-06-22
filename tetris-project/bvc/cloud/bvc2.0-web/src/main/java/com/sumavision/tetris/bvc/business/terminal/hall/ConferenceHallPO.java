@@ -13,7 +13,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>日期：</b>2020年6月15日 下午2:52:15
  */
 @Entity
-@Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_HALL_CONFERENCE_HALL")
+@Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_CONFERENCE_HALL")
 public class ConferenceHallPO extends AbstractBasePO{
 
 	/** 这是一个常量的说明 */
