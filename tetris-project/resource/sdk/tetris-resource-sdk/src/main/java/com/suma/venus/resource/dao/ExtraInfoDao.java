@@ -24,6 +24,17 @@ public interface ExtraInfoDao extends CommonDao<ExtraInfoPO>{
 	
 	public List<ExtraInfoPO> findByBundleIdIn(Collection<String> bundleIds);
 	
+	/**
+	 * 根据设备id列表和扩展变量名查询变量<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月22日 下午2:13:55
+	 * @param Collection<String> bundleIds 设备id列表
+	 * @param String name 变量名
+	 * @return List<ExtraInfoPO> 变量列表
+	 */
+	public List<ExtraInfoPO> findByBundleIdInAndName(Collection<String> bundleIds, String name);
+	
 	public ExtraInfoPO findByBundleIdAndName(String bundleId,String name);
 	
 	public List<ExtraInfoPO> findByNameAndValue(String name,String value);
