@@ -1,60 +1,28 @@
 package com.sumavision.tetris.capacity.service;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.sumavision.tetris.capacity.bo.request.AddTaskEncodeRequest;
-import com.sumavision.tetris.capacity.bo.request.AllRequest;
-import com.sumavision.tetris.capacity.bo.request.CreateInputsRequest;
-import com.sumavision.tetris.capacity.bo.request.CreateOutputsRequest;
-import com.sumavision.tetris.capacity.bo.request.CreateProgramsRequest;
-import com.sumavision.tetris.capacity.bo.request.CreateTaskRequest;
-import com.sumavision.tetris.capacity.bo.request.DeleteInputsRequest;
-import com.sumavision.tetris.capacity.bo.request.DeleteOutputsRequest;
-import com.sumavision.tetris.capacity.bo.request.DeleteProgramRequest;
-import com.sumavision.tetris.capacity.bo.request.DeleteTaskEncodeResponse;
-import com.sumavision.tetris.capacity.bo.request.DeleteTasksRequest;
-import com.sumavision.tetris.capacity.bo.request.GetEntiretiesResponse;
-import com.sumavision.tetris.capacity.bo.request.PatchDecodeRequest;
-import com.sumavision.tetris.capacity.bo.request.PutInputsRequest;
-import com.sumavision.tetris.capacity.bo.request.PutOutputRequest;
-import com.sumavision.tetris.capacity.bo.request.PutRealIndexRequest;
-import com.sumavision.tetris.capacity.bo.request.PutScheduleRequest;
-import com.sumavision.tetris.capacity.bo.request.PutTaskDecodeProcessRequest;
-import com.sumavision.tetris.capacity.bo.request.PutTaskEncodeRequest;
-import com.sumavision.tetris.capacity.bo.request.PutTaskSourceRequest;
-import com.sumavision.tetris.capacity.bo.request.ResultCodeResponse;
-import com.sumavision.tetris.capacity.bo.response.AllResponse;
-import com.sumavision.tetris.capacity.bo.response.AnalysisResponse;
-import com.sumavision.tetris.capacity.bo.response.CreateInputsResponse;
-import com.sumavision.tetris.capacity.bo.response.CreateOutputsResponse;
-import com.sumavision.tetris.capacity.bo.response.CreateProgramResponse;
-import com.sumavision.tetris.capacity.bo.response.CreateTaskResponse;
-import com.sumavision.tetris.capacity.bo.response.GetInputsResponse;
-import com.sumavision.tetris.capacity.bo.response.GetOutputResponse;
-import com.sumavision.tetris.capacity.bo.response.GetOutputsResponse;
-import com.sumavision.tetris.capacity.bo.response.GetTaskResponse;
-import com.sumavision.tetris.capacity.bo.response.PutInputResponse;
-import com.sumavision.tetris.capacity.bo.response.TaskBaseResponse;
-import com.sumavision.tetris.capacity.bo.response.TaskEncodeResponse;
-import com.sumavision.tetris.capacity.bo.response.TaskEncodeResultResponse;
-import com.sumavision.tetris.capacity.bo.response.TaskRealIndexResponse;
+import com.sumavision.tetris.capacity.bo.request.*;
+import com.sumavision.tetris.capacity.bo.response.*;
 import com.sumavision.tetris.capacity.config.CapacityProps;
 import com.sumavision.tetris.capacity.constant.UrlConstant;
 import com.sumavision.tetris.capacity.exception.HttpTimeoutException;
 import com.sumavision.tetris.capacity.util.http.HttpUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class CapacityService {
-	
+
+	private static final Logger LOG = LoggerFactory.getLogger(CapacityService.class);
+
 	@Autowired
 	private CapacityProps capacityProps;
 
@@ -90,11 +58,11 @@ public class CapacityService {
 										      .append("?msg_id=")
 										      .append(msg_id)
 										      .toString();
-		
+		LOG.info("[get-inputs] request, url: {}", url);
 		JSONObject res = HttpUtil.httpGet(url);
-		
+		LOG.info("[get-inputs] response, result: {}", res);
+
 		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
-		
 		GetInputsResponse response = JSONObject.parseObject(res.toJSONString(), GetInputsResponse.class);
 		
 		return response;
@@ -113,12 +81,6 @@ public class CapacityService {
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		all.setMsg_id(msg_id);
-		
-		Date date = new Date();
-        String str = "yyy-MM-dd HH:mm:ss";
-        SimpleDateFormat sdf = new SimpleDateFormat(str);
-        System.out.println(sdf.format(date));
-		System.out.println("create:  " + JSONObject.toJSONString(all));
 		
 		return createAll(all, ip, port);
 	}
@@ -141,9 +103,9 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(all, SerializerFeature.DisableCircularReferenceDetect));
-		
+		LOG.info("[create-all] request, url: {}", url);
 		JSONObject res = HttpUtil.httpPost(url, request);
-		
+		LOG.info("[create-all] response, result: {}" , res);
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		AllResponse response = JSONObject.parseObject(res.toJSONString(), AllResponse.class);
@@ -163,13 +125,7 @@ public class CapacityService {
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		all.setMsg_id(msg_id);
-		
-		Date date = new Date();
-        String str = "yyy-MM-dd HH:mm:ss";
-        SimpleDateFormat sdf = new SimpleDateFormat(str);
-        System.out.println(sdf.format(date));
-		System.out.println("delete:  " + JSONObject.toJSONString(all));
-		
+
 		deleteAll(all, ip, port);
 	}
 	
@@ -188,10 +144,27 @@ public class CapacityService {
 										      .append(port)
 										      .append(UrlConstant.URL_COMBINE)
 										      .toString();
-		
+		LOG.info("[delete-all] request, url: {}",url);
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(all));
-		
+		LOG.info("[delete-all] response, result: {}" , request);
+
 		HttpUtil.httpDelete(url, request);
+	}
+
+	/**
+	 * 创建输入<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午1:43:40
+	 * @param CreateInputsRequest input 不带msg_id的input
+	 * @return CreateInputsResponse
+	 */
+	public CreateInputsResponse createInputsWithMsgId(String ip,CreateInputsRequest input) throws Exception{
+		if (StringUtils.isBlank(input.getMsg_id())) {
+			String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+			input.setMsg_id(msg_id);
+		}
+		return createInputsToTransform(ip,input);
 		
 	}
 
@@ -203,15 +176,8 @@ public class CapacityService {
 	 * @param CreateInputsRequest input 不带msg_id的input
 	 * @return CreateInputsResponse
 	 */
-	public CreateInputsResponse createInputsAddMsgId(CreateInputsRequest input) throws Exception{
-		
-		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
-		input.setMsg_id(msg_id);
-		
-		System.out.println(JSONObject.toJSONString(input));
-		
-		return createInputs(input);
-		
+	public CreateInputsResponse createInputs(String ip,CreateInputsRequest input) throws Exception{
+		return createInputsToTransform(ip,input);
 	}
 	
 	/**
@@ -222,20 +188,21 @@ public class CapacityService {
 	 * @param CreateInputsRequest input 输入参数
 	 * @return CreateInputsResponse 创建输入返回
 	 */
-	private CreateInputsResponse createInputs(CreateInputsRequest input) throws Exception{
+	private CreateInputsResponse createInputsToTransform(String ip,CreateInputsRequest input) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_INPUT)
 										      .toString();
-		
+
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input, SerializerFeature.DisableCircularReferenceDetect));
-		
+		LOG.info("[create-inputs] request, url: {} \n body: {}",url,request );
 		JSONObject res = HttpUtil.httpPost(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[create-inputs] response, result: {}" , res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		CreateInputsResponse response = JSONObject.parseObject(res.toJSONString(), CreateInputsResponse.class);
 		
@@ -254,11 +221,23 @@ public class CapacityService {
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		input.setMsg_id(msg_id);
-		
-		deleteInputs(input, capacityIp);
+
+		deleteInputsToTransform(capacityIp,input);
 		
 	}
-	
+
+	/**
+	 * 删除输入<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午1:46:11
+	 * @param DeleteInputsRequest input 不带msg_id的input
+	 */
+	public void deleteInputs(String capacityIp, DeleteInputsRequest input) throws Exception{
+		deleteInputsToTransform(capacityIp,input);
+	}
+
+
 	/**
 	 * 删除输入<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -266,7 +245,7 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月5日 上午9:51:20
 	 * @param DeleteInputsRequest input 删除输入请求
 	 */
-	private void deleteInputs(DeleteInputsRequest input, String capacityIp) throws Exception{
+	private void deleteInputsToTransform( String capacityIp,DeleteInputsRequest input) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
 										      .append(capacityIp)
@@ -276,9 +255,9 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input));
-		
-		HttpUtil.httpDelete(url, request);
-		
+		LOG.info("[delete-inputs] request, url: {} \n body: {}",url,request);
+		JSONObject result = HttpUtil.httpDelete(url, request);
+		LOG.info("[delete-inputs] response, result: {}",result);
 	}
 	
 	/**
@@ -290,13 +269,26 @@ public class CapacityService {
 	 * @param PutInputsRequest input 不带msg_id的input
 	 * @return PutInputResponse
 	 */
-	public PutInputResponse modifyInputsAddMsgId(String inputId, PutInputsRequest input) throws Exception{
+	public PutInputResponse modifyInputsAddMsgId(String ip,String inputId, PutInputsRequest input) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		input.setMsg_id(msg_id);
 		
-		return modifyInputs(inputId, input);
+		return modifyInputsToTransform(ip, inputId, input);
 		
+	}
+
+	/**
+	 * 修改输入<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午1:49:16
+	 * @param String inputId
+	 * @param PutInputsRequest input 不带msg_id的input
+	 * @return PutInputResponse
+	 */
+	public PutInputResponse modifyInputs(String ip, PutInputsRequest input) throws Exception{
+		return modifyInputsToTransform(ip, input.getInput().getId(), input);
 	}
 	
 	/**
@@ -308,10 +300,10 @@ public class CapacityService {
 	 * @param PutInputsRequest input 修改输入参数
 	 * @return PutInputResponse 修改输入返回参数
 	 */
-	private PutInputResponse modifyInputs(String inputId, PutInputsRequest input) throws Exception{
+	private PutInputResponse modifyInputsToTransform(String ip, String inputId, PutInputsRequest input) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_INPUT)
@@ -321,10 +313,12 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(input));
-		
+
+		LOG.info("[modify-inputs] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[modify-inputs] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		PutInputResponse response = JSONObject.parseObject(res.toJSONString(), PutInputResponse.class);
 		
@@ -341,15 +335,29 @@ public class CapacityService {
 	 * @param CreateProgramsRequest program 不带msg_id的program
 	 * @return CreateProgramResponse
 	 */
-	public CreateProgramResponse createProgramAddMsgId(String inputId, CreateProgramsRequest program) throws Exception{
+	public CreateProgramResponse createProgramAddMsgId(String ip,String inputId, CreateProgramsRequest program) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		program.setMsg_id(msg_id);
 		
-		return createProgram(inputId, program);
+		return createProgramToTransform(ip,inputId, program);
 		
 	}
-	
+
+	/**
+	 * 创建节目<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午1:51:37
+	 * @param String inputId
+	 * @param CreateProgramsRequest program 不带msg_id的program
+	 * @return CreateProgramResponse
+	 */
+	public CreateProgramResponse createProgram(String ip, CreateProgramsRequest program) throws Exception{
+		return createProgramToTransform(ip,program.getInput_id(), program);
+	}
+
+
 	/**
 	 * 创建节目<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -359,10 +367,10 @@ public class CapacityService {
 	 * @param CreateProgramsRequest program 节目参数
 	 * @return CreateProgramResponse CreateProgramResponse 创建节目返回
 	 */
-	private CreateProgramResponse createProgram(String inputId, CreateProgramsRequest program) throws Exception{
+	private CreateProgramResponse createProgramToTransform(String ip,String inputId, CreateProgramsRequest program) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_INPUT)
@@ -373,9 +381,10 @@ public class CapacityService {
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(program, SerializerFeature.DisableCircularReferenceDetect));
 		
+		LOG.info("[create-program] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[create-program] response, result: {}",res);
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		CreateProgramResponse response = JSONObject.parseObject(res.toJSONString(), CreateProgramResponse.class);
 		
@@ -391,13 +400,26 @@ public class CapacityService {
 	 * @param String inputId
 	 * @param DeleteProgramRequest program 不带msg_id的program
 	 */
-	public void deleteProgramAddMsgId(String inputId, DeleteProgramRequest program) throws Exception{
+	public void deleteProgramAddMsgId(String ip,String inputId, DeleteProgramRequest program) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		program.setMsg_id(msg_id);
 		
-		deleteProgram(inputId, program);
+		deleteProgram(ip, inputId, program);
 		
+	}
+
+	/**
+	 * 删除节目<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午1:54:29
+	 * @param String inputId
+	 * @param DeleteProgramRequest program 不带msg_id的program
+	 */
+	public void deleteProgram(String ip, DeleteProgramRequest program) throws Exception{
+		deleteProgram(ip,program.getInput_id(), program);
+
 	}
 	
 	/**
@@ -408,10 +430,10 @@ public class CapacityService {
 	 * @param String inputId 输入id
 	 * @param DeleteProgramRequest program 删除节目参数
 	 */
-	private void deleteProgram(String inputId, DeleteProgramRequest program) throws Exception{
+	private void deleteProgram(String ip,String inputId, DeleteProgramRequest program) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_INPUT)
@@ -419,11 +441,12 @@ public class CapacityService {
 										      .append(inputId)
 										      .append(UrlConstant.URL_INPUT_PROGRAM)
 										      .toString();
-
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(program));
-		
-		HttpUtil.httpDelete(url, request);
-		
+
+		LOG.info("[delete-program] request, url: {} \n body: {}",url,request);
+		JSONObject result = HttpUtil.httpDelete(url, request);
+		LOG.info("[delete-program] response, result: {}",result);
+
 	}
 	
 	/**
@@ -438,6 +461,7 @@ public class CapacityService {
 	 * @return PutInputResponse
 	 */
 	public PutInputResponse modifyProgramDecodeAddMsgId(
+			String ip,
 			String inputId, 
 			String programId, 
 			String pid, 
@@ -446,8 +470,23 @@ public class CapacityService {
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		decode.setMsg_id(msg_id);
 		
-		return modifyProgramDecode(inputId, programId, pid, decode);
+		return modifyProgramDecode(ip,inputId, programId, pid, decode);
 		
+	}
+
+	/**
+	 * 修改指定节目解码<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午1:59:40
+	 * @param String inputId
+	 * @param String programId
+	 * @param String pid
+	 * @param PatchDecodeRequest decode
+	 * @return PutInputResponse
+	 */
+	public PutInputResponse modifyProgramDecodeMode(String ip, PatchDecodeRequest decode) throws Exception{
+		return modifyProgramDecode(ip,decode.getInput_id(), decode.getProgram_num(), decode.getPid(), decode);
 	}
 	
 	/**
@@ -462,13 +501,14 @@ public class CapacityService {
 	 * @return PutInputResponse
 	 */
 	private PutInputResponse modifyProgramDecode(
+			String ip,
 			String inputId, 
 			String programId, 
 			String pid, 
 			PatchDecodeRequest decode) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_INPUT)
@@ -484,10 +524,11 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(decode));
-		
+		LOG.info("[modify-program] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPatch(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[modify-program] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		PutInputResponse response = JSONObject.parseObject(res.toJSONString(), PutInputResponse.class);
 		
@@ -532,9 +573,10 @@ public class CapacityService {
 										      .append("?msg_id=")
 										      .append(msg_id)
 										      .toString();
-
+		LOG.info("[delete-program] request, url: {} \n body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
-		
+		LOG.info("[delete-program] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		AnalysisResponse response = JSONObject.parseObject(res.toJSONString(), AnalysisResponse.class);
@@ -575,9 +617,10 @@ public class CapacityService {
 										      .append("?msg_id=")
 										      .append(msg_id)
 										      .toString();
-	
+		LOG.info("[get-tasks] request, url: {} \n body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
-		
+		LOG.info("[get-tasks] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		GetTaskResponse response = JSONObject.parseObject(res.toJSONString(), GetTaskResponse.class);
@@ -622,9 +665,10 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(task, SerializerFeature.DisableCircularReferenceDetect));
-		
+		LOG.info("[create-tasks] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
-		
+		LOG.info("[create-taks] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		CreateTaskResponse response = JSONObject.parseObject(res.toJSONString(), CreateTaskResponse.class);
@@ -663,11 +707,12 @@ public class CapacityService {
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)
 										      .toString();
-		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(task));
-		
-		HttpUtil.httpDelete(url, request);
-		
+
+		LOG.info("[delete-tasks] request, url: {} \n body: {}",url,request);
+		JSONObject res = HttpUtil.httpDelete(url, request);
+		LOG.info("[delete-tasks] response, result: {}",res);
+
 	}
 	
 	/**
@@ -679,12 +724,27 @@ public class CapacityService {
 	 * @param AddTaskEncodeRequest encode 不带msg_id的encode
 	 * @return TaskEncodeResponse
 	 */
-	public TaskEncodeResponse addTaskEncodeAddMsgId(String taskId, AddTaskEncodeRequest encode) throws Exception{
+	public TaskEncodeResponse addTaskEncodeWithMsgId(String ip,String taskId, AddTaskEncodeRequest encode) throws Exception{
+
+		if (StringUtils.isBlank(encode.getMsg_id())) {
+			String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+			encode.setMsg_id(msg_id);
+		}
 		
-		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
-		encode.setMsg_id(msg_id);
-		
-		return addTaskEncode(taskId, encode);
+		return addTaskEncode(ip, taskId, encode);
+	}
+
+	/**
+	 * 添加任务编码<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午3:25:31
+	 * @param String taskId
+	 * @param AddTaskEncodeRequest encode 不带msg_id的encode
+	 * @return TaskEncodeResponse
+	 */
+	public TaskEncodeResponse addTaskEncode(String ip,AddTaskEncodeRequest encode) throws Exception{
+		return addTaskEncode(ip, encode.getTask_id(), encode);
 	}
 	
 	/**
@@ -695,10 +755,10 @@ public class CapacityService {
 	 * @param AddTaskEncodeRequest encode 添加任务编码参数
 	 * @return TaskEncodeResponse 添加任务编码返回
 	 */
-	private TaskEncodeResponse addTaskEncode(String taskId, AddTaskEncodeRequest encode) throws Exception{
+	private TaskEncodeResponse addTaskEncode(String ip, String taskId, AddTaskEncodeRequest encode) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)
@@ -708,10 +768,11 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(encode, SerializerFeature.DisableCircularReferenceDetect));
-		
+		LOG.info("[add-encode] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[add-encode] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskEncodeResponse response = JSONObject.parseObject(res.toJSONString(), TaskEncodeResponse.class);
 		
@@ -728,12 +789,25 @@ public class CapacityService {
 	 * @param DeleteTaskEncodeResponse encode 不带msg_id的encode
 	 * @return TaskEncodeResponse
 	 */
-	public TaskEncodeResponse deleteTaskEncodeAddMsgId(String taskId, DeleteTaskEncodeResponse encode) throws Exception{
-		
-		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
-		encode.setMsg_id(msg_id);
-		
-		return deleteTaskEncode(taskId, encode);
+	public TaskEncodeResponse deleteTaskEncodeWithMsgId(String ip,String taskId, DeleteTaskEncodeResponse encode) throws Exception{
+		if (StringUtils.isBlank(encode.getMsg_id())) {
+			String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+			encode.setMsg_id(msg_id);
+		}
+		return deleteTaskEncode(ip, taskId, encode);
+	}
+
+	/**
+	 * 删除任务编码<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午3:29:39
+	 * @param String taskId
+	 * @param DeleteTaskEncodeResponse encode 不带msg_id的encode
+	 * @return TaskEncodeResponse
+	 */
+	public TaskEncodeResponse deleteTaskEncode(String ip,DeleteTaskEncodeResponse encode) throws Exception{
+		return deleteTaskEncode(ip, encode.getTask_id(), encode);
 	}
 	
 	/**
@@ -744,10 +818,10 @@ public class CapacityService {
 	 * @param DeleteTaskEncodeResponse encode 删除任务编码请求参数
 	 * @return TaskEncodeResponse 删除任务编码返回
 	 */
-	private TaskEncodeResponse deleteTaskEncode(String taskId, DeleteTaskEncodeResponse encode) throws Exception{
+	private TaskEncodeResponse deleteTaskEncode(String ip,String taskId, DeleteTaskEncodeResponse encode) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)
@@ -757,10 +831,11 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(encode));
-		
+		LOG.info("[delete-encode] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpDelete(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[delete-encode] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskEncodeResponse response = JSONObject.parseObject(res.toJSONString(), TaskEncodeResponse.class);
 		
@@ -778,12 +853,26 @@ public class CapacityService {
 	 * @param PutTaskEncodeRequest encode 不带msg_id的encode
 	 * @return TaskEncodeResultResponse
 	 */
-	public TaskEncodeResultResponse modifyTaskEncodeAddMsgId(String taskId, String encodeId, PutTaskEncodeRequest encode) throws Exception{
+	public TaskEncodeResultResponse modifyTaskEncodeWithMsgId(String ip,String taskId, String encodeId, PutTaskEncodeRequest encode) throws Exception{
+
+		if (StringUtils.isBlank(encode.getMsg_id())) {
+			String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+			encode.setMsg_id(msg_id);
+		}
 		
-		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
-		encode.setMsg_id(msg_id);
-		
-		return modifyTaskEncode(taskId, encodeId, encode);
+		return modifyTaskEncode(ip,taskId, encodeId, encode);
+	}
+
+	/**
+	 * 修改任务编码<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午3:41:14
+	 * @param PutTaskEncodeRequest encode
+	 * @return TaskEncodeResultResponse
+	 */
+	public TaskEncodeResultResponse modifyTaskEncode(String ip,PutTaskEncodeRequest encode) throws Exception{
+		return modifyTaskEncode(ip, encode.getTask_id(), encode.getEncode_param().getEncode_id(), encode);
 	}
 	
 	/**
@@ -796,10 +885,10 @@ public class CapacityService {
 	 * @param PutTaskEncodeRequest encode 修改编码参数
 	 * @return TaskEncodeResultResponse 返回
 	 */
-	private TaskEncodeResultResponse modifyTaskEncode(String taskId, String encodeId, PutTaskEncodeRequest encode) throws Exception{
+	private TaskEncodeResultResponse modifyTaskEncode(String ip, String taskId, String encodeId, PutTaskEncodeRequest encode) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)
@@ -811,10 +900,11 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(encode));
-		
+		LOG.info("[modify-encode] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[modify-encode] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskEncodeResultResponse response = JSONObject.parseObject(res.toJSONString(), TaskEncodeResultResponse.class);
 		
@@ -831,13 +921,26 @@ public class CapacityService {
 	 * @param PutTaskDecodeProcessRequest decode
 	 * @return TaskResponse 
 	 */
-	public TaskBaseResponse modifyTaskDecodeProcessAddMsgId(String taskId, PutTaskDecodeProcessRequest decode) throws Exception{
+	public TaskBaseResponse modifyTaskDecodeProcessAddMsgId(String ip,String taskId, PutTaskDecodeProcessRequest decode) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		decode.setMsg_id(msg_id);
 		
-		return modifyTaskDecodeProcess(taskId, decode);
+		return modifyTaskDecodeProcessToTransform(ip,taskId, decode);
 		
+	}
+
+	/**
+	 * 修改解码后处理<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午3:48:50
+	 * @param String taskId
+	 * @param PutTaskDecodeProcessRequest decode
+	 * @return TaskResponse
+	 */
+	public TaskBaseResponse modifyTaskDecodeProcess(String ip,PutTaskDecodeProcessRequest decode) throws Exception{
+		return modifyTaskDecodeProcessToTransform(ip,decode.getTask_id(), decode);
 	}
 	
 	/**
@@ -849,10 +952,10 @@ public class CapacityService {
 	 * @param PutTaskDecodeProcessRequest decode 修改解码后处理参数
 	 * @return TaskResponse 返回
 	 */
-	private TaskBaseResponse modifyTaskDecodeProcess(String taskId, PutTaskDecodeProcessRequest decode) throws Exception{
+	private TaskBaseResponse modifyTaskDecodeProcessToTransform(String ip,String taskId, PutTaskDecodeProcessRequest decode) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)
@@ -862,10 +965,11 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(decode));
-		
+		LOG.info("[modify-decode-process] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[modify-decode-process] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskBaseResponse response = JSONObject.parseObject(res.toJSONString(), TaskBaseResponse.class);
 		
@@ -887,8 +991,21 @@ public class CapacityService {
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		source.setMsg_id(msg_id);
 		
-		return modifyTaskSource(taskId, capacityIp, source);
+		return modifyTaskSourceToTransform(capacityIp, taskId,  source);
 		
+	}
+
+	/**
+	 * 修改任务源<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午4:05:13
+	 * @param String taskId
+	 * @param PutTaskSourceRequest source 不带msg_id的source
+	 * @return TaskBaseResponse
+	 */
+	public TaskBaseResponse modifyTaskSource(String capacityIp, PutTaskSourceRequest source) throws Exception{
+		return modifyTaskSourceToTransform(capacityIp, source.getTask_id(),  source);
 	}
 	
 	/**
@@ -900,7 +1017,7 @@ public class CapacityService {
 	 * @param PutTaskSourceRequest source 修改任务源参数
 	 * @return TaskResponse 返回
 	 */
-	private TaskBaseResponse modifyTaskSource(String taskId, String capacityIp, PutTaskSourceRequest source) throws Exception{
+	private TaskBaseResponse modifyTaskSourceToTransform(String capacityIp, String taskId,  PutTaskSourceRequest source) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
 										      .append(capacityIp)
@@ -913,9 +1030,10 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(source));
-		
+		LOG.info("[modify-source] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
-		
+		LOG.info("[modify-source] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(capacityIp);
 
 		TaskBaseResponse response = JSONObject.parseObject(res.toJSONString(), TaskBaseResponse.class);
@@ -933,13 +1051,26 @@ public class CapacityService {
 	 * @param PutRealIndexRequest realIndex 不带msg_id的realIndex
 	 * @return TaskRealIndexResponse
 	 */
-	public TaskRealIndexResponse switchTaskSourceAddMsgId(String taskId, PutRealIndexRequest realIndex) throws Exception{
+	public TaskRealIndexResponse switchTaskSourceAddMsgId(String ip,String taskId, PutRealIndexRequest realIndex) throws Exception{
 		
 		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
 		realIndex.setMsg_id(msg_id);
 		
-		return switchTaskSource(taskId, realIndex);
+		return switchTaskSource(ip,taskId, realIndex);
 		
+	}
+
+	/**
+	 * 源节目切换<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午4:12:22
+	 * @param String taskId
+	 * @param PutRealIndexRequest realIndex 不带msg_id的realIndex
+	 * @return TaskRealIndexResponse
+	 */
+	public TaskRealIndexResponse switchTaskSource(String ip,PutRealIndexRequest realIndex) throws Exception{
+		return switchTaskSource(ip,realIndex.getTask_id(), realIndex);
 	}
 	
 	/**
@@ -951,10 +1082,10 @@ public class CapacityService {
 	 * @param PutRealIndexRequest realIndex 待切换节目索引
 	 * @return TaskRealIndexResponse 返回
 	 */
-	private TaskRealIndexResponse switchTaskSource(String taskId, PutRealIndexRequest realIndex) throws Exception{
+	private TaskRealIndexResponse switchTaskSource(String ip,String taskId, PutRealIndexRequest realIndex) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-										      .append(capacityProps.getIp())
+										      .append(ip)
 										      .append(":")
 										      .append(capacityProps.getPort())
 										      .append(UrlConstant.URL_TASK)
@@ -964,10 +1095,11 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(realIndex));
-		
+		LOG.info("[switch-source] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[switch-source] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		TaskRealIndexResponse response = JSONObject.parseObject(res.toJSONString(), TaskRealIndexResponse.class);
 		
@@ -1009,9 +1141,10 @@ public class CapacityService {
 										      .append("?msg_id=")
 										      .append(msg_id)
 										      .toString();
-
+		LOG.info("[get-outputs] request, url: {} \n body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
-		
+		LOG.info("[get-outputs] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		GetOutputsResponse response = JSONObject.parseObject(res.toJSONString(), GetOutputsResponse.class);
@@ -1028,17 +1161,11 @@ public class CapacityService {
 	 * @param CreateOutputsRequest output 不带msg_id的 输出
 	 * @return CreateOutputsResponse
 	 */
-	public CreateOutputsResponse createOutputsAddMsgId(CreateOutputsRequest output, String capacityIp) throws Exception{
-		
-		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
-		output.setMsg_id(msg_id);
-		
-		Date date = new Date();
-        String str = "yyy-MM-dd HH:mm:ss";
-        SimpleDateFormat sdf = new SimpleDateFormat(str);
-        System.out.println(sdf.format(date));
-		System.out.println("create-output" + JSONObject.toJSONString(output));
-		
+	public CreateOutputsResponse createOutputsWithMsgId(CreateOutputsRequest output, String capacityIp) throws Exception{
+		if (StringUtils.isBlank(output.getMsg_id())) {
+			String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+			output.setMsg_id(msg_id);
+		}
 		return createOutputs(output, capacityIp);
 	}
 	
@@ -1060,9 +1187,10 @@ public class CapacityService {
 										      .toString();
 		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(output, SerializerFeature.DisableCircularReferenceDetect));
-
+		LOG.info("[create-outputs] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPost(url, request);
-		
+		LOG.info("[create-outputs] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(capacityIp);
 		
 		CreateOutputsResponse response = JSONObject.parseObject(res.toJSONString(), CreateOutputsResponse.class);
@@ -1078,21 +1206,15 @@ public class CapacityService {
 	 * <b>日期：</b>2019年11月12日 上午8:55:13
 	 * @param DeleteOutputsRequest output 不带msg_id的output
 	 */
-	public void deleteOutputsAddMsgId(DeleteOutputsRequest output, String capacityIp) throws Exception{
-		
-		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
-		output.setMsg_id(msg_id);
-		
-		Date date = new Date();
-        String str = "yyy-MM-dd HH:mm:ss";
-        SimpleDateFormat sdf = new SimpleDateFormat(str);
-        System.out.println(sdf.format(date));
-		System.out.println("delete-output" + JSONObject.toJSONString(output));
-		
+	public void deleteOutputsWithMsgId(DeleteOutputsRequest output, String capacityIp) throws Exception{
+		if (StringUtils.isBlank(output.getMsg_id())) {
+			String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+			output.setMsg_id(msg_id);
+		}
+
 		deleteOutputs(output, capacityIp);
-		
 	}
-	
+
 	/**
 	 * 删除输出<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -1110,9 +1232,11 @@ public class CapacityService {
 										      .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(output));
-		
-		HttpUtil.httpDelete(url, request);
-		
+
+		LOG.info("[delete-outputs] request, url: {} \n body: {}",url,request);
+		JSONObject res = HttpUtil.httpDelete(url, request);
+		LOG.info("[delete-outputs] response, result: {}",res);
+
 	}
 	
 	/**
@@ -1152,9 +1276,10 @@ public class CapacityService {
 										      .append("?msg=")
 										      .append(msg_id)
 										      .toString();
-		
+		LOG.info("[get-output] request, url: {} \n body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
-		
+		LOG.info("[get-output] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
 		
 		GetOutputResponse response = JSONObject.parseObject(res.toJSONString(), GetOutputResponse.class);
@@ -1172,13 +1297,27 @@ public class CapacityService {
 	 * @param PutOutputRequest output 不带msg_id的output
 	 * @return ResultCodeResponse
 	 */
-	public ResultCodeResponse modifyOutputByIdAddMsgId(String id, PutOutputRequest output) throws Exception{
-		
-		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
-		output.setMsg_id(msg_id);
-		
-		return modifyOutputById(id, output);
-		
+	public ResultCodeResponse modifyOutputByIdWithMsgId(String ip, String id, PutOutputRequest output) throws Exception{
+
+		if (StringUtils.isBlank(output.getMsg_id())) {
+			String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+			output.setMsg_id(msg_id);
+		}
+
+		return modifyOutputById(ip,id, output);
+	}
+
+	/**
+	 * 修改指定输出<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月12日 上午9:00:07
+	 * @param String id
+	 * @param PutOutputRequest output 不带msg_id的output
+	 * @return ResultCodeResponse
+	 */
+	public ResultCodeResponse modifyOutputById(String ip,PutOutputRequest output) throws Exception{
+		return modifyOutputById(ip,output.getOutput().getId(), output);
 	}
 	
 	/**
@@ -1190,10 +1329,10 @@ public class CapacityService {
 	 * @param PutOutputRequest output 输出参数
 	 * @return ResultCodeResponse 返回
 	 */
-	private ResultCodeResponse modifyOutputById(String id, PutOutputRequest output) throws Exception{
+	private ResultCodeResponse modifyOutputById(String ip,String id, PutOutputRequest output) throws Exception{
 		
 		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
-											  .append(capacityProps.getIp())
+											  .append(ip)
 											  .append(":")
 											  .append(capacityProps.getPort())
 											  .append(UrlConstant.URL_OUTPUT)
@@ -1201,12 +1340,13 @@ public class CapacityService {
 											  .append(id)
 											  .append(UrlConstant.URL_INPUT_PARAM)
 											  .toString();
-		
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(output));
-		
+
+		LOG.info("[modify-output] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
-		
-		if(res == null) throw new HttpTimeoutException(capacityProps.getIp());
+		LOG.info("[modify-output] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
 		
@@ -1247,9 +1387,10 @@ public class CapacityService {
 											  .append("?msg_id=")
 											  .append(msg_id)
 											  .toString();
-		
+		LOG.info("[get-entities] request, url: {} \n body: {}",url,"");
 		JSONObject res = HttpUtil.httpGet(url);
-		
+		LOG.info("[get-entities] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(capacityIp);
 		
 		GetEntiretiesResponse response = JSONObject.parseObject(res.toJSONString(), GetEntiretiesResponse.class);
@@ -1290,9 +1431,10 @@ public class CapacityService {
 		
 		JSONObject json = new JSONObject();
 		json.put("msg_id", msg_id);
-		
-		HttpUtil.httpDelete(url, json);
-		
+		LOG.info("[remove-all] request, url: {} \n body: {}",url,"");
+		JSONObject res = HttpUtil.httpDelete(url, json);
+		LOG.info("[remove-all] response, result: {}",res);
+
 	}
 	
 	/**
@@ -1356,9 +1498,11 @@ public class CapacityService {
 		JSONObject post = new JSONObject();
 		post.put("msg_id", msg_id);
 		post.put("select_index", index);
-		
+
+		LOG.info("[change-backup] request, url: {} \n body: {}",url,post);
 		JSONObject res = HttpUtil.httpPost(url, post);
-		
+		LOG.info("[change-backup] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
@@ -1391,9 +1535,11 @@ public class CapacityService {
 		put.put("msg_id", msg_id);
 		put.put("alarm_url", alarmUrl);
 		put.put("max_count", 100);
-		
+
+		LOG.info("[set-alarm-url] request, url: {} \n body: {}",url,put);
 		JSONObject res = HttpUtil.httpPut(url, put);
-		
+		LOG.info("[set-alarm-url] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
@@ -1427,9 +1573,11 @@ public class CapacityService {
 		put.put("msg_id", msg_id);
 		put.put("heartbeat_url", heartbeatUrl);
 		put.put("span_second", 10);
-		
+
+		LOG.info("[set-heartbeat-url] request, url: {} \n body: {}",url,put);
 		JSONObject res = HttpUtil.httpPut(url, put);
-		
+		LOG.info("[set-heartbeat-url] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
@@ -1465,9 +1613,10 @@ public class CapacityService {
 											  .toString();
 
 		JSONObject request = JSONObject.parseObject(JSON.toJSONString(scheduleRequest));
-		
+		LOG.info("[set-schedule] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
-		
+		LOG.info("[set-schedule] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);
@@ -1499,9 +1648,10 @@ public class CapacityService {
 											  .append(port)
 											  .append(UrlConstant.URL_ALARMLIST)
 											  .toString();
-		
+		LOG.info("[set-alarm-list] request, url: {} \n body: {}",url,request);
 		JSONObject res = HttpUtil.httpPut(url, request);
-		
+		LOG.info("[set-alarm-list] response, result: {}",res);
+
 		if(res == null) throw new HttpTimeoutException(ip);
 		
 		ResultCodeResponse response = JSONObject.parseObject(res.toJSONString(), ResultCodeResponse.class);

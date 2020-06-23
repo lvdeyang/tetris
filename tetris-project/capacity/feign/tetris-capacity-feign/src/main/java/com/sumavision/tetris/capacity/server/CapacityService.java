@@ -46,7 +46,17 @@ public class CapacityService {
 	public String addTranscode(String transcodeInfo) throws Exception{
 		return JsonBodyResponseParser.parseObject(capacityFeign.addTranscode(transcodeInfo), String.class);
 	}
-	
+
+	/**
+	 * 修改流转码<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月19日 下午16:15:20
+	 * @param String taskInfo 流转码信息
+	 */
+	public String modifyTranscode(String taskInfo) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.modifyTranscode(taskInfo), String.class);
+	}
 	/**
 	 * 删除流转码<br/>
 	 * <b>作者:</b>wjw<br/>
