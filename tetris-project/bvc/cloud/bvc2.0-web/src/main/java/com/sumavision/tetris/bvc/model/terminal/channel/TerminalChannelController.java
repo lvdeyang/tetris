@@ -60,6 +60,24 @@ public class TerminalChannelController {
 	}
 	
 	/**
+	 * 查询终端下的视频解码通道<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月18日 下午4:01:59
+	 * @param Long terminalId 终端id
+	 * @return List<TerminalChannelVO> 视频解码通道列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/video/decode")
+	public Object loadVideoDecode(
+			Long terminalId,
+			HttpServletRequest request) throws Exception{
+		
+		return terminalChannelQuery.loadVideoDecode(terminalId);
+	}
+	
+	/**
 	 * 添加终端通道<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

@@ -15,7 +15,7 @@
             <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加屏幕</el-button>
             <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除屏幕</el-button>
 
-            <div style="position:absolute; top:86px; bottom:50px; left:0; right:0; padding:0 20px;">
+            <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
                 <el-scrollbar style="height:100%;">
                     <el-table
                             :data="table.rows"
@@ -30,12 +30,12 @@
                                 prop="name">
                         </el-table-column>
                         <el-table-column
-                                label="设备类型"
-                                prop="bundleType">
+                                label="屏幕主键"
+                                prop="screenPrimaryKey">
                         </el-table-column>
                         <el-table-column
-                                label="编解码类型"
-                                prop="type">
+                                label="通道"
+                                prop="terminalChannelName">
                         </el-table-column>
                         <el-table-column
                                 label="操作"
@@ -44,10 +44,10 @@
                                 <el-tooltip class="item" effect="dark" content="修改名称" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="查看通道" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="修改通道" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-tickets" style="font-size:20px; padding:0; margin-left:20px;" @click="handleListChannel(scope)"></el-button>
                                 </el-tooltip>
-                                <el-tooltip class="item" effect="dark" content="删除终端" placement="bottom-end">
+                                <el-tooltip class="item" effect="dark" content="删除屏幕" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
                                 </el-tooltip>
                             </template>
@@ -56,78 +56,88 @@
                 </el-scrollbar>
             </div>
 
-            <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px;">
-                <el-pagination
-                        style="float:right;"
-                        background
-                        @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange"
-                        :current-page="table.currentPage"
-                        :page-sizes="table.pageSizes"
-                        :page-size="table.pageSize"
-                        layout="total, sizes, prev, pager, next, jumper"
-                        :total="table.total">
-                </el-pagination>
-            </div>
-
         </el-card>
 
-        <!-- 添加设备对话框 -->
+        <!-- 添加屏幕 -->
         <el-dialog
                 :close-on-click-modal="false"
-                title="添加设备"
-                :visible.sync="dialog.addDevice.visible"
-                width="500px"
-                :before-close="handleAddDeviceClose">
-
-            <el-form label-width="100px">
-                <el-form-item label="名称前缀">
-                    <el-input v-model="dialog.addDevice.name"></el-input>
-                </el-form-item>
-                <el-form-item label="模板类型">
-                    <el-select v-model="dialog.addDevice.bundleType" placeholder="请选择" style="width:100%;">
-                        <el-option
-                                v-for="item in bundleTypes"
-                                :key="item"
-                                :label="item"
-                                :value="item">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="编解码类型">
-                    <el-select v-model="dialog.addDevice.type" placeholder="请选择" style="width:100%;">
-                        <el-option
-                                v-for="item in types"
-                                :key="item.id"
-                                :label="item.name"
-                                :value="item.id">
-                        </el-option>
-                    </el-select>
-                </el-form-item>
-                <el-form-item label="设备数量">
-                    <el-input-number v-model="dialog.addDevice.number" :min="1" :precision="0"></el-input-number>
-                </el-form-item>
-            </el-form>
+                title="添加屏幕"
+                :visible.sync="dialog.addScreen.visible"
+                width="1024px"
+                :before-close="handleAddScreenClose"
+                id="add-screen">
+            <el-dialog
+                    append-to-body
+                    :close-on-click-modal="true"
+                    title="选择通道"
+                    width="400px"
+                    :visible.sync="dialog.addScreen.channelsVisible"
+                    id="add-screen-select-channel"
+                    @close="handleAddScreenSelectChannelClose(scope)">
+                <div style="max-height:400px;">
+                    <el-tree
+                            v-if="dialog.addScreen.channelsVisible"
+                            ref="addScreenChannelsTree"
+                            :props="dialog.addScreen.props"
+                            highlight-current
+                            :data="dialog.addScreen.channels">
+                    </el-tree>
+                </div>
+            </el-dialog>
+            <div style="width:100%; height:600px; position:relative; border:1px solid #ebeef5;">
+                <div style="width:250px; height:100%; box-sizing:border-box; border-right:1px solid #ebeef5;">
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                            v-if="dialog.addScreen.visible"
+                            ref="screenPrimaryKeyTree"
+                            node-key="id"
+                            :props="dialog.addScreen.props"
+                            :data="dialog.addScreen.screenPrimaryKeys"
+                            show-checkbox
+                            @check-change="handleCheckChange">
+                        </el-tree>
+                    </el-scrollbar>
+                </div>
+                <div style="position:absolute; left:250px; top:0; right:0; height:100%;">
+                    <el-scrollbar style="height:100%;">
+                        <el-table
+                                :data="dialog.addScreen.screens"
+                                style="width:100%">
+                            <el-table-column
+                                    label="名称">
+                                <template slot-scope="scope">
+                                    <el-input v-model="scope.row.name"></el-input>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    label="屏幕主键"
+                                    prop="screenPrimaryKey"
+                                    width="150">
+                            </el-table-column>
+                            <el-table-column
+                                    label="通道">
+                                <template slot-scope="scope">
+                                    <el-input v-model="scope.row.terminalChannelName" readonly @click.native.stop="handleSelectChannel(scope)">
+                                        <span slot="suffix" class="el-input__icon el-icon-circle-close el-icon__clear" @click.stop="handleScreenRemoveChannelInfo(scope, $event)"></span>
+                                    </el-input>
+                                </template>
+                            </el-table-column>
+                            <el-table-column
+                                    width="50">
+                                <template slot-scope="scope">
+                                    <el-tooltip class="item" effect="dark" content="删除屏幕" placement="bottom-end">
+                                        <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0;" @click="handleScreenRemove(scope)"></el-button>
+                                    </el-tooltip>
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </el-scrollbar>
+                </div>
+            </div>
 
             <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleAddDeviceClose">取消</el-button>
-                <el-button size="medium" type="primary" @click="handleAddDeviceSubmit" :loading="dialog.addDevice.loading">确定</el-button>
-            </span>
-        </el-dialog>
-
-        <!-- 修改设备名称对话框 -->
-        <el-dialog
-                :close-on-click-modal="false"
-                title="修改名称"
-                :visible.sync="dialog.editDevice.visible"
-                width="500px"
-                :before-close="handleEditDeviceClose">
-
-            <el-input v-model="dialog.editDevice.name"></el-input>
-
-            <span slot="footer" class="dialog-footer">
-                <el-button size="medium" @click="handleEditDeviceClose">取消</el-button>
-                <el-button size="medium" type="primary" @click="handleEditDeviceSubmit" :loading="dialog.editDevice.loading">确定</el-button>
+                <el-button size="medium" @click="handleAddScreenClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddScreenSubmit" :loading="dialog.addScreen.loading">确定</el-button>
             </span>
         </el-dialog>
 

@@ -31,28 +31,25 @@ define([
                 terminalId:p.terminalId,
                 terminalName:p.terminalName,
                 groups: context.getProp('groups'),
-                bundleTypes:[],
-                types:[],
+                channels:[],
+                screenPrimaryKeys:[],
                 table:{
-                    rows:[],
-                    pageSize:50,
-                    pageSizes:[50, 100, 200, 400],
-                    currentPage:0,
-                    total:0
+                    rows:[]
                 },
                 dialog: {
-                    addDevice:{
+                    addScreen:{
                         visible:false,
                         loading:false,
-                        name:'',
-                        bundleType:'',
-                        type:'',
-                        number:1
-                    },
-                    editDevice:{
-                        visible:false,
-                        loading:false,
-                        name:''
+                        screenPrimaryKeys:[],
+                        screens:[],
+                        props:{
+                            label:'name',
+                            children:'children',
+                            isLeaf:'isLeaf'
+                        },
+                        channels:[],
+                        currentScreenWhenSelectChannel:'',
+                        channelsVisible:false
                     }
                 }
             },
@@ -64,59 +61,39 @@ define([
             },
             methods:{
                 rowKey:function(row){
-                    return 'terminal-' + row.uuid;
+                    return 'screen-' + row.uuid;
                 },
                 handleCreate:function(){
                     var self = this;
-                    self.dialog.addDevice.visible = true;
-                },
-                handleAddDeviceClose:function(){
-                    var self = this;
-                    self.dialog.addDevice.name = '';
-                    self.dialog.addDevice.bundleType = '';
-                    self.dialog.addDevice.type = '';
-                    self.dialog.addDevice.number = 1;
-                    self.dialog.addDevice.loading = false;
-                    self.dialog.addDevice.visible = false;
-                },
-                handleAddDeviceSubmit:function(){
-                    var self = this;
-                    if(!self.dialog.addDevice.name){
-                        self.$message({
-                            type:'error',
-                            message:'名称前缀不能为空'
-                        });
-                    }
-                    if(!self.dialog.addDevice.bundleType){
-                        self.$message({
-                            type:'error',
-                            message:'请选择设备类型'
-                        });
-                    }
-                    if(!self.dialog.addDevice.type){
-                        self.$message({
-                            type:'error',
-                            message:'请选设置编解码类型'
-                        });
-                    }
-                    self.dialog.addDevice.loading = true;
-                    ajax.post('/tetris/bvc/model/terminal/bundle/add', {
-                        terminalId:self.terminalId,
-                        name:self.dialog.addDevice.name,
-                        bundleType:self.dialog.addDevice.bundleType,
-                        type:self.dialog.addDevice.type,
-                        number:self.dialog.addDevice.number
-                    }, function(data, status){
-                        self.dialog.addDevice.loading = false;
-                        if(status !== 200) return;
-                        if(data && data.length>0){
-                            for(var i=0; i<data.length; i++){
-                                self.table.rows.push(data[i]);
+                    self.dialog.addScreen.screenPrimaryKeys.splice(0, self.dialog.addScreen.screenPrimaryKeys.length);
+                    for(var i=0; i<self.screenPrimaryKeys.length; i++){
+                        var primaryKey = self.screenPrimaryKeys[i];
+                        var exist = false;
+                        for(var j=0; j<self.table.rows.length; j++){
+                            var row = self.table.rows[j];
+                            if(row.screenPrimaryKey == primaryKey.screenPrimaryKey){
+                                exist = true;
+                                break;
                             }
-                            self.table.total += data.length;
                         }
-                        self.handleAddDeviceClose();
-                    }, null, ajax.TOTAL_CATCH_CODE);
+                        if(!exist){
+                            self.dialog.addScreen.screenPrimaryKeys.push(primaryKey);
+                        }
+                    }
+                    self.dialog.addScreen.visible = true;
+                },
+                handleAddScreenClose:function(){
+                    var self = this;
+                    self.dialog.addScreen.loading = false;
+                    self.dialog.addScreen.visible = false;
+                    self.dialog.addScreen.screenPrimaryKeys.splice(0, self.dialog.addScreen.screenPrimaryKeys.length);
+                    self.dialog.addScreen.screens.splice(0, self.dialog.addScreen.screens.length);
+                    self.dialog.addScreen.channels.splice(0, self.dialog.addScreen.channels.length);
+                    self.dialog.addScreen.channelsVisible = false;
+                },
+                handleAddScreenSubmit:function(){
+                    var self = this;
+                    
                 },
                 handleDelete:function(){
 
@@ -124,43 +101,9 @@ define([
                 handleRowEdit:function(scope){
                     var self = this;
                     var row = scope.row;
-                    self.dialog.editDevice.id = row.id;
-                    self.dialog.editDevice.name = row.name;
-                    self.dialog.editDevice.visible = true;
-                    self.dialog.editDevice.loading = false;
+
                 },
-                handleEditDeviceClose:function(){
-                    var self = this;
-                    self.dialog.editDevice.id = '';
-                    self.dialog.editDevice.name = '';
-                    self.dialog.editDevice.loading = false;
-                    self.dialog.editDevice.visible = false;
-                },
-                handleEditDeviceSubmit:function(){
-                    var self = this;
-                    self.dialog.editDevice.loading = true;
-                    ajax.post('/tetris/bvc/model/terminal/bundle/edit/name', {
-                        id:self.dialog.editDevice.id,
-                        name:self.dialog.editDevice.name
-                    }, function(data, status){
-                        self.dialog.editDevice.loading = false;
-                        if(status!==200) return;
-                        if(data){
-                            for(var i=0; i<self.table.rows.length; i++){
-                                if(self.table.rows[i].id == data.id){
-                                    self.table.rows.splice(i, 1, data);
-                                    break;
-                                }
-                            }
-                        }
-                        self.handleEditDeviceClose();
-                    }, null, ajax.TOTAL_CATCH_CODE);
-                },
-                handleListChannel:function(scope){
-                    var self = this;
-                    var row = scope.row;
-                    window.location.hash = '#/page-terminal-bundle-channel/' + self.terminalId + '/' + self.terminalName + '/' + row.id + '/' + row.name
-                },
+
                 handleRowDelete:function(scope){
                     var self = this;
                     var row = scope.row;
@@ -170,7 +113,7 @@ define([
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
-                                h('p', null, ['此操作将永久删除该终端，且不可恢复，是否继续?'])
+                                h('p', null, ['此操作将永久删除该屏幕，且不可恢复，是否继续?'])
                             ])
                         ]),
                         type:'wraning',
@@ -180,7 +123,7 @@ define([
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
-                                ajax.post('/tetris/bvc/model/terminal/bundle/delete', {
+                                ajax.post('/tetris/bvc/model/terminal/screen/delete', {
                                     id:row.id
                                 }, function(data, status){
                                     instance.confirmButtonLoading = false;
@@ -192,10 +135,6 @@ define([
                                             break;
                                         }
                                     }
-                                    self.table.total -= 1;
-                                    if(self.table.rows.length==0 && self.table.total>0){
-                                        self.load(self.table.currentPage-1);
-                                    }
                                 }, null, ajax.TOTAL_CATCH_CODE);
                             }else{
                                 instance.confirmButtonLoading = false;
@@ -204,59 +143,131 @@ define([
                         }
                     }).catch(function(){});
                 },
-                handleSizeChange:function(size){
+                handleCheckChange:function(data, checked){
                     var self = this;
-                    self.table.pageSize = size;
-                    self.load(1);
+                    if(checked){
+                        self.dialog.addScreen.screens.push({
+                            screenPrimaryKeyId:data.id,
+                            screenPrimaryKeyName:data.name,
+                            screenPrimaryKey:data.screenPrimaryKey,
+                            name:data.name,
+                            terminalChannelId:'',
+                            terminalChannelName:''
+                        });
+                    }else{
+                        for(var i=0; i<self.dialog.addScreen.screens.length; i++){
+                            if(self.dialog.addScreen.screens[i].screenPrimaryKeyId == data.id){
+                                self.dialog.addScreen.screens.splice(i, 1);
+                                break;
+                            }
+                        }
+                    }
                 },
-                handleCurrentChange:function(currentPage){
+                handleScreenRemove:function(scope){
                     var self = this;
-                    self.load(currentPage);
+                    var row = scope.row;
+                    for(var i=0; i<self.dialog.addScreen.screens.length; i++){
+                        if(self.dialog.addScreen.screens[i] === row){
+                            self.dialog.addScreen.screens.splice(i, 1);
+                            break;
+                        }
+                    }
+                    for(var i=0; i<self.dialog.addScreen.screenPrimaryKeys.length; i++){
+                        if(self.dialog.addScreen.screenPrimaryKeys[i].id == row.screenPrimaryKeyId){
+                            self.$refs.screenPrimaryKeyTree.setChecked(self.dialog.addScreen.screenPrimaryKeys[i], false);
+                            break;
+                        }
+                    }
                 },
-                load:function(currentPage){
+                handleSelectChannel:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    self.dialog.addScreen.channels.splice(0, self.dialog.addScreen.channels.length);
+                    for(var i=0; i<self.channels.length; i++){
+                        var channel = self.channels[i];
+                        var exist = false;
+                        for(var j=0; j<self.table.rows.length; j++){
+                            var row = self.table.rows[j];
+                            if(row.terminalChannelId == channel.id){
+                                exist = true;
+                                break;
+                            }
+                        }
+                        if(!exist){
+                            for(var j=0; j<self.dialog.addScreen.screens.length; j++){
+                                if(self.dialog.addScreen.screens[j].terminalChannelId == channel.id){
+                                    exist = true;
+                                    break;
+                                }
+                            }
+                            if(!exist){
+                                self.dialog.addScreen.channels.push(channel);
+                            }
+                        }
+                    }
+                    self.dialog.addScreen.currentScreenWhenSelectChannel = row;
+                    self.dialog.addScreen.channelsVisible = true;
+                },
+                handleAddScreenSelectChannelClose:function(){
+                    var self = this;
+                    var data = self.$refs.addScreenChannelsTree.getCurrentNode();
+                    if(data) {
+                        self.dialog.addScreen.currentScreenWhenSelectChannel.terminalChannelId = data.id;
+                        self.dialog.addScreen.currentScreenWhenSelectChannel.terminalChannelName = data.name;
+                    }
+                    self.dialog.addScreen.channels.splice(0, self.dialog.addScreen.channels.length);
+                    self.dialog.addScreen.currentScreenWhenSelectChannel = '';
+                    self.dialog.addScreen.channelsVisible = false;
+                },
+                handleScreenRemoveChannelInfo:function(scope, e){
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var self = this;
+                    var row = scope.row;
+                    row.terminalChannelId = '';
+                    row.terminalChannelName = '';
+                },
+                load:function(){
                     var self = this;
                     self.table.rows.splice(0, self.table.rows.length);
-                    ajax.post('/tetris/bvc/model/terminal/bundle/load', {
-                        terminalId:self.terminalId,
-                        currentPage:currentPage,
-                        pageSize:self.table.pageSize
+                    ajax.post('/tetris/bvc/model/terminal/screen/load', {
+                        terminalId:self.terminalId
                     }, function(data, status){
-                        var total = data.total;
-                        var rows = data.rows;
-                        if(rows && rows.length>0){
-                            for(var i=0; i<rows.length; i++){
-                                self.table.rows.push(rows[i]);
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.table.rows.push(data[i]);
                             }
                         }
-                        self.table.total = total;
-                        self.table.currentPage = currentPage;
                     });
                 },
-                queryTypes:function(){
+                queryChannels:function(){
                     var self = this;
-                    self.bundleTypes.splice(0, self.bundleTypes.length);
-                    self.types.splice(0, self.types.length);
-                    ajax.post('/tetris/bvc/model/terminal/bundle/query/types', null, function(data){
-                        var bundleTypes = data.bundleTypes;
-                        var types = data.types;
-                        if(bundleTypes && bundleTypes.length>0){
-                            for(var i=0; i<bundleTypes.length; i++){
-                                self.bundleTypes.push(bundleTypes[i]);
+                    ajax.post('/tetris/bvc/model/terminal/channel/load/video/decode', {
+                        terminalId:self.terminalId
+                    }, function(data){
+                       if(data && data.length>0){
+                           for(var i=0; i<data.length; i++){
+                               self.channels.push(data[i]);
+                           }
+                       }
+                    });
+                },
+                queryScreenPrimaryKeys:function(){
+                    var self = this;
+                    ajax.post('/tetris/bvc/model/terminal/screen/primary/key/load', null, function(data){
+                        if(data && data.length>0){
+                            for(var i=0; i<data.length; i++){
+                                self.screenPrimaryKeys.push(data[i]);
                             }
-                        }
-                        for(var i in types){
-                            self.types.push({
-                                id:i,
-                                name:types[i]
-                            })
                         }
                     });
                 }
             },
             created:function(){
                 var self = this;
-                self.load(1);
-                self.queryTypes();
+                self.load();
+                self.queryChannels();
+                self.queryScreenPrimaryKeys();
             }
         });
 

@@ -19,4 +19,15 @@ public interface TerminalChannelDAO extends BaseDAO<TerminalChannelPO>{
 	 */
 	public List<TerminalChannelPO> findByTerminalIdOrderByTypeAscNameAsc(Long terminalId);
 	
+	/**
+	 * 根据类型查询终端通道<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月18日 下午3:05:08
+	 * @param Long terminalId 终端id
+	 * @param TerminalChannelType type 通道类型
+	 * @return List<TerminalChannelPO> 通道列表
+	 */
+	public List<TerminalChannelPO> findByTerminalIdAndTypeOrderByTypeAscNameAsc(Long terminalId, TerminalChannelType type);
+	
 }
