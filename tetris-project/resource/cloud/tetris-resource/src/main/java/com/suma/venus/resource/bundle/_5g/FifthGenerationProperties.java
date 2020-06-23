@@ -23,7 +23,7 @@ public class FifthGenerationProperties {
 		InputStream in = null;
 		Properties props = null;
 		try{
-			in = this.getClass().getClassLoader().getResourceAsStream("5G.properties");
+			in = this.getClass().getClassLoader().getResourceAsStream("properties/5G.properties");
 			props = new Properties();
 			props.load(in);
 			this.minPort = Integer.valueOf(props.getProperty("port.min"));
