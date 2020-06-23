@@ -2,6 +2,7 @@ package com.sumavision.signal.bvc.socket;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.catalina.core.ApplicationContext;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IdleStatus;
@@ -9,12 +10,14 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.transport.socket.SocketSessionConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.signal.bvc.fifthg.bo.socket.FifthgSocketBO;
+import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
-
+import com.sumavision.signal.bvc.feign.*;
 @Component
 public class ServerHandler extends IoHandlerAdapter {
 
@@ -28,13 +31,15 @@ public class ServerHandler extends IoHandlerAdapter {
 	//1.声明service类
 	/*@Autowired
 	private TbBoxService tbBoxService;*/
-	
+	@Autowired
+	FifthGenerationKnapsackFeign fifthGenerationKnapsackFeign;
     private static ServerHandler serverHandler ;
     
     //2通过@PostConstruct实现初始化bean之前进行的操作
     @PostConstruct 
     public void init() { 
         serverHandler = this; 
+        serverHandler.fifthGenerationKnapsackFeign=this.fifthGenerationKnapsackFeign;
         //serverHandler.tbBoxService = this.tbBoxService;.
         //3.调用时需要加前缀 如 serverHandler.tbBoxService
     }  
@@ -47,6 +52,8 @@ public class ServerHandler extends IoHandlerAdapter {
 		
 	}
 	
+
+	
     @Override
     public void messageReceived(IoSession session, Object message)throws Exception {//接收消息
     	IoBuffer bbuf = (IoBuffer) message;
@@ -57,12 +64,15 @@ public class ServerHandler extends IoHandlerAdapter {
         logger.info("[收到消息]" + session.getId() + ",消息内容：" + temp);
         if(temp.contains("ip")){
         	
-        	String tempSocket = temp.split("\\{")[1].split("\\}")[0];
+        	String tempSocket = "{"+temp.split("\\{")[1].split("\\}")[0]+"}";
         	
         	//向资源上报设备上线
         	FifthgSocketBO bo = JSONObject.parseObject(tempSocket, FifthgSocketBO.class);
-        	
-        	messageResponse(session, temp);
+        	JSONObject portObj=serverHandler.fifthGenerationKnapsackFeign.doRegister(bo.getSn());
+        	JSONObject retObj=new JSONObject();
+        	retObj.put("data", portObj.getInteger("data"));
+        	retObj.put("status", portObj.getInteger("status"));
+        	messageResponse(session, retObj.toString());
         }
         
 	}
