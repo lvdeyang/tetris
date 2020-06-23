@@ -11,7 +11,9 @@ import java.util.List;
 public class DeleteTaskEncodeResponse {
 
 	private String msg_id;
-	
+
+	private String task_id;
+
 	private List<IdRequest> encode_array;
 
 	public String getMsg_id() {
@@ -31,5 +33,12 @@ public class DeleteTaskEncodeResponse {
 		this.encode_array = encode_array;
 		return this;
 	}
-	
+
+	public String getTask_id() {
+		return task_id;
+	}
+
+	public void setTask_id(String task_id) {
+		this.task_id = task_id;
+	}
 }

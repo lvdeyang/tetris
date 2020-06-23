@@ -9,7 +9,9 @@ package com.sumavision.tetris.capacity.bo.request;
 public class PutRealIndexRequest {
 
 	private String msg_id;
-	
+
+	private String task_id;
+
 	private Integer index;
 
 	public String getMsg_id() {
@@ -29,5 +31,12 @@ public class PutRealIndexRequest {
 		this.index = index;
 		return this;
 	}
-	
+
+	public String getTask_id() {
+		return task_id;
+	}
+
+	public void setTask_id(String task_id) {
+		this.task_id = task_id;
+	}
 }

@@ -11,6 +11,8 @@ import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 public class PutTaskEncodeRequest {
 
 	private String msg_id;
+
+	private String task_id;
 	
 	private EncodeBO encode_param;
 
@@ -31,5 +33,12 @@ public class PutTaskEncodeRequest {
 		this.encode_param = encode_param;
 		return this;
 	}
-	
+
+	public String getTask_id() {
+		return task_id;
+	}
+
+	public void setTask_id(String task_id) {
+		this.task_id = task_id;
+	}
 }

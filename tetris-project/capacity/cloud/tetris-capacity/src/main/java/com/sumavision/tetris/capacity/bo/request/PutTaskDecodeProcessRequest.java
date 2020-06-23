@@ -2,6 +2,7 @@ package com.sumavision.tetris.capacity.bo.request;
 
 import java.util.List;
 
+import com.sumavision.tetris.capacity.bo.task.DecodePreProcessingBO;
 import com.sumavision.tetris.capacity.bo.task.PreProcessingBO;
 
 /**
@@ -13,8 +14,10 @@ import com.sumavision.tetris.capacity.bo.task.PreProcessingBO;
 public class PutTaskDecodeProcessRequest {
 
 	private String msg_id;
-	
-	private List<PreProcessingBO> process_array;
+
+	private String task_id;
+
+	private List<DecodePreProcessingBO> process_array;
 
 	public String getMsg_id() {
 		return msg_id;
@@ -25,13 +28,19 @@ public class PutTaskDecodeProcessRequest {
 		return this;
 	}
 
-	public List<PreProcessingBO> getProcess_array() {
+	public List<DecodePreProcessingBO> getProcess_array() {
 		return process_array;
 	}
 
-	public PutTaskDecodeProcessRequest setProcess_array(List<PreProcessingBO> process_array) {
+	public void setProcess_array(List<DecodePreProcessingBO> process_array) {
 		this.process_array = process_array;
-		return this;
 	}
-	
+
+	public String getTask_id() {
+		return task_id;
+	}
+
+	public void setTask_id(String task_id) {
+		this.task_id = task_id;
+	}
 }
