@@ -42,7 +42,18 @@ public interface CapacityFeign{
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/add")
 	public JSONObject addTranscode(@RequestParam("transcodeInfo") String transcodeInfo) throws Exception;
-	
+
+
+	/**
+	 * 修改流转码<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月19日 下午16:15:20
+	 * @param String taskInfo 流转码信息
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/modify")
+	public JSONObject modifyTranscode(@RequestParam("taskInfo") String taskInfo) throws Exception;
+
 	/**
 	 * 删除流转码<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -189,7 +200,7 @@ public interface CapacityFeign{
 	 */
 	@RequestMapping(value = "/director/task/feign/add")
 	public JSONObject addDirector(@RequestParam("tasks") String tasks) throws Exception;
-	
+
 	/**
 	 * 删除导播任务<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -328,4 +339,7 @@ public interface CapacityFeign{
 	
 	@RequestMapping(value = "/capacity/package/feign/delete/task")
 	public JSONObject packageDeleteTask(@RequestParam("taskId") String taskId) throws Exception;
+
+
+
 }
