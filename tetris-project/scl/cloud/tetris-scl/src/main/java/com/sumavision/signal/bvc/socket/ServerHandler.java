@@ -62,7 +62,7 @@ public class ServerHandler extends IoHandlerAdapter {
         String temp=new String(byten);
         temp = temp.trim();
         logger.info("[收到消息]" + session.getId() + ",消息内容：" + temp);
-        if(temp.contains("ip")){
+        if(temp.contains("sn")){
         	
         	String tempSocket = "{"+temp.split("\\{")[1].split("\\}")[0]+"}";
         	
