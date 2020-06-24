@@ -4,6 +4,9 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.sumavision.tetris.business.transcode.vo.TaskSetVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +27,9 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @Controller
 @RequestMapping(value = "/capacity/transcode/feign")
 public class TranscodeTaskFeignController {
-	
+
+	private static final Logger LOG = LoggerFactory.getLogger(TranscodeTaskFeignController.class);
+
 	@Autowired
 	private TranscodeTaskService transcodeTaskService;
 	
@@ -98,11 +103,10 @@ public class TranscodeTaskFeignController {
 	public Object analysisInput(
 			String analysisInput,
 			HttpServletRequest request) throws Exception{
-		
-		System.out.println("刷源信息" + analysisInput);
+		LOG.info("(analysis-input) \n input: {}", analysisInput);
 		AnalysisInputVO analysisInputVO = JSONObject.parseObject(analysisInput, AnalysisInputVO.class);
 		String response = transcodeTaskService.analysisInput(analysisInputVO);
-		System.out.println("刷源返回" + response);
+		LOG.info("(analysis-input) \n response: {}", response);
 		return response;
 	}
 	
@@ -264,7 +268,7 @@ public class TranscodeTaskFeignController {
 			Long taskId,
 			Long outputId,
 			HttpServletRequest request) throws Exception{
-		
+		LOG.info("(delete-output) \n taskId: {}, outputId", taskId, outputId);
 		transcodeTaskService.deleteOutput(taskId, outputId);
 		
 		return null;
@@ -283,7 +287,7 @@ public class TranscodeTaskFeignController {
 	public Object sync(
 			String deviceIp,
 			HttpServletRequest request) throws Exception{
-		
+		LOG.info("(sync) \n ip: {}", deviceIp);
 		syncService.sync(deviceIp);
 		return null;
 	}
@@ -303,7 +307,7 @@ public class TranscodeTaskFeignController {
 			String ip,
 			String alarmlist,
 			HttpServletRequest request) throws Exception{
-		
+		LOG.info("(put-alarm-list) \n ip: {} alarmList: {}", ip, alarmlist);
 		transcodeTaskService.putAlarmList(ip, alarmlist);
 		return null;
 	}
@@ -321,8 +325,28 @@ public class TranscodeTaskFeignController {
 	public Object removeAll(
 			String ip,
 			HttpServletRequest request) throws Exception{
-		
+		LOG.info("(remove-all) \n ip: {}",ip);
 		transcodeTaskService.removeAll(ip);
+		return null;
+	}
+
+	/**
+	 * 修改任务<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月5日 下午4:42:32
+	 * @param String ip 转换模块ip
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/modify")
+	public Object modifyTask(
+			String taskInfo,
+			HttpServletRequest request) throws Exception{
+		LOG.info("(modify-task) \n body: {}",taskInfo);
+		TaskSetVO taskSetVO = JSONObject.parseObject(taskInfo, TaskSetVO.class);
+		transcodeTaskService.modifyTranscodeTask(taskSetVO);
+		LOG.info("(modify-task) \n success, taskLinkId: {}",taskSetVO.getTask_link_id());
 		return null;
 	}
 }
