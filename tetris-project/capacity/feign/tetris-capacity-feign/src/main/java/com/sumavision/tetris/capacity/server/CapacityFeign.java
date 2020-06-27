@@ -55,6 +55,16 @@ public interface CapacityFeign{
 	public JSONObject modifyTranscode(@RequestParam("taskInfo") String taskInfo) throws Exception;
 
 	/**
+	 * 获取支持的平台<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月19日 下午16:15:20
+	 * @param String taskInfo 流转码信息
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/platform")
+	public JSONObject getPlatform(@RequestParam("ip") String ip) throws Exception;
+
+	/**
 	 * 删除流转码<br/>
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
