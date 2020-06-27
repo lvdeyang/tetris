@@ -268,7 +268,7 @@ public class TranscodeTaskFeignController {
 			Long taskId,
 			Long outputId,
 			HttpServletRequest request) throws Exception{
-		LOG.info("(delete-output) \n taskId: {}, outputId", taskId, outputId);
+		LOG.info("(delete-output) taskId: {}, outputId: {}", taskId, outputId);
 		transcodeTaskService.deleteOutput(taskId, outputId);
 		
 		return null;
@@ -287,7 +287,7 @@ public class TranscodeTaskFeignController {
 	public Object sync(
 			String deviceIp,
 			HttpServletRequest request) throws Exception{
-		LOG.info("(sync) \n ip: {}", deviceIp);
+		LOG.info("(sync) ip: {}", deviceIp);
 		syncService.sync(deviceIp);
 		return null;
 	}
@@ -338,15 +338,34 @@ public class TranscodeTaskFeignController {
 	 * @param String ip 转换模块ip
 	 */
 	@JsonBody
-	@ResponseBody
-	@RequestMapping(value = "/modify")
-	public Object modifyTask(
-			String taskInfo,
-			HttpServletRequest request) throws Exception{
-		LOG.info("(modify-task) \n body: {}",taskInfo);
-		TaskSetVO taskSetVO = JSONObject.parseObject(taskInfo, TaskSetVO.class);
-		transcodeTaskService.modifyTranscodeTask(taskSetVO);
-		LOG.info("(modify-task) \n success, taskLinkId: {}",taskSetVO.getTask_link_id());
-		return null;
-	}
+    @ResponseBody
+    @RequestMapping(value = "/modify")
+    public Object modifyTask(
+            String taskInfo,
+            HttpServletRequest request) throws Exception{
+        LOG.info("(modify-task) \nbody: {}",taskInfo);
+        TaskSetVO taskSetVO = JSONObject.parseObject(taskInfo, TaskSetVO.class);
+        transcodeTaskService.modifyTranscodeTask(taskSetVO);
+        LOG.info("(modify-task) success, taskLinkId: {}",taskSetVO.getTask_link_id());
+        return null;
+    }
+
+    /**
+     * 获取硬件平台<br/>
+     * <b>作者:</b>yzx<br/>
+     * <b>版本：</b>1.0<br/>
+     * <b>日期：</b>2020年6月5日 下午4:42:32
+     * @param String ip 转换模块ip
+     */
+    @JsonBody
+    @ResponseBody
+    @RequestMapping(value = "/platform")
+    public Object getPlatform(
+            String ip,
+            HttpServletRequest request) throws Exception{
+        LOG.info("(get-platform) ip: {}",ip);
+		String response = transcodeTaskService.getPlatform(ip);
+        LOG.info("(get-platform) success. ip: {} \n result: {}",ip,response);
+        return response;
+    }
 }

@@ -14,7 +14,7 @@ public class DeleteTaskEncodeResponse {
 
 	private String task_id;
 
-	private List<IdRequest> encode_array;
+	private List<EncodeIdRequest> encode_array;
 
 	public String getMsg_id() {
 		return msg_id;
@@ -25,13 +25,12 @@ public class DeleteTaskEncodeResponse {
 		return this;
 	}
 
-	public List<IdRequest> getEncode_array() {
+	public List<EncodeIdRequest> getEncode_array() {
 		return encode_array;
 	}
 
-	public DeleteTaskEncodeResponse setEncode_array(List<IdRequest> encode_array) {
+	public void setEncode_array(List<EncodeIdRequest> encode_array) {
 		this.encode_array = encode_array;
-		return this;
 	}
 
 	public String getTask_id() {
