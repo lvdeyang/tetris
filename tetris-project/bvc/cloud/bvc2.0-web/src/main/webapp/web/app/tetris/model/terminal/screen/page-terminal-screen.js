@@ -50,6 +50,25 @@ define([
                         channels:[],
                         currentScreenWhenSelectChannel:'',
                         channelsVisible:false
+                    },
+                    editName:{
+                        visible:false,
+                        loading:false,
+                        id:'',
+                        name:''
+                    },
+                    editChannel:{
+                        visible:false,
+                        loading:false,
+                        channels:[],
+                        props:{
+                            label:'name',
+                            children:'children',
+                            isLeaf:'isLeaf'
+                        },
+                        id:'',
+                        terminalChannelId:'',
+                        terminalChannelName:''
                     }
                 }
             },
@@ -93,7 +112,25 @@ define([
                 },
                 handleAddScreenSubmit:function(){
                     var self = this;
-                    
+                    if(!self.dialog.addScreen.screens || self.dialog.addScreen.screens.length<=0){
+                        self.$message({
+                            type:'error',
+                            message:'请添加屏幕'
+                        });
+                        return;
+                    }
+                    self.dialog.addScreen.loading = true;
+                    ajax.post('/tetris/bvc/model/terminal/screen/add', {
+                        terminalId:self.terminalId,
+                        screenParams: $.toJSON(self.dialog.addScreen.screens)
+                    }, function(data, status){
+                        self.dialog.addScreen.loading = false;
+                        if(status !== 200) return;
+                        for(var i=0; i<data.length; i++){
+                            self.table.rows.push(data[i]);
+                        }
+                        self.handleAddScreenClose();
+                    }, null, ajax.TOTAL_CATCH_CODE);
                 },
                 handleDelete:function(){
 
@@ -101,9 +138,96 @@ define([
                 handleRowEdit:function(scope){
                     var self = this;
                     var row = scope.row;
-
+                    self.dialog.editName.id = row.id;
+                    self.dialog.editName.name = row.name;
+                    self.dialog.editName.visible = true;
                 },
-
+                handleEditNameClose:function(){
+                    var self = this;
+                    self.dialog.editName.id = '';
+                    self.dialog.editName.name = '';
+                    self.dialog.editName.loading = false;
+                    self.dialog.editName.visible = false;
+                },
+                handleEditNameSubmit:function(){
+                    var self = this;
+                    self.dialog.editName.loading = true;
+                    ajax.post('/tetris/bvc/model/terminal/screen/edit/name', {
+                        id:self.dialog.editName.id,
+                        name:self.dialog.editName.name
+                    }, function(data, status){
+                        self.dialog.editName.loading = false;
+                        if(status !== 200) return;
+                        for(var i=0; i<self.table.rows.length; i++){
+                            if(self.table.rows[i].id == data.id){
+                                self.table.rows.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleEditNameClose();
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                },
+                handleEditChannel:function(scope){
+                    var self = this;
+                    var row = scope.row;
+                    for(var i=0; i<self.channels.length; i++){
+                        var channel = self.channels[i];
+                        var exist = false;
+                        if(channel.id == row.terminalChannelId){
+                            exist = true;
+                        }
+                        /*if(channel.id==self.dialog.editChannel.terminalChannelId){
+                            exist = true;
+                        }
+                        if(!exist){
+                            for(var j=0; j<self.table.rows.length; j++){
+                                if(channel.id==self.table.rows[j].terminalChannelId){
+                                    exist = true;
+                                    break;
+                                }
+                            }
+                        }*/
+                        if(!exist){
+                            self.dialog.editChannel.channels.push(channel);
+                        }
+                    }
+                    self.dialog.editChannel.id = row.id;
+                    self.dialog.editChannel.terminalChannelId = row.terminalChannelId;
+                    self.dialog.editChannel.terminalChannelName = row.terminalChannelName;
+                    self.dialog.editChannel.visible = true;
+                },
+                handleEditChannelClose:function(){
+                    var self = this;
+                    self.dialog.editChannel.id = '';
+                    self.dialog.editChannel.terminalChannelId = '';
+                    self.dialog.editChannel.terminalChannelName = '';
+                    self.dialog.editChannel.channels.splice(0, self.dialog.editChannel.channels.length);
+                    self.dialog.editChannel.visible = false;
+                    self.dialog.editChannel.loading = false;
+                },
+                editChannelCurrentChange:function(data){
+                    var self = this;
+                    self.dialog.editChannel.terminalChannelId = data.id;
+                    self.dialog.editChannel.terminalChannelName = data.name;
+                },
+                handleEditChannelSubmit:function(){
+                    var self = this;
+                    self.dialog.editChannel.loading = true;
+                    ajax.post('/tetris/bvc/model/terminal/screen/edit/channel', {
+                        id:self.dialog.editChannel.id,
+                        terminalChannelId:self.dialog.editChannel.terminalChannelId
+                    }, function(data, status){
+                        self.dialog.editChannel.loading = false;
+                        if(status !== 200) return;
+                        for(var i=0; i<self.table.rows.length; i++){
+                            if(self.table.rows[i].id == data.id){
+                                self.table.rows.splice(i, 1, data);
+                                break;
+                            }
+                        }
+                        self.handleEditChannelClose();
+                    }, null, ajax.TOTAL_CATCH_CODE);
+                },
                 handleRowDelete:function(scope){
                     var self = this;
                     var row = scope.row;
@@ -187,8 +311,7 @@ define([
                         var channel = self.channels[i];
                         var exist = false;
                         for(var j=0; j<self.table.rows.length; j++){
-                            var row = self.table.rows[j];
-                            if(row.terminalChannelId == channel.id){
+                            if(self.table.rows[j].terminalChannelId == channel.id){
                                 exist = true;
                                 break;
                             }

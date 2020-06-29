@@ -45,7 +45,7 @@
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="修改通道" placement="bottom-end">
-                                    <el-button type="text" icon="el-icon-tickets" style="font-size:20px; padding:0; margin-left:20px;" @click="handleListChannel(scope)"></el-button>
+                                    <el-button type="text" icon="icon-random" style="font-size:20px; padding:0; margin-left:20px;" @click="handleEditChannel(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="删除屏幕" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
@@ -73,7 +73,7 @@
                     width="400px"
                     :visible.sync="dialog.addScreen.channelsVisible"
                     id="add-screen-select-channel"
-                    @close="handleAddScreenSelectChannelClose(scope)">
+                    @close="handleAddScreenSelectChannelClose">
                 <div style="max-height:400px;">
                     <el-tree
                             v-if="dialog.addScreen.channelsVisible"
@@ -141,6 +141,45 @@
             </span>
         </el-dialog>
 
+        <!-- 修改名称 -->
+        <el-dialog
+            :close-on-click-modal="false"
+            title="修改名称"
+            :visible.sync="dialog.editName.visible"
+            width="500px"
+            :before-close="handleEditNameClose">
+
+            <el-input v-model="dialog.editName.name"></el-input>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditNameClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditNameSubmit" :loading="dialog.editName.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改通道 -->
+        <el-dialog
+            :close-on-click-modal="false"
+            title="修改通道"
+            :visible.sync="dialog.editChannel.visible"
+            width="400px"
+            :before-close="handleEditChannelClose"
+            id="edit-channel-select-channel">
+            <div style="max-height:400px;">
+                <el-tree
+                    v-if="dialog.editChannel.visible"
+                    ref="editChannelTree"
+                    :props="dialog.editChannel.props"
+                    highlight-current
+                    :data="dialog.editChannel.channels"
+                    @current-change="editChannelCurrentChange">
+                </el-tree>
+            </div>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditChannelClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditChannelSubmit" :loading="dialog.editChannel.loading">确定</el-button>
+            </span>
+        </el-dialog>
     </template>
 
 </mi-frame>

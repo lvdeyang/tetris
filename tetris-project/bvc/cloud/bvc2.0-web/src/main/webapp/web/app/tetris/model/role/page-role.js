@@ -1,8 +1,8 @@
 /**
- * Created by lvdeyang on 2020/6/5.
+ * Created by lvdeyang on 2020/6/28.
  */
 define([
-    'text!' + window.APPPATH + 'tetris/model/terminal/page-terminal.html',
+    'text!' + window.APPPATH + 'tetris/model/role/page-role.html',
     'config',
     'restfull',
     'context',
@@ -10,10 +10,10 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
-    'css!' + window.APPPATH + 'tetris/model/terminal/page-terminal.css'
+    'css!' + window.APPPATH + 'tetris/model/role/page-role.css'
 ], function(tpl, config, ajax, context, commons, Vue){
 
-    var pageId = 'page-terminal';
+    var pageId = 'page-role';
 
     var init = function(){
 
@@ -29,6 +29,8 @@ define([
                 menus: context.getProp('menus'),
                 user: context.getProp('user'),
                 groups: context.getProp('groups'),
+                roleTypes:[],
+                mappingTypes:[],
                 table:{
                     rows:[],
                     pageSize:50,
@@ -37,16 +39,20 @@ define([
                     total:0
                 },
                 dialog: {
-                    createTerminal:{
+                    createRole:{
                         visible:false,
                         loading:false,
-                        name:''
+                        name:'',
+                        internalRoleType:'',
+                        roleUserMappingType:''
                     },
-                    editTerminal:{
+                    editRole:{
                         visible:false,
                         loading:false,
                         id:'',
-                        name:''
+                        name:'',
+                        internalRoleType:'',
+                        roleUserMappingType:''
                     }
                 }
             },
@@ -58,29 +64,33 @@ define([
             },
             methods:{
                 rowKey:function(row){
-                    return 'terminal-' + row.uuid;
+                    return 'role-' + row.uuid;
                 },
                 handleCreate:function(){
                     var self = this;
-                    self.dialog.createTerminal.visible = true;
+                    self.dialog.createRole.visible = true;
                 },
-                handleCreateTerminalClose:function(){
+                handleCreateRoleClose:function(){
                     var self = this;
-                    self.dialog.createTerminal.name = '';
-                    self.dialog.createTerminal.loading = false;
-                    self.dialog.createTerminal.visible = false;
+                    self.dialog.createRole.name = '';
+                    self.dialog.createRole.internalRoleType = '';
+                    self.dialog.createRole.roleUserMappingType = '';
+                    self.dialog.createRole.loading = false;
+                    self.dialog.createRole.visible = false;
                 },
-                handleCreateTerminalSubmit:function(){
+                handleCreateRoleSubmit:function(){
                     var self = this;
-                    self.dialog.createTerminal.loading = true;
-                    ajax.post('/tetris/bvc/model/terminal/create', {
-                        name:self.dialog.createTerminal.name
+                    self.dialog.createRole.loading = true;
+                    ajax.post('/tetris/bvc/model/role/add/internal', {
+                        name:self.dialog.createRole.name,
+                        internalRoleType:self.dialog.createRole.internalRoleType,
+                        roleUserMappingType:self.dialog.createRole.roleUserMappingType
                     }, function(data, status){
-                        self.dialog.createTerminal.loading = false;
+                        self.dialog.createRole.loading = false;
                         if(status !== 200) return;
                         self.table.rows.push(data);
                         self.table.total += 1;
-                        self.handleCreateTerminalClose();
+                        self.handleCreateRoleClose();
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
                 handleDelete:function(){
@@ -89,49 +99,43 @@ define([
                 handleRowEdit:function(scope){
                     var self = this;
                     var row = scope.row;
-                    self.dialog.editTerminal.id = row.id;
-                    self.dialog.editTerminal.name = row.name;
-                    self.dialog.editTerminal.visible = true;
+                    self.dialog.editRole.id = row.id;
+                    self.dialog.editRole.name = row.name;
+                    self.dialog.editRole.internalRoleType = row.internalRoleType;
+                    self.dialog.editRole.roleUserMappingType = row.roleUserMappingType;
+                    self.dialog.editRole.visible = true;
                 },
-                handleEditTerminalClose:function(){
-                    var self = this;
-                    self.dialog.editTerminal.id = '';
-                    self.dialog.editTerminal.name = '';
-                    self.dialog.editTerminal.loading = false;
-                    self.dialog.editTerminal.visible = false;
+                handleEditChannel:function(scope){
+                    var row = scope.row;
+                    window.location.hash = '#/page-role-channel/'+row.id + '/' + row.name;
                 },
-                handleEditTerminalSubmit:function(){
+                handleEditRoleClose:function(){
                     var self = this;
-                    self.dialog.editTerminal.loading = true;
-                    ajax.post('/tetris/bvc/model/terminal/edit', {
-                        id:self.dialog.editTerminal.id,
-                        name:self.dialog.editTerminal.name
+                    self.dialog.editRole.id = '';
+                    self.dialog.editRole.name = '';
+                    self.dialog.editRole.internalRoleType = '';
+                    self.dialog.editRole.roleUserMappingType = '';
+                    self.dialog.editRole.loading = false;
+                    self.dialog.editRole.visible = false;
+                },
+                handleEditRoleSubmit:function(){
+                    var self = this;
+                    self.dialog.editRole.loading = true;
+                    ajax.post('/tetris/bvc/model/role/edit/internal', {
+                        id:self.dialog.editRole.id,
+                        name:self.dialog.editRole.name,
+                        internalRoleType:self.dialog.editRole.internalRoleType,
+                        roleUserMappingType:self.dialog.editRole.roleUserMappingType
                     }, function(data, status){
-                        self.dialog.editTerminal.loading = false;
+                        self.dialog.editRole.loading = false;
                         if(status!==200) return;
                         for(var i=0; i<self.table.rows.length; i++){
                             if(self.table.rows[i].id == data.id){
                                 self.table.rows.splice(i, 1, data);
                             }
                         }
-                        self.handleEditTerminalClose();
+                        self.handleEditRoleClose();
                     }, null, ajax.TOTAL_CATCH_CODE);
-                },
-                handleEditBundle:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-terminal-bundle/'+row.id + '/' + row.name;
-                },
-                handleEditChannel:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-terminal-channel/'+row.id + '/' + row.name;
-                },
-                handleEditScreen:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-terminal-screen/'+row.id + '/' + row.name;
-                },
-                handleEditLayout:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-terminal-layout/'+row.id + '/' + row.name;
                 },
                 handleRowDelete:function(scope){
                     var self = this;
@@ -142,7 +146,7 @@ define([
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
-                                h('p', null, ['此操作将永久删除该终端，且不可恢复，是否继续?'])
+                                h('p', null, ['此操作将永久删除该角色，且不可恢复，是否继续?'])
                             ])
                         ]),
                         type:'wraning',
@@ -152,7 +156,7 @@ define([
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
-                                ajax.post('/tetris/bvc/model/terminal/delete', {
+                                ajax.post('/tetris/bvc/model/role/delete', {
                                     id:row.id
                                 }, function(data, status){
                                     instance.confirmButtonLoading = false;
@@ -187,7 +191,7 @@ define([
                 load:function(currentPage){
                     var self = this;
                     self.table.rows.splice(0, self.table.rows.length);
-                    ajax.post('/tetris/bvc/model/terminal/load', {
+                    ajax.post('/tetris/bvc/model/role/load/internal', {
                         currentPage:currentPage,
                         pageSize:self.table.pageSize
                     }, function(data, status){
@@ -201,11 +205,31 @@ define([
                         self.table.total = total;
                         self.table.currentPage = currentPage;
                     });
+                },
+                queryTypes:function(){
+                    var self = this;
+                    ajax.post('/tetris/bvc/model/role/query/types', null, function(data){
+                        var roleTypes = data.roleTypes;
+                        var mappingTypes = data.mappingTypes;
+                        for(var i in roleTypes){
+                            self.roleTypes.push({
+                                id:i,
+                                name:roleTypes[i]
+                            });
+                        }
+                        for(var i in mappingTypes){
+                            self.mappingTypes.push({
+                                id:i,
+                                name:mappingTypes[i]
+                            });
+                        }
+                    });
                 }
             },
             created:function(){
                 var self = this;
                 self.load(1);
+                self.queryTypes();
             }
         });
 

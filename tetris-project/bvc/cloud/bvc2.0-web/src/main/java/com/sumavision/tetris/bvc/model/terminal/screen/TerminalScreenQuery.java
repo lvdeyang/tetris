@@ -31,19 +31,24 @@ public class TerminalScreenQuery {
 		if(entities!=null && entities.size()>0){
 			List<Long> terminalChannelIds = new ArrayList<Long>();
 			for(TerminalScreenPO entity:entities){
-				terminalChannelIds.add(entity.getTerminalChannelId());
+				if(entity.getTerminalChannelId()!=null) terminalChannelIds.add(entity.getTerminalChannelId());
 			}
-			List<TerminalChannelPO> channels = terminalChannelDao.findAll(terminalChannelIds);
+			List<TerminalChannelPO> channels = null;
+			if(terminalChannelIds!=null && terminalChannelIds.size()>0){
+				channels = terminalChannelDao.findAll(terminalChannelIds);
+			}
 			List<TerminalScreenVO> screens = new ArrayList<TerminalScreenVO>();
 			for(TerminalScreenPO entity:entities){
 				TerminalChannelPO targetChannel = null;
-				for(TerminalChannelPO channel:channels){
-					if(channel.getId().equals(entity.getTerminalChannelId())){
-						targetChannel = channel;
-						break;
+				if(channels!=null && channels.size()>0){
+					for(TerminalChannelPO channel:channels){
+						if(channel.getId().equals(entity.getTerminalChannelId())){
+							targetChannel = channel;
+							break;
+						}
 					}
 				}
-				screens.add(new TerminalScreenVO().set(entity).setTerminalChannelName(targetChannel.getName()));
+				screens.add(new TerminalScreenVO().set(entity).setTerminalChannelName(targetChannel==null?null:targetChannel.getName()));
 			}
 			return screens;
 		}

@@ -1,0 +1,3 @@
+.layout-preview{width:100%; height:100%; position:relative; background-color:#16191E; box-sizing:border-box;}
+.layout-screen{position:absolute; background-color:#737373; border:1px solid #16191E; box-sizing:border-box; text-align:center; overflow:hidden; color:#fff;}
+#add-position-select-channel .el-dialog__body{padding-top:0; padding-bottom:20px;}

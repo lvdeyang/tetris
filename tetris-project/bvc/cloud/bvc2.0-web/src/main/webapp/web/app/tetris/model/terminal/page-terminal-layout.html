@@ -1,0 +1,75 @@
+<mi-frame id="page-terminal-layout-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">终端布局</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-terminal">{{terminalName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>终端布局</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加布局</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;移除布局</el-button>
+
+            <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="名称"
+                                prop="layoutName">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="350">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="删除布局" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+        </el-card>
+
+        <!-- 添加布局话框 -->
+        <el-dialog
+            :close-on-click-modal="false"
+            title="添加布局"
+            :visible.sync="dialog.addLayout.visible"
+            width="400px"
+            :before-close="handleAddLayoutClose"
+            id="add-layout-select-screen">
+
+            <div style="max-height:400px;">
+                <el-tree
+                    v-if="dialog.addLayout.visible"
+                    ref="addLayoutTree"
+                    :props="dialog.addLayout.props"
+                    show-checkbox
+                    node-key="id"
+                    :data="dialog.addLayout.layouts">
+                </el-tree>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddLayoutClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddLayoutSubmit" :loading="dialog.addLayout.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

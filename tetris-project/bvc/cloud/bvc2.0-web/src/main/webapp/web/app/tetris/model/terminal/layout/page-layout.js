@@ -1,8 +1,8 @@
 /**
- * Created by lvdeyang on 2020/6/5.
+ * Created by lvdeyang on 2020/6/24.
  */
 define([
-    'text!' + window.APPPATH + 'tetris/model/terminal/page-terminal.html',
+    'text!' + window.APPPATH + 'tetris/model/terminal/layout/page-layout.html',
     'config',
     'restfull',
     'context',
@@ -10,10 +10,10 @@ define([
     'vue',
     'element-ui',
     'mi-frame',
-    'css!' + window.APPPATH + 'tetris/model/terminal/page-terminal.css'
+    'css!' + window.APPPATH + 'tetris/model/terminal/layout/page-layout.css'
 ], function(tpl, config, ajax, context, commons, Vue){
 
-    var pageId = 'page-terminal';
+    var pageId = 'page-layout';
 
     var init = function(){
 
@@ -37,12 +37,12 @@ define([
                     total:0
                 },
                 dialog: {
-                    createTerminal:{
+                    createLayout:{
                         visible:false,
                         loading:false,
                         name:''
                     },
-                    editTerminal:{
+                    editLayout:{
                         visible:false,
                         loading:false,
                         id:'',
@@ -58,29 +58,29 @@ define([
             },
             methods:{
                 rowKey:function(row){
-                    return 'terminal-' + row.uuid;
+                    return 'layout-' + row.uuid;
                 },
                 handleCreate:function(){
                     var self = this;
-                    self.dialog.createTerminal.visible = true;
+                    self.dialog.createLayout.visible = true;
                 },
-                handleCreateTerminalClose:function(){
+                handleCreateLayoutClose:function(){
                     var self = this;
-                    self.dialog.createTerminal.name = '';
-                    self.dialog.createTerminal.loading = false;
-                    self.dialog.createTerminal.visible = false;
+                    self.dialog.createLayout.name = '';
+                    self.dialog.createLayout.loading = false;
+                    self.dialog.createLayout.visible = false;
                 },
-                handleCreateTerminalSubmit:function(){
+                handleCreateLayoutSubmit:function(){
                     var self = this;
-                    self.dialog.createTerminal.loading = true;
-                    ajax.post('/tetris/bvc/model/terminal/create', {
-                        name:self.dialog.createTerminal.name
+                    self.dialog.createLayout.loading = true;
+                    ajax.post('/tetris/bvc/model/terminal/layout/add', {
+                        name:self.dialog.createLayout.name
                     }, function(data, status){
-                        self.dialog.createTerminal.loading = false;
+                        self.dialog.createLayout.loading = false;
                         if(status !== 200) return;
                         self.table.rows.push(data);
                         self.table.total += 1;
-                        self.handleCreateTerminalClose();
+                        self.handleCreateLayoutClose();
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
                 handleDelete:function(){
@@ -89,49 +89,37 @@ define([
                 handleRowEdit:function(scope){
                     var self = this;
                     var row = scope.row;
-                    self.dialog.editTerminal.id = row.id;
-                    self.dialog.editTerminal.name = row.name;
-                    self.dialog.editTerminal.visible = true;
+                    self.dialog.editLayout.id = row.id;
+                    self.dialog.editLayout.name = row.name;
+                    self.dialog.editLayout.visible = true;
                 },
-                handleEditTerminalClose:function(){
+                handleEditLayoutClose:function(){
                     var self = this;
-                    self.dialog.editTerminal.id = '';
-                    self.dialog.editTerminal.name = '';
-                    self.dialog.editTerminal.loading = false;
-                    self.dialog.editTerminal.visible = false;
+                    self.dialog.editLayout.id = '';
+                    self.dialog.editLayout.name = '';
+                    self.dialog.editLayout.loading = false;
+                    self.dialog.editLayout.visible = false;
                 },
-                handleEditTerminalSubmit:function(){
+                handleEditLayoutSubmit:function(){
                     var self = this;
-                    self.dialog.editTerminal.loading = true;
-                    ajax.post('/tetris/bvc/model/terminal/edit', {
-                        id:self.dialog.editTerminal.id,
-                        name:self.dialog.editTerminal.name
+                    self.dialog.editLayout.loading = true;
+                    ajax.post('/tetris/bvc/model/terminal/layout/edit', {
+                        id:self.dialog.editLayout.id,
+                        name:self.dialog.editLayout.name
                     }, function(data, status){
-                        self.dialog.editTerminal.loading = false;
+                        self.dialog.editLayout.loading = false;
                         if(status!==200) return;
                         for(var i=0; i<self.table.rows.length; i++){
                             if(self.table.rows[i].id == data.id){
                                 self.table.rows.splice(i, 1, data);
                             }
                         }
-                        self.handleEditTerminalClose();
+                        self.handleEditLayoutClose();
                     }, null, ajax.TOTAL_CATCH_CODE);
-                },
-                handleEditBundle:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-terminal-bundle/'+row.id + '/' + row.name;
-                },
-                handleEditChannel:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-terminal-channel/'+row.id + '/' + row.name;
-                },
-                handleEditScreen:function(scope){
-                    var row = scope.row;
-                    window.location.hash = '#/page-terminal-screen/'+row.id + '/' + row.name;
                 },
                 handleEditLayout:function(scope){
                     var row = scope.row;
-                    window.location.hash = '#/page-terminal-layout/'+row.id + '/' + row.name;
+                    window.location.hash = '#/page-layout-position/'+row.id + '/' + row.name;
                 },
                 handleRowDelete:function(scope){
                     var self = this;
@@ -142,7 +130,7 @@ define([
                         message:h('div', null, [
                             h('div', {class:'el-message-box__status el-icon-warning'}, null),
                             h('div', {class:'el-message-box__message'}, [
-                                h('p', null, ['此操作将永久删除该终端，且不可恢复，是否继续?'])
+                                h('p', null, ['此操作将永久删除该布局，且不可恢复，是否继续?'])
                             ])
                         ]),
                         type:'wraning',
@@ -152,7 +140,7 @@ define([
                         beforeClose:function(action, instance, done){
                             instance.confirmButtonLoading = true;
                             if(action === 'confirm'){
-                                ajax.post('/tetris/bvc/model/terminal/delete', {
+                                ajax.post('/tetris/bvc/model/terminal/layout/delete', {
                                     id:row.id
                                 }, function(data, status){
                                     instance.confirmButtonLoading = false;
@@ -187,7 +175,7 @@ define([
                 load:function(currentPage){
                     var self = this;
                     self.table.rows.splice(0, self.table.rows.length);
-                    ajax.post('/tetris/bvc/model/terminal/load', {
+                    ajax.post('/tetris/bvc/model/terminal/layout/load', {
                         currentPage:currentPage,
                         pageSize:self.table.pageSize
                     }, function(data, status){

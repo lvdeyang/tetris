@@ -13,5 +13,11 @@ public class ScreenPrimaryKeyNotFoundException extends BaseException{
 															 .append(id)
 															 .toString());
 	}
+	
+	public ScreenPrimaryKeyNotFoundException(String screenPrimaryKey) {
+		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("屏幕主键不存在，主键：")
+															 .append(screenPrimaryKey)
+															 .toString());
+	}
 
 }

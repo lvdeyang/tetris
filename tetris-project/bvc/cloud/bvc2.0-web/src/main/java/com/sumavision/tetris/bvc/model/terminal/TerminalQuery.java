@@ -18,6 +18,18 @@ public class TerminalQuery {
 	private TerminalDAO terminalDao;
 	
 	/**
+	 * 查询全部终端<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月29日 下午3:07:03
+	 * @return List<TerminalVO> 终端列表
+	 */
+	public List<TerminalVO> loadAll() throws Exception{
+		List<TerminalPO> entities = terminalDao.findAll();
+		return TerminalVO.getConverter(TerminalVO.class).convert(entities, TerminalVO.class);
+	}
+	
+	/**
 	 * 分页查询终端<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>
