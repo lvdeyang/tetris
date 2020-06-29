@@ -66,5 +66,8 @@ public class UrlConstant {
 	
 	/** 告警列表 */
 	public static final String URL_ALARMLIST = "/v0.0/alarmlist";
-	
+
+	/** 硬件平台 */
+	public static final String GET_PLATFORM = "/v0.0/platform";
+
 }

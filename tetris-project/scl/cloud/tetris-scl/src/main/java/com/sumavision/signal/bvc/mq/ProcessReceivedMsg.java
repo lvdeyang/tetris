@@ -322,7 +322,7 @@ public class ProcessReceivedMsg {
         		return;
         	}
         	
-        	CapacityPermissionPortPO permission = capacityPermissionPortDao.findByBundleIdAndChannleId(localBundleId, localChannelID);
+        	CapacityPermissionPortPO permission = capacityPermissionPortDao.findByBundleIdAndChannelId(localBundleId, localChannelID);
         	if(permission == null){
         		System.out.println("源端口暂未协商成功！");
         		return;

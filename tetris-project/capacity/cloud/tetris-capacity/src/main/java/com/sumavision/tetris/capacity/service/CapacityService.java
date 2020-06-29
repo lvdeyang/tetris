@@ -1658,5 +1658,38 @@ public class CapacityService {
 		
 		return response;
 	}
-	
+
+
+	/**
+	 * 获取所有任务<br/>
+	 * <b>作者:</b>wjw<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年11月11日 下午2:18:39
+	 * @return GetTaskResponse
+	 */
+	public PlatformResponse getPlatforms(String ip) throws Exception{
+		return getPlatformsToTransform(ip);
+	}
+
+	public PlatformResponse getPlatformsToTransform(String ip) throws Exception{
+
+		String msg_id = UUID.randomUUID().toString().replaceAll("-", "");
+
+		String url = new StringBufferWrapper().append(UrlConstant.URL_PREFIX)
+				.append(ip)
+				.append(":")
+				.append(capacityProps.getPort())
+				.append(UrlConstant.GET_PLATFORM)
+				.append("?msg_id=")
+				.append(msg_id)
+				.toString();
+		LOG.info("[get-platform] request, url: {}",url);
+		JSONObject res = HttpUtil.httpGet(url);
+		LOG.info("[get-platform] response, result: {}",res);
+
+		if(res == null) throw new HttpTimeoutException(ip);
+
+		PlatformResponse response = JSONObject.parseObject(res.toJSONString(), PlatformResponse.class);
+		return response;
+	}
 }
