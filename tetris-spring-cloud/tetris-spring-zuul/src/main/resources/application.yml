@@ -64,7 +64,10 @@ zuul:
       serviceId: tetris-cms 
     tetris-resource:
       path: /tetris-resource/**
-      serviceId: tetris-resource      
+      serviceId: tetris-resource  
+    eb-insert-web:
+      path: /eb-insert-web/**
+      serviceId: eb-insert-web
 eureka:
 #客户端
   client:
