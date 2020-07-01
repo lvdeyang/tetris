@@ -18,6 +18,7 @@ import com.sumavision.tetris.capacity.bo.request.*;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
 import com.sumavision.tetris.capacity.bo.response.AnalysisResponse;
 import com.sumavision.tetris.capacity.bo.response.CreateOutputsResponse;
+import com.sumavision.tetris.capacity.bo.response.PlatformResponse;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
 import com.sumavision.tetris.capacity.bo.task.TaskBO;
 import com.sumavision.tetris.capacity.bo.task.TaskSourceBO;
@@ -1239,8 +1240,8 @@ public class TranscodeTaskService {
 					if (oriTask.getId().equals(deleteTaskEncodeResponse.getTask_id())){
 						capacityService.deleteTaskEncode(capacityIp, deleteTaskEncodeResponse);
 						for (EncodeBO encodeBO : oriTask.getEncode_array()) {
-							for (IdRequest idRequest : deleteTaskEncodeResponse.getEncode_array()) {
-								if (idRequest.getId().equals(encodeBO.getEncode_id())){
+							for (EncodeIdRequest idRequest : deleteTaskEncodeResponse.getEncode_array()) {
+								if (idRequest.getEncode_id().equals(encodeBO.getEncode_id())){
 									oriTask.getEncode_array().remove(encodeBO);
 								}
 							}
@@ -1458,4 +1459,23 @@ public class TranscodeTaskService {
 		taskInputDao.save(taskInputPO);
 		taskOutputDao.save(taskOutputPO);
 	}
+
+    /**
+     * 获取设备支持的硬件平台<br/>
+     * <b>作者:</b>yzx<br/>
+     * <b>版本：</b>1.0<br/>
+     * <b>日期：</b>2020年6月23日 下午2:41:38
+     * @param String ip 转换模块ip
+     */
+    public String getPlatform(String ip) throws Exception {
+        PlatformResponse platformResponse = capacityService.getPlatforms(ip);
+        List<String> platforms = new ArrayList<>();
+        platformResponse.getPlatform_array().stream().forEach(p->{
+            JSONObject jsonObject = JSONObject.parseObject(p);
+            platforms.add(jsonObject.getString("platform"));
+        });
+		return JSON.toJSONString(platforms);
+    }
+
+
 }

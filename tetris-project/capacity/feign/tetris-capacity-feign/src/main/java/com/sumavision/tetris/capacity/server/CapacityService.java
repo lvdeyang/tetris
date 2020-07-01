@@ -57,6 +57,18 @@ public class CapacityService {
 	public String modifyTranscode(String taskInfo) throws Exception{
 		return JsonBodyResponseParser.parseObject(capacityFeign.modifyTranscode(taskInfo), String.class);
 	}
+
+	/**
+	 * 获取支持的平台<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月19日 下午16:15:20
+	 * @param String ip 流转码信息
+	 */
+	public String getPlatform(String ip) throws Exception{
+		return JsonBodyResponseParser.parseObject(capacityFeign.getPlatform(ip), String.class);
+	}
+
 	/**
 	 * 删除流转码<br/>
 	 * <b>作者:</b>wjw<br/>
