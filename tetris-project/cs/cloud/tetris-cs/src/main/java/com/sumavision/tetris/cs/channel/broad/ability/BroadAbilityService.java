@@ -1386,6 +1386,9 @@ public class BroadAbilityService {
 	private Long querySchedulePlayTime(Long schedulId) throws Exception {
 		Long playTime = 0l;
 		ProgramVO programVO = programQuery.getProgram(schedulId);
+		if(programVO==null){
+			return playTime;
+		}
 		List<ScreenVO> screenVOs = programVO.getScreenInfo();
 		if (screenVOs == null || screenVOs.isEmpty()) return playTime;
 		Map<Long, Long> playTimeMap = new HashMap<Long, Long>();
