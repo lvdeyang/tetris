@@ -291,6 +291,8 @@ public class ScheduleService {
 		ProgramVO program = new ProgramVO();
 		program.setScheduleId(schedule.getId());
 		program.setScreenNum(1l);
+		program.setScreenId(1l);
+		program.setOrient("horizontal");
 		program.setUpdateTime(date);
 		program.setScreenInfo(screenVOs);
 			
