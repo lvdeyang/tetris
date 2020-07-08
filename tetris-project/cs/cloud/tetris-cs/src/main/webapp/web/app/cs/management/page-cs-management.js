@@ -510,7 +510,7 @@ define([
                         broadWay: self.dialog.addProgram.broadWay,
                         outputUsers: JSON.stringify(self.dialog.addProgram.broadWay == self.broadWayStream ? self.dialog.addProgram.outputQtUsers : self.dialog.addProgram.outputQtUsers.concat(self.dialog.addProgram.outputPushUsers)),
                         outputUserPort: self.dialog.addProgram.outputUserPort || '9999',
-                        ouputUserEndPort: self.dialog.addProgram.outputUserEndPort,
+                        outputUserEndPort: self.dialog.addProgram.outputUserEndPort,
                         output: JSON.stringify(self.dialog.addProgram.output),
                         encryption: self.dialog.addProgram.encryption,
                         autoBroad: self.dialog.addProgram.broadWay == self.broadWayStream ? self.dialog.addProgram.autoBroad : false,
