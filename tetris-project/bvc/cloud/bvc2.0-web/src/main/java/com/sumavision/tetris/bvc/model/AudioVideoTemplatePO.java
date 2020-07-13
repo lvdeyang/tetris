@@ -5,8 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
-
-import com.sumavision.bvc.system.enumeration.Resolution;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**

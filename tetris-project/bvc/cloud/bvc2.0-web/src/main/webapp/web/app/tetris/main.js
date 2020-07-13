@@ -27,6 +27,9 @@ require.config({
         'mi-frame':window.APPPATH + 'component/frame/frame',
         'mi-sub-title':window.APPPATH + 'component/sub-title/sub-title',
 
+        /* jquery-components */
+        'jquery.layout.auto':window.APPPATH + 'component/jQuery/jQuery.layout.auto/js/jQuery.layout.auto',
+
         /* page */
         'page-terminal':window.APPPATH + 'tetris/model/terminal/page-terminal',
         'page-terminal-bundle':window.APPPATH + 'tetris/model/terminal/page-terminal-bundle',
@@ -39,7 +42,16 @@ require.config({
         'page-layout-position':window.APPPATH + 'tetris/model/terminal/layout/page-layout-position',
         'page-role':window.APPPATH + 'tetris/model/role/page-role',
         'page-role-channel':window.APPPATH + 'tetris/model/role/page-role-channel',
-        'page-role-channel-terminal-channel-permission':window.APPPATH + 'tetris/model/role/page-role-channel-terminal-channel-permission'
+        'page-role-channel-terminal-channel-permission':window.APPPATH + 'tetris/model/role/page-role-channel-terminal-channel-permission',
+        'page-audio-video-template':window.APPPATH + 'tetris/model/page-audio-video-template',
+        'page-agenda':window.APPPATH + 'tetris/model/agenda/page-agenda',
+        'page-agenda-forward':window.APPPATH + 'tetris/model/agenda/page-agenda-forward',
+        'page-role-agenda-permission':window.APPPATH + 'tetris/model/agenda/page-role-agenda-permission',
+        'page-agenda-layout-template':window.APPPATH + 'tetris/model/agenda/page-agenda-layout-template',
+        'page-combine-video':window.APPPATH + 'tetris/model/agenda/combine/page-combine-video',
+        'page-combine-audio':window.APPPATH + 'tetris/model/agenda/combine/page-combine-audio',
+        'page-user-terminal-binding':window.APPPATH + 'tetris/business/terminal/user/page-user-terminal-binding',
+        'page-hall-terminal-binding':window.APPPATH + 'tetris/business/terminal/hall/page-hall-terminal-binding'
 
     },
     shim:{

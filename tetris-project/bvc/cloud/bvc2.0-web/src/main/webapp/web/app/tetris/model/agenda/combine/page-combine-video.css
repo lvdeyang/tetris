@@ -1,0 +1,10 @@
+.layout-auto .cell .el-button{font-size:18px; padding:0px;}
+.layout-auto .cell .button-edit{position:absolute; right:35px; top:5px;}
+.layout-auto .cell .button-delete{position:absolute; right:5px; top:5px;}
+.layout-auto .cell .text-area{font-size:14px; color:#fff; word-break:break-all; padding:5px;}
+
+#edit-position .el-dialog__body{padding-top:0;}
+#edit-src .el-dialog__body{padding-top:0; padding-bottom:0;}
+
+#edit-src .el-tabs__item{height:30px; line-height:30px; font-size:12px;}
+#edit-src .el-tabs__content{position:static;}

@@ -1,0 +1,3 @@
+#page-combine-audio-wrapper .el-tag + .el-tag {margin-left: 10px;}
+#edit-src-tree-outer .el-scrollbar__wrap:not(.el-select-dropdown__wrap),
+#edit-src-tree .el-scrollbar__wrap:not(.el-select-dropdown__wrap){overflow-x:scroll!important;}

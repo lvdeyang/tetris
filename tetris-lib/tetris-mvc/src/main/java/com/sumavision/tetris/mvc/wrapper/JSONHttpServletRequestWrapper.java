@@ -5,6 +5,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.util.wrapper.StringBuilderWrapper;
 
@@ -98,6 +99,14 @@ public class JSONHttpServletRequestWrapper extends HttpServletRequestWrapper{
 	
 	public float getFloatValue(String name){
 		return this.params.getFloatValue(name);
+	}
+	
+	public JSONObject getJSONObject(String name){
+		return this.params.getJSONObject(name);
+	}
+	
+	public JSONArray getJSONArray(String name){
+		return this.params.getJSONArray(name);
 	}
 	
 }

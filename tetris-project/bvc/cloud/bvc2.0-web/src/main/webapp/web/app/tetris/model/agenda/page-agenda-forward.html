@@ -1,0 +1,236 @@
+<mi-frame id="page-agenda-forward-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">议程转发</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-agenda">{{agendaName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>议程转发</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建议程</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除议程</el-button>
+
+            <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="源类型"
+                                prop="sourceTypeName">
+                        </el-table-column>
+                        <el-table-column
+                                label="源"
+                                prop="sourceName">
+                        </el-table-column>
+                        <el-table-column
+                                label="目的类型"
+                                prop="destinationTypeName">
+                        </el-table-column>
+                        <el-table-column
+                                label="目的"
+                                prop="destinationName">
+                        </el-table-column>
+                        <el-table-column
+                                label="转发类型"
+                                prop="typeName">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="200">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="删除转发" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+        </el-card>
+
+        <el-dialog
+                :close-on-click-modal="false"
+                title="新建转发"
+                :visible.sync="dialog.addForward.visible"
+                width="500px"
+                :before-close="handleAddForwardClose">
+            <el-form label-width="80px">
+                <el-form-item label="转发类型">
+                    <el-select v-model="dialog.addForward.type" style="width:100%;" @change="forwardTypeChange">
+                        <el-option v-for="item in forwardType" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="源类型">
+                    <el-select v-model="dialog.addForward.sourceType" style="width:100%;">
+                        <el-option v-for="item in dialog.addForward.sourceTypes" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="源">
+                    <el-input v-model="dialog.addForward.source.name" readonly @click.native="handleSelectSource"></el-input>
+                </el-form-item>
+                <el-form-item label="目的类型">
+                    <el-select v-model="dialog.addForward.destinationType" style="width:100%;">
+                        <el-option v-for="item in dialog.addForward.destinationTypes" :label="item.name" :value="item.id"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="目的">
+                    <el-input v-model="dialog.addForward.destination.name" readonly @click.native="handleSelectDestination"></el-input>
+                </el-form-item>
+            </el-form>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddForwardClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddForwardSubmit" :loading="dialog.addForward.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 选择源角色 -->
+        <el-dialog
+                :close-on-click-modal="true"
+                title="选择角色"
+                :visible.sync="dialog.selectSourceRole.visible"
+                width="400px"
+                :before-close="handleSelectSourceRoleClose"
+                class="dialog-tree">
+            <div style="max-height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                        v-if="dialog.selectSourceRole.visible"
+                        ref="selectSourceRoleTree"
+                        :props="dialog.selectSourceRole.props"
+                        highlight-current
+                        :data="dialog.selectSourceRole.data">
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+        </el-dialog>
+
+        <!-- 选择源角色通道 -->
+        <el-dialog
+                :close-on-click-modal="true"
+                title="选择角色通道"
+                :visible.sync="dialog.selectSourceRoleChannel.visible"
+                width="400px"
+                :before-close="handleSelectSourceRoleChannelClose"
+                class="dialog-tree">
+            <div style="max-height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                        v-if="dialog.selectSourceRoleChannel.visible"
+                        ref="selectSourceRoleChannelTree"
+                        default-expand-all
+                        :expand-on-click-node="false"
+                        :props="dialog.selectSourceRoleChannel.props"
+                        highlight-current
+                        :data="dialog.selectSourceRoleChannel.data">
+                        <span slot-scope="scope">
+                            {{scope.data.channels?scope.data.roleName:scope.data.name}}
+                        </span>
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+        </el-dialog>
+
+        <!-- 选择合屏 -->
+        <el-dialog
+                :close-on-click-modal="true"
+                title="选择合屏"
+                :visible.sync="dialog.selectCombineVideo.visible"
+                width="400px"
+                :before-close="handleSelectCombineVideoClose"
+                class="dialog-tree">
+            <div style="max-height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                            v-if="dialog.selectCombineVideo.visible"
+                            ref="selectCombineVideoTree"
+                            :props="dialog.selectCombineVideo.props"
+                            highlight-current
+                            :data="dialog.selectCombineVideo.data">
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+        </el-dialog>
+
+        <!-- 选择混音 -->
+        <el-dialog
+                :close-on-click-modal="true"
+                title="选择混音"
+                :visible.sync="dialog.selectCombineAudio.visible"
+                width="400px"
+                :before-close="handleSelectCombineAudioClose"
+                class="dialog-tree">
+            <div style="max-height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                            v-if="dialog.selectCombineAudio.visible"
+                            ref="selectCombineAudioTree"
+                            :props="dialog.selectCombineAudio.props"
+                            highlight-current
+                            :data="dialog.selectCombineAudio.data">
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+        </el-dialog>
+
+        <!-- 选择目的角色 -->
+        <el-dialog
+                :close-on-click-modal="true"
+                title="选择角色"
+                :visible.sync="dialog.selectDestinationRole.visible"
+                width="400px"
+                :before-close="handleSelectDestinationRoleClose"
+                class="dialog-tree">
+            <div style="max-height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                            v-if="dialog.selectDestinationRole.visible"
+                            ref="selectDestinationRoleTree"
+                            :props="dialog.selectDestinationRole.props"
+                            highlight-current
+                            :data="dialog.selectDestinationRole.data">
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+        </el-dialog>
+
+        <!-- 选择目的角色通道 -->
+        <el-dialog
+                :close-on-click-modal="true"
+                title="选择角色通道"
+                :visible.sync="dialog.selectDestinationRoleChannel.visible"
+                width="400px"
+                :before-close="handleSelectDestinationRoleChannelClose"
+                class="dialog-tree">
+            <div style="max-height:400px;">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                            v-if="dialog.selectDestinationRoleChannel.visible"
+                            ref="selectDestinationRoleChannelTree"
+                            default-expand-all
+                            :expand-on-click-node="false"
+                            :props="dialog.selectDestinationRoleChannel.props"
+                            highlight-current
+                            :data="dialog.selectDestinationRoleChannel.data">
+                        <span slot-scope="scope">
+                            {{scope.data.channels?scope.data.roleName:scope.data.name}}
+                        </span>
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

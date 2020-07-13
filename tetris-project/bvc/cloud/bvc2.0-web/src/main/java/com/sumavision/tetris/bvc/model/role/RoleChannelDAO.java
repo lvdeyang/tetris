@@ -1,5 +1,6 @@
 package com.sumavision.tetris.bvc.model.role;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.repository.RepositoryDefinition;
@@ -19,4 +20,14 @@ public interface RoleChannelDAO extends BaseDAO<RoleChannelPO>{
 	 */
 	public List<RoleChannelPO> findByRoleId(Long roleId);
 	
+	/**
+	 * 查询角色特定类型的通道<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月6日 上午10:52:07
+	 * @param Collection<Long> roleIds 角色id列表
+	 * @param Collection<RoleChannelType> types 通道类型列表
+	 * @return List<RoleChannelPO> 通道列表
+	 */
+	public List<RoleChannelPO> findByRoleIdInAndTypeIn(Collection<Long> roleIds, Collection<RoleChannelType> types);
 }

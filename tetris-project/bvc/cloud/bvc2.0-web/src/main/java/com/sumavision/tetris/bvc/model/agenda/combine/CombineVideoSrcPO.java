@@ -26,8 +26,8 @@ public class CombineVideoSrcPO extends AbstractBasePO{
 	/** 源类型 */
 	private CombineVideoSrcType combineVideoSrcType;
 	
-	/** 隶属合屏id */
-	private Long combineVideoId;
+	/** 隶属分屏id */
+	private Long combineVideoPositionId;
 	
 	/** 轮询时进行源排序 */
 	private Integer serial;
@@ -54,13 +54,13 @@ public class CombineVideoSrcPO extends AbstractBasePO{
 		this.combineVideoSrcType = combineVideoSrcType;
 	}
 
-	@Column(name = "COMBINE_VIDEO_ID")
-	public Long getCombineVideoId() {
-		return combineVideoId;
+	@Column(name = "COMBINE_VIDEO_POSITION_ID")
+	public Long getCombineVideoPositionId() {
+		return combineVideoPositionId;
 	}
 
-	public void setCombineVideoId(Long combineVideoId) {
-		this.combineVideoId = combineVideoId;
+	public void setCombineVideoPositionId(Long combineVideoPositionId) {
+		this.combineVideoPositionId = combineVideoPositionId;
 	}
 
 	@Column(name = "SERIAL")

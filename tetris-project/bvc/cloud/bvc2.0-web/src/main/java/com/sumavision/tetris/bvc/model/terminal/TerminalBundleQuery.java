@@ -19,6 +19,19 @@ public class TerminalBundleQuery {
 	private TerminalBundleDAO terminalBundleDao;
 	
 	/**
+	 * 查询终端设备<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月10日 上午9:03:43
+	 * @param Long terminalId 终端id
+	 * @return List<TerminalBundleVO> 设备列表
+	 */
+	public List<TerminalBundleVO> loadAll(Long terminalId) throws Exception{
+		List<TerminalBundlePO> entities = terminalBundleDao.findByTerminalId(terminalId);
+		return TerminalBundleVO.getConverter(TerminalBundleVO.class).convert(entities, TerminalBundleVO.class);
+	}
+	
+	/**
 	 * 分页查询终端下的设备模板<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

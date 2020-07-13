@@ -14,14 +14,14 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年6月4日 下午3:33:13
  */
-@Entity
-@Table(name = "TETRIS_BVC_MODEL_AGENDA_COMBINE_AUDIO")
+@Entity(name = "com.sumavision.tetris.bvc.model.agenda.combine.CombineAudioSrcPO")
+@Table(name = "TETRIS_BVC_MODEL_AGENDA_COMBINE_AUDIO_SRC")
 public class CombineAudioSrcPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 	
 	/** 源id */
-	private Long srcId;
+	private String srcId;
 	
 	/** 源类型 */
 	private CombineAudioSrcType combineAudioSrcType;
@@ -30,11 +30,11 @@ public class CombineAudioSrcPO extends AbstractBasePO{
 	private Long combineAudioId;
 
 	@Column(name = "SRC_ID")
-	public Long getSrcId() {
+	public String getSrcId() {
 		return srcId;
 	}
 
-	public void setSrcId(Long srcId) {
+	public void setSrcId(String srcId) {
 		this.srcId = srcId;
 	}
 

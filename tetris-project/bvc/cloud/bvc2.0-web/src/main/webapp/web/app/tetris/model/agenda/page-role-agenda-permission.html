@@ -1,0 +1,76 @@
+<mi-frame id="page-role-agenda-permission-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">议程角色</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-agenda">{{agendaName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>议程角色</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;添加角色</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;移除角色</el-button>
+
+            <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="名称"
+                                prop="roleName">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="250">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="移除角色" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+        </el-card>
+
+        <!-- 添加屏幕 -->
+        <el-dialog
+            append-to-body
+            :close-on-click-modal="false"
+            title="添加角色"
+            width="400px"
+            :visible.sync="dialog.addRole.visible"
+            id="add-role-select-role"
+            @close="handleAddRoleClose">
+
+            <div style="max-height:400px;">
+                <el-tree
+                        v-if="dialog.addRole.visible"
+                        ref="addRoleTree"
+                        :props="dialog.addRole.props"
+                        node-key="id"
+                        show-checkbox
+                        :data="dialog.addRole.roles">
+                </el-tree>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleAddRoleClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleAddRoleSubmit" :loading="dialog.addRole.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

@@ -594,4 +594,31 @@ public class UserFeignController {
 		List<UserVO> view_users = UserVO.getConverter(UserVO.class).convert(userPOs, UserVO.class);
 		return view_users;
 	}
+	
+	/**
+	 * 根据公司和条件查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午11:05:41
+	 * @param String nickname 用户昵称
+	 * @param String userno 用户号码
+	 * @param int currentPage 当前页
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/find/by/company/id/and/condition")
+	public Object findByCompanyIdAndCondition(
+			String nickname, 
+			String userno, 
+			int currentPage, 
+			int pageSize) throws Exception{
+		
+		UserVO user = userQuery.current();
+		
+		return userQuery.findByCompanyIdAndCondition(Long.valueOf(user.getGroupId()), nickname, userno, currentPage, pageSize);
+	}
+	
 }

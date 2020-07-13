@@ -11,6 +11,8 @@ public class TerminalBundleVO extends AbstractBaseVO<TerminalBundleVO, TerminalB
 	
 	private String type;
 	
+	private String typeName;
+	
 	private Long terminalId;
 	
 	public String getName() {
@@ -40,6 +42,15 @@ public class TerminalBundleVO extends AbstractBaseVO<TerminalBundleVO, TerminalB
 		return this;
 	}
 
+	public String getTypeName() {
+		return typeName;
+	}
+
+	public TerminalBundleVO setTypeName(String typeName) {
+		this.typeName = typeName;
+		return this;
+	}
+
 	public Long getTerminalId() {
 		return terminalId;
 	}
@@ -57,6 +68,7 @@ public class TerminalBundleVO extends AbstractBaseVO<TerminalBundleVO, TerminalB
 			.setName(entity.getName())
 			.setBundleType(entity.getBundleType())
 			.setType(entity.getType().getName())
+			.setTypeName(entity.getType().getName())
 			.setTerminalId(entity.getTerminalId());
 		return this;
 	}

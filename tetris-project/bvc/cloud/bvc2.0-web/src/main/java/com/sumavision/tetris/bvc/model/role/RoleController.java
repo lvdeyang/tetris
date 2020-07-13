@@ -57,6 +57,21 @@ public class RoleController {
 	}
 	
 	/**
+	 * 查询全部内置角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月28日 下午1:57:43
+	 * @return List<RoleVO> 角色列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/all/internal")
+	public Object loadAllInternal(HttpServletRequest request) throws Exception{
+		
+		return roleQuery.loadAllInternal();
+	}
+	
+	/**
 	 * 添加内置角色<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

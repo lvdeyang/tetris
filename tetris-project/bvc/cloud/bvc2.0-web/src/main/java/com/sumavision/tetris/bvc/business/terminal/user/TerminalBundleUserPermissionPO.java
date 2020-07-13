@@ -30,6 +30,9 @@ public class TerminalBundleUserPermissionPO extends AbstractBasePO{
 	/** bundleId */
 	private String bundleId;
 	
+	/** bundle名称 */
+	private String bundleName;
+	
 	/** 用户id */
 	private String userId;
 
@@ -69,6 +72,15 @@ public class TerminalBundleUserPermissionPO extends AbstractBasePO{
 		this.bundleId = bundleId;
 	}
 	
+	@Column(name = "BUNDLE_NAME")
+	public String getBundleName() {
+		return bundleName;
+	}
+
+	public void setBundleName(String bundleName) {
+		this.bundleName = bundleName;
+	}
+
 	@Column(name = "USER_ID")
 	public String getUserId() {
 		return userId;

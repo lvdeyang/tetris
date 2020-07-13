@@ -65,6 +65,24 @@ public class TerminalBundleController {
 	}
 	
 	/**
+	 * 查询终端设备<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月10日 上午9:03:43
+	 * @param Long terminalId 终端id
+	 * @return List<TerminalBundleVO> 设备列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/all")
+	public Object loadAll(
+			Long terminalId,
+			HttpServletRequest request) throws Exception{
+		
+		return terminalBundleQuery.loadAll(terminalId);
+	}
+	
+	/**
 	 * 分页查询终端下的设备模板<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

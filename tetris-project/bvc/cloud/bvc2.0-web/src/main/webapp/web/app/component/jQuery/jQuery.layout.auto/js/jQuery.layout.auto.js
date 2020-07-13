@@ -250,7 +250,7 @@
         //清除数据
         clearData:function(){
             var $cell = $(this);
-            $cell.text('&nbsp;');
+            if(!$cell.is('.custom')) $cell.text('&nbsp;');
             $cell.removeData('business-cache');
         },
 

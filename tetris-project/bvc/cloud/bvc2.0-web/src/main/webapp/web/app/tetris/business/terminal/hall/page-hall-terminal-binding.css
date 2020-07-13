@@ -1,0 +1,3 @@
+.select-bundle .el-dialog__body{padding-top:0; padding-bottom:20px;}
+.dialog-tree .el-dialog__body{padding-top:0; padding-bottom:20px;}
+.dialog-tree .el-scrollbar__wrap:not(.el-select-dropdown__wrap){overflow-x:scroll!important;}

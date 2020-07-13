@@ -65,4 +65,16 @@ public class RoleQuery {
 												   .getMap();
 	}
 	
+	/**
+	 * 查询全部内置角色<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月28日 下午1:57:43
+	 * @return List<RoleVO> 角色列表
+	 */
+	public List<RoleVO> loadAllInternal() throws Exception{
+		List<RolePO> entities = roleDao.findByBusinessIdIsNullAndUserIdIsNull();
+		return RoleVO.getConverter(RoleVO.class).convert(entities, RoleVO.class);
+	}
+	
 }

@@ -6,7 +6,8 @@ public enum AgendaDestinationType {
 	
 	ROLE("业务角色"),
 	ROLE_CHANNEL("业务角色"),
-	ROLE_COLLECTION("业务角色通道集合"),
+	//ROLE_COLLECTION("业务角色通道集合"),
+	BUNDLE("设备"),
 	CHANNEL("设备通道");
 	
 	private String name;

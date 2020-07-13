@@ -18,6 +18,9 @@ public class AgendaLayoutTemplatePO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 
+	/** 角色id */
+	private Long roleId;
+	
 	/** 终端id */
 	private Long terminalId;
 	
@@ -26,6 +29,15 @@ public class AgendaLayoutTemplatePO extends AbstractBasePO{
 	
 	/** 议程id */
 	private Long agendaId;
+
+	@Column(name = "ROLE_ID")
+	public Long getRoleId() {
+		return roleId;
+	}
+
+	public void setRoleId(Long roleId) {
+		this.roleId = roleId;
+	}
 
 	@Column(name = "TERMINAL_ID")
 	public Long getTerminalId() {

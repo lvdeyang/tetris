@@ -334,6 +334,28 @@ public class UserQuery {
 		userFeign.deleteLdapUser(JSON.toJSONString(userIds));
 	}
 	
+	/**
+	 * 根据公司和条件查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午11:05:41
+	 * @param String nickname 用户昵称
+	 * @param String userno 用户号码
+	 * @param int currentPage 当前页
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	public Map<String, Object> findByCompanyIdAndCondition(
+			Long companyId, 
+			String nickname, 
+			String userno, 
+			int currentPage, 
+			int pageSize) throws Exception{
+		
+		return (Map<String, Object>) JsonBodyResponseParser.parseObject(userFeign.findByCompanyIdAndCondition(nickname, userno, currentPage, pageSize), Map.class);
+	}
+	
 	/***************************************************
 	 ***************************************************
 	 ***************************************************/

@@ -23,14 +23,14 @@ public class AgendaForwardPO extends AbstractBasePO{
 	/** 转发类型 */
 	private AgendaForwardType type;
 	
-	/** 源id */
-	private Long sourceId;
+	/** 源id bundleId-channelId*/
+	private String sourceId;
 	
 	/** 源类型 */
 	private AgendaSourceType sourceType;
 	
 	/** 目的id */
-	private Long destinationId;
+	private String destinationId;
 	
 	/** 目的类型 */
 	private AgendaDestinationType destinationType;
@@ -48,11 +48,11 @@ public class AgendaForwardPO extends AbstractBasePO{
 	}
 
 	@Column(name = "SOURCE_ID")
-	public Long getSourceId() {
+	public String getSourceId() {
 		return sourceId;
 	}
 
-	public void setSourceId(Long sourceId) {
+	public void setSourceId(String sourceId) {
 		this.sourceId = sourceId;
 	}
 
@@ -67,11 +67,11 @@ public class AgendaForwardPO extends AbstractBasePO{
 	}
 
 	@Column(name = "DESTINATION_ID")
-	public Long getDestinationId() {
+	public String getDestinationId() {
 		return destinationId;
 	}
 
-	public void setDestinationId(Long destinationId) {
+	public void setDestinationId(String destinationId) {
 		this.destinationId = destinationId;
 	}
 

@@ -12,6 +12,8 @@ public class RoleChannelVO extends AbstractBaseVO<RoleChannelVO, RoleChannelPO>{
 	private String typeName;
 	
 	private Long roleId;
+	
+	private String roleName;
 
 	public String getName() {
 		return name;
@@ -46,6 +48,15 @@ public class RoleChannelVO extends AbstractBaseVO<RoleChannelVO, RoleChannelPO>{
 
 	public RoleChannelVO setRoleId(Long roleId) {
 		this.roleId = roleId;
+		return this;
+	}
+
+	public String getRoleName() {
+		return roleName;
+	}
+
+	public RoleChannelVO setRoleName(String roleName) {
+		this.roleName = roleName;
 		return this;
 	}
 

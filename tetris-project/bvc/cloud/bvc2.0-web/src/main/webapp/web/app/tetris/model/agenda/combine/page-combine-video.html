@@ -1,0 +1,223 @@
+<mi-frame id="page-combine-video-wrapper" :menus="menus" :user="user" :groups="groups">
+
+    <template slot="title">议程合屏</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item><a href="#/page-agenda">{{agendaName}}</a></el-breadcrumb-item>
+        <el-breadcrumb-item>议程合屏</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+
+            <el-button type="primary" size="small" @click="handleCreate"><span class="icon-plus" style="position:relative; right:1px;"></span>&nbsp;新建合屏</el-button>
+            <el-button type="warning" size="small" @click="handleDelete"><span class="icon-trash" style="position:relative; right:1px;"></span>&nbsp;删除合屏</el-button>
+
+            <div style="position:absolute; top:86px; bottom:0; left:0; right:0; padding:0 20px;">
+                <el-scrollbar style="height:100%;">
+                    <el-table
+                            :data="table.rows"
+                            :row-key="rowKey"
+                            style="width:100%">
+                        <el-table-column
+                                type="selection"
+                                width="55">
+                        </el-table-column>
+                        <el-table-column
+                                label="名称"
+                                prop="name">
+                        </el-table-column>
+                        <el-table-column
+                                label="操作"
+                                width="350">
+                            <template slot-scope="scope">
+                                <el-tooltip class="item" effect="dark" content="修改名称" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="编辑分屏" placement="bottom-end">
+                                    <el-button type="text" icon="icon-th" style="font-size:20px; padding:0; margin-left:20px;" @click="handleEditPosition(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="删除合屏" placement="bottom-end">
+                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
+                                </el-tooltip>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-scrollbar>
+            </div>
+
+        </el-card>
+
+        <!-- 新建合屏对话框 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="新建合屏"
+                :visible.sync="dialog.createCombineVideo.visible"
+                width="500px"
+                :before-close="handleCreateCombineVideoClose">
+            <el-input v-model="dialog.createCombineVideo.name"></el-input>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleCreateCombineVideoClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleCreateCombineVideoSubmit" :loading="dialog.createCombineVideo.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 修改合屏名称 -->
+        <el-dialog
+                :close-on-click-modal="false"
+                title="修改名称"
+                :visible.sync="dialog.editCombineVideo.visible"
+                width="500px"
+                :before-close="handleEditCombineVideoClose">
+            <el-input v-model="dialog.editCombineVideo.name"></el-input>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditCombineVideoClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditCombineVideoSubmit" :loading="dialog.editCombineVideo.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+        <!-- 编辑分屏 -->
+        <el-dialog
+                ref="editPosition"
+                :close-on-click-modal="false"
+                title="编辑分屏"
+                :visible.sync="dialog.editPosition.visible"
+                width="940px"
+                :before-close="handleEditPositionClose"
+                id="edit-position">
+            <el-dialog
+                append-to-body
+                ref="editSrc"
+                :close-on-click-modal="false"
+                title="編輯源"
+                :visible.sync="dialog.editSrc.visible"
+                :width="dialog.editSrc.pictureType==='POLLING'?'1000px':'490px'"
+                id="edit-src"
+                :before-close="handleEditSrcClose">
+
+                <div style="width:100%; height:400px; position:relative;">
+                    <div style="width:450px; height:100%;">
+                        <div style="width:100%; height:100%; position:relative;">
+                            <el-tabs v-model="dialog.editSrc.currentTab" type="card">
+                                <!--<el-tab-pane label="设备" name="device">
+                                    <div style="position:absolute; left:0; right:0; bottom:0; top:45px;">
+                                        设备
+                                    </div>
+                                </el-tab-pane>-->
+                                <el-tab-pane label="角色" name="role">
+                                    <div style="position:absolute; left:0; right:0; bottom:0; top:45px;">
+                                        <div style="width:100%; height:100%;">
+                                            <el-scrollbar style="height:100%;">
+                                                <el-tree v-if="dialog.editPosition.visible && dialog.editSrc.pictureType==='STATIC'"
+                                                         :data="dialog.editSrc.oneToOneRoles"
+                                                         node-key="uuid"
+                                                         default-expand-all
+                                                         id="tree1"
+                                                         :props="dialog.editSrc.props">
+                                                    <span slot-scope="scope">
+                                                        <span v-if="scope.data.channels">{{scope.data.roleName}}</span>
+                                                        <el-radio v-else v-model="dialog.editSrc.radio" :label="scope.data.uuid" @change="handleEditSrcCurrentChange">{{scope.data.name}}</el-radio>
+                                                    </span>
+                                                </el-tree>
+                                                <el-tree v-if="dialog.editPosition.visible && dialog.editSrc.pictureType==='POLLING'"
+                                                         :data="dialog.editSrc.totalRoles"
+                                                         node-key="uuid"
+                                                         default-expand-all
+                                                         id="tree2"
+                                                         :props="dialog.editSrc.props">
+                                                    <span slot-scope="scope">
+                                                        <span v-if="scope.data.channels">{{scope.data.roleName}}</span>
+                                                        <el-checkbox v-else v-model="scope.data.checked" @change="handleEditSrcChange(scope.data)">{{scope.data.name}}</el-checkbox>
+                                                    </span>
+                                                </el-tree>
+                                            </el-scrollbar>
+                                        </div>
+                                    </div>
+                                </el-tab-pane>
+                            </el-tabs>
+                            <el-switch
+                                    style="position:absolute; right:20px; top:0;"
+                                    v-model="dialog.editSrc.switch"
+                                    active-color="#13ce66"
+                                    inactive-color="#ff4949"
+                                    active-text="轮询"
+                                    @change="switchChange">
+                            </el-switch>
+                        </div>
+                    </div>
+                    <div v-if="dialog.editSrc.pictureType==='POLLING'" style="position:absolute; left:450px; top:0; right:0; bottom:0; border-left:1px solid #e4e7ed; box-sizing:border-box; padding:0 10px;">
+                        <div style="width:100%; height:100%; position:relative;">
+                            <div style="width:150px;">
+                                <el-input size="small" v-model="dialog.editSrc.pollingTime">
+                                    <span slot="append">秒</span>
+                                </el-input>
+                            </div>
+                            <div style="position:absolute; left:0; top:42px; right:0; bottom:0;">
+                                <el-scrollbar style="height:100%;">
+                                    <el-table
+                                        v-if="dialog.editPosition.visible && dialog.editSrc.pictureType==='POLLING'"
+                                        :data="dialog.editSrc.src"
+                                        style="width: 100%">
+                                        <el-table-column
+                                                prop="roleName"
+                                                label="角色">
+                                        </el-table-column>
+                                        <el-table-column
+                                                prop="name"
+                                                label="通道">
+                                        </el-table-column>
+                                        <el-table-column
+                                                label="操作">
+                                            <template slot-scope="scope">
+                                                <el-tooltip class="item" effect="dark" content="往前排" placement="bottom-end">
+                                                    <el-button v-if="scope.row!==dialog.editSrc.src[0]" type="text" icon="el-icon-sort-up" style="font-size:20px; padding:0; position:relative; right:7px;" @click="handleUpperSelectedSrc(scope)"></el-button>
+                                                    <el-button v-else type="text" icon="el-icon-sort-up" style="font-size:20px; padding:0; position:relative; right:7px;" disabled></el-button>
+                                                </el-tooltip>
+                                                <el-tooltip class="item" effect="dark" content="往后排" placement="bottom-end">
+                                                    <el-button v-if="scope.row!==dialog.editSrc.src[dialog.editSrc.src.length-1]" type="text" icon="el-icon-sort-down" style="font-size:20px; padding:0; margin-left:20px; position:relative; left:7px;" @click="handleDownSelectedSrc(scope)"></el-button>
+                                                    <el-button v-else type="text" icon="el-icon-sort-down" style="font-size:20px; padding:0; margin-left:20px; position:relative; left:7px;" disabled></el-button>
+                                                </el-tooltip>
+                                                <el-tooltip class="item" effect="dark" content="删除" placement="bottom-end">
+                                                    <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRemoveSelectedSrc(scope)"></el-button>
+                                                </el-tooltip>
+                                            </template>
+                                        </el-table-column>
+                                    </el-table>
+                                </el-scrollbar>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <span slot="footer" class="dialog-footer">
+                    <el-button size="medium" @click="handleEditSrcClose">取消</el-button>
+                    <el-button size="medium" type="primary" @click="handleEditSrcSubmit" :loading="dialog.editSrc.loading">确定</el-button>
+                </span>
+            </el-dialog>
+            <div style="margin-bottom:10px; text-align:center;">
+                <el-select v-model="dialog.editPosition.column" style="width:100px;" @change="handleRefreshPosition([])">
+                    <el-option :key="1" :label="1" :value="1"></el-option>
+                    <el-option :key="2" :label="2" :value="2"></el-option>
+                    <el-option :key="3" :label="3" :value="3"></el-option>
+                    <el-option :key="4" :label="4" :value="4"></el-option>
+                </el-select>
+                x
+                <el-select v-model="dialog.editPosition.row" style="width:100px;" @change="handleRefreshPosition([])">
+                    <el-option :key="1" :label="1" :value="1"></el-option>
+                    <el-option :key="2" :label="2" :value="2"></el-option>
+                    <el-option :key="3" :label="3" :value="3"></el-option>
+                    <el-option :key="4" :label="4" :value="4"></el-option>
+                </el-select>
+            </div>
+            <div class="screen-wrapper" style="width:100%; height:500px;"></div>
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleEditPositionClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleEditPositionSubmit" :loading="dialog.editPosition.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>

@@ -21,7 +21,13 @@ public class TerminalBundleConferenceHallPermissionPO extends AbstractBasePO{
 	
 	/** 绑定真实设备id */
 	private String bundleId;
+	
+	/** 设备类型 */
+	private String bundleType;
 
+	/** 设备名称 */
+	private String bundleName;
+	
 	@Column(name = "CONFERENCE_HALL_ID")
 	public Long getConferenceHallId() {
 		return conferenceHallId;
@@ -47,6 +53,24 @@ public class TerminalBundleConferenceHallPermissionPO extends AbstractBasePO{
 
 	public void setBundleId(String bundleId) {
 		this.bundleId = bundleId;
+	}
+
+	@Column(name = "BUNDLE_TYPE")
+	public String getBundleType() {
+		return bundleType;
+	}
+
+	public void setBundleType(String bundleType) {
+		this.bundleType = bundleType;
+	}
+
+	@Column(name = "BUNDLE_NAME")
+	public String getBundleName() {
+		return bundleName;
+	}
+
+	public void setBundleName(String bundleName) {
+		this.bundleName = bundleName;
 	}
 	
 }

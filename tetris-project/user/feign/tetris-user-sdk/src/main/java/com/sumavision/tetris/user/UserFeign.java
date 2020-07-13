@@ -333,4 +333,22 @@ public interface UserFeign {
 	@RequestMapping(value = "/user/feign/add/ldap/user")
 	public JSONObject addLdapUser(@RequestParam("users") String users);
 	
+	/**
+	 * 根据公司和条件查询用户<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年4月13日 上午11:05:41
+	 * @param String nickname 用户昵称
+	 * @param String userno 用户号码
+	 * @param int currentPage 当前页
+	 * @param int pageSize 每页数据量
+	 * @return int total 用户总量
+	 * @return List<UserVO> rows 用户列表
+	 */
+	@RequestMapping(value = "/user/feign/find/by/company/id/and/condition")
+	public JSONObject findByCompanyIdAndCondition(
+			@RequestParam("nickname") String nickname, 
+			@RequestParam("userno") String userno, 
+			@RequestParam("currentPage") int currentPage, 
+			@RequestParam("pageSize") int pageSize);
 }

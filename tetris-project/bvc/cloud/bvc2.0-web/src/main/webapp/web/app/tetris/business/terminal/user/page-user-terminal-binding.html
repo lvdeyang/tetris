@@ -1,0 +1,152 @@
+<mi-frame id="page-user-terminal-binding-wrapper" :menus="menus" :user="userInfo" :groups="groups">
+
+    <template slot="title">用户绑定设备</template>
+
+    <template slot="links">
+        <el-breadcrumb-item><a href="#/page-home">首页</a></el-breadcrumb-item>
+        <el-breadcrumb-item>用户绑定设备</el-breadcrumb-item>
+    </template>
+
+    <template>
+
+        <el-card class="box-card" shadow="hover" style="width:100%; height:100%;">
+            <div style="position:absolute; left:0; top:0; right:0; bottom:0;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="width:25%; height:100%; float:left; box-sizing:border-box; border-right:1px solid #dcdfe6; position:relative;">
+                        <div style="width:42%; float:left; padding:10px 5px 10px 10px; box-sizing:border-box;">
+                            <el-input v-model="user.filter.nickname" size="small" placeholder="昵称"></el-input>
+                        </div>
+                        <div style="width:42%; float:left; padding:10px 5px 10px 5px; box-sizing:border-box;">
+                            <el-input v-model="user.filter.userno" size="small" placeholder="号码"></el-input>
+                        </div>
+                        <div style="width:16%; float:left; box-sizing:border-box; padding:10px 10px 10px 5px;">
+                            <el-button size="small" type="primary" icon="el-icon-search" circle @click="loadUsers(user.page.currentPage)"></el-button>
+                        </div>
+
+                        <div style="position:absolute; left:0; top:52px; right:0; bottom:50px; padding:0 10px;">
+                            <el-scrollbar style="height:100%;">
+                                <el-tree
+                                    :props="user.props"
+                                    highlight-current
+                                    :data="user.data"
+                                    @current-change="handleUserCurrentNodeChange">
+                                </el-tree>
+                            </el-scrollbar>
+                        </div>
+
+                        <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px; padding-top:9px;">
+                            <el-pagination
+                                    style="float:right;"
+                                    background
+                                    @current-change="handleUserCurrentChange"
+                                    :current-page="user.page.currentPage"
+                                    :page-size="user.page.pageSize"
+                                    layout="total, prev, next"
+                                    :total="user.page.total">
+                            </el-pagination>
+                        </div>
+                    </div>
+                    <div v-if="user.current" style="width:25%; height:100%; float:left; box-sizing:border-box; border-right:1px solid #dcdfe6; padding:10px;">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                    ref="terminalTree"
+                                    node-key="uuid"
+                                    :props="terminal.props"
+                                    highlight-current
+                                    :data="terminal.data"
+                                    @current-change="handleTerminalCurrentNodeChange">
+                            </el-tree>
+                        </el-scrollbar>
+                    </div>
+                    <div v-if="terminal.current" style="width:25%; height:100%; float:left; box-sizing:border-box; border-right:1px solid #dcdfe6; padding:10px;">
+                        <el-scrollbar style="height:100%;">
+                            <el-tree
+                                    ref="terminalBundleTree"
+                                    node-key="uuid"
+                                    :props="terminalBundle.props"
+                                    highlight-current
+                                    :data="terminalBundle.data"
+                                    @current-change="handleTerminalBundleCurrentNodeChange">
+                                <span slot-scope="scope" style="font-size:14px;">{{scope.data.name}}-{{scope.data.bundleType}}-{{scope.data.typeName}}</span>
+                            </el-tree>
+                        </el-scrollbar>
+                    </div>
+                    <div v-if="terminalBundle.current" style="width:25%; height:100%; float:left; box-sizing:border-box; padding:10px; position:relative;">
+                        <el-button type="primary" size="small" @click="handleSelectBundles">绑定设备</el-button>
+                        <el-form label-width="80px">
+                            <el-form-item label="设备名称:">
+                                {{bundle.bundleName}}
+                            </el-form-item>
+                            <el-form-item label="设备id:">
+                                {{bundle.bundleId}}
+                            </el-form-item>
+                            <el-form-item label="设备类型:">
+                                {{bundle.bundleType}}
+                            </el-form-item>
+                            <el-form-item>
+                                <el-button type="danger" size="small" v-if="bundle.id" @click="clearBundle">清除</el-button>
+                            </el-form-item>
+                        </el-form>
+                    </div>
+                </div>
+            </div>
+        </el-card>
+
+        <el-dialog
+            title="选择设备"
+            :visible.sync="dialog.selectBundle.visible"
+            :before-close="handleSelectBundleClose"
+            width="800px;"
+            class="select-bundle">
+            <div style="width:100%; height:500px; position:relative;">
+                <div style="width:200px; float:left;">
+                    <el-input size="small" placeholder v-model="dialog.selectBundle.filter.bundleName"></el-input>
+                </div>
+                <div style="float:left; margin-left:10px;">
+                    <el-button size="small" type="primary" circle icon="el-icon-search" @click="loadBundles(dialog.selectBundle.page.currentPage)"></el-button>
+                </div>
+                <div style="position:absolute; left:0; top:42px; right:0; bottom:50px; padding:0 10px;">
+                    <el-scrollbar style="height:100%;">
+                        <el-table
+                            @current-change="currentBundleChange"
+                            ref="selectBundleTable"
+                            :data="dialog.selectBundle.data"
+                            highlight-current-row
+                            style="width: 100%">
+                            <el-table-column
+                                prop="bundleId"
+                                label="设备id">
+                            </el-table-column>
+                            <el-table-column
+                                prop="bundleName"
+                                label="设备名称">
+                            </el-table-column>
+                            <el-table-column
+                                prop="bundleType"
+                                label="设备类型">
+                            </el-table-column>
+                        </el-table>
+                    </el-scrollbar>
+                </div>
+                <div style="height:50px; width:100%; position:absolute; left:0; bottom:0; box-sizing:border-box; padding-right:20px; padding-top:9px;">
+                    <el-pagination
+                            style="float:right;"
+                            background
+                            @current-change="handleBundleCurrentChange"
+                            :current-page="dialog.selectBundle.page.currentPage"
+                            :page-size="dialog.selectBundle.page.pageSize"
+                            layout="total, prev, pager, next"
+                            :total="dialog.selectBundle.page.total">
+                    </el-pagination>
+                </div>
+            </div>
+
+            <span slot="footer" class="dialog-footer">
+                <el-button size="medium" @click="handleSelectBundleClose">取消</el-button>
+                <el-button size="medium" type="primary" @click="handleSelectBundleSubmit" :loading="dialog.selectBundle.loading">确定</el-button>
+            </span>
+        </el-dialog>
+
+    </template>
+
+</mi-frame>
