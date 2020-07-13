@@ -184,6 +184,7 @@ define([
                     self.dialog.editTag.name = data.name;
                     self.dialog.editTag.code = data.code;
                     self.dialog.editTag.remark = data.remark;
+                    self.dialog.editTag.thumbnail= data.thumbnail;
                     self.dialog.editTag.visible = true;
                 },
                 treeNodeAppend:function(parentNode, parent){

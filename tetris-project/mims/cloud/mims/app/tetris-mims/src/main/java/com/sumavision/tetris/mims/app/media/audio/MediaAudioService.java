@@ -512,6 +512,10 @@ public class MediaAudioService {
 		audio.setSize(audioFile.length());
 		audio.setMimetype(new MimetypesFileTypeMap().getContentType(new File(audioPath)));
 		audio.setUploadStatus(UploadStatus.COMPLETE);
+		MultimediaInfo multimediaInfo = new Encoder().getInfo(audioFile);
+		audio.setDuration(multimediaInfo.getDuration());
+		
+		
 		if(audio.getReviewStatus() != null){
 			//开启审核流程--这里会保存
 			startUploadProcess(audio);

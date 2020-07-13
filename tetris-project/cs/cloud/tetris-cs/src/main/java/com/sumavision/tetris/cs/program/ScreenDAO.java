@@ -10,7 +10,7 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = ScreenPO.class, idClass = Long.class)
 public interface ScreenDAO extends BaseDAO<ScreenPO>{
 
-	@Query(value = "SELECT * FROM TETRIS_CS_SCREEN WHERE PROGRAM_ID LIKE ?1", nativeQuery = true)
+	@Query(value = "SELECT * FROM TETRIS_CS_SCREEN WHERE PROGRAM_ID LIKE ?1 ORDER BY SCREEN_INDEX", nativeQuery = true)
 	public List<ScreenPO> findByProgramId(Long reg1);
 	
 	@Query(value = "SELECT * FROM TETRIS_CS_SCREEN WHERE PROGRAM_ID LIKE ?1 AND MIMS_UUID LIKE ?2", nativeQuery = true)
