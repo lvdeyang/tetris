@@ -35,7 +35,6 @@ import com.sumavision.tetris.business.director.vo.TextVO;
 import com.sumavision.tetris.business.director.vo.TranscodeAudioVO;
 import com.sumavision.tetris.business.director.vo.TranscodeVO;
 import com.sumavision.tetris.business.director.vo.TranscodeVideoVO;
-import com.sumavision.tetris.business.yjgb.vo.OutParamVO;
 import com.sumavision.tetris.capacity.bo.input.BackUpEsAndRawBO;
 import com.sumavision.tetris.capacity.bo.input.BackUpProgramBO;
 import com.sumavision.tetris.capacity.bo.input.InputBO;
@@ -51,11 +50,9 @@ import com.sumavision.tetris.capacity.bo.output.OutputBO;
 import com.sumavision.tetris.capacity.bo.output.OutputMediaBO;
 import com.sumavision.tetris.capacity.bo.output.OutputProgramBO;
 import com.sumavision.tetris.capacity.bo.request.AllRequest;
-import com.sumavision.tetris.capacity.bo.request.CreateOutputsRequest;
 import com.sumavision.tetris.capacity.bo.request.DeleteOutputsRequest;
 import com.sumavision.tetris.capacity.bo.request.IdRequest;
 import com.sumavision.tetris.capacity.bo.response.AllResponse;
-import com.sumavision.tetris.capacity.bo.response.CreateOutputsResponse;
 import com.sumavision.tetris.capacity.bo.task.AacBO;
 import com.sumavision.tetris.capacity.bo.task.DynamicPictureOsdBO;
 import com.sumavision.tetris.capacity.bo.task.EncodeBO;
@@ -372,7 +369,7 @@ public class DirectorTaskService {
 					delete.getOutput_array().add(idRequest);
 				}
 
-				capacityService.deleteOutputsAddMsgId(delete, capacityProps.getIp());
+				capacityService.deleteOutputsWithMsgId(delete, capacityProps.getIp());
 				
 				output.setUpdateTime(new Date());
 				output.setOutput(JSON.toJSONString(outputs));

@@ -13,7 +13,7 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>日期：</b>2020年6月4日 下午3:33:45
  */
 @Entity
-@Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_USER_BUNDLE_USER_PERMISSION")
+@Table(name = "TETRIS_BVC_BUSINESS_TERMINAL_BUNDLE_USER_PERMISSION")
 public class TerminalBundleUserPermissionPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;

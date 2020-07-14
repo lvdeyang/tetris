@@ -118,11 +118,20 @@ define([
                     }, null, ajax.TOTAL_CATCH_CODE);
                 },
                 handleEditBundle:function(scope){
-                    var self = this;
                     var row = scope.row;
-                    self.editTerminal.id = row.id;
-                    self.editTerminal.name = row.name;
-                    self.editTerminal.visible = true;
+                    window.location.hash = '#/page-terminal-bundle/'+row.id + '/' + row.name;
+                },
+                handleEditChannel:function(scope){
+                    var row = scope.row;
+                    window.location.hash = '#/page-terminal-channel/'+row.id + '/' + row.name;
+                },
+                handleEditScreen:function(scope){
+                    var row = scope.row;
+                    window.location.hash = '#/page-terminal-screen/'+row.id + '/' + row.name;
+                },
+                handleEditLayout:function(scope){
+                    var row = scope.row;
+                    window.location.hash = '#/page-terminal-layout/'+row.id + '/' + row.name;
                 },
                 handleRowDelete:function(scope){
                     var self = this;

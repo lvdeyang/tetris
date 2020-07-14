@@ -2,6 +2,8 @@ package com.sumavision.tetris.bvc.model.agenda.combine;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Table;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -25,6 +27,9 @@ public class CombineVideoPO extends AbstractBasePO{
 	
 	/** 隶属业务id */
 	private Long businessId;
+	
+	/** 业务类型 */
+	private CombineBusinessType businessType;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -51,6 +56,16 @@ public class CombineVideoPO extends AbstractBasePO{
 
 	public void setBusinessId(Long businessId) {
 		this.businessId = businessId;
+	}
+
+	@Column(name = "BUSINESS_TYPE")
+	@Enumerated(value = EnumType.STRING)
+	public CombineBusinessType getBusinessType() {
+		return businessType;
+	}
+
+	public void setBusinessType(CombineBusinessType businessType) {
+		this.businessType = businessType;
 	}
 	
 }

@@ -1,5 +1,7 @@
 package com.sumavision.tetris.capacity.server;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -8,7 +10,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.config.feign.FeignConfiguration;
 
 @FeignClient(name = "tetris-capacity", configuration = FeignConfiguration.class)
-public interface CapacityFeign {
+public interface CapacityFeign{
 
 	/**
 	 * 添加收录<br/>
@@ -40,7 +42,18 @@ public interface CapacityFeign {
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/add")
 	public JSONObject addTranscode(@RequestParam("transcodeInfo") String transcodeInfo) throws Exception;
-	
+
+
+	/**
+	 * 修改流转码<br/>
+	 * <b>作者:</b>yzx<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月19日 下午16:15:20
+	 * @param String taskInfo 流转码信息
+	 */
+	@RequestMapping(value = "/capacity/transcode/feign/modify")
+	public JSONObject modifyTranscode(@RequestParam("taskInfo") String taskInfo) throws Exception;
+
 	/**
 	 * 删除流转码<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -187,7 +200,7 @@ public interface CapacityFeign {
 	 */
 	@RequestMapping(value = "/director/task/feign/add")
 	public JSONObject addDirector(@RequestParam("tasks") String tasks) throws Exception;
-	
+
 	/**
 	 * 删除导播任务<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -316,4 +329,17 @@ public interface CapacityFeign {
 	 */
 	@RequestMapping(value = "/capacity/transcode/feign/remove/all")
 	public JSONObject removeAll(@RequestParam("ip") String ip) throws Exception;
+	
+	@RequestMapping(value = "/capacity/package/feign/add/task")
+	public JSONObject packageAddTask(
+			@RequestParam("deviceIp") String deviceIp,
+			@RequestParam("port") String port,
+			@RequestParam("dstIp") String dstIp,
+			@RequestParam("dstPort") String dstPort) throws Exception;
+	
+	@RequestMapping(value = "/capacity/package/feign/delete/task")
+	public JSONObject packageDeleteTask(@RequestParam("taskId") String taskId) throws Exception;
+
+
+
 }

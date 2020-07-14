@@ -261,7 +261,7 @@ public class ResponseService {
 				delete.getOutput_array().add(request);
 			}
 			
-			capacityService.deleteOutputsAddMsgId(delete, capacityIp);
+			capacityService.deleteOutputsWithMsgId(delete, capacityIp);
 		}
 
 	}

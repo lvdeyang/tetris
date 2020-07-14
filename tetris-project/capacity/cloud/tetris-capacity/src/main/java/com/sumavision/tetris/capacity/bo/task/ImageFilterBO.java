@@ -12,7 +12,7 @@ public class ImageFilterBO {
 	
 	private Integer nv_card_idx;
 	
-	private String denosie;
+	private String denoise;
 	
 	private String sharpen;
 
@@ -34,12 +34,12 @@ public class ImageFilterBO {
 		return this;
 	}
 
-	public String getDenosie() {
-		return denosie;
+	public String getDenoise() {
+		return denoise;
 	}
 
-	public ImageFilterBO setDenosie(String denosie) {
-		this.denosie = denosie;
+	public ImageFilterBO setDenoise(String denoise) {
+		this.denoise = denoise;
 		return this;
 	}
 

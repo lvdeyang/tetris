@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+
 import com.alibaba.fastjson.JSONObject;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -15,6 +17,7 @@ import com.sumavision.tetris.mims.app.media.StoreType;
 import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorDAO;
 import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorPO;
 import com.sumavision.tetris.mims.app.media.editor.MediaFileEditorVO;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.converter.AbstractBaseVO;
 
@@ -365,6 +368,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 	@Override
 	public MediaAudioVO set(MediaAudioPO entity) throws Exception {
 		ServerProps serverProps = SpringContext.getBean(ServerProps.class);
+        MimsServerPropsQuery serverPropsQuery = SpringContext.getBean(MimsServerPropsQuery.class);
 		MediaFileEditorDAO mediaFileEditorDAO = SpringContext.getBean(MediaFileEditorDAO.class);
 		MediaFileEditorPO mediaEditorPO = mediaFileEditorDAO.findByMediaIdAndMediaType(entity.getId(), FolderType.COMPANY_AUDIO);
 		this.setId(entity.getId())
@@ -389,7 +393,7 @@ public class MediaAudioVO extends AbstractBaseVO<MediaAudioVO, MediaAudioPO>{
 			.setDownloadCount(entity.getDownloadCount())
 			.setProgress(0)
 			.setEncryption(entity.getEncryption() != null && entity.getEncryption() ? true : false)
-			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverProps.getIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
+			.setPreviewUrl((entity.getStoreType() == StoreType.REMOTE) ? entity.getPreviewUrl() : new StringBufferWrapper().append("http://").append(serverPropsQuery.queryProps().getFtpIp()).append(":").append(serverProps.getPort()).append("/").append(entity.getPreviewUrl()).toString())
 			.setReviewStatus(entity.getReviewStatus()==null?"":entity.getReviewStatus().getName())
 			.setProcessInstanceId(entity.getProcessInstanceId())
 			.setAddition(entity.getAddition())

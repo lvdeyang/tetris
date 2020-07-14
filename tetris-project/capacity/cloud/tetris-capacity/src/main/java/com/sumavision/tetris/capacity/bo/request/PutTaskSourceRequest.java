@@ -13,6 +13,8 @@ import com.sumavision.tetris.capacity.bo.task.VideoMixSourceBO;
 public class PutTaskSourceRequest {
 
 	private String msg_id;
+
+	private String task_id;
 	
 	private TaskSourceBO es_source;
 	
@@ -77,5 +79,12 @@ public class PutTaskSourceRequest {
 		this.audio_mix_source = audio_mix_source;
 		return this;
 	}
-	
+
+	public String getTask_id() {
+		return task_id;
+	}
+
+	public void setTask_id(String task_id) {
+		this.task_id = task_id;
+	}
 }

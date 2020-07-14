@@ -30,13 +30,22 @@
                         </el-table-column>
                         <el-table-column
                                 label="操作"
-                                width="250">
+                                width="350">
                             <template slot-scope="scope">
                                 <el-tooltip class="item" effect="dark" content="修改名称" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-edit" style="font-size:20px; padding:0;" @click="handleRowEdit(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="编辑设备" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-tickets" style="font-size:20px; padding:0; margin-left:20px;" @click="handleEditBundle(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="编辑通道" placement="bottom-end">
+                                    <el-button type="text" icon="icon-random" style="font-size:20px; padding:0; margin-left:20px;" @click="handleEditChannel(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="编辑屏幕" placement="bottom-end">
+                                    <el-button type="text" icon="icon-desktop" style="font-size:18px; padding:0; margin-left:20px;" @click="handleEditScreen(scope)"></el-button>
+                                </el-tooltip>
+                                <el-tooltip class="item" effect="dark" content="编辑布局" placement="bottom-end">
+                                    <el-button type="text" icon="icon-th" style="font-size:18px; padding:0; margin-left:20px;" @click="handleEditLayout(scope)"></el-button>
                                 </el-tooltip>
                                 <el-tooltip class="item" effect="dark" content="删除终端" placement="bottom-end">
                                     <el-button type="text" icon="el-icon-delete" style="font-size:20px; padding:0; margin-left:20px;" @click="handleRowDelete(scope)"></el-button>
@@ -65,6 +74,7 @@
 
         <!-- 新建终端对话框 -->
         <el-dialog
+                :close-on-click-modal="false"
                 title="新建终端"
                 :visible.sync="dialog.createTerminal.visible"
                 width="500px"
@@ -80,6 +90,7 @@
 
         <!-- 修改终端对话框 -->
         <el-dialog
+                :close-on-click-modal="false"
                 title="修改终端"
                 :visible.sync="dialog.editTerminal.visible"
                 width="500px"

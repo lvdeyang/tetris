@@ -1,0 +1,4 @@
+#add-screen .el-dialog{margin-top:50px!important;}
+#add-screen .el-dialog__body{padding-top:0; padding-bottom:0;}
+#add-screen-select-channel .el-dialog__body{padding-top:0; padding-bottom:20px;}
+#edit-channel-select-channel .el-dialog__body{padding-top:0; padding-bottom:20px;}

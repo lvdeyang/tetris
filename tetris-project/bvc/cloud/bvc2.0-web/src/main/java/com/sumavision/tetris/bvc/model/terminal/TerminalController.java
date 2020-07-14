@@ -20,6 +20,21 @@ public class TerminalController {
 	private TerminalService terminalService;
 	
 	/**
+	 * 查询全部终端<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月29日 下午3:07:03
+	 * @return List<TerminalVO> 终端列表
+	 */
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/load/all")
+	public Object loadAll(HttpServletRequest request) throws Exception{
+		
+		return terminalQuery.loadAll();
+	}
+	
+	/**
 	 * 分页查询终端<br/>
 	 * <b>作者:</b>lvdeyang<br/>
 	 * <b>版本：</b>1.0<br/>

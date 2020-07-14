@@ -48,6 +48,7 @@ public class DirectorDstPO extends AbstractBasePO{
 	/** 目的附加参数 */
 	private String passBy;
 
+	@Column
 	public String getTaskId() {
 		return taskId;
 	}
@@ -56,6 +57,7 @@ public class DirectorDstPO extends AbstractBasePO{
 		this.taskId = taskId;
 	}
 
+	@Column
 	public String getBundleId() {
 		return bundleId;
 	}
@@ -64,6 +66,7 @@ public class DirectorDstPO extends AbstractBasePO{
 		this.bundleId = bundleId;
 	}
 
+	@Column
 	public String getChannelId() {
 		return channelId;
 	}
@@ -72,6 +75,7 @@ public class DirectorDstPO extends AbstractBasePO{
 		this.channelId = channelId;
 	}
 
+	@Column
 	public String getDeviceModel() {
 		return deviceModel;
 	}
@@ -80,6 +84,7 @@ public class DirectorDstPO extends AbstractBasePO{
 		this.deviceModel = deviceModel;
 	}
 
+	@Column
 	public String getDeviceIp() {
 		return deviceIp;
 	}
@@ -88,6 +93,7 @@ public class DirectorDstPO extends AbstractBasePO{
 		this.deviceIp = deviceIp;
 	}
 
+	@Column
 	public Long getDevicePort() {
 		return devicePort;
 	}
@@ -97,6 +103,7 @@ public class DirectorDstPO extends AbstractBasePO{
 	}
 
 	@Enumerated(value = EnumType.STRING)
+	@Column
 	public DeviceType getDeviceType() {
 		return deviceType;
 	}

@@ -90,6 +90,7 @@ import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoCannotMatc
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoErrorBeginOffsetException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoNotExistException;
 import com.sumavision.tetris.mims.app.media.video.exception.MediaVideoStatusErrorWhenUploadingException;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mims.config.server.ServerProps;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 import com.sumavision.tetris.mvc.wrapper.MultipartHttpServletRequestWrapper;
@@ -112,6 +113,9 @@ public class ApiServerMediaController {
 	
 	@Autowired
 	private ServerProps serverProps;
+	
+	@Autowired
+	private MimsServerPropsQuery serverPropsQuery;
 	
 	@Autowired
 	private FolderDAO folderDao;
@@ -824,7 +828,7 @@ public class ApiServerMediaController {
 		String duration = "-";
 		
 		StringBufferWrapper stringBufferWrapper = new StringBufferWrapper().append("http://")
-				.append(serverProps.getIp())
+				.append(serverPropsQuery.queryProps().getFtpIp())
 				.append(":")
 				.append(serverProps.getPort())
 				.append("/");
