@@ -8,4 +8,5 @@ import com.sumavision.tetris.orm.dao.MetBaseDAO;
 public interface PageInfoDAO extends MetBaseDAO<PageInfoPO>{
 	
 	public PageInfoPO findByOriginIdAndTerminalId(String originId, Long terminalId);
+	
 }

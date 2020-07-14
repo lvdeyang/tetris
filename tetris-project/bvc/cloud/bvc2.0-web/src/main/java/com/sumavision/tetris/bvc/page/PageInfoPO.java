@@ -120,6 +120,5 @@ public class PageInfoPO extends AbstractBasePO {
 		int m = pageTasks.size()%pageSize;
 		if(m > 0) totalPageCount++;
 		return totalPageCount;
-	}
-	
+	}	
 }
