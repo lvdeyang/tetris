@@ -6,7 +6,9 @@ public enum BusinessType {
 
 	COMMAND("指挥业务"),
 	MEETING_QT("会议业务"),
-	MEETING_BVC("会控业务");
+	MEETING_BVC("会控业务"),
+	VOD("点播业务"),
+	CALL("呼叫业务");
 	
 	private String name;
 	

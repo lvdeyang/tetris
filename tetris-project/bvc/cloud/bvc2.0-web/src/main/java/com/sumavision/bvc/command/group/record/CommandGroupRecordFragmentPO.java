@@ -10,11 +10,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.device.group.enumeration.ChannelType;
+import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
+import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.business.bo.SourceBO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -43,7 +48,7 @@ public class CommandGroupRecordFragmentPO extends AbstractBasePO{
 	/** 目的为角色时，角色id */
 	private int locationIndex;
 	
-	/** 业务类型，与播放器保持一致 */
+	/** 业务类型，与播放器保持一致（目前无用） */
 	private PlayerBusinessType playerBusinessType = PlayerBusinessType.NONE;
 	
 	/** 开始时间 */
@@ -332,6 +337,37 @@ public class CommandGroupRecordFragmentPO extends AbstractBasePO{
 
 	public void setSrcMemberId(Long srcMemberId) {
 		this.srcMemberId = srcMemberId;
+	}
+	
+	/** 无法设置info信息，需要额外设置 */
+	public CommandGroupRecordFragmentPO setByMemberSource(GroupMemberPO member, SourceBO source, Date date) throws Exception{
+		ChannelSchemeDTO videoSource = source.getVideoSource();
+		BundlePO videoBundle = source.getVideoBundle();
+		ChannelSchemeDTO audioSource = source.getAudioSource();
+		if(audioSource == null) audioSource = new ChannelSchemeDTO();
+		BundlePO audioBundle = source.getAudioBundle();
+		if(audioBundle == null) audioBundle = new BundlePO();
+		this.edit(
+				0,
+				null,
+				date,
+				null,//Date endTime,
+				null,//String info,
+				member.getId(),
+				videoSource.getBundleId(),
+				videoBundle.getBundleName(),
+				videoBundle.getBundleType(),
+				videoBundle.getAccessNodeUid(),
+				videoSource.getChannelId(),
+				videoSource.getBaseType(),
+				audioBundle.getBundleId(),
+				audioBundle.getBundleName(),
+				audioBundle.getBundleType(),
+				audioBundle.getAccessNodeUid(),
+				audioSource.getChannelId(),
+				audioSource.getBaseType()
+				);
+		return this;
 	}
 	
 	/** 无法设置info信息，需要额外设置 */

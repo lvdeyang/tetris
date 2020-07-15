@@ -38,6 +38,7 @@ import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
 import com.sumavision.bvc.config.ServerProps;
 import com.sumavision.bvc.system.enumeration.GearsLevel;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.business.group.BusinessType;
 
 @Service
 public class CommandCommonUtil {
@@ -670,6 +671,14 @@ public class CommandCommonUtil {
 			return serverProps.getCommandString();
 		}
 	}
+	public String generateCommandString(BusinessType type){
+		if(BusinessType.MEETING_QT.equals(type)){
+			return "会议";
+		}else{
+			//普通指挥和专向指挥
+			return serverProps.getCommandString();
+		}
+	}
 	
 	/**
 	 *生成“协同指挥”/“协同会议”/“发言”字符串<br/>
@@ -691,6 +700,13 @@ public class CommandCommonUtil {
 //			}else{
 //				return "协同会议";
 //			}
+			return "协同" + serverProps.getCommandString();
+		}
+	}
+	public String generateCooperateString(BusinessType type){
+		if(BusinessType.MEETING_QT.equals(type)){
+			return "发言";
+		}else{
 			return "协同" + serverProps.getCommandString();
 		}
 	}

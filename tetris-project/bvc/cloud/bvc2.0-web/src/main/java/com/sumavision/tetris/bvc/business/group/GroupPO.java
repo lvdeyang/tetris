@@ -15,7 +15,7 @@ import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
- * 业务组（目前设想做指挥，会议以及内蒙会控和zoom会议，其他如监控，点播，呼叫是否需要其他数据结构这个不清楚）<br/>
+ * 业务组（指挥，会议以及内蒙会控和zoom会议）<br/>
  * <b>作者:</b>lvdeyang<br/>
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年6月4日 下午3:37:07
@@ -29,13 +29,13 @@ public class GroupPO extends AbstractBasePO{
 	/** 名称 */
 	private String name;
 	
-	/** 主题（标准里的，暂时按照一个指挥一个主题来做） */
+	/** 主题（标准里的） */
 	private String subject;
 	
-	/** 创建用户id */
+	/** 创建人id */
 	private Long userId;
 	
-	/** 创建用户名 */
+	/** 创建人用户名 */
 	private String userName;
 	
 	/** 创建时间 */
@@ -51,13 +51,13 @@ public class GroupPO extends AbstractBasePO{
 	private Date fightTime;
 	
 	/** 业务类型 */
-	private BusinessType businessType;
+	private BusinessType groupBusinessType;
 	
 	/** 发流方式：单播或组播 */
-	private TransmissionMode transmissionMode;
+	private TransmissionMode transmissionMode = TransmissionMode.UNICAST;
 	
 	/** 会议中的模式，主席模式/讨论模式 */
-	private GroupSpeakType speakType = GroupSpeakType.CHAIRMAN;
+//	private GroupSpeakType speakType = GroupSpeakType.CHAIRMAN;
 	
 	/** 来源类型，本系统创建/外部系统创建 */
 	private OriginType originType = OriginType.INNER;
@@ -147,11 +147,11 @@ public class GroupPO extends AbstractBasePO{
 	@Column(name = "BUSINESS_TYPE")
 	@Enumerated(value = EnumType.STRING)
 	public BusinessType getBusinessType() {
-		return businessType;
+		return groupBusinessType;
 	}
 
-	public void setBusinessType(BusinessType businessType) {
-		this.businessType = businessType;
+	public void setBusinessType(BusinessType groupBusinessType) {
+		this.groupBusinessType = groupBusinessType;
 	}
 
 	@Enumerated(value = EnumType.STRING)
@@ -174,15 +174,15 @@ public class GroupPO extends AbstractBasePO{
 		this.status = status;
 	}
 
-	@Enumerated(value = EnumType.STRING)
-	@Column(name = "SPEAK_TYPE")
-	public GroupSpeakType getSpeakType() {
-		return speakType;
-	}
-
-	public void setSpeakType(GroupSpeakType speakType) {
-		this.speakType = speakType;
-	}
+//	@Enumerated(value = EnumType.STRING)
+//	@Column(name = "SPEAK_TYPE")
+//	public GroupSpeakType getSpeakType() {
+//		return speakType;
+//	}
+//
+//	public void setSpeakType(GroupSpeakType speakType) {
+//		this.speakType = speakType;
+//	}
 
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "ORIGIN_TYPE")

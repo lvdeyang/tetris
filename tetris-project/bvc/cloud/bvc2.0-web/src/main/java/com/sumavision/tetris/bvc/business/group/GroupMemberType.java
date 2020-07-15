@@ -6,6 +6,7 @@ public enum GroupMemberType {
 
 	MEMBER_USER("用户成员"),
 	MEMBER_DEVICE("设备成员"),
+	RESOURCE_USER("用户资源"),
 	RESOURCE_ENCODER("编码资源"),
 	RESOURCE_FILE("文件资源");
 	

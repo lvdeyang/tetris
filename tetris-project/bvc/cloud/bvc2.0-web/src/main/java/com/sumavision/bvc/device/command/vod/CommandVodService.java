@@ -605,7 +605,7 @@ public class CommandVodService {
 		
 		return decoderUserPlayer;
 	}
-
+	
 	/**
 	 * 停止点播设备<br/>
 	 * <b>作者:</b>wjw<br/>
@@ -829,7 +829,7 @@ public class CommandVodService {
 	 * <b>作者:</b>wjw<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2019年10月24日 下午3:12:16
-	 * @param CommandVodPO vod 点播信息
+	 * @param VodPO vod 点播信息
 	 * @param CodecParamBO codec 参数
 	 * @param Long userId 用户id
 	 * @return LogicBO 协议

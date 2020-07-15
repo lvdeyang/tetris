@@ -6,7 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Column;
 
-import com.sumavision.bvc.command.group.enumeration.OriginType;
+import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -24,10 +24,13 @@ public class GroupMemberPO extends AbstractBasePO{
 	/** 成员名称 */
 	private String name;
 	
-	/** 成员类型 */
+	/** 成员类型：用户/设备 */
 	private GroupMemberType groupMemberType;
 	
-	/** 成员为用户时存userId, 设备时存bundleId, 文件时存文件id*/
+	/** 用户/设备号码 */
+	private String code;
+	
+	/** 成员为用户时存userId, 设备时存bundleId, */
 	private String originId;
 	
 	/** 终端类型 */
@@ -46,25 +49,22 @@ public class GroupMemberPO extends AbstractBasePO{
 	private Boolean silenceToLower = false;
 	
 	/** 是否开启自己音频 */
-	private Boolean myAudio;
+	private Boolean myAudio = true;
 	
 	/** 是否开启自己视频 */
-	private Boolean myVideo;
-	
-	/** 是否入会 */
-	private Boolean join = false;
+	private Boolean myVideo = true;
 	
 	/** 成员状态 */
 	private GroupMemberStatus groupMemberStatus = GroupMemberStatus.DISCONNECT;
 	
-	/** 协同状态 */
-	private GroupMemberStatus cooperateStatus = GroupMemberStatus.DISCONNECT;
-	
-	/** 是否是管理员 */
+	/** 是否是主席 */
 	private Boolean isAdministrator = false;
 	
 	/** 隶属业务id */
 	private Long groupId;
+	
+	/** 非组业务时使用，如指挥的媒体转发 */
+	private String businessId;
 
 	@Column(name = "NAME")
 	public String getName() {
@@ -88,6 +88,14 @@ public class GroupMemberPO extends AbstractBasePO{
 	@Column(name = "ORIGIN_ID")
 	public String getOriginId() {
 		return originId;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public void setOriginId(String originId) {
@@ -158,15 +166,6 @@ public class GroupMemberPO extends AbstractBasePO{
 		this.myVideo = myVideo;
 	}
 
-	@Column(name = "JO_IN")
-	public Boolean getJoin() {
-		return join;
-	}
-
-	public void setJoin(Boolean join) {
-		this.join = join;
-	}
-
 	@Column(name = "GROUP_MEMBER_STATUS")
 	@Enumerated(value = EnumType.STRING)
 	public GroupMemberStatus getGroupMemberStatus() {
@@ -175,16 +174,6 @@ public class GroupMemberPO extends AbstractBasePO{
 
 	public void setGroupMemberStatus(GroupMemberStatus groupMemberStatus) {
 		this.groupMemberStatus = groupMemberStatus;
-	}
-
-	@Column(name = "COOPERATE_STATUS")
-	@Enumerated(value = EnumType.STRING)
-	public GroupMemberStatus getCooperateStatus() {
-		return cooperateStatus;
-	}
-
-	public void setCooperateStatus(GroupMemberStatus cooperateStatus) {
-		this.cooperateStatus = cooperateStatus;
 	}
 
 	@Column(name = "IS_ADMINISTRATOR")
@@ -203,6 +192,15 @@ public class GroupMemberPO extends AbstractBasePO{
 
 	public void setGroupId(Long groupId) {
 		this.groupId = groupId;
+	}
+
+	@Column(name = "BUSINESS_ID")
+	public String getBusinessId() {
+		return businessId;
+	}
+
+	public void setBusinessId(String businessId) {
+		this.businessId = businessId;
 	}
 	
 }

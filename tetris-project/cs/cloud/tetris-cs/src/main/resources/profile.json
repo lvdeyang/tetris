@@ -1,6 +1,6 @@
 {
-	"terminalBroadIp": "",
-	"terminalBroadPort": "8180",
+	"terminalBroadIp": "192.165.56.20",
+	"terminalBroadPort": "80",
 	"abilityBroadIp": "192.165.58.123",
 	"abilityBroadPort": "9000",
 	"ifLocal": false

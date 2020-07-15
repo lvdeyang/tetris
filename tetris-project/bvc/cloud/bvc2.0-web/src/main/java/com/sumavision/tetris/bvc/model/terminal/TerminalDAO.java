@@ -7,4 +7,5 @@ import com.sumavision.tetris.orm.dao.BaseDAO;
 @RepositoryDefinition(domainClass = TerminalPO.class, idClass = Long.class)
 public interface TerminalDAO extends BaseDAO<TerminalPO>{
 
+	public TerminalPO findByType(TerminalType type);
 }

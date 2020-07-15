@@ -8,6 +8,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sumavision.bvc.command.group.enumeration.CallStatus;
+import com.sumavision.bvc.command.group.enumeration.CallType;
 import com.sumavision.bvc.command.group.enumeration.UserCallType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -22,6 +23,8 @@ public class UserCallPO extends AbstractBasePO{
 	
 	/** 呼叫websocket消息id */
 	private Long messageId;
+	
+	private CallType callType = CallType.LOCAL_LOCAL;
 	
 	/** 音视频/语音 */
 	private UserCallType type;
@@ -39,6 +42,9 @@ public class UserCallPO extends AbstractBasePO{
 	/** 主叫用户名 */
 	private String callUsername;
 	
+	/** 主叫用户号码 */
+	private String callUserNo;
+	
 	/************
 	 ***被叫用户***
 	 ************/
@@ -48,6 +54,12 @@ public class UserCallPO extends AbstractBasePO{
 	
 	/** 被叫用户名 */
 	private String calledUsername;
+	
+	/** 被叫用户号码 */
+	private String calledUserNo;
+	
+	/** 隶属业务id */
+	private Long groupId;
 	
 	@Column(name = "FORMER_VOD_ID")
 	public Long getFormerVodId() {
@@ -65,6 +77,16 @@ public class UserCallPO extends AbstractBasePO{
 
 	public void setMessageId(Long messageId) {
 		this.messageId = messageId;
+	}
+	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "CALL_TYPE")
+	public CallType getCallType() {
+		return callType;
+	}
+
+	public void setCallType(CallType callType) {
+		this.callType = callType;
 	}
 
 	@Enumerated(value = EnumType.STRING)
@@ -87,6 +109,7 @@ public class UserCallPO extends AbstractBasePO{
 		this.status = status;
 	}
 
+	@Column(name = "CALL_USER_ID")
 	public Long getCallUserId() {
 		return callUserId;
 	}
@@ -113,6 +136,14 @@ public class UserCallPO extends AbstractBasePO{
 		this.calledUsername = calledUsername;
 	}
 
+	public String getCalledUserNo() {
+		return calledUserNo;
+	}
+
+	public void setCalledUserNo(String calledUserNo) {
+		this.calledUserNo = calledUserNo;
+	}
+
 	@Column(name = "CALL_USER_NAME")
 	public String getCallUsername() {
 		return callUsername;
@@ -122,6 +153,22 @@ public class UserCallPO extends AbstractBasePO{
 		this.callUsername = callUsername;
 	}
 	
+	public String getCallUserNo() {
+		return callUserNo;
+	}
+
+	public void setCallUserNo(String callUserNo) {
+		this.callUserNo = callUserNo;
+	}
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+
 	public UserCallPO(){}
 	
 	/*public UserCallPO(

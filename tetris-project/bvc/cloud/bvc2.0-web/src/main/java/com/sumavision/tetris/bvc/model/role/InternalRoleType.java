@@ -10,7 +10,10 @@ public enum InternalRoleType {
 	COMMAND_AUDIENCE("指挥观众"),
 	MEETIING_CHAIRMAN("会议主席"),
 	MEETING_SPEAKER("会议发言人"),
-	MEETING_AUDIENCE("会议观众");
+	MEETING_AUDIENCE("会议观众"),
+	VOD_DST("点播发起人"),
+	VOD_SRC("被点播资源"),
+	CALL_USER("呼叫双方");
 	
 	private String name;
 
