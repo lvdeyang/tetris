@@ -38,6 +38,8 @@ import com.sumavision.tetris.commons.util.xml.XmlUtil;
 import com.sumavision.tetris.easy.process.core.ProcessQuery;
 import com.sumavision.tetris.easy.process.core.ProcessService;
 import com.sumavision.tetris.easy.process.core.ProcessVO;
+import com.sumavision.tetris.mims.app.bo.AdiBo;
+import com.sumavision.tetris.mims.app.bo.BoUtil;
 import com.sumavision.tetris.mims.app.folder.FolderDAO;
 import com.sumavision.tetris.mims.app.folder.FolderPO;
 import com.sumavision.tetris.mims.app.folder.FolderQuery;
@@ -72,9 +74,12 @@ import com.sumavision.tetris.mims.app.media.video.MediaVideoVO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFileDAO;
 import com.sumavision.tetris.mims.app.storage.PreRemoveFilePO;
 import com.sumavision.tetris.mims.app.storage.StoreQuery;
+import com.sumavision.tetris.mims.config.server.MimsServerPropsQuery;
 import com.sumavision.tetris.mvc.listener.ServletContextListener.Path;
 import com.sumavision.tetris.user.UserQuery;
 import com.sumavision.tetris.user.UserVO;
+
+
 
 /**
  * 播发媒资操作（主增删改）<br/>
@@ -142,6 +147,9 @@ public class MediaCompressService {
 	
 	@Autowired
 	private MediaPushLiveService mediaPushLiveService;
+	
+	@Autowired
+	private MimsServerPropsQuery mimsServerPropsQuery;
 	
 	/**
 	 * 播发媒资上传审核通过<br/>
@@ -655,6 +663,16 @@ public class MediaCompressService {
 				content = new MediaAudioVO().set(audio).getPreviewUrl();
 				templateId = "yjgb_audio";
 				type = "AVIDEO";
+				
+				//对接OMC注入
+				BoUtil.uploadFile(audio.getUploadTmpPath(),audio.getUuid(), mimsServerPropsQuery.queryProps().getOmcftpIp(), 
+						Integer.parseInt(mimsServerPropsQuery.queryProps().getOmcftpPort()), mimsServerPropsQuery.queryProps().getOmcftpUsername(),
+						mimsServerPropsQuery.queryProps().getOmcftpPassword());
+			    AdiBo adiBo=new AdiBo();
+			    adiBo.setFileName(audio.getFileName());
+			    adiBo.setMediaId(audio.getUuid());
+			    adiBo.setFormat("audio");
+				BoUtil.injectBo(adiBo);
 
 			} else if (fileNameSuffix.equals("mp4")) {
 
