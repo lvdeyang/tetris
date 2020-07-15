@@ -6,9 +6,9 @@ public enum TerminalType {
 
 	JV210("jv210"),
 	JV220("jv220"),
-	STB("机顶盒"),
+	ANDROID_TVOS("机顶盒"),
 	QT_ZK("qt指控终端"),
-	WEB("web页面");
+	PC_PLATFORM("web页面");
 	
 	private String name;
 	

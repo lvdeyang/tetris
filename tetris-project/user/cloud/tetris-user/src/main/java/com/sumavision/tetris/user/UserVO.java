@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.commons.context.SpringContext;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
@@ -107,6 +108,9 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 	
 	/** 异常登录次数 */
 	private int errorLoginTimes;
+	
+	/** 终端类型 */
+	private TerminalType terminalType;
 	
 	public String getUsername() {
 		return username;
@@ -366,6 +370,15 @@ public class UserVO extends AbstractBaseVO<UserVO, UserPO>{
 
 	public UserVO setErrorLoginTimes(int errorLoginTimes) {
 		this.errorLoginTimes = errorLoginTimes;
+		return this;
+	}
+	
+	public TerminalType getTerminalType() {
+		return terminalType;
+	}
+
+	public UserVO setTerminalType(TerminalType terminalType) {
+		this.terminalType = terminalType;
 		return this;
 	}
 
