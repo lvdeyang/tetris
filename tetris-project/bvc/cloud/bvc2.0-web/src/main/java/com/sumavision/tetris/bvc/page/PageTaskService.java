@@ -41,7 +41,7 @@ import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
-import com.sumavision.tetris.bvc.business.dao.TerminalBundleUserPermissionDAO;
+import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;

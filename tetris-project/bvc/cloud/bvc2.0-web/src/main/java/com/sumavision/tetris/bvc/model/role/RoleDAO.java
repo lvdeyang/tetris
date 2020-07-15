@@ -39,4 +39,6 @@ public interface RoleDAO extends BaseDAO<RolePO>{
 	 */
 	public Long countByBusinessIdIsNullAndUserIdIsNull();
 	
+	public RolePO findByInternalRoleType(InternalRoleType internalRoleType);
+	
 }

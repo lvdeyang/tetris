@@ -28,10 +28,10 @@ public interface GroupMemberDAO extends MetBaseDAO<GroupMemberPO>{
 	public List<Long> findIdsByGroupId(Long groupId);
 	
 	/** 从groupId获取成员OriginId列表 */
-	@Query(value = "select m.OriginId from com.sumavision.tetris.bvc.business.group.GroupMemberPO m where m.groupId = ?1")
+	@Query(value = "select m.originId from com.sumavision.tetris.bvc.business.group.GroupMemberPO m where m.groupId = ?1")
 	public List<String> findOriginIdsByGroupId(Long groupId);
 	
 	/** 从originId列表获取成员id列表，通常用来把userId列表转换为成员id列表 */
-	@Query(value = "select m.id from com.sumavision.tetris.bvc.business.group.GroupMemberPO m where m.groupId = ?! and m.originId in ?2")
+	@Query(value = "select m.id from com.sumavision.tetris.bvc.business.group.GroupMemberPO m where m.groupId = ?1 and m.originId in ?2")
 	public List<Long> findIdsByGroupIdAndOriginIds(Long groupId, Collection<String> originIds);
 }

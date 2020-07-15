@@ -19,4 +19,12 @@ public interface AgendaForwardDAO extends BaseDAO<AgendaForwardPO>{
 	 */
 	public List<AgendaForwardPO> findByAgendaId(Long agendaId);
 	
+	public List<AgendaForwardPO> findBySourceTypeAndSourceId(AgendaSourceType sourceType, Long sourceId);
+	
+	public List<AgendaForwardPO> findBySourceTypeAndSourceIdIn(AgendaSourceType sourceType, List<Long> sourceIds);
+	
+	public List<AgendaForwardPO> findByDestinationTypeAndSourceId(AgendaDestinationType destinationType, Long sourceId);
+	
+	public List<AgendaForwardPO> findByDestinationTypeAndSourceIdIn(AgendaDestinationType destinationType, List<Long> sourceIds);
+	
 }

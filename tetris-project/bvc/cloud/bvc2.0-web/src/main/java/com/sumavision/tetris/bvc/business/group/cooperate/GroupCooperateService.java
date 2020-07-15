@@ -53,7 +53,6 @@ import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaService;
-import com.sumavision.tetris.bvc.model.dao.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageTaskDAO;
@@ -102,9 +101,6 @@ public class GroupCooperateService {
 	
 	@Autowired
 	private GroupMemberRolePermissionDAO groupMemberRolePermissionDao;
-	
-	@Autowired
-	private RoleDAO roleDao;
 	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;

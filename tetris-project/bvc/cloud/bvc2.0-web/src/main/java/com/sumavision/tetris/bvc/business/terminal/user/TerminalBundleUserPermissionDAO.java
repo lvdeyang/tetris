@@ -1,5 +1,7 @@
 package com.sumavision.tetris.bvc.business.terminal.user;
 
+import java.util.List;
+
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.orm.dao.BaseDAO;
@@ -18,5 +20,9 @@ public interface TerminalBundleUserPermissionDAO extends BaseDAO<TerminalBundleU
 	 * @return TerminalBundleUserPermissionPO 真实设备信息
 	 */
 	public TerminalBundleUserPermissionPO findByUserIdAndTerminalIdAndTerminalBundleId(String userId, Long terminalId, Long terminalBundleId);
+	
+	public List<TerminalBundleUserPermissionPO> findByUserIdAndTerminalId(String userId, Long terminalId);
+	
+	public List<TerminalBundleUserPermissionPO> findByBundleIdIn(List<String> bundleIds);
 	
 }

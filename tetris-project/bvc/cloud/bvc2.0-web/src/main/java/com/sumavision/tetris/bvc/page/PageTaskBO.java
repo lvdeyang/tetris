@@ -12,6 +12,7 @@ import com.sumavision.tetris.bvc.business.BusinessInfoType;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年5月27日 下午2:59:23
  */
+@Deprecated
 public class PageTaskBO {
 	
 	private BusinessInfoType businessType = BusinessInfoType.NONE;

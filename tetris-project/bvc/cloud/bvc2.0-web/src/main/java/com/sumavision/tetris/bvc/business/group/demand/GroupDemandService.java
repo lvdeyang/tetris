@@ -73,15 +73,15 @@ import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaDestinationType;
+import com.sumavision.tetris.bvc.model.agenda.AgendaForwardDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.agenda.AgendaSourceType;
-import com.sumavision.tetris.bvc.model.dao.AgendaDAO;
-import com.sumavision.tetris.bvc.model.dao.AgendaForwardDAO;
-import com.sumavision.tetris.bvc.model.dao.RoleDAO;
+import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.model.role.RoleUserMappingType;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
@@ -129,6 +129,7 @@ public class GroupDemandService {
 	
 	@Autowired
 	private AgendaForwardDAO agendaForwardDao;
+	
 	@Autowired
 	private GroupMemberRolePermissionDAO groupMemberRolePermissionDao;
 	
@@ -347,9 +348,9 @@ public class GroupDemandService {
 					AgendaForwardPO agendaVideoForward = new AgendaForwardPO();
 					agendaVideoForward.setBusinessInfoType(BusinessInfoType.COMMAND_FORWARD);
 					agendaVideoForward.setType(AgendaForwardType.VIDEO);
-					agendaVideoForward.setSourceId(srcRolePO.getId());
+					agendaVideoForward.setSourceId(srcRolePO.getId().toString());
 					agendaVideoForward.setSourceType(AgendaSourceType.ROLE);
-					agendaVideoForward.setDestinationId(dstRolePO.getId());
+					agendaVideoForward.setDestinationId(dstRolePO.getId().toString());
 					agendaVideoForward.setDestinationType(AgendaDestinationType.ROLE);
 					agendaVideoForward.setAgendaId(agenda.getId());					
 					AgendaForwardPO agendaAudioForward = new AgendaForwardPO();
@@ -584,7 +585,10 @@ public class GroupDemandService {
 			
 			AgendaPO agenda = agendaDao.findOne(agendaId);
 			List<AgendaForwardPO> forwards = agendaForwardDao.findByAgendaId(agendaId);
-			List<Long> roleIds = new ArrayListWrapper<Long>().add(forwards.get(0).getSourceId()).add(forwards.get(0).getDestinationId()).getList();
+			List<Long> roleIds = new ArrayListWrapper<Long>()
+					.add(Long.parseLong(forwards.get(0).getSourceId()))
+					.add(Long.parseLong(forwards.get(0).getDestinationId()))
+					.getList();
 			List<RolePO> roles = roleDao.findAll(roleIds);
 			GroupMemberPO srcMember = groupMemberDao.findOne(demand.getSrcMemberId());
 			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdIn(roleIds);
