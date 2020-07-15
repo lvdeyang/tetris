@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 
 public class CommandGroupUserLayoutShemeVO {
 
@@ -40,6 +41,7 @@ public class CommandGroupUserLayoutShemeVO {
 		this.players = players;
 	}
 
+	@Deprecated
 	private CommandGroupUserLayoutShemeVO setPlayersByPO(List<CommandGroupUserPlayerPO> players) {
 		this.setPlayers(new ArrayList<CommandGroupUserPlayerSettingVO>()); 
 		if(players == null) return this;
@@ -48,11 +50,30 @@ public class CommandGroupUserLayoutShemeVO {
 		}
 		return this;
 	}
-	
+
+	@Deprecated
 	public CommandGroupUserLayoutShemeVO set(CommandGroupUserLayoutShemePO schemePO){
 		this.setName(schemePO.getName());
 		this.setPlayerSplitLayout(String.valueOf(schemePO.getPlayerSplitLayout().getId()));
 		this.setPlayersByPO(schemePO.obtainPlayers());
+		
+		return this;
+	}
+
+	private CommandGroupUserLayoutShemeVO setPlayersByPageTasks(List<PageTaskPO> pageTasks) {
+		this.setPlayers(new ArrayList<CommandGroupUserPlayerSettingVO>()); 
+		if(pageTasks == null) return this;
+		for(PageTaskPO pageTask : pageTasks){
+			this.getPlayers().add(new CommandGroupUserPlayerSettingVO().set(pageTask));
+		}
+		//TODO:把剩下的补全，最好改成不用补全
+		return this;
+	}
+	
+	public CommandGroupUserLayoutShemeVO set(CommandGroupUserLayoutShemePO schemePO, List<PageTaskPO> pageTasks){
+		this.setName(schemePO.getName());
+		this.setPlayerSplitLayout(String.valueOf(schemePO.getPlayerSplitLayout().getId()));
+		this.setPlayersByPageTasks(pageTasks);
 		
 		return this;
 	}

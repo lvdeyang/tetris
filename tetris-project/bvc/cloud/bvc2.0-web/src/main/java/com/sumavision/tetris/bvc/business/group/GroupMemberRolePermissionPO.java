@@ -42,4 +42,11 @@ public class GroupMemberRolePermissionPO extends AbstractBasePO{
 		this.groupMemberId = groupMemberId;
 	}
 	
+	public GroupMemberRolePermissionPO(){}
+	
+	public GroupMemberRolePermissionPO(Long roleId, Long groupMemberId){
+		this.roleId = roleId;
+		this.groupMemberId = groupMemberId;
+	}
+	
 }

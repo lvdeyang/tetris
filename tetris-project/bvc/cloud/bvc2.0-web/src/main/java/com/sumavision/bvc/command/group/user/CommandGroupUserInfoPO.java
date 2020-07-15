@@ -11,6 +11,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import com.sumavision.bvc.command.group.user.decoder.CommandGroupDecoderSchemePO;
+import com.sumavision.bvc.command.group.user.layout.page.CommandPlayerTaskPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
 import com.sumavision.bvc.command.group.user.setting.CommandGroupUserSettingPO;
@@ -34,6 +35,9 @@ public class CommandGroupUserInfoPO extends AbstractBasePO {
 	/** 用户名称（便于查看） */
 	private String userName;
 	
+	/** 当前所在播放器分页的页数，从1开始 */
+	private Integer currentPage = 1;
+	
 	/** 关联设置 */
 	private CommandGroupUserSettingPO setting = new CommandGroupUserSettingPO();
 	
@@ -42,6 +46,9 @@ public class CommandGroupUserInfoPO extends AbstractBasePO {
 	
 	/** 各个播放器的配置信息 */
 	private List<CommandGroupUserPlayerPO> players;
+	
+	/** 播放器任务 */
+	private List<CommandPlayerTaskPO> tasks;
 	
 	/** 该用户配置的上屏方案 */
 	private List<CommandGroupDecoderSchemePO> decoderSchemes;
@@ -62,6 +69,15 @@ public class CommandGroupUserInfoPO extends AbstractBasePO {
 
 	public void setUserName(String userName) {
 		this.userName = userName;
+	}
+
+	@Column(name = "CURRENT_PAGE")
+	public Integer getCurrentPage() {
+		return currentPage;
+	}
+
+	public void setCurrentPage(Integer currentPage) {
+		this.currentPage = currentPage;
 	}
 
 	@OneToOne(mappedBy = "userInfo", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -95,6 +111,15 @@ public class CommandGroupUserInfoPO extends AbstractBasePO {
 		this.players = players;
 	}
 	
+	@OneToMany(mappedBy = "userInfo", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	public List<CommandPlayerTaskPO> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(List<CommandPlayerTaskPO> tasks) {
+		this.tasks = tasks;
+	}
+
 	@OneToMany(mappedBy = "userInfo", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	public List<CommandGroupDecoderSchemePO> getDecoderSchemes() {
 		return decoderSchemes;
@@ -133,6 +158,24 @@ public class CommandGroupUserInfoPO extends AbstractBasePO {
 		CommandGroupUserLayoutShemePO usingScheme = this.obtainUsingScheme();		
 		List<CommandGroupUserPlayerPO> usingSchemePlayers = usingScheme.obtainPlayers();
 		return usingSchemePlayers;
+	}
+	
+	/**
+	 * 获取总页数。总数为0时，总页数为1<br/>
+	 * <p>考虑优化this.getTasks()</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月3日 下午3:16:31
+	 * @return
+	 */
+	public int obtainTotalPageCount(){
+		List<CommandPlayerTaskPO> tasks = this.getTasks();
+		if(tasks==null || tasks.size()==0) return 1;
+		int playerCount = this.obtainUsingScheme().getPlayerSplitLayout().getPlayerCount();
+		int totalPageCount = tasks.size()/playerCount;
+		int m = tasks.size()%playerCount;
+		if(m > 0) totalPageCount++;
+		return totalPageCount;
 	}
 	
 }

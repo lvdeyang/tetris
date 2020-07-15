@@ -7,6 +7,8 @@ import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
+import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.commons.context.SpringContext;
 
 /**
@@ -149,6 +151,33 @@ public class CommandGroupUserPlayerSettingVO {
 		//上屏设备
 		List<CommandGroupUserPlayerCastDevicePO> devices = entity.getCastDevices();
 		this.setCastDevicesByPO(devices);
+		
+		return this;
+	}
+	
+	public CommandGroupUserPlayerSettingVO set(PageTaskPO entity){		
+		
+		this.setSerial(entity.getLocationIndex());
+		this.setBundleId(entity.getDstBundleId());
+		this.setBundleNo(entity.getDstCode());
+		this.setBusinessType(entity.getBusinessInfoType().getCode());
+		this.setBusinessId(entity.getBusinessId());
+		this.setBusinessInfo(entity.getBusinessName());
+		this.setUrl(entity.getPlayUrl());
+		//status，应该不用了
+		this.setStatus("start");		
+		/*BusinessType type = entity.getBusinessType();
+		if(type.equals(BusinessType.BASIC_COMMAND)
+				|| type.equals(BusinessType.CHAIRMAN_BASIC_COMMAND)
+				|| type.equals(BusinessType.COOPERATE_COMMAND)){
+			CommandGroupDAO commandGroupDao = SpringContext.getBean(CommandGroupDAO.class);
+			Long groupId = Long.parseLong(entity.getBusinessId().split("-")[0]);
+			GroupStatus status = commandGroupDao.findStatusById(groupId);
+			this.setStatus(status.toString().toLowerCase());
+		}*/
+		//上屏设备
+		/*List<CommandGroupUserPlayerCastDevicePO> devices = entity.getCastDevices();
+		this.setCastDevicesByPO(devices);*/
 		
 		return this;
 	}

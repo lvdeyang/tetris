@@ -6,6 +6,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Table;
 
+import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
 /**
@@ -28,6 +29,9 @@ public class AgendaPO extends AbstractBasePO{
 	
 	/** 隶属业务id */
 	private Long businessId;
+	
+	/** 业务类型 */
+	private BusinessInfoType businessInfoType;
 	
 	/** 设备议程音频 */
 	private Integer volume = 100;
@@ -60,6 +64,16 @@ public class AgendaPO extends AbstractBasePO{
 
 	public void setBusinessId(Long businessId) {
 		this.businessId = businessId;
+	}
+
+	@Column(name = "BUSINESS_INFO_TYPE")
+	@Enumerated(value = EnumType.STRING)
+	public BusinessInfoType getBusinessInfoType() {
+		return businessInfoType;
+	}
+
+	public void setBusinessInfoType(BusinessInfoType businessInfoType) {
+		this.businessInfoType = businessInfoType;
 	}
 
 	@Column(name = "VOLUME")
