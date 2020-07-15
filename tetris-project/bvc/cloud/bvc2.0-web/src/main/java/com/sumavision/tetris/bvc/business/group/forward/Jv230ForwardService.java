@@ -7,8 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.suma.venus.resource.dao.BundleDao;
+import com.suma.venus.resource.pojo.BundlePO;
+import com.sumavision.bvc.command.group.enumeration.UserCallType;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalType;
+import com.sumavision.tetris.bvc.model.terminal.TerminalVO;
+import com.sumavision.tetris.bvc.model.terminal.exception.TerminalNotFoundException;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
+import com.sumavision.tetris.commons.util.wrapper.StringBufferWrapper;
 import com.sumavision.tetris.user.UserQuery;
+import com.sumavision.tetris.user.UserVO;
 
 @Service
 public class Jv230ForwardService {
@@ -19,6 +30,9 @@ public class Jv230ForwardService {
 	@Autowired
 	private BundleDao bundleDao;
 	
+	@Autowired
+	private TerminalDAO terminalDao;
+	
 	/**
 	 * qt终端全部上屏jv230<br/>
 	 * <b>作者:</b>lvdeyang<br/>
@@ -27,6 +41,17 @@ public class Jv230ForwardService {
 	 * @param String bundleId jv230 设备id
 	 */
 	public void totalForward(String bundleId) throws Exception{
+		UserVO user = userQuery.current();
+		TerminalType terminalType = TerminalType.fromTokenType(user.getTerminalType());
+		TerminalPO terminalEntity = terminalDao.findByType(terminalType);
+		if(terminalEntity == null){
+			throw new TerminalNotFoundException(terminalType);
+		}
+		BundlePO bundle = bundleDao.findByBundleId(bundleId);
+		if(bundle == null){
+			throw new BaseException(StatusCode.FORBIDDEN, new StringBufferWrapper().append("jv230不存在，bundleId：").append(bundleId).toString());
+		}
+		
 		
 	}
 	

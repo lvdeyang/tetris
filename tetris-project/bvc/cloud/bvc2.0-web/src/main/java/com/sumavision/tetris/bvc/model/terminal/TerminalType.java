@@ -30,4 +30,14 @@ public enum TerminalType {
 		throw new ErrorTypeException("name", name);
 	}
 	
+	public static TerminalType fromTokenType(com.sumavision.tetris.auth.token.TerminalType tokenType) throws Exception{
+		TerminalType[] values = TerminalType.values();
+		for(TerminalType value:values){
+			if(value.toString().equals(tokenType.toString())){
+				return value;
+			}
+		}
+		return null;
+	}
+	
 }

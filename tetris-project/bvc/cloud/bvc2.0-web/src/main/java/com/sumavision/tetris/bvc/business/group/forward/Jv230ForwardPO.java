@@ -1,8 +1,10 @@
 package com.sumavision.tetris.bvc.business.group.forward;
 
 import javax.jdo.annotations.Column;
+import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.Table;
 
 import com.sumavision.tetris.orm.po.AbstractBasePO;
 
@@ -12,6 +14,8 @@ import com.sumavision.tetris.orm.po.AbstractBasePO;
  * <b>版本：</b>1.0<br/>
  * <b>日期：</b>2020年7月14日 下午3:02:00
  */
+@Entity
+@Table(name = "TETRIS_BVC_GROUP_JV230_FORWARD")
 public class Jv230ForwardPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
@@ -46,8 +50,13 @@ public class Jv230ForwardPO extends AbstractBasePO{
 	/** 源通道id */
 	private String sourceChannelId;
 	
+	/** 用户id */
 	private String userId;
 	
+	/** 终端id */
+	private Long terminalId;
+	
+	/** 业务 */
 	private Jv230ForwardBusinessType businessType;
 
 	@Column(name = "BUNDLE_ID")
@@ -150,6 +159,15 @@ public class Jv230ForwardPO extends AbstractBasePO{
 		this.userId = userId;
 	}
 
+	@Column(name = "TERMINAL_ID")
+	public Long getTerminalId() {
+		return terminalId;
+	}
+
+	public void setTerminalId(Long terminalId) {
+		this.terminalId = terminalId;
+	}
+	
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "BUSINESS_TYPE")
 	public Jv230ForwardBusinessType getBusinessType() {
