@@ -65,6 +65,10 @@ public class PcWebLoginFilter implements Filter{
 		JSONObject jsonResult = new JSONObject();
 		
 		String requestUri = request.getRequestURI();
+		if("/".equals(requestUri)){
+			response.sendRedirect("/web/app/login/login.html");
+			return;
+		}
 		if(!shouldFilter(requestUri)){
 			chain.doFilter(request, response);
 			return;
