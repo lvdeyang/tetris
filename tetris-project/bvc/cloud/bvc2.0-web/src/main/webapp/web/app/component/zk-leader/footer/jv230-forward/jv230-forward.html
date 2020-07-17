@@ -1,0 +1,43 @@
+<div class="zk-business-add-member">
+    <div class="win-header">
+        <span class="win-header-title">上屏列表</span>
+        <span class="win-header-close" @click="handleWindowClose"><span class="el-icon-close"></span></span>
+    </div>
+    <div style="position:absolute; left:0; top:40px; right:0;bottom:0">
+        <div style="width:100%; height:100%; position:relative;">
+            <div style="width:350px; height:100%; position:absolute; left:0; top:0; box-sizing:border-box; border-right:1px solid #123e80; padding:10px;">
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                        ref="tree"
+                        :data="bundles.data"
+                        highlight-current
+                        node-key="id"
+                        :props="bundles.props"
+                        @current-change="currentBundleChange">
+                    </el-tree>
+                </el-scrollbar>
+            </div>
+            <div style="position:absolute; left:350px; top:0; right:0; bottom:0; box-sizing:border-box;">
+                <div style="width:100%; height:100%; position:relative;">
+                    <div style="height:100%; padding-top:38px; box-sizing:border-box;">
+                        <table :class="'layout-split '+layoutStyle">
+                            <tr v-for="(tr, i0) in layout" :key="'tr-'+i0">
+                                <td v-for="(td, i1) in tr" :key="'td-'+i0+'-'+i1"
+                                        :colspan="td.colspan?td.colspan:1"
+                                        :rowspan="td.rowspan?td.rowspan:1">
+                                    <template v-if="bundles && !td.data">
+                                        <el-button type="text" icon="el-icon-refresh" style="padding:0; font-size:30px;" @click="refreshBundleSplit(td.data)"></el-button>
+                                    </template>
+                                    <template v-if="bundles && td.data">
+                                        <span style="color:#fff; font-size:16px;">{{td.data.businessName}}</span>
+                                        <el-button type="text" icon="el-icon-delete" style="padding:0; font-size:18px; position:absolute; top:10px; right:10px;" @click="deleteBundleSplit(td)"></el-button>
+                                    </template>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
