@@ -136,6 +136,9 @@ public class MediaPictureFeignController {
 	@RequestMapping(value = "/load/collection")
 	public Object loadCollection(Long folderId, HttpServletRequest request) throws Exception{
 		MediaPictureVO folder = mediaPictureQuery.loadPictureCollection(folderId);
+		if(folder==null){
+			return folder;
+		}
 		folder.setDeviceUpload(mediaFileEquipmentPermissionQuery.queryList(new MediaFileEquipmentPermissionBO().setMediaId(folder.getId()).setMediaType("folder")));
 		if (folder != null) {
 			List<MediaPictureVO> children = folder.getChildren();

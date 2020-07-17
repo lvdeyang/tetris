@@ -31,7 +31,7 @@ public class ServerHandler extends IoHandlerAdapter {
 	//1.声明service类
 	/*@Autowired
 	private TbBoxService tbBoxService;*/
-	@Autowired
+
 	FifthGenerationKnapsackFeign fifthGenerationKnapsackFeign;
     private static ServerHandler serverHandler ;
     

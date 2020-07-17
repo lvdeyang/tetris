@@ -2,8 +2,12 @@
 	"upload": true,
 	"oldMimsIp": "10.10.40.182",
 	"oldMimsPort": "8480",
-	"ftpIp": "",
+	"ftpIp": "192.165.56.229",
 	"ftpPort": "",
 	"ftpUsername": "test",
-	"ftpPassword": "123"
+	"ftpPassword": "123",
+	"omcftpIp": "192.166.62.151",
+	"omcftpPort": "21",
+	"omcftpUsername": "root",
+	"omcftpPassword": "123456"
  }
