@@ -665,12 +665,15 @@ public class MediaCompressService {
 				type = "AVIDEO";
 				
 				//对接OMC注入
-				BoUtil.uploadFile(audio.getUploadTmpPath(),audio.getUuid(), mimsServerPropsQuery.queryProps().getOmcftpIp(), 
+				BoUtil.uploadFile(audio.getUploadTmpPath(),"audio-"+audio.getId(), mimsServerPropsQuery.queryProps().getOmcftpIp(), 
+						Integer.parseInt(mimsServerPropsQuery.queryProps().getOmcftpPort()), mimsServerPropsQuery.queryProps().getOmcftpUsername(),
+						mimsServerPropsQuery.queryProps().getOmcftpPassword());
+				BoUtil.uploadFile(this.getClass().getResource("audio.jpg").getFile(),"audio-"+audio.getId(), mimsServerPropsQuery.queryProps().getOmcftpIp(), 
 						Integer.parseInt(mimsServerPropsQuery.queryProps().getOmcftpPort()), mimsServerPropsQuery.queryProps().getOmcftpUsername(),
 						mimsServerPropsQuery.queryProps().getOmcftpPassword());
 			    AdiBo adiBo=new AdiBo();
 			    adiBo.setFileName(audio.getFileName());
-			    adiBo.setMediaId(audio.getUuid());
+			    adiBo.setMediaId("audio-"+audio.getId());
 			    adiBo.setFormat("audio");
 				BoUtil.injectBo(adiBo);
 
