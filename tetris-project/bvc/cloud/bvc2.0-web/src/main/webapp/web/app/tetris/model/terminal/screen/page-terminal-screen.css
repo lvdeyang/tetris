@@ -1,4 +1,6 @@
 #add-screen .el-dialog{margin-top:50px!important;}
 #add-screen .el-dialog__body{padding-top:0; padding-bottom:0;}
 #add-screen-select-channel .el-dialog__body{padding-top:0; padding-bottom:20px;}
+#add-screen-select-channel .el-scrollbar__wrap:not(.el-select-dropdown__wrap){overflow-x:scroll!important;}
 #edit-channel-select-channel .el-dialog__body{padding-top:0; padding-bottom:20px;}
+#edit-channel-select-channel .el-scrollbar__wrap:not(.el-select-dropdown__wrap){overflow-x:scroll!important;}

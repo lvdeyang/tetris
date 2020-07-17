@@ -43,6 +43,14 @@ define([
             }
         },
         methods: {
+            jv230totalForward:function(){
+                var self = this;
+                self.qt.window('/router/zk/leader/footer/select/jv230', null, {width:500, height:700});
+            },
+            jv230ForwardList:function(){
+                var self = this;
+                self.qt.window('/router/zk/leader/footer/jv230/forward', {layout:self.playerLayout}, {width:1024, height:768});
+            },
             pushMessage: function (message) {
                 if (this.callBoard[0] === '暂无消息') {
                     this.callBoard = [];
@@ -140,7 +148,7 @@ define([
             //分屏事件
             layoutChange: function (index) {
                 var self = this;
-                $($('.screenCtrl span')[index]).css('color', '#00e9ff').siblings().css('color', '#fff');
+                //$($('.screenCtrl span')[index]).css('color', '#00e9ff').siblings().css('color', '#fff');
                 ajax.post('/command/split/change', {split: index}, function (data) {
                     if (index === 0) {
                         self.playerLayout = 1;

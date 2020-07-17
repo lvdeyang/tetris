@@ -8,6 +8,7 @@ import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.base.bo.EncoderBO;
 import com.suma.venus.resource.base.bo.UserBO;
 import com.suma.venus.resource.dao.EncoderDecoderUserMapDAO;
+import com.suma.venus.resource.pojo.BundlePO;
 import com.suma.venus.resource.pojo.ChannelSchemePO.LockStatus;
 import com.suma.venus.resource.pojo.EncoderDecoderUserMap;
 import com.suma.venus.resource.pojo.FolderPO;
@@ -420,6 +421,52 @@ public class TreeNodeVO {
 			this.setBundleStatus("bundle-online");
 		}else{
 			this.setBundleStatus("bundle-offline");
+		}
+			
+		return this;
+	}
+	
+	/**
+	 * 创建设备节点<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2018年10月14日 下午2:27:39
+	 * @param bundle 设备
+	 * @return TreeNodeVO 树节点
+	 */
+	public TreeNodeVO set(BundlePO bundle){
+		this.setId(bundle.getBundleId())
+			.setName(bundle.getBundleName())
+			.setParam(JSON.toJSONString(new HashMapWrapper<String, Object>().put("folderId", bundle.getFolderId())
+																			.put("bundleId", bundle.getId())
+																			.put("bundleName", bundle.getBundleName())
+																			.put("bundleType", bundle.getDeviceModel())
+																			.put("nodeUid", bundle.getAccessNodeUid())
+																			.put("venusBundleType", bundle.getBundleType())
+																		    .getMap()))
+			.setType(TreeNodeType.BUNDLE)
+			.setIcon(TreeNodeIcon.BUNDLE.getName())
+			.setKey(this.generateKey());
+		
+		if(LockStatus.BUSY.equals(bundle.getLockStatus())){
+			this.setStyle("color:#E6A23C;");
+		}else{
+			if("ONLINE".equals(bundle.getOnlineStatus())){
+				this.setStyle("color:#0dcc19;");
+			}
+		}
+		
+		if(null != bundle.getOnlineStatus()){
+			switch (bundle.getOnlineStatus().toString()){
+			case "ONLINE":
+				this.setBundleStatus("bundle-online");
+				break;
+			case "OFFLINE":
+				this.setBundleStatus("bundle-offline");
+				break;
+			default:
+				break;
+			}			
 		}
 			
 		return this;

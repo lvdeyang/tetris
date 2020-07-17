@@ -20,6 +20,9 @@ public class Jv230ForwardPO extends AbstractBasePO{
 
 	private static final long serialVersionUID = 1L;
 	
+	/** jv230接入层id */
+	private String layerId;
+	
 	/** jv230 bundleId */
 	private String bundleId;
 	
@@ -41,8 +44,14 @@ public class Jv230ForwardPO extends AbstractBasePO{
 	/** 高 */
 	private int h;
 	
+	/** 业务名称 */
+	private String businessName;
+	
 	/** 转发源类型 */
 	private Jv230ForwardSourceType sourceType;
+	
+	/** 源所在接入层 */
+	private String sourceLayerId;
 	
 	/** 源设备id */
 	private String sourceBundleId;
@@ -58,6 +67,15 @@ public class Jv230ForwardPO extends AbstractBasePO{
 	
 	/** 业务 */
 	private Jv230ForwardBusinessType businessType;
+
+	@Column(name = "LAYER_ID")
+	public String getLayerId() {
+		return layerId;
+	}
+
+	public void setLayerId(String layerId) {
+		this.layerId = layerId;
+	}
 
 	@Column(name = "BUNDLE_ID")
 	public String getBundleId() {
@@ -122,6 +140,15 @@ public class Jv230ForwardPO extends AbstractBasePO{
 		this.h = h;
 	}
 
+	@Column(name = "BUSINESS_NAME")
+	public String getBusinessName() {
+		return businessName;
+	}
+
+	public void setBusinessName(String businessName) {
+		this.businessName = businessName;
+	}
+
 	@Enumerated(value = EnumType.STRING)
 	@Column(name = "SOURCE_TYPE")
 	public Jv230ForwardSourceType getSourceType() {
@@ -130,6 +157,15 @@ public class Jv230ForwardPO extends AbstractBasePO{
 
 	public void setSourceType(Jv230ForwardSourceType sourceType) {
 		this.sourceType = sourceType;
+	}
+
+	@Column(name = "SOURCE_LAYER_ID")
+	public String getSourceLayerId() {
+		return sourceLayerId;
+	}
+
+	public void setSourceLayerId(String sourceLayerId) {
+		this.sourceLayerId = sourceLayerId;
 	}
 
 	@Column(name = "SOURCE_BUNDLE_ID")

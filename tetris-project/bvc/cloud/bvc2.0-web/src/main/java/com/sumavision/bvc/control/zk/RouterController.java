@@ -261,6 +261,34 @@ public class RouterController {
 	}
 	
 	/**
+	 * 首长终端  选择jv230上屏<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月9日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/footer/select/jv230")
+	public ModelAndView zkLeaderFooterSelectJv230(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/footer/select-jv230/select-jv230");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
+	 * 首长终端  查询jv230转发<br/>
+	 * <b>作者:</b>lvdeyang<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2019年12月9日 上午9:37:54
+	 * @param String token 用户登录token
+	 */
+	@RequestMapping(value = "/zk/leader/footer/jv230/forward")
+	public ModelAndView zkLeaderFooterJv230Forward(String token){
+		ModelAndView mv = new ModelAndView("web/bvc/zk-leader/footer/jv230-forward/jv230-forward");
+		mv.addObject("token", token);
+		return mv;
+	}
+	
+	/**
 	 * 首长终端 头部 <br/>
 	 * <b>作者:</b>yanxiaochao<br/>
 	 * <b>版本：</b>1.0<br/>

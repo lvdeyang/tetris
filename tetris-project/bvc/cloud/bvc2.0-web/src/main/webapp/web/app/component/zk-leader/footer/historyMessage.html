@@ -26,10 +26,15 @@
                 <img v-if="!buttons.sixteen" :src="baseUrl+'images/zk-leader/btns/sixteen.png'"/>
                 <img v-else :src="baseUrl+'images/zk-leader/btns/sixteenActive.png'"/>
             </div>
+            <div title="上一页" style="font-size:14px;"><span class="icon-chevron-left"></span></div>
+            <span style="font-size:14px; color:#fff; float:left; position:relative; top:1px;">1/2，30</span>
+            <div title="下一页" style="font-size:14px;"><span class="icon-chevron-right"></span></div>
+            <div title="全部上屏" style="font-size:16px;" @click="jv230totalForward"><span class="icon-external-link"></span></div>
+            <div title="上屏列表" style="font-size:16px;" @click="jv230ForwardList"><span class="icon-list"></span></div>
             <!--换一批-->
-            <div class="change" @click="replace">
+            <!--<div class="change" @click="replace">
                 <img src="../../../../../images/zk-leader/change.png" alt="换一批">
-            </div>
+            </div>-->
         </div>
         <!--历史消息
         <div class="msgBg">
@@ -90,4 +95,5 @@
     <!--底部折叠按钮
     <el-button size="small" @click="showOrHide">》折叠列表</el-button>
     -->
+
 </div>

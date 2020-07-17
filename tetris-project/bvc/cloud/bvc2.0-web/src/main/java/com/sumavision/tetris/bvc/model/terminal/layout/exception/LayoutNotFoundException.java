@@ -14,4 +14,10 @@ public class LayoutNotFoundException extends BaseException{
 															 .toString());
 	}
 
+	public LayoutNotFoundException(String name) {
+		super(StatusCode.FORBIDDEN, new StringBufferWrapper().append("布局不存在，name：")
+															 .append(name)
+															 .toString());
+	}
+	
 }

@@ -75,13 +75,15 @@
                     id="add-screen-select-channel"
                     @close="handleAddScreenSelectChannelClose">
                 <div style="max-height:400px;">
-                    <el-tree
-                            v-if="dialog.addScreen.channelsVisible"
-                            ref="addScreenChannelsTree"
-                            :props="dialog.addScreen.props"
-                            highlight-current
-                            :data="dialog.addScreen.channels">
-                    </el-tree>
+                    <el-scrollbar style="height:100%;">
+                        <el-tree
+                                v-if="dialog.addScreen.channelsVisible"
+                                ref="addScreenChannelsTree"
+                                :props="dialog.addScreen.props"
+                                highlight-current
+                                :data="dialog.addScreen.channels">
+                        </el-tree>
+                    </el-scrollbar>
                 </div>
             </el-dialog>
             <div style="width:100%; height:600px; position:relative; border:1px solid #ebeef5;">
@@ -166,14 +168,16 @@
             :before-close="handleEditChannelClose"
             id="edit-channel-select-channel">
             <div style="max-height:400px;">
-                <el-tree
-                    v-if="dialog.editChannel.visible"
-                    ref="editChannelTree"
-                    :props="dialog.editChannel.props"
-                    highlight-current
-                    :data="dialog.editChannel.channels"
-                    @current-change="editChannelCurrentChange">
-                </el-tree>
+                <el-scrollbar style="height:100%;">
+                    <el-tree
+                        v-if="dialog.editChannel.visible"
+                        ref="editChannelTree"
+                        :props="dialog.editChannel.props"
+                        highlight-current
+                        :data="dialog.editChannel.channels"
+                        @current-change="editChannelCurrentChange">
+                    </el-tree>
+                </el-scrollbar>
             </div>
             <span slot="footer" class="dialog-footer">
                 <el-button size="medium" @click="handleEditChannelClose">取消</el-button>
