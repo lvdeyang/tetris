@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<adi:ADI2 xmlns:adi="http://www.cablelabs.com/VODSchema/adi" xmlns="http://www.cablelabs.com/VODSchema/default" xmlns:vod="http://www.cablelabs.com/VODSchema/vod">
+  <adi:OpenGroupAsset type="VODRelease" product="VOD">
+    <vod:VODRelease providerID="WASU" providerType="2" assetID="jetsen1334254" updateNum="" groupAsset="Y" serialNo="1594370139473">
+      <adi:AssetLifetime startDateTime="2020-07-192" endDateTime="2020-07-192"/>
+    </vod:VODRelease>
+  </adi:OpenGroupAsset>
+  <adi:AddMetadataAsset groupProviderID="WASU" groupAssetID="jetsen1334254" type="Title" product="VOD">
+    <vod:Title providerID="WASU" assetID="jetsen1334254" updateNum="1">
+      <adi:AssetLifetime startDateTime="" endDateTime=""/>
+      <vod:TitleFull>新铁血战士</vod:TitleFull>
+      <vod:Format/>
+      <vod:StarLevel>0</vod:StarLevel>
+      <vod:Keyword></vod:Keyword>
+      <vod:IsAdvertise>0</vod:IsAdvertise>
+      <vod:Background/>
+      <vod:Year/>
+      <vod:StudioName/>
+      <vod:Actor type="Actor">
+        <vod:LastNameFirst></vod:LastNameFirst>
+      </vod:Actor>
+      <vod:RunTime/>
+      <vod:Actor type="Actress">
+        <vod:LastNameFirst/>
+      </vod:Actor>
+      <vod:Actor type="CoActress">
+        <vod:LastNameFirst/>
+      </vod:Actor>
+      <vod:Actor type="CoActor">
+        <vod:LastNameFirst/>
+      </vod:Actor>
+      <vod:MediaFormat/>
+      <vod:Director>
+        <vod:LastNameFirst></vod:LastNameFirst>
+      </vod:Director>
+      <vod:CountryOfOrigin>1</vod:CountryOfOrigin>
+      <vod:IptvDesc/>
+      <vod:Comments/>
+      <vod:Agent/>
+      <vod:ShowType>Movie</vod:ShowType>
+      <vod:Priority>2</vod:Priority>
+      <vod:Status>0</vod:Status>
+      <vod:Rating/>
+      <vod:SummaryMedium></vod:SummaryMedium>
+      <vod:SummaryShort></vod:SummaryShort>
+      <vod:Language></vod:Language>
+      <vod:Superviser/>
+      <vod:EnglishDesc/>
+      <vod:Extend>
+        <vod:Director_en/>
+        <vod:Name_en/>
+        <vod:Actor_en/>
+        <vod:Description_en/>
+      </vod:Extend>
+      <vod:programType>Video</vod:programType>
+    </vod:Title>
+  </adi:AddMetadataAsset>
+  <adi:AddMetadataAsset groupProviderID="WASU" groupAssetID="jetsen1334254" type="CategoryPath" product="VOD">
+    <vod:CategoryPath providerID="WASU" assetID="jetsen1334254" updateNum="1">
+      <adi:AssetLifetime startDateTime="" endDateTime=""/>
+      <vod:Category/>
+      <vod:Classification></vod:Classification>
+    </vod:CategoryPath>
+  </adi:AddMetadataAsset>
+  <adi:AddMetadataAsset groupProviderID="WASU" groupAssetID="jetsen1334254" type="Copyright" product="VOD">
+    <vod:Copyright providerID="WASU" assetID="jetsen1334254" updateNum="1">
+      <adi:AssetLifetime startDateTime="" endDateTime=""/>
+      <vod:LicenseType>0</vod:LicenseType>
+      <vod:TransferAgain>0</vod:TransferAgain>
+      <vod:CopyType>1</vod:CopyType>
+      <vod:OriginalLicenseCompany/>
+      <vod:Transfer3rd>0</vod:Transfer3rd>
+      <vod:CopyName/>
+      <vod:PublishNo/>
+      <vod:AuthorserilNo/>
+      <vod:VideoLicense/>
+      <vod:CopyIdea/>
+      <vod:CountryNo/>
+      <vod:PublicationDate/>
+      <vod:CopyLicense/>
+      <vod:PublicationDate/>
+      <vod:CopySerilNo/>
+      <vod:CopyLicenser/>
+      <vod:TransferLicenseCompany/>
+    </vod:Copyright>
+  </adi:AddMetadataAsset>
+  <adi:AcceptContentAsset type="Image" metadataOnly="N" fileName="" fileSize="13691" mD5CheckSum="" Original_Asset_ID="">
+    <vod:Image providerID="WASU" assetID="1680b78f-da5a-4901-821c-6ce66c54d077" updateNum="1" fileName="" fileSize="13691" mD5CheckSum="" transferContentURL="新铁血战士.jpg" imageEncodingProfile="JPG/JPEG">
+      <adi:AssetLifetime startDateTime="" endDateTime=""/>
+      <vod:Caption/>
+      <vod:MimeType>25</vod:MimeType>
+      <vod:FileType>3</vod:FileType>
+      <vod:ServiceType>1</vod:ServiceType>
+      <vod:ColorType>RGB</vod:ColorType>
+      <vod:Usage>6</vod:Usage>
+      <vod:ImagePixels horizontalPixels="" verticalPixels=""/>
+    </vod:Image>
+  </adi:AcceptContentAsset>
+  <adi:AssociateContent type="Image" effectiveDate="" groupProviderID="WASU" groupAssetID="jetsen1334254" providerID="WASU" assetID="1680b78f-da5a-4901-821c-6ce66c54d077"/>
+  <adi:AcceptContentAsset type="Video" metadataOnly="N" fileName="20200710-155045-d544cd21-cf1f-4596-a764-9711baa5b44" fileSize="4956530512" mD5CheckSum="" Original_Asset_ID="">
+    <vod:Video providerID="WASU" assetID="e898a9e7-5b84-4494-b7bf-fdebfea20dfe" updateNum="1" fileName="20200710-155045-d544cd21-cf1f-4596-a764-9711baa5b44" fileSize="4956530512" mD5CheckSum="" transferContentURL="20200710-155045-d544cd21-cf1f-4596-a764-9711baa5b44b.ts" encodingProfile="" encodingCode="">
+      <adi:AssetLifetime startDateTime="" endDateTime=""/>
+      <vod:AspectRatio>16:9</vod:AspectRatio>
+      <vod:HDFlag>0</vod:HDFlag>
+      <vod:Brightness/>
+      <vod:FrameHeight>1080</vod:FrameHeight>
+      <vod:IsFinished>1</vod:IsFinished>
+      <vod:MimeType>1</vod:MimeType>
+      <vod:IsEdit>1</vod:IsEdit>
+      <vod:ServiceType>1</vod:ServiceType>
+      <vod:parentAssetID/>
+      <vod:NeedDRM>1</vod:NeedDRM>
+      <vod:Usage>1</vod:Usage>
+      <vod:FrameWidth>1920</vod:FrameWidth>
+      <vod:VideoCodec/>
+      <vod:Numberofframes>3</vod:Numberofframes>
+      <vod:IsDRM>1</vod:IsDRM>
+      <vod:Duration/>
+      <vod:FileType>1</vod:FileType>
+      <vod:Bitrate>6350746</vod:Bitrate>
+      <vod:FrameRate/>
+    </vod:Video>
+  </adi:AcceptContentAsset>
+  <adi:AssociateContent type="Video" effectiveDate="" groupProviderID="WASU" groupAssetID="jetsen1334254" providerID="WASU" assetID="e898a9e7-5b84-4494-b7bf-fdebfea20dfe"/>
+</adi:ADI2>

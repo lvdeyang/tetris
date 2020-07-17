@@ -121,7 +121,11 @@ define([
                                 }
                             }
                             for (var k = 0; k < data[i].screen.length; k++) {
-                                if (!data[i].screen[k].contentType) data[i].screen[k].contentType = self.channelData.broadWay == self.broadWayStream ? '视频资源' : '仓库资源';
+                            	if(self.channelData.autoBroad){
+                            		data[i].screen[k].contentType="音频资源";
+                            	}else{
+                                    if (!data[i].screen[k].contentType) data[i].screen[k].contentType = self.channelData.broadWay == self.broadWayStream ? '视频资源' : '仓库资源';
+                            	}
                             }
                             self.options.list.push(data[i]);
                         }

@@ -24,6 +24,14 @@ public class ServerProps {
 	private String ftpUsername;
 	
 	private String ftpPassword;
+	
+    private String omcftpIp;
+	
+	private String omcftpPort;
+	
+	private String omcftpUsername;
+	
+	private String omcftpPassword;
 
 	public String getId() {
 		return id;
@@ -80,5 +88,38 @@ public class ServerProps {
 	public void setFtpPassword(String ftpPassword) {
 		this.ftpPassword = ftpPassword;
 	}
+
+	public String getOmcftpIp() {
+		return omcftpIp;
+	}
+
+	public void setOmcftpIp(String omcftpIp) {
+		this.omcftpIp = omcftpIp;
+	}
+
+	public String getOmcftpPort() {
+		return omcftpPort;
+	}
+
+	public void setOmcftpPort(String omcftpPort) {
+		this.omcftpPort = omcftpPort;
+	}
+
+	public String getOmcftpUsername() {
+		return omcftpUsername;
+	}
+
+	public void setOmcftpUsername(String omcftpUsername) {
+		this.omcftpUsername = omcftpUsername;
+	}
+
+	public String getOmcftpPassword() {
+		return omcftpPassword;
+	}
+
+	public void setOmcftpPassword(String omcftpPassword) {
+		this.omcftpPassword = omcftpPassword;
+	}
+	
 	
 }
