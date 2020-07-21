@@ -229,6 +229,8 @@ public class PageTaskPO extends AbstractBasePO {
 		this.businessName = businessName;
 	}
 	
+	@Column(name = "VIDEO_STATUS")
+	@Enumerated(value = EnumType.STRING)
 	public ExecuteStatus getVideoStatus() {
 		return videoStatus;
 	}
@@ -237,6 +239,8 @@ public class PageTaskPO extends AbstractBasePO {
 		this.videoStatus = videoStatus;
 	}
 
+	@Column(name = "AUDIO_STATUS")
+	@Enumerated(value = EnumType.STRING)
 	public ExecuteStatus getAudioStatus() {
 		return audioStatus;
 	}
@@ -293,6 +297,8 @@ public class PageTaskPO extends AbstractBasePO {
 		this.srcVideoCode = srcVideoCode;
 	}
 
+	@Column(name = "SRC_VIDEO_ORIGIN")
+	@Enumerated(value = EnumType.STRING)
 	public OriginType getSrcVideoOrigin() {
 		return srcVideoOrigin;
 	}
@@ -381,6 +387,8 @@ public class PageTaskPO extends AbstractBasePO {
 		this.srcAudioCode = srcAudioCode;
 	}
 
+	@Column(name = "SRC_AUDIO_ORIGIN")
+	@Enumerated(value = EnumType.STRING)
 	public OriginType getSrcAudioOrigin() {
 		return srcAudioOrigin;
 	}
@@ -601,7 +609,7 @@ public class PageTaskPO extends AbstractBasePO {
 	 */
 	public PageTaskPO setFree(){
 //		this.setBusinessType(BusinessType.NONE);
-//		this.setLocationIndex(null);
+		this.setLocationIndex(null);
 //		this.setBusinessId(null);
 		this.setShowing(false);
 		return this;
@@ -622,7 +630,8 @@ public class PageTaskPO extends AbstractBasePO {
 	/** 任务与任务是否相同 TODO:完善 */
 	public boolean equalsTask(PageTaskPO task){
 		if(this.getId().equals(task.getId())) return true;
-		if(this.srcVideoId.equals(task.getSrcVideoId())
+		if(this.businessId.equals(task.getBusinessId())
+				&& this.srcVideoId.equals(task.getSrcVideoId())
 				&& this.srcAudioId.equals(task.getSrcAudioId())){
 			return true;
 		}
@@ -645,15 +654,15 @@ public class PageTaskPO extends AbstractBasePO {
 //		this.businessId = player.getBusinessId();
 //		this.businessName = player.getBusinessName();
 		this.dstId = player.getId().toString();
-		this.dstAudioBaseType = "VenusAudioIn";
+		this.dstAudioBaseType = "VenusAudioOut";
 		this.dstAudioChannelId = ChannelType.AUDIODECODE1.getChannelId();
 		this.dstAudioChannelName = ChannelType.AUDIODECODE1.getName();
 		this.dstBundleId = player.getBundleId();
 		this.dstBundleName = bundlePO.getBundleName();
 		this.dstBundleType = bundlePO.getBundleType();
 		this.dstLayerId = bundlePO.getAccessNodeUid();
-		this.dstVideoBaseType = "VenusVideoIn";
-		this.dstVideoChannelId = ChannelType.VIDEOENCODE1.getChannelId();
+		this.dstVideoBaseType = "VenusVideoOut";
+		this.dstVideoChannelId = ChannelType.VIDEODECODE1.getChannelId();
 		this.dstVideoChannelName = ChannelType.VIDEOENCODE1.getName();
 		return this;
 	}
@@ -664,6 +673,7 @@ public class PageTaskPO extends AbstractBasePO {
 //		this.businessId = player.getBusinessId();
 //		this.businessName = player.getBusinessName();
 		this.dstId = null;
+		this.locationIndex = null;
 		this.dstAudioBaseType = null;
 		this.dstAudioChannelId = null;
 		this.dstAudioChannelName = null;

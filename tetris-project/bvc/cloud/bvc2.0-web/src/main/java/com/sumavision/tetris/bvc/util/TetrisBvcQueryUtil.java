@@ -47,6 +47,7 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 
 @Service
 public class TetrisBvcQueryUtil {
@@ -62,6 +63,17 @@ public class TetrisBvcQueryUtil {
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
+	
+	/** 根据dstId查找分页任务 */
+	public PageTaskPO queryPageTaskById(Collection<PageTaskPO> tasks, String dstId) {
+		if(tasks == null) return null;
+		for(PageTaskPO task : tasks){
+			if(dstId.equals(task.getDstId())){
+				return task;
+			}
+		}
+		return null;
+	}
 	
 	public AgendaPO queryAgendaById(Collection<AgendaPO> agendas, Long id){
 		for(AgendaPO agenda : agendas){

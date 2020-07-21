@@ -135,6 +135,8 @@ public class CommonForwardPO extends AbstractBasePO{
 		this.dstDeviceType = dstDeviceType;
 	}
 	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "TYPE")
 	public AgendaForwardType getType() {
 		return type;
 	}
@@ -183,6 +185,8 @@ public class CommonForwardPO extends AbstractBasePO{
 		this.srcCode = srcCode;
 	}
 
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "SRC_ORIGIN")
 	public OriginType getSrcOrigin() {
 		return srcOrigin;
 	}
@@ -191,6 +195,8 @@ public class CommonForwardPO extends AbstractBasePO{
 		this.srcOrigin = srcOrigin;
 	}
 
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "DST_ORIGIN")
 	public OriginType getDstOrigin() {
 		return dstOrigin;
 	}
@@ -271,6 +277,8 @@ public class CommonForwardPO extends AbstractBasePO{
 		this.srcChannelName = srcChannelName;
 	}
 
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "BUSINESS_INFO_TYPE")
 	public BusinessInfoType getBusinessInfoType() {
 		return businessType;
 	}

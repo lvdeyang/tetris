@@ -5,26 +5,17 @@ import java.util.Collections;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.suma.venus.resource.pojo.BundlePO;
-import com.sumavision.bvc.command.group.basic.CommandGroupPO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
-import com.sumavision.bvc.command.group.user.layout.page.CommandPlayerTaskBO;
-import com.sumavision.bvc.command.group.user.layout.page.CommandPlayerTaskPO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
-import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.command.group.user.layout.player.PlayerBusinessType;
 import com.sumavision.bvc.command.group.user.layout.scheme.CommandGroupUserLayoutShemePO;
-import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserLayoutShemeVO;
+import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
 import com.sumavision.bvc.device.command.bo.MessageSendCacheBO;
-import com.sumavision.bvc.device.command.bo.PlayerInfoBO;
 import com.sumavision.bvc.device.command.cast.CommandCastServiceImpl;
-import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.common.CommandCommonServiceImpl;
 import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
@@ -37,12 +28,12 @@ import com.sumavision.bvc.device.group.bo.LogicBO;
 import com.sumavision.bvc.device.group.bo.PassByBO;
 import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
-import com.sumavision.bvc.system.po.AvtplGearsPO;
-import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.ExecuteStatus;
+import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
+import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -65,13 +56,22 @@ import lombok.extern.slf4j.Slf4j;
 public class PageTaskService {
 	
 	@Autowired
+	private CommandGroupUserInfoDAO commandGroupUserInfoDao;	
+	
+	@Autowired
 	private PageInfoDAO pageInfoDao;
+	
+	@Autowired
+	private PageTaskDAO pageTaskDao;	
 	
 	@Autowired
 	private TerminalBundleUserPermissionDAO terminalBundleUserPermissionDao;
 	
 	@Autowired
 	private ResourceBundleDAO resourceBundleDao;
+	
+	@Autowired
+	private BusinessCommonService businessCommonService;
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
@@ -87,20 +87,25 @@ public class PageTaskService {
 
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+
+	@Autowired
+	private TetrisBvcQueryUtil tetrisBvcQueryUtil;
 	
 	@Autowired
 	private ExecuteBusinessProxy executeBusiness;
 	
-	//待重构
+	//重构
 	public MessageSendCacheBO notifyUser(CommandGroupUserInfoPO userInfo, PageInfoPO pageInfo, boolean doWebsocket) throws Exception{
 		
-		List<PageTaskPO> pageTasks = getPageTasks(pageInfo, pageInfo.getCurrentPage(), true);
+		/*List<PageTaskPO> pageTasks = getPageTasks(pageInfo, pageInfo.getCurrentPage(), true);
 		
 		CommandGroupUserLayoutShemePO usingScheme = userInfo.obtainUsingScheme();
-		CommandGroupUserLayoutShemeVO schemeVO = new CommandGroupUserLayoutShemeVO().set(usingScheme, pageTasks);
+		int totalPageNumber = getTotalPageNumber(pageInfo);
+		CommandGroupUserLayoutShemeVO schemeVO = generateSchemeVO(usingScheme, pageInfo, pageTasks, totalPageNumber);*/
+		CommandGroupUserLayoutShemeVO schemeVO = generateSchemeVO(userInfo, pageInfo);
 		
 		JSONObject message = new JSONObject();
-		message.put("businessType", "refreshSplit");
+		message.put("businessType", "refreshPage");
 		message.put("pageInfo", schemeVO);
 		log.info("layout: " + JSON.toJSONString(schemeVO));
 		
@@ -119,13 +124,6 @@ public class PageTaskService {
 		
 		if(newTasks == null) newTasks = new ArrayList<PageTaskPO>();
 		if(removeTasks == null) removeTasks = new ArrayList<PageTaskPO>();
-		
-//		//查找该用户配置信息
-//		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
-//		if(null == userInfo){
-//			//如果没有则建立默认
-////			userInfo = commandUserServiceImpl.generateDefaultUserInfo(user.getId(), user.getName(), true);
-//		}
 		
 		Integer currentPage = pageInfo.getCurrentPage();
 		
@@ -164,27 +162,66 @@ public class PageTaskService {
 		
 //		jumpToPage(pageInfo, newCurrentPage);
 		List<PageTaskPO> newPageTasks = getPageTasks(pageInfo, newCurrentPage, true);
-		comparePage(pageInfo, oldTaskPOs, newPageTasks, null, null, null);
-		//notifyUser
+		comparePage(pageInfo, oldTaskPOs, newPageTasks, true);
+		
+		//notifyUser，后续要改
+		Long userId = Long.parseLong(pageInfo.getOriginId());
+		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+		notifyUser(userInfo, pageInfo, true);
+		
 	}
 	
-	public void jumpToPage(PageInfoPO pageInfo, int toPage) throws Exception{
-		//对比新老页
-		//筛选出正在使用的播放器
-		/*List<CommandGroupUserPlayerPO> oldPageUsingPlayers = new ArrayList<CommandGroupUserPlayerPO>();
-		List<CommandGroupUserPlayerPO> players = pageInfo.obtainUsingSchemePlayers();
-		for(CommandGroupUserPlayerPO player : players){
-			if(!player.getPlayerBusinessType().equals(PlayerBusinessType.NONE)){
-				oldPageUsingPlayers.add(player);
-			}
+	/**
+	 * 切换分屏，跳转页数<br/>
+	 * <p>跳转页数时，分页大小不需要变化；分页大小改变时，一般跳转到第1页</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月21日 上午10:07:49
+	 * @param pageInfo
+	 * @param toPage 跳到第几页，切换分屏时一般跳到第1页
+	 * @param pageSize 切换分页大小
+	 * @throws Exception
+	 */
+	public void jumpToPageAndChangeSplit(PageInfoPO pageInfo, int toPage, int pageSize) throws Exception{
+		
+		if(toPage < 1) throw new BaseException(StatusCode.FORBIDDEN, "当前已经在第1页");
+		
+		int totalPageCount = getTotalPageNumber(pageInfo);
+		if(toPage > totalPageCount){
+			throw new BaseException(StatusCode.FORBIDDEN, "总页数为" + totalPageCount + "，无法找到第" + toPage + "页");
 		}
-		List<CommandPlayerTaskPO> newPageTasks = getPageTasks(pageInfo, toPage, true);
-		comparePage(pageInfo, newPageTasks);*/
+		
+		//获取当前分页下的任务
+		List<PageTaskPO> oldTaskPOs = getPageTasks(pageInfo, pageInfo.getCurrentPage(), true);
+		
+		//设置新的参数，持久化
+		pageInfo.setCurrentPage(toPage);
+		pageInfo.setPageSize(pageSize);
+		pageInfoDao.save(pageInfo);
+		
+		//获取新分页下的任务
+		List<PageTaskPO> newTaskPOs = getPageTasks(pageInfo, toPage, true);
+		
+		//对比新旧页，下发协议
+		comparePage(pageInfo, oldTaskPOs, newTaskPOs, true);
+		
+		//notifyUser，后续要改
+		Long userId = Long.parseLong(pageInfo.getOriginId());
+		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(userId);
+		notifyUser(userInfo, pageInfo, true);
+		
+	}
+	
+	/** 总页数 */
+	public int getTotalPageNumber(PageInfoPO pageInfo){
+		int lastIndex = pageInfo.getPageTasks().size() - 1;
+		if(lastIndex < 0) return 1;
+		return getPageNumberByIndex(pageInfo, lastIndex);
 	}
 	
 	/** 计算第index个任务在第几页 */
-	private int getPageNumberByIndex(PageInfoPO userInfo, int index){
-		int pageSize = userInfo.getPageSize();
+	private int getPageNumberByIndex(PageInfoPO pageInfo, int index){
+		int pageSize = pageInfo.getPageSize();
 		return calculatePageNumber(pageSize, index);
 	}
 	
@@ -230,9 +267,15 @@ public class PageTaskService {
 		}
 		
 		if(pageNumber < totalPageCount){
-			return tasks.subList((pageNumber-1)*pageSize, pageNumber*pageSize);
+//			return tasks.subList((pageNumber-1)*pageSize, pageNumber*pageSize);
+			List<PageTaskPO> subTasks = tasks.subList((pageNumber-1)*pageSize, pageNumber*pageSize);
+			List<PageTaskPO> result = new ArrayList<PageTaskPO>(subTasks);
+			return result;
 		}else{
-			return tasks.subList((pageNumber-1)*pageSize, tasks.size());
+//			return tasks.subList((pageNumber-1)*pageSize, tasks.size());
+			List<PageTaskPO> subTasks = tasks.subList((pageNumber-1)*pageSize, tasks.size());
+			List<PageTaskPO> result = new ArrayList<PageTaskPO>(subTasks);
+			return result;
 		}		
 	}
 	
@@ -268,6 +311,7 @@ public class PageTaskService {
 					index = tasks.size();
 				}
 				tasks.add(index, newTask);
+//				tasks.add(newTask);
 			}else{
 				//直接加在最后
 				tasks.add(newTask);
@@ -278,6 +322,7 @@ public class PageTaskService {
 		markIndex(tasks);
 		
 		//持久化
+		pageTaskDao.save(tasks);
 		pageInfoDao.save(pageInfo);
 		
 		return jumpTo;
@@ -307,187 +352,44 @@ public class PageTaskService {
 		pageInfoDao.save(pageInfo);
 	}
 	
-	/** 对比 */
-	/*private LogicBO comparePage(
-			CommandGroupUserInfoPO userInfo,
-//			List<CommandGroupUserPlayerPO> _oldPageUsingPlayers,
-			List<CommandPlayerTaskPO> newPageTasks) throws Exception{
-		
-		synchronized (userInfo.getUserId()) {
-//			for(CommandGroupUserPlayerPO _oldPlayer : _oldPageUsingPlayers){
-//				oldPlayers.add(_oldPlayer);
-//			}
-			
-			//把所有的task的LocationIndex置为null
-			List<CommandPlayerTaskPO> tasks = userInfo.getTasks();
-			for(CommandPlayerTaskPO task : tasks){
-				task.setLocationIndex(null);
-			}
-			
-			List<CommandGroupUserPlayerPO> allPlayers = userInfo.getPlayers();
-			Collections.sort(allPlayers, new CommandGroupUserPlayerPO.PlayerComparatorFromIndex());
-			
-			List<CommandGroupUserPlayerPO> oldPlayers = new ArrayList<CommandGroupUserPlayerPO>();
-			List<CommandGroupUserPlayerPO> idlePlayers = new ArrayList<CommandGroupUserPlayerPO>();
-			for(CommandGroupUserPlayerPO player : allPlayers){
-				if(!player.getPlayerBusinessType().equals(PlayerBusinessType.NONE)){
-					oldPlayers.add(player);
-				}else{
-					idlePlayers.add(player);
-				}
-			}
-			
-			//保留转发关系不变的播放器（index可能改变）（暂时无用）
-			List<CommandGroupUserPlayerPO> remainPlayers = new ArrayList<CommandGroupUserPlayerPO>();
-			
-			//可能需要关闭的播放器
-			List<CommandGroupUserPlayerPO> closePlayers = new ArrayList<CommandGroupUserPlayerPO>();
-			//本页上的新任务
-			List<CommandPlayerTaskPO> newTasks = new ArrayList<CommandPlayerTaskPO>();
-			
-			//循环，筛选出新的任务，剩下oldPlayers就是需要关闭的老任务
-			int newTaskIndex = 0;
-			for( ; newTaskIndex<newPageTasks.size(); newTaskIndex++){
-//			for(CommandPlayerTaskPO newPageTask : newPageTasks){
-				CommandPlayerTaskPO newPageTask = newPageTasks.get(newTaskIndex);
-				newPageTask.setLocationIndex(newTaskIndex);
-				boolean has = false;
-				for(CommandGroupUserPlayerPO oldPlayer : oldPlayers){
-					if(newPageTask.equalsPlayer(oldPlayer)){//对比2个播放器业务是否相同
-						has = true;
-						oldPlayer.setLocationIndex(newTaskIndex);
-						remainPlayers.add(oldPlayer);
-						oldPlayers.remove(oldPlayer);//remove，下次不再遍历
-						break;//删除了元素，必须跳出
-					}
-				}
-				if(!has){
-					newTasks.add(newPageTask);
-				}
-			}
-			
-			closePlayers.addAll(oldPlayers);
-			
-			
-			
-			//用来做新业务的所有播放器，可能包含老播放器，以及未使用的播放器
-			List<CommandGroupUserPlayerPO> newTaskPlayers = new ArrayList<CommandGroupUserPlayerPO>();
-			
-			//需要挂断的老播放器
-			List<CommandGroupUserPlayerPO> needClosePlayers = new ArrayList<CommandGroupUserPlayerPO>();
-							
-			if(newTasks.size() <= closePlayers.size()){
-				//直接用来做新业务的老播放器
-				List<CommandGroupUserPlayerPO> old4newPlayers = closePlayers.subList(0, newTasks.size());
-				newTaskPlayers.addAll(old4newPlayers);
-				
-				//需要挂断的老播放器
-				needClosePlayers = closePlayers.subList(newTasks.size(), closePlayers.size());
-			}else{
-				//所有老播放器都做新业务
-	//			List<CommandGroupUserPlayerPO> old4newPlayers = new ArrayList<CommandGroupUserPlayerPO>(closePlayers);
-				newTaskPlayers.addAll(closePlayers);
-				
-				//再找空闲播放器进行补充（数量一定足够吗？）
-				int needCount = newTasks.size() - closePlayers.size();
-//				List<CommandGroupUserPlayerPO> players = commandCommonServiceImpl.userChoseUsefulPlayers(userId, PlayerBusinessType.COOPERATE_COMMAND, needCount, false);
-				for(int i=0; i<needCount; i++){
-					newTaskPlayers.add(idlePlayers.get(0));
-					idlePlayers.remove(0);
-				}
-//				newTaskPlayers.addAll(players);
-			}
-			
-			for(int i=0; i<newTasks.size(); i++){
-				CommandPlayerTaskPO newTask = newTasks.get(i);
-				CommandGroupUserPlayerPO newTaskPlayer = newTaskPlayers.get(i);
-				//使用newTaskPlayer进行newTask的任务
-				newTaskPlayer.set(newTask);
-//				newTask.set(newTaskPlayer);
-				//newTaskPlayer与newTask互相关联
-			}
-			
-			//给挂断的老播放器、剩下的空闲播放器重新标locationIndex			
-			for(CommandGroupUserPlayerPO needClosePlayer : needClosePlayers){
-				needClosePlayer.setLocationIndex(newTaskIndex++);
-			}
-			for(CommandGroupUserPlayerPO idlePlayer : idlePlayers){
-				idlePlayer.setLocationIndex(newTaskIndex++);
-			}
-			
-			//呼叫所有的newTaskPlayers，挂断所有的NONE的needClosePlayers；进行相应的上屏处理；字幕下发
-			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();			
-			LogicBO logic = openAndCloseDecoder(newTaskPlayers, needClosePlayers, codec);
-//			log.info("对比分页 logic: " + JSON.toJSON(logic));
-			executeBusiness.execute(logic, "刷新播放器分页");
-			
-			
-			for(CommandGroupUserPlayerPO needClosePlayer : needClosePlayers){
-				needClosePlayer.setFree();
-			}
-			
-			//持久化
-			pageInfoDao.save(userInfo);
-			
-			return logic;
-		}
-	}*/
-	
-	/** 对比 */
+	/**
+	 * 对比前后分页的任务，呼叫或挂断解码器<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月21日 上午10:13:23
+	 * @param pageInfo 仅提供id等信息，不能用来获取pageInfo.getPageTasks
+	 * @param _oldPageTasks 需要提前提取之前分页中的任务
+	 * @param newPageTasks 切换分页之后的任务
+	 * @param doProtocal 是否下发协议
+	 * @return
+	 * @throws Exception
+	 */
 	private LogicBO comparePage(
 			PageInfoPO pageInfo,
 			List<PageTaskPO> _oldPageTasks,
 			List<PageTaskPO> newPageTasks,
-			List<PageTaskPO> remainTasks,
-			List<PageTaskPO> addTasks,
-			List<PageTaskPO> closeTasks) throws Exception{
+			boolean doProtocal) throws Exception{
 		
 		synchronized (pageInfo.getOriginId()) {//TODO:这个锁需要再考虑
 			
-			if(remainTasks == null) remainTasks = new ArrayList<PageTaskPO>();
-			if(addTasks == null) addTasks = new ArrayList<PageTaskPO>();
-			if(closeTasks == null) closeTasks = new ArrayList<PageTaskPO>();
+			List<PageTaskPO> remainTasks = new ArrayList<PageTaskPO>();
+			List<PageTaskPO> addTasks = new ArrayList<PageTaskPO>();
+			List<PageTaskPO> closeTasks = new ArrayList<PageTaskPO>();
+			List<PageTaskPO> needCloseTasks = new ArrayList<PageTaskPO>();//需要挂断的播放器
 			
-			List<PageTaskPO> oldPageTasks = new ArrayList<PageTaskPO>(_oldPageTasks);
-			for(PageTaskPO oldPageTask : oldPageTasks){
-				oldPageTask.setShowing(false);
-				oldPageTask.clearDst();
+			List<PageTaskPO> oldPageTasks = new ArrayList<PageTaskPO>();//(_oldPageTasks);
+			List<PageTaskPO> showingPageTasks = new ArrayList<PageTaskPO>();
+			for(PageTaskPO _oldPageTask : _oldPageTasks){
+				oldPageTasks.add(_oldPageTask);
+				showingPageTasks.add(_oldPageTask);
 			}
+			
 			int index=0;
 			for(PageTaskPO newPageTask : newPageTasks){
 				newPageTask.setShowing(true);
 				newPageTask.setLocationIndex(index++);
 			}
-//			for(CommandGroupUserPlayerPO _oldPlayer : _oldPageUsingPlayers){
-//				oldPlayers.add(_oldPlayer);
-//			}
-			
-			//把所有的task的LocationIndex置为null
-//			List<CommandPlayerTaskPO> tasks = pageInfo.getTasks();
-//			for(PageTaskPO task : oldPageTasks){
-//				task.setLocationIndex(null);
-//			}
-			
-//			List<CommandGroupUserPlayerPO> allPlayers = userInfo.getPlayers();
-//			Collections.sort(allPlayers, new CommandGroupUserPlayerPO.PlayerComparatorFromIndex());
-			
-//			List<CommandGroupUserPlayerPO> oldPlayers = new ArrayList<CommandGroupUserPlayerPO>();
-//			List<CommandGroupUserPlayerPO> idlePlayers = new ArrayList<CommandGroupUserPlayerPO>();
-//			for(CommandGroupUserPlayerPO player : allPlayers){
-//				if(!player.getPlayerBusinessType().equals(PlayerBusinessType.NONE)){
-//					oldPlayers.add(player);
-//				}else{
-//					idlePlayers.add(player);
-//				}
-//			}
-			
-			//保留转发关系不变的播放器（index可能改变）（暂时无用）
-//			List<CommandGroupUserPlayerPO> remainPlayers = new ArrayList<CommandGroupUserPlayerPO>();
-			
-			//可能需要关闭的播放器
-//			List<CommandGroupUserPlayerPO> closePlayers = new ArrayList<CommandGroupUserPlayerPO>();
-			//本页上的新任务
-//			List<CommandPlayerTaskPO> newTasks = new ArrayList<CommandPlayerTaskPO>();
 			
 			//循环，筛选出新的任务，剩下oldPlayers就是需要关闭的老任务
 			int newTaskIndex = 0;
@@ -512,29 +414,52 @@ public class PageTaskService {
 			closeTasks.addAll(oldPageTasks);
 			
 			//老播放器，一部分用来做新业务，剩余的挂断
-			List<String> bundleIds = new ArrayList<String>();
+			List<String> oldBundleIds = new ArrayList<String>();
 			for(PageTaskPO closeTask : closeTasks){
-				bundleIds.add(closeTask.getDstBundleId());
+				oldBundleIds.add(closeTask.getDstBundleId());
 			}
 			//TODO:这个查询再优化一下条件
-			List<TerminalBundleUserPermissionPO> closePlayers = terminalBundleUserPermissionDao.findByBundleIdIn(bundleIds);
+			List<TerminalBundleUserPermissionPO> closePlayers = terminalBundleUserPermissionDao.findByBundleIdIn(oldBundleIds);
 			
 			//TODO: 空闲的播放器
 			List<TerminalBundleUserPermissionPO> idlePlayers = new ArrayList<TerminalBundleUserPermissionPO>();
+			List<TerminalBundleUserPermissionPO> allPlayers = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(pageInfo.getOriginId(), pageInfo.getTerminalId());
+//			List<PageTaskPO> tasks = pageInfo.getPageTasks();
+			for(TerminalBundleUserPermissionPO aPlayer : allPlayers){
+				if(aPlayer.getBundleType().equals("player")){//后续改成从TerminalBundle里边判断type:DECODER/ENCODER
+					PageTaskPO task = tetrisBvcQueryUtil.queryPageTaskById(showingPageTasks, aPlayer.getId().toString());
+					if(task == null){
+						idlePlayers.add(aPlayer);
+					}
+				}
+			}
 			
 			//用来做新业务的所有播放器，可能包含老播放器，以及未使用的播放器
 			List<TerminalBundleUserPermissionPO> newTaskPlayers = new ArrayList<TerminalBundleUserPermissionPO>();
 			
 			//需要挂断的老播放器
 			List<TerminalBundleUserPermissionPO> needClosePlayers = new ArrayList<TerminalBundleUserPermissionPO>();
-										
+			
 			if(addTasks.size() <= closeTasks.size()){
-				//直接用来做新业务的老播放器
-				List<TerminalBundleUserPermissionPO> old4newPlayers = closePlayers.subList(0, addTasks.size());
-				newTaskPlayers.addAll(old4newPlayers);
+				//所有的新业务都可以用老播放器来做
+				//这两行不对，因为closePlayers和closeTasks的排序不同
+//				List<TerminalBundleUserPermissionPO> old4newPlayers = closePlayers.subList(0, addTasks.size());
+//				newTaskPlayers.addAll(old4newPlayers);
+				
+				List<PageTaskPO> old4newTasks = closeTasks.subList(0, addTasks.size());
+				List<String> old4newBundleIds = new ArrayList<String>();
+				for(PageTaskPO old4newTask : old4newTasks){
+					old4newBundleIds.add(old4newTask.getDstBundleId());
+				}
+				for(TerminalBundleUserPermissionPO p : closePlayers){
+					if(old4newBundleIds.contains(p.getBundleId())){
+						newTaskPlayers.add(p);
+					}
+				}				
 				
 				//需要挂断的老播放器
-				needClosePlayers = closePlayers.subList(addTasks.size(), closePlayers.size());
+				needClosePlayers = closePlayers.subList(addTasks.size(), closePlayers.size());//这个变量没有用
+				needCloseTasks = closeTasks.subList(addTasks.size(), closePlayers.size());
 			}else{
 				//所有老播放器都做新业务
 	//			List<CommandGroupUserPlayerPO> old4newPlayers = new ArrayList<CommandGroupUserPlayerPO>(closePlayers);
@@ -571,23 +496,23 @@ public class PageTaskService {
 			
 			//呼叫所有的newTaskPlayers，挂断所有的NONE的needClosePlayers；进行相应的上屏处理；字幕下发
 			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();			
-			LogicBO logic = openAndCloseDecoder(addTasks, closeTasks, codec);
-//			log.info("对比分页 logic: " + JSON.toJSON(logic));
-			executeBusiness.execute(logic, "刷新播放器分页");
-			
-			
-//			for(CommandGroupUserPlayerPO needClosePlayer : needClosePlayers){
-//				needClosePlayer.setFree();
-//			}
+			LogicBO logic = openAndCloseDecoder(addTasks, needCloseTasks, codec);
+						
+			for(PageTaskPO closeTask : closeTasks){
+				closeTask.setShowing(false);
+				closeTask.clearDst();
+			}
 			
 			//持久化
 			pageInfoDao.save(pageInfo);
+			
+			if(doProtocal) executeBusiness.execute(logic, "刷新播放器分页");
 			
 			return logic;
 		}
 	}
 	
-	/** 改变执行状态后，重呼解码器。并不会推送分页信息。只对showing = true的下发 */
+	/** 改变执行状态后，重呼解码器。并不会推送分页信息。只对showing = true的设置源，false的不带源 */
 	public LogicBO reExecute(
 			List<PageTaskPO> pageTasks,
 			boolean doProtocol) throws Exception{
@@ -608,6 +533,52 @@ public class PageTaskService {
 		
 		return logic;
 	}
+	
+	public CommandGroupUserLayoutShemeVO generateSchemeVO(CommandGroupUserInfoPO userInfo, PageInfoPO pageInfo) throws BaseException{
+		List<PageTaskPO> pageTasks = getPageTasks(pageInfo, pageInfo.getCurrentPage(), true);		
+		CommandGroupUserLayoutShemePO usingScheme = userInfo.obtainUsingScheme();
+		int totalPageNumber = getTotalPageNumber(pageInfo);
+		CommandGroupUserLayoutShemeVO schemeVO = generateSchemeVO(usingScheme, pageInfo, pageTasks, totalPageNumber);
+		return schemeVO;
+	}
+
+	private CommandGroupUserLayoutShemeVO generateSchemeVO(
+			CommandGroupUserLayoutShemePO schemePO, PageInfoPO pageInfo, List<PageTaskPO> pageTasks, int totalPageNumber){
+		CommandGroupUserLayoutShemeVO vo = new CommandGroupUserLayoutShemeVO();
+		vo.setName(schemePO.getName());
+		vo.setTotal(totalPageNumber);
+		vo.setCurrentPage(pageInfo.getCurrentPage());
+		vo.setPageSize(pageInfo.getPageSize());
+		vo.setPlayerSplitLayout(String.valueOf(schemePO.getPlayerSplitLayout().getId()));
+		vo.setPlayersByPageTasks(pageTasks);
+		
+		int allNumber = schemePO.getPlayerSplitLayout().getPlayerCount();
+		if(allNumber == pageTasks.size()) return vo;
+		int needNumber = allNumber - pageTasks.size();
+		
+		List<String> dstIds = new ArrayList<String>();
+		for(PageTaskPO pageTask : pageTasks){
+			dstIds.add(pageTask.getDstId());
+		}
+		
+		List<TerminalBundleUserPermissionPO> ps = terminalBundleUserPermissionDao.findByUserIdAndTerminalId(pageInfo.getOriginId(), pageInfo.getTerminalId());
+//		List<TerminalBundleUserPermissionPO> idlePs = new ArrayList<TerminalBundleUserPermissionPO>();
+		List<String> idleBundleIds = new ArrayList<String>();
+		for(TerminalBundleUserPermissionPO p : ps){
+			if(!dstIds.contains(p.getId().toString())){
+				idleBundleIds.add(p.getBundleId());
+				if(idleBundleIds.size()==needNumber) break;
+			}
+		}
+		
+		List<BundlePO> bundles = resourceBundleDao.findByBundleIds(idleBundleIds);
+		int i = pageTasks.size();
+		for(BundlePO bundle : bundles){
+			vo.getPlayers().add(new CommandGroupUserPlayerSettingVO().setIdlePlayer(i++, bundle));
+		}
+		
+		return vo;
+	}
 
 	private void markIndex(List<PageTaskPO> tasks){
 		int i = 0;
@@ -618,69 +589,7 @@ public class PageTaskService {
 	
 	//TODO:切分屏，参考 CommandSplitServiceImpl.changeLayoutScheme
 	
-	//TODO:特殊跳转，调用jumpToPage
-	
-	/*private LogicBO openAndCloseDecoder(
-			List<CommandGroupUserPlayerPO> openPlayers,
-			List<CommandGroupUserPlayerPO> closePlayers,
-			CodecParamBO codec){
-		
-		if(openPlayers == null) openPlayers = new ArrayList<CommandGroupUserPlayerPO>();
-		if(closePlayers == null) closePlayers = new ArrayList<CommandGroupUserPlayerPO>();
-		
-		LogicBO logic = new LogicBO().setUserId("-1")
-		 		 .setConnectBundle(new ArrayList<ConnectBundleBO>())
-		 		 .setDisconnectBundle(new ArrayList<DisconnectBundleBO>())
-		 		 .setPass_by(new ArrayList<PassByBO>());
-		
-		for(CommandGroupUserPlayerPO openPlayer : openPlayers){
-			ConnectBundleBO connectDecoderBundle = new ConnectBundleBO().setBusinessType(ConnectBundleBO.BUSINESS_TYPE_VOD)
-//			  													        .setOperateType(ConnectBundleBO.OPERATE_TYPE)
-			  													        .setLock_type("write")
-			  													        .setBundleId(openPlayer.getBundleId())
-			  													        .setLayerId(openPlayer.getLayerId())
-			  													        .setBundle_type(openPlayer.getBundleType());
-			ForwardSetSrcBO decoderVideoForwardSet = null;
-			if(openPlayer.getSrcVideoBundleId() != null){
-				decoderVideoForwardSet = new ForwardSetSrcBO().setType("channel")
-						.setBundleId(openPlayer.getSrcVideoBundleId())
-						.setLayerId(openPlayer.getSrcVideoLayerId())
-						.setChannelId(openPlayer.getSrcVideoChannelId());
-			}
-			ConnectBO connectDecoderVideoChannel = new ConnectBO().setChannelId(openPlayer.getVideoChannelId())
-														          .setChannel_status("Open")
-														          .setBase_type(openPlayer.getVideoBaseType())
-														          .setCodec_param(codec)
-														          .setSource_param(decoderVideoForwardSet);
-			ForwardSetSrcBO decoderAudioForwardSet = null;
-			if(openPlayer.getSrcAudioBundleId() != null){
-				decoderAudioForwardSet = new ForwardSetSrcBO().setType("channel")
-						.setBundleId(openPlayer.getSrcAudioBundleId())
-						.setLayerId(openPlayer.getSrcAudioLayerId())
-						.setChannelId(openPlayer.getSrcAudioChannelId());
-			}
-			ConnectBO connectDecoderAudioChannel = new ConnectBO().setChannelId(openPlayer.getAudioChannelId())
-																  .setChannel_status("Open")
-																  .setBase_type(openPlayer.getAudioBaseType())
-																  .setCodec_param(codec)
-																  .setSource_param(decoderAudioForwardSet);
-			
-			connectDecoderBundle.setChannels(new ArrayListWrapper<ConnectBO>().add(connectDecoderVideoChannel).add(connectDecoderAudioChannel).getList());
-			logic.getConnectBundle().add(connectDecoderBundle);
-		}
-		
-		for(CommandGroupUserPlayerPO closePlayer : closePlayers){
-			DisconnectBundleBO disconnectDecoderBundle = new DisconnectBundleBO().setBusinessType(DisconnectBundleBO.BUSINESS_TYPE_VOD)
-//																           	 .setOperateType(DisconnectBundleBO.OPERATE_TYPE)
-																           	 .setBundleId(closePlayer.getBundleId())
-																           	 .setBundle_type(closePlayer.getBundleType())
-																           	 .setLayerId(closePlayer.getLayerId());
-			logic.getDisconnectBundle().add(disconnectDecoderBundle);
-		}
-		
-		return logic;
-	}*/
-	
+	//TODO:特殊跳转，调用jumpToPage	
 	
 	private LogicBO openAndCloseDecoder(
 			List<PageTaskPO> openTasks,

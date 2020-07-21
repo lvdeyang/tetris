@@ -2,6 +2,8 @@ package com.sumavision.bvc.control.device.command.group.vo.user;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.suma.venus.resource.pojo.BundlePO;
 import com.sumavision.bvc.command.group.dao.CommandGroupDAO;
 import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerCastDevicePO;
@@ -151,6 +153,21 @@ public class CommandGroupUserPlayerSettingVO {
 		//上屏设备
 		List<CommandGroupUserPlayerCastDevicePO> devices = entity.getCastDevices();
 		this.setCastDevicesByPO(devices);
+		
+		return this;
+	}
+	
+	public CommandGroupUserPlayerSettingVO setIdlePlayer(int locationIndex, BundlePO entity){		
+		
+		this.setSerial(locationIndex);
+		this.setBundleId(entity.getBundleId());
+		this.setBundleNo(entity.getUsername());
+		this.setBusinessType(PlayerBusinessType.NONE.getCode());
+		//status
+		this.setStatus("start");
+		//上屏设备
+//		List<CommandGroupUserPlayerCastDevicePO> devices = entity.getCastDevices();
+//		this.setCastDevicesByPO(devices);
 		
 		return this;
 	}

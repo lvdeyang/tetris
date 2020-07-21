@@ -12,12 +12,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.suma.venus.resource.base.bo.UserBO;
-import com.suma.venus.resource.service.ResourceService;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
 import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.control.utils.UserUtils;
-import com.sumavision.bvc.device.command.common.CommandCommonConstant;
 import com.sumavision.bvc.device.command.user.CommandUserServiceImpl;
+import com.sumavision.tetris.bvc.business.call.UserCallService;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -47,7 +46,7 @@ public class CommandUserCallController {
 	private CommandUserServiceImpl commandUserServiceImpl;
 	
 	@Autowired
-	private ResourceService resourceService;
+	private UserCallService userCallService;
 	
 	/**
 	 * 呼叫用户<br/>

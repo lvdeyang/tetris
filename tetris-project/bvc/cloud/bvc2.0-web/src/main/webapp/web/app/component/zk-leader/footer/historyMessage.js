@@ -759,6 +759,11 @@ define([
                 self.qt.on('onHistoryDialogClose', function(){
                 	self.history.open = false;
                 });
+                
+                //刷新分屏
+                self.qt.on('refreshPage', function (e) {
+                	self.qt.invoke('changeSplit', e.params.playerSplitLayout, e.params.players);
+                });
             });
         }
     });

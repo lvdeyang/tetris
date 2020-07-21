@@ -59,6 +59,7 @@ import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.bo.MemberTerminalBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
+import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
 import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
@@ -72,12 +73,16 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupService;
+import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaForwardType;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalType;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
 import com.sumavision.tetris.bvc.page.PageInfoPO;
 import com.sumavision.tetris.bvc.page.PageTaskBO;
@@ -120,6 +125,9 @@ public class VodService {
 	private ResourceService resourceService;
 	
 	@Autowired
+	private AgendaDAO agendaDao;
+	
+	@Autowired
 	private PageInfoDAO pageInfoDao;
 	
 	@Autowired
@@ -127,6 +135,9 @@ public class VodService {
 	
 	@Autowired
 	private CommonForwardDAO commonForwardDao;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
 	
 	@Autowired
 	private GroupDAO groupDao;
@@ -171,6 +182,9 @@ public class VodService {
 	private FolderUserMapDAO folderUserMapDao;
 	
 	@Autowired
+	private BusinessCommonService businessCommonService;
+	
+	@Autowired
 	private AgendaService agendaService;
 	
 	@Autowired
@@ -189,6 +203,7 @@ public class VodService {
 	private ExecuteBusinessProxy executeBusiness;
 	
 	/** 重构点播文件 */
+	@Transactional(rollbackFor = Exception.class)
 	public void resourceVodStart(UserBO user, String resourceId) throws Exception{
 		
 		JSONObject file = resourceService.queryOnDemandResourceById(resourceId);
@@ -316,7 +331,10 @@ public class VodService {
 	}
 	
 	/** 重构点播用户 */
+	@Transactional(rollbackFor = Exception.class)
 	public void userStart(UserBO user, UserBO vodUser) throws Exception{
+		
+		TerminalPO terminal = terminalDao.findByType(TerminalType.QT_ZK);
 		
 		GroupPO group = new GroupPO();
 		group.setUserId(user.getId());		
@@ -341,7 +359,7 @@ public class VodService {
 		userMemberPO.setName(user.getName());
 		userMemberPO.setGroupMemberType(GroupMemberType.MEMBER_USER);
 		userMemberPO.setOriginId(user.getId().toString());
-//		userMemberPO.setTerminalId(terminalId);//TODO
+		userMemberPO.setTerminalId(terminal.getId());
 		userMemberPO.setFolderId(user.getFolderId());
 		userMemberPO.setGroupMemberStatus(GroupMemberStatus.CONNECT);
 		userMemberPO.setGroupId(group.getId());
@@ -352,11 +370,15 @@ public class VodService {
 		vodUserMemberPO.setName(vodUser.getName());
 		vodUserMemberPO.setGroupMemberType(GroupMemberType.MEMBER_USER);
 		vodUserMemberPO.setOriginId(vodUser.getId().toString());
-//		vodUserMemberPO.setTerminalId(terminalId);//TODO
+		vodUserMemberPO.setTerminalId(terminal.getId());
 		vodUserMemberPO.setFolderId(vodUser.getFolderId());
 		vodUserMemberPO.setGroupMemberStatus(GroupMemberStatus.CONNECT);
 		vodUserMemberPO.setGroupId(group.getId());
 		groupMemberDao.save(vodUserMemberPO);
+		
+		vod.setSrcMemberId(vodUserMemberPO.getId());
+		vod.setDstMemberId(userMemberPO.getId());
+		vodDao.save(vod);
 		
 		//把成员授权给角色
 		RolePO userRole = roleDao.findByInternalRoleType(InternalRoleType.VOD_DST);
@@ -375,7 +397,7 @@ public class VodService {
 		executeBusiness.execute(logic, group.getName() + "，打开编码");
 		
 		//执行议程
-		AgendaPO agenda = null;//TODO
+		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.PLAY_USER);//TODO
 		agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);
 	}
 	
@@ -394,8 +416,8 @@ public class VodService {
 			//查出PO
 			VodPO vod = vodDao.findByGroupId(group.getId());
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
-			RolePO userRole = roleDao.findByInternalRoleType(InternalRoleType.VOD_DST);
-			List<Long> memberIds = new ArrayListWrapper<Long>().add(members.get(0).getId()).add(members.get(1).getId()).getList();
+//			RolePO userRole = roleDao.findByInternalRoleType(InternalRoleType.VOD_DST);
+			List<Long> memberIds = businessCommonService.obtainMemberIds(members);
 			List<GroupMemberRolePermissionPO> permissions = groupMemberRolePermissionDao.findByGroupMemberIdIn(memberIds);
 			List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(groupId.toString());
 			

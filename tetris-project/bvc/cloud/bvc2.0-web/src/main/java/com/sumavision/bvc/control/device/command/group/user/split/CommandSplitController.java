@@ -13,9 +13,17 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.alibaba.fastjson.JSON;
 import com.sumavision.bvc.command.group.user.CommandGroupUserInfoPO;
 import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlayerPO;
+import com.sumavision.bvc.command.group.user.layout.scheme.PlayerSplitLayout;
 import com.sumavision.bvc.control.device.command.group.vo.user.CommandGroupUserPlayerSettingVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.split.CommandSplitServiceImpl;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.page.PageInfoDAO;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
+import com.sumavision.tetris.bvc.page.PageTaskService;
+import com.sumavision.tetris.commons.exception.BaseException;
+import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -25,6 +33,15 @@ public class CommandSplitController {
 	
 	@Autowired
 	private CommandSplitServiceImpl commandSplitServiceImpl;
+	
+	@Autowired
+	private PageTaskService pageTaskService;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
+	
+	@Autowired
+	private PageInfoDAO	pageInfoDao;
 	
 	@Autowired
 	
@@ -50,16 +67,49 @@ public class CommandSplitController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		CommandGroupUserInfoPO userInfo = commandSplitServiceImpl.changeLayoutScheme(userId, split);
+		//设置CommandGroupUserInfoPO、CommandGroupUserLayoutShemePO数据，后续使用新数据结构
+		commandSplitServiceImpl.changeLayoutScheme_re(userId, split);
 		
-		List<CommandGroupUserPlayerPO> players = userInfo.obtainUsingSchemePlayers();
-		List<CommandGroupUserPlayerSettingVO> settings = new ArrayList<CommandGroupUserPlayerSettingVO>();
-		for(CommandGroupUserPlayerPO player : players){
-			CommandGroupUserPlayerSettingVO setting = new CommandGroupUserPlayerSettingVO().set(player);
-			settings.add(setting);
-		}		
-		return JSON.toJSONString(new HashMapWrapper<String, Object>().put("settings", settings)
-				  .getMap());
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(userId.toString(), terminal.getId());
+		PlayerSplitLayout newSplitLayout = PlayerSplitLayout.fromId(split);
+		int pageSize = newSplitLayout.getPlayerCount();
+		
+		pageTaskService.jumpToPageAndChangeSplit(pageInfo, 1, pageSize);
+		
+		return null;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/next/page")
+	public Object nextPage(
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(userId.toString(), terminal.getId());
+		
+		pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()+1, pageInfo.getPageSize());
+		
+		return null;
+	}
+	
+	@JsonBody
+	@ResponseBody
+	@RequestMapping(value = "/previous/page")
+	public Object previousPage(
+			HttpServletRequest request) throws Exception{
+		
+		Long userId = userUtils.getUserIdFromSession(request);
+		
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(userId.toString(), terminal.getId());
+		
+		pageTaskService.jumpToPageAndChangeSplit(pageInfo, pageInfo.getCurrentPage()-1, pageInfo.getPageSize());
+		
+		return null;
 	}
 	
 	/**
@@ -82,11 +132,13 @@ public class CommandSplitController {
 			int toSerial,
 			HttpServletRequest request) throws Exception{
 		
-		Long userId = userUtils.getUserIdFromSession(request);
+		throw new BaseException(StatusCode.FORBIDDEN, "不能移动窗口");
 		
-		commandSplitServiceImpl.exchangeTwoSplit(userId, serial, toSerial);
-		
-		return null;
+//		Long userId = userUtils.getUserIdFromSession(request);
+//		
+//		commandSplitServiceImpl.exchangeTwoSplit(userId, serial, toSerial);
+//		
+//		return null;
 	}
 	
 	/**

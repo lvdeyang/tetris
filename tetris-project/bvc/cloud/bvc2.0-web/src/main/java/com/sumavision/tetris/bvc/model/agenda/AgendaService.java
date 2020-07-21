@@ -367,13 +367,16 @@ public class AgendaService {
 				ChannelSchemeDTO video = sourceBO.getVideoSource();
 				BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
 				CommonForwardPO videoForward = new CommonForwardPO();
+				videoForward.setBusinessId(sourceBO.getBusinessId());
 				videoForward.setBusinessInfoType(sourceBO.getBusinessInfoType());
 				videoForward.setType(AgendaForwardType.VIDEO);
 				videoForward.setDstMemberId(dstMember.getId());
+				videoForward.setSrcId(bundlePO.getBundleId());
 				videoForward.setSrcName(sourceBO.getSrcName());
 				videoForward.setSrcCode(bundlePO.getUsername());
 				videoForward.setSrcBundleName(bundlePO.getBundleName());
 				videoForward.setSrcBundleType(bundlePO.getBundleType());
+				videoForward.setSrcBundleId(bundlePO.getBundleId());
 				videoForward.setSrcLayerId(bundlePO.getAccessNodeUid());
 				videoForward.setSrcChannelId(video.getChannelId());
 				videoForward.setSrcBaseType(video.getBaseType());
@@ -386,13 +389,16 @@ public class AgendaService {
 				if(audio != null){
 					BundlePO bundlePO2 = bundleDao.findByBundleId(video.getBundleId());
 					CommonForwardPO audioForward = new CommonForwardPO();
+					audioForward.setBusinessId(sourceBO.getBusinessId());
 					audioForward.setBusinessInfoType(sourceBO.getBusinessInfoType());
 					audioForward.setType(AgendaForwardType.AUDIO);
 					audioForward.setDstMemberId(dstMember.getId());
+					audioForward.setSrcId(bundlePO2.getBundleId());
 					audioForward.setSrcName(sourceBO.getSrcName());
 					audioForward.setSrcCode(bundlePO2.getUsername());
 					audioForward.setSrcBundleName(bundlePO2.getBundleName());
 					audioForward.setSrcBundleType(bundlePO2.getBundleType());
+					audioForward.setSrcBundleId(bundlePO2.getBundleId());
 					audioForward.setSrcLayerId(bundlePO2.getAccessNodeUid());
 					audioForward.setSrcChannelId(audio.getChannelId());
 					audioForward.setSrcBaseType(audio.getBaseType());
@@ -428,6 +434,8 @@ public class AgendaService {
 		
 		//遍历转发
 		for(AgendaForwardPO agendaForward : agendaForwards){
+			
+			if(agendaForward.getType().equals(AgendaForwardType.AUDIO)) continue;
 			
 			//确认源（可能多个）
 			List<SourceBO> sourceBOs = new ArrayList<SourceBO>();
@@ -658,14 +666,20 @@ public class AgendaService {
 		for(CommonForwardPO addForward : addForwards){
 			Long dstMemberId = addForward.getDstMemberId();
 			MemberChangedTaskBO memberChangedTask = memberTaskMap.get(dstMemberId);
-			if(memberChangedTask == null) memberChangedTask = new MemberChangedTaskBO();
+			if(memberChangedTask == null){
+				memberChangedTask = new MemberChangedTaskBO();
+				memberTaskMap.put(dstMemberId, memberChangedTask);
+			}
 			memberChangedTask.getAddForwards().add(addForward);
 		}
 		
 		for(PageTaskPO removeTask : removeTasks){
 			Long dstMemberId = removeTask.getDstMemberId();
 			MemberChangedTaskBO memberChangedTask = memberTaskMap.get(dstMemberId);
-			if(memberChangedTask == null) memberChangedTask = new MemberChangedTaskBO();
+			if(memberChangedTask == null){
+				memberChangedTask = new MemberChangedTaskBO();
+				memberTaskMap.put(dstMemberId, memberChangedTask);
+			}
 			memberChangedTask.getRemoveTasks().add(removeTask);
 		}
 		
@@ -682,6 +696,10 @@ public class AgendaService {
 			
 			pageTaskService.addAndRemoveTasks(pageInfo, newTasks, thisRemoveTasks);
 		}
+		
+		//持久化 oldForwards不需要吧？
+		commonForwardDao.save(addForwards);
+		commonForwardDao.deleteInBatch(removeForwards);		
 	}
 
 	/*
@@ -730,6 +748,7 @@ public class AgendaService {
 				task.setSrcAudioCode(audioForward.getSrcCode());
 				task.setAudioForwardUuid(audioUuid);		
 			}
+			pageTaskPOs.add(task);
 		}
 		return pageTaskPOs;
 	}

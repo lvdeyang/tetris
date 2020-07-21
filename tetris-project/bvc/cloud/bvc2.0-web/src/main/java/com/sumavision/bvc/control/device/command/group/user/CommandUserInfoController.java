@@ -41,6 +41,11 @@ import com.sumavision.bvc.device.command.vod.CommandVodService;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dao.ResourceBundleDAO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.page.PageInfoDAO;
+import com.sumavision.tetris.bvc.page.PageInfoPO;
+import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
@@ -71,6 +76,12 @@ public class CommandUserInfoController {
 	private ResourceQueryUtil resourceQueryUtil;
 	
 	@Autowired
+	private PageInfoDAO pageInfoDao;
+	
+	@Autowired
+	private TerminalDAO terminalDao;
+	
+	@Autowired
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
 	
 	@Autowired
@@ -84,6 +95,9 @@ public class CommandUserInfoController {
 	
 	@Autowired
 	private CommandVodService commandVodService;
+	
+	@Autowired
+	private PageTaskService pageTaskService;
 	
 	@Autowired
 	private ResourceService resourceService;
@@ -103,6 +117,15 @@ public class CommandUserInfoController {
 		
 		UserVO user = userUtils.getUserFromSession(request);
 		
+		//重构的分页信息
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(user.getId().toString(), terminal.getId());
+		if(null == pageInfo){
+			pageInfo = new PageInfoPO(user.getId().toString(), terminal.getId());
+			pageInfo.setPageSize(16);
+			pageInfoDao.save(pageInfo);
+		}
+		
 		//查找该用户配置信息
 		CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(user.getId());
 		if(null == userInfo){
@@ -112,40 +135,9 @@ public class CommandUserInfoController {
 			//如果有，则更新播放器信息
 			commandUserServiceImpl.updateUserInfoPlayers(userInfo, true);
 		}
-
-		//查找自己看自己，如果没有，则添加一个
-		CommandGroupUserPlayerPO selfPlayer = null;
-		try{
-			selfPlayer = commandCommonUtil.queryPlayerByPlayerBusinessType(userInfo.obtainUsingSchemePlayers(), PlayerBusinessType.PLAY_USER_ONESELF);
-			UserBO userBO = userUtils.queryUserById(user.getId());
-
-			if(serverProps.getLocalPreviewMode() == 1){
-				if(selfPlayer == null){
-					commandVodService.seeOneselfLocalStart(userBO);
-				}
-			}else if(serverProps.getLocalPreviewMode() == 2){
-				//总是执行一遍seeOneselfUserStart，如果没有则会新建，如果已经存在则会检测编码器是否改变
-				UserBO admin = new UserBO();
-				admin.setId(-1L);
-				commandVodService.seeOneselfUserStart(userBO, admin, false);
-			}
-		}catch(Exception e){
-			log.info(user.getName() + " 用户添加本地视频预览失败");
-			e.printStackTrace();
-		}
 		
-		//找出正在使用的方案
-		List<CommandGroupUserLayoutShemePO> shemePOs = userInfo.getLayoutSchemes();
-		for(CommandGroupUserLayoutShemePO schemePO : shemePOs){
-			if(schemePO.getIsUsing()){
-				CommandGroupUserLayoutShemeVO schemeVO = new CommandGroupUserLayoutShemeVO().set(schemePO);				
-				log.info("getCurrent: " + JSON.toJSON(schemeVO));
-				
-				return schemeVO;
-			}
-		}
-		
-		return null;
+		CommandGroupUserLayoutShemeVO schemeVO = pageTaskService.generateSchemeVO(userInfo, pageInfo);		
+		return schemeVO;
 	}
 	
 	/**

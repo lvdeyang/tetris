@@ -16,6 +16,7 @@ import com.sumavision.bvc.command.group.user.layout.player.CommandGroupUserPlaye
 import com.sumavision.bvc.control.device.command.group.vo.BusinessPlayerVO;
 import com.sumavision.bvc.control.utils.UserUtils;
 import com.sumavision.bvc.device.command.vod.CommandVodService;
+import com.sumavision.tetris.bvc.business.vod.VodService;
 import com.sumavision.tetris.commons.util.wrapper.HashMapWrapper;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
@@ -37,6 +38,9 @@ public class CommandVodController {
 	
 	@Autowired
 	private CommandVodService commandVodService;
+	
+	@Autowired
+	private VodService vodService;
 	
 	/**
 	 * 通用方法，指定播放器，播放各种类型的资源<br/>
@@ -259,12 +263,11 @@ public class CommandVodController {
 		
 			UserBO user = userUtils.queryUserById(id);
 			UserBO vodUser = userUtils.queryUserById(userId);
-		
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandVodService.userStart_Cascade(user, vodUser, admin, -1);
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+//			vodService.userStop(57L);
+			
+			vodService.userStart(user, vodUser);
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
 			return _player;
 		}
@@ -371,9 +374,10 @@ public class CommandVodController {
 //			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandVodService.userStop(user, businessId, admin);
+//			CommandGroupUserPlayerPO player = commandVodService.userStop(user, businessId, admin);
+			vodService.userStop(businessId);
 			
-			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
+			return new HashMapWrapper<String, Object>().put("serial", 111)//player.getLocationIndex())
 					   								   .getMap();		
 		}
 	}	
@@ -509,6 +513,8 @@ public class CommandVodController {
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			
 			CommandGroupUserPlayerPO player = commandVodService.deviceStop(user, businessId, admin);
+			
+//			vodService.userStop(businessId);
 			
 			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
 					   								   .getMap();
