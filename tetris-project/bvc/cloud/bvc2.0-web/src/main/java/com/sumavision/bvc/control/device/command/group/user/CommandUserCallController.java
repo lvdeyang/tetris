@@ -67,9 +67,10 @@ public class CommandUserCallController {
 			UserBO callUser = userUtils.queryUserById(callUserId);
 			UserBO calledUser = userUtils.queryUserById(userId);
 			
-			CommandGroupUserPlayerPO player = commandUserServiceImpl.userCallUser_Cascade(callUser, calledUser, -1, null);
+			userCallService.userCallUser(callUser, calledUser, -1, null, null);
 			
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 	
 			return _player;
 		}
@@ -201,12 +202,14 @@ public class CommandUserCallController {
 			Long callUserId = userUtils.getUserIdFromSession(request);
 			UserBO callUser = userUtils.queryUserById(callUserId);
 			
-//			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandUserServiceImpl.acceptCall_Cascade(callUser, businessId, null);
+//			CommandGroupUserPlayerPO player = commandUserServiceImpl.acceptCall_Cascade(callUser, businessId, null);
 			
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			userCallService.acceptCall(callUser, businessId, null);//.acceptC(callUser, calledUser, -1, null, null);
+			
+//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
 			return _player;
 		}
@@ -230,7 +233,8 @@ public class CommandUserCallController {
 			Long callUserId = userUtils.getUserIdFromSession(request);
 			UserBO callUser = userUtils.queryUserById(callUserId);
 			
-			commandUserServiceImpl.stopCall_Cascade(callUser, businessId, null);
+//			commandUserServiceImpl.stopCall_Cascade(callUser, businessId, null);
+			userCallService.stopCall(callUser, businessId, null);
 			
 			return null;
 		}
@@ -258,9 +262,10 @@ public class CommandUserCallController {
 //			UserBO admin = new UserBO(); 
 //			admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandUserServiceImpl.stopCall_Cascade(user, businessId, null);
+//			CommandGroupUserPlayerPO player = commandUserServiceImpl.stopCall_Cascade(user, businessId, null);
+			userCallService.stopCall(user, businessId, null);
 			
-			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
+			return new HashMapWrapper<String, Object>().put("serial", 111)//player.getLocationIndex())
 													   .getMap();
 		}
 	}

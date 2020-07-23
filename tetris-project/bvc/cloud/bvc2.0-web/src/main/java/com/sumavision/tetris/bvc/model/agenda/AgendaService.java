@@ -54,10 +54,12 @@ import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.bo.MemberChangedTaskBO;
 import com.sumavision.tetris.bvc.business.bo.ModifyMemberRoleBO;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
+import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
 import com.sumavision.tetris.bvc.business.dao.RunningAgendaDAO;
@@ -66,10 +68,14 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
+import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionDAO;
 import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
+import com.sumavision.tetris.bvc.model.role.RoleChannelDAO;
+import com.sumavision.tetris.bvc.model.role.RoleChannelPO;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.model.terminal.TerminalBundleDAO;
@@ -113,6 +119,12 @@ public class AgendaService {
 	
 	@Autowired
 	private ResourceChannelDAO resourceChannelDao;
+	
+	@Autowired
+	private GroupDAO groupDao;
+	
+	@Autowired
+	private RoleChannelDAO roleChannelDao;
 	
 	@Autowired
 	private PageInfoDAO pageInfoDao;
@@ -280,6 +292,17 @@ public class AgendaService {
 		executeToFinal(groupId, oldForwards);
 	}
 
+	/**
+	 * 获取成员的音视频源<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年7月22日 下午4:19:57
+	 * @param sourceMembers
+	 * @param businessId 用于写入SourceBO
+	 * @param businessInfoType 用于写入SourceBO
+	 * @return List<SourceBO>
+	 */
 	public List<SourceBO> obtainSource(List<GroupMemberPO> sourceMembers, String businessId, BusinessInfoType businessInfoType){
 		
 		//确认源（可能多个）
@@ -362,8 +385,12 @@ public class AgendaService {
 			PageInfoPO pageInfo = pageInfoDao.findByOriginIdAndTerminalId(originId, terminalId);
 			if(pageInfo == null) pageInfo = new PageInfoPO(originId, terminalId);
 			
-			List<PageTaskBO> newTasks = new ArrayList<PageTaskBO>();
+//			List<PageTaskBO> newTasks = new ArrayList<PageTaskBO>();
 			for(SourceBO sourceBO : sourceBOs){
+				
+				//过滤掉自己看自己
+				if(sourceBO.getMemberId().equals(dstMember.getId())) continue;
+				
 				ChannelSchemeDTO video = sourceBO.getVideoSource();
 				BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
 				CommonForwardPO videoForward = new CommonForwardPO();
@@ -413,9 +440,9 @@ public class AgendaService {
 				}
 				//TODO:校验该转发是否已经存在
 				//TODO:分别校验音、视频的转发是否能执行
-				PageTaskBO taskBO = new PageTaskBO();
+//				PageTaskBO taskBO = new PageTaskBO();
 				//TODO:set
-				newTasks.add(taskBO);
+//				newTasks.add(taskBO);
 			}
 //			pageTaskService.addAndRemoveTasks(pageInfo, newTasks, null);
 			
@@ -426,6 +453,9 @@ public class AgendaService {
 	}
 
 	public List<CommonForwardPO> obtainCommonForwards(AgendaPO agenda, Long groupId){
+		
+		GroupPO group = groupDao.findOne(groupId);
+		GroupStatus groupStatus = group.getStatus();
 		
 		List<CommonForwardPO> result = new ArrayList<CommonForwardPO>();
 		
@@ -451,9 +481,16 @@ public class AgendaService {
 				}
 				if(businessInfoType == null){
 					//TODO:根据业务组类型确定
-				}				
+				}
 				
+				//这里直接获取了音视频，没有根据议程下的转发来获取。后续完善：查询该视频转发是否有对应的音频，如果没有则不生成音频源
 				sourceBOs = obtainSource(sourceMembers, groupId.toString(), businessInfoType);
+				
+				break;
+				
+			case ROLE_CHANNEL:
+				RoleChannelPO sourceRoleChannel = roleChannelDao.findOne(Long.valueOf(sourceId));
+				
 				
 				break;
 			default:
@@ -469,6 +506,7 @@ public class AgendaService {
 			case ROLE:
 				RolePO dstRole = roleDao.findOne(Long.valueOf(destinationId));
 				List<GroupMemberPO> dstMembers = groupMemberDao.findByGroupIdAndRoleId(groupId, dstRole.getId());
+				//从源和目的生成转发
 				forwards = obtainCommonForwardsFromSource(dstMembers, sourceBOs);
 				result.addAll(forwards);
 				
@@ -477,6 +515,14 @@ public class AgendaService {
 				break;
 			}
 		}
+		
+		//对于暂停的会议，将转发状态置为UNDONE。后续优化拓展到静默、专向业务
+		if(GroupStatus.PAUSE.equals(groupStatus)){
+			for(CommonForwardPO forward : result){
+				forward.setExecuteStatus(ExecuteStatus.UNDONE);
+			}
+		}
+		
 		return result;
 	}
 	
@@ -737,6 +783,8 @@ public class AgendaService {
 			task.setSrcVideoChannelId(forward.getSrcChannelId());
 			task.setSrcVideoName(forward.getSrcName());
 			task.setSrcVideoCode(forward.getSrcCode());
+			task.setVideoStatus(forward.getExecuteStatus());
+			task.setDstMemberId(forward.getDstMemberId());
 			task.setVideoForwardUuid(forward.getUuid());
 			if(audioUuid != null){
 				CommonForwardPO audioForward = tetrisBvcQueryUtil.queryForwardByUuid(forwards, audioUuid);
@@ -746,6 +794,7 @@ public class AgendaService {
 				task.setSrcAudioLayerId(audioForward.getSrcLayerId());
 				task.setSrcAudioChannelId(audioForward.getSrcChannelId());				
 				task.setSrcAudioCode(audioForward.getSrcCode());
+				task.setAudioStatus(audioForward.getExecuteStatus());
 				task.setAudioForwardUuid(audioUuid);		
 			}
 			pageTaskPOs.add(task);

@@ -34,7 +34,7 @@ public class CommonForwardPO extends AbstractBasePO{
 	private String relativeUuid;
 	
 	/** 执行状态 */
-	private ExecuteStatus executeStatus;
+	private ExecuteStatus executeStatus = ExecuteStatus.DONE;
 	
 	/** 业务类型 */
 	private BusinessInfoType businessType;

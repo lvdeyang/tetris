@@ -69,12 +69,15 @@ import com.sumavision.bvc.system.po.AvtplGearsPO;
 import com.sumavision.bvc.system.po.AvtplPO;
 import com.sumavision.tetris.auth.token.TerminalType;
 import com.sumavision.tetris.bvc.business.BusinessInfoType;
+import com.sumavision.tetris.bvc.business.ExecuteStatus;
 import com.sumavision.tetris.bvc.business.bo.SourceBO;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberRolePermissionDAO;
 import com.sumavision.tetris.bvc.business.dao.UserCallDAO;
+import com.sumavision.tetris.bvc.business.forward.CommonForwardPO;
 import com.sumavision.tetris.bvc.business.group.BusinessType;
 import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
@@ -83,11 +86,17 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberType;
 import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.GroupService;
 import com.sumavision.tetris.bvc.business.group.GroupStatus;
+import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaService;
 import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalDAO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalPO;
+import com.sumavision.tetris.bvc.page.PageTaskDAO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
+import com.sumavision.tetris.bvc.page.PageTaskService;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.wrapper.ArrayListWrapper;
@@ -104,6 +113,15 @@ public class UserCallService {
 	
 	@Autowired 
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired 
+	private TerminalDAO terminalDao;
+	
+	@Autowired 
+	private PageTaskDAO pageTaskDao;
+	
+	@Autowired 
+	private CommonForwardDAO commonForwardDao;
 	
 	@Autowired 
 	private CommandGroupUserInfoDAO commandGroupUserInfoDao;
@@ -154,6 +172,9 @@ public class UserCallService {
 	private ResourceChannelDAO resourceChannelDao;
 	
 	@Autowired
+	private PageTaskService pageTaskService;	
+	
+	@Autowired
 	private BusinessCommonService businessCommonService;
 	
 	@Autowired
@@ -164,6 +185,9 @@ public class UserCallService {
 	
 	@Autowired
 	private CommandGroupUserPlayerDAO commandGroupUserPlayerDao;
+	
+	@Autowired
+	private AgendaDAO agendaDao;	
 	
 	@Autowired
 	private UserLiveCallDAO userLiveCallDao;
@@ -196,7 +220,7 @@ public class UserCallService {
 		
 		//被呼叫校验
 		if(!calledUser.isLogined()){
-			throw new UserDoesNotLoginException(calledUser.getName());
+//			throw new UserDoesNotLoginException(calledUser.getName());
 		}
 		
 		FolderUserMap callUserfolderUserMap = folderUserMapDao.findByUserId(callUser.getId());
@@ -248,7 +272,7 @@ public class UserCallService {
 		group.setUserId(callUser.getId());
 		group.setUserName(callUser.getName());
 		group.setCreatetime(new Date());
-		group.setStatus(GroupStatus.START);
+		group.setStatus(GroupStatus.PAUSE);
 		groupDao.save(group);
 		
 		UserCallPO call = new UserCallPO();
@@ -266,6 +290,50 @@ public class UserCallService {
 //			call.setUuid(uuid);
 //		}
 		userCallDao.save(call);
+		
+		//建立成员
+		TerminalPO terminal = terminalDao.findByType(com.sumavision.tetris.bvc.model.terminal.TerminalType.QT_ZK);
+		
+		//主叫用户作为成员
+//		UserBO callUser = userUtils.queryUserById(call.getCallUserId());
+		GroupMemberPO callMemberPO = new GroupMemberPO();
+		callMemberPO.setName(callUser.getName());
+		callMemberPO.setGroupMemberType(GroupMemberType.MEMBER_USER);
+		callMemberPO.setOriginId(callUser.getId().toString());
+		callMemberPO.setTerminalId(terminal.getId());
+		callMemberPO.setFolderId(callUser.getFolderId());
+		callMemberPO.setGroupMemberStatus(GroupMemberStatus.CONNECT);
+		callMemberPO.setGroupId(group.getId());
+		groupMemberDao.save(callMemberPO);
+		
+		//被叫用户作为成员
+		GroupMemberPO calledMemberPO = new GroupMemberPO();
+		calledMemberPO.setName(calledUser.getName());
+		calledMemberPO.setGroupMemberType(GroupMemberType.MEMBER_USER);
+		calledMemberPO.setOriginId(calledUser.getId().toString());
+		calledMemberPO.setTerminalId(terminal.getId());
+		calledMemberPO.setFolderId(calledUser.getFolderId());
+		calledMemberPO.setGroupMemberStatus(GroupMemberStatus.CONNECT);
+		calledMemberPO.setGroupId(group.getId());
+		groupMemberDao.save(calledMemberPO);
+		
+		//把成员授权给角色
+		RolePO callRole = roleDao.findByInternalRoleType(InternalRoleType.CALL_USER);
+		GroupMemberRolePermissionPO callRolePermission = new GroupMemberRolePermissionPO(callRole.getId(), callMemberPO.getId());
+		groupMemberRolePermissionDao.save(callRolePermission);
+//				RolePO srcRole = roleDao.findByInternalRoleType(InternalRoleType.CALL_USER);
+		GroupMemberRolePermissionPO calledRolePermission = new GroupMemberRolePermissionPO(callRole.getId(), calledMemberPO.getId());
+		groupMemberRolePermissionDao.save(calledRolePermission);
+		
+		//呼叫编码
+		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(callMemberPO).add(calledMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
+		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+		LogicBO logic = groupService.openEncoder(sourceBOs, codec, -1L);
+		executeBusiness.execute(logic, group.getName() + "接听，打开编码");
+		
+		//执行议程
+		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.USER_CALL);
+		agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);//所有业务都使用groupPO
 		
 		if(!bCalledUserLdap){
 			
@@ -351,8 +419,9 @@ public class UserCallService {
 			System.out.println("消息消费异常，id：" + call.getMessageId());
 		}
 		
+		List<GroupMemberPO> members = groupMemberDao.findByGroupId(businessId);
 
-		
+		/*
 		//建立成员
 		//主叫用户作为成员
 		UserBO callUser = userUtils.queryUserById(call.getCallUserId());
@@ -383,30 +452,55 @@ public class UserCallService {
 		groupMemberRolePermissionDao.save(callRolePermission);
 //		RolePO srcRole = roleDao.findByInternalRoleType(InternalRoleType.CALL_USER);
 		GroupMemberRolePermissionPO calledRolePermission = new GroupMemberRolePermissionPO(callRole.getId(), calledMemberPO.getId());
-		groupMemberRolePermissionDao.save(calledRolePermission);
+		groupMemberRolePermissionDao.save(calledRolePermission);*/
 		
 		//呼叫编码
-		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(callMemberPO).add(calledMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
+//		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(callMemberPO).add(calledMemberPO).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);		
+		List<SourceBO> sourceBOs = agendaService.obtainSource(members, group.getId().toString(), BusinessInfoType.PLAY_VOD);
 		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
 		LogicBO logic = groupService.openEncoder(sourceBOs, codec, -1L);
 		executeBusiness.execute(logic, group.getName() + "接听，打开编码");
 		
-		//执行议程
-		AgendaPO agenda = null;//TODO
-		agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);//所有业务都使用groupPO
+//		//执行议程
+//		AgendaPO agenda = null;//TODO
+//		agendaService.runAndStopAgenda(group.getId(), new ArrayListWrapper<Long>().add(agenda.getId()).getList(), null);//所有业务都使用groupPO
 		
-		/*//参数模板
-		Map<String, Object> result = commandCommonServiceImpl.queryDefaultAvCodec();
-		AvtplPO targetAvtpl = (AvtplPO)result.get("avtpl");
-		AvtplGearsPO targetGear = (AvtplGearsPO)result.get("gear");
-		CodecParamBO codec = new CodecParamBO().set(new DeviceGroupAvtplPO().set(targetAvtpl), new DeviceGroupAvtplGearsPO().set(targetGear));
+		//查出所有分页任务，执行状态都置为DONE，查出所有forward，执行状态置为DONE，分页处理
+		List<PageTaskPO> changeTasks = new ArrayList<PageTaskPO>();
+		List<PageTaskPO> tasks = pageTaskDao.findByBusinessId(businessId.toString());
+		List<CommonForwardPO> forwards = commonForwardDao.findByBusinessId(businessId.toString());
+		for(CommonForwardPO forward : forwards){
+			forward.setExecuteStatus(ExecuteStatus.DONE);
+		}
+		for(PageTaskPO task : tasks){
+			boolean change = false;
+			if(ExecuteStatus.UNDONE.equals(task.getAudioStatus())){
+				task.setAudioStatus(ExecuteStatus.DONE);
+				change = true;
+			}
+			if(ExecuteStatus.UNDONE.equals(task.getVideoStatus())){
+				task.setVideoStatus(ExecuteStatus.DONE);
+				change = true;
+			}
+			if(change){
+				changeTasks.add(task);
+			}
+		}
 		
-		CallType callType = call.getCallType();
-		CommandGroupUserPlayerPO player = null;
-		if(callType==null || callType.equals(CallType.LOCAL_LOCAL) || callType.equals(CallType.OUTER_LOCAL)){
-			CommandGroupUserInfoPO userInfo = commandGroupUserInfoDao.findByUserId(call.getCalledUserId());
-			player = commandCommonServiceImpl.queryPlayerByBusiness(userInfo, PlayerBusinessType.USER_CALL, businessId.toString());
-		}*/
+		//持久化
+		group.setStatus(GroupStatus.START);
+		groupDao.save(group);
+		pageTaskDao.save(tasks);
+		commonForwardDao.save(forwards);		
+		
+//		List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
+//		List<GroupMemberPO> connectMembers = tetrisBvcQueryUtil.queryConnectMembers(members);
+		
+		pageTaskService.reExecute(changeTasks, true);
+		
+		
+//		group.setStatus(GroupStatus.START);
+//		groupDao.save(group);
 		
 		call.setGroupId(group.getId());
 		call.setStatus(CallStatus.ONGOING);
@@ -436,10 +530,10 @@ public class UserCallService {
 		}
 		
 		//根据接听与否来处理
-		if(call.getStatus().equals(CallStatus.WAITING_FOR_RESPONSE)){
-			userCallDao.delete(call);
-			return;
-		}
+//		if(call.getStatus().equals(CallStatus.WAITING_FOR_RESPONSE)){
+//			userCallDao.delete(call);
+//			return;
+//		}
 		
 		//查出所有数据
 		List<GroupMemberPO> members = groupMemberDao.findByGroupId(group.getId());
@@ -460,7 +554,7 @@ public class UserCallService {
 				message.put("fromUserId", user.getId());
 				message.put("fromUserName", user.getName());
 				message.put("businessInfo", user.getName() + "挂断了视频通话");
-//				message.put("serial", calledPlayer.getLocationIndex());
+				message.put("serial", -1);
 				
 				WebsocketMessageVO ws = websocketMessageService.send(call.getCalledUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
 				websocketMessageService.consume(ws.getId());
@@ -480,7 +574,7 @@ public class UserCallService {
 				message.put("fromUserId", user.getId());
 				message.put("fromUserName", user.getName());
 				message.put("businessInfo", user.getName() + "挂断了视频通话");
-//				message.put("serial", callPlayer.getLocationIndex());
+				message.put("serial", -1);
 				
 				WebsocketMessageVO ws = websocketMessageService.send(call.getCallUserId(), message.toJSONString(), WebsocketMessageType.COMMAND);
 				websocketMessageService.consume(ws.getId());
@@ -488,13 +582,15 @@ public class UserCallService {
 		}
 		
 		//停止编码
-		List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(members.get(0)).add(members.get(1)).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
-		CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
-		LogicBO logic = groupService.closeEncoder(sourceBOs, codec, -1L);
-		executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
+		if(call.getStatus().equals(CallStatus.ONGOING) || call.getStatus().equals(CallStatus.PAUSE)){
+			List<SourceBO> sourceBOs = agendaService.obtainSource(new ArrayListWrapper<GroupMemberPO>().add(members.get(0)).add(members.get(1)).getList(), group.getId().toString(), BusinessInfoType.PLAY_VOD);
+			CodecParamBO codec = commandCommonServiceImpl.queryDefaultAvCodecParamBO();
+			LogicBO logic = groupService.closeEncoder(sourceBOs, codec, -1L);
+			executeBusiness.execute(logic, group.getName() + "停止，关闭编码");
+		}
 		
 		//停止议程
-		AgendaPO agenda = null;//TODO
+		AgendaPO agenda = agendaDao.findByBusinessInfoType(BusinessInfoType.USER_CALL);
 		agendaService.runAndStopAgenda(group.getId(), null, new ArrayListWrapper<Long>().add(agenda.getId()).getList());//所有业务都使用groupPO
 		
 		//删除数据		
