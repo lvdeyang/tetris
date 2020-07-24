@@ -267,8 +267,8 @@ public class CommandVodController {
 //			vodService.userStop(57L);
 			
 			vodService.userStart(user, vodUser);
-			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 			return _player;
 		}
 	}
@@ -378,7 +378,7 @@ public class CommandVodController {
 			vodService.userStop(businessId);
 			
 			return new HashMapWrapper<String, Object>().put("serial", 111)//player.getLocationIndex())
-					   								   .getMap();		
+					   								   .getMap();
 		}
 	}	
 	
@@ -402,10 +402,14 @@ public class CommandVodController {
 			UserBO user = userUtils.queryUserById(id);
 		
 //			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
-			UserBO admin = new UserBO(); admin.setId(-1L);
+//			UserBO admin = new UserBO(); admin.setId(-1L);
+//			
+//			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
+//			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
 			
-			CommandGroupUserPlayerPO player = commandVodService.deviceStart_Cascade(user, deviceId, admin, -1);
-			BusinessPlayerVO _player = new BusinessPlayerVO().set(player);
+			vodService.deviceStart(user, deviceId);
+			
+			BusinessPlayerVO _player = new BusinessPlayerVO();
 			
 			return _player;
 		}
@@ -512,12 +516,17 @@ public class CommandVodController {
 //			UserBO admin = resourceService.queryUserInfoByUsername(CommandCommonConstant.USER_NAME);
 			UserBO admin = new UserBO(); admin.setId(-1L);
 			
-			CommandGroupUserPlayerPO player = commandVodService.deviceStop(user, businessId, admin);
+			vodService.deviceStop(businessId);
 			
-//			vodService.userStop(businessId);
-			
-			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
+			return new HashMapWrapper<String, Object>().put("serial", 111)//player.getLocationIndex())
 					   								   .getMap();
+			
+//			CommandGroupUserPlayerPO player = commandVodService.deviceStop(user, businessId, admin);
+//			
+////			vodService.userStop(businessId);
+//			
+//			return new HashMapWrapper<String, Object>().put("serial", player.getLocationIndex())
+//					   								   .getMap();
 		}
 	}
 	

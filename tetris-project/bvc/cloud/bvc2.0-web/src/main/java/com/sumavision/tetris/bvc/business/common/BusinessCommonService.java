@@ -96,6 +96,8 @@ import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalBundleChannelPO;
+import com.sumavision.tetris.bvc.model.terminal.channel.TerminalChannelPO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -213,12 +215,36 @@ public class BusinessCommonService {
 		return memberIds;
 	}
 	
-	public List<Long> obtainMemberIds(List<GroupMemberPO> members){
-		List<Long> memberIds = new ArrayList<Long>();
-		for(GroupMemberPO member : members){
-			memberIds.add(member.getId());
+	public Set<Long> obtainTerminalBundleIdsFromTerminalChannel(List<TerminalChannelPO> channels){
+		Set<Long> ids = new HashSet<Long>();
+		for(TerminalChannelPO channel : channels){
+			ids.add(channel.getTerminalBundleId());
 		}
-		return memberIds;
+		return ids;
+	}
+	
+	public Set<String> obtainChannelIdsFromTerminalChannel(List<TerminalChannelPO> channels){
+		Set<String> ids = new HashSet<String>();
+		for(TerminalChannelPO channel : channels){
+			ids.add(channel.getRealChannelId());
+		}
+		return ids;
+	}
+	
+	public Set<Long> obtainTerminalBundleIdsFromTerminalBundleChannel(List<TerminalBundleChannelPO> channels){
+		Set<Long> ids = new HashSet<Long>();
+		for(TerminalBundleChannelPO channel : channels){
+			ids.add(channel.getTerminalBundleId());
+		}
+		return ids;
+	}
+	
+	public Set<String> obtainChannelIdsFromTerminalBundleChannel(List<TerminalBundleChannelPO> channels){
+		Set<String> ids = new HashSet<String>();
+		for(TerminalBundleChannelPO channel : channels){
+			ids.add(channel.getChannelId());
+		}
+		return ids;
 	}
 	
 	public List<String> obtainMemberNames(List<GroupMemberPO> members){
@@ -257,6 +283,14 @@ public class BusinessCommonService {
 			ids.add(p.getId());
 		}
 		return ids;
+	}
+
+	public List<Long> obtainMemberIds(List<GroupMemberPO> members){
+		List<Long> memberIds = new ArrayList<Long>();
+		for(GroupMemberPO member : members){
+			memberIds.add(member.getId());
+		}
+		return memberIds;
 	}
 
 	public void notifyUserInfo(

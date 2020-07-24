@@ -46,6 +46,7 @@ import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
+import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 
@@ -742,6 +743,16 @@ public class TetrisBvcQueryUtil {
 		if(ps == null) return null;
 		for(GroupMemberRolePermissionPO p : ps){
 			if(p.getGroupMemberId().equals(memberId)){
+				return p;
+			}
+		}
+		return null;
+	}
+	
+	public TerminalBundleUserPermissionPO queryTerminalBundleUserPermissionByBerminalBundleId(Collection<TerminalBundleUserPermissionPO> ps, Long terminalBundleId){
+		if(ps == null) return null;
+		for(TerminalBundleUserPermissionPO p : ps){
+			if(p.getTerminalBundleId().equals(terminalBundleId)){
 				return p;
 			}
 		}
