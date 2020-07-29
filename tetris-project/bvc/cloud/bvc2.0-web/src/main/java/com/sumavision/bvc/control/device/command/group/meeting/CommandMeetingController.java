@@ -1,5 +1,6 @@
 package com.sumavision.bvc.control.device.command.group.meeting;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -22,12 +23,22 @@ import com.sumavision.bvc.device.command.basic.CommandBasicServiceImpl;
 import com.sumavision.bvc.device.command.cooperate.CommandCooperateServiceImpl;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
 import com.sumavision.bvc.device.command.meeting.CommandMeetingSpeakServiceImpl;
+import com.sumavision.tetris.bvc.business.group.BusinessType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
+import com.sumavision.tetris.bvc.business.group.GroupService;
+import com.sumavision.tetris.bvc.business.group.speak.GroupSpeakService;
 import com.sumavision.tetris.commons.util.date.DateUtil;
 import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 
 @Controller
 @RequestMapping(value = "/command/meeting")
 public class CommandMeetingController {
+
+	@Autowired
+	private GroupService groupService;
+
+	@Autowired
+	private GroupSpeakService groupSpeakService;
 	
 	@Autowired
 	private CommandBasicServiceImpl commandBasicServiceImpl;
@@ -74,10 +85,12 @@ public class CommandMeetingController {
 		}
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
+		List<String> bundleIdArray = new ArrayList<String>();
 		
-		CommandGroupPO group = null;
+		GroupPO group = null;
 		try{
-			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, name, GroupType.MEETING, OriginType.INNER, userIdArray);
+//			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, name, GroupType.MEETING, OriginType.INNER, userIdArray);
+			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, name, BusinessType.MEETING_QT, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, bundleIdArray, null);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();
@@ -125,7 +138,7 @@ public class CommandMeetingController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandMeetingSpeakServiceImpl.speakAppoint(user.getId(), Long.parseLong(id), userIdArray);
+		groupSpeakService.speakAppointU(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -150,7 +163,7 @@ public class CommandMeetingController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandMeetingSpeakServiceImpl.speakApply(userId, Long.parseLong(id));
+		groupSpeakService.speakApply(userId, Long.parseLong(id));
 		
 		return null;
 	}
@@ -178,7 +191,7 @@ public class CommandMeetingController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandMeetingSpeakServiceImpl.speakApplyAgree(user.getId(), Long.parseLong(id), userIdArray);
+		groupSpeakService.speakApplyAgreeU(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -206,7 +219,7 @@ public class CommandMeetingController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandMeetingSpeakServiceImpl.speakApplyDisagree(user.getId(), Long.parseLong(id), userIdArray);
+		groupSpeakService.speakApplyDisagree(user.getId(), Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -231,7 +244,7 @@ public class CommandMeetingController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandMeetingSpeakServiceImpl.speakStopByMember(userId, Long.parseLong(id));
+		groupSpeakService.speakStopByMember(userId, Long.parseLong(id));
 		
 		return null;
 	}
@@ -259,7 +272,7 @@ public class CommandMeetingController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandMeetingSpeakServiceImpl.speakStopByChairman(user.getId(), Long.parseLong(id), userIdArray);
+		groupSpeakService.speakStopByChairmanU(Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -284,7 +297,7 @@ public class CommandMeetingController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandMeetingSpeakServiceImpl.discussStart(userId, Long.parseLong(id));
+		groupSpeakService.discussStart(userId, Long.parseLong(id));
 		
 		return null;
 	}
@@ -309,7 +322,7 @@ public class CommandMeetingController {
 		
 		Long userId = userUtils.getUserIdFromSession(request);
 		
-		commandMeetingSpeakServiceImpl.discussStop(userId, Long.parseLong(id));
+		groupSpeakService.discussStop(userId, Long.parseLong(id));
 		
 		return null;
 	}

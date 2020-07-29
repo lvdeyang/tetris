@@ -14,6 +14,12 @@ public interface GroupDAO extends MetBaseDAO<GroupPO>{
 	@Query(value="select group.id from TETRIS_BVC_BUSINESS_GROUP _group left join TETRIS_BVC_GROUP_DEMAND demand on demand.business_id = _group.id where demand.id in ?1", nativeQuery = true)
 	public List<Long> findAllIdsByDemandIds(List<Long> demandIds);
 	
+	@Query(value="SELECT * FROM TETRIS_BVC_BUSINESS_GROUP _group INNER JOIN TETRIS_BVC_BUSINESS_GROUP_MEMBER member ON member.group_id=_group.id WHERE member.origin_id=?1", nativeQuery=true)
+	public List<GroupPO> findByMemberOriginId(String originId);
+	
+	@Query(value="SELECT * FROM TETRIS_BVC_BUSINESS_GROUP _group INNER JOIN TETRIS_BVC_BUSINESS_GROUP_MEMBER member ON member.group_id=_group.id WHERE (member.origin_id=?1 and (member.group_member_status='CONNECT' or member.is_administrator=true))", nativeQuery=true)
+	public List<GroupPO> findEnteredGroupByMemberOriginId(String originId);
+	
 /*
 	public List<GroupPO> findByName(String name);
 

@@ -21,6 +21,12 @@ import com.sumavision.bvc.device.group.bo.BundleBO;
 import com.sumavision.bvc.device.group.bo.ChannelBO;
 import com.sumavision.bvc.device.group.bo.FolderBO;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
+import com.sumavision.tetris.bvc.business.dao.GroupDAO;
+import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 
 /**
  * 树相关操作，提取公用方法<br/>
@@ -41,6 +47,15 @@ public class TreeUtils {
 	private CommandGroupDAO commandGroupDao;
 	
 	@Autowired
+	private GroupDAO groupDao;
+	
+	@Autowired
+	private GroupMemberDAO groupMemberDao;
+	
+	@Autowired
+	private BusinessCommonService businessCommonService;
+	
+	@Autowired
 	private ResourceService resourceService;
 
 	/**
@@ -50,6 +65,46 @@ public class TreeUtils {
 	 * @return 设备组树信息
 	 */
 	public Object queryGroupTree(Long groupId) throws Exception{
+		
+		List<FolderBO> folders = new ArrayList<FolderBO>();
+		List<TreeNodeVO> _roots = new ArrayList<TreeNodeVO>();
+		
+//		GroupPO group = groupDao.findOne(groupId);
+		List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
+		
+		//查询所有非点播的文件夹
+		List<FolderPO> totalFolders = resourceService.queryAllFolders();
+		for(FolderPO folder:totalFolders){
+			if(!FolderType.ON_DEMAND.equals(folder.getFolderType())){
+				folders.add(new FolderBO().set(folder));
+			}
+		}
+		
+		//过滤掉无用的文件夹
+		List<FolderBO> usefulFolders = filterUsefulFolders(folders, null, members);
+		
+		//得到所有的相关用户【这里没有处理设备】
+		List<UserBO> userBOs = businessCommonService.queryUsersByGroupMembers(members);
+		
+		//找所有的根
+		List<FolderBO> roots = findRoots(usefulFolders);
+		for(FolderBO root:roots){
+			TreeNodeVO _root = new TreeNodeVO().set(root)
+											   .setChildren(new ArrayList<TreeNodeVO>());
+			_roots.add(_root);
+			recursionFolder(_root, usefulFolders, null, null, members, userBOs);
+		}
+		
+		return _roots;
+	}
+
+	/**
+	 * @Title: 设备组成员树<br/>
+	 * @param groupId 设备组id
+	 * @throws Exception 
+	 * @return 设备组树信息
+	 */
+	/*public Object queryGroupTree1(Long groupId) throws Exception{
 		
 //		List<UserBO> filteredUsers = new ArrayList<UserBO>();
 		List<FolderBO> folders = new ArrayList<FolderBO>();
@@ -82,7 +137,7 @@ public class TreeUtils {
 		}
 		
 		return _roots;
-	}
+	}*/
 	
 	/**
 	 * 过滤出有用的文件夹<br/>
@@ -98,7 +153,7 @@ public class TreeUtils {
 	private List<FolderBO> filterUsefulFolders(
 			List<FolderBO> allFolders,
 			List<BundleBO> bundles,
-			List<CommandGroupMemberPO> users){
+			List<GroupMemberPO> users){
 		
 		Set<FolderBO> usefulFolders = new HashSet<FolderBO>();
 		Set<Long> ids = new HashSet<Long>();
@@ -108,7 +163,7 @@ public class TreeUtils {
 			}
 		}
 		if(users!=null && users.size()>0){
-			for(CommandGroupMemberPO user : users){
+			for(GroupMemberPO user : users){
 				ids.add(user.getFolderId());
 			}
 		}
@@ -152,7 +207,7 @@ public class TreeUtils {
 			List<FolderBO> folders, 
 			List<BundleBO> bundles, 
 			List<ChannelBO> channels,
-			List<CommandGroupMemberPO> members,
+			List<GroupMemberPO> members,
 			List<UserBO> userBOs){
 		
 		if(userBOs == null) userBOs = new ArrayList<UserBO>();
@@ -186,13 +241,15 @@ public class TreeUtils {
 			}
 		}
 		
-		//往里装用户
+		//往里装用户【后续处理设备】
 		if(members!=null && members.size()>0){
-			for(CommandGroupMemberPO member : members){
+			for(GroupMemberPO member : members){
 				if(member.getFolderId()!=null && root.getId().equals(member.getFolderId().toString())){
-					UserBO userBO = queryUtil.queryUserById(userBOs, member.getUserId());
-					TreeNodeVO userNode = new TreeNodeVO().set(member, userBO);
-					root.getChildren().add(userNode);
+					if(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
+						UserBO userBO = queryUtil.queryUserById(userBOs, Long.parseLong(member.getOriginId()));
+						TreeNodeVO userNode = new TreeNodeVO().set(member, userBO);
+						root.getChildren().add(userNode);
+					}
 				}
 			}
 		}

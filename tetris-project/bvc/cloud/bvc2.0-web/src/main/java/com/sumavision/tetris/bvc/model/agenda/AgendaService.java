@@ -369,7 +369,8 @@ public class AgendaService {
 				SourceBO sourceBO = new SourceBO()
 						.setBusinessId(businessId)
 						.setBusinessInfoType(businessInfoType)
-						.setMemberId(member.getId())
+						.setSrcId(member.getOriginId())
+						.setSrcMemberId(member.getId())
 						.setSrcName(member.getName())
 						.setSrcCode(member.getCode())
 						.setVideoSource(videoEncode1Channel)
@@ -476,7 +477,8 @@ public class AgendaService {
 					SourceBO sourceBO = new SourceBO()
 							.setBusinessId(businessId)
 							.setBusinessInfoType(businessInfoType)
-							.setMemberId(member.getId())
+							.setSrcId(member.getOriginId())
+							.setSrcMemberId(member.getId())
 							.setSrcName(member.getName())
 							.setSrcCode(member.getCode())
 							.setVideoSource(encodeChannel)
@@ -637,7 +639,7 @@ public class AgendaService {
 			for(SourceBO sourceBO : sourceBOs){
 				
 				//过滤掉自己看自己
-				if(sourceBO.getMemberId().equals(dstMember.getId())) continue;
+				if(sourceBO.getSrcMemberId().equals(dstMember.getId())) continue;
 				
 				ChannelSchemeDTO video = sourceBO.getVideoSource();
 				BundlePO bundlePO = bundleDao.findByBundleId(video.getBundleId());
@@ -646,8 +648,9 @@ public class AgendaService {
 				videoForward.setBusinessInfoType(sourceBO.getBusinessInfoType());
 				videoForward.setType(AgendaForwardType.VIDEO);
 				videoForward.setDstMemberId(dstMember.getId());
-				videoForward.setSrcId(bundlePO.getBundleId());
+				videoForward.setSrcId(sourceBO.getSrcId());
 				videoForward.setSrcName(sourceBO.getSrcName());
+				videoForward.setSrcMemberId(sourceBO.getSrcMemberId());
 				videoForward.setSrcCode(bundlePO.getUsername());
 				videoForward.setSrcBundleName(bundlePO.getBundleName());
 				videoForward.setSrcBundleType(bundlePO.getBundleType());
@@ -668,8 +671,9 @@ public class AgendaService {
 					audioForward.setBusinessInfoType(sourceBO.getBusinessInfoType());
 					audioForward.setType(AgendaForwardType.AUDIO);
 					audioForward.setDstMemberId(dstMember.getId());
-					audioForward.setSrcId(bundlePO2.getBundleId());
+					audioForward.setSrcId(sourceBO.getSrcId());
 					audioForward.setSrcName(sourceBO.getSrcName());
+					audioForward.setSrcMemberId(sourceBO.getSrcMemberId());
 					audioForward.setSrcCode(bundlePO2.getUsername());
 					audioForward.setSrcBundleName(bundlePO2.getBundleName());
 					audioForward.setSrcBundleType(bundlePO2.getBundleType());
@@ -831,7 +835,9 @@ public class AgendaService {
 			ps.add(memberRolePermission);
 		}
 		groupMemberRolePermissionDao.save(ps);
-		groupMemberRolePermissionDao.deleteByRoleIdInAndGroupMemberId(removeRoleIds, memberId);
+		List<GroupMemberRolePermissionPO> dps = groupMemberRolePermissionDao.findByRoleIdInAndGroupMemberId(removeRoleIds, memberId);
+		groupMemberRolePermissionDao.deleteInBatch(dps);
+//		groupMemberRolePermissionDao.deleteByRoleIdInAndGroupMemberId(removeRoleIds, memberId);
 				
 		executeToFinal(groupId, oldForwards);
 		
