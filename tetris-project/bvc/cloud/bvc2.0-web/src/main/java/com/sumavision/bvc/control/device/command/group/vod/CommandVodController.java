@@ -264,9 +264,9 @@ public class CommandVodController {
 			UserBO user = userUtils.queryUserById(id);
 			UserBO vodUser = userUtils.queryUserById(userId);
 			
-			vodService.userStop(153L);
+//			vodService.userStop(153L);//test
 			
-//			vodService.userStart(user, vodUser);
+			vodService.userStart(user, vodUser);
 			
 			BusinessPlayerVO _player = new BusinessPlayerVO();
 			return _player;
