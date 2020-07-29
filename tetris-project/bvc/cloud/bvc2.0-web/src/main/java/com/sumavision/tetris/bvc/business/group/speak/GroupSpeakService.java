@@ -41,6 +41,7 @@ import com.sumavision.bvc.device.group.service.test.ExecuteBusinessProxy;
 import com.sumavision.bvc.device.monitor.live.DstDeviceType;
 import com.sumavision.bvc.log.OperationLogService;
 import com.sumavision.bvc.meeting.logic.ExecuteBusinessReturnBO;
+import com.sumavision.tetris.bvc.business.BusinessInfoType;
 import com.sumavision.tetris.bvc.business.OriginType;
 import com.sumavision.tetris.bvc.business.common.BusinessCommonService;
 import com.sumavision.tetris.bvc.business.dao.CommonForwardDAO;
@@ -57,8 +58,10 @@ import com.sumavision.tetris.bvc.business.group.GroupStatus;
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
+import com.sumavision.tetris.bvc.model.agenda.AgendaDAO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaService;
+import com.sumavision.tetris.bvc.model.role.InternalRoleType;
 import com.sumavision.tetris.bvc.model.role.RoleDAO;
 import com.sumavision.tetris.bvc.model.role.RolePO;
 import com.sumavision.tetris.bvc.page.PageInfoDAO;
@@ -114,6 +117,9 @@ public class GroupSpeakService {
 	
 	@Autowired
 	private RoleDAO roleDao;
+	
+	@Autowired
+	private AgendaDAO agendaDao;
 	
 	@Autowired
 	private CommandGroupDAO commandGroupDao;
@@ -234,7 +240,7 @@ public class GroupSpeakService {
 			throw new BaseException(StatusCode.FORBIDDEN, speakingMembers.get(0).getName() + "正在发言");
 		}
 
-		RolePO speakRole = null;//TODO
+		RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
 		List<GroupMemberPO> speakMembers = new ArrayList<GroupMemberPO>();//统计本次新增的发言人
 		List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(speakRole.getId(), memberIds);
 		for(GroupMemberPO member : members){
@@ -302,7 +308,7 @@ public class GroupSpeakService {
 				}
 			}
 			
-			if(!group.getBusinessType().equals(BusinessType.COMMAND)){
+			if(group.getBusinessType().equals(BusinessType.COMMAND)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行发言");
 			}
 			
@@ -314,7 +320,7 @@ public class GroupSpeakService {
 			GroupMemberPO chairmanMember = tetrisBvcQueryUtil.queryChairmanMember(members);
 			GroupMemberPO speakMember = tetrisBvcQueryUtil.queryMemberByUserId(members, userId);
 			
-			RolePO speakRole = null;//TODO
+			RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
 //			List<GroupMemberPO> cooperateMembers = new ArrayList<GroupMemberPO>();//统计本次新增的协同成员
 			GroupMemberRolePermissionPO ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberId(speakRole.getId(), speakMember.getId());
 			
@@ -399,7 +405,7 @@ public class GroupSpeakService {
 				}
 			}
 			
-			if(!groupType.equals(BusinessType.COMMAND)){
+			if(groupType.equals(BusinessType.COMMAND)){
 				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + "指挥中不能进行发言");
 			}
 			
@@ -433,7 +439,7 @@ public class GroupSpeakService {
 			}
 			
 			List<GroupMemberPO> speakMembers = new ArrayList<GroupMemberPO>();//统计本次新增的发言人
-			RolePO speakRole = null;//TODO
+			RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
 			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(speakRole.getId(), memberIds);
 			for(GroupMemberPO member : members){
 				
@@ -566,7 +572,7 @@ public class GroupSpeakService {
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 //			List<GroupMemberPO> speakMembers = new ArrayList<CommandGroupMemberPO>();
 			GroupMemberPO speakMember = tetrisBvcQueryUtil.queryMemberByUserId(members, userId);
-			RolePO speakRole = null;//TODO
+			RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
 			GroupMemberRolePermissionPO ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberId(speakRole.getId(), speakMember.getId());
 			if(ps == null){
 				return;
@@ -598,6 +604,100 @@ public class GroupSpeakService {
 	}
 	
 	@Transactional(rollbackFor = Exception.class)
+	public void speakStopByChairmanU(Long groupId, List<Long> userIds) throws Exception{
+		synchronized (new StringBuffer().append(lockProcessPrefix).append(groupId).toString().intern()) {
+			List<Long> memberIds = businessCommonService.fromUserIdsToMemberIds(groupId, userIds);
+			speakStopByChairman(groupId, memberIds);
+		}
+	}
+	
+	/**
+	 * 重构，停止发言<br/>
+	 * <p>详细描述</p>
+	 * <b>作者:</b>zsy<br/>
+	 * <b>版本：</b>1.0<br/>
+	 * <b>日期：</b>2020年6月28日 下午4:24:30
+	 * @param groupId
+	 * @param memberIds
+	 * @throws Exception
+	 */
+	private void speakStopByChairman(Long groupId, List<Long> memberIds) throws Exception{
+		UserVO user = userQuery.current();
+		
+		if(groupId==null || groupId.equals("")){
+			log.info("停止协同指挥，会议id有误");
+			return;
+		}
+		
+		GroupPO group = groupDao.findOne(groupId);
+		
+		if(GroupStatus.STOP.equals(group.getStatus())){
+			if(!OriginType.OUTER.equals(group.getOriginType())){
+				throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经停止。id: " + group.getId());
+			}else{
+				return;
+			}
+		}
+		BusinessType groupType = group.getBusinessType();
+//			if(!groupType.equals(GroupBusinessType.COMMAND)){
+//				throw new BaseException(StatusCode.FORBIDDEN, "只能在指挥中进行协同");
+//			}
+	
+		String commandString = commandCommonUtil.generateCommandString(groupType);
+		List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
+		
+		RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
+		List<GroupMemberPO> revokeMembers = new ArrayList<GroupMemberPO>();//统计本次解除的发言人
+		List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(speakRole.getId(), memberIds);
+		for(GroupMemberPO member : members){
+			if(memberIds.contains(member.getId())){
+				//通过GroupMemberRolePermissionPO查询该成员是否已经是协同成员
+				GroupMemberRolePermissionPO p = tetrisBvcQueryUtil.queryGroupMemberRolePermissionByGroupMemberId(ps, member.getId());
+				if(p != null){
+					revokeMembers.add(member);					
+				}else{
+//						throw new BaseException(StatusCode.FORBIDDEN, member.getName() + " 没有被授权协同");
+				}
+				
+			}
+		}
+		
+		//给这些人解绑协同指挥角色。后续改成批量
+		List<Long> removeRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
+		for(GroupMemberPO revokeMember : revokeMembers){
+			agendaService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds);
+		}
+		
+		//发送websocket通知
+		JSONObject message = new JSONObject();
+		message.put("businessType", "speakStop");
+		message.put("businessId", group.getId().toString());
+		List<String> names = businessCommonService.obtainMemberNames(revokeMembers);
+		message.put("businessInfo", group.getName() + " " + StringUtils.join(names.toArray(), ",") + " 停止发言");
+		message.put("splits", new JSONArray());
+		List<Long> notifyMemberIds = businessCommonService.obtainMemberIds(groupId, true, false);
+		businessCommonService.notifyMemberInfo(notifyMemberIds, message.toJSONString(), WebsocketMessageType.COMMAND);
+		
+		/*
+		//录制更新
+		LogicBO logicRecord = commandRecordServiceImpl.update(group.getUserId(), group, 1, false);
+		logic.merge(logicRecord);			
+		ExecuteBusinessReturnBO returnBO = executeBusiness.execute(logic, revokeMembersNames.toString());
+		commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());
+		
+		//级联
+		GroupType type = group.getType();
+		if(!OriginType.OUTER.equals(group.getOriginType())){
+			if(GroupType.BASIC.equals(type)){
+				GroupBO groupBO = commandCascadeUtil.stopCooperation(group, revokeMembers);
+				commandCascadeService.stopCooperation(groupBO);
+			}
+		}
+		*/
+		operationLogService.send(user.getNickname(), "撤销协同指挥", user.getNickname() + "撤销协同指挥groupId:" + groupId + ", memberIds:" + memberIds.toString());
+	}
+
+	@Transactional(rollbackFor = Exception.class)
 	public void discussStart(Long userId, Long groupId) throws Exception{
 		UserVO user = userQuery.current();
 		
@@ -628,14 +728,14 @@ public class GroupSpeakService {
 			}
 			
 			//解绑所有发言人角色
-			RolePO speakRole = null;//TODO
+			RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
 			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
 			List<Long> memberIds = businessCommonService.obtainMemberIds(members);			
 			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(speakRole.getId(), memberIds);
 			groupMemberRolePermissionDao.deleteInBatch(ps);
 			
 			//执讨论议程
-			AgendaPO discussAgenda = null;
+			AgendaPO discussAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.MEETING_DISCUSS);
 			agendaService.runAndStopAgenda(groupId, new ArrayListWrapper<Long>().add(discussAgenda.getId()).getList(), null);
 			
 			//发送websocket通知
@@ -684,7 +784,7 @@ public class GroupSpeakService {
 			}
 			
 			//停止讨论议程
-			AgendaPO discussAgenda = null;
+			AgendaPO discussAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.MEETING_DISCUSS);
 			agendaService.runAndStopAgenda(groupId, null, new ArrayListWrapper<Long>().add(discussAgenda.getId()).getList());
 			
 			//发送websocket通知
@@ -705,105 +805,15 @@ public class GroupSpeakService {
 		operationLogService.send(user.getNickname(), "停止讨论模式", user.getNickname() + "停止讨论模式groupId:" + groupId);
 	}
 	
-	/**
-	 * 重构，停止发言<br/>
-	 * <p>详细描述</p>
-	 * <b>作者:</b>zsy<br/>
-	 * <b>版本：</b>1.0<br/>
-	 * <b>日期：</b>2020年6月28日 下午4:24:30
-	 * @param groupId
-	 * @param memberIds
-	 * @throws Exception
-	 */
-	@Transactional(rollbackFor = Exception.class)
-	public void speakStopByChairman(Long groupId, List<Long> memberIds) throws Exception{
-		UserVO user = userQuery.current();
-		
-		if(groupId==null || groupId.equals("")){
-			log.info("停止协同指挥，会议id有误");
-			return;
-		}
-		
-		synchronized (new StringBuffer().append(lockProcessPrefix).append(groupId).toString().intern()) {
-		
-			GroupPO group = groupDao.findOne(groupId);
-			
-			if(GroupStatus.STOP.equals(group.getStatus())){
-				if(!OriginType.OUTER.equals(group.getOriginType())){
-					throw new BaseException(StatusCode.FORBIDDEN, group.getName() + " 已经停止。id: " + group.getId());
-				}else{
-					return;
-				}
-			}
-			BusinessType groupType = group.getBusinessType();
-//			if(!groupType.equals(GroupBusinessType.COMMAND)){
-//				throw new BaseException(StatusCode.FORBIDDEN, "只能在指挥中进行协同");
-//			}
-		
-			String commandString = commandCommonUtil.generateCommandString(groupType);
-			List<GroupMemberPO> members = groupMemberDao.findByGroupId(groupId);
-			
-			RolePO speakRole = null;//TODO
-			List<GroupMemberPO> revokeMembers = new ArrayList<GroupMemberPO>();//统计本次解除的发言人
-			List<GroupMemberRolePermissionPO> ps = groupMemberRolePermissionDao.findByRoleIdAndGroupMemberIdIn(speakRole.getId(), memberIds);
-			for(GroupMemberPO member : members){
-				if(memberIds.contains(member.getId())){
-					//通过GroupMemberRolePermissionPO查询该成员是否已经是协同成员
-					GroupMemberRolePermissionPO p = tetrisBvcQueryUtil.queryGroupMemberRolePermissionByGroupMemberId(ps, member.getId());
-					if(p != null){
-						revokeMembers.add(member);					
-					}else{
-//						throw new BaseException(StatusCode.FORBIDDEN, member.getName() + " 没有被授权协同");
-					}
-					
-				}
-			}
-			
-			//给这些人解绑协同指挥角色。后续改成批量
-			List<Long> removeRoleIds = new ArrayListWrapper<Long>().add(speakRole.getId()).getList();
-			for(GroupMemberPO revokeMember : revokeMembers){
-				agendaService.modifyMemberRole(groupId, revokeMember.getId(), null, removeRoleIds);
-			}
-			
-			//发送websocket通知
-			JSONObject message = new JSONObject();
-			message.put("businessType", "speakStop");
-			message.put("businessId", group.getId().toString());
-			List<String> names = businessCommonService.obtainMemberNames(revokeMembers);
-			message.put("businessInfo", group.getName() + " " + StringUtils.join(names.toArray(), ",") + " 停止发言");
-			message.put("splits", new JSONArray());
-			List<Long> notifyMemberIds = businessCommonService.obtainMemberIds(groupId, true, false);
-			businessCommonService.notifyMemberInfo(notifyMemberIds, message.toJSONString(), WebsocketMessageType.COMMAND);
-			
-			/*
-			//录制更新
-			LogicBO logicRecord = commandRecordServiceImpl.update(group.getUserId(), group, 1, false);
-			logic.merge(logicRecord);			
-			ExecuteBusinessReturnBO returnBO = executeBusiness.execute(logic, revokeMembersNames.toString());
-			commandRecordServiceImpl.saveStoreInfo(returnBO, group.getId());
-			
-			//级联
-			GroupType type = group.getType();
-			if(!OriginType.OUTER.equals(group.getOriginType())){
-				if(GroupType.BASIC.equals(type)){
-					GroupBO groupBO = commandCascadeUtil.stopCooperation(group, revokeMembers);
-					commandCascadeService.stopCooperation(groupBO);
-				}
-			}
-			*/
-			operationLogService.send(user.getNickname(), "撤销协同指挥", user.getNickname() + "撤销协同指挥groupId:" + groupId + ", memberIds:" + memberIds.toString());
-		}
-	}
-	
 	private boolean isGroupUnderDiscussion(Long groupId){
-		AgendaPO discussAgenda = null;//TODO
+		AgendaPO discussAgenda = agendaDao.findByBusinessInfoType(BusinessInfoType.MEETING_DISCUSS);
 		RunningAgendaPO runningAgenda = runningAgendaDao.findByGroupIdAndAgendaId(groupId, discussAgenda.getId());
 		if(runningAgenda == null) return false;
 		return true;
 	}
 	
 	private List<GroupMemberPO> querySpeakMembers(Long groupId){
-		RolePO speakRole = null;//TODO
+		RolePO speakRole = roleDao.findByInternalRoleType(InternalRoleType.MEETING_SPEAKER);
 		List<GroupMemberPO> speakMembers = groupMemberDao.findByGroupIdAndRoleId(groupId, speakRole.getId());
 		return speakMembers;
 	}

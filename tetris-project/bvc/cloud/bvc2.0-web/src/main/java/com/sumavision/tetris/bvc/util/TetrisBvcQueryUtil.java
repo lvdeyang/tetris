@@ -45,8 +45,12 @@ import com.sumavision.tetris.bvc.business.group.BusinessType;
 import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
+import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.business.group.demand.GroupDemandPO;
+import com.sumavision.tetris.bvc.business.terminal.user.TerminalBundleUserPermissionPO;
 import com.sumavision.tetris.bvc.model.agenda.AgendaPO;
+import com.sumavision.tetris.bvc.page.PageTaskPO;
 
 @Service
 public class TetrisBvcQueryUtil {
@@ -62,6 +66,17 @@ public class TetrisBvcQueryUtil {
 	
 	@Autowired
 	private CommandCommonServiceImpl commandCommonServiceImpl;
+	
+	/** 根据dstId查找分页任务 */
+	public PageTaskPO queryPageTaskById(Collection<PageTaskPO> tasks, String dstId) {
+		if(tasks == null) return null;
+		for(PageTaskPO task : tasks){
+			if(dstId.equals(task.getDstId())){
+				return task;
+			}
+		}
+		return null;
+	}
 	
 	public AgendaPO queryAgendaById(Collection<AgendaPO> agendas, Long id){
 		for(AgendaPO agenda : agendas){
@@ -688,7 +703,7 @@ public class TetrisBvcQueryUtil {
 	}
 	
 	/**
-	 * 查询members列表对应的UserBO列表<br/>
+	 * 查询members列表对应的UserBO列表，目前只支持用户成员<br/>
 	 * <p>用户在线情况按照 QT_ZK 查询</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
@@ -696,10 +711,12 @@ public class TetrisBvcQueryUtil {
 	 * @param members
 	 * @return
 	 */
-	public List<UserBO> queryUsersByMembers(Collection<CommandGroupMemberPO> members){
+	public List<UserBO> queryUsersByMembers(Collection<GroupMemberPO> members){
 		List<Long> userIdList = new ArrayList<Long>();
-		for(CommandGroupMemberPO member : members){
-			userIdList.add(member.getUserId());
+		for(GroupMemberPO member : members){
+			if(GroupMemberType.MEMBER_USER.equals(member.getGroupMemberType())){
+				userIdList.add(Long.parseLong(member.getOriginId()));
+			}
 		}
 		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
 		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
@@ -716,9 +733,9 @@ public class TetrisBvcQueryUtil {
 	 * @param id
 	 * @return
 	 */
-	public CommandGroupPO queryGroupById(Collection<CommandGroupPO> groups, Long id){
+	public GroupPO queryGroupById(Collection<GroupPO> groups, Long id){
 		if(groups == null) return null;
-		for(CommandGroupPO group : groups){
+		for(GroupPO group : groups){
 			if(group.getId().equals(id)){
 				return group;
 			}
@@ -736,11 +753,21 @@ public class TetrisBvcQueryUtil {
 		return null;
 	}
 	
+	public TerminalBundleUserPermissionPO queryTerminalBundleUserPermissionByBerminalBundleId(Collection<TerminalBundleUserPermissionPO> ps, Long terminalBundleId){
+		if(ps == null) return null;
+		for(TerminalBundleUserPermissionPO p : ps){
+			if(p.getTerminalBundleId().equals(terminalBundleId)){
+				return p;
+			}
+		}
+		return null;
+	}
+	
 	public List<SourceBO> querySourceBOsByMemberIds(Collection<SourceBO> sourceBOs, Long memberId){
 		List<SourceBO> target = new ArrayList<SourceBO>();
 		for(SourceBO sourceBO : sourceBOs){
 			try{
-				if(memberId.equals(sourceBO.getMemberId())){
+				if(memberId.equals(sourceBO.getSrcMemberId())){
 					target.add(sourceBO);
 				}
 			}catch(Exception e){}			

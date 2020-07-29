@@ -47,6 +47,14 @@ import com.sumavision.bvc.device.command.common.CommandCommonUtil;
 import com.sumavision.bvc.device.command.exception.CommandGroupNameAlreadyExistedException;
 import com.sumavision.bvc.device.command.exception.UserHasNoFolderException;
 import com.sumavision.bvc.device.group.service.util.QueryUtil;
+import com.sumavision.tetris.bvc.business.dao.GroupDAO;
+import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
+import com.sumavision.tetris.bvc.business.group.BusinessType;
+import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
+import com.sumavision.tetris.bvc.business.group.GroupService;
+import com.sumavision.tetris.bvc.business.group.function.GroupFunctionService;
+import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -57,6 +65,12 @@ import com.sumavision.tetris.mvc.ext.response.json.aop.annotation.JsonBody;
 @Controller
 @RequestMapping(value = "/command/basic")
 public class CommandBasicController {
+
+	@Autowired
+	private GroupService groupService;
+	
+	@Autowired
+	private GroupFunctionService groupFunctionService;
 
 	@Autowired
 	private CommandBasicServiceImpl commandBasicServiceImpl;
@@ -77,6 +91,12 @@ public class CommandBasicController {
 	private CommandPageServiceImpl commandPageServiceImpl;
 
 	@Autowired
+	private GroupDAO groupDao;
+
+	@Autowired
+	private GroupMemberDAO groupMemberDao;
+
+	@Autowired
 	private CommandGroupDAO commandGroupDao;
 
 	@Autowired
@@ -93,6 +113,9 @@ public class CommandBasicController {
 
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+
+	@Autowired
+	private TetrisBvcQueryUtil tetrisBvcQueryUtil;
 
 	@Autowired
 	private ResourceService resourceService;
@@ -146,7 +169,7 @@ public class CommandBasicController {
 		
 //		UserVO user = userUtils.getUserFromSession(request);
 		
-		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
+		GroupPO group = groupDao.findOne(Long.parseLong(id));
 		
 		JSONObject info = new JSONObject();
 		info.put("id", group.getId().toString());
@@ -170,7 +193,7 @@ public class CommandBasicController {
 	
 	/**
 	 * 查询会议的所有成员及状态，列表呈现，不再是树<br/>
-	 * <p>详细描述</p>
+	 * <p>目前只支持用户成员</p>
 	 * <b>作者:</b>zsy<br/>
 	 * <b>版本：</b>1.0<br/>
 	 * <b>日期：</b>2020年2月21日 上午11:34:06
@@ -186,7 +209,7 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
-		CommandGroupPO group = commandGroupDao.findOne(Long.parseLong(id));
+		GroupPO group = groupDao.findOne(Long.parseLong(id));
 		
 		JSONObject info = new JSONObject();
 		info.put("id", group.getId().toString());
@@ -201,8 +224,8 @@ public class CommandBasicController {
 			info.put("isRecord", false);
 		}
 		
-		List<CommandGroupMemberPO> members = group.getMembers();
-		List<UserBO> userBOs = commandCommonUtil.queryUsersByMembers(members);
+		List<GroupMemberPO> members = groupMemberDao.findByGroupId(group.getId());
+		List<UserBO> userBOs = tetrisBvcQueryUtil.queryUsersByMembers(members);
 		
 		//成员列表节点
 		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
@@ -215,14 +238,14 @@ public class CommandBasicController {
 		List<FolderPO> totalFolders = resourceService.queryAllFolders();		
 		
 		//先放入主席
-		CommandGroupMemberPO chairmanMember = commandCommonUtil.queryChairmanMember(members);
-		UserBO chairmanUserBO = queryUtil.queryUserById(userBOs, chairmanMember.getUserId());
+		GroupMemberPO chairmanMember = tetrisBvcQueryUtil.queryChairmanMember(members);
+		UserBO chairmanUserBO = queryUtil.queryUserById(userBOs, Long.parseLong(chairmanMember.getOriginId()));
 		FolderPO chairmanFolder = queryUtil.queryFolderPOById(totalFolders, chairmanMember.getFolderId());
 		TreeNodeVO chairmanMemberTree = new TreeNodeVO().setWithInfo(chairmanMember, chairmanUserBO, chairmanFolder);
 		commandRoot.getChildren().add(chairmanMemberTree);
-		for(CommandGroupMemberPO member : members){
-			if(member.isAdministrator()) continue;
-			UserBO userBO = queryUtil.queryUserById(userBOs, member.getUserId());
+		for(GroupMemberPO member : members){
+			if(member.getIsAdministrator()) continue;
+			UserBO userBO = queryUtil.queryUserById(userBOs, Long.parseLong(member.getOriginId()));
 			FolderPO folder = queryUtil.queryFolderPOById(totalFolders, member.getFolderId());
 			TreeNodeVO commandTree = new TreeNodeVO().setWithInfo(member, userBO, folder);
 			commandRoot.getChildren().add(commandTree);
@@ -266,10 +289,13 @@ public class CommandBasicController {
 		String subject = name;
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
+		List<String> bundleIdArray = new ArrayList<String>();
 		
-		CommandGroupPO group = null;
+//		CommandGroupPO group2 = null;
+		GroupPO group = null;
 		try{
-			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, subject, GroupType.BASIC, OriginType.INNER, userIdArray);
+//			group = commandBasicServiceImpl.save(user.getId(), user.getId(), user.getName(), name, subject, GroupType.BASIC, OriginType.INNER, userIdArray);
+			group = groupService.saveCommand(user.getId(), user.getId(), user.getName(), name, subject, BusinessType.COMMAND, com.sumavision.tetris.bvc.business.OriginType.INNER, userIdArray, bundleIdArray, null);
 		}catch(CommandGroupNameAlreadyExistedException e){
 			//重名
 			JSONObject info = new JSONObject();
@@ -288,8 +314,8 @@ public class CommandBasicController {
 		info.put("status", group.getStatus().getCode());
 		info.put("commander", group.getUserId());
 		info.put("creator", group.getUserId());
-		Object membersArray = treeUtils.queryGroupTree(group.getId());
-		info.put("members", membersArray);
+//		Object membersArray = treeUtils.queryGroupTree(group.getId());
+//		info.put("members", membersArray);
 				
 		return info;
 	}
@@ -343,7 +369,7 @@ public class CommandBasicController {
 			groupIds.add(id);
 		}		
 		
-		commandBasicServiceImpl.remove(userId, groupIds);
+		groupService.remove(userId, groupIds);
 		
 		return null;
 	}
@@ -375,7 +401,7 @@ public class CommandBasicController {
 			groupIds.add(id);
 		}		
 		
-		JSONArray groupInfos = commandBasicServiceImpl.enter(userId, groupIds);
+		JSONArray groupInfos = groupService.enterGroups(userId, groupIds);
 		
 		for(int i=0; i<groupInfos.size(); i++){
 			JSONObject groupInfo = groupInfos.getJSONObject(i);
@@ -440,7 +466,7 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
-		Object result = commandBasicServiceImpl.start(Long.parseLong(id), -1);
+		Object result = groupService.start(Long.parseLong(id), -1);
 		return result;		
 	}
 	
@@ -463,7 +489,7 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 
 		Long userId = userUtils.getUserIdFromSession(request);
-		Object chairSplits = commandBasicServiceImpl.stop(userId, Long.parseLong(id), 0);
+		Object chairSplits = groupService.stop(userId, Long.parseLong(id), 0);
 		return chairSplits;
 	}
 	
@@ -475,8 +501,8 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
-		JSONArray chairSplits = commandBasicServiceImpl.pause(Long.parseLong(id));
-		return chairSplits;
+		groupFunctionService.pause(Long.parseLong(id));
+		return new JSONArray();
 	}
 	
 	
@@ -487,8 +513,8 @@ public class CommandBasicController {
 			String id,
 			HttpServletRequest request) throws Exception{
 		
-		JSONArray chairSplits = commandBasicServiceImpl.pauseRecover(Long.parseLong(id));
-		return chairSplits;
+		groupFunctionService.pauseRecover(Long.parseLong(id));
+		return new JSONArray();
 	}	
 	
 	
@@ -516,7 +542,7 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		Long userId = userUtils.getUserIdFromSession(request);
-		commandBasicServiceImpl.exitApply(userId, Long.parseLong(id));
+		groupService.exitApply(userId, Long.parseLong(id));
 		return null;
 	}
 	
@@ -532,7 +558,7 @@ public class CommandBasicController {
 //		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		Object splits = commandBasicServiceImpl.removeMembers2(Long.parseLong(id), userIdArray, 0);
+		Object splits = groupService.removeMembers2(Long.parseLong(id), userIdArray, 0);
 		
 		return splits;
 	}
@@ -549,7 +575,7 @@ public class CommandBasicController {
 		UserVO user = userUtils.getUserFromSession(request);
 		List<Long> userIdArray = JSONArray.parseArray(userIds, Long.class);
 		
-		commandBasicServiceImpl.exitApplyDisagree(user.getId(), Long.parseLong(id), userIdArray);
+		groupService.exitApplyDisagree(user.getId(), Long.parseLong(id), userIdArray);
 		
 		return null;
 	}
@@ -564,7 +590,7 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
-		Object splits = commandBasicServiceImpl.addOrEnterMembers(Long.parseLong(id), userIdArray);
+		Object splits = groupService.addOrEnterMembers(Long.parseLong(id), userIdArray, null);
 		return splits;
 	}
 		
@@ -589,7 +615,7 @@ public class CommandBasicController {
 			HttpServletRequest request) throws Exception{
 		
 		List<Long> userIdArray = JSONArray.parseArray(members, Long.class);
-		Object splits = commandBasicServiceImpl.removeMembers2(Long.parseLong(id), userIdArray, 2);
+		Object splits = groupService.removeMembers2(Long.parseLong(id), userIdArray, 2);
 		return splits;
 	}
 	

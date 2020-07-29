@@ -40,7 +40,6 @@ import com.sumavision.bvc.command.group.dao.CommandGroupMemberDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupRecordDAO;
 import com.sumavision.bvc.command.group.dao.CommandGroupUserInfoDAO;
 import com.sumavision.bvc.command.group.enumeration.ForwardDemandBusinessType;
-import com.sumavision.bvc.command.group.enumeration.GroupStatus;
 import com.sumavision.bvc.command.group.enumeration.GroupType;
 import com.sumavision.bvc.command.group.enumeration.MemberStatus;
 import com.sumavision.bvc.command.group.forward.CommandGroupForwardDemandPO;
@@ -67,6 +66,12 @@ import com.sumavision.bvc.device.group.service.util.QueryUtil;
 import com.sumavision.bvc.device.group.service.util.ResourceQueryUtil;
 import com.sumavision.bvc.resource.dto.ChannelSchemeDTO;
 import com.sumavision.tetris.auth.token.TerminalType;
+import com.sumavision.tetris.bvc.business.dao.GroupDAO;
+import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
+import com.sumavision.tetris.bvc.business.group.BusinessType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
+import com.sumavision.tetris.bvc.business.group.GroupStatus;
+import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
 import com.sumavision.tetris.commons.exception.code.StatusCode;
 import com.sumavision.tetris.commons.util.date.DateUtil;
@@ -97,6 +102,12 @@ public class CommandQueryController {
 	private ResourceService resourceService;
 	
 	@Autowired
+	private GroupDAO groupDao;
+	
+	@Autowired
+	private GroupMemberDAO groupMemberDao;
+	
+	@Autowired
 	private CommandGroupDAO commandGroupDao;
 	
 	@Autowired
@@ -119,6 +130,9 @@ public class CommandQueryController {
 	
 	@Autowired
 	private CommandCommonUtil commandCommonUtil;
+	
+	@Autowired
+	private TetrisBvcQueryUtil tetrisBvcQueryUtil;
 	
 	@Autowired
 	private CommandFightTimeServiceImpl commandFightTimeServiceImpl;
@@ -773,19 +787,22 @@ public class CommandQueryController {
 		Long userId = userUtils.getUserIdFromSession(request);
 		
 		if(type == null) type = "command";
-		GroupType needType = null;
+//		GroupType needType = null;
+		BusinessType needBusinessType = null;
 		switch (type){
 		case "meeting":
-			needType = GroupType.MEETING;
+//			needType = GroupType.MEETING;
+			needBusinessType = BusinessType.MEETING_QT;
 			break;
 		case "command":
 		default:
-			needType = GroupType.BASIC;
+//			needType = GroupType.BASIC;
+			needBusinessType = BusinessType.COMMAND;
 			break;
 		}
 		
-		List<CommandGroupPO> commands = commandGroupDao.findByMemberUserId(userId);
-		List <CommandGroupPO> enteredCommands = commandGroupDao.findEnteredGroupByMemberUserId(userId);
+		List<GroupPO> commands = groupDao.findByMemberOriginId(userId.toString());
+		List<GroupPO> enteredCommands = groupDao.findEnteredGroupByMemberOriginId(userId.toString());
 		
 		//加入会议组节点
 		TreeNodeVO commandRoot = new TreeNodeVO().setId(String.valueOf(TreeNodeVO.FOLDERID_COMMAND))
@@ -795,9 +812,9 @@ public class CommandQueryController {
 											     .setIcon(TreeNodeIcon.FOLDER.getName())
 											     .setChildren(new ArrayList<TreeNodeVO>());
 		
-		for(CommandGroupPO command: commands){
-			GroupType groupType = command.getType();
-			if(!needType.equals(groupType)){
+		for(GroupPO command: commands){
+			BusinessType groupType = command.getBusinessType();
+			if(!needBusinessType.equals(groupType)){
 				continue;
 			}
 			
@@ -811,7 +828,7 @@ public class CommandQueryController {
 				}
 			}else{
 				//别人的指挥
-				CommandGroupPO enteredCommand = commandCommonUtil.queryGroupById(enteredCommands, command.getId());
+				GroupPO enteredCommand = tetrisBvcQueryUtil.queryGroupById(enteredCommands, command.getId());
 				if(enteredCommand != null){
 					entered = true;
 				}
@@ -847,21 +864,21 @@ public class CommandQueryController {
 		JSONArray groups = new JSONArray();
 		
 		if(type == null) type = "command";
-		GroupType needType = null;
+		BusinessType needType = null;
 		switch (type){
 		case "meeting":
-			needType = GroupType.MEETING;
+			needType = BusinessType.MEETING_QT;
 			break;
 		case "command":
 		default:
-			needType = GroupType.BASIC;
+			needType = BusinessType.COMMAND;
 			break;
 		}
 		
-		List <CommandGroupPO> commands = commandGroupDao.findEnteredGroupByMemberUserId(userId);
+		List <GroupPO> commands = groupDao.findEnteredGroupByMemberOriginId(userId.toString());
 		
-		for(CommandGroupPO command : commands){
-			GroupType groupType = command.getType();
+		for(GroupPO command : commands){
+			BusinessType groupType = command.getBusinessType();
 			if(!needType.equals(groupType)){
 				continue;
 			}
@@ -869,7 +886,7 @@ public class CommandQueryController {
 			group.put("id", command.getId().toString());
 			group.put("name", command.getName());
 			group.put("creator", command.getUserId().toString());
-			if(groupType.equals(GroupType.BASIC)){// || type.equals(GroupType.COOPERATE) || type.equals(GroupType.SECRET)){
+			if(groupType.equals(BusinessType.COMMAND)){// || type.equals(GroupType.COOPERATE) || type.equals(GroupType.SECRET)){
 				group.put("type", "command");
 			}else{
 				group.put("type", "meeting");
@@ -877,12 +894,12 @@ public class CommandQueryController {
 			GroupStatus groupStatus = command.getStatus();
 			group.put("status", groupStatus.getCode());
 			//已经启动的会议，添加作战时间
-			if(!groupStatus.equals(GroupStatus.STOP)){
+			/*if(!groupStatus.equals(GroupStatus.STOP)){
 				Date fightTime = commandFightTimeServiceImpl.calculateCurrentFightTime(command);
 				if(fightTime != null){
 					group.put("fightTime", DateUtil.format(fightTime, DateUtil.dateTimePattern));
 				}
-			}
+			}*/
 			groups.add(group);
 		}
 		

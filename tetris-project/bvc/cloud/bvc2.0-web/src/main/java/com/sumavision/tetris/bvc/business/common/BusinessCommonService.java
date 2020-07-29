@@ -1,6 +1,7 @@
 package com.sumavision.tetris.bvc.business.common;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -88,14 +89,21 @@ import com.sumavision.tetris.bvc.business.bo.UserTerminalBO;
 import com.sumavision.tetris.bvc.business.dao.GroupDAO;
 import com.sumavision.tetris.bvc.business.dao.GroupMemberDAO;
 import com.sumavision.tetris.bvc.business.forward.CommonForwardPO;
+import com.sumavision.tetris.bvc.business.group.BusinessType;
 import com.sumavision.tetris.bvc.business.group.GroupMemberPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberRolePermissionPO;
 import com.sumavision.tetris.bvc.business.group.GroupMemberStatus;
 import com.sumavision.tetris.bvc.business.group.GroupMemberType;
+import com.sumavision.tetris.bvc.business.group.GroupPO;
 import com.sumavision.tetris.bvc.cascade.CommandCascadeService;
 import com.sumavision.tetris.bvc.cascade.ConferenceCascadeService;
 import com.sumavision.tetris.bvc.cascade.bo.GroupBO;
 import com.sumavision.tetris.bvc.cascade.bo.MinfoBO;
+import com.sumavision.tetris.bvc.model.role.InternalRoleType;
+import com.sumavision.tetris.bvc.model.role.RoleDAO;
+import com.sumavision.tetris.bvc.model.role.RolePO;
+import com.sumavision.tetris.bvc.model.terminal.TerminalBundleChannelPO;
+import com.sumavision.tetris.bvc.model.terminal.channel.TerminalChannelPO;
 import com.sumavision.tetris.bvc.page.PageTaskPO;
 import com.sumavision.tetris.bvc.util.TetrisBvcQueryUtil;
 import com.sumavision.tetris.commons.exception.BaseException;
@@ -116,6 +124,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class BusinessCommonService {
+	
+	@Autowired
+	private RoleDAO roleDao;
 	
 	@Autowired
 	private GroupDAO groupDao;
@@ -204,6 +215,26 @@ public class BusinessCommonService {
 	@Autowired
 	private ConferenceCascadeService conferenceCascadeService;
 	
+	public RolePO queryGroupMemberRole(GroupPO group){
+		BusinessType businessType = group.getBusinessType();
+		if(BusinessType.COMMAND.equals(businessType)){
+			return roleDao.findByInternalRoleType(InternalRoleType.COMMAND_AUDIENCE);
+		}else if(BusinessType.MEETING_QT.equals(businessType)){
+			return roleDao.findByInternalRoleType(InternalRoleType.MEETING_AUDIENCE);
+		}
+		return null;
+	}
+	
+	public RolePO queryGroupChairmanRole(GroupPO group){
+		BusinessType businessType = group.getBusinessType();
+		if(BusinessType.COMMAND.equals(businessType)){
+			return roleDao.findByInternalRoleType(InternalRoleType.COMMAND_CHAIRMAN);
+		}else if(BusinessType.MEETING_QT.equals(businessType)){
+			return roleDao.findByInternalRoleType(InternalRoleType.MEETING_CHAIRMAN);
+		}
+		return null;
+	}
+	
 	public List<Long> fromUserIdsToMemberIds(Long groupId, List<Long> userIds){
 		List<String> originIds = new ArrayList<String>();
 		for(Long userId : userIds){
@@ -213,12 +244,47 @@ public class BusinessCommonService {
 		return memberIds;
 	}
 	
-	public List<Long> obtainMemberIds(List<GroupMemberPO> members){
-		List<Long> memberIds = new ArrayList<Long>();
+	/** 只能查出用户成员，设备成员会被忽略 */
+	public List<UserBO> queryUsersByGroupMembers(Collection<GroupMemberPO> members){
+		List<String> userIdList = new ArrayList<String>();
 		for(GroupMemberPO member : members){
-			memberIds.add(member.getId());
+			userIdList.add(member.getOriginId());
 		}
-		return memberIds;
+		String userIdListStr = StringUtils.join(userIdList.toArray(), ",");
+		List<UserBO> commandUserBos = resourceService.queryUserListByIds(userIdListStr, TerminalType.QT_ZK);
+		return commandUserBos;
+	}
+	
+	public Set<Long> obtainTerminalBundleIdsFromTerminalChannel(List<TerminalChannelPO> channels){
+		Set<Long> ids = new HashSet<Long>();
+		for(TerminalChannelPO channel : channels){
+			ids.add(channel.getTerminalBundleId());
+		}
+		return ids;
+	}
+	
+	public Set<String> obtainChannelIdsFromTerminalChannel(List<TerminalChannelPO> channels){
+		Set<String> ids = new HashSet<String>();
+		for(TerminalChannelPO channel : channels){
+			ids.add(channel.getRealChannelId());
+		}
+		return ids;
+	}
+	
+	public Set<Long> obtainTerminalBundleIdsFromTerminalBundleChannel(List<TerminalBundleChannelPO> channels){
+		Set<Long> ids = new HashSet<Long>();
+		for(TerminalBundleChannelPO channel : channels){
+			ids.add(channel.getTerminalBundleId());
+		}
+		return ids;
+	}
+	
+	public Set<String> obtainChannelIdsFromTerminalBundleChannel(List<TerminalBundleChannelPO> channels){
+		Set<String> ids = new HashSet<String>();
+		for(TerminalBundleChannelPO channel : channels){
+			ids.add(channel.getChannelId());
+		}
+		return ids;
 	}
 	
 	public List<String> obtainMemberNames(List<GroupMemberPO> members){
@@ -254,9 +320,17 @@ public class BusinessCommonService {
 	public List<Long> obtainGroupMemberRolePermissionPOIds(List<GroupMemberRolePermissionPO> ps){
 		List<Long> ids = new ArrayList<Long>();
 		for(GroupMemberRolePermissionPO p : ps){
-			ids.add(p.getId());
+			ids.add(p.getRoleId());
 		}
 		return ids;
+	}
+
+	public List<Long> obtainMemberIds(List<GroupMemberPO> members){
+		List<Long> memberIds = new ArrayList<Long>();
+		for(GroupMemberPO member : members){
+			memberIds.add(member.getId());
+		}
+		return memberIds;
 	}
 
 	public void notifyUserInfo(

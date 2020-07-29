@@ -25,7 +25,10 @@ public class SourceBO {
 	
 	String businessId;
 	
-	Long memberId;
+	/** 用户userId/设备bundleId/文件id/合屏uuid */
+	String srcId;
+
+	Long srcMemberId;
 	
 	String srcName;
 	
@@ -84,13 +87,22 @@ public class SourceBO {
 		this.businessId = businessId;
 		return this;
 	}
-
-	public Long getMemberId() {
-		return memberId;
+	
+	public String getSrcId() {
+		return srcId;
 	}
 
-	public SourceBO setMemberId(Long memberId) {
-		this.memberId = memberId;
+	public SourceBO setSrcId(String srcId) {
+		this.srcId = srcId;
+		return this;
+	}
+
+	public Long getSrcMemberId() {
+		return srcMemberId;
+	}
+
+	public SourceBO setSrcMemberId(Long memberId) {
+		this.srcMemberId = memberId;
 		return this;
 	}
 

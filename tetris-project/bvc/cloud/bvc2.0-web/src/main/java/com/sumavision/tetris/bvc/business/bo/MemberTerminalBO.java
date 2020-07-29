@@ -33,6 +33,11 @@ public class MemberTerminalBO {
 		return originId;
 	}
 
+	public MemberTerminalBO setOriginId(String originId) {
+		this.originId = originId;
+		return this;
+	}
+
 	public MemberTerminalBO setUserId(String originId) {
 		this.originId = originId;
 		return this;

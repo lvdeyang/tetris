@@ -2570,8 +2570,8 @@ define([
                 self.qt.on('applyExitAgree', function (e) {
                     var e = e.params;
                     self.qt.info(e.businessInfo);
-                    if (e.splits && e.splits.length > 0) {
-                        self.qt.invoke('commandExit', e.splits);
+                    if (e.splits){// && e.splits.length > 0) {
+//                        self.qt.invoke('commandExit', e.splits);
                         if (self.agreeExitCommand === 1) {
                             self.refreshCommand(null, function(){
                             	self.buttons.exitCommand = false;

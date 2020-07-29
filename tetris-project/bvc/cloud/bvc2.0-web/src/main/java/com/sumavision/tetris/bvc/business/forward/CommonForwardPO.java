@@ -34,7 +34,7 @@ public class CommonForwardPO extends AbstractBasePO{
 	private String relativeUuid;
 	
 	/** 执行状态 */
-	private ExecuteStatus executeStatus;
+	private ExecuteStatus executeStatus = ExecuteStatus.DONE;
 	
 	/** 业务类型 */
 	private BusinessInfoType businessType;
@@ -60,7 +60,7 @@ public class CommonForwardPO extends AbstractBasePO{
 	
 	private OriginType srcOrigin = OriginType.INNER;
 	
-//	private Long srcMemberId;
+	private Long srcMemberId;
 	
 	/** 用户userId/设备bundleId/文件id/合屏uuid */
 	private String srcId;
@@ -135,6 +135,8 @@ public class CommonForwardPO extends AbstractBasePO{
 		this.dstDeviceType = dstDeviceType;
 	}
 	
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "TYPE")
 	public AgendaForwardType getType() {
 		return type;
 	}
@@ -183,6 +185,8 @@ public class CommonForwardPO extends AbstractBasePO{
 		this.srcCode = srcCode;
 	}
 
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "SRC_ORIGIN")
 	public OriginType getSrcOrigin() {
 		return srcOrigin;
 	}
@@ -191,6 +195,8 @@ public class CommonForwardPO extends AbstractBasePO{
 		this.srcOrigin = srcOrigin;
 	}
 
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "DST_ORIGIN")
 	public OriginType getDstOrigin() {
 		return dstOrigin;
 	}
@@ -203,13 +209,13 @@ public class CommonForwardPO extends AbstractBasePO{
 		return srcId;
 	}
 
-//	public Long getSrcMemberId() {
-//		return srcMemberId;
-//	}
-//
-//	public void setSrcMemberId(Long srcMemberId) {
-//		this.srcMemberId = srcMemberId;
-//	}
+	public Long getSrcMemberId() {
+		return srcMemberId;
+	}
+
+	public void setSrcMemberId(Long srcMemberId) {
+		this.srcMemberId = srcMemberId;
+	}
 
 	public void setSrcId(String srcId) {
 		this.srcId = srcId;
@@ -271,6 +277,8 @@ public class CommonForwardPO extends AbstractBasePO{
 		this.srcChannelName = srcChannelName;
 	}
 
+	@Enumerated(value = EnumType.STRING)
+	@Column(name = "BUSINESS_INFO_TYPE")
 	public BusinessInfoType getBusinessInfoType() {
 		return businessType;
 	}
@@ -452,6 +460,7 @@ public class CommonForwardPO extends AbstractBasePO{
 		CommonForwardPO forward = (CommonForwardPO) obj;
 		if(type.equals(forward.getType())
 				&& srcId.equals(forward.getSrcId())
+				&& srcMemberId.equals(forward.getSrcMemberId())
 				&& dstMemberId.equals(forward.getDstMemberId())){
 			return true;
 		}

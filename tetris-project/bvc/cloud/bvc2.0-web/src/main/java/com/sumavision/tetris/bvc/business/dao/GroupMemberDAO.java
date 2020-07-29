@@ -14,7 +14,7 @@ public interface GroupMemberDAO extends MetBaseDAO<GroupMemberPO>{
 	
 	public List<GroupMemberPO> findByGroupId(Long groupId);
 	
-	@Query(value = "select * from TETRIS_BVC_BUSINESS_GROUP_MEMBER member left join TETRIS_BVC_BUSINESS_GROUP_MEMBER_ROLE_PERMISSION m on member.id = m.group_member_id where member.group_id = ?1 m.role_id = ?2", nativeQuery = true)
+	@Query(value = "select * from TETRIS_BVC_BUSINESS_GROUP_MEMBER member left join TETRIS_BVC_BUSINESS_GROUP_MEMBER_ROLE_PERMISSION m on member.id = m.group_member_id where member.group_id = ?1 and m.role_id = ?2", nativeQuery = true)
 	public List<GroupMemberPO> findByGroupIdAndRoleId(Long groupId, Long roleId);
 	
 	@Query(value = "select * from TETRIS_BVC_BUSINESS_GROUP_MEMBER member left join TETRIS_BVC_BUSINESS_GROUP_MEMBER_ROLE_PERMISSION m on member.id = m.group_member_id where m.role_id = ?1", nativeQuery = true)

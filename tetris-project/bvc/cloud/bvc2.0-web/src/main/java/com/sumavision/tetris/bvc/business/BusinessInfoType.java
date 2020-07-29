@@ -11,7 +11,9 @@ public enum BusinessInfoType {
 	
 	NONE("未使用", "none", false),
 	COMMON("默认", "common", true),
-	BASIC_COMMAND("普通会议业务", "command", true),//主席用commandMember，其他成员用command
+	BASIC_COMMAND("普通指挥业务", "command", true),//主席用commandMember，其他成员用command
+	BASIC_MEETING("普通会议业务", "command", true),//给议程使用
+	MEETING_DISCUSS("会议讨论", "command", true),//给议程使用
 	CHAIRMAN_BASIC_COMMAND("主席的普通会议业务", "commandMember", false),//主席用commandMember，其他成员用command
 	COOPERATE_COMMAND("协同会议业务", "cooperation", false),
 //	COOPERATE_MEMBER_COMMAND("协同成员的业务", "cooperationMember"),//协同指挥成员观看其它成员的是时候使用
@@ -40,7 +42,7 @@ public enum BusinessInfoType {
 	private BusinessInfoType(String name, String code, boolean show){
 		this.name = name;
 		this.code = code;
-		this.show = show;
+		this.setShow(show);
 	}
 
 	public String getName(){
@@ -51,6 +53,14 @@ public enum BusinessInfoType {
 		return code;
 	}
 	
+	public boolean isShow() {
+		return show;
+	}
+
+	public void setShow(boolean show) {
+		this.show = show;
+	}
+
 	public boolean isCommandOrMeeting(){
 		switch(this){
 		case BASIC_COMMAND:

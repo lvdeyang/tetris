@@ -8,7 +8,7 @@ public enum InternalRoleType {
 	COMMAND_COOPERATION("协同指挥员"),
 	COMMAND_SPECIFIC("专向指挥员"),
 	COMMAND_AUDIENCE("指挥观众"),
-	MEETIING_CHAIRMAN("会议主席"),
+	MEETING_CHAIRMAN("会议主席"),
 	MEETING_SPEAKER("会议发言人"),
 	MEETING_AUDIENCE("会议观众"),
 	VOD_DST("点播发起人"),

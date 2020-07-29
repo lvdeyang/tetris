@@ -2,6 +2,7 @@ package com.sumavision.tetris.bvc.business.dao;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.RepositoryDefinition;
 
 import com.sumavision.tetris.bvc.business.group.RunningAgendaPO;
@@ -13,6 +14,10 @@ public interface RunningAgendaDAO extends MetBaseDAO<RunningAgendaPO>{
 	public RunningAgendaPO findByGroupIdAndAgendaId(Long groupId, Long agendaId);
 	
 	public List<RunningAgendaPO> findByGroupIdAndAgendaIdIn(Long groupId, List<Long> agendaIds);
+	
+	@Query(value = "select r.agendaId from com.sumavision.tetris.bvc.business.group.RunningAgendaPO r where r.groupId = ?1 and r.running = true")
+	public List<Long> findRunningAgendaIdsByGroupId(Long groupId);
+	
 	/*
 	public List<GroupMemberPO> findByGroupId(Long groupId);
 	
